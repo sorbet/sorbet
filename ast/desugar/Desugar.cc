@@ -163,7 +163,7 @@ void checkBlockRestArg(DesugarContext dctx, const MethodDef::ARGS_store &args) {
             return;
         }
 
-        if (auto e = dctx.ctx.beginError(it->loc(), core::errors::Desugar::BlockAnonymousRestParam)) {
+        if (auto e = dctx.ctx.beginIndexerError(it->loc(), core::errors::Desugar::BlockAnonymousRestParam)) {
             e.setHeader("Anonymous rest parameter in block args");
             e.addErrorNote("Naming the rest parameter will ensure you can access it in the block");
             e.replaceWith("Name the rest parameter", dctx.ctx.locAt(it->loc().copyEndWithZeroLength()), "_");
@@ -186,7 +186,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
         res = std::move(recv);
         auto *is = cast_tree<InsSeq>(res);
         if (!is) {
-            if (auto e = dctx.ctx.beginError(blockLoc, core::errors::Desugar::UnsupportedNode)) {
+            if (auto e = dctx.ctx.beginIndexerError(blockLoc, core::errors::Desugar::UnsupportedNode)) {
                 e.setHeader("No body in block");
             }
             return MK::EmptyTree();
@@ -328,7 +328,7 @@ ExpressionPtr validateRBIBody(DesugarContext dctx, ExpressionPtr body) {
         return body;
     } else if (isa_tree<Assign>(body)) {
         if (!isIVarAssign(body)) {
-            if (auto e = dctx.ctx.beginError(body.loc(), core::errors::Desugar::CodeInRBI)) {
+            if (auto e = dctx.ctx.beginIndexerError(body.loc(), core::errors::Desugar::CodeInRBI)) {
                 e.setHeader("RBI methods must not have code");
                 e.replaceWith("Delete the body", loc, "");
             }
@@ -336,20 +336,20 @@ ExpressionPtr validateRBIBody(DesugarContext dctx, ExpressionPtr body) {
     } else if (auto inseq = cast_tree<InsSeq>(body)) {
         for (auto &stat : inseq->stats) {
             if (!isIVarAssign(stat)) {
-                if (auto e = dctx.ctx.beginError(stat.loc(), core::errors::Desugar::CodeInRBI)) {
+                if (auto e = dctx.ctx.beginIndexerError(stat.loc(), core::errors::Desugar::CodeInRBI)) {
                     e.setHeader("RBI methods must not have code");
                     e.replaceWith("Delete the body", loc, "");
                 }
             }
         }
         if (!isIVarAssign(inseq->expr)) {
-            if (auto e = dctx.ctx.beginError(inseq->expr.loc(), core::errors::Desugar::CodeInRBI)) {
+            if (auto e = dctx.ctx.beginIndexerError(inseq->expr.loc(), core::errors::Desugar::CodeInRBI)) {
                 e.setHeader("RBI methods must not have code");
                 e.replaceWith("Delete the body", loc, "");
             }
         }
     } else {
-        if (auto e = dctx.ctx.beginError(body.loc(), core::errors::Desugar::CodeInRBI)) {
+        if (auto e = dctx.ctx.beginIndexerError(body.loc(), core::errors::Desugar::CodeInRBI)) {
             e.setHeader("RBI methods must not have code");
             e.replaceWith("Delete the body", loc, "");
         }
@@ -404,7 +404,7 @@ ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
 }
 
 ExpressionPtr unsupportedNode(DesugarContext dctx, parser::Node *node) {
-    if (auto e = dctx.ctx.beginError(node->loc, core::errors::Desugar::UnsupportedNode)) {
+    if (auto e = dctx.ctx.beginIndexerError(node->loc, core::errors::Desugar::UnsupportedNode)) {
         e.setHeader("Unsupported node type `{}`", node->nodeName());
     }
     return MK::EmptyTree();
@@ -472,7 +472,8 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
             } else {
                 ExpressionPtr lh = node2TreeImpl(dctx, std::move(c));
                 if (auto restArg = cast_tree<RestArg>(lh)) {
-                    if (auto e = dctx.ctx.beginError(lh.loc(), core::errors::Desugar::UnsupportedRestArgsDestructure)) {
+                    if (auto e = dctx.ctx.beginIndexerError(lh.loc(),
+                                                            core::errors::Desugar::UnsupportedRestArgsDestructure)) {
                         e.setHeader("Unsupported rest args in destructure");
                     }
                     lh = move(restArg->expr);
@@ -670,7 +671,7 @@ public:
         } else if (!isSymbol && !hashKeyStrings.contains(nameRef)) {
             hashKeyStrings[nameRef] = key.loc();
         } else {
-            if (auto e = dctx.ctx.beginError(key.loc(), core::errors::Desugar::DuplicatedHashKeys)) {
+            if (auto e = dctx.ctx.beginIndexerError(key.loc(), core::errors::Desugar::DuplicatedHashKeys)) {
                 core::LocOffsets originalLoc;
                 if (isSymbol) {
                     originalLoc = hashKeySymbols[nameRef];
@@ -1292,7 +1293,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto iff = MK::If(loc, std::move(cond), std::move(body), std::move(elsep));
                     result = std::move(iff);
                 } else if (isa_tree<UnresolvedConstantLit>(recv)) {
-                    if (auto e = dctx.ctx.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
+                    if (auto e = dctx.ctx.beginIndexerError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
                         e.setHeader("Constant reassignment is not supported");
                     }
                     ExpressionPtr res = MK::EmptyTree();
@@ -1388,7 +1389,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto iff = MK::If(loc, std::move(cond), std::move(body), std::move(elsep));
                     result = std::move(iff);
                 } else if (isa_tree<UnresolvedConstantLit>(recv)) {
-                    if (auto e = dctx.ctx.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
+                    if (auto e = dctx.ctx.beginIndexerError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
                         e.setHeader("Constant reassignment is not supported");
                     }
                     ExpressionPtr res = MK::EmptyTree();
@@ -1456,7 +1457,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto res = MK::Assign(loc, std::move(lhs), std::move(send));
                     result = std::move(res);
                 } else if (isa_tree<UnresolvedConstantLit>(recv)) {
-                    if (auto e = dctx.ctx.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
+                    if (auto e = dctx.ctx.beginIndexerError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
                         e.setHeader("Constant reassignment is not supported");
                     }
                     ExpressionPtr res = MK::EmptyTree();
@@ -1646,8 +1647,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             [&](parser::DefS *method) {
                 auto *self = parser::cast_node<parser::Self>(method->singleton.get());
                 if (self == nullptr) {
-                    if (auto e =
-                            dctx.ctx.beginError(method->singleton->loc, core::errors::Desugar::InvalidSingletonDef)) {
+                    if (auto e = dctx.ctx.beginIndexerError(method->singleton->loc,
+                                                            core::errors::Desugar::InvalidSingletonDef)) {
                         e.setHeader("`{}` is only supported for `{}`", "def EXPRESSION.method", "def self.method");
                         e.addErrorNote("When it's imperative to define a singleton method on an object,\n"
                                        "    use `{}` instead.\n"
@@ -1665,7 +1666,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 // which will get the symbol of `class.singleton_class`
                 auto *self = parser::cast_node<parser::Self>(sclass->expr.get());
                 if (self == nullptr) {
-                    if (auto e = dctx.ctx.beginError(sclass->expr->loc, core::errors::Desugar::InvalidSingletonDef)) {
+                    if (auto e =
+                            dctx.ctx.beginIndexerError(sclass->expr->loc, core::errors::Desugar::InvalidSingletonDef)) {
                         e.setHeader("`{}` is only supported for `{}`", "class << EXPRESSION", "class << self");
                     }
                     ExpressionPtr res = MK::EmptyTree();
@@ -1831,7 +1833,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                 if (!absl::SimpleAtoi(withoutUnderscores, &val)) {
                     val = 0;
-                    if (auto e = dctx.ctx.beginError(loc, core::errors::Desugar::IntegerOutOfRange)) {
+                    if (auto e = dctx.ctx.beginIndexerError(loc, core::errors::Desugar::IntegerOutOfRange)) {
                         e.setHeader("Unsupported integer literal: `{}`", integer->val);
                     }
                 }
@@ -1851,7 +1853,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     (underscorePos == string::npos) ? floatNode->val : absl::StrReplaceAll(floatNode->val, {{"_", ""}});
                 if (!absl::SimpleAtod(withoutUnderscores, &val)) {
                     val = numeric_limits<double>::quiet_NaN();
-                    if (auto e = dctx.ctx.beginError(loc, core::errors::Desugar::FloatOutOfRange)) {
+                    if (auto e = dctx.ctx.beginIndexerError(loc, core::errors::Desugar::FloatOutOfRange)) {
                         e.setHeader("Unsupported float literal: `{}`", floatNode->val);
                         e.addErrorNote("This likely represents a bug in Sorbet. Please report an issue:\n"
                                        "    https://github.com/sorbet/sorbet/issues");
@@ -1994,7 +1996,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     elems.reserve(ret->exprs.size());
                     for (auto &stat : ret->exprs) {
                         if (parser::isa_node<parser::BlockPass>(stat.get())) {
-                            if (auto e = dctx.ctx.beginError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                            if (auto e = dctx.ctx.beginIndexerError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
                                 e.setHeader("Block argument should not be given");
                             }
                             continue;
@@ -2006,7 +2008,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     result = std::move(res);
                 } else if (ret->exprs.size() == 1) {
                     if (parser::isa_node<parser::BlockPass>(ret->exprs[0].get())) {
-                        if (auto e = dctx.ctx.beginError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                        if (auto e = dctx.ctx.beginIndexerError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
                             e.setHeader("Block argument should not be given");
                         }
                         ExpressionPtr res = MK::Break(loc, MK::EmptyTree());
@@ -2027,7 +2029,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     elems.reserve(ret->exprs.size());
                     for (auto &stat : ret->exprs) {
                         if (parser::isa_node<parser::BlockPass>(stat.get())) {
-                            if (auto e = dctx.ctx.beginError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                            if (auto e = dctx.ctx.beginIndexerError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
                                 e.setHeader("Block argument should not be given");
                             }
                             continue;
@@ -2039,7 +2041,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     result = std::move(res);
                 } else if (ret->exprs.size() == 1) {
                     if (parser::isa_node<parser::BlockPass>(ret->exprs[0].get())) {
-                        if (auto e = dctx.ctx.beginError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                        if (auto e = dctx.ctx.beginIndexerError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
                             e.setHeader("Block argument should not be given");
                         }
                         ExpressionPtr res = MK::Break(loc, MK::EmptyTree());
@@ -2060,7 +2062,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     elems.reserve(ret->exprs.size());
                     for (auto &stat : ret->exprs) {
                         if (parser::isa_node<parser::BlockPass>(stat.get())) {
-                            if (auto e = dctx.ctx.beginError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                            if (auto e = dctx.ctx.beginIndexerError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
                                 e.setHeader("Block argument should not be given");
                             }
                             continue;
@@ -2072,7 +2074,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     result = std::move(res);
                 } else if (ret->exprs.size() == 1) {
                     if (parser::isa_node<parser::BlockPass>(ret->exprs[0].get())) {
-                        if (auto e = dctx.ctx.beginError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                        if (auto e = dctx.ctx.beginIndexerError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
                             e.setHeader("Block argument should not be given");
                         }
                         ExpressionPtr res = MK::Break(loc, MK::EmptyTree());
@@ -2103,8 +2105,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     // strict mode
                     auto blockArgName = dctx.enclosingBlockArg;
                     if (blockArgName == core::Names::blkArg()) {
-                        if (auto e = dctx.ctx.beginError(dctx.enclosingMethodLoc,
-                                                         core::errors::Desugar::UnnamedBlockParameter)) {
+                        if (auto e = dctx.ctx.beginIndexerError(dctx.enclosingMethodLoc,
+                                                                core::errors::Desugar::UnnamedBlockParameter)) {
                             e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
                                         dctx.enclosingMethodName.show(dctx.ctx), "yield");
                             e.addErrorLine(dctx.ctx.locAt(loc), "Arising from use of `{}` in method body", "yield");
@@ -2368,7 +2370,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::Undef *undef) {
-                if (auto e = dctx.ctx.beginError(what->loc, core::errors::Desugar::UndefUsage)) {
+                if (auto e = dctx.ctx.beginIndexerError(what->loc, core::errors::Desugar::UndefUsage)) {
                     e.setHeader("Unsuppored method: undef");
                 }
                 Send::ARGS_store args;
@@ -2459,7 +2461,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
         Exception::failInFuzzer();
         if (!locReported) {
             locReported = true;
-            if (auto e = dctx.ctx.beginError(what->loc, core::errors::Internal::InternalError)) {
+            if (auto e = dctx.ctx.beginIndexerError(what->loc, core::errors::Internal::InternalError)) {
                 e.setHeader("Failed to process tree (backtrace is above)");
             }
         }

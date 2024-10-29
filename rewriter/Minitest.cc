@@ -277,7 +277,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
     }
 
     // if any of the above tests were not satisfied, then mark this statement as being invalid here
-    if (auto e = ctx.beginError(stmt.loc(), core::errors::Rewriter::BadTestEach)) {
+    if (auto e = ctx.beginIndexerError(stmt.loc(), core::errors::Rewriter::BadTestEach)) {
         e.setHeader("Only valid `{}`, `{}`, `{}`, and `{}` blocks can appear within `{}`", "it", "before", "after",
                     "describe", eachName.show(ctx));
         e.addErrorNote("For other things, like constant and variable assignments,"
@@ -376,7 +376,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     if ((send->fun == core::Names::testEach() || send->fun == core::Names::testEachHash()) && send->numPosArgs() == 1) {
         if ((send->fun == core::Names::testEach() && block->args.size() < 1) ||
             (send->fun == core::Names::testEachHash() && block->args.size() != 2)) {
-            if (auto e = ctx.beginError(block->loc, core::errors::Rewriter::BadTestEach)) {
+            if (auto e = ctx.beginIndexerError(block->loc, core::errors::Rewriter::BadTestEach)) {
                 e.setHeader("Wrong number of parameters for `{}` block: expected `{}`, got `{}`", send->fun.show(ctx),
                             send->fun == core::Names::testEach() ? "at least 1" : "2", block->args.size());
             }
@@ -398,7 +398,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
     if (send->fun == core::Names::testEachHash() && send->numKwArgs() > 0) {
         auto errLoc = send->getKwKey(0).loc().join(send->getKwValue(send->numKwArgs() - 1).loc());
-        if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::BadTestEach)) {
+        if (auto e = ctx.beginIndexerError(errLoc, core::errors::Rewriter::BadTestEach)) {
             e.setHeader("`{}` expects a single `{}` argument, not keyword args", "test_each_hash", "Hash");
             if (send->numPosArgs() == 0 && errLoc.exists()) {
                 auto replaceLoc = ctx.locAt(errLoc);

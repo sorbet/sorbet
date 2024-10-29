@@ -135,7 +135,7 @@ void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
     }
 
     auto errLoc = (send->funLoc.exists() && !send->funLoc.empty()) ? send->funLoc : send->loc;
-    if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::InitializeReturnType)) {
+    if (auto e = ctx.beginIndexerError(errLoc, core::errors::Rewriter::InitializeReturnType)) {
         e.setHeader("The {} method should always return {}", "initialize", "void");
         auto replacementLoc = core::Loc(ctx.file, send->funLoc.beginPos(), send->loc.endPos());
         if (replacementLoc.exists() && !replacementLoc.empty()) {

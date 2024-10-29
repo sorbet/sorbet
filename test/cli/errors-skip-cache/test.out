@@ -1,0 +1,294 @@
+====first run (cold cache)====
+test/cli/errors-skip-cache/anonymous_block_param.rb:4: Anonymous rest parameter in block args https://srb.help/3012
+     4 |  [1,2,3].each do |*|
+                           ^
+  Note:
+    Naming the rest parameter will ensure you can access it in the block
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/errors-skip-cache/anonymous_block_param.rb:4: Insert `_`
+     4 |  [1,2,3].each do |*|
+                            ^
+Errors: 1
+====second run (warm cache)====
+test/cli/errors-skip-cache/anonymous_block_param.rb:4: Anonymous rest parameter in block args https://srb.help/3012
+     4 |  [1,2,3].each do |*|
+                           ^
+  Note:
+    Naming the rest parameter will ensure you can access it in the block
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/errors-skip-cache/anonymous_block_param.rb:4: Insert `_`
+     4 |  [1,2,3].each do |*|
+                            ^
+Errors: 1
+====first run (cold cache)====
+test/cli/errors-skip-cache/atoi.rb:3: Unsupported integer literal: `36893488147419103232` https://srb.help/3002
+     3 |36893488147419103232
+        ^^^^^^^^^^^^^^^^^^^^
+Errors: 1
+====second run (warm cache)====
+test/cli/errors-skip-cache/atoi.rb:3: Unsupported integer literal: `36893488147419103232` https://srb.help/3002
+     3 |36893488147419103232
+        ^^^^^^^^^^^^^^^^^^^^
+Errors: 1
+====first run (cold cache)====
+test/cli/errors-skip-cache/attributes.rb:6: Bad attribute name "bad attribute name" https://srb.help/3501
+     6 |  attr "bad attribute name"
+               ^^^^^^^^^^^^^^^^^^^^
+
+test/cli/errors-skip-cache/attributes.rb:8: The type for an `attr` cannot contain `type_parameters` https://srb.help/3504
+     8 |  sig { type_parameters(:K).returns(T.type_parameter(:K)) }
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 2
+====second run (warm cache)====
+test/cli/errors-skip-cache/attributes.rb:6: Bad attribute name "bad attribute name" https://srb.help/3501
+     6 |  attr "bad attribute name"
+               ^^^^^^^^^^^^^^^^^^^^
+
+test/cli/errors-skip-cache/attributes.rb:8: The type for an `attr` cannot contain `type_parameters` https://srb.help/3504
+     8 |  sig { type_parameters(:K).returns(T.type_parameter(:K)) }
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 2
+====first run (cold cache)====
+test/cli/errors-skip-cache/block_arg.rb:3: Block argument should not be given https://srb.help/3003
+     3 |next &a
+        ^^^^^^^
+
+test/cli/errors-skip-cache/block_arg.rb:4: Block argument should not be given https://srb.help/3003
+     4 |next a, &b
+        ^^^^^^^^^^
+
+test/cli/errors-skip-cache/block_arg.rb:5: Block argument should not be given https://srb.help/3003
+     5 |break &a
+        ^^^^^^^^
+
+test/cli/errors-skip-cache/block_arg.rb:6: Block argument should not be given https://srb.help/3003
+     6 |break a, &b
+        ^^^^^^^^^^^
+
+test/cli/errors-skip-cache/block_arg.rb:7: Block argument should not be given https://srb.help/3003
+     7 |return &a
+        ^^^^^^^^^
+
+test/cli/errors-skip-cache/block_arg.rb:8: Block argument should not be given https://srb.help/3003
+     8 |return a, &b
+        ^^^^^^^^^^^^
+Errors: 6
+====second run (warm cache)====
+test/cli/errors-skip-cache/block_arg.rb:3: Block argument should not be given https://srb.help/3003
+     3 |next &a
+        ^^^^^^^
+
+test/cli/errors-skip-cache/block_arg.rb:4: Block argument should not be given https://srb.help/3003
+     4 |next a, &b
+        ^^^^^^^^^^
+
+test/cli/errors-skip-cache/block_arg.rb:5: Block argument should not be given https://srb.help/3003
+     5 |break &a
+        ^^^^^^^^
+
+test/cli/errors-skip-cache/block_arg.rb:6: Block argument should not be given https://srb.help/3003
+     6 |break a, &b
+        ^^^^^^^^^^^
+
+test/cli/errors-skip-cache/block_arg.rb:7: Block argument should not be given https://srb.help/3003
+     7 |return &a
+        ^^^^^^^^^
+
+test/cli/errors-skip-cache/block_arg.rb:8: Block argument should not be given https://srb.help/3003
+     8 |return a, &b
+        ^^^^^^^^^^^^
+Errors: 6
+====first run (cold cache)====
+test/cli/errors-skip-cache/constant_reassignment.rb:3: Constant reassignment is not supported https://srb.help/3005
+     3 |X ||= 0
+        ^^^^^^^
+
+test/cli/errors-skip-cache/constant_reassignment.rb:4: Constant reassignment is not supported https://srb.help/3005
+     4 |X &&= 0
+        ^^^^^^^
+
+test/cli/errors-skip-cache/constant_reassignment.rb:5: Constant reassignment is not supported https://srb.help/3005
+     5 |X += 0
+        ^^^^^^
+Errors: 3
+====second run (warm cache)====
+test/cli/errors-skip-cache/constant_reassignment.rb:3: Constant reassignment is not supported https://srb.help/3005
+     3 |X ||= 0
+        ^^^^^^^
+
+test/cli/errors-skip-cache/constant_reassignment.rb:4: Constant reassignment is not supported https://srb.help/3005
+     4 |X &&= 0
+        ^^^^^^^
+
+test/cli/errors-skip-cache/constant_reassignment.rb:5: Constant reassignment is not supported https://srb.help/3005
+     5 |X += 0
+        ^^^^^^
+Errors: 3
+====first run (cold cache)====
+test/cli/errors-skip-cache/props.rb:6: `T.nilable(T.untyped)` is the same as `T.untyped` https://srb.help/3512
+     6 |  prop :foo, T.nilable(T.untyped)
+                     ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/errors-skip-cache/props.rb:6: Replace with `T.untyped`
+     6 |  prop :foo, T.nilable(T.untyped)
+                     ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/errors-skip-cache/props.rb:6: Insert `, default: nil`
+     6 |  prop :foo, T.nilable(T.untyped)
+                                         ^
+
+test/cli/errors-skip-cache/props.rb:10: Cannot use `prop` in an immutable struct https://srb.help/3511
+    10 |  prop :foo, Integer
+          ^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/errors-skip-cache/props.rb:10: Replace with `const`
+    10 |  prop :foo, Integer
+          ^^^^^^^^^^^^^^^^^^
+
+test/cli/errors-skip-cache/props.rb:5: Superclasses must only contain constant literals https://srb.help/4002
+     5 |class A < T:Struct
+                  ^^^^^^^^
+
+test/cli/errors-skip-cache/props.rb:6: Method `prop` does not exist on `T.class_of(A)` https://srb.help/7003
+     6 |  prop :foo, T.nilable(T.untyped)
+          ^^^^
+  Did you mean `proc`? Use `-a` to autocorrect
+    test/cli/errors-skip-cache/props.rb:6: Replace with `proc`
+     6 |  prop :foo, T.nilable(T.untyped)
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def proc(&blk); end
+            ^^^^^^^^^^^^^^
+Errors: 4
+====second run (warm cache)====
+test/cli/errors-skip-cache/props.rb:6: `T.nilable(T.untyped)` is the same as `T.untyped` https://srb.help/3512
+     6 |  prop :foo, T.nilable(T.untyped)
+                     ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/errors-skip-cache/props.rb:6: Replace with `T.untyped`
+     6 |  prop :foo, T.nilable(T.untyped)
+                     ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/errors-skip-cache/props.rb:6: Insert `, default: nil`
+     6 |  prop :foo, T.nilable(T.untyped)
+                                         ^
+
+test/cli/errors-skip-cache/props.rb:10: Cannot use `prop` in an immutable struct https://srb.help/3511
+    10 |  prop :foo, Integer
+          ^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/errors-skip-cache/props.rb:10: Replace with `const`
+    10 |  prop :foo, Integer
+          ^^^^^^^^^^^^^^^^^^
+
+test/cli/errors-skip-cache/props.rb:5: Superclasses must only contain constant literals https://srb.help/4002
+     5 |class A < T:Struct
+                  ^^^^^^^^
+
+test/cli/errors-skip-cache/props.rb:6: Method `prop` does not exist on `T.class_of(A)` https://srb.help/7003
+     6 |  prop :foo, T.nilable(T.untyped)
+          ^^^^
+  Did you mean `proc`? Use `-a` to autocorrect
+    test/cli/errors-skip-cache/props.rb:6: Replace with `proc`
+     6 |  prop :foo, T.nilable(T.untyped)
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def proc(&blk); end
+            ^^^^^^^^^^^^^^
+Errors: 4
+====first run (cold cache)====
+test/cli/errors-skip-cache/sclass.rb:3: `class << EXPRESSION` is only supported for `class << self` https://srb.help/3001
+     3 |class << 10; end
+                 ^^
+Errors: 1
+====second run (warm cache)====
+test/cli/errors-skip-cache/sclass.rb:3: `class << EXPRESSION` is only supported for `class << self` https://srb.help/3001
+     3 |class << 10; end
+                 ^^
+Errors: 1
+====first run (cold cache)====
+test/cli/errors-skip-cache/type_members.rb:7: Duplicate type member `X` https://srb.help/4011
+     7 |  X = type_member
+          ^
+    test/cli/errors-skip-cache/type_members.rb:6: Previous definition
+     6 |  X = type_member
+          ^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/errors-skip-cache/type_members.rb:7: Delete
+     7 |  X = type_member
+          ^^^^^^^^^^^^^^^
+Errors: 1
+====second run (warm cache)====
+test/cli/errors-skip-cache/type_members.rb:7: Duplicate type member `X` https://srb.help/4011
+     7 |  X = type_member
+          ^
+    test/cli/errors-skip-cache/type_members.rb:6: Previous definition
+     6 |  X = type_member
+          ^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/errors-skip-cache/type_members.rb:7: Delete
+     7 |  X = type_member
+          ^^^^^^^^^^^^^^^
+Errors: 1
+====first run (cold cache)====
+test/cli/errors-skip-cache/unsupported_nodes.rb:10: missing arg to ".." operator https://srb.help/2001
+    10 |  if 0..
+              ^^
+
+test/cli/errors-skip-cache/unsupported_nodes.rb:14: missing arg to "..." operator https://srb.help/2001
+    14 |  if 0...
+              ^^^
+
+test/cli/errors-skip-cache/unsupported_nodes.rb:3: Unsupported node type `Preexe` https://srb.help/3003
+     3 |BEGIN {
+     4 |  puts "hi"
+     5 |}
+
+test/cli/errors-skip-cache/unsupported_nodes.rb:7: Unsupported node type `Redo` https://srb.help/3003
+     7 |U = redo
+            ^^^^
+
+test/cli/errors-skip-cache/unsupported_nodes.rb:10: Unsupported node type `IFlipflop` https://srb.help/3003
+    10 |  if 0..
+    11 |    puts "IFlipflop"
+
+test/cli/errors-skip-cache/unsupported_nodes.rb:14: Unsupported node type `EFlipflop` https://srb.help/3003
+    14 |  if 0...
+    15 |    puts "EFlipflop"
+
+test/cli/errors-skip-cache/unsupported_nodes.rb:19: Unsupported node type `Postexe` https://srb.help/3003
+    19 |END {
+    20 |  puts "bye"
+    21 |}
+Errors: 7
+====second run (warm cache)====
+test/cli/errors-skip-cache/unsupported_nodes.rb:10: missing arg to ".." operator https://srb.help/2001
+    10 |  if 0..
+              ^^
+
+test/cli/errors-skip-cache/unsupported_nodes.rb:14: missing arg to "..." operator https://srb.help/2001
+    14 |  if 0...
+              ^^^
+
+test/cli/errors-skip-cache/unsupported_nodes.rb:3: Unsupported node type `Preexe` https://srb.help/3003
+     3 |BEGIN {
+     4 |  puts "hi"
+     5 |}
+
+test/cli/errors-skip-cache/unsupported_nodes.rb:7: Unsupported node type `Redo` https://srb.help/3003
+     7 |U = redo
+            ^^^^
+
+test/cli/errors-skip-cache/unsupported_nodes.rb:10: Unsupported node type `IFlipflop` https://srb.help/3003
+    10 |  if 0..
+    11 |    puts "IFlipflop"
+
+test/cli/errors-skip-cache/unsupported_nodes.rb:14: Unsupported node type `EFlipflop` https://srb.help/3003
+    14 |  if 0...
+    15 |    puts "EFlipflop"
+
+test/cli/errors-skip-cache/unsupported_nodes.rb:19: Unsupported node type `Postexe` https://srb.help/3003
+    19 |END {
+    20 |  puts "bye"
+    21 |}
+Errors: 7

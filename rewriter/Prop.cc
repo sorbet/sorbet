@@ -258,7 +258,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
 
     if (isTNilableTUntyped(ret.type)) {
         auto loc = ret.type.loc();
-        if (auto e = ctx.beginError(loc, core::errors::Rewriter::NilableUntyped)) {
+        if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::NilableUntyped)) {
             e.setHeader("`{}` is the same as `{}`", "T.nilable(T.untyped)", "T.untyped");
             e.replaceWith("Use `T.untyped`", ctx.locAt(loc), "T.untyped");
 
@@ -303,7 +303,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                 ret.computedByMethodNameLoc = lit->loc;
                 ret.computedByMethodName = lit->asSymbol();
             } else {
-                if (auto e = ctx.beginError(val.loc(), core::errors::Rewriter::ComputedBySymbol)) {
+                if (auto e = ctx.beginIndexerError(val.loc(), core::errors::Rewriter::ComputedBySymbol)) {
                     e.setHeader("Value for `{}` must be a symbol literal", "computed_by");
                 }
             }
@@ -316,7 +316,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             if (auto body = ASTUtil::thunkBody(ctx, ret.foreign)) {
                 ret.foreign = std::move(body);
             } else {
-                if (auto e = ctx.beginError(ret.foreign.loc(), core::errors::Rewriter::PropForeignStrict)) {
+                if (auto e = ctx.beginIndexerError(ret.foreign.loc(), core::errors::Rewriter::PropForeignStrict)) {
                     e.setHeader("The argument to `{}` must be a lambda", "foreign:");
                     auto foreignLoc = core::Loc{ctx.file, ret.foreign.loc()};
                     if (auto foreignSource = foreignLoc.source(ctx)) {
@@ -597,7 +597,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         }
 
         if (!propInfo->isImmutable && syntacticSuperClass == SyntacticSuperClass::TImmutableStruct) {
-            if (auto e = ctx.beginError(propInfo->loc, core::errors::Rewriter::InvalidStructMember)) {
+            if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::InvalidStructMember)) {
                 e.setHeader("Cannot use `{}` in an immutable struct", "prop");
                 e.replaceWith("Use `const`", ctx.locAt(propInfo->loc), "const");
             }

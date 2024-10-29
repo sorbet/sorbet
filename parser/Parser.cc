@@ -94,7 +94,7 @@ void reportDiagnostics(core::GlobalState &gs, core::FileRef file, ruby_parser::d
             continue;
         }
         auto loc = rangeToLoc(gs, file, diag.location());
-        if (auto e = gs.beginError(loc, errorClass)) {
+        if (auto e = gs.beginIndexerError(loc, errorClass)) {
             e.setHeader("{}", fmt::vformat(dclassStrings[(int)diag.error_class()], fmt::make_format_args(diag.data())));
             explainError(gs, file, e, loc, diag);
         }
@@ -149,7 +149,6 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
     // report the hints. Always reporting the original parse errors ensures that the user can always
     // see the real cause in case the hints are misleading.
     if (!driver->diagnostics.empty()) {
-        file.data(gs).setHasParseErrors(true);
         auto onlyHints = false;
         reportDiagnostics(gs, file, driver->diagnostics, onlyHints);
     }
