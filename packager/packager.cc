@@ -1564,8 +1564,8 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     auto possibleLayers = ctx.state.packageDB().layers();
     auto pkgLayer = thisPkg.layer.value().first;
     auto otherPkgLayer = otherPkg.layer.value().first;
-    auto pkgIndex = std::distance(possibleLayers.begin(), absl::c_find(possibleLayers, pkgLayer));
-    auto otherPkgIndex = std::distance(possibleLayers.begin(), absl::c_find(possibleLayers, otherPkgLayer));
+    auto pkgIndex = ctx.state.packageDB().layerIndex(pkgLayer);
+    auto otherPkgIndex = ctx.state.packageDB().layerIndex(otherPkgLayer);
 
     if (pkgIndex < otherPkgIndex) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
