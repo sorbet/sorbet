@@ -2311,6 +2311,11 @@ ErrorBuilder GlobalState::beginIndexerError(Loc loc, ErrorClass what) {
         // As errors from the indexing phase control whether or not we should cache trees, we set this flag on the file
         // even if the erorr would be suppressed, to ensure that the experience when the cache is enabled is consistent.
         loc.file().data(*this).setHasIndexErrors(true);
+
+        // All parse errors are index errors, but not all index errors are parse errors.
+        if (what.code < 3000) {
+            loc.file().data(*this).setHasParseErrors(true);
+        }
     }
 
     return ErrorBuilder(*this, shouldReportErrorOn(loc, what), loc, what);

@@ -62,6 +62,9 @@ public:
     // flag accessors
     bool isPackagedTest() const;
 
+    bool hasParseErrors() const;
+    void setHasParseErrors(bool value);
+
     bool hasIndexErrors() const;
     void setHasIndexErrors(bool value);
 
@@ -94,6 +97,8 @@ private:
         // if 'true' file is completely cached in kvstore
         bool cached : 1;
         // some reasonable invariants don't hold for invalid files
+        bool hasParseErrors : 1;
+        // indexing errors inform some later decisions, like whether or not to cache the tree
         bool hasIndexErrors : 1;
         // only relevant in --stripe-packages mode: is the file a `.test.rb` file?
         bool isPackagedTest : 1;

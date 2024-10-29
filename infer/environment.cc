@@ -1205,7 +1205,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                       ctx.owner.asMethodRef(), ctx.locAt(inWhat.loc)));
                 }
 
-                ENFORCE(ctx.file.data(ctx).hasIndexErrors() || !tp.origins.empty(),
+                ENFORCE(ctx.file.data(ctx).hasParseErrors() || !tp.origins.empty(),
                         "Inferencer did not assign location");
             },
             [&](cfg::Alias &a) {
@@ -1703,7 +1703,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             }
             tp.type = core::Types::untypedUntracked();
         }
-        ENFORCE(ctx.file.data(ctx).hasIndexErrors() || !tp.origins.empty(), "Inferencer did not assign location");
+        ENFORCE(ctx.file.data(ctx).hasParseErrors() || !tp.origins.empty(), "Inferencer did not assign location");
 
         if (!noLoopChecking && loopCount != bindMinLoops) {
             auto pin = pinnedTypes.find(bind.bind.variable);
