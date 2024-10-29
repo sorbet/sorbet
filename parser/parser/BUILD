@@ -56,6 +56,8 @@ bison(
     bison_options = [
         "-Wno-empty-rule",
         "-Wno-precedence",
+        "-Werror=conflicts-rr",
+        "-Werror=conflicts-sr",
     ],
 )
 
@@ -65,6 +67,8 @@ bison(
     bison_options = [
         "-Wno-empty-rule",
         "-Wno-precedence",
+        "-Werror=conflicts-rr",
+        "-Werror=conflicts-sr",
         "--debug",
     ],
 )
