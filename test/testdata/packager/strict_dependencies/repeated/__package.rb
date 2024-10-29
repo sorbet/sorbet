@@ -6,4 +6,5 @@
 class Repeated < PackageSpec
   strict_dependencies 'false'
   strict_dependencies 'false' # error: Repeated declaration of `strict_dependencies`
+  layer 'a'
 end
