@@ -1,0 +1,9 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def foo<<todo method>>(x:, x$1: = nil, &<blk>)
+    <emptyTree>
+  end
+
+  def bar<<todo method>>(x, y:, y$2: = nil, &<blk>)
+    <emptyTree>
+  end
+end
