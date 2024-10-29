@@ -10,7 +10,6 @@ trap cleanup EXIT
 mkdir "$dir/cache"
 
 run_sorbet() {
-  set -x
   main/sorbet --censor-for-snapshot-tests \
     --silence-dev-message \
     --cache-dir "$dir"/cache \
