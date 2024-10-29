@@ -29,11 +29,11 @@
             "name": "Debug Prism test in LLDB",
             "program": "${workspaceFolder}/bazel-bin/test/test_PosTests/prism_regression/${input:test_name}.runfiles/com_stripe_ruby_typer/test/pipeline_test_runner",
             "args": ["--single_test=${workspaceFolder}/test/prism_regression/${input:test_name}.rb", "--parser=prism"],
-            // See .vscode/tasks.json for the task that sets the `BAZEL_EXEC_ROOT` environment variable.
-            "preLaunchTask": "Prepare tests debugging",
+            // We need to run all tests to generate the pipeline_test_runner files, which are needed by the LLDB debugger to execute the tests.
+            "preLaunchTask": "Run all Prism tests",
             "stopOnEntry": false,
             "sourceMap": {
-                "${env:BAZEL_EXEC_ROOT}": "${workspaceFolder}",
+                "": "${workspaceFolder}",
             },
         },
         {
@@ -45,7 +45,7 @@
             "preLaunchTask": "Build with Prism",
             "stopOnEntry": false,
             "sourceMap": {
-                "${env:BAZEL_EXEC_ROOT}": "${workspaceFolder}",
+                "": "${workspaceFolder}",
             },
         },
     ],
