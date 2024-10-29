@@ -2787,9 +2787,10 @@ opt_block_args_tail:
                     }
                 | t_lambda error
                     {
+                      driver.numparam_stack.pop();
                       driver.lex.unextend();
                       driver.lex.context.inLambda = $1->context.inLambda;
-                      YYERROR;
+                      $$ = driver.build.error_node(self, @1.beginPos(), @1.endPos());
                     }
 
         t_lambda: tLAMBDA
