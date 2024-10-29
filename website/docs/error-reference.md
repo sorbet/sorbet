@@ -974,7 +974,7 @@ If the flag is passed with no argument, then the default valid layers are
 If a package is at `strict_dependencies` level `layered` or stricter, there are
 2 restrictions on what packages it may import:
 
-- all packages it imports must also be at level `layered` (or stricter)
+- all packages it imports must also be at `strict_dependencies` level `layered` (or stricter)
 - all packages must be in the same or lower layer
 
 ## 4001
