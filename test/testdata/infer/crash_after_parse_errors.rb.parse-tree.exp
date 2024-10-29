@@ -1,0 +1,31 @@
+Begin {
+  stmts = [
+    Assign {
+      lhs = LVarLhs {
+        name = <U r>
+      }
+      rhs = LVar {
+        name = <U e>
+      }
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U r>
+      }
+      rhs = LVar {
+        name = <U e>
+      }
+    }
+    And {
+      left = LVar {
+        name = <U r>
+      }
+      right = Send {
+        receiver = NULL
+        method = <U o>
+        args = [
+        ]
+      }
+    }
+  ]
+}
