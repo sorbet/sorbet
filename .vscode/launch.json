@@ -36,12 +36,29 @@
                 "${env:BAZEL_EXEC_ROOT}": "${workspaceFolder}",
             },
         },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Sorbet pipeline in LLDB",
+            "program": "${workspaceFolder}/bazel-bin/main/sorbet",
+            "args": ["--parser=prism", "${input:file_path}"],
+            "preLaunchTask": "Build with Prism",
+            "stopOnEntry": false,
+            "sourceMap": {
+                "${env:BAZEL_EXEC_ROOT}": "${workspaceFolder}",
+            },
+        },
     ],
     "inputs": [
         {
             "id": "test_name",
             "type": "promptString",
             "description": "Enter the test name, e.g. case for running test/prism_regression/case.rb",
+        },
+        {
+            "id": "file_path",
+            "type": "promptString",
+            "description": "Enter the path to the file to typecheck, e.g. test/prism_regression/case.rb",
         }
     ]
 }
