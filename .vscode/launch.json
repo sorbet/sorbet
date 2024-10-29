@@ -22,6 +22,26 @@
                     "ignoreFailures": false
                 }
             ]
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Prism test in LLDB",
+            "program": "${workspaceFolder}/bazel-bin/test/test_PosTests/prism_regression/${input:test_name}.runfiles/com_stripe_ruby_typer/test/pipeline_test_runner",
+            "args": ["--single_test=${workspaceFolder}/test/prism_regression/${input:test_name}.rb", "--parser=prism"],
+            // See .vscode/tasks.json for the task that sets the `BAZEL_EXEC_ROOT` environment variable.
+            "preLaunchTask": "Prepare tests debugging",
+            "stopOnEntry": false,
+            "sourceMap": {
+                "${env:BAZEL_EXEC_ROOT}": "${workspaceFolder}",
+            },
+        },
+    ],
+    "inputs": [
+        {
+            "id": "test_name",
+            "type": "promptString",
+            "description": "Enter the test name, e.g. case for running test/prism_regression/case.rb",
         }
     ]
 }
