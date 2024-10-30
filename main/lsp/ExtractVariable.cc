@@ -186,15 +186,17 @@ public:
     void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &tree) {
         if (tree.loc() == targetLoc.offsets()) {
             // It's not valid to extract the following node types
-            if (!ast::isa_tree<ast::Break>(tree) && !ast::isa_tree<ast::Next>(tree) &&
-                !ast::isa_tree<ast::Return>(tree) && !ast::isa_tree<ast::Retry>(tree) &&
-                !ast::isa_tree<ast::RescueCase>(tree) && !ast::isa_tree<ast::InsSeq>(tree)) {
-                matchingNode = &tree;
-                ENFORCE(!enclosingClassStack.empty());
-                matchingNodeEnclosingClass = enclosingClassStack.back();
-                if (!enclosingMethodStack.empty()) {
-                    matchingNodeEnclosingMethod = enclosingMethodStack.back();
-                }
+            if (ast::isa_tree<ast::Break>(tree) || ast::isa_tree<ast::Next>(tree) || ast::isa_tree<ast::Return>(tree) ||
+                ast::isa_tree<ast::Retry>(tree) || ast::isa_tree<ast::RescueCase>(tree) ||
+                ast::isa_tree<ast::InsSeq>(tree)) {
+                return;
+            }
+
+            matchingNode = &tree;
+            ENFORCE(!enclosingClassStack.empty());
+            matchingNodeEnclosingClass = enclosingClassStack.back();
+            if (!enclosingMethodStack.empty()) {
+                matchingNodeEnclosingMethod = enclosingMethodStack.back();
             }
         }
     }
