@@ -245,6 +245,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_BLOCK_PARAMETERS_NODE: { // The parameters declared at the top of a PM_BLOCK_NODE
             auto paramsNode = down_cast<pm_block_parameters_node>(node);
 
+            if (paramsNode->parameters == nullptr) {
+                return make_unique<parser::Args>(location, NodeVec{});
+            }
+
             // Sorbet's legacy parser inserts locals (Shadowargs) into the block's Args node, along with its other
             // parameters. So we need to extract the args vector from the Args node, and insert the locals at the end of
             // it.
