@@ -19,3 +19,6 @@ class C
     -> { 123 }
   end
 end
+
+# Empty lambda parameters
+->() { 1 + 2 }
