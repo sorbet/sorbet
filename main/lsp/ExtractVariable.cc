@@ -193,7 +193,7 @@ public:
             }
 
             if (auto classDef = ast::cast_tree<ast::ClassDef>(tree)) {
-                if (ast::isa_tree<ast::EmptyTree>(classDef->name)) {
+                if (classDef->symbol == core::Symbols::root()) {
                     return;
                 }
             }
