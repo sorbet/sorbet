@@ -192,5 +192,31 @@ Begin {
         }
       }
     }
+    Block {
+      send = Send {
+        receiver = Const {
+          scope = NULL
+          name = <C <U Kernel>>
+        }
+        method = <U lambda>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+        ]
+      }
+      body = Send {
+        receiver = Integer {
+          val = "1"
+        }
+        method = <U +>
+        args = [
+          Integer {
+            val = "2"
+          }
+        ]
+      }
+    }
   ]
 }
