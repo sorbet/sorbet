@@ -604,7 +604,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
             continue;
         }
 
-        if (syntacticSuperClass != SyntacticSuperClass::Unknown) {
+        if (wantTypedInitialize(syntacticSuperClass)) {
             auto it = absl::c_find_if(props, [&propInfo](auto &existing) { return existing.name == propInfo->name; });
             if (it != props.end()) {
                 if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::DuplicateProp)) {
