@@ -155,8 +155,9 @@ ast::ExpressionPtr runRewriter(core::GlobalState &gs, core::FileRef file, ast::E
 }
 
 ast::ParsedFile runLocalVars(core::GlobalState &gs, ast::ParsedFile tree) {
-    Timer timeit(gs.tracer(), "runLocalVars", {{"file", string(tree.file.data(gs).path())}});
     core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
+    Timer timeit(gs.tracer(), "runLocalVars", {{"file", string(tree.file.data(gs).path())}});
+    core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries when resolving duplicate arguments
     return sorbet::local_vars::LocalVars::run(ctx, move(tree));
 }
 

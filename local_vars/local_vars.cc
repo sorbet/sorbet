@@ -47,16 +47,29 @@ class LocalNameInserter {
 
     // Map through the reference structure, naming the locals, and preserving
     // the outer structure for the namer proper.
-    NamedArg nameArg(ast::ExpressionPtr arg) {
+    NamedArg nameArg(core::MutableContext ctx, const vector<NamedArg> &seen, ast::ExpressionPtr arg, uint32_t pos) {
         NamedArg named;
         auto *cursor = &arg;
+
+        auto mangleKeyword = [&ctx, &seen, pos](bool isKeyword, core::NameRef name) {
+            // Mangle any duplicate keyword arguments.
+            if (isKeyword) {
+                auto it = absl::c_find_if(seen, [name](auto &existing) { return existing.name == name; });
+                if (it != seen.end()) {
+                    return ctx.state.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, name, pos);
+                }
+            }
+
+            return name;
+        };
 
         while (cursor != nullptr) {
             typecase(
                 *cursor,
                 [&](ast::UnresolvedIdent &nm) {
-                    named.name = nm.name;
-                    named.local = enterLocal(nm.name);
+                    auto name = mangleKeyword(named.flags.keyword, nm.name);
+                    named.name = name;
+                    named.local = enterLocal(name);
                     named.loc = nm.loc;
                     *cursor = ast::make_expression<ast::Local>(nm.loc, named.local);
                     cursor = nullptr;
@@ -79,8 +92,9 @@ class LocalNameInserter {
                     cursor = &shadow.expr;
                 },
                 [&](const ast::Local &local) {
-                    named.name = local.localVariable._name;
-                    named.local = enterLocal(local.localVariable._name);
+                    auto name = mangleKeyword(named.flags.keyword, local.localVariable._name);
+                    named.name = name;
+                    named.local = enterLocal(name);
                     named.loc = local.loc;
                     *cursor = ast::make_expression<ast::Local>(local.loc, named.local);
                     cursor = nullptr;
@@ -93,11 +107,14 @@ class LocalNameInserter {
 
     vector<NamedArg> nameArgs(core::MutableContext ctx, ast::MethodDef::ARGS_store &methodArgs) {
         vector<NamedArg> namedArgs;
+        int pos = -1;
         for (auto &arg : methodArgs) {
+            ++pos;
+
             if (!ast::isa_reference(arg)) {
                 Exception::raise("Must be a reference!");
             }
-            auto named = nameArg(move(arg));
+            auto named = nameArg(ctx, namedArgs, move(arg), pos);
             namedArgs.emplace_back(move(named));
         }
 

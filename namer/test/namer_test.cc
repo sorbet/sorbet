@@ -60,8 +60,8 @@ TEST_CASE("namer tests") {
     SUBCASE("HelloWorld") {
         auto tree = hello_world(gs);
         {
+            sorbet::core::UnfreezeNameTable nameTableAccess(gs); // creates singletons and class names
             auto localTree = sorbet::local_vars::LocalVars::run(gs, move(tree));
-            sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
             sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
             runNamer(gs, move(localTree));
         }
