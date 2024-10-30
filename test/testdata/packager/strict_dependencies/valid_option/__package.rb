@@ -5,4 +5,5 @@
 
 class ValidOption < PackageSpec
   strict_dependencies 'false'
+  layer 'a'
 end

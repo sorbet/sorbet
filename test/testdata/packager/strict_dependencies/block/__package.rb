@@ -5,4 +5,5 @@
 
 class Block < PackageSpec
   strict_dependencies 'false' do end # error: Invalid expression in package: `Block` not allowed
+  layer 'a'
 end
