@@ -199,7 +199,7 @@ public:
             }
 
             matchingNode = &tree;
-            ENFORCE(!enclosingClassStack.empty());
+            ENFORCE(!enclosingClassStack.empty(), "Must at least have the <root> ClassDef");
             matchingNodeEnclosingClass = enclosingClassStack.back();
             if (!enclosingMethodStack.empty()) {
                 matchingNodeEnclosingMethod = enclosingMethodStack.back();
