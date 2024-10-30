@@ -1,0 +1,27 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def foo<<todo method>>(x:, x$1:, &<blk>)
+    <emptyTree>
+  end
+
+  def foo<<todo method>>(x:, x$1: = 10, &<blk>)
+    <emptyTree>
+  end
+
+  <self>.foo(:x, 0)
+
+  <self>.foo({:x => 0})
+
+  <self>.foo(begin
+      <hashTemp>$3 = ::<Magic>.<to-hash-dup>({:x => 0})
+      <hashTemp>$3
+    end)
+
+  <self>.foo(begin
+      <hashTemp>$5 = ::<Magic>.<to-hash-dup>(<self>.hash())
+      <hashTemp>$5
+    end)
+
+  <runtime method definition of foo>
+
+  <runtime method definition of foo>
+end
