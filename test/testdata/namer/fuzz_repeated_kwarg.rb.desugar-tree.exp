@@ -7,27 +7,27 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  def f3<<todo method>>(x:, x:, &<blk>)
+  def f3<<todo method>>(x:, x$1:, &<blk>)
     <emptyTree>
   end
 
-  def f4<<todo method>>(x:, x: = nil, &<blk>)
+  def f4<<todo method>>(x:, x$1: = nil, &<blk>)
     <emptyTree>
   end
 
-  def f5<<todo method>>(x, x:, &<blk>)
+  def f5<<todo method>>(x, x$1:, &<blk>)
     <emptyTree>
   end
 
-  def f6<<todo method>>(x, x: = nil, &<blk>)
+  def f6<<todo method>>(x, x$1: = nil, &<blk>)
     <emptyTree>
   end
 
-  def f7<<todo method>>(x = 0, x: = nil, &<blk>)
+  def f7<<todo method>>(x = 0, x$1: = nil, &<blk>)
     <emptyTree>
   end
 
-  def f8<<todo method>>(this, this:, &<blk>)
+  def f8<<todo method>>(this, this$1:, &<blk>)
     <emptyTree>
   end
 

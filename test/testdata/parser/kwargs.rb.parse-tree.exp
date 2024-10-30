@@ -91,7 +91,7 @@ Begin {
             name = <U x>
           }
           Kwarg {
-            name = <U x>
+            name = <K <U x> $1>
           }
         ]
       }
@@ -105,7 +105,7 @@ Begin {
             name = <U x>
           }
           Kwoptarg {
-            name = <U x>
+            name = <K <U x> $1>
             default_ = Integer {
               val = "10"
             }
