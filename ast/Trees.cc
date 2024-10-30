@@ -1,4 +1,5 @@
 #include "ast/Trees.h"
+#include "absl/strings/escaping.h"
 #include "absl/synchronization/blocking_counter.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
@@ -304,7 +305,7 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
     if (this->symbol != core::Symbols::StubModule()) {
         return nullopt;
     }
-    if (this->resolutionScopes == nullptr || !this->resolutionScopes->empty()) [[unlikely]] {
+    if (this->resolutionScopes == nullptr && this->resolutionScopes->empty()) [[unlikely]] {
         ENFORCE(false);
         fatalLogger->error(R"(msg="Bad fullUnresolvedPath" path="{}")");
         fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
