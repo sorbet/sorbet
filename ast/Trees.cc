@@ -304,7 +304,11 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
     if (this->symbol != core::Symbols::StubModule()) {
         return nullopt;
     }
-    ENFORCE(this->resolutionScopes != nullptr && !this->resolutionScopes->empty(), "loc={}", this->loc.showRaw(ctx));
+    if (this->resolutionScopes == nullptr || !this->resolutionScopes->empty()) {
+        ENFORCE(false);
+        fatalLogger->error(R"(msg="Bad fullUnresolvedPath" path="{}")");
+        fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
+    }
 
     vector<core::NameRef> namesFailedToResolve;
     auto *nested = this;
