@@ -52,6 +52,12 @@ class LocalNameInserter {
             return name;
         }
 
+        // Names prefixed with `_` aren't considered to conflict.
+        auto nameStr = name.shortName(ctx);
+        if (!name.empty() && name[0] == '_') {
+            return name;
+        }
+
         // In addition to the check in the parser, we look again for duplicate keyword arguments here. This is
         // because the method or block we're currently processing may have been defined by a rewrite pass, and wasn't
         // subject to any of the duplicate argument checks present in the parser.
