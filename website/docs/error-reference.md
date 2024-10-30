@@ -1391,6 +1391,19 @@ assignment and a class definition for a given constant, you can either:
 The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a
 Ruby `class`. For more, see the docs: [`T.attached_class`](attached-class.md).
 
+## 4024
+
+Two keyword arguments to a method definition or block have been given the same
+name:
+
+```ruby
+def foo(x:, x:)
+end
+```
+
+You can resolve this error by giving a different name to one of the conflicting
+arguments.
+
 ## 5001
 
 Sorbet cannot resolve references to dynamic constants. The common case occurs
