@@ -46,17 +46,25 @@ class LocalNameInserter {
     };
 
     // Handle the mangling of keyword argument names, if the name passed has already been seen in the argument list.
-    core::NameRef mangleKeyword(core::MutableContext ctx, const vector<NamedArg> &seen, bool isKeyword,
-                                core::NameRef name, uint32_t pos) const {
-        // Mangle any duplicate keyword arguments.
-        if (isKeyword) {
-            auto it = absl::c_find_if(seen, [name](auto &existing) { return existing.name == name; });
-            if (it != seen.end()) {
-                return ctx.state.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, name, pos);
-            }
+    core::NameRef mangleKeyword(core::MutableContext ctx, const vector<NamedArg> &seen, core::LocOffsets loc,
+                                bool isKeyword, core::NameRef name, uint32_t pos) const {
+        if (!isKeyword) {
+            return name;
         }
 
-        return name;
+        // In addition to the check in the parser, we look again for duplicate keyword arguments here. This is
+        // because the method or block we're currently processing may have been defined by a rewrite pass, and wasn't
+        // subject to any of the duplicate argument checks present in the parser.
+        auto it = absl::c_find_if(seen, [name](auto &existing) { return existing.name == name; });
+        if (it == seen.end()) {
+            return name;
+        }
+
+        if (auto e = ctx.beginError(loc, core::errors::Namer::DuplicateKeywordArg)) {
+            e.setHeader("duplicate argument name {}", name.shortName(ctx));
+        }
+
+        return ctx.state.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, name, pos);
     }
 
     // Map through the reference structure, naming the locals, and preserving
@@ -69,7 +77,7 @@ class LocalNameInserter {
             typecase(
                 *cursor,
                 [&](ast::UnresolvedIdent &nm) {
-                    auto name = mangleKeyword(ctx, seen, named.flags.keyword, nm.name, pos);
+                    auto name = mangleKeyword(ctx, seen, nm.loc, named.flags.keyword, nm.name, pos);
                     named.name = name;
                     named.local = enterLocal(name);
                     named.loc = nm.loc;
@@ -94,7 +102,8 @@ class LocalNameInserter {
                     cursor = &shadow.expr;
                 },
                 [&](const ast::Local &local) {
-                    auto name = mangleKeyword(ctx, seen, named.flags.keyword, local.localVariable._name, pos);
+                    auto name =
+                        mangleKeyword(ctx, seen, local.loc, named.flags.keyword, local.localVariable._name, pos);
                     named.name = name;
                     named.local = enterLocal(name);
                     named.loc = local.loc;
