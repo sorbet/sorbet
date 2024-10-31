@@ -146,7 +146,7 @@ unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef fil
         return std::unique_ptr<parser::Node>();
     }
 
-    auto nodes = Prism::Translator(parser, gs).translate(std::move(root));
+    auto nodes = Prism::Translator(parser, gs, file).translate(std::move(root));
 
     if (print.ParseTree.enabled) {
         print.ParseTree.fmt("{}\n", nodes->toStringWithTabs(gs, 0));

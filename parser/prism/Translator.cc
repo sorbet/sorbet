@@ -1207,14 +1207,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
         case PM_IMPLICIT_NODE:
         case PM_MISSING_NODE:
-            auto type_id = PM_NODE_TYPE(node);
-            auto type_name = pm_node_type_to_str(type_id);
-
-            fmt::memory_buffer buf;
-            fmt::format_to(std::back_inserter(buf), "Unimplemented node type {} (#{}).", type_name, type_id);
-            std::string s = fmt::to_string(buf);
-
-            return make_unique<parser::String>(location, gs.enterNameUTF8(s));
+            reportError(location, "unexpected token");
+            return make_unique<parser::Const>(location, nullptr, core::Names::Constants::ErrorNode());
     }
 }
 
@@ -1765,7 +1759,14 @@ template <typename PrismNode> std::unique_ptr<parser::Mlhs> Translator::translat
 // Context management methods
 Translator Translator::enterMethodDef() {
     auto isInMethodDef = true;
-    return Translator(parser, gs, isInMethodDef);
+    return Translator(parser, gs, file, isInMethodDef);
+}
+
+void Translator::reportError(core::LocOffsets loc, const std::string &message) {
+    auto errorLoc = core::Loc(file, loc);
+    if (auto e = gs.beginError(errorLoc, core::errors::Parser::ParserError)) {
+        e.setHeader("{}", message);
+    }
 }
 
 }; // namespace sorbet::parser::Prism
