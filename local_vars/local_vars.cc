@@ -54,7 +54,7 @@ class LocalNameInserter {
 
         // Names prefixed with `_` aren't considered to conflict.
         auto nameStr = name.shortName(ctx);
-        if (!name.empty() && name[0] == '_') {
+        if (!nameStr.empty() && nameStr.front() == '_') {
             return name;
         }
 
