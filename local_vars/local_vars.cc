@@ -45,9 +45,37 @@ class LocalNameInserter {
         ast::ExpressionPtr expr;
     };
 
+    // Handle the mangling of keyword argument names, if the name passed has already been seen in the argument list.
+    core::NameRef mangleKeyword(core::MutableContext ctx, const vector<NamedArg> &seen, core::LocOffsets loc,
+                                bool isKeyword, core::NameRef name, uint32_t pos) const {
+        if (!isKeyword) {
+            return name;
+        }
+
+        // Variables prefixed with `_` don't interact.
+        auto nameStr = name.shortName(ctx);
+        if (!nameStr.empty() && nameStr.front() == '_') {
+            return name;
+        }
+
+        // In addition to the check in the parser, we look again for duplicate keyword arguments here. This is
+        // because the method or block we're currently processing may have been defined by a rewrite pass, and wasn't
+        // subject to any of the duplicate argument checks present in the parser.
+        auto it = absl::c_find_if(seen, [name](auto &existing) { return existing.name == name; });
+        if (it == seen.end()) {
+            return name;
+        }
+
+        if (auto e = ctx.beginError(loc, core::errors::Namer::DuplicateKeywordArg)) {
+            e.setHeader("duplicate argument name {}", name.shortName(ctx));
+        }
+
+        return ctx.state.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, name, pos);
+    }
+
     // Map through the reference structure, naming the locals, and preserving
     // the outer structure for the namer proper.
-    NamedArg nameArg(ast::ExpressionPtr arg) {
+    NamedArg nameArg(core::MutableContext ctx, const vector<NamedArg> &seen, ast::ExpressionPtr arg, uint32_t pos) {
         NamedArg named;
         auto *cursor = &arg;
 
@@ -55,8 +83,9 @@ class LocalNameInserter {
             typecase(
                 *cursor,
                 [&](ast::UnresolvedIdent &nm) {
-                    named.name = nm.name;
-                    named.local = enterLocal(nm.name);
+                    auto name = mangleKeyword(ctx, seen, nm.loc, named.flags.keyword, nm.name, pos);
+                    named.name = name;
+                    named.local = enterLocal(name);
                     named.loc = nm.loc;
                     *cursor = ast::make_expression<ast::Local>(nm.loc, named.local);
                     cursor = nullptr;
@@ -79,8 +108,10 @@ class LocalNameInserter {
                     cursor = &shadow.expr;
                 },
                 [&](const ast::Local &local) {
-                    named.name = local.localVariable._name;
-                    named.local = enterLocal(local.localVariable._name);
+                    auto name =
+                        mangleKeyword(ctx, seen, local.loc, named.flags.keyword, local.localVariable._name, pos);
+                    named.name = name;
+                    named.local = enterLocal(name);
                     named.loc = local.loc;
                     *cursor = ast::make_expression<ast::Local>(local.loc, named.local);
                     cursor = nullptr;
@@ -93,11 +124,14 @@ class LocalNameInserter {
 
     vector<NamedArg> nameArgs(core::MutableContext ctx, ast::MethodDef::ARGS_store &methodArgs) {
         vector<NamedArg> namedArgs;
+        int pos = -1;
         for (auto &arg : methodArgs) {
+            ++pos;
+
             if (!ast::isa_reference(arg)) {
                 Exception::raise("Must be a reference!");
             }
-            auto named = nameArg(move(arg));
+            auto named = nameArg(ctx, namedArgs, move(arg), pos);
             namedArgs.emplace_back(move(named));
         }
 
