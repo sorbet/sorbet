@@ -1,13 +1,16 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:name, <emptyTree>::<C String>, :age, <emptyTree>::<C Integer>).void()
+      <self>.params(:name, <emptyTree>::<C String>, :name, <emptyTree>::<C Integer>, :age, <emptyTree>::<C Integer>, :name, <emptyTree>::<C Float>, :age, <emptyTree>::<C Float>).void()
     end
 
-    def initialize<<todo method>>(name:, age:, &<blk>)
+    def initialize<<todo method>>(name:, name:, age:, name:, age:, &<blk>)
       begin
-        @name = <cast:let>(name, <todo sym>, <emptyTree>::<C String>)
-        @age = <cast:let>(age, <todo sym>, <emptyTree>::<C Integer>)
+        @name = <cast:let>(name, <todo sym>, <emptyTree>::<C Float>)
+        @name = <cast:let>(name, <todo sym>, <emptyTree>::<C Float>)
+        @age = <cast:let>(age, <todo sym>, <emptyTree>::<C Float>)
+        @name = <cast:let>(name, <todo sym>, <emptyTree>::<C Float>)
+        @age = <cast:let>(age, <todo sym>, <emptyTree>::<C Float>)
         nil
       end
     end
@@ -18,6 +21,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def name<<todo method>>(&<blk>)
       @name
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def name<<todo method>>(&<blk>)
+      @name
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+    end
+
+    def name=<<todo method>>(arg0, &<blk>)
+      @name = arg0
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -36,13 +55,33 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @age = arg0
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Float>)
+    end
+
+    def name<<todo method>>(&<blk>)
+      @name
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Float>)
+    end
+
+    def age<<todo method>>(&<blk>)
+      @age
+    end
+
     <runtime method definition of initialize>
 
     <self>.const(:name, <emptyTree>::<C String>, :without_accessors, true)
 
     <runtime method definition of name>
 
-    <self>.prop(:name, <emptyTree>::<C Integer>)
+    <self>.prop(:name, <emptyTree>::<C Integer>, :without_accessors, true)
+
+    <runtime method definition of name>
+
+    <runtime method definition of name=>
 
     <self>.prop(:age, <emptyTree>::<C Integer>, :without_accessors, true)
 
@@ -50,8 +89,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of age=>
 
-    <self>.const(:name, <emptyTree>::<C Float>)
+    <self>.const(:name, <emptyTree>::<C Float>, :without_accessors, true)
 
-    <self>.const(:age, <emptyTree>::<C Float>)
+    <runtime method definition of name>
+
+    <self>.const(:age, <emptyTree>::<C Float>, :without_accessors, true)
+
+    <runtime method definition of age>
   end
 end
