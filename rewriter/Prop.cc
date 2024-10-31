@@ -604,17 +604,6 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
             continue;
         }
 
-        if (wantTypedInitialize(syntacticSuperClass)) {
-            auto it = absl::c_find_if(props, [&propInfo](auto &existing) { return existing.name == propInfo->name; });
-            if (it != props.end()) {
-                if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::DuplicateProp)) {
-                    e.setHeader("{} is defined multiple times", propInfo->isImmutable ? "const" : "prop");
-                    e.addErrorLine(ctx.locAt(it->loc), "Previous definition is here");
-                }
-                continue;
-            }
-        }
-
         auto processed = processProp(ctx, propInfo.value(), propContext);
         ENFORCE(!processed.empty(), "if parseProp completed successfully, processProp must complete too");
 
