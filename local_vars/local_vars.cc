@@ -52,7 +52,7 @@ class LocalNameInserter {
             return name;
         }
 
-        // Names prefixed with `_` aren't considered to conflict.
+        // Variables prefixed with `_` don't interact.
         auto nameStr = name.shortName(ctx);
         if (!nameStr.empty() && nameStr.front() == '_') {
             return name;
