@@ -14,17 +14,7 @@ module T::Private::Methods::CallValidation
   def self.wrap_method_if_needed(mod, method_sig, original_method)
     original_visibility = visibility_method_name(mod, method_sig.method_name)
     if method_sig.mode == T::Private::Methods::Modes.abstract
-      T::Private::ClassUtils.replace_method(mod, method_sig.method_name, true) do |*args, &blk|
-        # We allow abstract methods to be implemented by things further down the ancestor chain.
-        # So, if a super method exists, call it.
-        if defined?(super)
-          super(*args, &blk)
-        else
-          raise NotImplementedError.new(
-            "The method `#{method_sig.method_name}` on #{mod} is declared as `abstract`. It does not have an implementation."
-          )
-        end
-      end
+      create_abstract_wrapper(mod, method_sig, original_method, original_visibility)
     # Do nothing in this case; this method was not wrapped in _on_method_added.
     elsif method_sig.defined_raw
     # Note, this logic is duplicated (intentionally, for micro-perf) at `Methods._on_method_added`,
@@ -53,6 +43,24 @@ module T::Private::Methods::CallValidation
 
   def self.disable_fast_path
     @is_allowed_to_have_fast_path = false
+  end
+
+  def self.create_abstract_wrapper(mod, method_sig, original_method, original_visibility)
+    mod.module_eval(<<~METHOD, __FILE__, __LINE__ + 1)
+      #{original_visibility}
+
+      def #{method_sig.method_name}(...)
+        # We allow abstract methods to be implemented by things further down the ancestor chain.
+        # So, if a super method exists, call it.
+        if defined?(super)
+          super
+        else
+          raise NotImplementedError.new(
+            "The method `#{method_sig.method_name}` on #{mod} is declared as `abstract`. It does not have an implementation."
+          )
+        end
+      end
+    METHOD
   end
 
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
