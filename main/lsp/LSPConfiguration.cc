@@ -179,7 +179,7 @@ string LSPConfiguration::remoteName2Local(string_view encodedUri) const {
     string uri = urlDecode(encodedUri);
 
     if (!isUriInWorkspace(uri) && !isSorbetUri(uri)) {
-        logger->error("Unrecognized URI received from client: {}", uri);
+        logger->error(R"(msg="Unrecognized URI received from client" uri="{}")", absl::CEscape(uri));
         return string(uri);
     }
 
