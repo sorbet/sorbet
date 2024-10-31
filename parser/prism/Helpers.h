@@ -184,7 +184,7 @@ template <typename PrismNode> pm_node_t *up_cast(PrismNode *node) {
 template <typename PrismNode> PrismNode *down_cast(pm_node_t *anyNode) {
     static_assert(std::is_same_v<decltype(PrismNode::base), pm_node_t>,
                   "The `down_cast` function should only be called on Prism node pointers.");
-    ENFORCE(PM_NODE_TYPE_P(anyNode, PrismNodeTypeHelper<PrismNode>::TypeID),
+    ENFORCE(anyNode == nullptr || PM_NODE_TYPE_P(anyNode, PrismNodeTypeHelper<PrismNode>::TypeID),
             "Failed to cast a Prism AST Node. Expected {} (#{}), but got {} (#{}).",
             pm_node_type_to_str(PrismNodeTypeHelper<PrismNode>::TypeID), PrismNodeTypeHelper<PrismNode>::TypeID,
             pm_node_type_to_str(PM_NODE_TYPE(anyNode)), PM_NODE_TYPE(anyNode));
