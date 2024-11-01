@@ -1058,10 +1058,9 @@ struct PackageSpecBodyWalk {
             // null indicates an invalid import.
             if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 // Transform: `import Foo` -> `import <PackageSpecRegistry>::Foo`
-                auto importArg = move(send.getPosArg(0));
-                send.removePosArg(0);
-                ENFORCE(send.numPosArgs() == 0);
-                send.addPosArg(prependName(move(importArg)));
+                auto &posArg = send.getPosArg(0);
+                auto importArg = move(posArg);
+                posArg = prependName(move(importArg));
 
                 info.importedPackageNames.emplace_back(getPackageName(ctx, target), method2ImportType(send));
             }
@@ -1069,10 +1068,9 @@ struct PackageSpecBodyWalk {
 
         if (send.fun == core::Names::restrictToService() && send.numPosArgs() == 1) {
             // Transform: `restrict_to_service Foo` -> `restrict_to_service <PackageSpecRegistry>::Foo`
-            auto importArg = move(send.getPosArg(0));
-            send.removePosArg(0);
-            ENFORCE(send.numPosArgs() == 0);
-            send.addPosArg(prependName(move(importArg)));
+            auto &posArg = send.getPosArg(0);
+            auto importArg = move(posArg);
+            posArg = prependName(move(importArg));
         }
 
         if (send.fun == core::Names::exportAll() && send.numPosArgs() == 0) {
@@ -1103,10 +1101,9 @@ struct PackageSpecBodyWalk {
                 }
 
                 if (auto *recv = verifyConstant(ctx, send.fun, target->recv)) {
+                    auto &posArg = send.getPosArg(0);
                     auto importArg = move(target->recv);
-                    send.removePosArg(0);
-                    ENFORCE(send.numPosArgs() == 0);
-                    send.addPosArg(prependName(move(importArg)));
+                    posArg = prependName(move(importArg));
                     info.visibleTo_.emplace_back(getPackageName(ctx, recv), core::packages::VisibleToType::Wildcard);
                 } else {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
@@ -1116,10 +1113,9 @@ struct PackageSpecBodyWalk {
                     return;
                 }
             } else if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
-                auto importArg = move(send.getPosArg(0));
-                send.removePosArg(0);
-                ENFORCE(send.numPosArgs() == 0);
-                send.addPosArg(prependName(move(importArg)));
+                auto &posArg = send.getPosArg(0);
+                auto importArg = move(posArg);
+                posArg = prependName(move(importArg));
 
                 info.visibleTo_.emplace_back(getPackageName(ctx, target), core::packages::VisibleToType::Normal);
             }

@@ -1076,12 +1076,6 @@ void Send::insertPosArg(uint16_t index, ExpressionPtr arg) {
     this->numPosArgs_++;
 }
 
-void Send::removePosArg(uint16_t index) {
-    ENFORCE(index < numPosArgs_);
-    this->args.erase(this->args.begin() + index);
-    this->numPosArgs_--;
-}
-
 void Send::setBlock(ExpressionPtr block) {
     if (hasBlock()) {
         this->args.pop_back();
