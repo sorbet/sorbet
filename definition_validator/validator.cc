@@ -1206,7 +1206,7 @@ public:
 } // namespace
 
 ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
-    Timer timeit(ctx.state.tracer(), "validateSymbols");
+    Timer timeit(ctx.state.tracer(), "validateSymbols", {{"file", string(tree.file.data(ctx).path())}});
 
     ValidateWalk validate(tree.tree);
     ast::TreeWalk::apply(ctx, validate, tree.tree);
