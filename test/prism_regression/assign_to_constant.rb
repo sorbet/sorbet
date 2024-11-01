@@ -51,7 +51,25 @@ ConstantPath::TARGET1, ConstantPath::TARGET2 = 31, 32
 # Dynamic constant assignments
 
 def method1
-  DynamicConstant = "This should raise SyntaxError at runtime"
+  DynamicConstant = "These should all raise SyntaxErrors at runtime"
+
+  DynamicConstantBitwiseAnd &= 2
+  DynamicConstantBitwiseXor ^= 4
+  DynamicConstantShiftRight >>= 5
+  DynamicConstantShiftLeft <<= 6
+  DynamicConstantSubtractAssign -= 7
+  DynamicConstantModuleAssign %= 8
+  DynamicConstantBitwiseOr |= 9
+  DynamicConstantDivideAssign /= 10
+  DynamicConstantMultiplyAssign *= 11
+  DynamicConstantExponentiateAssign **= 12
+
+  # Special cases
+  DynamicConstantLazyAndAssign &&= 13
+  DynamicConstantLazyOrAssgin ||= 14
+
+  # Sorbet doesn't do the dynamic constant workaround for multi-target assignments
+  # DynamicConstantTarget1, DynamicConstantTarget2 = 35, 36
 end
 
 def method2

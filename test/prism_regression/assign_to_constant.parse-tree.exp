@@ -398,13 +398,123 @@ Begin {
     DefMethod {
       name = <U method1>
       args = NULL
-      body = Assign {
-        lhs = LVarLhs {
-          name = <U <dynamic-const-assign>>
-        }
-        rhs = String {
-          val = <U This should raise SyntaxError at runtime>
-        }
+      body = Begin {
+        stmts = [
+          Assign {
+            lhs = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            rhs = String {
+              val = <U These should all raise SyntaxErrors at runtime>
+            }
+          }
+          OpAsgn {
+            left = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            op = <U &>
+            right = Integer {
+              val = "2"
+            }
+          }
+          OpAsgn {
+            left = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            op = <U ^>
+            right = Integer {
+              val = "4"
+            }
+          }
+          OpAsgn {
+            left = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            op = <U >>>
+            right = Integer {
+              val = "5"
+            }
+          }
+          OpAsgn {
+            left = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            op = <U <<>
+            right = Integer {
+              val = "6"
+            }
+          }
+          OpAsgn {
+            left = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            op = <U ->
+            right = Integer {
+              val = "7"
+            }
+          }
+          OpAsgn {
+            left = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            op = <U %>
+            right = Integer {
+              val = "8"
+            }
+          }
+          OpAsgn {
+            left = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            op = <U |>
+            right = Integer {
+              val = "9"
+            }
+          }
+          OpAsgn {
+            left = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            op = <U />
+            right = Integer {
+              val = "10"
+            }
+          }
+          OpAsgn {
+            left = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            op = <U *>
+            right = Integer {
+              val = "11"
+            }
+          }
+          OpAsgn {
+            left = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            op = <U **>
+            right = Integer {
+              val = "12"
+            }
+          }
+          AndAsgn {
+            left = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            right = Integer {
+              val = "13"
+            }
+          }
+          OrAsgn {
+            left = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            right = Integer {
+              val = "14"
+            }
+          }
+        ]
       }
     }
     DefMethod {
