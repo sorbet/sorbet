@@ -1,10 +1,10 @@
 #ifndef SORBET_PARSER_PRISM_TRANSLATOR_H
 #define SORBET_PARSER_PRISM_TRANSLATOR_H
 
-#include <memory>
-
 #include "../Node.h" // To clarify: these are Sorbet Parser nodes, not Prism ones.
+#include "core/errors/parser.h"
 #include "parser/prism/Parser.h"
+#include <memory>
 
 extern "C" {
 #include "prism.h"
@@ -20,6 +20,9 @@ class Translator final {
     // escape that scope, which is why Translator objects can't be copied, or even moved.
     core::GlobalState &gs;
 
+    // Needed for reporting diagnostics
+    core::FileRef file;
+
     // Context variables
     uint16_t uniqueCounter = 1;
     bool isInMethodDef = false;
@@ -29,15 +32,17 @@ class Translator final {
     Translator &operator=(Translator &&) = delete;      // Move assignment
     Translator &operator=(const Translator &) = delete; // Copy assignment
 public:
-    Translator(Parser parser, core::GlobalState &gs) : parser(parser), gs(gs) {}
+    Translator(Parser parser, core::GlobalState &gs, core::FileRef file)
+        : parser(std::move(parser)), gs(gs), file(file) {}
 
     // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
     std::unique_ptr<parser::Node> translate(pm_node_t *node);
     std::unique_ptr<parser::Node> translate(const Node &node);
 
 private:
-    Translator(Parser parser, core::GlobalState &gs, bool isInMethodDef)
-        : parser(parser), gs(gs), isInMethodDef(isInMethodDef) {}
+    Translator(Parser parser, core::GlobalState &gs, core::FileRef file, bool isInMethodDef)
+        : parser(parser), gs(gs), file(file), isInMethodDef(isInMethodDef) {}
+    void reportError(core::LocOffsets loc, const std::string &message);
 
     core::LocOffsets translateLoc(pm_location_t loc);
 
