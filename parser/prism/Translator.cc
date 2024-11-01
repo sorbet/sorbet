@@ -1669,14 +1669,16 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node) {
     auto location = translateLoc(node->base.location);
     auto name = parser.resolveConstant(node->name);
 
-    if (isInMethodDef) { // Check if this is a dynamic constant assignment (SyntaxError at runtime)
-        // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
-        // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
+    if constexpr (is_same_v<PrismLhsNode, pm_constant_write_node> || is_same_v<PrismLhsNode, pm_constant_path_node>) {
+        if (isInMethodDef) { // Check if this is a dynamic constant assignment (SyntaxError at runtime)
+            // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
+            // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
 
-        // Enter the name of the constant so that it's available for the rest of the pipeline
-        gs.enterNameConstant(name);
+            // Enter the name of the constant so that it's available for the rest of the pipeline
+            gs.enterNameConstant(name);
 
-        return make_unique<LVarLhs>(location, core::Names::dynamicConstAssign());
+            return make_unique<LVarLhs>(location, core::Names::dynamicConstAssign());
+        }
     }
 
     return make_unique<SorbetLHSNode>(location, move(parent), gs.enterNameConstant(name));
