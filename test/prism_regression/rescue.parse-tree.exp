@@ -364,6 +364,32 @@ Begin {
         }
       ]
     }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = Array {
+                elts = [
+                  Const {
+                    scope = NULL
+                    name = <C <U StandardError>>
+                  }
+                ]
+              }
+              var = LVarLhs {
+                name = <U e>
+              }
+              body = String {
+                val = <U rescued>
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
     Rescue {
       body = Send {
         receiver = NULL

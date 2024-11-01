@@ -80,6 +80,12 @@ ensure
   "ensure"
 end
 
+# Testing a rescue clause with a begin and an empty body
+begin
+rescue StandardError => e
+  "rescued"
+end
+
 # Testing rescue modifiers
 problematic_code rescue puts "rescued"
 problematic_code rescue nil

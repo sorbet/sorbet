@@ -1585,6 +1585,7 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
 // (and its linked `subsequent` nodes) and assembling the corresponding `Rescue` and `Resbody` nodes in Sorbet's AST.
 unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescueNode, unique_ptr<parser::Node> bodyNode,
                                                      unique_ptr<parser::Node> elseNode) {
+    auto rescueLoc = translateLoc(prismRescueNode->base.location);
     NodeVec rescueBodies;
 
     // Each `rescue` clause generates a `Resbody` node, which is a child of the `Rescue` node.
@@ -1608,7 +1609,7 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescue
     }
 
     // The `Rescue` node combines the main body, the rescue clauses, and the else clause.
-    return make_unique<parser::Rescue>(bodyNode->loc, move(bodyNode), move(rescueBodies), move(elseNode));
+    return make_unique<parser::Rescue>(rescueLoc, move(bodyNode), move(rescueBodies), move(elseNode));
 }
 
 // Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
