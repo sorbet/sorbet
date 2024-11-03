@@ -27,6 +27,7 @@
 #include "rewriter/SigRewriter.h"
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
+#include "rewriter/TLambda.h"
 #include "rewriter/TestCase.h"
 #include "rewriter/TypeAssertion.h"
 #include "rewriter/TypeMembers.h"
@@ -182,6 +183,10 @@ public:
         auto *send = ast::cast_tree<ast::Send>(tree);
 
         if (ClassNew::run(ctx, send)) {
+            return;
+        }
+
+        if (TLambda::run(ctx, send)) {
             return;
         }
 
