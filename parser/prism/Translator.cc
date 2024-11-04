@@ -1208,7 +1208,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
         case PM_IMPLICIT_NODE:
         case PM_MISSING_NODE:
-            reportError(location, "unexpected token");
+            // For now, we only report errors when we hit a missing node because we don't want to always report dynamic
+            // constant assignment errors
+            // TODO: We will improve this in the future when we handle more errored cases
+            for (auto &error : parseErrors) {
+                reportError(translateLoc(error.location), error.message);
+            }
             return make_unique<parser::Const>(location, nullptr, core::Names::Constants::ErrorNode());
     }
 }
@@ -1777,7 +1782,7 @@ template <typename PrismNode> std::unique_ptr<parser::Mlhs> Translator::translat
 // Context management methods
 Translator Translator::enterMethodDef() {
     auto isInMethodDef = true;
-    return Translator(parser, gs, file, isInMethodDef);
+    return Translator(parser, parseErrors, gs, file, isInMethodDef);
 }
 
 void Translator::reportError(core::LocOffsets loc, const std::string &message) {

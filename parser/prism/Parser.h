@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 extern "C" {
 #include "prism.h"
@@ -13,6 +14,17 @@ extern "C" {
 namespace sorbet::parser::Prism {
 
 class Node;
+
+class ParseError {
+public:
+    ParseError(const char *id, const std::string &message, pm_location_t location, pm_error_level_t level)
+        : id(id), message(message), location(location), level(level) {}
+
+    const char *id;
+    std::string message;
+    pm_location_t location;
+    pm_error_level_t level;
+};
 
 // A backing implemenation detail of `Parser`, which stores a Prism parser and its options in a single allocation.
 struct ParserStorage {
@@ -54,6 +66,8 @@ public:
     core::LocOffsets translateLocation(pm_location_t location);
     std::string_view resolveConstant(pm_constant_id_t constant_id);
     std::string_view extractString(pm_string_t *string);
+
+    std::vector<ParseError> errors() const;
 
 private:
     pm_parser_t *get_raw_parser_pointer();
