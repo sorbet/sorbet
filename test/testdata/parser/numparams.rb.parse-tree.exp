@@ -1,5 +1,35 @@
 Begin {
   stmts = [
+    NumBlock {
+      send = Send {
+        receiver = Array {
+          elts = [
+            Integer {
+              val = "1"
+            }
+            Integer {
+              val = "2"
+            }
+            Integer {
+              val = "3"
+            }
+          ]
+        }
+        method = <U map>
+        args = [
+        ]
+      }
+      args = NumParams {
+        decls = [
+          LVar {
+            name = <U _1>
+          }
+        ]
+      }
+      body = LVar {
+        name = <U _1>
+      }
+    }
     Assign {
       lhs = LVarLhs {
         name = <U successful_parse>
@@ -34,7 +64,26 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = NumBlock {
+        send = Send {
+          receiver = LVar {
+            name = <U _1>
+          }
+          method = <U times>
+          args = [
+          ]
+        }
+        args = NumParams {
+          decls = [
+            LVar {
+              name = <U _1>
+            }
+          ]
+        }
+        body = LVar {
+          name = <U _1>
+        }
+      }
     }
   ]
 }

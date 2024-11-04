@@ -194,7 +194,7 @@ public:
             auto name_str = id->name.shortName(gs_);
             if (isNumberedParameterName(name_str) && driver_->lex.context.allowNumparams) {
                 if (driver_->numparam_stack.seen_ordinary_params()) {
-                    error_without_recovery(ruby_parser::dclass::OrdinaryParamDefined, id->loc);
+                    error(ruby_parser::dclass::OrdinaryParamDefined, id->loc);
                 }
 
                 auto raw_numparam_stack = driver_->numparam_stack.stackCopy();
@@ -212,7 +212,7 @@ public:
                         auto outer_scope_has_numparams = outer_scope.max > 0;
 
                         if (outer_scope_has_numparams) {
-                            error_without_recovery(ruby_parser::dclass::NumparamUsedInOuterScope, node->loc);
+                            error(ruby_parser::dclass::NumparamUsedInOuterScope, node->loc);
                         } else {
                             // for now it's ok, but an outer scope can also be a block
                             // like proc { _1; proc { proc { proc { _2}}}}
