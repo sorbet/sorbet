@@ -69,23 +69,6 @@
                 "reveal": "always"
             }
         },
-        // This task:
-        // - Runs tests to generate the pipeline_test_runner files, which are needed by the LLDB
-        //   debugger to execute the tests.
-        // - Sets the `BAZEL_EXEC_ROOT` environment variable, which is used by the LLDB
-        //   debugger to find the source files.
-        {
-            "label": "Prepare tests debugging",
-            "type": "shell",
-            "command": "export BAZEL_EXEC_ROOT=$(./bazel info execution_root)",
-            // We need to run tests first to get the pipeline_test_runner files generated
-            // Just building Sorbet with Prism doesn't generate them.
-            "dependsOn": ["Run all Prism tests"],
-            "hide": true,
-            "presentation": {
-                "reveal": "never",
-            }
-        }
     ],
     "inputs": [
         {
