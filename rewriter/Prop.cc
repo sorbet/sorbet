@@ -586,6 +586,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceNodes;
     replaceNodes.reserve(klass->rhs.size());
     vector<PropInfo> props;
+    UnorderedMap<core::NameRef, uint32_t> seenProps;
     for (auto &stat : klass->rhs) {
         auto *send = ast::cast_tree<ast::Send>(stat);
         if (send == nullptr) {
@@ -604,6 +605,17 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
             continue;
         }
 
+        if (wantTypedInitialize(syntacticSuperClass)) {
+            auto it = seenProps.find(propInfo->name);
+            if (it != seenProps.end()) {
+                if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::DuplicateProp)) {
+                    e.setHeader("{} is defined multiple times", propInfo->isImmutable ? "const" : "prop");
+                    e.addErrorLine(ctx.locAt(props[it->second].loc), "Previous definition is here");
+                }
+                continue;
+            }
+        }
+
         auto processed = processProp(ctx, propInfo.value(), propContext);
         ENFORCE(!processed.empty(), "if parseProp completed successfully, processProp must complete too");
 
@@ -611,6 +623,8 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         nodes.emplace_back(ensureWithoutAccessors(propInfo.value(), send));
         nodes.insert(nodes.end(), make_move_iterator(processed.begin()), make_move_iterator(processed.end()));
         replaceNodes[stat.get()] = std::move(nodes);
+
+        seenProps[propInfo->name] = props.size();
         props.emplace_back(std::move(propInfo.value()));
     }
     auto oldRHS = std::move(klass->rhs);

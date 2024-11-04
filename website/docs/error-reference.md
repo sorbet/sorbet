@@ -564,6 +564,37 @@ This error code is from an old Sorbet version. It's equivalent to error 4023:
 The `has_attached_class!` annotation cannot be given a contravariant `:in`
 annotation because `T.attached_class` is only allowed in output positions.
 
+## 3515
+
+This error indicates that a `prop` or `const` has already been defined with the
+name provided. For example:
+
+```ruby
+class Info < T::Struct
+  const :name, String
+  const :age, Integer
+  prop :age, Float
+end
+```
+
+In this case, the `:age` prop has been defined twice on lines 3 and 4, and this
+error will be raised on the occurrence on line 4.
+
+While these errors exist, the first occurrence of the conflicting name will be
+used when computing a typed initializer for static typechecking purposes. For
+the example above, the initializer would look as though it was defined with the
+following signature:
+
+```ruby
+class Info < T::struct
+  ...
+  sig {params(name: String, age: Integer).void}
+  def initialize(name:, age:)
+    ...
+  end
+end
+```
+
 ## 3702
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
