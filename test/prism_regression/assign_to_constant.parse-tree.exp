@@ -520,13 +520,171 @@ Begin {
     DefMethod {
       name = <U method2>
       args = NULL
-      body = Assign {
-        lhs = LVarLhs {
-          name = <U <dynamic-const-assign>>
-        }
-        rhs = String {
-          val = <U This should raise SyntaxError at runtime>
-        }
+      body = Begin {
+        stmts = [
+          Assign {
+            lhs = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            rhs = String {
+              val = <U This should raise a SyntaxError at runtime>
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = NULL
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantBitwiseAnd>>
+            }
+            op = <U &>
+            right = Integer {
+              val = "2"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = NULL
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantBitwiseXor>>
+            }
+            op = <U ^>
+            right = Integer {
+              val = "4"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = NULL
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantShiftRight>>
+            }
+            op = <U >>>
+            right = Integer {
+              val = "5"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = NULL
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantShiftLeft>>
+            }
+            op = <U <<>
+            right = Integer {
+              val = "6"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = NULL
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantSubtractAssign>>
+            }
+            op = <U ->
+            right = Integer {
+              val = "7"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = NULL
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantModuleAssign>>
+            }
+            op = <U %>
+            right = Integer {
+              val = "8"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = NULL
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantBitwiseOr>>
+            }
+            op = <U |>
+            right = Integer {
+              val = "9"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = NULL
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantDivideAssign>>
+            }
+            op = <U />
+            right = Integer {
+              val = "10"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = NULL
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantMultiplyAssign>>
+            }
+            op = <U *>
+            right = Integer {
+              val = "11"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = NULL
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantExponentiateAssign>>
+            }
+            op = <U **>
+            right = Integer {
+              val = "12"
+            }
+          }
+          AndAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = NULL
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantLazyAndAssign>>
+            }
+            right = Integer {
+              val = "13"
+            }
+          }
+          OrAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = NULL
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantLazyOrAssgin>>
+            }
+            right = Integer {
+              val = "14"
+            }
+          }
+        ]
       }
     }
   ]

@@ -80,7 +80,8 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
                          is_same_v<PrismAssignmentNode, pm_constant_path_and_write_node> ||
                          is_same_v<PrismAssignmentNode, pm_constant_path_or_write_node>) {
         // Handle operator assignment to a constant path, like `A::B::C += 1` or `::C += 1`
-        lhs = translateConst<pm_constant_path_node, parser::ConstLhs>(node->target);
+        bool skipDynamicConstantWorkaround = true;
+        lhs = translateConst<pm_constant_path_node, parser::ConstLhs>(node->target, skipDynamicConstantWorkaround);
     } else if constexpr (is_same_v<SorbetLHSNode, parser::Send>) {
         // Handle operator assignment to the result of a method call, like `a.b += 1`
         auto name = parser.resolveConstant(node->read_name);
@@ -1631,10 +1632,20 @@ unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stm
 
 // Handles any one of the Prism nodes that models any kind of assignment to a constant or constant path.
 //
+// Dynamic constant assignment inside of a method definition will raise a SyntaxError at runtime. In the
+// Sorbet validator, there is a check that will crash Sorbet if this is detected statically.
+// To work around this, we substitute dynamic constant assignments with a write to a fake local variable
+// called `dynamicConstAssign`.
+//
+// The only exception is that dynamic constant path *operator* assignments inside of a method definition
+// do not raise a SyntaxError at runtime, so we want to skip the workaround in that case.
+// However, within this method, both regular constant path assignments and constant path operator assignments
+// are passed in as `pm_constant_path_node` types, so we need an extra boolean flag to know when to skip the workaround.
+//
 // Usually returns the `SorbetLHSNode`, but for constant writes and targets,
 // it can can return an `LVarLhs` as a workaround in the case of a dynamic constant assignment.
 template <typename PrismLhsNode, typename SorbetLHSNode>
-unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node) {
+unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool skipDynamicConstantWorkaround) {
     static_assert(is_same_v<SorbetLHSNode, parser::Const> || is_same_v<SorbetLHSNode, parser::ConstLhs>,
                   "Invalid LHS type. Must be one of `parser::Const` or `parser::ConstLhs`.");
 
@@ -1673,7 +1684,8 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node) {
                   is_same_v<PrismLhsNode, pm_constant_operator_write_node> ||
                   is_same_v<PrismLhsNode, pm_constant_or_write_node> ||
                   is_same_v<PrismLhsNode, pm_constant_and_write_node>) {
-        if (isInMethodDef) { // Check if this is a dynamic constant assignment (SyntaxError at runtime)
+        if (isInMethodDef &&
+            !skipDynamicConstantWorkaround) { // Check if this is a dynamic constant assignment (SyntaxError at runtime)
             // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
             // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
 
@@ -1774,5 +1786,4 @@ void Translator::reportError(core::LocOffsets loc, const std::string &message) {
         e.setHeader("{}", message);
     }
 }
-
 }; // namespace sorbet::parser::Prism
