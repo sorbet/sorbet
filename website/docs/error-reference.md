@@ -578,7 +578,7 @@ end
 ```
 
 In this case, the `:age` prop has been defined twice on lines 3 and 4, and this
-error will be raised on the occurrenct on line 4.
+error will be raised on the occurrence on line 4.
 
 While these errors exist, the first occurrence of the conflicting name will be
 used when computing a typed initializer for static typechecking purposes. For
