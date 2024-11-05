@@ -244,7 +244,7 @@ BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *curr
 
 // This doesn't actually "walk" an empty tree, because there's nothing interesting to walk in one.
 // Instead, if conforms to mostly the same interface that `walk` (i.e., returns a BasicBlock *);
-BasicBlock *CFGBuilder::walkEmptyTreeInIf(CFGContext cctx, core::LocOffsets nilLoc, BasicBlock *current) {
+BasicBlock *CFGBuilder::walkEmptyTree(CFGContext cctx, core::LocOffsets nilLoc, BasicBlock *current) {
     synthesizeExpr(current, cctx.target, nilLoc, make_insn<Literal>(core::Types::nilClass()));
     return current;
 }
@@ -392,9 +392,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 auto elseBlock = cctx.inWhat.freshBlock(cctx.loops);
                 conditionalJump(cont, ifSym, thenBlock, elseBlock, cctx.inWhat, a.cond.loc());
 
-                auto thenEnd = ast::isa_tree<ast::EmptyTree>(a.thenp) ? walkEmptyTreeInIf(cctx, a.loc, thenBlock)
+                auto thenEnd = ast::isa_tree<ast::EmptyTree>(a.thenp) ? walkEmptyTree(cctx, a.loc, thenBlock)
                                                                       : walk(cctx, a.thenp, thenBlock);
-                auto elseEnd = ast::isa_tree<ast::EmptyTree>(a.elsep) ? walkEmptyTreeInIf(cctx, a.loc, elseBlock)
+                auto elseEnd = ast::isa_tree<ast::EmptyTree>(a.elsep) ? walkEmptyTree(cctx, a.loc, elseBlock)
                                                                       : walk(cctx, a.elsep, elseBlock);
                 if (thenEnd != cctx.inWhat.deadBlock() || elseEnd != cctx.inWhat.deadBlock()) {
                     if (thenEnd == cctx.inWhat.deadBlock()) {
@@ -506,9 +506,15 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](ast::InsSeq &a) {
                 for (auto &exp : a.stats) {
                     LocalRef temp = cctx.newTemporary(core::Names::statTemp());
+                    if (ast::isa_tree<ast::EmptyTree>(exp)) {
+                        // TODO(jez) You can move this above making the temporary, but doing it here
+                        // ensure that we don't mess up the numbers in exp files
+                        continue;
+                    }
                     current = walk(cctx.withTarget(temp), exp, current);
                 }
-                ret = walk(cctx, a.expr, current);
+                ret = ast::isa_tree<ast::EmptyTree>(a.expr) ? walkEmptyTree(cctx, a.loc, current)
+                                                            : walk(cctx, a.expr, current);
             },
             [&](ast::Send &s) {
                 LocalRef recv;
@@ -1034,7 +1040,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
 
-            [&](const ast::EmptyTree &n) { ret = current; },
+            [&](const ast::EmptyTree &n) {
+                ENFORCE(false, "Should not walk to an EmptyTree--should be handled by parent");
+                ret = current;
+            },
 
             [&](const ast::ClassDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
             [&](const ast::MethodDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
