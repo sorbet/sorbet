@@ -1034,7 +1034,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
 
-            [&](const ast::EmptyTree &n) { ret = current; },
+            [&](const ast::EmptyTree &n) {
+                ENFORCE(false, "Should not walk to an EmptyTree--should be handled by parent");
+                ret = current;
+            },
 
             [&](const ast::ClassDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
             [&](const ast::MethodDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
