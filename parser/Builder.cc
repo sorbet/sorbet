@@ -230,7 +230,7 @@ public:
 
             auto last_char = name_str.back();
             if (last_char == '?' || last_char == '!') {
-                error_without_recovery(ruby_parser::dclass::InvalidIdToGet, id->loc, std::string(name_str));
+                error(ruby_parser::dclass::InvalidIdToGet, id->loc, std::string(name_str));
             }
 
             if (driver_->lex.is_declared(name_str)) {
