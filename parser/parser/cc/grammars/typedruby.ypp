@@ -1024,6 +1024,7 @@ lbrace_cmd_block_start:
                       block->end = $3;
                       $$ = block;
                       driver.lex.context.inBlock = $1->context.inBlock;
+                      driver.lex.context.allowNumparams = $1->context.allowNumparams;
                     }
                   // Error-recovery case for typos like "foo {&:bar}"
                 | lbrace_cmd_block_start tAMPER arg_value tRCURLY
@@ -1036,6 +1037,7 @@ lbrace_cmd_block_start:
                       driver.diagnostics.emplace_back(dlevel::ERROR, dclass::CurlyBracesAroundBlockPass,
                           diagnostic::range(@1.beginPos(), @4.endPos()));
                       driver.lex.context.inBlock = $1->context.inBlock;
+                      driver.lex.context.allowNumparams = $1->context.allowNumparams;
                     }
 
            fcall: operation
@@ -2775,6 +2777,7 @@ opt_block_args_tail:
                       driver.lex.unextend();
                       driver.lex.cmdarg.pop();
                       driver.lex.context.inLambda = $1->context.inLambda;
+                      driver.lex.context.allowNumparams = $1->context.allowNumparams;
 
                       auto lambda_call = driver.build.callLambda(self, $1->token);
                       auto &lambda = delimited_block;
@@ -2790,6 +2793,7 @@ opt_block_args_tail:
                       driver.numparam_stack.pop();
                       driver.lex.unextend();
                       driver.lex.context.inLambda = $1->context.inLambda;
+                      driver.lex.context.allowNumparams = $1->context.allowNumparams;
                       $$ = driver.build.error_node(self, @1.beginPos(), @1.endPos());
                       DIAGCHECK();
                     }
@@ -2827,12 +2831,14 @@ opt_block_args_tail:
                   compstmt tRCURLY
                     {
                       driver.lex.context.inLambda = $1->context.inLambda;
+                      driver.lex.context.allowNumparams = $1->context.allowNumparams;
                       $$ = driver.alloc.delimited_block($1->token, nullptr, $2->body, $3);
                     }
                 | k_do_lambda
                   bodystmt kend_or_eof
                     {
                       driver.lex.context.inLambda = $1->context.inLambda;
+                      driver.lex.context.allowNumparams = $1->context.allowNumparams;
                       $$ = driver.alloc.delimited_block($1->token, nullptr, $2->body, $3);
                       driver.rewind_if_dedented($1->token, $3);
                     }
@@ -2847,6 +2853,7 @@ opt_block_args_tail:
         do_block: k_do_block do_body kend_or_eof
                     {
                       driver.lex.context.inBlock = $1->context.inBlock;
+                      driver.lex.context.allowNumparams = $1->context.allowNumparams;
                       auto &delimited_block = $2;
                       delimited_block->begin = $1->token;
                       delimited_block->end = $3;
@@ -2975,6 +2982,7 @@ lcurly_block_start:
                       block->end = $3;
                       $$ = block;
                       driver.lex.context.inBlock = $1->context.inBlock;
+                      driver.lex.context.allowNumparams = $1->context.allowNumparams;
                     }
                   // Error-recovery case for typos like "foo {&:bar}"
                 | lcurly_block_start tAMPER arg_value tRCURLY
@@ -2986,6 +2994,7 @@ lcurly_block_start:
                       $$ = block;
                       driver.diagnostics.emplace_back(dlevel::ERROR, dclass::CurlyBracesAroundBlockPass,
                           diagnostic::range(@1.beginPos(), @4.endPos()));
+                      driver.lex.context.allowNumparams = $1->context.allowNumparams;
                     }
                 | k_do do_body kend_or_eof
                     {
@@ -2995,6 +3004,7 @@ lcurly_block_start:
                       $$ = block;
                       driver.rewind_if_dedented($1->token, $3);
                       driver.lex.context.inBlock = $1->context.inBlock;
+                      driver.lex.context.allowNumparams = $1->context.allowNumparams;
                     }
 
       brace_body:   {
