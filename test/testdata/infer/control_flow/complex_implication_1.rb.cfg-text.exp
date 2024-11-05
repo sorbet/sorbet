@@ -89,7 +89,7 @@ bb11[firstDead=-1](final_attempt: T.untyped, foo: T.untyped, err: StandardError,
 # - bb11
 bb13[firstDead=-1](is_successful: T::Boolean, ||$2: T.untyped):
     <ifTemp>$14: T.untyped = ||$2
-    <ifTemp>$14 -> (T.untyped ? bb19 : bb24)
+    <ifTemp>$14 -> (T.untyped ? bb19 : bb20)
 
 # backedges
 # - bb10
@@ -101,13 +101,13 @@ bb14[firstDead=-1](foo: T.untyped, err: StandardError, is_successful: FalseClass
 # - bb14
 bb15[firstDead=-1](foo: T.untyped, is_successful: FalseClass):
     <ifTemp>$14: T.untyped = foo
-    <ifTemp>$14 -> (T.untyped ? bb19 : bb24)
+    <ifTemp>$14 -> (T.untyped ? bb19 : bb20)
 
 # backedges
 # - bb14
 bb16[firstDead=0](err: StandardError, is_successful: FalseClass):
     <ifTemp>$14 = err
-    <ifTemp>$14 -> (<nullptr> ? bb19 : bb24)
+    <ifTemp>$14 -> (<nullptr> ? bb19 : bb20)
 
 # backedges
 # - bb13
@@ -115,7 +115,15 @@ bb16[firstDead=0](err: StandardError, is_successful: FalseClass):
 # - bb16
 bb19[firstDead=-1](is_successful: T::Boolean):
     <ifTemp>$19: T::Boolean = is_successful: T::Boolean.!()
-    <ifTemp>$19 -> (T::Boolean ? bb21 : bb24)
+    <ifTemp>$19 -> (T::Boolean ? bb21 : bb22)
+
+# backedges
+# - bb13
+# - bb15
+# - bb16
+bb20[firstDead=-1]():
+    <returnMethodTemp>$2: NilClass = nil
+    <unconditional> -> bb24
 
 # backedges
 # - bb19
@@ -124,11 +132,15 @@ bb21[firstDead=-1]():
     <unconditional> -> bb24
 
 # backedges
-# - bb13
-# - bb15
-# - bb16
 # - bb19
+bb22[firstDead=-1]():
+    <returnMethodTemp>$2: NilClass = nil
+    <unconditional> -> bb24
+
+# backedges
+# - bb20
 # - bb21
+# - bb22
 bb24[firstDead=1](<returnMethodTemp>$2: T.nilable(Integer)):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)
     <unconditional> -> bb1
