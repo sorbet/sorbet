@@ -80,6 +80,29 @@ ensure
   "ensure"
 end
 
+# Testing a rescue clause with a begin and an empty body
+begin
+rescue StandardError => e
+  "rescued"
+end
+
+# Testing a rescue clause with a begin, an empty body, and an empty rescue body
+begin
+rescue StandardError => e
+end
+
+# Testing a rescue clause with a begin and an empty rescue body
+begin
+  "something"
+rescue StandardError => e
+end
+
+# Testing a rescue clause with no begin and an empty body
+def index
+rescue StandardError => e
+  "rescued"
+end
+
 # Testing rescue modifiers
 problematic_code rescue puts "rescued"
 problematic_code rescue nil

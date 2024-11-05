@@ -364,6 +364,108 @@ Begin {
         }
       ]
     }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = Array {
+                elts = [
+                  Const {
+                    scope = NULL
+                    name = <C <U StandardError>>
+                  }
+                ]
+              }
+              var = LVarLhs {
+                name = <U e>
+              }
+              body = String {
+                val = <U rescued>
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = Array {
+                elts = [
+                  Const {
+                    scope = NULL
+                    name = <C <U StandardError>>
+                  }
+                ]
+              }
+              var = LVarLhs {
+                name = <U e>
+              }
+              body = NULL
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = String {
+            val = <U something>
+          }
+          rescue = [
+            Resbody {
+              exception = Array {
+                elts = [
+                  Const {
+                    scope = NULL
+                    name = <C <U StandardError>>
+                  }
+                ]
+              }
+              var = LVarLhs {
+                name = <U e>
+              }
+              body = NULL
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    DefMethod {
+      name = <U index>
+      args = NULL
+      body = Rescue {
+        body = NULL
+        rescue = [
+          Resbody {
+            exception = Array {
+              elts = [
+                Const {
+                  scope = NULL
+                  name = <C <U StandardError>>
+                }
+              ]
+            }
+            var = LVarLhs {
+              name = <U e>
+            }
+            body = String {
+              val = <U rescued>
+            }
+          }
+        ]
+        else_ = NULL
+      }
+    }
     Rescue {
       body = Send {
         receiver = NULL
