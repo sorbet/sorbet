@@ -506,9 +506,15 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](ast::InsSeq &a) {
                 for (auto &exp : a.stats) {
                     LocalRef temp = cctx.newTemporary(core::Names::statTemp());
+                    if (ast::isa_tree<ast::EmptyTree>(exp)) {
+                        // TODO(jez) You can move this above making the temporary, but doing it here
+                        // ensure that we don't mess up the numbers in exp files
+                        continue;
+                    }
                     current = walk(cctx.withTarget(temp), exp, current);
                 }
-                ret = walk(cctx, a.expr, current);
+                ret = ast::isa_tree<ast::EmptyTree>(a.expr) ? walkEmptyTree(cctx, a.loc, current)
+                                                            : walk(cctx, a.expr, current);
             },
             [&](ast::Send &s) {
                 LocalRef recv;
