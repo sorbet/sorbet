@@ -1,0 +1,13 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  [1, 2, 3].map() do |_1|
+    _1
+  end
+
+  successful_parse = 10
+
+  [1, 2, 3].map() do |_1|
+    _1.times() do |_1|
+      _1
+    end
+  end
+end
