@@ -124,7 +124,7 @@ public:
         ENFORCE(edits.find(receiverLoc) == edits.end(), "Tried to edit the same call site twice...");
         edits[receiverLoc] = fmt::format("{}{}", owner.show(gs), sendResp->isPrivateOk ? "." : "");
 
-        auto receiverSource = sendResp->isPrivateOk ? "self"sv : sendResp->receiverLoc().source(gs).value();
+        auto receiverSource = string(sendResp->isPrivateOk ? "self" : sendResp->receiverLoc().source(gs).value());
         if (absl::StrContains(receiverSource, ";")) {
             // It never hurts to parenthesize an argument, it's still technically valid.
             //
