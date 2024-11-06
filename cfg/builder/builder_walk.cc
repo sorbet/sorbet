@@ -1034,7 +1034,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
 
-            [&](const ast::EmptyTree &n) { ret = current; },
+            [&](const ast::EmptyTree &n) {
+                // TODO(jez) We might want to ENFORCE(false) here, and make all attempts to walk an
+                // empty tree be handled by the parent node where the `EmptyTree` is a child, so
+                // that there's more context to be able to handle the `EmptyTree` in context. For
+                // example, how the `ast::If` case handles `EmptyTree` so that the loc of the
+                // `EmptyTree` can be set to the loc of the whole `if` expression.
+                ret = current;
+            },
 
             [&](const ast::ClassDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
             [&](const ast::MethodDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
