@@ -82,7 +82,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 bb->bexit.thenb != thenb->bexit.thenb) {
                 // shortcut then
                 bb->bexit.thenb = thenb->bexit.thenb;
-                thenb->bexit.thenb->backEdges.emplace_back(bb);
+                bb->bexit.thenb->backEdges.emplace_back(bb);
                 thenb->backEdges.erase(remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                        thenb->backEdges.end());
                 changed = true;
