@@ -30,7 +30,7 @@ bb4[firstDead=-1](foo: StandardError):
 # - bb4
 bb7[firstDead=-1](err: T.nilable(StandardError)):
     junk: T.nilable(StandardError) = err
-    err -> (T.nilable(StandardError) ? bb8 : bb10)
+    err -> (T.nilable(StandardError) ? bb8 : bb9)
 
 # backedges
 # - bb7
@@ -40,7 +40,13 @@ bb8[firstDead=-1]():
 
 # backedges
 # - bb7
+bb9[firstDead=-1]():
+    <returnMethodTemp>$2: NilClass = nil
+    <unconditional> -> bb10
+
+# backedges
 # - bb8
+# - bb9
 bb10[firstDead=1](<returnMethodTemp>$2: T.nilable(Integer)):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)
     <unconditional> -> bb1

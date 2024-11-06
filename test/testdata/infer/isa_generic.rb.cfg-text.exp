@@ -64,7 +64,13 @@ bb8[firstDead=-1](x: Concrete):
 bb10[firstDead=-1](x: T.any(Other, Concrete)):
     <cfgAlias>$30: T.class_of(Other) = alias <C Other>
     <ifTemp>$27: T::Boolean = x: T.any(Other, Concrete).is_a?(<cfgAlias>$30: T.class_of(Other))
-    <ifTemp>$27 -> (T::Boolean ? bb13 : bb12)
+    <ifTemp>$27 -> (T::Boolean ? bb11 : bb12)
+
+# backedges
+# - bb10
+bb11[firstDead=-1]():
+    <returnMethodTemp>$2: NilClass = nil
+    <unconditional> -> bb13
 
 # backedges
 # - bb10
@@ -77,7 +83,7 @@ bb12[firstDead=-1](x: Concrete):
     <unconditional> -> bb13
 
 # backedges
-# - bb10
+# - bb11
 # - bb12
 bb13[firstDead=1](<returnMethodTemp>$2: T.nilable(Concrete)):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Concrete)
@@ -92,7 +98,7 @@ bb0[firstDead=-1]():
     x: T.any(Base, Other) = load_arg(x)
     <cfgAlias>$6: T.class_of(Base)[Base, T.untyped] = alias <C Base>
     <ifTemp>$3: T::Boolean = x: T.any(Base, Other).is_a?(<cfgAlias>$6: T.class_of(Base)[Base, T.untyped])
-    <ifTemp>$3 -> (T::Boolean ? bb2 : bb4)
+    <ifTemp>$3 -> (T::Boolean ? bb2 : bb3)
 
 # backedges
 # - bb4
@@ -108,7 +114,13 @@ bb2[firstDead=-1](x: Base):
 
 # backedges
 # - bb0
+bb3[firstDead=-1]():
+    <returnMethodTemp>$2: NilClass = nil
+    <unconditional> -> bb4
+
+# backedges
 # - bb2
+# - bb3
 bb4[firstDead=1](<returnMethodTemp>$2: T.nilable(Base)):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Base)
     <unconditional> -> bb1

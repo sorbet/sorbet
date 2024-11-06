@@ -55,7 +55,7 @@ bb6[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0
 
 # backedges
 # - bb5
-bb7[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <magic>$29: T.class_of(<Magic>), <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
+bb7[firstDead=-1](<self>: Object, try: Integer(0), <magic>$29: T.class_of(<Magic>), <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
     <statTemp>$11: Integer(3) = 3
     <ifTemp>$9: T::Boolean = try: Integer(0).<(<statTemp>$11: Integer(3))
     <ifTemp>$9 -> (T::Boolean ? bb8 : bb9)
@@ -73,10 +73,10 @@ bb8[firstDead=6](<self>: Object, try: Integer(0), <magic>$29: T.class_of(<Magic>
 
 # backedges
 # - bb7
-bb9[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <magic>$29: T.class_of(<Magic>), <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
+bb9[firstDead=-1](<self>: Object, try: Integer(0), <magic>$29: T.class_of(<Magic>), <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
     <statTemp>$21: Integer(6) = 6
     <ifTemp>$19: T::Boolean = try: Integer(0).<(<statTemp>$21: Integer(6))
-    <ifTemp>$19 -> (T::Boolean ? bb10 : bb13)
+    <ifTemp>$19 -> (T::Boolean ? bb10 : bb11)
 
 # backedges
 # - bb9
@@ -90,9 +90,15 @@ bb10[firstDead=6](<self>: Object, try: Integer(0), <magic>$29: T.class_of(<Magic
     <unconditional> -> bb13
 
 # backedges
-# - bb8
 # - bb9
+bb11[firstDead=-1](<self>: Object, try: Integer(0), <magic>$29: T.class_of(<Magic>), <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
+    <returnMethodTemp>$2: NilClass = nil
+    <unconditional> -> bb13
+
+# backedges
+# - bb8
 # - bb10
+# - bb11
 bb13[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <magic>$29: T.class_of(<Magic>), <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
     <exceptionValue>$8: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$8 -> (T.nilable(Exception) ? bb6 : bb15)
