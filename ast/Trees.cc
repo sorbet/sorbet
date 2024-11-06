@@ -316,7 +316,7 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
                 fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
             }
 
-            if (!nested->resolutionScopes->front().exists()) {
+            if (nested->resolutionScopes->front().exists()) {
                 break;
             }
 
