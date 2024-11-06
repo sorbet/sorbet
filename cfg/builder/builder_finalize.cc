@@ -61,7 +61,8 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     changed = true;
                     sanityCheck(ctx, cfg);
                     continue;
-                } else if (thenb->bexit.cond.variable != LocalRef::blockCall() && thenb->exprs.empty()) {
+                } else if (thenb->bexit.cond.variable != LocalRef::blockCall() && thenb->exprs.empty() &&
+                           thenb->outerLoops == bb->outerLoops) {
                     // Don't remove block headers
                     bb->bexit.cond.variable = thenb->bexit.cond.variable;
                     bb->bexit.thenb = thenb->bexit.thenb;
