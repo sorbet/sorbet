@@ -85,6 +85,11 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 bb->bexit.thenb->backEdges.emplace_back(bb);
                 thenb->backEdges.erase(remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                        thenb->backEdges.end());
+                // Update unconditional jumps
+                if (thenb == elseb) {
+                    bb->bexit.elseb = bb->bexit.thenb;
+                }
+
                 changed = true;
                 sanityCheck(ctx, cfg);
                 continue;
@@ -97,6 +102,11 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 bb->bexit.elseb->backEdges.emplace_back(bb);
                 elseb->backEdges.erase(remove(elseb->backEdges.begin(), elseb->backEdges.end(), bb),
                                        elseb->backEdges.end());
+                // Update unconditional jumps
+                if (thenb == elseb) {
+                    bb->bexit.thenb = bb->bexit.elseb;
+                }
+
                 changed = true;
                 sanityCheck(ctx, cfg);
                 continue;
