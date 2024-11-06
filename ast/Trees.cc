@@ -305,16 +305,21 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
     if (this->symbol != core::Symbols::StubModule()) {
         return nullopt;
     }
-    if (this->resolutionScopes == nullptr || this->resolutionScopes->empty()) [[unlikely]] {
-        ENFORCE(false);
-        fatalLogger->error(R"(msg="Bad fullUnresolvedPath" path="{}")");
-        fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
-    }
 
     vector<core::NameRef> namesFailedToResolve;
     auto *nested = this;
     {
-        while (!nested->resolutionScopes->front().exists()) {
+        while (true) {
+            if (nested->resolutionScopes == nullptr || nested->resolutionScopes->empty()) [[unlikely]] {
+                ENFORCE(false);
+                fatalLogger->error(R"(msg="Bad fullUnresolvedPath" path="{}")");
+                fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
+            }
+
+            if (nested->resolutionScopes->front().exists()) {
+                break;
+            }
+
             auto *orig = cast_tree<UnresolvedConstantLit>(nested->original);
             ENFORCE(orig);
             namesFailedToResolve.emplace_back(orig->cnst);
