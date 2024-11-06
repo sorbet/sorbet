@@ -35,4 +35,4 @@ end
 
 (A).unary(A.new + A.new, 0)
 
-(A).unary(A.new ; A.new, 0)
+(A).unary((A.new ; A.new), 0)

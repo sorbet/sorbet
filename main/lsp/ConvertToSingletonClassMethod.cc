@@ -125,6 +125,15 @@ public:
         edits[receiverLoc] = fmt::format("{}{}", owner.show(gs), sendResp->isPrivateOk ? "." : "");
 
         auto receiverSource = sendResp->isPrivateOk ? "self"sv : sendResp->receiverLoc().source(gs).value();
+        if (absl::StrContains(receiverSource, ";")) {
+            // It never hurts to parenthesize an argument, it's still technically valid.
+            //
+            // If there's a `;` in the receiver, it could either be in a string (`"foo;bar".example`)
+            // OR it could be a statement separator: `(x; y).example`, and `example(x; y)` is a syntax error.
+            //
+            // Let's defend against this by parenthesizing, despite how rare this is likely to be.
+            receiverSource = fmt::format("({})", receiverSource);
+        }
 
         if (!sendResp->argLocOffsets.empty()) {
             auto newFirstArgLoc = core::Loc(sendResp->file, sendResp->argLocOffsets.front().copyWithZeroLength());
