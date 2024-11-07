@@ -12,10 +12,12 @@ class SendResponse final {
 public:
     SendResponse(std::shared_ptr<core::DispatchResult> dispatchResult, InlinedVector<core::LocOffsets, 2> argLocOffsets,
                  core::NameRef callerSideName, core::MethodRef enclosingMethod, bool isPrivateOk, core::FileRef file,
-                 core::LocOffsets termLocOffsets, core::LocOffsets receiverLocOffsets, core::LocOffsets funLocOffsets)
+                 core::LocOffsets termLocOffsets, core::LocOffsets receiverLocOffsets, core::LocOffsets funLocOffsets,
+                 core::LocOffsets locOffsetsWithoutBlock)
         : dispatchResult(std::move(dispatchResult)), argLocOffsets(std::move(argLocOffsets)),
           callerSideName(callerSideName), enclosingMethod(enclosingMethod), isPrivateOk(isPrivateOk), file(file),
-          termLocOffsets(termLocOffsets), receiverLocOffsets(receiverLocOffsets), funLocOffsets(funLocOffsets){};
+          termLocOffsets(termLocOffsets), receiverLocOffsets(receiverLocOffsets), funLocOffsets(funLocOffsets),
+          locOffsetsWithoutBlock(locOffsetsWithoutBlock){};
     const std::shared_ptr<core::DispatchResult> dispatchResult;
     const InlinedVector<core::LocOffsets, 2> argLocOffsets;
     const core::NameRef callerSideName;
@@ -25,6 +27,7 @@ public:
     const core::LocOffsets termLocOffsets;
     const core::LocOffsets receiverLocOffsets;
     const core::LocOffsets funLocOffsets;
+    const core::LocOffsets locOffsetsWithoutBlock;
 
     core::Loc termLoc() const {
         return core::Loc(file, termLocOffsets);
@@ -35,10 +38,13 @@ public:
     core::Loc funLoc() const {
         return core::Loc(file, funLocOffsets);
     }
+    core::Loc locWithoutBlock() const {
+        return core::Loc(file, locOffsetsWithoutBlock);
+    }
 
     const std::optional<core::Loc> getMethodNameLoc(const core::GlobalState &gs) const;
 };
-CheckSize(SendResponse, 80, 8);
+CheckSize(SendResponse, 88, 8);
 
 class IdentResponse final {
 public:
