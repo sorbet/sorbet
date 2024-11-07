@@ -11,4 +11,4 @@ while found
   end
 end
 
-T.reveal_type(xyz) # error: Revealed type: `T.nilable(Integer)`
+T.reveal_type(xyz) # error: Revealed type: `Integer`

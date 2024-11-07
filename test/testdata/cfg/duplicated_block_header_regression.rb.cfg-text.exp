@@ -13,7 +13,7 @@ bb0[firstDead=-1]():
     keep_for_ide$12: T.untyped = <keep-alive> keep_for_ide$12
     <castTemp>$16: TrueClass = true
     found: T::Boolean = cast(<castTemp>$16: TrueClass, T::Boolean);
-    found -> (T::Boolean ? bb5 : bb4)
+    <unconditional> -> bb2
 
 # backedges
 # - bb4
@@ -21,23 +21,22 @@ bb1[firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
+# - bb0
 # - bb5
-bb2[firstDead=-1](xyz: NilClass, found: NilClass):
+bb2[firstDead=-1](xyz: Integer, found: T::Boolean):
     # outerLoops: 1
-    found -> (NilClass ? bb5 : bb4)
+    found -> (T::Boolean ? bb5 : bb4)
 
 # backedges
-# - bb0
 # - bb2
 # - bb6
-bb4[firstDead=3](xyz: T.nilable(Integer)):
+bb4[firstDead=3](xyz: Integer):
     <cfgAlias>$28: T.class_of(T) = alias <C T>
-    <statTemp>$26: T.nilable(Integer) = <cfgAlias>$28: T.class_of(T).reveal_type(xyz: T.nilable(Integer))
+    <statTemp>$26: Integer = <cfgAlias>$28: T.class_of(T).reveal_type(xyz: Integer)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0
 # - bb2
 # - bb6
 bb5[firstDead=-1](xyz: Integer, found: TrueClass):
