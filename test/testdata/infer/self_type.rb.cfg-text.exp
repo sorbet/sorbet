@@ -166,8 +166,8 @@ bb5[firstDead=5](<self>: T.class_of(Parent), <block-pre-call-temp>$7: Sorbet::Pr
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <cfgAlias>$13: T.class_of(T) = alias <C T>
-    <statTemp>$11: Runtime object representing type: T.untyped = <cfgAlias>$13: T.class_of(T).self_type()
-    <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<statTemp>$11: Runtime object representing type: T.untyped)
+    <statTemp>$11: Runtime object representing type: T.self_type = <cfgAlias>$13: T.class_of(T).self_type()
+    <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<statTemp>$11: Runtime object representing type: T.self_type)
     <blockReturnTemp>$14: T.noreturn = blockreturn<sig> <blockReturnTemp>$9: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
 
@@ -247,9 +247,9 @@ bb5[firstDead=7](<self>: T.class_of(Generic), <block-pre-call-temp>$7: Sorbet::P
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <cfgAlias>$13: T.class_of(Generic) = alias <C Generic>
     <cfgAlias>$16: T.class_of(T) = alias <C T>
-    <statTemp>$14: Runtime object representing type: T.untyped = <cfgAlias>$16: T.class_of(T).self_type()
-    <statTemp>$11: Runtime object representing type: Generic[T.untyped] = <cfgAlias>$13: T.class_of(Generic).[](<statTemp>$14: Runtime object representing type: T.untyped)
-    <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<statTemp>$11: Runtime object representing type: Generic[T.untyped])
+    <statTemp>$14: Runtime object representing type: T.self_type = <cfgAlias>$16: T.class_of(T).self_type()
+    <statTemp>$11: Runtime object representing type: Generic[T.self_type] = <cfgAlias>$13: T.class_of(Generic).[](<statTemp>$14: Runtime object representing type: T.self_type)
+    <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<statTemp>$11: Runtime object representing type: Generic[T.self_type])
     <blockReturnTemp>$17: T.noreturn = blockreturn<sig> <blockReturnTemp>$9: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
 
@@ -322,8 +322,8 @@ bb5[firstDead=5](<self>: T.class_of(Array), <block-pre-call-temp>$7: Sorbet::Pri
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <cfgAlias>$13: T.class_of(T) = alias <C T>
-    <statTemp>$11: Runtime object representing type: T.untyped = <cfgAlias>$13: T.class_of(T).self_type()
-    <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<statTemp>$11: Runtime object representing type: T.untyped)
+    <statTemp>$11: Runtime object representing type: T.self_type = <cfgAlias>$13: T.class_of(T).self_type()
+    <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<statTemp>$11: Runtime object representing type: T.self_type)
     <blockReturnTemp>$14: T.noreturn = blockreturn<sig> <blockReturnTemp>$9: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
 
@@ -396,8 +396,8 @@ bb5[firstDead=5](<self>: T.class_of(B), <block-pre-call-temp>$7: Sorbet::Private
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <cfgAlias>$13: T.class_of(T) = alias <C T>
-    <statTemp>$11: Runtime object representing type: T.untyped = <cfgAlias>$13: T.class_of(T).self_type()
-    <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<statTemp>$11: Runtime object representing type: T.untyped)
+    <statTemp>$11: Runtime object representing type: T.self_type = <cfgAlias>$13: T.class_of(T).self_type()
+    <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<statTemp>$11: Runtime object representing type: T.self_type)
     <blockReturnTemp>$14: T.noreturn = blockreturn<sig> <blockReturnTemp>$9: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
 

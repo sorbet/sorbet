@@ -1638,7 +1638,7 @@ namespace {
 // Determines whether we will allow `new` on a type wrapped by a `MetaType`. Note that this function is conservative,
 // in that there are some cases we want to reject but cannot detect here.
 bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
-    if (isa_type<OrType>(wrapped) || isa_type<AndType>(wrapped)) {
+    if (isa_type<OrType>(wrapped) || isa_type<AndType>(wrapped) || isa_type<SelfType>(wrapped)) {
         return false;
     }
 
@@ -1901,7 +1901,7 @@ public:
 class T_self_type : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        res.returnType = make_type<MetaType>(Types::untypedUntracked());
+        res.returnType = make_type<MetaType>(make_type<SelfType>());
     }
 } T_self_type;
 

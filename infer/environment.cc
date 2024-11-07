@@ -1597,6 +1597,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 auto castType = core::Types::instantiate(ctx, c.type, klass.data(ctx)->typeMembers(),
                                                          klass.data(ctx)->selfTypeArgs(ctx));
+
+                castType = core::Types::replaceSelfType(ctx, castType, klass.data(ctx)->selfType(ctx));
+
                 if (inWhat.symbol.data(ctx)->flags.isGenericMethod) {
                     // ^ This mimics the check in LoadArg's call to argumentTypeAsSeenByImplementation
                     // It instantiates any `T.type_parameter(:U)`'s in the type (which are only
@@ -1689,6 +1692,15 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
         ENFORCE(tp.type != nullptr, "Inferencer did not assign type: {}", bind.value.toString(ctx, inWhat));
         tp.type.sanityCheck(ctx);
+
+        if (!tp.type.isFullyDefined()) {
+            if (auto *appliedType = core::cast_type<core::AppliedType>(tp.type)) {
+                for (auto it = appliedType->targs.begin(); it != appliedType->targs.end(); ++it) {
+                    *it =
+                        core::Types::replaceSelfType(ctx, *it, ctx.owner.enclosingClass(ctx).data(ctx)->selfType(ctx));
+                }
+            }
+        }
 
         if (checkFullyDefined && !tp.type.isFullyDefined()) {
             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::IncompleteType)) {
