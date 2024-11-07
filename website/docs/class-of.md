@@ -460,7 +460,7 @@ end
 ```
 
 This works because the `T.class_of(...)` tells Sorbet what singleton class
-methods exist, and the `[...]` tells Sorbet what type  an object instantiated
+methods exist, and the `[...]` tells Sorbet what type an object instantiated
 from that class has.
 
 The `T.all` is an [Intersection Type](intersection-types.md) and is needed
