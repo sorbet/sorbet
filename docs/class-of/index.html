@@ -436,7 +436,7 @@ sig <span class="hljs-keyword">do</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>This works because the <code>T.class_of(...)</code> tells Sorbet what singleton class
-methods exist, and the <code>[...]</code> tells Sorbet what type of an object instantiated
+methods exist, and the <code>[...]</code> tells Sorbet what type an object instantiated
 from that class has.</p>
 <p>The <code>T.all</code> is an <a href="/docs/intersection-types">Intersection Type</a> and is needed
 because unlike <code>T::Class</code>, which allows being applied to any type, the type
