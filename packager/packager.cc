@@ -1547,10 +1547,11 @@ void validateLayering(const core::Context &ctx, const Import &i) {
         return;
     }
 
-    ENFORCE(ctx.state.packageDB().getPackageInfo(i.name.mangledName).exists())
-    ENFORCE(ctx.state.packageDB().getPackageForFile(ctx, ctx.file).exists())
-    auto &thisPkg = PackageInfoImpl::from(ctx.state.packageDB().getPackageForFile(ctx, ctx.file));
-    auto &otherPkg = PackageInfoImpl::from(ctx.state.packageDB().getPackageInfo(i.name.mangledName));
+    const auto &packageDB = ctx.state.packageDB();
+    ENFORCE(packageDB.getPackageInfo(i.name.mangledName).exists())
+    ENFORCE(packageDB.getPackageForFile(ctx, ctx.file).exists())
+    auto &thisPkg = PackageInfoImpl::from(packageDB.getPackageForFile(ctx, ctx.file));
+    auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name.mangledName));
 
     if (!thisPkg.strictDependenciesLevel.has_value() || !otherPkg.strictDependenciesLevel.has_value() ||
         !thisPkg.layer.has_value() || !otherPkg.layer.has_value()) {
@@ -1561,11 +1562,11 @@ void validateLayering(const core::Context &ctx, const Import &i) {
         return;
     }
 
-    auto possibleLayers = ctx.state.packageDB().layers();
+    auto possibleLayers = packageDB.layers();
     auto pkgLayer = thisPkg.layer.value().first;
     auto otherPkgLayer = otherPkg.layer.value().first;
-    auto pkgIndex = ctx.state.packageDB().layerIndex(pkgLayer);
-    auto otherPkgIndex = ctx.state.packageDB().layerIndex(otherPkgLayer);
+    auto pkgIndex = packageDB.layerIndex(pkgLayer);
+    auto otherPkgIndex = packageDB.layerIndex(otherPkgLayer);
 
     if (pkgIndex < otherPkgIndex) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
