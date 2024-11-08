@@ -286,7 +286,7 @@ public:
             }
         }
         if (forwardArg && restArg) {
-            error_without_recovery(ruby_parser::dclass::ForwardArgAfterRestArg, args[0].get()->loc);
+            error(ruby_parser::dclass::ForwardArgAfterRestArg, args[0].get()->loc);
         }
     }
 
