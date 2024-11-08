@@ -61,7 +61,8 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     changed = true;
                     sanityCheck(ctx, cfg);
                     continue;
-                } else if (thenb->bexit.cond.variable != LocalRef::blockCall() && thenb->exprs.empty()) {
+                } else if (thenb->bexit.cond.variable != LocalRef::blockCall() && thenb->exprs.empty() &&
+                           thenb->outerLoops == bb->outerLoops) {
                     // Don't remove block headers
                     bb->bexit.cond.variable = thenb->bexit.cond.variable;
                     bb->bexit.thenb = thenb->bexit.thenb;
@@ -82,9 +83,14 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 bb->bexit.thenb != thenb->bexit.thenb) {
                 // shortcut then
                 bb->bexit.thenb = thenb->bexit.thenb;
-                thenb->bexit.thenb->backEdges.emplace_back(bb);
+                bb->bexit.thenb->backEdges.emplace_back(bb);
                 thenb->backEdges.erase(remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                        thenb->backEdges.end());
+                // Update unconditional jumps
+                if (thenb == elseb) {
+                    bb->bexit.elseb = bb->bexit.thenb;
+                }
+
                 changed = true;
                 sanityCheck(ctx, cfg);
                 continue;
@@ -97,6 +103,11 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 bb->bexit.elseb->backEdges.emplace_back(bb);
                 elseb->backEdges.erase(remove(elseb->backEdges.begin(), elseb->backEdges.end(), bb),
                                        elseb->backEdges.end());
+                // Update unconditional jumps
+                if (thenb == elseb) {
+                    bb->bexit.thenb = bb->bexit.elseb;
+                }
+
                 changed = true;
                 sanityCheck(ctx, cfg);
                 continue;
