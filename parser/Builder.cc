@@ -412,7 +412,7 @@ public:
         core::LocOffsets loc = receiver->loc.join(selectorLoc);
         if ((dot != nullptr) && dot->view() == "&.") {
             if (masgn) {
-                error_without_recovery(ruby_parser::dclass::CSendInLHSOfMAsgn, tokLoc(dot));
+                error(ruby_parser::dclass::CSendInLHSOfMAsgn, tokLoc(dot));
             }
             return make_unique<CSend>(loc, std::move(receiver), method, selectorLoc, sorbet::parser::NodeVec());
         }
