@@ -928,7 +928,7 @@ public:
         core::LocOffsets loc = head->loc.join(tokLoc(end));
 
         if (isLiteralNode(*(head->definee.get()))) {
-            error_without_recovery(ruby_parser::dclass::SingletonLiteral, head->definee->loc);
+            error(ruby_parser::dclass::SingletonLiteral, head->definee->loc);
         }
         checkReservedForNumberedParameters(head->name.toString(gs_), declLoc);
 
