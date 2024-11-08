@@ -482,8 +482,11 @@ namespace ruby_parser {
 namespace bison {
 namespace TYPEDRUBY {
 
-// DIAGCHECK will force a parse error if any diagnostics have been recorded with
-// `error_without_recovery`.
+// DIAGCHECK will forcibly emit an error token for diagnostics which have been
+// recorded with `error_without_recovery` (which sets driver.pending_error).
+//
+// Normally, the error token is only shifted when Bison fails to find any
+// matching rules.
 #define DIAGCHECK() do { \
 	if (driver.pending_error) { \
 		driver.pending_error = false; \
