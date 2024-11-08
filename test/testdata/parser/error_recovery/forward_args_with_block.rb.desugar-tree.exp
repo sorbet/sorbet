@@ -1,0 +1,7 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def test<<todo method>>(*<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
+    [1, 2, 3].each() do ||
+      <emptyTree>
+    end
+  end
+end
