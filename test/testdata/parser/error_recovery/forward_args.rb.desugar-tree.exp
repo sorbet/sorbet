@@ -1,0 +1,5 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def foo<<todo method>>(**, *<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
+    <emptyTree>
+  end
+end
