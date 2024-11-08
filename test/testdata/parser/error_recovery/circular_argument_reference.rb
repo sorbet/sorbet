@@ -4,5 +4,5 @@
               #      ^      error: circular argument reference x
               # ^           error: unmatched "|"
               #           ^ error: missing arg to "|" operator
-              #      ^      error: Method `x` does not exist
+              #        ^    error: Method `+` does not exist
 end

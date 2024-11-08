@@ -1739,7 +1739,7 @@ public:
 
     bool hasCircularArgumentReferences(const Node *node, std::string_view name) {
         if (name == driver_->current_arg_stack.top()) {
-            error_without_recovery(ruby_parser::dclass::CircularArgumentReference, node->loc, std::string(name));
+            error(ruby_parser::dclass::CircularArgumentReference, node->loc, std::string(name));
             return true;
         }
         return false;

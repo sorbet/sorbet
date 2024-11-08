@@ -1,3 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  <self>.x().+(1).|(<emptyTree>::<C <ErrorNode>>)
+  [1, 2, 3].each() do ||
+    x = x.+(1).|(<emptyTree>::<C <ErrorNode>>)
+  end
 end
