@@ -535,7 +535,7 @@ public:
             if (auto *bp = parser::cast_node<BlockPass>(callargs->back().get())) {
                 error(ruby_parser::dclass::BlockAndBlockarg, bp->loc);
             } else if (auto *fa = parser::cast_node<ForwardedArgs>(callargs->back().get())) {
-                error_without_recovery(ruby_parser::dclass::BlockAndBlockarg, fa->loc);
+                error(ruby_parser::dclass::BlockAndBlockarg, fa->loc);
             }
         }
 
