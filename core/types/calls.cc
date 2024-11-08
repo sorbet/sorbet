@@ -4070,7 +4070,6 @@ public:
     }
 } Array_compact;
 
-
 class Hash_compact : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
