@@ -32,6 +32,10 @@ public:
     bool isCondSet() {
         return cond.variable.exists();
     }
+    // Returns true when this exit condition represents an unconditional branch.
+    bool isUnconditional() const {
+        return thenb == elseb;
+    }
     BlockExit() : cond(), thenb(nullptr), elseb(nullptr){};
 };
 
