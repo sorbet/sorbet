@@ -482,6 +482,8 @@ namespace ruby_parser {
 namespace bison {
 namespace TYPEDRUBY {
 
+// DIAGCHECK will force a parse error if any diagnostics have been recorded with
+// `error_without_recovery`.
 #define DIAGCHECK() do { \
 	if (driver.pending_error) { \
 		driver.pending_error = false; \

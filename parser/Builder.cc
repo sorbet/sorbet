@@ -176,10 +176,14 @@ public:
         return cond;
     }
 
+    // Record a diagnostic error, and set internal state that will trigger a YYERROR on the next DIAGCHECK. Use this
+    // function if there's no reasonable tree that can be returned, as it will trigger the parser to throw away
+    // arbitrary amounts of the input tree, potentially leading to LSP taking the slow path unnecessarily.
     void error_without_recovery(ruby_parser::dclass err, core::LocOffsets loc, std::string data = "") {
         driver_->external_diagnostic(ruby_parser::dlevel::ERROR, err, loc.beginPos(), loc.endPos(), data);
     }
 
+    // Record a diagnostic only, don't modify any internal state that could cause the tree to be discarded.
     void error(ruby_parser::dclass err, core::LocOffsets loc, std::string data = "") {
         auto range = ruby_parser::diagnostic::range(loc.beginPos(), loc.endPos());
         driver_->diagnostics.emplace_back(ruby_parser::dlevel::ERROR, err, std::move(range), data);
