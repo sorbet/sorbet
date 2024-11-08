@@ -1,5 +1,7 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   [1, 2, 3].each() do |x|
-    <emptyTree>
+    ::<Magic>.<call-with-block>(<self>, :foo, <self>.bar()) do ||
+      <emptyTree>
+    end
   end
 end
