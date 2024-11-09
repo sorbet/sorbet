@@ -453,22 +453,80 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
     return upperBounds1;
 }
 
-int CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {
-    // ENFORCE(!marked[currentBB]) // graph is cyclic!
-    if (currentBB->fwdId != -1) {
-        return nextFree;
-    } else {
-        currentBB->fwdId = -2;
-        if (currentBB->bexit.thenb->outerLoops >= currentBB->bexit.elseb->outerLoops) {
-            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.elseb);
-            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.thenb);
-        } else {
-            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.thenb);
-            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.elseb);
+namespace {
+
+// The marker for nodes that the post-order traversal has not yet encountered.
+constexpr int UNVISITED = -1;
+
+// The marker for nodes that the post-order traversal is processing the children of (this implies that the node is
+// somewhere in the work queue).
+constexpr int PROCESSING = -2;
+
+struct WorkItem {
+    enum class Event { Enter, Exit };
+
+    BasicBlock *block;
+    Event event;
+
+    explicit WorkItem(BasicBlock *block) : block{block}, event{Event::Enter} {}
+};
+
+} // namespace
+
+std::vector<int> CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int numBlocks, BasicBlock *entryBB) {
+    ENFORCE(target.empty(), "The output vector must be empty to start with");
+
+    target.reserve(numBlocks);
+
+    std::vector<int> forwardIndex(numBlocks, UNVISITED);
+    std::vector<WorkItem> work;
+
+    // Arbitrary, could use tuning
+    work.reserve(10);
+
+    work.emplace_back(entryBB);
+
+    while (!work.empty()) {
+        auto [block, event] = work.back();
+
+        switch (event) {
+            case WorkItem::Event::Enter: {
+                // Have we seen this node already through another path?
+                if (forwardIndex[block->id] != UNVISITED) {
+                    work.pop_back();
+                    continue;
+                }
+
+                // Ensure that we record this node on the way back out, mark it as visited, and enqueue its successors.
+                work.back().event = WorkItem::Event::Exit;
+
+                forwardIndex[block->id] = PROCESSING;
+
+                if (forwardIndex[block->bexit.thenb->id] == UNVISITED) {
+                    work.emplace_back(block->bexit.thenb);
+                }
+
+                if (!block->bexit.isUnconditional() && forwardIndex[block->bexit.elseb->id] == UNVISITED) {
+                    work.emplace_back(block->bexit.elseb);
+                }
+
+                break;
+            }
+
+            case WorkItem::Event::Exit: {
+                if (forwardIndex[block->id] == PROCESSING) {
+                    forwardIndex[block->id] = target.size();
+                    target.emplace_back(block);
+                    work.pop_back();
+                }
+
+                break;
+            }
         }
-        target[nextFree] = currentBB;
-        currentBB->fwdId = nextFree;
-        return nextFree + 1;
     }
+
+    target.shrink_to_fit();
+
+    return forwardIndex;
 }
 } // namespace sorbet::cfg

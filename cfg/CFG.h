@@ -57,8 +57,6 @@ class BasicBlock final {
 public:
     std::vector<VariableUseSite> args;
     int id = 0;
-    int fwdId = -1;
-    int bwdId = -1;
     struct Flags {
         bool isLoopHeader : 1;
         bool wasJumpDestination : 1;
