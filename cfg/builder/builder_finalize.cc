@@ -453,22 +453,63 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
     return upperBounds1;
 }
 
-int CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {
-    // ENFORCE(!marked[currentBB]) // graph is cyclic!
-    if (currentBB->fwdId != -1) {
-        return nextFree;
-    } else {
-        currentBB->fwdId = -2;
-        if (currentBB->bexit.thenb->outerLoops >= currentBB->bexit.elseb->outerLoops) {
-            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.elseb);
-            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.thenb);
-        } else {
-            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.thenb);
-            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.elseb);
+namespace {
+constexpr int UNVISITED = -1;
+constexpr int VISITED = -2;
+
+struct WorkItem {
+    BasicBlock *block;
+    bool entering;
+
+    explicit WorkItem(BasicBlock *block) : block{block}, entering{true} {}
+};
+
+} // namespace
+
+std::vector<int> CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int numBlocks, BasicBlock *entryBB) {
+    ENFORCE(target.empty(), "The output vector must be empty to start with");
+
+    target.reserve(numBlocks);
+
+    std::vector<int> forwardIndex(numBlocks, UNVISITED);
+    std::vector<WorkItem> work;
+
+    // Arbitrary, could use tuning
+    work.reserve(10);
+
+    work.emplace_back(entryBB);
+
+    while (!work.empty()) {
+        auto [block, entering] = work.back();
+
+        if (entering) {
+            // Have we seen this node already thorugh another path?
+            if (forwardIndex[block->id] != UNVISITED) {
+                work.pop_back();
+                continue;
+            }
+
+            // Ensure that we record this node on the way back out, mark it as visited, and enqueue its successors.
+            work.back().entering = false;
+
+            forwardIndex[block->id] = VISITED;
+
+            if (forwardIndex[block->bexit.thenb->id] == UNVISITED) {
+                work.emplace_back(block->bexit.thenb);
+            }
+
+            if (forwardIndex[block->bexit.elseb->id] == UNVISITED) {
+                work.emplace_back(block->bexit.elseb);
+            }
+        } else if (forwardIndex[block->id] == VISITED) {
+            forwardIndex[block->id] = target.size();
+            target.emplace_back(block);
+            work.pop_back();
         }
-        target[nextFree] = currentBB;
-        currentBB->fwdId = nextFree;
-        return nextFree + 1;
     }
+
+    target.shrink_to_fit();
+
+    return forwardIndex;
 }
 } // namespace sorbet::cfg

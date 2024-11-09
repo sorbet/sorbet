@@ -151,16 +151,17 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
 }
 
 void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
-    auto &target1 = cfg.forwardsTopoSort;
-    target1.resize(cfg.basicBlocks.size());
-    int count = topoSortFwd(target1, 0, cfg.entry());
-    cfg.forwardsTopoSort.resize(count);
+    // A map from the index space of the basicBlocks index to forwardsTopoSort index.
+    cfg.forwardsTopoSort.reserve(cfg.maxBasicBlockId);
+    auto forwardsIds = topoSortFwd(cfg.forwardsTopoSort, cfg.maxBasicBlockId, cfg.entry());
+
+    cfg.forwardsTopoSort.shrink_to_fit();
 
     // Remove unreachable blocks (which were not found by the toposort)
     for (auto &bb : cfg.basicBlocks) {
-        if (bb->fwdId == -1) {
+        if (forwardsIds[bb->id] == -1) {
             for (auto &prev : bb->backEdges) {
-                ENFORCE(prev->fwdId == -1);
+                ENFORCE(forwardsIds[prev->id] == -1);
             }
 
             bb->bexit.thenb->backEdges.erase(
@@ -171,13 +172,15 @@ void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
                 bb->bexit.elseb->backEdges.end());
         }
     }
-    cfg.basicBlocks.erase(
-        remove_if(cfg.basicBlocks.begin(), cfg.basicBlocks.end(), [](auto &bb) -> bool { return bb->fwdId == -1; }),
-        cfg.basicBlocks.end());
+    cfg.basicBlocks.erase(remove_if(cfg.basicBlocks.begin(), cfg.basicBlocks.end(),
+                                    [&forwardsIds](auto &bb) -> bool { return forwardsIds[bb->id] == -1; }),
+                          cfg.basicBlocks.end());
 
     // needed to find loop headers.
     for (auto &bb : cfg.basicBlocks) {
-        fast_sort(bb->backEdges, [](const BasicBlock *a, const BasicBlock *b) -> bool { return a->fwdId > b->fwdId; });
+        fast_sort(bb->backEdges, [&forwardsIds](const BasicBlock *a, const BasicBlock *b) -> bool {
+            return forwardsIds[a->id] > forwardsIds[b->id];
+        });
     }
 }
 
