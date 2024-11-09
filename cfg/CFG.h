@@ -32,6 +32,10 @@ public:
     bool isCondSet() {
         return cond.variable.exists();
     }
+    // Returns true when this exit condition represents an unconditional branch.
+    bool isUnconditional() const {
+        return thenb == elseb;
+    }
     BlockExit() : cond(), thenb(nullptr), elseb(nullptr){};
 };
 
@@ -137,6 +141,9 @@ public:
      * The name here goes from using forwards or backwards edges as dependencies in topological sort.
      * This in indeed kind-a reverse to what order would node be in: for topological sort with forward edges
      * the entry point is going to be the last node in sorted array.
+     *
+     * This is a cached post-order traversal of the CFG from the entry node, which is why we traverse it in reverse when
+     * typechecking: the reversed post-order traversal ensures that we visit all nodes in data flow order.
      */
     std::vector<BasicBlock *> forwardsTopoSort;
     inline BasicBlock *entry() {
