@@ -1,0 +1,7 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def self.test<<todo method>>(&<blk>)
+    [1, 2, 3].each() do |x|
+      x
+    end
+  end
+end

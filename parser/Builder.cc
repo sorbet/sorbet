@@ -286,7 +286,7 @@ public:
             }
         }
         if (forwardArg && restArg) {
-            error_without_recovery(ruby_parser::dclass::ForwardArgAfterRestArg, args[0].get()->loc);
+            error(ruby_parser::dclass::ForwardArgAfterRestArg, args[0].get()->loc);
         }
     }
 
@@ -412,7 +412,7 @@ public:
         core::LocOffsets loc = receiver->loc.join(selectorLoc);
         if ((dot != nullptr) && dot->view() == "&.") {
             if (masgn) {
-                error_without_recovery(ruby_parser::dclass::CSendInLHSOfMAsgn, tokLoc(dot));
+                error(ruby_parser::dclass::CSendInLHSOfMAsgn, tokLoc(dot));
             }
             return make_unique<CSend>(loc, std::move(receiver), method, selectorLoc, sorbet::parser::NodeVec());
         }
@@ -533,9 +533,9 @@ public:
         }
         if (callargs != nullptr && !callargs->empty()) {
             if (auto *bp = parser::cast_node<BlockPass>(callargs->back().get())) {
-                error_without_recovery(ruby_parser::dclass::BlockAndBlockarg, bp->loc);
+                error(ruby_parser::dclass::BlockAndBlockarg, bp->loc);
             } else if (auto *fa = parser::cast_node<ForwardedArgs>(callargs->back().get())) {
-                error_without_recovery(ruby_parser::dclass::BlockAndBlockarg, fa->loc);
+                error(ruby_parser::dclass::BlockAndBlockarg, fa->loc);
             }
         }
 
@@ -928,7 +928,7 @@ public:
         core::LocOffsets loc = head->loc.join(tokLoc(end));
 
         if (isLiteralNode(*(head->definee.get()))) {
-            error_without_recovery(ruby_parser::dclass::SingletonLiteral, head->definee->loc);
+            error(ruby_parser::dclass::SingletonLiteral, head->definee->loc);
         }
         checkReservedForNumberedParameters(head->name.toString(gs_), declLoc);
 
@@ -1739,7 +1739,7 @@ public:
 
     bool hasCircularArgumentReferences(const Node *node, std::string_view name) {
         if (name == driver_->current_arg_stack.top()) {
-            error_without_recovery(ruby_parser::dclass::CircularArgumentReference, node->loc, std::string(name));
+            error(ruby_parser::dclass::CircularArgumentReference, node->loc, std::string(name));
             return true;
         }
         return false;
