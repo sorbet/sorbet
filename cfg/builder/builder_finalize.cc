@@ -514,11 +514,11 @@ std::vector<int> CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int numBl
             }
 
             case WorkItem::Event::Exit: {
-                if (forwardIndex[block->id] == PROCESSING) {
-                    forwardIndex[block->id] = target.size();
-                    target.emplace_back(block);
-                    work.pop_back();
-                }
+                ENFORCE(forwardIndex[block->id] == PROCESSING);
+
+                forwardIndex[block->id] = target.size();
+                target.emplace_back(block);
+                work.pop_back();
 
                 break;
             }
