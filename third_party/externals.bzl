@@ -1,6 +1,4 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("//third_party:ruby_externals.bzl", "register_ruby_dependencies")
-load("//third_party/openssl:system_openssl_repository.bzl", "system_openssl_repository")
 
 # We define our externals here instead of directly in WORKSPACE
 def register_sorbet_dependencies():
@@ -278,27 +276,6 @@ def register_sorbet_dependencies():
         strip_prefix = "cpp-subprocess-9c624ce4e3423cce9f148bafbae56abfd6437ea0",
     )
 
-    system_openssl_repository(
-        name = "system_ssl_darwin",
-        build_file = "@com_stripe_ruby_typer//third_party/openssl:darwin.BUILD",
-        openssl_dirs = [
-            "/usr/local/opt/openssl@1.1",
-            "/opt/homebrew/opt/openssl@1.1",
-            "/usr/local/opt/openssl",
-            "/opt/homebrew/opt/openssl",
-        ],
-    )
-
-    # If we ever want to search multiple paths, we can likely use the
-    # `system_openssl_repository` repository rule like above. But I figure that
-    # right now if it ain't broke don't fix it, so I've left this using
-    # new_local_repository.
-    native.new_local_repository(
-        name = "system_ssl_linux",
-        path = "/usr",
-        build_file = "@com_stripe_ruby_typer//third_party/openssl:linux.BUILD",
-    )
-
     http_archive(
         name = "bazel_skylib",
         sha256 = "cd55a062e763b9349921f0f5db8c3933288dc8ba4f76dd9416aac68acee3cb94",
@@ -335,5 +312,3 @@ def register_sorbet_dependencies():
         sha256 = "47b61d25dd52bdaa1d571dab6705d076f05ba3d7a1bbbfed36145f8281c0403f",
         strip_prefix = "rules_foreign_cc-d74623f0ad47f4e375de81baa454eb106715a416",
     )
-
-    register_ruby_dependencies()
