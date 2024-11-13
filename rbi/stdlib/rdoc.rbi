@@ -7753,16 +7753,6 @@ end
 # [`Inline`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD/Inline.html) keeps
 # track of markup and labels to create proper links.
 class RDoc::RD::Inline
-  # Creates a new
-  # [`Inline`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD/Inline.html) for
-  # `rdoc` and `reference`.
-  #
-  # `rdoc` may be another
-  # [`Inline`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD/Inline.html) or a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). If `reference`
-  # is not given it will use the text from `rdoc`.
-  def self.new(rdoc, reference); end
-
   def ==(other); end
 
   # Appends `more` to this inline. `more` may be a
