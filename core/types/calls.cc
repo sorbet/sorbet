@@ -4077,7 +4077,7 @@ public:
 
         auto *ap = cast_type<AppliedType>(args.thisType);
         ENFORCE(ap->klass == Symbols::Hash() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Hash()));
-        ENFORCE(ap->targs.size() == 3);
+        ENFORCE(ap->targs.size() >= 3);
         auto nillableValueType = ap->targs[1];
 
         auto valueType = Types::dropNil(gs, nillableValueType);
