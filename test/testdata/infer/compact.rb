@@ -65,3 +65,17 @@ T.assert_type!(
   T::Hash[Symbol, String]
 )
 
+class MyHash < Hash
+  extend T::Generic
+
+  K = type_member(:out)
+  V = type_member(:out)
+  Elem = type_member(:out)
+
+  Another = type_member(:out)
+end
+
+T.assert_type!(
+  MyHash.new.compact,
+  T::Hash[T.anything, T.anything]
+)
