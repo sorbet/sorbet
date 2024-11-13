@@ -533,16 +533,16 @@ only available in a version of Ruby newer than the one used to run a given
 project. You will have to rely on (runtime) test suites to verify that your
 project does not use new standard library APIs with an old Ruby version.
 
-The `sorbet-static` gem is only tested on macOS 10.14 (Mojave) and Ubuntu 18
-(Bionic Beaver). There is currently no Windows support. We expect
-`sorbet-static` to work as far back as macOS 10.10 (Yosemite), as far forward as
-macOS 11.0 Big Sur, and on most Linux distributions using `glibc`.
+The `sorbet-static` gem is only tested on macOS 10.14 (Mojave), macOS 15.0
+(Sequoia) on Apple Silicon, and Ubuntu 18 (Bionic Beaver). There is currently no
+Windows support. We expect `sorbet-static` to work as far back as macOS 10.10
+(Yosemite) and on most Linux distributions using `glibc`.
 
-We do not test nor publish prebuilt binaries for macOS on Apple Silicon. We have
-reports that it doesn't work, but no one on the Sorbet team has access to Apple
-Silicon-based macOS machines, so we have been unable to diagnose nor fix any
-problems. If you are interested in working on this, feel free to reach out in
-the #internals channel on our [Sorbet Slack](/slack).
+Starting from version 0.5.11577, Sorbet provides tested and prebuilt binaries
+for macOS on Apple Silicon. If you encounter bugs, please
+[open an issue](https://github.com/sorbet/sorbet/issues/new/choose). Otherwise,
+feel free to discuss this change in the #discuss channel on our
+[Sorbet Slack](/slack).
 
 The `sorbet` gem has runtime dependencies on `git` and `bash`.
 
