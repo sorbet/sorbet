@@ -181,13 +181,11 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     visited.resize(cfg->maxBasicBlockId);
     KnowledgeFilter knowledgeFilter(ctx, *cfg);
 
-    bool hasCustomerArg = false;
     std::string_view customerArgName = "";
 
     if (reportCustomerCallsite() && !ctx.file.data(ctx).isPackagedTest()) {
         for (auto &arg : cfg->symbol.data(ctx)->arguments) {
             if (getCustomerClass(ctx, arg.type).exists()) {
-                hasCustomerArg = true;
                 customerArgName = arg.argumentName(ctx);
 
                 if (cfg->loc.exists()) {
@@ -214,13 +212,45 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                                   << std::move(wrappingMethodName)
                                   << "\", \"context_loc\": \""
                                   << std::move(defFile) << ":" << wrappingMethodStart.line
-                                  << "\"}";
+                                  << "\", \"method_type\": \"arg\"}";
                         ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
                         // clang-format on
                     }
                 }
 
                 break;
+            }
+        }
+
+        auto &resultType = cfg->symbol.data(ctx)->resultType;
+        if (getCustomerClass(ctx, resultType).exists()) {
+            if (cfg->loc.exists()) {
+                auto defLoc = ctx.locAt(cfg->loc);
+                if (defLoc.exists()) {
+                    auto wrappingMethodClass = cfg->symbol.data(ctx)->owner;
+                    auto wrappingMethodName = cfg->symbol.data(ctx)->name.show(ctx);
+                    auto defFile = defLoc.file().data(ctx.state).path();
+                    auto [wrappingMethodStart, _ew] = std::move(defLoc).position(ctx.state);
+
+                    std::string wrappingMethodClassName;
+                    if (wrappingMethodClass.data(ctx)->isSingletonClass(ctx)) {
+                        wrappingMethodClassName = wrappingMethodClass.data(ctx)->attachedClass(ctx).showFullName(ctx);
+                    } else {
+                        wrappingMethodClassName = wrappingMethodClass.showFullName(ctx);
+                    }
+
+                    // JSONL machine-readable format
+                    // clang-format off
+                    std::ostringstream oss;
+                    oss << "{\"context\": \""
+                              << std::move(wrappingMethodClassName) << "#"
+                              << std::move(wrappingMethodName)
+                              << "\", \"context_loc\": \""
+                              << std::move(defFile) << ":" << wrappingMethodStart.line
+                              << "\", \"method_type\": \"ret\"}";
+                    ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
+                    // clang-format on
+                }
             }
         }
     }
@@ -450,7 +480,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 bind.bind.type =
                     current.processBinding(ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg),
                                            knowledgeFilter, *constr, methodReturnType, parentUpdateKnowledgeReceiver,
-                                           hasCustomerArg, customerArgName, customerCallsiteArgMatchOnly());
+                                           reportCustomerCallsite() && !ctx.file.data(ctx).isPackagedTest(),
+                                           customerArgName, customerCallsiteArgMatchOnly());
                 if (cfg::isa_instruction<cfg::Send>(bind.value)) {
                     totalSendCount++;
                     if (bind.bind.type && !bind.bind.type.isUntyped()) {

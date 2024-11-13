@@ -1000,12 +1000,11 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     return mapType;
 }
 
-core::TypePtr
-Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
-                            int bindMinLoops, KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
-                            core::TypePtr &methodReturnType,
-                            const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver,
-                            bool hasCustomerArg, std::string_view customerArgName, bool customerCallsiteArgMatchOnly) {
+core::TypePtr Environment::processBinding(
+    core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount, int bindMinLoops,
+    KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr, core::TypePtr &methodReturnType,
+    const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver, bool reportCustomerCallsite,
+    std::string_view customerArgName, bool customerCallsiteArgMatchOnly) {
     try {
         core::TypeAndOrigins tp;
         bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value) ||
@@ -1139,7 +1138,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                     // Code needed for internal Stripe codemod. Do not actually ready this PR to master, just leave it
                     // as a draft on a POC branch.
-                    if (hasCustomerArg && bind.loc.exists() && !ctx.file.data(ctx).isPackagedTest()) {
+                    if (reportCustomerCallsite && bind.loc.exists()) {
                         auto wrappingMethodClass = inWhat.symbol.data(ctx)->owner;
                         auto wrappingMethodName = inWhat.symbol.data(ctx)->name.show(ctx);
                         auto [wrappingMethodStart, _ew] = std::move(inWhat.symbol.data(ctx)->loc()).position(ctx.state);
@@ -1184,8 +1183,27 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                       << "\", \"loc\": \""
                                       << std::move(callSiteFile) << ":" << start.line
                                       << "\", \"recv\": \""
-                                      << std::move(receiverName)
-                                      << "\"}";
+                                      << std::move(receiverName);
+
+                            oss << "\", \"origin_locs\": [";
+                            int locIndex = 0;
+                            for (auto &originLoc : recvType.origins) {
+                                if (!originLoc.exists()) {
+                                    continue;
+                                }
+
+                                auto originFile = originLoc.file().data(ctx.state).path();
+                                auto [originStart, _e] = std::move(originLoc).position(ctx.state);
+                                if (locIndex == recvType.origins.size() - 1) {
+                                    oss << "\"" << std::move(originFile) << ":" << originStart.line << "\"";
+                                } else {
+                                    oss << "\"" << std::move(originFile) << ":" << originStart.line << "\",";
+                                }
+
+                                locIndex++;
+                            }
+
+                            oss << "], \"callsite_type\": \"recv\"}";
                             ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
                             // clang-format on
                         }
@@ -1198,7 +1216,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                 continue;
                             }
 
-                            // Only process arg if name matches the argument name of the passed-in customer class arg
+                            // Only process arg if name matches the argument name of the passed-in customer class
+                            // arg
                             auto &sendArg = send.args[index];
                             if (customerCallsiteArgMatchOnly &&
                                 sendArg.variable.data(inWhat)._name.toString(ctx) != customerArgName) {
@@ -1284,18 +1303,39 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                                 auto originFile = originLoc.file().data(ctx.state).path();
                                 auto [originStart, _e] = std::move(originLoc).position(ctx.state);
-                                if (locIndex == arg->origins.size()) {
+                                if (locIndex == arg->origins.size() - 1) {
                                     oss << "\"" << std::move(originFile) << ":" << originStart.line << "\"";
                                 } else {
                                     oss << "\"" << std::move(originFile) << ":" << originStart.line << "\",";
                                 }
+
+                                locIndex++;
                             }
-                            oss << "]}";
+                            oss << "], \"callsite_type\": \"arg\"}";
 
                             ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
                             // clang-format on
 
                             index++;
+                        }
+
+                        bool hasCustomerResult = infer::getCustomerClass(ctx, dispatched.returnType).exists();
+                        if (hasCustomerResult) {
+                            // JSONL machine-readable format
+                            // clang-format off
+                            std::ostringstream oss;
+                            oss << "{\"context\": \""
+                                      << std::move(wrappingMethodClassName) << "#"
+                                      << std::move(wrappingMethodName)
+                                      << "\", \"context_loc\": \""
+                                      << std::move(callSiteFile) << ":" << wrappingMethodStart.line
+                                      << "\", \"method\": \""
+                                      << std::move(methodClassName) << "#" << std::move(methodName)
+                                      << "\", \"loc\": \""
+                                      << std::move(callSiteFile) << ":" << start.line
+                                      << "\", \"callsite_type\": \"ret_asgn\"}";
+                            ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
+                            // clang-format on
                         }
                     }
 
@@ -1628,6 +1668,65 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 if (methodReturnType == core::Types::void_()) {
                     methodReturnType = core::Types::top();
                 }
+
+                if (reportCustomerCallsite && bind.loc.exists()) {
+                    auto klass = infer::getCustomerClass(ctx, typeAndOrigin.type);
+                    if (klass.exists()) {
+                        auto wrappingMethodClass = inWhat.symbol.data(ctx)->owner;
+                        auto wrappingMethodName = inWhat.symbol.data(ctx)->name.show(ctx);
+                        auto [wrappingMethodStart, _ew] = std::move(inWhat.symbol.data(ctx)->loc()).position(ctx.state);
+
+                        std::string wrappingMethodClassName;
+                        if (wrappingMethodClass.data(ctx)->isSingletonClass(ctx)) {
+                            wrappingMethodClassName =
+                                wrappingMethodClass.data(ctx)->attachedClass(ctx).showFullName(ctx);
+                        } else {
+                            wrappingMethodClassName = wrappingMethodClass.showFullName(ctx);
+                        }
+
+                        auto callSiteLoc = ctx.locAt(bind.loc);
+                        auto callSiteFile = callSiteLoc.file().data(ctx.state).path();
+                        auto [start, _e] = std::move(callSiteLoc).position(ctx.state);
+
+                        auto methodRetTypeStr = methodReturnType.show(ctx);
+
+                        // JSONL machine-readable format
+                        // clang-format off
+                        std::ostringstream oss;
+                        oss << "{\"context\": \""
+                                  << std::move(wrappingMethodClassName) << "#"
+                                  << std::move(wrappingMethodName)
+                                  << "\", \"context_loc\": \""
+                                  << std::move(callSiteFile) << ":" << wrappingMethodStart.line
+                                  << "\", \"loc\": \""
+                                  << std::move(callSiteFile) << ":" << start.line
+                                  << "\", \"ret_type\": \""
+                                  << std::move(methodRetTypeStr);
+
+                        oss << "\", \"origin_locs\": [";
+                        int locIndex = 0;
+                        for (auto &originLoc : typeAndOrigin.origins) {
+                            if (!originLoc.exists()) {
+                                continue;
+                            }
+
+                            auto originFile = originLoc.file().data(ctx.state).path();
+                            auto [originStart, _e] = std::move(originLoc).position(ctx.state);
+                            if (locIndex == typeAndOrigin.origins.size() - 1) {
+                                oss << "\"" << std::move(originFile) << ":" << originStart.line << "\"";
+                            } else {
+                                oss << "\"" << std::move(originFile) << ":" << originStart.line << "\",";
+                            }
+
+                            locIndex++;
+                        }
+
+                        oss << "], \"callsite_type\": \"ret_ret\"}";
+                        ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
+                        // clang-format on
+                    }
+                }
+
                 core::ErrorSection::Collector errorDetailsCollector;
                 if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType,
                                                            core::UntypedMode::AlwaysCompatible,
