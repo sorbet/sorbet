@@ -1139,7 +1139,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                     // Code needed for internal Stripe codemod. Do not actually ready this PR to master, just leave it
                     // as a draft on a POC branch.
-                    if (hasCustomerArg && bind.loc.exists()) {
+                    if (hasCustomerArg && bind.loc.exists() && !ctx.file.data(ctx).isPackagedTest()) {
                         auto wrappingMethodClass = inWhat.symbol.data(ctx)->owner;
                         auto wrappingMethodName = inWhat.symbol.data(ctx)->name.show(ctx);
                         auto [wrappingMethodStart, _ew] = std::move(inWhat.symbol.data(ctx)->loc()).position(ctx.state);
@@ -1273,8 +1273,25 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             }
 
                             oss << ", \"loc\": \""
-                                << std::move(callSiteFile) << ":" << start.line
-                                << "\"}";
+                                << std::move(callSiteFile) << ":" << start.line;
+
+                            oss << "\", \"origin_locs\": [";
+                            int locIndex = 0;
+                            for (auto &originLoc : arg->origins) {
+                                if (!originLoc.exists()) {
+                                    continue;
+                                }
+
+                                auto originFile = originLoc.file().data(ctx.state).path();
+                                auto [originStart, _e] = std::move(originLoc).position(ctx.state);
+                                if (locIndex == arg->origins.size()) {
+                                    oss << "\"" << std::move(originFile) << ":" << originStart.line << "\"";
+                                } else {
+                                    oss << "\"" << std::move(originFile) << ":" << originStart.line << "\",";
+                                }
+                            }
+                            oss << "]}";
+
                             ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
                             // clang-format on
 
