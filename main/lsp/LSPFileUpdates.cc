@@ -114,6 +114,9 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         return result;
     }
 
+    vector<core::WithoutUniqueNameHash> intersection;
+    intersection.reserve(result.changedSymbolNameHashes.size());
+
     int i = -1;
     for (auto &oldFile : gs.getFiles()) {
         i++;
@@ -138,7 +141,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
 
         ENFORCE(oldFile->getFileHash() != nullptr);
         const auto &oldHash = *oldFile->getFileHash();
-        vector<core::WithoutUniqueNameHash> intersection;
+        intersection.clear();
         absl::c_set_intersection(result.changedSymbolNameHashes, oldHash.usages.nameHashes,
                                  std::back_inserter(intersection));
         if (intersection.empty()) {
