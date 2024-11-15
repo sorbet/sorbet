@@ -1020,27 +1020,7 @@ private:
                 // existing one and create a new one
                 if (!isIntrinsic(sym.data(ctx))) {
                     paramMismatchErrors(ctx.withOwner(sym), declLoc, parsedArgs);
-
                     ctx.state.mangleRenameMethod(sym, method.name);
-
-                    // If the symbol we're mangling has overloads, we're in one of two situations:
-                    // 1. This is a symbol from a stdlib rbi,
-                    // 2. We've seen this symbol before, and are operating in incremental mode.
-                    // Either way, we can assume that the MangleOverload version of the name is present and defined on
-                    // the owner. We need to take care here and mangle the original definition, not the first entry
-                    // in the overload chain.
-                    if (sym.data(ctx)->flags.isOverloaded) {
-                        auto overloadName =
-                            ctx.state.lookupNameUnique(core::UniqueNameKind::MangleRenameOverload, method.name, 1);
-                        auto it = owner.data(ctx)->members().find(overloadName);
-                        ENFORCE(it != owner.data(ctx)->members().end());
-                        ENFORCE(it->second.kind() == core::SymbolRef::Kind::Method);
-
-                        // Mangle the original definition in a way that the resolver will pick up on later, when it's
-                        // also mangling the overload sigs.
-                        ctx.state.mangleRenameForOverload(it->second.asMethodRef(), sym.data(ctx)->name);
-                    }
-
                     // Re-enter a new symbol.
                     sym = ctx.state.enterMethodSymbol(declLoc, owner, method.name);
                 } else {
