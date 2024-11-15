@@ -4016,6 +4016,9 @@ public:
         bool isOverloaded = job.isOverloaded;
         auto originalName = mdef.symbol.data(ctx)->name;
 
+        // Propagate the overloadedness to the original definition's symbol.
+        mdef.symbol.data(ctx)->flags.isOverloaded = isOverloaded;
+
         // Unique overload names must have an index that's > 0 associated with them, so we start `i` at `0` to ensure
         // that the first iteration of the loop it's at `1`.
         int i = 0;
