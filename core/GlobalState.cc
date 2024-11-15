@@ -1810,17 +1810,17 @@ NameRef GlobalState::nextMangledName(ClassOrModuleRef owner, NameRef origName) {
     return name;
 }
 
-void GlobalState::mangleRenameMethodInternal(MethodRef what, NameRef origName, UniqueNameKind kind) {
+void GlobalState::mangleRenameMethodInternal(MethodRef what, NameRef baseName, UniqueNameKind kind) {
+    auto origName = what.data(*this)->name;
     auto owner = what.data(*this)->owner;
     auto ownerData = owner.data(*this);
     auto &ownerMembers = ownerData->members();
     auto fnd = ownerMembers.find(origName);
     ENFORCE_NO_TIMER(fnd != ownerMembers.end());
     ENFORCE_NO_TIMER(fnd->second == what);
-    ENFORCE_NO_TIMER(what.data(*this)->name == origName);
     NameRef name;
     if (kind == UniqueNameKind::MangleRename) {
-        name = nextMangledName(owner, origName);
+        name = nextMangledName(owner, baseName);
     } else {
         // We don't loop in this case because we're not trying to find an actually unique name, we
         // just want to essentially move the existing, non-overloaded `what` out of the way to allow
@@ -1831,7 +1831,7 @@ void GlobalState::mangleRenameMethodInternal(MethodRef what, NameRef origName, U
         // We know that there is no method with this name, because otherwise resolver would not have
         // called mangleRenameForOverload.
         ENFORCE_NO_TIMER(kind == UniqueNameKind::MangleRenameOverload);
-        name = freshNameUnique(UniqueNameKind::MangleRenameOverload, origName, 1);
+        name = freshNameUnique(UniqueNameKind::MangleRenameOverload, baseName, 1);
     }
     // Both branches of the above `if` condition should ENFORCE this (either due to the loop post
     // condition, or by way of the resolveMultiSignatureJob call site guaranteeing this).
