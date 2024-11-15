@@ -4016,17 +4016,9 @@ public:
         bool isOverloaded = job.isOverloaded;
         auto originalName = mdef.symbol.data(ctx)->name;
 
-        bool existingIsAlreadyMangled =
-            originalName.kind() == core::NameKind::UNIQUE &&
-            originalName.dataUnique(ctx)->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload;
-        if (isOverloaded && !existingIsAlreadyMangled) {
-            ctx.state.mangleRenameForOverload(mdef.symbol, originalName);
-        }
-        if (existingIsAlreadyMangled) {
-            originalName = originalName.dataUnique(ctx)->original;
-        }
-
-        int i = -1;
+        // Unique overload names must have an index that's > 0 associated with them, so we start `i` at `0` to ensure
+        // that the first iteration of the loop it's at `1`.
+        int i = 0;
         std::optional<OverloadedMethodSigInformation> combinedInfo;
         std::vector<OverloadedMethodArgInformation> args;
         for (auto &sig : sigs) {
@@ -4039,7 +4031,7 @@ public:
 
                 overloadSym.data(ctx)->setMethodVisibility(mdef.symbol.data(ctx)->methodVisibility());
                 overloadSym.data(ctx)->intrinsicOffset = mdef.symbol.data(ctx)->intrinsicOffset;
-                if (i != sigs.size() - 1) {
+                if (i != sigs.size()) {
                     overloadSym.data(ctx)->flags.isOverloaded = true;
                 }
             } else {

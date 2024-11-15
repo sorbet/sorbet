@@ -1355,11 +1355,9 @@ MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRe
 
 MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, core::NameRef originalName, uint32_t num,
                                               const vector<bool> &argsToKeep) {
-    NameRef name = num == 0 ? originalName : freshNameUnique(UniqueNameKind::Overload, originalName, num);
-    core::Loc loc = num == 0 ? original.data(*this)->loc()
-                             : sigLoc; // use original Loc for main overload so that we get right jump-to-def for it.
+    NameRef name = freshNameUnique(UniqueNameKind::Overload, originalName, num);
     auto owner = original.data(*this)->owner;
-    auto res = enterMethodSymbol(loc, owner, name);
+    auto res = enterMethodSymbol(sigLoc, owner, name);
     bool newMethod = res != original;
     const auto &resArguments = res.data(*this)->arguments;
     ENFORCE_NO_TIMER(newMethod || !resArguments.empty(), "must be at least the block arg");
