@@ -4031,6 +4031,7 @@ public:
 
                 overloadSym.data(ctx)->setMethodVisibility(mdef.symbol.data(ctx)->methodVisibility());
                 overloadSym.data(ctx)->intrinsicOffset = mdef.symbol.data(ctx)->intrinsicOffset;
+                // We don't mark the last sig as overloaded to indicate that this is the last one in the chain.
                 if (i != sigs.size()) {
                     overloadSym.data(ctx)->flags.isOverloaded = true;
                 }

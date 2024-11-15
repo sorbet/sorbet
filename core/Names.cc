@@ -48,9 +48,6 @@ string NameRef::showRaw(const GlobalState &gs) const {
                 case UniqueNameKind::MangleRename:
                     kind = "M";
                     break;
-                case UniqueNameKind::MangleRenameOverload:
-                    kind = "V";
-                    break;
                 case UniqueNameKind::Singleton:
                     kind = "S";
                     break;
@@ -133,8 +130,7 @@ string NameRef::show(const GlobalState &gs) const {
                 return fmt::format("<Class:{}>", unique->original.show(gs));
             } else if (unique->uniqueNameKind == UniqueNameKind::Overload) {
                 return absl::StrCat(unique->original.show(gs), " (overload.", unique->num, ")");
-            } else if (unique->uniqueNameKind == UniqueNameKind::MangleRename ||
-                       unique->uniqueNameKind == UniqueNameKind::MangleRenameOverload) {
+            } else if (unique->uniqueNameKind == UniqueNameKind::MangleRename) {
                 return unique->original.show(gs);
             } else if (unique->uniqueNameKind == UniqueNameKind::TEnum) {
                 // The entire goal of UniqueNameKind::TEnum is to have Name::show print the name as if on the
@@ -192,7 +188,6 @@ bool NameRef::isClassName(const GlobalState &gs) const {
             switch (dataUnique(gs)->uniqueNameKind) {
                 case UniqueNameKind::Singleton:
                 case UniqueNameKind::MangleRename:
-                case UniqueNameKind::MangleRenameOverload:
                 case UniqueNameKind::TEnum:
                 case UniqueNameKind::Struct:
                     return dataUnique(gs)->original.isClassName(gs);
@@ -239,7 +234,6 @@ bool NameRef::isValidConstantName(const GlobalState &gs) const {
                 case UniqueNameKind::Desugar:
                 case UniqueNameKind::Namer:
                 case UniqueNameKind::MangleRename:
-                case UniqueNameKind::MangleRenameOverload:
                 case UniqueNameKind::Singleton:
                 case UniqueNameKind::Overload:
                 case UniqueNameKind::TypeVarName:
