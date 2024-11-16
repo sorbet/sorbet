@@ -180,6 +180,14 @@ void NameRef::sanityCheck(const GlobalState &gs) const {
     }
 }
 
+bool NameRef::isOverload(const GlobalState &gs) const {
+    if (kind() != NameKind::UNIQUE) {
+        return false;
+    }
+
+    return dataUnique(gs)->uniqueNameKind == UniqueNameKind::Overload;
+}
+
 bool NameRef::isClassName(const GlobalState &gs) const {
     switch (kind()) {
         case NameKind::UTF8:

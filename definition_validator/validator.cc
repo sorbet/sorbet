@@ -1096,7 +1096,14 @@ private:
                 continue;
             }
 
-            auto concreteMethodRef = sym.data(ctx)->findConcreteMethodTransitive(ctx, proto.data(ctx)->name);
+            // Overload signatures all have unique names, so to find the name of the concrete implementation we need to
+            // use the original name, not the unique one.
+            auto protoName = proto.data(ctx)->name;
+            if (protoName.isOverload(ctx)) {
+                protoName = protoName.dataUnique(ctx)->original;
+            }
+
+            auto concreteMethodRef = sym.data(ctx)->findConcreteMethodTransitive(ctx, protoName);
             if (concreteMethodRef.exists()) {
                 continue;
             }
