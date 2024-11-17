@@ -162,6 +162,7 @@ public:
     FileRef findFileByPath(std::string_view path) const;
 
     const packages::PackageDB &packageDB() const;
+    packages::PackageDB &packageDB();
     void setPackagerOptions(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                             const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                             const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,

@@ -229,6 +229,7 @@ public:
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer = nullopt;
+    optional<int> sccID = nullopt;
 
     // PackageInfoImpl is the only implementation of PackageInfo
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
@@ -1539,6 +1540,83 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     return info;
 }
 
+// Metadata for Tarjan's algorithm
+struct ComputeSCCsMetadata {
+    int nextIndex = 1;
+    int nextSCCId = 0;
+    // A given package's index in the DFS traversal; ie. when it was first visited
+    UnorderedMap<core::packages::MangledName, int> index;
+    // The lowest index reachable from a given package (in the same SCC) by following any number of tree edges
+    // and at most one back/cross edge
+    UnorderedMap<core::packages::MangledName, int> lowLink;
+    UnorderedMap<core::packages::MangledName, bool> onStack;
+    std::vector<core::packages::MangledName> stack;
+};
+
+// DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
+// detecting SCCs.
+void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::packages::MangledName pkgName) {
+    if (!gs.packageDB().getPackageInfo(pkgName).exists()) {
+        return;
+    }
+    auto &pkgInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfo(pkgName));
+    metadata.index[pkgName] = metadata.nextIndex;
+    metadata.lowLink[pkgName] = metadata.nextIndex;
+    metadata.nextIndex++;
+    metadata.stack.push_back(pkgName);
+    metadata.onStack[pkgName] = true;
+    for (auto &i : pkgInfo.importedPackageNames) {
+        if (i.type == ImportType::Test) {
+            continue;
+        }
+        if (metadata.index[i.name.mangledName] == 0) {
+            // This is a tree edge (ie. a forward edge that we haven't visited yet).
+            strongConnect(gs, metadata, i.name.mangledName);
+            if (metadata.index[i.name.mangledName] == 0) {
+                // this might mean the other package doesn't exist, but that should have been caught already
+                continue;
+            }
+            // Since we can follow any number of tree edges for lowLink, the lowLink of child is valid for this package
+            // too.
+            metadata.lowLink[pkgName] = std::min(metadata.lowLink[pkgName], metadata.lowLink[i.name.mangledName]);
+        } else if (metadata.onStack[i.name.mangledName]) {
+            // This is a back edge (edge to ancestor) or cross edge (edge to a different subtree). Since we can only
+            // follow at most one back/cross edge, the best update we can make to lowlink of the current package is the
+            // child's index.
+            metadata.lowLink[pkgName] = std::min(metadata.lowLink[pkgName], metadata.index[i.name.mangledName]);
+        }
+        // If the child package is already visited and not on the stack, it's in a different SCC, so no update to the
+        // lowlink.
+    }
+
+    if (metadata.index[pkgName] == metadata.lowLink[pkgName]) {
+        // This is the root of an SCC. This means that all packages on the stack from this package to the top of the top
+        // of the stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them the same
+        // SCC ID.
+        core::packages::MangledName poppedPkgName;
+        do {
+            poppedPkgName = metadata.stack.back();
+            metadata.stack.pop_back();
+            metadata.onStack[poppedPkgName] = false;
+            PackageInfoImpl &poppedPkgInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfo(poppedPkgName));
+            poppedPkgInfo.sccID = metadata.nextSCCId;
+        } while (poppedPkgName != pkgName);
+        metadata.nextSCCId++;
+    }
+}
+
+// Tarjan's algorithm for finding strongly connected components
+void computeSCCs(core::GlobalState &gs) {
+    Timer timeit(gs.tracer(), "computeSCCs");
+    ComputeSCCsMetadata metadata;
+    auto allPackages = gs.packageDB().packages();
+    for (auto package : allPackages) {
+        if (metadata.index[package] == 0) {
+            strongConnect(gs, metadata, package);
+        }
+    }
+}
+
 void validateLayering(const core::Context &ctx, const Import &i) {
     if (i.type == ImportType::Test) {
         return;
@@ -1642,8 +1720,7 @@ void validatePackage(core::Context ctx) {
     for (auto &i : pkgInfo.importedPackageNames) {
         auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
 
-        // this might mean the other package doesn't exist, but that
-        // should have been caught already
+        // this might mean the other package doesn't exist, but that should have been caught already
         if (!otherPkg.exists()) {
             continue;
         }
@@ -1790,6 +1867,10 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
 
         for (size_t i = 0; i < files.size(); ++i) {
             taskq->push(i, 1);
+        }
+
+        if (gs.packageDB().enforceLayering()) {
+            computeSCCs(gs);
         }
 
         workers.multiplexJob("rewritePackagesAndFiles", [&gs, &files, &barrier, taskq]() {

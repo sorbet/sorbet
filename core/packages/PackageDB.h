@@ -37,6 +37,7 @@ public:
 
     const PackageInfo &getPackageForFile(const core::GlobalState &gs, core::FileRef file) const;
     const PackageInfo &getPackageInfo(MangledName mangledName) const;
+    PackageInfo &getPackageInfo(MangledName mangledName);
 
     // Lookup `PackageInfo` from the string representation of the un-mangled package name.
     const PackageInfo &getPackageInfo(const core::GlobalState &gs, std::string_view str) const;
@@ -70,6 +71,7 @@ public:
     // `app`.
     absl::Span<const core::NameRef> layers() const;
     const int layerIndex(core::NameRef layer) const;
+    // TODO(neil): this is more than just layering, also checks for strict dependencies. Maybe rename?
     const bool enforceLayering() const;
 
     const std::string_view errorHint() const;

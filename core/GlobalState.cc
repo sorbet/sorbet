@@ -2356,6 +2356,10 @@ const packages::PackageDB &GlobalState::packageDB() const {
     return packageDB_;
 }
 
+packages::PackageDB &GlobalState::packageDB() {
+    return packageDB_;
+}
+
 void GlobalState::setPackagerOptions(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                                      const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                      const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
