@@ -102,7 +102,12 @@ string NameRef::toString(const GlobalState &gs) const {
             if (unique->uniqueNameKind == UniqueNameKind::Singleton) {
                 return fmt::format("<Class:{}>", unique->original.show(gs));
             } else if (unique->uniqueNameKind == UniqueNameKind::Overload) {
-                return absl::StrCat(unique->original.show(gs), " (overload.", unique->num, ")");
+                // We consider the first overload to be the second signature.
+                if (unique->num > 1) {
+                    return absl::StrCat(unique->original.show(gs), " (overload.", unique->num - 1, ")");
+                } else {
+                    return unique->original.show(gs);
+                }
             } else if (unique->uniqueNameKind == UniqueNameKind::DesugarCsend) {
                 return fmt::format("<&{}>", unique->original.show(gs));
             }
@@ -129,7 +134,12 @@ string NameRef::show(const GlobalState &gs) const {
             if (unique->uniqueNameKind == UniqueNameKind::Singleton) {
                 return fmt::format("<Class:{}>", unique->original.show(gs));
             } else if (unique->uniqueNameKind == UniqueNameKind::Overload) {
-                return absl::StrCat(unique->original.show(gs), " (overload.", unique->num, ")");
+                // We consider the first overload to be the second signature.
+                if (unique->num > 1) {
+                    return absl::StrCat(unique->original.show(gs), " (overload.", unique->num - 1, ")");
+                } else {
+                    return unique->original.show(gs);
+                }
             } else if (unique->uniqueNameKind == UniqueNameKind::MangleRename) {
                 return unique->original.show(gs);
             } else if (unique->uniqueNameKind == UniqueNameKind::TEnum) {
