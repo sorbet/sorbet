@@ -972,6 +972,12 @@ vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const c
         // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
         auto similarMethod = similarMethods[0];
 
+        // We'll find all overloaded names as well as the original def's name, so if this is the original def of an
+        // overload chain, skip it.
+        if (similarMethod.method.data(gs)->flags.isOverloaded && !methodName.isOverload(gs)) {
+            continue;
+        }
+
         if (similarMethod.method.data(gs)->flags.isPrivate && !isPrivateOk) {
             continue;
         }
