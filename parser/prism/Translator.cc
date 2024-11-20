@@ -1208,7 +1208,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
         case PM_IMPLICIT_NODE:
         case PM_MISSING_NODE:
-            reportError(location, "unexpected token");
+            // For now, we only report errors when we hit a missing node because we don't want to always report dynamic
+            // constant assignment errors
+            // TODO: We will improve this in the future when we handle more errored cases
+            for (auto &error : parser.parseErrors) {
+                reportError(translateLoc(error.location), error.message);
+            }
             return make_unique<parser::Const>(location, nullptr, core::Names::Constants::ErrorNode());
     }
 }
