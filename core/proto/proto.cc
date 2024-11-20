@@ -370,6 +370,8 @@ com::stripe::rubytyper::File::StrictLevel strictToProto(core::StrictLevel strict
             return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_True;
         case core::StrictLevel::Strict:
             return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Strict;
+        case core::StrictLevel::Stringent:
+            return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Stringent;
         case core::StrictLevel::Strong:
             return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Strong;
         case core::StrictLevel::Max:

@@ -103,8 +103,10 @@ core::StrictLevel levelMinusOne(core::StrictLevel level) {
             return core::StrictLevel::False;
         case core::StrictLevel::Strict:
             return core::StrictLevel::True;
-        case core::StrictLevel::Strong:
+        case core::StrictLevel::Stringent:
             return core::StrictLevel::Strict;
+        case core::StrictLevel::Strong:
+            return core::StrictLevel::Stringent;
         case core::StrictLevel::Max:
             return core::StrictLevel::Strong;
         default:
@@ -124,11 +126,12 @@ core::StrictLevel levelToRecommendation(core::StrictLevel level) {
         case core::StrictLevel::False:
         case core::StrictLevel::True:
         case core::StrictLevel::Strict:
+        case core::StrictLevel::Stringent:
             return level;
 
         case core::StrictLevel::Strong:
         case core::StrictLevel::Max:
-            return core::StrictLevel::Strict;
+            return core::StrictLevel::Stringent;
 
         case core::StrictLevel::Internal:
         case core::StrictLevel::None:
@@ -148,6 +151,8 @@ string levelToSigil(core::StrictLevel level) {
             return "true";
         case core::StrictLevel::Strict:
             return "strict";
+        case core::StrictLevel::Stringent:
+            return "stringent";
         case core::StrictLevel::Strong:
             return "strong";
         case core::StrictLevel::Stdlib:

@@ -387,6 +387,9 @@ void incrementStrictLevelCounter(core::StrictLevel level) {
         case core::StrictLevel::Strict:
             prodCounterInc("types.input.files.sigil.strict");
             break;
+        case core::StrictLevel::Stringent:
+            prodCounterInc("types.input.files.sigil.stringent");
+            break;
         case core::StrictLevel::Strong:
             prodCounterInc("types.input.files.sigil.strong");
             break;
