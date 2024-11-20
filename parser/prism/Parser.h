@@ -57,6 +57,8 @@ class Parser final {
     std::shared_ptr<ParserStorage> storage;
 
 public:
+    std::vector<ParseError> parseErrors;
+
     Parser(std::string_view source_code) : storage(std::make_shared<ParserStorage>(source_code)) {}
 
     Parser(const Parser &) = default;
@@ -67,7 +69,7 @@ public:
     std::string_view resolveConstant(pm_constant_id_t constant_id);
     std::string_view extractString(pm_string_t *string);
 
-    std::vector<ParseError> errors() const;
+    void collectErrors();
 
 private:
     pm_parser_t *get_raw_parser_pointer();

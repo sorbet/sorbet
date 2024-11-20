@@ -15,8 +15,6 @@ namespace sorbet::parser::Prism {
 class Translator final {
     Parser parser;
 
-    std::vector<ParseError> parseErrors;
-
     // The functions in Pipeline.cc pass around a reference to the global state as a parameter,
     // but don't have explicit ownership over it. We take a temporary reference to it, but we can't
     // escape that scope, which is why Translator objects can't be copied, or even moved.
@@ -34,17 +32,16 @@ class Translator final {
     Translator &operator=(Translator &&) = delete;      // Move assignment
     Translator &operator=(const Translator &) = delete; // Copy assignment
 public:
-    Translator(Parser parser, std::vector<ParseError> parseErrors, core::GlobalState &gs, core::FileRef file)
-        : parser(std::move(parser)), parseErrors(parseErrors), gs(gs), file(file) {}
+    Translator(Parser parser, core::GlobalState &gs, core::FileRef file)
+        : parser(std::move(parser)), gs(gs), file(file) {}
 
     // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
     std::unique_ptr<parser::Node> translate(pm_node_t *node);
     std::unique_ptr<parser::Node> translate(const Node &node);
 
 private:
-    Translator(Parser parser, std::vector<ParseError> parseErrors, core::GlobalState &gs, core::FileRef file,
-               bool isInMethodDef)
-        : parser(parser), parseErrors(parseErrors), gs(gs), file(file), isInMethodDef(isInMethodDef) {}
+    Translator(Parser parser, core::GlobalState &gs, core::FileRef file, bool isInMethodDef)
+        : parser(parser), gs(gs), file(file), isInMethodDef(isInMethodDef) {}
     void reportError(core::LocOffsets loc, const std::string &message);
 
     core::LocOffsets translateLoc(pm_location_t loc);

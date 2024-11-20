@@ -28,22 +28,19 @@ std::string_view Parser::extractString(pm_string_t *string) {
     return std::string_view(reinterpret_cast<const char *>(pm_string_source(string)), pm_string_length(string));
 }
 
-std::vector<ParseError> Parser::errors() const {
-    std::vector<ParseError> errors;
+void Parser::collectErrors() {
+    parseErrors.reserve(storage->parser.error_list.size);
 
-    pm_list_node_t *node = storage->parser.error_list.head;
+    auto error_list = storage->parser.error_list;
 
-    while (node != nullptr) {
-        pm_diagnostic_t *error = reinterpret_cast<pm_diagnostic_t *>(node);
-        pm_error_level_t level = static_cast<pm_error_level_t>(error->level);
+    for (auto *node = error_list.head; node != nullptr; node = node->next) {
+        auto *error = reinterpret_cast<pm_diagnostic_t *>(node);
+        auto level = static_cast<pm_error_level_t>(error->level);
 
         ParseError parseError(pm_diagnostic_id_human(error->diag_id),
                               std::string(reinterpret_cast<const char *>(error->message)), error->location, level);
 
-        errors.push_back(parseError);
-        node = node->next;
+        parseErrors.push_back(parseError);
     }
-
-    return errors;
 }
 }; // namespace sorbet::parser::Prism
