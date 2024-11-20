@@ -170,7 +170,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         }
 
         ENFORCE(oldFile->getFileHash() != nullptr);
-        if (!intersects(result.changedSymbolNameHashes, oldFile->getFileHash()->usages.nameHashes) && !(changedPackages.contains(gs.packageDB().getPackageNameForFile(ref)) && isNoopUpdateForRetypecheck) {
+        if (!intersects(result.changedSymbolNameHashes, oldFile->getFileHash()->usages.nameHashes) && !(changedPackages.contains(gs.packageDB().getPackageNameForFile(ref)) && isNoopUpdateForRetypecheck)) {
             continue;
         }
 
