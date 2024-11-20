@@ -805,7 +805,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     if (enablePackager) {
         absl::c_stable_partition(trees, [&](const auto &pf) { return pf.file.isPackage(*gs); });
-        trees = packager::Packager::runIncremental(*gs, move(trees));
+        trees = packager::Packager::runIncremental(*gs, move(trees), *workers);
         for (auto &tree : trees) {
             handler.addObserved(*gs, "package-tree", [&]() {
                 return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
