@@ -81,10 +81,6 @@ StrictLevel File::fileStrictSigil(string_view source) {
     return ParseSigil<StrictLevel>::parse(source);
 }
 
-CompiledLevel File::fileCompiledSigil(string_view source) {
-    return ParseSigil<CompiledLevel>::parse(source);
-}
-
 PackagedLevel File::filePackagedSigil(string_view source) {
     return ParseSigil<PackagedLevel>::parse(source);
 }
@@ -111,13 +107,13 @@ bool File::isPackagePath(string_view path) {
 }
 
 File::Flags::Flags(string_view path)
-    : cached(false), hasParseErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)),
+    : cached(false), hasIndexErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)),
       isPackage(isPackagePath(path)), isOpenInClient(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(path_), packagedLevel{File::filePackagedSigil(source_)},
       path_(move(path_)), source_(move(source_)), originalSigil(fileStrictSigil(this->source_)),
-      strictLevel(originalSigil), compiledLevel(fileCompiledSigil(this->source_)) {}
+      strictLevel(originalSigil) {}
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string sourceCopy = source_;
@@ -207,7 +203,7 @@ constexpr string_view OVERLOADS_TEST_RB = "overloads_test.rb"sv;
 }
 
 bool File::permitOverloadDefinitions() const {
-    return this->isRBI() || FileOps::getFileName(this->path()) == OVERLOADS_TEST_RB;
+    return this->isRBI() || FileOps::getFileName(this->path()) == OVERLOADS_TEST_RB || this->isStdlib();
 }
 
 bool File::isPackage() const {
@@ -280,12 +276,12 @@ bool File::isPackageRBI() const {
     return flags.isPackageRBI;
 }
 
-bool File::hasParseErrors() const {
-    return flags.hasParseErrors;
+bool File::hasIndexErrors() const {
+    return flags.hasIndexErrors;
 }
 
-void File::setHasParseErrors(bool value) {
-    flags.hasParseErrors = value;
+void File::setHasIndexErrors(bool value) {
+    flags.hasIndexErrors = value;
 }
 
 bool File::cached() const {

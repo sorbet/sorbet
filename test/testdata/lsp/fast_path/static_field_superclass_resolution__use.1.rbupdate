@@ -1,7 +1,7 @@
 # typed: true
 # assert-slow-path: true
 
-class ChildContainer < FieldContainer # error-with-dupes: Unable to resolve constant `FieldContainer`
+class ChildContainer < FieldContainer # error: Unable to resolve constant `FieldContainer`
   def helper_method
     x = 6 + MEMBER_FIELD # error: Unable to resolve constant `MEMBER_FIELD`
     T.reveal_type(x) # error: Revealed type: `Integer`

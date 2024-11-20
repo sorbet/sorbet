@@ -21,7 +21,7 @@ class B
   end
 end
 
-# TODO: we'll need more tests when we implement subclasses and fix self in static scope
+# TODO, we'll need more tests when we implement subclasses and fix self in static scope
 B.new.write(1)
 
 puts B.read

@@ -153,13 +153,22 @@ bool Tracing::storeTraces(const CounterState &counters, const string &fileName) 
         writer.String("tid");
         writer.Int(timing.threadId);
 
-        if (timing.args != nullptr && !timing.args->empty()) {
+        if ((timing.args != nullptr && !timing.args->empty()) || (timing.tags != nullptr && !timing.tags->empty())) {
             writer.String("args");
 
             writer.StartObject();
-            for (const auto &[key, value] : *timing.args) {
-                writer.String(key);
-                writer.String(value);
+            // Puts all tags and args in the same namespace, and does not check for overlaps.
+            if (timing.args != nullptr && !timing.args->empty()) {
+                for (const auto &[key, value] : *timing.args) {
+                    writer.String(key);
+                    writer.String(value);
+                }
+            }
+            if (timing.tags != nullptr && !timing.tags->empty()) {
+                for (const auto &[key, value] : *timing.tags) {
+                    writer.String(key);
+                    writer.String(value);
+                }
             }
             writer.EndObject();
         }

@@ -105,7 +105,7 @@ FoundDefinitionRef FoundStaticFieldHash::owner() const {
 }
 
 void FoundStaticFieldHash::sanityCheck() const {
-    ENFORCE(nameHash.isDefined());
+    ENFORCE_NO_TIMER(nameHash.isDefined());
 }
 
 string FoundStaticFieldHash::toString() const {
@@ -122,7 +122,7 @@ FoundDefinitionRef FoundTypeMemberHash::owner() const {
 }
 
 void FoundTypeMemberHash::sanityCheck() const {
-    ENFORCE(nameHash.isDefined());
+    ENFORCE_NO_TIMER(nameHash.isDefined());
 }
 
 string FoundTypeMemberHash::toString() const {
@@ -140,7 +140,7 @@ FoundDefinitionRef FoundMethodHash::owner() const {
 }
 
 void FoundMethodHash::sanityCheck() const {
-    ENFORCE(nameHash.isDefined());
+    ENFORCE_NO_TIMER(nameHash.isDefined());
 }
 
 string FoundMethodHash::toString() const {
@@ -158,7 +158,7 @@ FoundDefinitionRef FoundFieldHash::owner() const {
 }
 
 void FoundFieldHash::sanityCheck() const {
-    ENFORCE(nameHash.isDefined());
+    ENFORCE_NO_TIMER(nameHash.isDefined());
 }
 
 string FoundFieldHash::toString() const {

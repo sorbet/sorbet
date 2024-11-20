@@ -408,7 +408,7 @@ module Opus::Types::Test
         ex = assert_raises do
           T::Configuration.default_checked_level = :foo
         end
-        assert_includes(ex.message, "Invalid `checked` level 'foo'. Use one of: [:always, :tests, :never, :compiled].")
+        assert_includes(ex.message, "Invalid `checked` level 'foo'. Use one of: [:always, :tests, :never].")
       end
 
       it 'fails when default_checked_level has already been read' do

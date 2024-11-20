@@ -1607,6 +1607,7 @@ module Opus::Types::Test
         it "returns true for a simple superclass" do
           assert_equal(true, subtype?(T.class_of(Base), Module))
           assert_equal(true, subtype?(T.class_of(Sub), Module))
+          assert_equal(true, subtype?(T.class_of(Mixin1), Module))
 
           custom_module = Class.new(Module)
           mod = custom_module.new
@@ -1615,8 +1616,20 @@ module Opus::Types::Test
           assert_equal(true, subtype?(T.class_of(mod), custom_module))
         end
 
+        it "returns false for module singleton classes against Class" do
+          assert_equal(true, subtype?(T.class_of(Mixin1), Module))
+        end
+
         it "returns false for a simple unrelated class" do
           assert_equal(false, subtype?(T.class_of(Base), Mixin1))
+        end
+
+        it "returns true for a singleton of a class against T::Class[...]" do
+          assert_equal(true, subtype?(T.class_of(Base), T::Class[T.anything]))
+        end
+
+        it "returns false for a singleton of a module against T::Class[...]" do
+          assert_equal(false, subtype?(T.class_of(Mixin1), T::Class[T.anything]))
         end
       end
 

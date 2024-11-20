@@ -234,7 +234,7 @@ module T::Private::Methods::SignatureValidation
     return if signature.override_allow_incompatible
     return if super_signature.mode == Modes.untyped
     return unless [signature, super_signature].all? do |sig|
-      sig.check_level == :always || sig.check_level == :compiled || (sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
+      sig.check_level == :always || (sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
     end
     mode_noun = super_signature.mode == Modes.abstract ? 'implementation' : 'override'
 

@@ -117,6 +117,3 @@ require_relative 'types/struct'
 require_relative 'types/non_forcing_constants'
 
 require_relative 'types/compatibility_patches'
-
-# Sorbet Compiler support module
-require_relative 'types/private/compiler'

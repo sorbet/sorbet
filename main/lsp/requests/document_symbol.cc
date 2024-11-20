@@ -193,12 +193,6 @@ bool DocumentSymbolTask::isDelayable() const {
 
 unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentSymbol);
-    if (!config.opts.lspDocumentSymbolEnabled) {
-        response->error =
-            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                       "The `Document Symbol` LSP feature is experimental and disabled by default.");
-        return response;
-    }
 
     const core::GlobalState &gs = typechecker.state();
     vector<unique_ptr<DocumentSymbol>> result;

@@ -4,4 +4,4 @@ SomeConstant = DoesNotExist
 #              ^^^^^^^^^^^^ error: Unable to resolve constant `DoesNotExist`
 
 p(SomeConstant)
-#  ^ hover: This constant is not defined
+#  ^ hover: SomeConstant = (unable to resolve constant)

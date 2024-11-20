@@ -154,6 +154,22 @@ class Enumerator < Object
   sig { params(initial: T.untyped, block: T.proc.params(arg: T.untyped).void).returns(T::Enumerator[T.untyped]) }
   def self.produce(initial = nil, &block); end
 
+  # Returns an enumerator object generated from this enumerator and a given 
+  # enumerable.
+  #
+  # ### Examples
+  #
+  # ```ruby
+  # e = (1..3).each + [4, 5]
+  # e.to_a #=> [1, 2, 3, 4, 5]
+  # ```
+  sig do
+    type_parameters(:T).params(
+      enum: T::Enumerable[T.type_parameter(:T)]
+    ).returns(T::Enumerator::Chain[T.any(Elem, T.type_parameter(:T))])
+  end
+  def +(enum); end
+
   # Iterates over the block according to how this
   # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) was
   # constructed. If no block and no arguments are given, returns self.
@@ -789,6 +805,21 @@ class Enumerator::Lazy < Enumerator
   #
   # Also aliased as:
   # [`_enumerable_grep`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_grep)
+  sig do
+    type_parameters(:Instance)
+      .params(
+          arg0: T::Class[T.type_parameter(:Instance)],
+      )
+      .returns(T::Enumerator::Lazy[T.all(Elem, T.type_parameter(:Instance))])
+  end
+  sig do
+    type_parameters(:Instance, :U)
+      .params(
+          arg0: T::Class[T.type_parameter(:Instance)],
+          blk: T.proc.params(arg0: T.type_parameter(:Instance)).returns(T.type_parameter(:U)),
+      )
+      .returns(T::Enumerator::Lazy[T.type_parameter(:U)])
+  end
   sig do
     params(
       arg0: BasicObject

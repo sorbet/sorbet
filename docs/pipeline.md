@@ -49,7 +49,7 @@ where what the phases of Sorbet actually do are documented.
                                           ▼
              ┌─────────────────────────────────────────────────────────┐
              │  ┌─────────────┐                                        │
-             │  │ GlobalState │        resolve                         │
+             │  │ GlobalState │    nameAndResolve                      │
              │  └─────────────┘                                        │
              ├─────────────────────────────────────────────────────────┤
              │                   ┌─────────────────┐                   │
@@ -124,7 +124,7 @@ Some notes:
   about it amongst ourselves) into three big chunks:
 
   1.  index
-  2.  resolve
+  2.  nameAndResolve
   3.  typecheck
 
 - The "index" chunk works at the file level and involves largely syntactic
@@ -163,12 +163,13 @@ Some notes:
   For more information on what's parallelized, see [Namer & Resolver
   Pipeline](namer-resolver-pipeline.md).
 
-  The sequential parts of resolve were originally designed to be whole-program,
-  which makes it tricky to make incremental. Our current trick is to separate
-  changes into "local changes" (fast path) and "non-local changes" (slow path).
-  It's easy to run resolve in a mode where it assumes it's on the fast path but
-  checks to see if it needs to take the slow path. The details are a bit hairy,
-  but you can see them if you look for `incrementalResolve` in the code.
+  The sequential parts of nameAndResolve were originally designed to be
+  whole-program, which makes it tricky to make incremental. Our current trick is
+  to separate changes into "local changes" (fast path) and "non-local changes"
+  (slow path). It's easy to run nameAndResolve in a mode where it assumes it's
+  on the fast path but checks to see if it needs to take the slow path. The
+  details are a bit hairy, but you can see them if you look for
+  `incrementalResolve` in the code.
 
 - The "typecheck" chunk operates on an immutable GlobalState. Because we don't
   do global type inference, type checking one method can't affect the result of

@@ -47,10 +47,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>::<C T>.reveal_type(@x)
       end
 
-      begin
-        "does thing"
-        <runtime method definition of <it 'does thing'>>
-      end
+      "does thing"
+
+      <runtime method definition of <it 'does thing'>>
     end
   end
 end

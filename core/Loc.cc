@@ -36,7 +36,7 @@ Loc Loc::join(Loc other) const {
     if (!other.exists()) {
         return *this;
     }
-    ENFORCE(this->file() == other.file(), "joining locations from different files");
+    ENFORCE_NO_TIMER(this->file() == other.file(), "joining locations from different files");
     return Loc(this->file(), min(this->beginPos(), other.beginPos()), max(this->endPos(), other.endPos()));
 }
 
@@ -46,7 +46,7 @@ Loc::Detail Loc::offset2Pos(const File &file, uint32_t off) {
     if (off > file.source().size()) {
         fatalLogger->error(R"(msg="Bad offset2Pos off" path="{}" off="{}"")", absl::CEscape(file.path()), off);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
-        ENFORCE(false);
+        ENFORCE_NO_TIMER(false);
     }
     auto it = absl::c_lower_bound(file.lineBreaks(), off);
     if (it == file.lineBreaks().begin()) {
@@ -128,7 +128,7 @@ void addLocLine(stringstream &buf, int line, const File &file, int tabs, int pos
     if (file.lineBreaks().size() <= line + 1) {
         fatalLogger->error(R"(msg="Bad addLocLine line" path="{}" line="{}"")", absl::CEscape(file.path()), line);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
-        ENFORCE(false);
+        ENFORCE_NO_TIMER(false);
     }
     auto endPos = file.lineBreaks()[line + 1];
     auto numToWrite = endPos - file.lineBreaks()[line] - 1;
@@ -140,13 +140,13 @@ void addLocLine(stringstream &buf, int line, const File &file, int tabs, int pos
         fatalLogger->error(R"(msg="Bad addLocLine offset" path="{}" line="{}" offset="{}")", absl::CEscape(file.path()),
                            line, offset);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
-        ENFORCE(false);
+        ENFORCE_NO_TIMER(false);
     }
     if (offset + numToWrite > file.source().size()) {
         fatalLogger->error(R"(msg="Bad addLocLine write size" path="{}" line="{}" offset="{}" numToWrite="{}")",
                            absl::CEscape(file.path()), line, offset, numToWrite);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
-        ENFORCE(false);
+        ENFORCE_NO_TIMER(false);
     }
     buf.write(file.source().data() + offset, numToWrite);
 }
@@ -371,7 +371,7 @@ Loc Loc::adjustLen(const GlobalState &gs, int32_t beginAdjust, int32_t len) cons
 pair<Loc, uint32_t> Loc::findStartOfLine(const GlobalState &gs) const {
     auto startDetail = this->position(gs).first;
     auto maybeLineStart = Loc::pos2Offset(this->file().data(gs), {startDetail.line, 1});
-    ENFORCE(maybeLineStart.has_value());
+    ENFORCE_NO_TIMER(maybeLineStart.has_value());
     auto lineStart = maybeLineStart.value();
     std::string_view lineView = this->file().data(gs).source().substr(lineStart);
 

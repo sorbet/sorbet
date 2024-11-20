@@ -23,7 +23,7 @@ protected:
     absl::Mutex mtx;
     // Implementation-specific write implementation. Will be called from multiple threads, but invocations will never
     // interleave as method is protected by a mutex.
-    virtual void rawWrite(std::unique_ptr<LSPMessage> msg) EXCLUSIVE_LOCKS_REQUIRED(mtx) = 0;
+    virtual void rawWrite(std::unique_ptr<LSPMessage> msg) ABSL_EXCLUSIVE_LOCKS_REQUIRED(mtx) = 0;
 
 public:
     LSPOutput() = default;
@@ -44,7 +44,7 @@ class LSPStdout final : public LSPOutput {
     std::shared_ptr<spdlog::logger> logger;
 
 protected:
-    void rawWrite(std::unique_ptr<LSPMessage> msg) override EXCLUSIVE_LOCKS_REQUIRED(mtx);
+    void rawWrite(std::unique_ptr<LSPMessage> msg) override ABSL_EXCLUSIVE_LOCKS_REQUIRED(mtx);
 
 public:
     LSPStdout(std::shared_ptr<spdlog::logger> &logger);
@@ -55,10 +55,10 @@ public:
  * Used in LSPWrapper and in tests.
  */
 class LSPOutputToVector final : public LSPOutput {
-    std::deque<std::unique_ptr<LSPMessage>> output GUARDED_BY(mtx);
+    std::deque<std::unique_ptr<LSPMessage>> output ABSL_GUARDED_BY(mtx);
 
 protected:
-    void rawWrite(std::unique_ptr<LSPMessage> msg) override EXCLUSIVE_LOCKS_REQUIRED(mtx);
+    void rawWrite(std::unique_ptr<LSPMessage> msg) override ABSL_EXCLUSIVE_LOCKS_REQUIRED(mtx);
 
 public:
     LSPOutputToVector() = default;

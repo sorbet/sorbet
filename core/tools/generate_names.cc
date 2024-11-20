@@ -28,6 +28,9 @@ NameDef names[] = {
     {"initialize"},
     {"andAnd", "&&"},
     {"orOr", "||"},
+    {"orAsgn", "||="},
+    {"andAsgn", "&&="},
+    {"opAsgn", "op="},
     {"toS", "to_s"},
     {"toA", "to_a"},
     {"toAry", "to_ary"},
@@ -51,12 +54,12 @@ NameDef names[] = {
     {"tripleEq", "==="},
     {"orOp", "|"},
     {"backtick", "`"},
-    {"slice"},
     {"defined_p", "defined?"},
     {"undef"},
     {"each"},
     {"subclasses"},
     {"transpose"},
+    {"caseWhen"},
 
     // Used in parser for error recovery
     {"methodNameMissing", "<method-name-missing>"},
@@ -208,6 +211,7 @@ NameDef names[] = {
     {"updatedProp", "updated_prop"},
     {"merchantProp", "merchant_prop"},
     {"merchantTokenProp", "merchant_token_prop"},
+    {"name"},
     {"encryptedProp", "encrypted_prop"},
     {"array"},
     {"defDelegator", "def_delegator"},
@@ -296,6 +300,7 @@ NameDef names[] = {
     {"Concern", "Concern", true},
 
     {"instance"},
+    {"singletonClassInstance", "singleton class instance"},
     {"normal"},
     {"genericPropGetter"},
 
@@ -356,6 +361,8 @@ NameDef names[] = {
     {"destructureArg", "<destructure>"},
 
     {"lambda"},
+    {"lambdaTLet", "<lambda T.let>"},
+    {"returnType", "return_type"},
     {"nil_p", "nil?"},
     {"blank_p", "blank?"},
     {"present_p", "present?"},
@@ -455,12 +462,14 @@ NameDef names[] = {
     {"visibleTo", "visible_to"},
     {"tests"},
     {"exportAll", "export_all!"},
+    {"layer"},
+    {"strictDependencies", "strict_dependencies"},
+    {"false_", "false"},
+    {"layered"},
+    {"layeredDag", "layered_dag"},
+    {"dag"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
-
-    // Compiler
-    {"runningCompiled_p", "running_compiled?"},
-    {"compilerVersion", "compiler_version"},
 
     // GlobalState initEmpty()
     {"Top", "T.anything", true},
@@ -565,7 +574,6 @@ NameDef names[] = {
     {"VERSION", "VERSION", true},
     {"Thread", "Thread", true},
     {"Configuration", "Configuration", true},
-    {"Compiler", "Compiler", true},
     {"Test", "Test", true},
     {"Autogen", "Autogen", true},
     {"Tokens", "Tokens", true},
@@ -578,9 +586,6 @@ NameDef names[] = {
     {"Int", "Int", true},
     {"Timestamp", "Timestamp", true},
     {"Bool", "Bool", true},
-
-    // used by the compiler
-    {"returnValue", "<returnValue>"},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

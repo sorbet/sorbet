@@ -332,6 +332,27 @@ sig {params(_a: String, _b: Integer).void} # ok
 def foo(_a, _b); end
 ```
 
+## 3012
+
+There was an anonymous rest argument defined in the block parameter list.
+
+```ruby
+[1,2,3].each do |*|
+  T.unsafe(self).p(*)
+end
+```
+
+The anonymous rest argument may only refer to method parameters, and uses of it
+will generate runtime syntax errors if it's used in the context of a block that
+defines it. This can be resolved by naming the rest argument parameter in the
+block:
+
+```ruby
+[1,2,3].each do |*args|
+  T.unsafe(self).p(*args)
+end
+```
+
 ## 3501
 
 Sorbet has special support for understanding Ruby's `attr_reader`,
@@ -542,6 +563,37 @@ This error code is from an old Sorbet version. It's equivalent to error 4023:
 
 The `has_attached_class!` annotation cannot be given a contravariant `:in`
 annotation because `T.attached_class` is only allowed in output positions.
+
+## 3515
+
+This error indicates that a `prop` or `const` has already been defined with the
+name provided. For example:
+
+```ruby
+class Info < T::Struct
+  const :name, String
+  const :age, Integer
+  prop :age, Float
+end
+```
+
+In this case, the `:age` prop has been defined twice on lines 3 and 4, and this
+error will be raised on the occurrence on line 4.
+
+While these errors exist, the first occurrence of the conflicting name will be
+used when computing a typed initializer for static typechecking purposes. For
+the example above, the initializer would look as though it was defined with the
+following signature:
+
+```ruby
+class Info < T::struct
+  ...
+  sig {params(name: String, age: Integer).void}
+  def initialize(name:, age:)
+    ...
+  end
+end
+```
 
 ## 3702
 
@@ -865,6 +917,59 @@ add.
 ## 3724
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) and
+> [go/strict-dependencies](http://go/strict-dependencies) for more.
+
+All packages have a `strict_dependencies` level, which controls what
+restrictions are applied on imported packages.
+
+```ruby
+class MyPackage < PackageSpec
+  strict_dependencies 'false'
+end
+```
+
+The 4 possible values are:
+
+- `'false'`: No restrictions are placed on dependencies.
+- `'layered'`
+- `'layered_dag'`
+- `'dag'`
+
+## 3725
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) and
+> [go/layers](http://go/layers) for more.
+
+All packages have a `layer`, which is used when checking for layering
+violations.
+
+<!-- TODO(neil): explain this further once we implement these checks -->
+
+```ruby
+class MyPackage < PackageSpec
+  strict_dependencies 'false'
+  layer 'library'
+end
+```
+
+You can choose the valid layers using the `--packager-layers` command line flag.
+For example, the following specifies that there are three valid layers: `util`,
+`lib` and `app`, ordered lowest to highest.
+
+<!-- TODO(neil): explain what lowest to highest means once we implement these checks -->
+
+```bash
+srb tc --packager-layers util,lib,app
+```
+
+If the flag is passed with no argument, then the default valid layers are
+`library` and `application`.
+
+## 3726
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
 > at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 This error indicates a package visibility problem due to missing `import` or
@@ -883,6 +988,9 @@ Sorbet parses the syntax of `include` and `extend` declarations, even in
 that all constants in a Sorbet codebase must resolve, even at `# typed: false`.
 Parsing `include` blocks is required for this, so incorrect usages of `include`
 are reported when encountered.
+
+To fix, ensure that the `include` or `extend` line is given at least one
+argument.
 
 ## 4002
 
@@ -955,6 +1063,8 @@ Sorbet parses the syntax of `include` and `extend` declarations, even in
 that all constants in a Sorbet codebase must resolve, even at `# typed: false`.
 Parsing `include` blocks is required for this, so incorrect usages of `include`
 are reported when encountered.
+
+To fix, ensure that the `include` or `extend` line is not given a block.
 
 ## 4006
 
@@ -1133,13 +1243,15 @@ Instead, they must be used inside a class or module definition.
 
 ## 4019
 
-This error is only reported when running Sorbet with the `--stripe-mode` command
-line flag.
+This error is only reported when running Sorbet with the
+`--uniquely-defined-behavior` command line flag (formerly called
+`--stripe-mode`).
 
 A class defines behavior in multiple files when at least two files would need to
 be run in order to completely load that class. A class definition that only
 serves as a namespace for inner definitions is not considered to have behavior.
-For example, in this example module `A` has behavior in two files:
+For example, in this example module `A` has behavior in two files, and thus
+produces an error in this mode:
 
 ```ruby
 # -- file1.rb --
@@ -1153,7 +1265,9 @@ module A
 end
 ```
 
-However, in this example, module `A` does not have any behavior:
+However, in this example, module `A` is defined in two files, but the second
+definition does not define any behavior (just an empty module body), and thus
+does not produce an error:
 
 ```ruby
 # -- file1.rb --
@@ -1171,8 +1285,15 @@ end
 
 The limitations around what constitutes "defining behavior" is intertwined with
 which files would have to be loaded for a class (like `A` above) to be fully
-loaded. In `--stripe-mode`, there must be at most one file to require to fully
-load a class.
+loaded. When checking `--uniquely-defined-behavior`, it must be possible to
+require at most one file to fully load a class. This property is useful to check
+in Ruby codebases which use an autoloader, like
+[Zeitwerk](https://github.com/fxn/zeitwerk).
+
+**What counts as behavior**? Basically anything with side effects (any method
+calls) and any method definitions. It's easier to describe what **doesn't**
+count: empty class or module definitions, or those class/module definitions
+which only have constant assignments and/or literals.
 
 ## 4021
 
@@ -1208,7 +1329,7 @@ migrating your codebase to the new syntax.
 This error includes an autocorrect you can run to automatically migrate to the
 new syntax:
 
-```
+```bash
 srb tc --isolate-error-code=4021 --autocorrect
 ```
 
@@ -1282,6 +1403,19 @@ assignment and a class definition for a given constant, you can either:
 
 The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a
 Ruby `class`. For more, see the docs: [`T.attached_class`](attached-class.md).
+
+## 4024
+
+Two keyword arguments to a method definition or block have been given the same
+name:
+
+```ruby
+def foo(x:, x:)
+end
+```
+
+You can resolve this error by giving a different name to one of the conflicting
+arguments.
 
 ## 5001
 
@@ -1462,9 +1596,68 @@ A class was changed to inherit from a different superclass.
 class A; end
 class B; end
 
+if RUBY_VERSION < "3.0"
+  class C < A; end
+else
+  class C < B; end # error: Parent of class C redefined from A to B
+end
+```
+
+Sorbet requires that a project have a single, unified inheritance hierarchy. A
+class cannot sometimes inherit from one class and sometimes inherit from another
+class depending on code at runtime.
+
+If it's simply not possible to refactor the codebase so that the given class
+always descends from one superclass, the next path forward is to hide all but
+one of the superclasses of this class. For example, using a trick like this with
+`# typed: ignore` files:
+
+```ruby
+# -- main.rb --
+class A; end
+class B; end
+
+if RUBY_VERSION < "3.0"
+  require_relative './c_a.rb'
+else
+  require_relative './c_b.rb'
+end
+
+class C
+  # ...
+end
+
+# -- c_a.rb --
+# typed: ignore
 class C < A; end
+
+# -- c_b.rb --
 class C < B; end
 ```
+
+In this example, Sorbet will think that `C` always descends from `B` statically,
+even though sometimes it may descend from `A`.
+
+Another trick to hide the superclass involves using `Class.new` to hide the
+definition of `C` from Sorbet entirely.
+
+Neither of these tricks work when one of the class definitions with a
+conflicting superclass definition comes from Sorbet's definitions for standard
+library classes. For example, this happens when generating an RBI for a newer
+version of a gem which is also include in Sorbet's stdlib RBI payload.
+
+In these cases, Sorbet provides the
+`--suppress-payload-superclass-redefinition-for` command line flag, which
+suppresses the superclass redefinition error for that class. For example, if the
+class `C` above were a class defined in Sorbet's payload, this would silence the
+errors:
+
+```bash
+srb tc --suppress-payload-superclass-redefinition-for=C
+```
+
+This flag can be repeated once per payload class with a superclass redefinition
+error.
 
 ## 5013
 
@@ -1544,6 +1737,21 @@ implementing its abstract methods as singleton class methods (`def self.foo`)
 instead of instance methods (`def foo`).
 
 For more information, see the docs for [Generics](generics.md).
+
+<a class="anchor" aria-hidden="true" id="redeclare-fixed"></a>
+
+**Why does this apply even to `fixed` types?** Sorbet requires redeclaring even
+`fixed` type members and templates. This differs from many other typed,
+object-oriented languages that support generic classes. This choice is an
+implementation detail which simplifies some logic inside Sorbet, specifically
+around responding incrementally to file edits in an editor. It's _not_
+fundamental to Ruby or the type system semantics Sorbet chooses to implement,
+which means that one day we could consider changing Sorbet to support this
+(which would require adjusting Sorbet's algorithm for handling incremental
+updates).
+
+For a more technical explanation, see
+[the Sorbet source code](https://github.com/sorbet/sorbet/blob/233b47bb46fcedb60982fd7f70148f07a147468f/resolver/GlobalPass.cc#L54-L63).
 
 ## 5015
 
@@ -1758,7 +1966,7 @@ example `Enumerable` needs a `each` method in the target class.
 Failing example in
 [sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Example%0A%20%20include%20Enumerable%0Aend):
 
-```
+```ruby
 class Example
   include Enumerable
 end
@@ -1770,7 +1978,7 @@ the required functionality.
 Passing example in
 [sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Example%0A%20%20include%20Enumerable%0A%0A%20%20def%20each%28%26blk%29%0A%0A%20%20end%0Aend):
 
-```
+```ruby
 class Example
   include Enumerable
 
@@ -3071,6 +3279,64 @@ class PossiblyEmptyBox
 end
 ```
 
+## 5076
+
+`T.nilable` expects exactly one argument. A common typo is `T.nilable(X, Y)` to
+mean `T.nilable(T.any(X, Y))` (which would also be the same as
+`T.any(NilClass, X, Y)`).
+
+See [Nilable Types](nilable-types.md) and [Union Types](union-types.md) for more
+information.
+
+## 5077
+
+Sorbet does not allow value literals in type syntax. None of these are allowed:
+
+```ruby
+# ❌NOT SUPPORTED ❌
+T.any(:left, :right)
+T.any(1, 2, 3)
+T.any('foo', 'bar')
+```
+
+There are two options:
+
+- Widen the type to whatever type underlies the literal, like `Symbol` or
+  `Integer` or `String`, and check the values at runtime (not statically in the
+  type system).
+
+  ```ruby
+  sig { params(direction: Symbol).void }
+  def move(direction)
+    if ![:left, :right].include?(direction)
+      raise ArgumentError.new("Bad direction: #{direction}")
+    end
+    # ...
+  end
+  ```
+
+- Define a [`T::Enum`](tenum.md) and use that instead, which requires converting
+  to and from the literal type when calling the method:
+
+  ```ruby
+  class Direction < T::Enum
+    enums do
+      Left = new(:left)
+      Right = new(:right)
+    end
+  end
+
+  sig { params(direction: Direction).void }
+  def move(direction)
+    # ...
+    direction_symbol = direction.serialize
+  end
+
+  direction_symbol = # ...
+  direction = Direction.deserialize(direction_symbol)
+  move(direction)
+  ```
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside
@@ -3191,7 +3457,7 @@ found_valid = false
 
 list.each do |elem|
   # Might change the type of `found_valid` to `TrueClass`
-  found_valid = true if valid?(elem) # error: Changing the type of a variable in a loop
+  found_valid = true if valid?(elem) # error: Changing the type of a variable is not permitted
 end
 ```
 
@@ -4089,7 +4355,7 @@ sig do
     .void
 end
 def example(x)
-  x.foo # error!
+  x.foo # ❌ error!
 end
 ```
 
@@ -4120,7 +4386,7 @@ sig do
     .void
 end
 def example(x)
-  x.foo # error!
+  x.foo # ✅ no error
 end
 ```
 
@@ -4346,17 +4612,28 @@ See also:
 
 ## 7049
 
-See [Methods with Overloaded Signatures](overloads.md) for complete docs on.
+See [Methods with Overloaded Signatures](overloads.md) for complete docs on how
+to declare overloaded methods correctly.
 
 ## 7050
 
-Calling `T.must` with an untyped object is an indication that code that was
-considered typed (and `T.must` was ensuring that the value was not `nil`) is not
-typed anymore.
+Calling `T.must` when the argument is `T.untyped`, `T.anything`, `Object`, or
+`BasicObject` is redundant. This indicates that either:
 
-This was separated from [7015](#7015) to maintain this error in
-`# typed: strict` and above, but allow for [7015](#7015) to be enforced at lower
-strictness levels.
+- a previously-typed argument became untyped, indicating a regression in type
+  safety somewhere, or
+- the code does not benefit from `T.must`, because the type before and after the
+  call is the same.
+
+If raising an exception for `nil` values is the desired runtime behavior, do so
+explicitly:
+
+```ruby
+raise if x == nil
+```
+
+This was separated from [7015](#7015) allow it to be autocorrected independently
+from invalid usages of `T.let` and `T.cast`.
 
 ## 7051
 

@@ -1,46 +1,21 @@
 begin
-  <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::NormalClass)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::ANamespace)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::ANamespace::ClassInNamespace)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Parent)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Mixin)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::OtherMixin)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Child)
-          ::Sorbet::Private::Static.keep_for_ide(::Parent)
-          <emptyTree>
-        end
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   class ::NormalClass<<C NormalClass>> < (::<todo sym>)
@@ -52,20 +27,14 @@ begin
       <emptyTree>
     end
 
+    <emptyTree>
+
+    <emptyTree>
+
     def self.<static-init>(<blk>)
       begin
         <runtime method definition of normal_method>
         <runtime method definition of self.normal_static_method>
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::NormalClass::InnerClass)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::NormalClass::InnerModule)
-          <emptyTree>
-        end
         <emptyTree>
       end
     end
@@ -81,12 +50,10 @@ begin
     end
   end
   module ::ANamespace<<C ANamespace>> < ()
+    <emptyTree>
+
     def self.<static-init>(<blk>)
-      begin
-        <emptyTree>
-        ::Sorbet::Private::Static.keep_for_ide(::ANamespace::ObviousChild)
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   class ::ANamespace::ObviousChild<<C ObviousChild>> < (::<todo sym>)

@@ -34,7 +34,7 @@ void ModuleFunction::run(core::MutableContext ctx, ast::ClassDef *cdef) {
                     replaceNodes[stat.get()] = run(ctx, send, prevStat);
                 }
             }
-        } else if (auto defn = ast::cast_tree<ast::MethodDef>(stat)) {
+        } else if (ast::isa_tree<ast::MethodDef>(stat)) {
             // if we've already seen a bare `module_function` call, then every subsequent method definition needs to get
             // rewritten appropriately
             if (moduleFunctionActive) {
@@ -127,7 +127,7 @@ vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Se
                 if (validAttr) {
                     methodName = nameRef;
                 } else {
-                    if (auto e = ctx.beginError(lit->loc, core::errors::Rewriter::BadModuleFunction)) {
+                    if (auto e = ctx.beginIndexerError(lit->loc, core::errors::Rewriter::BadModuleFunction)) {
                         e.setHeader("Bad attribute name \"{}\"", absl::CEscape(shortName));
                     }
                 }
@@ -142,7 +142,7 @@ vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Se
             ast::cast_tree_nonnull<ast::MethodDef>(methodDef).flags.isSelfMethod = true;
             stats.emplace_back(std::move(methodDef));
         } else {
-            if (auto e = ctx.beginError(arg.loc(), core::errors::Rewriter::BadModuleFunction)) {
+            if (auto e = ctx.beginIndexerError(arg.loc(), core::errors::Rewriter::BadModuleFunction)) {
                 e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing",
                             "module_function");
             }
@@ -152,14 +152,14 @@ vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Se
     const auto numKwArgs = send->numKwArgs();
     for (auto i = 0; i < numKwArgs; ++i) {
         auto loc = send->getKwKey(i).loc().join(send->getKwValue(i).loc());
-        if (auto e = ctx.beginError(loc, core::errors::Rewriter::BadModuleFunction)) {
+        if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::BadModuleFunction)) {
             e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing",
                         "module_function");
         }
     }
 
     if (auto *kwSplat = send->kwSplat()) {
-        if (auto e = ctx.beginError(kwSplat->loc(), core::errors::Rewriter::BadModuleFunction)) {
+        if (auto e = ctx.beginIndexerError(kwSplat->loc(), core::errors::Rewriter::BadModuleFunction)) {
             e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing",
                         "module_function");
         }

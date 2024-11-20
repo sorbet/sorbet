@@ -26,3 +26,6 @@ class Outer2
   class Other < Inner1::Inner2
   end
 end
+
+(Does::Not::Exist)
+#^^^^ error: Unable to resolve constant `Does`

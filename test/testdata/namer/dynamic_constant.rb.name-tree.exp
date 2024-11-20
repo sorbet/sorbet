@@ -1,16 +1,9 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    begin
-      class ::A<<C A>> < (::<todo sym>)
-        def self.foo(<blk>)
-          <dynamic-const-assign> = 10
-        end
-
-        <runtime method definition of self.foo>
-      end
-      ::Sorbet::Private::Static.keep_for_ide(::A)
-      <emptyTree>
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::A<<C A>> < (::<todo sym>)
+    def self.foo(<blk>)
+      <dynamic-const-assign> = 10
     end
+
+    <runtime method definition of self.foo>
   end
-  <emptyTree>
 end

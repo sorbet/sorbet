@@ -124,7 +124,7 @@ environment variable ensures this value gets set before any sigs are evaluated.
 
 Configure the default checked level for a sig with no explicit `.checked`
 builder. When unset, the default checked level is `:always`. This must be set to
-a valid checked level (e.g. `always` or `tests`).
+a valid checked level (for example: `always`, `tests`, or `never`).
 
 This can also be done by calling `T::Configuration.default_checked_level = ...`
 but the environment variable ensures this value gets set before any sigs are

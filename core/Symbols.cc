@@ -23,10 +23,10 @@ namespace sorbet::core {
 using namespace std;
 
 const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 215;
-const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 53;
+const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 58;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
-const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
-const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 73;
+const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 6;
+const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 71;
 
 namespace {
 constexpr string_view COLON_SEPARATOR = "::"sv;
@@ -508,7 +508,7 @@ bool ClassOrModule::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::o
         //   checking the linearization bit.
 
         // Ignore superclass (as in GlobalPass.cc's `computeClassLinearization`)
-        if (sym != superClass() && absl::c_find(mixins_, sym) == mixins_.end()) {
+        if (sym != superClass() && !absl::c_contains(mixins_, sym)) {
             auto parent = superClass();
             // Don't include as mixin if it derives from the parent class (as in GlobalPass.cc's `maybeAddMixin`)
             if (!parent.exists() || !parent.data(gs)->derivesFrom(gs, sym)) {
@@ -811,7 +811,7 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
     // Don't run under the fuzzer, as otherwise fuzzy match dominates runtime.
     // N.B.: There are benefits to running this method under the fuzzer; we have found bugs in this method before
     // via fuzzing (e.g. https://github.com/sorbet/sorbet/issues/128).
-    if (fuzz_mode) {
+    if constexpr (fuzz_mode) {
         return res;
     }
 
@@ -2058,7 +2058,7 @@ vector<ClassOrModule::RequiredAncestor> ClassOrModule::requiredAncestors(const G
 // All required ancestors by this class or module
 std::vector<ClassOrModule::RequiredAncestor>
 ClassOrModule::requiredAncestorsTransitiveInternal(GlobalState &gs, std::vector<ClassOrModuleRef> &seen) {
-    if (absl::c_find(seen, this->ref(gs)) != seen.end()) {
+    if (absl::c_contains(seen, this->ref(gs))) {
         return requiredAncestors(gs); // Break recursive loops if we already visited this ancestor
     }
     seen.emplace_back(this->ref(gs));
@@ -2259,7 +2259,7 @@ int ClassOrModule::typeArity(const GlobalState &gs) const {
 }
 
 void ClassOrModule::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     ClassOrModuleRef current = this->ref(gs);
@@ -2276,7 +2276,7 @@ void ClassOrModule::sanityCheck(const GlobalState &gs) const {
 }
 
 void Method::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     MethodRef current = this->ref(gs);
@@ -2305,7 +2305,7 @@ void Method::sanityCheck(const GlobalState &gs) const {
 }
 
 void Field::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     FieldRef current = this->ref(gs);
@@ -2322,7 +2322,7 @@ void Field::sanityCheck(const GlobalState &gs) const {
 }
 
 void TypeParameter::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     SymbolRef current = this->ref(gs);

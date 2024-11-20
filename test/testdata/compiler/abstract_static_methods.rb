@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
-# run_filecheck: INITIAL
 
 class IFoo
   extend T::Sig
@@ -12,9 +11,6 @@ class IFoo
   def self.foo; end
 end
 
-# INITIAL{LITERAL}-LABEL: define internal i64 @"func_IFoo.14<static-init>
-# INITIAL: call void @{{sorbet_defineMethodSingleton.*@func_IFoo.3foo,}}
-# INITIAL{LITERAL}: }
 
 class Foo < IFoo
 

@@ -1,5 +1,4 @@
 begin
-  <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
     def main(<blk>)
       begin
@@ -14,44 +13,23 @@ begin
       end
     end
 
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::A)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::B)
-          <emptyTree>
-        end
         $c = ::Object.new()
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::D)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::E)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::F)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::G)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::H)
-          <emptyTree>
-        end
         <runtime method definition of main>
         <self>.main()
         <emptyTree>
@@ -64,11 +42,10 @@ begin
     end
   end
   class ::B<<C B>> < (::<todo sym>)
+    <emptyTree>
+
     def self.<static-init>(<blk>)
-      begin
-        <emptyTree>
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   class <singleton class><<Class:B>> < ()
@@ -81,19 +58,17 @@ begin
     end
   end
   class ::D<<C D>> < (::<todo sym>)
+    <emptyTree>
+
     def self.<static-init>(<blk>)
-      begin
-        <emptyTree>
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   class <singleton class><<Class:D>> < ()
+    <emptyTree>
+
     def self.<static-init>(<blk>)
-      begin
-        <emptyTree>
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   class <singleton class><<Class:<Class:D>>> < ()
@@ -106,15 +81,10 @@ begin
     end
   end
   class ::E<<C E>> < (::<todo sym>)
+    <emptyTree>
+
     def self.<static-init>(<blk>)
-      begin
-        begin
-          <emptyTree>
-          <emptyTree>
-        end
-        <self>.wrapper()
-        <emptyTree>
-      end
+      <self>.wrapper()
     end
   end
   class <singleton class><<Class:E>> < ()
@@ -131,11 +101,10 @@ begin
     end
   end
   class ::F<<C F>> < (::<todo sym>)
+    <emptyTree>
+
     def self.<static-init>(<blk>)
-      begin
-        <emptyTree>
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   class <singleton class><<Class:F>> < ()
@@ -164,16 +133,14 @@ begin
       <self>.inner()
     end
 
+    <emptyTree>
+
     def self.g(<blk>)
       "g"
     end
 
     def self.<static-init>(<blk>)
       begin
-        begin
-          <emptyTree>
-          <emptyTree>
-        end
         <runtime method definition of wrapper>
         <runtime method definition of self.g>
         <emptyTree>
@@ -190,20 +157,17 @@ begin
     end
   end
   class ::H<<C H>> < (::<todo sym>)
+    <emptyTree>
+
     def self.<static-init>(<blk>)
-      begin
-        <emptyTree>
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   class <singleton class><<Class:H>> < ()
+    <emptyTree>
+
     def self.<static-init>(<blk>)
-      begin
-        <emptyTree>
-        ::Sorbet::Private::Static.keep_for_ide(::<Class:H>::H2)
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   class ::<Class:H>::H2<<C H2>> < (::<todo sym>)

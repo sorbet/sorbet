@@ -38,10 +38,10 @@ class A
       #          ^^^^^^^^^^^   error: Unsupported type literal
       #    ^^^^                error: Method `enum` does not exist on `T.class_of(T)`
       b1: T.deprecated_enum, # error: Not enough arguments provided for method `T.deprecated_enum`. Expected: `1`, got: `0`
-      c11: T.deprecated_enum(1),
-      c12: T.deprecated_enum(1.0),
-      c13: T.deprecated_enum("d"),
-      c14: T.deprecated_enum(:e),
+      c11: T.deprecated_enum(1), # error: Expected `T.any(T::Set[T.anything], T::Array[T.anything])`
+      c12: T.deprecated_enum(1.0), # error: Expected `T.any(T::Set[T.anything], T::Array[T.anything])`
+      c13: T.deprecated_enum("d"), # error: Expected `T.any(T::Set[T.anything], T::Array[T.anything])`
+      c14: T.deprecated_enum(:e), # error: Expected `T.any(T::Set[T.anything], T::Array[T.anything])`
       d1: T.deprecated_enum([]), # error: enum([]) is invalid
       e1: T.deprecated_enum([unsupported]), # error: Unsupported type literal
       f: 0, # error: Unsupported literal in type syntax

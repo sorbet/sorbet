@@ -1,23 +1,20 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=5]():
+bb0[firstDead=2]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$8: T.class_of(TestIVar) = alias <C TestIVar>
-    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$8: T.class_of(TestIVar))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
+# - bb0
+bb1[firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::TestIVar#initialize {
 
-bb0[rubyRegionId=0, firstDead=9]():
+bb0[firstDead=9]():
     @foo$3: Integer = alias @foo
     <self>: TestIVar = cast(<self>: NilClass, TestIVar);
     <cfgAlias>$5: T.class_of(Integer) = alias <C Integer>
@@ -30,15 +27,15 @@ bb0[rubyRegionId=0, firstDead=9]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
+# - bb0
+bb1[firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::TestIVar#test {
 
-bb0[rubyRegionId=0, firstDead=5]():
+bb0[firstDead=5]():
     @foo$3: Integer = alias @foo
     <self>: TestIVar = cast(<self>: NilClass, TestIVar);
     @foo$3: Integer = nil
@@ -47,22 +44,22 @@ bb0[rubyRegionId=0, firstDead=5]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
+# - bb0
+bb1[firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::<Class:TestIVar>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=2]():
+bb0[firstDead=2]():
     <self>: T.class_of(TestIVar) = cast(<self>: NilClass, T.class_of(TestIVar));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
+# - bb0
+bb1[firstDead=-1]():
     <unconditional> -> bb1
 
 }

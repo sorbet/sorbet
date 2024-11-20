@@ -36,6 +36,10 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     if (name == core::Names::beforeAngles()) {
         return true;
     }
+    // internal representation of enums as classes
+    if (sym.isClassOrModule() && sym.asClassOrModuleRef().data(gs)->name.isTEnumName(gs)) {
+        return true;
+    }
     // static-init for a file
     if (name.kind() == core::NameKind::UNIQUE && name.dataUnique(gs)->original == core::Names::staticInit()) {
         return true;
@@ -44,6 +48,11 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     if (name.kind() == core::NameKind::UNIQUE && name.dataUnique(gs)->original == core::Names::blockTemp()) {
         return true;
     }
+
+    if (name == core::Names::requiredAncestorsLin()) {
+        return true;
+    }
+
     return false;
 }
 
@@ -64,12 +73,15 @@ unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, string_view ru
 }
 
 string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant) {
-    // Request that the constant already be dealiased, rather than dealias here to avoid defensively dealiasing.
-    // We should understand where dealias calls go.
-    ENFORCE(constant == constant.dealias(gs));
-
     if (constant == core::Symbols::StubModule()) {
-        return "This constant is not defined";
+        return "(unable to resolve constant)";
+    }
+
+    if (constant.isClassAlias(gs)) {
+        auto dealiased = constant.dealias(gs);
+        auto dealiasedShow =
+            dealiased == core::Symbols::StubModule() ? "(unable to resolve constant)" : dealiased.show(gs);
+        return fmt::format("{} = {}", constant.name(gs).show(gs), dealiasedShow);
     }
 
     core::TypePtr result;
@@ -169,7 +181,27 @@ vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, co
 }
 
 unique_ptr<core::lsp::QueryResponse>
-skipLiteralIfMethodDef(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+skipLiteralIfPunnedKeywordArg(const core::GlobalState &gs,
+                              vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    auto &resp = queryResponses[0];
+    auto *litResp = resp->isLiteral();
+    if (litResp == nullptr || queryResponses.size() <= 1) {
+        return nullptr;
+    }
+    auto identResp = queryResponses[1]->isIdent();
+    if (identResp == nullptr || identResp->termLoc.adjust(gs, 0, -1) != litResp->termLoc) {
+        return nullptr;
+    }
+
+    return move(queryResponses[1]);
+}
+
+unique_ptr<core::lsp::QueryResponse>
+skipLiteralIfMethodDef(const core::GlobalState &gs, vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    if (auto punnedKwarg = skipLiteralIfPunnedKeywordArg(gs, queryResponses)) {
+        return punnedKwarg;
+    }
+
     for (auto &r : queryResponses) {
         if (r->isMethodDef()) {
             return move(r);
@@ -182,12 +214,13 @@ skipLiteralIfMethodDef(vector<unique_ptr<core::lsp::QueryResponse>> &queryRespon
 }
 
 unique_ptr<core::lsp::QueryResponse>
-getQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+getQueryResponseForFindAllReferences(const core::GlobalState &gs,
+                                     vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
     // Find all references might show an Ident last if its a `prop`, and the Ident will be the
     // synthetic local variable name of the method argument.
     auto firstResp = queryResponses[0]->isIdent();
     if (firstResp == nullptr) {
-        return skipLiteralIfMethodDef(queryResponses);
+        return skipLiteralIfMethodDef(gs, queryResponses);
     }
 
     for (auto resp = queryResponses.begin() + 1; resp != queryResponses.end(); ++resp) {
@@ -207,11 +240,11 @@ getQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>
         if ((*resp)->isMethodDef()) {
             return move(*resp);
         } else {
-            return skipLiteralIfMethodDef(queryResponses);
+            return skipLiteralIfMethodDef(gs, queryResponses);
         }
     }
 
-    return skipLiteralIfMethodDef(queryResponses);
+    return skipLiteralIfMethodDef(gs, queryResponses);
 }
 
 /**
@@ -252,30 +285,69 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
         }
 
         // Handle multi-line sig block
-        else if (absl::StartsWith(line, "end")) {
-            // ASSUMPTION: We either hit the start of file, a `sig do`/`sig(:final) do` or an `end`
+        else if (absl::StartsWith(line, "}")) {
+            // ASSUMPTION: We either hit the start of file or a `sig {`.
+            //
+            // Note that this will not properly handle brace blocks where the
+            // closing brace is not on its own line, such as
+            // ```
+            // sig { params(foo: Foo)
+            //       .returns(Bar) }
+            // ```
             it++;
+            line = absl::StripAsciiWhitespace(*it);
             while (
                 // SOF
                 it != all_lines.rend()
                 // Start of sig block
-                && !(absl::StartsWith(absl::StripAsciiWhitespace(*it), "sig do") ||
-                     absl::StartsWith(absl::StripAsciiWhitespace(*it), "sig(:final) do"))
-                // Invalid end keyword
-                && !absl::StartsWith(absl::StripAsciiWhitespace(*it), "end")) {
+                && !(absl::StartsWith(line, "sig {") || absl::StartsWith(line, "sig(:final) {"))
+                // Invalid closing brace
+                && !absl::StartsWith(line, "}")) {
                 it++;
+                if (it != all_lines.rend()) {
+                    line = absl::StripAsciiWhitespace(*it);
+                }
+            };
+
+            // We have either
+            // 1) Reached the start of the file
+            // 2) Found a `sig {`
+            // 3) Found an invalid closing brace
+            if (it == all_lines.rend() || absl::StartsWith(line, "}")) {
+                break;
+            }
+
+            // Reached a sig block.
+            ENFORCE(absl::StartsWith(line, "sig {") || absl::StartsWith(line, "sig(:final) {"));
+        }
+
+        // Handle multi-line sig block
+        else if (absl::StartsWith(line, "end")) {
+            // ASSUMPTION: We either hit the start of file, a `sig do`/`sig(:final) do` or an `end`
+            it++;
+            line = absl::StripAsciiWhitespace(*it);
+            while (
+                // SOF
+                it != all_lines.rend()
+                // Start of sig block
+                && !(absl::StartsWith(line, "sig do") || absl::StartsWith(line, "sig(:final) do"))
+                // Invalid end keyword
+                && line != "end") {
+                it++;
+                if (it != all_lines.rend()) {
+                    line = absl::StripAsciiWhitespace(*it);
+                }
             };
 
             // We have either
             // 1) Reached the start of the file
             // 2) Found a `sig do`
             // 3) Found an invalid end keyword
-            if (it == all_lines.rend() || absl::StartsWith(absl::StripAsciiWhitespace(*it), "end")) {
+            if (it == all_lines.rend() || line == "end") {
                 break;
             }
 
             // Reached a sig block.
-            line = absl::StripAsciiWhitespace(*it);
             ENFORCE(absl::StartsWith(line, "sig do") || absl::StartsWith(line, "sig(:final) do"));
 
             // Stop looking if this is a single-line block e.g `sig do; <block>; end`

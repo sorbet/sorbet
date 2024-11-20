@@ -257,20 +257,6 @@ module Opus::Types::Test
             mod.test_method(:llamas) # wrong, but ignored
           end
 
-          it '`compiled` is not checked' do
-            mod = Module.new do
-              extend T::Sig
-              sig do
-                params(x: Integer)
-                .returns(String)
-                .checked(:compiled)
-              end
-              def self.test_method(x); end
-            end
-
-            mod.test_method(:llamas) # wrong, but ignored
-          end
-
           def make_mod
             Module.new do
               extend T::Sig
@@ -391,19 +377,6 @@ module Opus::Types::Test
             end
             assert_includes(ex.message, "To use .on_failure you must additionally call .checked(:tests) or .checked(:always), otherwise, the .on_failure has no effect")
           end
-
-          it 'forbids .on_failure if default_checked_level is :compiled' do
-            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :compiled)
-
-            ex = assert_raises do
-              Class.new do
-                extend T::Sig
-                sig {void.on_failure(:soft, notify: 'me')}
-                def self.foo; end; foo
-              end
-            end
-            assert_includes(ex.message, "To use .on_failure you must additionally call .checked(:tests) or .checked(:always), otherwise, the .on_failure has no effect")
-          end
         end
       end
 
@@ -451,17 +424,6 @@ module Opus::Types::Test
         assert_includes(ex.message, "You can't use .checked(:never) with .on_failure")
       end
 
-      it 'forbids .on_failure and then .checked(:compiled)' do
-        ex = assert_raises do
-          Class.new do
-            extend T::Sig
-            sig {returns(NilClass).on_failure(:soft, notify: 'me').checked(:compiled)}
-            def self.foo; end; foo
-          end
-        end
-        assert_includes(ex.message, "You can't use .checked(:compiled) with .on_failure")
-      end
-
       it 'allows .on_failure and then .checked(:tests)' do
         Class.new do
           extend T::Sig
@@ -490,18 +452,6 @@ module Opus::Types::Test
           end
         end
         assert_includes(ex.message, "You can't use .on_failure with .checked(:never)")
-      end
-
-      it 'forbids .checked(:compiled) and then .on_failure' do
-        ex = assert_raises do
-          Class.new do
-            extend T::Sig
-            # We explicitly need to test that this ordering raises a certain error
-            sig {returns(NilClass).checked(:compiled).on_failure(:soft, notify: 'me')}
-            def self.foo; end; foo
-          end
-        end
-        assert_includes(ex.message, "You can't use .on_failure with .checked(:compiled)")
       end
 
       it 'allows .checked(:tests) and then .on_failure' do

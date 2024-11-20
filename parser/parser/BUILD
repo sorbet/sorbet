@@ -10,8 +10,7 @@ ragel(
     ragel_options = select({
         # emscripten builds are usually dealing with small amounts of Ruby source,
         # so they don't need a super-fast parser.
-        "@com_stripe_ruby_typer//tools/config:webasm_opt": [],
-        "@com_stripe_ruby_typer//tools/config:webasm": [],
+        "@platforms//cpu:wasm32": [],
         "@com_stripe_ruby_typer//tools/config:opt": ["-G1"],
         "//conditions:default": [],
     }),
@@ -57,6 +56,8 @@ bison(
     bison_options = [
         "-Wno-empty-rule",
         "-Wno-precedence",
+        "-Werror=conflicts-rr",
+        "-Werror=conflicts-sr",
     ],
 )
 
@@ -66,6 +67,8 @@ bison(
     bison_options = [
         "-Wno-empty-rule",
         "-Wno-precedence",
+        "-Werror=conflicts-rr",
+        "-Werror=conflicts-sr",
         "--debug",
     ],
 )
@@ -104,6 +107,7 @@ cc_library(
     hdrs = glob(["include/**/*.hh"]),
     copts = [
         "-Wno-unused-const-variable",
+        "-Wno-unused-but-set-variable",
     ] + select({
         # What we really want here is to say "it's never ok to use -Os, because
         # that will take 2+ minutes to compile." We have to do this to override

@@ -5,16 +5,15 @@ sidebar_label: Blocks, Procs, & Lambdas
 ---
 
 ```ruby
-T.proc.params(arg0: Arg0Type, arg1: Arg2Type, ...).returns(ReturnType)
+T.proc.params(arg0: Arg0Type, arg1: Arg1Type, ...).returns(ReturnType)
 ```
 
 This is the type of a `Proc` (such as a block passed to a method as a `&blk`
 parameter) that accepts arguments of types `Arg0Type`, `Arg1Type`, etc., and
 returns `ReturnType`.
 
-At present, all parameters are assumed to be required positional parameters. We
-may add support for optional or keyword parameters in the future, if there is
-demand.
+At present, all parameters are assumed to be required positional
+parameters—`T.proc` types cannot declare optional nor keyword parameters.
 
 Types of procs are not checked at all at runtime (whereas methods are), and
 serve only as hints to `srb` statically (and for documentation).
@@ -103,6 +102,151 @@ end
 Note that the `yield` itself in the method body doesn't need to change at all.
 Since every Ruby method can only accept one block, both Ruby and Sorbet are able
 to connect the `yield` call to the `blk` parameter automatically.
+
+## Methods that do not take blocks
+
+It's hard for Sorbet to know whether a method takes a block or not. Technically,
+Ruby allows passing a block at runtime to **all methods**, regardless of whether
+that method declares an explicit `&blk` parameter or uses the `yield` keyword.
+
+This means that Sorbet can only catch "Method does not take a block" errors when
+the method definition:
+
+- has a signature
+- does not mention a `&blk` parameter
+- is defined in a `# typed: strict` file
+
+Absent all three conditions, Sorbet allows passing a block to a method that
+might not actually accept a block.
+
+### Why `# typed: strict` files?
+
+To ease the adoption in pre-existing Ruby codebases, Sorbet allows methods to
+use `yield` but not declare a `&blk` parameter in `# typed: true` files. We may
+reconsider this decision in the future, but for now, Sorbet can only be sure
+that a method does not take a block if the method is defined in a
+`# typed: strict` file.
+
+Note that this applies to RBI files too: if a method is defined with a
+signature, that does not mention a `&blk` parameter, in a `# typed: strict` RBI
+file, Sorbet will error for attempts to pass a block to the method.
+
+For RBI authors, it's important to ensure that `# typed: strict` RBIs correctly
+declare whether a method takes a block or not, or else use `# typed: true` for
+that RBI file to opt the methods defined in that RBI out of "Method does not
+take a block" errors.
+
+## Prefer blocks to procs or lambdas
+
+Sorbet's type inference gives substantial preference to Ruby blocks
+(`f { ... }`) over procs and lambdas (`f(proc { ... })`/ `f(-> { ... })`). Code
+making heavy use of procs and lambdas will make it hard to avoid depending on
+`T.untyped` accidentally.
+
+Here are some examples:
+
+```ruby
+sig { params(blk: T.proc.params(x: Integer).void).void }
+def takes_block(&blk); end
+
+sig { params(f: T.proc.params(x: Integer).void).void }
+def takes_lambda(f); end
+
+takes_block do |x|
+  T.reveal_type(x) # => Integer ✅
+end
+
+takes_lambda(-> (x) do
+  T.reveal_type(x) # => T.untyped ‼️
+end)
+
+f = -> (x) { x }
+T.reveal_type(f) # => T.proc.params(arg0: T.untyped).returns(T.untyped) ‼️
+takes_lambda(f)
+```
+
+For lambdas and procs, sorbet only does return-type inference (not argument type
+inference).
+
+For blocks, Sorbet doesn't have to do type inference: it simply reads the type
+of the block from the associated method.
+
+By contrast, Sorbet computes a type for all non-block arguments (including procs
+and lambdas) **before** type checking a call to a method. That means that even
+when written like this:
+
+```ruby
+takes_lambda(-> (x) { x })
+```
+
+Sorbet computes a type for the first positional argument `f` as if the user had
+written this:
+
+```ruby
+f = -> (x) { x }
+takes_lambda(f)
+```
+
+It attempts to compute a type for `f` without "looking ahead" at the type of
+`takes_lambda`. There's more on this implementation decision in
+[Why does Sorbet sometimes need type annotations for local variables?](https://sorbet.org/docs/why-type-annotations#-for-local-variables),
+but it comes down to a combination of performance and simplicity.
+
+### What can I do for better proc and lambda types?
+
+- Use blocks instead, if possible.
+
+- Make a typed wrapper that takes a block and returns a proc or lambda:
+
+  ```ruby
+  MyProcType = T.type_alias { T.proc.params(x: Integer).returns(Integer) }
+
+  sig { params(blk: MyProcType).returns(MyProcType) }
+  def make_typed_proc(&blk)
+    blk
+  end
+
+  f = make_typed_proc { |x| x }
+  ```
+
+  This is good because the body of the proc will benefit from well-typed
+  arguments, and the proc type only has to be written once—there is little
+  runtime overhead for this pattern.
+
+- Use a `T.let` annotation.
+
+  ```ruby
+  f = T.let(
+    -> (x) { x },
+    T.proc.params(x: Integer).returns(Integer)
+  )
+  ```
+
+  Using `T.let` with `->` instructs Sorbet to assume that the `T.proc`
+  annotation holds when typechecking the body of the lambda. Specifically,
+  Sorbet assumes that the lambda arguments have the types specified in the
+  `T.let` annotation and checks the lambda body to ensure it returns the
+  specified return type.
+
+  This only works with Ruby's `->` lambda syntax, with `Kernel.lambda`, and with
+  `Kernel.proc` (it doesn't work when calling the `lambda` and `proc` methods on
+  Kernel implicitly, without a receiver).
+
+  ```ruby
+  f = T.let(-> () { 0 },         T.proc.returns(Integer)) ✅
+  f = T.let(Kernel.lambda { 0 }, T.proc.returns(Integer)) ✅
+  f = T.let(Kernel.proc { 0 },   T.proc.returns(Integer)) ✅
+
+  f = T.let(lambda { 0 },        T.proc.returns(Integer)) ❌
+  f = T.let(proc { 0 },          T.proc.returns(Integer)) ❌
+  ```
+
+- For lambdas, use `-> () { ... }` or `Kernel.lambda { ... }` syntax instead of
+  `lambda { ... }` syntax.
+
+  This will ensure that Sorbet treats `return` inside the lambda as returning
+  from the lambda, not from the enclosing method (which is one main difference
+  that sets lambdas apart from procs/blocks in Ruby).
 
 ## Annotating the self type with `T.proc.bind`
 

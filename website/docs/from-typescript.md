@@ -97,6 +97,37 @@ the features Sorbet provides.
     </tr>
     <tr>
       <td>
+        <code>Record&lt;KeyType, ValueType&gt;</code><br>
+        <code>Map&lt;KeyType, ValueType&gt;</code><br>
+        <code>{[x: KeyType]: ValueType}</code>
+      </td>
+      <td>
+        <code>T::Hash[KeyType, ValueType]</code>
+      </td>
+      <td>
+        <p>
+          TypeScript programs frequently use "objects" as maps of keys to
+          values, so long as the keys are JS strings or symbols. In Ruby,
+          objects are instances of classes, and do not generally support
+          arbitrary key-value lookup.
+        </p>
+        <p>
+          For key-value mappings, Ruby uses the <code>Hash</code> class. This
+          most closely resembles the <code>Map</code> class from JavaScript.
+          Ruby Hash instances are created with <code>{x: y}</code> syntax like
+          JavaScript objects, and as a result are much more common than
+          JavaScript <code>Map</code> instances.
+        </p>
+        <p>
+          There is more information about why Sorbet uses the <code>T::</code>
+          prefix in front of <code>Hash</code> in <a
+          href="/docs/stdlib-generics">Arrays, Hashes, and Generics in the
+          Standard Library</a>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
         <code>any</code>
       </td>
       <td>
@@ -163,6 +194,21 @@ def f(x); ...; end</code></pre>
         href="/docs/union-types">Union types</a>. Do not confuse this with
         TypeScript's <code>any</code>, which corresponds to Sorbet's
         <code>T.untyped</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>MyClass & MyInterface</code>
+      </td>
+      <td>
+        <code>T.all(MyClass, MyInterface)</code>
+      </td>
+      <td>
+        Sorbet uses <code>T.all(...)</code> to declare <a
+        href="/docs/intersection-types">Intersection types</a>. Note that since
+        Sorbet's type system is nominal (unlike TypeScript's structural type
+        system), <code>T.all</code> typically only makes sense when at most one
+        of the types is a class type (and the rest are modules/interfaces).
       </td>
     </tr>
     <tr>

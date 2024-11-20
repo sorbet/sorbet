@@ -132,15 +132,15 @@ class MyTest
   CONST_LIST_TUPLE = [[1,'a'], [2,'b']]
   test_each CONST_LIST_TUPLE do |i, s|
     it "succeeds with a constant list of tuples" do
-      T.reveal_type(i) # error: type: `T.untyped`
-      T.reveal_type(s) # error: type: `T.untyped`
+      T.reveal_type(i) # error: type: `T.nilable(T.any(Integer, String))`
+      T.reveal_type(s) # error: type: `T.nilable(T.any(Integer, String))`
     end
   end
 
   test_each CONST_LIST_TUPLE do |(i, s)|
     it "succeeds with a constant list of tuples and destructuring" do
-      T.reveal_type(i) # error: type: `T.untyped`
-      T.reveal_type(s) # error: type: `T.untyped`
+      T.reveal_type(i) # error: type: `T.nilable(T.any(Integer, String))`
+      T.reveal_type(s) # error: type: `T.nilable(T.any(Integer, String))`
     end
   end
 

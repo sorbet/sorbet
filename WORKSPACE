@@ -29,28 +29,48 @@ load("@com_grail_bazel_compdb//:deps.bzl", "bazel_compdb_deps")
 
 bazel_compdb_deps()
 
-load("@com_grail_bazel_toolchain//toolchain:deps.bzl", "bazel_toolchain_dependencies")
+load("@toolchains_llvm//toolchain:deps.bzl", "bazel_toolchain_dependencies")
 
 bazel_toolchain_dependencies()
 
-load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
+load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
 llvm_toolchain(
-    name = "llvm_toolchain_12_0_0",
+    name = "llvm_toolchain_15_0_7",
     absolute_paths = True,
-    llvm_mirror_prefixes = [
-        "https://sorbet-deps.s3-us-west-2.amazonaws.com/",
-        "https://artifactory-content.stripe.build/artifactory/github-archives/llvm/llvm-project/releases/download/llvmorg-",
-        "https://github.com/llvm/llvm-project/releases/download/llvmorg-",
+    alternative_llvm_sources = [
+        "https://github.com/sorbet/llvm-project/releases/download/llvmorg-{llvm_version}/{basename}",
     ],
-    llvm_version = "12.0.0",
+    llvm_version = "15.0.7",
+    # The sysroots are needed for cross-compiling
+    sysroot = {
+        "": "",
+        "darwin-x86_64": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "darwin-aarch64": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+    },
 )
+
+load("@llvm_toolchain_15_0_7//:toolchains.bzl", "llvm_register_toolchains")
+
+llvm_register_toolchains()
+
+load("@emsdk//:deps.bzl", emsdk_deps = "deps")
+
+emsdk_deps()
+
+load("@emsdk//:emscripten_deps.bzl", emsdk_emscripten_deps = "emscripten_deps")
+
+emsdk_emscripten_deps(emscripten_version = "3.1.59")
+
+load("@emsdk//:toolchains.bzl", "register_emscripten_toolchains")
+
+register_emscripten_toolchains()
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 
 go_rules_dependencies()
 
-go_register_toolchains()
+go_register_toolchains(version = "1.20.7")
 
 load("@rules_ragel//ragel:ragel.bzl", "ragel_register_toolchains")
 
@@ -72,27 +92,10 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
 
-load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories")
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
-node_repositories()
+bazel_skylib_workspace()
 
-load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
+load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies")
 
-rules_rust_dependencies()
-
-rust_register_toolchains(
-    edition = "2021",
-    versions = [
-        "1.58.1",
-    ],
-)
-
-BAZEL_VERSION = "5.2.0"
-
-BAZEL_INSTALLER_VERSION_LINUX_X86_64_SHA = "7d9ef51beab5726c55725fb36675c6fed0518576d3ba51fb4067580ddf7627c4"
-
-BAZEL_INSTALLER_VERSION_LINUX_ARM64_SHA = "ae50cb7d64aebee986287134ff8ca0335651a0c1685348b3216f3fdfa20ff7e7"
-
-BAZEL_INSTALLER_VERSION_DARWIN_X86_64_SHA = "645e7c335efc3207905e98f0c56a598b7cb0282d54d9470e80f38fb698064fb3"
-
-BAZEL_INSTALLER_VERSION_DARWIN_ARM64_SHA = "bc018ee7980cdf1c3f0099ec1568847a1756a3c00f1f9440bca44c26ceb3d90f"
+aspect_bazel_lib_dependencies()

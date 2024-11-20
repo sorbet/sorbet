@@ -37,7 +37,7 @@ module Config
   sig {returns(Integer)}
   def self.suggest_t_let
     @suggest_t_let ||= ''
-  # ^^^^^^^^^^^^^^ error: The instance variable `@suggest_t_let` must be declared using `T.let` when specifying `# typed: strict`
+  # ^^^^^^^^^^^^^^ error: The singleton class instance variable `@suggest_t_let` must be declared using `T.let` when specifying `# typed: strict`
   # ^^^^^^^^^^^^^^ error: Use of undeclared variable `@suggest_t_let`
   end
 

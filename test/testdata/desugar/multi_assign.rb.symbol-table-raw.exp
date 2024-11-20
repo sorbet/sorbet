@@ -1,6 +1,6 @@
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/desugar/multi_assign.rb start=2:1 end=14:4}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/desugar/multi_assign.rb start=2:1 end=16:4}
       argument <blk><block> @ Loc {file=test/testdata/desugar/multi_assign.rb start=??? end=???}
   static-field <C <U A>> @ Loc {file=test/testdata/desugar/multi_assign.rb start=2:1 end=2:2}
   static-field <C <U B>> @ Loc {file=test/testdata/desugar/multi_assign.rb start=2:4 end=2:5}
@@ -11,6 +11,6 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/desugar/multi_assign.rb start=??? end=???}
   class <S <C <U Test>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/multi_assign.rb start=4:1 end=4:11}
     type-member(+) <S <C <U Test>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Test>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Test) @ Loc {file=test/testdata/desugar/multi_assign.rb start=4:1 end=4:11}
-    method <S <C <U Test>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/multi_assign.rb start=4:1 end=14:4}
+    method <S <C <U Test>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/multi_assign.rb start=4:1 end=16:4}
       argument <blk><block> @ Loc {file=test/testdata/desugar/multi_assign.rb start=??? end=???}
 

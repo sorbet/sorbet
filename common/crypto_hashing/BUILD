@@ -7,9 +7,8 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = ["//common"] + select({
-        "//tools/config:webasm": ["@com_github_blake2_blake2"],
-        "//tools/config:darwin_x86_64": ["@com_github_blake2_libb2"],
-        "//tools/config:linux_x86_64": ["@com_github_blake2_libb2"],
-        "//conditions:default": ["@com_github_blake2_blake2"],
+        "@platforms//cpu:x86_64": ["@com_github_blake2_libb2"],
+        "@platforms//cpu:arm64": ["@com_github_blake2_blake2//:com_github_blake2_blake2_neon"],
+        "//conditions:default": ["@com_github_blake2_blake2//:com_github_blake2_blake2_ref"],
     }),
 )

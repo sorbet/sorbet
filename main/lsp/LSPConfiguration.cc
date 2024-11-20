@@ -35,7 +35,7 @@ string getRootPath(const shared_ptr<LSPOutput> &output, const options::Options &
 }
 
 MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
-    if (absl::c_find(formats, MarkupKind::Markdown) != formats.end()) {
+    if (absl::c_contains(formats, MarkupKind::Markdown)) {
         return MarkupKind::Markdown;
     } else {
         return MarkupKind::Plaintext;
@@ -162,7 +162,9 @@ string urlDecode(string_view uri) {
         auto from = uri.substr(pos, 3);
         // add replacement only if % is actually followed by exactly 2 hex digits
         if (from.size() == 3 && isxdigit(from[1]) && isxdigit(from[2])) {
-            auto to = absl::HexStringToBytes(from.substr(1));
+            string to;
+            auto valid = absl::HexStringToBytes(from.substr(1), &to);
+            ENFORCE(valid, "We checked it was valid above");
             replacements.push_back({from, to});
         }
     }
@@ -177,7 +179,7 @@ string LSPConfiguration::remoteName2Local(string_view encodedUri) const {
     string uri = urlDecode(encodedUri);
 
     if (!isUriInWorkspace(uri) && !isSorbetUri(uri)) {
-        logger->error("Unrecognized URI received from client: {}", uri);
+        logger->error(R"(msg="Unrecognized URI received from client" uri="{}")", absl::CEscape(uri));
         return string(uri);
     }
 

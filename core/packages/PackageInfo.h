@@ -27,6 +27,13 @@ enum class VisibleToType {
     Wildcard,
 };
 
+enum class StrictDependenciesLevel {
+    False,
+    Layered,
+    LayeredDag,
+    Dag,
+};
+
 struct VisibleTo {
     std::vector<core::NameRef> packageName;
     VisibleToType visibleToType;

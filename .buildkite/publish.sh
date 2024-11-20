@@ -39,10 +39,9 @@ if [ "$dryrun" = "" ]; then
   echo "--- releasing sorbet.run"
 
   rm -rf sorbet.run
-  git clone git@github.com:sorbet/sorbet.run.git --single-branch --branch master
-  tar -xvf ./_out_/webasm/sorbet-wasm.tar ./sorbet-wasm.wasm ./sorbet-wasm.js
-  mv sorbet-wasm.wasm sorbet.run/docs
-  mv sorbet-wasm.js sorbet.run/docs
+  git clone git@github.com:sorbet/sorbet.run.git --single-branch --branch master --depth 1
+  mv _out_/webasm/sorbet-wasm.wasm sorbet.run/docs
+  mv _out_/webasm/sorbet-wasm.js sorbet.run/docs
   pushd sorbet.run/docs
   git add sorbet-wasm.wasm sorbet-wasm.js
   dirty=
@@ -106,8 +105,7 @@ mv release/gems/* release
 rmdir release/gems
 rm release/website/website.tar.bz2
 rmdir release/website
-rm release/webasm/sorbet-wasm.tar
-rmdir release/webasm
+rm -r release/webasm
 
 pushd release
 files=()
@@ -147,7 +145,7 @@ elif [ "$dryrun" = "" ]; then
     # It can take 4+ minutes for the marketplace to "verify" our extension
     # before it shows up as published according to `vsce show`.
     cat "$vsce_publish_output"
-    if grep -qF 'Version number cannot be the same'; then
+    if grep -qF 'Version number cannot be the same' "$vsce_publish_output"; then
       echo "... $extension_release_version is already published"
     else
       exit 1

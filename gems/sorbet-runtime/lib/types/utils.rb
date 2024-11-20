@@ -155,7 +155,7 @@ module T::Utils
       raise ArgumentError.new("#{enum.inspect} is not a T.deprecated_enum")
     end
 
-    classes = enum.values.map(&:class).uniq
+    classes = T.unsafe(enum.values).map(&:class).uniq
     if classes.empty?
       T.untyped
     elsif classes.length > 1

@@ -3,5 +3,7 @@
 require_relative './child'
 
 module Bopus
-  class ChildOfChild < Child; end
+  ChildAlias = Child
+  class ChildOfChild1 < Child; end
+  class ChildOfChild2 < ChildAlias; end
 end

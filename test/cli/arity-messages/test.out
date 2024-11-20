@@ -14,7 +14,7 @@ arity-messages.rb:4: Too many positional arguments provided for method `Object#f
 
 arity-messages.rb:5: Unrecognized keyword argument `y` passed for method `Object#foo` https://srb.help/7004
      5 |foo(y: 1)
-        ^^^^^^^^^
+            ^^^^
 
 arity-messages.rb:8: Too many positional arguments provided for method `Object#bar`. Expected: `0`, got: `1` https://srb.help/7004
      8 |bar(5, x: 8)
@@ -74,7 +74,7 @@ arity-messages.rb:18: Too many positional arguments provided for method `Object#
 
 arity-messages.rb:21: Unrecognized keyword argument `c` passed for method `Object#qaadr` https://srb.help/7004
     21 |qaadr({a: 1}, {b: 2}, {c: 3})
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                              ^^^^^^
 
 arity-messages.rb:21: Too many positional arguments provided for method `Object#qaadr`. Expected: `0`, got: `2` https://srb.help/7004
     21 |qaadr({a: 1}, {b: 2}, {c: 3})

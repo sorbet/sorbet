@@ -22,30 +22,32 @@ bool Inference::willRun(core::Context ctx, core::LocOffsets loc, core::MethodRef
     auto isMangleRenameOverload = name.kind() == core::NameKind::UNIQUE &&
                                   name.dataUnique(ctx)->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload;
     if (isMangleRenameOverload || methodData->flags.isOverloaded) {
-        if (!ctx.file.data(ctx).permitOverloadDefinitions()) {
-            if (auto e = ctx.beginError(loc, core::errors::Infer::TypecheckOverloadBody)) {
-                e.setHeader("Refusing to typecheck `{}` against an overloaded signature", method.show(ctx));
-                auto overloadMethod = method;
-                if (isMangleRenameOverload) {
-                    overloadMethod =
-                        methodData->owner.data(ctx)->findMember(ctx, name.dataUnique(ctx)->original).asMethodRef();
-                }
-                e.addErrorLine(overloadMethod.data(ctx)->loc(), "Given an overloaded signature here");
-                e.addErrorNote("Overloads are only supported in RBI files.\n"
-                               "    To silence this error, mark this file `{}`\n"
-                               "    Read the error doc for how to avoid using overloaded methods in the first place.",
-                               "# typed: false");
+        if (auto e = ctx.beginError(loc, core::errors::Infer::TypecheckOverloadBody)) {
+            e.setHeader("Refusing to typecheck `{}` against an overloaded signature", method.show(ctx));
+            auto overloadMethod = method;
+            if (isMangleRenameOverload) {
+                overloadMethod =
+                    methodData->owner.data(ctx)->findMember(ctx, name.dataUnique(ctx)->original).asMethodRef();
             }
+            e.addErrorLine(overloadMethod.data(ctx)->loc(), "Given an overloaded signature here");
+            e.addErrorNote("Overloads are only supported in RBI files.\n"
+                           "    To silence this error, mark this file `{}`\n"
+                           "    Read the error doc for how to avoid using overloaded methods in the first place.",
+                           "# typed: false");
         }
 
         return false;
     }
 
-    if (methodData->flags.isAbstract && ctx.file.data(ctx).compiledLevel != core::CompiledLevel::True) {
+    if (methodData->flags.isAbstract) {
         return false;
     }
 
     return true;
+}
+
+bool silenceDeadCodeError(const cfg::InstructionPtr &value) {
+    return value.isSynthetic() || cfg::isa_instruction<cfg::TAbsurd>(value);
 }
 
 unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
@@ -214,10 +216,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
                 if (absl::c_any_of(bb->backEdges, [&](const auto &bb) { return !outEnvironments[bb->id].isDead; })) {
                     for (auto &expr : bb->exprs) {
-                        if (expr.value.isSynthetic()) {
-                            continue;
-                        }
-                        if (cfg::isa_instruction<cfg::TAbsurd>(expr.value)) {
+                        if (silenceDeadCodeError(expr.value)) {
                             continue;
                         }
 
@@ -362,7 +361,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     // this can also be result of evaluating an instruction, e.g. an always false hard_assert
                     bb->firstDeadInstructionIdx = i;
                 }
-            } else if (ctx.state.lspQuery.isEmpty() && current.isDead && !bind.value.isSynthetic()) {
+            } else if (ctx.state.lspQuery.isEmpty() && current.isDead && !silenceDeadCodeError(bind.value)) {
                 if (auto e = ctx.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
                     e.setHeader("This code is unreachable");
                     e.addErrorLine(madeBlockDead, "This expression always raises or can never be computed");

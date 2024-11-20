@@ -1820,6 +1820,8 @@ class Socket < BasicSocket
   MSG_DONTROUTE = ::T.let(nil, ::T.untyped)
   # This message should be non-blocking
   MSG_DONTWAIT = ::T.let(nil, ::T.untyped)
+  # [Data completes connection](https://ruby-doc.org/stdlib-3.0.0/libdoc/socket/rdoc/Socket.html#MSG_EOF)
+  MSG_EOF = ::T.let(nil, ::T.untyped) 
   # [`Data`](https://docs.ruby-lang.org/en/2.7.0/Data.html) completes record
   MSG_EOR = ::T.let(nil, ::T.untyped)
   # Fetch message from error queue
@@ -4769,6 +4771,10 @@ end
 class SocketError < StandardError
 end
 
+# [`Socket::ResolutionError`](https://docs.ruby-lang.org/en/master/Socket/ResolutionError.html)
+# is the error class for socket name resolution.
+class Socket::ResolutionError < SocketError    
+end
 
 # UDP/IP address information used by
 # [`Socket.udp_server_loop`](https://docs.ruby-lang.org/en/2.7.0/Socket.html#method-c-udp_server_loop).

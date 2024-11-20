@@ -534,7 +534,7 @@ class Module < Object
   # ```
   sig do
     params(
-      const_name: T.any(Symbol)
+      const_name: Symbol
     )
     .returns(T.untyped)
   end

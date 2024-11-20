@@ -10,9 +10,9 @@ def show_type_error(&blk)
   rescue TypeError => exception
     # sorbet-runtime includes three lines, something like:
     #
-    #   TypeError: Parameter 'x': Expected type Integer, got type String with value "hello"
-    #   Caller: /home/aprocter/stripe/sorbet/foo.rb:20
-    #   Definition: /home/aprocter/stripe/sorbet/foo.rb:16
+    #   TypeError Parameter 'x': Expected type Integer, got type String with value "hello"
+    #   Caller /home/aprocter/stripe/sorbet/foo.rb:20
+    #   Definition /home/aprocter/stripe/sorbet/foo.rb:16
     #
     # The compiler currently only produces the first of these lines.
     exception_line = exception.message.split("\n").fetch(0)

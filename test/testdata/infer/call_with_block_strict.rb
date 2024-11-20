@@ -35,7 +35,7 @@ end
 
 sig {params(a: Integer, blk: T.proc.returns(String)).void}
 def baz(a, &blk)
-  T.reveal_type(proc(&blk)) # error: Revealed type: `T.proc.returns(T.untyped)`
+  T.reveal_type(proc(&blk)) # error: Revealed type: `T.proc.returns(String)`
   foo(a, &blk)
   foo(a, &nil)
 end

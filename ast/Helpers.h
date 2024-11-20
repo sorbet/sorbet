@@ -414,11 +414,6 @@ public:
                                        {core::Names::Constants::T(), core::Names::Constants::Boolean()});
     }
 
-    static ExpressionPtr KeepForIDE(core::LocOffsets loc, ExpressionPtr arg) {
-        return Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::keepForIde(), loc,
-                     std::move(arg));
-    }
-
     static ExpressionPtr ZSuper(core::LocOffsets loc, core::NameRef method) {
         Send::Flags flags;
         flags.isPrivateOk = true;
@@ -428,14 +423,6 @@ public:
 
     static ExpressionPtr Magic(core::LocOffsets loc) {
         return Constant(loc, core::Symbols::Magic());
-    }
-
-    static ExpressionPtr DefineTopClassOrModule(core::LocOffsets loc, core::ClassOrModuleRef klass) {
-        Send::Flags flags;
-        flags.isRewriterSynthesized = true;
-        // Use a 0-sized loc so that LSP queries for "what is at this location" do not return this synthetic send.
-        return Send(core::LocOffsets{loc.beginLoc, loc.beginLoc}, Magic(loc), core::Names::defineTopClassOrModule(),
-                    loc, 1, SendArgs(Constant(loc, klass)), flags);
     }
 
     static ExpressionPtr RuntimeMethodDefinition(core::LocOffsets loc, core::NameRef name, bool isSelfMethod) {

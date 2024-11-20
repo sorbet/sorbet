@@ -12,9 +12,6 @@ module T::Private::RuntimeLevels
     # Don't even validate in tests, b/c too expensive,
     # or b/c we fully trust the static typing
     :never,
-    # Validate the sig when the file is using the Sorbet Compiler.
-    # Behaves like :never when interpreted.
-    :compiled,
   ].freeze
 
   @check_tests = false

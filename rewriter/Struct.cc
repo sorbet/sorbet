@@ -121,7 +121,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         auto symLoc = sym->loc;
         auto strname = name.shortName(ctx);
         if (!strname.empty() && strname.back() == '=') {
-            if (auto e = ctx.beginError(symLoc, core::errors::Rewriter::InvalidStructMember)) {
+            if (auto e = ctx.beginIndexerError(symLoc, core::errors::Rewriter::InvalidStructMember)) {
                 e.setHeader("Struct member `{}` cannot end with an equal", strname);
             }
         }

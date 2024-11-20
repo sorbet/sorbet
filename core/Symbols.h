@@ -654,7 +654,7 @@ private:
 
     void addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> index);
 };
-CheckSize(ClassOrModule, 128, 8);
+CheckSize(ClassOrModule, 120, 8);
 
 } // namespace sorbet::core
 #endif // SORBET_SYMBOLS_H

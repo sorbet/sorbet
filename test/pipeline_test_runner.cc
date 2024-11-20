@@ -244,8 +244,11 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
         handler.addObserved(*gs, "rewrite-tree", [&]() { return rewritten.tree.toString(*gs); });
         handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return rewritten.tree.showRaw(*gs); });
 
-        core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
-        localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewritten)));
+        {
+            core::UnfreezeNameTable nameTableAccess(*gs); // possibly enters mangled names
+            core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
+            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewritten)));
+        }
 
         handler.addObserved(*gs, "index-tree", [&]() { return localNamed.tree.toString(*gs); });
         handler.addObserved(*gs, "index-tree-raw", [&]() { return localNamed.tree.showRaw(*gs); });
@@ -258,6 +261,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
 
 void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAssertion>> &assertions) {
     vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
+    vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
     vector<std::string> extraPackageFilesDirectorySlashPrefixes;
     vector<std::string> skipRBIExportEnforcementDirs;
     vector<std::string> allowRelaxedPackagerChecksFor;
@@ -266,6 +270,12 @@ void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAss
         StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
     if (extraDirUnderscore.has_value()) {
         extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
+    }
+
+    auto extraDirSlashDeprecated =
+        StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash-deprecated", assertions);
+    if (extraDirSlashDeprecated.has_value()) {
+        extraPackageFilesDirectorySlashDeprecatedPrefixes.emplace_back(extraDirSlashDeprecated.value());
     }
 
     auto extraDirSlash = StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
@@ -278,11 +288,16 @@ void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAss
         allowRelaxedPackagerChecksFor.emplace_back(allowRelaxedPackager.value());
     }
 
+    std::vector<std::string> defaultLayers = {};
+    auto packagerLayers = StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
+
     {
         core::UnfreezeNameTable packageNS(*gs);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-        gs->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashPrefixes,
-                               {}, allowRelaxedPackagerChecksFor, "PACKAGE_ERROR_HINT");
+        gs->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
+                               extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                               extraPackageFilesDirectorySlashPrefixes, {}, allowRelaxedPackagerChecksFor,
+                               packagerLayers, "PACKAGE_ERROR_HINT");
     }
 }
 
@@ -301,6 +316,14 @@ void package(unique_ptr<core::GlobalState> &gs, unique_ptr<WorkerPool> &workers,
             return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
         });
     }
+}
+
+void name(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
+    core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+    core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+    auto foundHashes = nullptr;
+    auto canceled = namer::Namer::run(gs, trees, workers, foundHashes);
+    ENFORCE(!canceled);
 }
 
 TEST_CASE("PerPhaseTest") { // NOLINT
@@ -336,7 +359,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     gs->typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
     // TODO(jez) Allow allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
 
-    if (!BooleanPropertyAssertion::getValue("stripe-mode", assertions).value_or(false)) {
+    if (!BooleanPropertyAssertion::getValue("uniquely-defined-behavior", assertions).value_or(false)) {
         gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
     }
 
@@ -394,10 +417,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         // First run: only the __package.rb files. This populates the packageDB
         package(gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
+        name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
     }
 
     auto nonPackageTrees = index(gs, filesSpan, handler, test);
     package(gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
+    name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
 
     if (enablePackager) {
@@ -446,7 +471,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 core::UnfreezeNameTable nameTableAccess(*rbiGenGs);     // creates singletons and class names
                 core::UnfreezeSymbolTable symbolTableAccess(*rbiGenGs); // enters symbols
                 auto foundHashes = nullptr;
-                trees = move(namer::Namer::run(*rbiGenGs, move(trees), *workers, foundHashes).result());
+                auto canceled = namer::Namer::run(*rbiGenGs, absl::Span<ast::ParsedFile>(trees), *workers, foundHashes);
+                ENFORCE(!canceled);
             }
 
             // Resolver
@@ -473,13 +499,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 }
             }
         }
-    }
-
-    {
-        core::UnfreezeNameTable nameTableAccess(*gs);     // creates singletons and class names
-        core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
-        auto foundHashes = nullptr;
-        trees = move(namer::Namer::run(*gs, move(trees), *workers, foundHashes).result());
     }
 
     for (auto &tree : trees) {
@@ -809,7 +828,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             // to stress the codepath where Namer is not tasked with deleting anything when run for
             // the fast path.
             ENFORCE(!ranIncrementalNamer);
-            vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers, &foundHashes).result());
+            auto canceled = namer::Namer::run(*gs, absl::Span<ast::ParsedFile>(vTmp), *workers, &foundHashes);
+            ENFORCE(!canceled);
             tree = testSerialize(*gs, move(vTmp[0]));
 
             handler.addObserved(*gs, "name-tree", [&]() { return tree.tree.toString(*gs); });
@@ -818,7 +838,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     // resolver
-    trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncrementalNamer).result());
+    {
+        core::UnfreezeNameTable nameTableAccess(*gs);
+        core::UnfreezeSymbolTable symbolTableAccess(*gs);
+        trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncrementalNamer, *workers).result());
+    }
 
     if (enablePackager) {
         trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));

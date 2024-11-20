@@ -10,24 +10,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       begin
-        begin
-          "adds a method"
-          <runtime method definition of <it 'adds a method'>>
-        end
-        class <emptyTree>::<C <describe 'inner'>><<C <todo sym>>> < (<self>)
-          ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-            <self>.void()
-          end
+        "adds a method"
+        <runtime method definition of <it 'adds a method'>>
+      end
 
-          def <it 'inner test'><<todo method>>(&<blk>)
-            <emptyTree>
-          end
-
-          begin
-            "inner test"
-            <runtime method definition of <it 'inner test'>>
-          end
+      class <emptyTree>::<C <describe 'inner'>><<C <todo sym>>> < (<self>)
+        ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+          <self>.void()
         end
+
+        def <it 'inner test'><<todo method>>(&<blk>)
+          <emptyTree>
+        end
+
+        "inner test"
+
+        <runtime method definition of <it 'inner test'>>
       end
     end
   end
@@ -48,10 +46,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.test_method()
       end
 
-      begin
-        "adds a method"
-        <runtime method definition of <it 'adds a method'>>
-      end
+      "adds a method"
+
+      <runtime method definition of <it 'adds a method'>>
     end
   end
 end

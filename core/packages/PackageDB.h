@@ -60,8 +60,14 @@ public:
     }
 
     const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes() const;
+    const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes() const;
     const std::vector<std::string> &skipRBIExportEnforcementDirs() const;
+    // Possible layers for packages to be in. The layers are ordered lowest to highest.
+    // Ie. {'util', 'app'} means that code in `app` can call code in `util`, but code in `util` cannot call code in
+    // `app`.
+    const std::vector<core::NameRef> &layers() const;
+    const bool enforceLayering() const;
 
     const std::string_view errorHint() const;
     bool allowRelaxedPackagerChecksFor(const MangledName mangledName) const;
@@ -69,10 +75,12 @@ public:
 private:
     bool enabled_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
+    std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;
     std::string errorHint_;
     std::vector<std::string> skipRBIExportEnforcementDirs_;
     std::vector<MangledName> allowRelaxedPackagerChecksFor_;
+    std::vector<core::NameRef> layers_;
 
     // This vector is kept in sync with the size of the file table in the global state by
     // `Packager::setPackageNameOnFiles`. A `FileRef` being out of bounds in this vector is treated as the file having

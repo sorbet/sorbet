@@ -155,8 +155,6 @@ struct FoundMethod final {
     struct Flags {
         bool isSelfMethod : 1;
         bool isRewriterSynthesized : 1;
-        // Controls whether this gets compiled as a VM_METHOD_TYPE_IVAR method, for performance
-        bool isAttrReader : 1;
         // Controls whether to display this as an attr_*/prop-defined method in the LSP client
         // This is best effort and thus UI-only! Should not be used for the sake of type checking.
         bool isAttrBestEffortUIOnly : 1;
@@ -165,8 +163,18 @@ struct FoundMethod final {
 
         // In C++20 we can replace this with bit field initialzers
         Flags()
-            : isSelfMethod(false), isRewriterSynthesized(false), isAttrReader(false), isAttrBestEffortUIOnly(false),
-              discardDef(false), genericPropGetter(false) {}
+            : isSelfMethod(false), isRewriterSynthesized(false), isAttrBestEffortUIOnly(false), discardDef(false),
+              genericPropGetter(false) {}
+
+        bool operator==(const Flags &other) const noexcept {
+            return isSelfMethod == other.isSelfMethod && isRewriterSynthesized == other.isRewriterSynthesized &&
+                   isAttrBestEffortUIOnly == other.isAttrBestEffortUIOnly && discardDef == other.discardDef &&
+                   genericPropGetter == other.genericPropGetter;
+        }
+
+        bool operator!=(const Flags &other) const noexcept {
+            return !(*this == other);
+        }
     };
     Flags flags;
     CheckSize(Flags, 1, 1);

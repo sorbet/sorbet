@@ -27,12 +27,12 @@ suggest-constant-type.rb:8: Constants must have type annotations with `T.let` wh
             ^^^^^^
 
 suggest-constant-type.rb:13: Constants must have type annotations with `T.let` when specifying `# typed: strict` https://srb.help/7027
-    13 |G = ["foo", 1, :symbol] # widens proxy types
-            ^^^^^^^^^^^^^^^^^^^
+    13 |G = ["foo", 1, :symbol, puts] # widens proxy types
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-constant-type.rb:13: Replaced with `T.let(["foo", 1, :symbol], T::Array[T.any(Integer, String, Symbol)])`
-    13 |G = ["foo", 1, :symbol] # widens proxy types
-            ^^^^^^^^^^^^^^^^^^^
+    suggest-constant-type.rb:13: Replaced with `T.let(["foo", 1, :symbol, puts], T::Array[T.nilable(T.any(Integer, String, Symbol))])`
+    13 |G = ["foo", 1, :symbol, puts] # widens proxy types
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 5
 
 --------------------------------------------------------------------------
@@ -49,4 +49,4 @@ C = B1 + 1 # does only a single iteration at a time
 E = F # doesn't do forward references
 F = 0
 
-G = T.let(["foo", 1, :symbol], T::Array[T.any(Integer, String, Symbol)]) # widens proxy types
+G = T.let(["foo", 1, :symbol, puts], T::Array[T.nilable(T.any(Integer, String, Symbol))]) # widens proxy types

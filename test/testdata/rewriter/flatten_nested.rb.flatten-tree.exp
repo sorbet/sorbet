@@ -1,35 +1,22 @@
 begin
-  <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::A)
-          <emptyTree>
-        end
         ::A.new().outer_method()
         ::A.new().inner_method()
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::B)
-          <emptyTree>
-        end
         b = ::B.new()
         b.outer_method()
         b.inner_method()
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::C)
-          <emptyTree>
-        end
         ::C.outer_method()
         ::C.new().inner_method()
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::D)
-          <emptyTree>
-        end
         ::D.outer_method()
         ::D.inner_method()
         <emptyTree>

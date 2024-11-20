@@ -32,6 +32,10 @@ public:
     bool isCondSet() {
         return cond.variable.exists();
     }
+    // Returns true when this exit condition represents an unconditional branch.
+    bool isUnconditional() const {
+        return thenb == elseb;
+    }
     BlockExit() : cond(), thenb(nullptr), elseb(nullptr){};
 };
 
@@ -63,14 +67,6 @@ public:
     };
     Flags flags;
     int outerLoops = 0;
-    // Tracks which Ruby block (do ... end) or Ruby exception-handling region
-    // (in begin ... rescue ... else ... ensure ... end, each `...` is its own
-    // region) this BasicBlock was generated from.  We call it a "region" to
-    // avoid confusion between BasicBlocks and Ruby blocks.
-    //
-    // Incremented every time builder_walk sees a new Ruby block while traversing a Ruby method.
-    // rubyRegionId == 0 means code at the top-level of this method (outside any Ruby block).
-    int rubyRegionId = 0;
     int firstDeadInstructionIdx = -1;
     std::vector<Binding> exprs;
     BlockExit bexit;
@@ -124,7 +120,6 @@ public:
      */
     core::MethodRef symbol;
     int maxBasicBlockId = 0;
-    int maxRubyRegionId = 0;
 
     /**
      * Get the number of unique local variables in the CFG. Used to size vectors that contain an entry per LocalRef.
@@ -146,13 +141,16 @@ public:
      * The name here goes from using forwards or backwards edges as dependencies in topological sort.
      * This in indeed kind-a reverse to what order would node be in: for topological sort with forward edges
      * the entry point is going to be the last node in sorted array.
+     *
+     * This is a cached post-order traversal of the CFG from the entry node, which is why we traverse it in reverse when
+     * typechecking: the reversed post-order traversal ensures that we visit all nodes in data flow order.
      */
     std::vector<BasicBlock *> forwardsTopoSort;
     inline BasicBlock *entry() {
         return basicBlocks[0].get();
     }
 
-    BasicBlock *deadBlock() {
+    BasicBlock *deadBlock() const {
         return basicBlocks[1].get();
     };
 
@@ -192,8 +190,7 @@ public:
 
 private:
     CFG();
-    BasicBlock *freshBlock(int outerLoops, BasicBlock *current);
-    BasicBlock *freshBlockWithRegion(int outerLoops, int rubyRegionId);
+    BasicBlock *freshBlock(int outerLoops);
     void enterLocalInternal(core::LocalVariable variable, LocalRef &ref);
     std::vector<int> minLoops;
     std::vector<int> maxLoopWrite;

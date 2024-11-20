@@ -176,20 +176,15 @@ pair<ast::ExpressionPtr, ast::ExpressionPtr> ASTUtil::extractHashValue(core::Mut
     return make_pair(nullptr, nullptr);
 }
 
-ast::Send *ASTUtil::castSig(ast::ExpressionPtr &expr) {
-    auto *send = ast::cast_tree<ast::Send>(expr);
-    if (send == nullptr) {
-        return nullptr;
-    }
-
-    return ASTUtil::castSig(send);
-}
+namespace {
 
 // This will return nullptr if the argument is not the right shape as a sig (i.e. a send to a method called `sig` with 0
 // or 1 arguments, that in turn contains a block that contains a send) and it also checks the final method of the send
 // against the provided `returns` (so that some uses can specifically look for `void` sigs while others can specifically
 // look for non-void sigs).
-ast::Send *ASTUtil::castSig(ast::Send *send) {
+template <typename T> T *castSigImpl(T *send) {
+    static_assert(is_same_v<remove_const_t<T>, ast::Send>);
+
     if (send->fun != core::Names::sig()) {
         return nullptr;
     }
@@ -213,6 +208,34 @@ ast::Send *ASTUtil::castSig(ast::Send *send) {
     } else {
         return nullptr;
     }
+}
+
+} // namespace
+
+ast::Send *ASTUtil::castSig(ast::ExpressionPtr &expr) {
+    auto *send = ast::cast_tree<ast::Send>(expr);
+    if (send == nullptr) {
+        return nullptr;
+    }
+
+    return castSigImpl(send);
+}
+
+const ast::Send *ASTUtil::castSig(const ast::ExpressionPtr &expr) {
+    auto *send = ast::cast_tree<ast::Send>(expr);
+    if (send == nullptr) {
+        return nullptr;
+    }
+
+    return castSigImpl(send);
+}
+
+ast::Send *ASTUtil::castSig(ast::Send *expr) {
+    return castSigImpl(expr);
+}
+
+const ast::Send *ASTUtil::castSig(const ast::Send *expr) {
+    return castSigImpl(expr);
 }
 
 ast::ExpressionPtr ASTUtil::mkKwArgsHash(const ast::Send *send) {

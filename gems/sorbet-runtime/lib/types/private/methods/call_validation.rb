@@ -14,17 +14,7 @@ module T::Private::Methods::CallValidation
   def self.wrap_method_if_needed(mod, method_sig, original_method)
     original_visibility = visibility_method_name(mod, method_sig.method_name)
     if method_sig.mode == T::Private::Methods::Modes.abstract
-      T::Private::ClassUtils.replace_method(mod, method_sig.method_name, true) do |*args, &blk|
-        # We allow abstract methods to be implemented by things further down the ancestor chain.
-        # So, if a super method exists, call it.
-        if defined?(super)
-          super(*args, &blk)
-        else
-          raise NotImplementedError.new(
-            "The method `#{method_sig.method_name}` on #{mod} is declared as `abstract`. It does not have an implementation."
-          )
-        end
-      end
+      create_abstract_wrapper(mod, method_sig, original_method, original_visibility)
     # Do nothing in this case; this method was not wrapped in _on_method_added.
     elsif method_sig.defined_raw
     # Note, this logic is duplicated (intentionally, for micro-perf) at `Methods._on_method_added`,
@@ -53,6 +43,24 @@ module T::Private::Methods::CallValidation
 
   def self.disable_fast_path
     @is_allowed_to_have_fast_path = false
+  end
+
+  def self.create_abstract_wrapper(mod, method_sig, original_method, original_visibility)
+    mod.module_eval(<<~METHOD, __FILE__, __LINE__ + 1)
+      #{original_visibility}
+
+      def #{method_sig.method_name}(...)
+        # We allow abstract methods to be implemented by things further down the ancestor chain.
+        # So, if a super method exists, call it.
+        if defined?(super)
+          super
+        else
+          raise NotImplementedError.new(
+            "The method `#{method_sig.method_name}` on #{mod} is declared as `abstract`. It does not have an implementation."
+          )
+        end
+      end
+    METHOD
   end
 
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
@@ -291,11 +299,21 @@ module T::Private::Methods::CallValidation
 
   def self.report_error(method_sig, error_message, kind, name, type, value, caller_offset: 0)
     caller_loc = T.must(caller_locations(3 + caller_offset, 1))[0]
-    definition_file, definition_line = method_sig.method.source_location
+    method = method_sig.method
+    definition_file, definition_line = method.source_location
+
+    owner = method.owner
+    pretty_method_name =
+      if owner.singleton_class? && owner.respond_to?(:attached_object)
+        # attached_object is new in Ruby 3.2
+        "#{owner.attached_object}.#{method.name}"
+      else
+        "#{owner}##{method.name}"
+      end
 
     pretty_message = "#{kind}#{name ? " '#{name}'" : ''}: #{error_message}\n" \
       "Caller: #{caller_loc.path}:#{caller_loc.lineno}\n" \
-      "Definition: #{definition_file}:#{definition_line}"
+      "Definition: #{definition_file}:#{definition_line} (#{pretty_method_name})"
 
     T::Configuration.call_validation_error_handler(
       method_sig,

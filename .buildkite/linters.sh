@@ -65,6 +65,23 @@ if ! ./tools/scripts/format_website.sh -t &> format_website; then
     buildkite-agent annotate --context tools/scripts/format_website.sh --style error --append < format_website
 fi
 
+if grep -n -r '^  \w*\.md' website &> lint_docusaurus_md; then
+  globalErr=1
+  echo "^^^ +++"
+  buildkite-agent annotate --context "Docusaurus Link Reference Definitions" --style error --append <<EOF
+These markdown files have link reference definitions which split onto multiple lines.
+
+Prettier insists on splitting long link reference definitions onto multiple lines,
+but Docusaurus fails to linkify these definitions.
+
+Rewrite these link reference definitions to be inline links to avoid broken links:
+
+\`\`\`
+$(< lint_docusaurus_md)
+\`\`\`
+EOF
+fi
+
 echo "~~~ Checking the vscode extension"
 pushd vscode_extension
 yarn install

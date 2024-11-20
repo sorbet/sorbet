@@ -54,7 +54,7 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, const
             continue;
         }
 
-        auto &mapEntry = out[ref.sym];
+        auto &mapEntry = out[ref.sym.dealias(ctx)];
         mapEntry.entries.insert(defn.data(pf).sym.asClassOrModuleRef());
         mapEntry.classKind = ref.parentKind;
     }

@@ -1,5 +1,5 @@
 # typed: false
-# stripe-mode: true
+# uniquely-defined-behavior: true
 require 'x'
 
 module Foo # error: `Foo` has behavior defined in multiple files

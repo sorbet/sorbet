@@ -18,11 +18,3 @@ end
 module T::Private::Methods::CallValidation
   def self.disable_fast_path; end
 end
-
-module T::Private::Compiler
-  sig {returns(T::Boolean)}
-  def self.running_compiled?; end
-
-  sig {returns(T.nilable(String))}
-  def self.compiler_version; end
-end

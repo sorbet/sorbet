@@ -12,23 +12,33 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retType,
-                        const core::DispatchResult &dispatchResult, const unique_ptr<core::TypeConstraint> &constraint,
+string methodInfoString(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
                         const core::ShowOptions options) {
     string contents;
     auto start = &dispatchResult;
-    ;
+
     while (start != nullptr) {
         auto &component = start->main;
         if (component.method.exists()) {
             if (!contents.empty()) {
                 contents += "\n";
             }
-            contents = absl::StrCat(contents, core::source_generator::prettyTypeForMethod(gs, component.method,
-                                                                                          component.receiver, retType,
-                                                                                          constraint.get(), options));
+            contents = absl::StrCat(
+                move(contents), "# ", component.method.show(gs), ":\n",
+                core::source_generator::prettyTypeForMethod(gs, component.method, component.receiver, options));
         }
         start = start->secondary.get();
+    }
+
+    // contents being empty implies that there were no components that existed, which means that
+    // there was an error. We don't show any hover results, so that the only thing that's shown on
+    // hover is any relevant diagnostics (e.g., we could show `result type: T.untyped` but for
+    // errors that would just be misleading--people might think the problem is _caused_ by untyped,
+    // but the untyped is an artifact of how we recover from errors).
+    if (!contents.empty()) {
+        // Reads from returnType on the overall DispatchResult, which will have aggregated all the
+        // components (e.g., unions and intersections)
+        contents = absl::StrCat(move(contents), "\n\n# result type:\n", dispatchResult.returnType.showWithMoreInfo(gs));
     }
 
     return contents;
@@ -49,11 +59,14 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         return response;
     }
 
+    auto uri = params->textDocument->uri;
+    auto fref = config.uri2FileRef(gs, uri);
+    // LSPQuery::byLoc reports an error if the file or loc don't exist
+    auto queryLoc = params->position->toLoc(gs, fref).value();
+
     auto &queryResponses = result.responses;
     auto clientHoverMarkupKind = config.getClientConfig().clientHoverMarkupKind;
     if (queryResponses.empty()) {
-        auto fref = config.uri2FileRef(gs, params->textDocument->uri);
-        ENFORCE(fref.exists());
         auto level = fref.data(gs).strictLevel;
         if (level < core::StrictLevel::True) {
             auto text = level == core::StrictLevel::Ignore
@@ -69,31 +82,55 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         return response;
     }
 
-    auto resp = move(queryResponses[0]);
+    auto resp = skipLiteralIfMethodDef(gs, queryResponses);
     auto options = core::ShowOptions();
     vector<core::Loc> documentationLocations;
     string typeString;
 
     if (auto s = resp->isSend()) {
-        auto start = s->dispatchResult.get();
-        if (start != nullptr && start->main.method.exists() && !start->main.receiver.isUntyped()) {
-            auto loc = start->main.method.data(gs)->loc();
-            if (loc.exists()) {
-                documentationLocations.emplace_back(loc);
+        // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
+        if (s->funLoc().exists() && s->funLoc().contains(queryLoc)) {
+            auto start = s->dispatchResult.get();
+            if (start != nullptr && start->main.method.exists() && !start->main.receiver.isUntyped()) {
+                auto loc = start->main.method.data(gs)->loc();
+                if (loc.exists()) {
+                    documentationLocations.emplace_back(loc);
+                }
+            }
+
+            if (s->dispatchResult->main.method.exists() &&
+                s->dispatchResult->main.method.data(gs)->owner == core::Symbols::MagicSingleton()) {
+                // Most <Magic>.<foo> are not meant to be exposed to the user. Instead, just show
+                // the result type.
+                typeString = s->dispatchResult->returnType.showWithMoreInfo(gs);
+            } else {
+                typeString = methodInfoString(gs, *s->dispatchResult, options);
             }
         }
     } else if (auto c = resp->isConstant()) {
-        for (auto loc : c->symbol.locs(gs)) {
+        for (auto loc : c->symbolBeforeDealias.locs(gs)) {
             if (loc.exists()) {
                 documentationLocations.emplace_back(loc);
             }
         }
+        auto dealiased = c->symbolBeforeDealias.dealias(gs);
+        if (dealiased != c->symbolBeforeDealias) {
+            for (auto loc : dealiased.locs(gs)) {
+                if (loc.exists()) {
+                    documentationLocations.emplace_back(loc);
+                }
+            }
+        }
+
+        typeString = prettyTypeForConstant(gs, c->symbolBeforeDealias);
     } else if (auto d = resp->isMethodDef()) {
         for (auto loc : d->symbol.data(gs)->locs()) {
             if (loc.exists()) {
                 documentationLocations.emplace_back(loc);
             }
         }
+
+        typeString = core::source_generator::prettyTypeForMethod(gs, d->symbol, nullptr, options);
     } else if (resp->isField()) {
         const auto &origins = resp->getTypeAndOrigins().origins;
         for (auto loc : origins) {
@@ -101,29 +138,15 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
                 documentationLocations.emplace_back(loc);
             }
         }
-    }
 
-    if (auto sendResp = resp->isSend()) {
-        auto retType = sendResp->dispatchResult->returnType;
-        auto &constraint = sendResp->dispatchResult->main.constr;
-        if (constraint) {
-            retType = core::Types::instantiate(gs, retType, *constraint);
+        auto retType = resp->getRetType();
+        // Some untyped arguments have null types.
+        if (!retType) {
+            retType = core::Types::untypedUntracked();
         }
-        if (sendResp->dispatchResult->main.method.exists() &&
-            sendResp->dispatchResult->main.method.data(gs)->owner == core::Symbols::MagicSingleton()) {
-            // Most <Magic>.<foo> are not meant to be exposed to the user. Instead, just show
-            // the result type.
-            typeString = retType.showWithMoreInfo(gs);
-        } else {
-            typeString = methodInfoString(gs, retType, *sendResp->dispatchResult, constraint, options);
-        }
-    } else if (auto defResp = resp->isMethodDef()) {
-        typeString = core::source_generator::prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type,
-                                                                 nullptr, options);
-    } else if (auto constResp = resp->isConstant()) {
-        typeString = prettyTypeForConstant(gs, constResp->symbol);
+        typeString = retType.showWithMoreInfo(gs);
     } else {
-        core::TypePtr retType = resp->getRetType();
+        auto retType = resp->getRetType();
         // Some untyped arguments have null types.
         if (!retType) {
             retType = core::Types::untypedUntracked();

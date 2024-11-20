@@ -50,9 +50,37 @@ LSPFileUpdates LSPFileUpdates::copy() const {
     return copy;
 }
 
-LSPFileUpdates::FastPathFilesToTypecheckResult LSPFileUpdates::fastPathFilesToTypecheck(
-    const core::GlobalState &gs, const LSPConfiguration &config, const vector<shared_ptr<core::File>> &updatedFiles,
-    const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles, bool isNoopUpdateForRetypecheck) {
+namespace {
+
+// Returns `true` if the two containers share a value, and `false` otherwise. This requires that the two containers are
+// sorted, which is also a requirement of using `absl::c_set_intersetion`, so this is a drop-in replacement when the
+// resulting set isn't needed.
+template <typename C1, typename C2> bool intersects(const C1 &left, const C2 &right) {
+    auto leftIt = left.begin();
+    auto rightIt = right.begin();
+
+    while (leftIt != left.end() && rightIt != right.end()) {
+        if (*leftIt == *rightIt) {
+            return true;
+        }
+
+        if (*leftIt < *rightIt) {
+            ++leftIt;
+        } else {
+            ++rightIt;
+        }
+    }
+
+    return false;
+}
+
+} // namespace
+
+LSPFileUpdates::FastPathFilesToTypecheckResult
+LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
+                                         const vector<shared_ptr<core::File>> &updatedFiles,
+                                         const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles,
+                                         bool isNoopUpdateForRetypecheck) {
     FastPathFilesToTypecheckResult result;
     Timer timeit(config.logger, "compute_fast_path_file_set");
     vector<core::SymbolHash> changedRetypecheckableSymbolHashes;
@@ -142,11 +170,7 @@ LSPFileUpdates::FastPathFilesToTypecheckResult LSPFileUpdates::fastPathFilesToTy
         }
 
         ENFORCE(oldFile->getFileHash() != nullptr);
-        const auto &oldHash = *oldFile->getFileHash();
-        vector<core::WithoutUniqueNameHash> intersection;
-        absl::c_set_intersection(result.changedSymbolNameHashes, oldHash.usages.nameHashes,
-                                 std::back_inserter(intersection));
-        if (intersection.empty() && !(changedPackages.contains(gs.packageDB().getPackageNameForFile(ref)) && isNoopUpdateForRetypecheck) ) {
+        if (!intersects(result.changedSymbolNameHashes, oldFile->getFileHash()->usages.nameHashes) && !(changedPackages.contains(gs.packageDB().getPackageNameForFile(ref)) && isNoopUpdateForRetypecheck) {
             continue;
         }
 

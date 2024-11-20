@@ -159,12 +159,14 @@ struct Options {
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
-    bool stripeMode = false;
+    bool uniquelyDefinedBehavior = false;
     bool stripePackages = false;
     std::string stripePackagesHint = "";
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
+    std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes;
     std::vector<std::string> allowRelaxedPackagerChecksFor;
+    std::vector<std::string> packagerLayers;
     std::string typedSource = "";
     std::string cacheDir = "";
     // This configured both maximum filesystem db size and max virtual memory usage
@@ -205,7 +207,7 @@ struct Options {
 
     std::string metricsFile;
     std::string metricsRepo = "none";
-    std::string metricsPrefix = "ruby_typer.unknown.";
+    std::string metricsPrefix = "ruby_typer.unknown";
     std::string metricsBranch = "none";
     std::string metricsSha = "none";
     std::map<std::string, std::string> metricsExtraTags; // be super careful with cardinality here
@@ -236,6 +238,9 @@ struct Options {
     std::vector<std::string> autogenSubclassesRelativeIgnorePatterns;
     // Allow RBI files to define behavior if they are in one of these paths.
     std::vector<std::string> autogenBehaviorAllowedInRBIFilesPaths;
+    // When set, msgpack serialization of references skips extra metadata like inheritance information and expression
+    // ranges.
+    bool autogenMsgpackSkipReferenceMetadata;
     AutogenConstCacheConfig autogenConstantCacheConfig;
 
     // List of directories not available editor-side. References to files in these directories should be sent via
@@ -247,7 +252,6 @@ struct Options {
     bool lspAllBetaFeaturesEnabled = false;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
     bool lspDocumentHighlightEnabled = false;
-    bool lspDocumentSymbolEnabled = false;
     bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
     bool lspExtractToVariableEnabled = false;
@@ -261,6 +265,7 @@ struct Options {
     std::string inlineInput; // passed via -e
     std::string debugLogFile;
     std::string webTraceFile;
+    std::string inlineRBIInput; // passed via --e-rbi
 
     // Path to an RBI whose contents should be minimized by subtracting parts that Sorbet already
     // has a record of in its own GlobalState.

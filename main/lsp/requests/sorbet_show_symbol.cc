@@ -26,6 +26,11 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
         return response;
     }
 
+    auto uri = params->textDocument->uri;
+    auto fref = config.uri2FileRef(gs, uri);
+    // LSPQuery::byLoc reports an error if the file or loc don't exist
+    auto queryLoc = params->position->toLoc(gs, fref).value();
+
     auto &queryResponses = result.responses;
     if (queryResponses.empty()) {
         // Note: Need to specifically specify the variant type here so the null gets placed into the proper slot.
@@ -33,7 +38,7 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
         return response;
     }
 
-    auto resp = move(queryResponses[0]);
+    auto resp = skipLiteralIfMethodDef(gs, queryResponses);
 
     core::SymbolRef sym;
     if (auto c = resp->isConstant()) {
@@ -45,9 +50,12 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
     } else if (auto f = resp->isField()) {
         sym = f->symbol;
     } else if (auto s = resp->isSend()) {
-        if (s->dispatchResult->secondary == nullptr) {
-            // Multiple results not currently supported.
-            sym = s->dispatchResult->main.method;
+        // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
+        if (s->funLoc().exists() && s->funLoc().contains(queryLoc)) {
+            if (s->dispatchResult->secondary == nullptr) {
+                // Multiple results not currently supported.
+                sym = s->dispatchResult->main.method;
+            }
         }
     }
 

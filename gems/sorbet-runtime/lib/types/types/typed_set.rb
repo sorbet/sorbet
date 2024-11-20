@@ -4,7 +4,7 @@
 module T::Types
   class TypedSet < TypedEnumerable
     def underlying_class
-      Hash
+      Set
     end
 
     # overrides Base
@@ -37,7 +37,7 @@ module T::Types
 
     class Untyped < TypedSet
       def initialize
-        super(T.untyped)
+        super(T::Types::Untyped::Private::INSTANCE)
       end
 
       def valid?(obj)

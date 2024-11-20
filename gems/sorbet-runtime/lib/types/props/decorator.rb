@@ -430,7 +430,7 @@ class T::Props::Decorator
     else
       nonnil_type = T::Utils.unwrap_nilable(type)
       if nonnil_type
-        T.unsafe(T.nilable(T.all(nonnil_type, T.deprecated_enum(enum))))
+        T.unsafe(T.nilable(T.all(T.unsafe(nonnil_type), T.deprecated_enum(enum))))
       else
         T.unsafe(T.all(T.unsafe(type), T.deprecated_enum(enum)))
       end

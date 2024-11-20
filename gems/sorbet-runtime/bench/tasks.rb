@@ -12,6 +12,7 @@ require_relative 'sigs'
 require_relative 'tutils'
 require_relative 'typecheck'
 require_relative 'typecheck_kwargs_splat'
+require_relative 'enum'
 
 namespace :bench do
   task :getters do
@@ -56,6 +57,10 @@ namespace :bench do
 
   task :tutils do
     SorbetBenchmarks::TUtils.run
+  end
+
+  task :enum do
+    SorbetBenchmarks::Enum.run
   end
 
   task all: %i[getters setters constructor deserialize prop_definition serialize_custom_type sigs tutils typecheck]

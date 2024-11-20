@@ -1,0 +1,16 @@
+# typed: true
+
+sig {
+  params(x: T.nilable(Integer, String))
+  #                   ^^^^^^^^^^^^^^^ error: `T.nilable` expects exactly `1` arguments, but got `2`
+    .void(42)
+  #       ^^ error: `void` expects exactly `0` arguments, but got `1`
+}
+def example(x); end
+
+sig {
+  params(x: T.any)
+  #         ^^^^^ error: `any` expects at least `2` arguments, but got `0`
+    .void
+}
+def zero_args(x); end

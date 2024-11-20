@@ -1,9 +1,5 @@
-begin
-  <emptyTree>
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      1.+("hi")
-    end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def self.<static-init><<static-init>$CENSORED>(<blk>)
+    1.+("hi")
   end
-  <emptyTree>
 end

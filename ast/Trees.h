@@ -217,6 +217,7 @@ public:
     }
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string nodeName() const;
 
@@ -339,9 +340,11 @@ template <> inline const ExpressionPtr &ExpressionPtr::cast<ExpressionPtr>(const
     return tree;
 }
 
-#define EXPRESSION(name)                                                                  \
-    class name;                                                                           \
-    template <> struct ExpressionToTag<name> { static constexpr Tag value = Tag::name; }; \
+#define EXPRESSION(name)                        \
+    class name;                                 \
+    template <> struct ExpressionToTag<name> {  \
+        static constexpr Tag value = Tag::name; \
+    };                                          \
     class __attribute__((aligned(8))) name final
 
 EXPRESSION(ClassDef) {
@@ -374,6 +377,7 @@ public:
              ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -403,6 +407,7 @@ public:
               ARGS_store args, ExpressionPtr rhs, Flags flags);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -423,6 +428,7 @@ public:
     If(core::LocOffsets loc, ExpressionPtr cond, ExpressionPtr thenp, ExpressionPtr elsep);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -442,6 +448,7 @@ public:
     While(core::LocOffsets loc, ExpressionPtr cond, ExpressionPtr body);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -460,6 +467,7 @@ public:
     Break(core::LocOffsets loc, ExpressionPtr expr);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -476,6 +484,7 @@ public:
     Retry(core::LocOffsets loc);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -494,6 +503,7 @@ public:
     Next(core::LocOffsets loc, ExpressionPtr expr);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -512,6 +522,7 @@ public:
     Return(core::LocOffsets loc, ExpressionPtr expr);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -538,6 +549,7 @@ public:
     RescueCase(core::LocOffsets loc, EXCEPTION_store exceptions, ExpressionPtr var, ExpressionPtr body);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -563,6 +575,7 @@ public:
            ExpressionPtr ensure);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -581,6 +594,7 @@ public:
     Local(core::LocOffsets loc, core::LocalVariable localVariable1);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -606,6 +620,7 @@ public:
     UnresolvedIdent(core::LocOffsets loc, Kind kind, core::NameRef name);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -624,6 +639,7 @@ public:
     RestArg(core::LocOffsets loc, ExpressionPtr arg);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -642,6 +658,7 @@ public:
     KeywordArg(core::LocOffsets loc, ExpressionPtr expr);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -661,6 +678,7 @@ public:
     OptionalArg(core::LocOffsets loc, ExpressionPtr expr, ExpressionPtr default_);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -679,6 +697,7 @@ public:
     BlockArg(core::LocOffsets loc, ExpressionPtr expr);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -697,6 +716,7 @@ public:
     ShadowArg(core::LocOffsets loc, ExpressionPtr expr);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -716,6 +736,7 @@ public:
     Assign(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -740,6 +761,14 @@ public:
 
         // In C++20 we can replace this with bit field initialzers
         Flags() : isPrivateOk(false), isRewriterSynthesized(false), hasBlock(false) {}
+        bool operator==(const Flags &other) const noexcept {
+            return isPrivateOk == other.isPrivateOk && isRewriterSynthesized == other.isRewriterSynthesized &&
+                   hasBlock == other.hasBlock;
+        }
+
+        bool operator!=(const Flags &other) const noexcept {
+            return !(*this == other);
+        }
     };
     CheckSize(Flags, 1, 1);
 
@@ -781,6 +810,7 @@ public:
          ARGS_store args, Flags flags = {});
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     // Returns nullptr if no block present.
     const ast::Block *block() const;
@@ -809,9 +839,6 @@ public:
 
     // Insert the given positional argument at the given position, shifting existing arguments over.
     void insertPosArg(uint16_t index, ExpressionPtr arg);
-
-    // Removes the position argument at the given index.
-    void removePosArg(uint16_t index);
 
     // Reserve space for the given number of arguments.
     void reserveArguments(size_t posArgs, size_t kwArgs, bool hasSplat, bool hasBlock) {
@@ -966,6 +993,7 @@ public:
     Cast(core::LocOffsets loc, core::TypePtr ty, ExpressionPtr arg, core::NameRef cast, ExpressionPtr typeExpr);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -988,6 +1016,7 @@ public:
     Hash(core::LocOffsets loc, ENTRY_store keys, ENTRY_store values);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1009,6 +1038,7 @@ public:
     Array(core::LocOffsets loc, ENTRY_store elems);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1027,15 +1057,18 @@ public:
     Literal(core::LocOffsets loc, const core::TypePtr &value);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
     std::string nodeName() const;
     bool isString() const;
     bool isSymbol() const;
+    bool isName() const;
     bool isNil(const core::GlobalState &gs) const;
     core::NameRef asString() const;
     core::NameRef asSymbol() const;
+    core::NameRef asName() const;
     bool isTrue(const core::GlobalState &gs) const;
     bool isFalse(const core::GlobalState &gs) const;
 
@@ -1053,6 +1086,7 @@ public:
     UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1077,6 +1111,7 @@ public:
     ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, ExpressionPtr original);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1095,6 +1130,7 @@ public:
     ZSuperArgs(core::LocOffsets loc);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1114,6 +1150,7 @@ public:
     Block(core::LocOffsets loc, MethodDef::ARGS_store args, ExpressionPtr body);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1137,6 +1174,7 @@ public:
     InsSeq(core::LocOffsets locOffsets, STATS_store stats, ExpressionPtr expr);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1157,6 +1195,7 @@ public:
     RuntimeMethodDefinition(core::LocOffsets loc, core::NameRef name, bool isSelfMethod);
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1173,6 +1212,7 @@ public:
     EmptyTree();
 
     ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;

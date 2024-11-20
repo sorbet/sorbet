@@ -1685,3 +1685,37 @@ class IRB::WorkSpace
   # `IRB.conf[:__MAIN__]`
   def main; end
 end
+
+module IRB::Command
+  class << self
+    attr_reader :commands
+
+    def register(name, command_class); end
+  end
+end
+
+class IRB::Command::Base
+  class << self
+    def category(category = nil); end
+
+    def description(description = nil); end
+
+    def help_message(help_message = nil); end
+  end
+end
+
+module IRB::HelperMethod
+  class << self
+    attr_reader :helper_methods
+
+    def register(name, helper_class); end
+
+    def all_helper_methods_info; end
+  end
+end
+
+class IRB::HelperMethod::Base
+  class << self
+    def description(description = nil); end
+  end
+end

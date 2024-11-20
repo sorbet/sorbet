@@ -9,6 +9,7 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/TypeConstraint.h"
+#include "core/TypeErrorDiagnostics.h"
 #include "core/errors/infer.h"
 #include "core/errors/resolver.h"
 #include <utility>
@@ -143,6 +144,10 @@ TypePtr Types::Object() {
     return make_type<ClassType>(Symbols::Object());
 }
 
+TypePtr Types::BasicObject() {
+    return make_type<ClassType>(Symbols::BasicObject());
+}
+
 TypePtr Types::falsyTypes() {
     static auto res = OrType::make_shared(Types::nilClass(), Types::falseClass());
     return res;
@@ -272,8 +277,7 @@ bool Types::canBeFalsy(const GlobalState &gs, const TypePtr &what) {
         return true;
     }
     return Types::isSubType(gs, Types::falseClass(), what) ||
-           Types::isSubType(gs, Types::nilClass(),
-                            what); // check if inhabited by falsy values
+           Types::isSubType(gs, Types::nilClass(), what); // check if inhabited by falsy values
 }
 
 TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, const TypePtr &what) {
@@ -629,14 +633,12 @@ InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, 
         for (auto originalTp : asIf.data(gs)->typeMembers()) {
             auto name = originalTp.data(gs)->name;
             SymbolRef align;
-            int i = 0;
             for (auto x : what.data(gs)->typeMembers()) {
                 if (x.data(gs)->name == name) {
                     align = x;
                     currentAlignment.emplace_back(x);
                     break;
                 }
-                i++;
             }
             if (!align.exists()) {
                 currentAlignment.emplace_back(Symbols::noTypeMember());
@@ -781,8 +783,8 @@ TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
     return res;
 }
 
-SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags, int rubyRegionId)
-    : argFlags(move(argFlags)), fun(fun), rubyRegionId(rubyRegionId) {}
+SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags)
+    : argFlags(move(argFlags)), fun(fun) {}
 
 shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
     auto copy = *this;
@@ -891,8 +893,11 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
             }
         },
         [&](const TypePtr &tp) {
-            ENFORCE(false, "Unhandled case: {}", type.toString(ctx));
-            Exception::notImplemented();
+            if (type != nullptr) {
+                Exception::raise("unwrapSelfTypeParam: unhandled case type={}", type.toString(ctx));
+            } else {
+                Exception::raise("unwrapSelfTypeParam: unhandled case type=nullptr");
+            }
         });
 
     ENFORCE(ret != nullptr);
@@ -982,13 +987,12 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
             unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
         }
         return make_type<TupleType>(move(unwrappedElems));
-    } else if (isa_type<NamedLiteralType>(tp) || isa_type<IntegerLiteralType>(tp) || isa_type<FloatLiteralType>(tp)) {
-        if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-            e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
-        }
-        return Types::untypedUntracked();
     }
-    return tp;
+
+    if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
+        e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
+    }
+    return Types::untypedUntracked();
 }
 
 // This method is actually special: not only is it called from dispatchCall in calls.cc, it's
@@ -1082,7 +1086,8 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
             bool validBounds = true;
 
             // Validate type parameter bounds.
-            if (!Types::isSubType(gs, argType, memType->upperBound)) {
+            ErrorSection::Collector errorDetailsCollector;
+            if (!Types::isSubType(gs, argType, memType->upperBound, errorDetailsCollector)) {
                 validBounds = false;
                 if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
                     auto argStr = argType.show(gs);
@@ -1090,10 +1095,13 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
                                 mem.showFullName(gs));
                     e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs), "upper",
                                    memType->upperBound.show(gs));
+                    TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector, memType->upperBound,
+                                                              argType);
                 }
             }
 
-            if (!Types::isSubType(gs, memType->lowerBound, argType)) {
+            ErrorSection::Collector errorDetailsCollector2;
+            if (!Types::isSubType(gs, memType->lowerBound, argType, errorDetailsCollector2)) {
                 validBounds = false;
 
                 if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
@@ -1102,6 +1110,8 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
                                 mem.showFullName(gs));
                     e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs), "lower",
                                    memType->lowerBound.show(gs));
+                    TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector2, memType->lowerBound,
+                                                              argType);
                 }
             }
 

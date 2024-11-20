@@ -18,7 +18,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 namespace {
 void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
-    if (!options.stripeMode) {
+    if (!options.uniquelyDefinedBehavior) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced
         // in Stripe code.
         gs.suppressErrorClass(sorbet::core::errors::Namer::MultipleBehaviorDefs.code);
@@ -167,7 +167,6 @@ unique_ptr<LSPMessage> MultiThreadedLSPWrapper::read(int timeoutMs) {
 
 void LSPWrapper::enableAllExperimentalFeatures() {
     opts->lspDocumentHighlightEnabled = true;
-    opts->lspDocumentSymbolEnabled = true;
     opts->lspSignatureHelpEnabled = true;
     opts->lspDocumentFormatRubyfmtEnabled = true;
 }

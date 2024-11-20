@@ -78,6 +78,9 @@ string NameRef::showRaw(const GlobalState &gs) const {
                 case UniqueNameKind::Packager:
                     kind = "G";
                     break;
+                case UniqueNameKind::DesugarCsend:
+                    kind = "&";
+                    break;
             }
             if (gs.censorForSnapshotTests && unique->uniqueNameKind == UniqueNameKind::Namer &&
                 unique->original == core::Names::staticInit()) {
@@ -103,6 +106,8 @@ string NameRef::toString(const GlobalState &gs) const {
                 return fmt::format("<Class:{}>", unique->original.show(gs));
             } else if (unique->uniqueNameKind == UniqueNameKind::Overload) {
                 return absl::StrCat(unique->original.show(gs), " (overload.", unique->num, ")");
+            } else if (unique->uniqueNameKind == UniqueNameKind::DesugarCsend) {
+                return fmt::format("<&{}>", unique->original.show(gs));
             }
             if (gs.censorForSnapshotTests && unique->uniqueNameKind == UniqueNameKind::Namer &&
                 unique->original == core::Names::staticInit()) {
@@ -156,7 +161,7 @@ string_view NameRef::shortName(const GlobalState &gs) const {
 }
 
 void NameRef::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     switch (kind()) {
@@ -201,9 +206,12 @@ bool NameRef::isClassName(const GlobalState &gs) const {
                 case UniqueNameKind::PositionalArg:
                 case UniqueNameKind::MangledKeywordArg:
                     return false;
+                case UniqueNameKind::DesugarCsend:
+                    Exception::raise("UniqueNameKind::DesugarCsend should only be used in Extract to Variable");
+                    return false;
             }
         case NameKind::CONSTANT:
-            ENFORCE(dataCnst(gs)->original.isValidConstantName(gs));
+            ENFORCE_NO_TIMER(dataCnst(gs)->original.isValidConstantName(gs));
             return true;
     }
 }
@@ -237,6 +245,9 @@ bool NameRef::isValidConstantName(const GlobalState &gs) const {
                 case UniqueNameKind::TypeVarName:
                 case UniqueNameKind::PositionalArg:
                 case UniqueNameKind::MangledKeywordArg:
+                    return false;
+                case UniqueNameKind::DesugarCsend:
+                    Exception::raise("UniqueNameKind::DesugarCsend should only be used in Extract to Variable");
                     return false;
             }
         case NameKind::CONSTANT:
@@ -272,6 +283,7 @@ bool NameRef::isUpdateKnowledgeName() const {
         case Names::nil_p().rawId():
         case Names::present_p().rawId():
         case Names::tripleEq().rawId():
+        case Names::checkMatchArray().rawId():
             return true;
         default:
             return false;
@@ -446,7 +458,7 @@ UTF8NameData::UTF8NameData(const UTF8Name &ref, const GlobalState &gs) : DebugOn
 NameDataDebugCheck::NameDataDebugCheck(const GlobalState &gs) : gs(gs), nameCountAtCreation(gs.namesUsedTotal()) {}
 
 void NameDataDebugCheck::check() const {
-    ENFORCE(nameCountAtCreation == gs.namesUsedTotal());
+    ENFORCE_NO_TIMER(nameCountAtCreation == gs.namesUsedTotal());
 }
 
 const UniqueName *UniqueNameData::operator->() const {

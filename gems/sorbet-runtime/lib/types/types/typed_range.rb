@@ -4,7 +4,7 @@
 module T::Types
   class TypedRange < TypedEnumerable
     def underlying_class
-      Hash
+      Range
     end
 
     # overrides Base

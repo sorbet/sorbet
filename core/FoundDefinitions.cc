@@ -5,62 +5,62 @@ using namespace std;
 namespace sorbet::core {
 
 FoundClass &FoundDefinitionRef::klass(FoundDefinitions &foundDefs) {
-    ENFORCE(kind() == FoundDefinitionRef::Kind::Class);
-    ENFORCE(foundDefs._klasses.size() > idx());
+    ENFORCE_NO_TIMER(kind() == FoundDefinitionRef::Kind::Class);
+    ENFORCE_NO_TIMER(foundDefs._klasses.size() > idx());
     return foundDefs._klasses[idx()];
 }
 const FoundClass &FoundDefinitionRef::klass(const FoundDefinitions &foundDefs) const {
-    ENFORCE(kind() == FoundDefinitionRef::Kind::Class);
-    ENFORCE(foundDefs._klasses.size() > idx());
+    ENFORCE_NO_TIMER(kind() == FoundDefinitionRef::Kind::Class);
+    ENFORCE_NO_TIMER(foundDefs._klasses.size() > idx());
     return foundDefs._klasses[idx()];
 }
 
 FoundMethod &FoundDefinitionRef::method(FoundDefinitions &foundDefs) {
-    ENFORCE(kind() == FoundDefinitionRef::Kind::Method);
-    ENFORCE(foundDefs._methods.size() > idx());
+    ENFORCE_NO_TIMER(kind() == FoundDefinitionRef::Kind::Method);
+    ENFORCE_NO_TIMER(foundDefs._methods.size() > idx());
     return foundDefs._methods[idx()];
 }
 const FoundMethod &FoundDefinitionRef::method(const FoundDefinitions &foundDefs) const {
-    ENFORCE(kind() == FoundDefinitionRef::Kind::Method);
-    ENFORCE(foundDefs._methods.size() > idx());
+    ENFORCE_NO_TIMER(kind() == FoundDefinitionRef::Kind::Method);
+    ENFORCE_NO_TIMER(foundDefs._methods.size() > idx());
     return foundDefs._methods[idx()];
 }
 
 FoundStaticField &FoundDefinitionRef::staticField(FoundDefinitions &foundDefs) {
-    ENFORCE(kind() == FoundDefinitionRef::Kind::StaticField);
-    ENFORCE(foundDefs._staticFields.size() > idx());
+    ENFORCE_NO_TIMER(kind() == FoundDefinitionRef::Kind::StaticField);
+    ENFORCE_NO_TIMER(foundDefs._staticFields.size() > idx());
     return foundDefs._staticFields[idx()];
 }
 const FoundStaticField &FoundDefinitionRef::staticField(const FoundDefinitions &foundDefs) const {
-    ENFORCE(kind() == FoundDefinitionRef::Kind::StaticField);
-    ENFORCE(foundDefs._staticFields.size() > idx());
+    ENFORCE_NO_TIMER(kind() == FoundDefinitionRef::Kind::StaticField);
+    ENFORCE_NO_TIMER(foundDefs._staticFields.size() > idx());
     return foundDefs._staticFields[idx()];
 }
 
 FoundTypeMember &FoundDefinitionRef::typeMember(FoundDefinitions &foundDefs) {
-    ENFORCE(kind() == FoundDefinitionRef::Kind::TypeMember);
-    ENFORCE(foundDefs._typeMembers.size() > idx());
+    ENFORCE_NO_TIMER(kind() == FoundDefinitionRef::Kind::TypeMember);
+    ENFORCE_NO_TIMER(foundDefs._typeMembers.size() > idx());
     return foundDefs._typeMembers[idx()];
 }
 const FoundTypeMember &FoundDefinitionRef::typeMember(const FoundDefinitions &foundDefs) const {
-    ENFORCE(kind() == FoundDefinitionRef::Kind::TypeMember);
-    ENFORCE(foundDefs._typeMembers.size() > idx());
+    ENFORCE_NO_TIMER(kind() == FoundDefinitionRef::Kind::TypeMember);
+    ENFORCE_NO_TIMER(foundDefs._typeMembers.size() > idx());
     return foundDefs._typeMembers[idx()];
 }
 
 FoundField &FoundDefinitionRef::field(FoundDefinitions &foundDefs) {
-    ENFORCE(kind() == FoundDefinitionRef::Kind::Field);
-    ENFORCE(foundDefs._fields.size() > idx());
+    ENFORCE_NO_TIMER(kind() == FoundDefinitionRef::Kind::Field);
+    ENFORCE_NO_TIMER(foundDefs._fields.size() > idx());
     return foundDefs._fields[idx()];
 }
 const FoundField &FoundDefinitionRef::field(const FoundDefinitions &foundDefs) const {
-    ENFORCE(kind() == FoundDefinitionRef::Kind::Field);
-    ENFORCE(foundDefs._fields.size() > idx());
+    ENFORCE_NO_TIMER(kind() == FoundDefinitionRef::Kind::Field);
+    ENFORCE_NO_TIMER(foundDefs._fields.size() > idx());
     return foundDefs._fields[idx()];
 }
 
 core::ClassOrModuleRef FoundDefinitionRef::symbol() const {
-    ENFORCE(kind() == FoundDefinitionRef::Kind::Symbol);
+    ENFORCE_NO_TIMER(kind() == FoundDefinitionRef::Kind::Symbol);
     return core::ClassOrModuleRef::fromRaw(_storage.id);
 }
 

@@ -11,7 +11,7 @@ uint16_t getQueryResponseTypeSpecificity(const core::lsp::QueryResponse &q) {
         return 8;
     } else if (q.isMethodDef()) {
         return 7;
-    } else if (auto send = q.isSend()) {
+    } else if (q.isSend()) {
         return 6;
     } else if (q.isField()) {
         return 5;

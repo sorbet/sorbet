@@ -210,6 +210,14 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
                     message = sectionHeader;
                 }
 
+                // VSCode strips out leading whitespace, but we use leading whitespaces to convey
+                // indentation/nesting. This replaces all leading whitespace with a NBSP.
+                auto firstNonWhitespace = message.find_first_not_of(' ');
+                for (string::size_type pos = 0; pos != string::npos && pos < firstNonWhitespace;
+                     pos = message.find(' ', pos)) {
+                    message.replace(pos, 1, "\u00A0");
+                    pos += 1;
+                }
                 relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(std::move(location), message));
             }
         }
@@ -252,7 +260,7 @@ uint32_t ErrorReporter::lastDiagnosticEpochForFile(core::FileRef file) {
 }
 
 void ErrorReporter::sanityCheck() const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
 

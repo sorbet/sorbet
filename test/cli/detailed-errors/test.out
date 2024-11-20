@@ -1,0 +1,307 @@
+type_members.rb:35: Argument does not have asserted type `Box2[Integer]` https://srb.help/7007
+    35 |  T.let(box1, Box2[Integer])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `Box1[Integer]` originating from:
+    type_members.rb:34:
+    34 |def takes_box1(box1)
+                       ^^^^
+  Detailed explanation:
+    `Box1` does not derive from `Box2`
+
+type_members.rb:36: Argument does not have asserted type `Integer` https://srb.help/7007
+    36 |  T.let(box1, Integer)
+          ^^^^^^^^^^^^^^^^^^^^
+  Got `Box1[Integer]` originating from:
+    type_members.rb:34:
+    34 |def takes_box1(box1)
+                       ^^^^
+  Detailed explanation:
+    `Box1` does not derive from `Integer`
+
+type_members.rb:49: Expected `Box[T.any(Integer, String)]` but found `Box[Integer]` for argument `box` https://srb.help/7002
+    49 |  takes_box_int_str(box)
+                            ^^^
+  Expected `Box[T.any(Integer, String)]` for argument `box` of method `Object#takes_box_int_str`:
+    type_members.rb:44:
+    44 |sig { params(box: Box[T.any(Integer, String)]).void }
+                     ^^^
+  Got `Box[Integer]` originating from:
+    type_members.rb:48:
+    48 |def takes_box_integer(box)
+                              ^^^
+  Detailed explanation:
+    `Integer` is not equivalent to `T.any(Integer, String)` for invariant type member `Box::Elem`
+      `Integer` is a subtype of `T.any(Integer, String)` but not the reverse, so they are not equivalent
+
+type_members.rb:21: Argument does not have asserted type `A[Middle, Middle, Middle]` https://srb.help/7007
+    21 |T.let(A[String, Lower, Upper].new, A[Middle, Middle, Middle])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `A[String, Lower, Upper]` originating from:
+    type_members.rb:21:
+    21 |T.let(A[String, Lower, Upper].new, A[Middle, Middle, Middle])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Detailed explanation:
+    `String` is not equivalent to `Middle` for invariant type member `A::X`
+    `Lower` is not a supertype of `Middle` for contravariant type member `A::Y`
+    `Upper` is not a subtype of `Middle` for covariant type member `A::Z`
+
+intersection.rb:46: Argument does not have asserted type `T.all(M1, M2)` https://srb.help/7007
+    46 |T.let(C.new, T.all(M1, M2))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `C` originating from:
+    intersection.rb:46:
+    46 |T.let(C.new, T.all(M1, M2))
+              ^^^^^
+  Detailed explanation:
+    `C` is not a subtype of `M1` (the left side of the `T.all`)
+
+intersection.rb:47: Argument does not have asserted type `T.all(M1, M2)` https://srb.help/7007
+    47 |T.let(C1.new, T.all(M1, M2))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `C1` originating from:
+    intersection.rb:47:
+    47 |T.let(C1.new, T.all(M1, M2))
+              ^^^^^^
+  Detailed explanation:
+    `C1` is not a subtype of `M2` (the right side of the `T.all`)
+
+intersection.rb:48: Argument does not have asserted type `T.all(M1, M2)` https://srb.help/7007
+    48 |T.let(C2.new, T.all(M1, M2))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `C2` originating from:
+    intersection.rb:48:
+    48 |T.let(C2.new, T.all(M1, M2))
+              ^^^^^^
+  Detailed explanation:
+    `C2` is not a subtype of `M1` (the left side of the `T.all`)
+
+intersection.rb:49: Argument does not have asserted type `T.all(M1, M2, M3, M4)` https://srb.help/7007
+    49 |T.let(C1.new, T.all(M1, M2, M3, M4))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `C1` originating from:
+    intersection.rb:49:
+    49 |T.let(C1.new, T.all(M1, M2, M3, M4))
+              ^^^^^^
+  Detailed explanation:
+    `C1` is not a subtype of `T.all(M1, M2, M3)` (the left side of the `T.all`)
+      `C1` is not a subtype of `T.all(M1, M2)` (the left side of the `T.all`)
+        `C1` is not a subtype of `M2` (the right side of the `T.all`)
+
+intersection.rb:50: Argument does not have asserted type `T.all(M1, M2, M3, M4)` https://srb.help/7007
+    50 |T.let(C123.new, T.all(M1, M2, M3, M4))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `C123` originating from:
+    intersection.rb:50:
+    50 |T.let(C123.new, T.all(M1, M2, M3, M4))
+              ^^^^^^^^
+  Detailed explanation:
+    `C123` is not a subtype of `M4` (the right side of the `T.all`)
+
+intersection.rb:51: Argument does not have asserted type `T.all(M1, M2, M3, M4)` https://srb.help/7007
+    51 |T.let(C124.new, T.all(M1, M2, M3, M4))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `C124` originating from:
+    intersection.rb:51:
+    51 |T.let(C124.new, T.all(M1, M2, M3, M4))
+              ^^^^^^^^
+  Detailed explanation:
+    `C124` is not a subtype of `T.all(M1, M2, M3)` (the left side of the `T.all`)
+      `C124` is not a subtype of `M3` (the right side of the `T.all`)
+
+intersection.rb:52: Argument does not have asserted type `T.all(M1, M2, M3, M4)` https://srb.help/7007
+    52 |T.let(C134.new, T.all(M1, M2, M3, M4))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `C134` originating from:
+    intersection.rb:52:
+    52 |T.let(C134.new, T.all(M1, M2, M3, M4))
+              ^^^^^^^^
+  Detailed explanation:
+    `C134` is not a subtype of `T.all(M1, M2, M3)` (the left side of the `T.all`)
+      `C134` is not a subtype of `T.all(M1, M2)` (the left side of the `T.all`)
+        `C134` is not a subtype of `M2` (the right side of the `T.all`)
+
+shapes.rb:10: Expected `{a: Integer, b: String}` but found `{}` for argument `x` https://srb.help/7002
+    10 |takes_shape({})
+                    ^^
+  Expected `{a: Integer, b: String}` for argument `x` of method `Object#takes_shape`:
+    shapes.rb:5:
+     5 |sig { params(x: {a: Integer, b: String}).void }
+                     ^
+  Got `{} (shape of T::Hash[T.untyped, T.untyped])` originating from:
+    shapes.rb:10:
+    10 |takes_shape({})
+                    ^^
+
+shapes.rb:11: Expected `{a: Integer, b: String}` but found `{a: Integer(1)}` for argument `x` https://srb.help/7002
+    11 |takes_shape({a: 1})
+                    ^^^^^^
+  Expected `{a: Integer, b: String}` for argument `x` of method `Object#takes_shape`:
+    shapes.rb:5:
+     5 |sig { params(x: {a: Integer, b: String}).void }
+                     ^
+  Got `{a: Integer(1)} (shape of T::Hash[T.untyped, T.untyped])` originating from:
+    shapes.rb:11:
+    11 |takes_shape({a: 1})
+                    ^^^^^^
+
+shapes.rb:14: Expected `{a: Integer, b: String}` but found `{a: Integer(1), c: Integer(1)}` for argument `x` https://srb.help/7002
+    14 |takes_shape({a: 1, c: 1})
+                    ^^^^^^^^^^^^
+  Expected `{a: Integer, b: String}` for argument `x` of method `Object#takes_shape`:
+    shapes.rb:5:
+     5 |sig { params(x: {a: Integer, b: String}).void }
+                     ^
+  Got `{a: Integer(1), c: Integer(1)} (shape of T::Hash[T.untyped, T.untyped])` originating from:
+    shapes.rb:14:
+    14 |takes_shape({a: 1, c: 1})
+                    ^^^^^^^^^^^^
+
+shapes.rb:15: Expected `{a: Integer, b: String}` but found `{c: Integer(1), d: Integer(1)}` for argument `x` https://srb.help/7002
+    15 |takes_shape({c: 1, d: 1})
+                    ^^^^^^^^^^^^
+  Expected `{a: Integer, b: String}` for argument `x` of method `Object#takes_shape`:
+    shapes.rb:5:
+     5 |sig { params(x: {a: Integer, b: String}).void }
+                     ^
+  Got `{c: Integer(1), d: Integer(1)} (shape of T::Hash[T.untyped, T.untyped])` originating from:
+    shapes.rb:15:
+    15 |takes_shape({c: 1, d: 1})
+                    ^^^^^^^^^^^^
+
+shapes.rb:18: Expected `{a: Integer, b: String}` but found `{a: Integer(1), b: Integer(1)}` for argument `x` https://srb.help/7002
+    18 |takes_shape({a: 1, b: 1})
+                    ^^^^^^^^^^^^
+  Expected `{a: Integer, b: String}` for argument `x` of method `Object#takes_shape`:
+    shapes.rb:5:
+     5 |sig { params(x: {a: Integer, b: String}).void }
+                     ^
+  Got `{a: Integer(1), b: Integer(1)} (shape of T::Hash[T.untyped, T.untyped])` originating from:
+    shapes.rb:18:
+    18 |takes_shape({a: 1, b: 1})
+                    ^^^^^^^^^^^^
+  Detailed explanation:
+    `Integer(1)` is not a subtype of `String` for key `Symbol(:b)`
+
+shapes.rb:19: Expected `{a: Integer, b: String}` but found `{a: String(""), b: Integer(1)}` for argument `x` https://srb.help/7002
+    19 |takes_shape({a: '', b: 1})
+                    ^^^^^^^^^^^^^
+  Expected `{a: Integer, b: String}` for argument `x` of method `Object#takes_shape`:
+    shapes.rb:5:
+     5 |sig { params(x: {a: Integer, b: String}).void }
+                     ^
+  Got `{a: String(""), b: Integer(1)} (shape of T::Hash[T.untyped, T.untyped])` originating from:
+    shapes.rb:19:
+    19 |takes_shape({a: '', b: 1})
+                    ^^^^^^^^^^^^^
+  Detailed explanation:
+    `String("")` is not a subtype of `Integer` for key `Symbol(:a)`
+    `Integer(1)` is not a subtype of `String` for key `Symbol(:b)`
+
+shapes.rb:22: Expected `{a: Integer, b: String}` but found `{a: String(""), c: Integer(1)}` for argument `x` https://srb.help/7002
+    22 |takes_shape({a: '', c: 1})
+                    ^^^^^^^^^^^^^
+  Expected `{a: Integer, b: String}` for argument `x` of method `Object#takes_shape`:
+    shapes.rb:5:
+     5 |sig { params(x: {a: Integer, b: String}).void }
+                     ^
+  Got `{a: String(""), c: Integer(1)} (shape of T::Hash[T.untyped, T.untyped])` originating from:
+    shapes.rb:22:
+    22 |takes_shape({a: '', c: 1})
+                    ^^^^^^^^^^^^^
+  Detailed explanation:
+    `String("")` is not a subtype of `Integer` for key `Symbol(:a)`
+
+hash.rb:10: Expected `T.nilable(T::Hash[String, Integer])` but found `T.nilable(T::Hash[Symbol, Integer])` for argument `string_hash` https://srb.help/7002
+    10 |  takes_string_hash(symbol_hash)
+                            ^^^^^^^^^^^
+  Expected `T.nilable(T::Hash[String, Integer])` for argument `string_hash` of method `Object#takes_string_hash`:
+    hash.rb:4:
+     4 |sig { params(string_hash: T.nilable(T::Hash[String, Integer])).void }
+                     ^^^^^^^^^^^
+  Got `T.nilable(T::Hash[Symbol, Integer])` originating from:
+    hash.rb:9:
+     9 |def takes_symbol_hash(symbol_hash)
+                              ^^^^^^^^^^^
+  Detailed explanation:
+    `Symbol` is not a subtype of `String` for covariant type member `Hash::K`
+    `Hash` does not derive from `NilClass`
+
+tuples.rb:10: Expected `[Integer, String]` but found `[]` for argument `x` https://srb.help/7002
+    10 |takes_tuple([])
+                    ^^
+  Expected `[Integer, String]` for argument `x` of method `Object#takes_tuple`:
+    tuples.rb:5:
+     5 |sig { params(x: [Integer, String]).void }
+                     ^
+  Got `[] (0-tuple)` originating from:
+    tuples.rb:10:
+    10 |takes_tuple([])
+                    ^^
+
+tuples.rb:11: Expected `[Integer, String]` but found `[Integer(1)]` for argument `x` https://srb.help/7002
+    11 |takes_tuple([1])
+                    ^^^
+  Expected `[Integer, String]` for argument `x` of method `Object#takes_tuple`:
+    tuples.rb:5:
+     5 |sig { params(x: [Integer, String]).void }
+                     ^
+  Got `[Integer(1)] (1-tuple)` originating from:
+    tuples.rb:11:
+    11 |takes_tuple([1])
+                    ^^^
+
+tuples.rb:14: Expected `[Integer, String]` but found `[Integer(1), Integer(1)]` for argument `x` https://srb.help/7002
+    14 |takes_tuple([1, 1])
+                    ^^^^^^
+  Expected `[Integer, String]` for argument `x` of method `Object#takes_tuple`:
+    tuples.rb:5:
+     5 |sig { params(x: [Integer, String]).void }
+                     ^
+  Got `[Integer(1), Integer(1)] (2-tuple)` originating from:
+    tuples.rb:14:
+    14 |takes_tuple([1, 1])
+                    ^^^^^^
+  Detailed explanation:
+    `Integer(1)` is not a subtype of `String` for index `1` of `2`-tuple
+
+tuples.rb:15: Expected `[Integer, String]` but found `[String(""), Integer(1)]` for argument `x` https://srb.help/7002
+    15 |takes_tuple(['', 1])
+                    ^^^^^^^
+  Expected `[Integer, String]` for argument `x` of method `Object#takes_tuple`:
+    tuples.rb:5:
+     5 |sig { params(x: [Integer, String]).void }
+                     ^
+  Got `[String(""), Integer(1)] (2-tuple)` originating from:
+    tuples.rb:15:
+    15 |takes_tuple(['', 1])
+                    ^^^^^^^
+  Detailed explanation:
+    `String("")` is not a subtype of `Integer` for index `0` of `2`-tuple
+    `Integer(1)` is not a subtype of `String` for index `1` of `2`-tuple
+
+tuples.rb:18: Expected `[Integer, String]` but found `[String("")]` for argument `x` https://srb.help/7002
+    18 |takes_tuple([''])
+                    ^^^^
+  Expected `[Integer, String]` for argument `x` of method `Object#takes_tuple`:
+    tuples.rb:5:
+     5 |sig { params(x: [Integer, String]).void }
+                     ^
+  Got `[String("")] (1-tuple)` originating from:
+    tuples.rb:18:
+    18 |takes_tuple([''])
+                    ^^^^
+
+class_of.rb:10: Expected `T::Class[IFoo]` but found `T.class_of(IFoo)` for argument `klass` https://srb.help/7002
+    10 |takes_t_class_ifoo(IFoo)
+                           ^^^^
+  Expected `T::Class[IFoo]` for argument `klass` of method `Object#takes_t_class_ifoo`:
+    class_of.rb:6:
+     6 |sig { params(klass: T::Class[IFoo]).void }
+                     ^^^^^
+  Got `T.class_of(IFoo)` originating from:
+    class_of.rb:10:
+    10 |takes_t_class_ifoo(IFoo)
+                           ^^^^
+  Detailed explanation:
+    `T.class_of(IFoo)` represents a module singleton class type, which is a `Module`, not a `Class`. See the `T.class_of` docs.
+Errors: 25

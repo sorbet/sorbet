@@ -36,14 +36,14 @@ class Struct < Object
 
   sig do
     params(
-        arg0: T.any(Symbol, String),
+        arg0: T.nilable(T.any(Symbol, String)),
         arg1: T.any(Symbol, String),
         keyword_init: T::Boolean,
         blk: T.untyped,
     )
     .void
   end
-  def initialize(arg0, *arg1, keyword_init: false, &blk); end
+  def initialize(arg0 = nil, *arg1, keyword_init: false, &blk); end
 
   # Equality---Returns `true` if `other` has the same struct subclass and has
   # equal member values (according to Object#==).

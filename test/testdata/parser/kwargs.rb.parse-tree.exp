@@ -83,5 +83,36 @@ Begin {
         }
       ]
     }
+    DefMethod {
+      name = <U foo>
+      args = Args {
+        args = [
+          Kwarg {
+            name = <U x>
+          }
+          Kwarg {
+            name = <K <U x> $1>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U foo>
+      args = Args {
+        args = [
+          Kwarg {
+            name = <U x>
+          }
+          Kwoptarg {
+            name = <K <U x> $1>
+            default_ = Integer {
+              val = "10"
+            }
+          }
+        ]
+      }
+      body = NULL
+    }
   ]
 }

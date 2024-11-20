@@ -135,7 +135,7 @@ void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
     }
 
     auto errLoc = (send->funLoc.exists() && !send->funLoc.empty()) ? send->funLoc : send->loc;
-    if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::InitializeReturnType)) {
+    if (auto e = ctx.beginIndexerError(errLoc, core::errors::Rewriter::InitializeReturnType)) {
         e.setHeader("The {} method should always return {}", "initialize", "void");
         auto replacementLoc = core::Loc(ctx.file, send->funLoc.beginPos(), send->loc.endPos());
         if (replacementLoc.exists() && !replacementLoc.empty()) {
@@ -146,7 +146,7 @@ void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
 
 } // namespace
 
-void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::ExpressionPtr *prevStat) {
+void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const ast::ExpressionPtr *prevStat) {
     // this should only run in an `initialize` that has a sig
     if (methodDef->name != core::Names::initialize() || methodDef->flags.isSelfMethod) {
         return;
@@ -190,7 +190,7 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
         const auto *restArg = ast::cast_tree<ast::RestArg>(arg);
         if (restArg == nullptr) {
             argKindMap[ast::MK::arg2Name(arg)] = ArgKind::Plain;
-        } else if (const auto *kwRestArg = ast::cast_tree<ast::KeywordArg>(restArg->expr)) {
+        } else if (ast::isa_tree<ast::KeywordArg>(restArg->expr)) {
             argKindMap[ast::MK::arg2Name(arg)] = ArgKind::KeywordRestArg;
         } else {
             ENFORCE(ast::isa_tree<ast::UnresolvedIdent>(restArg->expr));

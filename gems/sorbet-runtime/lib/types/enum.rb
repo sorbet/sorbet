@@ -192,68 +192,92 @@ class T::Enum
   # responds to the `to_str` method. It does not actually call `to_str` however.
   #
   # See https://ruby-doc.org/core-2.4.0/String.html#method-i-3D-3D
-  sig {returns(String)}
+  T::Sig::WithoutRuntime.sig {returns(String)}
   def to_str
     msg = 'Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.'
     if T::Configuration.legacy_t_enum_migration_mode?
       T::Configuration.soft_assert_handler(
         msg,
-        storytime: {class: self.class.name},
+        storytime: {
+          class: self.class.name,
+          caller_location: Kernel.caller_locations(1..1)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
+        },
       )
       serialize.to_s
     else
-      raise NoMethodError.new(msg)
+      Kernel.raise NoMethodError.new(msg)
     end
   end
 
-  sig {params(other: BasicObject).returns(T::Boolean).checked(:never)}
-  def ==(other)
-    case other
-    when String
-      if T::Configuration.legacy_t_enum_migration_mode?
-        comparison_assertion_failed(:==, other)
-        self.serialize == other
+  module LegacyMigrationMode
+    include Kernel
+    extend T::Helpers
+    abstract!
+
+    if T.unsafe(false)
+      # Declare to the type system that the `serialize` method for sure exists
+      # on whatever we mix this into.
+      T::Sig::WithoutRuntime.sig {abstract.returns(T.untyped)}
+      def serialize; end
+    end
+
+    # WithoutRuntime so that comparison_assertion_failed can assume a constant stack depth
+    T::Sig::WithoutRuntime.sig {params(other: BasicObject).returns(T::Boolean)}
+    def ==(other)
+      case other
+      when String
+        if T::Configuration.legacy_t_enum_migration_mode?
+          comparison_assertion_failed(:==, other)
+          self.serialize == other
+        else
+          false
+        end
       else
-        false
+        super(other)
       end
-    else
-      super(other)
     end
-  end
 
-  sig {params(other: BasicObject).returns(T::Boolean).checked(:never)}
-  def ===(other)
-    case other
-    when String
-      if T::Configuration.legacy_t_enum_migration_mode?
-        comparison_assertion_failed(:===, other)
-        self.serialize == other
+    # WithoutRuntime so that comparison_assertion_failed can assume a constant stack depth
+    T::Sig::WithoutRuntime.sig {params(other: BasicObject).returns(T::Boolean)}
+    def ===(other)
+      case other
+      when String
+        if T::Configuration.legacy_t_enum_migration_mode?
+          comparison_assertion_failed(:===, other)
+          self.serialize == other
+        else
+          false
+        end
       else
-        false
+        super(other)
       end
-    else
-      super(other)
     end
-  end
 
-  sig {params(method: Symbol, other: T.untyped).void}
-  private def comparison_assertion_failed(method, other)
-    T::Configuration.soft_assert_handler(
-      'Enum to string comparison not allowed. Compare to the Enum instance directly instead. See go/enum-migration',
-      storytime: {
-        class: self.class.name,
-        self: self.inspect,
-        other: other,
-        other_class: other.class.name,
-        method: method,
-      }
-    )
+    # WithoutRuntime so that caller_locations can assume a constant stack depth
+    # (Otherwise, the first call would be the method with the wrapping, which would have a different stack depth.)
+    T::Sig::WithoutRuntime.sig {params(method: Symbol, other: T.untyped).void}
+    private def comparison_assertion_failed(method, other)
+      T::Configuration.soft_assert_handler(
+        'Enum to string comparison not allowed. Compare to the Enum instance directly instead. See go/enum-migration',
+        storytime: {
+          class: self.class.name,
+          self: self.inspect,
+          other: other,
+          other_class: other.class.name,
+          method: method,
+          caller_location: Kernel.caller_locations(2..2)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
+        }
+      )
+    end
   end
 
   ### Private implementation ###
 
+  UNSET = T.let(Module.new.freeze, Module)
+  private_constant :UNSET
+
   sig {params(serialized_val: SerializedVal).void}
-  def initialize(serialized_val=nil)
+  def initialize(serialized_val=UNSET)
     raise 'T::Enum is abstract' if self.class == T::Enum
     if !self.class.started_initializing?
       raise "Must instantiate all enum values of #{self.class} inside 'enums do'."
@@ -279,7 +303,7 @@ class T::Enum
   sig {params(const_name: Symbol).void}
   def _bind_name(const_name)
     @const_name = const_name
-    @serialized_val = const_to_serialized_val(const_name) if @serialized_val.nil?
+    @serialized_val = const_to_serialized_val(const_name) if @serialized_val.equal?(UNSET)
     freeze
   end
 

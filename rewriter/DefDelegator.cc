@@ -43,7 +43,7 @@ vector<ast::ExpressionPtr> runDefDelegator(core::MutableContext ctx, const ast::
     }
 
     auto *accessor = ast::cast_tree<ast::Literal>(send->getPosArg(0));
-    if (!accessor || !(accessor->isSymbol() || accessor->isString())) {
+    if (!accessor || !accessor->isName()) {
         return methodStubs;
     }
 
@@ -88,7 +88,7 @@ vector<ast::ExpressionPtr> runDefDelegators(core::MutableContext ctx, const ast:
     }
 
     auto *accessor = ast::cast_tree<ast::Literal>(send->getPosArg(0));
-    if (!accessor || !(accessor->isSymbol() || accessor->isString())) {
+    if (!accessor || !accessor->isName()) {
         return methodStubs;
     }
 

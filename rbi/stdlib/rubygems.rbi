@@ -7515,6 +7515,18 @@ module Gem::Util
   def self.traverse_parents(directory, &block); end
 end
 
+# The `BUNDLED_GEMS` (undocumented) module was introduced in Ruby 3.3.
+module Gem::BUNDLED_GEMS
+  SINCE = ::T.let(nil, T::Hash[String, String])
+  EXACT = ::T.let(nil, T::Hash[String, T::Boolean])
+  PREFIXED = ::T.let(nil, T::Hash[String, T::Boolean])
+  WARNED = ::T.let(nil, T::Hash[String, T::Boolean])
+  LIBDIR = ::T.let(nil, String)
+  ARCHDIR = ::T.let(nil, String)
+  DLEXT = ::T.let(nil, Regexp)
+  LIBEXT = ::T.let(nil, Regexp)
+end
+
 module Kernel
   # Use
   # [`Kernel#gem`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-gem)

@@ -18,6 +18,7 @@ module M
       param: T.type_parameter(a: Integer),
       #      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `T.type_parameter` does not accept keyword arguments
       enum: T.deprecated_enum(a: Integer),
+      #                       ^^^^^^^^^^ error: Expected `T.any(T::Set[T.anything], T::Array[T.anything])`
       #     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `T.deprecated_enum` does not accept keyword arguments
       klass: T.class_of(a: Integer),
       #      ^^^^^^^^^^^^^^^^^^^^^^ error: `T.class_of` does not accept keyword arguments

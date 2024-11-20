@@ -1181,9 +1181,15 @@ class Pathname < Object
   # Recursively deletes a directory, including all directories beneath it.
   #
   # See
-  # [`FileUtils.rm_r`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-rm_r)
-  sig {returns(Integer)}
-  def rmtree(); end
+  # [`FileUtils.rm_rf`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-rm_rf)
+  sig do
+    params(
+      noop: T.nilable(T::Boolean),
+      verbose: T.nilable(T::Boolean),
+      secure: T.nilable(T::Boolean)
+    ).void
+  end
+  def rmtree(noop: nil, verbose: nil, secure: nil); end
 
   # Predicate method for root directories. Returns `true` if the pathname
   # consists of consecutive slashes.

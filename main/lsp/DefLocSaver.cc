@@ -52,10 +52,11 @@ void DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::Expressio
     auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
     if (id.kind == ast::UnresolvedIdent::Kind::Instance || id.kind == ast::UnresolvedIdent::Kind::Class) {
         core::ClassOrModuleRef klass;
-        // Logic cargo culted from `global2Local` in `walker_build.cc`.
+        // Logic originally from `unresolvedIdent2Local` in `builder_walk.cc`, then modified.
         if (id.kind == ast::UnresolvedIdent::Kind::Instance) {
-            ENFORCE(ctx.owner.isMethod());
-            klass = ctx.owner.owner(ctx).asClassOrModuleRef();
+            // Unlike in `unresolvedIdent2Local` in `builder_walk.cc`, we run DefLocSaver without first
+            // running class_flatten, which means that not all code is inside method definitions.
+            klass = ctx.owner.enclosingClass(ctx);
         } else {
             // Class var.
             klass = ctx.owner.enclosingClass(ctx);
@@ -126,8 +127,8 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             }
 
             auto enclosingMethod = enclosingMethodFromContext(ctx);
-            auto resp = core::lsp::ConstantResponse(symbol, symbolBeforeDealias, ctx.locAt(lit->loc), scopes,
-                                                    unresolved.cnst, tp, enclosingMethod);
+            auto resp = core::lsp::ConstantResponse(symbolBeforeDealias, ctx.locAt(lit->loc), scopes, unresolved.cnst,
+                                                    tp, enclosingMethod);
             core::lsp::QueryResponse::pushQueryResponse(ctx, resp);
         }
         lit = ast::cast_tree<ast::ConstantLit>(unresolved.scope);
@@ -138,12 +139,45 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
     }
 }
 
+// This decides if we need to keep a node around incase the current LSP query needs type information for it
+bool shouldLeaveAncestorForIDE(const ast::ExpressionPtr &anc) {
+    // used in Desugar <-> resolver to signal classes that did not have explicit superclass
+    if (ast::isa_tree<ast::EmptyTree>(anc) || anc.isSelfReference()) {
+        return false;
+    }
+    auto rcl = ast::cast_tree<ast::ConstantLit>(anc);
+    if (rcl && rcl->symbol == core::Symbols::todo()) {
+        return false;
+    }
+    return true;
+}
+
 } // namespace
 
 void DefLocSaver::postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
     auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
     matchesQuery(ctx, &lit, lspQuery, lit.symbol);
+}
+
+void DefLocSaver::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+    const core::lsp::Query &lspQuery = ctx.state.lspQuery;
+    if (ast::isa_tree<ast::EmptyTree>(classDef.name)) {
+        ENFORCE(classDef.symbol == core::Symbols::root());
+    } else if (auto *ident = ast::cast_tree<ast::UnresolvedIdent>(classDef.name)) {
+        ENFORCE(ident->name == core::Names::singleton());
+    } else {
+        // The `<root>` class we wrap all code with uses EmptyTree for the ClassDef::name field.
+        auto *lit = ast::cast_tree<ast::ConstantLit>(classDef.name);
+        matchesQuery(ctx, lit, lspQuery, lit->symbol);
+    }
+
+    if (classDef.kind == ast::ClassDef::Kind::Class && !classDef.ancestors.empty() &&
+        shouldLeaveAncestorForIDE(classDef.ancestors.front())) {
+        auto *lit = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front());
+        matchesQuery(ctx, lit, lspQuery, lit->symbol);
+    }
 }
 
 } // namespace sorbet::realmain::lsp

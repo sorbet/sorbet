@@ -67,7 +67,6 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.absoluteIgnorePatterns.size(), opts.absoluteIgnorePatterns.size());
     CHECK_EQ(empty.relativeIgnorePatterns.size(), opts.relativeIgnorePatterns.size());
     CHECK_EQ(empty.inputFileNames.size(), opts.inputFileNames.size());
-    CHECK_EQ(empty.lspDocumentSymbolEnabled, opts.lspDocumentSymbolEnabled);
     CHECK_EQ(empty.lspDocumentHighlightEnabled, opts.lspDocumentHighlightEnabled);
     CHECK_EQ(empty.lspSignatureHelpEnabled, opts.lspSignatureHelpEnabled);
     CHECK_EQ(empty.lspDocumentFormatRubyfmtEnabled, opts.lspDocumentFormatRubyfmtEnabled);
@@ -75,7 +74,7 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.inlineInput, opts.inlineInput);
     CHECK_EQ(empty.debugLogFile, opts.debugLogFile);
     CHECK_EQ(empty.webTraceFile, opts.webTraceFile);
-    CHECK_EQ(empty.stripeMode, opts.stripeMode);
+    CHECK_EQ(empty.uniquelyDefinedBehavior, opts.uniquelyDefinedBehavior);
     CHECK_EQ(empty.stripePackages, opts.stripePackages);
     CHECK_EQ(empty.forceHashing, opts.forceHashing);
     CHECK_EQ(empty.lspErrorCap, opts.lspErrorCap);

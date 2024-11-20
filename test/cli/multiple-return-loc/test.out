@@ -9,6 +9,8 @@ test.rb:6: Expected `T::Array[Integer]` but found `[Integer(1), String("")]` for
     test.rb:6:
      6 |  return 1, ""
                  ^^^^^
+  Detailed explanation:
+    `T.any(Integer, String)` is not a subtype of `Integer` for covariant type member `Array::Elem`
 
 test.rb:13: Revealed type: `[Integer(1), Integer(2)] (2-tuple)` https://srb.help/7014
     13 |T.reveal_type(x)

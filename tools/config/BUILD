@@ -47,22 +47,10 @@ config_setting(
 )
 
 config_setting(
-    name = "webasm",
-    values = {
-        "cpu": "webasm",
-    },
-)
-
-config_setting(
-    name = "webasm_opt",
-    values = {
-        "cpu": "webasm",
-        "compilation_mode": "opt",
-    },
-)
-
-config_setting(
     name = "linkshared",
+    constraint_values = [
+        "@platforms//os:linux",
+    ],
     values = {
         "define": "linkshared=true",
     },

@@ -1,13 +1,9 @@
 begin
-  <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    <emptyTree>
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::A)
-          <emptyTree>
-        end
         ::A::B::C
         ::A::B::D
         ::A
@@ -16,16 +12,10 @@ begin
     end
   end
   module ::A<<C A>> < ()
+    <emptyTree>
+
     def self.<static-init>(<blk>)
-      begin
-        ::A::B::C = 1
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::A::B)
-          <emptyTree>
-        end
-        <emptyTree>
-      end
+      ::A::B::C = 1
     end
   end
   module ::A::B<<C B>> < ()

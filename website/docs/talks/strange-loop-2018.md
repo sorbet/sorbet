@@ -4,6 +4,9 @@ title: Gradual typing of Ruby at Scale
 sidebar_label: Strange Loop 2018
 ---
 
+**Date**: September 28, 2018\
+**Speakers**: Paul Tarjan, Dmitry Petrashko
+
 - [→ Talk page](https://www.thestrangeloop.com/2018/gradual-typing-of-ruby-at-scale.html)
 - [→ Video](https://www.youtube.com/watch?v=uFFJyp8vXQI)
 - [→ Slides](https://sorbet.run/talks/StrangeLoop2018/#/)

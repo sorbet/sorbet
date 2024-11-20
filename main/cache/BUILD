@@ -1,7 +1,7 @@
 cc_library(
     name = "cache",
     srcs = select({
-        "//tools/config:webasm": ["cache-orig.cc"],
+        "@platforms//cpu:wasm32": ["cache-orig.cc"],
         "//conditions:default": ["cache.cc"],
     }),
     hdrs = ["cache.h"],
@@ -10,13 +10,14 @@ cc_library(
         "//conditions:default": 1,
     }),
     visibility = ["//visibility:public"],
-    deps = select({
-        "//tools/config:webasm": [],
+    deps = [
+        "//common/kvstore",
+        "//core/serialize",
+    ] + select({
+        "@platforms//cpu:wasm32": [],
         "//conditions:default": [
-            "//common/kvstore",
+            "//common/concurrency",
             "//main/options",
-            "//main/pipeline",
-            "//payload:interface",
             "//sorbet_version",
         ],
     }),
@@ -34,5 +35,7 @@ cc_library(
         "//conditions:default": 1,
     }),
     visibility = ["//visibility:public"],
-    deps = [],
+    deps = [
+        "//common/kvstore",
+    ],
 )

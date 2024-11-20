@@ -113,7 +113,7 @@ struct Definition {
 };
 
 // A `Reference` corresponds to a simple use of a constant name in a file. After a `ParsedFile` has been created, every
-// constant use should have a `Reference` corresponding to it _unless_ it appears in a `keep_for_ide` call.
+// constant use should have a `Reference` corresponding to it
 struct Reference {
     // the reference to this reference. Once `AutogenWalk` is completed and a full `ParsedFile` has been created, it
     // should always be the case that
@@ -151,6 +151,7 @@ struct Reference {
 
 struct AutogenConfig {
     const std::vector<std::string> behaviorAllowedInRBIsPaths;
+    const bool msgpackSkipReferenceMetadata = false;
 };
 
 // A `ParsedFile` contains all the `Definition`s and `References` used in a particular file
@@ -174,7 +175,7 @@ struct ParsedFile {
 
     std::string toString(const core::GlobalState &gs, int version) const;
     std::string toMsgpack(core::Context ctx, int version, const AutogenConfig &autogenCfg);
-    static std::string msgpackGlobalHeader(int version, size_t numFiles);
+    static std::string msgpackGlobalHeader(int version, size_t numFiles, const AutogenConfig &autogenCfg);
 
     std::vector<core::NameRef> showFullName(const core::GlobalState &gs, DefinitionRef id) const;
     QualifiedName showQualifiedName(const core::GlobalState &gs, DefinitionRef id) const;

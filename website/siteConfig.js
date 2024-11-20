@@ -82,6 +82,11 @@ const users = [
     infoLink: 'https://www.taskrabbit.com/',
   },
   {
+    caption: 'Tines',
+    image: 'img/tines-logo.svg',
+    infoLink: 'https://www.tines.com',
+  },
+  {
     caption: 'TriumphPay',
     image: 'img/triumphpay-logo.svg',
     infoLink: 'https://triumphpay.com',

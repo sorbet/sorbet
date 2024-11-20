@@ -38,7 +38,7 @@ public:
     // Don't report timer when it gets destructed.
     void cancel();
 
-    // Add a tag to the statsd metrics for this timer. Will not appear in traces.
+    // Add a tag to the statsd metrics for this timer. Will show up as additional "args" in a JSON trace
     void setTag(ConstExprStr name, ConstExprStr value);
 
     // Creates a new timer with the same start time, tags, args, and name.

@@ -1504,6 +1504,29 @@ module Process
     .returns(T.nilable([Integer, Process::Status]))
   end
   def self.waitpid2(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
+
+  # Notify the Ruby virtual machine that the boot sequence is finished,
+  # and that now is a good time to optimize the application. This is useful
+  # for long running applications.
+  #
+  # This method is expected to be called at the end of the application boot.
+  # If the application is deployed using a pre-forking model, `Process.warmup`
+  # should be called in the original process before the first fork.
+  #
+  # The actual optimizations performed are entirely implementation specific
+  # and may change in the future without notice.
+  #
+  # On CRuby, `Process.warmup`
+  #
+  # * Performs a major GC.
+  # * Compacts the heap.
+  # * Promotes all surviving objects to the old generation.
+  # * Precomputes the coderange of all strings.
+  # * Frees all empty heap pages and increments the allocatable pages counter
+  #   by the number of pages freed.
+  # * Invoke `malloc_trim` if available to free empty malloc pages.
+  sig {returns(TrueClass)}
+  def self.warmup; end
 end
 
 # The [`Process::GID`](https://docs.ruby-lang.org/en/2.7.0/Process/GID.html)

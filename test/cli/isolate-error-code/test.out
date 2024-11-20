@@ -9,15 +9,3 @@ test/cli/isolate-error-code/isolate-error-code.rb:6: The method `foo` does not h
      6 | def foo
         ^
 Errors: 1
-`--error-white-list` is deprecated; please use `--isolate-error-code` instead
-test/cli/isolate-error-code/isolate-error-code.rb:6: The method `foo` does not have a `sig` https://srb.help/7017
-     6 | def foo
-         ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `sig { returns(Integer) }`
-     6 | def foo
-         ^
-    test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `extend T::Sig`
-     6 | def foo
-        ^
-Errors: 1

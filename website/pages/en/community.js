@@ -93,6 +93,11 @@ class Index extends React.Component {
                   venue: 'Strange Loop 2018',
                 },
                 {
+                  title: 'Sorbet: A Typechecker for Ruby',
+                  link: '/docs/talks/ruby-conf-2018',
+                  venue: 'RubyConf 2018',
+                },
+                {
                   title: 'State of Sorbet: A type checker for Ruby',
                   link: '/docs/talks/ruby-kaigi-2019',
                   venue: 'RubyKaigi 2019',
@@ -111,6 +116,21 @@ class Index extends React.Component {
                   title: 'Sorbet: A type checker for Ruby 3 you can use today!',
                   link: '/docs/talks/ruby-conf-2019',
                   venue: 'RubyConf 2019',
+                },
+                {
+                  title: 'Sorbet: Why and How We Built a Typechecker for Ruby',
+                  link: '/docs/talks/qcon-2019',
+                  venue: 'QCon 2019',
+                },
+                {
+                  title: 'Sorbet: A type checker for Ruby 3 you can use today!',
+                  link: '/docs/talks/parisrb-2020',
+                  venue: 'ParisRB 2020',
+                },
+                {
+                  title: 'Sorbet: A type checker for Ruby 3 you can use today!',
+                  link: '/docs/talks/pdxrb-2020',
+                  venue: 'PDX.rb 2020',
                 },
                 {
                   title: 'Compiling Ruby to Native Code with Sorbet and LLVM',

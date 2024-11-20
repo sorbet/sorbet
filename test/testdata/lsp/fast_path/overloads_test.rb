@@ -5,7 +5,7 @@ class A
 
   sig {params(x: Integer).void}
   sig {params(x: Integer, y: String).void}
-  def self.example(x, y='')
+  def self.example(x, y='') # error: against an overloaded signature
   end
 end
 

@@ -41,7 +41,6 @@ using namespace std;
 namespace sorbet::rewriter {
 
 class FlattenWalk {
-    const bool compiledFile;
     enum class ScopeType { ClassScope, StaticMethodScope, InstanceMethodScope };
 
     struct ScopeInfo {
@@ -292,7 +291,7 @@ class FlattenWalk {
     }
 
 public:
-    FlattenWalk(core::Context ctx) : compiledFile(ctx.file.data(ctx).compiledLevel == core::CompiledLevel::True) {
+    FlattenWalk(core::Context ctx) {
         newMethodSet();
     }
     ~FlattenWalk() {
@@ -372,19 +371,10 @@ public:
         if (discardable) {
             tree = ast::MK::EmptyTree();
             return;
-        } else if (!this->compiledFile) {
+        } else {
             // We need to return something here so things like `module_function` and method
             // visibility tracking can work correctly.
             tree = ast::MK::RuntimeMethodDefinition(loc, name, methodDef.flags.isSelfMethod);
-            return;
-        } else {
-            auto keepName = methodDef.flags.isSelfMethod ? core::Names::keepSelfDef() : core::Names::keepDef();
-            auto kind = methodDef.flags.genericPropGetter ? core::Names::genericPropGetter()
-                        : methodDef.flags.isAttrReader    ? core::Names::attrReader()
-                                                          : core::Names::normal();
-            tree = ast::MK::Send3(loc, ast::MK::Constant(loc, core::Symbols::Sorbet_Private_Static()), keepName,
-                                  loc.copyWithZeroLength(), ast::MK::Self(loc), ast::MK::Symbol(loc, name),
-                                  ast::MK::Symbol(loc, kind));
             return;
         }
     };

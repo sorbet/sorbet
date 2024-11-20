@@ -14,8 +14,8 @@ class A
   def example
     A.unary(self) # error: Not enough arguments provided
     A.unary(self, 0)
-    A.unary(self, 0)) {}
-    A.unary(self, 0)) do
+    A.unary(self, 0) {}
+    A.unary(self, 0) do
     end
   end
 
@@ -25,10 +25,14 @@ end
 
 A.unary(A.new) # error: Not enough arguments provided
 A.unary(A.new, 0)
-A.unary(A.new, 0)
-A.unary(A.new, 0)) do
+A.unary(
+  A.new, 0
+)
+A.unary(A.new, 0) do
 end
 
 (T.unsafe(A.new)).unary(0)
 
-A.unary((A.new + A.new), 0)
+(A).unary(A.new + A.new, 0)
+
+(A).unary((A.new ; A.new), 0)

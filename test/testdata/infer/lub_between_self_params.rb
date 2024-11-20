@@ -26,6 +26,6 @@ class Child < Parent
     self["foo"] || self["bar"]
 #        ^^^^^ error: Expected `Child::A` but found `String("foo")` for argument `k`
 #              ^^^^ error: Branching on `void` value
-#                  ^^^^^^^^^^^ error: This code is unreachable
+#                       ^^^^^ error: Expected `Child::A` but found `String("bar")` for argument `k`
   end
 end

@@ -4094,6 +4094,182 @@ module Bundler::FileUtils::Verbose
   def self.uptodate?(new, old_list); end
 end
 
+class Bundler::GemHelper
+  sig {returns(T.untyped)}
+  def allowed_push_host(); end
+
+  sig {returns(T.untyped)}
+  def already_tagged?(); end
+
+  sig {returns(T.untyped)}
+  def base(); end
+
+  sig do
+    params(
+      built_gem_path: T.untyped,
+    )
+    .returns(T.untyped)
+  end
+  def build_checksum(built_gem_path=T.unsafe(nil)); end
+
+  sig {returns(T.untyped)}
+  def build_gem(); end
+
+  sig {returns(T.untyped)}
+  def built_gem_path(); end
+
+  sig {returns(T.untyped)}
+  def clean?(); end
+
+  sig {returns(T.untyped)}
+  def committed?(); end
+
+  sig {returns(T.untyped)}
+  def current_branch(); end
+
+  sig {returns(T.untyped)}
+  def default_remote(); end
+
+  sig {returns(T.untyped)}
+  def gem_command(); end
+
+  sig {returns(T.untyped)}
+  def gem_key(); end
+
+  sig {returns(T.untyped)}
+  def gem_push?(); end
+
+  sig {returns(T.untyped)}
+  def gem_push_host(); end
+
+  sig {returns(T.untyped)}
+  def gemspec(); end
+
+  sig do
+    params(
+      remote: T.untyped,
+    )
+    .returns(T.untyped)
+  end
+  def git_push(remote=T.unsafe(nil)); end
+
+  sig {returns(T.untyped)}
+  def guard_clean(); end
+
+  sig do
+    params(
+      base: T.untyped,
+      name: T.untyped,
+    )
+    .void
+  end
+  def initialize(base=T.unsafe(nil), name=T.unsafe(nil)); end
+
+  sig {returns(T.untyped)}
+  def install(); end
+
+  sig do
+    params(
+      built_gem_path: T.untyped,
+      local: T.untyped,
+    )
+    .returns(T.untyped)
+  end
+  def install_gem(built_gem_path=T.unsafe(nil), local=T.unsafe(nil)); end
+
+  sig {returns(T.untyped)}
+  def name(); end
+
+  sig do
+    params(
+      path: T.untyped,
+    )
+    .returns(T.untyped)
+  end
+  def rubygem_push(path); end
+
+  sig do
+    params(
+      cmd: T.untyped,
+      block: T.untyped,
+    )
+    .returns(T.untyped)
+  end
+  def sh(cmd, &block); end
+
+  sig do
+    params(
+      cmd: T.untyped,
+    )
+    .returns(T.untyped)
+  end
+  def sh_with_input(cmd); end
+
+  sig do
+    params(
+      cmd: T.untyped,
+      block: T.untyped,
+    )
+    .returns(T.untyped)
+  end
+  def sh_with_status(cmd, &block); end
+
+  sig {returns(T.untyped)}
+  def spec_path(); end
+
+  sig do
+    params(
+      tag_prefix: T.untyped,
+    )
+    .returns(T.untyped)
+  end
+  def tag_prefix=(tag_prefix); end
+
+  sig {returns(T.untyped)}
+  def tag_version(); end
+
+  sig {returns(T.untyped)}
+  def version(); end
+
+  sig {returns(T.untyped)}
+  def version_tag(); end
+
+  sig {returns(T.untyped)}
+  def self.instance(); end
+
+  sig do
+    params(
+      instance: T.untyped,
+    )
+    .returns(T.untyped)
+  end
+  def self.instance=(instance); end
+
+  sig do
+    params(
+      opts: T.untyped,
+    )
+    .returns(T.untyped)
+  end
+  def self.install_tasks(opts=T.unsafe(nil)); end
+
+  sig do
+    params(
+      tag_prefix: T.untyped,
+    )
+    .returns(T.untyped)
+  end
+  def self.tag_prefix=(tag_prefix); end
+
+  sig do
+    params(
+      block: T.untyped,
+    )
+    .returns(T.untyped)
+  end
+  def self.gemspec(&block); end
+end
+
 module Bundler::GemHelpers
   GENERICS = ::T.let(nil, T.untyped)
   GENERIC_CACHE = ::T.let(nil, T.untyped)

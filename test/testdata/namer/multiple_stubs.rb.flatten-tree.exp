@@ -1,13 +1,9 @@
-begin
-  <emptyTree>
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        Unresolved: Unresolved: <emptyTree>::<C Foo>::<C Bar>.baz(1)
-        Unresolved: Unresolved: <emptyTree>::<C Foo>::<C Bar>.baz(2)
-        <emptyTree>
-      end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def self.<static-init><<static-init>$CENSORED>(<blk>)
+    begin
+      Unresolved: Unresolved: <emptyTree>::<C Foo>::<C Bar>.baz(1)
+      Unresolved: Unresolved: <emptyTree>::<C Foo>::<C Bar>.baz(2)
+      <emptyTree>
     end
   end
-  <emptyTree>
 end

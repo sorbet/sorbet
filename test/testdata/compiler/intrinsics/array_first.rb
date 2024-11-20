@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
-# run_filecheck: INITIAL
 
 def test_array_first
   p [].first
@@ -15,12 +14,3 @@ end
 
 test_array_first
 
-# INITIAL-LABEL: define internal i64 @"func_Object#16test_array_first"
-# INITIAL: call i64 @sorbet_int_rb_ary_first(
-# INITIAL: call i64 @sorbet_int_rb_ary_first(
-# INITIAL: call i64 @sorbet_int_rb_ary_first(
-# INITIAL: call i64 @sorbet_int_rb_ary_first(
-# INITIAL: call i64 @sorbet_int_rb_ary_first(
-# INITIAL: call i64 @sorbet_int_rb_ary_first(
-# INITIAL: call i64 @sorbet_int_rb_ary_first(
-# INITIAL{LITERAL}: }

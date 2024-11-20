@@ -50,3 +50,8 @@ class Child < Parent
     nil
   end
 end
+
+sig { params(x: T.untyped).void }
+def method_name_missing(x)
+  x.
+end # error: unexpected token "end"

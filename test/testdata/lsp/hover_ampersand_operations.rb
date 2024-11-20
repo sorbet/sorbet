@@ -12,10 +12,15 @@ def main
   dogs = T.let([], T::Array[Dog])
   # Check hover of breeds / map / : / breed
   breeds = dogs.map(&:breed)
-# ^ hover: T::Array[String]
-              # ^ hover:     blk: T.proc.params(arg0: Dog).returns(String)
-                   # ^ hover: sig { returns(String) }
-                    # ^ hover: sig { returns(String) }
+  # ^ hover: T::Array[String]
+  #             ^ hover-line: 3 sig do
+  #             ^ hover-line: 4   params(
+  #             ^ hover-line: 5     blk: T.proc.params(arg0: Dog).returns(T.type_parameter(:U))
+  #             ^ hover-line: 6   )
+  #             ^ hover-line: 7   .returns(T::Array[T.type_parameter(:U)])
+  #             ^ hover-line: 8 end
+  #                  ^ hover: sig { returns(String) }
+  #                   ^ hover: sig { returns(String) }
 
   # Safenav
   dog = Dog.new
@@ -24,7 +29,7 @@ def main
 # ^ hover: String
   #       ^ hover: Dog
   #          ^ hover: Dog
-  #           ^ hover: sig { returns(String) }
+  #           ^ hover: (nothing)
   #            ^ hover: sig { returns(String) }
   #             ^ hover: sig { returns(String) }
 

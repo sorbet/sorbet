@@ -12,7 +12,7 @@ test/cli/exception-loop/test.rb:23: Revealed type: `T.nilable(A)` https://srb.he
     14 |def example1
         ^^^^^^^^^^^^
 
-test/cli/exception-loop/test.rb:25: Changing the type of a variable in a loop is not permitted https://srb.help/7001
+test/cli/exception-loop/test.rb:25: Changing the type of a variable is not permitted in loops and blocks https://srb.help/7001
     25 |    rescue B => e
                         ^
   Existing variable has type: `T.nilable(A)`

@@ -13,7 +13,6 @@
 #include <sstream>
 #endif
 #include "ProgressIndicator.h"
-#include "absl/strings/escaping.h" // BytesToHexString
 #include "absl/strings/match.h"
 #include "ast/Helpers.h"
 #include "ast/desugar/Desugar.h"
@@ -24,7 +23,6 @@
 #include "class_flatten/class_flatten.h"
 #include "common/FileOps.h"
 #include "common/concurrency/ConcurrentQueue.h"
-#include "common/crypto_hashing/crypto_hashing.h"
 #include "common/sort/sort.h"
 #include "common/strings/formatting.h"
 #include "common/timers/Timer.h"
@@ -84,28 +82,26 @@ public:
     }
 };
 
-string fileKey(const core::File &file) {
-    auto path = file.path();
-    string key(path.begin(), path.end());
-    key += "//";
-    auto hashBytes = sorbet::crypto_hashing::hash64(file.source());
-    key += absl::BytesToHexString(string_view{(char *)hashBytes.data(), size(hashBytes)});
-    return key;
-}
-
 ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, core::File &file,
                                       const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    if (kvstore && fref.id() < gs.filesUsed()) {
-        string fileHashKey = fileKey(file);
-        auto maybeCached = kvstore->read(fileHashKey);
-        if (maybeCached.data != nullptr) {
-            prodCounterInc("types.input.files.kvstore.hit");
-            return core::serialize::Serializer::loadTree(gs, file, maybeCached.data);
-        } else {
-            prodCounterInc("types.input.files.kvstore.miss");
-        }
+    if (kvstore == nullptr) {
+        return nullptr;
     }
-    return nullptr;
+
+    if (fref.id() >= gs.filesUsed()) {
+        prodCounterInc("types.input.files.kvstore.unindexed");
+        return nullptr;
+    }
+
+    string fileHashKey = core::serialize::Serializer::fileKey(file);
+    auto maybeCached = kvstore->read(fileHashKey);
+    if (maybeCached.data == nullptr) {
+        prodCounterInc("types.input.files.kvstore.miss");
+        return nullptr;
+    }
+
+    prodCounterInc("types.input.files.kvstore.hit");
+    return core::serialize::Serializer::loadTree(gs, file, maybeCached.data);
 }
 
 unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
@@ -134,13 +130,13 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
 }
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
-                              const options::Printers &print) {
+                              const options::Printers &print, bool preserveConcreteSyntax = false) {
     Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
     ast::ExpressionPtr ast;
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     {
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
-        ast = ast::desugar::node2Tree(ctx, move(parseTree));
+        ast = ast::desugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax);
     }
     if (print.DesugarTree.enabled) {
         print.DesugarTree.fmt("{}\n", ast.toStringWithTabs(gs, 0));
@@ -159,8 +155,9 @@ ast::ExpressionPtr runRewriter(core::GlobalState &gs, core::FileRef file, ast::E
 }
 
 ast::ParsedFile runLocalVars(core::GlobalState &gs, ast::ParsedFile tree) {
-    Timer timeit(gs.tracer(), "runLocalVars", {{"file", string(tree.file.data(gs).path())}});
     core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
+    Timer timeit(gs.tracer(), "runLocalVars", {{"file", string(tree.file.data(gs).path())}});
+    core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries when resolving duplicate arguments
     return sorbet::local_vars::LocalVars::run(ctx, move(tree));
 }
 
@@ -168,7 +165,8 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
     return {ast::MK::EmptyTree(), file};
 }
 
-ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &gs, core::FileRef file) {
+ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &gs, core::FileRef file,
+                              bool preserveConcreteSyntax) {
     auto &print = opts.print;
 
     Timer timeit(gs.tracer(), "desugarOne", {{"file", string(file.data(gs).path())}});
@@ -177,7 +175,7 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
             return ast::MK::EmptyTree();
         }
         auto parseTree = runParser(gs, file, print, opts.traceLexer, opts.traceParser);
-        return runDesugar(gs, file, move(parseTree), print);
+        return runDesugar(gs, file, move(parseTree), print, preserveConcreteSyntax);
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
@@ -243,19 +241,20 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
 vector<ast::ParsedFile>
 incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                    optional<UnorderedMap<core::FileRef, core::FoundDefHashes>> &&foundHashesForFiles,
-                   const options::Options &opts) {
+                   const options::Options &opts, WorkerPool &workers) {
     try {
 #ifndef SORBET_REALMAIN_MIN
         if (opts.stripePackages) {
             Timer timeit(gs.tracer(), "incremental_packager");
             // For simplicity, we still call Packager::runIncremental here, even though
-            // pipeline::resolve no longer calls Packager::run.
+            // pipeline::nameAndResolve no longer calls Packager::run.
             //
             // TODO(jez) We may want to revisit this. At the moment, the only thing that
             // runIncremental does is validate that files have the right package prefix. We could
             // split `pipeline::package` into something like "populate the package DB" and "verify
-            // the package prefixes" with the later living in `pipeline::resolve` once again (thus
-            // restoring the symmetry).
+            // the package prefixes" with the later living in `pipeline::nameAndResolve` once again
+            // (thus restoring the symmetry).
+            // TODO(jez) Parallelize this
             what = packager::Packager::runIncremental(gs, move(what));
         }
 #endif
@@ -264,16 +263,14 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             Timer timeit(gs.tracer(), "incremental_naming");
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
-            auto emptyWorkers = WorkerPool::create(0, gs.tracer());
 
-            auto result = runIncrementalNamer
-                              ? sorbet::namer::Namer::runIncremental(
-                                    gs, move(what), std::move(foundHashesForFiles.value()), *emptyWorkers)
-                              : sorbet::namer::Namer::run(gs, move(what), *emptyWorkers, nullptr);
+            auto canceled = runIncrementalNamer
+                                ? sorbet::namer::Namer::runIncremental(gs, absl::Span<ast::ParsedFile>(what),
+                                                                       std::move(foundHashesForFiles.value()), workers)
+                                : sorbet::namer::Namer::run(gs, absl::Span<ast::ParsedFile>(what), workers, nullptr);
 
             // Cancellation cannot occur during incremental namer.
-            ENFORCE(result.hasResult());
-            what = move(result.result());
+            ENFORCE(!canceled);
 
             // Required for autogen tests, which need to control which phase to stop after.
             if (opts.stopAfterPhase == options::Phase::NAMER) {
@@ -287,7 +284,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
-            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what), runIncrementalNamer);
+            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what), runIncrementalNamer, workers);
             // incrementalResolve is not cancelable.
             ENFORCE(result.hasResult());
             what = move(result.result());
@@ -300,8 +297,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
 
 #ifndef SORBET_REALMAIN_MIN
         if (opts.stripePackages) {
-            auto emptyWorkers = WorkerPool::create(0, gs.tracer());
-            what = packager::VisibilityChecker::run(gs, *emptyWorkers, std::move(what));
+            what = packager::VisibilityChecker::run(gs, workers, std::move(what));
         }
 #endif
 
@@ -623,6 +619,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
         ret = indexSuppliedFiles(gs, files, opts, workers, kvstore);
     }
 
+    // TODO(jez) Do we want this fast_sort here? Is it redundant?
     fast_sort(ret, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
     return ret;
 }
@@ -721,15 +718,15 @@ size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileR
     return numPackageFiles;
 }
 
-void unpartitionPackageFiles(vector<ast::ParsedFile> &indexed, vector<ast::ParsedFile> &&nonPackageIndexed) {
-    if (indexed.empty()) {
+void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::ParsedFile> &&nonPackageFiles) {
+    if (packageFiles.empty()) {
         // Performance optimization--if it's already empty, no need to move one-by-one
-        indexed = move(nonPackageIndexed);
+        packageFiles = move(nonPackageFiles);
     } else {
         // In this case, all the __package.rb files will have been sorted before non-__package.rb files,
         // and within each subsequence, the parsed files will be sorted (pipeline::index sorts its result)
-        indexed.reserve(indexed.size() + nonPackageIndexed.size());
-        absl::c_move(nonPackageIndexed, back_inserter(indexed));
+        packageFiles.reserve(packageFiles.size() + nonPackageFiles.size());
+        absl::c_move(nonPackageFiles, back_inserter(packageFiles));
     }
 }
 
@@ -743,8 +740,9 @@ void setPackagerOptions(core::GlobalState &gs, const options::Options &opts) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
         gs.setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
+                              opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
                               opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-                              opts.allowRelaxedPackagerChecksFor, opts.stripePackagesHint);
+                              opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint);
     }
 #endif
 }
@@ -775,24 +773,58 @@ void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const opti
 #endif
 }
 
-ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                                 WorkerPool &workers, core::FoundDefHashes *foundHashes) {
+[[nodiscard]] bool name(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
+                        WorkerPool &workers, core::FoundDefHashes *foundHashes) {
     Timer timeit(gs.tracer(), "name");
     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-    auto result = namer::Namer::run(gs, move(what), workers, foundHashes);
+    bool canceled = false;
+    try {
+        canceled = namer::Namer::run(gs, what, workers, foundHashes);
+    } catch (SorbetException &) {
+        Exception::failInFuzzer();
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception naming (backtrace is above)");
+        }
+    }
 
-    return result;
+    if (!canceled) {
+        for (auto &named : what) {
+            if (opts.print.NameTree.enabled) {
+                opts.print.NameTree.fmt("{}\n", named.tree.toStringWithTabs(gs, 0));
+            }
+            if (opts.print.NameTreeRaw.enabled) {
+                opts.print.NameTreeRaw.fmt("{}\n", named.tree.showRaw(gs));
+            }
+        }
+    }
+
+    return canceled;
 }
+
 class GatherUnresolvedConstantsWalk {
 public:
     vector<string> unresolvedConstants;
+
     void postTransformConstantLit(core::MutableContext ctx, const ast::ConstantLit &tree) {
         auto unresolvedPath = tree.fullUnresolvedPath(ctx);
         if (unresolvedPath.has_value()) {
             unresolvedConstants.emplace_back(fmt::format(
                 "{}::{}", unresolvedPath->first != core::Symbols::root() ? unresolvedPath->first.show(ctx) : "",
                 fmt::map_join(unresolvedPath->second, "::", [&](const auto &el) -> string { return el.show(ctx); })));
+        }
+    }
+
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
+        if (classDef.kind == ast::ClassDef::Kind::Class && !classDef.ancestors.empty()) {
+            auto *lit = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front());
+            auto unresolvedPath = lit->fullUnresolvedPath(ctx);
+            if (unresolvedPath.has_value()) {
+                unresolvedConstants.emplace_back(fmt::format(
+                    "{}::{}", unresolvedPath->first != core::Symbols::root() ? unresolvedPath->first.show(ctx) : "",
+                    fmt::map_join(unresolvedPath->second,
+                                  "::", [&](const auto &el) -> string { return el.show(ctx); })));
+            }
         }
     }
 };
@@ -860,25 +892,20 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
     return what;
 }
 
+ast::ParsedFilesOrCancelled nameAndResolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
+                                           const options::Options &opts, WorkerPool &workers,
+                                           core::FoundDefHashes *foundHashes) {
+    auto canceled = name(*gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
+    if (canceled) {
+        return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
+    }
+
+    return resolve(gs, move(what), opts, workers);
+}
+
 ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                    const options::Options &opts, WorkerPool &workers,
-                                    core::FoundDefHashes *foundHashes) {
+                                    const options::Options &opts, WorkerPool &workers) {
     try {
-        auto result = name(*gs, move(what), opts, workers, foundHashes);
-        if (!result.hasResult()) {
-            return result;
-        }
-        what = move(result.result());
-
-        for (auto &named : what) {
-            if (opts.print.NameTree.enabled) {
-                opts.print.NameTree.fmt("{}\n", named.tree.toStringWithTabs(*gs, 0));
-            }
-            if (opts.print.NameTreeRaw.enabled) {
-                opts.print.NameTreeRaw.fmt("{}\n", named.tree.showRaw(*gs));
-            }
-        }
-
         if (opts.stopAfterPhase != options::Phase::NAMER) {
             ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
             {
@@ -916,7 +943,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                     // We don't compute file hashes when running for incrementalResolve.
                     auto foundHashesForFiles = nullopt;
                     auto reresolved =
-                        pipeline::incrementalResolve(*gs, move(toBeReResolved), foundHashesForFiles, opts);
+                        pipeline::incrementalResolve(*gs, move(toBeReResolved), foundHashesForFiles, opts, workers);
                     ENFORCE(reresolved.size() == 1);
                     f = checkNoDefinitionsInsideProhibitedLines(*gs, move(reresolved[0]), 0, prohibitedLines);
                 }
@@ -1110,7 +1137,6 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, std::v
                                 core::FileRef file = job.file;
                                 try {
                                     core::Context ctx(gs, core::Symbols::root(), file);
-                                    auto file = job.file;
                                     typecheckOne(ctx, move(job), opts, intentionallyLeakASTs);
                                 } catch (SorbetException &) {
                                     Exception::failInFuzzer();
@@ -1235,73 +1261,6 @@ void printFileTable(unique_ptr<core::GlobalState> &gs, const options::Options &o
         }
     }
 #endif
-}
-
-bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> parsedFiles,
-                        const unique_ptr<OwnedKeyValueStore> &kvstore) {
-    if (kvstore == nullptr) {
-        return false;
-    }
-
-    Timer timeit(gs.tracer(), "pipeline::cacheTreesAndFiles");
-
-    // Compress files in parallel.
-    auto fileq = make_shared<ConcurrentBoundedQueue<const ast::ParsedFile *>>(parsedFiles.size());
-    for (auto &parsedFile : parsedFiles) {
-        fileq->push(&parsedFile, 1);
-    }
-
-    auto resultq = make_shared<BlockingBoundedQueue<vector<pair<string, vector<uint8_t>>>>>(parsedFiles.size());
-    workers.multiplexJob("compressTreesAndFiles", [fileq, resultq, &gs]() {
-        vector<pair<string, vector<uint8_t>>> threadResult;
-        int processedByThread = 0;
-        const ast::ParsedFile *job = nullptr;
-        unique_ptr<Timer> timeit;
-        {
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    processedByThread++;
-                    if (timeit == nullptr) {
-                        timeit = make_unique<Timer>(gs.tracer(), "cacheTreesAndFilesWorker");
-                    }
-
-                    if (!job->file.exists()) {
-                        continue;
-                    }
-
-                    auto &file = job->file.data(gs);
-                    if (!file.cached() && !file.hasParseErrors()) {
-                        threadResult.emplace_back(fileKey(file), core::serialize::Serializer::storeTree(file, *job));
-                        // Stream out compressed files so that writes happen in parallel with processing.
-                        if (processedByThread > 100) {
-                            resultq->push(move(threadResult), processedByThread);
-                            processedByThread = 0;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (processedByThread > 0) {
-            resultq->push(move(threadResult), processedByThread);
-        }
-    });
-
-    bool written = false;
-    {
-        vector<pair<string, vector<uint8_t>>> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            if (result.gotItem()) {
-                for (auto &a : threadResult) {
-                    kvstore->write(move(a.first), move(a.second));
-                    written = true;
-                }
-            }
-        }
-    }
-    return written;
 }
 
 vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const string &cachePath,

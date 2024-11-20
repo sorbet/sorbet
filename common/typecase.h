@@ -14,9 +14,15 @@ namespace sorbet {
 
 // Begin ecatmur's code
 template <typename T> struct remove_class {};
-template <typename C, typename R, typename... A> struct remove_class<R (C::*)(A...)> { using type = R(A...); };
-template <typename C, typename R, typename... A> struct remove_class<R (C::*)(A...) const> { using type = R(A...); };
-template <typename C, typename R, typename... A> struct remove_class<R (C::*)(A...) volatile> { using type = R(A...); };
+template <typename C, typename R, typename... A> struct remove_class<R (C::*)(A...)> {
+    using type = R(A...);
+};
+template <typename C, typename R, typename... A> struct remove_class<R (C::*)(A...) const> {
+    using type = R(A...);
+};
+template <typename C, typename R, typename... A> struct remove_class<R (C::*)(A...) volatile> {
+    using type = R(A...);
+};
 template <typename C, typename R, typename... A> struct remove_class<R (C::*)(A...) const volatile> {
     using type = R(A...);
 };
@@ -24,9 +30,15 @@ template <typename C, typename R, typename... A> struct remove_class<R (C::*)(A.
 template <typename T> struct get_signature_impl {
     using type = typename remove_class<decltype(&std::remove_reference<T>::type::operator())>::type;
 };
-template <typename R, typename... A> struct get_signature_impl<R(A...)> { using type = R(A...); };
-template <typename R, typename... A> struct get_signature_impl<R (&)(A...)> { using type = R(A...); };
-template <typename R, typename... A> struct get_signature_impl<R (*)(A...)> { using type = R(A...); };
+template <typename R, typename... A> struct get_signature_impl<R(A...)> {
+    using type = R(A...);
+};
+template <typename R, typename... A> struct get_signature_impl<R (&)(A...)> {
+    using type = R(A...);
+};
+template <typename R, typename... A> struct get_signature_impl<R (*)(A...)> {
+    using type = R(A...);
+};
 template <typename T> using get_signature = typename get_signature_impl<T>::type;
 // End ecatmur's code
 

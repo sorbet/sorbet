@@ -10,5 +10,7 @@ class Test
     a, b, *c, d, e = array
     a, * = array
     a.x, b = array
+    a, *b = *T.unsafe(array)
+    *a, b = *T.unsafe(array)
   end
 end

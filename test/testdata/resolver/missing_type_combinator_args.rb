@@ -2,6 +2,7 @@
 T.cast(nil, T.nilable) # error: Not enough arguments provided for method
 T.cast(nil, T.nilable(Integer, Integer))
 #                              ^^^^^^^  error: Too many arguments provided for method
+#                     ^^^^^^^^^^^^^^^^  error: `T.nilable` expects exactly `1` arguments, but got `2`
 T.cast(nil, T.any) # error: Not enough arguments provided for method
 T.cast(nil, T.all) # error: Not enough arguments provided for method
 T.must # error: Not enough arguments provided for method

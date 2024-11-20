@@ -118,40 +118,48 @@ public:
             return;
         }
 
-        auto replaceLoc = sendResp->termLoc();
-        ENFORCE(edits.find(replaceLoc) == edits.end(), "Tried to edit the same call site twice...");
+        auto receiverLoc =
+            sendResp->receiverLoc().exists() ? sendResp->receiverLoc() : sendResp->termLoc().copyWithZeroLength();
 
-        fmt::memory_buffer buf;
-        fmt::format_to(back_inserter(buf), "{}.{}", owner.show(gs), sendResp->callerSideName.show(gs));
-        auto receiverSource = sendResp->isPrivateOk ? "self"sv : sendResp->receiverLoc().source(gs).value();
-        if (sendResp->argLocOffsets.empty()) {
-            fmt::format_to(back_inserter(buf), "({})", receiverSource);
+        ENFORCE(edits.find(receiverLoc) == edits.end(), "Tried to edit the same call site twice...");
+        edits[receiverLoc] = fmt::format("{}{}", owner.show(gs), sendResp->isPrivateOk ? "." : "");
+
+        auto receiverSource = string(sendResp->isPrivateOk ? "self" : sendResp->receiverLoc().source(gs).value());
+        if (absl::StrContains(receiverSource, ";")) {
+            // It never hurts to parenthesize an argument, it's still technically valid.
+            //
+            // If there's a `;` in the receiver, it could either be in a string (`"foo;bar".example`)
+            // OR it could be a statement separator: `(x; y).example`, and `example(x; y)` is a syntax error.
+            //
+            // Let's defend against this by parenthesizing, despite how rare this is likely to be.
+            receiverSource = fmt::format("({})", receiverSource);
+        }
+
+        if (!sendResp->argLocOffsets.empty()) {
+            auto newFirstArgLoc = core::Loc(sendResp->file, sendResp->argLocOffsets.front().copyWithZeroLength());
+
+            ENFORCE(edits.find(newFirstArgLoc) == edits.end(), "Tried to edit the same call site twice...");
+            edits[newFirstArgLoc] = fmt::format("{}, ", receiverSource);
+        } else if (sendResp->funLocOffsets.exists() && !sendResp->funLocOffsets.empty() &&
+                   sendResp->locOffsetsWithoutBlock.exists() &&
+                   sendResp->funLocOffsets.endPos() <= sendResp->locOffsetsWithoutBlock.endPos()) {
+            auto newFirstArgLoc =
+                core::Loc(sendResp->file, sendResp->funLocOffsets.endPos(), sendResp->locOffsetsWithoutBlock.endPos());
+
+            if (newFirstArgLoc.empty()) {
+                auto checkForEmptyParens = newFirstArgLoc.adjustLen(gs, 0, 2);
+                if (checkForEmptyParens.source(gs) == "()") {
+                    newFirstArgLoc = checkForEmptyParens;
+                }
+            }
+
+            ENFORCE(edits.find(newFirstArgLoc) == edits.end(), "Tried to edit the same call site twice...");
+            edits[newFirstArgLoc] = fmt::format("({})", receiverSource);
         } else {
-            auto file = sendResp->file;
-            auto firstArgLoc = core::Loc(file, sendResp->argLocOffsets.front());
-            auto lastArgLoc = core::Loc(file, sendResp->argLocOffsets.back());
-            if (!firstArgLoc.exists() || !lastArgLoc.exists()) {
-                return;
-            }
-            auto argSource = firstArgLoc.join(lastArgLoc).source(gs).value();
-            fmt::format_to(back_inserter(buf), "({}, {})", receiverSource, argSource);
+            ENFORCE(false, "You've found a test case, please add one!");
+            auto newFirstArgLoc = core::Loc(sendResp->file, sendResp->funLocOffsets.copyEndWithZeroLength());
+            edits[newFirstArgLoc] = fmt::format("({})", receiverSource);
         }
-
-        if (sendResp->dispatchResult->main.blockPreType != nullptr) {
-            auto blockLocStart = sendResp->argLocOffsets.empty()
-                                     ? sendResp->funLocOffsets.copyEndWithZeroLength()
-                                     : sendResp->argLocOffsets.back().copyEndWithZeroLength();
-            auto blockLocEnd = sendResp->termLocOffsets.copyEndWithZeroLength();
-            auto blockLoc = core::Loc(sendResp->file, blockLocStart.join(blockLocEnd));
-            if (auto maybeBlockSource = blockLoc.source(gs)) {
-                string_view blockSource = (!maybeBlockSource->empty() && absl::StartsWith(*maybeBlockSource, "()"))
-                                              ? maybeBlockSource->substr(2)
-                                              : *maybeBlockSource;
-                fmt::format_to(back_inserter(buf), "{}", blockSource);
-            }
-        }
-
-        edits[replaceLoc] = to_string(buf);
     }
 
     void addSymbol(const core::SymbolRef symbol) override {

@@ -1,0 +1,41 @@
+Begin {
+  stmts = [
+    Const {
+      scope = NULL
+      name = <C <U <ErrorNode>>>
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U r>
+      }
+      rhs = Send {
+        receiver = NULL
+        method = <U e>
+        args = [
+        ]
+      }
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U r>
+      }
+      rhs = Send {
+        receiver = NULL
+        method = <U e>
+        args = [
+        ]
+      }
+    }
+    And {
+      left = LVar {
+        name = <U r>
+      }
+      right = Send {
+        receiver = NULL
+        method = <U o>
+        args = [
+        ]
+      }
+    }
+  ]
+}

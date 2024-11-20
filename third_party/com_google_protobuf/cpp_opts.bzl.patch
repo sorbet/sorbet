@@ -1,0 +1,12 @@
+diff --git build_defs/cpp_opts.bzl build_defs/cpp_opts.bzl
+index f667a4088..160ec467f 100644
+--- build_defs/cpp_opts.bzl
++++ build_defs/cpp_opts.bzl
+@@ -22,6 +22,7 @@ COPTS = select({
+         "-Woverloaded-virtual",
+         "-Wno-sign-compare",
+         "-Wno-nonnull",
++        "-Wno-missing-field-initializers",
+         "-Werror",
+     ],
+ })

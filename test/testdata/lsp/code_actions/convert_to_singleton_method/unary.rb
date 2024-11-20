@@ -34,3 +34,5 @@ end
 (T.unsafe(A.new)).unary(0)
 
 (A.new + A.new).unary(0)
+
+(A.new ; A.new).unary(0)

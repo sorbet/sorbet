@@ -3,6 +3,7 @@ cc_library(
     srcs = [
         "definitions.cc",
         "msgpack.cc",
+        "msgpack_lite.cc",
     ],
     hdrs = [
         "definitions.h",

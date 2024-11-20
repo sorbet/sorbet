@@ -38,8 +38,8 @@ x = 2 + 3
 You may still provide a wider type annotation if you would like. This can
 occasionally be helpful if you want the type of a variable to be broader than
 Sorbet's inferred type, such as in situations where you are changing the value
-of a variable in a loop to something that is broader than the expression that
-you use to initialize the variable:
+of a variable in a loop or block to something that is broader than the
+expression used to initialize the variable:
 
 ```ruby
 # without this T.let, x would have the inferred type NilClass
@@ -51,12 +51,65 @@ end
 
 ## Annotating constants
 
-Sorbet does not, by default, infer the types of constants, but they can be
-specified using `T.let`:
+Sorbet does _very_ minimal inference for types of constants. These are the cases
+where Sorbet infers constant types:
+
+- Constants initialized with simple literals (like `"foo"`, `123`, or `[""]`)
+  will have their types inferred. Importantly, this does not include `Hash`
+  literals.
+
+- Constants initialized as an alias to another constant, like `X = Y`. Sorbet
+  infers the type of `X` to be whatever the type of `Y` is (if `Y` has neither
+  an explicit nor an inferred type, `X` will be inferred to be `T.untyped`).
+
+- Array literal type inference is recursive, so Sorbet will only assume an array
+  type for an array literal if the contents of the array are all literals
+  (including class or module constant literals).
+
+- Array literals are inferred to have type `T::Array[...]` where `...` is a
+  [union type](union-types.md) of all the types of elements in the array. If the
+  array literal is also frozen with the `.freeze` method, the inferred type will
+  be a [tuple type](tuples.md) instead. This array vs tuple decision is not
+  recursive, because `.freeze` is not recursive. To have Sorbet infer array of
+  tuples types, call `.freeze` on each array nested inside the top-level array.
+
+- Constants initialized with a call to `SomeClass.new` will have their type
+  inferred to `SomeClass`. Importantly, this assumption happens **regardless**
+  of whether the `new` method actually returns an instance of `SomeClass`, which
+  might not be the case if the `new` method has been overridden.
+
+  In these cases, Sorbet reports an error stating that it requires an explicit
+  type annotation to correct the faulty assumption. This only applies at the
+  top-level (e.g., not inside arrays).
+
+In all other cases, Sorbet does not infer the types of constants, and will
+assume a type of `T.untyped`. In [`# typed: strict`](static.md) files, Sorbet
+reports an error requiring that a type be specified, so that Sorbet does not
+assume `T.untyped`.
+
+To specify the type of a constant, use `T.let`:
 
 ```ruby
 NAMES = T.let(["Nelson", "Dmitry", "Paul"], T::Array[String])
 ```
+
+In codebases that require calling `.freeze` on constants, the call to `.freeze`
+**must** go inside the `T.let`, or Sorbet will not see the call to `T.let`.
+
+```ruby
+# ✅ Good
+NAMES = T.let(["Nelson", "Dmitry", "Paul"].freeze, T::Array[String])
+#                                         ^^^^^^^ ✅
+
+# ❌ BAD
+NAMES = T.let(["Nelson", "Dmitry", "Paul"], T::Array[String]).freeze
+#                                                         ❌ ^^^^^^^
+```
+
+We recommend using the [`rubocop-sorbet`] gem, which modifies the behavior of
+RuboCop's `Style/MutableConstant` rule, making it aware of `T.let`.
+
+[`rubocop-sorbet`]: https://github.com/Shopify/rubocop-sorbet
 
 ## Declaring class and instance variables
 
@@ -127,6 +180,22 @@ smart enough to understand that either:
     condition is truthy and thus must return a `String`, or
 2.  `@user` has not yet been initialized, but the initial value, computed using
     `ENV.fetch('USER')`, has type `String` (and is thus non-nil).
+
+Note that using `||=` like this only works when `nil` is the same as
+"uninitialized." If it's possible for the instance variable to be initialized
+and also possibly `nil` (meaning that there's no need to attempt to
+re-initialize it on subsequent calls), use the `defined?` keyword built into
+Ruby:
+
+```ruby
+module B
+  sig {returns(T.nilable(String))}
+  def current_git_dir
+    return @git_dir if defined?(@git_dir)
+    @git_dir = T.let(ENV['GIT_DIR'], T.nilable(String))
+  end
+end
+```
 
 ## Limitations on instance variable inference
 

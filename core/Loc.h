@@ -73,9 +73,9 @@ public:
     }
 
     inline Loc(FileRef file, uint32_t begin, uint32_t end) : storage{{begin, end}, file} {
-        ENFORCE(begin <= INVALID_POS_LOC);
-        ENFORCE(end <= INVALID_POS_LOC);
-        ENFORCE(begin <= end);
+        ENFORCE_NO_TIMER(begin <= INVALID_POS_LOC);
+        ENFORCE_NO_TIMER(end <= INVALID_POS_LOC);
+        ENFORCE_NO_TIMER(begin <= end);
     }
 
     inline Loc(FileRef file, LocOffsets offsets) : Loc(file, offsets.beginPos(), offsets.endPos()){};

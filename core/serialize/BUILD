@@ -12,6 +12,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast",
+        "//common/crypto_hashing",
         "//core",
         "@com_google_absl//absl/types:span",
         "@lz4",

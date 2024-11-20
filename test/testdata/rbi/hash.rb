@@ -73,6 +73,12 @@ initial_hash.transform_keys!.with_index do |k, i|
   T.assert_type!(i, Integer)
 end
 
+transformed_keys_hash2 = initial_hash.dup.transform_keys({ a: :A, b: :B })
+T.assert_type!(transformed_keys_hash2, T::Hash[Symbol, Float])
+
+transformed_keys_bang_hash2 = initial_hash.dup.transform_keys!({ a: :A, b: :B })
+T.assert_type!(transformed_keys_bang_hash2, T::Hash[Symbol, Float])
+
 transformed_values_hash = initial_hash.transform_values(&:to_s)
 T.assert_type!(transformed_values_hash, T::Hash[Symbol, String])
 initial_hash.transform_values(&:size) # error: Method `size` does not exist on `Float`
@@ -100,3 +106,7 @@ end)
 
 T.assert_type!({a: 1}.shift, T.nilable(T::Array[T.untyped]))
 T.assert_type!({}.shift, T.nilable(T::Array[T.untyped]))
+
+[:a, :b].each do |key|
+  T.assert_type!({a: 1}.slice(key), T::Hash[Symbol, Integer])
+end

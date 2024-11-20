@@ -1183,7 +1183,7 @@ class Sorbet::Private::GemLoader
     end,
   }
 
-  # This is so that the autoloader doesn't treat these as manditory requires
+  # This is so that the autoloader doesn't treat these as mandatory requires
   # before loading this file
   def self.my_require(gem)
     require gem # rubocop:disable PrisonGuard/NoDynamicRequire

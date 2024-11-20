@@ -27,7 +27,7 @@ echo ------------------------------
 # Compute metrics for classes, modules and methods
 
 main/sorbet --silence-dev-message --metrics-file=metrics5.json test/cli/metrics-file/files_for_metrics/ 2>&1
-grep -A1 "\"ruby_typer.unknown..types.input.modules.total\"" metrics5.json
-grep -A1 "\"ruby_typer.unknown..types.input.classes.total\"" metrics5.json
-grep -A1 "\"ruby_typer.unknown..types.input.singleton_classes.total\"" metrics5.json
-grep -A1 "\"ruby_typer.unknown..types.input.methods.total\"" metrics5.json
+grep -A1 "types.input.modules.total\"" metrics5.json
+grep -A1 "types.input.classes.total\"" metrics5.json
+grep -A1 "types.input.singleton_classes.total\"" metrics5.json
+grep -A1 "types.input.methods.total\"" metrics5.json

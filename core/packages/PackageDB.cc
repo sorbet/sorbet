@@ -217,8 +217,20 @@ const std::vector<std::string> &PackageDB::skipRBIExportEnforcementDirs() const 
     return skipRBIExportEnforcementDirs_;
 }
 
+const std::vector<core::NameRef> &PackageDB::layers() const {
+    return layers_;
+}
+
+const bool PackageDB::enforceLayering() const {
+    return !layers_.empty();
+}
+
 const std::vector<std::string> &PackageDB::extraPackageFilesDirectoryUnderscorePrefixes() const {
     return extraPackageFilesDirectoryUnderscorePrefixes_;
+}
+
+const std::vector<std::string> &PackageDB::extraPackageFilesDirectorySlashDeprecatedPrefixes() const {
+    return extraPackageFilesDirectorySlashDeprecatedPrefixes_;
 }
 
 const std::vector<std::string> &PackageDB::extraPackageFilesDirectorySlashPrefixes() const {
@@ -230,7 +242,7 @@ const std::string_view PackageDB::errorHint() const {
 }
 
 bool PackageDB::allowRelaxedPackagerChecksFor(MangledName mangledName) const {
-    return absl::c_find(allowRelaxedPackagerChecksFor_, mangledName) != allowRelaxedPackagerChecksFor_.end();
+    return absl::c_contains(allowRelaxedPackagerChecksFor_, mangledName);
 }
 
 PackageDB PackageDB::deepCopy() const {
@@ -242,6 +254,8 @@ PackageDB PackageDB::deepCopy() const {
     }
     result.enabled_ = this->enabled_;
     result.extraPackageFilesDirectoryUnderscorePrefixes_ = this->extraPackageFilesDirectoryUnderscorePrefixes_;
+    result.extraPackageFilesDirectorySlashDeprecatedPrefixes_ =
+        this->extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     result.extraPackageFilesDirectorySlashPrefixes_ = this->extraPackageFilesDirectorySlashPrefixes_;
     result.packagesByPathPrefix = this->packagesByPathPrefix;
     result.mangledNames = this->mangledNames;

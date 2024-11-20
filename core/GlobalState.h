@@ -163,9 +163,11 @@ public:
 
     const packages::PackageDB &packageDB() const;
     void setPackagerOptions(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                            const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                             const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                             const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
-                            const std::vector<std::string> &skipImportVisibilityCheckFor, std::string errorHint);
+                            const std::vector<std::string> &skipImportVisibilityCheckFor,
+                            const std::vector<std::string> &packagerLayers, std::string errorHint);
     packages::UnfreezePackages unfreezePackages();
 
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
@@ -194,6 +196,8 @@ public:
     unsigned int filesUsed() const;
     unsigned int symbolsUsedTotal() const;
 
+    void sanityCheckTableSizes() const;
+    void sanityCheckNames() const;
     void sanityCheck() const;
     void markAsPayload();
 
@@ -224,6 +228,10 @@ public:
 
     ErrorBuilder beginError(Loc loc, ErrorClass what) const;
     void _error(std::unique_ptr<Error> error) const;
+
+    // A version of `beginError` that's specific to the index phase of the pipeline, as it will record that index errors
+    // have been seen on the file associated with the loc.
+    ErrorBuilder beginIndexerError(Loc loc, ErrorClass what);
 
     int totalErrors() const;
     bool wasModified() const;

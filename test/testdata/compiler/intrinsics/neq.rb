@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
-# run_filecheck: INITIAL
 
 extend T::Sig
 
@@ -16,23 +15,11 @@ def do_neq(x, y)
   x != y
 end
 
-# INITIAL-LABEL: @"func_Object#6do_neq"
-# INITIAL-NOT: call i64 @sorbet_vm_neq
-# INITIAL: call i64{{.*}}@sorbet_i_send
-# INITIAL-NOT: call i64 @sorbet_vm_neq
-# INITIAL: call i64 @sorbet_rb_int_neq
-# INITIAL-NOT: call i64 @sorbet_vm_neq
-# INITIAL{LITERAL}: }
 
 def do_neq_untyped(x, y)
   x != y
 end
 
-# INITIAL-LABEL: @"func_Object#14do_neq_untyped"
-# INITIAL-NOT: call i64 @sorbet_rb_int_neq
-# INITIAL: call i64 @sorbet_vm_neq
-# INITIAL-NOT: call i64 @sorbet_rb_int_neq
-# INITIAL{LITERAL}: }
 
 p do_neq(4, 5)
 p do_neq(8, 9.0)

@@ -51,7 +51,7 @@ void CounterImpl::histogramAdd(const char *histogram, int key, unsigned long val
 }
 
 void CounterImpl::prodHistogramAdd(const char *histogram, int key, unsigned long value) {
-    if (fuzz_mode) {
+    if constexpr (fuzz_mode) {
         return;
     }
     this->histograms[histogram][key] += value;
@@ -65,7 +65,7 @@ void CounterImpl::categoryCounterAdd(const char *category, const char *counter, 
 }
 
 void CounterImpl::prodCategoryCounterAdd(const char *category, const char *counter, unsigned long value) {
-    if (fuzz_mode) {
+    if constexpr (fuzz_mode) {
         return;
     }
     this->countersByCategory[category][counter] += value;
@@ -79,21 +79,21 @@ void CounterImpl::counterAdd(const char *counter, unsigned long value) {
 }
 
 void CounterImpl::prodCounterAdd(const char *counter, unsigned long value) {
-    if (fuzz_mode) {
+    if constexpr (fuzz_mode) {
         return;
     }
     this->counters[counter] += value;
 }
 
 void CounterImpl::prodCounterSet(const char *counter, unsigned long value) {
-    if (fuzz_mode) {
+    if constexpr (fuzz_mode) {
         return;
     }
     this->counters[counter] = value;
 }
 
 void CounterImpl::timingAdd(CounterImpl::Timing timing) {
-    if (fuzz_mode) {
+    if constexpr (fuzz_mode) {
         return;
     }
     this->timings.emplace_back(move(timing));
@@ -424,7 +424,7 @@ string getCounterStatistics() {
 
         fmt::format_to(std::back_inserter(buf), "{}",
                        fmt::map_join(
-                           sortedTimings, "", [](const auto &el) -> auto { return el.second; }));
+                           sortedTimings, "", [](const auto &el) -> auto{ return el.second; }));
     }
 
     {
@@ -440,7 +440,7 @@ string getCounterStatistics() {
 
         fmt::format_to(std::back_inserter(buf), "{}",
                        fmt::map_join(
-                           sortedOther, "", [](const auto &el) -> auto { return el.second; }));
+                           sortedOther, "", [](const auto &el) -> auto{ return el.second; }));
     }
     return to_string(buf);
 }

@@ -298,7 +298,7 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
     this.context.log.debug(` > ${command} ${args.join(" ")}`);
     this.sorbetProcess = spawn(command, args, {
       cwd: workspace.rootPath,
-      env: activeConfig?.env ?? process.env,
+      env: { ...process.env, ...activeConfig?.env },
     });
     // N.B.: 'exit' is sometimes not invoked if the process exits with an error/fails to start, as per the Node.js docs.
     // So, we need to handle both events. ¯\_(ツ)_/¯
@@ -364,6 +364,19 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
         reason = RestartReason.FORCIBLY_TERMINATED;
       } else {
         reason = RestartReason.CRASH_LC_CLOSED;
+        this.context.log.error("");
+        this.context.log.error(
+          `The Sorbet LSP process crashed exit_code=${this.sorbetProcessExitCode}`,
+        );
+        this.context.log.error("The Node.js backtrace above is not useful.");
+        this.context.log.error(
+          "If there is a C++ backtrace above, that is useful.",
+        );
+        this.context.log.error(
+          "Otherwise, more useful output will be in the --debug-log-file to the Sorbet process",
+        );
+        this.context.log.error("(if provided as a command-line argument).");
+        this.context.log.error("");
       }
 
       this.status = ServerStatus.RESTARTING;

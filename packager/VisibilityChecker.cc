@@ -217,6 +217,16 @@ class PropagateVisibility final {
         }
 
         // If sym is an enum value, it can't be exported directly. Instead, its wrapping enum class must be exported.
+        //
+        // This was originally an implementation limitation, but is now an intentional choice. The considerations:
+        //
+        // - Each additional export was previously expensive in the rewriter-based package visibility checker.
+        // - Nothing prevents `MyEnum.deserialize('x')` to simply hide visibility violations.
+        // - It was hard for end users to know whether an enum had only exported some values intentionally.
+        //   In practice people just exported the new values without thinking.
+        //
+        // See also how when we get a visibility violation for an enum value not being exported we export the entire
+        // enum, not the specific enum value, to avoid conflict-inducing churn on `__package.rb` files.
         auto enumClass = getEnumClassForEnumValue(ctx.state, sym);
         if (enumClass.exists()) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
@@ -373,27 +383,7 @@ public:
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
         : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
 
-    // `keep-def` will reference constants in a way that looks like a packaging violation, but is actually fine. This
-    // boolean allows for an early exit when we know we're in the context of processing one of these sends. Currently
-    // the only sends that we process this way will not have any nested method calls, but if that changes this will need
-    // to become a stack.
-    bool ignoreConstant = false;
-
-    void preTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        ENFORCE(!this->ignoreConstant, "keepForIde has nested sends");
-        this->ignoreConstant = send.fun == core::Names::keepForIde();
-    }
-
-    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
-        this->ignoreConstant = false;
-    }
-
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
-        if (this->ignoreConstant) {
-            return;
-        }
-
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
         if (!lit.symbol.isClassOrModule() && !lit.symbol.isFieldOrStaticField()) {
             return;

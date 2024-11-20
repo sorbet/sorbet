@@ -145,12 +145,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
       end
 
+      <runtime method definition of inside_method>
+
       begin
-        <runtime method definition of inside_method>
-        begin
-          "works inside"
-          <runtime method definition of <it 'works inside'>>
-        end
+        "works inside"
+        <runtime method definition of <it 'works inside'>>
       end
     end
 
@@ -189,14 +188,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       begin
-        begin
-          <emptyTree>::<C Object>
-          <runtime method definition of <it 'Object'>>
-        end
-        begin
-          <emptyTree>::<C Object>
-          <runtime method definition of <it 'Object'>>
-        end
+        <emptyTree>::<C Object>
+        <runtime method definition of <it 'Object'>>
+      end
+
+      begin
+        <emptyTree>::<C Object>
+        <runtime method definition of <it 'Object'>>
       end
     end
 
@@ -217,14 +215,43 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      begin
-        class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)
-        end
-        begin
-          "contains nested describes"
-          <runtime method definition of <it 'contains nested describes'>>
-        end
+      class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)
       end
+
+      begin
+        "contains nested describes"
+        <runtime method definition of <it 'contains nested describes'>>
+      end
+    end
+  end
+
+  class <emptyTree>::<C <describe 'extends T::Sig'>><<C <todo sym>>> < (<self>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def example<<todo method>>(&<blk>)
+      0
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <it 'calls example'><<todo method>>(&<blk>)
+      begin
+        res = <self>.example()
+        <emptyTree>::<C T>.reveal_type(res)
+      end
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of example>
+
+    begin
+      "calls example"
+      <runtime method definition of <it 'calls example'>>
     end
   end
 

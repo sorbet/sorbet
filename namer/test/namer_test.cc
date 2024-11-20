@@ -46,7 +46,9 @@ vector<ast::ParsedFile> runNamer(core::GlobalState &gs, ast::ParsedFile tree) {
     v.emplace_back(move(tree));
     auto workers = WorkerPool::create(0, *logger);
     core::FoundDefHashes foundHashes; // compute this just for test coverage
-    return move(namer::Namer::run(gs, move(v), *workers, &foundHashes).result());
+    auto canceled = namer::Namer::run(gs, absl::Span<ast::ParsedFile>(v), *workers, &foundHashes);
+    ENFORCE(!canceled);
+    return v;
 }
 
 } // namespace
@@ -58,8 +60,8 @@ TEST_CASE("namer tests") {
     SUBCASE("HelloWorld") {
         auto tree = hello_world(gs);
         {
+            sorbet::core::UnfreezeNameTable nameTableAccess(gs); // creates singletons and class names
             auto localTree = sorbet::local_vars::LocalVars::run(gs, move(tree));
-            sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
             sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
             runNamer(gs, move(localTree));
         }

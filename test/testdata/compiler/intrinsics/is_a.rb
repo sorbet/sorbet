@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
-# run_filecheck: INITIAL
 
 class Normal
   def f(x, y)
@@ -13,13 +12,7 @@ class Normal
   end
 end
 
-# INITIAL-LABEL: define internal i64 @"func_Normal#1f"
-# INITIAL: call i64 @sorbet_vm_isa_p
-# INITIAL{LITERAL}: }
 
-# INITIAL-LABEL: define internal i64 @"func_Normal#1g"
-# INITIAL: call i64 @sorbet_vm_isa_p
-# INITIAL{LITERAL}: }
 
 class Override
   def is_a?(x)

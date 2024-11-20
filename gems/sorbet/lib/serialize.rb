@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 # typed: true
 
-require 'bigdecimal'
-
 class Sorbet::Private::Serialize
   DENYLIST_CONSTANTS = [
     ['DidYouMean', :NameErrorCheckers], # https://github.com/yuki24/did_you_mean/commit/b72fdbe194401f1be21f8ad7b6e3f784a0ad197d
@@ -189,8 +187,9 @@ class Sorbet::Private::Serialize
   end
 
   def comparable?(value)
-    return false if Sorbet::Private::RealStdlib.real_is_a?(value, BigDecimal) && value.nan?
-    return false if Sorbet::Private::RealStdlib.real_is_a?(value, Float) && value.nan?
+    return false if Sorbet::Private::RealStdlib.real_is_a?(value, Numeric) &&
+      Sorbet::Private::RealStdlib.real_respond_to?(value, :nan?) &&
+      value.nan?
     return false if Sorbet::Private::RealStdlib.real_is_a?(value, Complex)
     true
   end

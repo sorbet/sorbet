@@ -41,6 +41,9 @@ int main(int argc, char **argv) {
         std::vector<fmt::memory_buffer> enumClassFileBuffer(enumSource.size());
 
         for (auto &buffer : enumClassFileBuffer) {
+            fmt::format_to(std::back_inserter(buffer), "#pragma GCC diagnostic push\n");
+            fmt::format_to(std::back_inserter(buffer),
+                           "#pragma GCC diagnostic ignored \"-Wunused-but-set-variable\"\n");
             fmt::format_to(std::back_inserter(buffer), "#include \"main/lsp/json_types.h\"\n");
             fmt::format_to(std::back_inserter(buffer), "#include \"main/lsp/lsp_messages_gen_helpers.h\"\n");
             fmt::format_to(std::back_inserter(buffer), "namespace sorbet::realmain::lsp {{\n");
@@ -55,6 +58,7 @@ int main(int argc, char **argv) {
 
         for (auto &buffer : enumClassFileBuffer) {
             fmt::format_to(std::back_inserter(buffer), "}}\n");
+            fmt::format_to(std::back_inserter(buffer), "#pragma GCC diagnostic pop\n");
         }
 
         if (!writeFile(enumHeader, enumHeaderBuffer)) {
@@ -76,6 +80,9 @@ int main(int argc, char **argv) {
         std::vector<fmt::memory_buffer> classFileBuffer(msgSources.size());
 
         for (auto &buffer : classFileBuffer) {
+            fmt::format_to(std::back_inserter(buffer), "#pragma GCC diagnostic push\n");
+            fmt::format_to(std::back_inserter(buffer),
+                           "#pragma GCC diagnostic ignored \"-Wunused-but-set-variable\"\n");
             fmt::format_to(std::back_inserter(buffer), "#include \"main/lsp/json_types.h\"\n");
             fmt::format_to(std::back_inserter(buffer), "#include \"main/lsp/lsp_messages_gen_helpers.h\"\n");
             fmt::format_to(std::back_inserter(buffer), "namespace sorbet::realmain::lsp {{\n");
@@ -89,6 +96,7 @@ int main(int argc, char **argv) {
 
         for (auto &buffer : classFileBuffer) {
             fmt::format_to(std::back_inserter(buffer), "}}\n");
+            fmt::format_to(std::back_inserter(buffer), "#pragma GCC diagnostic pop\n");
         }
 
         // Output buffers to files.

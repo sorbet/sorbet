@@ -1,7 +1,6 @@
 # typed: true
 # compiled: true
 # frozen_string_literal: true
-# run_filecheck: INITIAL
 
 class Parent
   extend T::Sig
@@ -24,6 +23,3 @@ Parent.new.[]
 #
 # This test is intended to ensure we don't run into that situation again.
 
-# INITIAL-LABEL: define internal i64 @"func_<root>.13<static-init>
-# INITIAL: call i64 @"direct_func_Parent#2[]"
-# INITIAL{LITERAL}: }

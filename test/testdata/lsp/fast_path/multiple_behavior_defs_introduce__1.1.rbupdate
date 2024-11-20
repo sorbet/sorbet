@@ -1,5 +1,5 @@
 # typed: false
-# stripe-mode: true
+# uniquely-defined-behavior: true
 # exclude-from-file-update: true
 
 module Foo

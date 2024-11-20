@@ -56,6 +56,11 @@ Loc MutableContext::locAt(LocOffsets offsets) const {
 ErrorBuilder MutableContext::beginError(LocOffsets loc, ErrorClass what) const {
     return state.beginError(Loc(file, loc), what);
 }
+
+ErrorBuilder MutableContext::beginIndexerError(LocOffsets loc, ErrorClass what) const {
+    return state.beginIndexerError(Loc(file, loc), what);
+}
+
 ErrorBuilder Context::beginError(LocOffsets loc, ErrorClass what) const {
     return state.beginError(Loc(file, loc), what);
 }

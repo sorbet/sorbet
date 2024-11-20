@@ -4,7 +4,7 @@ class A
   extend T::Sig
 
   @declared = T.let(0, Integer)
-  @undeclared = 0 # error: The instance variable `@undeclared` must be declared using `T.let` when specifying `# typed: strict`
+  @undeclared = 0 # error: The singleton class instance variable `@undeclared` must be declared using `T.let` when specifying `# typed: strict`
 
   @undefined # error: Use of undeclared variable `@undefined`
 

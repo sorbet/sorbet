@@ -1,30 +1,15 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    begin
-      module ::Constants<<C Constants>> < ()
-        ::Constants::MAX_NUM_ADDITIONAL_DEVBOXES = 200
-      end
-      ::Sorbet::Private::Static.keep_for_ide(::Constants)
-      <emptyTree>
-    end
-
-    begin
-      module ::Routes::Helpers<<C Helpers>> < ()
-        ::Routes::Helpers::MAX_NUM_ADDITIONAL_DEVBOXES = ::Constants::MAX_NUM_ADDITIONAL_DEVBOXES
-      end
-      ::Sorbet::Private::Static.keep_for_ide(::Routes::Helpers)
-      <emptyTree>
-    end
-
-    begin
-      module ::Routes::WillCollapseOut<<C WillCollapseOut>> < ()
-        ::Routes::WillCollapseOut::Helpers = ::Routes::Helpers
-      end
-      ::Sorbet::Private::Static.keep_for_ide(::Routes::WillCollapseOut)
-      <emptyTree>
-    end
-
-    ::Routes::Helpers::MAX_NUM_ADDITIONAL_DEVBOXES
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::Constants<<C Constants>> < ()
+    ::Constants::MAX_NUM_ADDITIONAL_DEVBOXES = 200
   end
-  <emptyTree>
+
+  module ::Routes::Helpers<<C Helpers>> < ()
+    ::Routes::Helpers::MAX_NUM_ADDITIONAL_DEVBOXES = ::Constants::MAX_NUM_ADDITIONAL_DEVBOXES
+  end
+
+  module ::Routes::WillCollapseOut<<C WillCollapseOut>> < ()
+    ::Routes::WillCollapseOut::Helpers = ::Routes::Helpers
+  end
+
+  ::Routes::Helpers::MAX_NUM_ADDITIONAL_DEVBOXES
 end

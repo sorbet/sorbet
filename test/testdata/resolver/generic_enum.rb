@@ -2,7 +2,7 @@
 # disable-fast-path: true
 class MyEnum < T::Enum
   extend T::Generic
-  Value = type_template {{fixed: String}} # error: All constants defined on an `T::Enum` must be unique instances of the enum
+  Value = type_template {{fixed: String}} # error: All non-enum constants in a `T::Enum` must be defined after the `enums do` block
 
   enums do
     X = new # error: Type `Value` declared by parent `T.class_of(MyEnum)` must be re-declared

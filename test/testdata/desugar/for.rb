@@ -10,7 +10,7 @@ end
 
 class E
     def self.e=(e) # error: does not have a `sig`
-        @e = e; # error: The instance variable `@e` must be declared using `T.let` when specifying `# typed: strict`
+        @e = e; # error: The singleton class instance variable `@e` must be declared using `T.let` when specifying `# typed: strict`
     end
     def self.e # error: does not have a `sig`
         @e # error: Use of undeclared variable `@e`
@@ -40,7 +40,7 @@ class Main
         puts "main"
         # You can put all sorts of things on the left
         for @a,@@b,$c,d,E.e in A do
-          # ^^ error: The instance variable `@a` must be declared using `T.let` when specifying `# typed: strict`
+          # ^^ error: The singleton class instance variable `@a` must be declared using `T.let` when specifying `# typed: strict`
           #    ^^^ error: The class variable `@@b` must be declared using `T.let` when specifying `# typed: strict`
             puts @a.inspect
             puts @@b.inspect
@@ -50,7 +50,7 @@ class Main
         end
         A.each do |*forTemp|
             @a,@@b,$c,d,E.e = *forTemp
-          # ^^ error: The instance variable `@a` must be declared using `T.let` when specifying `# typed: strict`
+          # ^^ error: The singleton class instance variable `@a` must be declared using `T.let` when specifying `# typed: strict`
           #    ^^^ error: The class variable `@@b` must be declared using `T.let` when specifying `# typed: strict`
             puts @a.inspect
             puts @@b.inspect

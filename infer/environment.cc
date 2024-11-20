@@ -216,7 +216,7 @@ void KnowledgeFact::min(core::Context ctx, const KnowledgeFact &other) {
 }
 
 void KnowledgeFact::sanityCheck() const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     for (auto &a : yesTypeTests) {
@@ -353,7 +353,7 @@ void TestedKnowledge::emitKnowledgeSizeMetric() const {
 }
 
 void TestedKnowledge::sanityCheck() const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     _truthy->sanityCheck();
@@ -481,7 +481,20 @@ namespace {
 // This is not the case for most other equality tests. e.g., x != 0 does not imply ¬ x : Integer.
 //
 // This powers (among other things) exhaustiveness checking for T::Enum.
-bool isSingleton(core::Context ctx, core::ClassOrModuleRef sym) {
+bool isSingleton(core::Context ctx, const core::TypePtr &ty, bool includeSingletonClasses) {
+    auto sym = core::Symbols::noClassOrModule();
+    if (core::isa_type<core::ClassType>(ty)) {
+        auto c = core::cast_type_nonnull<core::ClassType>(ty);
+        sym = c.symbol;
+    } else if (core::isa_type<core::AppliedType>(ty)) {
+        auto &a = core::cast_type_nonnull<core::AppliedType>(ty);
+        sym = a.klass;
+    }
+
+    if (!sym.exists()) {
+        return false;
+    }
+
     // Singletons that are built into the Ruby VM
     if (sym == core::Symbols::NilClass() || sym == core::Symbols::FalseClass() || sym == core::Symbols::TrueClass()) {
         return true;
@@ -493,7 +506,8 @@ bool isSingleton(core::Context ctx, core::ClassOrModuleRef sym) {
     }
 
     // attachedClass on untyped symbol is defined to return itself
-    if (sym != core::Symbols::untyped() && sym.data(ctx)->attachedClass(ctx).exists() && sym.data(ctx)->flags.isFinal) {
+    if (includeSingletonClasses && sym != core::Symbols::untyped() && sym.data(ctx)->attachedClass(ctx).exists() &&
+        sym.data(ctx)->flags.isFinal) {
         // This is a Ruby singleton class object
         return true;
     }
@@ -504,6 +518,36 @@ bool isSingleton(core::Context ctx, core::ClassOrModuleRef sym) {
 
 } // namespace
 
+void Environment::updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, core::Loc loc,
+                                        const core::TypePtr &klassType, cfg::LocalRef ref,
+                                        KnowledgeFilter &knowledgeFilter) {
+    auto &whoKnows = getKnowledge(local);
+
+    core::ClassOrModuleRef klass = core::Types::getRepresentedClass(ctx, klassType);
+    if (klass.exists()) {
+        auto ty = klass.data(ctx)->externalType();
+        if (!ty.isUntyped()) {
+            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, ty);
+            whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, ty);
+        }
+    } else if (auto *klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
+        if (klassTypeApp->klass == core::Symbols::Class()) {
+            auto currentAlignment =
+                core::Types::alignBaseTypeArgs(ctx, klassTypeApp->klass, klassTypeApp->targs, core::Symbols::Class());
+            auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) {
+                return tmRef.data(ctx)->name == core::Names::Constants::AttachedClass();
+            });
+            ENFORCE(it != currentAlignment.end());
+            auto instanceTy = klassTypeApp->targs[distance(currentAlignment.begin(), it)];
+            if (!instanceTy.isUntyped()) {
+                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, instanceTy);
+                // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
+                // https://github.com/sorbet/sorbet/issues/4358
+            }
+        }
+    }
+}
+
 void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send *send,
                                   KnowledgeFilter &knowledgeFilter) {
     if (!send->fun.isUpdateKnowledgeName()) {
@@ -513,11 +557,13 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         return;
     }
 
+    if (!knowledgeFilter.isNeeded(local)) {
+        return;
+    }
+
+    auto &whoKnows = getKnowledge(local);
+
     if (send->fun == core::Names::bang()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
-        auto &whoKnows = getKnowledge(local);
         auto fnd = _vars.find(send->recv.variable);
         if (fnd != _vars.end()) {
             whoKnows.replaceTruthy(local, typeTestsWithVar, fnd->second.knowledge.falsy());
@@ -534,10 +580,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::nil_p()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
-        auto &whoKnows = getKnowledge(local);
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
         whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
         whoKnows.sanityCheck();
@@ -545,16 +587,12 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::blank_p()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
         // Note that this assumes that .blank? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
         auto &originalType = send->recv.type;
         auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
 
         if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
-            auto &whoKnows = getKnowledge(local);
             whoKnows.falsy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
         }
@@ -562,16 +600,12 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::present_p()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
         // Note that this assumes that .present? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
         auto &originalType = send->recv.type;
         auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
 
         if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
-            auto &whoKnows = getKnowledge(local);
             whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
         }
@@ -584,44 +618,14 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
     // TODO(jez) We should probably update this to be aware of T::NonForcingConstants.non_forcing_is_a?
     if (send->fun == core::Names::kindOf_p() || send->fun == core::Names::isA_p()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
-        auto &whoKnows = getKnowledge(local);
-        auto &klassType = send->args[0].type;
-        core::ClassOrModuleRef klass = core::Types::getRepresentedClass(ctx, klassType);
-        if (klass.exists()) {
-            auto ty = klass.data(ctx)->externalType();
-            if (!ty.isUntyped()) {
-                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, ty);
-                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, ty);
-            }
-            whoKnows.sanityCheck();
-        } else if (auto *klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
-            if (klassTypeApp->klass == core::Symbols::Class()) {
-                auto currentAlignment = core::Types::alignBaseTypeArgs(ctx, klassTypeApp->klass, klassTypeApp->targs,
-                                                                       core::Symbols::Class());
-                auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) {
-                    return tmRef.data(ctx)->name == core::Names::Constants::AttachedClass();
-                });
-                ENFORCE(it != currentAlignment.end());
-                auto instanceTy = klassTypeApp->targs[distance(currentAlignment.begin(), it)];
-                if (!instanceTy.isUntyped()) {
-                    whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, instanceTy);
-                    // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
-                    // https://github.com/sorbet/sorbet/issues/4358
-                }
-            }
-        }
-
+        const auto &klassType = send->args[0].type;
+        auto ref = send->recv.variable;
+        updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter);
+        whoKnows.sanityCheck();
         return;
     }
 
     if (send->fun == core::Names::eqeq() || send->fun == core::Names::equal_p() || send->fun == core::Names::neq()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
-        auto &whoKnows = getKnowledge(local);
         const auto &argType = send->args[0].type;
         const auto &recvType = send->recv.type;
 
@@ -631,34 +635,17 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
         ENFORCE(argType != nullptr);
         ENFORCE(recvType != nullptr);
+        auto includeSingletonClasses = true;
         if (!argType.isUntyped()) {
             truthy.addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
-
-            auto argSymbol = core::Symbols::noClassOrModule();
-            if (core::isa_type<core::ClassType>(argType)) {
-                auto c = core::cast_type_nonnull<core::ClassType>(argType);
-                argSymbol = c.symbol;
-            } else if (core::isa_type<core::AppliedType>(argType)) {
-                auto &a = core::cast_type_nonnull<core::AppliedType>(argType);
-                argSymbol = a.klass;
-            }
-            if (argSymbol.exists() && isSingleton(ctx, argSymbol)) {
+            if (isSingleton(ctx, argType, includeSingletonClasses)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
             }
         }
 
         if (!recvType.isUntyped()) {
             truthy.addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
-
-            core::ClassOrModuleRef recvSymbol = core::Symbols::noClassOrModule();
-            if (core::isa_type<core::ClassType>(recvType)) {
-                auto c = core::cast_type_nonnull<core::ClassType>(recvType);
-                recvSymbol = c.symbol;
-            } else if (core::isa_type<core::AppliedType>(recvType)) {
-                auto &a = core::cast_type_nonnull<core::AppliedType>(recvType);
-                recvSymbol = a.klass;
-            }
-            if (recvSymbol.exists() && isSingleton(ctx, recvSymbol)) {
+            if (isSingleton(ctx, recvType, includeSingletonClasses)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
             }
         }
@@ -668,77 +655,101 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::tripleEq()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
-        auto &whoKnows = getKnowledge(local);
-        const auto &recvType = send->recv.type;
-
+        const auto &klassType = send->recv.type;
+        auto ref = send->args[0].variable;
         // `when` against class literal
-        core::ClassOrModuleRef representedClass = core::Types::getRepresentedClass(ctx, recvType);
-        if (representedClass.exists()) {
-            auto representedType = representedClass.data(ctx)->externalType();
-            if (!representedType.isUntyped()) {
-                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, representedType);
-                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, representedType);
-            }
-        } else if (auto *recvApp = core::cast_type<core::AppliedType>(recvType)) {
-            if (recvApp->klass == core::Symbols::Class()) {
-                auto currentAlignment =
-                    core::Types::alignBaseTypeArgs(ctx, recvApp->klass, recvApp->targs, core::Symbols::Class());
-                auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) {
-                    return tmRef.data(ctx)->name == core::Names::Constants::AttachedClass();
-                });
-                ENFORCE(it != currentAlignment.end());
-                auto instanceTy = recvApp->targs[distance(currentAlignment.begin(), it)];
-                if (!instanceTy.isUntyped()) {
-                    whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, instanceTy);
-                    // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
-                    // https://github.com/sorbet/sorbet/issues/4358
-                }
-            }
-        }
+        updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter);
 
         // `when` against singleton
-        if (core::isa_type<core::ClassType>(recvType)) {
-            auto s = core::cast_type_nonnull<core::ClassType>(recvType);
-            // check if s is a singleton. in this case we can learn that
-            // a failed comparison means that type test would also fail
-            if (isSingleton(ctx, s.symbol)) {
-                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
-                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
-            }
+        // check if s is a singleton. in this case we can learn that
+        // a failed comparison means that type test would also fail.
+        //
+        // Have to exclude singleton classes, because this logic only applies for non-`Module`
+        // types, where `===` is `Kernel#===` (and is the same as `Kernel#==`).
+        //
+        // In other words, this half of the `===` logic behaves more like the `==` case in
+        // `updateKnowledge`, excluding Module objects.
+        auto includeSingletonClasses = false;
+        if (isSingleton(ctx, klassType, includeSingletonClasses)) {
+            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, klassType);
+            whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, klassType);
         }
         whoKnows.sanityCheck();
         return;
     }
 
     if (send->fun == core::Names::lessThan() || send->fun == core::Names::leq()) {
-        const auto &recvKlass = send->recv.type;
-        const auto &argType = send->args[0].type;
-
-        if (core::isa_type<core::ClassType>(argType)) {
-            auto argClass = core::cast_type_nonnull<core::ClassType>(argType);
-            if (!recvKlass.derivesFrom(ctx, core::Symbols::Module()) ||
-                !argClass.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
-                return;
-            }
-        } else if (auto *argClass = core::cast_type<core::AppliedType>(argType)) {
-            if (!recvKlass.derivesFrom(ctx, core::Symbols::Module()) ||
-                !argClass->klass.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
-                return;
-            }
-        } else {
+        auto argType = send->args[0].type;
+        if (argType.isUntyped() ||
+            (!core::isa_type<core::ClassType>(argType) && !core::isa_type<core::AppliedType>(argType))) {
             return;
         }
 
-        auto &whoKnows = getKnowledge(local);
+        const auto &recvType = send->recv.type;
+        if (!recvType.derivesFrom(ctx, core::Symbols::Module())) {
+            return;
+        }
+
+        auto argSym = core::Types::getRepresentedClass(ctx, argType);
+        if (!argSym.exists()) {
+            return;
+        }
+
+        // We only know the NoTypeTest for `<=`, not `<`, because `x < A` being false could mean
+        // that `x == A`, which would mean `x` still has type `T.class_of(A)`.
+        bool canAddNoTypeTest = send->fun == core::Names::leq();
+
+        const auto &argSymData = argSym.data(ctx);
+        if (argSymData->isModule()) {
+            if (!recvType.isUntyped() && recvType.derivesFrom(ctx, core::Symbols::Class())) {
+                argType = core::Types::tClass(argSymData->externalType());
+
+                // Can't add noTypeTest for module types, because Ruby has multiple inheritance for modules
+                // Even if the current recv doesn't include argSym, that doesn't mean that a subclass couldn't.
+                canAddNoTypeTest = false;
+            } else {
+                // Can't support this case until we have T::Module
+                return;
+            }
+        }
+
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
-        if (send->fun == core::Names::leq()) {
-            // We only know the NoTypeTest for `<=`, not `<`, because `x < A` being false could mean
-            // that `x == A`, which would mean `x` still has type `T.class_of(A)`.
+        if (canAddNoTypeTest) {
             whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
         }
+        whoKnows.sanityCheck();
+        return;
+    }
+
+    if (send->fun == core::Names::checkMatchArray()) {
+        auto tupleType = core::cast_type<core::TupleType>(send->args[1].type);
+        if (tupleType == nullptr) {
+            return;
+        }
+
+        auto typeTestType = core::Types::bottom();
+        for (const auto &klassType : tupleType->elems) {
+            // This mimics the non-T::Class case in `updateKnowledgeKindOf`
+            // We could extend this to `T::Class` types in the future, but let's start simple.
+            auto klass = core::Types::getRepresentedClass(ctx, klassType);
+            if (klass.exists()) {
+                auto ty = klass.data(ctx)->externalType();
+                if (ty.isUntyped()) {
+                    return;
+                }
+
+                typeTestType = core::Types::any(ctx, move(typeTestType), move(ty));
+            } else if (isSingleton(ctx, klassType, /* includeSingletonClasses */ false)) {
+                typeTestType = core::Types::any(ctx, move(typeTestType), klassType);
+            } else {
+                return;
+            }
+        }
+
+        auto ref = send->args[0].variable;
+        whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, typeTestType);
+        whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, typeTestType);
+
         whoKnows.sanityCheck();
         return;
     }
@@ -1137,12 +1148,14 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 if (send.link) {
                     // This should eventually become ENFORCEs but currently they are wrong
                     if (!retainedResult->main.blockReturnType) {
+                        // TODO(jez) This only looks at the main component!
                         retainedResult->main.blockReturnType = core::Types::untyped(retainedResult->main.method);
                     }
                     if (!retainedResult->main.blockPreType) {
+                        // TODO(jez) This only looks at the main component!
                         retainedResult->main.blockPreType = core::Types::untyped(retainedResult->main.method);
                     }
-                    ENFORCE(retainedResult->main.sendTp);
+                    ENFORCE(retainedResult->main.returnTypeBeforeSolve);
                 }
 
                 // For `case x; when X ...`, desugar produces `X.===(x)`, but with
@@ -1168,9 +1181,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         }
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx,
-                        core::lsp::SendResponse(retainedResult, send.argLocs, fun, ctx.owner.asMethodRef(),
-                                                send.isPrivateOk, ctx.file, bind.loc, send.receiverLoc, send.funLoc));
+                        ctx, core::lsp::SendResponse(retainedResult, send.argLocs, fun, ctx.owner.asMethodRef(),
+                                                     send.isPrivateOk, ctx.file, bind.loc, send.receiverLoc,
+                                                     send.funLoc, locWithoutBlock));
                 }
                 if (send.link) {
                     send.link->result = move(retainedResult);
@@ -1192,8 +1205,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                       ctx.owner.asMethodRef(), ctx.locAt(inWhat.loc)));
                 }
 
-                ENFORCE(ctx.file.data(ctx).hasParseErrors() || !tp.origins.empty(),
-                        "Inferencer did not assign location");
+                ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
             },
             [&](cfg::Alias &a) {
                 core::SymbolRef symbol = a.what.dealias(ctx);
@@ -1273,8 +1285,12 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         }
                         type = core::Types::untypedUntracked();
                     } else {
-                        type = core::Types::instantiate(ctx, main.sendTp, *main.constr);
+                        type = core::Types::instantiate(ctx, main.returnTypeBeforeSolve, *main.constr);
                     }
+                    // Write back into the DispatchResult so that retained results affect LSP queries.
+                    // (Note that the SendResponse has already been pushed, with a shared_ptr to the
+                    // DispatchResult we're mutating here)
+                    i.link->result->returnType = type;
                 } else {
                     type = i.link->result->returnType;
                 }
@@ -1446,8 +1462,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 if (methodReturnType == core::Types::void_()) {
                     methodReturnType = core::Types::top();
                 }
+                core::ErrorSection::Collector errorDetailsCollector;
                 if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType,
-                                                           core::UntypedMode::AlwaysCompatible)) {
+                                                           core::UntypedMode::AlwaysCompatible,
+                                                           errorDetailsCollector)) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         auto owner = ctx.owner;
                         e.setHeader("Expected `{}` but found `{}` for method result type", methodReturnType.show(ctx),
@@ -1456,7 +1474,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         e.addErrorSection(
                             core::TypeAndOrigins::explainExpected(ctx, methodReturnType, owner.loc(ctx), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
-                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, methodReturnType, typeAndOrigin.type);
+                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, methodReturnType,
+                                                                        typeAndOrigin.type);
                         if (i.whatLoc != inWhat.implicitReturnLoc) {
                             auto replaceLoc = ctx.locAt(i.whatLoc);
                             core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, methodReturnType,
@@ -1468,7 +1487,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, typeAndOrigin.type);
                     auto errLoc = ctx.locAt(bind.loc).truncateToFirstLine(ctx);
                     if (auto e = ctx.state.beginError(errLoc, what)) {
-                        e.setHeader("Value returned from method is `{}`", "T.untyped");
+                        e.setHeader("Value returned from method `{}` is `{}`", ctx.owner.name(ctx).show(ctx),
+                                    "T.untyped");
                         core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, typeAndOrigin, ownerLoc);
                     }
                 }
@@ -1483,12 +1503,13 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     expectedType = core::Types::top();
                 }
                 bool isSubtype;
+                core::ErrorSection::Collector errorDetailsCollector;
                 if (i.link->result->main.constr) {
-                    isSubtype =
-                        core::Types::isSubTypeUnderConstraint(ctx, *i.link->result->main.constr, typeAndOrigin.type,
-                                                              expectedType, core::UntypedMode::AlwaysCompatible);
+                    isSubtype = core::Types::isSubTypeUnderConstraint(
+                        ctx, *i.link->result->main.constr, typeAndOrigin.type, expectedType,
+                        core::UntypedMode::AlwaysCompatible, errorDetailsCollector);
                 } else {
-                    isSubtype = core::Types::isSubType(ctx, typeAndOrigin.type, expectedType);
+                    isSubtype = core::Types::isSubType(ctx, typeAndOrigin.type, expectedType, errorDetailsCollector);
                 }
                 if (!isSubtype) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
@@ -1501,7 +1522,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             core::TypeAndOrigins::explainExpected(ctx, expectedType, bspec.loc, "block result type"));
 
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
-                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, expectedType, typeAndOrigin.type);
+                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, expectedType,
+                                                                        typeAndOrigin.type);
                     }
                 } else if (!expectedType.isUntyped() && !expectedType.isTop() && typeAndOrigin.type.isUntyped()) {
                     auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, typeAndOrigin.type);
@@ -1595,18 +1617,21 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 // TODO(jez) Should we allow `T.let` / `T.cast` opt out of the untyped code error?
                 if (c.cast != core::Names::cast()) {
+                    core::ErrorSection::Collector errorDetailsCollector;
                     if (c.cast == core::Names::assertType() && ty.type.isUntyped()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
                             e.setHeader("Expected a type but found `{}` for `{}`", "T.untyped", "T.assert_type!");
                             e.addErrorSection(ty.explainGot(ctx, ownerLoc));
                             e.addErrorNote("You may need to add additional `{}` annotations", "sig");
                         }
-                    } else if (!core::Types::isSubType(ctx, ty.type, castType)) {
+                    } else if (!core::Types::isSubType(ctx, ty.type, castType, errorDetailsCollector)) {
                         if (c.cast == core::Names::assumeType()) {
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::IncorrectlyAssumedType)) {
                                 e.setHeader("Assumed expression had type `{}` but found `{}`", castType.show(ctx),
                                             ty.type.show(ctx));
                                 e.addErrorSection(ty.explainGot(ctx, ownerLoc));
+                                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, castType,
+                                                                                ty.type);
                                 e.addErrorNote("Please add an explicit type annotation to correct this assumption");
                                 if (bind.loc.exists() && c.valueLoc.exists()) {
                                     e.replaceWith("Add explicit annotation", ctx.locAt(bind.loc), "T.let({}, {})",
@@ -1617,6 +1642,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
                                 e.setHeader("Argument does not have asserted type `{}`", castType.show(ctx));
                                 e.addErrorSection(ty.explainGot(ctx, ownerLoc));
+                                e.addErrorSections(std::move(errorDetailsCollector));
                                 core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, ctx.locAt(c.valueLoc), constr,
                                                                              castType, ty.type);
                             }
@@ -1676,7 +1702,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             }
             tp.type = core::Types::untypedUntracked();
         }
-        ENFORCE(ctx.file.data(ctx).hasParseErrors() || !tp.origins.empty(), "Inferencer did not assign location");
+        ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
 
         if (!noLoopChecking && loopCount != bindMinLoops) {
             auto pin = pinnedTypes.find(bind.bind.variable);
@@ -1684,8 +1710,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 (pin != pinnedTypes.end()) ? pin->second : getTypeAndOrigin(ctx, bind.bind.variable);
 
             // TODO(jez) What should we do about untyped code and pinning?
+            core::ErrorSection::Collector errorDetailsCollector;
             bool asGoodAs = core::Types::isSubType(ctx, core::Types::dropLiteral(ctx, tp.type),
-                                                   core::Types::dropLiteral(ctx, cur.type));
+                                                   core::Types::dropLiteral(ctx, cur.type), errorDetailsCollector);
 
             {
                 switch (bindMinLoops) {
@@ -1699,7 +1726,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                 // message, but we don't have a convenient way to compute this at the moment.
                                 e.addErrorSection(cur.explainExpected(ctx, "field defined here", ownerLoc));
                                 e.addErrorSection(tp.explainGot(ctx, ownerLoc));
-                                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, cur.type, tp.type);
+                                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, cur.type,
+                                                                                tp.type);
                                 auto replaceLoc = ctx.locAt(bind.loc);
                                 // We are not processing a method call, so there is no constraint.
                                 auto &constr = core::TypeConstraint::EmptyFrozenConstraint;
@@ -1715,6 +1743,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                 e.setHeader("Incompatible assignment to variable declared via `{}`: `{}` is not a "
                                             "subtype of `{}`",
                                             "let", tp.type.show(ctx), cur.type.show(ctx));
+                                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, tp.type,
+                                                                                cur.type);
                             }
                             tp = cur;
                         }
@@ -1737,7 +1767,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                 }
                             }
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
-                                e.setHeader("Changing the type of a variable in a loop is not permitted");
+                                e.setHeader("Changing the type of a variable is not permitted in loops and blocks");
                                 e.addErrorSection(core::ErrorSection(
                                     core::ErrorColors::format("Existing variable has type: `{}`", cur.type.show(ctx))));
                                 e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
@@ -1758,6 +1788,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                     e.addErrorSection(core::ErrorSection("Original type from:",
                                                                          cur.origins2Explanations(ctx, ownerLoc)));
                                 }
+                                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, tp.type,
+                                                                                cur.type);
 
                                 if (!cur.origins.empty() && !tp.origins.empty() &&
                                     absl::c_any_of(cur.origins,
@@ -1807,7 +1839,7 @@ void Environment::cloneFrom(const Environment &rhs) {
 
 core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const core::DispatchComponent &main,
                                                     cfg::LocalRef fallback) {
-    auto rebind = main.blockSpec.rebind;
+    auto rebind = main.rebind;
 
     if (rebind.exists()) {
         core::TypeAndOrigins result;
@@ -1825,7 +1857,7 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
             result.type = rebind.data(ctx)->selfType(ctx);
         }
 
-        result.origins.emplace_back(main.blockSpec.loc);
+        result.origins.emplace_back(main.rebindLoc);
         return result;
     } else {
         return getTypeAndOrigin(ctx, fallback);
@@ -1862,11 +1894,7 @@ void Environment::setUninitializedVarsToNil(const core::Context &ctx, core::Loc 
 
 namespace {
 core::TypeAndOrigins nilTypesWithOriginWithLoc(core::Loc loc) {
-    // I'd love to have this, but keepForIDE intentionally has Loc::none() and
-    // sometimes ends up here...
-    // ENFORCE(loc.exists());
-    core::TypeAndOrigins ret{core::Types::nilClass(), loc};
-    return ret;
+    return {core::Types::nilClass(), loc};
 }
 } // namespace
 

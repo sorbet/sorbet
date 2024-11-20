@@ -53,3 +53,23 @@ class Foo4
     private :foo
   end
 end
+
+class Foo5
+  T.unsafe(nil).private
+
+  def foo; end  # this does not end up being private
+end
+
+class Foo6
+  self.private
+
+  def foo; end
+end
+
+class Foo7
+  bar = nil
+  bar.private
+  #   ^^^^^^^ error: Method `private` does not exist on `NilClass`
+
+  def foo; end
+end

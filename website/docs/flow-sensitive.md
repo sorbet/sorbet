@@ -263,3 +263,100 @@ View full example on sorbet.run</a>
 > **Note**: Many Ruby constructs that look like local variables are actually
 > method calls without parens! Specifically, watch out for `attr_reader` and
 > zero-argument method definitions.
+
+Note that given Sorbet's architecture, it's not possible to implement some sort
+of annotation that would mark a method as "pure" or "constant," declaring that a
+method always returns the same value across consecutive calls to the method
+(this also precludes special support for methods defined via `const` or
+`attr_reader`). For more information on why, see
+[this blog post](https://blog.jez.io/syntactic-control-flow/) which explains
+that control flow in Sorbet is a syntactic property, not a semantic property
+(which could be influenced by semantic annotations like this).
+
+## Tips
+
+These are some helpful tips for helping Sorbet track the types of expressions
+throughout a program.
+
+### Prefer `xs.compact` to `xs.reject(&:nil?)`
+
+Sorbet does not use the boolean predicate accepted by methods like
+`Array#select`, `Array#filter`, or `Array#reject` to infer a more narrow type
+about the element of the list.
+
+To remove the `nil` values from an Array and have Sorbet understand that they
+are gone, use `Array#compact` instead:
+
+```ruby
+sig { params(xs: T::Array[T.nilable(Integer)]).void }
+def example(xs)
+  ys = xs.reject(&:nil?)
+  T.reveal_type(ys) # <- still nilable ❌
+
+  ys = xs.compact # <- non-nil ✅
+end
+```
+
+<a
+href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.nilable%28Integer%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.reject%28%26%3Anil%3F%29%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20still%20nilable%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.compact%20%23%20%3C-%20non-nil%20%E2%9C%85%0Aend">View
+on sorbet.run</a>
+
+### Prefer `xs.grep(A)` to `xs.filter { |x| x.is_a?(A) }`
+
+Sorbet does not use the boolean predicate accepted by methods like
+`Array#select`, `Array#filter`, or `Array#reject` to infer a more narrow type
+about the element of the list.
+
+For the specific case of filtering a list using `is_a?`, prefer using
+`Enumerable#grep`:
+
+```ruby
+sig { params(xs: T::Array[T.any(Integer, String)]).void }
+def example(xs)
+  ys = xs.select { |x| x.is_a?(Integer) }
+  T.reveal_type(ys) # <- not just Integer ❌
+
+  ys = xs.grep(Integer)
+  T.reveal_type(ys) # <- only Integers ✅
+end
+```
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.any%28Integer%2C%20String%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.select%20%7B%20%7Cx%7C%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20not%20just%20Integer%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.grep%28Integer%29%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20only%20Integers%20%E2%9C%85%0Aend">View
+on sorbet.run</a>
+
+Two gotchas:
+
+- This requires the RBI definitions inside Sorbet 0.5.11388 or higher.
+- This only works for classes, not modules.
+
+If either of these gotchas apply, see the `filter_map` tip below.
+
+### Prefer `xs.filter_map { ... }` to `xs.filter { ... }`
+
+Sorbet does not use the boolean predicate accepted by methods like
+`Array#select`, `Array#filter`, or `Array#reject` to infer a more narrow type
+about the element of the list.
+
+For complicated flow-sensitive predicates (i.e., more than just checking for
+`nil?` or `is_a?`), use `Array#filter_map`. For example:
+
+```ruby
+sig { params(xs: T::Array[T.any(Integer, String)]).void }
+def example(xs)
+  ys = xs.select { |x| x.is_a?(Integer) && x.even? }
+  T.reveal_type(ys) # <- not just Integer ❌
+
+  ys = xs.filter_map { |x| x if x.is_a?(Integer) && x.even? }
+  T.reveal_type(ys) # <- only Integers ✅
+end
+```
+
+<a
+href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.any%28Integer%2C%20String%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.select%20%7B%20%7Cx%7C%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20not%20just%20Integer%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.filter_map%20%7B%20%7Cx%7C%20x%20if%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20only%20integers%20%E2%9C%85%0Aend">View
+on sorbet.run</a>
+
+`Array#filter_map` removes any element for which the filter returns a falsy
+value. If the value is truthy, the value at that index is mapped to the new,
+truthy value. The `x if x.is_a?(Integer)` evaluates to `x` (an `Integer`, thus
+always truthy) if it's an Integer, or implicitly returns `nil` (which is falsy)
+if it's a String.

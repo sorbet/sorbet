@@ -24,12 +24,6 @@
 {
  "files": [
   {
-   "path": "https://github.com/sorbet/sorbet/tree/master/bazel-out/host/bin/rbi/procs.rbi",
-   "sigil": "True",
-   "strict": "True",
-   "min_error_level": "Max"
-  },
-  {
    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/core/argf.rbi",
    "sigil": "Stdlib",
    "strict": "Stdlib",
@@ -79,6 +73,12 @@
   },
   {
    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/core/data.rbi",
+   "sigil": "Stdlib",
+   "strict": "Stdlib",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi",
    "sigil": "Stdlib",
    "strict": "Stdlib",
    "min_error_level": "Max"

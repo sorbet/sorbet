@@ -53,7 +53,7 @@ constexpr ErrorClass NonOverlappingEqual{7046, StrictLevel::True};
 constexpr ErrorClass UntypedValueInformation{7047, StrictLevel::True};
 constexpr ErrorClass UnknownSuperMethod{7048, StrictLevel::True};
 constexpr ErrorClass TypecheckOverloadBody{7049, StrictLevel::True};
-constexpr ErrorClass MustOnUntyped{7050, StrictLevel::Strict};
+constexpr ErrorClass RedundantMust{7050, StrictLevel::Strict};
 constexpr ErrorClass BranchOnVoid{7051, StrictLevel::True};
 // N.B infer does not run for untyped call at all. StrictLevel::False here would be meaningless
 

@@ -26,15 +26,32 @@ namespace sorbet::namer {
 
 namespace {
 
+struct ParsedFileWithIdx {
+    ast::ParsedFile parsedFile;
+    size_t idx;
+
+    ParsedFileWithIdx() = default;
+    ParsedFileWithIdx(ast::ParsedFile &&parsedFile, size_t idx) : parsedFile(move(parsedFile)), idx(idx) {}
+    ParsedFileWithIdx(const ParsedFileWithIdx &job) = delete;
+    ParsedFileWithIdx &operator=(const ParsedFileWithIdx &job) = delete;
+    ParsedFileWithIdx(ParsedFileWithIdx &&job) = default;
+    ParsedFileWithIdx &operator=(ParsedFileWithIdx &&job) = default;
+};
+
 struct SymbolFinderResult {
     ast::ParsedFile tree;
     unique_ptr<core::FoundDefinitions> names;
+
+    SymbolFinderResult() = default;
+    SymbolFinderResult(ast::ParsedFile &&tree, unique_ptr<core::FoundDefinitions> names)
+        : tree(move(tree)), names(move(names)) {}
+    SymbolFinderResult(const SymbolFinderResult &result) = delete;
+    SymbolFinderResult &operator=(const SymbolFinderResult &result) = delete;
+    SymbolFinderResult(SymbolFinderResult &&result) = default;
+    SymbolFinderResult &operator=(SymbolFinderResult &&result) = default;
 };
 
-void swap(SymbolFinderResult &a, SymbolFinderResult &b) {
-    a.tree.swap(b.tree);
-    a.names.swap(b.names);
-}
+using AllFoundDefinitions = vector<pair<core::FileRef, unique_ptr<core::FoundDefinitions>>>;
 
 core::ClassOrModuleRef methodOwner(core::Context ctx, core::SymbolRef owner, bool isSelfMethod) {
     ENFORCE(owner.exists() && owner != core::Symbols::todo());
@@ -372,6 +389,11 @@ public:
                 }
                 if (!original.hasPosArgs()) {
                     ENFORCE(!methodVisiStack.empty());
+
+                    if (!original.recv.isSelfReference()) {
+                        break;
+                    }
+
                     methodVisiStack.back() = optional<core::FoundModifier>{core::FoundModifier{
                         core::FoundModifier::Kind::Method,
                         getOwner(),
@@ -492,24 +514,18 @@ public:
     }
 
     void addConstantModifier(core::Context ctx, core::NameRef modifierName, const ast::ExpressionPtr &arg) {
-        auto target = core::NameRef::noName();
-        if (auto sym = ast::cast_tree<ast::Literal>(arg)) {
-            if (sym->isSymbol()) {
-                target = sym->asSymbol();
-            } else if (sym->isString()) {
-                target = sym->asString();
-            }
+        auto sym = ast::cast_tree<ast::Literal>(arg);
+        if (sym == nullptr || !sym->isName()) {
+            return;
         }
 
-        if (target.exists()) {
-            foundDefs->addModifier(core::FoundModifier{
-                core::FoundModifier::Kind::ClassOrStaticField,
-                getOwner(),
-                arg.loc(),
-                /*name*/ modifierName,
-                target,
-            });
-        }
+        foundDefs->addModifier(core::FoundModifier{
+            core::FoundModifier::Kind::ClassOrStaticField,
+            getOwner(),
+            arg.loc(),
+            /*name*/ modifierName,
+            sym->asName(),
+        });
     }
 
     core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::ExpressionPtr &expr) {
@@ -612,12 +628,23 @@ public:
         return foundDefs->addTypeMember(move(found));
     }
 
+    bool sendRecvIsT(const ast::Send &s) {
+        bool result = false;
+
+        typecase(
+            s.recv, [&](const ast::UnresolvedConstantLit &c) { result = c.cnst == core::Names::Constants::T(); },
+            [&](const ast::ConstantLit &c) { result = c.symbol == core::Symbols::T(); },
+            [&](const ast::ExpressionPtr &_default) { result = false; });
+
+        return result;
+    }
+
     core::FoundDefinitionRef handleAssignment(core::Context ctx, const ast::Assign &asgn) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(asgn.rhs);
         auto foundRef = fillAssign(ctx, asgn);
         ENFORCE(foundRef.kind() == core::FoundDefinitionRef::Kind::StaticField);
         auto &staticField = foundRef.staticField(*foundDefs);
-        staticField.isTypeAlias = send.fun == core::Names::typeAlias();
+        staticField.isTypeAlias = sendRecvIsT(send) && send.fun == core::Names::typeAlias();
         return foundRef;
     }
 
@@ -827,16 +854,6 @@ private:
         // we know right now that pos >= arguments.size() because otherwise we would have hit the early return at the
         // beginning of this method
         auto &argInfo = ctx.state.enterMethodArgumentSymbol(ctx.locAt(parsedArg.loc), ctx.owner.asMethodRef(), name);
-        // if enterMethodArgumentSymbol did not emplace a new argument into the list, then it means it's reusing an
-        // existing one, which means we've seen a repeated kwarg (as it treats identically named kwargs as
-        // identical). We know that we need to match the arity of the function as written, so if we don't have as many
-        // arguments as we expect, clone the one we got back from enterMethodArgumentSymbol in the position we expect
-        if (methodData->arguments.size() == pos) {
-            auto argCopy = argInfo.deepCopy();
-            argCopy.name = ctx.state.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, argInfo.name, pos + 1);
-            methodData->arguments.emplace_back(move(argCopy));
-            return;
-        }
         // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
         // from enterMethodArgumentSymbol
         ENFORCE(methodData->arguments.size() >= pos + 1);
@@ -1647,7 +1664,7 @@ public:
         }
     }
 
-    SymbolDefiner(const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
+    SymbolDefiner(const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> &&oldFoundHashes)
         : foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
 
     SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs,
@@ -1814,19 +1831,12 @@ public:
         }
     }
 
-    // This decides if we need to keep a node around incase the current LSP query needs type information for it
-    bool shouldLeaveAncestorForIDE(const ast::ExpressionPtr &anc) {
-        // used in Desugar <-> resolver to signal classes that did not have explicit superclass
-        if (ast::isa_tree<ast::EmptyTree>(anc) || anc.isSelfReference()) {
-            return false;
-        }
-        auto rcl = ast::cast_tree<ast::ConstantLit>(anc);
-        if (rcl && rcl->symbol == core::Symbols::todo()) {
-            return false;
-        }
-        return true;
-    }
-
+#ifdef DEBUG_MODE
+    // After some refactors, the only thing left in this callback is a bunch of ENFORCEs, so I've
+    // compiled the entire callback out unless DEBUG_MODE is set.
+    //
+    // If you're changing this to put load bearing logic back into this method, feel free to remove
+    // the #ifdef above.
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
@@ -1839,22 +1849,11 @@ public:
         // ENFORCE'ing it here makes certain errors apparent earlier.
         auto allowMissing = true;
         ENFORCE(ctx.state.lookupStaticInitForClass(klass.symbol, allowMissing).exists());
-
-        auto loc = klass.declLoc;
-        ast::InsSeq::STATS_store retSeqs;
-        retSeqs.emplace_back(std::move(tree));
-        if (ast::isa_tree<ast::ConstantLit>(klass.name)) {
-            retSeqs.emplace_back(ast::MK::KeepForIDE(loc.copyWithZeroLength(), klass.name.deepCopy()));
-        }
-        if (klass.kind == ast::ClassDef::Kind::Class && !klass.ancestors.empty() &&
-            shouldLeaveAncestorForIDE(klass.ancestors.front())) {
-            retSeqs.emplace_back(ast::MK::KeepForIDE(loc.copyWithZeroLength(), klass.ancestors.front().deepCopy()));
-        }
-
-        tree = ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
     }
+#endif
 
-    ast::MethodDef::ARGS_store fillInArgs(vector<core::ParsedArg> parsedArgs, ast::MethodDef::ARGS_store oldArgs) {
+    ast::MethodDef::ARGS_store fillInArgs(const vector<core::ParsedArg> &parsedArgs,
+                                          ast::MethodDef::ARGS_store oldArgs) {
         ast::MethodDef::ARGS_store args;
         int i = -1;
         for (auto &arg : parsedArgs) {
@@ -2164,50 +2163,44 @@ public:
     }
 };
 
-vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                       WorkerPool &workers) {
+AllFoundDefinitions findSymbols(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.findSymbols");
-    auto resultq = make_shared<BlockingBoundedQueue<vector<SymbolFinderResult>>>(trees.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
-    vector<SymbolFinderResult> allFoundDefinitions;
-    allFoundDefinitions.reserve(trees.size());
+    auto resultq = make_shared<BlockingBoundedQueue<pair<size_t, SymbolFinderResult>>>(trees.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<ParsedFileWithIdx>>(trees.size());
+    AllFoundDefinitions allFoundDefinitions(trees.size());
+    size_t idx = 0;
     for (auto &tree : trees) {
-        fileq->push(move(tree), 1);
+        fileq->push(ParsedFileWithIdx(move(tree), idx++), 1);
     }
 
     workers.multiplexJob("findSymbols", [&gs, fileq, resultq]() {
         Timer timeit(gs.tracer(), "naming.findSymbolsWorker");
         SymbolFinder finder;
-        vector<SymbolFinderResult> output;
-        ast::ParsedFile job;
+        ParsedFileWithIdx job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
-                Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", string(job.file.data(gs).path())}});
-                core::Context ctx(gs, core::Symbols::root(), job.file);
-                ast::TreeWalk::apply(ctx, finder, job.tree);
-                SymbolFinderResult jobOutput{move(job), finder.getAndClearFoundDefinitions()};
-                output.emplace_back(move(jobOutput));
+                Timer timeit(gs.tracer(), "naming.findSymbolsOne",
+                             {{"file", string(job.parsedFile.file.data(gs).path())}});
+                core::Context ctx(gs, core::Symbols::root(), job.parsedFile.file);
+                ast::TreeWalk::apply(ctx, finder, job.parsedFile.tree);
+                auto threadResult = SymbolFinderResult(move(job.parsedFile), finder.getAndClearFoundDefinitions());
+                resultq->push({job.idx, move(threadResult)}, 1);
             }
         }
-        if (!output.empty()) {
-            resultq->push(move(output), output.size());
-        }
     });
-    trees.clear();
 
     {
-        vector<SymbolFinderResult> threadResult;
+        pair<size_t, SymbolFinderResult> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                allFoundDefinitions.insert(allFoundDefinitions.end(), make_move_iterator(threadResult.begin()),
-                                           make_move_iterator(threadResult.end()));
+                auto fref = threadResult.second.tree.file;
+                trees[threadResult.first] = move(threadResult.second.tree);
+                allFoundDefinitions[threadResult.first] = make_pair(fref, move(threadResult.second.names));
             }
         }
     }
-    fast_sort(allFoundDefinitions,
-              [](const auto &lhs, const auto &rhs) -> bool { return lhs.tree.file < rhs.tree.file; });
 
     return allFoundDefinitions;
 }
@@ -2296,44 +2289,36 @@ void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap 
     }
 }
 
-ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions,
-                                          WorkerPool &workers,
-                                          UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles,
-                                          core::FoundDefHashes *foundHashesOut) {
+void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinitions, WorkerPool &workers,
+                   UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles,
+                   core::FoundDefHashes *foundHashesOut) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
-    vector<ast::ParsedFile> output;
-    output.reserve(allFoundDefinitions.size());
     const auto &epochManager = *gs.epochManager;
     uint32_t count = 0;
     uint32_t foundMethods = 0;
     ClassBehaviorLocsMap classBehaviorLocs;
     UnorderedMap<core::FileRef, SymbolDefiner::State> incrementalDefinitions;
     auto willDeleteOldDefs = !oldFoundHashesForFiles.empty();
-    for (auto &fileFoundDefinitions : allFoundDefinitions) {
-        foundMethods += fileFoundDefinitions.names->methods().size();
+    for (auto &[fref, fileFoundDefinitions] : allFoundDefinitions) {
+        foundMethods += fileFoundDefinitions->methods().size();
         count++;
         // defineSymbols is really fast. Avoid this mildly expensive check for most turns of the loop.
         if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
-            for (; count <= allFoundDefinitions.size(); count++) {
-                output.emplace_back(move(allFoundDefinitions[count - 1].tree));
-            }
-            return ast::ParsedFilesOrCancelled::cancel(move(output), workers);
+            return;
         }
-        auto fref = fileFoundDefinitions.tree.file;
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
         auto frefIt = oldFoundHashesForFiles.find(fref);
         auto oldFoundHashes =
             frefIt == oldFoundHashesForFiles.end() ? optional<core::FoundDefHashes>() : std::move(frefIt->second);
-        SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, move(oldFoundHashes));
+        SymbolDefiner symbolDefiner(*fileFoundDefinitions, move(oldFoundHashes));
         auto state = symbolDefiner.enterClassDefinitions(ctx, willDeleteOldDefs, classBehaviorLocs);
         if (willDeleteOldDefs) {
             symbolDefiner.deleteOldDefinitions(ctx, state);
         }
         incrementalDefinitions[fref] = move(state);
-        output.emplace_back(move(fileFoundDefinitions.tree));
         if (foundHashesOut != nullptr) {
-            populateFoundDefHashes(ctx, *fileFoundDefinitions.names, *foundHashesOut);
+            populateFoundDefHashes(ctx, *fileFoundDefinitions, *foundHashesOut);
         }
     }
 
@@ -2341,13 +2326,12 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     ENFORCE(incrementalDefinitions.size() == allFoundDefinitions.size());
     prodCounterAdd("types.input.foundmethods.total", foundMethods);
     count = 0;
-    for (auto &fileFoundDefinitions : allFoundDefinitions) {
+    for (auto &[fref, fileFoundDefinitions] : allFoundDefinitions) {
         count++;
         if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
-            return ast::ParsedFilesOrCancelled::cancel(move(output), workers);
+            return;
         }
 
-        auto fref = fileFoundDefinitions.tree.file;
         // The contents of this don't matter for incremental definition.  The
         // old definitions should only matter when deleting old symbols (which
         // happened in the previous phase of incremental namer), not here when
@@ -2355,99 +2339,85 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
         optional<core::FoundDefHashes> oldFoundHashes;
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
-        SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, oldFoundHashes);
+        SymbolDefiner symbolDefiner(*fileFoundDefinitions, move(oldFoundHashes));
         symbolDefiner.enterNewDefinitions(ctx, move(incrementalDefinitions[fref]));
     }
-    return output;
+    return;
 }
 
-struct SymbolizeTreesResult {
-    vector<ast::ParsedFile> trees;
-};
-
-vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                       WorkerPool &workers) {
+void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
-    auto resultq = make_shared<BlockingBoundedQueue<SymbolizeTreesResult>>(trees.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
+    auto resultq = make_shared<BlockingBoundedQueue<ParsedFileWithIdx>>(trees.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<ParsedFileWithIdx>>(trees.size());
+    size_t idx = 0;
     for (auto &tree : trees) {
-        fileq->push(move(tree), 1);
+        fileq->push(ParsedFileWithIdx(move(tree), idx++), 1);
     }
 
     workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq]() {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
         TreeSymbolizer inserter;
-        SymbolizeTreesResult output;
-        ast::ParsedFile job;
+        ParsedFileWithIdx job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
-                Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(job.file.data(gs).path())}});
-                core::Context ctx(gs, core::Symbols::root(), job.file);
-                ast::TreeWalk::apply(ctx, inserter, job.tree);
-                output.trees.emplace_back(move(job));
+                Timer timeit(gs.tracer(), "naming.symbolizeTreesOne",
+                             {{"file", string(job.parsedFile.file.data(gs).path())}});
+                core::Context ctx(gs, core::Symbols::root(), job.parsedFile.file);
+                ast::TreeWalk::apply(ctx, inserter, job.parsedFile.tree);
+                resultq->push(move(job), 1);
             }
         }
-        if (!output.trees.empty()) {
-            resultq->push(move(output), output.trees.size());
-        }
     });
-    trees.clear();
 
     {
-        SymbolizeTreesResult threadResult;
+        ParsedFileWithIdx threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
-                             make_move_iterator(threadResult.trees.end()));
+                trees[threadResult.idx] = move(threadResult.parsedFile);
             }
         }
     }
-    fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
-    return trees;
 }
 
 } // namespace
 
-ast::ParsedFilesOrCancelled
-Namer::runInternal(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
-                   UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles,
-                   core::FoundDefHashes *foundHashesOut) {
-    auto foundDefs = findSymbols(gs, move(trees), workers);
+// Returns whether typechecking was cancelled
+[[nodiscard]] bool Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
+                                      UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles,
+                                      core::FoundDefHashes *foundHashesOut) {
+    auto foundDefs = findSymbols(gs, trees, workers);
     if (gs.epochManager->wasTypecheckingCanceled()) {
-        trees.reserve(foundDefs.size());
-        for (auto &def : foundDefs) {
-            trees.emplace_back(move(def.tree));
-        }
-        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
+        return true;
     }
     if (foundHashesOut != nullptr) {
         ENFORCE(foundDefs.size() == 1,
                 "Producing foundMethodHashes is meant to only happen when hashing a single file");
     }
-    auto result = defineSymbols(gs, move(foundDefs), workers, std::move(oldFoundHashesForFiles), foundHashesOut);
-    if (!result.hasResult()) {
-        return result;
+    defineSymbols(gs, move(foundDefs), workers, std::move(oldFoundHashesForFiles), foundHashesOut);
+    if (gs.epochManager->wasTypecheckingCanceled()) {
+        return true;
     }
-    trees = symbolizeTrees(gs, move(result.result()), workers);
-    return trees;
+
+    symbolizeTrees(gs, trees, workers);
+    return false;
 }
 
-ast::ParsedFilesOrCancelled Namer::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
-                                       core::FoundDefHashes *foundHashesOut) {
+[[nodiscard]] bool Namer::run(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
+                              core::FoundDefHashes *foundHashesOut) {
     // In non-incremental namer, there are no old FoundDefHashes; just defineSymbols like normal.
     auto oldFoundHashesForFiles = UnorderedMap<core::FileRef, core::FoundDefHashes>{};
-    return runInternal(gs, move(trees), workers, std::move(oldFoundHashesForFiles), foundHashesOut);
+    return runInternal(gs, trees, workers, std::move(oldFoundHashesForFiles), foundHashesOut);
 }
 
-ast::ParsedFilesOrCancelled
-Namer::runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
-                      UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles, WorkerPool &workers) {
+[[nodiscard]] bool Namer::runIncremental(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees,
+                                         UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles,
+                                         WorkerPool &workers) {
     // foundHashesOut is only used when namer is run via hashing.cc to compute a FileHash for each file
     // The incremental namer mode should never be used for hashing.
     auto foundHashesOut = nullptr;
-    return runInternal(gs, move(trees), workers, std::move(oldFoundHashesForFiles), foundHashesOut);
+    return runInternal(gs, trees, workers, std::move(oldFoundHashesForFiles), foundHashesOut);
 }
 
 }; // namespace sorbet::namer

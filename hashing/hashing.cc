@@ -43,7 +43,7 @@ bool isEmptyParseResult(const core::GlobalState &gs, const ast::ExpressionPtr &t
 
 unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_ptr<core::GlobalState> &lgs,
                                                  core::UsageHash usageHash, ast::ParsedFile file) {
-    if (file.file.data(*lgs).hasParseErrors()) {
+    if (file.file.data(*lgs).hasIndexErrors()) {
         if (isEmptyParseResult(*lgs, file.tree)) {
             rapidjson::StringBuffer result;
             rapidjson::Writer<rapidjson::StringBuffer> writer(result);
@@ -80,7 +80,7 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_
 
     auto workers = WorkerPool::create(0, lgs->tracer());
     core::FoundDefHashes foundHashes; // out parameter
-    realmain::pipeline::resolve(lgs, move(single), opts(), *workers, &foundHashes);
+    realmain::pipeline::nameAndResolve(lgs, move(single), opts(), *workers, &foundHashes);
 
     return make_unique<core::FileHash>(move(*lgs->hash()), move(usageHash), move(foundHashes));
 }

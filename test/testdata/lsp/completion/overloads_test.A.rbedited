@@ -6,7 +6,7 @@ class A
   extend T::Sig
   sig {params(x: I).void}
   sig {params(x: S).void}
-  def my_method(x); end
+  def my_method(x); end # error: against an overloaded signature
 end
 
 # Not possible to see in the test, but in VS Code though these items have the

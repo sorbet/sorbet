@@ -25,9 +25,6 @@ else
 fi
 # --- end runfiles.bash initialization --- }}}
 
-# shellcheck source-path=SCRIPTDIR/..
-source "test/logging.sh"
-
 # Argument Parsing #############################################################
 
 test_directory=$1
@@ -37,10 +34,9 @@ test_directory=$1
 root="$PWD"
 
 sorbet="$(rlocation com_stripe_ruby_typer/main/sorbet)"
-ruby="$(rlocation sorbet_ruby_2_7/toolchain/bin/ruby)"
-sorbet_runtime="$(dirname $(rlocation com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb))"
-rbi_gen_package_runner="$(rlocation com_stripe_ruby_typer/test/rbi_gen_package_runner.rb)"
+rbi_gen_package_runner="$(rlocation com_stripe_ruby_typer/test/single_package_runner_cc)"
 
 # Main #########################################################################
 
-exec "$ruby" -I "${sorbet_runtime}" "${rbi_gen_package_runner}" --sorbet "${sorbet}" --root="$root" --test-directory="${test_directory}"
+set -x
+exec "${rbi_gen_package_runner}" "${sorbet}" "$root" "${test_directory}"

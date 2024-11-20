@@ -252,7 +252,7 @@ const UnorderedMap<
         {"highlight-untyped-values", BooleanPropertyAssertion::make},
         {"disable-fast-path", BooleanPropertyAssertion::make},
         {"disable-stress-incremental", BooleanPropertyAssertion::make},
-        {"stripe-mode", BooleanPropertyAssertion::make},
+        {"uniquely-defined-behavior", BooleanPropertyAssertion::make},
         {"check-out-of-order-constant-references", BooleanPropertyAssertion::make},
         {"enable-packager", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
@@ -274,8 +274,10 @@ const UnorderedMap<
         {"symbol-search", SymbolSearchAssertion::make},
         {"apply-rename", ApplyRenameAssertion::make},
         {"extra-package-files-directory-prefix-underscore", StringPropertyAssertion::make},
+        {"extra-package-files-directory-prefix-slash-deprecated", StringPropertyAssertion::make},
         {"extra-package-files-directory-prefix-slash", StringPropertyAssertion::make},
         {"allow-relaxed-packager-checks-for", StringPropertyAssertion::make},
+        {"packager-layers", StringPropertyAssertions::make},
         {"implementation", ImplementationAssertion::make},
         {"find-implementation", FindImplementationAssertion::make},
         {"show-symbol", ShowSymbolAssertion::make},
@@ -285,11 +287,17 @@ const UnorderedMap<
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
 const UnorderedSet<string> ignoredAssertionLabels = {
-    "typed",         "TODO",
-    "linearization", "commented-out-error",
-    "Note",          "See",
-    "packaged",      "rubyfmt-force-exit",
-    "compiled",      "exclude-from-file-update",
+    "typed",
+    "TODO",
+    "linearization",
+    "commented-out-error",
+    "Note",
+    "NOTE",
+    "See",
+    "packaged",
+    "rubyfmt-force-exit",
+    "compiled",
+    "exclude-from-file-update",
 };
 
 constexpr string_view NOTHING_LABEL = "(nothing)"sv;
@@ -1494,7 +1502,7 @@ shared_ptr<ApplyCompletionAssertion> ApplyCompletionAssertion::make(string_view 
 
     ADD_FAIL_CHECK_AT(
         string(filename).c_str(), assertionLine + 1,
-        fmt::format("Improperly formatted apply-completion assertion. Expected '[<version>] <index>'. Found '{}'",
+        fmt::format("Improperly formatted apply-completion assertion. Expected '[<version>] item: <index>'. Found '{}'",
                     assertionContents));
 
     return nullptr;

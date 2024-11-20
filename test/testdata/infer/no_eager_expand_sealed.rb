@@ -9,7 +9,7 @@ class MyEnum < T::Enum
 end
 
 sig { params(enums: T::Array[MyEnum], orig: T.nilable(MyEnum)).void }
-def exmaple(enums, orig)
+def example(enums, orig)
   current_enum = orig
   if current_enum.nil?
     return

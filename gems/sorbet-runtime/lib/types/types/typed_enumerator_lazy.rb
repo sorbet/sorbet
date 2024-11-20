@@ -28,7 +28,7 @@ module T::Types
 
     class Untyped < TypedEnumeratorLazy
       def initialize
-        super(T.untyped)
+        super(T::Types::Untyped::Private::INSTANCE)
       end
 
       def valid?(obj)

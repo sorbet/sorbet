@@ -1,4 +1,5 @@
 #include "core/errors/resolver.h"
+#include "absl/strings/escaping.h"
 #include "ast/Helpers.h"
 #include "ast/Trees.h"
 #include "ast/ast.h"
@@ -7,6 +8,7 @@
 #include "core/Error.h"
 #include "core/Names.h"
 #include "core/StrictLevel.h"
+#include "core/TypeErrorDiagnostics.h"
 #include "core/core.h"
 #include "core/errors/internal.h"
 #include "core/lsp/TypecheckEpochManager.h"
@@ -474,7 +476,7 @@ private:
         // Check that the candidate name is one of the top-level exported names from a parent package.
         bool exportsSymbol(bool inTestNamespace, core::NameRef candidate) const {
             auto &exportList = inTestNamespace ? this->testExports : this->exports;
-            return absl::c_find(exportList, candidate) != exportList.end();
+            return absl::c_contains(exportList, candidate);
         }
     };
 
@@ -532,7 +534,7 @@ private:
 
     static void ensureTGenericMixin(core::GlobalState &gs, core::ClassOrModuleRef klass) {
         auto &mixins = klass.data(gs)->mixins();
-        if (absl::c_find(mixins, core::Symbols::T_Generic()) == mixins.end()) {
+        if (!absl::c_contains(mixins, core::Symbols::T_Generic())) {
             mixins.emplace_back(core::Symbols::T_Generic());
         }
     }
@@ -1073,9 +1075,11 @@ private:
                         e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
                                     job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
                         if (!fileIsPayload && klassDefinedInPayload) {
-                            e.addErrorNote("Add `{}` at the top of this file to silence this error.\n"
-                                           "    Only use this to work around Ruby or gem upgrade incompatibilities.",
-                                           "# allow-parent-payload-override: true");
+                            e.addErrorNote(
+                                "Pass `{}` at the command line or in the `{}` file to silence this error.\n"
+                                "    Only use this to work around Ruby or gem upgrade incompatibilities.",
+                                fmt::format("--suppress-payload-superclass-redefinition-for={}", job.klass.show(ctx)),
+                                "sorbet/config");
                         }
                     }
                 }
@@ -1185,7 +1189,7 @@ private:
             auto type = core::make_type<core::ClassType>(idSymbol);
             auto &elems = (core::cast_type<core::TupleType>(mixMethod.data(gs)->resultType))->elems;
             // Make sure we are not adding existing symbols to our tuple
-            if (absl::c_find(elems, type) == elems.end()) {
+            if (!absl::c_contains(elems, type)) {
                 elems.emplace_back(type);
             }
         }
@@ -1288,7 +1292,7 @@ private:
 
     void transformAncestor(core::Context ctx, core::ClassOrModuleRef klass, ast::ExpressionPtr &ancestor,
                            bool isInclude, bool isSuperclass = false) {
-        if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(ancestor)) {
+        if (ast::isa_tree<ast::UnresolvedConstantLit>(ancestor)) {
             auto scopeTmp = nesting_;
             if (isSuperclass) {
                 nesting_ = nesting_->parent;
@@ -2223,10 +2227,12 @@ class ResolveTypeMembersAndFieldsWalk {
         if (cast->type == core::Types::todo()) {
             if (auto e = ctx.beginError(cast->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                 e.setHeader("Unable to resolve declared type for `{}`", uidName.show(ctx));
-                e.addErrorNote("One possible cause is attempting to declare the type of a field using `{}`.",
-                               "\n    Type parameters are only valid within the scope of a method, while fields are in "
-                               "class scope.",
-                               "T.type_parameter");
+                e.addErrorNote(
+                    "One possible cause is attempting to declare the type of a field using `{}`.\n"
+                    "    Type parameters are only valid within the scope of a method, while fields are in "
+                    "class scope.\n"
+                    "    Almost always, the fix is to make the enclosing class generic and use `{}` instead.",
+                    "T.type_parameter", "type_member");
             }
             castType = core::Types::untypedUntracked();
         }
@@ -2264,7 +2270,7 @@ class ResolveTypeMembersAndFieldsWalk {
                        !core::Types::isSubType(ctx, core::Types::nilClass(), castType)) {
                 // Declaring a class instance variable in a static method
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                    e.setHeader("The singleton instance variable `{}` must be declared inside the class body or "
+                    e.setHeader("The singleton class instance variable `{}` must be declared inside the class body or "
                                 "declared nilable",
                                 uid->name.show(ctx));
                 }
@@ -2286,30 +2292,41 @@ class ResolveTypeMembersAndFieldsWalk {
             // This was previously entered by namer and we are now resolving the type.
             priorField.data(ctx)->resultType = castType;
             return;
-        } else if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, castType)) {
+        }
+
+        auto priorFieldResultType = priorField.data(ctx)->resultType;
+        if (priorFieldResultType == nullptr || castType == nullptr) [[unlikely]] {
+            const auto &file = ctx.file.data(ctx);
+            fatalLogger->error(
+                R"(msg="Bad core::Types::equiv in resolveField" path="{}" priorField="{}" resultTypeNull="{}" castTypeNull="{}")",
+                file.path(), priorField.show(ctx), priorFieldResultType == nullptr ? "true" : "false",
+                castType == nullptr ? "true" : "false");
+            fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
+        }
+
+        if (core::Types::equiv(ctx, priorFieldResultType, castType)) {
             // We already have a symbol for this field, and it matches what we already saw, so we can short
             // circuit.
             return;
-        } else {
-            // We do some normalization here to ensure that the file / line we report the error on doesn't
-            // depend on the order that we traverse files nor the order we traverse within a file.
-            auto priorLoc = priorField.data(ctx)->loc();
-            core::Loc reportOn;
-            core::Loc errorLine;
-            core::Loc thisLoc = core::Loc(job.file, uid->loc);
-            if (thisLoc.file() == priorLoc.file()) {
-                reportOn = thisLoc.beginPos() < priorLoc.beginPos() ? thisLoc : priorLoc;
-                errorLine = thisLoc.beginPos() < priorLoc.beginPos() ? priorLoc : thisLoc;
-            } else {
-                reportOn = thisLoc.file() < priorLoc.file() ? thisLoc : priorLoc;
-                errorLine = thisLoc.file() < priorLoc.file() ? priorLoc : thisLoc;
-            }
+        }
 
-            if (auto e = ctx.state.beginError(reportOn, core::errors::Resolver::DuplicateVariableDeclaration)) {
-                e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.show(ctx));
-                e.addErrorLine(errorLine, "Previous declaration is here:");
-            }
-            return;
+        // We do some normalization here to ensure that the file / line we report the error on doesn't
+        // depend on the order that we traverse files nor the order we traverse within a file.
+        auto priorLoc = priorField.data(ctx)->loc();
+        core::Loc reportOn;
+        core::Loc errorLine;
+        core::Loc thisLoc = core::Loc(job.file, uid->loc);
+        if (thisLoc.file() == priorLoc.file()) {
+            reportOn = thisLoc.beginPos() < priorLoc.beginPos() ? thisLoc : priorLoc;
+            errorLine = thisLoc.beginPos() < priorLoc.beginPos() ? priorLoc : thisLoc;
+        } else {
+            reportOn = thisLoc.file() < priorLoc.file() ? thisLoc : priorLoc;
+            errorLine = thisLoc.file() < priorLoc.file() ? priorLoc : thisLoc;
+        }
+
+        if (auto e = ctx.state.beginError(reportOn, core::errors::Resolver::DuplicateVariableDeclaration)) {
+            e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.show(ctx));
+            e.addErrorLine(errorLine, "Previous declaration is here:");
         }
     }
 
@@ -2318,10 +2335,43 @@ class ResolveTypeMembersAndFieldsWalk {
     //
     // We don't handle array or hash literals, because intuiting the element
     // type (once we have generics) will be nontrivial.
-    [[nodiscard]] static core::TypePtr resolveConstantType(core::Context ctx, const ast::ExpressionPtr &expr) {
+    [[nodiscard]] static core::TypePtr resolveConstantType(core::Context ctx, const ast::ExpressionPtr &expr,
+                                                           bool topCall, bool isFrozen) {
         core::TypePtr result;
         typecase(
             expr, [&](const ast::Literal &a) { result = core::Types::dropLiteral(ctx, a.value); },
+            [&](const ast::ConstantLit &cnst) {
+                if (topCall) {
+                    // This needs to be treated as a static field class alias, which is handled elsewhere.
+                    return;
+                }
+
+                ENFORCE(cnst.symbol.exists());
+                if (!cnst.symbol.exists()) {
+                    return;
+                }
+
+                if (cnst.symbol.isClassOrModule() && cnst.symbol != core::Symbols::StubModule()) {
+                    auto singletonClass = cnst.symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
+                    if (singletonClass.data(ctx)->resultType == nullptr) {
+                        // Has not been filled in yet, will be filled in during this phase.
+                        return;
+                    }
+                    auto externalType = singletonClass.data(ctx)->externalType();
+                    if (externalType.isUntyped()) {
+                        return;
+                    }
+                    result = move(externalType);
+                } else if (cnst.symbol.isStaticField(ctx) &&
+                           core::isa_type<core::ClassType>(cnst.symbol.resultType(ctx))) {
+                    auto resultType = cnst.symbol.resultType(ctx);
+                    auto classType = core::cast_type_nonnull<core::ClassType>(resultType);
+                    if (!classType.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
+                        return;
+                    }
+                    result = resultType;
+                }
+            },
             [&](const ast::Cast &cast) {
                 if (cast.type == core::Types::todo()) {
                     return;
@@ -2333,9 +2383,47 @@ class ResolveTypeMembersAndFieldsWalk {
                         e.setHeader("Use `{}` to specify the type of constants", "T.let");
                     }
                 }
+                // Don't recurse--just take the type from the cast verbatim (no inference)
                 result = cast.type;
             },
-            [&](const ast::InsSeq &outer) { result = resolveConstantType(ctx, outer.expr); },
+            [&](const ast::Array &arr) {
+                if (arr.elems.empty()) {
+                    // Require type annotation for empty array, instead of inferring something like
+                    // T.untyped or T.noreturn
+                    return;
+                }
+
+                vector<core::TypePtr> typeElems;
+                typeElems.reserve(arr.elems.size());
+                for (const auto &elem : arr.elems) {
+                    auto typeElem = resolveConstantType(ctx, elem, /* topCall */ false, /* isFrozen */ false);
+                    if (typeElem == nullptr) {
+                        return;
+                    }
+                    typeElems.emplace_back(move(typeElem));
+                }
+
+                if (isFrozen) {
+                    result = core::make_type<core::TupleType>(move(typeElems));
+                } else {
+                    result =
+                        core::Types::arrayOf(ctx, core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeElems)));
+                }
+            },
+            [&](const ast::Send &send) {
+                if (send.fun != core::Names::freeze() || send.hasNonBlockArgs() || send.hasBlock() ||
+                    !(ast::isa_tree<ast::Array>(send.recv) || ast::isa_tree<ast::Hash>(send.recv))) {
+                    return;
+                }
+                auto recvType = resolveConstantType(ctx, send.recv, /* topCall */ false, /* isFrozen */ true);
+                if (recvType == nullptr) {
+                    return;
+                }
+                result = move(recvType);
+            },
+            [&](const ast::InsSeq &outer) {
+                result = resolveConstantType(ctx, outer.expr, /* topCall */ false, /* isFrozen */ false);
+            },
             [&](const ast::ExpressionPtr &expr) {});
         return result;
     }
@@ -2346,7 +2434,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto &asgn = job.asgn;
         auto data = job.sym.data(ctx);
         if (data->resultType == nullptr) {
-            if (auto resultType = resolveConstantType(ctx, asgn->rhs)) {
+            if (auto resultType = resolveConstantType(ctx, asgn->rhs, /* topCall */ false, /* isFrozen */ false)) {
                 return resultType;
             }
         }
@@ -2361,7 +2449,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto data = job.sym.data(ctx);
         // Hoisted out here to report an error from within resolveConstantType when using
         // `T.assert_type!` even on the fast path
-        auto resultType = resolveConstantType(ctx, asgn->rhs);
+        auto resultType = resolveConstantType(ctx, asgn->rhs, /* topCall */ true, /* isFrozen */ false);
         if (data->resultType == nullptr) {
             // Do not attempt to suggest types for aliases that fail to resolve in package files.
             if (resultType == nullptr && !ctx.file.data(ctx).isPackage()) {
@@ -2467,7 +2555,8 @@ class ResolveTypeMembersAndFieldsWalk {
         // If the parent bounds exists, validate the new bounds against those of the parent.
         if (parentType != nullptr) {
             auto parentData = parentMember.data(ctx);
-            if (!core::Types::isSubType(ctx, parentType->lowerBound, memberType->lowerBound)) {
+            core::ErrorSection::Collector errorDetailsCollector;
+            if (!core::Types::isSubType(ctx, parentType->lowerBound, memberType->lowerBound, errorDetailsCollector)) {
                 auto errLoc = lowerBoundTypeLoc.exists() ? lowerBoundTypeLoc : ctx.locAt(rhs->loc);
                 if (auto e = ctx.state.beginError(errLoc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
                     e.setHeader("The `{}` type bound `{}` must be {} the parent's `{}` type bound `{}` "
@@ -2478,6 +2567,8 @@ class ResolveTypeMembersAndFieldsWalk {
                                 rhs->fun.show(ctx), data->name.show(ctx));
                     e.addErrorLine(parentMember.data(ctx)->loc(), "`{}` defined in parent here",
                                    parentMember.show(ctx));
+                    core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector,
+                                                                    parentType->lowerBound, memberType->lowerBound);
                     if (lowerBoundTypeLoc.exists()) {
                         auto replacementType = ctx.state.suggestUnsafe.has_value() ? core::Types::untypedUntracked()
                                                                                    : parentType->lowerBound;
@@ -2485,7 +2576,8 @@ class ResolveTypeMembersAndFieldsWalk {
                     }
                 }
             }
-            if (!core::Types::isSubType(ctx, memberType->upperBound, parentType->upperBound)) {
+            core::ErrorSection::Collector errorDetailsCollector2;
+            if (!core::Types::isSubType(ctx, memberType->upperBound, parentType->upperBound, errorDetailsCollector2)) {
                 auto errLoc = upperBoundTypeLoc.exists() ? upperBoundTypeLoc : ctx.locAt(rhs->loc);
                 if (auto e = ctx.state.beginError(errLoc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
                     e.setHeader("The `{}` type bound `{}` must be {} the parent's `{}` type bound `{}` "
@@ -2496,6 +2588,8 @@ class ResolveTypeMembersAndFieldsWalk {
                                 rhs->fun.show(ctx), data->name.show(ctx));
                     e.addErrorLine(parentMember.data(ctx)->loc(), "`{}` defined in parent here",
                                    parentMember.show(ctx));
+                    core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector2,
+                                                                    parentType->upperBound, memberType->upperBound);
                     if (upperBoundTypeLoc.exists()) {
                         auto replacementType = ctx.state.suggestUnsafe.has_value() ? core::Types::untypedUntracked()
                                                                                    : parentType->upperBound;
@@ -2507,10 +2601,13 @@ class ResolveTypeMembersAndFieldsWalk {
 
         // Ensure that the new lower bound is a subtype of the upper bound.
         // This will be a no-op in the case that the type member is fixed.
-        if (!core::Types::isSubType(ctx, memberType->lowerBound, memberType->upperBound)) {
+        core::ErrorSection::Collector errorDetailsCollector;
+        if (!core::Types::isSubType(ctx, memberType->lowerBound, memberType->upperBound, errorDetailsCollector)) {
             if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::InvalidTypeMemberBounds)) {
                 e.setHeader("The `{}` type bound `{}` is not a subtype of the `{}` type bound `{}` for `{}`", "lower",
                             memberType->lowerBound.show(ctx), "upper", memberType->upperBound.show(ctx), lhs.show(ctx));
+                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, memberType->upperBound,
+                                                                memberType->lowerBound);
             }
         }
 
@@ -3470,40 +3567,6 @@ private:
         return true;
     }
 
-    static void recordMethodInfoInSig(core::Context ctx, core::MethodRef method, ParsedSig &sig,
-                                      const ast::MethodDef &mdef) {
-        // Later passes are going to separate the sig and the method definition.
-        // Record some information in the sig call itself so that we can reassociate
-        // them later in the compiler.
-        if (ctx.file.data(ctx).compiledLevel != core::CompiledLevel::True) {
-            return;
-        }
-
-        // Note that the sig still needs to send to a method called "sig" so that
-        // code completion in LSP works.  We change the receiver, below, so that
-        // sigs that don't pass through here still reflect the user's intent.
-        auto *send = sig.origSend;
-        auto *self = ast::cast_tree<ast::Local>(send->getPosArg(0));
-        if (self == nullptr) {
-            return;
-        }
-
-        // We distinguish "user-written" sends by checking for self.
-        // T::Sig::WithoutRuntime.sig wouldn't have any runtime effect that we need
-        // to record later.
-        if (self->localVariable != core::LocalVariable::selfVariable()) {
-            return;
-        }
-
-        auto *cnst = ast::cast_tree<ast::ConstantLit>(send->recv);
-        ENFORCE(cnst != nullptr, "sig send receiver must be a ConstantLit if we got a ParsedSig from the send");
-
-        cnst->symbol = core::Symbols::Sorbet_Private_Static_ResolvedSig();
-
-        send->addPosArg(mdef.flags.isSelfMethod ? ast::MK::True(send->loc) : ast::MK::False(send->loc));
-        send->addPosArg(ast::MK::Symbol(send->loc, method.data(ctx)->name));
-    }
-
     struct OverloadedMethodArgInformation {
         std::vector<core::ArgInfo> posArgs;
         std::vector<core::ArgInfo> kwArgs;
@@ -3646,6 +3709,8 @@ private:
                 }
 
                 arg.type = std::move(spec->type);
+                // Passing in a noOp collector even though this call is used for error reporting,
+                // because it's unlikely we'll add more details to a subtype check for T.nilable(Proc)
                 if (isBlkArg && !core::Types::isSubType(ctx, arg.type, core::Types::nilableProcClass())) {
                     if (auto e = ctx.state.beginError(spec->nameLoc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Block argument type must be either `{}` or a `{}` type (and possibly nilable)",
@@ -3731,7 +3796,6 @@ private:
             }
         }
 
-        recordMethodInfoInSig(ctx, method, sig, mdef);
         return info;
     }
 
@@ -3766,7 +3830,7 @@ private:
         klass.rhs.erase(toRemove, klass.rhs.end());
     }
 
-    void processInSeq(core::Context ctx, ast::InsSeq &seq) {
+    void processInsSeq(core::Context ctx, ast::InsSeq &seq) {
         InlinedVector<ast::Send *, 1> lastSigs;
 
         // Explicitly check in the contxt of the class, not <static-init>
@@ -3822,7 +3886,7 @@ private:
             },
 
             [&](ast::MethodDef &mdef) {
-                if (debug_mode) {
+                if constexpr (debug_mode) {
                     bool hasSig = !lastSigs.empty();
                     bool rewritten = mdef.flags.isRewriterSynthesized;
                     bool isRBI = ctx.file.data(ctx).isRBI();
@@ -4040,43 +4104,6 @@ public:
                                 "as abstract using `abstract!` or `interface!`");
                 }
             }
-
-            // Rewrite the empty body of the abstract method to forward all arguments to `super`, mirroring the
-            // behavior of the runtime, but only in compiled files.
-            if (ctx.file.data(ctx).compiledLevel != core::CompiledLevel::True) {
-                return;
-            }
-            ast::Send::ARGS_store args;
-
-            auto argIdx = -1;
-            auto numPosArgs = 0;
-            for (auto &arg : mdef.args) {
-                ++argIdx;
-
-                const ast::Local *local = nullptr;
-                if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg)) {
-                    local = ast::cast_tree<ast::Local>(opt->expr);
-                } else {
-                    local = ast::cast_tree<ast::Local>(arg);
-                }
-
-                auto &info = mdef.symbol.data(ctx)->arguments[argIdx];
-                if (info.flags.isKeyword) {
-                    args.emplace_back(ast::MK::Symbol(local->loc, info.name));
-                    args.emplace_back(local->deepCopy());
-                } else if (info.flags.isRepeated || info.flags.isBlock) {
-                    // Explicitly skip for now.
-                    // Involves synthesizing a call to callWithSplat, callWithBlock, or
-                    // callWithSplatAndBlock
-                } else {
-                    args.emplace_back(local->deepCopy());
-                    ++numPosArgs;
-                }
-            }
-
-            auto self = ast::MK::Self(mdef.loc);
-            mdef.rhs = ast::MK::Send(mdef.loc, std::move(self), core::Names::untypedSuper(),
-                                     mdef.loc.copyWithZeroLength(), numPosArgs, std::move(args));
         } else if (mdef.symbol.enclosingClass(ctx).data(ctx)->flags.isInterface) {
             if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                 e.setHeader("All methods in an interface must be declared abstract");
@@ -4090,7 +4117,7 @@ public:
     }
 
     void postTransformInsSeq(core::Context ctx, ast::ExpressionPtr &tree) {
-        processInSeq(ctx, ast::cast_tree_nonnull<ast::InsSeq>(tree));
+        processInsSeq(ctx, ast::cast_tree_nonnull<ast::InsSeq>(tree));
     }
 };
 
@@ -4245,9 +4272,8 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
 }
 
 ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                                     bool ranIncrementalNamer) {
-    auto workers = WorkerPool::create(0, gs.tracer());
-    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
+                                                     bool ranIncrementalNamer, WorkerPool &workers) {
+    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
     verifyLinearizationComputed(gs);
     // (verifyLinearizationComputed vs finalizeAncestors is currently the only difference between
@@ -4260,8 +4286,8 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     if (ranIncrementalNamer) {
         Resolver::finalizeSymbols(gs);
     }
-    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
-    auto result = resolveSigs(gs, std::move(rtmafResult.trees), *workers);
+    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers);
+    auto result = resolveSigs(gs, std::move(rtmafResult.trees), workers);
     ResolveTypeMembersAndFieldsWalk::resolvePendingCastItems(gs, rtmafResult.todoResolveCastItems);
     sanityCheck(gs, result);
     // This check is FAR too slow to run on large codebases, especially with sanitizers on.

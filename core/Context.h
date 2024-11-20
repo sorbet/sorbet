@@ -68,6 +68,10 @@ public:
     MutableContext withFile(FileRef file) const;
     ErrorBuilder beginError(LocOffsets loc, ErrorClass what) const;
 
+    // A version of `beginError` that's specific to the index phase of the pipeline, as it will record that index errors
+    // have been seen on the file associated with the loc.
+    ErrorBuilder beginIndexerError(LocOffsets loc, ErrorClass what) const;
+
     Loc locAt(LocOffsets offset) const;
 
     void trace(std::string_view msg) const;

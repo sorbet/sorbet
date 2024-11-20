@@ -80,6 +80,18 @@ class MyTest
     end
 end
 
+describe 'extends T::Sig' do
+  extend T::Sig
+
+  sig { returns(Integer) }
+  def example = 0
+
+  it 'calls example' do
+    res = example
+    T.reveal_type(res) # error: `Integer`
+  end
+end
+
 def junk
 end
 

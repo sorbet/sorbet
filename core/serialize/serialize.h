@@ -8,6 +8,8 @@ class Serializer {
 public:
     static const uint32_t VERSION = 6;
 
+    static constexpr std::string_view GLOBAL_STATE_KEY = "GlobalState";
+
     // Serialize a global state.
     static std::vector<uint8_t> store(const GlobalState &gs);
 
@@ -16,6 +18,8 @@ public:
     // a global state containing a name table along side a large number of
     // individual cached files, which can be loaded independently.
     static std::vector<uint8_t> storePayloadAndNameTable(const GlobalState &gs);
+
+    static std::string fileKey(const core::File &file);
 
     // Serializes an AST and file hash.
     static std::vector<uint8_t> storeTree(const core::File &file, const ast::ParsedFile &tree);

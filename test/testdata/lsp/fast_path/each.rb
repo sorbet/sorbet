@@ -17,7 +17,7 @@ class A
     )
     .returns(T.untyped)
   end
-  def each(&blk) # error: Block parameter `blk` of type `T.proc.params(arg0: A::Elem).void` not compatible with type of abstract method `Enumerable#each`
+  def each(&blk)
     yield ''
   end
 

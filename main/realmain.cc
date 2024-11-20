@@ -188,6 +188,20 @@ core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
     return core::Loc(file, start, end);
 }
 
+void addInlineInput(const string &input, const string &filename, vector<core::FileRef> &inputFiles,
+                    core::GlobalState &gs) {
+    prodCounterAdd("types.input.bytes", input.size());
+    prodCounterInc("types.input.lines");
+    prodCounterInc("types.input.files");
+    auto modifiedInput = input;
+    if (core::File::fileStrictSigil(input) == core::StrictLevel::None) {
+        // put it at the end so as to not upset line numbers
+        modifiedInput += "\n# typed: true";
+    }
+    auto file = gs.enterFile(filename, modifiedInput);
+    inputFiles.emplace_back(file);
+}
+
 #ifndef SORBET_REALMAIN_MIN
 struct AutogenResult {
     struct Serialized {
@@ -282,7 +296,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             Timer timeit(logger, "autogenDependencyDBPrint");
             if (opts.print.AutogenMsgPack.enabled) {
                 opts.print.AutogenMsgPack.print(
-                    autogen::ParsedFile::msgpackGlobalHeader(autogenVersion, merged.size()));
+                    autogen::ParsedFile::msgpackGlobalHeader(autogenVersion, merged.size(), autogenCfg));
             }
             for (auto &elem : merged) {
                 if (opts.print.Autogen.enabled) {
@@ -390,9 +404,6 @@ int realmain(int argc, char *argv[]) {
     vector<unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
     options::Options opts;
     options::readOptions(opts, extensions, argc, argv, extensionProviders, logger);
-    while (opts.waitForDebugger && !stopInDebugger()) {
-        // spin
-    }
     if (opts.stdoutHUPHack) {
         startHUPMonitor();
     }
@@ -504,7 +515,7 @@ int realmain(int argc, char *argv[]) {
     gs->ruby3KeywordArgs = opts.ruby3KeywordArgs;
     gs->typedSuper = opts.typedSuper;
     gs->suppressPayloadSuperclassRedefinitionFor = opts.suppressPayloadSuperclassRedefinitionFor;
-    if (!opts.stripeMode) {
+    if (!opts.uniquelyDefinedBehavior) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
         if (opts.isolateErrorCode.empty()) {
             gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
@@ -525,11 +536,19 @@ int realmain(int argc, char *argv[]) {
     if (opts.suggestTyped) {
         gs->ignoreErrorClassForSuggestTyped(core::errors::Infer::SuggestTyped.code);
         gs->ignoreErrorClassForSuggestTyped(core::errors::Resolver::SigInFileWithoutSigil.code);
-        if (!opts.stripeMode) {
+        if (!opts.uniquelyDefinedBehavior) {
             gs->ignoreErrorClassForSuggestTyped(core::errors::Namer::MultipleBehaviorDefs.code);
         }
     }
     gs->suggestUnsafe = opts.suggestUnsafe;
+
+    if (gs->runningUnderAutogen) {
+        gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
+        gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
+        gs->suppressErrorClass(core::errors::Namer::ConstantKindRedefinition.code);
+        gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
+        gs->suppressErrorClass(core::errors::Resolver::RecursiveTypeAlias.code);
+    }
 
     logger->trace("done building initial global state");
 
@@ -659,9 +678,10 @@ int realmain(int argc, char *argv[]) {
                 core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*gs);
                 core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
                 gs->setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
+                                       opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                        opts.extraPackageFilesDirectorySlashPrefixes,
                                        opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor,
-                                       opts.stripePackagesHint);
+                                       opts.packagerLayers, opts.stripePackagesHint);
             }
 
             packager::Packager::findPackages(*gs, absl::Span<ast::ParsedFile>(packages));
@@ -696,16 +716,10 @@ int realmain(int argc, char *argv[]) {
         {
             core::UnfreezeFileTable fileTableAccess(*gs);
             if (!opts.inlineInput.empty()) {
-                prodCounterAdd("types.input.bytes", opts.inlineInput.size());
-                prodCounterInc("types.input.lines");
-                prodCounterInc("types.input.files");
-                auto input = opts.inlineInput;
-                if (core::File::fileStrictSigil(opts.inlineInput) == core::StrictLevel::None) {
-                    // put it at the end so as to not upset line numbers
-                    input += "\n# typed: true";
-                }
-                auto file = gs->enterFile(string("-e"), input);
-                inputFiles.emplace_back(file);
+                addInlineInput(opts.inlineInput, "-e", inputFiles, *gs);
+            }
+            if (!opts.inlineRBIInput.empty()) {
+                addInlineInput(opts.inlineRBIInput, "--e-rbi.rbi", inputFiles, *gs);
             }
         }
 
@@ -727,12 +741,15 @@ int realmain(int argc, char *argv[]) {
 
                 // Cache these before any pipeline::package rewrites, so that the cache is still
                 // usable regardless of whether `--stripe-packages` was passed.
-                cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers,
-                                                     indexed);
+                // Want to keep the kvstore around so we can still write to it later.
+                kvstore = cache::ownIfUnchanged(
+                    *gs, cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs,
+                                                              *workers, indexed));
 
                 // First run: only the __package.rb files. This populates the packageDB
                 pipeline::setPackagerOptions(*gs, opts);
                 pipeline::package(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
+                // TODO(jez) Put the call to pipeline::name back here
             }
 
             auto nonPackageIndexed =
@@ -749,7 +766,22 @@ int realmain(int argc, char *argv[]) {
             // Second run: all the other files (the packageDB shouldn't change)
             pipeline::package(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers);
 
+            {
+                // TODO(jez) Put this back after the call to `pipeline::package` in the stripePackages section
+                // Only need to compute hashes when running to compute a FileHash
+                auto foundHashes = nullptr;
+                auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
+                ENFORCE(!canceled, "There's no cancellation in batch mode");
+            }
+
+            // Only need to compute hashes when running to compute a FileHash
+            auto foundHashes = nullptr;
+            auto canceled =
+                pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers, foundHashes);
+            ENFORCE(!canceled, "There's no cancellation in batch mode");
+
             pipeline::unpartitionPackageFiles(indexed, move(nonPackageIndexed));
+            // TODO(jez) At this point, it's not correct to call it `indexed` anymore: we've run namer too
 
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
@@ -761,23 +793,15 @@ int realmain(int argc, char *argv[]) {
             logger->warn("Autogen is disabled in sorbet-orig for faster builds");
             return 1;
 #else
-
+            // TODO(jez) Make sure that it's still okay to run this phase after namer, otherwise
+            // you'll have to adjust the non-autogen pipeline code. At first read, it seems like it
+            // unwraps ConstantLit to UnresolvedConstantLit and proceeds as normal, so I think it
+            // should be fine.
             if (!opts.autogenConstantCacheConfig.cacheFile.empty()) {
                 // we should regenerate the constant cache here
                 indexed = pipeline::autogenWriteCacheFile(*gs, opts.autogenConstantCacheConfig.cacheFile, move(indexed),
                                                           *workers);
             }
-
-            gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
-            gs->suppressErrorClass(core::errors::Namer::InvalidClassOwner.code);
-            gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
-            gs->suppressErrorClass(core::errors::Namer::ConstantKindRedefinition.code);
-            gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
-            gs->suppressErrorClass(core::errors::Resolver::RecursiveTypeAlias.code);
-
-            // Only need to compute FoundMethodHashes when running to compute a FileHash
-            auto foundMethodHashes = nullptr;
-            indexed = move(pipeline::name(*gs, move(indexed), opts, *workers, foundMethodHashes).result());
 
             {
                 core::UnfreezeNameTable nameTableAccess(*gs);
@@ -786,15 +810,14 @@ int realmain(int argc, char *argv[]) {
                 indexed = resolver::Resolver::runConstantResolution(*gs, move(indexed), *workers);
             }
 
-            autogen::AutogenConfig autogenCfg = {.behaviorAllowedInRBIsPaths =
-                                                     std::move(opts.autogenBehaviorAllowedInRBIFilesPaths)};
+            autogen::AutogenConfig autogenCfg = {
+                .behaviorAllowedInRBIsPaths = std::move(opts.autogenBehaviorAllowedInRBIFilesPaths),
+                .msgpackSkipReferenceMetadata = std::move(opts.autogenMsgpackSkipReferenceMetadata)};
 
             runAutogen(*gs, opts, autogenCfg, *workers, indexed, opts.autogenConstantCacheConfig.changedFiles);
 #endif
         } else {
-            // Only need to compute hashes when running to compute a FileHash
-            auto foundHashes = nullptr;
-            indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers, foundHashes).result());
+            indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers).result());
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }

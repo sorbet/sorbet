@@ -3,11 +3,11 @@ extend T::Sig
 
 sig {params(s: Integer).void}
 sig {params(s: String).void}
-def f(s); end
+def f(s); end # error: against an overloaded signature
 
 sig {params(s: Symbol).void}
 sig {params(s: Float).void}
-def f(s); end
+def f(s); end # error: against an overloaded signature
 
 f(0) # error: Expected `Symbol`
 f('') # error: Expected `Symbol`
@@ -19,19 +19,19 @@ class Wrap1
 
   sig {params(x: Integer).void}
   sig {params(x: Integer, blk: T.proc.returns(Integer)).void}
-  def one_kw(x:, &blk); end
+  def one_kw(x:, &blk); end # error: against an overloaded signature
 
   sig {params(x: Integer).void}
   sig {params(x: Integer, blk: T.proc.returns(Integer)).void}
-  def opt_kw(x: 0, &blk); end
+  def opt_kw(x: 0, &blk); end # error: against an overloaded signature
 
   sig {params(s: String, x: Integer).void}
   sig {params(s: String, x: Integer, blk: T.proc.returns(Integer)).void}
-  def opt_pos_opt_kw(s='', x: 0, &blk); end
+  def opt_pos_opt_kw(s='', x: 0, &blk); end # error: against an overloaded signature
 
   sig {params(x: Integer, y: String).void}
   sig {params(x: Integer, y: String, blk: T.proc.returns(Integer)).void}
-  def two_kw(x:, y:, &blk); end
+  def two_kw(x:, y:, &blk); end # error: against an overloaded signature
 
   sig {params(x: Integer, y: String).void}
 #             ^ error: Overloaded functions cannot have keyword arguments
@@ -39,29 +39,31 @@ class Wrap1
   sig {params(x: Integer, y: String, blk: T.proc.returns(Integer)).void}
 #             ^ error: Overloaded functions cannot have keyword arguments
 #                         ^ error: Unknown argument name
-  def arg_in_sig_but_not_method(x:, &blk); end
+  def arg_in_sig_but_not_method(x:, &blk); end # error: against an overloaded signature
 
   sig {params(x: Integer, y: String).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
   sig {params(y: String, x: Integer).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
-  def keyword_ordering_matters(x:, y:); end # error-with-dupes: Bad parameter ordering
+  def keyword_ordering_matters(x:, y:); end # error: against an overloaded signature
+  #                            ^^ error: Bad parameter ordering
+  #                                ^^ error: Bad parameter ordering
 
   sig {params(x: T::Boolean).void}
 #             ^ error: Overloaded functions cannot have keyword arguments
   sig {params(x: FalseClass, blk: T.proc.returns(Integer)).void}
 #             ^ error: Overloaded functions cannot have keyword arguments
-  def arg_types_must_match(x:, &blk); end
+  def arg_types_must_match(x:, &blk); end # error: against an overloaded signature
 
   sig {params(x: Integer, blk: T.proc.returns(Integer)).void}
 #             ^ error: Overloaded functions cannot have keyword arguments
   sig {params(x: Integer, blk: T.proc.returns(String)).void}
 #             ^ error: Overloaded functions cannot have keyword arguments
-  def only_one_block_per_pair(x:, &blk); end
+  def only_one_block_per_pair(x:, &blk); end # error: against an overloaded signature
 
   sig {params(x: Integer).void}
 #             ^ error: Overloaded functions cannot have keyword arguments
   sig {params(x: Integer).void}
 #             ^ error: Overloaded functions cannot have keyword arguments
-  def needs_one_block_per_pair(x:); end
+  def needs_one_block_per_pair(x:); end # error: against an overloaded signature
 
   # We currently require type equivalence for parameters in sigs for overloaded methods
   # with keyword arguments.  This is probably a little too strong, but fixing it would
@@ -76,7 +78,7 @@ class Wrap1
       .params(x: T.type_parameter(:U), y: Integer, blk: T.proc.returns(Integer)) # error: Overloaded functions cannot have keyword arguments
       .void
   end
-  def matching_positional_type_parameters_not_allowed(x, y:, &blk); end
+  def matching_positional_type_parameters_not_allowed(x, y:, &blk); end # error: against an overloaded signature
 
   sig do
     type_parameters(:U)
@@ -88,7 +90,7 @@ class Wrap1
       .params(x: T.type_parameter(:V), y: Integer, blk: T.proc.returns(Integer)) # error: Overloaded functions cannot have keyword arguments
       .void
   end
-  def mismatched_positional_type_parameters_not_allowed(x, y:, &blk); end
+  def mismatched_positional_type_parameters_not_allowed(x, y:, &blk); end # error: against an overloaded signature
 
   sig do
     type_parameters(:U)
@@ -100,7 +102,7 @@ class Wrap1
       .params(x: T.type_parameter(:U), blk: T.proc.returns(Integer)) # error: Overloaded functions cannot have keyword arguments
       .void
   end
-  def matching_kwarg_type_parameters_not_allowed(x:, &blk); end
+  def matching_kwarg_type_parameters_not_allowed(x:, &blk); end # error: against an overloaded signature
 
   sig do
     type_parameters(:U)
@@ -112,7 +114,7 @@ class Wrap1
       .params(x: T.type_parameter(:V), blk: T.proc.returns(Integer)) # error: Overloaded functions cannot have keyword arguments
       .void
   end
-  def mismatched_kwargs_type_parameters_not_allowed(x:, &blk); end
+  def mismatched_kwargs_type_parameters_not_allowed(x:, &blk); end # error: against an overloaded signature
 end
 
 Wrap1.new.opt_kw()
@@ -128,26 +130,26 @@ class Wrap2
 
   sig {params(x: Integer).void} # error: Overloaded functions cannot have keyword arguments
   sig {params(x: Integer, y: String).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
-  def missing_kw1(x:, y: ''); end
+  def missing_kw1(x:, y: ''); end # error: against an overloaded signature
 
   sig {params(x: Integer, y: String).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
   sig {params(x: Integer).void} # error: Overloaded functions cannot have keyword arguments
-  def missing_kw2(x:, y: ''); end
+  def missing_kw2(x:, y: ''); end # error: against an overloaded signature
 
   # Same pattern as the above, but 3 sigs will error where two will not.
   # TODO(froydnj): can we test what happens when the relevant error is suppressed?
   sig {params(x: Integer).void} # error: Overloaded functions cannot have keyword arguments
   sig {params(x: Integer, y: String).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
   sig {params(x: Integer, y: String, z: Float).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
-  def multiple_missing_kw(x:, y: '', z: 0.0); end
+  def multiple_missing_kw(x:, y: '', z: 0.0); end # error: against an overloaded signature
 
   sig {params(z: String, x: Integer).void} # error: Overloaded functions cannot have keyword arguments
   sig {params(x: Integer).void} # error: Overloaded functions cannot have keyword arguments
-  def mismatched_positional_args1(z='', x:); end
+  def mismatched_positional_args1(z='', x:); end # error: against an overloaded signature
 
   sig {params(x: Integer).void} # error: Overloaded functions cannot have keyword arguments
   sig {params(z: String, x: Integer).void} # error: Overloaded functions cannot have keyword arguments
-  def mismatched_positional_args2(z='', x:); end
+  def mismatched_positional_args2(z='', x:); end # error: against an overloaded signature
 end
 
 Wrap2.new.missing_kw1(x: 0, y: 'foo') # error: Unrecognized keyword argument
@@ -178,7 +180,7 @@ class WrapGeneric1
     params(x: Elem, y: Integer, blk: T.proc.returns(Integer))
       .void
   end
-  def matching_positional_type_members(x, y:, &blk); end
+  def matching_positional_type_members(x, y:, &blk); end # error: against an overloaded signature
 
   sig do
     params(x: Elem)
@@ -188,7 +190,7 @@ class WrapGeneric1
     params(x: Elem, blk: T.proc.returns(Integer))
       .void
   end
-  def matching_kwarg_type_members(x:, &blk); end
+  def matching_kwarg_type_members(x:, &blk); end # error: against an overloaded signature
 end
 
 class WrapGeneric2
@@ -205,7 +207,7 @@ class WrapGeneric2
     params(x: Elem, y: Integer, blk: T.proc.returns(Integer))
       .void
   end
-  def self.matching_positional_type_templates(x, y:, &blk); end
+  def self.matching_positional_type_templates(x, y:, &blk); end # error: against an overloaded signature
 
   sig do
     params(x: Elem)
@@ -215,7 +217,7 @@ class WrapGeneric2
     params(x: Elem, blk: T.proc.returns(Integer))
       .void
   end
-  def self.matching_kwarg_type_templates(x:, &blk); end
+  def self.matching_kwarg_type_templates(x:, &blk); end # error: against an overloaded signature
 end
 
 class WrapGeneric3
@@ -235,7 +237,7 @@ class WrapGeneric3
 #                   ^ error: Overloaded functions cannot have keyword arguments
       .void
   end
-  def mismatched_positional_type_members(x, y:, &blk); end
+  def mismatched_positional_type_members(x, y:, &blk); end # error: against an overloaded signature
 
   sig do
     params(x: Elem)
@@ -247,7 +249,7 @@ class WrapGeneric3
 #          ^ error: Overloaded functions cannot have keyword arguments
       .void
   end
-  def mismatched_kwarg_type_members(x:, &blk); end
+  def mismatched_kwarg_type_members(x:, &blk); end # error: against an overloaded signature
 end
 
 class WrapGeneric4
@@ -267,7 +269,7 @@ class WrapGeneric4
 #                   ^ error: Overloaded functions cannot have keyword arguments
       .void
   end
-  def self.mismatched_positional_type_templates(x, y:, &blk); end
+  def self.mismatched_positional_type_templates(x, y:, &blk); end # error: against an overloaded signature
 
   sig do
     params(x: Elem)
@@ -279,7 +281,7 @@ class WrapGeneric4
 #          ^ error: Overloaded functions cannot have keyword arguments
       .void
   end
-  def self.mismatched_kwarg_type_templates(x:, &blk); end
+  def self.mismatched_kwarg_type_templates(x:, &blk); end # error: against an overloaded signature
 end
 
 

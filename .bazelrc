@@ -10,9 +10,16 @@ common:build --define absl=1
 common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 
 ##
-##  Custom toolchain.
+##  Custom toolchain (bazel-contrib/toolchains_llvm).
 ##
-build --crosstool_top=@llvm_toolchain_12_0_0//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD
+# Not needed after https://github.com/bazelbuild/bazel/issues/7260 is closed
+build --incompatible_enable_cc_toolchain_resolution
+# For macOS only, needed for Bazel versions before 7.
+# Without this, one can use `--linkopt='-undefined dynamic_lookup'`.
+# This feature is intentionally not supported on macOS.
+build --features=-supports_dynamic_linker
+# Not needed after https://github.com/grailbio/bazel-toolchain/pull/229.
+build --features=-libtool
 
 ##
 ##  Common build options across all build configurations
@@ -25,11 +32,6 @@ build --crosstool_top=@llvm_toolchain_12_0_0//:toolchain --copt=-D_LIBCPP_ENABLE
 # this flag here once flipped in Bazel again.
 build --incompatible_strict_action_env
 
-# Enforce that we don't rely on `@bazel_tools//platforms` and instead use the
-# `@platforms` repository for constraint resolution.  See
-# https://github.com/bazelbuild/bazel/issues/8622 for more information.
-build --incompatible_use_platforms_repo_for_constraints
-
 # C / C++ Options
 # Don't depend on system compiler
 build --cxxopt=-std=c++17 --host_cxxopt=-std=c++17
@@ -40,6 +42,8 @@ build --copt=-fstack-protector
 
 build --copt=-Werror --copt=-Wimplicit-fallthrough --copt=-Wmissing-field-initializers
 
+build --copt=-D_LIBCPP_ENABLE_NODISCARD
+
 build --host_copt=-O1
 build --host_copt=-DFORCE_DEBUG
 build --host_cxxopt=-Wno-unused-variable --host_cxxopt=-Wno-overloaded-virtual --host_cxxopt=-Wno-unused-const-variable # ragel violates those and we want a silent build
@@ -49,8 +53,6 @@ build --host_cxxopt=-Wno-pass-failed # host build doesn't have enough optimizati
 # <command line>:1:9: and <built-in>:355:9: so sadly we turn them all off
 build --copt=-Wno-macro-redefined
 
-# Clang 12.0.0 has warnings when compiling LLVM 12.0.0 on C++20, sadly.
-# TODO(jez) When we upgrade to LLVM 13.0.0+ can we delete this?
 # TODO(jez) We will need these to build C++20, but emscripten doesn't even know about these options yet.
 # Leaving them commented out so we can uncomment them after upgrading emscripten.
 # build --host_cxxopt=-Wno-deprecated-anon-enum-enum-conversion
@@ -59,13 +61,16 @@ build --copt=-Wno-macro-redefined
 # build --cxxopt=-Wno-deprecated-enum-enum-conversion
 # build --cxxopt=-Wno-ambiguous-reversed-operator
 
+# TODO(jez) Something between Clang 12 and Clang 15 seems to have introduced a
+# warning saying _never_ use unqualified `std` calls...
+build --cxxopt=-Wno-unqualified-std-cast-call --host_cxxopt=-Wno-unqualified-std-cast-call
+
 ##
 ## debug configuration
 ##
 build:dbg --copt=-O0
 build:dbg --compilation_mode=dbg
 build:dbg --config=debugsymbols
-build:dbg --config=rubydbg
 
 build:rubydbg --copt=-DRUBY_DEBUG --copt=-DVM_CHECK_MODE=1 --copt=-DTRANSIENT_HEAP_CHECK_MODE --copt=-DRGENGC_CHECK_MODE --copt=-DENC_DEBUG
 
@@ -84,10 +89,8 @@ build:dbg-linux --config=dbg --platforms=@//tools/platforms:linux_x86_64
 ##
 # release version: optimized, with debug symbols and version information
 build:release-common --define release=true
-build:release-common --define mimalloc=true
 build:release-common --compilation_mode=opt
 build:release-common --config=backtracesymbols
-build:release-common --config=static-libs
 build:release-common --config=versioned
 
 build:release-debug-common --config=forcedebug
@@ -107,9 +110,20 @@ build:untyped-blame --copt=-DTRACK_UNTYPED_BLAME_MODE
 # harden: mark relocation sections read-only
 build:release-linux --linkopt=-Wl,-z,relro,-z,now
 build:release-linux --config=lto-linux --config=release-common
+build:release-linux --config=static-libs
 # Separate config for aarch64, so x86_64 can be differently optimized
 build:release-linux-aarch64 --linkopt=-Wl,-z,relro,-z,now
 build:release-linux-aarch64 --config=lto-linux --config=release-common
+build:release-linux-aarch64 --config=static-libs
+
+# It would be nice to move this back to release-common, but there is a build
+# failure when using clang 15 on macOS to build GNU make via rules_foreign_cc:
+# <https://github.com/bazelbuild/rules_foreign_cc/issues/1186>
+# We only use rules_foreign_cc for mimalloc and we only use mimalloc in release
+# builds, so I'm moving this here until we can figure out a better workaround,
+# or a fix lands upstream.
+build:release-linux --define mimalloc=true
+build:release-linux-aarch64 --define mimalloc=true
 
 # This is to turn on vector instructions where available.
 # We used to do this unconditionally, but Rosetta 2 doesn't translate all vector instructions well.
@@ -121,8 +135,17 @@ build:release-linux-aarch64 --config=lto-linux --config=release-common
 # however some AWS instances in our fleet still run Sandy Bridge (Skylake predecessor), as of 2018.
 build:release-linux           --copt=-march=sandybridge
 build:release-sanitized-linux --copt=-march=sandybridge
+build:release-linux-aarch64   --copt=-march=armv8.1a
 
-build:release-mac --config=release-common --platforms=@//tools/platforms:darwin_x86_64
+build:release-mac --config=release-common --config=shared-libs
+
+build:cross-to-darwin-x86_64 --platforms=@//tools/platforms:darwin_x86_64
+build:cross-to-darwin-x86_64 --extra_toolchains=@llvm_toolchain_15_0_7//:cc-toolchain-x86_64-darwin
+build:cross-to-darwin-x86_64 --copt=-stdlib=libc++ --linkopt=-lc++
+
+build:cross-to-darwin-arm64 --platforms=@//tools/platforms:darwin_arm64
+build:cross-to-darwin-arm64 --extra_toolchains=@llvm_toolchain_15_0_7//:cc-toolchain-aarch64-darwin
+build:cross-to-darwin-arm64 --copt=-stdlib=libc++ --linkopt=-lc++
 
 build:release-debug-linux --config=release-linux
 build:release-debug-linux --config=release-debug-common
@@ -217,10 +240,13 @@ build:ubsan --linkopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefine
 build:ubsan --define unsanitized=false
 build:ubsan --copt=-DHAS_SANITIZER
 
-# Bazel links C++ files with $CC, not $CXX, this breaks UBSan
-build:sanitize-linux --linkopt=external/llvm_toolchain_12_0_0/lib/clang/12.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
-build:sanitize-linux --linkopt=external/llvm_toolchain_12_0_0/lib/clang/12.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
-build:sanitize-linux --linkopt=external/llvm_toolchain_12_0_0/lib/clang/12.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
+# TODO(jez) It's not clear whether we still need these tricks to get sanitizers to work,
+# because we're using the toolchain's lld linker now.
+# We could consider replacing this with something more typical.
+# Original motivation: Bazel links C++ files with $CC, not $CXX, this breaks UBSan
+build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.asan_cxx.a
+build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone_cxx.a
+build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone.a
 build:sanitize-linux --config=sanitize
 
 build:sanitize-mac --config=sanitize
@@ -258,18 +284,13 @@ build:fuzz --copt=-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 ##
 ## Webasm config. Please use either of those depending on your platform
 ##
-build:webasm-linux --crosstool_top=//tools/toolchain/webasm-linux --config=webasm
-build:webasm-darwin --crosstool_top=//tools/toolchain/webasm-darwin --config=webasm
-
-# common webasm config
-# Use --cpu as a differentiator.
-build:webasm --cpu=webasm --spawn_strategy=local --genrule_strategy=local --copt=-Oz --linkopt=-Oz --copt=-DMDB_USE_ROBUST=0
+build:webasm --copt=-Oz --linkopt=-Oz --copt=-DMDB_USE_ROBUST=0
 build:webasm --define release=true
 build:webasm --compilation_mode=opt
-build:webasm --copt=-DNDEBUG --linkopt=-DNDEBUG # for some reason emscripten doesn't pass those when -O2\-Oz are specified
-build:webasm --copt=--llvm-lto --copt=3 --linkopt=--llvm-lto --linkopt=3
-# Specify a "sane" C++ toolchain for the host platform.
-build:webasm --host_crosstool_top=@llvm_toolchain_12_0_0//:toolchain
+# https://emscripten.org/docs/porting/exceptions.html#webassembly-exception-handling-based-support
+build:webasm --features=exceptions --cxxopt=-fwasm-exceptions --linkopt=-fwasm-exceptions
+# Blocked on https://github.com/emscripten-core/emscripten/issues/9780
+build:webasm --copt=-fno-stack-protector
 
 ##
 ## Stripe's ci passes --config=ci, we need it to exist

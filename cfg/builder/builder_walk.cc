@@ -114,6 +114,20 @@ bool sendRecvIsT(ast::Send &s) {
     }
 }
 
+bool isKernelLambda(ast::Send &s) {
+    if (s.fun != core::Names::lambda()) {
+        return false;
+    }
+
+    // Only handle `-> () {}` and `Kernel.lambda` lambdas for now, because there's nothing stopping
+    // someone from defining a method called `lambda` on their own that behaves differently.
+    //
+    // We could revisit this in the future but for now let's be conservative.
+
+    auto *cnst = ast::cast_tree<ast::ConstantLit>(s.recv);
+    return cnst != nullptr && cnst->symbol == core::Symbols::Kernel();
+}
+
 InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
     const auto &ctx = cctx.ctx;
     auto method = cctx.inWhat.symbol;
@@ -169,6 +183,21 @@ InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
     return make_insn<Alias>(typeParam);
 }
 
+ast::Send *isKernelProcOrLambda(ast::ExpressionPtr &expr) {
+    auto *send = ast::cast_tree<ast::Send>(expr);
+    if (send == nullptr || send->hasNonBlockArgs() ||
+        (send->fun != core::Names::lambda() && send->fun != core::Names::proc())) {
+        return nullptr;
+    }
+
+    auto *recv = ast::cast_tree<ast::ConstantLit>(send->recv);
+    if (recv == nullptr || recv->symbol != core::Symbols::Kernel()) {
+        return nullptr;
+    }
+
+    return send;
+}
+
 } // namespace
 
 void CFGBuilder::jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc) {
@@ -213,8 +242,38 @@ BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *curr
     return current;
 }
 
+// This doesn't actually "walk" an empty tree, because there's nothing interesting to walk in one.
+// Instead, if conforms to mostly the same interface that `walk` (i.e., returns a BasicBlock *);
+BasicBlock *CFGBuilder::walkEmptyTreeInIf(CFGContext cctx, core::LocOffsets nilLoc, BasicBlock *current) {
+    synthesizeExpr(current, cctx.target, nilLoc, make_insn<Literal>(core::Types::nilClass()));
+    return current;
+}
+
+BasicBlock *CFGBuilder::walkBlockReturn(CFGContext cctx, core::LocOffsets loc, ast::ExpressionPtr &expr,
+                                        BasicBlock *current) {
+    LocalRef exprSym = cctx.newTemporary(core::Names::nextTemp());
+    auto afterNext = walk(cctx.withTarget(exprSym), expr, current);
+    if (afterNext != cctx.inWhat.deadBlock() && cctx.isInsideRubyBlock) {
+        LocalRef dead = cctx.newTemporary(core::Names::nextTemp());
+        ENFORCE(cctx.link.get() != nullptr);
+        afterNext->exprs.emplace_back(dead, loc, make_insn<BlockReturn>(cctx.link, exprSym));
+    }
+
+    if (cctx.nextScope == nullptr) {
+        if (auto e = cctx.ctx.beginError(loc, core::errors::CFG::NoNextScope)) {
+            e.setHeader("No `{}` block around `{}`", "do", "next");
+        }
+        // I guess just keep going into deadcode?
+        unconditionalJump(afterNext, cctx.inWhat.deadBlock(), cctx.inWhat, loc);
+    } else {
+        unconditionalJump(afterNext, cctx.nextScope, cctx.inWhat, loc);
+    }
+
+    return cctx.inWhat.deadBlock();
+}
+
 BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b) {
-    auto *join = cctx.inWhat.freshBlock(cctx.loops, a);
+    auto *join = cctx.inWhat.freshBlock(cctx.loops);
     unconditionalJump(a, join, cctx.inWhat, core::LocOffsets::none());
     unconditionalJump(b, join, cctx.inWhat, core::LocOffsets::none());
     return join;
@@ -226,8 +285,8 @@ tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext c
                                                                     BasicBlock *presentCont, BasicBlock *defaultCont) {
     auto defLoc = def.loc();
 
-    auto *presentNext = cctx.inWhat.freshBlock(cctx.loops, presentCont);
-    auto *defaultNext = cctx.inWhat.freshBlock(cctx.loops, presentCont);
+    auto *presentNext = cctx.inWhat.freshBlock(cctx.loops);
+    auto *defaultNext = cctx.inWhat.freshBlock(cctx.loops);
 
     auto present = cctx.newTemporary(core::Names::argPresent());
     auto methodSymbol = cctx.inWhat.symbol;
@@ -269,17 +328,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
         typecase(
             what,
             [&](ast::While &a) {
-                auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1, current);
+                auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
                 // breakNotCalledBlock is only entered if break is not called in
                 // the loop body
-                auto breakNotCalledBlock = cctx.inWhat.freshBlock(cctx.loops, current);
-                auto continueBlock = cctx.inWhat.freshBlock(cctx.loops, current);
+                auto breakNotCalledBlock = cctx.inWhat.freshBlock(cctx.loops);
+                auto continueBlock = cctx.inWhat.freshBlock(cctx.loops);
                 unconditionalJump(current, headerBlock, cctx.inWhat, a.loc);
 
                 LocalRef condSym = cctx.newTemporary(core::Names::whileTemp());
                 auto headerEnd =
                     walk(cctx.withTarget(condSym).withLoopScope(headerBlock, continueBlock), a.cond, headerBlock);
-                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1, current);
+                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
                 conditionalJump(headerEnd, condSym, bodyBlock, breakNotCalledBlock, cctx.inWhat, a.cond.loc());
                 // finishHeader
                 LocalRef bodySym = cctx.newTemporary(core::Names::statTemp());
@@ -314,6 +373,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                  */
             },
             [&](ast::Return &a) {
+                if (cctx.isInsideLambda) {
+                    ret = walkBlockReturn(cctx, a.loc, a.expr, current);
+                    return;
+                }
+
                 LocalRef retSym = cctx.newTemporary(core::Names::returnTemp());
                 auto cont = walk(cctx.withTarget(retSym), a.expr, current);
                 cont->exprs.emplace_back(cctx.target, a.loc, make_insn<Return>(retSym, a.expr.loc())); // dead assign.
@@ -324,19 +388,21 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 LocalRef ifSym = cctx.newTemporary(core::Names::ifTemp());
                 ENFORCE(ifSym.exists(), "ifSym does not exist");
                 auto cont = walk(cctx.withTarget(ifSym), a.cond, current);
-                auto thenBlock = cctx.inWhat.freshBlock(cctx.loops, current);
-                auto elseBlock = cctx.inWhat.freshBlock(cctx.loops, current);
+                auto thenBlock = cctx.inWhat.freshBlock(cctx.loops);
+                auto elseBlock = cctx.inWhat.freshBlock(cctx.loops);
                 conditionalJump(cont, ifSym, thenBlock, elseBlock, cctx.inWhat, a.cond.loc());
 
-                auto thenEnd = walk(cctx, a.thenp, thenBlock);
-                auto elseEnd = walk(cctx, a.elsep, elseBlock);
+                auto thenEnd = ast::isa_tree<ast::EmptyTree>(a.thenp) ? walkEmptyTreeInIf(cctx, a.loc, thenBlock)
+                                                                      : walk(cctx, a.thenp, thenBlock);
+                auto elseEnd = ast::isa_tree<ast::EmptyTree>(a.elsep) ? walkEmptyTreeInIf(cctx, a.loc, elseBlock)
+                                                                      : walk(cctx, a.elsep, elseBlock);
                 if (thenEnd != cctx.inWhat.deadBlock() || elseEnd != cctx.inWhat.deadBlock()) {
                     if (thenEnd == cctx.inWhat.deadBlock()) {
                         ret = elseEnd;
                     } else if (elseEnd == cctx.inWhat.deadBlock()) {
                         ret = thenEnd;
                     } else {
-                        ret = cctx.inWhat.freshBlock(cctx.loops, current);
+                        ret = cctx.inWhat.freshBlock(cctx.loops);
                         unconditionalJump(thenEnd, ret, cctx.inWhat, a.loc);
                         unconditionalJump(elseEnd, ret, cctx.inWhat, a.loc);
                     }
@@ -408,8 +474,19 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     if (foundError && shouldReportErrorOn) {
                         auto zeroLoc = a.loc.copyWithZeroLength();
                         auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());
-                        auto fieldKind = ident->kind == ast::UnresolvedIdent::Kind::Class ? core::Names::class_()
-                                                                                          : core::Names::instance();
+                        core::NameRef fieldKind;
+                        if (ident->kind == ast::UnresolvedIdent::Kind::Class) {
+                            fieldKind = core::Names::class_();
+                        } else {
+                            ENFORCE(cctx.ctx.owner.isMethod());
+                            auto owner = cctx.ctx.owner.owner(cctx.ctx).asClassOrModuleRef();
+                            if (owner.data(cctx.ctx)->isSingletonClass(cctx.ctx)) {
+                                fieldKind = core::Names::singletonClassInstance();
+                            } else {
+                                fieldKind = core::Names::instance();
+                            }
+                        }
+
                         // Mutate a.rhs before walking.
                         a.rhs =
                             ast::MK::Send4(a.lhs.loc(), move(magic), core::Names::suggestFieldType(), zeroLoc,
@@ -526,14 +603,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 }
 
                 if (auto *block = s.block()) {
-                    auto newRubyRegionId = ++cctx.inWhat.maxRubyRegionId;
                     auto &blockArgs = block->args;
                     vector<core::ParsedArg> blockArgFlags = ast::ArgParsing::parseArgs(blockArgs);
                     vector<core::ArgInfo::ArgFlags> argFlags;
                     for (auto &e : blockArgFlags) {
                         argFlags.emplace_back(e.flags);
                     }
-                    auto link = make_shared<core::SendAndBlockLink>(s.fun, move(argFlags), newRubyRegionId);
+                    auto link = make_shared<core::SendAndBlockLink>(s.fun, move(argFlags));
                     auto send = make_insn<Send>(recv, s.recv.loc(), s.fun, s.funLoc, s.numPosArgs(), args,
                                                 std::move(argLocs), !!s.flags.isPrivateOk, link);
                     LocalRef sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
@@ -543,13 +619,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     synthesizeExpr(current, restoreSelf, core::LocOffsets::none(),
                                    make_insn<Ident>(LocalRef::selfVariable()));
 
-                    auto headerBlock = cctx.inWhat.freshBlockWithRegion(cctx.loops + 1, newRubyRegionId);
+                    auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
                     // solveConstraintBlock is only entered if break is not called
                     // in the block body.
-                    auto solveConstraintBlock = cctx.inWhat.freshBlock(cctx.loops, current);
-                    auto postBlock = cctx.inWhat.freshBlock(cctx.loops, current);
+                    auto solveConstraintBlock = cctx.inWhat.freshBlock(cctx.loops);
+                    auto postBlock = cctx.inWhat.freshBlock(cctx.loops);
                     auto bodyLoops = cctx.loops + 1;
-                    auto bodyBlock = cctx.inWhat.freshBlockWithRegion(bodyLoops, newRubyRegionId);
+                    auto bodyBlock = cctx.inWhat.freshBlock(bodyLoops);
 
                     bodyBlock->exprs.emplace_back(LocalRef::selfVariable(), s.loc,
                                                   make_insn<LoadSelf>(link, LocalRef::selfVariable()));
@@ -573,8 +649,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                             }
 
                             if (auto *opt = ast::cast_tree<ast::OptionalArg>(blockArgs[i])) {
-                                auto *presentBlock = cctx.inWhat.freshBlockWithRegion(bodyLoops, newRubyRegionId);
-                                auto *missingBlock = cctx.inWhat.freshBlockWithRegion(bodyLoops, newRubyRegionId);
+                                auto *presentBlock = cctx.inWhat.freshBlock(bodyLoops);
+                                auto *missingBlock = cctx.inWhat.freshBlock(bodyLoops);
 
                                 // add a test for YieldParamPresent
                                 auto present = cctx.newTemporary(core::Names::argPresent());
@@ -583,7 +659,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                 conditionalJump(argBlock, present, presentBlock, missingBlock, cctx.inWhat, arg.loc);
 
                                 // make a new block for the present and missing blocks to join
-                                argBlock = cctx.inWhat.freshBlockWithRegion(bodyLoops, newRubyRegionId);
+                                argBlock = cctx.inWhat.freshBlock(bodyLoops);
 
                                 // compile the argument fetch in the present block
                                 presentBlock->exprs.emplace_back(argLoc, arg.loc,
@@ -606,11 +682,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     unconditionalJump(current, headerBlock, cctx.inWhat, s.loc);
 
                     LocalRef blockrv = cctx.newTemporary(core::Names::blockReturnTemp());
-                    auto blockLast = walk(cctx.withTarget(blockrv)
-                                              .withBlockBreakTarget(cctx.target)
-                                              .withLoopScope(headerBlock, postBlock, true)
-                                              .withSendAndBlockLink(link),
-                                          s.block()->body, argBlock);
+                    BasicBlock *blockLast;
+                    {
+                        auto newCctx = cctx.withTarget(blockrv)
+                                           .withBlockBreakTarget(cctx.target)
+                                           .withLoopScope(headerBlock, postBlock, true)
+                                           .withSendAndBlockLink(link);
+                        if (isKernelLambda(s)) {
+                            newCctx.isInsideLambda = true;
+                        }
+                        blockLast = walk(newCctx, s.block()->body, argBlock);
+                    }
                     if (blockLast != cctx.inWhat.deadBlock()) {
                         LocalRef dead = cctx.newTemporary(core::Names::blockReturnTemp());
 
@@ -669,27 +751,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
             [&](const ast::Block &a) { Exception::raise("should never encounter a bare Block"); },
 
-            [&](ast::Next &a) {
-                LocalRef exprSym = cctx.newTemporary(core::Names::nextTemp());
-                auto afterNext = walk(cctx.withTarget(exprSym), a.expr, current);
-                if (afterNext != cctx.inWhat.deadBlock() && cctx.isInsideRubyBlock) {
-                    LocalRef dead = cctx.newTemporary(core::Names::nextTemp());
-                    ENFORCE(cctx.link.get() != nullptr);
-                    afterNext->exprs.emplace_back(dead, a.loc, make_insn<BlockReturn>(cctx.link, exprSym));
-                }
-
-                if (cctx.nextScope == nullptr) {
-                    if (auto e = cctx.ctx.beginError(a.loc, core::errors::CFG::NoNextScope)) {
-                        e.setHeader("No `{}` block around `{}`", "do", "next");
-                    }
-                    // I guess just keep going into deadcode?
-                    unconditionalJump(afterNext, cctx.inWhat.deadBlock(), cctx.inWhat, a.loc);
-                } else {
-                    unconditionalJump(afterNext, cctx.nextScope, cctx.inWhat, a.loc);
-                }
-
-                ret = cctx.inWhat.deadBlock();
-            },
+            [&](ast::Next &a) { ret = walkBlockReturn(cctx, a.loc, a.expr, current); },
 
             [&](ast::Break &a) {
                 LocalRef exprSym = cctx.newTemporary(core::Names::returnTemp());
@@ -768,13 +830,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
 
             [&](ast::Rescue &a) {
-                auto bodyRubyRegionId = ++cctx.inWhat.maxRubyRegionId;
-                auto handlersRubyRegionId = bodyRubyRegionId + CFG::HANDLERS_REGION_OFFSET;
-                auto ensureRubyRegionId = bodyRubyRegionId + CFG::ENSURE_REGION_OFFSET;
-                auto elseRubyRegionId = bodyRubyRegionId + CFG::ELSE_REGION_OFFSET;
-                cctx.inWhat.maxRubyRegionId = elseRubyRegionId;
-
-                auto rescueHeaderBlock = cctx.inWhat.freshBlock(cctx.loops, current);
+                auto rescueHeaderBlock = cctx.inWhat.freshBlock(cctx.loops);
                 unconditionalJump(current, rescueHeaderBlock, cctx.inWhat, a.loc);
                 cctx.rescueScope = rescueHeaderBlock;
 
@@ -786,8 +842,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 // Unanalyzable variable at the top of the body using
                 // `exceptionValue` and one at the end of the else using
                 // `rescueEndTemp` which can jump into the rescue handlers.
-                auto rescueHandlersBlock = cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRubyRegionId);
-                auto bodyBlock = cctx.inWhat.freshBlockWithRegion(cctx.loops, bodyRubyRegionId);
+                auto rescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops);
+                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops);
                 auto exceptionValue = cctx.newTemporary(core::Names::exceptionValue());
                 // In `rescue; ...; end`, we don't want the conditional jumps' variables nor the
                 // GetCurrentException calls to look like they blame to the whole `rescue; ...; end`
@@ -808,13 +864,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 bodyBlock = walk(cctx, a.body, bodyBlock);
 
                 // else is only executed if body didn't raise an exception
-                auto elseBody = cctx.inWhat.freshBlockWithRegion(cctx.loops, elseRubyRegionId);
+                auto elseBody = cctx.inWhat.freshBlock(cctx.loops);
                 synthesizeExpr(bodyBlock, exceptionValue, rescueKeywordLoc, make_insn<GetCurrentException>());
                 conditionalJump(bodyBlock, exceptionValue, rescueHandlersBlock, elseBody, cctx.inWhat,
                                 rescueKeywordLoc);
 
                 elseBody = walk(cctx, a.else_, elseBody);
-                auto ensureBody = cctx.inWhat.freshBlockWithRegion(cctx.loops, ensureRubyRegionId);
+                auto ensureBody = cctx.inWhat.freshBlock(cctx.loops);
                 unconditionalJump(elseBody, ensureBody, cctx.inWhat, a.loc);
 
                 auto magic = cctx.newTemporary(core::Names::magic());
@@ -822,7 +878,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                 for (auto &expr : a.rescueCases) {
                     auto *rescueCase = ast::cast_tree<ast::RescueCase>(expr);
-                    auto caseBody = cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRubyRegionId);
+                    auto caseBody = cctx.inWhat.freshBlock(cctx.loops);
                     auto &exceptions = rescueCase->exceptions;
                     auto added = false;
                     auto *local = ast::cast_tree<ast::Local>(rescueCase->var);
@@ -877,7 +933,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                             make_insn<Send>(exceptionClass, loc, core::Names::tripleEq(), loc.copyWithZeroLength(),
                                             args.size(), args, std::move(argLocs), isPrivateOk));
 
-                        auto otherHandlerBlock = cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRubyRegionId);
+                        auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops);
                         conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
                         rescueHandlersBlock = otherHandlerBlock;
                     }
@@ -898,7 +954,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                 auto throwAway = cctx.newTemporary(core::Names::throwAwayTemp());
                 ensureBody = walk(cctx.withTarget(throwAway), a.ensure, ensureBody);
-                ret = cctx.inWhat.freshBlock(cctx.loops, current);
+                ret = cctx.inWhat.freshBlock(cctx.loops);
                 conditionalJump(ensureBody, gotoDeadTemp, cctx.inWhat.deadBlock(), ret, cctx.inWhat, a.loc);
             },
 
@@ -924,12 +980,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
 
             [&](ast::Cast &c) {
-                // This is kind of gross, but it is the only way to ensure that the bits in the
-                // type expression make it into the CFG for LSP to hit on their locations.
-                LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
-                current = walk(cctx.withTarget(deadSym), c.typeExpr, current);
-                // Ensure later passes don't delete the results of the typeExpr.
-                current->exprs.emplace_back(deadSym, core::LocOffsets::none(), make_insn<KeepAlive>(deadSym));
+                if (auto *kernelLambda = isKernelProcOrLambda(c.arg)) {
+                    kernelLambda->fun = core::Names::lambdaTLet();
+                    kernelLambda->addPosArg(move(c.typeExpr));
+                } else {
+                    // This is kind of gross, but it is the only way to ensure that the bits in the
+                    // type expression make it into the CFG for LSP to hit on their locations.
+                    LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
+                    current = walk(cctx.withTarget(deadSym), c.typeExpr, current);
+                    // Ensure later passes don't delete the results of the typeExpr.
+                    current->exprs.emplace_back(deadSym, core::LocOffsets::none(), make_insn<KeepAlive>(deadSym));
+                }
                 LocalRef tmp = cctx.newTemporary(core::Names::castTemp());
                 core::LocOffsets argLoc = c.arg.loc();
                 current = walk(cctx.withTarget(tmp), c.arg, current);
@@ -973,7 +1034,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
 
-            [&](const ast::EmptyTree &n) { ret = current; },
+            [&](const ast::EmptyTree &n) {
+                // TODO(jez) We might want to ENFORCE(false) here, and make all attempts to walk an
+                // empty tree be handled by the parent node where the `EmptyTree` is a child, so
+                // that there's more context to be able to handle the `EmptyTree` in context. For
+                // example, how the `ast::If` case handles `EmptyTree` so that the loc of the
+                // `EmptyTree` can be set to the loc of the whole `if` expression.
+                ret = current;
+            },
 
             [&](const ast::ClassDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
             [&](const ast::MethodDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },

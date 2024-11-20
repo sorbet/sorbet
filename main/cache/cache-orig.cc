@@ -1,3 +1,4 @@
+#include "common/kvstore/KeyValueStore.h"
 #include "main/cache/cache.h"
 
 using namespace std;
@@ -12,9 +13,10 @@ unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, uniqu
     return nullptr;
 }
 
-void maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore> kvstore, const options::Options &opts,
-                                   core::GlobalState &gs, WorkerPool &workers, const vector<ast::ParsedFile> &indexed) {
-    return;
+unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore> kvstore, const options::Options &opts,
+                                                        core::GlobalState &gs, WorkerPool &workers,
+                                                        const vector<ast::ParsedFile> &indexed) {
+    return kvstore;
 }
 
 } // namespace sorbet::realmain::cache

@@ -4,6 +4,9 @@ title: Gradual typing of Ruby at Scale
 sidebar_label: Curry On! 2019
 ---
 
+**Date**: July 16, 2019\
+**Speaker**: Dmitry Petrashko
+
 - [→ Talk page](https://www.curry-on.org/2019/sessions/gradual-typing-for-ruby-at-scale-with-sorbet.html)
 - [→ Video](https://www.curry-on.org/2019/sessions/gradual-typing-for-ruby-at-scale-with-sorbet.html)
 - [→ Slides](https://sorbet.run/talks/CurryOn2019/#/)

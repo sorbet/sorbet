@@ -21,7 +21,7 @@ module T::Types
       valid?(obj)
     end
 
-    def valid?(obj)
+    define_method(:valid?) do |_obj|
       raise NotImplementedError
     end
 
@@ -35,12 +35,12 @@ module T::Types
 
     # Force any lazy initialization that this type might need to do
     # It's unusual to call this directly; you probably want to call it indirectly via `T::Utils.run_all_sig_blocks`.
-    def build_type
+    define_method(:build_type) do
       raise NotImplementedError
     end
 
     # Equality is based on name, so be sure the name reflects all relevant state when implementing.
-    def name
+    define_method(:name) do
       raise NotImplementedError
     end
 

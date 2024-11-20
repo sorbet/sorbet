@@ -178,7 +178,7 @@ the repl.
 First, we can explain the error on the call to `example2` by looking at
 ancestors:
 
-```
+```plaintext
 ❯ MyClass.singleton_class.ancestors
 => [#<Class:MyClass>, MyInterface::ClassMethods,
     #<Class:Object>, T::Private::Methods::MethodHooks, #<Class:BasicObject>,
@@ -193,7 +193,7 @@ in Ruby will cause `#<Class:MyInterface>` to appear in any ancestors list.
 
 Next, let's explain the other two errors:
 
-```
+```plaintext
 ❯ MyInterface.singleton_class.ancestors
 => [#<Class:MyInterface>,
     T::Private::MixesInClassMethods, T::Helpers, Module, T::Sig, Object,
@@ -460,7 +460,7 @@ end
 ```
 
 This works because the `T.class_of(...)` tells Sorbet what singleton class
-methods exist, and the `[...]` tells Sorbet what type of an object instantiated
+methods exist, and the `[...]` tells Sorbet what type an object instantiated
 from that class has.
 
 The `T.all` is an [Intersection Type](intersection-types.md) and is needed

@@ -24,7 +24,7 @@ end
 sig { returns(Integer) }
 def example1
   with_block_untyped do
-# ^^^^^^^^^^^^^^^^^^^^^ error: Value returned from method is `T.untyped`
+# ^^^^^^^^^^^^^^^^^^^^^ error: Value returned from method `example1` is `T.untyped`
     0
   end
 end
@@ -32,7 +32,7 @@ end
 sig { returns(Integer) }
 def example2
   returns_untyped(
-# ^^^^^^^^^^^^^^^^ error: Value returned from method is `T.untyped`
+# ^^^^^^^^^^^^^^^^ error: Value returned from method `example2` is `T.untyped`
     0,
     ''
   )

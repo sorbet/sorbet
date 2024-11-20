@@ -406,6 +406,44 @@ flag to Sorbet.
 [super_incompatible]:
   https://sorbet.run/#%23%20typed%3A%20strict%0A%0Aclass%20Parent%0A%20%20extend%20T%3A%3ASig%0A%20%20sig%20%7Breturns%28Integer%29%7D%0A%20%20def%20self.foo%0A%20%20%20%200%0A%20%20end%0Aend%0A%0Aclass%20Child%20%3C%20Parent%0A%20%20sig%20%7Breturns%28String%29%7D%0A%20%20def%20self.foo%0A%20%20%20%20super%0A%20%20end%0Aend
 
+## Why does `T.untyped && T::Boolean` have type `T.nilable(T::Boolean)`?
+
+**The short answer**: because `T.untyped` includes `nil`, and `nil && false` is
+`nil`. Therefore, the whole expression's type is possibly nilable.
+
+**The long answer**: given a snippet like this
+
+```ruby
+sig { params(x: T.untyped, y: T::Boolean).void }
+def example(x, y)
+  res = x && y
+  T.reveal_type(res) # => T.nilable(T::Boolean)
+end
+```
+
+The revealed type is [`T.nilable`](nilable-types.md) despite neither `x` nor `y`
+being `T.nilable`. Ruby's `&&` operator is short-circuiting, and `nil` is falsy:
+
+```ruby
+x = nil && anything_else()
+p(x) # => nil
+```
+
+This `&&` expression evaluates to `nil` without evaluating `anything_else()`.
+
+So thinking about our `res = x && y` expression:
+
+1.  If `x` is `nil`, the whole expression is `nil` and the type must be at least
+    [`NilClass`](class-types.md#nil).
+1.  If `x` is `false`, the whole expression's type must be at least
+    [`FalseClass`](class-types.md#booleans).
+1.  Otherwise, `x` is truthy (only `nil` and `false` are falsy in Ruby), so the
+    expression evaluates to the value of `y`, assuming it's type. In this case,
+    `T::Boolean`.
+
+Therefore, the type is `T.any(NilClass, FalseClass, T::Boolean)` which
+simplifies to `T.nilable(T::Boolean)`.
+
 ## Does Sorbet work with Rake and Rakefiles?
 
 Kind of, with some effort. Rake monkey patches the global `main` object (i.e.,
@@ -464,7 +502,7 @@ constantly, without warning.
 
 To upgrade a patch level (e.g., from 0.4.4314 to 0.4.4358):
 
-```
+```bash
 bundle update sorbet sorbet-runtime
 # also update plugins, if any
 
@@ -495,16 +533,16 @@ only available in a version of Ruby newer than the one used to run a given
 project. You will have to rely on (runtime) test suites to verify that your
 project does not use new standard library APIs with an old Ruby version.
 
-The `sorbet-static` gem is only tested on macOS 10.14 (Mojave) and Ubuntu 18
-(Bionic Beaver). There is currently no Windows support. We expect
-`sorbet-static` to work as far back as macOS 10.10 (Yosemite), as far forward as
-macOS 11.0 Big Sur, and on most Linux distributions using `glibc`.
+The `sorbet-static` gem is only tested on macOS 10.14 (Mojave), macOS 15.0
+(Sequoia) on Apple Silicon, and Ubuntu 18 (Bionic Beaver). There is currently no
+Windows support. We expect `sorbet-static` to work as far back as macOS 10.10
+(Yosemite) and on most Linux distributions using `glibc`.
 
-We do not test nor publish prebuilt binaries for macOS on Apple Silicon. We have
-reports that it doesn't work, but no one on the Sorbet team has access to Apple
-Silicon-based macOS machines, so we have been unable to diagnose nor fix any
-problems. If you are interested in working on this, feel free to reach out in
-the #internals channel on our [Sorbet Slack](/slack).
+Starting from version 0.5.11577, Sorbet provides tested and prebuilt binaries
+for macOS on Apple Silicon. If you encounter bugs, please
+[open an issue](https://github.com/sorbet/sorbet/issues/new/choose). Otherwise,
+feel free to discuss this change in the #discuss channel on our
+[Sorbet Slack](/slack).
 
 The `sorbet` gem has runtime dependencies on `git` and `bash`.
 

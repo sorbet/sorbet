@@ -20,7 +20,7 @@ def example(x)
   needs_pin = T.let(nil, T.nilable(T.type_parameter(:U)))
   1.times do
     needs_pin = x
-    #           ^ error: Changing the type of a variable in a loop is not permitted
+    #           ^ error: Changing the type of a variable is not permitted in loops and blocks
   end
   puts needs_pin
 

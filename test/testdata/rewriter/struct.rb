@@ -64,26 +64,24 @@ class MixinStruct
     self.new(1, 2)
     #        ^^^^ error: Too many positional arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
     self.new(giberish: 1)
-  # ^^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
+    #        ^^^^^^^^^^^ error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
   end
 
   MyKeywordInitStruct.new(1, 2)
   #                       ^^^^ error: Too many positional arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
   MyKeywordInitStruct.new(giberish: 1)
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
+  #                       ^^^^^^^^^^^ error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
   MyStruct.new.x
   MyStruct.new.foo
 end
 
 class BadUsages
-  A = Struct.new # error: Not enough arguments provided for method `Struct#initialize`. Expected: `1+`, got: `0`
+  A = Struct.new
   B = Struct.new(giberish: 1)
-  #              ^^^^^^^^^^^ error: Expected `T.any(Symbol, String)` but found `{giberish: Integer(1)}` for argument `arg0`
+  #              ^^^^^^^^^^^ error: Unrecognized keyword argument `giberish` passed for method `Struct#initialize`
   C = Struct.new(keyword_init: true)
-  #              ^^^^^^^^^^^^^^^^^^ error: Expected `T.any(Symbol, String)` but found `{keyword_init: TrueClass}` for argument `arg0`
   local = true
   D = Struct.new(keyword_init: local)
-  #              ^^^^^^^^^^^^^^^^^^^ error: Expected `T.any(Symbol, String)` but found `{keyword_init: TrueClass}` for argument `arg0`
   E = Struct.new(:a, keyword_init: local) # we run too early in to be able to support this
 end
 
@@ -130,7 +128,7 @@ end
 
 class ImmutableTest
   Immutable.new(a: 1, b: "foo")
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `a` passed for method `Immutable#initialize`
+  #             ^^^^ error: Unrecognized keyword argument `a` passed for method `Immutable#initialize`
 
   obj = Immutable.new(b: "foo")
   obj.b = "bar"

@@ -79,20 +79,40 @@ public:
      *
      * The parameter `mode` controls whether or not `T.untyped` is
      * considered to be a super type or subtype of all other types */
+
+    /**
+     * The `errorDetailsCollector` parameter is used to pass additional details out of isSubType
+     * about why subtyping failed, which can then be shown to the user. See ErrorSection::Collector
+     * in core/Error.h for the API.
+     *
+     * If this call is going to be used to determine if an error should be shown, you should pass in
+     * an instance of ErrorSection::Collector. Otherwise, you should pass in
+     * ErrorSection::Collector::NO_OP, as passing an ErrorSection::Collector will slow down subtype
+     * checking to collect the additional information.
+     */
+    template <class T>
     static bool isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                         const TypePtr &t2, UntypedMode mode);
+                                         const TypePtr &t2, UntypedMode mode, T &errorDetailsCollector);
 
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
-    static bool isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    template <class T>
+    static bool isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector);
+    /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
+    static bool isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+        return isSubType(gs, t1, t2, ErrorSection::Collector::NO_OP);
+    };
     static bool equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    template <class T>
     static bool equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                     const TypePtr &t2);
+                                     const TypePtr &t2, T &errorDetailsCollector);
 
     /** check that t1 <: t2, but do not consider `T.untyped` as super type or a subtype of all other types */
     static bool isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     static bool equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+
+    template <class T>
     static bool equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                              const TypePtr &t2);
+                                              const TypePtr &t2, T &errorDetailsCollector);
 
     static TypePtr top();
     static TypePtr bottom();
@@ -108,6 +128,7 @@ public:
     static TypePtr Float();
     static TypePtr Boolean();
     static TypePtr Object();
+    static TypePtr BasicObject();
     static TypePtr arrayOfUntyped(sorbet::core::SymbolRef blame);
     static TypePtr rangeOfUntyped(sorbet::core::SymbolRef blame);
     static TypePtr hashOfUntyped();
@@ -336,16 +357,22 @@ template <> inline bool TypePtr::isa<TypePtr>(const TypePtr &what) {
 }
 
 // Required to support cast<TypePtr> specialization.
-template <> struct TypePtr::TypeToIsInlined<TypePtr> { static constexpr bool value = false; };
+template <> struct TypePtr::TypeToIsInlined<TypePtr> {
+    static constexpr bool value = false;
+};
 
 template <> inline TypePtr const &TypePtr::cast<TypePtr>(const TypePtr &what) {
     return what;
 }
 
-#define TYPE_IMPL(name, isInlined)                                                                             \
-    class name;                                                                                                \
-    template <> struct TypePtr::TypeToTag<name> { static constexpr TypePtr::Tag value = TypePtr::Tag::name; }; \
-    template <> struct TypePtr::TypeToIsInlined<name> { static constexpr bool value = isInlined; };            \
+#define TYPE_IMPL(name, isInlined)                                \
+    class name;                                                   \
+    template <> struct TypePtr::TypeToTag<name> {                 \
+        static constexpr TypePtr::Tag value = TypePtr::Tag::name; \
+    };                                                            \
+    template <> struct TypePtr::TypeToIsInlined<name> {           \
+        static constexpr bool value = isInlined;                  \
+    };                                                            \
     class __attribute__((aligned(8))) name
 
 #define TYPE(name) TYPE_IMPL(name, false)
@@ -709,8 +736,9 @@ private:
     friend TypePtr Types::Boolean();
     friend class NameSubstitution;
     friend class serialize::SerializerImpl;
+    template <class T>
     friend bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                                const TypePtr &t2, UntypedMode mode);
+                                                const TypePtr &t2, UntypedMode mode, T &errorDetailsCollector);
     friend TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
@@ -760,8 +788,9 @@ private:
     friend class serialize::SerializerImpl;
     friend class TypeConstraint;
 
+    template <class T>
     friend bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                                const TypePtr &t2, UntypedMode mode);
+                                                const TypePtr &t2, UntypedMode mode, T &errorDetailsCollector);
     friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
@@ -903,10 +932,9 @@ public:
     SendAndBlockLink(SendAndBlockLink &&) = default;
     std::vector<ArgInfo::ArgFlags> argFlags;
     core::NameRef fun;
-    int rubyRegionId;
     std::shared_ptr<DispatchResult> result;
 
-    SendAndBlockLink(NameRef fun, std::vector<ArgInfo::ArgFlags> &&argFlags, int rubyRegionId);
+    SendAndBlockLink(NameRef fun, std::vector<ArgInfo::ArgFlags> &&argFlags);
     std::optional<int> fixedArity() const;
     std::shared_ptr<SendAndBlockLink> duplicate();
 };
@@ -1031,15 +1059,33 @@ struct DispatchComponent {
     TypePtr receiver;
     MethodRef method;
     std::vector<std::unique_ptr<Error>> errors;
-    TypePtr sendTp;
+    // If a call site is given a block, the `DispatchResult::returnType` is not fully known until
+    // after the `SolveConstraint` instruction which is processed after running inference on the
+    // block (and possibly accumulating more constraints).
+    //
+    // This field holds the type which we can later instantiate after solving the constraint.
+    //
+    // Note that this is on the DispatchComponent, which means that it will be the return type for
+    // just this component, unlike `DispatchResult::returnType`, which will be a union/intersection
+    // type in multi-component dispatches.
+    TypePtr returnTypeBeforeSolve;
+    // The declared/expected return type of the `&blk` parameter for the `method` we dispatched to.
+    // Used primarily when processing `BlockReturn` instructions.
+    //
+    // TODO(jez) Is this redundant? Would it make more sense to derive this from blockPreType wherever we need it?
     TypePtr blockReturnType;
+    // The declared type of the `&blk` parameter for the `method` we dispatched to.
+    // Used primarily when LoadYieldParams ascribes types to block variables within a block.
     TypePtr blockPreType;
-    ArgInfo blockSpec; // used only by LoadSelf to change type of self inside method.
+    ClassOrModuleRef rebind;
+    Loc rebindLoc;
     std::unique_ptr<TypeConstraint> constr;
 };
 
 struct DispatchResult {
     enum class Combinator { OR, AND };
+    // The overall return type of the call expression, accounting for the `Combinator`, where the
+    // LHS is `main.returnTypeBeforeSolve` and the RHS is `secondary.returnType` (recursive).
     TypePtr returnType;
     DispatchComponent main;
     std::unique_ptr<DispatchResult> secondary;
@@ -1049,7 +1095,7 @@ struct DispatchResult {
     DispatchResult(TypePtr returnType, TypePtr receiverType, core::MethodRef method)
         : returnType(returnType),
           main(DispatchComponent{
-              std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, ArgInfo{}, nullptr}){};
+              std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, {}, {}, nullptr}){};
     DispatchResult(TypePtr returnType, DispatchComponent comp)
         : returnType(std::move(returnType)), main(std::move(comp)){};
     DispatchResult(TypePtr returnType, DispatchComponent comp, std::unique_ptr<DispatchResult> secondary,
