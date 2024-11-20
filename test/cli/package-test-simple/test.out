@@ -9,7 +9,7 @@ main_lib/__package.rb:8: Invalid expression in package: Arguments to functions m
      8 |  export_for_test Project::MainLib::Lib
                           ^^^^^^^^^^^^^^^^^^^^^
 
-main_lib/__package.rb:5: Package `Project::MainLib` is missing imports https://srb.help/3719
+main_lib/__package.rb:5: Package `Project::MainLib` is missing imports https://srb.help/3726
      5 |class Project::MainLib < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Used `test_import` instead of `import` for Project::TestOnly

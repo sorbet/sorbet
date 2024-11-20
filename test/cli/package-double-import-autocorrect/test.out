@@ -12,7 +12,7 @@ different-files/c1.rb:6: `A::Foo` resolves but its package is not imported https
      3 |class A < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
 
-different-files/__package.rb:3: Package `C` is missing imports https://srb.help/3719
+different-files/__package.rb:3: Package `C` is missing imports https://srb.help/3726
      3 |class C < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   `A` resolves but its package is not imported

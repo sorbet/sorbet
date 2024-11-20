@@ -25,7 +25,7 @@ foo_class.rb:14: `Foo::Bar::OtherPackage::OtherClass` resolves but its package i
   Note:
     Try running generate-packages.sh
 
-__package.rb:5: Package `Foo::MyPackage` is missing imports https://srb.help/3719
+__package.rb:5: Package `Foo::MyPackage` is missing imports https://srb.help/3726
      5 |class Foo::MyPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   `Foo::Bar::OtherPackage` resolves but its package is not imported

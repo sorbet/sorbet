@@ -48,7 +48,7 @@ foo_class.rb:17: `Test::Foo::Bar::OtherPackage::TestUtil` is defined in a test n
     17 |  Test::Foo::Bar::OtherPackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-__package.rb:5: Package `Foo::MyPackage` is missing imports https://srb.help/3719
+__package.rb:5: Package `Foo::MyPackage` is missing imports https://srb.help/3726
      5 |class Foo::MyPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   `Foo::Bar::OtherPackage` resolves but its package is not imported
