@@ -548,6 +548,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
 
     options.add_options(section)("enable-experimental-lsp-extract-to-variable",
                                  "Enable experimental LSP feature: Extract To Variable");
+    options.add_options(section)("enable-experimental-lsp-multiple-dir",
+                                 "Enable experimental LSP feature: Multiple --dir options");
     options.add_options(section)(
         "enable-all-experimental-lsp-features",
         "Enable every experimental LSP feature. (WARNING: can be crashy; for developer use only. "
@@ -946,6 +948,7 @@ void readOptions(Options &opts,
         opts.lspDocumentHighlightEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
+        opts.lspMultipleDirEnabled = raw["enable-experimental-lsp-multiple-dir"].as<bool>();
         opts.rubyfmtPath = raw["rubyfmt-path"].as<string>();
         if (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>()) {
             if (!FileOps::exists(opts.rubyfmtPath)) {

@@ -209,7 +209,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
     const auto &opts = config->opts;
     auto &logger = config->logger;
     if (!opts.disableWatchman) {
-        if (opts.rawInputDirNames.size() != 1 || !opts.rawInputFileNames.empty()) {
+        if (!opts.lspMultipleDirEnabled && (opts.rawInputDirNames.size() != 1 || !opts.rawInputFileNames.empty())) {
             auto msg = "Watchman support currently only works when Sorbet is run with a single input directory. If "
                        "Watchman is not needed, run Sorbet with `--disable-watchman`.";
             logger->error(msg);
