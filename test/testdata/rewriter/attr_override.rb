@@ -9,6 +9,8 @@ end
 
 class FooChild < Foo
   extend T::Sig
+  extend T::Helpers
+  abstract!
 
   sig {void}
   def initialize
@@ -26,4 +28,19 @@ class FooChild < Foo
 
   sig {returns(T.nilable(Integer)).override.checked(:always)}
   attr_accessor :method4
+
+  sig {returns(T.nilable(Integer)).overridable}
+  attr_accessor :method5
+
+  sig {returns(T.nilable(Integer)).abstract}
+  def method6; end
+end
+
+class FooGrandChild < FooChild
+  extend T::Sig
+
+  sig {override.returns(T.nilable(Integer))}
+  def method6
+    42
+  end
 end
