@@ -1581,7 +1581,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
 
     if (otherPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::False) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
-            e.setHeader("All of this package's dependecies must be `{}` or higher", "layered");
+            e.setHeader("All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx), "import", "layered");
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel.value().second),
                            "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
         }
