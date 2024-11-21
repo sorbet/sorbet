@@ -1003,7 +1003,9 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
 // again by infer).
 
 TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, uint16_t numPosArgs,
-                                  const InlinedVector<const TypeAndOrigins *, 2> &args, ClassOrModuleRef genericClass) {
+                                  const InlinedVector<const TypeAndOrigins *, 2> &args, ClassOrModuleRef genericClass,
+                                  ErrorClass genericArgumentCountMismatchError,
+                                  ErrorClass genericArgumentKeywordArgsError) {
     genericClass = genericClass.maybeUnwrapBuiltinGenericForwarder();
 
     int arity;
@@ -1020,7 +1022,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
         auto end = locs.args.back().endPos();
         core::Loc kwargsLoc{locs.file, begin, end};
 
-        if (auto e = gs.beginError(kwargsLoc, errors::Infer::GenericArgumentKeywordArgs)) {
+        if (auto e = gs.beginError(kwargsLoc, genericArgumentKeywordArgsError)) {
             e.setHeader("Keyword arguments given to `{}`", genericClass.show(gs));
             // offer an autocorrect to turn the keyword args into a hash if there is no double-splat
             if (numKwArgs % 2 == 0 && kwargsLoc.exists()) {
@@ -1044,7 +1046,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
         auto squareBracketsLoc = core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
         auto errLoc =
             !locs.args.empty() ? core::Loc(locs.file, locs.args.front().join(locs.args.back())) : squareBracketsLoc;
-        if (auto e = gs.beginError(errLoc, errors::Infer::GenericArgumentCountMismatch)) {
+        if (auto e = gs.beginError(errLoc, genericArgumentCountMismatchError)) {
             if (arity == 0) {
                 if (genericClass.data(gs)->typeMembers().empty()) {
                     e.setHeader("`{}` is not a generic class, but was given type parameters", genericClass.show(gs));

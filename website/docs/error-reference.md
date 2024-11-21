@@ -3324,6 +3324,22 @@ There are two options:
   move(direction)
   ```
 
+## 5078
+
+This error is functionally equivalent to error [7010](#7010). It is reported
+during the inference stage, while 5078 is reported during the resolver stage.
+
+For detailed information and examples, please refer to the documentation for
+error [7010](#7010).
+
+## 5079
+
+This error is functionally equivalent to error [7032](#7032). It is reported
+during the inference stage, while 5079 is reported during the resolver stage.
+
+For detailed information and examples, please refer to the documentation for
+error [7032](#7032).
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside
