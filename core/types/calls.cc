@@ -1748,7 +1748,8 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
                 return badMetaTypeCall(gs, args, errLoc, this->wrapped);
             }
 
-            auto returnType = Types::applyTypeArguments(gs, args.locs, args.numPosArgs, args.args, applied->klass);
+            auto returnType = Types::applyTypeArguments(gs, args.locs, args.numPosArgs, args.args, applied->klass,
+                                                        /* inResolver */ false);
             return DispatchResult(returnType, args.selfType, Symbols::T_Generic_squareBrackets());
         }
         case Names::bind().rawId():
@@ -2238,7 +2239,8 @@ public:
             return;
         }
 
-        res.returnType = Types::applyTypeArguments(gs, args.locs, args.numPosArgs, args.args, attachedClass);
+        res.returnType =
+            Types::applyTypeArguments(gs, args.locs, args.numPosArgs, args.args, attachedClass, /* inResolver */ false);
     }
 } T_Generic_squareBrackets;
 
