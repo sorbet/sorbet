@@ -8,5 +8,5 @@ class Service1 < PackageSpec
   layer 'service'
 
   import Business1
-  import Utility2 # error: All of this package's dependecies must be `layered` or higher
+  import Utility2 # error: All of `Service1`'s `import`s must be `layered` or higher
 end
