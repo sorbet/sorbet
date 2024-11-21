@@ -1970,8 +1970,7 @@ public:
                                             asgn.loc.copyWithZeroLength(),
                                             ast::MK::Block0(asgn.loc, ast::MK::Untyped(asgn.loc)));
 
-            return handleAssignment(ctx,
-                                    ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
+            return handleAssignment(ctx, ast::MK::Assign(asgn.loc, move(asgn.lhs), move(send)));
         }
 
         if (isBadHasAttachedClass(ctx, typeName->cnst)) {
@@ -2001,14 +2000,20 @@ public:
         // Prevent a crash by validating the arguments before we do any symbol lookups or manipulations
         if (send->hasPosArgs() || send->hasKwArgs() || send->block() != nullptr) {
             if (send->numPosArgs() > 1) {
-                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                    e.setHeader("Too many args in type definition");
+                auto extraArgsLoc = send->getPosArg(1).loc().join(send->getPosArg(send->numPosArgs() - 1).loc());
+                if (auto e = ctx.beginError(extraArgsLoc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Too many arguments in `{}` definition for `{}`", send->fun.show(ctx),
+                                typeName->cnst.show(ctx));
+                    auto firstArgLoc = send->getPosArg(0).loc();
+                    auto argsLoc = send->argsLoc();
+                    auto replacementRange = core::Loc(ctx.file, firstArgLoc.endPos(), argsLoc.endPos());
+                    e.replaceWith("Retain only the first argument", replacementRange, "",
+                                  ctx.locAt(firstArgLoc).source(ctx).value());
                 }
                 auto send = ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
                                                 asgn.loc.copyWithZeroLength(),
                                                 ast::MK::Block0(asgn.loc, ast::MK::Untyped(asgn.loc)));
-                return handleAssignment(
-                    ctx, ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
+                return handleAssignment(ctx, ast::MK::Assign(asgn.loc, move(asgn.lhs), move(send)));
             }
         }
 
