@@ -2007,7 +2007,7 @@ public:
                     auto firstArgLoc = send->getPosArg(0).loc();
                     auto argsLoc = send->argsLoc();
                     auto replacementRange = core::Loc(ctx.file, firstArgLoc.endPos(), argsLoc.endPos());
-                    e.replaceWith("Retain only the first argument", replacementRange, "");
+                    e.replaceWith("Delete extra args", replacementRange, "");
                 }
                 auto send = ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
                                                 asgn.loc.copyWithZeroLength(),
