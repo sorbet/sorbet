@@ -345,7 +345,12 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                 while ((entry = readdir(dir)) != nullptr) {
                     const auto namelen = strlen(entry->d_name);
                     string_view nameview{entry->d_name, namelen};
-                    if (entry->d_type == DT_DIR) {
+
+                    auto fullPath = fmt::format("{}/{}", path, nameview);
+                    bool isDir =
+                        entry->d_type == DT_DIR || (entry->d_type == DT_LNK && sorbet::FileOps::dirExists(fullPath));
+
+                    if (isDir) {
                         if (!recursive) {
                             continue;
                         }
@@ -364,13 +369,12 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                         }
                     }
 
-                    auto fullPath = fmt::format("{}/{}", path, nameview);
                     if (sorbet::FileOps::isFileIgnored(basePath, fullPath, absoluteIgnorePatterns,
                                                        relativeIgnorePatterns)) {
                         continue;
                     }
 
-                    if (entry->d_type == DT_DIR) {
+                    if (isDir) {
                         ++pendingJobs;
                         jobq->push(move(fullPath), 1);
                     } else {
