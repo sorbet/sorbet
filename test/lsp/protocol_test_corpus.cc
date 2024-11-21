@@ -922,4 +922,55 @@ TEST_CASE_FIXTURE(ProtocolTest, "DidChangeConfigurationNotificationUpdatesHighli
                              });
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "OverleoadedStdlibSymbolWithOverloads") {
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    assertErrorDiagnostics(send(*openFile("a.rbi", "# typed: __STDLIB_INTERNAL\n"
+                                                   "\n"
+                                                   "module A\n"
+                                                   "  sig { params(x: Integer).void }\n"
+                                                   "  sig { params(x: String).void }\n"
+                                                   "  def foo(x) end\n"
+                                                   "\n"
+                                                   "  sig { void }\n"
+                                                   "  def bar; end\n"
+                                                   "end\n"
+                                                   "")),
+                           {});
+
+    assertErrorDiagnostics(send(*openFile("monkey_patch.rb", "# typed: false\n"
+                                                             "\n"
+                                                             "module A\n"
+                                                             "  def foo(x,y)\n"
+                                                             "  end\n"
+                                                             "\n"
+                                                             "  module_function :foo\n"
+                                                             "end\n"
+                                                             "")),
+                           {});
+
+    assertErrorDiagnostics(send(*openFile("test.rb", "# typed: true\n"
+                                                     "\n"
+                                                     "class Test\n"
+                                                     "  include A\n"
+                                                     "  def test()\n"
+                                                     "    bar\n"
+                                                     "  end\n"
+                                                     "\n"
+                                                     "  module_function :open\n"
+                                                     "end\n"
+                                                     "")),
+                           {});
+
+    auto defResponses = send(*getDefinition("test.rb", 5, 4));
+    REQUIRE_EQ(1, defResponses.size());
+    REQUIRE(defResponses.front()->isResponse());
+
+    auto &resp = defResponses.front()->asResponse();
+    REQUIRE(!resp.error.has_value());
+    REQUIRE(resp.result.has_value());
+
+    auto codeActionResponses = send(*codeAction("a.rbi", 8, 6));
+}
+
 } // namespace sorbet::test::lsp
