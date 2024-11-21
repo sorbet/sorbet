@@ -254,7 +254,6 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             // split `pipeline::package` into something like "populate the package DB" and "verify
             // the package prefixes" with the later living in `pipeline::nameAndResolve` once again
             // (thus restoring the symmetry).
-            // TODO(jez) Parallelize this
             what = packager::Packager::runIncremental(gs, move(what), workers);
         }
 #endif
