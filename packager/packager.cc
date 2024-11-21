@@ -1757,26 +1757,43 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
     }
 }
 
-// TODO(jez) Parallelize this
-vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, vector<ast::ParsedFile> files) {
+vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, vector<ast::ParsedFile> files,
+                                                 WorkerPool &workers) {
     // Note: This will only run if packages have not been changed (byte-for-byte equality).
     // TODO(nroman-stripe) This could be further incrementalized to avoid processing all packages by
     // building in an understanding of the dependencies between packages.
     Timer timeit(gs.tracer(), "packager.runIncremental");
-    for (auto &file : files) {
-        core::Context ctx(gs, core::Symbols::root(), file.file);
-        if (file.file.data(gs).isPackage()) {
-            // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
-            // report some syntactic packager errors.
-            auto info = definePackage(gs, file);
-            if (info != nullptr) {
-                rewritePackageSpec(gs, file, *info);
-            }
-            validatePackage(ctx);
-        } else {
-            validatePackagedFile(ctx, file.tree);
-        }
+
+    auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
+    absl::BlockingCounter barrier(max(workers.size(), 1));
+
+    for (size_t i = 0; i < files.size(); ++i) {
+        taskq->push(i, 1);
     }
+    workers.multiplexJob("validatePackagesAndFiles", [&gs, &files, &barrier, taskq]() {
+        size_t idx;
+        for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
+            if (!result.gotItem()) {
+                continue;
+            }
+
+            ast::ParsedFile &file = files[idx];
+            core::Context ctx(gs, core::Symbols::root(), file.file);
+            if (file.file.data(gs).isPackage()) {
+                // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
+                // report some syntactic packager errors.
+                auto info = definePackage(gs, file);
+                if (info != nullptr) {
+                    rewritePackageSpec(gs, file, *info);
+                }
+                validatePackage(ctx);
+            } else {
+                validatePackagedFile(ctx, file.tree);
+            }
+        }
+        barrier.DecrementCount();
+    });
+    barrier.Wait();
     return files;
 }
 

@@ -45,7 +45,8 @@ public:
     static void run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files);
 
     // Run packager incrementally. Note: `files` must contain all packages files. Does not support package changes.
-    static std::vector<ast::ParsedFile> runIncremental(const core::GlobalState &gs, std::vector<ast::ParsedFile> files);
+    static std::vector<ast::ParsedFile> runIncremental(const core::GlobalState &gs, std::vector<ast::ParsedFile> files,
+                                                       WorkerPool &workers);
 
     static void dumpPackageInfo(const core::GlobalState &gs, std::string output);
 
