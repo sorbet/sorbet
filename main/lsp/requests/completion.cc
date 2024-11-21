@@ -974,7 +974,7 @@ vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const c
 
         // We'll find all overloaded names as well as the original def's name, so if this is the original def of an
         // overload chain, skip it.
-        if (similarMethod.method.data(gs)->flags.isOverloaded && !methodName.isOverload(gs)) {
+        if (similarMethod.method.data(gs)->flags.isOverloaded && !methodName.isOverloadName(gs)) {
             continue;
         }
 

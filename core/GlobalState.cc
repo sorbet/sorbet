@@ -1077,7 +1077,7 @@ bool matchesArityHash(const GlobalState &gs, ArityHash arityHash, MethodRef meth
     auto methodData = method.data(gs);
     // lookupMethodSymbolWithHash is called from namer, before resolver enters overloads.
     // It wants to be able to find the "namer version" of the method, not the overload.
-    return !methodData->name.isOverload(gs) &&
+    return !methodData->name.isOverloadName(gs) &&
            (methodData->methodArityHash(gs) == arityHash || (methodData->hasIntrinsic() && !methodData->hasSig()));
 }
 } // namespace

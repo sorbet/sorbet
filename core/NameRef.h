@@ -177,7 +177,7 @@ public:
 
     NameRef prepend(GlobalState &gs, std::string_view s) const;
 
-    bool isOverload(const GlobalState &gs) const;
+    bool isOverloadName(const GlobalState &gs) const;
 
     bool isClassName(const GlobalState &gs) const;
 
