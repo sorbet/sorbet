@@ -963,8 +963,7 @@ vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const c
 
     for (auto &[methodName, similarMethods] : similarMethodsByName) {
         if (methodName.kind() == core::NameKind::UNIQUE &&
-            (methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename ||
-             methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload)) {
+            methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename) {
             // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
             // unique names, because we want each overload to show up but those use unique names.
             continue;
@@ -972,6 +971,12 @@ vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const c
 
         // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
         auto similarMethod = similarMethods[0];
+
+        // We'll find all overloaded names as well as the original def's name, so if this is the original def of an
+        // overload chain, skip it.
+        if (similarMethod.method.data(gs)->flags.isOverloaded && !methodName.isOverloadName(gs)) {
+            continue;
+        }
 
         if (similarMethod.method.data(gs)->flags.isPrivate && !isPrivateOk) {
             continue;

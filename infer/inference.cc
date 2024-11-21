@@ -18,17 +18,10 @@ bool Inference::willRun(core::Context ctx, core::LocOffsets loc, core::MethodRef
     }
 
     const auto &methodData = method.data(ctx);
-    auto name = methodData->name;
-    auto isMangleRenameOverload = name.kind() == core::NameKind::UNIQUE &&
-                                  name.dataUnique(ctx)->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload;
-    if (isMangleRenameOverload || methodData->flags.isOverloaded) {
+    if (methodData->flags.isOverloaded) {
         if (auto e = ctx.beginError(loc, core::errors::Infer::TypecheckOverloadBody)) {
             e.setHeader("Refusing to typecheck `{}` against an overloaded signature", method.show(ctx));
             auto overloadMethod = method;
-            if (isMangleRenameOverload) {
-                overloadMethod =
-                    methodData->owner.data(ctx)->findMember(ctx, name.dataUnique(ctx)->original).asMethodRef();
-            }
             e.addErrorLine(overloadMethod.data(ctx)->loc(), "Given an overloaded signature here");
             e.addErrorNote("Overloads are only supported in RBI files.\n"
                            "    To silence this error, mark this file `{}`\n"

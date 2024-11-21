@@ -503,12 +503,26 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
     if (klassData->superClass().exists()) {
         auto superMethod = klassData->superClass().data(ctx)->findMethodTransitive(ctx, name);
         if (superMethod.exists()) {
+            if (superMethod.data(ctx)->flags.isOverloaded) {
+                ENFORCE(!superMethod.data(ctx)->name.isOverloadName(ctx));
+                auto overload = ctx.state.lookupNameUnique(core::UniqueNameKind::Overload, name, 1);
+                superMethod = superMethod.data(ctx)->owner.data(ctx)->findMethod(ctx, overload);
+                ENFORCE(superMethod.exists());
+            }
+
             overriddenMethods.emplace_back(superMethod);
         }
     }
     for (const auto &mixin : klassData->mixins()) {
         auto superMethod = mixin.data(ctx)->findMethod(ctx, name);
         if (superMethod.exists()) {
+            if (superMethod.data(ctx)->flags.isOverloaded) {
+                ENFORCE(!superMethod.data(ctx)->name.isOverloadName(ctx));
+                auto overload = ctx.state.lookupNameUnique(core::UniqueNameKind::Overload, name, 1);
+                superMethod = superMethod.data(ctx)->owner.data(ctx)->findMethod(ctx, overload);
+                ENFORCE(superMethod.exists());
+            }
+
             overriddenMethods.emplace_back(superMethod);
         }
     }
@@ -1096,7 +1110,14 @@ private:
                 continue;
             }
 
-            auto concreteMethodRef = sym.data(ctx)->findConcreteMethodTransitive(ctx, proto.data(ctx)->name);
+            // Overload signatures all have unique names, so to find the name of the concrete implementation we need to
+            // use the original name, not the unique one.
+            auto protoName = proto.data(ctx)->name;
+            if (protoName.isOverloadName(ctx)) {
+                protoName = protoName.dataUnique(ctx)->original;
+            }
+
+            auto concreteMethodRef = sym.data(ctx)->findConcreteMethodTransitive(ctx, protoName);
             if (concreteMethodRef.exists()) {
                 continue;
             }

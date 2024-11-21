@@ -922,4 +922,43 @@ TEST_CASE_FIXTURE(ProtocolTest, "DidChangeConfigurationNotificationUpdatesHighli
                              });
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "OverloadedStdlibSymbolWithMonkeyPatches") {
+    const bool supportsMarkdown = false;
+    const bool supportsCodeActionResolve = true;
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->supportsSorbetURIs = true;
+    assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(initOptions)), {});
+
+    assertErrorDiagnostics(send(*openFile("monkey_patch.rb", "# typed: false\n"
+                                                             "\n"
+                                                             "module ::Kernel\n"
+                                                             "  def open(*args); end\n"
+                                                             "end\n"
+                                                             "")),
+                           {});
+
+    assertErrorDiagnostics(send(*openFile("test.rb", "# typed: true\n"
+                                                     "\n"
+                                                     "class Test\n"
+                                                     "  def test()\n"
+                                                     "    self.send(:p)\n"
+                                                     "  end\n"
+                                                     "end\n"
+                                                     "")),
+                           {});
+
+    // Lookup the definition of `send` on the `self.send(:p)` line of `test.rb`.
+    auto locs = getDefinitions("test.rb", 4, 9);
+    REQUIRE_EQ(1, locs.size());
+    auto &loc = locs.front();
+    fmt::print("loc: {}\n", loc->uri);
+    REQUIRE(absl::StartsWith(loc->uri, "sorbet:https://github.com/"));
+
+    // Read and load in kernel.rbi
+    auto kernelRBIText = readFile(loc->uri);
+
+    // At this point we see a crash related to overload processing, prior to https://github.com/sorbet/sorbet/pull/8303
+    assertErrorDiagnostics(send(*openFile(loc->uri, kernelRBIText)), {});
+}
+
 } // namespace sorbet::test::lsp

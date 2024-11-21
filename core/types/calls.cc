@@ -360,10 +360,8 @@ struct GuessOverloadCandidate {
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
-    MethodRef fallback = primary;
     vector<MethodRef> allCandidates;
 
-    allCandidates.emplace_back(primary);
     { // create candidates and sort them by number of arguments(stable by symbol id)
         size_t i = 0;
         MethodRef current = primary;
@@ -391,6 +389,8 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             return false;
         });
     }
+
+    MethodRef fallback = allCandidates.front();
 
     vector<GuessOverloadCandidate> allCandidatesWithConstraints;
 

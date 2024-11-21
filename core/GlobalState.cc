@@ -1077,7 +1077,7 @@ bool matchesArityHash(const GlobalState &gs, ArityHash arityHash, MethodRef meth
     auto methodData = method.data(gs);
     // lookupMethodSymbolWithHash is called from namer, before resolver enters overloads.
     // It wants to be able to find the "namer version" of the method, not the overload.
-    return !methodData->flags.isOverloaded &&
+    return !methodData->name.isOverloadName(gs) &&
            (methodData->methodArityHash(gs) == arityHash || (methodData->hasIntrinsic() && !methodData->hasSig()));
 }
 } // namespace
@@ -1097,17 +1097,6 @@ MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRe
             auto resMethod = resSym.asMethodRef();
             if (matchesArityHash(*this, arityHash, resMethod)) {
                 return resMethod;
-            }
-        }
-
-        auto lookupNameOverload = lookupNameUnique(UniqueNameKind::MangleRenameOverload, lookupName, 1);
-        if (lookupNameOverload.exists()) {
-            auto overloadIt = ownerScope->members().find(lookupNameOverload);
-            if (overloadIt != ownerScope->members().end() && overloadIt->second.isMethod()) {
-                auto resMethod = overloadIt->second.asMethodRef();
-                if (matchesArityHash(*this, arityHash, resMethod)) {
-                    return resMethod;
-                }
             }
         }
 
@@ -1160,22 +1149,9 @@ SymbolRef GlobalState::findRenamedSymbol(ClassOrModuleRef owner, SymbolRef sym) 
 
     if (name.kind() == NameKind::UNIQUE) {
         auto uniqueData = name.dataUnique(*this);
-        if (uniqueData->uniqueNameKind == UniqueNameKind::MangleRenameOverload) {
-            auto it = ownerScope->members().find(uniqueData->original);
-            ENFORCE_NO_TIMER(it != ownerScope->members().end());
-            // return it->second;
-            auto res = findRenamedSymbol(owner, it->second);
-            if (res.exists() && res.isMethod()) {
-                const auto &resData = res.asMethodRef().data(*this);
-                if (resData->flags.isOverloaded) {
-                    auto overloadedName = lookupNameUnique(UniqueNameKind::MangleRenameOverload, resData->name, 1);
-                    auto it = ownerScope->members().find(overloadedName);
-                    ENFORCE_NO_TIMER(it != ownerScope->members().end());
-                    res = it->second;
-                }
-            }
-            return res;
-        } else if (uniqueData->uniqueNameKind != UniqueNameKind::MangleRename) {
+        ENFORCE(uniqueData->uniqueNameKind != UniqueNameKind::Overload,
+                "Overloads should never be used in a context where MangleRename is possible");
+        if (uniqueData->uniqueNameKind != UniqueNameKind::MangleRename) {
             return Symbols::noSymbol();
         }
         if (uniqueData->num == 1) {
@@ -1355,11 +1331,9 @@ MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRe
 
 MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, core::NameRef originalName, uint32_t num,
                                               const vector<bool> &argsToKeep) {
-    NameRef name = num == 0 ? originalName : freshNameUnique(UniqueNameKind::Overload, originalName, num);
-    core::Loc loc = num == 0 ? original.data(*this)->loc()
-                             : sigLoc; // use original Loc for main overload so that we get right jump-to-def for it.
+    NameRef name = freshNameUnique(UniqueNameKind::Overload, originalName, num);
     auto owner = original.data(*this)->owner;
-    auto res = enterMethodSymbol(loc, owner, name);
+    auto res = enterMethodSymbol(sigLoc, owner, name);
     bool newMethod = res != original;
     const auto &resArguments = res.data(*this)->arguments;
     ENFORCE_NO_TIMER(newMethod || !resArguments.empty(), "must be at least the block arg");
@@ -1810,38 +1784,6 @@ NameRef GlobalState::nextMangledName(ClassOrModuleRef owner, NameRef origName) {
     return name;
 }
 
-void GlobalState::mangleRenameMethodInternal(MethodRef what, NameRef origName, UniqueNameKind kind) {
-    auto owner = what.data(*this)->owner;
-    auto ownerData = owner.data(*this);
-    auto &ownerMembers = ownerData->members();
-    auto fnd = ownerMembers.find(origName);
-    ENFORCE_NO_TIMER(fnd != ownerMembers.end());
-    ENFORCE_NO_TIMER(fnd->second == what);
-    ENFORCE_NO_TIMER(what.data(*this)->name == origName);
-    NameRef name;
-    if (kind == UniqueNameKind::MangleRename) {
-        name = nextMangledName(owner, origName);
-    } else {
-        // We don't loop in this case because we're not trying to find an actually unique name, we
-        // just want to essentially move the existing, non-overloaded `what` out of the way to allow
-        // the first overload to have the name that `what` currently has. We also need to be able to
-        // map predictably between the new, overloaded symbol and the original it came from, so the
-        // unique name is always chosen using `1` for the `num` argument.
-        //
-        // We know that there is no method with this name, because otherwise resolver would not have
-        // called mangleRenameForOverload.
-        ENFORCE_NO_TIMER(kind == UniqueNameKind::MangleRenameOverload);
-        name = freshNameUnique(UniqueNameKind::MangleRenameOverload, origName, 1);
-    }
-    // Both branches of the above `if` condition should ENFORCE this (either due to the loop post
-    // condition, or by way of the resolveMultiSignatureJob call site guaranteeing this).
-    ENFORCE(!ownerData->findMember(*this, name).exists(), "would overwrite the Symbol with name {}",
-            name.showRaw(*this));
-    ownerMembers.erase(fnd);
-    ownerMembers[name] = what;
-    what.data(*this)->name = name;
-}
-
 // We have to use this mangle renaming logic to get old methods out of the way, because method
 // redefinitions are not an error at `typed: false`, which means that people can expect that their
 // redefined method will be given precedence when called in another (typed: true) file.
@@ -1849,10 +1791,21 @@ void GlobalState::mangleRenameMethodInternal(MethodRef what, NameRef origName, U
 // (Constant redefinition errors are always enforced at `# typed: false`, so we can afford to simply
 // define a new symbol with a mangled name, instead of mangling AND renaming constant symbols.)
 void GlobalState::mangleRenameMethod(MethodRef what, NameRef origName) {
-    mangleRenameMethodInternal(what, origName, UniqueNameKind::MangleRename);
-}
-void GlobalState::mangleRenameForOverload(MethodRef what, NameRef origName) {
-    mangleRenameMethodInternal(what, origName, UniqueNameKind::MangleRenameOverload);
+    auto owner = what.data(*this)->owner;
+    auto ownerData = owner.data(*this);
+    auto &ownerMembers = ownerData->members();
+    auto fnd = ownerMembers.find(origName);
+    ENFORCE_NO_TIMER(fnd != ownerMembers.end());
+    ENFORCE_NO_TIMER(fnd->second == what);
+    ENFORCE_NO_TIMER(what.data(*this)->name == origName);
+    NameRef name = nextMangledName(owner, origName);
+    // Both branches of the above `if` condition should ENFORCE this (either due to the loop post
+    // condition, or by way of the resolveMultiSignatureJob call site guaranteeing this).
+    ENFORCE(!ownerData->findMember(*this, name).exists(), "would overwrite the Symbol with name {}",
+            name.showRaw(*this));
+    ownerMembers.erase(fnd);
+    ownerMembers[name] = what;
+    what.data(*this)->name = name;
 }
 
 // This method should be used sparingly, because using it correctly is tricky.

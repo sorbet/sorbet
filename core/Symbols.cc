@@ -722,6 +722,11 @@ MethodRef findConcreteMethodTransitiveInternal(const GlobalState &gs, ClassOrMod
     }
 
     MethodRef result = owner.data(gs)->findMethod(gs, name);
+    if (result.exists() && result.data(gs)->flags.isOverloaded) {
+        auto overloadName = gs.lookupNameUnique(UniqueNameKind::Overload, name, 1);
+        result = owner.data(gs)->findMethod(gs, overloadName);
+    }
+
     if (result.exists() && !result.data(gs)->flags.isAbstract) {
         return result;
     }
@@ -729,6 +734,12 @@ MethodRef findConcreteMethodTransitiveInternal(const GlobalState &gs, ClassOrMod
     for (auto it = owner.data(gs)->mixins().begin(); it != owner.data(gs)->mixins().end(); ++it) {
         ENFORCE(it->exists());
         result = it->data(gs)->findMethod(gs, name);
+
+        if (result.exists() && result.data(gs)->flags.isOverloaded) {
+            auto overloadName = gs.lookupNameUnique(UniqueNameKind::Overload, name, 1);
+            result = owner.data(gs)->findMethod(gs, overloadName);
+        }
+
         if (result.exists() && !result.data(gs)->flags.isAbstract) {
             return result;
         }

@@ -23,7 +23,6 @@ enum class UniqueNameKind : uint8_t {
     Desugar,
     Namer,
     MangleRename,
-    MangleRenameOverload,
     Singleton,
     Overload,
     TypeVarName,
