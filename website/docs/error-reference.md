@@ -945,6 +945,8 @@ The 4 possible values are:
 All packages have a `layer`, which is used when checking for layering
 violations. See [3726](#3726).
 
+<!-- TODO(neil): Replace [3726](#3726) with a link to layering/strict_deps documentation when we write that. -->
+
 ```ruby
 class MyPackage < PackageSpec
   strict_dependencies 'false'
@@ -954,13 +956,16 @@ end
 
 You can choose the valid layers using the `--packager-layers` command line flag.
 For example, the following specifies that there are three valid layers: `util`,
-`lib` and `app`, ordered lowest to highest. This means that in `layered` (or
-stricter), packages in the `app` layer can import those in `util` or `lib`, but
-packages in the `util` layer cannot import those in `lib` or `app`.
+`lib` and `app`, ordered lowest to highest.
 
 ```bash
 srb tc --packager-layers util,lib,app
 ```
+
+Note that the order matters here. Passing the option as above means that in
+`layered` (or stricter), packages in the `app` layer can import those in `util`
+or `lib`, but packages in the `util` layer cannot import those in `lib` or
+`app`.
 
 If the flag is passed with no argument, then the default valid layers are
 `library` and `application`.
@@ -971,12 +976,14 @@ If the flag is passed with no argument, then the default valid layers are
 > at Stripe, please see [go/modularity](http://go/modularity) and
 > [go/layers](http://go/layers) for more.
 
-If a package is at `strict_dependencies` level `layered` or stricter, there are
-2 restrictions on what packages it may import:
+If a package is at `strict_dependencies 'layered'` or stricter, there are two
+restrictions on what packages it may import:
 
-- all packages it imports must also be at `strict_dependencies` level `layered`
-  (or stricter)
-- all packages must be in the same or lower layer
+- all packages it imports must also be at `strict_dependencies 'layered'` (or
+  stricter)
+- all packages it imports must be in the same or lower layer. For example, given
+  `--packager-layers util,lib,app`, all imports for a package with layer `lib`
+  must either also have layer `lib`, or have layer `util` (but not layer `app`).
 
 ## 4001
 
