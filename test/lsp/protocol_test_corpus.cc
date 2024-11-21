@@ -933,7 +933,6 @@ TEST_CASE_FIXTURE(ProtocolTest, "OverloadedStdlibSymbolWithMonkeyPatches") {
                                                              "\n"
                                                              "module ::Kernel\n"
                                                              "  def open(*args); end\n"
-                                                             "  module_function :open\n"
                                                              "end\n"
                                                              "")),
                            {});
@@ -956,11 +955,10 @@ TEST_CASE_FIXTURE(ProtocolTest, "OverloadedStdlibSymbolWithMonkeyPatches") {
     REQUIRE(absl::StartsWith(loc->uri, "sorbet:https://github.com/"));
 
     // Read and load in kernel.rbi
-    auto kernelRBIPath = absl::StrReplaceAll(loc->uri, {{"https://github.com/", "https%3A//github.com/"}});
-    auto kernelRBIText = readFile(kernelRBIPath);
+    auto kernelRBIText = readFile(loc->uri);
 
     // At this point we see a crash related to overload processing, prior to https://github.com/sorbet/sorbet/pull/8303
-    assertErrorDiagnostics(send(*openFile(kernelRBIPath, kernelRBIText)), {});
+    assertErrorDiagnostics(send(*openFile(loc->uri, kernelRBIText)), {});
 }
 
 } // namespace sorbet::test::lsp
