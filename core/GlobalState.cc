@@ -1149,6 +1149,8 @@ SymbolRef GlobalState::findRenamedSymbol(ClassOrModuleRef owner, SymbolRef sym) 
 
     if (name.kind() == NameKind::UNIQUE) {
         auto uniqueData = name.dataUnique(*this);
+        ENFORCE(uniqueData->uniqueNameKind != UniqueNameKind::Overload,
+                "Overloads should never be used in a context where MangleRename is possible");
         if (uniqueData->uniqueNameKind != UniqueNameKind::MangleRename) {
             return Symbols::noSymbol();
         }
