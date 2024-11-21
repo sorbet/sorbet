@@ -219,7 +219,8 @@ public:
     // something that look like type syntax in a method body.
     static TypePtr applyTypeArguments(const GlobalState &gs, const CallLocs &locs, uint16_t numPosArgs,
                                       const InlinedVector<const TypeAndOrigins *, 2> &args,
-                                      ClassOrModuleRef genericClass, bool inResolver);
+                                      ClassOrModuleRef genericClass, ErrorClass genericArgumentCountMismatchError,
+                                      ErrorClass genericArgumentKeywordArgsError);
 };
 
 struct Intrinsic {
