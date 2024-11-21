@@ -2020,6 +2020,20 @@ public:
             }
         }
 
+        // Prevent a crash by validating the arguments before we do any symbol lookups or manipulations
+        if (send->hasPosArgs() || send->hasKwArgs() || send->block() != nullptr) {
+            if (send->numPosArgs() > 1) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Too many args in type definition");
+                }
+                auto send = ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
+                                                asgn.loc.copyWithZeroLength(),
+                                                ast::MK::Block0(asgn.loc, ast::MK::Untyped(asgn.loc)));
+                return handleAssignment(
+                    ctx, ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
+            }
+        }
+
         bool isTypeTemplate = send->fun == core::Names::typeTemplate();
         auto onSymbol =
             isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx) : ctx.owner;
@@ -2032,99 +2046,83 @@ public:
         // `A::B = type_member` syntax)
         asgn.lhs = ast::make_expression<ast::ConstantLit>(asgn.lhs.loc(), sym, move(asgn.lhs));
 
-        if (send->hasPosArgs() || send->hasKwArgs() || send->block() != nullptr) {
-            if (send->numPosArgs() > 1) {
-                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                    e.setHeader("Too many args in type definition");
+        if (send->hasKwArgs()) {
+            const auto numKwArgs = send->numKwArgs();
+            auto kwArgsLoc = ctx.locAt(send->getKwKey(0).loc().join(send->getKwValue(numKwArgs - 1).loc()));
+            if (auto e = ctx.state.beginError(kwArgsLoc, core::errors::Namer::OldTypeMemberSyntax)) {
+                e.setHeader("The `{}` syntax for bounds has changed to use a block instead of keyword args",
+                            send->fun.show(ctx));
+
+                if (kwArgsLoc.exists() && send->block() == nullptr) {
+                    lazyTypeMemberAutocorrect(ctx, e, send, kwArgsLoc);
+                } else {
+                    e.addErrorNote("Provide these keyword args in a block that returns a `{}` literal", "Hash");
                 }
-                auto send = ast::MK::Send1(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
-                                           asgn.loc.copyWithZeroLength(), ast::MK::Untyped(asgn.loc));
-                return handleAssignment(
-                    ctx, ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
             }
+        }
 
-            if (send->hasKwArgs()) {
-                const auto numKwArgs = send->numKwArgs();
-                auto kwArgsLoc = ctx.locAt(send->getKwKey(0).loc().join(send->getKwValue(numKwArgs - 1).loc()));
-                if (auto e = ctx.state.beginError(kwArgsLoc, core::errors::Namer::OldTypeMemberSyntax)) {
-                    e.setHeader("The `{}` syntax for bounds has changed to use a block instead of keyword args",
-                                send->fun.show(ctx));
+        if (send->block() != nullptr) {
+            bool fixed = false;
+            bool bounded = false;
 
-                    if (kwArgsLoc.exists() && send->block() == nullptr) {
-                        lazyTypeMemberAutocorrect(ctx, e, send, kwArgsLoc);
-                    } else {
-                        e.addErrorNote("Provide these keyword args in a block that returns a `{}` literal", "Hash");
+            if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
+                for (const auto &keyExpr : hash->keys) {
+                    const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+                    if (key == nullptr || !key->isSymbol()) {
+                        if (auto e = ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
+                            e.setHeader("Hash provided in block to `{}` must have symbol keys", send->fun.show(ctx));
+                        }
+                        return tree;
                     }
-                }
-            }
 
-            if (send->block() != nullptr) {
-                bool fixed = false;
-                bool bounded = false;
+                    switch (key->asSymbol().rawId()) {
+                        case core::Names::fixed().rawId():
+                            fixed = true;
+                            break;
 
-                if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
-                    for (const auto &keyExpr : hash->keys) {
-                        const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
-                        if (key == nullptr || !key->isSymbol()) {
+                        case core::Names::lower().rawId():
+                        case core::Names::upper().rawId():
+                            bounded = true;
+                            break;
+
+                        default:
                             if (auto e = ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
-                                e.setHeader("Hash provided in block to `{}` must have symbol keys",
+                                e.setHeader("Unknown key `{}` provided in block to `{}`", key->asSymbol().show(ctx),
                                             send->fun.show(ctx));
                             }
                             return tree;
-                        }
-
-                        switch (key->asSymbol().rawId()) {
-                            case core::Names::fixed().rawId():
-                                fixed = true;
-                                break;
-
-                            case core::Names::lower().rawId():
-                            case core::Names::upper().rawId():
-                                bounded = true;
-                                break;
-
-                            default:
-                                if (auto e =
-                                        ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
-                                    e.setHeader("Unknown key `{}` provided in block to `{}`", key->asSymbol().show(ctx),
-                                                send->fun.show(ctx));
-                                }
-                                return tree;
-                        }
-                    }
-                } else {
-                    if (auto e =
-                            ctx.beginError(send->block()->body.loc(), core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Block given to `{}` must contain a single `{}` literal", send->fun.show(ctx),
-                                    "Hash");
-                        return tree;
                     }
                 }
-
-                // one of fixed or bounds were provided
-                if (fixed != bounded) {
-                    asgn.lhs = ast::MK::Constant(asgn.lhs.loc(), sym);
-
-                    // Leave it in the tree for the resolver to chew on.
+            } else {
+                if (auto e = ctx.beginError(send->block()->body.loc(), core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Block given to `{}` must contain a single `{}` literal", send->fun.show(ctx), "Hash");
                     return tree;
-                } else if (fixed) {
-                    // both fixed and bounds were specified
-                    if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Type member is defined with bounds and `{}`", "fixed");
-                    }
-                } else {
-                    if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Missing required param `{}`", "fixed");
-                    }
                 }
             }
 
-            if (send->numPosArgs() > 0) {
-                auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
-                if (!lit || !lit->isSymbol()) {
-                    if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Invalid param, must be a :symbol");
-                    }
+            // one of fixed or bounds were provided
+            if (fixed != bounded) {
+                asgn.lhs = ast::MK::Constant(asgn.lhs.loc(), sym);
+
+                // Leave it in the tree for the resolver to chew on.
+                return tree;
+            } else if (fixed) {
+                // both fixed and bounds were specified
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Type member is defined with bounds and `{}`", "fixed");
+                }
+            } else {
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Missing required param `{}`", "fixed");
+                }
+            }
+        }
+
+        if (send->numPosArgs() > 0) {
+            auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
+            if (!lit || !lit->isSymbol()) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Invalid param, must be a :symbol");
                 }
             }
         }
