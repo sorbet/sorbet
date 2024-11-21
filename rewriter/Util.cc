@@ -200,7 +200,8 @@ template <typename T> T *castSigImpl(T *send) {
     auto *block = send->block();
     ENFORCE(block);
     auto *body = ast::cast_tree<ast::Send>(block->body);
-    while (body != nullptr && (body->fun == core::Names::checked() || body->fun == core::Names::onFailure())) {
+    while (body != nullptr && (body->fun == core::Names::checked() || body->fun == core::Names::onFailure() ||
+                               body->fun == core::Names::override_())) {
         body = ast::cast_tree<ast::Send>(body->recv);
     }
     if (body != nullptr && (body->fun == core::Names::void_() || body->fun == core::Names::returns())) {
