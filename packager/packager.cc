@@ -1571,12 +1571,11 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     if (pkgIndex < otherPkgIndex) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
             e.setHeader("`{}` is at layer `{}`, so it can not import package `{}`, which is at layer `{}`",
-                        thisPkg.name.toString(ctx), pkgLayer.toString(ctx), otherPkg.name.toString(ctx),
-                        otherPkgLayer.toString(ctx));
+                        thisPkg.show(ctx), pkgLayer.show(ctx), otherPkg.show(ctx), otherPkgLayer.show(ctx));
             e.addErrorLine(core::Loc(thisPkg.loc.file(), thisPkg.layer.value().second), "`{}`'s `{}` declared here",
-                           thisPkg.name.toString(ctx), "layer");
+                           thisPkg.show(ctx), "layer");
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.layer.value().second), "`{}`'s `{}` declared here",
-                           otherPkg.name.toString(ctx), "layer");
+                           otherPkg.show(ctx), "layer");
         }
     }
 
@@ -1584,7 +1583,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
             e.setHeader("All of this package's dependecies must be `{}` or higher", "layered");
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel.value().second),
-                           "`{}`'s `{}` level declared here", otherPkg.name.toString(ctx), "strict_dependencies");
+                           "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
         }
     }
 }
