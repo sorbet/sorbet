@@ -110,13 +110,14 @@ steps:
 
   - wait: ~
 
-  - label: ":linux: build-static-release-java.sh (master only)"
-    command: '.buildkite/build-static-release-java.sh < /dev/null'
-    # this needs to be run when both linux & mac build-static-release
-    # are done. at the moment, mac is only done on master branch
-    branches: master
-    artifact_paths: _out_/**/*
-    <<: *elastic
+  # TODO(jez) Reenable when the macOS client is back online
+  # - label: ":linux: build-static-release-java.sh (master only)"
+  #   command: '.buildkite/build-static-release-java.sh < /dev/null'
+  #   # this needs to be run when both linux & mac build-static-release
+  #   # are done. at the moment, mac is only done on master branch
+  #   branches: master
+  #   artifact_paths: _out_/**/*
+  #   <<: *elastic
 
   - wait: ~
 
