@@ -923,7 +923,11 @@ TEST_CASE_FIXTURE(ProtocolTest, "DidChangeConfigurationNotificationUpdatesHighli
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "OverleoadedStdlibSymbolWithOverloads") {
-    assertErrorDiagnostics(initializeLSP(), {});
+    const bool supportsMarkdown = false;
+    const bool supportsCodeActionResolve = true;
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->supportsSorbetURIs = true;
+    assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(initOptions)), {});
 
     assertErrorDiagnostics(send(*openFile("a.rbi", "# typed: __STDLIB_INTERNAL\n"
                                                    "\n"
@@ -946,15 +950,22 @@ TEST_CASE_FIXTURE(ProtocolTest, "OverleoadedStdlibSymbolWithOverloads") {
                                                              "\n"
                                                              "  module_function :foo\n"
                                                              "end\n"
+                                                             "\n"
+                                                             "module ::Kernel\n"
+                                                             "  def open(*args); end\n"
+                                                             "  module_function :open\n"
+                                                             "end\n"
                                                              "")),
                            {});
 
     assertErrorDiagnostics(send(*openFile("test.rb", "# typed: true\n"
                                                      "\n"
                                                      "class Test\n"
+                                                     "  include ::Kernel\n"
                                                      "  include A\n"
                                                      "  def test()\n"
                                                      "    bar\n"
+                                                     "    self.send(:p)\n"
                                                      "  end\n"
                                                      "\n"
                                                      "  module_function :open\n"
@@ -962,15 +973,25 @@ TEST_CASE_FIXTURE(ProtocolTest, "OverleoadedStdlibSymbolWithOverloads") {
                                                      "")),
                            {});
 
-    auto defResponses = send(*getDefinition("test.rb", 5, 4));
-    REQUIRE_EQ(1, defResponses.size());
-    REQUIRE(defResponses.front()->isResponse());
+    {
+        auto locs = getDefinitions("test.rb", 6, 4);
+        REQUIRE_EQ(1, locs.size());
+    }
 
-    auto &resp = defResponses.front()->asResponse();
-    REQUIRE(!resp.error.has_value());
-    REQUIRE(resp.result.has_value());
+    auto locs = getDefinitions("test.rb", 7, 9);
+    REQUIRE_EQ(1, locs.size());
+    auto &loc = locs.front();
+    fmt::print("loc: {}\n", loc->uri);
+    REQUIRE(absl::StartsWith(loc->uri, "sorbet:https://github.com/"));
 
-    auto codeActionResponses = send(*codeAction("a.rbi", 8, 6));
+    auto kernelRBIPath = absl::StrReplaceAll(loc->uri, {{"https://github.com/", "https%3A//github.com/"}});
+    readFile(kernelRBIPath);
+
+    auto codeActionResponses = send(*codeAction(kernelRBIPath, 0, 0));
+    for (auto &resp : codeActionResponses) {
+        fmt::print("{}\n", resp->toJSON());
+    }
+    REQUIRE_EQ(1, 2);
 }
 
 } // namespace sorbet::test::lsp
