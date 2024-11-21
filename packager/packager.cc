@@ -1565,10 +1565,10 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     auto possibleLayers = packageDB.layers();
     auto pkgLayer = thisPkg.layer.value().first;
     auto otherPkgLayer = otherPkg.layer.value().first;
-    auto pkgIndex = packageDB.layerIndex(pkgLayer);
-    auto otherPkgIndex = packageDB.layerIndex(otherPkgLayer);
+    auto pkgLayerIndex = packageDB.layerIndex(pkgLayer);
+    auto otherPkgLayerIndex = packageDB.layerIndex(otherPkgLayer);
 
-    if (pkgIndex < otherPkgIndex) {
+    if (pkgLayerIndex < otherPkgLayerIndex) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
             e.setHeader("`{}` is at layer `{}`, so it can not import package `{}`, which is at layer `{}`",
                         thisPkg.show(ctx), pkgLayer.show(ctx), otherPkg.show(ctx), otherPkgLayer.show(ctx));
