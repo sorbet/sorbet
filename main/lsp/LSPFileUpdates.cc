@@ -58,7 +58,7 @@ namespace {
 //
 // This is adapted from
 // https://github.com/llvm/llvm-project/blob/b89e774672678ef26baf8f94c616f43551d29428/libcxx/include/__algorithm/set_intersection.h#L47-L123
-// and adapted to return early when any intersection is found.
+// and modified to return early when any intersection is found.
 bool intersects(const std::vector<core::WithoutUniqueNameHash> &changed,
                 const std::vector<core::WithoutUniqueNameHash> &used) {
     auto changedIt = changed.begin();
