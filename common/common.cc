@@ -298,6 +298,10 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
     auto resultq = make_shared<BlockingBoundedQueue<JobOutput>>(numWorkers);
     atomic<size_t> pendingJobs{0};
 
+    // Track the directories we've already seen to protect against infinite symlink loops.
+    std::unordered_set<ino_t> visited;
+    absl::Mutex visitedMutex;
+
     // The invariant that the code below must maintain is pendingJobs must be
     // at least as large as the number of items in jobq.  Therefore, once
     // pendingJobs is 0, whatever thread observes that can be assured that there
@@ -309,7 +313,8 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
     jobq->push(path, 1);
 
     workers.multiplexJob("options.findFiles", [numWorkers, jobq, resultq, &pendingJobs, &basePath, &extensions,
-                                               &recursive, &absoluteIgnorePatterns, &relativeIgnorePatterns]() {
+                                               &recursive, &absoluteIgnorePatterns, &relativeIgnorePatterns,
+                                               &visited, &visitedMutex]() {
         Job job;
         vector<string> output;
 
@@ -347,8 +352,16 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                     string_view nameview{entry->d_name, namelen};
 
                     auto fullPath = fmt::format("{}/{}", path, nameview);
-                    bool isDir =
-                        entry->d_type == DT_DIR || (entry->d_type == DT_LNK && sorbet::FileOps::dirExists(fullPath));
+                    bool isDir = entry->d_type == DT_DIR;
+                    ino_t inode = entry->d_ino;
+
+                    if (entry->d_type == DT_LNK) {
+                        struct stat statbuf;
+                        if (stat(fullPath.c_str(), &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
+                            isDir = true;
+                            inode = statbuf.st_ino;
+                        }
+                    }
 
                     if (isDir) {
                         if (!recursive) {
@@ -356,6 +369,12 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                         }
                         if (nameview == "."sv || nameview == ".."sv) {
                             continue;
+                        }
+                        {
+                            absl::MutexLock l(&visitedMutex);
+                            if (!visited.insert(inode).second) {
+                                continue;
+                            }
                         }
                     } else {
                         auto dotLocation = nameview.rfind('.');
