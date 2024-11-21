@@ -55,20 +55,45 @@ namespace {
 // Returns `true` if the two containers share a value, and `false` otherwise. This requires that the two containers are
 // sorted, which is also a requirement of using `absl::c_set_intersetion`, so this is a drop-in replacement when the
 // resulting set isn't needed.
-template <typename C1, typename C2> bool intersects(const C1 &left, const C2 &right) {
-    auto leftIt = left.begin();
-    auto rightIt = right.begin();
+//
+// This is adapted from
+// https://github.com/llvm/llvm-project/blob/b89e774672678ef26baf8f94c616f43551d29428/libcxx/include/__algorithm/set_intersection.h#L47-L123
+// and adapted to return early when any intersection is found.
+bool intersects(const std::vector<core::WithoutUniqueNameHash> &changed,
+                const std::vector<core::WithoutUniqueNameHash> &used) {
+    auto changedIt = changed.begin();
+    auto changedEnd = changed.end();
+    auto usedIt = used.begin();
+    auto usedEnd = used.end();
 
-    while (leftIt != left.end() && rightIt != right.end()) {
-        if (*leftIt == *rightIt) {
+    bool prevEqual = false;
+
+    while (usedIt != usedEnd) {
+        auto changedNext = std::lower_bound(changedIt, changedEnd, *usedIt);
+        std::swap(changedNext, changedIt);
+        bool changedEqual = changedNext == changedIt;
+
+        // If we didn't advance `changedIt`, and the previous lower_bound call for `used` also didn't advance `usedIt`,
+        // we've found a match.
+        if (changedEqual && prevEqual) {
             return true;
         }
+        prevEqual = changedEqual;
 
-        if (*leftIt < *rightIt) {
-            ++leftIt;
-        } else {
-            ++rightIt;
+        if (changedIt == changedEnd) {
+            break;
         }
+
+        auto usedNext = std::lower_bound(usedIt, usedEnd, *changedIt);
+        std::swap(usedNext, usedIt);
+        bool usedEqual = usedNext == usedIt;
+
+        // If we didn't advance `usedIt`, and the previous lower_bound call for `changed` also didn't advance
+        // `changedIt`, we've found a match.
+        if (usedEqual && prevEqual) {
+            return true;
+        }
+        prevEqual = usedEqual;
     }
 
     return false;
