@@ -104,11 +104,9 @@ not interfere with the inferred return type of a method call.</li>
 <p>The biggest downside of this approach has to do with sharing code.</p>
 <p>In most cases, it’s possible to implement one method in terms of the other. For
 example, with our <code>find_one</code>/<code>find_many</code> example above:</p>
-<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">id:</span> String).returns(MyModel) }
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">find_one</span><span class="hljs-params">(id)</span></span>
-  result = find_many([id])
-  raise <span class="hljs-string">"find_many did not return a single result"</span> <span class="hljs-keyword">unless</span> result.size == <span class="hljs-number">1</span>
-  result.fetch(<span class="hljs-number">0</span>)
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">ids:</span> T::Array[String]).returns(T::Array[MyModel]) }
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">find_many</span><span class="hljs-params">(ids)</span></span>
+  ids.map { <span class="hljs-params">|id|</span> find_one(id) }
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>In cases when this is not possible, another option is to do something like this:</p>
