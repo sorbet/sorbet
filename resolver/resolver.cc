@@ -3578,6 +3578,11 @@ private:
     // merging the results of several such structures together from overloaded methods.
     struct OverloadedMethodSigInformation {
         bool hasKwArgs = false;
+        bool isAbstract = false;
+        bool isIncompatibleOverride = false;
+        bool isOverridable = false;
+        bool isOverride = false;
+        bool isFinal = false;
         // Optimistically assume this.
         bool allArgsMatched = true;
         bool hasMissingArgument = false;
@@ -3586,9 +3591,25 @@ private:
         std::optional<OverloadedMethodArgInformation> args;
 
         void merge(OverloadedMethodSigInformation &other) {
+            this->isAbstract |= other.isAbstract;
+            this->isIncompatibleOverride |= other.isIncompatibleOverride;
+            this->isOverridable |= other.isOverridable;
+            this->isOverride |= other.isOverride;
+            this->isFinal |= other.isFinal;
+            this->hasMissingArgument |= other.hasMissingArgument;
+
             this->hasKwArgs &= other.hasKwArgs;
             this->allArgsMatched &= other.allArgsMatched;
-            this->hasMissingArgument |= other.hasMissingArgument;
+        }
+
+        // Set the method flags cached here in the method symbol.
+        void setMethodFlagsOn(core::GlobalState &gs, core::MethodRef method) const {
+            auto &flags = method.data(gs)->flags;
+            flags.isAbstract |= this->isAbstract;
+            flags.isIncompatibleOverride |= this->isIncompatibleOverride;
+            flags.isOverridable |= this->isOverridable;
+            flags.isOverride |= this->isOverride;
+            flags.isFinal |= this->isFinal;
         }
     };
 
@@ -3609,11 +3630,13 @@ private:
             }
         }
 
+        OverloadedMethodSigInformation info;
+
         if (sig.seen.abstract) {
-            method.data(ctx)->flags.isAbstract = true;
+            info.isAbstract = true;
         }
         if (sig.seen.incompatibleOverride) {
-            method.data(ctx)->flags.isIncompatibleOverride = true;
+            info.isIncompatibleOverride = true;
         }
         if (!sig.typeArgs.empty()) {
             method.data(ctx)->flags.isGenericMethod = true;
@@ -3629,13 +3652,13 @@ private:
             }
         }
         if (sig.seen.overridable) {
-            method.data(ctx)->flags.isOverridable = true;
+            info.isOverridable = true;
         }
         if (sig.seen.override_) {
-            method.data(ctx)->flags.isOverride = true;
+            info.isOverride = true;
         }
         if (sig.seen.final) {
-            method.data(ctx)->flags.isFinal = true;
+            info.isFinal = true;
         }
         if (sig.seen.bind) {
             if (sig.bind == core::Symbols::MagicBindToAttachedClass()) {
@@ -3650,7 +3673,6 @@ private:
 
         auto methodInfo = method.data(ctx);
 
-        OverloadedMethodSigInformation info;
         if (usesArgumentForwardingSyntax(ctx, methodInfo, mdef, isOverloaded)) {
             if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Unsupported `{}` for argument forwarding syntax", "sig");
@@ -4055,13 +4077,25 @@ public:
             }
         }
 
+        ENFORCE(combinedInfo.has_value());
+
+        // The original method definition is the authoritative location for all of the attributes, so if we see
+        // something like:
+        //
+        // > sig { override.void }
+        // > sig(:final) { void }
+        // > def foo; end
+        //
+        // The symbol named `<U foo>` will have both `isOverride` and `isFinal` set, but the two override sigs will have
+        // neither.
+        combinedInfo->setMethodFlagsOn(ctx, mdef.symbol);
+
         // We permit keyword arguments for overloaded methods only in the following case:
         //
         // * There are only two signatures;
         // * They differ solely in the presence of a block argument.
         //
         // This usually comes up in the standard library (e.g. `String#each_line`).
-        ENFORCE(combinedInfo.has_value());
         if (isOverloaded && combinedInfo->hasKwArgs) {
             if (!hasCompatibleOverloadedSigsWithKwArgs(ctx, sigs.size(), *combinedInfo, args)) {
                 for (auto &argv : args) {
@@ -4080,7 +4114,8 @@ public:
         prodCounterInc("types.sig.count");
         auto &mdef = *job.mdef;
         bool isOverloaded = false;
-        fillInInfoFromSig(ctx, mdef.symbol, job.loc, job.sig, isOverloaded, mdef);
+        auto info = fillInInfoFromSig(ctx, mdef.symbol, job.loc, job.sig, isOverloaded, mdef);
+        info.setMethodFlagsOn(ctx, mdef.symbol);
         handleAbstractMethod(ctx, mdef);
     }
 
