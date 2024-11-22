@@ -371,7 +371,7 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                             continue;
                         }
                         {
-                            absl::MutexLock l(&visitedMutex);
+                            absl::MutexLock lock(&visitedMutex);
                             if (!visited.insert(inode).second) {
                                 continue;
                             }

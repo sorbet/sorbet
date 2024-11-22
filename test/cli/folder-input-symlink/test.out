@@ -1,0 +1,19 @@
+{
+ "files": [
+  {
+   "path": "test/cli/folder-input-symlink/input/dir-symlink/file.rb",
+   "strict": "False",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "test/cli/folder-input-symlink/input/file-symlink.rb",
+   "strict": "False",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "test/cli/folder-input-symlink/input/file.rb",
+   "strict": "False",
+   "min_error_level": "Max"
+  }
+ ]
+}
