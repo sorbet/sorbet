@@ -1665,6 +1665,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                            thisPkg.show(ctx), "layer");
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.layer.value().second), "`{}`'s `{}` declared here",
                            otherPkg.show(ctx), "layer");
+            // TODO: Autocorrect to delete this import?
         }
     }
 
@@ -1680,6 +1681,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                         "import", strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel.value().second),
                            "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
+            // TODO: Autocorrect to delete this import?
         }
     }
 
@@ -1690,6 +1692,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                             otherPkg.show(ctx), thisPkg.show(ctx), "strict_dependencies",
                             strictDependenciesLevelToString(thisPkg.strictDependenciesLevel.value().first));
             }
+            // TODO: Autocorrect to delete this import?
         }
     }
 }
@@ -1737,6 +1740,7 @@ void validatePackage(core::Context ctx) {
     if (ctx.file.data(ctx).originalSigil < core::StrictLevel::Strict) {
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::PackageFileMustBeStrict)) {
             e.setHeader("Package files must be at least `{}`", "# typed: strict");
+            // TODO(neil): Autocorrect to update the sigil?
         }
     }
 
