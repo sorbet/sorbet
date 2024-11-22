@@ -276,7 +276,11 @@ bool sorbet::FileOps::isFileIgnored(string_view basePath, string_view filePath,
 }
 
 struct QuitToken {};
-using Job = variant<QuitToken, string>;
+struct JobParams {
+    string path;
+    int symlinkDepth;
+};
+using Job = variant<QuitToken, JobParams>;
 // We record all classes of exceptions we can throw separately, rather than one single `SorbetException`.
 //
 // We do this for two reasons: one is that when looking for a `catch` handler, C++ will only look for
@@ -289,6 +293,8 @@ using Job = variant<QuitToken, string>;
 // dynamic type of the original exception would be lost.
 using JobOutput = variant<std::monostate, sorbet::FileNotFoundException, sorbet::FileNotDirException, vector<string>>;
 
+const int MAX_SYMLINK_DEPTH = 40;
+
 void appendFilesInDir(string_view basePath, const string &path, const sorbet::UnorderedSet<string> &extensions,
                       sorbet::WorkerPool &workers, bool recursive, vector<string> &allPaths,
                       const std::vector<std::string> &absoluteIgnorePatterns,
@@ -298,10 +304,6 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
     auto resultq = make_shared<BlockingBoundedQueue<JobOutput>>(numWorkers);
     atomic<size_t> pendingJobs{0};
 
-    // Track the directories we've already seen to protect against infinite symlink loops.
-    std::unordered_set<ino_t> visited;
-    absl::Mutex visitedMutex;
-
     // The invariant that the code below must maintain is pendingJobs must be
     // at least as large as the number of items in jobq.  Therefore, once
     // pendingJobs is 0, whatever thread observes that can be assured that there
@@ -310,131 +312,124 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
     // In practice, all it takes to maintain this invariant is that pendingJobs
     // must be incremented prior to pushing work onto jobq.
     ++pendingJobs;
-    jobq->push(path, 1);
+    jobq->push(JobParams{path, 0}, 1);
 
-    workers.multiplexJob("options.findFiles",
-                         [numWorkers, jobq, resultq, &pendingJobs, &basePath, &extensions, &recursive,
-                          &absoluteIgnorePatterns, &relativeIgnorePatterns, &visited, &visitedMutex]() {
-                             Job job;
-                             vector<string> output;
+    workers.multiplexJob("options.findFiles", [numWorkers, jobq, resultq, &pendingJobs, &basePath, &extensions,
+                                               &recursive, &absoluteIgnorePatterns, &relativeIgnorePatterns]() {
+        Job job;
+        vector<string> output;
 
-                             try {
-                                 while (true) {
-                                     auto result = jobq->try_pop(job);
-                                     if (!result.gotItem()) {
-                                         continue;
-                                     }
-                                     if (std::holds_alternative<QuitToken>(job)) {
-                                         break;
-                                     }
+        try {
+            while (true) {
+                auto result = jobq->try_pop(job);
+                if (!result.gotItem()) {
+                    continue;
+                }
+                if (std::holds_alternative<QuitToken>(job)) {
+                    break;
+                }
 
-                                     auto *strvariant = std::get_if<string>(&job);
-                                     ENFORCE(strvariant != nullptr);
-                                     auto &path = *strvariant;
+                auto *jobParams = std::get_if<JobParams>(&job);
+                ENFORCE(jobParams != nullptr);
+                auto &path = jobParams->path;
+                int symlinkDepth = jobParams->symlinkDepth;
 
-                                     DIR *dir;
-                                     struct dirent *entry;
+                DIR *dir;
+                struct dirent *entry;
 
-                                     if ((dir = opendir(path.c_str())) == nullptr) {
-                                         switch (errno) {
-                                             case ENOTDIR: {
-                                                 throw sorbet::FileNotDirException();
-                                             }
-                                             default:
-                                                 // Mirrors other FileOps functions: Assume other errors are from
-                                                 // FileNotFound.
-                                                 auto msg = fmt::format("Couldn't open directory `{}`", path);
-                                                 throw sorbet::FileNotFoundException(msg);
-                                         }
-                                     }
+                if ((dir = opendir(path.c_str())) == nullptr) {
+                    switch (errno) {
+                        case ENOTDIR: {
+                            throw sorbet::FileNotDirException();
+                        }
+                        default:
+                            // Mirrors other FileOps functions: Assume other errors are from FileNotFound.
+                            auto msg = fmt::format("Couldn't open directory `{}`", path);
+                            throw sorbet::FileNotFoundException(msg);
+                    }
+                }
 
-                                     while ((entry = readdir(dir)) != nullptr) {
-                                         const auto namelen = strlen(entry->d_name);
-                                         string_view nameview{entry->d_name, namelen};
+                while ((entry = readdir(dir)) != nullptr) {
+                    const auto namelen = strlen(entry->d_name);
+                    string_view nameview{entry->d_name, namelen};
 
-                                         auto fullPath = fmt::format("{}/{}", path, nameview);
-                                         bool isDir = entry->d_type == DT_DIR;
-                                         ino_t inode = entry->d_ino;
+                    auto fullPath = fmt::format("{}/{}", path, nameview);
+                    bool isDir = entry->d_type == DT_DIR;
+                    int nextSymlinkDepth = symlinkDepth;
 
-                                         if (entry->d_type == DT_LNK) {
-                                             struct stat statbuf;
-                                             if (stat(fullPath.c_str(), &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
-                                                 isDir = true;
-                                                 inode = statbuf.st_ino;
-                                             }
-                                         }
+                    if (entry->d_type == DT_LNK && sorbet::FileOps::dirExists(fullPath)) {
+                        isDir = true;
+                        ++nextSymlinkDepth;
+                        if (nextSymlinkDepth > MAX_SYMLINK_DEPTH) {
+                            continue;
+                        }
+                    }
 
-                                         if (isDir) {
-                                             if (!recursive) {
-                                                 continue;
-                                             }
-                                             if (nameview == "."sv || nameview == ".."sv) {
-                                                 continue;
-                                             }
-                                             {
-                                                 absl::MutexLock lock(&visitedMutex);
-                                                 if (!visited.insert(inode).second) {
-                                                     continue;
-                                                 }
-                                             }
-                                         } else {
-                                             auto dotLocation = nameview.rfind('.');
-                                             if (dotLocation == string_view::npos) {
-                                                 continue;
-                                             }
+                    if (isDir) {
+                        if (!recursive) {
+                            continue;
+                        }
+                        if (nameview == "."sv || nameview == ".."sv) {
+                            continue;
+                        }
+                    } else {
+                        auto dotLocation = nameview.rfind('.');
+                        if (dotLocation == string_view::npos) {
+                            continue;
+                        }
 
-                                             string_view ext = nameview.substr(dotLocation);
-                                             if (!extensions.contains(ext)) {
-                                                 continue;
-                                             }
-                                         }
+                        string_view ext = nameview.substr(dotLocation);
+                        if (!extensions.contains(ext)) {
+                            continue;
+                        }
+                    }
 
-                                         if (sorbet::FileOps::isFileIgnored(basePath, fullPath, absoluteIgnorePatterns,
-                                                                            relativeIgnorePatterns)) {
-                                             continue;
-                                         }
+                    if (sorbet::FileOps::isFileIgnored(basePath, fullPath, absoluteIgnorePatterns,
+                                                       relativeIgnorePatterns)) {
+                        continue;
+                    }
 
-                                         if (isDir) {
-                                             ++pendingJobs;
-                                             jobq->push(move(fullPath), 1);
-                                         } else {
-                                             output.push_back(move(fullPath));
-                                         }
-                                     }
+                    if (isDir) {
+                        ++pendingJobs;
+                        jobq->push(JobParams{move(fullPath), nextSymlinkDepth}, 1);
+                    } else {
+                        output.push_back(move(fullPath));
+                    }
+                }
 
-                                     closedir(dir);
+                closedir(dir);
 
-                                     // Now that we've finished with this directory, we can decrement.
-                                     auto remaining = --pendingJobs;
-                                     // If this thread is finished with the last job in the queue, then
-                                     // we can start signaling other threads that they need to quit.
-                                     if (remaining == 0) {
-                                         // Maintain the invariant, even though we're all done.
-                                         pendingJobs += numWorkers;
-                                         for (auto i = 0; i < numWorkers; ++i) {
-                                             jobq->push(QuitToken{}, 1);
-                                         }
-                                         break;
-                                     }
-                                 }
-                             } catch (sorbet::FileNotFoundException &e) {
-                                 resultq->push(e, 1);
-                                 pendingJobs += numWorkers;
-                                 for (auto i = 0; i < numWorkers; ++i) {
-                                     jobq->push(QuitToken{}, 1);
-                                 }
-                                 return;
-                             } catch (sorbet::FileNotDirException &e) {
-                                 resultq->push(e, 1);
-                                 pendingJobs += numWorkers;
-                                 for (auto i = 0; i < numWorkers; ++i) {
-                                     jobq->push(QuitToken{}, 1);
-                                 }
-                                 return;
-                             }
+                // Now that we've finished with this directory, we can decrement.
+                auto remaining = --pendingJobs;
+                // If this thread is finished with the last job in the queue, then
+                // we can start signaling other threads that they need to quit.
+                if (remaining == 0) {
+                    // Maintain the invariant, even though we're all done.
+                    pendingJobs += numWorkers;
+                    for (auto i = 0; i < numWorkers; ++i) {
+                        jobq->push(QuitToken{}, 1);
+                    }
+                    break;
+                }
+            }
+        } catch (sorbet::FileNotFoundException &e) {
+            resultq->push(e, 1);
+            pendingJobs += numWorkers;
+            for (auto i = 0; i < numWorkers; ++i) {
+                jobq->push(QuitToken{}, 1);
+            }
+            return;
+        } catch (sorbet::FileNotDirException &e) {
+            resultq->push(e, 1);
+            pendingJobs += numWorkers;
+            for (auto i = 0; i < numWorkers; ++i) {
+                jobq->push(QuitToken{}, 1);
+            }
+            return;
+        }
 
-                             resultq->push(move(output), 1);
-                         });
+        resultq->push(move(output), 1);
+    });
 
     {
         JobOutput threadResult;
