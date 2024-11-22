@@ -37,8 +37,8 @@ void Parser::collectErrors() {
         auto *error = reinterpret_cast<pm_diagnostic_t *>(node);
         auto level = static_cast<pm_error_level_t>(error->level);
 
-        ParseError parseError(pm_diagnostic_id_human(error->diag_id),
-                              std::string(reinterpret_cast<const char *>(error->message)), error->location, level);
+        ParseError parseError(error->diag_id, std::string(reinterpret_cast<const char *>(error->message)),
+                              error->location, level);
 
         parseErrors.push_back(parseError);
     }

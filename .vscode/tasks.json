@@ -69,6 +69,22 @@
                 "reveal": "always"
             }
         },
+        {
+            "label": "Display Prism parse tree & errors for Ruby file",
+            "type": "shell",
+            "command": "tools/scripts/inspect_parsing_errors.rb ${file}",
+            "presentation": {
+                "reveal": "always"
+            },
+            "options": {
+                // Makes sure the shell can find the correct Ruby version
+                "shell": {
+                    "executable": "${env:SHELL}",
+                    "args": ["-c"]
+                }
+            },
+            "problemMatcher": []
+        }
     ],
     "inputs": [
         {

@@ -1212,7 +1212,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // constant assignment errors
             // TODO: We will improve this in the future when we handle more errored cases
             for (auto &error : parser.parseErrors) {
-                reportError(translateLoc(error.location), error.message);
+                // EOF error is always pointed to the very last line of the file, which can't be expressed in Sorbet's
+                // error comments
+                if (error.id != PM_ERR_UNEXPECTED_TOKEN_CLOSE_CONTEXT) {
+                    reportError(translateLoc(error.location), error.message);
+                }
             }
             return make_unique<parser::Const>(location, nullptr, core::Names::Constants::ErrorNode());
     }

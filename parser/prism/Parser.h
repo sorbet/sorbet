@@ -17,10 +17,10 @@ class Node;
 
 class ParseError {
 public:
-    ParseError(const char *id, const std::string &message, pm_location_t location, pm_error_level_t level)
+    ParseError(pm_diagnostic_id_t id, const std::string &message, pm_location_t location, pm_error_level_t level)
         : id(id), message(message), location(location), level(level) {}
 
-    const char *id;
+    pm_diagnostic_id_t id;
     std::string message;
     pm_location_t location;
     pm_error_level_t level;
