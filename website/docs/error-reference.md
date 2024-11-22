@@ -987,8 +987,26 @@ must either also have layer `lib`, or have layer `util` (but not layer `app`).
 > at Stripe, please see [go/modularity](http://go/modularity) and
 > [go/strict-dependencies](http://go/strict-dependencies) for more.
 
-If a package is at `strict_dependencies 'layered'`, all packages it imports must
-also be at `strict_dependencies 'layered'`.
+If a package is at `strict_dependencies 'layered'` or stricter, all packages it
+imports must also be at `strict_dependencies 'layered'`.
+
+If a package is at `strict_dependencies 'layered_dag'` or stricter, it can not
+be part of a cycle of dependencies. For example, the following is invalid:
+
+```ruby
+class A < PackageSpec
+  strict_dependencies 'layered_dag'
+  import B # error: importing B will put A into a cycle, which is not valid at strict_dependencies level layered_dag
+end
+
+class B < PackageSpec
+  strict_dependencies 'layered'
+  import A
+end
+```
+
+Additionally, if a package is at `strict_dependencies 'dag'`, all packages it
+imports must also be at `strict_dependencies 'dag'`.
 
 ## 4001
 
