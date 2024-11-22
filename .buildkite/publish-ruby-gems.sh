@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# TODO(jez) Re-enable this job once we're running on macOS again
-exit 0
-
 set -euo pipefail
 
 if [ "${PUBLISH_TO_RUBYGEMS:-}" == "" ]; then
