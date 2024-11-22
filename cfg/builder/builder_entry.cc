@@ -152,7 +152,6 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
 
 void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
     // A map from the index space of the basicBlocks index to forwardsTopoSort index.
-    cfg.forwardsTopoSort.reserve(cfg.maxBasicBlockId);
     auto forwardsIds = topoSortFwd(cfg.forwardsTopoSort, cfg.maxBasicBlockId, cfg.entry());
 
     // Remove unreachable blocks (which were not found by the toposort)
