@@ -59,6 +59,19 @@ string buildValidLayersStr(const core::GlobalState &gs) {
     return result;
 }
 
+string strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level) {
+    switch (level) {
+        case core::packages::StrictDependenciesLevel::False:
+            return "false";
+        case core::packages::StrictDependenciesLevel::Layered:
+            return "layered";
+        case core::packages::StrictDependenciesLevel::LayeredDag:
+            return "layered_dag";
+        case core::packages::StrictDependenciesLevel::Dag:
+            return "dag";
+    }
+}
+
 struct FullyQualifiedName {
     vector<core::NameRef> parts;
     core::Loc loc;
@@ -1655,10 +1668,16 @@ void validateLayering(const core::Context &ctx, const Import &i) {
         }
     }
 
-    if (otherPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::False) {
+    core::packages::StrictDependenciesLevel otherPkgExpectedLevel = core::packages::StrictDependenciesLevel::Layered;
+
+    if (thisPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::Dag) {
+        otherPkgExpectedLevel = core::packages::StrictDependenciesLevel::Dag;
+    }
+
+    if (otherPkg.strictDependenciesLevel.value().first < otherPkgExpectedLevel) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
             e.setHeader("Strict Dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
-                        "import", "layered");
+                        "import", strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel.value().second),
                            "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
         }
