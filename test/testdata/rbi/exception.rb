@@ -7,7 +7,7 @@ StandardError.new(:msg)
 ex = StandardError.new("bees")
 RuntimeError.new(ex)
 
-SystemCallError.new # error: Not enough arguments provided for method `SystemCallError.new`. Expected: `1`, got: `0`
+SystemCallError.new # error: Not enough arguments provided for method `SystemCallError.new (overload.1)`. Expected: `1`, got: `0`
 SystemCallError.new(1)
 SystemCallError.new(nil)
 SystemCallError.new("message")
