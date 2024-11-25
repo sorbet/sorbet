@@ -27,11 +27,19 @@ fi
 echo
 echo --------------------------------------------------------------------------
 
+if "$old_pwd/main/sorbet" --silence-dev-message --lsp --disable-watchman --forcibly-silence-lsp-multiple-dir-error 2>&1; then
+  echo "expected to fail, but it didn't!"
+  exit 1
+fi
+
+echo
+echo --------------------------------------------------------------------------
+
 in_pipe="$(mktemp -u)"
 mkfifo -m 600 "$in_pipe"
 trap "rm $in_pipe" exit
 
-"$old_pwd/main/sorbet" --silence-dev-message --lsp --disable-watchman --enable-experimental-lsp-multiple-dir foo bar < "$in_pipe" &
+"$old_pwd/main/sorbet" --silence-dev-message --lsp --disable-watchman --forcibly-silence-lsp-multiple-dir-error foo bar < "$in_pipe" &
 sorbet_pid=$!
 
 # This should be

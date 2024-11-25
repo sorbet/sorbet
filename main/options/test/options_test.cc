@@ -78,5 +78,5 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.stripePackages, opts.stripePackages);
     CHECK_EQ(empty.forceHashing, opts.forceHashing);
     CHECK_EQ(empty.lspErrorCap, opts.lspErrorCap);
-    CHECK_EQ(empty.lspMultipleDirEnabled, opts.lspMultipleDirEnabled);
+    CHECK_EQ(empty.forciblySilenceLspMultipleDirError, opts.forciblySilenceLspMultipleDirError);
 }

@@ -255,7 +255,7 @@ struct Options {
     bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
     bool lspExtractToVariableEnabled = false;
-    bool lspMultipleDirEnabled = false;
+    bool forciblySilenceLspMultipleDirError = false;
     // Enables out-of-order reference checking
     bool outOfOrderReferenceChecksEnabled = false;
     core::TrackUntyped trackUntyped = core::TrackUntyped::Nowhere;

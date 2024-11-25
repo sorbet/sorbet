@@ -8,6 +8,11 @@ Content-Length: 177
 
 {"jsonrpc":"2.0","method":"window/showMessage","params":{"type":1,"message":"Sorbet's language server requires a single input directory. However, 2 are configured: [foo, bar]"}}
 --------------------------------------------------------------------------
+Sorbet's language server requires at least one input directory. However, 0 are configured: []
+Content-Length: 173
+
+{"jsonrpc":"2.0","method":"window/showMessage","params":{"type":1,"message":"Sorbet's language server requires at least one input directory. However, 0 are configured: []"}}
+--------------------------------------------------------------------------
 Content-Length: 638
 
 {"jsonrpc":"2.0","id":0,"requestMethod":"initialize","result":{"capabilities":{"textDocumentSync":1,"hoverProvider":true,"completionProvider":{"triggerCharacters":[".",":","@","#"]},"definitionProvider":true,"typeDefinitionProvider":true,"implementationProvider":true,"referencesProvider":true,"documentHighlightProvider":false,"documentSymbolProvider":true,"workspaceSymbolProvider":true,"codeActionProvider":{"codeActionKinds":["quickfix","source.fixAll.sorbet","refactor.extract","refactor.rewrite"],"resolveProvider":true},"documentFormattingProvider":false,"renameProvider":{"prepareProvider":true},"sorbetShowSymbolProvider":true}}}Content-Length: 65

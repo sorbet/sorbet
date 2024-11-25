@@ -233,8 +233,6 @@ Usage:
                                 Enable experimental LSP feature: Signature Help
       --enable-experimental-lsp-extract-to-variable
                                 Enable experimental LSP feature: Extract To Variable
-      --enable-experimental-lsp-multiple-dir
-                                Enable experimental LSP feature: Multiple --dir options
       --enable-all-experimental-lsp-features
                                 Enable every experimental LSP feature. (WARNING: can be
                                 crashy; for developer use only. End users should prefer
@@ -242,6 +240,11 @@ Usage:
       --enable-all-beta-lsp-features
                                 Enable (expected-to-be-non-crashy) early-access LSP
                                 features.
+      --forcibly-silence-lsp-multiple-dir-error
+                                Allow the LSP to start with multiple `--dir` options by
+                                silencing the error. (WARNING: This flag does not address
+                                the known issues with multiple directory support in LSP
+                                mode. You are likely to encounter unexpected behavior.)
 
 ```
 
