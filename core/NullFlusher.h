@@ -15,6 +15,13 @@ public:
     }
     void flushErrors(spdlog::logger &logger, const core::GlobalState &gs, core::FileRef file,
                      std::vector<std::unique_ptr<core::ErrorQueueMessage>> errors) override;
+    void flushAndRetainErrors(spdlog::logger &logger, const GlobalState &gs, core::FileRef file,
+                              std::vector<std::unique_ptr<ErrorQueueMessage>> errors) override;
+
+    void flushAllErrors(spdlog::logger &logger, const GlobalState &gs, core::FileRef file,
+                        std::vector<std::unique_ptr<ErrorQueueMessage>> errors) override;
+
+    void clearCacheForFile(const GlobalState &gs, core::FileRef fref, int upperBound, int lowerBound) override;
 };
 
 } // namespace sorbet::core

@@ -272,17 +272,8 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             // Cancellation cannot occur during incremental namer.
             ENFORCE(!canceled);
 
-            if (opts.runLSP && gs.lspQuery.kind == core::lsp::Query::Kind::NONE) {
-                for (auto &file : what) {
-                    gs.clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
-                        // Namer errors codes are 40XX
-                        return err->error->what.code < 5000;
-                    });
-                }
-
-                for (auto &file : what) {
-                    gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
-                }
+            for (auto &file : what) {
+                gs.errorQueue->flushButRetainErrorsForFile(gs, file.file, -1, 5000);
             }
             // Required for autogen tests, which need to control which phase to stop after.
             if (opts.stopAfterPhase == options::Phase::NAMER) {
@@ -301,17 +292,8 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             ENFORCE(result.hasResult());
             what = move(result.result());
 
-            if (opts.runLSP && gs.lspQuery.kind == core::lsp::Query::Kind::NONE) {
-                for (auto &file : what) {
-                    gs.clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
-                        // Resolver errors codes are 50XX
-                        return err->error->what.code > 4999 && err->error->what.code < 6000;
-                    });
-                }
-
-                for (auto &file : what) {
-                    gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
-                }
+            for (auto &file : what) {
+                gs.errorQueue->flushButRetainErrorsForFile(gs, file.file, 4999, 6000);
             }
             // Required for autogen tests, which need to control which phase to stop after.
             if (opts.stopAfterPhase == options::Phase::RESOLVER) {
@@ -950,17 +932,8 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             }
 #endif
 
-            if (opts.runLSP) {
-                for (auto &file : what) {
-                    gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
-                        // Resolver errors codes are 50XX
-                        return err->error->what.code > 4999 && err->error->what.code < 6000;
-                    });
-                }
-
-                for (auto &file : what) {
-                    gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
-                }
+            for (auto &file : what) {
+                gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file, 4999, 6000);
             }
             if (opts.stressIncrementalResolver) {
                 auto symbolsBefore = gs->symbolsUsedTotal();
@@ -1202,33 +1175,34 @@ typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const optio
                             }
                         }
 
+                        // TODO(iz): figure this out
                         // After slow path cancellation, some errors might disappear from the editor but remain in
                         // cache. Re-flushing them to ensure accuracy. This issue can be replicated by running a
                         // specific test. Grep for "CanCancelSlowPathWithFastPathThatReintroducesOldError".
-                        if (gs.lspQuery.kind == core::lsp::Query::Kind::NONE) {
-                            for (const auto &[f, errors] : gs.errors) {
-                                if (!f.exists()) {
-                                    continue;
-                                }
+                        // if (gs.lspQuery.kind == core::lsp::Query::Kind::NONE) {
+                        // for (const auto &[f, errors] : gs.errors) {
+                        // if (!f.exists()) {
+                        // continue;
+                        // }
 
-                                if (errors.empty()) {
-                                    continue;
-                                }
+                        // if (errors.empty()) {
+                        // continue;
+                        // }
 
-                                std::vector<std::unique_ptr<core::ErrorQueueMessage>> cachedErrors;
-                                for (const auto &e : errors) {
-                                    cachedErrors.push_back(make_unique<core::ErrorQueueMessage>(e->clone()));
-                                }
+                        // std::vector<std::unique_ptr<core::ErrorQueueMessage>> cachedErrors;
+                        // for (const auto &e : errors) {
+                        // cachedErrors.push_back(make_unique<core::ErrorQueueMessage>(e->clone()));
+                        // }
 
-                                if (newErrors[f].size() != 0) {
-                                    for (const auto &e : newErrors[f]) {
-                                        cachedErrors.push_back(make_unique<core::ErrorQueueMessage>(e->clone()));
-                                    }
-                                }
+                        // if (newErrors[f].size() != 0) {
+                        // for (const auto &e : newErrors[f]) {
+                        // cachedErrors.push_back(make_unique<core::ErrorQueueMessage>(e->clone()));
+                        // }
+                        // }
 
-                                gs.errorQueue->flushErrors(gs, f, move(cachedErrors));
-                            }
-                        }
+                        // gs.errorQueue->flushErrors(gs, f, move(cachedErrors));
+                        // }
+                        // }
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
 

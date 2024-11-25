@@ -64,4 +64,13 @@ void ErrorFlusherStdout::flushAutocorrects(const GlobalState &gs, FileSystem &fs
     autocorrects.clear();
 }
 
+void ErrorFlusherStdout::flushAndRetainErrors(spdlog::logger &logger, const GlobalState &gs, core::FileRef file,
+                                              std::vector<std::unique_ptr<ErrorQueueMessage>> errors) {}
+
+void ErrorFlusherStdout::flushAllErrors(spdlog::logger &logger, const GlobalState &gs, core::FileRef file,
+                    std::vector<std::unique_ptr<ErrorQueueMessage>> errors) {
+    flushErrors(logger, gs, file, move(errors));
+}
+
+void ErrorFlusherStdout::clearCacheForFile(const core::GlobalState &gs, core::FileRef fref, int lowerBound, int upperBound){};
 } // namespace sorbet::core

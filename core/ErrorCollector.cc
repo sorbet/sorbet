@@ -20,4 +20,13 @@ void ErrorCollector::flushErrors(spdlog::logger &logger, const core::GlobalState
     return move(collectedErrors);
 }
 
+void ErrorCollector::flushAndRetainErrors(spdlog::logger &logger, const GlobalState &gs, core::FileRef file,
+                                          std::vector<std::unique_ptr<ErrorQueueMessage>> errors) {}
+
+void ErrorCollector::flushAllErrors(spdlog::logger &logger, const GlobalState &gs, core::FileRef file,
+                                    std::vector<std::unique_ptr<ErrorQueueMessage>> errors) {
+    flushErrors(logger, gs, file, move(errors));
+};
+
+    void ErrorCollector::clearCacheForFile(const GlobalState &gs, core::FileRef fref, int lowerBound, int upperBound) {};
 } // namespace sorbet::core

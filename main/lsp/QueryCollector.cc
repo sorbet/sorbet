@@ -58,4 +58,14 @@ vector<unique_ptr<core::lsp::QueryResponse>> QueryCollector::drainQueryResponses
 
     return move(queryResponses);
 };
+
+void QueryCollector::flushAndRetainErrors(spdlog::logger &logger, const core::GlobalState &gs, core::FileRef file,
+                                          std::vector<std::unique_ptr<core::ErrorQueueMessage>> errors) {}
+
+void QueryCollector::flushAllErrors(spdlog::logger &logger, const core::GlobalState &gs, core::FileRef file,
+                                    std::vector<std::unique_ptr<core::ErrorQueueMessage>> errors) {
+    flushErrors(logger, gs, file, move(errors));
+}
+
+void QueryCollector::clearCacheForFile(const core::GlobalState &gs, core::FileRef fref, int lowerBound, int upperBound){};
 } // namespace sorbet::realmain::lsp

@@ -32,10 +32,6 @@ void ErrorQueue::flushAllErrors(GlobalState &gs) {
     Timer timeit(tracer, "ErrorQueue::flushAllErrors");
     auto collectedErrors = drainAll();
 
-    for (auto &[file, errors] : gs.errors) {
-        move(errors.begin(), errors.end(), std::back_inserter(collectedErrors[file]));
-        errors.clear();
-    }
     for (auto &it : collectedErrors) {
         errorFlusher->flushErrors(logger, gs, it.first, move(it.second));
     }
@@ -57,32 +53,23 @@ vector<unique_ptr<ErrorQueueMessage>> ErrorQueue::flushErrorsForFile(const Globa
     checkOwned();
 
     Timer timeit(tracer, "ErrorQueue::flushErrorsForFile");
+    errorFlusher->clearCacheForFile(gs, file, 5999, 10000);
 
-    vector<unique_ptr<ErrorQueueMessage>> newErrors;
     core::ErrorQueueMessage msg;
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
-        newErrors.emplace_back(make_unique<ErrorQueueMessage>(msg.clone()));
         collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
     }
 
-    auto prevErrorsIt = gs.errors.find(file);
-    if (prevErrorsIt != gs.errors.end()) {
-        auto &prevErrors = (*prevErrorsIt).second;
-        for (auto &e : prevErrors) {
-            auto cloned = make_unique<ErrorQueueMessage>(e->clone());
-            collected[file].emplace_back(move(cloned));
-        }
-    }
-
     errorFlusher->flushErrors(logger, gs, file, move(collected[file]));
-
-    return newErrors;
+    return {};
 }
 
-void ErrorQueue::flushButRetainErrorsForFile(GlobalState &gs, FileRef file) {
+void ErrorQueue::flushButRetainErrorsForFile(GlobalState &gs, FileRef file, int upperBound, int lowerBound) {
     checkOwned();
 
     Timer timeit(tracer, "ErrorQueue::flushButRetainErrorsForFile");
+    errorFlusher->clearCacheForFile(gs, file, lowerBound, upperBound);
+
 
     core::ErrorQueueMessage msg;
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
@@ -93,18 +80,7 @@ void ErrorQueue::flushButRetainErrorsForFile(GlobalState &gs, FileRef file) {
         collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
     }
 
-    for (auto &e : collected[file]) {
-        gs.errors[file].emplace_back(move(e));
-    }
-    collected[file].clear();
-
-    std::vector<std::unique_ptr<core::ErrorQueueMessage>> errorsToFlush;
-    for (auto &e : gs.errors[file]) {
-        auto cloned = make_unique<core::ErrorQueueMessage>(e->clone());
-        errorsToFlush.emplace_back(move(cloned));
-    }
-
-    errorFlusher->flushErrors(logger, gs, file, move(errorsToFlush));
+    errorFlusher->flushAndRetainErrors(logger, gs, file, move(collected[file]));
 };
 
 void ErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::Error> error) {

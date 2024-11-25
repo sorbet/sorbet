@@ -26,6 +26,11 @@ public:
                      std::vector<std::unique_ptr<ErrorQueueMessage>> errors) override;
     void flushErrorCount(spdlog::logger &logger, int count);
     void flushAutocorrects(const GlobalState &gs, FileSystem &fs);
+    void flushAndRetainErrors(spdlog::logger &logger, const GlobalState &gs, core::FileRef file,
+                              std::vector<std::unique_ptr<ErrorQueueMessage>> errors) override;
+    void flushAllErrors(spdlog::logger &logger, const GlobalState &gs, core::FileRef file,
+                        std::vector<std::unique_ptr<ErrorQueueMessage>> errors) override;
+    void clearCacheForFile(const GlobalState &gs, core::FileRef fref, int upperBound, int lowerBound) override;
 };
 
 } // namespace sorbet::core

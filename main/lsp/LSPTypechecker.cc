@@ -125,6 +125,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
     {
         const bool isIncremental = false;
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
+        // ERRORFLUSHER:INIT
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
         committed = runSlowPath(move(updates), workers, errorFlusher, /* cancelable */ false);
         epoch.committed = committed;
@@ -183,6 +184,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     {
         ErrorEpoch epoch(*errorReporter, updates.epoch, isFastPath, move(diagnosticLatencyTimers));
 
+        // ERRORFLUSHER:INIT
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
         if (isFastPath) {
             bool isNoopUpdateForRetypecheck = false;
@@ -320,20 +322,21 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     const auto presorted = true;
     const auto cancelable = false;
 
-    for (auto const &file : sorted) {
-        gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
-            // clear errors which might be reported in typecheck
-            return err->error->what.code > 5999;
-        });
-    }
+    // TODO(iz): 
+    // for (auto const &file : sorted) {
+        // gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+            // // clear errors which might be reported in typecheck
+            // return err->error->what.code > 5999;
+        // });
+    // }
     auto newErrors = pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, std::nullopt, presorted);
-    if (newErrors.has_value()) {
-        for (auto &[file, errors] : *newErrors) {
-            for (auto &e : errors) {
-                gs->errors[file].emplace_back(move(e));
-            }
-        }
-    }
+    // if (newErrors.has_value()) {
+        // for (auto &[file, errors] : *newErrors) {
+            // for (auto &e : errors) {
+                // gs->errors[file].emplace_back(move(e));
+            // }
+        // }
+    // }
     gs->lspTypecheckCount++;
 
     return toTypecheck;
@@ -495,13 +498,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
             return;
         }
         for (auto &file : indexedCopies) {
-            gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
-                // Namer errors codes are 40XX
-                return err->error->what.code < 5000;
-            });
-        }
-        for (auto &file : indexedCopies) {
-            gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
+            gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file, -1, 5000);
         }
 
         auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers);
@@ -561,22 +558,23 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
 
         auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
         const auto presorted = true;
-        for (auto const &file : sorted) {
-            gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
-                // clear errors which might be reported in typecheck
-                return err->error->what.code > 5999;
-            });
-        }
+        // TODO(iz): do we still need this
+        // for (auto const &file : sorted) {
+            // gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                // // clear errors which might be reported in typecheck
+                // return err->error->what.code > 5999;
+            // });
+        // }
         auto newErrors =
             pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
 
-        if (newErrors.has_value()) {
-            for (auto &[file, errors] : *newErrors) {
-                for (auto &e : errors) {
-                    gs->errors[file].emplace_back(move(e));
-                }
-            }
-        }
+        // if (newErrors.has_value()) {
+            // for (auto &[file, errors] : *newErrors) {
+                // for (auto &e : errors) {
+                    // gs->errors[file].emplace_back(move(e));
+                // }
+            // }
+        // }
     });
 
     // Note: `gs` now holds the value of `finalGS`.
@@ -694,7 +692,6 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
 
     const auto cancelable = true;
     pipeline::typecheck(*gs, move(resolved), config->opts, workers, cancelable);
-    gs->errors.clear();
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};

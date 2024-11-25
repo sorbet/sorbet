@@ -43,7 +43,7 @@ public:
     bool wouldFlushErrorsForFile(FileRef file) const;
 
     /** Reports errors, but doesn't remove them from internal cache in GlobalState, so they can be re-reported later*/
-    void flushButRetainErrorsForFile(GlobalState &gs, FileRef file);
+    void flushButRetainErrorsForFile(GlobalState &gs, FileRef file, int upperBound, int lowerBound);
 
     void flushErrors(const GlobalState &gs, FileRef file, std::vector<std::unique_ptr<ErrorQueueMessage>> errors);
     /** Checks if the queue is empty. Is approximate if there are any concurrent dequeue/enqueue operations */

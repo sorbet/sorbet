@@ -330,7 +330,6 @@ public:
 
     void clearErrorCacheForFile(core::FileRef fref,
                                 std::function<bool(const std::unique_ptr<core::ErrorQueueMessage> &)> predicate);
-    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::ErrorQueueMessage>>> errors;
 
 private:
     struct DeepCloneHistoryEntry {
