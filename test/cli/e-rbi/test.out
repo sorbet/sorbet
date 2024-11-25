@@ -1,7 +1,7 @@
 -e:1: Expected `Integer` but found `String("abc")` for argument `x` https://srb.help/7002
      1 |Foo.foo("abc")
                 ^^^^^
-  Expected `Integer` for argument `x` of method `Foo.foo (overload.1)`:
+  Expected `Integer` for argument `x` of method `Foo.foo (overload.2)`:
     --e-rbi.rbi:4:
      4 |      sig { params(x: Integer).returns(Integer) }
                            ^

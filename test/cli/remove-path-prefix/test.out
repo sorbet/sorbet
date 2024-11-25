@@ -1,7 +1,7 @@
 remove-path-prefix.rb:2: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
      2 |1 + "s"
             ^^^
-  Expected `Integer` for argument `arg0` of method `Integer#+`:
+  Expected `Integer` for argument `arg0` of method `Integer#+ (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
       NN |        arg0: Integer,
                   ^^^^
