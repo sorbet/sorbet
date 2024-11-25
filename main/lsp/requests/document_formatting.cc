@@ -72,6 +72,7 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
     auto path = config.remoteName2Local(params->textDocument->uri);
 
     auto maybeFileContents = preprocessor.maybeGetFileContents(path);
+    std::string ignoredFileContents;
     string_view sourceView;
     if (maybeFileContents.has_value()) {
         sourceView = maybeFileContents.value();
@@ -81,8 +82,11 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
         // we leave sourceView as empty and this becomes a no-op
 
         // In this case, the request is for a file that's
-        // not open in the IDE, so we read it from disk instead
-        sourceView = sorbet::FileOps::read(path);
+        // not open in the IDE, so we read it from disk instead.
+        // We store it in `ignoredFileContents` to ensure that the
+        // `sourceView` points at valid data for its lifetime.
+        ignoredFileContents = sorbet::FileOps::read(path);
+        sourceView = ignoredFileContents;
     }
 
     // Don't format `__package.rb` files, since currently formatting them
