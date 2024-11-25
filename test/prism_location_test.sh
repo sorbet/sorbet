@@ -32,7 +32,7 @@ set -e  # Re-enable exit on error
 if ! diff -q "$sorbet_output_prism" "$sorbet_output_sorbet" >/dev/null 2>&1; then
     echo "Test failed for $TEST_FILE"
     echo "Differences:"
-    diff -u "$sorbet_output_prism" "$sorbet_output_sorbet"
+    diff -u "$sorbet_output_sorbet" "$sorbet_output_prism"
     rm "$sorbet_output_prism" "$sorbet_output_sorbet"
     exit 1
 fi
