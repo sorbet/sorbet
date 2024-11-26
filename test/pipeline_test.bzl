@@ -142,6 +142,14 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
                         "disabled": "disabled" in test_name,
                         "isPackage": True,
                     }
+
+                    # Tests that run with Prism parser need to have "_prism" appended to their name
+                    # to differentiate them from the tests that run with Sorbet parser.
+                    # The condition here is only for the packager tests
+                    # Other tests are handled below.
+                    if parser == "prism":
+                        test_name = test_name + "_prism"
+
                     tests[test_name] = data
                 continue
 
