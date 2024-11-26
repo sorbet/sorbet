@@ -150,6 +150,11 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
 
         test_name = dirname(path) + "/" + prefix
 
+        # Tests that run with Prism parser need to have "_prism" appended to their name
+        # to differentiate them from the tests that run with Sorbet parser.
+        if parser == "prism":
+            test_name = test_name + "_prism"
+
         current = tests.get(test_name)
         if None == current:
             data = {

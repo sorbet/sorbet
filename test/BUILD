@@ -256,6 +256,16 @@ pipeline_tests(
 )
 
 pipeline_tests(
+    "test_corpus_prism",
+    glob([
+        "testdata/parser/**/*.rb",
+        "testdata/parser/**/*.exp",
+    ]),
+    "PosTests",
+    parser = "prism",
+)
+
+pipeline_tests(
     "whitequark_parser_corpus",
     glob([
         "whitequark/**/*.rb",
@@ -290,6 +300,11 @@ pipeline_tests(
 test_suite(
     name = "test",
     tests = ["test_corpus"],
+)
+
+test_suite(
+    name = "test_prism",
+    tests = ["test_corpus_prism"],
 )
 
 test_suite(
