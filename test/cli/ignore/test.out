@@ -1,7 +1,7 @@
 subfolder2/subfolder/bar.rb:4: Expected `Integer` but found `String("subfolder2/subfolder/bar.rb")` for argument `arg0` https://srb.help/7002
      4 |1 + "subfolder2/subfolder/bar.rb"
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Expected `Integer` for argument `arg0` of method `Integer#+`:
+  Expected `Integer` for argument `arg0` of method `Integer#+ (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
       NN |        arg0: Integer,
                   ^^^^
@@ -13,7 +13,7 @@ subfolder2/subfolder/bar.rb:4: Expected `Integer` but found `String("subfolder2/
 bar.rb:4: Expected `Integer` but found `String("bar.rb")` for argument `arg0` https://srb.help/7002
      4 |1 + "bar.rb"
             ^^^^^^^^
-  Expected `Integer` for argument `arg0` of method `Integer#+`:
+  Expected `Integer` for argument `arg0` of method `Integer#+ (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
       NN |        arg0: Integer,
                   ^^^^

@@ -82,10 +82,10 @@ def foo
 
   # Range.new
 
-  rn1 = Range.new # error: Not enough arguments provided for method `Range#initialize`. Expected: `2..3`, got: `0`
+  rn1 = Range.new # error: Not enough arguments provided for method `Range#initialize (overload.1)`. Expected: `2..3`, got: `0`
   T.reveal_type(rn1) # error: Revealed type: `T::Range[T.untyped]`
 
-  rn2 = Range.new(nil) # error: Not enough arguments provided for method `Range#initialize`. Expected: `2..3`, got: `1`
+  rn2 = Range.new(nil) # error: Not enough arguments provided for method `Range#initialize (overload.1)`. Expected: `2..3`, got: `1`
   T.reveal_type(rn2) # error: Revealed type: `T::Range[T.untyped]`
 
   rn3 = Range.new(1, 2)
@@ -129,7 +129,7 @@ def foo
   tr1 = T::Range.new # error: Method `new` does not exist on `T.class_of(T::Range)`
   T.reveal_type(tr1) # error: Revealed type: `T.untyped`
 
-  tr2 = T::Range[Integer].new # error: Not enough arguments provided for method `Range#initialize`. Expected: `2..3`, got: `0`
+  tr2 = T::Range[Integer].new # error: Not enough arguments provided for method `Range#initialize (overload.1)`. Expected: `2..3`, got: `0`
   T.reveal_type(tr2) # error: Revealed type: `T::Range[Integer]`
 
   tr3 = T::Range[Integer].new(1, 2)
