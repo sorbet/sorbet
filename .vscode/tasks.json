@@ -16,9 +16,9 @@
             }
         },
         {
-            "label": "Run all Prism tests",
+            "label": "Run all Prism regression tests",
             "type": "shell",
-            "command": "./bazel test //test:prism //test:prism_location_tests --config=dbg  --test_output=all",
+            "command": "./bazel test //test:prism_regression //test:prism_location_tests --config=dbg  --test_output=all",
             "group": {
                 "kind": "test",
                 "isDefault": true
@@ -28,9 +28,38 @@
             }
         },
         {
-            "label": "Run a single Prism test",
+            "label": "Run a single Prism regression test",
             "type": "shell",
             "command": "./bazel test //test:test_PosTests/prism_regression/${input:test_name} //test:prism_regression/${input:test_name}_location_test --config=dbg  --test_output=all",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            },
+            // With this option, when running this task with the `Tasks: Rerun Last Test` command, it'll
+            // reuse the previous run's input, rather than prompting for it again
+            "runOptions": {
+                "reevaluateOnRerun": false
+            }
+        },
+        {
+            "label": "Run all Prism corpus tests",
+            "type": "shell",
+            "command": "./bazel test //test:test_corpus_prism --config=dbg  --test_output=all",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Run a single Prism corpus test",
+            "type": "shell",
+            "command": "./bazel test //test:test_PosTests/testdata/${input:test_name}_prism --config=dbg  --test_output=all",
             "group": {
                 "kind": "test",
                 "isDefault": true

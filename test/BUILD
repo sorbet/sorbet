@@ -256,6 +256,16 @@ pipeline_tests(
 )
 
 pipeline_tests(
+    "test_corpus_prism",
+    glob([
+        "testdata/parser/**/*.rb",
+        "testdata/parser/**/*.exp",
+    ]),
+    "PosTests",
+    parser = "prism",
+)
+
+pipeline_tests(
     "whitequark_parser_corpus",
     glob([
         "whitequark/**/*.rb",
@@ -278,7 +288,7 @@ pipeline_tests(
 )
 
 pipeline_tests(
-    "test_corpus_prism",
+    "prism_regression_corpus",
     glob([
         "prism_regression/**/*.rb",
         "prism_regression/**/*.exp",
@@ -293,13 +303,18 @@ test_suite(
 )
 
 test_suite(
+    name = "test_prism",
+    tests = ["test_corpus_prism"],
+)
+
+test_suite(
     name = "whitequark_parser_tests",
     tests = ["whitequark_parser_corpus"],
 )
 
 test_suite(
-    name = "prism",
-    tests = ["test_corpus_prism"],
+    name = "prism_regression",
+    tests = ["prism_regression_corpus"],
 )
 
 sh_binary(
