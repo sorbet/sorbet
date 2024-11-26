@@ -1,4 +1,5 @@
 #include "rewriter/Prop.h"
+#include "absl/strings/escaping.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
@@ -227,6 +228,15 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         if ((nameValue.front() == '\'' && nameValue.back() == '\'') ||
             (nameValue.front() == '\"' && nameValue.back() == '\"')) {
             ret.nameLoc = core::LocOffsets{ret.nameLoc.beginPos() + 1, ret.nameLoc.endPos() - 1};
+        }
+        const string_view shortName = ctx.locAt(ret.nameLoc).source(ctx).value();
+        bool validProp = !shortName.empty() && (isalpha(shortName.front()) || shortName.front() == '_') &&
+                         absl::c_all_of(shortName, [](char c) { return isalnum(c) || c == '_'; });
+        if (!validProp) {
+            if (auto e = ctx.beginIndexerError(ret.nameLoc, core::errors::Rewriter::BadAttrArg)) {
+                e.setHeader("Bad prop name \"{}\"", absl::CEscape(shortName));
+            }
+            return nullopt;
         }
     }
 
