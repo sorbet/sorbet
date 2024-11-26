@@ -278,7 +278,7 @@ pipeline_tests(
 )
 
 pipeline_tests(
-    "test_corpus_prism",
+    "prism_regression_corpus",
     glob([
         "prism_regression/**/*.rb",
         "prism_regression/**/*.exp",
@@ -298,8 +298,8 @@ test_suite(
 )
 
 test_suite(
-    name = "prism",
-    tests = ["test_corpus_prism"],
+    name = "prism_regression",
+    tests = ["prism_regression_corpus"],
 )
 
 sh_binary(
