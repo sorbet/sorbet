@@ -554,6 +554,11 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "End users should prefer to use `--enable-all-beta-lsp-features`, instead.)");
     options.add_options(section)("enable-all-beta-lsp-features",
                                  "Enable (expected-to-be-non-crashy) early-access LSP features.");
+    options.add_options(section)(
+        "forcibly-silence-lsp-multiple-dir-error",
+        "Allow the LSP to start with multiple `--dir` options by silencing the error. (WARNING: This flag does not "
+        "address the known issues with multiple directory support in LSP mode. You are likely to encounter unexpected "
+        "behavior.)");
     // }}}
 
     // ----- PERFORMANCE -------------------------------------------------- {{{
@@ -946,6 +951,7 @@ void readOptions(Options &opts,
         opts.lspDocumentHighlightEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
+        opts.forciblySilenceLspMultipleDirError = raw["forcibly-silence-lsp-multiple-dir-error"].as<bool>();
         opts.rubyfmtPath = raw["rubyfmt-path"].as<string>();
         if (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>()) {
             if (!FileOps::exists(opts.rubyfmtPath)) {

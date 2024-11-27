@@ -240,6 +240,11 @@ Usage:
       --enable-all-beta-lsp-features
                                 Enable (expected-to-be-non-crashy) early-access LSP
                                 features.
+      --forcibly-silence-lsp-multiple-dir-error
+                                Allow the LSP to start with multiple `--dir` options by
+                                silencing the error. (WARNING: This flag does not address
+                                the known issues with multiple directory support in LSP
+                                mode. You are likely to encounter unexpected behavior.)
 
 ```
 
