@@ -642,6 +642,12 @@ void handleBlockType(const GlobalState &gs, DispatchComponent &component, TypePt
 DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::ClassOrModuleRef symbol,
                                   const vector<TypePtr> &targs) {
     auto errLoc = args.errLoc();
+    if (args.name == core::Names::present_p() &&
+        (symbol == core::Symbols::TrueClass() || symbol == core::Symbols::FalseClass())) {
+        if (auto e = gs.beginError(errLoc, core::errors::Infer::UnknownMethod)) {
+            e.setHeader("Method `present?` called on `T::Boolean`");
+        }
+    }
     if (symbol == core::Symbols::untyped() && args.name != core::Names::methodNameMissing()) {
         auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file, args.thisType);
         if (auto e = gs.beginError(errLoc, what)) {
