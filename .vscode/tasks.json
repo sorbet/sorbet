@@ -30,7 +30,7 @@
         {
             "label": "Run a single Prism regression test",
             "type": "shell",
-            "command": "./bazel test //test:test_PosTests/prism_regression/${input:test_name} //test:prism_regression/${input:test_name}_location_test --config=dbg  --test_output=all",
+            "command": "./bazel test //test:test_PosTests/prism_regression/${input:test_name}_prism //test:prism_regression/${input:test_name}_location_test --config=dbg  --test_output=all",
             "group": {
                 "kind": "test",
                 "isDefault": true

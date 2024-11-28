@@ -30,7 +30,7 @@
             "program": "${workspaceFolder}/bazel-bin/test/test_PosTests/prism_regression/${input:test_name}.runfiles/com_stripe_ruby_typer/test/pipeline_test_runner",
             "args": ["--single_test=${workspaceFolder}/test/prism_regression/${input:test_name}.rb", "--parser=prism"],
             // We need to run all tests to generate the pipeline_test_runner files, which are needed by the LLDB debugger to execute the tests.
-            "preLaunchTask": "Run all Prism tests",
+            "preLaunchTask": "Run all Prism regression tests",
             "stopOnEntry": false,
             "sourceMap": {
                 "": "${workspaceFolder}",
