@@ -675,9 +675,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_INTEGER_NODE: { // An integer literal, e.g. `123`
             auto intNode = down_cast<pm_integer_node>(node);
+            auto nodeLoc = intNode->base.location;
 
-            // Will only work for positive, 32-bit integers
-            return make_unique<parser::Integer>(location, std::to_string(intNode->value.value));
+            auto *start = nodeLoc.start;
+            auto *end = nodeLoc.end;
+
+            std::string valueString(reinterpret_cast<const char *>(start), end - start);
+
+            return make_unique<parser::Integer>(location, move(valueString));
         }
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE: { // An interpolated regex literal in a conditional...
             // ...that implicitly checks against the last read line by an IO object, e.g. `if /wat #{123}/`
