@@ -526,8 +526,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_FLOAT_NODE: { // A floating point number literal, e.g. `1.23`
             auto floatNode = down_cast<pm_float_node>(node);
+            auto nodeLoc = floatNode->base.location;
 
-            return make_unique<parser::Float>(location, std::to_string(floatNode->value));
+            auto *start = nodeLoc.start;
+            auto *end = nodeLoc.end;
+
+            std::string valueString(reinterpret_cast<const char *>(start), end - start);
+
+            return make_unique<parser::Float>(location, move(valueString));
         }
         case PM_FLIP_FLOP_NODE: { // A flip-flop pattern, like the `flip..flop` in `if flip..flop`
             auto flipFlopNode = down_cast<pm_flip_flop_node>(node);
