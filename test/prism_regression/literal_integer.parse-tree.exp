@@ -1,3 +1,13 @@
-Integer {
-  val = "42"
+Begin {
+  stmts = [
+    Integer {
+      val = "42"
+    }
+    Integer {
+      val = "+42"
+    }
+    Integer {
+      val = "-42"
+    }
+  ]
 }
