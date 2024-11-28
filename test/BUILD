@@ -258,6 +258,8 @@ pipeline_tests(
 pipeline_tests(
     "test_corpus_prism",
     glob([
+        # Replace [parser] with other phases to test Prism at that level
+        # Phases: https://github.com/Shopify/sorbet/blob/prism/docs/internals.md#phases
         "testdata/parser/**/*.rb",
         "testdata/parser/**/*.exp",
     ]),
