@@ -3,7 +3,7 @@
 
 # This should not have an unpackaged error since it is a package file.
 
-class MyPackage < PackageSpec
+class MyPackage < PackageSpec # error: Package `MyPackage` is missing imports
   # No imports or exports.
   import OtherPackageImported
 end

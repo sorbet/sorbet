@@ -255,20 +255,21 @@ public:
     explicit PackageInfoImpl(const PackageInfoImpl &) = default;
     PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;
 
-    optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
-                                                    bool isTestImport) const {
+    // returns the loc of the import to be converted
+    optional<core::Loc> shouldConvertTestImport(const core::GlobalState &gs, const PackageInfo &pkg) const {
         auto &info = PackageInfoImpl::from(pkg);
         for (auto &import : importedPackageNames) {
             if (import.name != info.name) {
                 continue;
             }
-            if (!isTestImport && import.type == ImportType::Test) {
-                return convertTestImport(gs, info, core::Loc(fullLoc().file(), import.name.loc));
+            if (import.type == ImportType::Test) {
+                return core::Loc(fullLoc().file(), import.name.loc);
             }
-            // we already import this, and if so, don't return an autocorrect
-            return nullopt;
         }
+        return nullopt;
+    };
 
+    std::optional<core::Loc> newImportLoc(const core::GlobalState &gs, const PackageInfo &pkg) const {
         core::Loc insertionLoc = loc.adjust(gs, core::INVALID_POS_LOC, core::INVALID_POS_LOC);
         // first let's try adding it to the end of the imports.
         if (!importedPackageNames.empty()) {
@@ -298,14 +299,7 @@ public:
             insertionLoc = {loc.file(), exportLoc + 1, exportLoc + 1};
         }
         ENFORCE(insertionLoc.exists());
-
-        // now find the appropriate place for it, specifically by
-        // finding the import that directly precedes it, if any
-        core::AutocorrectSuggestion suggestion(
-            fmt::format("Import `{}` in package `{}`", info.name.toString(gs), name.toString(gs)),
-            {{insertionLoc,
-              fmt::format("\n  {} {}", isTestImport ? "test_import" : "import", info.name.toString(gs))}});
-        return {suggestion};
+        return insertionLoc;
     }
 
     optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,

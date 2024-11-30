@@ -199,7 +199,9 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
     //
     // As an optimization, we might want to try to store that information on the update itself, so
     // that the typechecking thread can simply read it instead of having to compute it.
-    auto result = LSPFileUpdates::fastPathFilesToTypecheck(*initialGS, *config, changedFiles, evictedFiles);
+    bool isNoopUpdateForRetypecheck = false;
+    auto result = LSPFileUpdates::fastPathFilesToTypecheck(*initialGS, *config, changedFiles, evictedFiles,
+                                                           isNoopUpdateForRetypecheck);
     auto filesToTypecheck = result.changedFiles.size() + result.extraFiles.size();
     if (filesToTypecheck > config->opts.lspMaxFilesOnFastPath) {
         logger.debug(

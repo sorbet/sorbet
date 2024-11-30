@@ -104,10 +104,12 @@ bool intersects(const std::vector<core::WithoutUniqueNameHash> &changed,
 LSPFileUpdates::FastPathFilesToTypecheckResult
 LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
                                          const vector<shared_ptr<core::File>> &updatedFiles,
-                                         const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) {
+                                         const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles,
+                                         bool isNoopUpdateForRetypecheck) {
     FastPathFilesToTypecheckResult result;
     Timer timeit(config.logger, "compute_fast_path_file_set");
     vector<core::SymbolHash> changedRetypecheckableSymbolHashes;
+    UnorderedSet<core::packages::MangledName> changedPackages;
     auto idx = -1;
     for (const auto &updatedFile : updatedFiles) {
         idx++;
@@ -120,6 +122,10 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             // Only relevant in --stripe-packages mode. Package declarations do not have method
             // hashes. Instead we rely on recomputing packages if any __package.rb source
             // changes.
+
+            if (isNoopUpdateForRetypecheck) {
+                changedPackages.insert(gs.packageDB().getPackageNameForFile(fref));
+            }
             continue;
         }
         if (!fref.exists()) {
@@ -158,7 +164,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
                       [](const auto &symhash) { return symhash.nameHash; });
     core::WithoutUniqueNameHash::sortAndDedupe(result.changedSymbolNameHashes);
 
-    if (result.changedSymbolNameHashes.empty()) {
+    if (result.changedSymbolNameHashes.empty() && !(!changedPackages.empty() && isNoopUpdateForRetypecheck)) {
         // Optimization--skip the loop over every file in the project (`gs.getFiles()`) if
         // the set of changed symbols is empty (e.g., running a completion request inside a
         // method body)
@@ -168,6 +174,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
     int i = -1;
     for (auto &oldFile : gs.getFiles()) {
         i++;
+
         if (oldFile == nullptr) {
             continue;
         }
@@ -188,7 +195,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         }
 
         ENFORCE(oldFile->getFileHash() != nullptr);
-        if (!intersects(result.changedSymbolNameHashes, oldFile->getFileHash()->usages.nameHashes)) {
+        if (!intersects(result.changedSymbolNameHashes, oldFile->getFileHash()->usages.nameHashes) && !(changedPackages.contains(gs.packageDB().getPackageNameForFile(ref)) && isNoopUpdateForRetypecheck)) {
             continue;
         }
 
@@ -228,13 +235,15 @@ const UnorderedMap<core::FileRef, shared_ptr<core::File>> EMPTY_CONST_MAP;
 
 LSPFileUpdates::FastPathFilesToTypecheckResult
 LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
-                                         const vector<shared_ptr<core::File>> &updatedFiles) {
-    return fastPathFilesToTypecheck(gs, config, updatedFiles, EMPTY_CONST_MAP);
+                                         const vector<shared_ptr<core::File>> &updatedFiles,
+                                         bool isNoopUpdateForRetypecheck) {
+    return fastPathFilesToTypecheck(gs, config, updatedFiles, EMPTY_CONST_MAP, isNoopUpdateForRetypecheck);
 }
 
 LSPFileUpdates::FastPathFilesToTypecheckResult
-LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config) const {
-    return fastPathFilesToTypecheck(gs, config, this->updatedFiles);
+LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
+                                         bool isNoopUpdateForRetypecheck) const {
+    return fastPathFilesToTypecheck(gs, config, this->updatedFiles, isNoopUpdateForRetypecheck);
 }
 
 } // namespace sorbet::realmain::lsp

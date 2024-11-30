@@ -2,6 +2,6 @@
 # typed: strict
 # enable-packager: true
 
-class Package < PackageSpec
+class Package < PackageSpec # error: Package `Package` is missing imports
 
 end

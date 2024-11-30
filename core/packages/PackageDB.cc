@@ -41,15 +41,19 @@ public:
         return Loc::none();
     }
 
-    std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
-                                                         bool isTestImport) const {
+    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
+                                                         const core::SymbolRef name) const {
+        return {};
+    }
+
+    std::optional<core::Loc> shouldConvertTestImport(const core::GlobalState &gs, const PackageInfo &pkg) const {
         notImplemented();
         return nullopt;
     }
 
-    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
-                                                         const core::SymbolRef name) const {
-        return {};
+    virtual std::optional<core::Loc> newImportLoc(const core::GlobalState &gs, const PackageInfo &pkg) const {
+        notImplemented();
+        return nullopt;
     }
 
     bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const {

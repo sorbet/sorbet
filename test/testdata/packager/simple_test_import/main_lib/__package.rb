@@ -2,7 +2,7 @@
 # typed: strict
 # enable-packager: true
 
-class Project::MainLib < PackageSpec
+class Project::MainLib < PackageSpec # error: Package `Project::MainLib` is missing imports
   import Project::Util
   test_import Project::TestOnly
 

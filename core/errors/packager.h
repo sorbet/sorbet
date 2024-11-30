@@ -30,5 +30,6 @@ constexpr ErrorClass InvalidExport{3721, StrictLevel::False};
 constexpr ErrorClass ImportNotVisible{3723, StrictLevel::False};
 constexpr ErrorClass InvalidStrictDependencies{3724, StrictLevel::False};
 constexpr ErrorClass InvalidLayer{3725, StrictLevel::False};
+constexpr ErrorClass PackageVisibilityIssues{3726, StrictLevel::False};
 } // namespace sorbet::core::errors::Packager
 #endif
