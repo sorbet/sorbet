@@ -37,7 +37,7 @@ constexpr ErrorClass UntypedConstantSuggestion{7027, StrictLevel::Strict};
 // constexpr ErrorClass LazyResolve{7029, StrictLevel::True};
 constexpr ErrorClass MetaTypeDispatchCall{7030, StrictLevel::True};
 constexpr ErrorClass PrivateMethod{7031, StrictLevel::True};
-constexpr ErrorClass GenericArgumentKeywordArgs{7032, StrictLevel::True};
+// constexpr ErrorClass GenericArgumentKeywordArgs{7032, StrictLevel::True};
 constexpr ErrorClass KeywordArgHashWithoutSplat{7033, StrictLevel::True};
 constexpr ErrorClass UnnecessarySafeNavigation{7034, StrictLevel::True};
 constexpr ErrorClass TakesNoBlock{7035, StrictLevel::True};
