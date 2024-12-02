@@ -99,6 +99,31 @@ bool intersects(const std::vector<core::WithoutUniqueNameHash> &changed,
     return false;
 }
 
+// An output iterator that only writes out the `nameHash` component of a `SymbolHash`. This allows us to avoid
+// materializing a vector of `WithoutUniqueNameHash` when we're only interested in the `nameHash` components.
+class NameHashOutputIterator final {
+public:
+    using container_type = std::vector<core::WithoutUniqueNameHash>;
+
+    NameHashOutputIterator(container_type &container) : container{container} {}
+
+    NameHashOutputIterator &operator=(const core::SymbolHash &symHash) {
+        container.push_back(symHash.nameHash);
+        return *this;
+    }
+
+    NameHashOutputIterator &operator++() {
+        return *this;
+    }
+
+    NameHashOutputIterator &operator*() {
+        return *this;
+    }
+
+private:
+    container_type &container;
+};
+
 } // namespace
 
 LSPFileUpdates::FastPathFilesToTypecheckResult
@@ -107,7 +132,6 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
                                          const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) {
     FastPathFilesToTypecheckResult result;
     Timer timeit(config.logger, "compute_fast_path_file_set");
-    vector<core::SymbolHash> changedRetypecheckableSymbolHashes;
     auto idx = -1;
     for (const auto &updatedFile : updatedFiles) {
         idx++;
@@ -148,15 +172,10 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         // This will insert two entries into `retypecheckableSymbolHashes` for each changed method, but they
         // will get deduped later.
         absl::c_set_symmetric_difference(oldRetypecheckableSymbolHashes, newRetypecheckableSymbolHashes,
-                                         std::back_inserter(changedRetypecheckableSymbolHashes));
+                                         NameHashOutputIterator(result.changedSymbolNameHashes));
 
         result.changedFiles.emplace(fref, idx);
     }
-
-    result.changedSymbolNameHashes.reserve(changedRetypecheckableSymbolHashes.size());
-    absl::c_transform(changedRetypecheckableSymbolHashes, std::back_inserter(result.changedSymbolNameHashes),
-                      [](const auto &symhash) { return symhash.nameHash; });
-    core::WithoutUniqueNameHash::sortAndDedupe(result.changedSymbolNameHashes);
 
     if (result.changedSymbolNameHashes.empty()) {
         // Optimization--skip the loop over every file in the project (`gs.getFiles()`) if
@@ -164,6 +183,8 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         // method body)
         return result;
     }
+
+    core::WithoutUniqueNameHash::sortAndDedupe(result.changedSymbolNameHashes);
 
     int i = -1;
     for (auto &oldFile : gs.getFiles()) {
