@@ -108,7 +108,7 @@ public:
     NameHashOutputIterator(container_type &container) : container{container} {}
 
     NameHashOutputIterator &operator=(const core::SymbolHash &symHash) {
-        container.push_back(symHash.nameHash);
+        container.emplace_back(symHash.nameHash);
         return *this;
     }
 
