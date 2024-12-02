@@ -9,5 +9,8 @@ Begin {
     Integer {
       val = "-42"
     }
+    Integer {
+      val = "~42"
+    }
   ]
 }
