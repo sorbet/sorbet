@@ -796,8 +796,15 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         gs->replaceFile(f.file, move(newFile));
 
         // this replicates the logic of pipeline::indexOne
-        auto settings = parser::Parser::Settings{};
-        auto nodes = parser::Parser::run(*gs, f.file, settings);
+        unique_ptr<parser::Node> nodes;
+
+        if (parser == realmain::options::Parser::SORBET) {
+            auto settings = parser::Parser::Settings{};
+            nodes = parser::Parser::run(*gs, f.file, settings);
+        } else if (parser == realmain::options::Parser::PRISM) {
+            nodes = realmain::pipeline::runPrismParser(*gs, f.file, false, {});
+        }
+
         handler.addObserved(*gs, "parse-tree", [&]() { return nodes->toString(*gs); });
         handler.addObserved(*gs, "parse-tree-json", [&]() { return nodes->toJSON(*gs); });
 
