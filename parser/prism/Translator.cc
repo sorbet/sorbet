@@ -281,6 +281,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto name = parser.resolveConstant(callNode->name);
             auto receiver = translate(callNode->receiver);
 
+            // Handle `~[Integer]`, like `~42`
+            // Unlike `-[Integer]`, Prism treats `~[Integer]` as a method call
+            // But Sorbet's legacy parser treats both `~[Integer]` and `-[Integer]` as integer literals
+            if (name == "~" && dynamic_cast<parser::Integer *>(receiver.get())) {
+                std::string valueString(reinterpret_cast<const char *>(callNode->base.location.start),
+                                        callNode->base.location.end - callNode->base.location.start);
+
+                return std::make_unique<parser::Integer>(location, std::move(valueString));
+            }
+
             pm_node_t *prismBlock = callNode->block;
             // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
             // but not an explicit block with `{ ... }` or `do ... end`
