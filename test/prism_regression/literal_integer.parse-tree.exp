@@ -19,10 +19,22 @@ Begin {
       val = "51966"
     }
     Integer {
+      val = "+51966"
+    }
+    Integer {
+      val = "-51966"
+    }
+    Integer {
       val = "123"
     }
     Integer {
       val = "123"
+    }
+    Integer {
+      val = "+123"
+    }
+    Integer {
+      val = "-123"
     }
     Integer {
       val = "511"
@@ -31,10 +43,22 @@ Begin {
       val = "511"
     }
     Integer {
+      val = "+511"
+    }
+    Integer {
+      val = "-511"
+    }
+    Integer {
       val = "42"
     }
     Integer {
       val = "42"
+    }
+    Integer {
+      val = "+42"
+    }
+    Integer {
+      val = "-42"
     }
   ]
 }
