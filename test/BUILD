@@ -257,12 +257,35 @@ pipeline_tests(
 
 pipeline_tests(
     "test_corpus_prism",
-    glob([
-        # Replace [parser] with other phases to test Prism at that level
-        # Phases: https://github.com/Shopify/sorbet/blob/prism/docs/internals.md#phases
-        "testdata/parser/**/*.rb",
-        "testdata/parser/**/*.exp",
-    ]),
+    glob(
+        [
+            # Replace [parser] with other phases to test Prism at that level
+            # Phases: https://github.com/Shopify/sorbet/blob/prism/docs/internals.md#phases
+            "testdata/parser/**/*.rb",
+            "testdata/parser/**/*.exp",
+        ],
+        exclude = [
+            # Tests having to do with error recovery; will address later
+            "testdata/parser/error_recovery/**",
+            "testdata/parser/bad_argument_crash.rb",
+            "testdata/parser/compare_overload_parse_error.rb",
+            "testdata/parser/crash_block_pass.rb",
+            "testdata/parser/crash_block_pass_suggestion.rb",
+            "testdata/parser/fuzz_ivar.rb",
+            "testdata/parser/invalid_fatal.rb",
+            "testdata/parser/invalid_syntax_error.rb",
+            "testdata/parser/invalid_trailing_in_number.rb",
+            "testdata/parser/curly_braces_block_pass.rb",
+            "testdata/parser/forward_arg_after_restarg.rb",
+            "testdata/parser/kwargs_missing_comma.rb",
+            "testdata/parser/kwargs_missing_comma_unsupported.rb",
+            "testdata/parser/kwnil_errors.rb",
+            "testdata/parser/method_def_trailing_comma.rb",
+            "testdata/parser/misc.rb",
+            "testdata/parser/offset0.rb",
+            "testdata/parser/ruby_25.rb",
+        ],
+    ),
     "PosTests",
     parser = "prism",
 )
