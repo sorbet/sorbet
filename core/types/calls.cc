@@ -94,8 +94,13 @@ TypePtr OrType::getCallArguments(const GlobalState &gs, NameRef name) const {
 DispatchResult AndType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "andtype");
     // Tell dispatchCall to not produce any dispatch-related errors. They are very expensive to produce.
-    auto leftRet = left.dispatchCall(gs, args.withThisRef(left).withErrorsSuppressed());
-    auto rightRet = right.dispatchCall(gs, args.withThisRef(right).withErrorsSuppressed());
+    auto leftArgsNoErrors = args.withThisRef(left);
+    leftArgsNoErrors.suppressErrors = true;
+    auto leftRet = left.dispatchCall(gs, leftArgsNoErrors);
+
+    auto rightArgsNoErrors = args.withThisRef(right);
+    rightArgsNoErrors.suppressErrors = true;
+    auto rightRet = right.dispatchCall(gs, rightArgsNoErrors);
 
     // If either side is missing the method, dispatch to the other.
     auto leftOk = allComponentsPresent(leftRet);
