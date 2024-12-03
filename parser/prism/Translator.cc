@@ -710,21 +710,36 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // For normal integers, retain the original valueString including any sign
             std::string valueString(reinterpret_cast<const char *>(start), end - start);
 
+            ENFORCE(!valueString.empty());
+
             // Index to track position in valueString after optional sign
             size_t index = 0;
             auto sign = valueString[0];
 
             // Check for optional '+' or '-' sign
-            if (!valueString.empty() && (sign == '+' || sign == '-')) {
+            if (sign == '+' || sign == '-') {
                 index++;
             }
 
             // Check for prefixed literals starting from the current index
             if (valueString.size() > index + 1 && valueString[index] == '0' &&
-                !isdigit(static_cast<unsigned char>(valueString[index + 1]))) {
-                // Handle prefixed integer literals (e.g., 0x, 0b, 0o, 0d)
-                // Prism has already parsed their values so we use the precomputed value directly
-                valueString = std::to_string(intNode->value.value);
+                (valueString[index + 1] == '0' || !isdigit(static_cast<unsigned char>(valueString[index + 1])))) {
+                // When it comes to prefixed integer literals, Sorbet's parser is inconsistent:
+                // If it's a decimal literal, we remove the prefix, but keep the underscore
+                // Example: `0d1_23` is 123, needs to be translated to `1_23`
+                if (valueString[index + 1] == 'd' || valueString[index + 1] == 'D') {
+                    valueString = valueString.substr(index + 2, valueString.size() - index - 2);
+                    // But when it's a hexadecimal, octal, or binary literal, Sorbet's parser treats prefixed
+                    // literals with underscores as invalid, so we just use `0`
+                    // Example: `0xca_fe` is invalid, should be translated to `0`
+                    // Note: Prism actually parses these literals correctly
+                } else if (valueString.find('_') != std::string::npos) {
+                    valueString = "0";
+                } else {
+                    // Handle prefixed integer literals (e.g., 0x, 0b, 0o, 0d) without underscores
+                    // Prism has already parsed their values so we use the precomputed value directly
+                    valueString = std::to_string(intNode->value.value);
+                }
 
                 // Add the optional sign back if it was present
                 if (index != 0) {
