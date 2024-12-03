@@ -643,10 +643,9 @@ void handleBlockType(const GlobalState &gs, DispatchComponent &component, TypePt
 //    (with a subtype check on the key type, once we have generics)
 DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::ClassOrModuleRef symbol,
                                   const vector<TypePtr> &targs) {
-    auto errLoc = args.errLoc();
     if (symbol == core::Symbols::untyped() && args.name != core::Names::methodNameMissing()) {
         auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file, args.thisType);
-        if (auto e = gs.beginError(errLoc, what)) {
+        if (auto e = gs.beginError(args.errLoc(), what)) {
             e.setHeader("Call to method `{}` on `{}`", args.name.show(gs), "T.untyped");
             TypeErrorDiagnostics::explainUntyped(gs, e, what, args.fullType, args.originForUninitialized);
         }
@@ -655,14 +654,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                               Symbols::noMethod());
     } else if (symbol == Symbols::void_()) {
         if (!args.suppressErrors) {
-            if (auto e = gs.beginError(errLoc, errors::Infer::UnknownMethod)) {
+            if (auto e = gs.beginError(args.errLoc(), errors::Infer::UnknownMethod)) {
                 e.setHeader("Cannot call method `{}` on void type", args.name.show(gs));
             }
         }
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
     } else if (symbol == Symbols::DeclBuilderForProcsSingleton() && args.name == Names::new_()) {
         if (!args.suppressErrors) {
-            if (auto e = gs.beginError(errLoc, errors::Infer::MetaTypeDispatchCall)) {
+            if (auto e = gs.beginError(args.errLoc(), errors::Infer::MetaTypeDispatchCall)) {
                 e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", Names::new_().show(gs),
                             symbol.show(gs));
             }
@@ -719,7 +718,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // and recorded.
         // Instead, the error always should get queued up in the
         // errors list of the result so that the caller can deal with the error.
-        auto e = gs.beginError(errLoc, unknownMethodCode);
+        auto e = gs.beginError(args.errLoc(), unknownMethodCode);
         if (e) {
             string thisStr = args.thisType.show(gs);
             auto ancestorsOf = args.name == Names::super() ? "ancestors of " : "";
@@ -773,7 +772,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                           " {{ |x| {}(x).{} }}", wrapInFn, shortName);
                         }
                     }
-                } else if (errLoc == args.funLoc() &&
+                } else if (args.errLoc() == args.funLoc() &&
                            args.funLoc().source(gs) == absl::StrCat(args.name.shortName(gs), "=")) {
                     e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.funLoc(), "= {}({}) {}", wrapInFn,
                                   args.receiverLoc().source(gs).value(), args.name.shortName(gs));
@@ -916,7 +915,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     auto methodData = method.data(gs);
     if (methodData->flags.isPrivate && !args.isPrivateOk) {
-        if (auto e = gs.beginError(errLoc, core::errors::Infer::PrivateMethod)) {
+        if (auto e = gs.beginError(args.errLoc(), core::errors::Infer::PrivateMethod)) {
             if (args.fullType.type != args.thisType) {
                 e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`",
                             methodData->name.show(gs), args.thisType.show(gs), args.fullType.type.show(gs));
@@ -1543,7 +1542,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // if block is there we do not attempt to solve the constraint. CFG adds an explicit solve
         // node that triggers constraint solving
         if (!constr->solve(gs)) {
-            if (auto e = gs.beginError(errLoc, errors::Infer::GenericMethodConstraintUnsolved)) {
+            if (auto e = gs.beginError(args.errLoc(), errors::Infer::GenericMethodConstraintUnsolved)) {
                 e.setHeader("Could not find valid instantiation of type parameters for `{}`", method.show(gs));
                 e.addErrorLine(methodData->loc(), "`{}` defined here", method.show(gs));
                 e.addErrorSection(constr->explain(gs));
