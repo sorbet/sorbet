@@ -107,9 +107,11 @@ DispatchResult AndType::dispatchCall(const GlobalState &gs, const DispatchArgs &
         return rightRet;
     }
     if (!rightOk && !leftOk) {
-        // Expensive case. Re-dispatch the calls with errors enabled so we can give the user an error.
-        leftRet = left.dispatchCall(gs, args.withThisRef(left));
-        rightRet = right.dispatchCall(gs, args.withThisRef(right));
+        if (!args.suppressErrors) {
+            // Expensive case. Re-dispatch the calls with errors enabled so we can give the user an error.
+            leftRet = left.dispatchCall(gs, args.withThisRef(left));
+            rightRet = right.dispatchCall(gs, args.withThisRef(right));
+        }
     }
 
     return DispatchResult::merge(gs, DispatchResult::Combinator::AND, std::move(leftRet), std::move(rightRet));
