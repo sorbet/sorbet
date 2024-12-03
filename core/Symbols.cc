@@ -731,9 +731,9 @@ MethodRef findConcreteMethodTransitiveInternal(const GlobalState &gs, ClassOrMod
         return result;
     }
 
-    for (auto it = owner.data(gs)->mixins().begin(); it != owner.data(gs)->mixins().end(); ++it) {
-        ENFORCE(it->exists());
-        result = it->data(gs)->findMethod(gs, name);
+    for (auto sym : owner.data(gs)->mixins()) {
+        ENFORCE(sym.exists());
+        result = sym.data(gs)->findMethod(gs, name);
 
         if (result.exists() && result.data(gs)->flags.isOverloaded) {
             auto overloadName = gs.lookupNameUnique(UniqueNameKind::Overload, name, 1);
@@ -761,7 +761,7 @@ SymbolRef ClassOrModule::findParentMemberTransitiveInternal(const GlobalState &g
                                                             bool dealias) const {
     SymbolRef result;
     if (flags.isLinearizationComputed) {
-        for (auto it = this->mixins().begin(); it != this->mixins().end(); ++it) {
+        for (auto it = this->mixins().begin(), end = this->mixins().end(); it != end; ++it) {
             ENFORCE(it->exists());
             result = dealias ? it->data(gs)->findMember(gs, name) : it->data(gs)->findMemberNoDealias(name);
             if (result.exists()) {
@@ -769,7 +769,7 @@ SymbolRef ClassOrModule::findParentMemberTransitiveInternal(const GlobalState &g
             }
         }
     } else {
-        for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
+        for (auto it = this->mixins().rbegin(), end = this->mixins().rend(); it != end; ++it) {
             ENFORCE(it->exists());
             result = it->data(gs)->findMemberTransitiveInternal(gs, name, maxDepth - 1, dealias);
             if (result.exists()) {
