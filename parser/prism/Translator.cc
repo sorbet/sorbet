@@ -618,17 +618,34 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::If>(location, move(predicate), move(ifTrue), move(ifFalse));
         }
-        case PM_IMAGINARY_NODE: { // An imaginary number literal, like `1.0i`
+        case PM_IMAGINARY_NODE: { // An imaginary number literal, like `1.0i`, `+1.0i`, or `-1.0i`
             auto imaginaryNode = down_cast<pm_imaginary_node>(node);
             pm_location_t loc = imaginaryNode->base.location;
 
             const uint8_t *start = loc.start;
             const uint8_t *end = loc.end;
 
-            // `-1` drops the trailing `i` end of the value
+            // Create a string_view of the value without the trailing 'i'
             auto value = std::string_view(reinterpret_cast<const char *>(start), end - start - 1);
 
-            return make_unique<parser::Complex>(location, move(value));
+            ENFORCE(!value.empty());
+
+            char sign = value[0];
+            // Check for optional leading '+' or '-'
+            if (sign == '+' || sign == '-') {
+                value.remove_prefix(1);
+
+                // Create the Complex node with the unsigned value
+                auto receiver = make_unique<parser::Complex>(location, std::string(value));
+
+                // Return the appropriate unary operation
+                core::NameRef unaryOp = (sign == '-') ? core::Names::unaryMinus() : core::Names::unaryPlus();
+                return make_unique<parser::Send>(location, move(receiver), unaryOp,
+                                                 core::LocOffsets{location.beginLoc, location.beginLoc + 1}, NodeVec{});
+            }
+
+            // No leading sign; return the Complex node directly
+            return make_unique<parser::Complex>(location, std::string(value));
         }
         case PM_IMPLICIT_REST_NODE: { // An implicit splat, like the `,` in `a, = 1, 2, 3`
             unreachable("PM_IMPLICIT_REST_NODE is handled separately as part of PM_MULTI_WRITE_NODE and "
