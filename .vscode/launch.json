@@ -27,8 +27,8 @@
             "type": "lldb",
             "request": "launch",
             "name": "Debug Prism test in LLDB",
-            "program": "${workspaceFolder}/bazel-bin/test/test_PosTests/prism_regression/${input:test_name}_prism.runfiles/com_stripe_ruby_typer/test/pipeline_test_runner",
-            "args": ["--single_test=${workspaceFolder}/test/prism_regression/${input:test_name}.rb", "--parser=prism"],
+            "program": "${workspaceFolder}/bazel-bin/test/test_PosTests/prism_regression/${input:prism_regression_test_name}_prism.runfiles/com_stripe_ruby_typer/test/pipeline_test_runner",
+            "args": ["--single_test=${workspaceFolder}/test/prism_regression/${input:prism_regression_test_name}.rb", "--parser=prism"],
             // We need to run all tests to generate the pipeline_test_runner files, which are needed by the LLDB debugger to execute the tests.
             "preLaunchTask": "Run all Prism regression tests",
             "stopOnEntry": false,
@@ -51,7 +51,7 @@
     ],
     "inputs": [
         {
-            "id": "test_name",
+            "id": "prism_regression_test_name",
             "type": "promptString",
             "description": "Enter the test name, e.g. case for running test/prism_regression/case.rb",
         },
