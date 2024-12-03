@@ -1053,7 +1053,6 @@ struct DispatchArgs {
 
     DispatchArgs withSelfAndThisRef(const TypePtr &newSelfRef) const;
     DispatchArgs withThisRef(const TypePtr &newThisRef) const;
-    DispatchArgs withErrorsSuppressed() const;
 };
 
 struct DispatchComponent {
