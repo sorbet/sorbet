@@ -700,7 +700,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_INSTANCE_VARIABLE_WRITE_NODE: { // Regular assignment to an instance variable, e.g. `@iv = 1`
             return translateAssignment<pm_instance_variable_write_node, parser::IVarLhs>(node);
         }
-        case PM_INTEGER_NODE: { // An integer literal, e.g. `123`
+        case PM_INTEGER_NODE: { // An integer literal, e.g., `123`, `0xcafe`, `0b1010`, etc.
             auto intNode = down_cast<pm_integer_node>(node);
             auto nodeLoc = intNode->base.location;
 
@@ -709,7 +709,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             std::string valueString(reinterpret_cast<const char *>(start), end - start);
 
-            return make_unique<parser::Integer>(location, move(valueString));
+            if (valueString.size() > 1 && valueString[0] == '0' &&
+                !isdigit(static_cast<unsigned char>(valueString[1]))) {
+                // Handle prefixed integer literals (e.g., 0x, 0b, 0o, 0d)
+                // Prism has already parsed their values so we use the precomputed value directly
+                return make_unique<parser::Integer>(location, std::to_string(intNode->value.value));
+            } else {
+                // For standard integers, retain the original literal to preserve any prefix
+                return make_unique<parser::Integer>(location, move(valueString));
+            }
         }
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE: { // An interpolated regex literal in a conditional...
             // ...that implicitly checks against the last read line by an IO object, e.g. `if /wat #{123}/`
