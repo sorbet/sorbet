@@ -609,8 +609,10 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
             auto it = seenProps.find(propInfo->name);
             if (it != seenProps.end()) {
                 if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::DuplicateProp)) {
-                    e.setHeader("{} is defined multiple times", propInfo->isImmutable ? "const" : "prop");
-                    e.addErrorLine(ctx.locAt(props[it->second].loc), "Previous definition is here");
+                    auto headerProp = fmt::format("{} {}", propInfo->isImmutable ? "const" : "prop",
+                                                  core::NamedLiteralType::showAsSymbolLiteral(ctx, propInfo->name));
+                    e.setHeader("The `{}` is defined multiple times", headerProp);
+                    e.addErrorLine(ctx.locAt(props[it->second].loc), "Originally defined here");
                 }
                 continue;
             }
