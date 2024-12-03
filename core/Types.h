@@ -993,7 +993,7 @@ struct DispatchArgs {
     uint16_t numPosArgs;
     InlinedVector<const TypeAndOrigins *, 2> &args;
     const TypePtr &selfType;
-    const TypeAndOrigins fullType;
+    const TypeAndOrigins &fullType;
     const TypePtr &thisType;
     const std::shared_ptr<const SendAndBlockLink> &block;
     Loc originForUninitialized;
