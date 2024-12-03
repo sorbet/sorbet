@@ -1718,12 +1718,13 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
             }
 
             // The Ruby VM treats `initialize` as private by default, but allows calling it directly within `new`.
+            const TypeAndOrigins wrappedFullType{wrapped, args.fullType.origins};
             auto innerArgs = DispatchArgs{Names::initialize(),
                                           args.locs,
                                           args.numPosArgs,
                                           args.args,
                                           wrapped,
-                                          {wrapped, args.fullType.origins},
+                                          wrappedFullType,
                                           wrapped,
                                           args.block,
                                           args.originForUninitialized,
