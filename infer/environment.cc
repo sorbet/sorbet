@@ -924,18 +924,20 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
         for (cfg::BasicBlock *parent : bb->backEdges) {
             auto &other = envs[parent->id];
             auto otherPin = other.pinnedTypes.find(var);
-            if (otherPin != other.pinnedTypes.end()) {
-                if (tp.type != nullptr) {
-                    tp.type = core::Types::any(ctx, tp.type, otherPin->second.type);
-                    for (auto origin : otherPin->second.origins) {
-                        if (!absl::c_linear_search(tp.origins, origin)) {
-                            tp.origins.emplace_back(origin);
-                        }
+            if (otherPin == other.pinnedTypes.end()) {
+                continue;
+            }
+
+            if (tp.type != nullptr) {
+                tp.type = core::Types::any(ctx, tp.type, otherPin->second.type);
+                for (auto origin : otherPin->second.origins) {
+                    if (!absl::c_linear_search(tp.origins, origin)) {
+                        tp.origins.emplace_back(origin);
                     }
-                    tp.type.sanityCheck(ctx);
-                } else {
-                    tp = otherPin->second;
                 }
+                tp.type.sanityCheck(ctx);
+            } else {
+                tp = otherPin->second;
             }
         }
 
