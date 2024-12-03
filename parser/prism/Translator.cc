@@ -707,17 +707,32 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto *start = nodeLoc.start;
             auto *end = nodeLoc.end;
 
+            // For normal integers, retain the original valueString including any sign
             std::string valueString(reinterpret_cast<const char *>(start), end - start);
 
-            if (valueString.size() > 1 && valueString[0] == '0' &&
-                !isdigit(static_cast<unsigned char>(valueString[1]))) {
+            // Index to track position in valueString after optional sign
+            size_t index = 0;
+            auto sign = valueString[0];
+
+            // Check for optional '+' or '-' sign
+            if (!valueString.empty() && (sign == '+' || sign == '-')) {
+                index++;
+            }
+
+            // Check for prefixed literals starting from the current index
+            if (valueString.size() > index + 1 && valueString[index] == '0' &&
+                !isdigit(static_cast<unsigned char>(valueString[index + 1]))) {
                 // Handle prefixed integer literals (e.g., 0x, 0b, 0o, 0d)
                 // Prism has already parsed their values so we use the precomputed value directly
-                return make_unique<parser::Integer>(location, std::to_string(intNode->value.value));
-            } else {
-                // For standard integers, retain the original literal to preserve any prefix
-                return make_unique<parser::Integer>(location, move(valueString));
+                valueString = std::to_string(intNode->value.value);
+
+                // Add the optional sign back if it was present
+                if (index != 0) {
+                    valueString = sign + valueString;
+                }
             }
+
+            return make_unique<parser::Integer>(location, std::move(valueString));
         }
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE: { // An interpolated regex literal in a conditional...
             // ...that implicitly checks against the last read line by an IO object, e.g. `if /wat #{123}/`
