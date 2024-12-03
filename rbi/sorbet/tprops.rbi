@@ -20,6 +20,13 @@ module T::Props
   mixes_in_class_methods(T::Props::ClassMethods)
 end
 
+class T::Props::Decorator
+  Rules = T.type_alias {T::Hash[Symbol, T.untyped]}
+  DecoratedInstance = T.type_alias {T.untyped} # Would be T::Props, but that produces circular reference errors in some circumstances
+  PropType = T.type_alias {T::Types::Base}
+  PropTypeOrClass = T.type_alias {T.any(PropType, Module)}
+end
+
 module T::Props::ClassMethods
   sig {params(name: Symbol, cls_or_args: T.untyped, args: T.untyped).void}
   def const(name, cls_or_args, **args); end
@@ -29,6 +36,7 @@ module T::Props::ClassMethods
   def decorator_class; end
   def plugin(mod); end
   def plugins; end
+  sig {returns(T::Props::Decorator::Rules)}
   def props; end
   def reload_decorator!; end
   def validate_prop_value(prop, val); end
@@ -50,13 +58,6 @@ module T::Props::GeneratedCodeValidation
 end
 
 class T::Props::Decorator
-  Rules = T.type_alias {T::Hash[Symbol, T.untyped]}
-  DecoratedInstance = T.type_alias {T.untyped} # Would be T::Props, but that produces circular reference errors in some circumstances
-  PropType = T.type_alias {T::Types::Base}
-  PropTypeOrClass = T.type_alias {T.any(PropType, Module)}
-end
-
-class T::Props::Decorator
   def add_prop_definition(prop, rules); end
   def all_props; end
   def decorated_class; end
@@ -73,6 +74,7 @@ class T::Props::Decorator
   def prop_set(instance, prop, value, rules = {}); end
   alias_method :set, :prop_set
   def prop_validate_definition!(name, cls, rules, type); end
+  sig {returns(Rules)}
   def props; end
   def self.method_added(name); end
   def self.singleton_method_added(name); end
