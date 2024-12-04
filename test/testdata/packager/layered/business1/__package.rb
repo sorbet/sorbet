@@ -5,6 +5,6 @@ class Business1 < PackageSpec
   strict_dependencies 'layered'
   layer 'business'
 
-  import Service1 # error: `Business1` is at layer `business`, so it can not import package `Service1`, which is at layer `service`
+  import Service1 # error: Layering violation: cannot import `Service1` (in layer `service`) from `Business1` (in layer `business`)
   import Business2
 end
