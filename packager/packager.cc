@@ -1555,6 +1555,8 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
 }
 
 // Metadata for Tarjan's algorithm
+// https://www.cs.cmu.edu/~15451-f18/lectures/lec19-DFS-strong-components.pdf provides a good overview of the
+// algorithm.
 struct ComputeSCCsMetadata {
     int nextIndex = 1;
     int nextSCCId = 0;
@@ -1563,7 +1565,10 @@ struct ComputeSCCsMetadata {
     // The lowest index reachable from a given package (in the same SCC) by following any number of tree edges
     // and at most one back/cross edge
     UnorderedMap<core::packages::MangledName, int> lowLink;
+    // Fast way to check if a package is on the stack
     UnorderedMap<core::packages::MangledName, bool> onStack;
+    // As we visit packages, we push them onto the stack. Once we find the "root" of an SCC, we can use the stack to
+    // determine all packages in the SCC.
     std::vector<core::packages::MangledName> stack;
 };
 
