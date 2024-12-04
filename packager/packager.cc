@@ -242,6 +242,7 @@ public:
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer = nullopt;
+    // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
     optional<int> sccID = nullopt;
 
     // PackageInfoImpl is the only implementation of PackageInfo
@@ -1620,7 +1621,7 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
 
 // Tarjan's algorithm for finding strongly connected components
 void computeSCCs(core::GlobalState &gs) {
-    Timer timeit(gs.tracer(), "computeSCCs");
+    Timer timeit(gs.tracer(), "packager::computeSCCs");
     ComputeSCCsMetadata metadata;
     auto allPackages = gs.packageDB().packages();
     for (auto package : allPackages) {
@@ -1688,7 +1689,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     if (thisPkg.strictDependenciesLevel.value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
         if (thisPkg.sccID == otherPkg.sccID) {
             if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
-                e.setHeader("importing `{}` will put `{}` into a cycle, which is not valid at `{}` level `{}`",
+                e.setHeader("Importing `{}` will put `{}` into a cycle, which is not valid at `{}` level `{}`",
                             otherPkg.show(ctx), thisPkg.show(ctx), "strict_dependencies",
                             strictDependenciesLevelToString(thisPkg.strictDependenciesLevel.value().first));
             }

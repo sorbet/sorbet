@@ -990,7 +990,7 @@ must either also have layer `lib`, or have layer `util` (but not layer `app`).
 If a package is at `strict_dependencies 'layered'` or stricter, all packages it
 imports must also be at `strict_dependencies 'layered'`.
 
-If a package is at `strict_dependencies 'layered_dag'` or stricter, it can not
+If a package is at `strict_dependencies 'layered_dag'` or stricter, it cannot
 be part of a cycle of dependencies. For example, the following is invalid:
 
 ```ruby
