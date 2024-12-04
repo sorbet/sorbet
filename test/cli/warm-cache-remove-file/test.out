@@ -3,5 +3,6 @@
             types.input.files.kvstore.miss :             22
            types.input.files.kvstore.write :             22
 ====second run (only one file)====
+                             cache.aborted :              1
                          types.input.files :              2
              types.input.files.kvstore.hit :              1
