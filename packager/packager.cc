@@ -1557,10 +1557,12 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
 // Metadata for Tarjan's algorithm
 // https://www.cs.cmu.edu/~15451-f18/lectures/lec19-DFS-strong-components.pdf provides a good overview of the
 // algorithm.
+const int UNVISITED = 0;
 struct ComputeSCCsMetadata {
     int nextIndex = 1;
     int nextSCCId = 0;
-    // A given package's index in the DFS traversal; ie. when it was first visited
+    // A given package's index in the DFS traversal; ie. when it was first visited. The default value of 0 means the
+    // package hasn't been visited yet.
     UnorderedMap<core::packages::MangledName, int> index;
     // The lowest index reachable from a given package (in the same SCC) by following any number of tree edges
     // and at most one back/cross edge
@@ -1588,10 +1590,10 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
         if (i.type == ImportType::Test) {
             continue;
         }
-        if (metadata.index[i.name.mangledName] == 0) {
+        if (metadata.index[i.name.mangledName] == UNVISITED) {
             // This is a tree edge (ie. a forward edge that we haven't visited yet).
             strongConnect(gs, metadata, i.name.mangledName);
-            if (metadata.index[i.name.mangledName] == 0) {
+            if (metadata.index[i.name.mangledName] == UNVISITED) {
                 // this might mean the other package doesn't exist, but that should have been caught already
                 continue;
             }
@@ -1630,7 +1632,7 @@ void computeSCCs(core::GlobalState &gs) {
     ComputeSCCsMetadata metadata;
     auto allPackages = gs.packageDB().packages();
     for (auto package : allPackages) {
-        if (metadata.index[package] == 0) {
+        if (metadata.index[package] == UNVISITED) {
             strongConnect(gs, metadata, package);
         }
     }
