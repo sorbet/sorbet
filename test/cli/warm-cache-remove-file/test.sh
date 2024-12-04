@@ -26,7 +26,7 @@ run_sorbet() {
     cat "$dir/stderr.txt"
     exit 1
   fi
-  grep 'types.input.files\(.kvstore.miss\|.kvstore.hit\|.kvstore.write\)\? :' "$dir/stderr.txt"
+  grep 'cache.abort\|types.input.files\(.kvstore.miss\|.kvstore.hit\|.kvstore.write\)\? :' "$dir/stderr.txt"
 }
 
 echo "====first run (all files)===="

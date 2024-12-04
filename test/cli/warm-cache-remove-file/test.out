@@ -4,4 +4,5 @@
            types.input.files.kvstore.write :             22
 ====second run (only one file)====
                          types.input.files :              2
-             types.input.files.kvstore.hit :              1
+             types.input.files.kvstore.hit :              2
+           types.input.files.kvstore.write :              0
