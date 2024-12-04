@@ -118,8 +118,8 @@ MangledName PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
     ENFORCE(!frozen);
     ENFORCE(writerThread == this_thread::get_id(), "PackageDB writes are not thread safe");
     auto nr = pkg->mangledName();
-    auto prev = packages_.find(nr);
-    if (prev == packages_.end()) {
+    auto [it, newlyInserted] = packages_.insert({nr, nullptr});
+    if (newlyInserted) {
         for (const auto &prefix : pkg->pathPrefixes()) {
             packagesByPathPrefix[prefix] = nr;
         }
@@ -129,10 +129,10 @@ MangledName PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
         // we always run slow-path and fully rebuild the set of packages. In some cases, the LSP
         // fast-path may re-run on an unchanged package file. Sanity check to ensure the loc and
         // prefixes are the same.
-        ENFORCE(prev->second->declLoc() == pkg->declLoc());
-        ENFORCE(prev->second->pathPrefixes() == pkg->pathPrefixes());
+        ENFORCE(it->second->declLoc() == pkg->declLoc());
+        ENFORCE(it->second->pathPrefixes() == pkg->pathPrefixes());
     }
-    packages_[nr] = move(pkg);
+    it->second = move(pkg);
     ENFORCE(mangledNames.size() == packages_.size());
     return nr;
 }
