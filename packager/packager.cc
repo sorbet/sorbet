@@ -1485,10 +1485,11 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
         populateMangledName(gs, visibleTo.first);
     }
 
-    auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
-    auto extraPackageFilesDirectorySlashDeprecatedPrefixes =
+    const auto &extraPackageFilesDirectoryUnderscorePrefixes =
+        gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
+    const auto &extraPackageFilesDirectorySlashDeprecatedPrefixes =
         gs.packageDB().extraPackageFilesDirectorySlashDeprecatedPrefixes();
-    auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
+    const auto &extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
 
     const auto numPrefixes = extraPackageFilesDirectoryUnderscorePrefixes.size() +
                              extraPackageFilesDirectorySlashDeprecatedPrefixes.size() +
