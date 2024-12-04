@@ -87,6 +87,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
     if (config->disableFastPath) {
         logger.debug("Taking slow path because fast path is disabled.");
         prodCategoryCounterInc("lsp.slow_path_reason", "fast_path_disabled");
+        timeit.setTag("path_chosen", "slow");
         return TypecheckingPath::Slow;
     }
 
@@ -94,6 +95,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
         logger.debug("Taking slow path because too many files changed ({} files > {} files)", changedFiles.size(),
                      config->opts.lspMaxFilesOnFastPath);
         prodCategoryCounterInc("lsp.slow_path_reason", "too_many_files");
+        timeit.setTag("path_chosen", "slow");
         return TypecheckingPath::Slow;
     }
 
@@ -102,6 +104,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
         if (!fref.exists()) {
             logger.debug("Taking slow path because {} is a new file", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
+            timeit.setTag("path_chosen", "slow");
             return TypecheckingPath::Slow;
         }
 
@@ -115,6 +118,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
         if (this->config->opts.stripePackages && oldFile.isPackage() && oldFile.source() != f->source()) {
             logger.debug("Taking slow path because {} is a package file", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "package_file");
+            timeit.setTag("path_chosen", "slow");
             return TypecheckingPath::Slow;
         }
         ENFORCE(oldFile.getFileHash() != nullptr);
@@ -125,6 +129,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
         if (newHash.localSymbolTableHashes.isInvalidParse()) {
             logger.debug("Taking slow path because {} has a syntax error", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "syntax_error");
+            timeit.setTag("path_chosen", "slow");
             return TypecheckingPath::Slow;
         }
 
@@ -181,6 +186,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
                     prodCategoryCounterInc("lsp.slow_path_changed_def", "onlymethods");
                 }
             }
+            timeit.setTag("path_chosen", "slow");
             return TypecheckingPath::Slow;
         }
     }
@@ -206,10 +212,12 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
             "Taking slow path because too many extra files would be typechecked on the fast path ({} files > {} files)",
             filesToTypecheck, config->opts.lspMaxFilesOnFastPath);
         prodCategoryCounterInc("lsp.slow_path_reason", "too_many_extra_files");
+        timeit.setTag("path_chosen", "slow");
         return TypecheckingPath::Slow;
     }
 
     logger.debug("Taking fast path");
+    timeit.setTag("path_chosen", "fast");
     return TypecheckingPath::Fast;
 }
 
