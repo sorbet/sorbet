@@ -88,12 +88,12 @@ string NamedLiteralType::showValue(const GlobalState &gs) const {
 }
 
 string NamedLiteralType::showAsSymbolLiteral(const GlobalState &gs, NameRef name) {
-            auto shown = name.show(gs);
-            if (absl::StrContains(shown, " ")) {
-                return fmt::format(":\"{}\"", absl::CEscape(shown));
-            } else {
-                return fmt::format(":{}", shown);
-            }
+    auto shown = name.show(gs);
+    if (absl::StrContains(shown, " ")) {
+        return fmt::format(":\"{}\"", absl::CEscape(shown));
+    } else {
+        return fmt::format(":{}", shown);
+    }
 }
 
 string IntegerLiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
