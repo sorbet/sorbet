@@ -571,6 +571,7 @@ public:
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
     std::string showValue(const GlobalState &gs) const;
+    static std::string showAsSymbolLiteral(const GlobalState &gs, NameRef name);
     uint32_t hash(const GlobalState &gs) const;
 
     bool equals(const NamedLiteralType &rhs) const;
