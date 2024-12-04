@@ -189,7 +189,7 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
                           sizeBytes, usedPercent);
     } else {
         prodCounterInc("cache.aborted");
-        OwnedKeyValueStore::abort(move(ownedKvstore));
+        kvstore = OwnedKeyValueStore::abort(move(ownedKvstore));
     }
 
     return kvstore;
