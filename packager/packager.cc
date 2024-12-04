@@ -59,7 +59,7 @@ string buildValidLayersStr(const core::GlobalState &gs) {
     return result;
 }
 
-string strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level) {
+string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level) {
     switch (level) {
         case core::packages::StrictDependenciesLevel::False:
             return "false";
