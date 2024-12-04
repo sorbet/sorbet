@@ -40,8 +40,8 @@ public:
     std::unique_ptr<parser::Node> translate(const Node &node);
 
 private:
-    Translator(Parser parser, core::GlobalState &gs, core::FileRef file, bool isInMethodDef)
-        : parser(parser), gs(gs), file(file), isInMethodDef(isInMethodDef) {}
+    Translator(Parser parser, core::GlobalState &gs, core::FileRef file, bool isInMethodDef, int uniqueCounter)
+        : parser(parser), gs(gs), file(file), uniqueCounter(uniqueCounter), isInMethodDef(isInMethodDef) {}
     void reportError(core::LocOffsets loc, const std::string &message);
 
     core::LocOffsets translateLoc(pm_location_t loc);
