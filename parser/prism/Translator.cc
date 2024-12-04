@@ -479,6 +479,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto params = childContext.translate(up_cast(defNode->parameters));
             auto body = childContext.translate(defNode->body);
 
+            uniqueCounter = childContext.uniqueCounter;
+
             if (defNode->body != nullptr && PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
                 // If the body is a PM_BEGIN_NODE instead of a PM_STATEMENTS_NODE, it means the method definition
                 // doesn't have an explicit begin block.
@@ -1862,7 +1864,7 @@ template <typename PrismNode> std::unique_ptr<parser::Mlhs> Translator::translat
 // Context management methods
 Translator Translator::enterMethodDef() {
     auto isInMethodDef = true;
-    return Translator(parser, gs, file, isInMethodDef);
+    return Translator(parser, gs, file, isInMethodDef, uniqueCounter);
 }
 
 void Translator::reportError(core::LocOffsets loc, const std::string &message) {
