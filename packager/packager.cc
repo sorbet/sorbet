@@ -1648,8 +1648,8 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     ENFORCE(packageDB.getPackageForFile(ctx, ctx.file).exists())
     auto &thisPkg = PackageInfoImpl::from(packageDB.getPackageForFile(ctx, ctx.file));
     auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name.mangledName));
-    ENFORCE(thisPkg.sccID.has_value());
-    ENFORCE(otherPkg.sccID.has_value());
+    ENFORCE(thisPkg.sccID.has_value(), "computeSCCs should already have been called and set sccID");
+    ENFORCE(otherPkg.sccID.has_value(), "computeSCCs should already have been called and set sccID");
 
     if (!thisPkg.strictDependenciesLevel.has_value() || !otherPkg.strictDependenciesLevel.has_value() ||
         !thisPkg.layer.has_value() || !otherPkg.layer.has_value()) {
