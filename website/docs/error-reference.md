@@ -981,6 +981,8 @@ imports must be in the same or lower layer. For example, given
 `--packager-layers util,lib,app`, all imports for a package with layer `lib`
 must either also have layer `lib`, or have layer `util` (but not layer `app`).
 
+Note: `test_import`s are not checked for layering violations.
+
 ## 3727
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
@@ -1007,6 +1009,8 @@ end
 
 Additionally, if a package is at `strict_dependencies 'dag'`, all packages it
 imports must also be at `strict_dependencies 'dag'`.
+
+Note: `test_import`s are not checked for strict dependency violations.
 
 ## 4001
 
