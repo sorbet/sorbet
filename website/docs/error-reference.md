@@ -992,8 +992,8 @@ Note: `test_import`s are not checked for layering violations.
 If a package is at `strict_dependencies 'layered'` or stricter, all packages it
 imports must also be at `strict_dependencies 'layered'`.
 
-If a package is at `strict_dependencies 'layered_dag'` or stricter, it cannot
-be part of a cycle of dependencies. For example, the following is invalid:
+If a package is at `strict_dependencies 'layered_dag'` or stricter, it cannot be
+part of a cycle of dependencies. For example, the following is invalid:
 
 ```ruby
 class A < PackageSpec
