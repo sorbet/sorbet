@@ -237,8 +237,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 auto name = parser.resolveConstant(prismName);
                 sorbetName = gs.enterNameUTF8(name);
             } else { // An anonymous block parameter, like `def foo(&)`
-                sorbetName =
-                    gs.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter);
+                sorbetName = gs.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), nextUniqueID());
             }
 
             return make_unique<parser::Blockarg>(location, sorbetName);
@@ -496,8 +495,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             Translator childContext = enterMethodDef();
             auto params = childContext.translate(up_cast(defNode->parameters));
             auto body = childContext.translate(defNode->body);
-
-            uniqueCounter = childContext.uniqueCounter;
 
             if (defNode->body != nullptr && PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
                 // If the body is a PM_BEGIN_NODE instead of a PM_STATEMENTS_NODE, it means the method definition
@@ -829,7 +826,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 auto name = parser.resolveConstant(prismName);
                 sorbetName = gs.enterNameUTF8(name);
             } else { // An anonymous keyword rest parameter, like `def foo(**)`
-                sorbetName = gs.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter);
+                sorbetName = gs.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), nextUniqueID());
             }
 
             return make_unique<parser::Kwrestarg>(location, sorbetName);
