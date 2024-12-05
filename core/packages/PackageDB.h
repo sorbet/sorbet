@@ -37,7 +37,7 @@ public:
 
     const PackageInfo &getPackageForFile(const core::GlobalState &gs, core::FileRef file) const;
     const PackageInfo &getPackageInfo(MangledName mangledName) const;
-    PackageInfo &getPackageInfo(MangledName mangledName);
+    PackageInfo *getPackageInfoNonConst(MangledName mangledName);
 
     // Lookup `PackageInfo` from the string representation of the un-mangled package name.
     const PackageInfo &getPackageInfo(const core::GlobalState &gs, std::string_view str) const;

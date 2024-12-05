@@ -1577,10 +1577,11 @@ struct ComputeSCCsMetadata {
 // DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
 // detecting SCCs.
 void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::packages::MangledName pkgName) {
-    if (!gs.packageDB().getPackageInfo(pkgName).exists()) {
+    if (!gs.packageDB().getPackageInfoNonConst(pkgName)) {
+        // This is to handle the case where the user imports a package that doesn't exist.
         return;
     }
-    auto &pkgInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfo(pkgName));
+    auto &pkgInfo = PackageInfoImpl::from(*(gs.packageDB().getPackageInfoNonConst(pkgName)));
     metadata.index[pkgName] = metadata.nextIndex;
     metadata.lowLink[pkgName] = metadata.nextIndex;
     metadata.nextIndex++;
@@ -1594,7 +1595,7 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
             // This is a tree edge (ie. a forward edge that we haven't visited yet).
             strongConnect(gs, metadata, i.name.mangledName);
             if (metadata.index[i.name.mangledName] == UNVISITED) {
-                // this might mean the other package doesn't exist, but that should have been caught already
+                // This is to handle early return above.
                 continue;
             }
             // Since we can follow any number of tree edges for lowLink, the lowLink of child is valid for this package
@@ -1619,7 +1620,8 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
             poppedPkgName = metadata.stack.back();
             metadata.stack.pop_back();
             metadata.onStack[poppedPkgName] = false;
-            PackageInfoImpl &poppedPkgInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfo(poppedPkgName));
+            PackageInfoImpl &poppedPkgInfo =
+                PackageInfoImpl::from(*(gs.packageDB().getPackageInfoNonConst(poppedPkgName)));
             poppedPkgInfo.sccID = metadata.nextSCCId;
         } while (poppedPkgName != pkgName);
         metadata.nextSCCId++;
