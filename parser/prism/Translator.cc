@@ -82,12 +82,12 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
         // Handle operator assignment to a constant path, like `A::B::C += 1` or `::C += 1`
         bool skipDynamicConstantWorkaround = true;
         lhs = translateConst<pm_constant_path_node, parser::ConstLhs>(node->target, skipDynamicConstantWorkaround);
-    } else if constexpr (is_same_v<SorbetLHSNode, parser::Send>) {
+    } else if constexpr (is_same_v<SorbetLHSNode, parser::Send> || is_same_v<SorbetLHSNode, parser::CSend>) {
         // Handle operator assignment to the result of a method call, like `a.b += 1`
         auto name = parser.resolveConstant(node->read_name);
         auto receiver = translate(node->receiver);
         auto messageLoc = translateLoc(node->message_loc);
-        lhs = make_unique<parser::Send>(location, move(receiver), gs.enterNameUTF8(name), messageLoc, NodeVec{});
+        lhs = make_unique<SorbetLHSNode>(location, move(receiver), gs.enterNameUTF8(name), messageLoc, NodeVec{});
     } else {
         // Handle regular assignment to any other kind of LHS.
         auto nameLoc = translateLoc(node->name_loc);
@@ -270,6 +270,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Break>(location, move(arguments));
         }
         case PM_CALL_AND_WRITE_NODE: { // And-assignment to a method call, e.g. `a.b &&= false`
+            auto flags = static_cast<pm_call_node_flags>(node->flags);
+
+            if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) {
+                return translateOpAssignment<pm_call_and_write_node, parser::AndAsgn, parser::CSend>(node);
+            }
+
             return translateOpAssignment<pm_call_and_write_node, parser::AndAsgn, parser::Send>(node);
         }
         case PM_CALL_NODE: { // A method call like `a.b()` or `a&.b()`
@@ -333,9 +339,21 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
         }
         case PM_CALL_OPERATOR_WRITE_NODE: { // Compound assignment to a method call, e.g. `a.b += 1`
+            auto flags = static_cast<pm_call_node_flags>(node->flags);
+
+            if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) {
+                return translateOpAssignment<pm_call_operator_write_node, parser::OpAsgn, parser::CSend>(node);
+            }
+
             return translateOpAssignment<pm_call_operator_write_node, parser::OpAsgn, parser::Send>(node);
         }
         case PM_CALL_OR_WRITE_NODE: { // Or-assignment to a method call, e.g. `a.b ||= true`
+            auto flags = static_cast<pm_call_node_flags>(node->flags);
+
+            if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) {
+                return translateOpAssignment<pm_call_or_write_node, parser::OrAsgn, parser::CSend>(node);
+            }
+
             return translateOpAssignment<pm_call_or_write_node, parser::OrAsgn, parser::Send>(node);
         }
         case PM_CALL_TARGET_NODE: { // Target of an indirect write to the result of a method call
