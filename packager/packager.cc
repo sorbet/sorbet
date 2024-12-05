@@ -1696,7 +1696,8 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     if (thisPkg.strictDependenciesLevel.value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
         if (thisPkg.sccID == otherPkg.sccID) {
             if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
-                e.setHeader("Importing `{}` will put `{}` into a cycle, which is not valid at `{}` level `{}`",
+                e.setHeader("Strict Dependencies violation: Importing `{}` will put `{}` into a cycle, which is not "
+                            "valid at `{}` level `{}`",
                             otherPkg.show(ctx), thisPkg.show(ctx), "strict_dependencies",
                             strictDependenciesLevelToString(thisPkg.strictDependenciesLevel.value().first));
             }
