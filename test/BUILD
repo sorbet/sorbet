@@ -290,7 +290,6 @@ pipeline_tests(
             # Legitimately failing desugar tests
             "testdata/desugar/blockpass.rb",
             "testdata/desugar/constant_error.rb",
-            "testdata/desugar/defs_not_self_in_class.rb",
             "testdata/desugar/for.rb",
             "testdata/desugar/oror_classvar.rb",
             "testdata/desugar/oror_ivar.rb",
@@ -299,7 +298,6 @@ pipeline_tests(
             "testdata/desugar/pattern_matching_hash.rb",
             "testdata/desugar/range.rb",
             "testdata/desugar/regexp.rb",
-            "testdata/desugar/sclass_inheritance.rb",
             "testdata/desugar/sclass.rb",
             "testdata/desugar/star_in_block_arg.rb",
 
