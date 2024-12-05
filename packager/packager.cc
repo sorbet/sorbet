@@ -230,7 +230,7 @@ public:
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer = nullopt;
 
-    // PackageInfoImpl is the only implementation of PackageInfoImpl
+    // PackageInfoImpl is the only implementation of PackageInfo
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
         ENFORCE(pkg.exists());
         return reinterpret_cast<const PackageInfoImpl &>(pkg); // TODO is there a more idiomatic way to do this?
@@ -1542,9 +1542,83 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     return info;
 }
 
+void validateLayering(const core::Context &ctx, const Import &i) {
+    if (i.type == ImportType::Test) {
+        return;
+    }
+
+    const auto &packageDB = ctx.state.packageDB();
+    ENFORCE(packageDB.getPackageInfo(i.name.mangledName).exists())
+    ENFORCE(packageDB.getPackageForFile(ctx, ctx.file).exists())
+    auto &thisPkg = PackageInfoImpl::from(packageDB.getPackageForFile(ctx, ctx.file));
+    auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name.mangledName));
+
+    if (!thisPkg.strictDependenciesLevel.has_value() || !otherPkg.strictDependenciesLevel.has_value() ||
+        !thisPkg.layer.has_value() || !otherPkg.layer.has_value()) {
+        return;
+    }
+
+    if (thisPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::False) {
+        return;
+    }
+
+    auto possibleLayers = packageDB.layers();
+    auto pkgLayer = thisPkg.layer.value().first;
+    auto otherPkgLayer = otherPkg.layer.value().first;
+    auto pkgLayerIndex = packageDB.layerIndex(pkgLayer);
+    auto otherPkgLayerIndex = packageDB.layerIndex(otherPkgLayer);
+
+    if (pkgLayerIndex < otherPkgLayerIndex) {
+        if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
+            e.setHeader("Layering violation: cannot import `{}` (in layer `{}`) from `{}` (in layer `{}`)",
+                        otherPkg.show(ctx), otherPkgLayer.show(ctx), thisPkg.show(ctx), pkgLayer.show(ctx));
+            e.addErrorLine(core::Loc(thisPkg.loc.file(), thisPkg.layer.value().second), "`{}`'s `{}` declared here",
+                           thisPkg.show(ctx), "layer");
+            e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.layer.value().second), "`{}`'s `{}` declared here",
+                           otherPkg.show(ctx), "layer");
+        }
+    }
+
+    if (otherPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::False) {
+        if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
+            e.setHeader("Strict Dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
+                        "import", "layered");
+            e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel.value().second),
+                           "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
+        }
+    }
+}
+
+void validateVisibility(const core::Context &ctx, const Import i) {
+    ENFORCE(ctx.state.packageDB().getPackageInfo(i.name.mangledName).exists())
+    ENFORCE(ctx.state.packageDB().getPackageForFile(ctx, ctx.file).exists())
+    auto &absPkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
+    auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.name.mangledName);
+
+    const auto &visibleTo = otherPkg.visibleTo();
+    if (visibleTo.empty() && !otherPkg.visibleToTests()) {
+        return;
+    }
+
+    if (otherPkg.visibleToTests() && i.type == ImportType::Test) {
+        return;
+    }
+
+    bool allowed = absl::c_any_of(otherPkg.visibleTo(),
+                                  [&absPkg](const auto &other) { return visibilityApplies(other, absPkg.fullName()); });
+
+    if (!allowed) {
+        if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
+            e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
+                        otherPkg.show(ctx), absPkg.show(ctx));
+            e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
+                           "visible_to", otherPkg.show(ctx));
+        }
+    }
+}
+
 } // namespace
 
-// Validate that the package file is marked `# typed: strict`.
 void validatePackage(core::Context ctx) {
     const auto &packageDB = ctx.state.packageDB();
     auto &absPkg = packageDB.getPackageForFile(ctx, ctx.file);
@@ -1554,47 +1628,36 @@ void validatePackage(core::Context ctx) {
         return;
     }
 
-    auto &pkgInfo = PackageInfoImpl::from(absPkg);
-    bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
-
-    if (!skipImportVisibilityCheck) {
-        for (auto &i : pkgInfo.importedPackageNames) {
-            auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
-
-            // this might mean the other package doesn't exist, but that
-            // should have been caught already
-            if (!otherPkg.exists()) {
-                continue;
-            }
-
-            const auto &visibleTo = otherPkg.visibleTo();
-            if (visibleTo.empty() && !otherPkg.visibleToTests()) {
-                continue;
-            }
-
-            if (otherPkg.visibleToTests() && i.type == ImportType::Test) {
-                continue;
-            }
-
-            bool allowed = absl::c_any_of(otherPkg.visibleTo(), [&absPkg](const auto &other) {
-                return visibilityApplies(other, absPkg.fullName());
-            });
-
-            if (!allowed) {
-                if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
-                    e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
-                                otherPkg.show(ctx), absPkg.show(ctx));
-                    e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
-                                   "visible_to", otherPkg.show(ctx));
-                }
-            }
-        }
-    }
-
     // Sanity check: __package.rb files _must_ be typed: strict
     if (ctx.file.data(ctx).originalSigil < core::StrictLevel::Strict) {
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::PackageFileMustBeStrict)) {
             e.setHeader("Package files must be at least `{}`", "# typed: strict");
+        }
+    }
+
+    auto &pkgInfo = PackageInfoImpl::from(absPkg);
+    bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
+    auto enforceLayering = ctx.state.packageDB().enforceLayering();
+
+    if (skipImportVisibilityCheck && !enforceLayering) {
+        return;
+    }
+
+    for (auto &i : pkgInfo.importedPackageNames) {
+        auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+
+        // this might mean the other package doesn't exist, but that
+        // should have been caught already
+        if (!otherPkg.exists()) {
+            continue;
+        }
+
+        if (enforceLayering) {
+            validateLayering(ctx, i);
+        }
+
+        if (!skipImportVisibilityCheck) {
+            validateVisibility(ctx, i);
         }
     }
 }

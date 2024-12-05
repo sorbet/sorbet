@@ -217,6 +217,12 @@ const std::vector<core::NameRef> &PackageDB::layers() const {
     return layers_;
 }
 
+const int PackageDB::layerIndex(core::NameRef layer) const {
+    auto findResult = absl::c_find(layers_, layer);
+    ENFORCE(findResult != layers_.end());
+    return std::distance(layers_.begin(), findResult);
+}
+
 const bool PackageDB::enforceLayering() const {
     return !layers_.empty();
 }

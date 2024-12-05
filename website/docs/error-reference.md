@@ -943,9 +943,9 @@ The 4 possible values are:
 > [go/layers](http://go/layers) for more.
 
 All packages have a `layer`, which is used when checking for layering
-violations.
+violations. See [3726](#3726).
 
-<!-- TODO(neil): explain this further once we implement these checks -->
+<!-- TODO(neil): Replace [3726](#3726) with a link to layering/strict_deps documentation when we write that. -->
 
 ```ruby
 class MyPackage < PackageSpec
@@ -958,14 +958,37 @@ You can choose the valid layers using the `--packager-layers` command line flag.
 For example, the following specifies that there are three valid layers: `util`,
 `lib` and `app`, ordered lowest to highest.
 
-<!-- TODO(neil): explain what lowest to highest means once we implement these checks -->
-
 ```bash
 srb tc --packager-layers util,lib,app
 ```
 
+Note that the order matters here. Passing the option as above means that in
+`layered` (or stricter), packages in the `app` layer can import those in `util`
+or `lib`, but packages in the `util` layer cannot import those in `lib` or
+`app`.
+
 If the flag is passed with no argument, then the default valid layers are
 `library` and `application`.
+
+## 3726
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) and
+> [go/layers](http://go/layers) for more.
+
+If a package is at `strict_dependencies 'layered'` or stricter, all packages it
+imports must be in the same or lower layer. For example, given
+`--packager-layers util,lib,app`, all imports for a package with layer `lib`
+must either also have layer `lib`, or have layer `util` (but not layer `app`).
+
+## 3727
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) and
+> [go/strict-dependencies](http://go/strict-dependencies) for more.
+
+If a package is at `strict_dependencies 'layered'`, all packages it imports must
+also be at `strict_dependencies 'layered'`.
 
 ## 4001
 
