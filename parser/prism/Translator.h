@@ -24,8 +24,13 @@ class Translator final {
     core::FileRef file;
 
     // Context variables
-    uint16_t uniqueCounter = 1;
     bool isInMethodDef = false;
+
+    // Keep track of the unique ID counter
+    // uniqueCounterStorage is the source of truth maintained by the parent Translator
+    // uniqueCounter is a pointer to uniqueCounterStorage and is passed down to child Translators
+    int uniqueCounterStorage;
+    int *uniqueCounter;
 
     Translator(Translator &&) = delete;                 // Move constructor
     Translator(const Translator &) = delete;            // Copy constructor
@@ -33,15 +38,23 @@ class Translator final {
     Translator &operator=(const Translator &) = delete; // Copy assignment
 public:
     Translator(Parser parser, core::GlobalState &gs, core::FileRef file)
-        : parser(std::move(parser)), gs(gs), file(file) {}
+        : parser(std::move(parser)), gs(gs), file(file), uniqueCounterStorage(1),
+          uniqueCounter(&this->uniqueCounterStorage) {}
+
+    int nextUniqueID() {
+        return *uniqueCounter += 1;
+    }
 
     // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
     std::unique_ptr<parser::Node> translate(pm_node_t *node);
     std::unique_ptr<parser::Node> translate(const Node &node);
 
 private:
-    Translator(Parser parser, core::GlobalState &gs, core::FileRef file, bool isInMethodDef, int uniqueCounter)
-        : parser(parser), gs(gs), file(file), uniqueCounter(uniqueCounter), isInMethodDef(isInMethodDef) {}
+    // Private constructor used only for creating child translators
+    // uniqueCounterStorage is passed as the minimum integer value and is never used
+    Translator(Parser parser, core::GlobalState &gs, core::FileRef file, bool isInMethodDef, int *uniqueCounter)
+        : parser(parser), gs(gs), file(file), isInMethodDef(isInMethodDef),
+          uniqueCounterStorage(std::numeric_limits<int>::min()), uniqueCounter(uniqueCounter) {}
     void reportError(core::LocOffsets loc, const std::string &message);
 
     core::LocOffsets translateLoc(pm_location_t loc);
