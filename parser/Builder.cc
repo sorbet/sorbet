@@ -1857,7 +1857,6 @@ public:
     void checkAssignmentToNumberedParameters(std::string_view name, core::LocOffsets loc) {
         if (driver_->lex.context.allowNumparams && isNumberedParameterName(name) &&
             driver_->numparam_stack.seen_numparams()) {
-            std::cout << "Assignment error" << std::endl;
             core::Loc location = core::Loc(file_, loc);
             if (auto e = gs_.beginIndexerError(location, core::errors::Parser::AssignmentToNumparamError)) {
                 e.setHeader("cannot assign to numbered parameter `{}`", name);
