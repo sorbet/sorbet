@@ -99,6 +99,7 @@ enum class Phase {
     DESUGARER,
     REWRITER,
     LOCAL_VARS,
+    INDEXING,
     NAMER,
     PACKAGER,
     RESOLVER,

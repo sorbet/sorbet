@@ -234,6 +234,7 @@ const vector<StopAfterOptions> stop_after_options({
     {"desugarer", Phase::DESUGARER},
     {"rewriter", Phase::REWRITER},
     {"local-vars", Phase::LOCAL_VARS},
+    {"indexing", Phase::INDEXING},
     {"namer", Phase::NAMER},
     {"resolver", Phase::RESOLVER},
     {"cfg", Phase::CFG},
