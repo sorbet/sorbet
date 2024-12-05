@@ -516,6 +516,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 }
             }
 
+            if (auto receiver = defNode->receiver; receiver != nullptr) {
+                auto sorbetReceiver = translate(receiver);
+                return make_unique<parser::DefS>(location, declLoc, move(sorbetReceiver), gs.enterNameUTF8(name),
+                                                 move(params), move(body));
+            }
+
             return make_unique<parser::DefMethod>(location, declLoc, gs.enterNameUTF8(name), move(params), move(body));
         }
         case PM_DEFINED_NODE: {
