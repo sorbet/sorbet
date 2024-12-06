@@ -1209,6 +1209,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto returnValues = translateArguments(superNode->arguments);
 
+            if (auto block = superNode->block; block != nullptr) {
+                auto prismBlock = translate(superNode->block);
+                returnValues.emplace_back(move(prismBlock));
+            }
+
             return make_unique<parser::Super>(location, move(returnValues));
         }
         case PM_SYMBOL_NODE: { // A symbol literal, e.g. `:foo`
