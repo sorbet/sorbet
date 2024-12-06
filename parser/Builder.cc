@@ -1719,10 +1719,10 @@ public:
             return out;
         }
 
-        auto *args = const_cast<node_list *>(cargs);
-        out.reserve(args->size());
-        for (int i = 0; i < args->size(); i++) {
-            out.emplace_back(cast_node(args->at(i)));
+        auto nodes = cargs->nodes();
+        out.reserve(nodes.size());
+        for (auto node : nodes) {
+            out.emplace_back(cast_node(node));
         }
         return out;
     }
