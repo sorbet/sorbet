@@ -690,7 +690,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto openingLoc = translateLoc(indexedTargetNode->opening_loc);                  // The location of `[]=`
             auto lBracketLoc = core::LocOffsets{openingLoc.beginLoc, openingLoc.endLoc - 1}; // Drop the `=`
             auto receiver = translate(indexedTargetNode->receiver);
-            auto arguments = translateArguments(indexedTargetNode->arguments, nullptr);
+            auto arguments = translateArguments(indexedTargetNode->arguments, up_cast(indexedTargetNode->block));
 
             return make_unique<parser::Send>(location, move(receiver), core::Names::squareBracketsEq(), lBracketLoc,
                                              move(arguments));

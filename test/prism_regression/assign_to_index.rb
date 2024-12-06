@@ -23,3 +23,6 @@ lazy_or_assign[0] ||= 14
 target[0], target[1] = 15, 16
 target[2, 3], target[4, 5] = 17, 18, 19, 20
 target[] = 21 # Yes, this is valid. You can have `def []=(only_one_param)`.
+
+# Index target node with a block
+target[&blk], target[1] = 4
