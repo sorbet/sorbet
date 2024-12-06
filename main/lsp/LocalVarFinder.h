@@ -15,10 +15,11 @@ class LocalVarFinder {
     // flattened at this point. (LSP code should try to make minimal assumptions to be robust to changes.)
     std::vector<core::MethodRef> methodStack;
 
-    std::vector<core::NameRef> result_;
+    std::vector<core::NameRef> &result_;
 
 public:
-    LocalVarFinder(core::MethodRef targetMethod, core::Loc queryLoc) : targetMethod(targetMethod), queryLoc(queryLoc) {}
+    LocalVarFinder(core::MethodRef targetMethod, core::Loc queryLoc, std::vector<core::NameRef> &result)
+        : targetMethod(targetMethod), queryLoc(queryLoc), result_{result} {}
 
     void postTransformAssign(core::Context ctx, const ast::Assign &assign);
     void preTransformBlock(core::Context ctx, const ast::Block &block);
@@ -26,8 +27,6 @@ public:
     void postTransformMethodDef(core::Context ctx, const ast::MethodDef &methodDef);
     void preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef);
     void postTransformClassDef(core::Context ctx, const ast::ClassDef &classDef);
-
-    const std::vector<core::NameRef> &result() const;
 };
 }; // namespace sorbet::realmain::lsp
 
