@@ -68,7 +68,7 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
         auto lBracketLoc = core::LocOffsets{openingLoc.beginLoc, openingLoc.endLoc - 1};
 
         auto receiver = translate(node->receiver);
-        auto args = translateArguments(node->arguments, nullptr);
+        auto args = translateArguments(node->arguments, up_cast(node->block));
         lhs =
             make_unique<parser::Send>(location, move(receiver), core::Names::squareBrackets(), lBracketLoc, move(args));
     } else if constexpr (is_same_v<PrismAssignmentNode, pm_constant_operator_write_node> ||
