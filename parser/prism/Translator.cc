@@ -1207,12 +1207,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_SUPER_NODE: { // The `super` keyword, like `super`, `super(a, b)`
             auto superNode = down_cast<pm_super_node>(node);
 
-            auto returnValues = translateArguments(superNode->arguments, nullptr);
-
-            if (auto block = superNode->block; block != nullptr) {
-                auto prismBlock = translate(superNode->block);
-                returnValues.emplace_back(move(prismBlock));
-            }
+            auto returnValues = translateArguments(superNode->arguments, superNode->block);
 
             return make_unique<parser::Super>(location, move(returnValues));
         }
@@ -1590,20 +1585,20 @@ void Translator::patternTranslateMultiInto(NodeVec &outSorbetNodes, absl::Span<p
 
 // The legacy Sorbet parser doesn't have a counterpart to PM_ARGUMENTS_NODE to wrap the array
 // of argument nodes. It just uses a NodeVec directly, which is what this function produces.
-NodeVec Translator::translateArguments(pm_arguments_node *argsNode, pm_block_node *blockNode, size_t extraCapacity) {
+NodeVec Translator::translateArguments(pm_arguments_node *argsNode, pm_node *blockNode, size_t extraCapacity) {
     NodeVec results;
 
-    if (argsNode == nullptr) {
-        results.reserve(extraCapacity);
-        return results;
+    absl::Span<pm_node *> prismArgs;
+
+    if (argsNode != nullptr) {
+        prismArgs = absl::MakeSpan(argsNode->arguments.nodes, argsNode->arguments.size);
     }
 
-    auto prismArgs = absl::MakeSpan(argsNode->arguments.nodes, argsNode->arguments.size);
     results.reserve(prismArgs.size() + extraCapacity + blockNode == nullptr ? 0 : 1);
 
     translateMultiInto(results, prismArgs);
     if (blockNode != nullptr) {
-        results.emplace_back(translate(up_cast(blockNode)));
+        results.emplace_back(translate(blockNode));
     }
 
     return results;
