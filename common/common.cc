@@ -486,17 +486,19 @@ uint32_t sorbet::nextPowerOfTwo(uint32_t v) {
 
 vector<int> sorbet::findLineBreaks(string_view s) {
     vector<int> res;
-    int i = -1;
     res.emplace_back(-1);
-    for (auto c : s) {
-        i++;
-        if (c == '\n') {
-            res.emplace_back(i);
+    size_t next_pos = 0;
+    while (true) {
+        auto pos = s.find_first_of('\n', next_pos);
+        if (pos == string_view::npos) {
+            break;
         }
+
+        res.emplace_back((int)pos);
+        next_pos = pos + 1;
     }
-    // We start at -1 so the last character of the file is actually i+1
-    res.emplace_back(i + 1);
-    ENFORCE(i + 1 == s.size());
+
+    res.emplace_back(s.size());
     return res;
 }
 
