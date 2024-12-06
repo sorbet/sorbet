@@ -1725,18 +1725,18 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
 
             // The Ruby VM treats `initialize` as private by default, but allows calling it directly within `new`.
             const TypeAndOrigins wrappedFullType{wrapped, args.fullType.origins};
-            auto innerArgs = DispatchArgs{Names::initialize(),
-                                          args.locs,
-                                          args.numPosArgs,
-                                          args.args,
-                                          wrapped,
-                                          wrappedFullType,
-                                          wrapped,
-                                          args.block,
-                                          args.originForUninitialized,
-                                          /* isPrivateOk */ true,
-                                          args.suppressErrors,
-                                          args.enclosingMethodForSuper};
+            DispatchArgs innerArgs{Names::initialize(),
+                                   args.locs,
+                                   args.numPosArgs,
+                                   args.args,
+                                   wrapped,
+                                   wrappedFullType,
+                                   wrapped,
+                                   args.block,
+                                   args.originForUninitialized,
+                                   /* isPrivateOk */ true,
+                                   args.suppressErrors,
+                                   args.enclosingMethodForSuper};
             auto original = wrapped.dispatchCall(gs, innerArgs);
             original.returnType = wrapped;
             // We want this to behave as if MetaType::dispatchCall were an Intrinsic--in an
@@ -3802,7 +3802,7 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
     };
     auto baseCaseArgTypes = InlinedVector<const TypeAndOrigins *, 2>{};
     baseCaseArgTypes.emplace_back(args.args[0]);
-    auto baseCaseArgs = DispatchArgs{
+    DispatchArgs baseCaseArgs{
         methodToDigWith,  baseCaseLocs,        1, /* numPosArgs */
         baseCaseArgTypes, args.selfType,       {args.selfType, args.fullType.origins},
         args.selfType,    args.block,          args.originForUninitialized,
