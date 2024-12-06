@@ -1485,10 +1485,11 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
         populateMangledName(gs, visibleTo.first);
     }
 
-    auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
-    auto extraPackageFilesDirectorySlashDeprecatedPrefixes =
+    const auto &extraPackageFilesDirectoryUnderscorePrefixes =
+        gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
+    const auto &extraPackageFilesDirectorySlashDeprecatedPrefixes =
         gs.packageDB().extraPackageFilesDirectorySlashDeprecatedPrefixes();
-    auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
+    const auto &extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
 
     const auto numPrefixes = extraPackageFilesDirectoryUnderscorePrefixes.size() +
                              extraPackageFilesDirectorySlashDeprecatedPrefixes.size() +
@@ -1503,34 +1504,31 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
 
     for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
         // Project_FooBar -- munge with underscore
-        string additionalDirPath = absl::StrCat(prefix, dirNameFromShortName, "/");
-        info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
+        info->packagePathPrefixes.emplace_back(absl::StrCat(prefix, dirNameFromShortName, "/"));
     }
 
     for (const string &prefix : extraPackageFilesDirectorySlashDeprecatedPrefixes) {
         // project/Foo_bar -- convert camel-case to snake-case and munge with slash
-        std::stringstream ss;
-        ss << prefix;
+        std::string additionalDirPath;
+        additionalDirPath.reserve(prefix.size() + 2 * dirNameFromShortName.length() + 1);
+        additionalDirPath += prefix;
         for (int i = 0; i < dirNameFromShortName.length(); i++) {
             if (dirNameFromShortName[i] == '_') {
-                ss << '/';
+                additionalDirPath.push_back('/');
             } else if (i == 0 || dirNameFromShortName[i - 1] == '_') {
                 // Capitalizing first letter in each directory name to avoid conflicts with ignored directories,
                 // which tend to be all lower case
-                char upper = std::toupper(dirNameFromShortName[i]);
-                ss << std::move(upper);
+                additionalDirPath.push_back(std::toupper(dirNameFromShortName[i]));
             } else {
                 if (isupper(dirNameFromShortName[i])) {
-                    ss << '_'; // snake-case munging
+                    additionalDirPath.push_back('_'); // snake-case munging
                 }
 
-                char lower = std::tolower(dirNameFromShortName[i]);
-                ss << std::move(lower);
+                additionalDirPath.push_back(std::tolower(dirNameFromShortName[i]));
             }
         }
-        ss << '/';
+        additionalDirPath.push_back('/');
 
-        std::string additionalDirPath(ss.str());
         info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
     }
 
