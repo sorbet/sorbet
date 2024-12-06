@@ -1632,6 +1632,7 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
 void computeSCCs(core::GlobalState &gs) {
     Timer timeit(gs.tracer(), "packager::computeSCCs");
     ComputeSCCsMetadata metadata;
+    metadata.stack.reserve(gs.packageDB().packages().size());
     auto allPackages = gs.packageDB().packages();
     for (auto package : allPackages) {
         if (metadata.index[package] == UNVISITED) {
