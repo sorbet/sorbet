@@ -358,7 +358,7 @@ public:
 private:
     SymbolRef::LOC_store locs_;
 };
-CheckSize(TypeParameter, 56, 8);
+CheckSize(TypeParameter, 64, 8);
 
 class ClassOrModule final {
 public:

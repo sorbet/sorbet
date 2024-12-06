@@ -386,7 +386,7 @@ class SymbolRef final {
     friend class MethodRef;
 
     // Stores the symbol's Kind and Index. Kind occupies the lower bits.
-    uint32_t _id;
+    uint64_t _id;
     uint32_t unsafeTableIndex() const {
         return _id >> KIND_BITS;
     }
@@ -576,7 +576,7 @@ public:
      */
     bool isUnderNamespace(const GlobalState &gs, core::ClassOrModuleRef otherClass) const;
 };
-CheckSize(SymbolRef, 4, 4);
+CheckSize(SymbolRef, 8, 8);
 
 class Symbols {
     Symbols() = delete;

@@ -84,7 +84,7 @@ public:
     const core::MethodRef enclosingMethod;
     const core::TypeAndOrigins retType;
 };
-CheckSize(ConstantResponse, 80, 8);
+CheckSize(ConstantResponse, 88, 8);
 
 class FieldResponse final {
 public:

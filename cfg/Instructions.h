@@ -93,7 +93,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Alias, 8, 8);
+CheckSize(Alias, 16, 8);
 
 INSN(SolveConstraint) : public Instruction {
 public:
