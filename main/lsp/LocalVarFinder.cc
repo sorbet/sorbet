@@ -71,9 +71,4 @@ void LocalVarFinder::postTransformClassDef(core::Context ctx, const ast::ClassDe
     this->methodStack.pop_back();
 }
 
-const vector<core::NameRef> &LocalVarFinder::result() const {
-    ENFORCE(this->methodStack.empty());
-    return this->result_;
-}
-
 }; // namespace sorbet::realmain::lsp

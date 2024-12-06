@@ -6,8 +6,9 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-FieldFinder::FieldFinder(core::ClassOrModuleRef target, ast::UnresolvedIdent::Kind queryKind)
-    : targetClass(target), queryKind(queryKind) {
+FieldFinder::FieldFinder(core::ClassOrModuleRef target, ast::UnresolvedIdent::Kind queryKind,
+                         std::vector<core::NameRef> &result)
+    : targetClass(target), queryKind(queryKind), result_{result} {
     ENFORCE(queryKind != ast::UnresolvedIdent::Kind::Local);
 }
 
@@ -38,10 +39,6 @@ void FieldFinder::preTransformClassDef(core::Context ctx, const ast::ClassDef &c
 
 void FieldFinder::postTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
     this->classStack.pop_back();
-}
-
-const vector<core::NameRef> &FieldFinder::result() const {
-    return this->result_;
 }
 
 }; // namespace sorbet::realmain::lsp

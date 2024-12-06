@@ -42,7 +42,7 @@ bool visibilityApplies(const core::packages::VisibleTo vt, absl::Span<const core
 }
 
 string buildValidLayersStr(const core::GlobalState &gs) {
-    auto &validLayers = gs.packageDB().layers();
+    auto validLayers = gs.packageDB().layers();
     ENFORCE(validLayers.size() > 0);
     if (validLayers.size() == 1) {
         return string(validLayers.front().shortName(gs));
@@ -144,12 +144,12 @@ struct Export {
 // [X Y]
 // [X Y Z]
 class LexNext final {
-    const vector<core::NameRef> &names;
+    absl::Span<const core::NameRef> names;
 
 public:
     LexNext(const vector<core::NameRef> &names) : names(names) {}
 
-    bool operator<(const vector<core::NameRef> &rhs) const {
+    bool operator<(absl::Span<const core::NameRef> rhs) const {
         // Lexicographic comparison:
         for (auto lhsIt = names.begin(), rhsIt = rhs.begin(); lhsIt != names.end() && rhsIt != rhs.end();
              ++lhsIt, ++rhsIt) {
@@ -173,12 +173,12 @@ public:
         return name.mangledName;
     }
 
-    const vector<core::NameRef> &fullName() const {
-        return name.fullName.parts;
+    absl::Span<const core::NameRef> fullName() const {
+        return absl::MakeSpan(name.fullName.parts);
     }
 
-    const std::vector<std::string> &pathPrefixes() const {
-        return packagePathPrefixes;
+    absl::Span<const std::string> pathPrefixes() const {
+        return absl::MakeSpan(packagePathPrefixes);
     }
 
     core::Loc fullLoc() const {
@@ -558,7 +558,7 @@ const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRe
 
 // Binary search to find a packages index in the global packages list
 uint16_t findPackageIndex(core::Context ctx, const PackageInfoImpl &pkg) {
-    auto &packages = ctx.state.packageDB().packages();
+    auto packages = ctx.state.packageDB().packages();
     return std::lower_bound(packages.begin(), packages.end(), pkg.fullName(),
                             [ctx](auto pkgName, auto &curFileFullName) {
                                 auto &pkg = ctx.state.packageDB().getPackageInfo(pkgName);
@@ -583,8 +583,8 @@ uint16_t findPackageIndex(core::Context ctx, const PackageInfoImpl &pkg) {
 class PackageNamespaces final {
     using Bound = pair<uint16_t, uint16_t>;
 
-    const vector<core::packages::MangledName> &packages; // Mangled names sorted lexicographically
-    const PackageInfoImpl &filePkg;                      // Package for current file
+    const absl::Span<const core::packages::MangledName> packages; // Mangled names sorted lexicographically
+    const PackageInfoImpl &filePkg;                               // Package for current file
     // Current bounds:
     uint16_t begin;
     uint16_t end;
@@ -1341,7 +1341,7 @@ private:
     }
 
     optional<core::NameRef> parseLayerOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
-        auto &validLayers = gs.packageDB().layers();
+        auto validLayers = gs.packageDB().layers();
         auto *lit = ast::cast_tree<ast::Literal>(arg);
         if (!lit || !lit->isString()) {
             return nullopt;
@@ -1485,11 +1485,10 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
         populateMangledName(gs, visibleTo.first);
     }
 
-    const auto &extraPackageFilesDirectoryUnderscorePrefixes =
-        gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
-    const auto &extraPackageFilesDirectorySlashDeprecatedPrefixes =
+    auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
+    auto extraPackageFilesDirectorySlashDeprecatedPrefixes =
         gs.packageDB().extraPackageFilesDirectorySlashDeprecatedPrefixes();
-    const auto &extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
+    auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
 
     const auto numPrefixes = extraPackageFilesDirectoryUnderscorePrefixes.size() +
                              extraPackageFilesDirectorySlashDeprecatedPrefixes.size() +
@@ -1560,7 +1559,6 @@ void validateLayering(const core::Context &ctx, const Import &i) {
         return;
     }
 
-    auto possibleLayers = packageDB.layers();
     auto pkgLayer = thisPkg.layer.value().first;
     auto otherPkgLayer = otherPkg.layer.value().first;
     auto pkgLayerIndex = packageDB.layerIndex(pkgLayer);

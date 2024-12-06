@@ -605,12 +605,12 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typecheck
         auto resolved = typechecker.getResolved(files);
 
         // Instantiate fieldFinder outside loop so that result accumulates over every time we TreeWalk::apply
-        FieldFinder fieldFinder(klass, kind);
+        std::vector<core::NameRef> fields;
+        FieldFinder fieldFinder(klass, kind, fields);
         for (auto &t : resolved) {
             auto ctx = core::Context(gs, core::Symbols::root(), t.file);
             ast::ConstTreeWalk::apply(ctx, fieldFinder, t.tree);
         }
-        auto fields = fieldFinder.result();
 
         // TODO: this does prefix matching for instance/class variables, but our
         // completion for locals matches anywhere in the name
@@ -644,13 +644,13 @@ vector<core::NameRef> localNamesForMethod(LSPTypecheckerDelegate &typechecker, c
     auto resolved = typechecker.getResolved(files);
 
     // Instantiate localVarFinder outside loop so that result accumualates over every time we TreeWalk::apply
-    LocalVarFinder localVarFinder(method, queryLoc);
+    std::vector<core::NameRef> result;
+    LocalVarFinder localVarFinder(method, queryLoc, result);
     for (auto &t : resolved) {
         auto ctx = core::Context(gs, core::Symbols::root(), t.file);
         ast::ConstTreeWalk::apply(ctx, localVarFinder, t.tree);
     }
 
-    auto result = localVarFinder.result();
     fast_sort(result, [&gs](const auto &left, const auto &right) {
         // Sort by actual name, not by NameRef id
         if (left != right) {

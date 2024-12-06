@@ -1,5 +1,6 @@
 #include "core/packages/PackageDB.h"
 #include "absl/strings/match.h"
+#include "absl/types/span.h"
 #include "common/sort/sort.h"
 #include "core/AutocorrectSuggestion.h"
 #include "core/GlobalState.h"
@@ -16,14 +17,14 @@ public:
         return MangledName();
     }
 
-    const vector<core::NameRef> &fullName() const {
+    absl::Span<const core::NameRef> fullName() const {
         notImplemented();
-        return emptyName;
+        return absl::Span<const core::NameRef>();
     }
 
-    const vector<string> &pathPrefixes() const {
+    absl::Span<const string> pathPrefixes() const {
         notImplemented();
-        return prefixes;
+        return absl::Span<const string>();
     }
 
     unique_ptr<PackageInfo> deepCopy() const {
@@ -88,9 +89,6 @@ public:
     ~NonePackage() {}
 
 private:
-    const vector<string> prefixes;
-    const vector<core::NameRef> emptyName;
-
     void notImplemented() const {
         ENFORCE(false, "Not implemented for NonePackage");
     }
@@ -205,16 +203,16 @@ const PackageInfo &PackageDB::getPackageInfo(MangledName mangledName) const {
     return *it->second;
 }
 
-const vector<MangledName> &PackageDB::packages() const {
-    return mangledNames;
+absl::Span<const MangledName> PackageDB::packages() const {
+    return absl::MakeSpan(mangledNames);
 }
 
-const std::vector<std::string> &PackageDB::skipRBIExportEnforcementDirs() const {
-    return skipRBIExportEnforcementDirs_;
+absl::Span<const std::string> PackageDB::skipRBIExportEnforcementDirs() const {
+    return absl::MakeSpan(skipRBIExportEnforcementDirs_);
 }
 
-const std::vector<core::NameRef> &PackageDB::layers() const {
-    return layers_;
+absl::Span<const core::NameRef> PackageDB::layers() const {
+    return absl::MakeSpan(layers_);
 }
 
 const int PackageDB::layerIndex(core::NameRef layer) const {
@@ -227,16 +225,16 @@ const bool PackageDB::enforceLayering() const {
     return !layers_.empty();
 }
 
-const std::vector<std::string> &PackageDB::extraPackageFilesDirectoryUnderscorePrefixes() const {
-    return extraPackageFilesDirectoryUnderscorePrefixes_;
+absl::Span<const std::string> PackageDB::extraPackageFilesDirectoryUnderscorePrefixes() const {
+    return absl::MakeSpan(extraPackageFilesDirectoryUnderscorePrefixes_);
 }
 
-const std::vector<std::string> &PackageDB::extraPackageFilesDirectorySlashDeprecatedPrefixes() const {
-    return extraPackageFilesDirectorySlashDeprecatedPrefixes_;
+absl::Span<const std::string> PackageDB::extraPackageFilesDirectorySlashDeprecatedPrefixes() const {
+    return absl::MakeSpan(extraPackageFilesDirectorySlashDeprecatedPrefixes_);
 }
 
-const std::vector<std::string> &PackageDB::extraPackageFilesDirectorySlashPrefixes() const {
-    return extraPackageFilesDirectorySlashPrefixes_;
+absl::Span<const std::string> PackageDB::extraPackageFilesDirectorySlashPrefixes() const {
+    return absl::MakeSpan(extraPackageFilesDirectorySlashPrefixes_);
 }
 
 const std::string_view PackageDB::errorHint() const {

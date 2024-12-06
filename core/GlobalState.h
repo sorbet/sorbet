@@ -293,7 +293,7 @@ public:
     void trace(std::string_view msg) const;
 
     std::unique_ptr<LocalSymbolTableHashes> hash() const;
-    const std::vector<std::shared_ptr<File>> &getFiles() const;
+    absl::Span<const std::shared_ptr<File>> getFiles() const;
 
     // Contains a string to be used as the base of the error URL.
     // The error code is appended to this string.

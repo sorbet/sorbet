@@ -2511,8 +2511,8 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     return result;
 }
 
-const vector<shared_ptr<File>> &GlobalState::getFiles() const {
-    return files;
+absl::Span<const shared_ptr<File>> GlobalState::getFiles() const {
+    return absl::MakeSpan(files);
 }
 
 MethodRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {

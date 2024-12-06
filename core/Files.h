@@ -76,7 +76,7 @@ public:
     File(const File &other) = delete;
     File() = delete;
     std::unique_ptr<File> deepCopy(GlobalState &) const;
-    std::vector<int> &lineBreaks() const;
+    absl::Span<const int> lineBreaks() const;
     int lineCount() const;
     StrictLevel minErrorLevel() const;
 

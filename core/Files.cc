@@ -220,12 +220,12 @@ void File::setIsOpenInClient(bool isOpenInClient) {
     this->flags.isOpenInClient = isOpenInClient;
 }
 
-vector<int> &File::lineBreaks() const {
+absl::Span<const int> File::lineBreaks() const {
     ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);
     auto ptr = atomic_load(&lineBreaks_);
     if (ptr != nullptr) {
-        return *ptr;
+        return absl::MakeSpan(*ptr);
     } else {
         auto my = make_shared<vector<int>>(findLineBreaks(this->source_));
         atomic_compare_exchange_weak(&lineBreaks_, &ptr, my);
@@ -238,7 +238,7 @@ int File::lineCount() const {
 }
 
 string_view File::getLine(int i) const {
-    auto &lineBreaks = this->lineBreaks();
+    auto lineBreaks = this->lineBreaks();
     ENFORCE(i < lineBreaks.size());
     ENFORCE(i > 0);
     auto start = lineBreaks[i - 1] + 1;
