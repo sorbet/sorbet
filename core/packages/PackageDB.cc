@@ -203,6 +203,14 @@ const PackageInfo &PackageDB::getPackageInfo(MangledName mangledName) const {
     return *it->second;
 }
 
+PackageInfo *PackageDB::getPackageInfoNonConst(MangledName mangledName) {
+    auto it = packages_.find(mangledName);
+    if (it == packages_.end()) {
+        return nullptr;
+    }
+    return it->second.get();
+}
+
 absl::Span<const MangledName> PackageDB::packages() const {
     return absl::MakeSpan(mangledNames);
 }

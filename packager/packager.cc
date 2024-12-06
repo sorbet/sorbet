@@ -59,6 +59,19 @@ string buildValidLayersStr(const core::GlobalState &gs) {
     return result;
 }
 
+string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level) {
+    switch (level) {
+        case core::packages::StrictDependenciesLevel::False:
+            return "false";
+        case core::packages::StrictDependenciesLevel::Layered:
+            return "layered";
+        case core::packages::StrictDependenciesLevel::LayeredDag:
+            return "layered_dag";
+        case core::packages::StrictDependenciesLevel::Dag:
+            return "dag";
+    }
+}
+
 struct FullyQualifiedName {
     vector<core::NameRef> parts;
     core::Loc loc;
@@ -229,6 +242,8 @@ public:
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer = nullopt;
+    // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
+    optional<int> sccID = nullopt;
 
     // PackageInfoImpl is the only implementation of PackageInfo
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
@@ -1539,6 +1554,93 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     return info;
 }
 
+// Metadata for Tarjan's algorithm
+// https://www.cs.cmu.edu/~15451-f18/lectures/lec19-DFS-strong-components.pdf provides a good overview of the
+// algorithm.
+const int UNVISITED = 0;
+struct ComputeSCCsMetadata {
+    int nextIndex = 1;
+    int nextSCCId = 0;
+    // A given package's index in the DFS traversal; ie. when it was first visited. The default value of 0 means the
+    // package hasn't been visited yet.
+    UnorderedMap<core::packages::MangledName, int> index;
+    // The lowest index reachable from a given package (in the same SCC) by following any number of tree edges
+    // and at most one back/cross edge
+    UnorderedMap<core::packages::MangledName, int> lowLink;
+    // Fast way to check if a package is on the stack
+    UnorderedMap<core::packages::MangledName, bool> onStack;
+    // As we visit packages, we push them onto the stack. Once we find the "root" of an SCC, we can use the stack to
+    // determine all packages in the SCC.
+    std::vector<core::packages::MangledName> stack;
+};
+
+// DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
+// detecting SCCs.
+void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::packages::MangledName pkgName) {
+    if (!gs.packageDB().getPackageInfoNonConst(pkgName)) {
+        // This is to handle the case where the user imports a package that doesn't exist.
+        return;
+    }
+    auto &pkgInfo = PackageInfoImpl::from(*(gs.packageDB().getPackageInfoNonConst(pkgName)));
+    metadata.index[pkgName] = metadata.nextIndex;
+    metadata.lowLink[pkgName] = metadata.nextIndex;
+    metadata.nextIndex++;
+    metadata.stack.push_back(pkgName);
+    metadata.onStack[pkgName] = true;
+    for (auto &i : pkgInfo.importedPackageNames) {
+        if (i.type == ImportType::Test) {
+            continue;
+        }
+        if (metadata.index[i.name.mangledName] == UNVISITED) {
+            // This is a tree edge (ie. a forward edge that we haven't visited yet).
+            strongConnect(gs, metadata, i.name.mangledName);
+            if (metadata.index[i.name.mangledName] == UNVISITED) {
+                // This is to handle early return above.
+                continue;
+            }
+            // Since we can follow any number of tree edges for lowLink, the lowLink of child is valid for this package
+            // too.
+            metadata.lowLink[pkgName] = std::min(metadata.lowLink[pkgName], metadata.lowLink[i.name.mangledName]);
+        } else if (metadata.onStack[i.name.mangledName]) {
+            // This is a back edge (edge to ancestor) or cross edge (edge to a different subtree). Since we can only
+            // follow at most one back/cross edge, the best update we can make to lowlink of the current package is the
+            // child's index.
+            metadata.lowLink[pkgName] = std::min(metadata.lowLink[pkgName], metadata.index[i.name.mangledName]);
+        }
+        // If the child package is already visited and not on the stack, it's in a different SCC, so no update to the
+        // lowlink.
+    }
+
+    if (metadata.index[pkgName] == metadata.lowLink[pkgName]) {
+        // This is the root of an SCC. This means that all packages on the stack from this package to the top of the top
+        // of the stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them the same
+        // SCC ID.
+        core::packages::MangledName poppedPkgName;
+        do {
+            poppedPkgName = metadata.stack.back();
+            metadata.stack.pop_back();
+            metadata.onStack[poppedPkgName] = false;
+            PackageInfoImpl &poppedPkgInfo =
+                PackageInfoImpl::from(*(gs.packageDB().getPackageInfoNonConst(poppedPkgName)));
+            poppedPkgInfo.sccID = metadata.nextSCCId;
+        } while (poppedPkgName != pkgName);
+        metadata.nextSCCId++;
+    }
+}
+
+// Tarjan's algorithm for finding strongly connected components
+void computeSCCs(core::GlobalState &gs) {
+    Timer timeit(gs.tracer(), "packager::computeSCCs");
+    ComputeSCCsMetadata metadata;
+    metadata.stack.reserve(gs.packageDB().packages().size());
+    auto allPackages = gs.packageDB().packages();
+    for (auto package : allPackages) {
+        if (metadata.index[package] == UNVISITED) {
+            strongConnect(gs, metadata, package);
+        }
+    }
+}
+
 void validateLayering(const core::Context &ctx, const Import &i) {
     if (i.type == ImportType::Test) {
         return;
@@ -1549,6 +1651,8 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     ENFORCE(packageDB.getPackageForFile(ctx, ctx.file).exists())
     auto &thisPkg = PackageInfoImpl::from(packageDB.getPackageForFile(ctx, ctx.file));
     auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name.mangledName));
+    ENFORCE(thisPkg.sccID.has_value(), "computeSCCs should already have been called and set sccID");
+    ENFORCE(otherPkg.sccID.has_value(), "computeSCCs should already have been called and set sccID");
 
     if (!thisPkg.strictDependenciesLevel.has_value() || !otherPkg.strictDependenciesLevel.has_value() ||
         !thisPkg.layer.has_value() || !otherPkg.layer.has_value()) {
@@ -1572,15 +1676,35 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                            thisPkg.show(ctx), "layer");
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.layer.value().second), "`{}`'s `{}` declared here",
                            otherPkg.show(ctx), "layer");
+            // TODO: Autocorrect to delete this import?
         }
     }
 
-    if (otherPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::False) {
+    core::packages::StrictDependenciesLevel otherPkgExpectedLevel = core::packages::StrictDependenciesLevel::Layered;
+
+    if (thisPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::Dag) {
+        otherPkgExpectedLevel = core::packages::StrictDependenciesLevel::Dag;
+    }
+
+    if (otherPkg.strictDependenciesLevel.value().first < otherPkgExpectedLevel) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
             e.setHeader("Strict Dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
-                        "import", "layered");
+                        "import", strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel.value().second),
                            "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
+            // TODO: Autocorrect to delete this import?
+        }
+    }
+
+    if (thisPkg.strictDependenciesLevel.value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
+        if (thisPkg.sccID == otherPkg.sccID) {
+            if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
+                e.setHeader("Strict Dependencies violation: Importing `{}` will put `{}` into a cycle, which is not "
+                            "valid at `{}` level `{}`",
+                            otherPkg.show(ctx), thisPkg.show(ctx), "strict_dependencies",
+                            strictDependenciesLevelToString(thisPkg.strictDependenciesLevel.value().first));
+            }
+            // TODO: Autocorrect to delete this import?
         }
     }
 }
@@ -1628,6 +1752,7 @@ void validatePackage(core::Context ctx) {
     if (ctx.file.data(ctx).originalSigil < core::StrictLevel::Strict) {
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::PackageFileMustBeStrict)) {
             e.setHeader("Package files must be at least `{}`", "# typed: strict");
+            // TODO(neil): Autocorrect to update the sigil?
         }
     }
 
@@ -1642,8 +1767,7 @@ void validatePackage(core::Context ctx) {
     for (auto &i : pkgInfo.importedPackageNames) {
         auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
 
-        // this might mean the other package doesn't exist, but that
-        // should have been caught already
+        // this might mean the other package doesn't exist, but that should have been caught already
         if (!otherPkg.exists()) {
             continue;
         }
@@ -1790,6 +1914,10 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
 
         for (size_t i = 0; i < files.size(); ++i) {
             taskq->push(i, 1);
+        }
+
+        if (gs.packageDB().enforceLayering()) {
+            computeSCCs(gs);
         }
 
         workers.multiplexJob("rewritePackagesAndFiles", [&gs, &files, &barrier, taskq]() {
