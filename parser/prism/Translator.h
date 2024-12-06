@@ -62,7 +62,7 @@ private:
     parser::NodeVec translateMulti(pm_node_list prismNodes);
     void translateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);
 
-    NodeVec translateArguments(pm_arguments_node *node, pm_node *blockNode, size_t extraCapacity = 0);
+    NodeVec translateArguments(pm_arguments_node *node, pm_node *blockNode = nullptr);
     std::unique_ptr<parser::Hash> translateHash(pm_node_t *node, pm_node_list_t elements,
                                                 bool isUsedForKeywordArguments);
     std::unique_ptr<parser::Node> translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,

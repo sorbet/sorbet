@@ -264,7 +264,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_BREAK_NODE: { // A `break` statement, e.g. `break`, `break 1, 2, 3`
             auto breakNode = down_cast<pm_break_node>(node);
 
-            auto arguments = translateArguments(breakNode->arguments, nullptr);
+            auto arguments = translateArguments(breakNode->arguments);
 
             return make_unique<parser::Break>(location, move(arguments));
         }
@@ -303,7 +303,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
                 args = translateArguments(callNode->arguments, callNode->block);
             } else {
-                args = translateArguments(callNode->arguments, nullptr);
+                args = translateArguments(callNode->arguments);
             }
 
             if (name == "[]=") {
@@ -931,7 +931,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_NEXT_NODE: { // A `next` statement, e.g. `next`, `next 1, 2, 3`
             auto nextNode = down_cast<pm_next_node>(node);
 
-            auto arguments = translateArguments(nextNode->arguments, nullptr);
+            auto arguments = translateArguments(nextNode->arguments);
 
             return make_unique<parser::Next>(location, move(arguments));
         }
@@ -1145,7 +1145,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_RETURN_NODE: { // A `return` statement, like `return 1, 2, 3`
             auto returnNode = down_cast<pm_return_node>(node);
 
-            auto returnValues = translateArguments(returnNode->arguments, nullptr);
+            auto returnValues = translateArguments(returnNode->arguments);
 
             return make_unique<parser::Return>(location, move(returnValues));
         }
@@ -1284,7 +1284,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_YIELD_NODE: { // The `yield` keyword, like `yield`, `yield 1, 2, 3`
             auto yieldNode = down_cast<pm_yield_node>(node);
 
-            auto yieldArgs = translateArguments(yieldNode->arguments, nullptr);
+            auto yieldArgs = translateArguments(yieldNode->arguments);
 
             return make_unique<parser::Yield>(location, move(yieldArgs));
         }
@@ -1583,7 +1583,7 @@ void Translator::patternTranslateMultiInto(NodeVec &outSorbetNodes, absl::Span<p
 
 // The legacy Sorbet parser doesn't have a counterpart to PM_ARGUMENTS_NODE to wrap the array
 // of argument nodes. It just uses a NodeVec directly, which is what this function produces.
-NodeVec Translator::translateArguments(pm_arguments_node *argsNode, pm_node *blockNode, size_t extraCapacity) {
+NodeVec Translator::translateArguments(pm_arguments_node *argsNode, pm_node *blockNode) {
     NodeVec results;
 
     absl::Span<pm_node *> prismArgs;
@@ -1592,7 +1592,7 @@ NodeVec Translator::translateArguments(pm_arguments_node *argsNode, pm_node *blo
         prismArgs = absl::MakeSpan(argsNode->arguments.nodes, argsNode->arguments.size);
     }
 
-    results.reserve(prismArgs.size() + extraCapacity + blockNode == nullptr ? 0 : 1);
+    results.reserve(prismArgs.size() + (blockNode == nullptr ? 0 : 1));
 
     translateMultiInto(results, prismArgs);
     if (blockNode != nullptr) {
