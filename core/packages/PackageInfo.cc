@@ -20,7 +20,7 @@ PackageInfo::~PackageInfo() {
     // see https://eli.thegreenplace.net/2010/11/13/pure-virtual-destructors-in-c
 }
 
-bool PackageInfo::lexCmp(const std::vector<core::NameRef> &lhs, const std::vector<core::NameRef> &rhs) {
+bool PackageInfo::lexCmp(absl::Span<const core::NameRef> lhs, absl::Span<const core::NameRef> rhs) {
     return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
                                         [](NameRef a, NameRef b) -> bool { return a.rawId() < b.rawId(); });
 }
@@ -29,7 +29,7 @@ ImportInfo ImportInfo::fromPackage(const core::GlobalState &gs, const PackageInf
     ImportInfo res;
     res.package = info.mangledName();
 
-    auto &thisName = info.fullName();
+    auto thisName = info.fullName();
 
     auto &db = gs.packageDB();
 
@@ -38,7 +38,7 @@ ImportInfo ImportInfo::fromPackage(const core::GlobalState &gs, const PackageInf
             continue;
         }
 
-        auto &fullName = db.getPackageInfo(pkg).fullName();
+        auto fullName = db.getPackageInfo(pkg).fullName();
         if (thisName.size() >= fullName.size()) {
             if (std::equal(fullName.begin(), fullName.end(), thisName.begin())) {
                 res.parentImports.emplace_back(pkg);
@@ -75,7 +75,7 @@ core::ClassOrModuleRef getParentNamespaceSym(const core::GlobalState &gs, const 
 }
 
 core::ClassOrModuleRef lookupNameOn(const core::GlobalState &gs, const core::ClassOrModuleRef root,
-                                    const std::vector<core::NameRef> &name) {
+                                    absl::Span<const core::NameRef> name) {
     auto curSym = root;
     if (!curSym.exists()) {
         return {};

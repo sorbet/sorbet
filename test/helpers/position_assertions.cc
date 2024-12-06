@@ -571,7 +571,7 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
 
     auto source = file->source();
     auto filename = string(file->path());
-    auto &lineBreaks = file->lineBreaks();
+    auto lineBreaks = file->lineBreaks();
 
     for (auto lineBreak : lineBreaks) {
         // Ignore first line break entry.

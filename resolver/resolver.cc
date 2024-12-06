@@ -402,7 +402,7 @@ private:
 
     struct PackageStub {
         core::packages::MangledName packageId;
-        vector<core::NameRef> fullName;
+        absl::Span<const core::NameRef> fullName;
 
         PackageStub(const core::packages::PackageInfo &info)
             : packageId{info.mangledName()}, fullName{info.fullName()} {}

@@ -1,6 +1,8 @@
 #ifndef SORBET_CORE_PACKAGES_PACKAGEDB_H
 #define SORBET_CORE_PACKAGES_PACKAGEDB_H
 
+#include "absl/types/span.h"
+
 #include "common/common.h"
 #include "core/Files.h"
 #include "core/Names.h"
@@ -42,7 +44,7 @@ public:
     // Get mangled names for all packages.
     // Packages are ordered lexicographically with respect to the NameRef's that make up their
     // namespaces.
-    const std::vector<MangledName> &packages() const;
+    absl::Span<const MangledName> packages() const;
 
     PackageDB deepCopy() const;
 
@@ -59,14 +61,14 @@ public:
         return this->enabled_;
     }
 
-    const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes() const;
-    const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
-    const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes() const;
-    const std::vector<std::string> &skipRBIExportEnforcementDirs() const;
+    absl::Span<const std::string> extraPackageFilesDirectoryUnderscorePrefixes() const;
+    absl::Span<const std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
+    absl::Span<const std::string> extraPackageFilesDirectorySlashPrefixes() const;
+    absl::Span<const std::string> skipRBIExportEnforcementDirs() const;
     // Possible layers for packages to be in. The layers are ordered lowest to highest.
     // Ie. {'util', 'app'} means that code in `app` can call code in `util`, but code in `util` cannot call code in
     // `app`.
-    const std::vector<core::NameRef> &layers() const;
+    absl::Span<const core::NameRef> layers() const;
     const int layerIndex(core::NameRef layer) const;
     const bool enforceLayering() const;
 

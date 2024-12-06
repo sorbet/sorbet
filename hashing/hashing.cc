@@ -118,7 +118,7 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
 }
 }; // namespace
 
-void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spdlog::logger &logger,
+void Hashing::computeFileHashes(absl::Span<const shared_ptr<core::File>> files, spdlog::logger &logger,
                                 WorkerPool &workers, const realmain::options::Options &opts) {
     Timer timeit(logger, "computeFileHashes");
     auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
