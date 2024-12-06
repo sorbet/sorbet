@@ -297,15 +297,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             pm_node_t *prismBlock = callNode->block;
+            NodeVec args;
             // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
             // but not an explicit block with `{ ... }` or `do ... end`
-            auto hasBlockArgument = prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE);
-
-            auto args = translateArguments(callNode->arguments, nullptr, (hasBlockArgument ? 0 : 1));
-
-            if (hasBlockArgument) {
-                auto blockPassNode = translate(prismBlock);
-                args.emplace_back(move(blockPassNode));
+            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                args = translateArguments(callNode->arguments, callNode->block);
+            } else {
+                args = translateArguments(callNode->arguments, nullptr);
             }
 
             if (name == "[]=") {
