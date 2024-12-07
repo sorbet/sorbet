@@ -1,0 +1,8 @@
+If {
+  condition = False {
+  }
+  then_ = Integer {
+    val = "5"
+  }
+  else_ = NULL
+}
