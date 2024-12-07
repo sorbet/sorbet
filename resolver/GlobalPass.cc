@@ -223,12 +223,13 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
     }
     for (auto mixin : sym.data(gs)->mixins()) {
         resolveTypeMembers(gs, mixin, typeAliases, resolved);
-        auto typeMembers = mixin.data(gs)->typeMembers();
-        for (auto tm : typeMembers) {
-            resolveTypeMember(gs, mixin, tm, sym, typeAliases);
+        if (sym != core::Symbols::Module()) {
+            auto typeMembers = mixin.data(gs)->typeMembers();
+            for (auto tm : typeMembers) {
+                resolveTypeMember(gs, mixin, tm, sym, typeAliases);
+            }
         }
     }
-
     // If this class has no type members, fix attached class early.
     if (sym.data(gs)->typeMembers().empty()) {
         sym.data(gs)->unsafeComputeExternalType(gs);
