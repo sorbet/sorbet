@@ -42,6 +42,7 @@ def cli_tests(suite_name, scripts, tags = []):
 
 def _cli_test(name, script, tags = []):
     test_name = "test_{}".format(name)
+    update_name = "update_{}".format(name)
 
     script_path = "{}/{}".format(name, script)
 
@@ -66,7 +67,7 @@ def _cli_test(name, script, tags = []):
     native.sh_test(
         name = test_name,
         srcs = ["test_one.sh"],
-        args = ["$(location {})".format(script_path), "$(location {})".format(output)],
+        args = ["$(location {})".format(script_path), "$(location {})".format(output), update_name],
         data = [
             script_path,
             ":run_{}".format(name),
@@ -76,8 +77,6 @@ def _cli_test(name, script, tags = []):
         size = "medium",
         tags = tags,
     )
-
-    update_name = "update_{}".format(name)
 
     native.sh_test(
         name = update_name,
