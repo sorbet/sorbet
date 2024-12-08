@@ -100,10 +100,13 @@ vector<ast::ExpressionPtr> Delegate::run(core::MutableContext ctx, const ast::Se
         } else {
             methodName = lit->asSymbol();
         }
-        // sig {params(arg0: T.untyped, blk: Proc).returns(T.untyped)}
-        auto sigArgs = ast::MK::SendArgs(ast::MK::Symbol(loc, core::Names::arg0()), ast::MK::Untyped(loc),
-                                         ast::MK::Symbol(loc, core::Names::blkArg()),
-                                         ast::MK::Nilable(loc, ast::MK::Constant(loc, core::Symbols::Proc())));
+        // sig {params(arg0: T.untyped, blk: T::Proc[T.untyped]).returns(T.untyped)}
+        auto sigArgs =
+            ast::MK::SendArgs(ast::MK::Symbol(loc, core::Names::arg0()), ast::MK::Untyped(loc),
+                              ast::MK::Symbol(loc, core::Names::blkArg()),
+                              ast::MK::Nilable(loc, ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::T_Proc()),
+                                                                   core::Names::squareBrackets(),
+                                                                   loc.copyWithZeroLength(), ast::MK::Untyped(loc))));
 
         methodStubs.push_back(ast::MK::Sig(loc, std::move(sigArgs), ast::MK::Untyped(loc)));
 
