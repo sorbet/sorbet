@@ -1882,9 +1882,17 @@ template <typename PrismNode> std::unique_ptr<parser::Mlhs> Translator::translat
                 // has a different Sorbet node type, `parser::SplatLhs`
                 auto splatNode = down_cast<pm_splat_node>(prismSplat);
                 auto location = translateLoc(splatNode->base.location);
-                auto expr = translate(splatNode->expression);
+                auto expression = splatNode->expression;
 
-                sorbetLhs.emplace_back(make_unique<parser::SplatLhs>(location, move(expr)));
+                if (expression != nullptr && PM_NODE_TYPE_P(expression, PM_REQUIRED_PARAMETER_NODE)) {
+                    auto requiredParamNode = down_cast<pm_required_parameter_node>(expression);
+                    auto name = parser.resolveConstant(requiredParamNode->name);
+                    sorbetLhs.emplace_back(make_unique<parser::Restarg>(
+                        location, gs.enterNameUTF8(name), translateLoc(requiredParamNode->base.location)));
+                } else {
+                    sorbetLhs.emplace_back(make_unique<parser::SplatLhs>(location, move(translate(expression))));
+                }
+
                 break;
             }
             case PM_IMPLICIT_REST_NODE:

@@ -298,7 +298,6 @@ pipeline_tests(
             "testdata/desugar/range.rb",
             "testdata/desugar/regexp.rb",
             "testdata/desugar/sclass.rb",
-            "testdata/desugar/star_in_block_arg.rb",
 
             # Desugar tests having to do with error recovery; will address later
             "testdata/desugar/complex.rb",
