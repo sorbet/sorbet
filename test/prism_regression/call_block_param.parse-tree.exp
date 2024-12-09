@@ -227,5 +227,45 @@ Begin {
       args = NULL
       body = NULL
     }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Mlhs {
+            exprs = [
+              Restarg {
+                name = <U args>
+              }
+            ]
+          }
+        ]
+      }
+      body = String {
+        val = <U block with multi-target rest args>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Restarg {
+            name = <U args>
+          }
+        ]
+      }
+      body = String {
+        val = <U block with rest args>
+      }
+    }
   ]
 }

@@ -33,3 +33,11 @@ foo { |bar; baz, qux| }
 foo(&forwarded_block)
 
 foo&.bar {}
+
+foo do |(*args)|
+  "block with multi-target rest args"
+end
+
+foo do |*args|
+  "block with rest args"
+end
