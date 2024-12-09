@@ -22,6 +22,26 @@ DefMethod {
           }
         ]
       }
+      Block {
+        send = Super {
+          args = [
+          ]
+        }
+        args = NULL
+        body = Yield {
+          exprs = [
+          ]
+        }
+      }
+      Block {
+        send = ZSuper {
+        }
+        args = NULL
+        body = Yield {
+          exprs = [
+          ]
+        }
+      }
     ]
   }
 }

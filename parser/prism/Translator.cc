@@ -68,7 +68,7 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
         auto lBracketLoc = core::LocOffsets{openingLoc.beginLoc, openingLoc.endLoc - 1};
 
         auto receiver = translate(node->receiver);
-        auto args = translateArguments(node->arguments);
+        auto args = translateArguments(node->arguments, up_cast(node->block));
         lhs =
             make_unique<parser::Send>(location, move(receiver), core::Names::squareBrackets(), lBracketLoc, move(args));
     } else if constexpr (is_same_v<PrismAssignmentNode, pm_constant_operator_write_node> ||
@@ -297,15 +297,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             pm_node_t *prismBlock = callNode->block;
+            NodeVec args;
             // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
             // but not an explicit block with `{ ... }` or `do ... end`
-            auto hasBlockArgument = prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE);
-
-            auto args = translateArguments(callNode->arguments, (hasBlockArgument ? 0 : 1));
-
-            if (hasBlockArgument) {
-                auto blockPassNode = translate(prismBlock);
-                args.emplace_back(move(blockPassNode));
+            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                args = translateArguments(callNode->arguments, callNode->block);
+            } else {
+                args = translateArguments(callNode->arguments);
             }
 
             if (name == "[]=") {
@@ -599,7 +597,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return translateSimpleKeyword<parser::ForwardArg>(node);
         }
         case PM_FORWARDING_SUPER_NODE: { // `super` with no `(...)`
-            return translateSimpleKeyword<parser::ZSuper>(node);
+            auto forwardingSuperNode = down_cast<pm_forwarding_super_node>(node);
+            auto translatedNode = translateSimpleKeyword<parser::ZSuper>(node);
+
+            auto blockArgumentNode = forwardingSuperNode->block;
+
+            if (blockArgumentNode != nullptr) { // always a PM_BLOCK_NODE
+                return translateCallWithBlock(up_cast(blockArgumentNode), move(translatedNode));
+            }
+
+            return move(translatedNode);
         }
         case PM_GLOBAL_VARIABLE_AND_WRITE_NODE: { // And-assignment to a global variable, e.g. `$g &&= false`
             return translateOpAssignment<pm_global_variable_and_write_node, parser::AndAsgn, parser::GVarLhs>(node);
@@ -690,7 +697,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto openingLoc = translateLoc(indexedTargetNode->opening_loc);                  // The location of `[]=`
             auto lBracketLoc = core::LocOffsets{openingLoc.beginLoc, openingLoc.endLoc - 1}; // Drop the `=`
             auto receiver = translate(indexedTargetNode->receiver);
-            auto arguments = translateArguments(indexedTargetNode->arguments);
+            auto arguments = translateArguments(indexedTargetNode->arguments, up_cast(indexedTargetNode->block));
 
             return make_unique<parser::Send>(location, move(receiver), core::Names::squareBracketsEq(), lBracketLoc,
                                              move(arguments));
@@ -1207,8 +1214,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_SUPER_NODE: { // The `super` keyword, like `super`, `super(a, b)`
             auto superNode = down_cast<pm_super_node>(node);
 
-            auto returnValues = translateArguments(superNode->arguments);
+            auto blockArgumentNode = superNode->block;
+            NodeVec returnValues;
 
+            if (blockArgumentNode != nullptr && PM_NODE_TYPE_P(blockArgumentNode, PM_BLOCK_NODE)) {
+                returnValues = translateArguments(superNode->arguments);
+                auto superNode = make_unique<parser::Super>(location, move(returnValues));
+                return translateCallWithBlock(blockArgumentNode, move(superNode));
+            }
+
+            returnValues = translateArguments(superNode->arguments, blockArgumentNode);
             return make_unique<parser::Super>(location, move(returnValues));
         }
         case PM_SYMBOL_NODE: { // A symbol literal, e.g. `:foo`
@@ -1585,18 +1600,21 @@ void Translator::patternTranslateMultiInto(NodeVec &outSorbetNodes, absl::Span<p
 
 // The legacy Sorbet parser doesn't have a counterpart to PM_ARGUMENTS_NODE to wrap the array
 // of argument nodes. It just uses a NodeVec directly, which is what this function produces.
-NodeVec Translator::translateArguments(pm_arguments_node *argsNode, size_t extraCapacity) {
+NodeVec Translator::translateArguments(pm_arguments_node *argsNode, pm_node *blockArgumentNode) {
     NodeVec results;
 
-    if (argsNode == nullptr) {
-        results.reserve(extraCapacity);
-        return results;
+    absl::Span<pm_node *> prismArgs;
+
+    if (argsNode != nullptr) {
+        prismArgs = absl::MakeSpan(argsNode->arguments.nodes, argsNode->arguments.size);
     }
 
-    auto prismArgs = absl::MakeSpan(argsNode->arguments.nodes, argsNode->arguments.size);
-    results.reserve(prismArgs.size() + extraCapacity);
+    results.reserve(prismArgs.size() + (blockArgumentNode == nullptr ? 0 : 1));
 
     translateMultiInto(results, prismArgs);
+    if (blockArgumentNode != nullptr) {
+        results.emplace_back(translate(blockArgumentNode));
+    }
 
     return results;
 }

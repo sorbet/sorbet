@@ -288,7 +288,6 @@ pipeline_tests(
             "testdata/parser/ruby_25.rb",
 
             # Legitimately failing desugar tests
-            "testdata/desugar/blockpass.rb",
             "testdata/desugar/constant_error.rb",
             "testdata/desugar/for.rb",
             "testdata/desugar/oror_classvar.rb",
