@@ -6,4 +6,9 @@ def m
   super() # Invoke super, explicitly with no arguments
 
   super(1, 2, 3)
+
+  # Invoke super with a block
+  super() do
+    yield
+  end
 end

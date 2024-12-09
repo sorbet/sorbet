@@ -22,6 +22,17 @@ DefMethod {
           }
         ]
       }
+      Block {
+        send = Super {
+          args = [
+          ]
+        }
+        args = NULL
+        body = Yield {
+          exprs = [
+          ]
+        }
+      }
     ]
   }
 }

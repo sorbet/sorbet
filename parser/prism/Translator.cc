@@ -1205,8 +1205,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_SUPER_NODE: { // The `super` keyword, like `super`, `super(a, b)`
             auto superNode = down_cast<pm_super_node>(node);
 
-            auto returnValues = translateArguments(superNode->arguments, superNode->block);
+            auto blockArgumentNode = superNode->block;
+            NodeVec returnValues;
 
+            if (blockArgumentNode != nullptr && PM_NODE_TYPE_P(blockArgumentNode, PM_BLOCK_NODE)) {
+                returnValues = translateArguments(superNode->arguments);
+                auto superNode = make_unique<parser::Super>(location, move(returnValues));
+                return translateCallWithBlock(blockArgumentNode, move(superNode));
+            }
+
+            returnValues = translateArguments(superNode->arguments, blockArgumentNode);
             return make_unique<parser::Super>(location, move(returnValues));
         }
         case PM_SYMBOL_NODE: { // A symbol literal, e.g. `:foo`
