@@ -1583,7 +1583,7 @@ void Translator::patternTranslateMultiInto(NodeVec &outSorbetNodes, absl::Span<p
 
 // The legacy Sorbet parser doesn't have a counterpart to PM_ARGUMENTS_NODE to wrap the array
 // of argument nodes. It just uses a NodeVec directly, which is what this function produces.
-NodeVec Translator::translateArguments(pm_arguments_node *argsNode, pm_node *blockNode) {
+NodeVec Translator::translateArguments(pm_arguments_node *argsNode, pm_node *blockArgumentNode) {
     NodeVec results;
 
     absl::Span<pm_node *> prismArgs;
@@ -1592,11 +1592,11 @@ NodeVec Translator::translateArguments(pm_arguments_node *argsNode, pm_node *blo
         prismArgs = absl::MakeSpan(argsNode->arguments.nodes, argsNode->arguments.size);
     }
 
-    results.reserve(prismArgs.size() + (blockNode == nullptr ? 0 : 1));
+    results.reserve(prismArgs.size() + (blockArgumentNode == nullptr ? 0 : 1));
 
     translateMultiInto(results, prismArgs);
-    if (blockNode != nullptr) {
-        results.emplace_back(translate(blockNode));
+    if (blockArgumentNode != nullptr) {
+        results.emplace_back(translate(blockArgumentNode));
     }
 
     return results;
