@@ -597,7 +597,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return translateSimpleKeyword<parser::ForwardArg>(node);
         }
         case PM_FORWARDING_SUPER_NODE: { // `super` with no `(...)`
-            return translateSimpleKeyword<parser::ZSuper>(node);
+            auto forwardingSuperNode = down_cast<pm_forwarding_super_node>(node);
+            auto translatedNode = translateSimpleKeyword<parser::ZSuper>(node);
+
+            auto blockArgumentNode = forwardingSuperNode->block;
+
+            if (blockArgumentNode != nullptr) { // always a PM_BLOCK_NODE
+                return translateCallWithBlock(up_cast(blockArgumentNode), move(translatedNode));
+            }
+
+            return move(translatedNode);
         }
         case PM_GLOBAL_VARIABLE_AND_WRITE_NODE: { // And-assignment to a global variable, e.g. `$g &&= false`
             return translateOpAssignment<pm_global_variable_and_write_node, parser::AndAsgn, parser::GVarLhs>(node);

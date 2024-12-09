@@ -33,6 +33,15 @@ DefMethod {
           ]
         }
       }
+      Block {
+        send = ZSuper {
+        }
+        args = NULL
+        body = Yield {
+          exprs = [
+          ]
+        }
+      }
     ]
   }
 }

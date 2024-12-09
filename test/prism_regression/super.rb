@@ -11,4 +11,9 @@ def m
   super() do
     yield
   end
+
+  # Invoke super with a block, forwarding all arguments
+  super do
+    yield
+  end
 end
