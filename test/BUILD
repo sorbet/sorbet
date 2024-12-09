@@ -267,27 +267,17 @@ pipeline_tests(
             "testdata/desugar/**/*.exp",
         ],
         exclude = [
-            # Parser tests having to do with error recovery; will address later
+            # Parser tests having to do with tree differences in invalid Ruby code; will address later
             "testdata/parser/error_recovery/**",
-            "testdata/parser/bad_argument_crash.rb",
-            "testdata/parser/compare_overload_parse_error.rb",
-            "testdata/parser/crash_block_pass.rb",
             "testdata/parser/crash_block_pass_suggestion.rb",
-            "testdata/parser/fuzz_ivar.rb",
             "testdata/parser/invalid_fatal.rb",
             "testdata/parser/invalid_syntax_error.rb",
-            "testdata/parser/invalid_trailing_in_number.rb",
-            "testdata/parser/curly_braces_block_pass.rb",
-            "testdata/parser/forward_arg_after_restarg.rb",
             "testdata/parser/kwargs_missing_comma.rb",
-            "testdata/parser/kwargs_missing_comma_unsupported.rb",
-            "testdata/parser/kwnil_errors.rb",
-            "testdata/parser/method_def_trailing_comma.rb",
             "testdata/parser/misc.rb",
             "testdata/parser/offset0.rb",
             "testdata/parser/ruby_25.rb",
 
-            # Legitimately failing desugar tests
+            # Desugar tests having to do with tree differences; will address later
             "testdata/desugar/constant_error.rb",
             "testdata/desugar/for.rb",
             "testdata/desugar/oror_classvar.rb",
@@ -296,16 +286,6 @@ pipeline_tests(
             "testdata/desugar/range.rb",
             "testdata/desugar/regexp.rb",
             "testdata/desugar/sclass.rb",
-
-            # Desugar tests having to do with error recovery; will address later
-            "testdata/desugar/complex.rb",
-            "testdata/desugar/duplicated_hash_keys.rb",
-            "testdata/desugar/forwarded_rest_args_array.rb",
-            "testdata/desugar/forwarded_restarg_and_kwrestarg.rb",
-            "testdata/desugar/fuzz_block_pass.rb",
-            "testdata/desugar/fuzz_break_do_end.rb",
-            "testdata/desugar/integers.rb",
-            "testdata/desugar/keyword_args.rb",
         ],
     ),
     "PosTests",
