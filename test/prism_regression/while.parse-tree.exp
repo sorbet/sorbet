@@ -1,0 +1,53 @@
+Begin {
+  stmts = [
+    While {
+      cond = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      body = Integer {
+        val = "5"
+      }
+    }
+    While {
+      cond = True {
+      }
+      body = NULL
+    }
+    While {
+      cond = True {
+      }
+      body = Begin {
+        stmts = [
+          Assign {
+            lhs = LVarLhs {
+              name = <U x>
+            }
+            rhs = Send {
+              receiver = Integer {
+                val = "3"
+              }
+              method = <U +>
+              args = [
+                Integer {
+                  val = "2"
+                }
+              ]
+            }
+          }
+          Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U hi>
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

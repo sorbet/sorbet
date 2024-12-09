@@ -1,0 +1,34 @@
+Begin {
+  stmts = [
+    Begin {
+      stmts = [
+      ]
+    }
+    Begin {
+      stmts = [
+        Integer {
+          val = "123"
+        }
+      ]
+    }
+    Send {
+      receiver = Begin {
+        stmts = [
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      method = <U +>
+      args = [
+        Begin {
+          stmts = [
+            Integer {
+              val = "2"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
