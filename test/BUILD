@@ -121,6 +121,21 @@ sh_test(
     ],
 )
 
+# Load the macro that creates a test for every file in the prism_regression folder
+load("//test:prism_location_test.bzl", "prism_test_suite")
+
+# Run the macro
+prism_test_suite(
+    name = "prism_location_tests",
+    srcs = glob(["prism_regression/**/*.rb"]),
+)
+
+# Create a test suite to run all the location tests
+test_suite(
+    name = "prism_location_tests",
+    tags = ["prism_location_test"],
+)
+
 cc_test(
     name = "hello-test",
     size = "small",
@@ -241,6 +256,65 @@ pipeline_tests(
 )
 
 pipeline_tests(
+    "test_corpus_prism",
+    glob(
+        [
+            # Replace [parser] with other phases to test Prism at that level
+            # Phases: https://github.com/Shopify/sorbet/blob/prism/docs/internals.md#phases
+            "testdata/parser/**/*.rb",
+            "testdata/parser/**/*.exp",
+            "testdata/desugar/**/*.rb",
+            "testdata/desugar/**/*.exp",
+        ],
+        exclude = [
+            # Parser tests having to do with error recovery; will address later
+            "testdata/parser/error_recovery/**",
+            "testdata/parser/bad_argument_crash.rb",
+            "testdata/parser/compare_overload_parse_error.rb",
+            "testdata/parser/crash_block_pass.rb",
+            "testdata/parser/crash_block_pass_suggestion.rb",
+            "testdata/parser/fuzz_ivar.rb",
+            "testdata/parser/invalid_fatal.rb",
+            "testdata/parser/invalid_syntax_error.rb",
+            "testdata/parser/invalid_trailing_in_number.rb",
+            "testdata/parser/curly_braces_block_pass.rb",
+            "testdata/parser/forward_arg_after_restarg.rb",
+            "testdata/parser/kwargs_missing_comma.rb",
+            "testdata/parser/kwargs_missing_comma_unsupported.rb",
+            "testdata/parser/kwnil_errors.rb",
+            "testdata/parser/method_def_trailing_comma.rb",
+            "testdata/parser/misc.rb",
+            "testdata/parser/offset0.rb",
+            "testdata/parser/ruby_25.rb",
+
+            # Legitimately failing desugar tests
+            "testdata/desugar/constant_error.rb",
+            "testdata/desugar/for.rb",
+            "testdata/desugar/oror_classvar.rb",
+            "testdata/desugar/oror_ivar.rb",
+            "testdata/desugar/pattern_matching_array.rb",
+            "testdata/desugar/pattern_matching_const.rb",
+            "testdata/desugar/pattern_matching_hash.rb",
+            "testdata/desugar/range.rb",
+            "testdata/desugar/regexp.rb",
+            "testdata/desugar/sclass.rb",
+
+            # Desugar tests having to do with error recovery; will address later
+            "testdata/desugar/complex.rb",
+            "testdata/desugar/duplicated_hash_keys.rb",
+            "testdata/desugar/forwarded_rest_args_array.rb",
+            "testdata/desugar/forwarded_restarg_and_kwrestarg.rb",
+            "testdata/desugar/fuzz_block_pass.rb",
+            "testdata/desugar/fuzz_break_do_end.rb",
+            "testdata/desugar/integers.rb",
+            "testdata/desugar/keyword_args.rb",
+        ],
+    ),
+    "PosTests",
+    parser = "prism",
+)
+
+pipeline_tests(
     "whitequark_parser_corpus",
     glob([
         "whitequark/**/*.rb",
@@ -262,14 +336,34 @@ pipeline_tests(
     extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
 )
 
+pipeline_tests(
+    "prism_regression_corpus",
+    glob([
+        "prism_regression/**/*.rb",
+        "prism_regression/**/*.exp",
+    ]),
+    "PosTests",
+    parser = "prism",
+)
+
 test_suite(
     name = "test",
     tests = ["test_corpus"],
 )
 
 test_suite(
+    name = "test_prism",
+    tests = ["test_corpus_prism"],
+)
+
+test_suite(
     name = "whitequark_parser_tests",
     tests = ["whitequark_parser_corpus"],
+)
+
+test_suite(
+    name = "prism_regression",
+    tests = ["prism_regression_corpus"],
 )
 
 sh_binary(

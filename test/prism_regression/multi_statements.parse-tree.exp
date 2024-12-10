@@ -1,0 +1,13 @@
+Begin {
+  stmts = [
+    Integer {
+      val = "42"
+    }
+    String {
+      val = <U hello>
+    }
+    Rational {
+      val = "1.0"
+    }
+  ]
+}

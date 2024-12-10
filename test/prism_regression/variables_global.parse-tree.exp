@@ -1,0 +1,15 @@
+Begin {
+  stmts = [
+    Assign {
+      lhs = GVarLhs {
+        name = <U $global_variable_or_write>
+      }
+      rhs = Integer {
+        val = "1"
+      }
+    }
+    GVar {
+      name = <U $global_variable_or_write>
+    }
+  ]
+}
