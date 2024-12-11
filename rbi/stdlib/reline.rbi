@@ -563,7 +563,7 @@ class Reline::GeneralIO
   def self.ungetc(c); end
   def self.win?; end
 end
-class Reline::ANSI
+class Reline::ANSI < Reline::IO
   def self.clear_screen; end
   def self.cursor_pos; end
   def self.deprep(otio); end
