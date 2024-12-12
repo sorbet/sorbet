@@ -219,7 +219,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
 
     std::vector<core::FileRef> toTypecheck;
-    toTypecheck.reserve(updates.fastPathExtraFiles.size() + updates.fastPathChangedFiles.size());
+    toTypecheck.reserve(updates.fastPathExtraFiles.size() + updates.updatedFiles.size());
     for (auto &path : updates.fastPathExtraFiles) {
         auto fref = gs->findFileByPath(path);
         ENFORCE(fref.exists());
@@ -230,9 +230,13 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     UnorderedMap<core::FileRef, core::FoundDefHashes> oldFoundHashesForFiles;
     auto shouldRunIncrementalNamer = updates.fastPathUseIncrementalNamer;
     UnorderedSet<core::FileRef> changedFiles;
-    for (auto [path, idx] : updates.fastPathChangedFiles) {
-        auto fref = gs->findFileByPath(path);
-        ENFORCE(fref.exists());
+    for (auto &file : updates.updatedFiles) {
+        auto fref = gs->findFileByPath(file->path());
+        ENFORCE(fref.exists(), "New files are not supported in the fast path");
+
+        if (config->opts.stripePackages && file->isPackage()) {
+            continue;
+        }
 
         if (shouldRunIncrementalNamer) {
             // Only set oldFoundHashesForFiles if we're processing a real edit.
@@ -255,7 +259,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             oldFoundHashesForFiles.emplace(fref, move(fref.data(*gs).getFileHash()->foundHashes));
         }
 
-        gs->replaceFile(fref, updates.updatedFiles[idx]);
+        gs->replaceFile(fref, file);
         // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
         fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
 
@@ -681,8 +685,6 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
         ENFORCE(fref.exists());
         ENFORCE(fref.id() < indexed.size());
         auto &index = indexed[fref.id()];
-
-        noop.fastPathChangedFiles.emplace_back(fref.data(*gs).path(), noop.updatedFiles.size());
 
         // Note: `index.tree` can be null if the file is a stdlib file.
         noop.updatedFileIndexes.push_back({(index.tree ? index.tree.deepCopy() : nullptr), index.file});

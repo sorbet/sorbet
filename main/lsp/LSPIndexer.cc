@@ -230,12 +230,6 @@ LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
     LSPFileUpdates::FastPathFilesToTypecheckResult result;
     auto path = getTypecheckingPathInternal(result, edit.updatedFiles, evictedFiles);
     if (path == TypecheckingPath::Fast) {
-        // If we're taking the fast path, that means that there's relevant information in `result` that we should stash
-        // away for the typechecker.
-        for (auto &[fref, idx] : result.changedFiles) {
-            edit.fastPathChangedFiles.emplace_back(fref.data(*initialGS).path(), idx);
-        }
-
         edit.fastPathUseIncrementalNamer = !result.changedSymbolNameHashes.empty();
 
         for (auto fref : result.extraFiles) {
