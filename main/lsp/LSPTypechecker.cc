@@ -304,22 +304,22 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     }
     ENFORCE(gs->errorQueue->isEmpty());
     vector<ast::ParsedFile> updatedIndexed;
-    for (auto &f : toTypecheck) {
+    for (core::FileRef fref : toTypecheck) {
         // TODO(jvilk): We don't need to re-index files that didn't change.
         // (`updates` has already-indexed trees, but they've been indexed with initialGS, not the
         // `*gs` that we'll be typechecking with. We could do an ast::Substitute here if we had
         // access to `initialGS`, but that's owned by the indexer thread, not this thread.)
-        auto t = pipeline::indexOne(config->opts, *gs, f);
+        auto t = pipeline::indexOne(config->opts, *gs, fref);
         updatedIndexed.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
         updates.updatedFinalGSFileIndexes.push_back(move(t));
 
         // See earlier in the method for an explanation of the isNoopUpdateForRetypecheck check here.
-        if (shouldRunIncrementalNamer && oldFoundHashesForFiles.find(f) == oldFoundHashesForFiles.end()) {
+        if (shouldRunIncrementalNamer && !oldFoundHashesForFiles.contains(fref)) {
             // This is an extra file that we need to typecheck which was not part of the original
             // edited files, so whatever it happens to have in foundMethodHashes is still "old"
             // (but we can't use `move` to steal it like before, because we're not replacing the
             // whole file).
-            oldFoundHashesForFiles.emplace(f, f.data(*gs).getFileHash()->foundHashes);
+            oldFoundHashesForFiles.emplace(fref, fref.data(*gs).getFileHash()->foundHashes);
         }
     }
 
