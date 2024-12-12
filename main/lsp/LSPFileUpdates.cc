@@ -130,6 +130,9 @@ LSPFileUpdates::FastPathFilesToTypecheckResult
 LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
                                          const vector<shared_ptr<core::File>> &updatedFiles,
                                          const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) {
+    UnorderedMap<core::FileRef, size_t> changedFiles;
+    std::vector<core::WithoutUniqueNameHash> changedSymbolNameHashes;
+
     FastPathFilesToTypecheckResult result;
     Timer timeit(config.logger, "compute_fast_path_file_set");
     auto idx = -1;
@@ -172,19 +175,23 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         // This will insert two entries into `retypecheckableSymbolHashes` for each changed method, but they
         // will get deduped later.
         absl::c_set_symmetric_difference(oldRetypecheckableSymbolHashes, newRetypecheckableSymbolHashes,
-                                         NameHashOutputIterator(result.changedSymbolNameHashes));
+                                         NameHashOutputIterator(changedSymbolNameHashes));
 
-        result.changedFiles.emplace(fref, idx);
+        changedFiles.emplace(fref, idx);
     }
 
-    if (result.changedSymbolNameHashes.empty()) {
+    result.totalChanged = changedFiles.size();
+
+    if (changedSymbolNameHashes.empty()) {
         // Optimization--skip the loop over every file in the project (`gs.getFiles()`) if
         // the set of changed symbols is empty (e.g., running a completion request inside a
         // method body)
         return result;
     }
 
-    core::WithoutUniqueNameHash::sortAndDedupe(result.changedSymbolNameHashes);
+    result.useIncrementalNamer = true;
+
+    core::WithoutUniqueNameHash::sortAndDedupe(changedSymbolNameHashes);
 
     int i = -1;
     for (auto &oldFile : gs.getFiles()) {
@@ -194,7 +201,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         }
 
         auto ref = core::FileRef(i);
-        if (result.changedFiles.contains(ref)) {
+        if (changedFiles.contains(ref)) {
             continue;
         }
 
@@ -209,13 +216,14 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         }
 
         ENFORCE(oldFile->getFileHash() != nullptr);
-        if (!intersects(result.changedSymbolNameHashes, oldFile->getFileHash()->usages.nameHashes)) {
+        if (!intersects(changedSymbolNameHashes, oldFile->getFileHash()->usages.nameHashes)) {
             continue;
         }
 
-        result.extraFiles.emplace_back(ref);
+        result.extraFiles.emplace_back(ref.data(gs).path());
+        result.totalChanged += 1;
 
-        if (result.changedFiles.size() + result.extraFiles.size() > (2 * config.opts.lspMaxFilesOnFastPath)) {
+        if (result.totalChanged > (2 * config.opts.lspMaxFilesOnFastPath)) {
             // Short circuit, as a performance optimization.
             // (gs.getFiles() is usually 3-4 orders of magnitude larger than lspMaxFilesOnFastPath)
             //

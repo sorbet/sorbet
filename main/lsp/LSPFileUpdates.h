@@ -59,14 +59,14 @@ public:
     LSPFileUpdates copy() const;
 
     struct FastPathFilesToTypecheckResult {
-        // size_t is an index into the LSPFileUpdates::updatedFiles vector
-        UnorderedMap<core::FileRef, size_t> changedFiles;
+        // The number of files that would be checked in the fast path.
+        size_t totalChanged = 0;
 
-        // The names of all symbols changed by this set of updates
-        std::vector<core::WithoutUniqueNameHash> changedSymbolNameHashes;
+        // True when we should use the incremental namer.
+        bool useIncrementalNamer = false;
 
         // Extra files that need to be typechecked because the file mentions the name of one of the changed symbols.
-        std::vector<core::FileRef> extraFiles;
+        std::vector<std::string> extraFiles;
     };
 
     // It would be nice to have this accept `...<const core::File>...`

@@ -201,11 +201,10 @@ LSPIndexer::getTypecheckingPathInternal(LSPFileUpdates::FastPathFilesToTypecheck
     // files) would need to be typechecked on the fast path so we can compare that number against
     // `lspMaxFilesOnFastPath` as well.
     result = LSPFileUpdates::fastPathFilesToTypecheck(*initialGS, *config, changedFiles, evictedFiles);
-    auto filesToTypecheck = result.changedFiles.size() + result.extraFiles.size();
-    if (filesToTypecheck > config->opts.lspMaxFilesOnFastPath) {
+    if (result.totalChanged > config->opts.lspMaxFilesOnFastPath) {
         logger.debug(
             "Taking slow path because too many extra files would be typechecked on the fast path ({} files > {} files)",
-            filesToTypecheck, config->opts.lspMaxFilesOnFastPath);
+            result.totalChanged, config->opts.lspMaxFilesOnFastPath);
         prodCategoryCounterInc("lsp.slow_path_reason", "too_many_extra_files");
         timeit.setTag("path_chosen", "slow");
         return TypecheckingPath::Slow;
@@ -231,11 +230,8 @@ LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
     auto path = getTypecheckingPathInternal(result, edit.updatedFiles, evictedFiles);
     switch (path) {
         case TypecheckingPath::Fast: {
-            edit.fastPathUseIncrementalNamer = !result.changedSymbolNameHashes.empty();
-
-            for (auto fref : result.extraFiles) {
-                edit.fastPathExtraFiles.emplace_back(fref.data(*initialGS).path());
-            }
+            edit.fastPathUseIncrementalNamer = result.useIncrementalNamer;
+            edit.fastPathExtraFiles = std::move(result.extraFiles);
             break;
         }
 
