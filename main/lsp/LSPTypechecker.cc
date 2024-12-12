@@ -263,9 +263,9 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         changedFiles.insert(fref);
     }
 
-    UnorderedSet<core::FileRef> packageFiles;
-
     if (shouldRunIncrementalNamer) {
+        UnorderedSet<core::FileRef> packageFiles;
+
         for (auto fref : toTypecheck) {
             // Only need to re-run packager if we're going to delete constants and have to re-define
             // their visibility, which only happens if we're running incrementalNamer.
@@ -287,11 +287,11 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 }
             }
         }
-    }
 
-    for (auto packageFref : packageFiles) {
-        if (!changedFiles.contains(packageFref)) {
-            toTypecheck.emplace_back(packageFref);
+        for (auto packageFref : packageFiles) {
+            if (!changedFiles.contains(packageFref)) {
+                toTypecheck.emplace_back(packageFref);
+            }
         }
     }
 
