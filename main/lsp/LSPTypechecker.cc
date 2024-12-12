@@ -229,7 +229,6 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     config->logger->debug("Added {} files that were not part of the edit to the update set", toTypecheck.size());
     UnorderedMap<core::FileRef, core::FoundDefHashes> oldFoundHashesForFiles;
     auto shouldRunIncrementalNamer = updates.fastPathUseIncrementalNamer;
-    UnorderedSet<core::FileRef> changedFiles;
     for (auto &file : updates.updatedFiles) {
         auto fref = gs->findFileByPath(file->path());
         ENFORCE(fref.exists(), "New files are not supported in the fast path");
@@ -264,11 +263,10 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
 
         toTypecheck.emplace_back(fref);
-        changedFiles.insert(fref);
     }
 
     if (shouldRunIncrementalNamer) {
-        UnorderedSet<core::FileRef> packageFiles;
+        std::vector<core::FileRef> packageFiles;
 
         for (auto fref : toTypecheck) {
             // Only need to re-run packager if we're going to delete constants and have to re-define
@@ -287,19 +285,16 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                         continue;
                     }
 
-                    packageFiles.emplace(packageFref);
+                    packageFiles.emplace_back(packageFref);
                 }
             }
         }
 
-        for (auto packageFref : packageFiles) {
-            if (!changedFiles.contains(packageFref)) {
-                toTypecheck.emplace_back(packageFref);
-            }
-        }
+        toTypecheck.insert(toTypecheck.end(), packageFiles.begin(), packageFiles.end());
     }
 
     fast_sort(toTypecheck);
+    toTypecheck.erase(std::unique(toTypecheck.begin(), toTypecheck.end()), toTypecheck.end());
 
     config->logger->debug("Running fast path over num_files={}", toTypecheck.size());
     unique_ptr<ShowOperation> op;
