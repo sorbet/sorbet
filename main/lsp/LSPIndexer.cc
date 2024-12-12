@@ -229,12 +229,18 @@ LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
 
     LSPFileUpdates::FastPathFilesToTypecheckResult result;
     auto path = getTypecheckingPathInternal(result, edit.updatedFiles, evictedFiles);
-    if (path == TypecheckingPath::Fast) {
-        edit.fastPathUseIncrementalNamer = !result.changedSymbolNameHashes.empty();
+    switch (path) {
+        case TypecheckingPath::Fast: {
+            edit.fastPathUseIncrementalNamer = !result.changedSymbolNameHashes.empty();
 
-        for (auto fref : result.extraFiles) {
-            edit.fastPathExtraFiles.emplace_back(fref.data(*initialGS).path());
+            for (auto fref : result.extraFiles) {
+                edit.fastPathExtraFiles.emplace_back(fref.data(*initialGS).path());
+            }
+            break;
         }
+
+        case TypecheckingPath::Slow:
+            break;
     }
 
     return path;
