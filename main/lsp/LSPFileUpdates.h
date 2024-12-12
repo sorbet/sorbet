@@ -87,9 +87,6 @@ public:
     fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
                              const std::vector<std::shared_ptr<core::File>> &updatedFiles,
                              const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles);
-
-    FastPathFilesToTypecheckResult fastPathFilesToTypecheck(const core::GlobalState &gs,
-                                                            const LSPConfiguration &config) const;
 };
 } // namespace sorbet::realmain::lsp
 

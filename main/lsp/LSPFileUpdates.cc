@@ -253,9 +253,4 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
     return fastPathFilesToTypecheck(gs, config, updatedFiles, EMPTY_CONST_MAP);
 }
 
-LSPFileUpdates::FastPathFilesToTypecheckResult
-LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config) const {
-    return fastPathFilesToTypecheck(gs, config, this->updatedFiles);
-}
-
 } // namespace sorbet::realmain::lsp
