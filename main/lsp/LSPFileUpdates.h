@@ -25,6 +25,18 @@ public:
 
     TypecheckingPath typecheckingPath = TypecheckingPath::Slow;
 
+    // The names of all the changed files involved in a fast path edit, and the index of their data in the
+    // `updatedFiles` vector. This vector stores paths because file refs can change between deciding if it's possible to
+    // take the fast path and actually taking it.
+    std::vector<std::pair<std::string, size_t>> fastPathChangedFiles;
+
+    // Indicates whether or not the incremental namer should be used on the fast path.
+    bool fastPathUseIncrementalNamer = false;
+
+    // The paths of any additional files implicated in a fast path edit. This vector stores paths because file refs can
+    // change between deciding if it's possible to take the fast path and actually taking it.
+    std::vector<std::string> fastPathExtraFiles;
+
     // Indicates that this update contains a new file. Is a hack for determining if combining two updates can take the
     // fast path.
     bool hasNewFiles = false;
