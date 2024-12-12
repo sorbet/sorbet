@@ -217,12 +217,23 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     Timer timeit(config->logger, "fast_path");
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
-    auto result = updates.fastPathFilesToTypecheck(*gs, *config);
-    config->logger->debug("Added {} files that were not part of the edit to the update set", result.extraFiles.size());
+
+    std::vector<core::FileRef> toTypecheck;
+    toTypecheck.reserve(updates.fastPathExtraFiles.size() + updates.fastPathChangedFiles.size());
+    for (auto &path : updates.fastPathExtraFiles) {
+        auto fref = gs->findFileByPath(path);
+        ENFORCE(fref.exists());
+        toTypecheck.emplace_back(fref);
+    }
+
+    config->logger->debug("Added {} files that were not part of the edit to the update set", toTypecheck.size());
     UnorderedMap<core::FileRef, core::FoundDefHashes> oldFoundHashesForFiles;
-    auto toTypecheck = move(result.extraFiles);
-    auto shouldRunIncrementalNamer = !result.changedSymbolNameHashes.empty();
-    for (auto [fref, idx] : result.changedFiles) {
+    auto shouldRunIncrementalNamer = updates.fastPathUseIncrementalNamer;
+    UnorderedSet<core::FileRef> changedFiles;
+    for (auto [path, idx] : updates.fastPathChangedFiles) {
+        auto fref = gs->findFileByPath(path);
+        ENFORCE(fref.exists());
+
         if (shouldRunIncrementalNamer) {
             // Only set oldFoundHashesForFiles if we're processing a real edit.
             //
@@ -249,6 +260,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
 
         toTypecheck.emplace_back(fref);
+        changedFiles.insert(fref);
     }
 
     UnorderedSet<core::FileRef> packageFiles;
@@ -278,7 +290,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     }
 
     for (auto packageFref : packageFiles) {
-        if (result.changedFiles.find(packageFref) == result.changedFiles.end()) {
+        if (!changedFiles.contains(packageFref)) {
             toTypecheck.emplace_back(packageFref);
         }
     }
@@ -669,6 +681,9 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
         ENFORCE(fref.exists());
         ENFORCE(fref.id() < indexed.size());
         auto &index = indexed[fref.id()];
+
+        noop.fastPathChangedFiles.emplace_back(fref.data(*gs).path(), noop.updatedFiles.size());
+
         // Note: `index.tree` can be null if the file is a stdlib file.
         noop.updatedFileIndexes.push_back({(index.tree ? index.tree.deepCopy() : nullptr), index.file});
         noop.updatedFiles.push_back(gs->getFiles()[fref.id()]);

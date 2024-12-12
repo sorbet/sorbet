@@ -80,9 +80,8 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) 
 // incremental mode(s) that lied between the original fast and slow path. Leaving this comment here
 // because old habits die hard and I still can only remember the name "canTakeFastPath"
 TypecheckingPath
-LSPIndexer::getTypecheckingPathInternal(
-        LSPFileUpdates::FastPathFilesToTypecheckResult &result,
-        const vector<shared_ptr<core::File>> &changedFiles,
+LSPIndexer::getTypecheckingPathInternal(LSPFileUpdates::FastPathFilesToTypecheckResult &result,
+                                        const vector<shared_ptr<core::File>> &changedFiles,
                                         const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     Timer timeit(config->logger, "fast_path_decision");
     auto &logger = *config->logger;
@@ -218,7 +217,7 @@ LSPIndexer::getTypecheckingPathInternal(
 }
 
 TypecheckingPath
-LSPIndexer::getTypecheckingPath(const LSPFileUpdates &edit,
+LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
                                 const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     auto &logger = *config->logger;
     // Path taken after the first time an update has been encountered. Hack since we can't roll back new files just yet.
@@ -229,7 +228,22 @@ LSPIndexer::getTypecheckingPath(const LSPFileUpdates &edit,
     }
 
     LSPFileUpdates::FastPathFilesToTypecheckResult result;
-    return getTypecheckingPathInternal(result, edit.updatedFiles, evictedFiles);
+    auto path = getTypecheckingPathInternal(result, edit.updatedFiles, evictedFiles);
+    if (path == TypecheckingPath::Fast) {
+        // If we're taking the fast path, that means that there's relevant information in `result` that we should stash
+        // away for the typechecker.
+        for (auto &[fref, idx] : result.changedFiles) {
+            edit.fastPathChangedFiles.emplace_back(fref.data(*initialGS).path(), idx);
+        }
+
+        edit.fastPathUseIncrementalNamer = !result.changedSymbolNameHashes.empty();
+
+        for (auto fref : result.extraFiles) {
+            edit.fastPathExtraFiles.emplace_back(fref.data(*initialGS).path());
+        }
+    }
+
+    return path;
 }
 
 TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
