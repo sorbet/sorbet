@@ -1,4 +1,5 @@
 #include "main/lsp/LSPIndexer.h"
+#include "LSPFileUpdates.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/ErrorQueue.h"
 #include "core/FileHash.h"
@@ -79,7 +80,9 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) 
 // incremental mode(s) that lied between the original fast and slow path. Leaving this comment here
 // because old habits die hard and I still can only remember the name "canTakeFastPath"
 TypecheckingPath
-LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &changedFiles,
+LSPIndexer::getTypecheckingPathInternal(
+        LSPFileUpdates::FastPathFilesToTypecheckResult &result,
+        const vector<shared_ptr<core::File>> &changedFiles,
                                         const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     Timer timeit(config->logger, "fast_path_decision");
     auto &logger = *config->logger;
@@ -198,14 +201,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
     // foreground..." operation, we also compute how many downstream files (outside of the changed
     // files) would need to be typechecked on the fast path so we can compare that number against
     // `lspMaxFilesOnFastPath` as well.
-
-    // TODO(jez) Currently we compute the full set of information that we would need for the sake of
-    // whether to take the fast path twice--once here and once again in runFastPath on the
-    // typechecking thread.
-    //
-    // As an optimization, we might want to try to store that information on the update itself, so
-    // that the typechecking thread can simply read it instead of having to compute it.
-    auto result = LSPFileUpdates::fastPathFilesToTypecheck(*initialGS, *config, changedFiles, evictedFiles);
+    result = LSPFileUpdates::fastPathFilesToTypecheck(*initialGS, *config, changedFiles, evictedFiles);
     auto filesToTypecheck = result.changedFiles.size() + result.extraFiles.size();
     if (filesToTypecheck > config->opts.lspMaxFilesOnFastPath) {
         logger.debug(
@@ -231,7 +227,9 @@ LSPIndexer::getTypecheckingPath(const LSPFileUpdates &edit,
         prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
         return TypecheckingPath::Slow;
     }
-    return getTypecheckingPathInternal(edit.updatedFiles, evictedFiles);
+
+    LSPFileUpdates::FastPathFilesToTypecheckResult result;
+    return getTypecheckingPathInternal(result, edit.updatedFiles, evictedFiles);
 }
 
 TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
@@ -248,7 +246,9 @@ TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::F
 
     // Ensure all files have computed hashes.
     computeFileHashes(changedFiles);
-    return getTypecheckingPathInternal(changedFiles, emptyMap);
+
+    LSPFileUpdates::FastPathFilesToTypecheckResult result;
+    return getTypecheckingPathInternal(result, changedFiles, emptyMap);
 }
 
 void LSPIndexer::transferInitializeState(InitializedTask &task) {
