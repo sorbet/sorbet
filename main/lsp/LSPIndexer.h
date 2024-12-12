@@ -57,7 +57,8 @@ class LSPIndexer final {
      * INVARIANT: `changedFiles` must have hashes computed.
      */
     TypecheckingPath
-    getTypecheckingPathInternal(const std::vector<std::shared_ptr<core::File>> &changedFiles,
+    getTypecheckingPathInternal(LSPFileUpdates::FastPathFilesToTypecheckResult &result,
+                                const std::vector<std::shared_ptr<core::File>> &changedFiles,
                                 const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
 
 public:
