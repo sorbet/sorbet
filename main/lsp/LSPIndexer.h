@@ -53,12 +53,17 @@ class LSPIndexer final {
     TypecheckingPath
     getTypecheckingPath(LSPFileUpdates &edit,
                         const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
+
+    struct TypecheckingPathResult {
+        TypecheckingPath path = TypecheckingPath::Slow;
+        LSPFileUpdates::FastPathFilesToTypecheckResult files;
+    };
+
     /**
      * INVARIANT: `changedFiles` must have hashes computed.
      */
-    TypecheckingPath
-    getTypecheckingPathInternal(LSPFileUpdates::FastPathFilesToTypecheckResult &result,
-                                const std::vector<std::shared_ptr<core::File>> &changedFiles,
+    TypecheckingPathResult
+    getTypecheckingPathInternal(const std::vector<std::shared_ptr<core::File>> &changedFiles,
                                 const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
 
 public:
