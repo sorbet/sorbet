@@ -592,6 +592,8 @@ class Reline::ANSI
   def self.show_cursor; end
   def self.ungetc(c); end
   def self.win?; end
+  def self.set_default_key_bindings_ansi_cursor(config); end
+  def self.with_raw_input(); end
 end
 class Reline::ConfigEncodingConversionError < StandardError
 end
