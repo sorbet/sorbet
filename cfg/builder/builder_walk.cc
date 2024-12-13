@@ -572,9 +572,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                 InlinedVector<LocalRef, 2> args;
                 InlinedVector<core::LocOffsets, 2> argLocs;
-                const auto posEnd = s.numPosArgs();
-                for (auto argIdx = 0; argIdx < posEnd; ++argIdx) {
-                    auto &exp = s.getPosArg(argIdx);
+                for (auto &exp : s.posArgs()) {
                     LocalRef temp = cctx.newTemporary(core::Names::statTemp());
                     current = walk(cctx.withTarget(temp), exp, current);
                     args.emplace_back(temp);
