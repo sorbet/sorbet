@@ -223,7 +223,18 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
     }
     for (auto mixin : sym.data(gs)->mixins()) {
         resolveTypeMembers(gs, mixin, typeAliases, resolved);
-        if (sym != core::Symbols::Module()) {
+        // When processing type members from mixins, we need to handle inheritance chains carefully.
+        // If a mixin inherits from another mixin that we'll process later, we skip propagating its
+        // type members to ensure each type member is only processed once through its original source.
+        // This prevents duplicate declarations when handling complex inheritance hierarchies.
+        bool skipTypeMemberPropagation = false;
+        for (auto otherMixin : sym.data(gs)->mixins()) {
+            if (mixin != otherMixin && mixin.data(gs)->derivesFrom(gs, otherMixin)) {
+                skipTypeMemberPropagation = true;
+                break;
+            }
+        }
+        if (!skipTypeMemberPropagation) {
             auto typeMembers = mixin.data(gs)->typeMembers();
             for (auto tm : typeMembers) {
                 resolveTypeMember(gs, mixin, tm, sym, typeAliases);
