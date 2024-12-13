@@ -28,8 +28,10 @@ public:
     // Indicates whether or not the incremental namer should be used on the fast path.
     bool fastPathUseIncrementalNamer = false;
 
-    // The paths of any additional files implicated in a fast path edit. This vector stores paths because file refs can
-    // change between deciding if it's possible to take the fast path and actually taking it.
+    // The paths of any additional files implicated in a fast path edit. This vector stores path
+    // strings because FileRef IDs might be different in the GlobalState used on the indexing thread
+    // and the typechecking thread, but the `LSPFileUpdates` structure must be valid to transfer
+    // ownership from one thread to the other.
     std::vector<std::string> fastPathExtraFiles;
 
     // Indicates that this update contains a new file. Is a hack for determining if combining two updates can take the
