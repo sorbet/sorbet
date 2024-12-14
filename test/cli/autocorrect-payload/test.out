@@ -1,11 +1,11 @@
 # typed: true
 
-T.let(FOO, T.nilable(Integer)) = 10 # TODO Also fix this autocorrect
+FOO = 10 # TODO Also fix this autocorrect
 
-a = FOO
+a = T.let(FOO, T.nilable(Integer))
 [].each { |i| a = nil }
 
-b = Float::INFINITY
+b = T.let(Float::INFINITY, T.nilable(Float))
 [].each { |i| b = nil }
 
 c = T.let(10, T.nilable(Integer))
