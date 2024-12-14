@@ -21,9 +21,20 @@ public:
     uint32_t committedEditCount = 0;
 
     std::vector<std::shared_ptr<core::File>> updatedFiles;
+
+    // Indexed versions of `updatedFiles`, tied to the `initialGS` global state in the indexer.
     std::vector<ast::ParsedFile> updatedFileIndexes;
 
     TypecheckingPath typecheckingPath = TypecheckingPath::Slow;
+
+    // Indicates whether or not the incremental namer should be used on the fast path.
+    bool fastPathUseIncrementalNamer = false;
+
+    // The paths of any additional files implicated in a fast path edit. This vector stores path
+    // strings because FileRef IDs might be different in the GlobalState used on the indexing thread
+    // and the typechecking thread, but the `LSPFileUpdates` structure must be valid to transfer
+    // ownership from one thread to the other.
+    std::vector<std::string> fastPathExtraFiles;
 
     // Indicates that this update contains a new file. Is a hack for determining if combining two updates can take the
     // fast path.
@@ -52,14 +63,14 @@ public:
     LSPFileUpdates copy() const;
 
     struct FastPathFilesToTypecheckResult {
-        // size_t is an index into the LSPFileUpdates::updatedFiles vector
-        UnorderedMap<core::FileRef, size_t> changedFiles;
+        // The number of files that would be checked in the fast path.
+        size_t totalChanged = 0;
 
-        // The names of all symbols changed by this set of updates
-        std::vector<core::WithoutUniqueNameHash> changedSymbolNameHashes;
+        // True when we should use the incremental namer.
+        bool useIncrementalNamer = false;
 
         // Extra files that need to be typechecked because the file mentions the name of one of the changed symbols.
-        std::vector<core::FileRef> extraFiles;
+        std::vector<std::string> extraFiles;
     };
 
     // It would be nice to have this accept `...<const core::File>...`
@@ -75,9 +86,6 @@ public:
     fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
                              const std::vector<std::shared_ptr<core::File>> &updatedFiles,
                              const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles);
-
-    FastPathFilesToTypecheckResult fastPathFilesToTypecheck(const core::GlobalState &gs,
-                                                            const LSPConfiguration &config) const;
 };
 } // namespace sorbet::realmain::lsp
 
