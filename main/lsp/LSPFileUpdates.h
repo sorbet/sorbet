@@ -21,6 +21,8 @@ public:
     uint32_t committedEditCount = 0;
 
     std::vector<std::shared_ptr<core::File>> updatedFiles;
+
+    // Indexed versions of `updatedFiles`, tied to the `initialGS` global state in the indexer.
     std::vector<ast::ParsedFile> updatedFileIndexes;
 
     TypecheckingPath typecheckingPath = TypecheckingPath::Slow;
