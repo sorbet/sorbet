@@ -41,7 +41,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     string methodReturnType =
         (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType.show(gs, options), ")");
     vector<string> typeAndArgNames;
-
+    vector<string> typeParams;
     vector<string> flags;
     auto sym = method.data(gs);
     string sigCall = "sig";
@@ -71,13 +71,22 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     if (!flags.empty()) {
         flagString = fmt::format("{}.", fmt::join(flags, "."));
     }
+    string typeParamString = "";
+    if (!sym->typeArguments().empty()) {
+        for (const auto &typeParam : sym->typeArguments()) {
+            typeParams.push_back(fmt::format(":{}", typeParam.data(gs)->name.show(gs)));
+        }
+        typeParamString = fmt::format("type_parameters({}).", fmt::join(typeParams, ", "));
+    }
     string paramsString = "";
     if (!typeAndArgNames.empty()) {
         paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
     }
 
-    auto oneline = fmt::format("{} {{ {}{}{} }}", sigCall, flagString, paramsString, methodReturnType);
-    if (oneline.size() <= MAX_PRETTY_WIDTH && typeAndArgNames.size() <= MAX_PRETTY_SIG_ARGS) {
+    auto oneline =
+        fmt::format("{} {{ {}{}{}{} }}", sigCall, flagString, typeParamString, paramsString, methodReturnType);
+    if ((oneline.size() - typeParamString.size()) <= MAX_PRETTY_WIDTH &&
+        typeAndArgNames.size() <= MAX_PRETTY_SIG_ARGS) {
         return oneline;
     }
 
@@ -87,7 +96,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     if (!typeAndArgNames.empty()) {
         paramsString = fmt::format("params(\n    {}\n  )\n  .", fmt::join(typeAndArgNames, ",\n    "));
     }
-    return fmt::format("{} do\n  {}{}{}\nend", sigCall, flagString, paramsString, methodReturnType);
+    return fmt::format("{} do\n  {}{}{}{}\nend", sigCall, flagString, typeParamString, paramsString, methodReturnType);
 }
 
 string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, const ShowOptions options) {
