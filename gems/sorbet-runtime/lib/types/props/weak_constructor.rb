@@ -8,60 +8,36 @@ module T::Props::WeakConstructor
   # checked(:never) - O(runtime object construction)
   sig {params(hash: T::Hash[Symbol, T.untyped]).void.checked(:never)}
   def initialize(hash={})
-    decorator = self.class.decorator
-
-    hash_keys_matching_props = decorator.construct_props_with_defaults(self, hash) +
-      decorator.construct_props_without_defaults(self, hash)
+    hash_keys_matching_props = __t_props_generated_initialize(hash)
 
     if hash_keys_matching_props < hash.size
-      raise ArgumentError.new("#{self.class}: Unrecognized properties: #{(hash.keys - decorator.props.keys).join(', ')}")
+      raise ArgumentError.new("#{self.class}: Unrecognized properties: #{(hash.keys - self.class.decorator.props.keys).join(', ')}")
     end
+  end
+
+  private def __t_props_generated_initialize(hash)
+    # No-op; will be overridden if there are any props.
+    #
+    # To see the definition for class `Foo`, run `Foo.decorator.send(:generate_initialize_source)`
+    0
   end
 end
 
 module T::Props::WeakConstructor::DecoratorMethods
+  include T::Props::HasLazilySpecializedMethods::DecoratorMethods
   extend T::Sig
 
-  # Set values for all props that have no defaults. Ignore any not present.
-  #
-  # @return [Integer] A count of props that we successfully initialized (which
-  # we'll use to check for any unrecognized input.)
-  #
-  # checked(:never) - O(runtime object construction)
-  sig {params(instance: T::Props::WeakConstructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never)}
-  def construct_props_without_defaults(instance, hash)
-    # Use `each_pair` rather than `count` because, as of Ruby 2.6, the latter delegates to Enumerator
-    # and therefore allocates for each entry.
-    result = 0
-    props_without_defaults&.each_pair do |p, setter_proc|
-      if hash.key?(p)
-        instance.instance_exec(hash[p], &setter_proc)
-        result += 1
-      end
-    end
-    result
+  def add_prop_definition(prop, rules)
+    res = super
+    enqueue_lazy_method_definition!(:__t_props_generated_initialize) {generate_initialize_source}
+    res
   end
 
-  # Set values for all props that have defaults. Use the default if and only if
-  # the prop key isn't in the input.
-  #
-  # @return [Integer] A count of props that we successfully initialized (which
-  # we'll use to check for any unrecognized input.)
-  #
-  # checked(:never) - O(runtime object construction)
-  sig {params(instance: T::Props::WeakConstructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never)}
-  def construct_props_with_defaults(instance, hash)
-    # Use `each_pair` rather than `count` because, as of Ruby 2.6, the latter delegates to Enumerator
-    # and therefore allocates for each entry.
-    result = 0
-    props_with_defaults&.each_pair do |p, default_struct|
-      if hash.key?(p)
-        instance.instance_exec(hash[p], &default_struct.setter_proc)
-        result += 1
-      else
-        default_struct.set_default(instance)
-      end
-    end
-    result
+  private def generate_initialize_source
+    T::Props::Private::InitializerGenerator.generate(
+      props,
+      props_with_defaults || {},
+      weak: true
+    )
   end
 end
