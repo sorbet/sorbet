@@ -9,6 +9,7 @@ class Root::A
     RBI::Foo.one
     GlobalFoo.foo
     RBI::Bar.one
-    GlobalBar.foo # error: `GlobalBar` resolves but is not exported from `RBI`
+    # Not exported, but also not owned by any package:
+    GlobalBar.foo
   end
 end
