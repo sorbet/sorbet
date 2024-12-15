@@ -365,7 +365,8 @@ struct GuessOverloadCandidate {
 };
 
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
-                        InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
+                        InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs,
+                        const shared_ptr<const SendAndBlockLink> &block) {
     counterInc("calls.overloaded_invocations");
     vector<MethodRef> allCandidates;
 
@@ -478,24 +479,84 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         fallback = leftCandidates[0].candidate;
     }
 
-    { // keep only candidates that have a block iff we are passing one
+    MethodRef blockFallback;
+    {
+        auto blockFixedArity = block == nullptr ? nullopt : block->fixedArity();
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
             const auto &[candidate, constr] = *it;
-            const auto &args = candidate.data(gs)->arguments;
-            ENFORCE(!args.empty(), "Should at least have a block argument.");
-            const auto &lastArg = args.back();
-            auto mentionsBlockArg = !lastArg.isSyntheticBlockArgument();
-            if (hasBlock) {
-                if (!mentionsBlockArg || lastArg.type == Types::nilClass()) {
+            const auto &params = candidate.data(gs)->arguments;
+            ENFORCE(!params.empty(), "Should at least have a block parameter.");
+            const auto &lastParam = params.back();
+            auto mentionsBlockParam = !lastParam.isSyntheticBlockArgument();
+            if (mentionsBlockParam && !blockFallback.exists()) {
+                blockFallback = candidate;
+            }
+
+            if (block == nullptr) {
+                // keep only candidates that have a block iff we are passing one
+                if (mentionsBlockParam && lastParam.type != nullptr &&
+                    (!lastParam.type.isFullyDefined() || !Types::isSubType(gs, Types::nilClass(), lastParam.type))) {
                     it = leftCandidates.erase(it);
                     continue;
-                }
-            } else {
-                if (mentionsBlockArg && lastArg.type != nullptr &&
-                    (!lastArg.type.isFullyDefined() || !Types::isSubType(gs, Types::nilClass(), lastArg.type))) {
-                    it = leftCandidates.erase(it);
+                } else {
+                    ++it;
                     continue;
                 }
+            }
+
+            if (!mentionsBlockParam || lastParam.type == Types::nilClass()) {
+                // keep only candidates that have a block iff we are passing one
+                it = leftCandidates.erase(it);
+                continue;
+            }
+
+            if (!blockFixedArity.has_value()) {
+                // Don't bother with block arguments that have keyword or repeated args
+                ++it;
+                continue;
+            }
+
+            // Don't bother if we don't have a T.proc type, where we can't know the specific arity
+            auto blockParamType = cast_type<AppliedType>(lastParam.type);
+            if (blockParamType == nullptr) {
+                ++it;
+                continue;
+            }
+            auto paramProcArity = Types::getProcArity(*blockParamType);
+            if (!paramProcArity.has_value()) {
+                ++it;
+                continue;
+            }
+
+            // When yielding a single value yielded to a block, the Ruby VM will splat it into the
+            // block argument if its arity is greater than 1 (even when not using any destructuring
+            // parameters like `|(x, y)|`)
+            if (paramProcArity == 1 && blockParamType->targs.size() == 2 && blockFixedArity != 1) {
+                auto blockParamTArgs1 = Types::resultTypeAsSeenFrom(gs, blockParamType->targs[1],
+                                                                    candidate.data(gs)->owner, inClass, targs);
+                if (auto *tupleType = cast_type<TupleType>(blockParamTArgs1)) {
+                    // If the call site is requesting more arguments than the definition can supply,
+                    // reject this candidate.
+                    if (tupleType->elems.size() < blockFixedArity) {
+                        it = leftCandidates.erase(it);
+                        continue;
+                    } else {
+                        ++it;
+                        continue;
+                    }
+                } else if (!blockParamTArgs1.isUntyped() && blockParamTArgs1.derivesFrom(gs, Symbols::Array())) {
+                    // Don't know the length of the array, so we can't know the expected arity
+                    // of the block.
+                    ++it;
+                    continue;
+                }
+            }
+
+            if (paramProcArity < blockFixedArity) {
+                // If the call site is requesting more arguments than the definition can supply,
+                // reject this candidate.
+                it = leftCandidates.erase(it);
+                continue;
             }
             ++it;
         }
@@ -524,6 +585,9 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
 
     if (!leftCandidates.empty()) {
         return leftCandidates[0].candidate;
+    }
+    if (block != nullptr && blockFallback.exists()) {
+        return blockFallback;
     }
     return fallback;
 }
@@ -913,10 +977,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return result;
     }
 
-    auto method =
-        mayBeOverloaded.data(gs)->flags.isOverloaded
-            ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, targs, args.block != nullptr)
-            : mayBeOverloaded;
+    auto method = mayBeOverloaded.data(gs)->flags.isOverloaded
+                      ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, targs, args.block)
+                      : mayBeOverloaded;
 
     auto methodData = method.data(gs);
     if (methodData->flags.isPrivate && !args.isPrivateOk) {
