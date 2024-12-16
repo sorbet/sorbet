@@ -149,9 +149,8 @@ vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Se
         }
     }
 
-    const auto numKwArgs = send->numKwArgs();
-    for (auto i = 0; i < numKwArgs; ++i) {
-        auto loc = send->getKwKey(i).loc().join(send->getKwValue(i).loc());
+    for (auto pair : send->kwArgPairs()) {
+        auto loc = pair.key().loc().join(pair.value().loc());
         if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::BadModuleFunction)) {
             e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing",
                         "module_function");

@@ -579,10 +579,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     argLocs.emplace_back(exp.loc());
                 }
 
-                const auto kwEnd = s.numKwArgs();
-                for (auto argIdx = 0; argIdx < kwEnd; ++argIdx) {
-                    auto &key = s.getKwKey(argIdx);
-                    auto &val = s.getKwValue(argIdx);
+                for (auto pair : s.kwArgPairs()) {
+                    auto &key = pair.key();
+                    auto &val = pair.value();
                     LocalRef keyTmp = cctx.newTemporary(core::Names::hashTemp());
                     LocalRef valTmp = cctx.newTemporary(core::Names::hashTemp());
                     current = walk(cctx.withTarget(keyTmp), key, current);

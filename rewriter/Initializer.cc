@@ -175,11 +175,10 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const
     }
 
     // build a lookup table that maps from names to the types they have
-    auto numKwArgs = params->numKwArgs();
     UnorderedMap<core::NameRef, const ast::ExpressionPtr *> argTypeMap;
-    for (int i = 0; i < numKwArgs; ++i) {
-        auto *argName = ast::cast_tree<ast::Literal>(params->getKwKey(i));
-        auto *argVal = &params->getKwValue(i);
+    for (auto pair : params->kwArgPairs()) {
+        auto *argName = ast::cast_tree<ast::Literal>(pair.key());
+        auto *argVal = &pair.value();
         if (argName->isSymbol()) {
             argTypeMap[argName->asSymbol()] = argVal;
         }
