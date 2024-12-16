@@ -284,6 +284,22 @@ public:
             return nullopt;
         }
 
+        if (gs.packageDB().enforceLayering()) {
+            if (layer.has_value() && info.layer.has_value() && strictDependenciesLevel.has_value() &&
+                info.strictDependenciesLevel.has_value()) {
+                if (strictDependenciesLevel.value().first > core::packages::StrictDependenciesLevel::False) {
+                    auto pkgLayer = layer.value().first;
+                    auto otherPkgLayer = info.layer.value().first;
+                    auto pkgLayerIndex = gs.packageDB().layerIndex(pkgLayer);
+                    auto otherPkgLayerIndex = gs.packageDB().layerIndex(otherPkgLayer);
+                    if (pkgLayerIndex < otherPkgLayerIndex) {
+                        // Importing a package from a lower layer is a layering violation, so let's not suggest it
+                        return nullopt;
+                    }
+                }
+            }
+        }
+
         core::Loc insertionLoc = loc.adjust(gs, core::INVALID_POS_LOC, core::INVALID_POS_LOC);
         // first let's try adding it to the end of the imports.
         if (!importedPackageNames.empty()) {

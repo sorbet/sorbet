@@ -443,6 +443,7 @@ public:
             // We failed to import the package that defines the symbol
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::MissingImport)) {
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+                // TODO: if importing this package would create a layering violation, the error message should be something like "its package cannot be imported because of a layering violation"
                 e.setHeader("`{}` resolves but its package is not imported", lit.symbol.show(ctx));
                 bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
                 e.addErrorLine(pkg.declLoc(), "Exported from package here");
