@@ -1,3 +1,4 @@
+#include "absl/algorithm/container.h"
 #include "absl/strings/escaping.h"
 #include "absl/types/span.h"
 #include "ast/ast.h"
@@ -14,15 +15,7 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Exp
 
 bool structurallyEqualSpan(const core::GlobalState &gs, const void *avoid, absl::Span<const ExpressionPtr> a,
                            absl::Span<const ExpressionPtr> b, const core::FileRef file) {
-    if (a.size() != b.size()) {
-        return false;
-    }
-    for (size_t i = 0; i < a.size(); i++) {
-        if (!structurallyEqual(gs, avoid, a[i], b[i], file)) {
-            return false;
-        }
-    }
-    return true;
+    return absl::c_equal(a, b, [&](const auto &a, const auto &b) { return structurallyEqual(gs, avoid, a, b, file); });
 }
 
 class StructurallyEqualError {};
