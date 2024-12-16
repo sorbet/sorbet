@@ -239,7 +239,7 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr, cons
     }
 }
 
-// Ensure that two argument lists are compatible in shape and type
+// Ensure that two argument lists are compatible in shape and type and that method visibility is compatible
 void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPtr &tree, core::MethodRef superMethod,
                                 const ast::MethodDef &methodDef) {
     auto method = methodDef.symbol;
@@ -249,6 +249,23 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
         // to match overloads against their superclass definitions. Since we
         // Only permit overloading in the stdlib for now, this is no great loss.
         return;
+    }
+
+    if ((method.data(ctx)->flags.isPrivate &&
+         (superMethod.data(ctx)->flags.isProtected || superMethod.data(ctx)->isMethodPublic())) ||
+        (method.data(ctx)->flags.isProtected && superMethod.data(ctx)->isMethodPublic())) {
+        if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
+            auto modifier = method.data(ctx)->flags.isPrivate ? "private" : "protected";
+            e.setHeader("Method `{}` is {} in `{}` but not in `{}`", method.data(ctx)->name.show(ctx), modifier,
+                        method.data(ctx)->owner.show(ctx), superMethod.data(ctx)->owner.show(ctx));
+            e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+
+            auto len = method.data(ctx)->flags.isPrivate ? 7 : 9;
+            auto loc = ctx.locAt(methodDef.declLoc).adjustLen(ctx, -(len + 1), len);
+            if (loc.source(ctx) == modifier) {
+                e.replaceWith("Replace with public", loc, "public");
+            }
+        }
     }
 
     if (superMethod.data(ctx)->flags.isGenericMethod != method.data(ctx)->flags.isGenericMethod &&
