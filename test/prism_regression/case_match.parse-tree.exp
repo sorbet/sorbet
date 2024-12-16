@@ -304,6 +304,25 @@ Begin {
             ]
           }
         }
+        InPattern {
+          pattern = ArrayPatternWithTail {
+            elts = [
+              MatchVar {
+                name = <U i>
+              }
+            ]
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U An array with an element and maybe other stuff>
+              }
+            ]
+          }
+        }
       ]
       elseBody = NULL
     }

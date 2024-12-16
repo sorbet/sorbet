@@ -28,6 +28,8 @@ in Array[first, second] # Requires the `array_like_thing` to be an `Array` speci
   puts "An Array with first: #{first} and second: #{second}"
 in Point[x, y]          # Requires the `array_like_thing` to be a `Point` specifically
   puts "A Point with x: #{x} and y: #{y}"
+in [i,]
+  puts "An array with an element and maybe other stuff"
 end
 
 case hash_like_thing
