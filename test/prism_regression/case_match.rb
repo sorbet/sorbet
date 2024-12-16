@@ -12,7 +12,7 @@ else
 end
 
 case array_like_thing
-in []
+in [] => a
   puts "empty!"
 in [1, 2]
   puts "one and two!"
