@@ -1,4 +1,5 @@
 #include "absl/strings/escaping.h"
+#include "absl/types/span.h"
 #include "ast/ast.h"
 #include <type_traits>
 
@@ -11,13 +12,12 @@ namespace {
 bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const ExpressionPtr &tree,
                        const ExpressionPtr &other, const core::FileRef file, bool root = false);
 
-template <unsigned long N>
-bool structurallyEqualVec(const core::GlobalState &gs, const void *avoid, const InlinedVector<ExpressionPtr, N> &a,
-                          const InlinedVector<ExpressionPtr, N> &b, const core::FileRef file) {
+bool structurallyEqualSpan(const core::GlobalState &gs, const void *avoid, absl::Span<const ExpressionPtr> a,
+                           absl::Span<const ExpressionPtr> b, const core::FileRef file) {
     if (a.size() != b.size()) {
         return false;
     }
-    for (int i = 0; i < a.size(); i++) {
+    for (size_t i = 0; i < a.size(); i++) {
         if (!structurallyEqual(gs, avoid, a[i], b[i], file)) {
             return false;
         }
@@ -56,7 +56,7 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
                 return false;
             }
 
-            return structurallyEqualVec(gs, avoid, a->rawArgsDoNotUse(), b->rawArgsDoNotUse(), file);
+            return structurallyEqualSpan(gs, avoid, a->rawArgsDoNotUse(), b->rawArgsDoNotUse(), file);
         }
 
         case Tag::ClassDef: {
@@ -71,13 +71,13 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
             if (!structurallyEqual(gs, avoid, a->name, b->name, file)) {
                 return false;
             }
-            if (!structurallyEqualVec(gs, avoid, a->ancestors, b->ancestors, file)) {
+            if (!structurallyEqualSpan(gs, avoid, a->ancestors, b->ancestors, file)) {
                 return false;
             }
-            if (!structurallyEqualVec(gs, avoid, a->singletonAncestors, b->singletonAncestors, file)) {
+            if (!structurallyEqualSpan(gs, avoid, a->singletonAncestors, b->singletonAncestors, file)) {
                 return false;
             }
-            if (!structurallyEqualVec(gs, avoid, a->rhs, b->rhs, file)) {
+            if (!structurallyEqualSpan(gs, avoid, a->rhs, b->rhs, file)) {
                 return false;
             }
             return true;
@@ -98,7 +98,7 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
             if (!structurallyEqual(gs, avoid, a->rhs, b->rhs, file)) {
                 return false;
             }
-            if (!structurallyEqualVec(gs, avoid, a->args, b->args, file)) {
+            if (!structurallyEqualSpan(gs, avoid, a->args, b->args, file)) {
                 return false;
             }
             return true;
@@ -150,7 +150,7 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
             if (!structurallyEqual(gs, avoid, a->body, b->body, file)) {
                 return false;
             }
-            return structurallyEqualVec(gs, avoid, a->exceptions, b->exceptions, file);
+            return structurallyEqualSpan(gs, avoid, a->exceptions, b->exceptions, file);
         }
 
         case Tag::Rescue: {
@@ -165,7 +165,7 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
             if (!structurallyEqual(gs, avoid, a->ensure, b->ensure, file)) {
                 return false;
             }
-            return structurallyEqualVec(gs, avoid, a->rescueCases, b->rescueCases, file);
+            return structurallyEqualSpan(gs, avoid, a->rescueCases, b->rescueCases, file);
         }
 
         case Tag::Local: {
@@ -234,13 +234,13 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
         case Tag::Hash: {
             auto *a = reinterpret_cast<const Hash *>(tree);
             auto *b = reinterpret_cast<const Hash *>(other);
-            return structurallyEqualVec(gs, avoid, a->keys, b->keys, file) &&
-                   structurallyEqualVec(gs, avoid, a->values, b->values, file);
+            return structurallyEqualSpan(gs, avoid, a->keys, b->keys, file) &&
+                   structurallyEqualSpan(gs, avoid, a->values, b->values, file);
         }
         case Tag::Array: {
             auto *a = reinterpret_cast<const Array *>(tree);
             auto *b = reinterpret_cast<const Array *>(other);
-            return structurallyEqualVec(gs, avoid, a->elems, b->elems, file);
+            return structurallyEqualSpan(gs, avoid, a->elems, b->elems, file);
         }
 
         case Tag::Literal: {
@@ -305,14 +305,14 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
         case Tag::Block: {
             auto *a = reinterpret_cast<const Block *>(tree);
             auto *b = reinterpret_cast<const Block *>(other);
-            return structurallyEqualVec(gs, avoid, a->args, b->args, file) &&
+            return structurallyEqualSpan(gs, avoid, a->args, b->args, file) &&
                    structurallyEqual(gs, avoid, a->body, b->body, file);
         }
 
         case Tag::InsSeq: {
             auto *a = reinterpret_cast<const InsSeq *>(tree);
             auto *b = reinterpret_cast<const InsSeq *>(other);
-            return structurallyEqualVec(gs, avoid, a->stats, b->stats, file) &&
+            return structurallyEqualSpan(gs, avoid, a->stats, b->stats, file) &&
                    structurallyEqual(gs, avoid, a->expr, b->expr, file);
         }
 
