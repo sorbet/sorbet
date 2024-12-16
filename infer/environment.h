@@ -215,9 +215,9 @@ public:
 
     // NB: you can't call this function on vars in the first basic block since
     // their type will be nullptr
-    const core::TypeAndOrigins &getTypeAndOrigin(core::Context ctx, cfg::LocalRef symbol) const;
+    const core::TypeAndOrigins &getTypeAndOrigin(cfg::LocalRef symbol) const;
 
-    const core::TypeAndOrigins &getAndFillTypeAndOrigin(core::Context ctx, cfg::VariableUseSite &symbol) const;
+    const core::TypeAndOrigins &getAndFillTypeAndOrigin(cfg::VariableUseSite &symbol) const;
 
     /*
      * Create an Environment out of this one that holds if final condition in

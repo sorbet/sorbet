@@ -400,7 +400,7 @@ bool Environment::hasType(core::Context ctx, cfg::LocalRef symbol) const {
     return fnd->second.typeAndOrigins.type != nullptr;
 }
 
-const core::TypeAndOrigins &Environment::getTypeAndOrigin(core::Context ctx, cfg::LocalRef symbol) const {
+const core::TypeAndOrigins &Environment::getTypeAndOrigin(cfg::LocalRef symbol) const {
     auto fnd = _vars.find(symbol);
     if (fnd == _vars.end()) {
         return uninitialized;
@@ -409,9 +409,8 @@ const core::TypeAndOrigins &Environment::getTypeAndOrigin(core::Context ctx, cfg
     return fnd->second.typeAndOrigins;
 }
 
-const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(core::Context ctx,
-                                                                 cfg::VariableUseSite &symbol) const {
-    const auto &ret = getTypeAndOrigin(ctx, symbol.variable);
+const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(cfg::VariableUseSite &symbol) const {
+    const auto &ret = getTypeAndOrigin(symbol.variable);
     symbol.type = ret.type;
     return ret;
 }
@@ -782,7 +781,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
             return;
         }
 
-        core::TypeAndOrigins tp = getTypeAndOrigin(ctx, cond);
+        core::TypeAndOrigins tp = getTypeAndOrigin(cond);
         tp.origins.emplace_back(loc);
         if (tp.type.isUntyped()) {
             tp.type = core::Types::falsyTypes();
@@ -795,7 +794,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
         }
         setTypeAndOrigin(cond, tp);
     } else {
-        core::TypeAndOrigins tp = getTypeAndOrigin(ctx, cond);
+        core::TypeAndOrigins tp = getTypeAndOrigin(cond);
         tp.origins.emplace_back(loc);
         tp.type = core::Types::dropSubtypesOf(ctx, tp.type, core::Types::falsySymbols());
         if (tp.type.isBottom()) {
@@ -818,7 +817,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
         if (!filter.contains(typeTested.first)) {
             continue;
         }
-        core::TypeAndOrigins tp = getTypeAndOrigin(ctx, typeTested.first);
+        core::TypeAndOrigins tp = getTypeAndOrigin(typeTested.first);
         auto glbbed = core::Types::all(ctx, tp.type, typeTested.second);
         if (tp.type != glbbed) {
             tp.origins.emplace_back(loc);
@@ -835,7 +834,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
         if (!filter.contains(typeTested.first)) {
             continue;
         }
-        core::TypeAndOrigins tp = getTypeAndOrigin(ctx, typeTested.first);
+        core::TypeAndOrigins tp = getTypeAndOrigin(typeTested.first);
         tp.origins.emplace_back(loc);
 
         if (!tp.type.isUntyped()) {
@@ -854,7 +853,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
     this->isDead |= other.isDead;
     for (auto &pair : _vars) {
         auto var = pair.first;
-        const auto &otherTO = other.getTypeAndOrigin(ctx, var);
+        const auto &otherTO = other.getTypeAndOrigin(var);
         auto &thisTO = pair.second.typeAndOrigins;
         if (thisTO.type != nullptr) {
             thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
@@ -951,7 +950,7 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
     this->isDead = other.isDead;
     for (auto &pair : _vars) {
         auto var = pair.first;
-        pair.second.typeAndOrigins = other.getTypeAndOrigin(ctx, var);
+        pair.second.typeAndOrigins = other.getTypeAndOrigin(var);
         pair.second.knowledge.replace(var, typeTestsWithVar, other.getKnowledge(var, false));
         pair.second.knownTruthy = other.getKnownTruthy(var);
     }
@@ -1027,10 +1026,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 args.reserve(send.args.size());
                 for (cfg::VariableUseSite &arg : send.args) {
-                    args.emplace_back(&getAndFillTypeAndOrigin(ctx, arg));
+                    args.emplace_back(&getAndFillTypeAndOrigin(arg));
                 }
 
-                const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(ctx, send.recv);
+                const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(send.recv);
                 if (send.link) {
                     checkFullyDefined = false;
                 }
@@ -1197,7 +1196,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::Ident &i) {
-                const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i.what);
+                const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what);
                 tp.type = typeAndOrigin.type;
                 tp.origins = typeAndOrigin.origins;
 
@@ -1396,7 +1395,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // TODO: handle kwsplats here as well.
                 if (i.flags.isRepeated) {
                     if (i.argId == 0) {
-                        const core::TypeAndOrigins &argsType = getAndFillTypeAndOrigin(ctx, i.yieldParam);
+                        const core::TypeAndOrigins &argsType = getAndFillTypeAndOrigin(i.yieldParam);
                         tp.type = argsType.type;
                     } else {
                         tp.type = core::Types::untyped(core::Symbols::Magic_UntypedSource_YieldLoadArg());
@@ -1407,7 +1406,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 // Fetch the type for the argument out of the parameters for the block
                 // by simulating a blockParam[i] call.
-                const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(ctx, i.yieldParam);
+                const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(i.yieldParam);
 
                 if (recvType.type.isUntyped()) {
                     // This avoids reporting an untyped usage for ->(x) { 0 }. Sorbet would
@@ -1460,7 +1459,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.type = core::Types::bottom();
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
 
-                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
+                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(i.what);
                 if (methodReturnType == core::Types::void_()) {
                     methodReturnType = core::Types::top();
                 }
@@ -1499,7 +1498,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 ENFORCE(i.link);
                 ENFORCE(i.link->result->main.blockReturnType != nullptr);
 
-                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
+                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(i.what);
                 auto expectedType = i.link->result->main.blockReturnType;
                 if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
                     expectedType = core::Types::top();
@@ -1548,7 +1547,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 }
             },
             [&](cfg::TAbsurd &i) {
-                const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i.what.variable);
+                const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what.variable);
 
                 if (auto e = ctx.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
                     if (typeAndOrigin.type.isUntyped()) {
@@ -1613,7 +1612,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     noLoopChecking = true;
                 }
 
-                const core::TypeAndOrigins &ty = getAndFillTypeAndOrigin(ctx, c.value);
+                const core::TypeAndOrigins &ty = getAndFillTypeAndOrigin(c.value);
                 ENFORCE(c.cast != core::Names::uncheckedLet() && c.cast != core::Names::bind() &&
                         c.cast != core::Names::syntheticBind());
 
@@ -1709,7 +1708,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
         if (!noLoopChecking && loopCount != bindMinLoops) {
             auto pin = pinnedTypes.find(bind.bind.variable);
             const core::TypeAndOrigins &cur =
-                (pin != pinnedTypes.end()) ? pin->second : getTypeAndOrigin(ctx, bind.bind.variable);
+                (pin != pinnedTypes.end()) ? pin->second : getTypeAndOrigin(bind.bind.variable);
 
             // TODO(jez) What should we do about untyped code and pinning?
             core::ErrorSection::Collector errorDetailsCollector;
@@ -1862,7 +1861,7 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
         result.origins.emplace_back(main.rebindLoc);
         return result;
     } else {
-        return getTypeAndOrigin(ctx, fallback);
+        return getTypeAndOrigin(fallback);
     }
 }
 
