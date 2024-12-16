@@ -900,15 +900,8 @@ public:
     void clearArgs();
 
     template <typename PtrT> struct KwPair {
-        absl::Span<PtrT> span;
-
-        PtrT &key() {
-            return span[0];
-        }
-
-        PtrT &value() {
-            return span[1];
-        }
+        PtrT &key;
+        PtrT &value;
     };
 
     // We're going to use this type to encapsulate both the span over the kwargs,
@@ -925,7 +918,7 @@ public:
         }
 
         KwPair<PtrT> operator*() {
-            return KwPair<PtrT>{span};
+            return KwPair<PtrT>{span[0], span[1]};
         }
 
         KwPairSpan &operator++() {

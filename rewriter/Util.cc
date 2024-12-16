@@ -25,11 +25,11 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
             // T.proc.params takes inlined keyword argument pairs, and can't handle kwsplat
             ast::Send::ARGS_store args;
 
-            for (auto pair : send->kwArgPairs()) {
-                ENFORCE(ast::isa_tree<ast::Literal>(pair.key()));
-                args.emplace_back(pair.key().deepCopy());
+            for (auto [key, value] : send->kwArgPairs()) {
+                ENFORCE(ast::isa_tree<ast::Literal>(key));
+                args.emplace_back(key.deepCopy());
 
-                auto dupedValue = ASTUtil::dupType(pair.value());
+                auto dupedValue = ASTUtil::dupType(value);
                 if (dupedValue == nullptr) {
                     return nullptr;
                 }
@@ -247,9 +247,9 @@ ast::ExpressionPtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
     ast::Hash::ENTRY_store keys;
     ast::Hash::ENTRY_store values;
 
-    for (auto pair : send->kwArgPairs()) {
-        keys.emplace_back(pair.key().deepCopy());
-        values.emplace_back(pair.value().deepCopy());
+    for (auto [key, value] : send->kwArgPairs()) {
+        keys.emplace_back(key.deepCopy());
+        values.emplace_back(value.deepCopy());
     }
 
     // handle a double-splat or a hash literal as the last argument
