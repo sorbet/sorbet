@@ -1,4 +1,5 @@
 #include "namer/namer.h"
+#include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
 #include "ast/ArgParsing.h"
@@ -896,22 +897,12 @@ private:
 
     bool paramsMatch(core::MutableContext ctx, core::MethodRef method, const vector<core::ParsedArg> &parsedArgs) {
         auto sym = method.data(ctx)->dealiasMethod(ctx);
-        if (sym.data(ctx)->arguments.size() != parsedArgs.size()) {
-            return false;
-        }
-        for (int i = 0; i < parsedArgs.size(); i++) {
-            auto &methodArg = parsedArgs[i];
-            auto &symArg = sym.data(ctx)->arguments[i];
-
-            if (symArg.flags.isKeyword != methodArg.flags.isKeyword ||
-                symArg.flags.isBlock != methodArg.flags.isBlock ||
-                symArg.flags.isRepeated != methodArg.flags.isRepeated ||
-                (symArg.flags.isKeyword && symArg.name != methodArg.local._name)) {
-                return false;
-            }
-        }
-
-        return true;
+        return absl::c_equal(parsedArgs, sym.data(ctx)->arguments, [](const auto &methodArg, const auto &symArg) {
+            return symArg.flags.isKeyword == methodArg.flags.isKeyword &&
+                   symArg.flags.isBlock == methodArg.flags.isBlock &&
+                   symArg.flags.isRepeated == methodArg.flags.isRepeated &&
+                   (!symArg.flags.isKeyword || symArg.name == methodArg.local._name);
+        });
     }
 
     void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<core::ParsedArg> &parsedArgs) {
