@@ -2869,7 +2869,7 @@ class ResolveTypeMembersAndFieldsWalk {
         // If this string _begins_ with `::`, then the first fragment will be an empty string; in multiple places
         // below, we'll check to find out whether the first part is `""` or not, which means we're testing whether
         // the string did or did not begin with `::`.
-        vector<string> parts = absl::StrSplit(shortName, "::");
+        vector<string_view> parts = absl::StrSplit(shortName, "::");
 
         core::SymbolRef current;
         for (auto part : parts) {
