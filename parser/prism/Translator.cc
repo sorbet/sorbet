@@ -1437,7 +1437,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
         case PM_CAPTURE_PATTERN_NODE: { // A variable capture such as the `Integer => i` in `in Integer => i`
             auto capturePatternNode = down_cast<pm_capture_pattern_node>(node);
 
-            auto pattern = translate(capturePatternNode->value);
+            auto pattern = patternTranslate(capturePatternNode->value);
             auto target = patternTranslate(up_cast(capturePatternNode->target));
 
             return make_unique<parser::MatchAs>(location, move(pattern), move(target));

@@ -78,9 +78,14 @@ Begin {
       }
       inBodies = [
         InPattern {
-          pattern = ArrayPattern {
-            elts = [
-            ]
+          pattern = MatchAs {
+            value = ArrayPattern {
+              elts = [
+              ]
+            }
+            as = MatchVar {
+              name = <U a>
+            }
           }
           guard = NULL
           body = Send {
