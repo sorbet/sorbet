@@ -1407,12 +1407,21 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
             patternTranslateMultiInto(sorbetElements, prismPrefixNodes);
 
-            if (prismRestNode != nullptr)
+            // Implicit rest nodes in array patterns don't need to be translated
+            if (prismRestNode != nullptr && !PM_NODE_TYPE_P(prismRestNode, PM_IMPLICIT_REST_NODE)) {
                 sorbetElements.emplace_back(patternTranslate(prismRestNode));
+            }
 
             patternTranslateMultiInto(sorbetElements, prismSuffixNodes);
 
-            auto arrayPattern = make_unique<parser::ArrayPattern>(location, move(sorbetElements));
+            unique_ptr<parser::Node> arrayPattern = nullptr;
+
+            // When the pattern ends with an implicit rest node, we need to return an `ArrayPatternWithTail` instead
+            if (prismRestNode != nullptr && PM_NODE_TYPE_P(prismRestNode, PM_IMPLICIT_REST_NODE)) {
+                arrayPattern = make_unique<parser::ArrayPatternWithTail>(location, move(sorbetElements));
+            } else {
+                arrayPattern = make_unique<parser::ArrayPattern>(location, move(sorbetElements));
+            }
 
             if (auto prismConstant = arrayPatternNode->constant; prismConstant != nullptr) {
                 // An array pattern can start with a constant that matches against a specific type,

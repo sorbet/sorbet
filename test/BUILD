@@ -292,7 +292,6 @@ pipeline_tests(
             "testdata/desugar/for.rb",
             "testdata/desugar/oror_classvar.rb",
             "testdata/desugar/oror_ivar.rb",
-            "testdata/desugar/pattern_matching_array.rb",
             "testdata/desugar/pattern_matching_const.rb",
             "testdata/desugar/pattern_matching_hash.rb",
             "testdata/desugar/range.rb",
