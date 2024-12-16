@@ -1049,9 +1049,7 @@ struct PackageSpecBodyWalk {
 
         // Sanity check arguments for unrecognized methods
         if (!isSpecMethod(send)) {
-            const auto numPosArgs = send.numPosArgs();
-            for (auto i = 0; i < numPosArgs; ++i) {
-                auto &arg = send.getPosArg(i);
+            for (auto &arg : send.posArgs()) {
                 if (!ast::isa_tree<ast::Literal>(arg)) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Packager::InvalidPackageExpression)) {
                         e.setHeader("Invalid expression in package: Arguments to functions must be literals");
