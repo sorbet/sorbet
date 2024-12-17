@@ -87,7 +87,7 @@ private:
     std::unique_ptr<SorbetAssignmentNode> translateOpAssignment(pm_node_t *node);
 
     template <typename PrismLhsNode, typename SorbetLHSNode>
-    std::unique_ptr<parser::Node> translateConst(PrismLhsNode *node, bool skipDynamicConstantWorkaround = false);
+    std::unique_ptr<parser::Node> translateConst(PrismLhsNode *node, bool replaceWithDynamicConstAssign = false);
 
     // Pattern-matching
     // ... variations of the main translation functions for pattern-matching related nodes.
