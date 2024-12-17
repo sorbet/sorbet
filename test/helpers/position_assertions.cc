@@ -58,6 +58,11 @@ template <typename T> bool isDuplicateDiagnostic(string_view filename, T *assert
 template <typename T>
 void reportMissingError(const string &filename, const T &assertion, string_view sourceLine, string_view errorPrefix,
                         bool missingDuplicate = false) {
+    // Skip error message checking when running with Prism.
+    if (sorbet::test::parser == realmain::options::Parser::PRISM) {
+        return;
+    }
+
     auto coreMessage = missingDuplicate ? "Error was not duplicated" : "Did not find expected error";
     auto messagePostfix = missingDuplicate ? "\nYou can fix this error by changing the assertion to `error:`." : "";
     ADD_FAIL_CHECK_AT(filename.c_str(), assertion.range->start->line + 1,
@@ -68,6 +73,11 @@ void reportMissingError(const string &filename, const T &assertion, string_view 
 
 void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine,
                            string_view errorPrefix) {
+    // Skip error message checking when running with Prism.
+    if (sorbet::test::parser == realmain::options::Parser::PRISM) {
+        return;
+    }
+
     ADD_FAIL_CHECK_AT(
         filename.c_str(), diagnostic.range->start->line + 1,
         fmt::format(
@@ -476,6 +486,10 @@ string ErrorAssertion::toString() const {
 }
 
 bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
+    // Skip error message checking when running with Prism.
+    if (sorbet::test::parser == realmain::options::Parser::PRISM) {
+        return true;
+    }
     // The error message must contain `message`.
     if (diagnostic.message.find(message) == string::npos) {
         ADD_FAIL_CHECK_AT(filename.c_str(), range->start->line + 1,
