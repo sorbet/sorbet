@@ -438,7 +438,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // See`PM_CONSTANT_READ_NODE`, which handles the `::C` part
             auto constantPathNode = down_cast<pm_constant_path_node>(node);
 
-            return translateConst<pm_constant_path_node, parser::Const>(constantPathNode);
+            auto skipDynamicConstantWorkaround = true;
+            return translateConst<pm_constant_path_node, parser::Const>(constantPathNode,
+                                                                        skipDynamicConstantWorkaround);
         }
         case PM_CONSTANT_PATH_OPERATOR_WRITE_NODE: { // Compound assignment to a constant path, e.g. `A::B += 1`
             return translateOpAssignment<pm_constant_path_operator_write_node, parser::OpAsgn, parser::ConstLhs>(node);
