@@ -31,7 +31,7 @@ bool isTestNamespace(const core::NameRef ns) {
     return ns == core::packages::PackageDB::TEST_NAMESPACE;
 }
 
-bool visibilityApplies(const core::packages::VisibleTo vt, absl::Span<const core::NameRef> name) {
+bool visibilityApplies(const core::packages::VisibleTo &vt, absl::Span<const core::NameRef> name) {
     if (vt.visibleToType == core::packages::VisibleToType::Wildcard) {
         // a wildcard will match if it's a proper prefix of the package name
         return vt.packageName == name.subspan(0, vt.packageName.size());
