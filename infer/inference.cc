@@ -243,7 +243,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     if (dueToSafeNavigation && send != nullptr) {
                         if (auto e = ctx.state.beginError(locForUnreachable,
                                                           core::errors::Infer::UnnecessarySafeNavigation)) {
-                            auto ty = current.getAndFillTypeAndOrigin(send->args[0]);
+                            const auto &ty = current.getAndFillTypeAndOrigin(send->args[0]);
 
                             e.setHeader("Used `{}` operator on `{}`, which can never be nil", "&.", ty.type.show(ctx));
                             e.addErrorSection(ty.explainGot(ctx, current.locForUninitialized()));
@@ -315,7 +315,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                                               *ctx.state.suggestUnsafe, bexitLoc.source(ctx).value());
                             }
 
-                            auto ty = prevEnv.getTypeAndOrigin(cond.variable);
+                            const auto &ty = prevEnv.getTypeAndOrigin(cond.variable);
                             e.addErrorSection(ty.explainGot(ctx, prevEnv.locForUninitialized()));
                         }
 
@@ -364,7 +364,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
         if (!current.isDead) {
             ENFORCE(bb->firstDeadInstructionIdx == -1);
-            auto bexitTpo = current.getAndFillTypeAndOrigin(bb->bexit.cond);
+            const auto &bexitTpo = current.getAndFillTypeAndOrigin(bb->bexit.cond);
             if (bexitTpo.type.isUntyped()) {
                 auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, bexitTpo.type);
                 if (auto e = ctx.beginError(bb->bexit.loc, what)) {
