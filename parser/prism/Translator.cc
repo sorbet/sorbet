@@ -1316,13 +1316,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_IN_NODE:                // An `in` pattern such as in a `case` statement, or as a standalone expression.
         case PM_PINNED_EXPRESSION_NODE: // A "pinned" expression, like `^(1 + 2)` in `in ^(1 + 2)`
         case PM_PINNED_VARIABLE_NODE:   // A "pinned" variable, like `^x` in `in ^x`
+        case PM_IMPLICIT_NODE:
             unreachable(
                 "These pattern-match related nodes are handled separately in `Translator::patternTranslate()`.");
 
         case PM_SCOPE_NODE: // An internal node type only created by the MRI's Ruby compiler, and not Prism itself.
             unreachable("Prism's parser never produces `PM_SCOPE_NODE` nodes.");
 
-        case PM_IMPLICIT_NODE:
         case PM_MISSING_NODE:
             // For now, we only report errors when we hit a missing node because we don't want to always report dynamic
             // constant assignment errors
@@ -1383,8 +1383,8 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
         case PM_ALTERNATION_PATTERN_NODE: { // A pattern like `1 | 2`
             auto alternationPatternNode = down_cast<pm_alternation_pattern_node>(node);
 
-            auto left = translate(alternationPatternNode->left);
-            auto right = translate(alternationPatternNode->right);
+            auto left = patternTranslate(alternationPatternNode->left);
+            auto right = patternTranslate(alternationPatternNode->right);
 
             return make_unique<parser::MatchAlt>(location, move(left), move(right));
         }
@@ -1393,6 +1393,10 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
             auto key = patternTranslate(assocNode->key);
             auto value = patternTranslate(assocNode->value);
+
+            if (PM_NODE_TYPE_P(assocNode->value, PM_IMPLICIT_NODE)) {
+                return value;
+            }
 
             return make_unique<parser::Pair>(location, move(key), move(value));
         }
@@ -1488,7 +1492,9 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
                 switch (PM_NODE_TYPE(prismRestNode)) {
                     case PM_ASSOC_SPLAT_NODE: {
-                        sorbetElements.emplace_back(make_unique<parser::MatchRest>(loc, nullptr));
+                        auto assocSplatNode = down_cast<pm_assoc_splat_node>(prismRestNode);
+                        sorbetElements.emplace_back(
+                            make_unique<parser::MatchRest>(loc, patternTranslate(assocSplatNode->value)));
                         break;
                     }
                     case PM_NO_KEYWORDS_PARAMETER_NODE: {
@@ -1512,6 +1518,10 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             }
 
             return hashPattern;
+        }
+        case PM_IMPLICIT_NODE: {
+            auto implicitNode = down_cast<pm_implicit_node>(node);
+            return patternTranslate(implicitNode->value);
         }
         case PM_IN_NODE: { // An `in` pattern such as in a `case` statement, or as a standalone expression.
             auto inNode = down_cast<pm_in_node>(node);

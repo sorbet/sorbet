@@ -280,8 +280,10 @@ pipeline_tests(
             # Desugar tests having to do with tree differences; will address later
             "testdata/desugar/constant_error.rb",
             "testdata/desugar/for.rb",
-            "testdata/desugar/pattern_matching_hash.rb",
             "testdata/desugar/sclass.rb",
+
+            # Sorbets' parser incorrectly accepts invalid syntax
+            "testdata/desugar/pattern_matching_hash.rb", # See https://github.com/Shopify/sorbet/issues/362
         ],
     ),
     "PosTests",
