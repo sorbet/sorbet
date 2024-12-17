@@ -1575,11 +1575,12 @@ struct ComputeSCCsMetadata {
 // DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
 // detecting SCCs.
 void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::packages::MangledName pkgName) {
-    if (!gs.packageDB().getPackageInfoNonConst(pkgName)) {
+    auto *pkgInfoPtr = gs.packageDB().getPackageInfoNonConst(pkgName);
+    if (!pkgInfoPtr) {
         // This is to handle the case where the user imports a package that doesn't exist.
         return;
     }
-    auto &pkgInfo = PackageInfoImpl::from(*(gs.packageDB().getPackageInfoNonConst(pkgName)));
+    auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
     metadata.index[pkgName] = metadata.nextIndex;
     metadata.lowLink[pkgName] = metadata.nextIndex;
     metadata.nextIndex++;
