@@ -563,6 +563,13 @@ class Reline::GeneralIO
   def self.ungetc(c); end
   def self.win?; end
 end
+class Reline::IO
+  def self.decide_io_gate; end
+  def dumb?; end
+  def win?; end
+  def reset_color_sequence; end
+  def read_single_char(keyseq_timeout); end
+end
 class Reline::ANSI < Reline::IO
   def self.clear_screen; end
   def self.cursor_pos; end
