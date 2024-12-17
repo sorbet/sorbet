@@ -41,7 +41,7 @@ struct VisibleTo {
     VisibleToType visibleToType;
 
     VisibleTo(std::vector<core::NameRef> packageName, VisibleToType visibleToType)
-        : packageName(packageName), visibleToType(visibleToType){};
+        : packageName(std::move(packageName)), visibleToType(visibleToType){};
 };
 
 class PackageInfo {
