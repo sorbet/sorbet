@@ -1724,8 +1724,8 @@ void validateVisibility(const core::Context &ctx, const Import i) {
         return;
     }
 
-    bool allowed = absl::c_any_of(otherPkg.visibleTo(),
-                                  [&absPkg](const auto &other) { return visibilityApplies(other, absPkg.fullName()); });
+    bool allowed =
+        absl::c_any_of(visibleTo, [&absPkg](const auto &other) { return visibilityApplies(other, absPkg.fullName()); });
 
     if (!allowed) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
