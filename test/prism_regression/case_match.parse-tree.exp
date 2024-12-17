@@ -78,9 +78,14 @@ Begin {
       }
       inBodies = [
         InPattern {
-          pattern = ArrayPattern {
-            elts = [
-            ]
+          pattern = MatchAs {
+            value = ArrayPattern {
+              elts = [
+              ]
+            }
+            as = MatchVar {
+              name = <U a>
+            }
           }
           guard = NULL
           body = Send {
@@ -300,6 +305,25 @@ Begin {
                     ]
                   }
                 ]
+              }
+            ]
+          }
+        }
+        InPattern {
+          pattern = ArrayPatternWithTail {
+            elts = [
+              MatchVar {
+                name = <U i>
+              }
+            ]
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U An array with an element and maybe other stuff>
               }
             ]
           }
