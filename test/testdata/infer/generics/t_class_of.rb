@@ -120,7 +120,7 @@ T.reveal_type(instance) # error: `ChildAFixedString`
 sig do
   type_parameters(:U)
     .params(klass: T.class_of(A)[T.type_parameter(:U), Integer])
-    #                            ^^^^^^^^^^^^^^^^^^^^ error: `T.type_parameter(:<todo typeargument>)` is not a subtype of upper bound of type member `::<Class:A>::<AttachedClass>
+    #                            ^^^^^^^^^^^^^^^^^^^^ error: `T.type_parameter(:"<todo typeargument>")` is not a subtype of upper bound of type member `::<Class:A>::<AttachedClass>
     .returns(T.type_parameter(:U))
 end
 def example4(klass)

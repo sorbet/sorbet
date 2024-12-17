@@ -1,4 +1,5 @@
 #include "absl/strings/str_cat.h"
+#include "common/strings/formatting.h"
 #include "core/core.h"
 
 using namespace std;
@@ -41,7 +42,6 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     string methodReturnType =
         (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType.show(gs, options), ")");
     vector<string> typeAndArgNames;
-    vector<string> typeParams;
     vector<string> flags;
     auto sym = method.data(gs);
     string sigCall = "sig";
@@ -73,23 +73,26 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     }
     string typeParamString = "";
     if (!sym->typeArguments().empty()) {
-        for (const auto &typeParam : sym->typeArguments()) {
-            typeParams.push_back(fmt::format(":{}", typeParam.data(gs)->name.show(gs)));
-        }
-        typeParamString = fmt::format("type_parameters({}).", fmt::join(typeParams, ", "));
+        typeParamString =
+            fmt::format("type_parameters({}).", fmt::map_join(sym->typeArguments(), ", ", [&](const auto &typeParam) {
+                            return typeParam.data(gs)->name.showAsSymbolLiteral(gs);
+                        }));
     }
     string paramsString = "";
     if (!typeAndArgNames.empty()) {
         paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
     }
 
-    auto oneline =
-        fmt::format("{} {{ {}{}{}{} }}", sigCall, flagString, typeParamString, paramsString, methodReturnType);
-    if ((oneline.size() - typeParamString.size()) <= MAX_PRETTY_WIDTH &&
-        typeAndArgNames.size() <= MAX_PRETTY_SIG_ARGS) {
-        return oneline;
+    auto oneline = sigCall.size() + flagString.size() + paramsString.size() + methodReturnType.size();
+    if (oneline <= MAX_PRETTY_WIDTH && typeAndArgNames.size() <= MAX_PRETTY_SIG_ARGS) {
+        return fmt::format("{} {{ {}{}{}{} }}", sigCall, flagString, typeParamString, paramsString, methodReturnType);
     }
-
+    if (!sym->typeArguments().empty()) {
+        typeParamString = fmt::format("type_parameters({})\n  .",
+                                      fmt::map_join(sym->typeArguments(), ", ", [&](const auto &typeParam) {
+                                          return typeParam.data(gs)->name.showAsSymbolLiteral(gs);
+                                      }));
+    }
     if (!flags.empty()) {
         flagString = fmt::format("{}\n  .", fmt::join(flags, "\n  ."));
     }

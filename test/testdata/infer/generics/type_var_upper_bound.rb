@@ -15,7 +15,7 @@ end
 sig do
   type_parameters(:U)
   .params(
-    x: Box[T.type_parameter(:U)], # error: `T.type_parameter(:<todo typeargument>)` is not a subtype of upper bound of type member `::Box::Elem`
+    x: Box[T.type_parameter(:U)], # error: `T.type_parameter(:"<todo typeargument>")` is not a subtype of upper bound of type member `::Box::Elem`
     y: T.type_parameter(:U),
   )
   .void

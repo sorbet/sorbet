@@ -82,17 +82,8 @@ string NamedLiteralType::showValue(const GlobalState &gs) const {
         case NamedLiteralType::LiteralTypeKind::String:
             return fmt::format("\"{}\"", absl::CEscape(asName().show(gs)));
         case NamedLiteralType::LiteralTypeKind::Symbol: {
-            return showAsSymbolLiteral(gs, asName());
+            return name.showAsSymbolLiteral(gs);
         }
-    }
-}
-
-string NamedLiteralType::showAsSymbolLiteral(const GlobalState &gs, NameRef name) {
-    auto shown = name.show(gs);
-    if (absl::StrContains(shown, " ")) {
-        return fmt::format(":\"{}\"", absl::CEscape(shown));
-    } else {
-        return fmt::format(":{}", shown);
     }
 }
 
@@ -395,12 +386,8 @@ string TypeVar::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string TypeVar::show(const GlobalState &gs, ShowOptions options) const {
-    auto shown = sym.data(gs)->name.show(gs);
-    if (absl::StrContains(shown, " ")) {
-        return fmt::format("T.type_parameter(:{})", absl::CEscape(shown));
-    } else {
-        return fmt::format("T.type_parameter(:{})", shown);
-    }
+    auto symbolName = sym.data(gs)->name.showAsSymbolLiteral(gs);
+    return fmt::format("T.type_parameter({})", symbolName);
 }
 
 string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {

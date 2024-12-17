@@ -38,14 +38,15 @@ def example_any(x)
     #      ^ hover-line: 4 def foo(&blk); end
     #      ^ hover-line: 5 # B#foo:
     #      ^ hover-line: 6 sig do
-    #      ^ hover-line: 7   params(
-    #      ^ hover-line: 8     blk: T.proc.returns(T.type_parameter(:U))
-    #      ^ hover-line: 9   )
-    #      ^ hover-line: 10   .returns(T.type_parameter(:U))
-    #      ^ hover-line: 11 end
-    #      ^ hover-line: 12 def foo(&blk); end
-    #      ^ hover-line: 14 # result type:
-    #      ^ hover-line: 15 IFoo
+    #      ^ hover-line: 7   type_parameters(:U)
+    #      ^ hover-line: 8   .params(
+    #      ^ hover-line: 9     blk: T.proc.returns(T.type_parameter(:U))
+    #      ^ hover-line: 10   )
+    #      ^ hover-line: 11   .returns(T.type_parameter(:U))
+    #      ^ hover-line: 12 end
+    #      ^ hover-line: 13 def foo(&blk); end
+    #      ^ hover-line: 15 # result type:
+    #      ^ hover-line: 16 IFoo
     ""
   }
   # WRONG!
@@ -60,14 +61,15 @@ def example_all(x)
     #     ^ hover-line: 4 def foo(&blk); end
     #     ^ hover-line: 5 # B#foo:
     #     ^ hover-line: 6 sig do
-    #     ^ hover-line: 7   params(
-    #     ^ hover-line: 8     blk: T.proc.returns(T.type_parameter(:U))
-    #     ^ hover-line: 9   )
-    #     ^ hover-line: 10   .returns(T.type_parameter(:U))
-    #     ^ hover-line: 11 end
-    #     ^ hover-line: 12 def foo(&blk); end
-    #     ^ hover-line: 14 # result type:
-    #     ^ hover-line: 15 IFoo
+    #     ^ hover-line: 7   type_parameters(:U)
+    #     ^ hover-line: 8   .params(
+    #     ^ hover-line: 9     blk: T.proc.returns(T.type_parameter(:U))
+    #     ^ hover-line: 10   )
+    #     ^ hover-line: 11   .returns(T.type_parameter(:U))
+    #     ^ hover-line: 12 end
+    #     ^ hover-line: 13 def foo(&blk); end
+    #     ^ hover-line: 15 # result type:
+    #     ^ hover-line: 16 IFoo
     ""
   }
   # WRONG!
