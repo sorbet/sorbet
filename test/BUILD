@@ -280,11 +280,7 @@ pipeline_tests(
             # Desugar tests having to do with tree differences; will address later
             "testdata/desugar/constant_error.rb",
             "testdata/desugar/for.rb",
-            "testdata/desugar/oror_classvar.rb",
-            "testdata/desugar/oror_ivar.rb",
             "testdata/desugar/pattern_matching_hash.rb",
-            "testdata/desugar/range.rb",
-            "testdata/desugar/regexp.rb",
             "testdata/desugar/sclass.rb",
         ],
     ),
