@@ -715,11 +715,6 @@ bool MetaType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const 
     return false;
 }
 
-TypePtr MetaType::_approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
-    // dispatchCall is invoked on them in resolver
-    return nullptr;
-}
-
 TypePtr MetaType::underlying(const GlobalState &gs) const {
     return Types::Object();
 }
