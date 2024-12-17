@@ -35,16 +35,24 @@ end
 case hash_like_thing
 in {}
   puts "empty!"
-in { a: 1, b: 2 }
-  puts "contains a and b, and maybe other stuff!"
-in { c: 3, ** }
-  puts "has c, and maybe other stuff!"
-in { d: 4, **nil }
-  puts "has d and nothing else!"
+in { a: 1, b: 2 } => h
+  puts "#{h} contains a and b, and maybe other stuff!"
+in { c: 3, ** } => h
+  puts "#{h} has c, and maybe other stuff!"
+in { d: 4, **nil } => h
+  puts "#{h} has d and nothing else!"
+in {"kj": j} | {"kh": l} => m
+  puts "#{m} has j or l!"
+in {"n1":, n2:, "n3":} => n4
+  puts "#{n4} has n1, n2, and n3!"
 in Hash[e: 5 => e]             # Requires the `hash_like_thing` to be a `Hash` specifically
   puts "A Hash with e: #{e}"
 in Point[x: 6 => x, y: 7 => y] # Requires the `hash_like_thing` to be a `Point` specifically
   puts "A Point with x: #{x} and y: #{y}"
+in **o
+  puts "splat!"
+in **nil
+  puts "splat nil!"
 end
 
 # no else
