@@ -4345,7 +4345,17 @@ class Net::IMAP::Address < Struct
   def self.new(*_); end
 end
 
-class Net::IMAP::Atom
+class Net::IMAP::CommandData < Data
+  def initialize(data); end
+
+  def data; end
+
+  def send_data(imap); end
+
+  def validate(); end
+end
+
+class Net::IMAP::Atom < Net::IMAP::CommandData
   def initialize(data); end
 
   def send_data(imap); end
@@ -5010,7 +5020,7 @@ end
 class Net::IMAP::FlagCountError < Net::IMAP::Error
 end
 
-class Net::IMAP::Literal
+class Net::IMAP::Literal < Net::IMAP::CommandData
   def initialize(data); end
 
   def send_data(imap); end
@@ -5191,7 +5201,7 @@ class Net::IMAP::MailboxQuotaRoot < Struct
   def self.new(*_); end
 end
 
-class Net::IMAP::MessageSet
+class Net::IMAP::MessageSet < Net::IMAP::CommandData
   def initialize(data); end
 
   def send_data(imap); end
@@ -5227,7 +5237,7 @@ class Net::IMAP::PlainAuthenticator
   def process(data); end
 end
 
-class Net::IMAP::QuotedString
+class Net::IMAP::QuotedString < Net::IMAP::CommandData
   def initialize(data); end
 
   def send_data(imap); end
@@ -5235,7 +5245,7 @@ class Net::IMAP::QuotedString
   def validate(); end
 end
 
-class Net::IMAP::RawData
+class Net::IMAP::RawData < Net::IMAP::CommandData
   def initialize(data); end
 
   def send_data(imap); end
