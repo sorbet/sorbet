@@ -356,86 +356,229 @@ Begin {
           }
         }
         InPattern {
-          pattern = HashPattern {
-            pairs = [
-              Pair {
-                key = Symbol {
-                  val = <U a>
+          pattern = MatchAs {
+            value = HashPattern {
+              pairs = [
+                Pair {
+                  key = Symbol {
+                    val = <U a>
+                  }
+                  value = Integer {
+                    val = "1"
+                  }
                 }
-                value = Integer {
-                  val = "1"
+                Pair {
+                  key = Symbol {
+                    val = <U b>
+                  }
+                  value = Integer {
+                    val = "2"
+                  }
                 }
-              }
-              Pair {
-                key = Symbol {
-                  val = <U b>
-                }
-                value = Integer {
-                  val = "2"
-                }
-              }
-            ]
+              ]
+            }
+            as = MatchVar {
+              name = <U h>
+            }
           }
           guard = NULL
           body = Send {
             receiver = NULL
             method = <U puts>
             args = [
-              String {
-                val = <U contains a and b, and maybe other stuff!>
+              DString {
+                nodes = [
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U h>
+                      }
+                    ]
+                  }
+                  String {
+                    val = <U  contains a and b, and maybe other stuff!>
+                  }
+                ]
               }
             ]
           }
         }
         InPattern {
-          pattern = HashPattern {
-            pairs = [
-              Pair {
-                key = Symbol {
-                  val = <U c>
+          pattern = MatchAs {
+            value = HashPattern {
+              pairs = [
+                Pair {
+                  key = Symbol {
+                    val = <U c>
+                  }
+                  value = Integer {
+                    val = "3"
+                  }
                 }
-                value = Integer {
-                  val = "3"
+                MatchRest {
+                  var = NULL
                 }
-              }
-              MatchRest {
-                var = NULL
-              }
-            ]
+              ]
+            }
+            as = MatchVar {
+              name = <U h>
+            }
           }
           guard = NULL
           body = Send {
             receiver = NULL
             method = <U puts>
             args = [
-              String {
-                val = <U has c, and maybe other stuff!>
+              DString {
+                nodes = [
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U h>
+                      }
+                    ]
+                  }
+                  String {
+                    val = <U  has c, and maybe other stuff!>
+                  }
+                ]
               }
             ]
           }
         }
         InPattern {
-          pattern = HashPattern {
-            pairs = [
-              Pair {
-                key = Symbol {
-                  val = <U d>
+          pattern = MatchAs {
+            value = HashPattern {
+              pairs = [
+                Pair {
+                  key = Symbol {
+                    val = <U d>
+                  }
+                  value = Integer {
+                    val = "4"
+                  }
                 }
-                value = Integer {
-                  val = "4"
+                MatchNilPattern {
                 }
-              }
-              MatchNilPattern {
-              }
-            ]
+              ]
+            }
+            as = MatchVar {
+              name = <U h>
+            }
           }
           guard = NULL
           body = Send {
             receiver = NULL
             method = <U puts>
             args = [
-              String {
-                val = <U has d and nothing else!>
+              DString {
+                nodes = [
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U h>
+                      }
+                    ]
+                  }
+                  String {
+                    val = <U  has d and nothing else!>
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        InPattern {
+          pattern = MatchAs {
+            value = MatchAlt {
+              left = HashPattern {
+                pairs = [
+                  Pair {
+                    key = Symbol {
+                      val = <U kj>
+                    }
+                    value = MatchVar {
+                      name = <U j>
+                    }
+                  }
+                ]
+              }
+              right = HashPattern {
+                pairs = [
+                  Pair {
+                    key = Symbol {
+                      val = <U kh>
+                    }
+                    value = MatchVar {
+                      name = <U l>
+                    }
+                  }
+                ]
+              }
+            }
+            as = MatchVar {
+              name = <U m>
+            }
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              DString {
+                nodes = [
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U m>
+                      }
+                    ]
+                  }
+                  String {
+                    val = <U  has j or l!>
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        InPattern {
+          pattern = MatchAs {
+            value = HashPattern {
+              pairs = [
+                MatchVar {
+                  name = <U n1>
+                }
+                MatchVar {
+                  name = <U n2>
+                }
+                MatchVar {
+                  name = <U n3>
+                }
+              ]
+            }
+            as = MatchVar {
+              name = <U n4>
+            }
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              DString {
+                nodes = [
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U n4>
+                      }
+                    ]
+                  }
+                  String {
+                    val = <U  has n1, n2, and n3!>
+                  }
+                ]
               }
             ]
           }
@@ -551,6 +694,45 @@ Begin {
                     ]
                   }
                 ]
+              }
+            ]
+          }
+        }
+        InPattern {
+          pattern = HashPattern {
+            pairs = [
+              MatchRest {
+                var = MatchVar {
+                  name = <U o>
+                }
+              }
+            ]
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U splat!>
+              }
+            ]
+          }
+        }
+        InPattern {
+          pattern = HashPattern {
+            pairs = [
+              MatchNilPattern {
+              }
+            ]
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U splat nil!>
               }
             ]
           }
