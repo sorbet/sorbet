@@ -41,3 +41,5 @@ end
 foo do |*args|
   "block with rest args"
 end
+
+def_delegators :foo, local => :thing
