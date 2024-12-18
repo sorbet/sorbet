@@ -777,9 +777,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             e.replaceWith("Prefix with `Kernel.`", args.receiverLoc(), "Kernel.");
                         }
                     }
-                }
-                if (!symbol.data(gs)->attachedClass(gs).exists() &&
-                    symbol.data(gs)->lookupSingletonClass(gs).exists()) {
+                } else if (!symbol.data(gs)->attachedClass(gs).exists() &&
+                           symbol.data(gs)->lookupSingletonClass(gs).exists()) {
                     auto singleton = symbol.data(gs)->lookupSingletonClass(gs);
                     auto methodOnSingleton = singleton.data(gs)->findMethodTransitive(gs, args.name);
                     if (methodOnSingleton.exists()) {
