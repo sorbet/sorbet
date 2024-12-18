@@ -679,6 +679,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // No leading sign; return the Complex node directly
             return make_unique<parser::Complex>(location, std::string(value));
         }
+        case PM_IMPLICIT_NODE: { // A hash key without explicit value, like the `k4` in `{ k4: }`
+            auto implicitNode = down_cast<pm_implicit_node>(node);
+            return translate(implicitNode->value);
+        }
         case PM_IMPLICIT_REST_NODE: { // An implicit splat, like the `,` in `a, = 1, 2, 3`
             unreachable("PM_IMPLICIT_REST_NODE is handled separately as part of PM_MULTI_WRITE_NODE and "
                         "PM_MULTI_TARGET_NODE, see their implementations for details.");
@@ -1316,7 +1320,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_IN_NODE:                // An `in` pattern such as in a `case` statement, or as a standalone expression.
         case PM_PINNED_EXPRESSION_NODE: // A "pinned" expression, like `^(1 + 2)` in `in ^(1 + 2)`
         case PM_PINNED_VARIABLE_NODE:   // A "pinned" variable, like `^x` in `in ^x`
-        case PM_IMPLICIT_NODE:
             unreachable(
                 "These pattern-match related nodes are handled separately in `Translator::patternTranslate()`.");
 

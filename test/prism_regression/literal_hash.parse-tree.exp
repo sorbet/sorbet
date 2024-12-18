@@ -108,5 +108,31 @@ Begin {
         ]
       }
     }
+    Assign {
+      lhs = LVarLhs {
+        name = <U v4>
+      }
+      rhs = String {
+        val = <U v4>
+      }
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U k4>
+      }
+      rhs = Hash {
+        kwargs = false
+        pairs = [
+          Pair {
+            key = Symbol {
+              val = <U v4>
+            }
+            value = LVar {
+              name = <U v4>
+            }
+          }
+        ]
+      }
+    }
   ]
 }
