@@ -31,7 +31,7 @@ bool isTestNamespace(const core::NameRef ns) {
     return ns == core::packages::PackageDB::TEST_NAMESPACE;
 }
 
-bool visibilityApplies(const core::packages::VisibleTo vt, absl::Span<const core::NameRef> name) {
+bool visibilityApplies(const core::packages::VisibleTo &vt, absl::Span<const core::NameRef> name) {
     if (vt.visibleToType == core::packages::VisibleToType::Wildcard) {
         // a wildcard will match if it's a proper prefix of the package name
         return vt.packageName == name.subspan(0, vt.packageName.size());
@@ -1725,8 +1725,8 @@ void validateVisibility(const core::Context &ctx, const Import i) {
         return;
     }
 
-    bool allowed = absl::c_any_of(otherPkg.visibleTo(),
-                                  [&absPkg](const auto &other) { return visibilityApplies(other, absPkg.fullName()); });
+    bool allowed =
+        absl::c_any_of(visibleTo, [&absPkg](const auto &other) { return visibilityApplies(other, absPkg.fullName()); });
 
     if (!allowed) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
