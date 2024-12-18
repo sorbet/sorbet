@@ -267,5 +267,30 @@ Begin {
         val = <U block with rest args>
       }
     }
+    Send {
+      receiver = NULL
+      method = <U def_delegators>
+      args = [
+        Symbol {
+          val = <U foo>
+        }
+        Hash {
+          kwargs = false
+          pairs = [
+            Pair {
+              key = Send {
+                receiver = NULL
+                method = <U local>
+                args = [
+                ]
+              }
+              value = Symbol {
+                val = <U thing>
+              }
+            }
+          ]
+        }
+      ]
+    }
   ]
 }

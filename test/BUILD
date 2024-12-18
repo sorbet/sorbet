@@ -287,7 +287,6 @@ pipeline_tests(
             # Rewriter tests
             "testdata/rewriter/attr_multi.rb",
             "testdata/rewriter/attr.rb",
-            "testdata/rewriter/def_delegator.rb",
             "testdata/rewriter/prop.rb",
             "testdata/rewriter/rails/delegate.rb",
             "testdata/rewriter/struct.rb",
