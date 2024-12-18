@@ -288,7 +288,6 @@ pipeline_tests(
             "testdata/rewriter/attr_multi.rb",
             "testdata/rewriter/attr.rb",
             "testdata/rewriter/prop.rb",
-            "testdata/rewriter/rails/delegate.rb",
             "testdata/rewriter/struct.rb",
 
             # Sorbets' parser incorrectly accepts invalid syntax
