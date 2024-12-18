@@ -2343,6 +2343,13 @@ class Gem::Specification < Gem::BasicSpecification
   # Loads the default specifications. It should be called only once.
   def self.load_defaults(); end
 
+  # Adds `spec` to the known specifications, keeping the collection
+  # properly sorted.
+  def self.add_spec(spec); end
+
+  # Removes `spec` from the known specs.
+  def self.remove_spec(spec); end
+
   # [`Specification`](https://docs.ruby-lang.org/en/2.7.0/Gem/Specification.html)
   # attributes that must be non-nil
   def self.non_nil_attributes(); end
