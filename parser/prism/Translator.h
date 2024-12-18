@@ -65,6 +65,7 @@ private:
     NodeVec translateArguments(pm_arguments_node *node, pm_node *blockArgumentNode = nullptr);
     std::unique_ptr<parser::Hash> translateHash(pm_node_t *node, pm_node_list_t elements,
                                                 bool isUsedForKeywordArguments);
+    static bool isKeywordHashElement(sorbet::parser::Node *nd);
     std::unique_ptr<parser::Node> translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,
                                                          std::unique_ptr<parser::Node> sendNode);
     std::unique_ptr<parser::Node> translateRescue(pm_rescue_node *prismRescueNode,

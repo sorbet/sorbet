@@ -1684,7 +1684,29 @@ unique_ptr<parser::Hash> Translator::translateHash(pm_node_t *node, pm_node_list
         }
     }
 
-    return make_unique<parser::Hash>(translateLoc(loc), isUsedForKeywordArguments, move(sorbetElements));
+    auto allKeywordHashElements =
+        absl::c_all_of(sorbetElements, [](const auto &node) { return isKeywordHashElement(node.get()); });
+    auto isKwargs = isUsedForKeywordArguments && allKeywordHashElements;
+
+    return make_unique<parser::Hash>(translateLoc(loc), isKwargs, move(sorbetElements));
+}
+
+// Copied from `Builder::isKeywordHashElement()`
+// Checks if the given node is a keyword hash element based on the standards of Sorbet's legacy parser.
+bool Translator::isKeywordHashElement(sorbet::parser::Node *node) {
+    if (parser::isa_node<Kwsplat>(node)) {
+        return true;
+    }
+
+    if (parser::isa_node<ForwardedKwrestArg>(node)) {
+        return true;
+    }
+
+    if (auto *pair = parser::cast_node<Pair>(node)) {
+        return parser::isa_node<Symbol>(pair->key.get());
+    }
+
+    return false;
 }
 
 // Prism models a call with an explicit block argument as a `pm_call_node` that contains a `pm_block_node`.
