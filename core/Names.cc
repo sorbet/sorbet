@@ -6,6 +6,7 @@
 #include "core/hashing/hashing.h"
 #include <numeric> // accumulate
 
+#include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
@@ -143,6 +144,16 @@ string NameRef::show(const GlobalState &gs) const {
             return dataCnst(gs)->original.show(gs);
     }
 }
+
+std::string NameRef::showAsSymbolLiteral(const GlobalState &gs) const {
+    auto shown = this->show(gs);
+    if (absl::StrContains(shown, " ")) {
+        return fmt::format(":\"{}\"", absl::CEscape(shown));
+    } else {
+        return fmt::format(":{}", shown);
+    }
+}
+
 string_view NameRef::shortName(const GlobalState &gs) const {
     switch (kind()) {
         case NameKind::UTF8: {

@@ -14,11 +14,12 @@ def main
   breeds = dogs.map(&:breed)
   # ^ hover: T::Array[String]
   #             ^ hover-line: 3 sig do
-  #             ^ hover-line: 4   params(
-  #             ^ hover-line: 5     blk: T.proc.params(arg0: Dog).returns(T.type_parameter(:U))
-  #             ^ hover-line: 6   )
-  #             ^ hover-line: 7   .returns(T::Array[T.type_parameter(:U)])
-  #             ^ hover-line: 8 end
+  #             ^ hover-line: 4   type_parameters(:U)
+  #             ^ hover-line: 5   .params(
+  #             ^ hover-line: 6     blk: T.proc.params(arg0: Dog).returns(T.type_parameter(:U))
+  #             ^ hover-line: 7   )
+  #             ^ hover-line: 8   .returns(T::Array[T.type_parameter(:U)])
+  #             ^ hover-line: 9 end
   #                  ^ hover: sig { returns(String) }
   #                   ^ hover: sig { returns(String) }
 

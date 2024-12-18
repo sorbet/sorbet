@@ -205,6 +205,7 @@ public:
     std::string showRaw(const GlobalState &gs) const;
     std::string toString(const GlobalState &gs) const;
     std::string show(const GlobalState &gs) const;
+    std::string showAsSymbolLiteral(const GlobalState &gs) const;
 
     void enforceCorrectGlobalState(const GlobalState &gs) const;
     void sanityCheckSubstitution(const NameSubstitution &subst) const;
