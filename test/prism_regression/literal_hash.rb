@@ -13,3 +13,6 @@ end
 def has_anonymous_kwargs(**)
   { before: "value before", **, after: "value after" }
 end
+
+v4 = "v4"
+k4 = { v4: }
