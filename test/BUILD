@@ -265,6 +265,8 @@ pipeline_tests(
             "testdata/parser/**/*.exp",
             "testdata/desugar/**/*.rb",
             "testdata/desugar/**/*.exp",
+            "testdata/rewriter/**/*.rb",
+            "testdata/rewriter/**/*.exp",
         ],
         exclude = [
             # Parser tests having to do with tree differences in invalid Ruby code; will address later
@@ -281,6 +283,14 @@ pipeline_tests(
             "testdata/desugar/constant_error.rb",
             "testdata/desugar/for.rb",
             "testdata/desugar/sclass.rb",
+
+            # Rewriter tests
+            "testdata/rewriter/attr_multi.rb",
+            "testdata/rewriter/attr.rb",
+            "testdata/rewriter/def_delegator.rb",
+            "testdata/rewriter/prop.rb",
+            "testdata/rewriter/rails/delegate.rb",
+            "testdata/rewriter/struct.rb",
 
             # Sorbets' parser incorrectly accepts invalid syntax
             "testdata/desugar/pattern_matching_hash.rb", # See https://github.com/Shopify/sorbet/issues/362
