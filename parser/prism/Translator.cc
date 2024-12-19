@@ -495,7 +495,18 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             // These 2 need to be called on a new Translator with isInMethod set to true
             Translator childContext = enterMethodDef();
-            auto params = childContext.translate(up_cast(defNode->parameters));
+
+            unique_ptr<parser::Node> params;
+
+            // The definition has no parameters but still has parentheses, e.g. `def foo(); end`
+            // In this case, Sorbet's legacy parser will still hold an empty Args node, so we need to
+            // create one here
+            if (defNode->parameters == nullptr && rparenLoc.start != nullptr) {
+                params = make_unique<parser::Args>(location, NodeVec{});
+            } else {
+                params = childContext.translate(up_cast(defNode->parameters));
+            }
+
             auto body = childContext.translate(defNode->body);
 
             if (defNode->body != nullptr && PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
