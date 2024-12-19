@@ -922,7 +922,6 @@ public:
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
 
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr underlying(const GlobalState &gs) const;
 };
 CheckSize(MetaType, 16, 8);
