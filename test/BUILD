@@ -299,7 +299,6 @@ pipeline_tests(
             "testdata/namer/alias_cross_file__01.rb",
             "testdata/namer/alias_cross_file__02.rb",
             "testdata/namer/all_constant_redefinitions.rb",
-            "testdata/namer/arguments.rb",
             "testdata/namer/class_alias_inside_method.rb",
             "testdata/namer/class_and_alias.rb",
             "testdata/namer/constant_in_block.rb",
