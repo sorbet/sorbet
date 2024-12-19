@@ -503,8 +503,6 @@ public:
             return sym->asSymbol();
         } else if (auto *def = ast::cast_tree<ast::RuntimeMethodDefinition>(expr)) {
             return def->name;
-        } else if (auto send = ast::cast_tree<ast::Send>(expr)) {
-            return core::NameRef::noName();
         } else {
             ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
             return core::NameRef::noName();
