@@ -9,6 +9,14 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
+        name = "prism",
+        url = "https://github.com/ruby/prism/archive/v1.2.0.zip",
+        sha256 = "f398cdb0ed9e5f9b8f7127a8c180ed6a8a611ad4612dcdae8a91ebfc5ee0ed7c",
+        strip_prefix = "prism-1.2.0",
+        build_file = "@com_stripe_ruby_typer//third_party:prism.BUILD",
+    )
+
+    http_archive(
         name = "doctest",
         url = "https://github.com/doctest/doctest/archive/v2.4.9.zip",
         sha256 = "88a552f832ef3e4e7b733f9ab4eff5d73d7c37e75bebfef4a3339bf52713350d",

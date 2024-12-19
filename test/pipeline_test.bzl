@@ -15,7 +15,7 @@ def dropExtension(p):
 _TEST_SCRIPT = """#!/usr/bin/env bash
 export ASAN_SYMBOLIZER_PATH=`pwd`/external/llvm_toolchain_15_0_7/bin/llvm-symbolizer
 set -x
-exec {runner} --single_test="{test}"
+exec {runner} --single_test="{test}" --parser="{parser}"
 """
 
 def _exp_test_impl(ctx):
@@ -24,6 +24,7 @@ def _exp_test_impl(ctx):
         content = _TEST_SCRIPT.format(
             runner = ctx.executable.runner.short_path,
             test = ctx.file.test.path,
+            parser = ctx.attr.parser,
         ),
     )
 
@@ -50,6 +51,7 @@ exp_test = rule(
         "_llvm_symbolizer": attr.label(
             default = "//test:llvm-symbolizer",
         ),
+        "parser": attr.string(default="sorbet"),
     },
 )
 
@@ -112,7 +114,7 @@ _TEST_RUNNERS = {
     "PackagerTests": ":pipeline_test_runner",
 }
 
-def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], tags = []):
+def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], tags = [], parser = "sorbet"):
     tests = {}  # test_name-> {"path": String, "prefix": String, "sentinel": String, "isPackage": bool}
 
     # The packager step needs folder-based steps since folder structure dictates package membership.
@@ -140,6 +142,14 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
                         "disabled": "disabled" in test_name,
                         "isPackage": True,
                     }
+
+                    # Tests that run with Prism parser need to have "_prism" appended to their name
+                    # to differentiate them from the tests that run with Sorbet parser.
+                    # The condition here is only for the packager tests
+                    # Other tests are handled below.
+                    if parser == "prism":
+                        test_name = test_name + "_prism"
+
                     tests[test_name] = data
                 continue
 
@@ -147,6 +157,11 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
         prefix = dropExtension(basename(path).partition("__")[0])
 
         test_name = dirname(path) + "/" + prefix
+
+        # Tests that run with Prism parser need to have "_prism" appended to their name
+        # to differentiate them from the tests that run with Sorbet parser.
+        if parser == "prism":
+            test_name = test_name + "_prism"
 
         current = tests.get(test_name)
         if None == current:
@@ -205,6 +220,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
             test = sentinel,
             size = "small",
             tags = tags + extra_tags,
+            parser = parser,
         )
 
     native.test_suite(
