@@ -2,13 +2,14 @@
 #include "common/strings/formatting.h"
 #include "core/GlobalState.h"
 #include "core/Symbols.h"
+#include <utility>
 
 using namespace std;
 
 namespace sorbet::core {
 
 bool TypeConstraint::isEmpty() const {
-    return upperBounds.empty() && lowerBounds.empty();
+    return this->bounds.empty();
 }
 
 void TypeConstraint::defineDomain(const GlobalState &gs, absl::Span<const TypeArgumentRef> typeParams) {
@@ -33,58 +34,10 @@ bool TypeConstraint::solve(const GlobalState &gs) {
         return true;
     }
 
-    // instantiate types to upper bound approximations
-    for (auto &k : upperBounds) {
-        auto &tv = k.first;
-        auto &bound = k.second;
-        if (bound == Types::top()) {
-            continue;
-        }
-        auto approximation = bound._approximate(gs, *this, core::Polarity::Positive);
-        if (approximation) {
-            findSolution(tv) = approximation;
-        } else {
-            ENFORCE(bound.isFullyDefined());
-            findSolution(tv) = bound;
-        }
-    }
-    // or lower bound approximation, if there is no upper bound
-    for (auto &k : lowerBounds) {
-        auto &tv = k.first;
-        auto &bound = k.second;
-        auto &sol = findSolution(tv);
-        if (sol) {
-            continue;
-        }
-        auto approximation = bound._approximate(gs, *this, core::Polarity::Positive);
-        if (approximation) {
-            sol = approximation;
-        } else {
-            ENFORCE(bound.isFullyDefined());
-            sol = bound;
-        }
-    }
-
-    for (auto &k : upperBounds) {
-        auto &tv = k.first;
-        auto &upperBound = k.second;
-        auto &sol = findSolution(tv);
-        if (!sol) {
-            sol = upperBound;
-        }
-        if (upperBound) {
-            cantSolve = !Types::isSubType(gs, findSolution(tv), upperBound);
-            if (cantSolve) {
-                return false;
-            }
-        }
-    }
-
-    for (auto &k : lowerBounds) {
-        auto &tv = k.first;
-        auto &lowerBound = k.second;
-
-        cantSolve = !Types::isSubType(gs, lowerBound, findSolution(tv));
+    for (auto &bound : this->bounds) {
+        ENFORCE(bound.lower.isFullyDefined());
+        ENFORCE(bound.upper.isFullyDefined());
+        cantSolve = !Types::isSubType(gs, bound.lower, bound.upper);
         if (cantSolve) {
             return false;
         }
@@ -92,6 +45,66 @@ bool TypeConstraint::solve(const GlobalState &gs) {
 
     wasSolved = true;
     return true;
+    //
+    // // instantiate types to upper bound approximations
+    // for (auto &k : upperBounds) {
+    //     auto &tv = k.first;
+    //     auto &bound = k.second;
+    //     if (bound == Types::top()) {
+    //         continue;
+    //     }
+    //     auto approximation = bound._approximate(gs, *this, core::Polarity::Positive);
+    //     if (approximation) {
+    //         findSolution(tv) = approximation;
+    //     } else {
+    //         ENFORCE(bound.isFullyDefined());
+    //         findSolution(tv) = bound;
+    //     }
+    // }
+    // // or lower bound approximation, if there is no upper bound
+    // for (auto &k : lowerBounds) {
+    //     auto &tv = k.first;
+    //     auto &bound = k.second;
+    //     auto &sol = findSolution(tv);
+    //     if (sol) {
+    //         continue;
+    //     }
+    //     auto approximation = bound._approximate(gs, *this, core::Polarity::Positive);
+    //     if (approximation) {
+    //         sol = approximation;
+    //     } else {
+    //         ENFORCE(bound.isFullyDefined());
+    //         sol = bound;
+    //     }
+    // }
+    //
+    // for (auto &k : upperBounds) {
+    //     auto &tv = k.first;
+    //     auto &upperBound = k.second;
+    //     auto &sol = findSolution(tv);
+    //     if (!sol) {
+    //         sol = upperBound;
+    //     }
+    //     if (upperBound) {
+    //         cantSolve = !Types::isSubType(gs, findSolution(tv), upperBound);
+    //         if (cantSolve) {
+    //             return false;
+    //         }
+    //     }
+    // }
+    //
+    // for (auto &k : lowerBounds) {
+    //     auto &tv = k.first;
+    //     auto &lowerBound = k.second;
+    //
+    //     cantSolve = !Types::isSubType(gs, lowerBound, findSolution(tv));
+    //     if (cantSolve) {
+    //         return false;
+    //     }
+    // }
+    //
+    // wasSolved = true;
+    // return true;
 }
 
 bool TypeConstraint::rememberIsSubtype(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
@@ -136,15 +149,14 @@ bool TypeConstraint::isAlreadyASubType(const GlobalState &gs, const TypePtr &t1,
     }
 }
 
-TypePtr TypeConstraint::getInstantiation(TypeArgumentRef sym) const {
+const TypeConstraint::Bounds &TypeConstraint::getInstantiation(TypeArgumentRef sym) const {
     ENFORCE(wasSolved);
     return findSolution(sym);
 }
 
 unique_ptr<TypeConstraint> TypeConstraint::deepCopy() const {
     auto res = make_unique<TypeConstraint>();
-    res->lowerBounds = this->lowerBounds;
-    res->upperBounds = this->upperBounds;
+    res->bounds = this->bounds;
     return res;
 }
 TypeConstraint TypeConstraint::makeEmptyFrozenConstraint() {
@@ -156,78 +168,43 @@ TypeConstraint TypeConstraint::makeEmptyFrozenConstraint() {
 TypeConstraint TypeConstraint::EmptyFrozenConstraint(makeEmptyFrozenConstraint());
 
 bool TypeConstraint::hasUpperBound(TypeArgumentRef forWhat) const {
-    for (auto &entry : this->upperBounds) {
-        if (entry.first == forWhat) {
-            return true;
-        }
-    }
-    return false;
+    return absl::c_any_of(this->bounds, [forWhat](auto &entry) { return entry.arg == forWhat; });
 }
 
 bool TypeConstraint::hasLowerBound(TypeArgumentRef forWhat) const {
-    for (auto &entry : this->lowerBounds) {
-        if (entry.first == forWhat) {
-            return true;
-        }
-    }
-    return false;
+    return absl::c_any_of(this->bounds, [forWhat](auto &entry) { return entry.arg == forWhat; });
 }
 
 TypePtr &TypeConstraint::findUpperBound(TypeArgumentRef forWhat) {
-    for (auto &entry : this->upperBounds) {
-        if (entry.first == forWhat) {
-            return entry.second;
-        }
-    }
-    auto &inserted = this->upperBounds.emplace_back();
-    inserted.first = forWhat;
-    return inserted.second;
+    return this->findSolution(forWhat).upper;
 }
 
 TypePtr &TypeConstraint::findLowerBound(TypeArgumentRef forWhat) {
-    for (auto &entry : this->lowerBounds) {
-        if (entry.first == forWhat) {
-            return entry.second;
-        }
-    }
-    auto &inserted = this->lowerBounds.emplace_back();
-    inserted.first = forWhat;
-    return inserted.second;
+    return this->findSolution(forWhat).lower;
 }
 
-TypePtr &TypeConstraint::findSolution(TypeArgumentRef forWhat) {
-    for (auto &entry : this->solution) {
-        if (entry.first == forWhat) {
-            return entry.second;
+TypeConstraint::Bounds &TypeConstraint::findSolution(TypeArgumentRef forWhat) {
+    for (auto &entry : this->bounds) {
+        if (entry.arg == forWhat) {
+            return entry;
         }
     }
-    auto &inserted = this->solution.emplace_back();
-    inserted.first = forWhat;
-    return inserted.second;
+    auto &inserted = this->bounds.emplace_back(Bounds{forWhat, Types::bottom(), Types::top()});
+    return inserted;
 }
 
 TypePtr TypeConstraint::findUpperBound(TypeArgumentRef forWhat) const {
-    for (auto &entry : this->upperBounds) {
-        if (entry.first == forWhat) {
-            return entry.second;
-        }
-    }
-    Exception::raise("Failed to find entry in TypeConstraint::upperBounds for type argument");
+    return this->findSolution(forWhat).upper;
 }
 
 TypePtr TypeConstraint::findLowerBound(TypeArgumentRef forWhat) const {
-    for (auto &entry : this->lowerBounds) {
-        if (entry.first == forWhat) {
-            return entry.second;
-        }
-    }
-    Exception::raise("Failed to find entry in TypeConstraint::lowerBounds for type argument");
+    return this->findSolution(forWhat).lower;
 }
 
-TypePtr TypeConstraint::findSolution(TypeArgumentRef forWhat) const {
-    for (auto &entry : this->solution) {
-        if (entry.first == forWhat) {
-            return entry.second;
+const TypeConstraint::Bounds &TypeConstraint::findSolution(TypeArgumentRef forWhat) const {
+    for (auto &entry : this->bounds) {
+        if (entry.arg == forWhat) {
+            return entry;
         }
     }
     Exception::raise("Failed to find entry in TypeConstraint::solution for type argument");
@@ -236,8 +213,8 @@ TypePtr TypeConstraint::findSolution(TypeArgumentRef forWhat) const {
 InlinedVector<SymbolRef, 4> TypeConstraint::getDomain() const {
     ENFORCE(isSolved());
     InlinedVector<SymbolRef, 4> ret;
-    for (auto &entry : this->solution) {
-        ret.emplace_back(entry.first);
+    for (auto &entry : this->bounds) {
+        ret.emplace_back(entry.arg);
     }
     return ret;
 }
@@ -245,15 +222,9 @@ InlinedVector<SymbolRef, 4> TypeConstraint::getDomain() const {
 UnorderedMap<TypeArgumentRef, std::pair<TypePtr, TypePtr>> TypeConstraint::collateBounds(const GlobalState &gs) const {
     auto collated = UnorderedMap<TypeArgumentRef, pair<TypePtr, TypePtr>>{};
 
-    for (const auto &[sym, lowerBound] : this->lowerBounds) {
-        auto &[lowerRef, _upperRef] = collated[sym];
-        ENFORCE(lowerRef == nullptr, "{} in lowerBounds twice?", sym.show(gs));
-        lowerRef = lowerBound;
-    }
-    for (const auto &[sym, upperBound] : this->upperBounds) {
-        auto &[_lowerRef, upperRef] = collated[sym];
-        ENFORCE(upperRef == nullptr, "{} in upperBounds twice?", sym.show(gs));
-        upperRef = upperBound;
+    for (const auto &bound : this->bounds) {
+        auto [_it, inserted] = collated.insert(std::make_pair(bound.arg, std::make_pair(bound.lower, bound.upper)));
+        ENFORCE(inserted, "{} in bounds twice?", bound.arg.show(gs));
     }
 
     return collated;
@@ -262,22 +233,14 @@ UnorderedMap<TypeArgumentRef, std::pair<TypePtr, TypePtr>> TypeConstraint::colla
 string TypeConstraint::toString(const core::GlobalState &gs) const {
     auto collated = this->collateBounds(gs);
 
-    fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "bounds: [{}]\n",
-                   fmt::map_join(
-                       collated.begin(), collated.end(), ", ", [&gs](auto entry) -> auto{
+    return fmt::format("bounds: [{}]\n",
+                       fmt::map_join(collated.begin(), collated.end(), ", ", [&gs](auto entry) -> auto {
                            const auto &[sym, bounds] = entry;
                            const auto &[lowerBound, upperBound] = bounds;
                            auto lower = lowerBound != nullptr ? lowerBound.show(gs) : "_";
                            auto upper = upperBound != nullptr ? upperBound.show(gs) : "_";
                            return fmt::format("{} <: {} <: {}", lower, sym.show(gs), upper);
                        }));
-    fmt::format_to(std::back_inserter(buf), "solution: [{}]\n",
-                   fmt::map_join(
-                       this->solution.begin(), this->solution.end(), ", ", [&gs](auto pair) -> auto{
-                           return fmt::format("{}: {}", pair.first.show(gs), pair.second.show(gs));
-                       }));
-    return to_string(buf);
 }
 
 ErrorSection TypeConstraint::explain(const core::GlobalState &gs) const {

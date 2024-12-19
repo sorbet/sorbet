@@ -8,15 +8,23 @@
 namespace sorbet::core {
 
 class TypeConstraint {
+public:
+    struct Bounds {
+        TypeArgumentRef arg;
+        TypePtr lower;
+        TypePtr upper;
+    };
+
+private:
     static TypeConstraint makeEmptyFrozenConstraint();
-    std::vector<std::pair<TypeArgumentRef, TypePtr>> upperBounds;
-    std::vector<std::pair<TypeArgumentRef, TypePtr>> lowerBounds;
-    std::vector<std::pair<TypeArgumentRef, TypePtr>> solution;
+
+    std::vector<Bounds> bounds;
+
     bool wasSolved = false;
     bool cantSolve = false;
     TypePtr &findUpperBound(TypeArgumentRef forWhat);
     TypePtr &findLowerBound(TypeArgumentRef forWhat);
-    TypePtr &findSolution(TypeArgumentRef forWhat);
+    Bounds &findSolution(TypeArgumentRef forWhat);
 
     UnorderedMap<TypeArgumentRef, std::pair<TypePtr, TypePtr>> collateBounds(const GlobalState &gs) const;
 
@@ -27,7 +35,7 @@ public:
     void defineDomain(const GlobalState &gs, absl::Span<const TypeArgumentRef> typeParams);
     bool hasUpperBound(TypeArgumentRef forWhat) const;
     bool hasLowerBound(TypeArgumentRef forWhat) const;
-    TypePtr findSolution(TypeArgumentRef forWhat) const;
+    const Bounds &findSolution(TypeArgumentRef forWhat) const;
     TypePtr findUpperBound(TypeArgumentRef forWhat) const;
     TypePtr findLowerBound(TypeArgumentRef forWhat) const;
 
@@ -43,7 +51,7 @@ public:
     bool isAlreadyASubType(const GlobalState &gs, const TypePtr &, const TypePtr &) const;
     // returns true if was successfully solved
     bool solve(const GlobalState &gs);
-    TypePtr getInstantiation(TypeArgumentRef) const;
+    const Bounds &getInstantiation(TypeArgumentRef) const;
     std::unique_ptr<TypeConstraint> deepCopy() const;
     InlinedVector<SymbolRef, 4> getDomain() const;
     static TypeConstraint EmptyFrozenConstraint;
