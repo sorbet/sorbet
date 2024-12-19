@@ -267,6 +267,8 @@ pipeline_tests(
             "testdata/desugar/**/*.exp",
             "testdata/rewriter/**/*.rb",
             "testdata/rewriter/**/*.exp",
+            "testdata/local_vars/**/*.rb",
+            "testdata/local_vars/**/*.exp",
         ],
         exclude = [
             # Parser tests having to do with tree differences in invalid Ruby code; will address later
@@ -284,11 +286,14 @@ pipeline_tests(
             "testdata/desugar/for.rb",
             "testdata/desugar/sclass.rb",
 
-            # Rewriter tests
+            # Rewriter tests having to do with symbol table differences; will address later
             "testdata/rewriter/attr_multi.rb",
             "testdata/rewriter/attr.rb",
             "testdata/rewriter/prop.rb",
             "testdata/rewriter/struct.rb",
+
+            # Failing local_vars tests to investigate
+            "testdata/local_vars/z_super_args_splats_blocks.rb",
 
             # Sorbets' parser incorrectly accepts invalid syntax
             "testdata/desugar/pattern_matching_hash.rb", # See https://github.com/Shopify/sorbet/issues/362
