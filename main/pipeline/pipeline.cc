@@ -329,11 +329,6 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
     auto &fileData = file.data(gs);
 
     core::StrictLevel level;
-    string filePath = string(fileData.path());
-    // make sure all relative file paths start with ./
-    if (!absl::StartsWith(filePath, "/") && !absl::StartsWith(filePath, "./")) {
-        filePath.insert(0, "./");
-    }
 
     if (fileData.originalSigil == core::StrictLevel::None) {
         level = core::StrictLevel::False;
@@ -347,15 +342,22 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
         level = max(min(level, maxStrict), minStrict);
     }
 
-    auto fnd = opts.strictnessOverrides.find(filePath);
-    if (fnd != opts.strictnessOverrides.end()) {
-        if (fnd->second == fileData.originalSigil && fnd->second > opts.forceMinStrict &&
-            fnd->second < opts.forceMaxStrict) {
-            if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Parser::ParserError)) {
-                e.setHeader("Useless override of strictness level");
-            }
+    if (!opts.strictnessOverrides.empty()) {
+        string filePath = string(fileData.path());
+        // make sure all relative file paths start with ./
+        if (!absl::StartsWith(filePath, "/") && !absl::StartsWith(filePath, "./")) {
+            filePath.insert(0, "./");
         }
-        level = fnd->second;
+        auto fnd = opts.strictnessOverrides.find(filePath);
+        if (fnd != opts.strictnessOverrides.end()) {
+            if (fnd->second == fileData.originalSigil && fnd->second > opts.forceMinStrict &&
+                fnd->second < opts.forceMaxStrict) {
+                if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Parser::ParserError)) {
+                    e.setHeader("Useless override of strictness level");
+                }
+            }
+            level = fnd->second;
+        }
     }
 
     if (gs.runningUnderAutogen) {
