@@ -165,7 +165,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Pair>(location, move(key), move(value));
         }
         case PM_ASSOC_SPLAT_NODE: { // A Hash splat, e.g. `**h` in `f(a: 1, **h)` and `{ k: v, **h }`
-            unreachable("PM_ASSOC_SPLAT_NODE is handled separately in `Translator::translateHash()` and "
+            unreachable("PM_ASSOC_SPLAT_NODE is handled separately in `Translator::translateKeyValuePairs()` and "
                         "`PM_HASH_PATTERN_NODE`, because its translation depends on whether its used in a "
                         "Hash literal, Hash pattern, or method call.");
         }
@@ -638,8 +638,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return translateAssignment<pm_global_variable_write_node, parser::GVarLhs>(node);
         }
         case PM_HASH_NODE: { // A hash literal, like `{ a: 1, b: 2 }`
-            auto usedForKeywordArgs = false;
-            return translateHash(node, down_cast<pm_hash_node>(node)->elements, usedForKeywordArgs);
+            auto kvPairs = translateKeyValuePairs(down_cast<pm_hash_node>(node)->elements);
+            return make_unique<parser::Hash>(location, false, move(kvPairs));
         }
         case PM_IF_NODE: { // An `if` statement or modifier, like `if cond; ...; end` or `a.b if cond`
             auto ifNode = down_cast<pm_if_node>(node);
@@ -832,8 +832,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             unreachable("The `it` keyword was introduced in Ruby 3.4, which isn't supported by Sorbet yet.");
         }
         case PM_KEYWORD_HASH_NODE: { // A hash of keyword arguments, like `foo(a: 1, b: 2)`
-            auto usedForKeywordArgs = true;
-            return translateHash(node, down_cast<pm_keyword_hash_node>(node)->elements, usedForKeywordArgs);
+            auto kvPairs = translateKeyValuePairs(down_cast<pm_keyword_hash_node>(node)->elements);
+            auto isKwargs = absl::c_all_of(kvPairs, [](const auto &node) { return isKeywordHashElement(node.get()); });
+
+            return make_unique<parser::Hash>(location, isKwargs, move(kvPairs));
         }
         case PM_KEYWORD_REST_PARAMETER_NODE: { // A keyword rest parameter, like `def foo(**kwargs)`
             // This doesn't include `**nil`, which is a `PM_NO_KEYWORDS_PARAMETER_NODE`.
@@ -1643,21 +1645,15 @@ NodeVec Translator::translateArguments(pm_arguments_node *argsNode, pm_node *blo
     return results;
 }
 
-// Translates the given Prism elements into a `parser::Hash`.
+// Translates the given Prism elements into a `NodeVec` of legacy parser nodes.
 // The elements are are usually key/value pairs, but can also be Hash splats (`**`).
 //
 // This method is used by:
 //   * PM_HASH_NODE (Hash literals)
 //   * PM_KEYWORD_HASH_NODE (keyword arguments to a method call)
 //
-// @param node The node the elements came from. Only used for source location information.
 // @param elements The Prism key/value pairs to be translated
-// @param isUsedForKeywordArguments True if this hash represents keyword arguments to a function,
-//                                  false if it represents a Hash literal.
-unique_ptr<parser::Hash> Translator::translateHash(pm_node_t *node, pm_node_list_t elements,
-                                                   bool isUsedForKeywordArguments) {
-    pm_location_t loc = node->location;
-
+parser::NodeVec Translator::translateKeyValuePairs(pm_node_list_t elements) {
     auto prismElements = absl::MakeSpan(elements.nodes, elements.size);
 
     parser::NodeVec sorbetElements{};
@@ -1684,7 +1680,25 @@ unique_ptr<parser::Hash> Translator::translateHash(pm_node_t *node, pm_node_list
         }
     }
 
-    return make_unique<parser::Hash>(translateLoc(loc), isUsedForKeywordArguments, move(sorbetElements));
+    return sorbetElements;
+}
+
+// Copied from `Builder::isKeywordHashElement()`
+// Checks if the given node is a keyword hash element based on the standards of Sorbet's legacy parser.
+bool Translator::isKeywordHashElement(sorbet::parser::Node *node) {
+    if (parser::isa_node<Kwsplat>(node)) {
+        return true;
+    }
+
+    if (parser::isa_node<ForwardedKwrestArg>(node)) {
+        return true;
+    }
+
+    if (auto *pair = parser::cast_node<Pair>(node)) {
+        return parser::isa_node<Symbol>(pair->key.get());
+    }
+
+    return false;
 }
 
 // Prism models a call with an explicit block argument as a `pm_call_node` that contains a `pm_block_node`.
