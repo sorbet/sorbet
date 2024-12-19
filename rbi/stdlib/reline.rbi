@@ -569,6 +569,7 @@ class Reline::IO
   def win?; end
   def reset_color_sequence; end
   def read_single_char(keyseq_timeout); end
+  RESET_COLOR = T.let(T.unsafe(nil), String)
 end
 class Reline::ANSI < Reline::IO
   def self.clear_screen; end
