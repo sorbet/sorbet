@@ -310,6 +310,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             if (name == "[]=") {
                 messageLoc.endLoc += 2; // The message includes the closing bracket and equals sign
+            } else if (name == "[]") {
+                messageLoc.endLoc = messageLoc.beginLoc;
             } else if (name.back() == '=') {
                 messageLoc.endLoc = args.front()->loc.beginPos() - 1; // The message ends right before the equals sign
             }

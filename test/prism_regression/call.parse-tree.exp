@@ -12,5 +12,36 @@ Begin {
       args = [
       ]
     }
+    Send {
+      receiver = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      method = <U []>
+      args = [
+        Symbol {
+          val = <U bar>
+        }
+      ]
+    }
+    Send {
+      receiver = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      method = <U []=>
+      args = [
+        Symbol {
+          val = <U baz>
+        }
+        Integer {
+          val = "1"
+        }
+      ]
+    }
   ]
 }
