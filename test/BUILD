@@ -269,6 +269,8 @@ pipeline_tests(
             "testdata/rewriter/**/*.exp",
             "testdata/local_vars/**/*.rb",
             "testdata/local_vars/**/*.exp",
+            "testdata/namer/**/*.rb",
+            "testdata/namer/**/*.exp",
         ],
         exclude = [
             # Parser tests having to do with tree differences in invalid Ruby code; will address later
@@ -292,6 +294,29 @@ pipeline_tests(
             "testdata/rewriter/attr.rb",
             "testdata/rewriter/prop.rb",
             "testdata/rewriter/struct.rb",
+
+            # Failing namer tests to investigate
+            "testdata/namer/alias_cross_file__01.rb",
+            "testdata/namer/alias_cross_file__02.rb",
+            "testdata/namer/all_constant_redefinitions.rb",
+            "testdata/namer/arguments.rb",
+            "testdata/namer/class_alias_inside_method.rb",
+            "testdata/namer/class_and_alias.rb",
+            "testdata/namer/constant_in_block.rb",
+            "testdata/namer/constant_types.rb",
+            "testdata/namer/constants.rb",
+            "testdata/namer/fuzz_class_in_field.rb",
+            "testdata/namer/fuzz_repeated_kwarg.rb",
+            "testdata/namer/fuzz_type_template_overwrite.rb",
+            "testdata/namer/module_function.rb",
+            "testdata/namer/parameter_names.rb",
+            "testdata/namer/redefinition_method.rb",
+            "testdata/namer/type_alias_inside_method.rb",
+            "testdata/namer/type_alias_not_on_T.rb",
+            "testdata/namer/type_alias.rb",
+            "testdata/namer/type_member_inside_method.rb",
+            "testdata/namer/type_template_inside_method.rb",
+            "testdata/namer/yield.rb",
 
             # Sorbets' parser incorrectly accepts invalid syntax
             "testdata/desugar/pattern_matching_hash.rb", # See https://github.com/Shopify/sorbet/issues/362
