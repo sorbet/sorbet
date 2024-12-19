@@ -13,3 +13,5 @@ def baz
   "string2"
   end
 end
+
+def qux(); end
