@@ -42,7 +42,8 @@ TypePtr Types::approximate(const GlobalState &gs, const TypePtr &what, const Typ
 }
 
 TypePtr TypeVar::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-    return tc.getInstantiation(sym);
+    // TODO: should pick bound based on polarity
+    return tc.getInstantiation(sym).upper;
 }
 
 TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
@@ -150,7 +151,7 @@ optional<vector<TypePtr>> approximateElems(const vector<TypePtr> &elems, const G
 } // anonymous namespace
 
 TypePtr TupleType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                const vector<TypePtr> &targs) const {
+                                const vector<TypePtr> &targs, Polarity polarity) const {
     optional<vector<TypePtr>> newElems = instantiateElems(this->elems, gs, params, targs);
     if (!newElems) {
         return nullptr;
@@ -158,7 +159,7 @@ TypePtr TupleType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemb
     return make_type<TupleType>(move(*newElems));
 }
 
-TypePtr TupleType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
+TypePtr TupleType::_instantiate(const GlobalState &gs, const TypeConstraint &tc, Polarity polarity) const {
     optional<vector<TypePtr>> newElems = instantiateElems(this->elems, gs, tc);
     if (!newElems) {
         return nullptr;

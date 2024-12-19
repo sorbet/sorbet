@@ -327,14 +327,14 @@ TypePtr TypePtr::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver
 #undef _REPLACE_SELF_TYPE
 }
 
-TypePtr TypePtr::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-#define _INSTANTIATE(T) return CALL_MEMBER__instantiate<const T>::call(cast_type_nonnull<T>(*this), gs, tc);
+TypePtr TypePtr::_instantiate(const GlobalState &gs, const TypeConstraint &tc, Polarity polarity) const {
+#define _INSTANTIATE(T) return CALL_MEMBER__instantiate<const T>::call(cast_type_nonnull<T>(*this), gs, tc, polarity);
     GENERATE_TAG_SWITCH(tag(), _INSTANTIATE)
 #undef _INSTANTIATE
 }
 
 TypePtr TypePtr::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                              const std::vector<TypePtr> &targs) const {
+                              const std::vector<TypePtr> &targs, Polarity polarity) const {
     switch (tag()) {
         case Tag::BlamedUntyped:
         case Tag::UnresolvedAppliedType:
@@ -349,17 +349,17 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, absl::Span<const TypeMember
             return nullptr;
 
         case Tag::TupleType:
-            return cast_type_nonnull<TupleType>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<TupleType>(*this)._instantiate(gs, params, targs, polarity);
         case Tag::ShapeType:
-            return cast_type_nonnull<ShapeType>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<ShapeType>(*this)._instantiate(gs, params, targs, polarity);
         case Tag::OrType:
-            return cast_type_nonnull<OrType>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<OrType>(*this)._instantiate(gs, params, targs, polarity);
         case Tag::AndType:
-            return cast_type_nonnull<AndType>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<AndType>(*this)._instantiate(gs, params, targs, polarity);
         case Tag::AppliedType:
-            return cast_type_nonnull<AppliedType>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<AppliedType>(*this)._instantiate(gs, params, targs, polarity);
         case Tag::LambdaParam:
-            return cast_type_nonnull<LambdaParam>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<LambdaParam>(*this)._instantiate(gs, params, targs, polarity);
 
         case Tag::MetaType:
         case Tag::AliasType:
