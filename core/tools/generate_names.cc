@@ -393,8 +393,6 @@ NameDef names[] = {
     {"args"},
     {"Elem", "Elem", true},
     {"keepForIde", "keep_for_ide"},
-    {"keepDef", "keep_def"},
-    {"keepSelfDef", "keep_self_def"},
     {"keepForCfg", "<keep-for-cfg>"},
     {"retry", "<retry>"},
     {"unresolvedAncestors", "<unresolved-ancestors>"},
