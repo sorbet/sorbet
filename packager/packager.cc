@@ -1038,11 +1038,6 @@ struct PackageSpecBodyWalk {
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
-        // Ignore methods
-        if (send.fun == core::Names::keepDef() || send.fun == core::Names::keepSelfDef()) {
-            return;
-        }
-
         // Disallowed methods
         if (send.fun == core::Names::extend() || send.fun == core::Names::include()) {
             if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidPackageExpression)) {

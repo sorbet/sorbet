@@ -403,29 +403,6 @@ public:
                 }
                 break;
             }
-            case core::Names::keepDef().rawId(): {
-                // ^ visibility toggle doesn't look at `self.*` methods, only instance methods
-                // (need to use `class << self` to use nullary private with singleton class methods)
-
-                if (original.numPosArgs() != 3) {
-                    break;
-                }
-
-                ENFORCE(!methodVisiStack.empty());
-                if (!methodVisiStack.back().has_value()) {
-                    break;
-                }
-
-                auto recv = ast::cast_tree<ast::ConstantLit>(original.recv);
-                if (recv == nullptr || recv->symbol != core::Symbols::Sorbet_Private_Static()) {
-                    break;
-                }
-
-                auto methodName = unwrapLiteralToMethodName(ctx, original.getPosArg(1));
-                foundDefs->addModifier(methodVisiStack.back()->withTarget(methodName));
-
-                break;
-            }
             case core::Names::aliasMethod().rawId(): {
                 if (ownerIsMethod) {
                     break;
@@ -527,24 +504,7 @@ public:
         } else if (auto *def = ast::cast_tree<ast::RuntimeMethodDefinition>(expr)) {
             return def->name;
         } else if (auto send = ast::cast_tree<ast::Send>(expr)) {
-            if (send->fun != core::Names::keepDef() && send->fun != core::Names::keepSelfDef()) {
-                return core::NameRef::noName();
-            }
-
-            auto recv = ast::cast_tree<ast::ConstantLit>(send->recv);
-            if (recv == nullptr) {
-                return core::NameRef::noName();
-            }
-
-            if (recv->symbol != core::Symbols::Sorbet_Private_Static()) {
-                return core::NameRef::noName();
-            }
-
-            if (send->numPosArgs() != 3) {
-                return core::NameRef::noName();
-            }
-
-            return unwrapLiteralToMethodName(ctx, send->getPosArg(1));
+            return core::NameRef::noName();
         } else {
             ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
             return core::NameRef::noName();
