@@ -292,9 +292,6 @@ pipeline_tests(
             "testdata/rewriter/prop.rb",
             "testdata/rewriter/struct.rb",
 
-            # Failing local_vars tests to investigate
-            "testdata/local_vars/z_super_args_splats_blocks.rb",
-
             # Sorbets' parser incorrectly accepts invalid syntax
             "testdata/desugar/pattern_matching_hash.rb", # See https://github.com/Shopify/sorbet/issues/362
         ],
