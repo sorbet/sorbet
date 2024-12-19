@@ -33,5 +33,13 @@ Begin {
         ]
       }
     }
+    DefMethod {
+      name = <U qux>
+      args = Args {
+        args = [
+        ]
+      }
+      body = NULL
+    }
   ]
 }
