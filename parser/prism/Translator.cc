@@ -1286,7 +1286,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto predicate = translate(untilNode->predicate);
             auto body = translate(up_cast(untilNode->statements));
 
-            return make_unique<parser::Until>(location, move(predicate), move(body));
+            auto flags = untilNode->base.flags;
+
+            // When the until loop is placed after a `begin` block, like `begin; end until false`,
+            if (flags & PM_LOOP_FLAGS_BEGIN_MODIFIER) {
+                return make_unique<parser::UntilPost>(location, move(predicate), move(body));
+            } else {
+                return make_unique<parser::Until>(location, move(predicate), move(body));
+            }
         }
         case PM_WHEN_NODE: { // A `when` clause, as part of a `case` statement
             auto whenNode = down_cast<pm_when_node>(node);
