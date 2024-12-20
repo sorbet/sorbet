@@ -88,7 +88,8 @@ struct SymbolHash {
         : nameHash(nameHash), symbolHash(symbolHash) {}
 
     inline bool operator<(const SymbolHash &h) const noexcept {
-        return this->nameHash < h.nameHash || (!(h.nameHash < this->nameHash) && this->symbolHash < h.symbolHash);
+        // Take advantage of lexicographic ordering with std::tie
+        return std::tie(this->nameHash, this->symbolHash) < std::tie(h.nameHash, h.symbolHash);
     }
 };
 CheckSize(SymbolHash, 8, 4);
