@@ -277,6 +277,7 @@ pipeline_tests(
             "testdata/parser/invalid_fatal.rb",
             "testdata/parser/invalid_syntax_error.rb",
             "testdata/parser/kwargs_missing_comma.rb",
+            "testdata/parser/kwnil_errors.rb", # See https://github.com/Shopify/sorbet/issues/393
             "testdata/parser/misc.rb",
             "testdata/parser/offset0.rb",
             "testdata/parser/ruby_25.rb",
@@ -291,9 +292,6 @@ pipeline_tests(
             "testdata/rewriter/attr.rb",
             "testdata/rewriter/prop.rb",
             "testdata/rewriter/struct.rb",
-
-            # Failing local_vars tests to investigate
-            "testdata/local_vars/z_super_args_splats_blocks.rb",
 
             # Sorbets' parser incorrectly accepts invalid syntax
             "testdata/desugar/pattern_matching_hash.rb", # See https://github.com/Shopify/sorbet/issues/362

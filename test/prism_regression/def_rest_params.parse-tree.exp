@@ -22,5 +22,22 @@ Begin {
       }
       body = NULL
     }
+    DefMethod {
+      name = <U foo>
+      args = Args {
+        args = [
+          Restarg {
+            name = <U a>
+          }
+          Arg {
+            name = <U b>
+          }
+          Arg {
+            name = <U c>
+          }
+        ]
+      }
+      body = NULL
+    }
   ]
 }

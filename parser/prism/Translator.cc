@@ -1027,6 +1027,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto requireds = absl::MakeSpan(paramsNode->requireds.nodes, paramsNode->requireds.size);
             auto optionals = absl::MakeSpan(paramsNode->optionals.nodes, paramsNode->optionals.size);
             auto keywords = absl::MakeSpan(paramsNode->keywords.nodes, paramsNode->keywords.size);
+            auto posts = absl::MakeSpan(paramsNode->posts.nodes, paramsNode->posts.size);
 
             parser::NodeVec params;
 
@@ -1034,7 +1035,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto kwrestSize = paramsNode->keyword_rest == nullptr ? 0 : 1;
             auto blockSize = paramsNode->block == nullptr ? 0 : 1;
 
-            params.reserve(requireds.size() + optionals.size() + restSize + keywords.size() + kwrestSize + blockSize);
+            params.reserve(requireds.size() + optionals.size() + restSize + posts.size() + keywords.size() +
+                           kwrestSize + blockSize);
 
             translateMultiInto(params, requireds);
             translateMultiInto(params, optionals);
@@ -1042,6 +1044,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             if (paramsNode->rest != nullptr)
                 params.emplace_back(translate(paramsNode->rest));
 
+            translateMultiInto(params, posts);
             translateMultiInto(params, keywords);
 
             if (auto prismKwRestNode = paramsNode->keyword_rest; prismKwRestNode != nullptr) {
