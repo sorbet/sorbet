@@ -91,8 +91,11 @@ module T::Props
             "T::Props::Utils.deep_clone_object(#{varname})"
           end
         when T::Types::Union
+          non_unknown_type = T::Utils.unwrap_unknown_value(type)
           non_nil_type = T::Utils.unwrap_nilable(type)
-          if non_nil_type
+          if non_unknown_type
+            handle_unknown_value_subtype(varname, non_unknown_type, mode)
+          elsif non_nil_type
             inner = generate(non_nil_type, mode, varname)
             if inner.nil?
               nil
@@ -148,6 +151,35 @@ module T::Props
           generate(T::Utils.lift_enum(type), mode, varname)
         else
           "T::Props::Utils.deep_clone_object(#{varname})"
+        end
+      end
+
+      sig {params(varname: String, type: T::Types::Base, mode: ModeType).returns(T.nilable(String)).checked(:never)}
+      private_class_method def self.handle_unknown_value_subtype(varname, type, mode)
+        inner = generate(type, mode, varname)
+        if inner.nil?
+          nil
+        else
+          case mode
+          when Serialize
+            <<~RUBY
+              if #{varname}.is_a?(T::Props::UnknownValue)
+                T::Props::Utils.deep_clone_object(#{varname}.serialized_value)
+              else
+                #{inner}
+              end
+            RUBY
+          when Deserialize
+            <<~RUBY
+              begin
+                #{inner}
+              rescue => e # Swallow deserialize errors
+                T::Props::UnknownValue.new(T::Props::Utils.deep_clone_object(#{varname}), e)
+              end
+            RUBY
+          else
+            T.absurd(mode)
+          end
         end
       end
 
