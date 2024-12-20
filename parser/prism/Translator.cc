@@ -1306,7 +1306,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto statements = translateStatements(whileNode->statements, inlineIfSingle);
 
-            return make_unique<parser::While>(location, move(predicate), move(statements));
+            auto flags = whileNode->base.flags;
+
+            // When the while loop is placed after a `begin` block, like `begin; end while false`,
+            if (flags & PM_LOOP_FLAGS_BEGIN_MODIFIER) {
+                return make_unique<parser::WhilePost>(location, move(predicate), move(statements));
+            } else {
+                return make_unique<parser::While>(location, move(predicate), move(statements));
+            }
         }
         case PM_X_STRING_NODE: { // An interpolated x-string, like `/usr/bin/env ls`
             auto strNode = down_cast<pm_x_string_node>(node);
