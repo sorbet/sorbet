@@ -277,6 +277,7 @@ pipeline_tests(
             "testdata/parser/invalid_fatal.rb",
             "testdata/parser/invalid_syntax_error.rb",
             "testdata/parser/kwargs_missing_comma.rb",
+            "testdata/parser/kwnil_errors.rb", # See https://github.com/Shopify/sorbet/issues/393
             "testdata/parser/misc.rb",
             "testdata/parser/offset0.rb",
             "testdata/parser/ruby_25.rb",
