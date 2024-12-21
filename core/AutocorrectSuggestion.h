@@ -11,6 +11,9 @@ struct AutocorrectSuggestion {
     struct Edit {
         core::Loc loc;
         std::string replacement;
+
+        Edit() = default;
+        Edit(core::Loc loc, std::string replacement) : loc(loc), replacement(move(replacement)) {}
     };
 
     const std::string title;

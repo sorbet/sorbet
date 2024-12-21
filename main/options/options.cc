@@ -696,7 +696,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         } else {
             fmt::format_to(std::back_inserter(print_help), ", ");
         }
-        fmt::format_to(std::back_inserter(print_help), it->option);
+        fmt::format_to(std::back_inserter(print_help), "{}", it->option);
     }
     fmt::format_to(std::back_inserter(print_help), "]\n\n"
                                                    "Unstable: [");
@@ -707,7 +707,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         } else {
             fmt::format_to(std::back_inserter(print_help), ", ");
         }
-        fmt::format_to(std::back_inserter(print_help), it->option);
+        fmt::format_to(std::back_inserter(print_help), "{}", it->option);
     }
     options.add_options(section)("p,print", to_string(print_help), cxxopts::value<vector<string>>(), "<format>");
     // }}}
