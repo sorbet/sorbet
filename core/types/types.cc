@@ -308,7 +308,7 @@ TypePtr Types::dropLiteral(const GlobalState &gs, const TypePtr &tp) {
     return tp;
 }
 
-TypePtr Types::lubAll(const GlobalState &gs, const vector<TypePtr> &elements) {
+TypePtr Types::lubAll(const GlobalState &gs, absl::Span<const TypePtr> elements) {
     TypePtr acc = Types::bottom();
     for (auto &el : elements) {
         acc = Types::lub(gs, acc, el);
@@ -616,7 +616,7 @@ void MetaType::_sanityCheck(const GlobalState &gs) const {
  * If some typeArgs are not present, return NoSymbol
  * */
 InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, ClassOrModuleRef what,
-                                                         const vector<TypePtr> &targs, ClassOrModuleRef asIf) {
+                                                         absl::Span<const TypePtr> targs, ClassOrModuleRef asIf) {
     ENFORCE(what == asIf || what.data(gs)->derivesFrom(gs, asIf) || asIf.data(gs)->derivesFrom(gs, what),
             "what={} asIf={}", what.data(gs)->name.showRaw(gs), asIf.data(gs)->name.showRaw(gs));
     InlinedVector<TypeMemberRef, 4> currentAlignment;
@@ -653,7 +653,7 @@ InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, 
  * inWhat   - where the generic type is observed
  */
 TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef fromWhat,
-                                    ClassOrModuleRef inWhat, const vector<TypePtr> &targs) {
+                                    ClassOrModuleRef inWhat, absl::Span<const TypePtr> targs) {
     auto originalOwner = fromWhat;
 
     // TODO: the ENFORCE below should be above this conditional, but there is
@@ -847,7 +847,7 @@ TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
 }
 
 namespace {
-vector<TypePtr> unwrapTypeVector(Context ctx, const vector<TypePtr> &elems) {
+vector<TypePtr> unwrapTypeVector(Context ctx, absl::Span<const TypePtr> elems) {
     std::vector<TypePtr> unwrapped;
     unwrapped.reserve(elems.size());
     for (auto &e : elems) {
@@ -998,7 +998,7 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
 // again by infer).
 
 TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, uint16_t numPosArgs,
-                                  const InlinedVector<const TypeAndOrigins *, 2> &args, ClassOrModuleRef genericClass,
+                                  absl::Span<const TypeAndOrigins *> args, ClassOrModuleRef genericClass,
                                   ErrorClass genericArgumentCountMismatchError,
                                   ErrorClass genericArgumentKeywordArgsError) {
     genericClass = genericClass.maybeUnwrapBuiltinGenericForwarder();

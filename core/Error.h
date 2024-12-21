@@ -79,10 +79,10 @@ struct ErrorSection {
     ErrorSection(std::string_view header) : header(header) {}
     ErrorSection(std::string_view header, const std::initializer_list<ErrorLine> &messages)
         : header(header), messages(messages) {}
-    ErrorSection(std::string_view header, const std::vector<ErrorLine> &messages)
-        : header(header), messages(messages) {}
+    ErrorSection(std::string_view header, absl::Span<const ErrorLine> messages)
+        : header(header), messages(messages.cbegin(), messages.cend()) {}
     ErrorSection(const std::initializer_list<ErrorLine> &messages) : ErrorSection("", messages) {}
-    ErrorSection(const std::vector<ErrorLine> &messages) : ErrorSection("", messages) {}
+    ErrorSection(absl::Span<const ErrorLine> messages) : ErrorSection("", messages) {}
     std::string toString(const GlobalState &gs) const;
 
     class NoOpCollector {

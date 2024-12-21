@@ -81,7 +81,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
     core::DispatchArgs dispatchArgs{snd->fun,
                                     locs,
                                     numPosArgs,
-                                    args,
+                                    absl::MakeSpan(args),
                                     snd->recv.type,
                                     {snd->recv.type, {originForFullType}},
                                     snd->recv.type,
