@@ -268,10 +268,8 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 typeArgSpec.loc = ctx.locAt(arg.loc());
             }
 
-            const auto numKwArgs = tsend->numKwArgs();
-            for (auto i = 0; i < numKwArgs; ++i) {
-                auto &kwkey = tsend->getKwKey(i);
-                if (auto e = ctx.beginError(kwkey.loc(), core::errors::Resolver::InvalidMethodSignature)) {
+            for (auto [key, _value] : tsend->kwArgPairs()) {
+                if (auto e = ctx.beginError(key.loc(), core::errors::Resolver::InvalidMethodSignature)) {
                     e.setHeader("Malformed `{}`: Type parameters are specified with symbols", "sig");
                 }
             }
@@ -408,10 +406,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                     // TODO(trevor) add an error for this
                 }
 
-                auto end = send->numKwArgs();
-                for (auto i = 0; i < end; ++i) {
-                    auto &key = send->getKwKey(i);
-                    auto &value = send->getKwValue(i);
+                for (auto [key, value] : send->kwArgPairs()) {
                     auto *lit = ast::cast_tree<ast::Literal>(key);
                     if (lit && lit->isSymbol()) {
                         core::NameRef name = lit->asSymbol();
@@ -460,10 +455,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 }
 
                 if (send->hasKwArgs()) {
-                    auto end = send->numKwArgs();
-                    for (auto i = 0; i < end; ++i) {
-                        auto &key = send->getKwKey(i);
-                        auto &value = send->getKwValue(i);
+                    for (auto [key, value] : send->kwArgPairs()) {
                         auto lit = ast::cast_tree<ast::Literal>(key);
                         if (lit && lit->isSymbol()) {
                             if (lit->asSymbol() == core::Names::allowIncompatible()) {
@@ -1398,22 +1390,18 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             argLocs.emplace_back(arg.loc());
         }
 
-        const auto numKwArgs = s.numKwArgs();
-        for (auto i = 0; i < numKwArgs; ++i) {
-            auto &kw = s.getKwKey(i);
-            auto &val = s.getKwValue(i);
-
+        for (auto [key, value] : s.kwArgPairs()) {
             // Fill the keyword and val args in with a dummy type. We don't want to parse this as type
             // syntax because we already know it's garbage.
             // But we still want to record some sort of arg (for the loc specifically) so
             // that the calls.cc intrinsic can craft an autocorrect.
-            auto &kwtao = holders.emplace_back(core::Types::untypedUntracked(), ctx.locAt(kw.loc()));
+            auto &kwtao = holders.emplace_back(core::Types::untypedUntracked(), ctx.locAt(key.loc()));
             targs.emplace_back(&kwtao);
-            argLocs.emplace_back(kw.loc());
+            argLocs.emplace_back(key.loc());
 
-            auto &valtao = holders.emplace_back(core::Types::untypedUntracked(), ctx.locAt(val.loc()));
+            auto &valtao = holders.emplace_back(core::Types::untypedUntracked(), ctx.locAt(value.loc()));
             targs.emplace_back(&valtao);
-            argLocs.emplace_back(val.loc());
+            argLocs.emplace_back(value.loc());
         }
 
         if (auto *splat = s.kwSplat()) {
