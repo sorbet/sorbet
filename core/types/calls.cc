@@ -273,7 +273,7 @@ namespace {
 
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc receiverLoc, ClassOrModuleRef inClass,
                                MethodRef method, const TypeAndOrigins &argTpe, const ArgInfo &argSym,
-                               const TypePtr &selfType, const vector<TypePtr> &targs, Loc argLoc,
+                               const TypePtr &selfType, absl::Span<const TypePtr> targs, Loc argLoc,
                                Loc originForUninitialized, bool mayBeSetter = false) {
     TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
     if (!expectedType) {
@@ -331,7 +331,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
 }
 
 unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc, MethodRef method, const ArgInfo &arg,
-                             ClassOrModuleRef inClass, const vector<TypePtr> &targs) {
+                             ClassOrModuleRef inClass, absl::Span<const TypePtr> targs) {
     if (auto e = gs.beginError(argsLoc, errors::Infer::MethodArgumentCountMismatch)) {
         auto argName = arg.name.show(gs);
         e.setHeader("Missing required keyword argument `{}` for method `{}`", argName, method.show(gs));
@@ -365,7 +365,7 @@ struct GuessOverloadCandidate {
 };
 
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
-                        InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
+                        absl::Span<const TypeAndOrigins *> args, absl::Span<const TypePtr> targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
     vector<MethodRef> allCandidates;
 
@@ -647,7 +647,7 @@ void handleBlockType(const GlobalState &gs, DispatchComponent &component, TypePt
 //    We should, at a minimum, probably allow one to satisfy an **kwargs : untyped
 //    (with a subtype check on the key type, once we have generics)
 DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::ClassOrModuleRef symbol,
-                                  const vector<TypePtr> &targs) {
+                                  absl::Span<const TypePtr> targs) {
     if (symbol == core::Symbols::untyped() && args.name != core::Names::methodNameMissing()) {
         auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file, args.thisType);
         if (auto e = gs.beginError(args.errLoc(), what)) {
@@ -2276,9 +2276,9 @@ void applySig(const GlobalState &gs, const DispatchArgs &args, DispatchResult &r
     }
 
     auto recv = *args.args[0];
-    res = recv.type.dispatchCall(gs, {core::Names::sig(), callLocs, numPosArgs, dispatchArgsArgs, recv.type, recv,
-                                      recv.type, args.block, args.originForUninitialized, args.isPrivateOk,
-                                      args.suppressErrors, args.enclosingMethodForSuper});
+    res = recv.type.dispatchCall(gs, {core::Names::sig(), callLocs, numPosArgs, absl::MakeSpan(dispatchArgsArgs),
+                                      recv.type, recv, recv.type, args.block, args.originForUninitialized,
+                                      args.isPrivateOk, args.suppressErrors, args.enclosingMethodForSuper});
 }
 
 class SorbetPrivateStatic_sig : public IntrinsicMethod {
@@ -2506,7 +2506,7 @@ public:
         DispatchArgs innerArgs{fn,
                                sendLocs,
                                numPosArgs,
-                               sendArgs,
+                               absl::MakeSpan(sendArgs),
                                receiver->type,
                                *receiver,
                                receiver->type,
@@ -2551,7 +2551,7 @@ private:
         DispatchArgs innerArgs{core::Names::toProc(),
                                sendLocs,
                                0,
-                               sendArgs,
+                               absl::MakeSpan(sendArgs),
                                nonNilBlockType.type,
                                nonNilBlockType,
                                nonNilBlockType.type,
@@ -2762,7 +2762,7 @@ public:
         DispatchArgs innerArgs{fn,
                                sendLocs,
                                numPosArgs,
-                               sendArgs,
+                               absl::MakeSpan(sendArgs),
                                receiver->type,
                                *receiver,
                                receiver->type,
@@ -2877,7 +2877,7 @@ public:
         DispatchArgs innerArgs{fn,
                                sendLocs,
                                numPosArgs,
-                               sendArgs,
+                               absl::MakeSpan(sendArgs),
                                receiver->type,
                                *receiver,
                                receiver->type,
@@ -3055,7 +3055,7 @@ public:
             fun,
             sendLocs,
             numPosArgs,
-            sendArgStore,
+            absl::MakeSpan(sendArgStore),
             selfTy.type,
             selfTy,
             selfTy.type,
@@ -3083,7 +3083,7 @@ public:
                     fun,
                     sendLocs,
                     numPosArgs,
-                    sendArgStore,
+                    absl::MakeSpan(sendArgStore),
                     selfTyAndAnd.type,
                     selfTyAndAnd,
                     selfTyAndAnd.type,
@@ -3170,7 +3170,7 @@ public:
         DispatchArgs dispatch{core::Names::toA(),
                               locs,
                               0,
-                              innerArgs,
+                              absl::MakeSpan(innerArgs),
                               arg->type,
                               {arg->type, args.fullType.origins},
                               arg->type,
@@ -3586,7 +3586,7 @@ public:
         DispatchArgs dispatch{core::Names::toHash(),
                               locs,
                               0,
-                              innerArgs,
+                              absl::MakeSpan(innerArgs),
                               arg->type,
                               {arg->type, args.fullType.origins},
                               arg->type,
@@ -3627,7 +3627,7 @@ class Magic_mergeHash : public IntrinsicMethod {
         DispatchArgs mergeArgs{core::Names::merge(),
                                sendLocs,
                                1,
-                               sendArgs,
+                               absl::MakeSpan(sendArgs),
                                accType,
                                {accType, args.args[0]->origins},
                                accType,
@@ -3697,7 +3697,7 @@ class Magic_mergeHashValues : public IntrinsicMethod {
         DispatchArgs mergeArgs{core::Names::merge(),
                                sendLocs,
                                1,
-                               sendArgs,
+                               absl::MakeSpan(sendArgs),
                                accType,
                                {accType, args.args[0]->origins},
                                accType,
@@ -3800,13 +3800,21 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
         args.locs.args[0].copyWithZeroLength(), // fun
         baseCaseArgLocs,                        // args
     };
-    auto baseCaseArgTypes = InlinedVector<const TypeAndOrigins *, 2>{};
+    InlinedVector<const TypeAndOrigins *, 2> baseCaseArgTypes;
     baseCaseArgTypes.emplace_back(args.args[0]);
     DispatchArgs baseCaseArgs{
-        methodToDigWith,  baseCaseLocs,        1, /* numPosArgs */
-        baseCaseArgTypes, args.selfType,       {args.selfType, args.fullType.origins},
-        args.selfType,    args.block,          args.originForUninitialized,
-        args.isPrivateOk, args.suppressErrors, args.enclosingMethodForSuper,
+        methodToDigWith,
+        baseCaseLocs,
+        1, /* numPosArgs */
+        absl::MakeSpan(baseCaseArgTypes),
+        args.selfType,
+        {args.selfType, args.fullType.origins},
+        args.selfType,
+        args.block,
+        args.originForUninitialized,
+        args.isPrivateOk,
+        args.suppressErrors,
+        args.enclosingMethodForSuper,
     };
 
     auto dispatched = args.selfType.dispatchCall(gs, baseCaseArgs);
@@ -3870,7 +3878,7 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
         Names::dig(),
         digLocs,
         newNumPosArgs,
-        digArgTypes,
+        absl::MakeSpan(digArgTypes),
         newSelfType,
         newFullType,
         newSelfType,
@@ -3924,7 +3932,7 @@ class Array_flatten : public IntrinsicMethod {
         DispatchArgs innerArgs{toAry,
                                sendLocs,
                                0,
-                               sendArgs,
+                               absl::MakeSpan(sendArgs),
                                type,
                                {type, args.fullType.origins},
                                type,
@@ -4306,7 +4314,7 @@ public:
             Names::new_(),
             newCallLocs,
             newNumPosArgs,
-            newSendArgs,
+            absl::MakeSpan(newSendArgs),
             classArg->type,
             *classArg,
             classArg->type,
@@ -4351,7 +4359,7 @@ public:
         DispatchArgs dispatch{core::Names::enumerableToH(),
                               locs,
                               1,
-                              innerArgs,
+                              absl::MakeSpan(innerArgs),
                               hash,
                               {hash, args.fullType.origins},
                               hash,

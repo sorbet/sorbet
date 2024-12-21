@@ -1453,7 +1453,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         auto genericClass = corrected.asClassOrModuleRef();
         ENFORCE_NO_TIMER(genericClass.exists());
         core::CallLocs locs{ctx.file, s.loc, s.recv.loc(), s.funLoc, argLocs};
-        auto out = core::Types::applyTypeArguments(ctx, locs, s.numPosArgs(), targs, genericClass,
+        auto out = core::Types::applyTypeArguments(ctx, locs, s.numPosArgs(), absl::MakeSpan(targs), genericClass,
                                                    core::errors::Resolver::GenericArgumentCountMismatch,
                                                    core::errors::Resolver::GenericArgumentKeywordArgs);
 

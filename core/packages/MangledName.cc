@@ -7,7 +7,7 @@
 using namespace std;
 
 namespace sorbet::core::packages {
-MangledName MangledName::mangledNameFromParts(core::GlobalState &gs, const std::vector<std::string_view> &parts) {
+MangledName MangledName::mangledNameFromParts(core::GlobalState &gs, absl::Span<const std::string_view> parts) {
     // Foo::Bar => Foo_Bar_Package
     auto mangledName = absl::StrCat(absl::StrJoin(parts, "_"), core::PACKAGE_SUFFIX);
 
@@ -16,7 +16,7 @@ MangledName MangledName::mangledNameFromParts(core::GlobalState &gs, const std::
     return MangledName(gs.enterNameConstant(packagerName));
 }
 
-MangledName MangledName::mangledNameFromParts(core::GlobalState &gs, const std::vector<core::NameRef> &parts) {
+MangledName MangledName::mangledNameFromParts(core::GlobalState &gs, absl::Span<const core::NameRef> parts) {
     // Foo::Bar => Foo_Bar_Package
     auto mangledName = absl::StrCat(absl::StrJoin(parts, "_", NameFormatter(gs)), core::PACKAGE_SUFFIX);
 

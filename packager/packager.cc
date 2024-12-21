@@ -137,7 +137,7 @@ struct Export {
 
     explicit Export(FullyQualifiedName &&fqn) : fqn(move(fqn)) {}
 
-    const vector<core::NameRef> &parts() const {
+    absl::Span<const core::NameRef> parts() const {
         return fqn.parts;
     }
 
@@ -160,7 +160,7 @@ class LexNext final {
     absl::Span<const core::NameRef> names;
 
 public:
-    LexNext(const vector<core::NameRef> &names) : names(names) {}
+    LexNext(absl::Span<const core::NameRef> names) : names(names) {}
 
     bool operator<(absl::Span<const core::NameRef> rhs) const {
         // Lexicographic comparison:

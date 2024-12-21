@@ -29,7 +29,7 @@ struct AutocorrectSuggestion {
     // to those files into a resulting string with all edits applied. Does not write those back out
     // to disk.
     static UnorderedMap<FileRef, std::string> apply(const GlobalState &gs, FileSystem &fs,
-                                                    const std::vector<AutocorrectSuggestion> &autocorrects);
+                                                    absl::Span<const AutocorrectSuggestion> autocorrects);
 };
 
 } // namespace sorbet::core
