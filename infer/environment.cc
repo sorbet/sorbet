@@ -986,8 +986,18 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
         ctx.file, loc.offsets(), loc.offsets(), loc.offsets(), argLocs,
     };
 
-    core::DispatchArgs dispatchArgs{core::Names::flatten(), locs,    1,   args, recvType.type, recvType,
-                                    recvType.type,          nullptr, loc, true, false,         currentMethodName};
+    core::DispatchArgs dispatchArgs{core::Names::flatten(),
+                                    locs,
+                                    1,
+                                    absl::MakeSpan(args),
+                                    recvType.type,
+                                    recvType,
+                                    recvType.type,
+                                    nullptr,
+                                    loc,
+                                    true,
+                                    false,
+                                    currentMethodName};
 
     auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
     if (dispatched.main.errors.empty()) {
@@ -1041,7 +1051,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // that we want to report all errors (suppressing nothing).
                 auto suppressErrors = false;
                 core::DispatchArgs dispatchArgs{send.fun,        locs,
-                                                send.numPosArgs, args,
+                                                send.numPosArgs, absl::MakeSpan(args),
                                                 recvType.type,   recvType,
                                                 recvType.type,   send.link,
                                                 ownerLoc,        send.isPrivateOk,
@@ -1435,7 +1445,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),
                                                     locs,
                                                     numPosArgs,
-                                                    args,
+                                                    absl::MakeSpan(args),
                                                     recvType.type,
                                                     recvType,
                                                     recvType.type,
