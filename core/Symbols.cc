@@ -1455,6 +1455,10 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
                        showRaw ? sym->rebind.toStringFullName(gs) : sym->rebind.showFullName(gs));
     }
 
+    if (sym->blockRebind.exists()) {
+        fmt::format_to(std::back_inserter(buf), " rebindTo {}", sym->blockRebind.showFullName(gs));
+    }
+
     ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
     fmt::format_to(std::back_inserter(buf), "\n");
     for (auto ta : sym->typeArguments()) {
@@ -1727,10 +1731,6 @@ string ArgInfo::toString(const GlobalState &gs) const {
     }
 
     fmt::format_to(std::back_inserter(buf), " @ {}", loc.showRaw(gs));
-
-    if (this->rebind.exists()) {
-        fmt::format_to(std::back_inserter(buf), " rebindTo {}", this->rebind.showFullName(gs));
-    }
 
     return to_string(buf);
 }
@@ -2163,7 +2163,6 @@ ArgInfo ArgInfo::deepCopy() const {
     result.type = this->type;
     result.loc = this->loc;
     result.name = this->name;
-    result.rebind = this->rebind;
     return result;
 }
 

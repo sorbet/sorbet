@@ -3725,7 +3725,7 @@ private:
                     arg.type = core::Types::untypedUntracked();
                 }
                 arg.loc = spec->nameLoc;
-                arg.rebind = spec->rebind;
+                methodInfo->blockRebind = spec->rebind;
                 sig.argTypes.erase(spec);
                 // Since methods always have (synthesized if necessary) block arguments,
                 // we need to record the explicit presence of a block arg from the sig here.

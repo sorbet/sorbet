@@ -1515,7 +1515,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
         TypePtr blockType = Types::resultTypeAsSeenFrom(gs, bspec.type, methodData->owner, symbol, targs);
         handleBlockType(gs, component, blockType);
-        component.rebind = bspec.rebind;
+        component.rebind = methodData->blockRebind;
         component.rebindLoc = bspec.loc;
     }
 
