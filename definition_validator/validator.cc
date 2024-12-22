@@ -167,7 +167,7 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
 // Ensure that two argument lists are compatible in shape and type and that method visibility is compatible
 void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMethod, core::MethodRef method) {
     auto methodData = method.data(ctx);
-    auto methodLoc = method.data(ctx)->loc();
+    auto methodLoc = methodData->loc();
     if (methodData->flags.isOverloaded) {
         // Don't try to check overloaded methods; It's not immediately clear how
         // to match overloads against their superclass definitions. Since we
@@ -176,7 +176,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
     }
 
     auto superMethodData = superMethod.data(ctx);
-    auto superMethodLoc = superMethod.data(ctx)->loc();
+    auto superMethodLoc = superMethodData->loc();
     if ((methodData->flags.isPrivate && (superMethodData->flags.isProtected || superMethodData->isMethodPublic())) ||
         (methodData->flags.isProtected && superMethodData->isMethodPublic())) {
         if (auto e = ctx.state.beginError(methodLoc, core::errors::Resolver::BadMethodOverride)) {
