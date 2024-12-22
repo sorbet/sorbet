@@ -1,0 +1,18 @@
+test/cli/case-blank-when-body/blank.rb:14: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
+    14 |end
+        ^^^
+  Expected `String` for result type of method `foo`:
+    test/cli/case-blank-when-body/blank.rb:6:
+     6 |def foo(x)
+        ^^^^^^^^^^
+  Got `T.nilable(String)` originating from:
+    test/cli/case-blank-when-body/blank.rb:8:
+     8 |  when 1
+     9 |  when 2
+    test/cli/case-blank-when-body/blank.rb:10:
+    10 |    "a"
+            ^^^
+    test/cli/case-blank-when-body/blank.rb:12:
+    12 |    "b"
+            ^^^
+Errors: 1
