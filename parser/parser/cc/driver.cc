@@ -93,7 +93,9 @@ bool base_driver::rewind_if_different_line(token_t token1, token_t token2) {
         return false;
     }
 
-    if (token1->lineStart() == token2->lineStart()) {
+    auto lineStart1 = lex.line_start(token1->type(), token1->start());
+    auto lineStart2 = lex.line_start(token2->type(), token2->start());
+    if (lineStart1 == lineStart2) {
         return false;
     }
 

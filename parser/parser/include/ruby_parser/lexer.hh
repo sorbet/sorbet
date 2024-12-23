@@ -143,7 +143,6 @@ private:
 
     bool traceLexer;
 
-    size_t line_start(token_type type, size_t beginPos);
     void check_stack_capacity();
     int stack_pop();
     int arg_or_cmdarg(int cmd_state);
@@ -203,6 +202,8 @@ public:
     void unadvance(token_t token);
 
     std::string_view tok_view_from_offsets(size_t start, size_t end) const;
+
+    size_t line_start(token_type type, size_t beginPos);
 
     // Useful for error recovery. Manually sets `_p` so that the next call to `advance` starts
     // from the desired location, and resets some state to trick the lexer into thinking it's in the
