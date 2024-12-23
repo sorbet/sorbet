@@ -242,7 +242,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 sorbetName = gs.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), nextUniqueID());
             }
 
-            return make_unique<parser::Blockarg>(location, sorbetName);
+            auto blockLoc = core::LocOffsets{location.beginPos() + 1, location.endPos()};
+
+            return make_unique<parser::Blockarg>(blockLoc, sorbetName);
         }
         case PM_BLOCK_PARAMETERS_NODE: { // The parameters declared at the top of a PM_BLOCK_NODE
             auto paramsNode = down_cast<pm_block_parameters_node>(node);
@@ -863,7 +865,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 sorbetName = gs.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), nextUniqueID());
             }
 
-            return make_unique<parser::Kwrestarg>(location, sorbetName);
+            auto kwrestLoc = core::LocOffsets{location.beginPos() + 2, location.endPos()};
+            return make_unique<parser::Kwrestarg>(kwrestLoc, sorbetName);
         }
         case PM_LAMBDA_NODE: { // lambda literals, like `-> { 123 }`
             auto lambdaNode = down_cast<pm_lambda_node>(node);
