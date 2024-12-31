@@ -1628,6 +1628,8 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
 }
 
 // Tarjan's algorithm for finding strongly connected components
+// NOTE: This function must be called every time a non-test import is added or removed from a package.
+// It is relatively fast, so calling it on every __package.rb edit is an okay overapproximation for simplicity.
 void computeSCCs(core::GlobalState &gs) {
     Timer timeit(gs.tracer(), "packager::computeSCCs");
     ComputeSCCsMetadata metadata;
@@ -1675,7 +1677,8 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                            thisPkg.show(ctx), "layer");
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.layer.value().second), "`{}`'s `{}` declared here",
                            otherPkg.show(ctx), "layer");
-            // TODO: Autocorrect to delete this import?
+            // TODO: if the import is unused (ie. there are no references in this package to the imported package),
+            // autocorrect to delete import
         }
     }
 
@@ -1691,7 +1694,10 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                         "import", strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel.value().second),
                            "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
-            // TODO: Autocorrect to delete this import?
+            // TODO: if the import is unused (ie. there are no references in this package to the imported package),
+            // autocorrect to delete import
+            // TODO: if the imported package can be trivially upgraded to the required level (ex. it's at 'false' but
+            // has no layering violations), autocorrect to do so
         }
     }
 
@@ -1705,7 +1711,8 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                             "valid at `{}`",
                             otherPkg.show(ctx), thisPkg.show(ctx), level);
             }
-            // TODO: Autocorrect to delete this import?
+            // TODO: if the import is unused (ie. there are no references in this package to the imported package),
+            // autocorrect to delete import
         }
     }
 }
