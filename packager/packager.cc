@@ -1765,6 +1765,8 @@ void validatePackage(core::Context ctx) {
         return;
     }
 
+    auto previousStrictLevel = core::packages::StrictDependenciesLevel::False;
+    auto sortedErrorRaised = false;
     for (auto &i : pkgInfo.importedPackageNames) {
         auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
 
@@ -1772,8 +1774,20 @@ void validatePackage(core::Context ctx) {
         if (!otherPkg.exists()) {
             continue;
         }
+        auto &otherPkgImpl = PackageInfoImpl::from(packageDB.getPackageInfo(i.name.mangledName));
 
         if (enforceLayering) {
+            if (i.type == ImportType::Normal) {
+                if (otherPkgImpl.strictDependenciesLevel.has_value()) {
+                    if (otherPkgImpl.strictDependenciesLevel.value().first < previousStrictLevel && !sortedErrorRaised) {
+                        if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportsNotSorted)) {
+                            e.setHeader("Imports must be sorted by `{}` level", "strict_dependencies");
+                            sortedErrorRaised = true;
+                        }
+                    }
+                    previousStrictLevel = otherPkgImpl.strictDependenciesLevel.value().first;
+                }
+            }
             validateLayering(ctx, i);
         }
 
