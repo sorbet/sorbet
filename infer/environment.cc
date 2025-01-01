@@ -876,7 +876,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
         bool canBeTruthy = core::Types::canBeTruthy(ctx, otherTO.type);
 
         if (canBeTruthy) {
-            auto &thisKnowledge = getKnowledge(var);
+            auto &thisKnowledge = pair.second.knowledge;
             auto otherTruthy =
                 other.getKnowledge(var, false).truthy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
             if (!otherTruthy->isDead) {
@@ -890,7 +890,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
         }
 
         if (canBeFalsy) {
-            auto &thisKnowledge = getKnowledge(var);
+            auto &thisKnowledge = pair.second.knowledge;
             auto otherFalsy =
                 other.getKnowledge(var, false).falsy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
             if (!otherFalsy->isDead) {
