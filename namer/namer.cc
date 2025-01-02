@@ -2,6 +2,7 @@
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
+#include "absl/synchronization/blocking_counter.h"
 #include "ast/ArgParsing.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
@@ -37,19 +38,6 @@ struct ParsedFileWithIdx {
     ParsedFileWithIdx &operator=(const ParsedFileWithIdx &job) = delete;
     ParsedFileWithIdx(ParsedFileWithIdx &&job) = default;
     ParsedFileWithIdx &operator=(ParsedFileWithIdx &&job) = default;
-};
-
-struct SymbolFinderResult {
-    ast::ParsedFile tree;
-    unique_ptr<core::FoundDefinitions> names;
-
-    SymbolFinderResult() = default;
-    SymbolFinderResult(ast::ParsedFile &&tree, unique_ptr<core::FoundDefinitions> names)
-        : tree(move(tree)), names(move(names)) {}
-    SymbolFinderResult(const SymbolFinderResult &result) = delete;
-    SymbolFinderResult &operator=(const SymbolFinderResult &result) = delete;
-    SymbolFinderResult(SymbolFinderResult &&result) = default;
-    SymbolFinderResult &operator=(SymbolFinderResult &&result) = default;
 };
 
 using AllFoundDefinitions = vector<pair<core::FileRef, unique_ptr<core::FoundDefinitions>>>;
@@ -2136,42 +2124,32 @@ public:
 
 AllFoundDefinitions findSymbols(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.findSymbols");
-    auto resultq = make_shared<BlockingBoundedQueue<pair<size_t, SymbolFinderResult>>>(trees.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<ParsedFileWithIdx>>(trees.size());
+    auto taskq = make_shared<ConcurrentBoundedQueue<size_t>>(trees.size());
+    absl::BlockingCounter barrier(max(workers.size(), 1));
     AllFoundDefinitions allFoundDefinitions(trees.size());
-    size_t idx = 0;
-    for (auto &tree : trees) {
-        fileq->push(ParsedFileWithIdx(move(tree), idx++), 1);
+
+    for (size_t i = 0, size = trees.size(); i < size; ++i) {
+        taskq->push(i, 1);
     }
 
-    workers.multiplexJob("findSymbols", [&gs, fileq, resultq]() {
+    workers.multiplexJob("findSymbols", [&gs, &barrier, &allFoundDefinitions, trees, taskq]() {
         Timer timeit(gs.tracer(), "naming.findSymbolsWorker");
         SymbolFinder finder;
-        ParsedFileWithIdx job;
-        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+        size_t idx;
+        for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
             if (result.gotItem()) {
-                Timer timeit(gs.tracer(), "naming.findSymbolsOne",
-                             {{"file", string(job.parsedFile.file.data(gs).path())}});
-                core::Context ctx(gs, core::Symbols::root(), job.parsedFile.file);
-                ast::TreeWalk::apply(ctx, finder, job.parsedFile.tree);
-                auto threadResult = SymbolFinderResult(move(job.parsedFile), finder.getAndClearFoundDefinitions());
-                resultq->push({job.idx, move(threadResult)}, 1);
+                auto &parsedFile = trees[idx];
+                Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", string(parsedFile.file.data(gs).path())}});
+                core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
+                ast::TreeWalk::apply(ctx, finder, parsedFile.tree);
+                allFoundDefinitions[idx] = make_pair(parsedFile.file, finder.getAndClearFoundDefinitions());
             }
         }
+
+        barrier.DecrementCount();
     });
 
-    {
-        pair<size_t, SymbolFinderResult> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            if (result.gotItem()) {
-                auto fref = threadResult.second.tree.file;
-                trees[threadResult.first] = move(threadResult.second.tree);
-                allFoundDefinitions[threadResult.first] = make_pair(fref, move(threadResult.second.names));
-            }
-        }
-    }
+    barrier.Wait();
 
     return allFoundDefinitions;
 }
