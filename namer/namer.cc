@@ -2,6 +2,7 @@
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
+#include "absl/synchronization/blocking_counter.h"
 #include "ast/ArgParsing.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
@@ -2318,38 +2319,31 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
 
 void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
-    auto resultq = make_shared<BlockingBoundedQueue<ParsedFileWithIdx>>(trees.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<ParsedFileWithIdx>>(trees.size());
-    size_t idx = 0;
-    for (auto &tree : trees) {
-        fileq->push(ParsedFileWithIdx(move(tree), idx++), 1);
+    auto taskq = make_shared<ConcurrentBoundedQueue<size_t>>(trees.size());
+    absl::BlockingCounter barrier(max(workers.size(), 1));
+
+    for (size_t i = 0, size = trees.size(); i < size; ++i) {
+        taskq->push(i, 1);
     }
 
-    workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq]() {
+    workers.multiplexJob("symbolizeTrees", [&gs, &barrier, trees, taskq]() {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
         TreeSymbolizer inserter;
-        ParsedFileWithIdx job;
-        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+        size_t idx;
+        for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
             if (result.gotItem()) {
+                auto &parsedFile = trees[idx];
                 Timer timeit(gs.tracer(), "naming.symbolizeTreesOne",
-                             {{"file", string(job.parsedFile.file.data(gs).path())}});
-                core::Context ctx(gs, core::Symbols::root(), job.parsedFile.file);
-                ast::TreeWalk::apply(ctx, inserter, job.parsedFile.tree);
-                resultq->push(move(job), 1);
+                             {{"file", string(parsedFile.file.data(gs).path())}});
+                core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
+                ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
             }
         }
+
+        barrier.DecrementCount();
     });
 
-    {
-        ParsedFileWithIdx threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            if (result.gotItem()) {
-                trees[threadResult.idx] = move(threadResult.parsedFile);
-            }
-        }
-    }
+    barrier.Wait();
 }
 
 } // namespace
