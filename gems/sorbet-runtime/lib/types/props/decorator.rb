@@ -244,7 +244,7 @@ class T::Props::Decorator
     nil
   end
 
-  SAFE_NAME = T.let(/\A[A-Za-z_][A-Za-z0-9_-]*\z/.freeze, Regexp, checked: false)
+  SAFE_NAME = T.let(/\A[A-Za-z_][A-Za-z0-9_]*\z/.freeze, Regexp, checked: false)
 
   # Used to validate both prop names and serialized forms
   sig {params(name: T.any(Symbol, String)).void.checked(:never)}
