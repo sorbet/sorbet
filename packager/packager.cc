@@ -172,6 +172,10 @@ public:
                 return false;
             }
         }
+
+        // This is where this implementation differs from `std::lexicographic_compare`: if one name is the prefix of
+        // another they're considered equal, wheras `std::lexicographic_compare` would return `true` if the LHS
+        // was shorter.
         return false;
     }
 
