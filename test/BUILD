@@ -121,6 +121,21 @@ sh_test(
     ],
 )
 
+# Load the macro that creates a test for every file in the prism_regression folder
+load("//test:prism_location_test.bzl", "prism_test_suite")
+
+# Run the macro
+prism_test_suite(
+    name = "prism_location_tests",
+    srcs = glob(["prism_regression/**/*.rb"]),
+)
+
+# Create a test suite to run all the location tests
+test_suite(
+    name = "prism_location_tests",
+    tags = ["prism_location_test"],
+)
+
 cc_test(
     name = "hello-test",
     size = "small",
@@ -241,6 +256,74 @@ pipeline_tests(
 )
 
 pipeline_tests(
+    "test_corpus_prism",
+    glob(
+        [
+            # Replace [parser] with other phases to test Prism at that level
+            # Phases: https://github.com/Shopify/sorbet/blob/prism/docs/internals.md#phases
+            "testdata/parser/**/*.rb",
+            "testdata/parser/**/*.exp",
+            "testdata/desugar/**/*.rb",
+            "testdata/desugar/**/*.exp",
+            "testdata/rewriter/**/*.rb",
+            "testdata/rewriter/**/*.exp",
+            "testdata/local_vars/**/*.rb",
+            "testdata/local_vars/**/*.exp",
+            "testdata/namer/**/*.rb",
+            "testdata/namer/**/*.exp",
+        ],
+        exclude = [
+            # Parser tests having to do with tree differences in invalid Ruby code; will address later
+            "testdata/parser/error_recovery/**",
+            "testdata/parser/crash_block_pass_suggestion.rb",
+            "testdata/parser/invalid_fatal.rb",
+            "testdata/parser/invalid_syntax_error.rb",
+            "testdata/parser/kwargs_missing_comma.rb",
+            "testdata/parser/kwnil_errors.rb", # See https://github.com/Shopify/sorbet/issues/393
+            "testdata/parser/misc.rb",
+            "testdata/parser/offset0.rb",
+            "testdata/parser/ruby_25.rb",
+
+            # Desugar tests having to do with tree differences; will address later
+            "testdata/desugar/constant_error.rb",
+            "testdata/desugar/for.rb",
+            "testdata/desugar/sclass.rb",
+
+            # Rewriter tests having to do with symbol table differences; will address later
+            "testdata/rewriter/attr_multi.rb",
+            "testdata/rewriter/attr.rb",
+            "testdata/rewriter/prop.rb",
+            "testdata/rewriter/struct.rb",
+
+            # Failing namer tests to investigate
+            "testdata/namer/alias_cross_file__01.rb",
+            "testdata/namer/alias_cross_file__02.rb",
+            "testdata/namer/all_constant_redefinitions.rb",
+            "testdata/namer/class_alias_inside_method.rb",
+            "testdata/namer/class_and_alias.rb",
+            "testdata/namer/constant_in_block.rb",
+            "testdata/namer/constant_types.rb",
+            "testdata/namer/constants.rb",
+            "testdata/namer/fuzz_class_in_field.rb",
+            "testdata/namer/fuzz_repeated_kwarg.rb",
+            "testdata/namer/fuzz_type_template_overwrite.rb",
+            "testdata/namer/module_function.rb",
+            "testdata/namer/parameter_names.rb",
+            "testdata/namer/redefinition_method.rb",
+            "testdata/namer/type_alias_inside_method.rb",
+            "testdata/namer/type_alias.rb",
+            "testdata/namer/type_member_inside_method.rb",
+            "testdata/namer/type_template_inside_method.rb",
+
+            # Sorbets' parser incorrectly accepts invalid syntax
+            "testdata/desugar/pattern_matching_hash.rb", # See https://github.com/Shopify/sorbet/issues/362
+        ],
+    ),
+    "PosTests",
+    parser = "prism",
+)
+
+pipeline_tests(
     "whitequark_parser_corpus",
     glob([
         "whitequark/**/*.rb",
@@ -262,14 +345,34 @@ pipeline_tests(
     extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
 )
 
+pipeline_tests(
+    "prism_regression_corpus",
+    glob([
+        "prism_regression/**/*.rb",
+        "prism_regression/**/*.exp",
+    ]),
+    "PosTests",
+    parser = "prism",
+)
+
 test_suite(
     name = "test",
     tests = ["test_corpus"],
 )
 
 test_suite(
+    name = "test_prism",
+    tests = ["test_corpus_prism"],
+)
+
+test_suite(
     name = "whitequark_parser_tests",
     tests = ["whitequark_parser_corpus"],
+)
+
+test_suite(
+    name = "prism_regression",
+    tests = ["prism_regression_corpus"],
 )
 
 sh_binary(

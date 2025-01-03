@@ -1,7 +1,9 @@
 {
   "recommendations": [
     // C++ intellisense with clangd.
-    "llvm-vs-code-extensions.vscode-clangd"
+    "llvm-vs-code-extensions.vscode-clangd",
+    // TODO: remove this before upstreaming
+    "vadimcn.vscode-lldb",
   ],
   "unwantedRecommendations": [
     // Microsoft C++ intellisense (doesn't work properly with Sorbet)
