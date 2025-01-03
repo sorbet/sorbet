@@ -476,25 +476,27 @@ constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &
 }
 
 void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree, core::MethodRef method) {
-    auto klass = method.data(ctx)->owner;
-    auto name = method.data(ctx)->name;
+    auto methodData = method.data(ctx);
+    auto klass = methodData->owner;
+    auto name = methodData->name;
     auto klassData = klass.data(ctx);
+    auto methodLoc = methodData->loc();
+    auto methodName = method.show(ctx);
     InlinedVector<core::MethodRef, 4> overriddenMethods;
 
     // Matches the behavior of the runtime checks
     // NOTE(jez): I don't think this check makes all that much sense, but I haven't thought about it.
     // We already deleted the corresponding check for `private`, and may want to revisit this, too.
-    if (klassData->flags.isInterface && method.data(ctx)->flags.isProtected) {
-        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
-            e.setHeader("Interface method `{}` cannot be protected", method.show(ctx));
+    if (klassData->flags.isInterface && methodData->flags.isProtected) {
+        if (auto e = ctx.state.beginError(methodLoc, core::errors::Resolver::NonPublicAbstract)) {
+            e.setHeader("Interface method `{}` cannot be protected", methodName);
         }
     }
 
-    if (method.data(ctx)->flags.isAbstract && klassData->isSingletonClass(ctx)) {
+    if (methodData->flags.isAbstract && klassData->isSingletonClass(ctx)) {
         auto attached = klassData->attachedClass(ctx);
         if (attached.exists() && attached.data(ctx)->isModule()) {
-            if (auto e =
-                    ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::StaticAbstractModuleMethod)) {
+            if (auto e = ctx.state.beginError(methodLoc, core::errors::Resolver::StaticAbstractModuleMethod)) {
                 e.setHeader("Static methods in a module cannot be abstract");
             }
         }
@@ -503,10 +505,11 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
     if (klassData->superClass().exists()) {
         auto superMethod = klassData->superClass().data(ctx)->findMethodTransitive(ctx, name);
         if (superMethod.exists()) {
-            if (superMethod.data(ctx)->flags.isOverloaded) {
-                ENFORCE(!superMethod.data(ctx)->name.isOverloadName(ctx));
+            auto superMethodData = superMethod.data(ctx);
+            if (superMethodData->flags.isOverloaded) {
+                ENFORCE(!superMethodData->name.isOverloadName(ctx));
                 auto overload = ctx.state.lookupNameUnique(core::UniqueNameKind::Overload, name, 1);
-                superMethod = superMethod.data(ctx)->owner.data(ctx)->findMethod(ctx, overload);
+                superMethod = superMethodData->owner.data(ctx)->findMethod(ctx, overload);
                 ENFORCE(superMethod.exists());
             }
 
@@ -516,10 +519,11 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
     for (const auto &mixin : klassData->mixins()) {
         auto superMethod = mixin.data(ctx)->findMethod(ctx, name);
         if (superMethod.exists()) {
-            if (superMethod.data(ctx)->flags.isOverloaded) {
-                ENFORCE(!superMethod.data(ctx)->name.isOverloadName(ctx));
+            auto superMethodData = superMethod.data(ctx);
+            if (superMethodData->flags.isOverloaded) {
+                ENFORCE(!superMethodData->name.isOverloadName(ctx));
                 auto overload = ctx.state.lookupNameUnique(core::UniqueNameKind::Overload, name, 1);
-                superMethod = superMethod.data(ctx)->owner.data(ctx)->findMethod(ctx, overload);
+                superMethod = superMethodData->owner.data(ctx)->findMethod(ctx, overload);
                 ENFORCE(superMethod.exists());
             }
 
@@ -527,10 +531,14 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
         }
     }
 
-    if (overriddenMethods.size() == 0 && method.data(ctx)->flags.isOverride &&
-        !method.data(ctx)->flags.isIncompatibleOverride) {
-        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Method `{}` is marked `{}` but does not override anything", method.show(ctx), "override");
+    if (overriddenMethods.empty() && methodData->flags.isOverride && !methodData->flags.isIncompatibleOverride) {
+        if (auto e = ctx.state.beginError(methodLoc, core::errors::Resolver::BadMethodOverride)) {
+            if (methodData->flags.isRewriterSynthesized) {
+                e.setHeader("Method `{}` is marked `{}` but the interface only defines a {} method", methodName,
+                            "override", absl::EndsWith(methodName, "=") ? "reader" : "writer");
+            } else {
+                e.setHeader("Method `{}` is marked `{}` but does not override anything", methodName, "override");
+            }
         }
     }
 
@@ -538,49 +546,48 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
     // time whether any parent methods are abstract
     auto anyIsInterface = absl::c_any_of(overriddenMethods, [&](auto &m) { return m.data(ctx)->flags.isAbstract; });
     for (const auto &overriddenMethod : overriddenMethods) {
-        if (overriddenMethod.data(ctx)->flags.isFinal) {
-            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverridesFinal)) {
-                e.setHeader("`{}` was declared as final and cannot be overridden by `{}`", overriddenMethod.show(ctx),
-                            method.show(ctx));
-                e.addErrorLine(overriddenMethod.data(ctx)->loc(), "original method defined here");
+        auto overriddenMethodData = overriddenMethod.data(ctx);
+        auto overriddenMethodLoc = overriddenMethodData->loc();
+        auto overriddenMethodName = overriddenMethod.show(ctx);
+        if (overriddenMethodData->flags.isFinal) {
+            if (auto e = ctx.state.beginError(methodLoc, core::errors::Resolver::OverridesFinal)) {
+                e.setHeader("`{}` was declared as final and cannot be overridden by `{}`", overriddenMethodName,
+                            methodName);
+                e.addErrorLine(overriddenMethodLoc, "original method defined here");
             }
         }
-        auto isRBI = absl::c_any_of(method.data(ctx)->locs(), [&](auto &loc) { return loc.file().data(ctx).isRBI(); });
-        if (!method.data(ctx)->flags.isOverride && method.data(ctx)->hasSig() &&
-            (overriddenMethod.data(ctx)->flags.isOverridable || overriddenMethod.data(ctx)->flags.isOverride) &&
-            !anyIsInterface && overriddenMethod.data(ctx)->hasSig() && !method.data(ctx)->flags.isRewriterSynthesized &&
-            !isRBI) {
-            auto methodLoc = method.data(ctx)->loc();
-
+        auto isRBI = absl::c_any_of(methodData->locs(), [&](auto &loc) { return loc.file().data(ctx).isRBI(); });
+        if (!methodData->flags.isOverride && methodData->hasSig() &&
+            (overriddenMethodData->flags.isOverridable || overriddenMethodData->flags.isOverride) && !anyIsInterface &&
+            overriddenMethodData->hasSig() && !methodData->flags.isRewriterSynthesized && !isRBI) {
             if (auto e = ctx.state.beginError(methodLoc, core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` overrides an overridable method `{}` but is not declared with `{}`",
-                            method.show(ctx), overriddenMethod.show(ctx), "override.");
-                e.addErrorLine(overriddenMethod.data(ctx)->loc(), "defined here");
+                            methodName, overriddenMethodName, "override.");
+                e.addErrorLine(overriddenMethodLoc, "defined here");
 
                 auto potentialAutocorrect = constructOverrideAutocorrect(ctx, tree, method);
                 if (potentialAutocorrect.has_value()) {
-                    e.addAutocorrect(std::move(*potentialAutocorrect));
+                    e.addAutocorrect(move(*potentialAutocorrect));
                 }
             }
         }
-        if (!method.data(ctx)->flags.isOverride && !method.data(ctx)->flags.isAbstract && method.data(ctx)->hasSig() &&
-            overriddenMethod.data(ctx)->flags.isAbstract && overriddenMethod.data(ctx)->hasSig() &&
-            !method.data(ctx)->flags.isRewriterSynthesized && !isRBI) {
-            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
-                e.setHeader("Method `{}` implements an abstract method `{}` but is not declared with `{}`",
-                            method.show(ctx), overriddenMethod.show(ctx), "override.");
-                e.addErrorLine(overriddenMethod.data(ctx)->loc(), "defined here");
+        if (!methodData->flags.isOverride && !methodData->flags.isAbstract && methodData->hasSig() &&
+            overriddenMethodData->flags.isAbstract && overriddenMethodData->hasSig() &&
+            !methodData->flags.isRewriterSynthesized && !isRBI) {
+            if (auto e = ctx.state.beginError(methodLoc, core::errors::Resolver::UndeclaredOverride)) {
+                e.setHeader("Method `{}` implements an abstract method `{}` but is not declared with `{}`", methodName,
+                            overriddenMethodName, "override.");
+                e.addErrorLine(overriddenMethodLoc, "defined here");
 
                 auto potentialAutocorrect = constructOverrideAutocorrect(ctx, tree, method);
                 if (potentialAutocorrect.has_value()) {
-                    e.addAutocorrect(std::move(*potentialAutocorrect));
+                    e.addAutocorrect(move(*potentialAutocorrect));
                 }
             }
         }
-        if ((overriddenMethod.data(ctx)->flags.isAbstract || overriddenMethod.data(ctx)->flags.isOverridable ||
-             (overriddenMethod.data(ctx)->hasSig() && method.data(ctx)->flags.isOverride)) &&
-            !method.data(ctx)->flags.isIncompatibleOverride && !isRBI &&
-            !method.data(ctx)->flags.isRewriterSynthesized &&
+        if ((overriddenMethodData->flags.isAbstract || overriddenMethodData->flags.isOverridable ||
+             (overriddenMethodData->hasSig() && methodData->flags.isOverride)) &&
+            !methodData->flags.isIncompatibleOverride && !isRBI && !methodData->flags.isRewriterSynthesized &&
             overriddenMethod != core::Symbols::BasicObject_initialize()) {
             // We only ignore BasicObject#initialize for backwards compatibility.
             // One day, we may want to build something like overridable(allow_incompatible: true)
