@@ -9,14 +9,14 @@ using namespace std;
 
 namespace {
 
-unique_ptr<LSPMessage> makeShowOperation(std::string operationName, std::string description,
+unique_ptr<LSPMessage> makeShowOperation(std::string_view operationName, std::string_view description,
                                          SorbetOperationStatus status) {
     return make_unique<LSPMessage>(make_unique<NotificationMessage>(
         "2.0", LSPMethod::SorbetShowOperation,
-        make_unique<SorbetShowOperationParams>(move(operationName), move(description), status)));
+        make_unique<SorbetShowOperationParams>(std::string(operationName), std::string(description), status)));
 }
 
-string_view kindToOperationName(ShowOperation::Kind kind) {
+constexpr string_view kindToOperationName(ShowOperation::Kind kind) {
     switch (kind) {
         case ShowOperation::Kind::Indexing:
             return "Indexing";
@@ -37,7 +37,7 @@ string_view kindToOperationName(ShowOperation::Kind kind) {
     }
 }
 
-string_view kindToDescription(ShowOperation::Kind kind) {
+constexpr string_view kindToDescription(ShowOperation::Kind kind) {
     switch (kind) {
         case ShowOperation::Kind::Indexing:
             return "Indexing files...";
