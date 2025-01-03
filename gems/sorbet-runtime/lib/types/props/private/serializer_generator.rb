@@ -64,7 +64,7 @@ module T::Props
         end
 
         <<~RUBY
-          def __t_props_generated_serialize(strict)
+          def __t_props_generated_serialize(strict, secure: false)
             h = {}
             #{parts.join("\n\n")}
             h
