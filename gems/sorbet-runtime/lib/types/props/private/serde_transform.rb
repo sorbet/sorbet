@@ -155,7 +155,13 @@ module T::Props
       private_class_method def self.handle_serializable_subtype(varname, type, mode)
         case mode
         when Serialize
-          "#{varname}.serialize(strict)"
+          <<~GEN
+          if secure && T::NonForcingConstants.non_forcing_is_a?(#{varname}, "Opus::SecureLoggables::ODMDocument")
+            #{varname}.__secure_log__secure_message.serialize(strict)
+          else
+            #{varname}.serialize(strict)
+          end
+          GEN
         when Deserialize
           type_name = T.must(module_name(type))
           "#{type_name}.from_hash(#{varname})"

@@ -15,9 +15,9 @@ module T::Props::Serializable
   #   exception if this object has mandatory props with missing
   #   values.
   # @return [Hash] A serialization of this object.
-  def serialize(strict=true)
+  def serialize(strict=true, secure: false)
     begin
-      h = __t_props_generated_serialize(strict)
+      h = __t_props_generated_serialize(strict, secure: secure)
     rescue => e
       msg = self.class.decorator.message_with_generated_source_context(
         e,
