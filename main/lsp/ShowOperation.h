@@ -13,8 +13,8 @@ class LSPConfiguration;
  */
 class ShowOperation final {
     const LSPConfiguration &config;
-    const std::string_view operationName;
-    const std::string_view description;
+    const std::string operationName;
+    const std::string description;
 
 public:
     enum class Kind {
