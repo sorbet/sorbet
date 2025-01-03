@@ -56,13 +56,17 @@ end
 
 The default error handler is to raise an error.
 
+**Note**: `signature` may be `nil` (currently the case for all runtime type
+checking failures that result from `prop`- and `const`-defined methods, see
+[T::Struct](tstruct.md)).
+
 The example handler above does the same thing for every method. One thing which
 can be useful is to pass custom metadata to the `call_validation` handler, which
 can be done with `.on_failure`:
 
 ```ruby
 T::Configuration.call_validation_error_handler = lambda do |signature, opts|
-  if signature.on_failure
+  if signature&.on_failure
     puts "Metadata: #{signature.on_failure}"
   end
   raise TypeError.new(opts[:pretty_message])
