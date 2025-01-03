@@ -32,8 +32,6 @@ public:
     using ArgFlags = core::ParsedArg::ArgFlags;
     ArgFlags flags;
     NameRef name;
-    // Stores the `.bind(...)` symbol if the `&blk` arg's type had one
-    ClassOrModuleRef rebind;
     Loc loc;
     TypePtr type;
 

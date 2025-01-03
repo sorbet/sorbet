@@ -612,7 +612,6 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
 
 void SerializerImpl::pickle(Pickler &p, const ArgInfo &a) {
     p.putU4(a.name.rawId());
-    p.putU4(a.rebind.id());
     pickle(p, a.loc);
     p.putU1(a.flags.toU1());
     pickle(p, a.type);
@@ -621,7 +620,6 @@ void SerializerImpl::pickle(Pickler &p, const ArgInfo &a) {
 ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
     ArgInfo result;
     result.name = NameRef::fromRaw(*gs, p.getU4());
-    result.rebind = core::ClassOrModuleRef::fromRaw(p.getU4());
     result.loc = unpickleLoc(p);
     {
         uint8_t flags = p.getU1();
@@ -635,6 +633,7 @@ void SerializerImpl::pickle(Pickler &p, const Method &what) {
     p.putU4(what.owner.id());
     p.putU4(what.name.rawId());
     p.putU4(what.rebind.id());
+    p.putU4(what.blockRebind.id());
     p.putU4(what.flags.serialize());
     p.putU4(what.typeArguments().size());
     for (auto s : what.typeArguments()) {
@@ -657,6 +656,7 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
     result.owner = ClassOrModuleRef::fromRaw(p.getU4());
     result.name = NameRef::fromRaw(*gs, p.getU4());
     result.rebind = ClassOrModuleRef::fromRaw(p.getU4());
+    result.blockRebind = ClassOrModuleRef::fromRaw(p.getU4());
     auto flagsU2 = static_cast<uint16_t>(p.getU4());
     Method::Flags flags;
     static_assert(sizeof(flags) == sizeof(flagsU2));
