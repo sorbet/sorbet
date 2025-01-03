@@ -69,7 +69,8 @@ ShowOperation::ShowOperation(const LSPConfiguration &config, Kind kind)
 
 ShowOperation::~ShowOperation() {
     if (config.getClientConfig().enableOperationNotifications) {
-        config.output->write(makeShowOperation(this->operationName, this->description, SorbetOperationStatus::End));
+        config.output->write(makeShowOperation(std::move(this->operationName), std::move(this->description),
+                                               SorbetOperationStatus::End));
     }
 }
 } // namespace sorbet::realmain::lsp
