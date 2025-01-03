@@ -99,11 +99,14 @@ types or return types don’t match the actual value present at runtime, use thi
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>The default error handler is to raise an error.</p>
+<p><strong>Note</strong>: <code>signature</code> may be <code>nil</code> (currently the case for all runtime type
+checking failures that result from <code>prop</code>- and <code>const</code>-defined methods, see
+<a href="/docs/tstruct">T::Struct</a>).</p>
 <p>The example handler above does the same thing for every method. One thing which
 can be useful is to pass custom metadata to the <code>call_validation</code> handler, which
 can be done with <code>.on_failure</code>:</p>
 <pre><code class="hljs css language-ruby">T::Configuration.call_validation_error_handler = lambda <span class="hljs-keyword">do</span> <span class="hljs-params">|signature, opts|</span>
-  <span class="hljs-keyword">if</span> signature.on_failure
+  <span class="hljs-keyword">if</span> signature&amp;.on_failure
     puts <span class="hljs-string">"Metadata: <span class="hljs-subst">#{signature.on_failure}</span>"</span>
   <span class="hljs-keyword">end</span>
   raise TypeError.new(opts[<span class="hljs-symbol">:pretty_message</span>])

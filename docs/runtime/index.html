@@ -186,8 +186,8 @@ callback, we can change what happens when a sig check fails. For example:</p>
 <span class="hljs-comment"># (1) Register call_validation_error_handler callback.</span>
 <span class="hljs-comment"># This runs every time a method with a sig fails to type check at runtime.</span>
 T::Configuration.call_validation_error_handler = lambda <span class="hljs-keyword">do</span> <span class="hljs-params">|signature, opts|</span>
-  <span class="hljs-comment">#                                                     ┌──┐</span>
-  <span class="hljs-keyword">if</span> signature.on_failure &amp;&amp; signature.on_failure[<span class="hljs-number">0</span>] == <span class="hljs-symbol">:log</span>
+  <span class="hljs-comment">#                                                       ┌──┐</span>
+  <span class="hljs-keyword">if</span> signature&amp;.on_failure &amp;&amp; signature&amp;.on_failure[<span class="hljs-number">0</span>] == <span class="hljs-symbol">:log</span>
     puts opts[<span class="hljs-symbol">:pretty_message</span>]
   <span class="hljs-keyword">else</span>
     raise TypeError.new(opts[<span class="hljs-symbol">:pretty_message</span>])
@@ -226,8 +226,8 @@ provided, which means the logging behavior is opt in. This is nice because it
 means the default behavior is still to make problems with types fail loudly and
 early, rather than silently as a log. If we wanted, we could have inverted this:</p>
 <pre><code class="hljs css language-ruby">T::Configuration.call_validation_error_handler = lambda <span class="hljs-keyword">do</span> <span class="hljs-params">|signature, opts|</span>
-  <span class="hljs-comment">#                                                     ┌────┐</span>
-  <span class="hljs-keyword">if</span> signature.on_failure &amp;&amp; signature.on_failure[<span class="hljs-number">0</span>] == <span class="hljs-symbol">:raise</span>
+  <span class="hljs-comment">#                                                       ┌────┐</span>
+  <span class="hljs-keyword">if</span> signature&amp;.on_failure &amp;&amp; signature&amp;.on_failure[<span class="hljs-number">0</span>] == <span class="hljs-symbol">:raise</span>
     raise TypeError.new(opts[<span class="hljs-symbol">:pretty_message</span>])
   <span class="hljs-keyword">else</span>
     puts opts[<span class="hljs-symbol">:pretty_message</span>]
