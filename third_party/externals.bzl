@@ -72,10 +72,13 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "lmdb",
-        url = "https://github.com/DarkDimius/lmdb/archive/75766ec2b663b360be8eea9730a7adc0d252ce7e.zip",
-        sha256 = "bd120470d62c6f3433f80bb9841f09f158924081eb0c3236da6e8d1a0976eccc",
+        url = "https://github.com/LMDB/lmdb/archive/da9aeda08c3ff710a0d47d61a079f5a905b0a10a.zip",
+        sha256 = "893a324b60c6465edcf7feb7dafacb3d5f5803649f1b5de6f453b3a6d9e2bb97",
         build_file = "@com_stripe_ruby_typer//third_party:lmdb.BUILD",
-        strip_prefix = "lmdb-75766ec2b663b360be8eea9730a7adc0d252ce7e",
+        strip_prefix = "lmdb-da9aeda08c3ff710a0d47d61a079f5a905b0a10a",
+        patches = [
+            "@com_stripe_ruby_typer//third_party:lmdb/strdup.patch",
+        ],
     )
 
     http_archive(
