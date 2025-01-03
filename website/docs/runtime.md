@@ -162,8 +162,8 @@ require 'sorbet-runtime'
 # (1) Register call_validation_error_handler callback.
 # This runs every time a method with a sig fails to type check at runtime.
 T::Configuration.call_validation_error_handler = lambda do |signature, opts|
-  #                                                     ┌──┐
-  if signature.on_failure && signature.on_failure[0] == :log
+  #                                                       ┌──┐
+  if signature&.on_failure && signature&.on_failure[0] == :log
     puts opts[:pretty_message]
   else
     raise TypeError.new(opts[:pretty_message])
@@ -206,8 +206,8 @@ early, rather than silently as a log. If we wanted, we could have inverted this:
 
 ```ruby
 T::Configuration.call_validation_error_handler = lambda do |signature, opts|
-  #                                                     ┌────┐
-  if signature.on_failure && signature.on_failure[0] == :raise
+  #                                                       ┌────┐
+  if signature&.on_failure && signature&.on_failure[0] == :raise
     raise TypeError.new(opts[:pretty_message])
   else
     puts opts[:pretty_message]
