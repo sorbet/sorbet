@@ -147,7 +147,7 @@ MethodBuilder enterMethod(GlobalState &gs, ClassOrModuleRef klass, NameRef name)
 }
 
 struct ParentLinearizationInformation {
-    const InlinedVector<core::ClassOrModuleRef, 4> &mixins;
+    absl::Span<const core::ClassOrModuleRef> mixins;
     core::ClassOrModuleRef superClass;
     core::ClassOrModuleRef klass;
     InlinedVector<core::ClassOrModuleRef, 4> fullLinearizationSlow(core::GlobalState &gs);

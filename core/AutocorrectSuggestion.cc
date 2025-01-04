@@ -41,7 +41,7 @@ const string AutocorrectSuggestion::applySingleEditForTesting(const std::string_
 }
 
 UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(const GlobalState &gs, FileSystem &fs,
-                                                           const vector<AutocorrectSuggestion> &autocorrects) {
+                                                           absl::Span<const AutocorrectSuggestion> autocorrects) {
     UnorderedMap<FileRef, string> sources;
     for (auto &autocorrect : autocorrects) {
         for (auto &edit : autocorrect.edits) {
