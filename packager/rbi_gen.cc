@@ -1303,7 +1303,7 @@ RBIGenerator::RBIOutput RBIGenerator::runOnce(const core::GlobalState &gs, core:
     return exporter.emit();
 }
 
-void RBIGenerator::run(core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
+void RBIGenerator::run(const core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
                        string outputDir, WorkerPool &workers) {
     absl::BlockingCounter threadBarrier(std::max(workers.size(), 1));
 
@@ -1339,7 +1339,7 @@ void RBIGenerator::run(core::GlobalState &gs, const UnorderedSet<core::ClassOrMo
     threadBarrier.Wait();
 }
 
-void RBIGenerator::runSinglePackage(core::GlobalState &gs,
+void RBIGenerator::runSinglePackage(const core::GlobalState &gs,
                                     const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
                                     core::packages::MangledName package, string outputDir, WorkerPool &workers) {
     auto output = runOnce(gs, package, packageNamespaces);
