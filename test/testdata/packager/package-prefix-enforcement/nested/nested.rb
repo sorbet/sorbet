@@ -52,6 +52,7 @@ module Root
 # ^^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Root::Nested`
   NOT_IN_PACKAGE = T.let(1, Integer)
 # ^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+# ^^^^^^^^^^^^^^ error: `Root::NOT_IN_PACKAGE` resolves but is not exported from `Root`
 
   sig {returns(NilClass)}
 # ^^^^^^^^^^^^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Root::Nested`

@@ -25,8 +25,12 @@ vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::
 
     auto sym = symInPackage;
     while (sym.exists() && sym != core::Symbols::PackageSpecRegistry() && sym != core::Symbols::root()) {
-        fullName.emplace_back(sym.name(gs));
+        auto name = sym.name(gs);
         sym = sym.owner(gs);
+        if (name == core::Names::Constants::PackageSpec_Storage()) {
+            continue;
+        }
+        fullName.emplace_back(name);
     }
     reverse(fullName.begin(), fullName.end());
 
@@ -44,6 +48,7 @@ vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::
         auto symFound = findSym(gs, fullName, namespaceToCheck);
         // Do nothing if the symbol is not found or is from the same package -- i.e. for class ... < PackageSpec
         // declarations
+        // TODO(jez) Replace with getPackageNameForSymbol
         if (symFound.exists() && gs.packageDB().getPackageNameForFile(symFound.loc(gs).file()) != packageName) {
             result.emplace_back(std::move(symFound));
         }

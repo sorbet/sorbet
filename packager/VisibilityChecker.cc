@@ -35,19 +35,13 @@ class PropagateVisibility final {
     const core::packages::PackageInfo &package;
 
     bool definedByThisPackage(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
-        auto pkg = gs.packageDB().getPackageNameForFile(sym.data(gs)->loc().file());
+        auto pkg = gs.packageDB().getPackageNameForSymbol(gs, sym);
         return this->package.mangledName() == pkg;
     }
 
     void recursiveExportSymbol(core::GlobalState &gs, bool firstSymbol, core::ClassOrModuleRef klass) {
-        // We only mark symbols from this package. However, there's a
-        // tough case where non-behavior-defining "namespace-like"
-        // constants might get attributed to other packages (since we
-        // don't have a canonical location, so we use the first place
-        // we see them... which might be in a subpackage) and
-        // therefore this might stop too soon. That's why we only stop
-        // recursing if the thing is actually behavior-defining.
-        if (!this->definedByThisPackage(gs, klass) && klass.data(gs)->flags.isBehaviorDefining) {
+        // We only mark symbols from this package, no subpackages.
+        if (!this->definedByThisPackage(gs, klass)) {
             return;
         }
 
@@ -80,10 +74,11 @@ class PropagateVisibility final {
     // Lookup the package name on the given root symbol, and mark the final symbol as exported.
     void exportRoot(core::GlobalState &gs, core::ClassOrModuleRef sym) {
         // For a package named `A::B`, the ClassDef that we see in this pass is for a symbol named
-        // `<PackageSpecRegistry>::A::B`. In order to make the name `A::B` visible to packages that have imported
-        // `A::B`, we explicitly lookup and export them here. This is a design decision inherited from the previous
-        // packages implementation, and we could remove it after migrating Stripe's codebase to not depend on package
-        // names being exported by default.
+        // `<PackageSpecRegistry>::A::B::<PackageSpec>`. In order to make the name `A::B` visible to
+        // packages that have imported `A::B`, we explicitly lookup and export them here. This is a
+        // design decision inherited from the previous packages implementation, and we could remove
+        // it after migrating Stripe's codebase to not depend on package names being exported by
+        // default.
         for (auto name : this->package.fullName()) {
             auto next = sym.data(gs)->findMember(gs, name);
             if (!next.exists() || !next.isClassOrModule()) {
@@ -109,9 +104,10 @@ class PropagateVisibility final {
         }
     }
 
-    // While processing the ClassDef for the package, which will be named something like `<PackageSpecRegistry>::A::B`,
-    // we also check that the symbols `A::B` and `Test::A::B` have locations whose package matches the one we're
-    // processing. If they don't match, we add locs to ensure that those symbols are associated with this package.
+    // While processing the ClassDef for the package, which will be named something like
+    // `<PackageSpecRegistry>::A::B::<PackageSpec>`, we also check that the symbols `A::B` and `Test::A::B` have
+    // locations whose package matches the one we're processing. If they don't match, we add locs to ensure that those
+    // symbols are associated with this package.
     //
     // The reason for this step is that it's currently allowed to refer to the name of the package outside of the
     // context of the package spec, even if it doesn't explicitly export its top-level name. So in the case above, there
@@ -120,6 +116,9 @@ class PropagateVisibility final {
     // that declaration will be marked as owning `A::B`, thus breaking the invariant that the file can be used to
     // determine the package that owns a symbol. So, to avoid this case we ensure that the symbols that correspond to
     // the package name are always owned by the package that defines them.
+    //
+    // TODO(jez) Determine which package a symbol belongs to using the symbol table ownership (not definition locs)
+    // and remove this code.
     void setPackageLocs(core::MutableContext ctx, core::LocOffsets loc, core::ClassOrModuleRef sym) {
         std::vector<core::NameRef> names;
 
@@ -151,6 +150,7 @@ class PropagateVisibility final {
 
             if (packageSym.exists()) {
                 auto file = packageSym.data(ctx)->loc().file();
+                // TODO(jez) Delete this, because package ownership doesn't care about locs anymore
                 if (db.getPackageNameForFile(file) != this->package.mangledName()) {
                     packageSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
                 }
@@ -177,6 +177,7 @@ class PropagateVisibility final {
 
             if (testSym.exists()) {
                 auto file = testSym.data(ctx)->loc().file();
+                // TODO(jez) Delete this, because package ownership doesn't care about locs anymore
                 if (db.getPackageNameForFile(file) != this->package.mangledName()) {
                     testSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
                 }
@@ -206,8 +207,7 @@ class PropagateVisibility final {
             }
         }
 
-        auto definingFile = sym.loc(ctx).file();
-        auto symPackage = ctx.state.packageDB().getPackageNameForFile(definingFile);
+        auto symPackage = ctx.state.packageDB().getPackageNameForSymbol(ctx, sym);
         if (symPackage != this->package.mangledName()) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Cannot export `{}` because it is owned by another package", sym.show(ctx));
@@ -394,7 +394,7 @@ public:
         auto &db = ctx.state.packageDB();
 
         // no need to check visibility for these cases
-        auto otherPackage = db.getPackageNameForFile(otherFile);
+        auto otherPackage = db.getPackageNameForSymbol(ctx, lit.symbol);
         if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
             return;
         }
