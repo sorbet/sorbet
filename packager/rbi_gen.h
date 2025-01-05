@@ -30,7 +30,7 @@ public:
     // Generate RBIs for a single package, provided as the mangled package name `package`.
     static void runSinglePackage(const core::GlobalState &gs,
                                  const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
-                                 core::packages::MangledName package, std::string outputDir, WorkerPool &workers);
+                                 core::packages::MangledName package, std::string outputDir);
 };
 } // namespace sorbet::packager
 
