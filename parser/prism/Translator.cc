@@ -1893,6 +1893,14 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
             is_same_v<PrismLhsNode, pm_constant_operator_write_node> ||
             is_same_v<PrismLhsNode, pm_constant_target_node> || is_same_v<PrismLhsNode, pm_constant_read_node> ||
             is_same_v<PrismLhsNode, pm_constant_write_node>);
+
+        // For writes, location should only include the name, like `FOO` in `FOO = 1`.
+        if constexpr (is_same_v<PrismLhsNode, pm_constant_and_write_node> ||
+                      is_same_v<PrismLhsNode, pm_constant_or_write_node> ||
+                      is_same_v<PrismLhsNode, pm_constant_operator_write_node> ||
+                      is_same_v<PrismLhsNode, pm_constant_write_node>) {
+            location = translateLoc(node->name_loc);
+        }
         parent = nullptr;
     }
 
