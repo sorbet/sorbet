@@ -5,8 +5,6 @@
 #include "core/proto/proto.h"
 // ^^ has to go first
 #include "common/json2msgpack/json2msgpack.h"
-#include "main/autogen/cache.h"
-#include "main/autogen/constant_hash.h"
 #include "packager/packager.h"
 #include "rapidjson/ostreamwrapper.h"
 #include "rapidjson/writer.h"
