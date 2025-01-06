@@ -1589,11 +1589,14 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
         return;
     }
     auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
-    metadata.nodeMap[pkgName].index = metadata.nextIndex;
-    metadata.nodeMap[pkgName].lowLink = metadata.nextIndex;
-    metadata.nextIndex++;
-    metadata.stack.push_back(pkgName);
-    metadata.nodeMap[pkgName].onStack = true;
+    {
+        auto &info = metadata.nodeMap[pkgName];
+        info.index = metadata.nextIndex;
+        info.lowLink = metadata.nextIndex;
+        metadata.nextIndex++;
+        metadata.stack.push_back(pkgName);
+        info.onStack = true;
+    }
     for (auto &i : pkgInfo.importedPackageNames) {
         if (i.type == ImportType::Test) {
             continue;
@@ -1620,7 +1623,8 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
         // lowlink.
     }
 
-    if (metadata.nodeMap[pkgName].index == metadata.nodeMap[pkgName].lowLink) {
+    auto &ourInfo = metadata.nodeMap[pkgName];
+    if (ourInfo.index == ourInfo.lowLink) {
         // This is the root of an SCC. This means that all packages on the stack from this package to the top of the top
         // of the stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them the same
         // SCC ID.
