@@ -320,18 +320,6 @@ UnorderedMap<string, core::StrictLevel> extractStrictnessOverrides(string fileNa
     return result;
 }
 
-void buildAutogenCacheOptions(cxxopts::Options &options, const string &section) {
-    options.add_options(section)("autogen-constant-cache-file",
-                                 "Location of the cache file used to determine if it's safe to skip autogen. If "
-                                 "this is not provided, autogen will always run.",
-                                 cxxopts::value<string>()->default_value(""));
-    options.add_options(section)("autogen-changed-files",
-                                 "List of files which have changed since the last autogen run. If a cache file is "
-                                 "also provided, autogen may exit early if it determines that these files could "
-                                 "not have affected the output of autogen.",
-                                 cxxopts::value<vector<string>>());
-}
-
 cxxopts::Options
 buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders) {
     // Used to populate default options.
@@ -646,7 +634,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
     section = groupToString(Group::STRIPE_AUTOGEN);
     options.add_options(section)("autogen-version", "Autogen version to output", cxxopts::value<int>());
-    buildAutogenCacheOptions(options, section);
     options.add_options(section)("autogen-subclasses-parent",
                                  "Parent classes for which generate a list of subclasses. "
                                  "This option must be used in conjunction with -p autogen-subclasses",
