@@ -1604,14 +1604,16 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
         if (metadata.nodeMap[i.name.mangledName].index == UNVISITED) {
             // This is a tree edge (ie. a forward edge that we haven't visited yet).
             strongConnect(gs, metadata, i.name.mangledName);
-            if (metadata.nodeMap[i.name.mangledName].index == UNVISITED) {
+
+            auto &importInfo = metadata.nodeMap[i.name.mangledName];
+            if (importInfo.index == UNVISITED) {
                 // This is to handle early return above.
                 continue;
             }
             // Since we can follow any number of tree edges for lowLink, the lowLink of child is valid for this package
             // too.
             auto &pkgLink = metadata.nodeMap[pkgName].lowLink;
-            pkgLink = std::min(pkgLink, metadata.nodeMap[i.name.mangledName].lowLink);
+            pkgLink = std::min(pkgLink, importInfo.lowLink);
         } else if (metadata.nodeMap[i.name.mangledName].onStack) {
             // This is a back edge (edge to ancestor) or cross edge (edge to a different subtree). Since we can only
             // follow at most one back/cross edge, the best update we can make to lowlink of the current package is the
