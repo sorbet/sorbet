@@ -271,9 +271,11 @@ pipeline_tests(
             "testdata/local_vars/**/*.exp",
             "testdata/namer/**/*.rb",
             "testdata/namer/**/*.exp",
+            "testdata/lsp/**/*.rb",
+            "testdata/lsp/**/*.exp",
         ],
         exclude = [
-            # Parser tests having to do with tree differences in invalid Ruby code; will address later
+            # Tests having to do with tree differences in invalid Ruby code; will address later
             "testdata/parser/error_recovery/**",
             "testdata/parser/crash_block_pass_suggestion.rb",
             "testdata/parser/invalid_fatal.rb",
@@ -283,6 +285,14 @@ pipeline_tests(
             "testdata/parser/misc.rb",
             "testdata/parser/offset0.rb",
             "testdata/parser/ruby_25.rb",
+            "testdata/lsp/completion/bad_arguments.rb",
+            "testdata/lsp/completion/bad_list_elems.rb",
+            "testdata/lsp/completion/case_1.rb",
+            "testdata/lsp/completion/case_2.rb",
+            "testdata/lsp/completion/eof.rb",
+            "testdata/lsp/completion/missing_const_name.rb",
+            "testdata/lsp/completion/missing_fun.rb",
+            "testdata/lsp/completion/self_receiver.rb",
 
             # Desugar tests having to do with tree differences; will address later
             "testdata/desugar/constant_error.rb",
