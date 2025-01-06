@@ -295,8 +295,6 @@ pipeline_tests(
             "testdata/lsp/completion/self_receiver.rb",
 
             # Desugar tests having to do with tree differences; will address later
-            "testdata/desugar/constant_error.rb",
-            "testdata/desugar/for.rb",
             "testdata/desugar/sclass.rb",
 
             # Rewriter tests having to do with symbol table differences; will address later
@@ -306,17 +304,8 @@ pipeline_tests(
             "testdata/rewriter/struct.rb",
 
             # Failing namer tests to investigate
-            "testdata/namer/alias_cross_file__01.rb",
-            "testdata/namer/alias_cross_file__02.rb",
-            "testdata/namer/all_constant_redefinitions.rb",
             "testdata/namer/class_alias_inside_method.rb",
-            "testdata/namer/class_and_alias.rb",
-            "testdata/namer/constant_in_block.rb",
-            "testdata/namer/constant_types.rb",
-            "testdata/namer/constants.rb",
-            "testdata/namer/fuzz_class_in_field.rb",
             "testdata/namer/fuzz_repeated_kwarg.rb",
-            "testdata/namer/fuzz_type_template_overwrite.rb",
             "testdata/namer/module_function.rb",
             "testdata/namer/parameter_names.rb",
             "testdata/namer/redefinition_method.rb",
