@@ -1314,34 +1314,21 @@ void RBIGenerator::run(const core::GlobalState &gs, const UnorderedSet<core::Cla
         inputq->push(move(package), 1);
     }
 
-    workers.multiplexJob(
-        "RBIGenerator", [inputq, outputDir, &threadBarrier, &rogs = std::as_const(gs), &packageNamespaces]() {
-            core::packages::MangledName job;
-            for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
-                if (result.gotItem()) {
-                    auto output = runOnce(rogs, job, packageNamespaces);
-                    if (!output.rbi.empty()) {
-                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".package.rbi"), output.rbi);
-                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".deps.json"),
-                                       output.rbiPackageDependencies);
-                    }
-
-                    if (!output.testRBI.empty()) {
-                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.package.rbi"),
-                                       output.testRBI);
-                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.deps.json"),
-                                       output.testRBIPackageDependencies);
-                    }
-                }
+    workers.multiplexJob("RBIGenerator", [inputq, outputDir, &threadBarrier, &gs, &packageNamespaces]() {
+        core::packages::MangledName job;
+        for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
+            if (result.gotItem()) {
+                runSinglePackage(gs, packageNamespaces, job, outputDir);
             }
-            threadBarrier.DecrementCount();
-        });
+        }
+        threadBarrier.DecrementCount();
+    });
     threadBarrier.Wait();
 }
 
 void RBIGenerator::runSinglePackage(const core::GlobalState &gs,
                                     const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
-                                    core::packages::MangledName package, string outputDir, WorkerPool &workers) {
+                                    core::packages::MangledName package, string outputDir) {
     auto output = runOnce(gs, package, packageNamespaces);
     if (!output.rbi.empty()) {
         FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".package.rbi"), output.rbi);

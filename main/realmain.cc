@@ -918,7 +918,7 @@ int realmain(int argc, char *argv[]) {
 
             if (!opts.singlePackage.empty()) {
                 packager::RBIGenerator::runSinglePackage(*gs, packageNamespaces, gs->singlePackageImports->package,
-                                                         opts.packageRBIDir, *workers);
+                                                         opts.packageRBIDir);
             } else {
                 packager::RBIGenerator::run(*gs, packageNamespaces, opts.packageRBIDir, *workers);
             }
