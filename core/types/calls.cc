@@ -361,13 +361,14 @@ size_t getArity(const GlobalState &gs, MethodRef method) {
 
 struct GuessOverloadCandidate {
     MethodRef candidate;
+    size_t arity;
     shared_ptr<TypeConstraint> constr;
 };
 
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
-    vector<MethodRef> allCandidates;
+    vector<std::pair<MethodRef, size_t>> allCandidates;
 
     { // create candidates and sort them by number of arguments(stable by symbol id)
         size_t i = 0;
@@ -379,31 +380,31 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             if (!overload.exists()) {
                 Exception::raise("Corruption of overloads?");
             } else {
-                allCandidates.emplace_back(overload);
+                allCandidates.emplace_back(std::make_pair(overload, getArity(gs, overload)));
                 current = overload;
             }
         }
 
         fast_sort(allCandidates, [&](const auto &s1, const auto &s2) -> bool {
-            auto s1Arity = getArity(gs, s1);
-            auto s2Arity = getArity(gs, s2);
+            auto s1Arity = s1.second;
+            auto s2Arity = s2.second;
             if (s1Arity < s2Arity) {
                 return true;
             }
             if (s1Arity == s2Arity) {
-                return s1.id() < s2.id();
+                return s1.first.id() < s2.first.id();
             }
             return false;
         });
     }
 
-    MethodRef fallback = allCandidates.front();
+    MethodRef fallback = allCandidates.front().first;
 
     vector<GuessOverloadCandidate> allCandidatesWithConstraints;
 
-    for (const auto &candidate : allCandidates) {
+    for (const auto &[candidate, arity] : allCandidates) {
         if (!candidate.data(gs)->flags.isGenericMethod) {
-            allCandidatesWithConstraints.emplace_back(GuessOverloadCandidate{candidate, nullptr});
+            allCandidatesWithConstraints.emplace_back(GuessOverloadCandidate{candidate, arity, nullptr});
             continue;
         }
 
@@ -420,7 +421,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             Exception::raise("Constraint should always solve after creating TypeConstraint with only untyped bounds");
         }
 
-        allCandidatesWithConstraints.emplace_back(GuessOverloadCandidate{candidate, move(constr)});
+        allCandidatesWithConstraints.emplace_back(GuessOverloadCandidate{candidate, arity, move(constr)});
     }
 
     // Copy the vector
@@ -429,10 +430,9 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     {
         auto checkArg = [&](auto i, const TypePtr &arg) {
             for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
-                const auto &[candidate, constr] = *it;
+                const auto &[candidate, arity, constr] = *it;
                 const auto &arguments = candidate.data(gs)->arguments;
                 TypePtr argTypeRaw;
-                auto arity = getArity(gs, candidate);
                 if (i < arguments.size() - 1) {
                     argTypeRaw = arguments[i].type;
                 } else if (arity == SIZE_MAX) {
@@ -480,7 +480,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
 
     { // keep only candidates that have a block iff we are passing one
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
-            const auto &[candidate, constr] = *it;
+            const auto &[candidate, _arity, constr] = *it;
             const auto &args = candidate.data(gs)->arguments;
             ENFORCE(!args.empty(), "Should at least have a block argument.");
             const auto &lastArg = args.back();
@@ -506,11 +506,11 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             const GlobalState &gs;
 
             bool operator()(GuessOverloadCandidate &s, int i) const {
-                return getArity(gs, s.candidate) < i;
+                return s.arity < i;
             }
 
             bool operator()(int i, GuessOverloadCandidate &s) const {
-                return i < getArity(gs, s.candidate);
+                return i < s.arity;
             }
 
             Comp(const GlobalState &gs) : gs(gs){};
