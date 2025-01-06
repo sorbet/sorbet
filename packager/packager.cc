@@ -1616,12 +1616,16 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
             }
             // Since we can follow any number of tree edges for lowLink, the lowLink of child is valid for this package
             // too.
+            //
+            // Note that we cannot use `infoAtEntry` here because it might have been invalidated.
             auto &pkgLink = metadata.nodeMap[pkgName].lowLink;
             pkgLink = std::min(pkgLink, importInfo.lowLink);
         } else if (importInfo.onStack) {
             // This is a back edge (edge to ancestor) or cross edge (edge to a different subtree). Since we can only
             // follow at most one back/cross edge, the best update we can make to lowlink of the current package is the
             // child's index.
+            //
+            // Note that we cannot use `infoAtEntry` here because it might have been invalidated.
             auto &pkgLink = metadata.nodeMap[pkgName].lowLink;
             pkgLink = std::min(pkgLink, importInfo.index);
         }
@@ -1629,6 +1633,8 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
         // lowlink.
     }
 
+    // We cannot re-use `infoAtEntry` here because `nodeMap` might have been re-allocated and
+    // invalidate our reference.
     auto &ourInfo = metadata.nodeMap[pkgName];
     if (ourInfo.index == ourInfo.lowLink) {
         // This is the root of an SCC. This means that all packages on the stack from this package to the top of the top
