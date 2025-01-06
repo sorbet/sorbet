@@ -285,10 +285,18 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto callNode = down_cast<pm_call_node>(node);
 
             auto loc = location;
-            auto messageLoc = translateLoc(callNode->message_loc);
 
             auto name = parser.resolveConstant(callNode->name);
             auto receiver = translate(callNode->receiver);
+
+            core::LocOffsets messageLoc;
+
+            // When the message is empty, like `foo.()`, the message location is the same as the call operator location
+            if (callNode->message_loc.start == nullptr && callNode->message_loc.end == nullptr) {
+                messageLoc = translateLoc(callNode->call_operator_loc);
+            } else {
+                messageLoc = translateLoc(callNode->message_loc);
+            }
 
             // Handle `~[Integer]`, like `~42`
             // Unlike `-[Integer]`, Prism treats `~[Integer]` as a method call

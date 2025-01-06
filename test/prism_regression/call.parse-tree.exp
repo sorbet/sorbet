@@ -19,6 +19,17 @@ Begin {
         args = [
         ]
       }
+      method = <U call>
+      args = [
+      ]
+    }
+    Send {
+      receiver = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
       method = <U []>
       args = [
         Symbol {
