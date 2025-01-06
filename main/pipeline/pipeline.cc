@@ -1257,47 +1257,6 @@ void printFileTable(unique_ptr<core::GlobalState> &gs, const options::Options &o
 #endif
 }
 
-vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const string &cachePath,
-                                              vector<ast::ParsedFile> what, WorkerPool &workers) {
-#ifndef SORBET_REALMAIN_MIN
-    Timer timeit(gs.tracer(), "autogenWriteCacheFile");
-
-    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(what.size());
-    auto resultq = make_shared<BlockingBoundedQueue<autogen::HashedParsedFile>>(what.size());
-    for (auto &pf : what) {
-        fileq->push(move(pf), 1);
-    }
-
-    workers.multiplexJob("computeConstantCache", [&]() {
-        ast::ParsedFile job;
-        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-            resultq->push(autogen::constantHashTree(gs, move(job)), 1);
-        }
-    });
-
-    autogen::AutogenCache cache;
-    vector<ast::ParsedFile> results;
-
-    {
-        autogen::HashedParsedFile output;
-        for (auto result = resultq->wait_pop_timed(output, WorkerPool::BLOCK_INTERVAL(), gs.tracer()); !result.done();
-             result = resultq->wait_pop_timed(output, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            if (!result.gotItem()) {
-                continue;
-            }
-            cache.add(string(output.pf.file.data(gs).path()), output.constantHash);
-            results.emplace_back(move(output.pf));
-        }
-    }
-
-    FileOps::write(cachePath, cache.pack());
-
-    return results;
-#else
-    return what;
-#endif
-}
-
 void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedBlames,
                         const options::Options &opts) {
 #ifndef SORBET_REALMAIN_MIN

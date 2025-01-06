@@ -799,12 +799,6 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
     }
     return true;
 }
-void extractAutogenConstCacheConfig(cxxopts::ParseResult &raw, AutogenConstCacheConfig &cfg) {
-    cfg.cacheFile = raw["autogen-constant-cache-file"].as<string>();
-    if (raw.count("autogen-changed-files") > 0) {
-        cfg.changedFiles = raw["autogen-changed-files"].as<vector<string>>();
-    }
-}
 
 Phase extractStopAfter(cxxopts::ParseResult &raw, shared_ptr<spdlog::logger> logger) {
     string opt = raw["stop-after"].as<string>();
@@ -1073,8 +1067,6 @@ void readOptions(Options &opts,
             logger->error("-p untyped-blame:<output-path> must also include --track-untyped");
             throw EarlyReturnWithCode(1);
         }
-
-        extractAutogenConstCacheConfig(raw, opts.autogenConstantCacheConfig);
 
         opts.noErrorCount = raw["no-error-count"].as<bool>();
         opts.noStdlib = raw["no-stdlib"].as<bool>();
@@ -1382,21 +1374,6 @@ void readOptions(Options &opts,
     } catch (cxxopts::OptionParseException &e) {
         logger->info("{}. To see all available options pass `--help`.", e.what());
         throw EarlyReturnWithCode(1);
-    }
-}
-
-bool readAutogenConstCacheOptions(AutogenConstCacheConfig &cfg, int argc, const char *argv[],
-                                  shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
-    cxxopts::Options options("sorbet", "Typechecker for Ruby");
-    options.allow_unrecognised_options(); // Don't raise error on other options
-    buildAutogenCacheOptions(options, " === Stripe autogen");
-
-    try {
-        cxxopts::ParseResult raw = options.parse(argc, argv);
-        extractAutogenConstCacheConfig(raw, cfg);
-        return true;
-    } catch (cxxopts::OptionParseException &e) {
-        return false;
     }
 }
 
