@@ -1582,7 +1582,8 @@ struct ComputeSCCsMetadata {
 
 // DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
 // detecting SCCs.
-void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::packages::MangledName pkgName) {
+void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::packages::MangledName pkgName,
+                   NodeInfo &infoAtEntry) {
     auto *pkgInfoPtr = gs.packageDB().getPackageInfoNonConst(pkgName);
     if (!pkgInfoPtr) {
         // This is to handle the case where the user imports a package that doesn't exist.
@@ -1590,21 +1591,24 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
     }
     auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
     {
-        auto &info = metadata.nodeMap[pkgName];
-        info.index = metadata.nextIndex;
-        info.lowLink = metadata.nextIndex;
+        infoAtEntry.index = metadata.nextIndex;
+        infoAtEntry.lowLink = metadata.nextIndex;
         metadata.nextIndex++;
         metadata.stack.push_back(pkgName);
-        info.onStack = true;
+        infoAtEntry.onStack = true;
     }
     for (auto &i : pkgInfo.importedPackageNames) {
         if (i.type == ImportType::Test) {
             continue;
         }
-        if (metadata.nodeMap[i.name.mangledName].index == UNVISITED) {
+        // We need to be careful with this; it's not valid after a call to `strongConnect`,
+        // because our reference might disappear from underneath us during that call.
+        auto &importInfo = metadata.nodeMap[i.name.mangledName];
+        if (importInfo.index == UNVISITED) {
             // This is a tree edge (ie. a forward edge that we haven't visited yet).
-            strongConnect(gs, metadata, i.name.mangledName);
+            strongConnect(gs, metadata, i.name.mangledName, importInfo);
 
+            // Need to re-lookup for the reason above.
             auto &importInfo = metadata.nodeMap[i.name.mangledName];
             if (importInfo.index == UNVISITED) {
                 // This is to handle early return above.
@@ -1656,8 +1660,9 @@ void computeSCCs(core::GlobalState &gs) {
     metadata.stack.reserve(allPackages.size());
     metadata.nodeMap.reserve(allPackages.size());
     for (auto package : allPackages) {
-        if (metadata.nodeMap[package].index == UNVISITED) {
-            strongConnect(gs, metadata, package);
+        auto &info = metadata.nodeMap[package];
+        if (info.index == UNVISITED) {
+            strongConnect(gs, metadata, package, info);
         }
     }
 }
