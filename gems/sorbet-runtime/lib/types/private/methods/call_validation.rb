@@ -46,21 +46,25 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_abstract_wrapper(mod, method_sig, original_method, original_visibility)
-    mod.module_eval(<<~METHOD, __FILE__, __LINE__ + 1)
-      #{original_visibility}
+    T::Configuration.without_ruby_warnings do
+      T::Private::DeclState.current.without_on_method_added do
+        mod.module_eval(<<~METHOD, __FILE__, __LINE__ + 1)
+          #{original_visibility}
 
-      def #{method_sig.method_name}(...)
-        # We allow abstract methods to be implemented by things further down the ancestor chain.
-        # So, if a super method exists, call it.
-        if defined?(super)
-          super
-        else
-          raise NotImplementedError.new(
-            "The method `#{method_sig.method_name}` on #{mod} is declared as `abstract`. It does not have an implementation."
-          )
-        end
+          def #{method_sig.method_name}(...)
+            # We allow abstract methods to be implemented by things further down the ancestor chain.
+            # So, if a super method exists, call it.
+            if defined?(super)
+              super
+            else
+              raise NotImplementedError.new(
+                "The method `#{method_sig.method_name}` on #{mod} is declared as `abstract`. It does not have an implementation."
+              )
+            end
+          end
+        METHOD
       end
-    METHOD
+    end
   end
 
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
