@@ -1618,15 +1618,12 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
             // too.
             auto &pkgLink = metadata.nodeMap[pkgName].lowLink;
             pkgLink = std::min(pkgLink, importInfo.lowLink);
-        } else {
-            auto &importInfo = metadata.nodeMap[i.name.mangledName];
-            if (importInfo.onStack) {
-                // This is a back edge (edge to ancestor) or cross edge (edge to a different subtree). Since we can only
-                // follow at most one back/cross edge, the best update we can make to lowlink of the current package is the
-                // child's index.
-                auto &pkgLink = metadata.nodeMap[pkgName].lowLink;
-                pkgLink = std::min(pkgLink, importInfo.index);
-            }
+        } else if (importInfo.onStack) {
+            // This is a back edge (edge to ancestor) or cross edge (edge to a different subtree). Since we can only
+            // follow at most one back/cross edge, the best update we can make to lowlink of the current package is the
+            // child's index.
+            auto &pkgLink = metadata.nodeMap[pkgName].lowLink;
+            pkgLink = std::min(pkgLink, importInfo.index);
         }
         // If the child package is already visited and not on the stack, it's in a different SCC, so no update to the
         // lowlink.
