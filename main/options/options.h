@@ -106,13 +106,6 @@ enum class Phase {
     INFERENCER,
 };
 
-struct AutogenConstCacheConfig {
-    // A file which contains a cache that can be used to potentially skip autogen
-    std::string cacheFile;
-    // A list of files which have changed since the last autogen run.
-    std::vector<std::string> changedFiles;
-};
-
 namespace {
 
 #if !defined(EMSCRIPTEN)
@@ -241,7 +234,6 @@ struct Options {
     // When set, msgpack serialization of references skips extra metadata like inheritance information and expression
     // ranges.
     bool autogenMsgpackSkipReferenceMetadata;
-    AutogenConstCacheConfig autogenConstantCacheConfig;
 
     // List of directories not available editor-side. References to files in these directories should be sent via
     // sorbet: URIs to clients that support them.
@@ -299,10 +291,6 @@ void readOptions(
     Options &, std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> &configuredExtensions,
     int argc, char *argv[],
     const std::vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
-    std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
-
-bool readAutogenConstCacheOptions(
-    AutogenConstCacheConfig &cfg, int argc, const char *argv[],
     std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
 
 void flushPrinters(Options &);

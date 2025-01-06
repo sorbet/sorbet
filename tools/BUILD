@@ -60,7 +60,6 @@ compilation_database(
         "//main:sorbet",
         "//main:sorbet-orig",
         "//main/autogen:autogen",
-        "//main/autogen:constant_hash_test",
         "//main/autogen/data:data",
         "//main/cache:cache",
         "//main/cache:cache-orig",

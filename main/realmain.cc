@@ -7,7 +7,6 @@
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
-#include "main/autogen/cache.h"
 #include "main/autogen/crc_builder.h"
 #include "main/autogen/data/version.h"
 #include "main/autogen/subclasses.h"
@@ -215,7 +214,7 @@ struct AutogenResult {
 };
 
 void runAutogen(const core::GlobalState &gs, options::Options &opts, const autogen::AutogenConfig &autogenCfg,
-                WorkerPool &workers, vector<ast::ParsedFile> &indexed, const vector<std::string> &changedFiles) {
+                WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
     Timer timeit(logger, "autogen");
 
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
@@ -343,35 +342,6 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     }
 }
 
-// Returns `true` if the constant hash information provided tells us
-// we can exit `autogen` early, and `false` otherwise.
-bool autogenCanExitEarly(shared_ptr<spdlog::logger> &logger, const options::AutogenConstCacheConfig &cfg) {
-    Timer timeit(logger, "autogenCanExitEarly");
-
-    if (cfg.cacheFile.empty()) {
-        return false;
-    }
-
-    if (cfg.changedFiles.empty()) {
-        return false;
-    }
-
-    logger->info("Checking {} changed files", cfg.changedFiles.size());
-    // this global state should only ever be used for a very small
-    // number of files and will never progress past the desugar phase,
-    // so the fact that we're making a fresh empty one shouldn't hurt
-    // us here.
-    auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
-    core::GlobalState minGs(errorQueue);
-    minGs.initEmpty();
-    if (autogen::AutogenCache::canSkipAutogen(minGs, cfg.cacheFile, cfg.changedFiles)) {
-        logger->info("All constant hashes unchanged; exiting");
-        return true;
-    }
-
-    logger->info("Autogen still needs rerunning");
-    return false;
-}
 #endif
 
 int realmain(int argc, char *argv[]) {
@@ -386,19 +356,6 @@ int realmain(int argc, char *argv[]) {
 
     auto typeErrorsConsole = make_shared<spdlog::logger>("typeDiagnostics", stderrColorSink);
     typeErrorsConsole->set_pattern("%v");
-
-#ifndef SORBET_REALMAIN_MIN
-    {
-        options::AutogenConstCacheConfig cfg;
-        bool optSuccess = options::readAutogenConstCacheOptions(cfg, argc, const_cast<const char **>(argv), logger);
-        // this is all about making sure we exit as quickly as possible,
-        // so test this as soon as we can: i.e. after we have parsed
-        // `opts`.
-        if (optSuccess && autogenCanExitEarly(logger, cfg)) {
-            return 0;
-        }
-    }
-#endif
 
     auto extensionProviders = sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders();
     vector<unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
@@ -793,16 +750,6 @@ int realmain(int argc, char *argv[]) {
             logger->warn("Autogen is disabled in sorbet-orig for faster builds");
             return 1;
 #else
-            // TODO(jez) Make sure that it's still okay to run this phase after namer, otherwise
-            // you'll have to adjust the non-autogen pipeline code. At first read, it seems like it
-            // unwraps ConstantLit to UnresolvedConstantLit and proceeds as normal, so I think it
-            // should be fine.
-            if (!opts.autogenConstantCacheConfig.cacheFile.empty()) {
-                // we should regenerate the constant cache here
-                indexed = pipeline::autogenWriteCacheFile(*gs, opts.autogenConstantCacheConfig.cacheFile, move(indexed),
-                                                          *workers);
-            }
-
             {
                 core::UnfreezeNameTable nameTableAccess(*gs);
                 core::UnfreezeSymbolTable symbolAccess(*gs);
@@ -814,7 +761,7 @@ int realmain(int argc, char *argv[]) {
                 .behaviorAllowedInRBIsPaths = std::move(opts.autogenBehaviorAllowedInRBIFilesPaths),
                 .msgpackSkipReferenceMetadata = std::move(opts.autogenMsgpackSkipReferenceMetadata)};
 
-            runAutogen(*gs, opts, autogenCfg, *workers, indexed, opts.autogenConstantCacheConfig.changedFiles);
+            runAutogen(*gs, opts, autogenCfg, *workers, indexed);
 #endif
         } else {
             indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers).result());

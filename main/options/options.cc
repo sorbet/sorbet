@@ -320,18 +320,6 @@ UnorderedMap<string, core::StrictLevel> extractStrictnessOverrides(string fileNa
     return result;
 }
 
-void buildAutogenCacheOptions(cxxopts::Options &options, const string &section) {
-    options.add_options(section)("autogen-constant-cache-file",
-                                 "Location of the cache file used to determine if it's safe to skip autogen. If "
-                                 "this is not provided, autogen will always run.",
-                                 cxxopts::value<string>()->default_value(""));
-    options.add_options(section)("autogen-changed-files",
-                                 "List of files which have changed since the last autogen run. If a cache file is "
-                                 "also provided, autogen may exit early if it determines that these files could "
-                                 "not have affected the output of autogen.",
-                                 cxxopts::value<vector<string>>());
-}
-
 cxxopts::Options
 buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders) {
     // Used to populate default options.
@@ -646,7 +634,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
     section = groupToString(Group::STRIPE_AUTOGEN);
     options.add_options(section)("autogen-version", "Autogen version to output", cxxopts::value<int>());
-    buildAutogenCacheOptions(options, section);
     options.add_options(section)("autogen-subclasses-parent",
                                  "Parent classes for which generate a list of subclasses. "
                                  "This option must be used in conjunction with -p autogen-subclasses",
@@ -798,12 +785,6 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
         }
     }
     return true;
-}
-void extractAutogenConstCacheConfig(cxxopts::ParseResult &raw, AutogenConstCacheConfig &cfg) {
-    cfg.cacheFile = raw["autogen-constant-cache-file"].as<string>();
-    if (raw.count("autogen-changed-files") > 0) {
-        cfg.changedFiles = raw["autogen-changed-files"].as<vector<string>>();
-    }
 }
 
 Phase extractStopAfter(cxxopts::ParseResult &raw, shared_ptr<spdlog::logger> logger) {
@@ -1073,8 +1054,6 @@ void readOptions(Options &opts,
             logger->error("-p untyped-blame:<output-path> must also include --track-untyped");
             throw EarlyReturnWithCode(1);
         }
-
-        extractAutogenConstCacheConfig(raw, opts.autogenConstantCacheConfig);
 
         opts.noErrorCount = raw["no-error-count"].as<bool>();
         opts.noStdlib = raw["no-stdlib"].as<bool>();
@@ -1382,21 +1361,6 @@ void readOptions(Options &opts,
     } catch (cxxopts::OptionParseException &e) {
         logger->info("{}. To see all available options pass `--help`.", e.what());
         throw EarlyReturnWithCode(1);
-    }
-}
-
-bool readAutogenConstCacheOptions(AutogenConstCacheConfig &cfg, int argc, const char *argv[],
-                                  shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
-    cxxopts::Options options("sorbet", "Typechecker for Ruby");
-    options.allow_unrecognised_options(); // Don't raise error on other options
-    buildAutogenCacheOptions(options, " === Stripe autogen");
-
-    try {
-        cxxopts::ParseResult raw = options.parse(argc, argv);
-        extractAutogenConstCacheConfig(raw, cfg);
-        return true;
-    } catch (cxxopts::OptionParseException &e) {
-        return false;
     }
 }
 

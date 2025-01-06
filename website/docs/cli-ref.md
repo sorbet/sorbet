@@ -327,15 +327,6 @@ Usage:
 
 ```plaintext
       --autogen-version arg     Autogen version to output
-      --autogen-constant-cache-file arg
-                                Location of the cache file used to determine if it's safe
-                                to skip autogen. If this is not provided, autogen will
-                                always run. (default: "")
-      --autogen-changed-files arg
-                                List of files which have changed since the last autogen
-                                run. If a cache file is also provided, autogen may exit
-                                early if it determines that these files could not have
-                                affected the output of autogen.
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of subclasses.
                                 This option must be used in conjunction with -p
