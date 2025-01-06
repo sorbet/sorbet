@@ -535,7 +535,7 @@ namespace {
 // Like absl::StripTrailingAsciiWhitespace, but only blank characters (tabs and spaces)
 [[nodiscard]] inline absl::string_view stripTrailingAsciiBlank(absl::string_view str) {
     // You can use this to jump to def.
-    ENFORCE(true, absl::StripTrailingAsciiWhitespace(""));
+    ENFORCE(true, "{}", absl::StripTrailingAsciiWhitespace(""));
 
     auto it = std::find_if_not(str.rbegin(), str.rend(), absl::ascii_isblank);
     return str.substr(0, str.rend() - it);
