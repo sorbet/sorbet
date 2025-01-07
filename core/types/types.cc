@@ -781,11 +781,6 @@ TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
 SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags)
     : argFlags(move(argFlags)), fun(fun) {}
 
-shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
-    auto copy = *this;
-    return make_shared<SendAndBlockLink>(move(copy));
-}
-
 optional<int> SendAndBlockLink::fixedArity() const {
     optional<int> arity = 0;
     for (auto &arg : argFlags) {
