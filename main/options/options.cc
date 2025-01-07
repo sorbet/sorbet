@@ -17,7 +17,6 @@
 #include "main/options/options.h"
 #include "options.h"
 #include "sorbet_version/sorbet_version.h"
-#include "spdlog/fmt/ranges.h"
 #include "third_party/licenses/licenses.h"
 #include <sys/ioctl.h>
 #include <sys/stat.h>

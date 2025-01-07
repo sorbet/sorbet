@@ -40,7 +40,6 @@
 #include "pipeline.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
-#include "spdlog/fmt/ranges.h"
 
 using namespace std;
 

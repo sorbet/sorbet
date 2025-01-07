@@ -16,7 +16,6 @@
 #include "main/minimize/minimize.h"
 #include "packager/packager.h"
 #include "packager/rbi_gen.h"
-#include "spdlog/fmt/ranges.h"
 #endif
 
 #include "absl/algorithm/container.h"

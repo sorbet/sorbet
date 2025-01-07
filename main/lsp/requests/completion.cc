@@ -16,7 +16,6 @@
 #include "main/lsp/NextMethodFinder.h"
 #include "main/lsp/json_types.h"
 #include "rapidjson/writer.h"
-#include "spdlog/fmt/ranges.h"
 
 using namespace std;
 

@@ -6,7 +6,6 @@
 #include "core/GlobalState.h"
 #include "core/TypeConstraint.h"
 #include "core/TypeErrorDiagnostics.h"
-#include "spdlog/fmt/ranges.h"
 #include <algorithm> // find, remove_if
 
 using namespace std;

@@ -22,6 +22,5 @@ cc_library(
         "//ast",
         "//ast/treemap",
         "//core",
-        "@spdlog",
     ],
 )

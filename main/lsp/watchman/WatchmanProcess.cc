@@ -7,7 +7,6 @@
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
 #include "rapidjson/document.h"
-#include "spdlog/fmt/ranges.h"
 #include "subprocess.hpp"
 
 using namespace std;

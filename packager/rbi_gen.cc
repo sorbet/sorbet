@@ -10,7 +10,6 @@
 #include "common/sort/sort.h"
 #include "core/GlobalState.h"
 #include "packager/packager.h"
-#include "spdlog/fmt/ranges.h"
 
 using namespace std;
 namespace sorbet::packager {

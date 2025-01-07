@@ -25,6 +25,5 @@ cc_library(
         "//common",
         "//core",
         "//core/hashing",
-        "@spdlog",
     ],
 )

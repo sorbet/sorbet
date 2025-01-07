@@ -22,7 +22,6 @@ cc_library(
         "//common",
         "//core",
         "@com_google_absl//absl/types:optional",
-        "@spdlog",
     ],
 )
 

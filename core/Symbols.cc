@@ -12,7 +12,6 @@
 #include "core/Types.h"
 #include "core/errors/internal.h"
 #include "core/hashing/hashing.h"
-#include "spdlog/fmt/ranges.h"
 #include <string>
 
 template class std::vector<sorbet::core::TypeAndOrigins>;

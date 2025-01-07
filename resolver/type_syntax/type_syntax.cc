@@ -7,7 +7,6 @@
 #include "core/TypeErrorDiagnostics.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
-#include "spdlog/fmt/ranges.h"
 
 using namespace std;
 

@@ -19,6 +19,5 @@ cc_library(
         "//ast",
         "//core",
         "@com_github_ludocode_mpack",
-        "@spdlog",
     ],
 )
