@@ -17,7 +17,7 @@ template <typename It, typename Char, class UnaryOp, typename UnaryOpResult> str
 template <typename It, typename Char, class UnaryOp, typename UnaryOpResult>
 struct formatter<arg_map_join<It, Char, UnaryOp, UnaryOpResult>, Char> : formatter<UnaryOpResult, Char> {
     template <typename FormatContext>
-    auto format(const arg_map_join<It, Char, UnaryOp, UnaryOpResult> &value, FormatContext &ctx)
+    auto format(const arg_map_join<It, Char, UnaryOp, UnaryOpResult> &value, FormatContext &ctx) const
         -> decltype(ctx.out()) {
         using base = formatter<UnaryOpResult, Char>;
 
