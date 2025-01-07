@@ -116,7 +116,7 @@ void Literal::_sanityCheck() {
         case core::TypePtr::Tag::ClassType:
             break;
         default:
-            ENFORCE(false, "unexpected TypePtr::Tag: {}", tag);
+            ENFORCE(false, "unexpected TypePtr::Tag: {}", fmt::underlying(tag));
     }
 }
 

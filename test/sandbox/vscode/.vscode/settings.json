@@ -8,6 +8,8 @@
             "command": [
                 "../../../bazel-bin/main/sorbet",
                 "--debug-log-file=sorbet-vscode.log",
+                "--ignore=things",
+                "--rubyfmt-path=/Users/trevor/stripe/rubyfmt/target/release/rubyfmt",
                 "--lsp",
                 "--dir=.",
             ]

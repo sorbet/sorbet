@@ -17,5 +17,6 @@ cc_library(
         "//main/lsp",
         "@doctest//doctest",
         "@dtl",
+        "@spdlog",
     ],
 )

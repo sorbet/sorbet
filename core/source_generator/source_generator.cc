@@ -1,6 +1,7 @@
 #include "absl/strings/str_cat.h"
 #include "common/strings/formatting.h"
 #include "core/core.h"
+#include "spdlog/fmt/ranges.h"
 
 using namespace std;
 

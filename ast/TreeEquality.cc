@@ -260,7 +260,7 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
                 auto class_type_b = core::cast_type_nonnull<core::ClassType>(bType);
                 return class_type_a.symbol == class_type_b.symbol;
             } else {
-                ENFORCE(false, "unexpected TypePtr::Tag: {}", aType.tag());
+                ENFORCE(false, "unexpected TypePtr::Tag: {}", fmt::underlying(aType.tag()));
             }
             return false;
         }

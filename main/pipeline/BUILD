@@ -36,6 +36,7 @@ cc_library(
         "//payload/text",
         "//resolver",
         "//rewriter",
+        "@spdlog",
     ],
 )
 
@@ -74,5 +75,6 @@ cc_library(
         "//payload/text",
         "//resolver",
         "//rewriter",
+        "@spdlog",
     ],
 )

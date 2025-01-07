@@ -4,6 +4,7 @@
 #include "core/Files.h"
 #include "core/GlobalState.h"
 #include "main/autogen/data/msgpack.h"
+#include "spdlog/fmt/ranges.h"
 
 using namespace std;
 

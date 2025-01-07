@@ -6,6 +6,7 @@
 #include "common/JSON.h"
 #include "common/common.h"
 #include "common/strings/formatting.h"
+#include "spdlog/fmt/ranges.h"
 
 #include <fstream>
 #include <iostream>

@@ -9,6 +9,7 @@
 #include "common/sort/sort.h"
 #include "common/strings/formatting.h"
 #include "main/lsp/LSPConfiguration.h"
+#include "spdlog/fmt/ranges.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
 #include <iterator>

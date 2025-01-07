@@ -87,6 +87,7 @@ cc_library(
         "//main/options",
         "//main/pipeline",
         "//payload:interface",
+        "@spdlog",
     ],
 )
 
@@ -110,5 +111,6 @@ cc_library(
         "//main/options",
         "//main/pipeline:pipeline-orig",
         "//payload:interface",
+        "@spdlog",
     ],
 )

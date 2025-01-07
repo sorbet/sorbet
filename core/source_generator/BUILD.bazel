@@ -17,5 +17,6 @@ cc_library(
     deps = [
         "//core",
         "@com_google_absl//absl/strings",
+        "@spdlog",
     ],
 )

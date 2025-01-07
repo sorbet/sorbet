@@ -16,6 +16,7 @@
 #include "main/minimize/minimize.h"
 #include "packager/packager.h"
 #include "packager/rbi_gen.h"
+#include "spdlog/fmt/ranges.h"
 #endif
 
 #include "absl/algorithm/container.h"
@@ -337,8 +338,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         vector<string> serializedDescendantsMap =
             autogen::Subclasses::genDescendantsMap(gs, childMap, autogenSubclassesParentsRefs);
 
-        opts.print.AutogenSubclasses.fmt(
-            "{}\n", fmt::join(serializedDescendantsMap.begin(), serializedDescendantsMap.end(), "\n"));
+        opts.print.AutogenSubclasses.fmt("{}\n", fmt::join(serializedDescendantsMap, "\n"));
     }
 }
 

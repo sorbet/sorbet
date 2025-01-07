@@ -6,6 +6,7 @@
 #include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/Symbols.h"
+#include "spdlog/fmt/ranges.h"
 #include <sstream>
 #include <utility>
 
