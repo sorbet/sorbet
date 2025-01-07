@@ -261,18 +261,8 @@ pipeline_tests(
         [
             # Replace [parser] with other phases to test Prism at that level
             # Phases: https://github.com/Shopify/sorbet/blob/prism/docs/internals.md#phases
-            "testdata/parser/**/*.rb",
-            "testdata/parser/**/*.exp",
-            "testdata/desugar/**/*.rb",
-            "testdata/desugar/**/*.exp",
-            "testdata/rewriter/**/*.rb",
-            "testdata/rewriter/**/*.exp",
-            "testdata/local_vars/**/*.rb",
-            "testdata/local_vars/**/*.exp",
-            "testdata/namer/**/*.rb",
-            "testdata/namer/**/*.exp",
-            "testdata/lsp/**/*.rb",
-            "testdata/lsp/**/*.exp",
+            "testdata/**/*.rb",
+            "testdata/**/*.exp",
         ],
         exclude = [
             # Tests having to do with tree differences in invalid Ruby code; will address later
@@ -294,6 +284,7 @@ pipeline_tests(
             "testdata/lsp/completion/missing_fun.rb",
             "testdata/lsp/completion/self_receiver.rb",
             "testdata/namer/fuzz_repeated_kwarg.rb",
+            "testdata/deviations/keyword_method_names.rb",
 
             # Sorbets' parser incorrectly accepts invalid syntax
             "testdata/desugar/pattern_matching_hash.rb", # See https://github.com/Shopify/sorbet/issues/362
