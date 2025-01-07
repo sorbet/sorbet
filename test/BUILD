@@ -293,26 +293,7 @@ pipeline_tests(
             "testdata/lsp/completion/missing_const_name.rb",
             "testdata/lsp/completion/missing_fun.rb",
             "testdata/lsp/completion/self_receiver.rb",
-
-            # Desugar tests having to do with tree differences; will address later
-            "testdata/desugar/sclass.rb",
-
-            # Rewriter tests having to do with symbol table differences; will address later
-            "testdata/rewriter/attr_multi.rb",
-            "testdata/rewriter/attr.rb",
-            "testdata/rewriter/prop.rb",
-            "testdata/rewriter/struct.rb",
-
-            # Failing namer tests to investigate
-            "testdata/namer/class_alias_inside_method.rb",
             "testdata/namer/fuzz_repeated_kwarg.rb",
-            "testdata/namer/module_function.rb",
-            "testdata/namer/parameter_names.rb",
-            "testdata/namer/redefinition_method.rb",
-            "testdata/namer/type_alias_inside_method.rb",
-            "testdata/namer/type_alias.rb",
-            "testdata/namer/type_member_inside_method.rb",
-            "testdata/namer/type_template_inside_method.rb",
 
             # Sorbets' parser incorrectly accepts invalid syntax
             "testdata/desugar/pattern_matching_hash.rb", # See https://github.com/Shopify/sorbet/issues/362

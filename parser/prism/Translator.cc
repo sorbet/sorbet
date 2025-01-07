@@ -1261,12 +1261,18 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             returnValues = translateArguments(superNode->arguments, blockArgumentNode);
             return make_unique<parser::Super>(location, move(returnValues));
         }
-        case PM_SYMBOL_NODE: { // A symbol literal, e.g. `:foo`
+        case PM_SYMBOL_NODE: { // A symbol literal, e.g. `:foo`, or `a:` in `{a: 1}`
             auto symNode = down_cast<pm_symbol_node>(node);
 
             auto unescaped = &symNode->unescaped;
 
             auto source = parser.extractString(unescaped);
+
+            // If the opening location is null, the symbol is used as a key with a colon postfix, like `{a: 1}`
+            // In those cases, the location should not include the colon.
+            if (symNode->opening_loc.start == nullptr) {
+                location = translateLoc(symNode->value_loc);
+            }
 
             // TODO: can these have different encodings?
             return make_unique<parser::Symbol>(location, gs.enterNameUTF8(source));
