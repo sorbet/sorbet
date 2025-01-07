@@ -566,7 +566,7 @@ public:
             [&](Node *n) { Exception::raise("Unexpected send node: {}", n->nodeName()); });
 
         auto &send = exprs->front();
-        core::LocOffsets blockLoc = send->loc.join(tokLoc(end));
+        core::LocOffsets blockLoc = tokLoc(begin).join(tokLoc(end));
         unique_ptr<Node> block;
         if (isNumblock) {
             block = make_unique<NumBlock>(blockLoc, std::move(send), std::move(args), std::move(body));
