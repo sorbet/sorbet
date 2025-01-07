@@ -1043,7 +1043,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 core::DispatchArgs dispatchArgs{send.fun,        locs,
                                                 send.numPosArgs, args,
                                                 recvType.type,   recvType,
-                                                recvType.type,   send.link,
+                                                recvType.type,   send.link.get(),
                                                 ownerLoc,        send.isPrivateOk,
                                                 suppressErrors,  inWhat.symbol.data(ctx)->name};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
@@ -1431,7 +1431,6 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     const auto numPosArgs = 1;
                     const auto suppressErrors = true;
                     const auto isPrivateOk = true;
-                    const std::shared_ptr<const core::SendAndBlockLink> block = nullptr;
                     core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),
                                                     locs,
                                                     numPosArgs,
@@ -1439,7 +1438,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                     recvType.type,
                                                     recvType,
                                                     recvType.type,
-                                                    block,
+                                                    nullptr,
                                                     ctx.locAt(bind.loc),
                                                     isPrivateOk,
                                                     suppressErrors,
