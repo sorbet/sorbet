@@ -12,8 +12,8 @@ static_assert(false, "Need c++17 to compile this codebase");
 #include "absl/container/flat_hash_set.h"
 #include "absl/container/inlined_vector.h"
 #include "sorbet_version/sorbet_version.h"
-#include "spdlog/spdlog.h"
 #include "spdlog/fmt/ranges.h"
+#include "spdlog/spdlog.h"
 #include <stdint.h>
 #include <string>
 #include <string_view>
