@@ -937,7 +937,6 @@ public:
 
     SendAndBlockLink(NameRef fun, std::vector<ArgInfo::ArgFlags> &&argFlags);
     std::optional<int> fixedArity() const;
-    std::shared_ptr<SendAndBlockLink> duplicate();
 };
 
 class TypeAndOrigins final {
