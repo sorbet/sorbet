@@ -33,10 +33,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "spdlog",
-        url = "https://github.com/gabime/spdlog/archive/eb3220622e73a4889eee355ffa37972b3cac3df5.zip",  # v1.9.2
-        sha256 = "b7570488bdd94ab6d3653bc324d8ed7976d9f3a2f035eb2e969ebcaad3b0d5c7",
+        url = "https://github.com/gabime/spdlog/archive/8e5613379f5140fefb0b60412fbf1f5406e7c7f8.zip",  # v1.15.0
+        sha256 = "86d0688c088f6cad36533c731e8377882d1cb0d05508afa3e624d3c0e7cf92af",
         build_file = "@com_stripe_ruby_typer//third_party:spdlog.BUILD",
-        strip_prefix = "spdlog-eb3220622e73a4889eee355ffa37972b3cac3df5",
+        strip_prefix = "spdlog-8e5613379f5140fefb0b60412fbf1f5406e7c7f8",
     )
 
     # We don't use this directly, but protobuf will skip defining its own
