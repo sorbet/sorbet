@@ -85,7 +85,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
                                     snd->recv.type,
                                     {snd->recv.type, {originForFullType}},
                                     snd->recv.type,
-                                    snd->link,
+                                    snd->link.get(),
                                     originForUninitialized,
                                     snd->isPrivateOk,
                                     suppressErrors,

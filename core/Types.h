@@ -995,7 +995,7 @@ struct DispatchArgs {
     const TypePtr &selfType;
     const TypeAndOrigins &fullType;
     const TypePtr &thisType;
-    const std::shared_ptr<const SendAndBlockLink> &block;
+    const SendAndBlockLink *const block;
     Loc originForUninitialized;
     bool isPrivateOk;
     // Do not produce dispatch-related errors while evaluating the call. This is a performance optimization, as there

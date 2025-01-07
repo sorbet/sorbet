@@ -2608,8 +2608,7 @@ private:
     }
 
     static void simulateCall(const GlobalState &gs, const TypeAndOrigins *receiver, const DispatchArgs &innerArgs,
-                             shared_ptr<SendAndBlockLink> link, TypePtr passedInBlockType, Loc callLoc, Loc blockLoc,
-                             DispatchResult &res) {
+                             TypePtr passedInBlockType, Loc callLoc, Loc blockLoc, DispatchResult &res) {
         auto dispatched = receiver->type.dispatchCall(gs, innerArgs);
         // We use isSubTypeUnderConstraint here with a TypeConstraint, so that we discover the correct generic bounds
         // as we do the subtyping check.
@@ -2756,7 +2755,7 @@ public:
             Magic_callWithBlock::typeToProc(gs, *args.args[2], args.locs.file, args.locs.call, args.locs.args[2],
                                             args.locs.fun, args.originForUninitialized, args.suppressErrors);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
-        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity));
+        core::SendAndBlockLink link{fn, Magic_callWithBlock::argInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn,
@@ -2766,14 +2765,13 @@ public:
                                receiver->type,
                                *receiver,
                                receiver->type,
-                               link,
+                               &link,
                                args.originForUninitialized,
                                args.isPrivateOk,
                                args.suppressErrors,
                                args.enclosingMethodForSuper};
 
-        Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, link, finalBlockType, args.argLoc(2), args.callLoc(),
-                                          res);
+        Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, finalBlockType, args.argLoc(2), args.callLoc(), res);
     }
 } Magic_callWithBlock;
 
@@ -2871,7 +2869,7 @@ public:
             Magic_callWithBlock::typeToProc(gs, *args.args[4], args.locs.file, args.locs.call, args.locs.args[4],
                                             args.locs.fun, args.originForUninitialized, args.suppressErrors);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
-        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity));
+        core::SendAndBlockLink link{fn, Magic_callWithBlock::argInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn,
@@ -2881,14 +2879,13 @@ public:
                                receiver->type,
                                *receiver,
                                receiver->type,
-                               link,
+                               &link,
                                args.originForUninitialized,
                                args.isPrivateOk,
                                args.suppressErrors,
                                args.enclosingMethodForSuper};
 
-        Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, link, finalBlockType, args.argLoc(4), args.callLoc(),
-                                          res);
+        Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, finalBlockType, args.argLoc(4), args.callLoc(), res);
     }
 } Magic_callWithSplatAndBlock;
 
