@@ -19,6 +19,8 @@ class Context;
 
 namespace sorbet::core::packages {
 
+class PackageDB;
+
 enum class ImportType {
     Normal,
     Test,
@@ -68,6 +70,9 @@ public:
     core::ClassOrModuleRef getPackageTestScope(const core::GlobalState &gs) const;
 
     virtual std::optional<ImportType> importsPackage(MangledName mangledName) const = 0;
+
+    virtual bool causesLayeringViolation(const core::packages::PackageDB &packageDB,
+                                         const PackageInfo &otherPkg) const = 0;
 
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
