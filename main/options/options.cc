@@ -676,26 +676,14 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                    "--print=<format>:<file>\n"
                    "Most of these formats are unstable, for internal-use only.\n\n"
                    "Stable: [");
-    auto first = true;
-    for (auto it = partitioned_print_options.begin(); it != stableEnd; it++) {
-        if (first) {
-            first = false;
-        } else {
-            fmt::format_to(std::back_inserter(print_help), ", ");
-        }
-        fmt::format_to(std::back_inserter(print_help), it->option);
-    }
+    fmt::format_to(
+        std::back_inserter(print_help), "{}",
+        fmt::map_join(partitioned_print_options.begin(), stableEnd, ", ", [](const auto &it) { return it.option; }));
     fmt::format_to(std::back_inserter(print_help), "]\n\n"
                                                    "Unstable: [");
-    first = true;
-    for (auto it = stableEnd; it != partitioned_print_options.end(); it++) {
-        if (first) {
-            first = false;
-        } else {
-            fmt::format_to(std::back_inserter(print_help), ", ");
-        }
-        fmt::format_to(std::back_inserter(print_help), it->option);
-    }
+    fmt::format_to(
+        std::back_inserter(print_help), "{}",
+        fmt::map_join(stableEnd, partitioned_print_options.end(), ", ", [](const auto &it) { return it.option; }));
     options.add_options(section)("p,print", to_string(print_help), cxxopts::value<vector<string>>(), "<format>");
     // }}}
 
