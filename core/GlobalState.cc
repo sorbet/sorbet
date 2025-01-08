@@ -797,10 +797,6 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::defineTopClassOrModule())
                  .untypedArg(Names::arg0())
                  .buildWithResult(Types::void_());
-    // Synthesize <Magic>.<keep-for-cfg>(arg: T.untyped) => Void
-    method = enterMethod(*this, Symbols::MagicSingleton(), Names::keepForCfg())
-                 .untypedArg(Names::arg0())
-                 .buildWithResult(Types::void_());
     // Synthesize <Magic>.<retry>() => Void
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::retry()).buildWithResult(Types::void_());
 
