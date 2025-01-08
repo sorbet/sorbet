@@ -1590,13 +1590,13 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
         return;
     }
     auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
-    {
-        infoAtEntry.index = metadata.nextIndex;
-        infoAtEntry.lowLink = metadata.nextIndex;
-        metadata.nextIndex++;
-        metadata.stack.push_back(pkgName);
-        infoAtEntry.onStack = true;
-    }
+
+    infoAtEntry.index = metadata.nextIndex;
+    infoAtEntry.lowLink = metadata.nextIndex;
+    metadata.nextIndex++;
+    metadata.stack.push_back(pkgName);
+    infoAtEntry.onStack = true;
+
     for (auto &i : pkgInfo.importedPackageNames) {
         if (i.type == ImportType::Test) {
             continue;
