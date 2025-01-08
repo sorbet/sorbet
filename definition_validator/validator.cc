@@ -1015,7 +1015,7 @@ private:
             [classOrModuleIndent](auto &line) -> string { return fmt::format("{}  {}", classOrModuleIndent, line); });
         auto indentedMethodDefinition = absl::StrJoin(indentedLines, "\n");
 
-        return core::AutocorrectSuggestion::Edit{insertAt, fmt::format(format, indentedMethodDefinition)};
+        return core::AutocorrectSuggestion::Edit{insertAt, fmt::format(fmt::runtime(format), indentedMethodDefinition)};
     }
 
     void validateAbstract(const core::Context ctx, core::ClassOrModuleRef sym, const ast::ClassDef &classDef) {
