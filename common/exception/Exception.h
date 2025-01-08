@@ -59,10 +59,10 @@ public:
     }
     template <typename... TArgs>
     [[noreturn]] static inline bool enforce_handler(std::string_view check, std::string_view file, int line,
-                                                    fmt::format_string<TArgs...> message, TArgs &&...args)
+                                                    std::string_view message, TArgs &&...args)
         __attribute__((noreturn)) {
         raise("{}:{} enforced condition {} has failed: {}", file, line, check,
-              fmt::format(message, std::forward<TArgs>(args)...));
+              fmt::format(fmt::runtime(message), std::forward<TArgs>(args)...));
     }
 };
 
