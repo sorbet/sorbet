@@ -78,12 +78,14 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
     auto originForUninitialized = core::Loc::none();
     auto originForFullType = core::Loc::none();
     auto suppressErrors = true;
+    core::TypeAndOrigins wrappedFullType{snd->recv.type, {originForFullType}};
+
     core::DispatchArgs dispatchArgs{snd->fun,
                                     locs,
                                     numPosArgs,
                                     args,
                                     snd->recv.type,
-                                    {snd->recv.type, {originForFullType}},
+                                    wrappedFullType,
                                     snd->recv.type,
                                     snd->link.get(),
                                     originForUninitialized,

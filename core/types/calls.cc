@@ -2177,6 +2177,7 @@ public:
             currentAlignment, [&](auto tmRef) { return tmRef.data(gs)->name == Names::Constants::AttachedClass(); });
         ENFORCE(it != currentAlignment.end());
         auto instanceTy = selfApp->targs[distance(currentAlignment.begin(), it)];
+        TypeAndOrigins wrappedFullType{instanceTy, args.fullType.origins};
 
         // The Ruby VM treats `initialize` as private by default, but allows calling it directly within `new`.
         DispatchArgs innerArgs{Names::initialize(),
@@ -2184,7 +2185,7 @@ public:
                                args.numPosArgs,
                                args.args,
                                instanceTy,
-                               {instanceTy, args.fullType.origins},
+                               wrappedFullType,
                                instanceTy,
                                args.block,
                                args.originForUninitialized,
@@ -3163,13 +3164,14 @@ public:
         InlinedVector<LocOffsets, 2> argLocs{args.locs.receiver};
         CallLocs locs{args.locs.file, args.locs.call, args.locs.call, args.locs.fun, argLocs};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs;
+        TypeAndOrigins wrappedFullType{arg->type, args.fullType.origins};
 
         DispatchArgs dispatch{core::Names::toA(),
                               locs,
                               0,
                               innerArgs,
                               arg->type,
-                              {arg->type, args.fullType.origins},
+                              wrappedFullType,
                               arg->type,
                               nullptr,
                               args.originForUninitialized,
@@ -3579,13 +3581,14 @@ public:
         InlinedVector<LocOffsets, 2> argLocs;
         CallLocs locs{args.locs.file, args.locs.call, args.locs.call, args.locs.fun, argLocs};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs;
+        TypeAndOrigins wrappedFullType{arg->type, args.fullType.origins};
 
         DispatchArgs dispatch{core::Names::toHash(),
                               locs,
                               0,
                               innerArgs,
                               arg->type,
-                              {arg->type, args.fullType.origins},
+                              wrappedFullType,
                               arg->type,
                               nullptr,
                               args.originForUninitialized,
@@ -3619,6 +3622,7 @@ class Magic_mergeHash : public IntrinsicMethod {
         sendArgLocs.emplace_back(args.locs.args[1]);
 
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, args.locs.fun, sendArgLocs};
+        TypeAndOrigins wrappedFullType{accType, args.args[0]->origins};
 
         // emulate a call to `resType#merge`
         DispatchArgs mergeArgs{core::Names::merge(),
@@ -3626,7 +3630,7 @@ class Magic_mergeHash : public IntrinsicMethod {
                                1,
                                sendArgs,
                                accType,
-                               {accType, args.args[0]->origins},
+                               wrappedFullType,
                                accType,
                                nullptr,
                                args.originForUninitialized,
@@ -3689,6 +3693,7 @@ class Magic_mergeHashValues : public IntrinsicMethod {
         sendArgLocs.emplace_back(hashLoc);
 
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, args.locs.fun, sendArgLocs};
+        TypeAndOrigins wrappedFullType{accType, args.args[0]->origins};
 
         // emulate a call to `resType#merge` with a shape argument
         DispatchArgs mergeArgs{core::Names::merge(),
@@ -3696,7 +3701,7 @@ class Magic_mergeHashValues : public IntrinsicMethod {
                                1,
                                sendArgs,
                                accType,
-                               {accType, args.args[0]->origins},
+                               wrappedFullType,
                                accType,
                                nullptr,
                                args.originForUninitialized,
@@ -3799,9 +3804,11 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
     };
     auto baseCaseArgTypes = InlinedVector<const TypeAndOrigins *, 2>{};
     baseCaseArgTypes.emplace_back(args.args[0]);
+    TypeAndOrigins wrappedFullType{args.selfType, args.fullType.origins};
+
     DispatchArgs baseCaseArgs{
         methodToDigWith,  baseCaseLocs,        1, /* numPosArgs */
-        baseCaseArgTypes, args.selfType,       {args.selfType, args.fullType.origins},
+        baseCaseArgTypes, args.selfType,       wrappedFullType,
         args.selfType,    args.block,          args.originForUninitialized,
         args.isPrivateOk, args.suppressErrors, args.enclosingMethodForSuper,
     };
@@ -3917,13 +3924,14 @@ class Array_flatten : public IntrinsicMethod {
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
         InlinedVector<LocOffsets, 2> sendArgLocs;
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, args.locs.fun, sendArgLocs};
+        TypeAndOrigins wrappedFullType{type, args.fullType.origins};
 
         DispatchArgs innerArgs{toAry,
                                sendLocs,
                                0,
                                sendArgs,
                                type,
-                               {type, args.fullType.origins},
+                               wrappedFullType,
                                type,
                                nullptr,
                                args.originForUninitialized,
@@ -4344,13 +4352,14 @@ public:
         };
         TypeAndOrigins myType{args.selfType, args.receiverLoc()};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs{&myType};
+        TypeAndOrigins wrappedFullType{hash, args.fullType.origins};
 
         DispatchArgs dispatch{core::Names::enumerableToH(),
                               locs,
                               1,
                               innerArgs,
                               hash,
-                              {hash, args.fullType.origins},
+                              wrappedFullType,
                               hash,
                               nullptr,
                               args.originForUninitialized,
