@@ -2055,26 +2055,36 @@ public:
                          const UnorderedMap<core::packages::MangledName, PackageFiles> &packageFiles)
         : gs(gs), packageFiles(packageFiles) {}
 
+    std::string files(const UnorderedMap<core::packages::MangledName, PackageFiles>::const_iterator it) const {
+        std::string res;
+        if (it != packageFiles.end()) {
+            res = absl::StrJoin(it->second.files, ",", FileListFormatter(gs));
+        }
+        return res;
+    }
+
+    std::string testFiles(const UnorderedMap<core::packages::MangledName, PackageFiles>::const_iterator it) const {
+        std::string res;
+        if (it != packageFiles.end()) {
+            res = absl::StrJoin(it->second.testFiles, ",", FileListFormatter(gs));
+        }
+        return res;
+    }
+
     void operator()(std::string *out, core::packages::MangledName mangledName) const {
         const auto &pkg = gs.packageDB().getPackageInfo(mangledName);
-        out->append("{");
-        out->append("\"name\":");
-        fmt::format_to(back_inserter(*out), "\"{}\",",
-                       absl::StrJoin(pkg.fullName(), "::", core::packages::NameFormatter(gs)));
-        out->append("\"imports\":[");
-        fmt::format_to(back_inserter(*out), "{}", absl::StrJoin(pkg.imports(), ",", ImportFormatter(gs)));
-        out->append("],\"testImports\":[");
-        fmt::format_to(back_inserter(*out), "{}", absl::StrJoin(pkg.testImports(), ",", ImportFormatter(gs)));
-        out->append("],\"files\":[");
         const auto it = packageFiles.find(mangledName);
-        if (it != packageFiles.end()) {
-            fmt::format_to(back_inserter(*out), "{}", absl::StrJoin(it->second.files, ",", FileListFormatter(gs)));
-        }
-        out->append("], \"testFiles\":[");
-        if (it != packageFiles.end()) {
-            fmt::format_to(back_inserter(*out), "{}", absl::StrJoin(it->second.testFiles, ",", FileListFormatter(gs)));
-        }
-        out->append("]}");
+        // clang-format off
+        absl::StrAppend(
+            out,
+            "{\"name\":\"", absl::StrJoin(pkg.fullName(), "::", core::packages::NameFormatter(gs)),
+            "\",\"imports\":[", absl::StrJoin(pkg.imports(), ",", ImportFormatter(gs)),
+            "],\"testImports\":[" , absl::StrJoin(pkg.testImports(), ",", ImportFormatter(gs)),
+            "],\"files\":[", this->files(it),
+            "], \"testFiles\":[", this->testFiles(it),
+            "]}"
+        );
+        // clang-format on
     }
 };
 
@@ -2096,12 +2106,9 @@ void Packager::dumpPackageInfo(const core::GlobalState &gs, std::string outputFi
         }
     }
 
-    fmt::memory_buffer out;
-    fmt::format_to(back_inserter(out), "[");
-    fmt::format_to(back_inserter(out), "{}",
-                   absl::StrJoin(pkgDB.packages(), ",", PackageInfoFormatter(gs, packageFiles)));
-    fmt::format_to(back_inserter(out), "]");
-    FileOps::write(outputFile, fmt::to_string(out));
+    std::string info;
+    absl::StrAppend(&info, "[", absl::StrJoin(pkgDB.packages(), ",", PackageInfoFormatter(gs, packageFiles)), "]");
+    FileOps::write(outputFile, info);
 }
 
 } // namespace sorbet::packager
