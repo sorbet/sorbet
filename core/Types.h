@@ -1003,6 +1003,10 @@ struct DispatchArgs {
     bool suppressErrors;
     NameRef enclosingMethodForSuper;
 
+    DispatchArgs(NameRef name, const CallLocs &locs, uint16_t numPosArgs,
+                 InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &selfType,
+                 const TypeAndOrigins &fullType, const TypePtr &thisType, const SendAndBlockLink *block,
+                 Loc originForUninitialized, bool isPrivateOk, bool suppressErrors, NameRef enclosingMethodForSuper);
     DispatchArgs(const DispatchArgs &) = delete;
     DispatchArgs &operator=(const DispatchArgs &) = delete;
 

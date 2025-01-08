@@ -1127,6 +1127,15 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
     return make_type<MetaType>(make_type<AppliedType>(genericClass, move(targs)));
 }
 
+DispatchArgs::DispatchArgs(NameRef name, const CallLocs &locs, uint16_t numPosArgs,
+                           InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &selfType,
+                           const TypeAndOrigins &fullType, const TypePtr &thisType, const SendAndBlockLink *block,
+                           Loc originForUninitialized, bool isPrivateOk, bool suppressErrors,
+                           NameRef enclosingMethodForSuper)
+    : name(name), locs(locs), numPosArgs(numPosArgs), args(args), selfType(selfType), fullType(fullType),
+      thisType(thisType), block(block), originForUninitialized(originForUninitialized), isPrivateOk(isPrivateOk),
+      suppressErrors(suppressErrors), enclosingMethodForSuper(enclosingMethodForSuper) {}
+
 Loc DispatchArgs::blockLoc(const GlobalState &gs) const {
     ENFORCE(this->block != nullptr);
     auto blockLoc = core::Loc(locs.file, argsLoc().endPos(), callLoc().endPos());
