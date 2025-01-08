@@ -1560,17 +1560,21 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
 // https://www.cs.cmu.edu/~15451-f18/lectures/lec19-DFS-strong-components.pdf provides a good overview of the
 // algorithm.
 const int UNVISITED = 0;
+struct NodeInfo {
+    // A given package's index in the DFS traversal; ie. when it was first visited. The default value of 0 means the
+    // package hasn't been visited yet.
+    int index = UNVISITED;
+    // The lowest index reachable from a given package (in the same SCC) by following any number of tree edges
+    // and at most one back/cross edge
+    int lowLink = 0;
+    // Fast way to check if a package is on the stack
+    bool onStack = false;
+};
+
 struct ComputeSCCsMetadata {
     int nextIndex = 1;
     int nextSCCId = 0;
-    // A given package's index in the DFS traversal; ie. when it was first visited. The default value of 0 means the
-    // package hasn't been visited yet.
-    UnorderedMap<core::packages::MangledName, int> index;
-    // The lowest index reachable from a given package (in the same SCC) by following any number of tree edges
-    // and at most one back/cross edge
-    UnorderedMap<core::packages::MangledName, int> lowLink;
-    // Fast way to check if a package is on the stack
-    UnorderedMap<core::packages::MangledName, bool> onStack;
+    UnorderedMap<core::packages::MangledName, NodeInfo> nodeMap;
     // As we visit packages, we push them onto the stack. Once we find the "root" of an SCC, we can use the stack to
     // determine all packages in the SCC.
     std::vector<core::packages::MangledName> stack;
@@ -1578,45 +1582,61 @@ struct ComputeSCCsMetadata {
 
 // DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
 // detecting SCCs.
-void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::packages::MangledName pkgName) {
+void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::packages::MangledName pkgName,
+                   NodeInfo &infoAtEntry) {
     auto *pkgInfoPtr = gs.packageDB().getPackageInfoNonConst(pkgName);
     if (!pkgInfoPtr) {
         // This is to handle the case where the user imports a package that doesn't exist.
         return;
     }
     auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
-    metadata.index[pkgName] = metadata.nextIndex;
-    metadata.lowLink[pkgName] = metadata.nextIndex;
+
+    infoAtEntry.index = metadata.nextIndex;
+    infoAtEntry.lowLink = metadata.nextIndex;
     metadata.nextIndex++;
     metadata.stack.push_back(pkgName);
-    metadata.onStack[pkgName] = true;
+    infoAtEntry.onStack = true;
+
     for (auto &i : pkgInfo.importedPackageNames) {
         if (i.type == ImportType::Test) {
             continue;
         }
-        if (metadata.index[i.name.mangledName] == UNVISITED) {
+        // We need to be careful with this; it's not valid after a call to `strongConnect`,
+        // because our reference might disappear from underneath us during that call.
+        auto &importInfo = metadata.nodeMap[i.name.mangledName];
+        if (importInfo.index == UNVISITED) {
             // This is a tree edge (ie. a forward edge that we haven't visited yet).
-            strongConnect(gs, metadata, i.name.mangledName);
-            if (metadata.index[i.name.mangledName] == UNVISITED) {
+            strongConnect(gs, metadata, i.name.mangledName, importInfo);
+
+            // Need to re-lookup for the reason above.
+            auto &importInfo = metadata.nodeMap[i.name.mangledName];
+            if (importInfo.index == UNVISITED) {
                 // This is to handle early return above.
                 continue;
             }
             // Since we can follow any number of tree edges for lowLink, the lowLink of child is valid for this package
             // too.
-            auto &pkgLink = metadata.lowLink[pkgName];
-            pkgLink = std::min(pkgLink, metadata.lowLink[i.name.mangledName]);
-        } else if (metadata.onStack[i.name.mangledName]) {
+            //
+            // Note that we cannot use `infoAtEntry` here because it might have been invalidated.
+            auto &pkgLink = metadata.nodeMap[pkgName].lowLink;
+            pkgLink = std::min(pkgLink, importInfo.lowLink);
+        } else if (importInfo.onStack) {
             // This is a back edge (edge to ancestor) or cross edge (edge to a different subtree). Since we can only
             // follow at most one back/cross edge, the best update we can make to lowlink of the current package is the
             // child's index.
-            auto &pkgLink = metadata.lowLink[pkgName];
-            pkgLink = std::min(pkgLink, metadata.index[i.name.mangledName]);
+            //
+            // Note that we cannot use `infoAtEntry` here because it might have been invalidated.
+            auto &pkgLink = metadata.nodeMap[pkgName].lowLink;
+            pkgLink = std::min(pkgLink, importInfo.index);
         }
         // If the child package is already visited and not on the stack, it's in a different SCC, so no update to the
         // lowlink.
     }
 
-    if (metadata.index[pkgName] == metadata.lowLink[pkgName]) {
+    // We cannot re-use `infoAtEntry` here because `nodeMap` might have been re-allocated and
+    // invalidate our reference.
+    auto &ourInfo = metadata.nodeMap[pkgName];
+    if (ourInfo.index == ourInfo.lowLink) {
         // This is the root of an SCC. This means that all packages on the stack from this package to the top of the top
         // of the stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them the same
         // SCC ID.
@@ -1624,7 +1644,7 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
         do {
             poppedPkgName = metadata.stack.back();
             metadata.stack.pop_back();
-            metadata.onStack[poppedPkgName] = false;
+            metadata.nodeMap[poppedPkgName].onStack = false;
             PackageInfoImpl &poppedPkgInfo =
                 PackageInfoImpl::from(*(gs.packageDB().getPackageInfoNonConst(poppedPkgName)));
             poppedPkgInfo.sccID = metadata.nextSCCId;
@@ -1639,11 +1659,13 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
 void computeSCCs(core::GlobalState &gs) {
     Timer timeit(gs.tracer(), "packager::computeSCCs");
     ComputeSCCsMetadata metadata;
-    metadata.stack.reserve(gs.packageDB().packages().size());
     auto allPackages = gs.packageDB().packages();
+    metadata.stack.reserve(allPackages.size());
+    metadata.nodeMap.reserve(allPackages.size());
     for (auto package : allPackages) {
-        if (metadata.index[package] == UNVISITED) {
-            strongConnect(gs, metadata, package);
+        auto &info = metadata.nodeMap[package];
+        if (info.index == UNVISITED) {
+            strongConnect(gs, metadata, package, info);
         }
     }
 }
