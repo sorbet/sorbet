@@ -764,7 +764,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "DoesNotCrashOnNonWorkspaceURIs") {
     getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(move(didOpenNotif)));
 }
 
-// Tests that Sorbet does not crash when attempting to format a file URI outside of the workspace.
+// Tests that Sorbet does not crash when attempting to format a file URI outside of the workspace. And also that it
+// unconditionally returns an error.
 TEST_CASE_FIXTURE(ProtocolTest, "DoesNotCrashOnFormattingNonWorkspaceURIs") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
@@ -782,6 +783,12 @@ TEST_CASE_FIXTURE(ProtocolTest, "DoesNotCrashOnFormattingNonWorkspaceURIs") {
     // Just assert that this doesn't crash -- it's really a no-op
     INFO("Expected only a single response to the formatting request.");
     REQUIRE_EQ(resp.size(), 1);
+    REQUIRE(resp.front()->isResponse());
+
+    // We don't support formatting ignored or unknown files, so the response must be an error.
+    auto error = std::move(resp.front()->asResponse().error);
+    REQUIRE(error.has_value());
+    REQUIRE_NE(error.value()->message.find("Unable to format ignored/unknown file"), std::string::npos);
 }
 
 // Tests that Sorbet reports metrics about the request's response status for certain requests
