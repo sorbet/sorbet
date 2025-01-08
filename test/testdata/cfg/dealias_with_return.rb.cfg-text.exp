@@ -2,7 +2,6 @@ method ::Object#a {
 
 bb0[firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
-    <magic>$6: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -17,10 +16,10 @@ bb1[firstDead=-1]():
 
 # backedges
 # - bb0
-bb3[firstDead=-1](<exceptionValue>$4: Exception, <magic>$6: T.class_of(<Magic>)):
-    <cfgAlias>$9: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$10: T::Boolean = <cfgAlias>$9: T.class_of(StandardError).===(<exceptionValue>$4: Exception)
-    <isaCheckTemp>$10 -> (T::Boolean ? bb7 : bb8)
+bb3[firstDead=-1](<exceptionValue>$4: Exception):
+    <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(<exceptionValue>$4: Exception)
+    <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
@@ -31,24 +30,24 @@ bb4[firstDead=2]():
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<exceptionValue>$4: StandardError, <magic>$6: T.class_of(<Magic>)):
+bb7[firstDead=-1](<exceptionValue>$4: StandardError):
     <exceptionValue>$4: NilClass = nil
-    <keepForCfgTemp>$7: Sorbet::Private::Static::Void = <magic>$6: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$4: NilClass)
+    <keepForCfgTemp>$6: T.untyped = <keep-alive> <exceptionValue>$4
     a: Integer(2) = 2
-    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
+    <gotoDeadTemp>$10 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1]():
-    <gotoDeadTemp>$11: TrueClass = true
-    <gotoDeadTemp>$11 -> (TrueClass ? bb1 : bb9)
+    <gotoDeadTemp>$10: TrueClass = true
+    <gotoDeadTemp>$10 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb7
 # - bb8
 bb9[firstDead=3](a: Integer(2)):
-    <statTemp>$14: Integer(3) = 3
-    <returnMethodTemp>$2: Integer = a: Integer(2).+(<statTemp>$14: Integer(3))
+    <statTemp>$13: Integer(3) = 3
+    <returnMethodTemp>$2: Integer = a: Integer(2).+(<statTemp>$13: Integer(3))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer
     <unconditional> -> bb1
 

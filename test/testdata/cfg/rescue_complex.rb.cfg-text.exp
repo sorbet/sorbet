@@ -166,7 +166,6 @@ method ::TestRescue#multiple_rescue {
 
 bb0[firstDead=-1]():
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -182,51 +181,51 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
-    <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
+bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    <cfgAlias>$7: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$8: T::Boolean = <cfgAlias>$7: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$8 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
+bb4[firstDead=-1](<self>: TestRescue):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$16: NilClass):
-    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb11)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$15: NilClass):
+    <gotoDeadTemp>$15 -> (NilClass ? bb1 : bb11)
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, <magic>$5: T.class_of(<Magic>)):
+bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError):
     <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
+    <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.baz()
-    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb11)
+    <gotoDeadTemp>$15 -> (NilClass ? bb1 : bb11)
 
 # backedges
 # - bb3
-bb8[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
-    <cfgAlias>$13: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$14: T::Boolean = <cfgAlias>$13: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$14 -> (T::Boolean ? bb9 : bb10)
+bb8[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    <cfgAlias>$12: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$13: T::Boolean = <cfgAlias>$12: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$13 -> (T::Boolean ? bb9 : bb10)
 
 # backedges
 # - bb8
-bb9[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, <magic>$5: T.class_of(<Magic>)):
+bb9[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError):
     <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$11: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
+    <keepForCfgTemp>$10: T.untyped = <keep-alive> <exceptionValue>$3
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
-    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb11)
+    <gotoDeadTemp>$15 -> (NilClass ? bb1 : bb11)
 
 # backedges
 # - bb8
 bb10[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <gotoDeadTemp>$16: TrueClass = true
-    <gotoDeadTemp>$16 -> (TrueClass ? bb1 : bb11)
+    <gotoDeadTemp>$15: TrueClass = true
+    <gotoDeadTemp>$15 -> (TrueClass ? bb1 : bb11)
 
 # backedges
 # - bb6
@@ -243,7 +242,6 @@ method ::TestRescue#multiple_rescue_classes {
 
 bb0[firstDead=-1]():
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -258,45 +256,45 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
-    <cfgAlias>$8: T.untyped = alias <C T.untyped>
-    <isaCheckTemp>$9: T.untyped = <cfgAlias>$8: T.untyped.===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$9 -> (T.untyped ? bb7 : bb8)
+bb3[firstDead=-1](<returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    <cfgAlias>$7: T.untyped = alias <C T.untyped>
+    <isaCheckTemp>$8: T.untyped = <cfgAlias>$7: T.untyped.===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$8 -> (T.untyped ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
+bb4[firstDead=-1](<self>: TestRescue):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$13: NilClass):
-    <gotoDeadTemp>$13 -> (NilClass ? bb1 : bb10)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$12: NilClass):
+    <gotoDeadTemp>$12 -> (NilClass ? bb1 : bb10)
 
 # backedges
 # - bb3
 # - bb8
-bb7[firstDead=-1](<exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
+bb7[firstDead=-1](<exceptionValue>$3: Exception):
     baz: Exception = <exceptionValue>$3
     <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
+    <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
     <returnMethodTemp>$2: Exception = baz
-    <gotoDeadTemp>$13 -> (NilClass ? bb1 : bb10)
+    <gotoDeadTemp>$12 -> (NilClass ? bb1 : bb10)
 
 # backedges
 # - bb3
-bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
-    <cfgAlias>$11: T.untyped = alias <C T.untyped>
-    <isaCheckTemp>$12: T.untyped = <cfgAlias>$11: T.untyped.===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$12 -> (T.untyped ? bb7 : bb9)
+bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    <cfgAlias>$10: T.untyped = alias <C T.untyped>
+    <isaCheckTemp>$11: T.untyped = <cfgAlias>$10: T.untyped.===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$11 -> (T.untyped ? bb7 : bb9)
 
 # backedges
 # - bb8
 bb9[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <gotoDeadTemp>$13: TrueClass = true
-    <gotoDeadTemp>$13 -> (TrueClass ? bb1 : bb10)
+    <gotoDeadTemp>$12: TrueClass = true
+    <gotoDeadTemp>$12 -> (TrueClass ? bb1 : bb10)
 
 # backedges
 # - bb6
@@ -312,7 +310,6 @@ method ::TestRescue#multiple_rescue_classes_varuse {
 
 bb0[firstDead=-1]():
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$6: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -327,52 +324,52 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<exceptionValue>$4: Exception, <magic>$6: T.class_of(<Magic>)):
-    <cfgAlias>$9: T.class_of(LoadError) = alias <C LoadError>
-    <isaCheckTemp>$10: T::Boolean = <cfgAlias>$9: T.class_of(LoadError).===(<exceptionValue>$4: Exception)
-    <isaCheckTemp>$10 -> (T::Boolean ? bb7 : bb8)
+bb3[firstDead=-1](<exceptionValue>$4: Exception):
+    <cfgAlias>$8: T.class_of(LoadError) = alias <C LoadError>
+    <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(LoadError).===(<exceptionValue>$4: Exception)
+    <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue, <magic>$6: T.class_of(<Magic>)):
+bb4[firstDead=-1](<self>: TestRescue):
     <statTemp>$3: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb6[firstDead=-1](baz: NilClass, <gotoDeadTemp>$14: NilClass):
-    <gotoDeadTemp>$14 -> (NilClass ? bb1 : bb10)
+bb6[firstDead=-1](baz: NilClass, <gotoDeadTemp>$13: NilClass):
+    <gotoDeadTemp>$13 -> (NilClass ? bb1 : bb10)
 
 # backedges
 # - bb3
 # - bb8
-bb7[firstDead=-1](<exceptionValue>$4: T.any(LoadError, SocketError), <magic>$6: T.class_of(<Magic>)):
+bb7[firstDead=-1](<exceptionValue>$4: T.any(LoadError, SocketError)):
     baz: T.any(LoadError, SocketError) = <exceptionValue>$4
     <exceptionValue>$4: NilClass = nil
-    <keepForCfgTemp>$7: Sorbet::Private::Static::Void = <magic>$6: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$4: NilClass)
-    <gotoDeadTemp>$14 -> (NilClass ? bb1 : bb10)
+    <keepForCfgTemp>$6: T.untyped = <keep-alive> <exceptionValue>$4
+    <gotoDeadTemp>$13 -> (NilClass ? bb1 : bb10)
 
 # backedges
 # - bb3
-bb8[firstDead=-1](<exceptionValue>$4: Exception, <magic>$6: T.class_of(<Magic>)):
-    <cfgAlias>$12: T.class_of(SocketError) = alias <C SocketError>
-    <isaCheckTemp>$13: T::Boolean = <cfgAlias>$12: T.class_of(SocketError).===(<exceptionValue>$4: Exception)
-    <isaCheckTemp>$13 -> (T::Boolean ? bb7 : bb9)
+bb8[firstDead=-1](<exceptionValue>$4: Exception):
+    <cfgAlias>$11: T.class_of(SocketError) = alias <C SocketError>
+    <isaCheckTemp>$12: T::Boolean = <cfgAlias>$11: T.class_of(SocketError).===(<exceptionValue>$4: Exception)
+    <isaCheckTemp>$12 -> (T::Boolean ? bb7 : bb9)
 
 # backedges
 # - bb8
 bb9[firstDead=-1]():
-    <gotoDeadTemp>$14: TrueClass = true
-    <gotoDeadTemp>$14 -> (TrueClass ? bb1 : bb10)
+    <gotoDeadTemp>$13: TrueClass = true
+    <gotoDeadTemp>$13 -> (TrueClass ? bb1 : bb10)
 
 # backedges
 # - bb6
 # - bb7
 # - bb9
 bb10[firstDead=3](baz: T.nilable(T.any(LoadError, SocketError))):
-    <cfgAlias>$17: T.class_of(T) = alias <C T>
-    <returnMethodTemp>$2: T.nilable(T.any(LoadError, SocketError)) = <cfgAlias>$17: T.class_of(T).reveal_type(baz: T.nilable(T.any(LoadError, SocketError)))
+    <cfgAlias>$16: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: T.nilable(T.any(LoadError, SocketError)) = <cfgAlias>$16: T.class_of(T).reveal_type(baz: T.nilable(T.any(LoadError, SocketError)))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(T.any(LoadError, SocketError))
     <unconditional> -> bb1
 
@@ -403,7 +400,7 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb13
-bb2[firstDead=-1](<self>: TestRescue, ex: T.nilable(StandardError), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: NilClass, <gotoDeadTemp>$22: NilClass):
+bb2[firstDead=-1](<self>: TestRescue, ex: T.nilable(StandardError), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: NilClass, <gotoDeadTemp>$21: NilClass):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
@@ -416,26 +413,25 @@ bb3[firstDead=1](<block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfR
 
 # backedges
 # - bb2
-bb5[firstDead=-1](<self>: TestRescue, ex: T.nilable(StandardError), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: NilClass, <gotoDeadTemp>$22: NilClass):
+bb5[firstDead=-1](<self>: TestRescue, ex: T.nilable(StandardError), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: NilClass, <gotoDeadTemp>$21: NilClass):
     # outerLoops: 1
     <self>: TestRescue = loadSelf(loop)
     ex: NilClass = nil
-    <magic>$17: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$15: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$15 -> (T.nilable(Exception) ? bb7 : bb8)
 
 # backedges
 # - bb5
 # - bb8
-bb7[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <exceptionValue>$15: Exception, <magic>$17: T.class_of(<Magic>), <gotoDeadTemp>$22: NilClass):
+bb7[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <exceptionValue>$15: Exception, <gotoDeadTemp>$21: NilClass):
     # outerLoops: 1
-    <cfgAlias>$20: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$21: T::Boolean = <cfgAlias>$20: T.class_of(StandardError).===(<exceptionValue>$15: Exception)
-    <isaCheckTemp>$21 -> (T::Boolean ? bb11 : bb12)
+    <cfgAlias>$19: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$20: T::Boolean = <cfgAlias>$19: T.class_of(StandardError).===(<exceptionValue>$15: Exception)
+    <isaCheckTemp>$20 -> (T::Boolean ? bb11 : bb12)
 
 # backedges
 # - bb5
-bb8[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <magic>$17: T.class_of(<Magic>), <gotoDeadTemp>$22: NilClass):
+bb8[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <gotoDeadTemp>$21: NilClass):
     # outerLoops: 1
     <blockReturnTemp>$13: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$15: T.nilable(Exception) = <get-current-exception>
@@ -443,33 +439,33 @@ bb8[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: So
 
 # backedges
 # - bb8
-bb10[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <gotoDeadTemp>$22: NilClass):
+bb10[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <gotoDeadTemp>$21: NilClass):
     # outerLoops: 1
-    <gotoDeadTemp>$22 -> (NilClass ? bb1 : bb13)
+    <gotoDeadTemp>$21 -> (NilClass ? bb1 : bb13)
 
 # backedges
 # - bb7
-bb11[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <exceptionValue>$15: StandardError, <magic>$17: T.class_of(<Magic>), <gotoDeadTemp>$22: NilClass):
+bb11[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <exceptionValue>$15: StandardError, <gotoDeadTemp>$21: NilClass):
     # outerLoops: 1
     ex: StandardError = <exceptionValue>$15
     <exceptionValue>$15: NilClass = nil
-    <keepForCfgTemp>$18: Sorbet::Private::Static::Void = <magic>$17: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$15: NilClass)
-    <gotoDeadTemp>$22 -> (NilClass ? bb1 : bb13)
+    <keepForCfgTemp>$17: T.untyped = <keep-alive> <exceptionValue>$15
+    <gotoDeadTemp>$21 -> (NilClass ? bb1 : bb13)
 
 # backedges
 # - bb7
 bb12[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped):
     # outerLoops: 1
-    <gotoDeadTemp>$22: TrueClass = true
-    <gotoDeadTemp>$22 -> (TrueClass ? bb1 : bb13)
+    <gotoDeadTemp>$21: TrueClass = true
+    <gotoDeadTemp>$21 -> (TrueClass ? bb1 : bb13)
 
 # backedges
 # - bb10
 # - bb11
 # - bb12
-bb13[firstDead=1](<self>: TestRescue, ex: T.nilable(StandardError), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <gotoDeadTemp>$22: NilClass):
+bb13[firstDead=1](<self>: TestRescue, ex: T.nilable(StandardError), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <gotoDeadTemp>$21: NilClass):
     # outerLoops: 1
-    <blockReturnTemp>$24: T.noreturn = blockreturn<loop> <blockReturnTemp>$13: T.untyped
+    <blockReturnTemp>$23: T.noreturn = blockreturn<loop> <blockReturnTemp>$13: T.untyped
     <unconditional> -> bb2
 
 }
@@ -478,7 +474,6 @@ method ::TestRescue#rescue_untyped_splat {
 
 bb0[firstDead=-1]():
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -493,40 +488,40 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
-    <cfgAlias>$9: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$10: T.untyped = <self>: TestRescue.untyped_exceptions()
-    <exceptionClassTemp>$7: T.untyped = <cfgAlias>$9: T.class_of(<Magic>).<splat>(<statTemp>$10: T.untyped)
-    <isaCheckTemp>$12: T.untyped = <exceptionClassTemp>$7: T.untyped.===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$12 -> (T.untyped ? bb7 : bb8)
+bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    <cfgAlias>$8: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$9: T.untyped = <self>: TestRescue.untyped_exceptions()
+    <exceptionClassTemp>$6: T.untyped = <cfgAlias>$8: T.class_of(<Magic>).<splat>(<statTemp>$9: T.untyped)
+    <isaCheckTemp>$11: T.untyped = <exceptionClassTemp>$6: T.untyped.===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$11 -> (T.untyped ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
+bb4[firstDead=-1](<self>: TestRescue):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$16: NilClass):
-    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb9)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$15: NilClass):
+    <gotoDeadTemp>$15 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
+bb7[firstDead=-1](<exceptionValue>$3: Exception):
     e: Exception = <exceptionValue>$3
     <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
-    <cfgAlias>$14: T.class_of(T) = alias <C T>
-    <returnMethodTemp>$2: Exception = <cfgAlias>$14: T.class_of(T).reveal_type(e: Exception)
-    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb9)
+    <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
+    <cfgAlias>$13: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: Exception = <cfgAlias>$13: T.class_of(T).reveal_type(e: Exception)
+    <gotoDeadTemp>$15 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <gotoDeadTemp>$16: TrueClass = true
-    <gotoDeadTemp>$16 -> (TrueClass ? bb1 : bb9)
+    <gotoDeadTemp>$15: TrueClass = true
+    <gotoDeadTemp>$15 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
@@ -542,7 +537,6 @@ method ::TestRescue#rescue_typed_splat {
 
 bb0[firstDead=-1]():
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -557,40 +551,40 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
-    <cfgAlias>$9: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$10: T::Array[T.class_of(Exception)] = <self>: TestRescue.typed_exceptions()
-    <exceptionClassTemp>$7: T::Array[T.class_of(Exception)] = <cfgAlias>$9: T.class_of(<Magic>).<splat>(<statTemp>$10: T::Array[T.class_of(Exception)])
-    <isaCheckTemp>$12: T::Boolean = <exceptionClassTemp>$7: T::Array[T.class_of(Exception)].===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$12 -> (T::Boolean ? bb7 : bb8)
+bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    <cfgAlias>$8: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$9: T::Array[T.class_of(Exception)] = <self>: TestRescue.typed_exceptions()
+    <exceptionClassTemp>$6: T::Array[T.class_of(Exception)] = <cfgAlias>$8: T.class_of(<Magic>).<splat>(<statTemp>$9: T::Array[T.class_of(Exception)])
+    <isaCheckTemp>$11: T::Boolean = <exceptionClassTemp>$6: T::Array[T.class_of(Exception)].===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$11 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
+bb4[firstDead=-1](<self>: TestRescue):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$16: NilClass):
-    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb9)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$15: NilClass):
+    <gotoDeadTemp>$15 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
+bb7[firstDead=-1](<exceptionValue>$3: Exception):
     e: Exception = <exceptionValue>$3
     <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
-    <cfgAlias>$14: T.class_of(T) = alias <C T>
-    <returnMethodTemp>$2: Exception = <cfgAlias>$14: T.class_of(T).reveal_type(e: Exception)
-    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb9)
+    <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
+    <cfgAlias>$13: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: Exception = <cfgAlias>$13: T.class_of(T).reveal_type(e: Exception)
+    <gotoDeadTemp>$15 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <gotoDeadTemp>$16: TrueClass = true
-    <gotoDeadTemp>$16 -> (TrueClass ? bb1 : bb9)
+    <gotoDeadTemp>$15: TrueClass = true
+    <gotoDeadTemp>$15 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
@@ -606,7 +600,6 @@ method ::TestRescue#rescue_typed_splat {
 
 bb0[firstDead=-1]():
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -621,40 +614,40 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
-    <cfgAlias>$9: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$10: [T.class_of(TypeError), T.class_of(ArgumentError)] = <self>: TestRescue.tuple_exceptions()
-    <exceptionClassTemp>$7: [T.class_of(TypeError), T.class_of(ArgumentError)] = <cfgAlias>$9: T.class_of(<Magic>).<splat>(<statTemp>$10: [T.class_of(TypeError), T.class_of(ArgumentError)])
-    <isaCheckTemp>$12: T::Boolean = <exceptionClassTemp>$7: [T.class_of(TypeError), T.class_of(ArgumentError)].===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$12 -> (T::Boolean ? bb7 : bb8)
+bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    <cfgAlias>$8: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$9: [T.class_of(TypeError), T.class_of(ArgumentError)] = <self>: TestRescue.tuple_exceptions()
+    <exceptionClassTemp>$6: [T.class_of(TypeError), T.class_of(ArgumentError)] = <cfgAlias>$8: T.class_of(<Magic>).<splat>(<statTemp>$9: [T.class_of(TypeError), T.class_of(ArgumentError)])
+    <isaCheckTemp>$11: T::Boolean = <exceptionClassTemp>$6: [T.class_of(TypeError), T.class_of(ArgumentError)].===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$11 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
+bb4[firstDead=-1](<self>: TestRescue):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$16: NilClass):
-    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb9)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$15: NilClass):
+    <gotoDeadTemp>$15 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
+bb7[firstDead=-1](<exceptionValue>$3: Exception):
     e: Exception = <exceptionValue>$3
     <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
-    <cfgAlias>$14: T.class_of(T) = alias <C T>
-    <returnMethodTemp>$2: Exception = <cfgAlias>$14: T.class_of(T).reveal_type(e: Exception)
-    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb9)
+    <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
+    <cfgAlias>$13: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: Exception = <cfgAlias>$13: T.class_of(T).reveal_type(e: Exception)
+    <gotoDeadTemp>$15 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <gotoDeadTemp>$16: TrueClass = true
-    <gotoDeadTemp>$16 -> (TrueClass ? bb1 : bb9)
+    <gotoDeadTemp>$15: TrueClass = true
+    <gotoDeadTemp>$15 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
@@ -670,7 +663,6 @@ method ::TestRescue#parse_rescue_ensure {
 
 bb0[firstDead=-1]():
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -683,20 +675,321 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
-    <cfgAlias>$11: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$12: T::Boolean = <cfgAlias>$11: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$12 -> (T::Boolean ? bb7 : bb8)
+bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    <cfgAlias>$10: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$11: T::Boolean = <cfgAlias>$10: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$11 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
+bb4[firstDead=-1](<self>: TestRescue):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
+# - bb7
+# - bb8
+bb6[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: T.nilable(Exception), <gotoDeadTemp>$13: T.nilable(TrueClass)):
+    <cfgAlias>$6: T.class_of(T) = alias <C T>
+    <rescueTemp>$2: T.untyped = <cfgAlias>$6: T.class_of(T).unsafe(<exceptionValue>$3: T.nilable(Exception))
+    <throwAwayTemp>$14: T.untyped = <self>: TestRescue.bar()
+    <gotoDeadTemp>$13 -> (T.nilable(TrueClass) ? bb1 : bb9)
+
+# backedges
+# - bb3
+bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError):
+    <exceptionValue>$3: NilClass = nil
+    <keepForCfgTemp>$8: T.untyped = <keep-alive> <exceptionValue>$3
+    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.baz()
+    <unconditional> -> bb6
+
+# backedges
+# - bb3
+bb8[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    <gotoDeadTemp>$13: TrueClass = true
+    <unconditional> -> bb6
+
+# backedges
+# - bb6
+bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+    <unconditional> -> bb1
+
+}
+
+method ::TestRescue#parse_bug_rescue_empty_else {
+
+bb0[firstDead=-1]():
+    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
+
+# backedges
+# - bb6
+# - bb7
+# - bb8
+# - bb9
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+# - bb4
+bb3[firstDead=-1](<exceptionValue>$3: Exception):
+    <cfgAlias>$6: T.class_of(LoadError) = alias <C LoadError>
+    <isaCheckTemp>$7: T::Boolean = <cfgAlias>$6: T.class_of(LoadError).===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$7 -> (T::Boolean ? bb7 : bb8)
+
+# backedges
+# - bb0
+bb4[firstDead=-1]():
+    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
+
+# backedges
+# - bb4
+bb6[firstDead=-1](<gotoDeadTemp>$8: NilClass):
+    <gotoDeadTemp>$8 -> (NilClass ? bb1 : bb9)
+
+# backedges
+# - bb3
+bb7[firstDead=-1](<exceptionValue>$3: LoadError):
+    <exceptionValue>$3: NilClass = nil
+    <keepForCfgTemp>$4: T.untyped = <keep-alive> <exceptionValue>$3
+    <gotoDeadTemp>$8 -> (NilClass ? bb1 : bb9)
+
+# backedges
+# - bb3
+bb8[firstDead=-1]():
+    <gotoDeadTemp>$8: TrueClass = true
+    <gotoDeadTemp>$8 -> (TrueClass ? bb1 : bb9)
+
+# backedges
+# - bb6
+# - bb7
+# - bb8
+bb9[firstDead=1]():
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+}
+
+method ::TestRescue#parse_ruby_bug_12686 {
+
+bb0[firstDead=-1]():
+    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <exceptionValue>$5: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb4)
+
+# backedges
+# - bb6
+# - bb7
+# - bb8
+# - bb9
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+# - bb4
+bb3[firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped, <exceptionValue>$5: Exception):
+    <cfgAlias>$9: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$10: T::Boolean = <cfgAlias>$9: T.class_of(StandardError).===(<exceptionValue>$5: Exception)
+    <isaCheckTemp>$10 -> (T::Boolean ? bb7 : bb8)
+
+# backedges
+# - bb0
+bb4[firstDead=-1](<self>: TestRescue):
+    <statTemp>$4: T.untyped = <self>: TestRescue.bar()
+    <exceptionValue>$5: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb6)
+
+# backedges
+# - bb4
+bb6[firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped, <gotoDeadTemp>$11: NilClass):
+    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
+
+# backedges
+# - bb3
+bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$5: StandardError):
+    <exceptionValue>$5: NilClass = nil
+    <keepForCfgTemp>$7: T.untyped = <keep-alive> <exceptionValue>$5
+    <statTemp>$4: NilClass = nil
+    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
+
+# backedges
+# - bb3
+bb8[firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped):
+    <gotoDeadTemp>$11: TrueClass = true
+    <gotoDeadTemp>$11 -> (TrueClass ? bb1 : bb9)
+
+# backedges
+# - bb6
+# - bb7
+# - bb8
+bb9[firstDead=2](<self>: TestRescue, <statTemp>$4: T.untyped):
+    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.take_arg(<statTemp>$4: T.untyped)
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+    <unconditional> -> bb1
+
+}
+
+method ::TestRescue#parse_rescue_mod {
+
+bb0[firstDead=-1]():
+    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
+
+# backedges
+# - bb6
+# - bb7
+# - bb8
+# - bb9
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+# - bb4
+bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    <cfgAlias>$7: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$8: T::Boolean = <cfgAlias>$7: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$8 -> (T::Boolean ? bb7 : bb8)
+
+# backedges
+# - bb0
+bb4[firstDead=-1](<self>: TestRescue):
+    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
+    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
+
+# backedges
+# - bb4
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$10: NilClass):
+    <gotoDeadTemp>$10 -> (NilClass ? bb1 : bb9)
+
+# backedges
+# - bb3
+bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError):
+    <exceptionValue>$3: NilClass = nil
+    <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
+    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
+    <gotoDeadTemp>$10 -> (NilClass ? bb1 : bb9)
+
+# backedges
+# - bb3
+bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
+    <gotoDeadTemp>$10: TrueClass = true
+    <gotoDeadTemp>$10 -> (TrueClass ? bb1 : bb9)
+
+# backedges
+# - bb6
+# - bb7
+# - bb8
+bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+    <unconditional> -> bb1
+
+}
+
+method ::TestRescue#parse_resbody_list_var {
+
+bb0[firstDead=-1]():
+    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
+
+# backedges
+# - bb6
+# - bb7
+# - bb8
+# - bb9
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+# - bb4
+bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    <exceptionClassTemp>$6: T.untyped = <self>: TestRescue.foo()
+    <isaCheckTemp>$8: T.untyped = <exceptionClassTemp>$6: T.untyped.===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$8 -> (T.untyped ? bb7 : bb8)
+
+# backedges
+# - bb0
+bb4[firstDead=-1](<self>: TestRescue):
+    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
+    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
+
+# backedges
+# - bb4
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$10: NilClass):
+    <gotoDeadTemp>$10 -> (NilClass ? bb1 : bb9)
+
+# backedges
+# - bb3
+bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: Exception):
+    <exceptionValue>$3: NilClass = nil
+    <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
+    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
+    <gotoDeadTemp>$10 -> (NilClass ? bb1 : bb9)
+
+# backedges
+# - bb3
+bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
+    <gotoDeadTemp>$10: TrueClass = true
+    <gotoDeadTemp>$10 -> (TrueClass ? bb1 : bb9)
+
+# backedges
+# - bb6
+# - bb7
+# - bb8
+bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+    <unconditional> -> bb1
+
+}
+
+method ::TestRescue#parse_rescue_else_ensure {
+
+bb0[firstDead=-1]():
+    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
+
+# backedges
+# - bb6
+# - bb9
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+# - bb4
+bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    <cfgAlias>$11: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$12: T::Boolean = <cfgAlias>$11: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$12 -> (T::Boolean ? bb7 : bb8)
+
+# backedges
+# - bb0
+bb4[firstDead=-1](<self>: TestRescue):
+    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
+    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+
+# backedges
+# - bb4
+bb5[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: NilClass):
+    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.foo()
+    <unconditional> -> bb6
+
+# backedges
+# - bb5
 # - bb7
 # - bb8
 bb6[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: T.nilable(Exception), <gotoDeadTemp>$14: T.nilable(TrueClass)):
@@ -707,9 +1000,9 @@ bb6[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptio
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, <magic>$5: T.class_of(<Magic>)):
+bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError):
     <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$9: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
+    <keepForCfgTemp>$9: T.untyped = <keep-alive> <exceptionValue>$3
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.baz()
     <unconditional> -> bb6
 
@@ -727,317 +1020,10 @@ bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
 
 }
 
-method ::TestRescue#parse_bug_rescue_empty_else {
-
-bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$4: T.class_of(<Magic>) = alias <C <Magic>>
-    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
-
-# backedges
-# - bb6
-# - bb7
-# - bb8
-# - bb9
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-# - bb4
-bb3[firstDead=-1](<exceptionValue>$3: Exception, <magic>$4: T.class_of(<Magic>)):
-    <cfgAlias>$7: T.class_of(LoadError) = alias <C LoadError>
-    <isaCheckTemp>$8: T::Boolean = <cfgAlias>$7: T.class_of(LoadError).===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$8 -> (T::Boolean ? bb7 : bb8)
-
-# backedges
-# - bb0
-bb4[firstDead=-1](<magic>$4: T.class_of(<Magic>)):
-    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
-
-# backedges
-# - bb4
-bb6[firstDead=-1](<gotoDeadTemp>$9: NilClass):
-    <gotoDeadTemp>$9 -> (NilClass ? bb1 : bb9)
-
-# backedges
-# - bb3
-bb7[firstDead=-1](<exceptionValue>$3: LoadError, <magic>$4: T.class_of(<Magic>)):
-    <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$5: Sorbet::Private::Static::Void = <magic>$4: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
-    <gotoDeadTemp>$9 -> (NilClass ? bb1 : bb9)
-
-# backedges
-# - bb3
-bb8[firstDead=-1]():
-    <gotoDeadTemp>$9: TrueClass = true
-    <gotoDeadTemp>$9 -> (TrueClass ? bb1 : bb9)
-
-# backedges
-# - bb6
-# - bb7
-# - bb8
-bb9[firstDead=1]():
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-}
-
-method ::TestRescue#parse_ruby_bug_12686 {
-
-bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$7: T.class_of(<Magic>) = alias <C <Magic>>
-    <exceptionValue>$5: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb4)
-
-# backedges
-# - bb6
-# - bb7
-# - bb8
-# - bb9
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-# - bb4
-bb3[firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped, <exceptionValue>$5: Exception, <magic>$7: T.class_of(<Magic>)):
-    <cfgAlias>$10: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$11: T::Boolean = <cfgAlias>$10: T.class_of(StandardError).===(<exceptionValue>$5: Exception)
-    <isaCheckTemp>$11 -> (T::Boolean ? bb7 : bb8)
-
-# backedges
-# - bb0
-bb4[firstDead=-1](<self>: TestRescue, <magic>$7: T.class_of(<Magic>)):
-    <statTemp>$4: T.untyped = <self>: TestRescue.bar()
-    <exceptionValue>$5: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb6)
-
-# backedges
-# - bb4
-bb6[firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped, <gotoDeadTemp>$12: NilClass):
-    <gotoDeadTemp>$12 -> (NilClass ? bb1 : bb9)
-
-# backedges
-# - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$5: StandardError, <magic>$7: T.class_of(<Magic>)):
-    <exceptionValue>$5: NilClass = nil
-    <keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$5: NilClass)
-    <statTemp>$4: NilClass = nil
-    <gotoDeadTemp>$12 -> (NilClass ? bb1 : bb9)
-
-# backedges
-# - bb3
-bb8[firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped):
-    <gotoDeadTemp>$12: TrueClass = true
-    <gotoDeadTemp>$12 -> (TrueClass ? bb1 : bb9)
-
-# backedges
-# - bb6
-# - bb7
-# - bb8
-bb9[firstDead=2](<self>: TestRescue, <statTemp>$4: T.untyped):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.take_arg(<statTemp>$4: T.untyped)
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
-    <unconditional> -> bb1
-
-}
-
-method ::TestRescue#parse_rescue_mod {
-
-bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
-    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
-
-# backedges
-# - bb6
-# - bb7
-# - bb8
-# - bb9
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-# - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
-    <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
-
-# backedges
-# - bb0
-bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
-    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
-
-# backedges
-# - bb4
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: NilClass):
-    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
-
-# backedges
-# - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, <magic>$5: T.class_of(<Magic>)):
-    <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
-    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
-
-# backedges
-# - bb3
-bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <gotoDeadTemp>$11: TrueClass = true
-    <gotoDeadTemp>$11 -> (TrueClass ? bb1 : bb9)
-
-# backedges
-# - bb6
-# - bb7
-# - bb8
-bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
-    <unconditional> -> bb1
-
-}
-
-method ::TestRescue#parse_resbody_list_var {
-
-bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
-    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
-
-# backedges
-# - bb6
-# - bb7
-# - bb8
-# - bb9
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-# - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
-    <exceptionClassTemp>$7: T.untyped = <self>: TestRescue.foo()
-    <isaCheckTemp>$9: T.untyped = <exceptionClassTemp>$7: T.untyped.===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$9 -> (T.untyped ? bb7 : bb8)
-
-# backedges
-# - bb0
-bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
-    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
-
-# backedges
-# - bb4
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: NilClass):
-    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
-
-# backedges
-# - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
-    <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
-    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
-
-# backedges
-# - bb3
-bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <gotoDeadTemp>$11: TrueClass = true
-    <gotoDeadTemp>$11 -> (TrueClass ? bb1 : bb9)
-
-# backedges
-# - bb6
-# - bb7
-# - bb8
-bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
-    <unconditional> -> bb1
-
-}
-
-method ::TestRescue#parse_rescue_else_ensure {
-
-bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$6: T.class_of(<Magic>) = alias <C <Magic>>
-    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
-
-# backedges
-# - bb6
-# - bb9
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-# - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$6: T.class_of(<Magic>)):
-    <cfgAlias>$12: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$13: T::Boolean = <cfgAlias>$12: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$13 -> (T::Boolean ? bb7 : bb8)
-
-# backedges
-# - bb0
-bb4[firstDead=-1](<self>: TestRescue, <magic>$6: T.class_of(<Magic>)):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
-    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
-
-# backedges
-# - bb4
-bb5[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: NilClass):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.foo()
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: T.nilable(Exception), <gotoDeadTemp>$15: T.nilable(TrueClass)):
-    <cfgAlias>$8: T.class_of(T) = alias <C T>
-    <rescueTemp>$2: T.untyped = <cfgAlias>$8: T.class_of(T).unsafe(<exceptionValue>$3: T.nilable(Exception))
-    <throwAwayTemp>$16: T.untyped = <self>: TestRescue.bar()
-    <gotoDeadTemp>$15 -> (T.nilable(TrueClass) ? bb1 : bb9)
-
-# backedges
-# - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, <magic>$6: T.class_of(<Magic>)):
-    <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$10: Sorbet::Private::Static::Void = <magic>$6: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.baz()
-    <unconditional> -> bb6
-
-# backedges
-# - bb3
-bb8[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
-    <gotoDeadTemp>$15: TrueClass = true
-    <unconditional> -> bb6
-
-# backedges
-# - bb6
-bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
-    <unconditional> -> bb1
-
-}
-
 method ::TestRescue#parse_rescue {
 
 bb0[firstDead=-1]():
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -1052,36 +1038,36 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
-    <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
+bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    <cfgAlias>$7: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$8: T::Boolean = <cfgAlias>$7: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$8 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
+bb4[firstDead=-1](<self>: TestRescue):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: NilClass):
-    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$10: NilClass):
+    <gotoDeadTemp>$10 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, <magic>$5: T.class_of(<Magic>)):
+bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError):
     <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
+    <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.foo()
-    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
+    <gotoDeadTemp>$10 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <gotoDeadTemp>$11: TrueClass = true
-    <gotoDeadTemp>$11 -> (TrueClass ? bb1 : bb9)
+    <gotoDeadTemp>$10: TrueClass = true
+    <gotoDeadTemp>$10 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
@@ -1097,7 +1083,6 @@ method ::TestRescue#parse_resbody_var {
 
 bb0[firstDead=-1]():
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -1112,36 +1097,36 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
-    <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
+bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    <cfgAlias>$7: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$8: T::Boolean = <cfgAlias>$7: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$8 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
+bb4[firstDead=-1](<self>: TestRescue):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: NilClass):
-    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$10: NilClass):
+    <gotoDeadTemp>$10 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, <magic>$5: T.class_of(<Magic>)):
+bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError):
     <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
+    <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
-    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
+    <gotoDeadTemp>$10 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <gotoDeadTemp>$11: TrueClass = true
-    <gotoDeadTemp>$11 -> (TrueClass ? bb1 : bb9)
+    <gotoDeadTemp>$10: TrueClass = true
+    <gotoDeadTemp>$10 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
@@ -1156,9 +1141,8 @@ bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
 method ::TestRescue#parse_resbody_var_1 {
 
 bb0[firstDead=-1]():
-    @ex$11: T.nilable(StandardError) = alias @ex
+    @ex$10: T.nilable(StandardError) = alias @ex
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -1173,38 +1157,38 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>), @ex$11: T.nilable(StandardError)):
-    <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
+bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, @ex$10: T.nilable(StandardError)):
+    <cfgAlias>$7: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$8: T::Boolean = <cfgAlias>$7: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$8 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>), @ex$11: T.nilable(StandardError)):
+bb4[firstDead=-1](<self>: TestRescue, @ex$10: T.nilable(StandardError)):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$13: NilClass):
-    <gotoDeadTemp>$13 -> (NilClass ? bb1 : bb9)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$12: NilClass):
+    <gotoDeadTemp>$12 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, <magic>$5: T.class_of(<Magic>), @ex$11: T.nilable(StandardError)):
+bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, @ex$10: T.nilable(StandardError)):
     <rescueTemp>$2: StandardError = <exceptionValue>$3
     <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
-    @ex$11: StandardError = <rescueTemp>$2
+    <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
+    @ex$10: StandardError = <rescueTemp>$2
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
-    <gotoDeadTemp>$13 -> (NilClass ? bb1 : bb9)
+    <gotoDeadTemp>$12 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <gotoDeadTemp>$13: TrueClass = true
-    <gotoDeadTemp>$13 -> (TrueClass ? bb1 : bb9)
+    <gotoDeadTemp>$12: TrueClass = true
+    <gotoDeadTemp>$12 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
@@ -1221,7 +1205,6 @@ method ::TestRescue#parse_rescue_mod_op_assign {
 bb0[firstDead=-1]():
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
     <statTemp>$3: NilClass = foo
-    <magic>$7: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$5: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -1236,36 +1219,36 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <statTemp>$3: NilClass, <statTemp>$4: T.untyped, <exceptionValue>$5: Exception, <magic>$7: T.class_of(<Magic>)):
-    <cfgAlias>$10: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$11: T::Boolean = <cfgAlias>$10: T.class_of(StandardError).===(<exceptionValue>$5: Exception)
-    <isaCheckTemp>$11 -> (T::Boolean ? bb7 : bb8)
+bb3[firstDead=-1](<self>: TestRescue, <statTemp>$3: NilClass, <statTemp>$4: T.untyped, <exceptionValue>$5: Exception):
+    <cfgAlias>$9: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$10: T::Boolean = <cfgAlias>$9: T.class_of(StandardError).===(<exceptionValue>$5: Exception)
+    <isaCheckTemp>$10 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue, <statTemp>$3: NilClass, <magic>$7: T.class_of(<Magic>)):
+bb4[firstDead=-1](<self>: TestRescue, <statTemp>$3: NilClass):
     <statTemp>$4: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$5: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb6[firstDead=-1](<statTemp>$3: NilClass, <statTemp>$4: T.untyped, <gotoDeadTemp>$13: NilClass):
-    <gotoDeadTemp>$13 -> (NilClass ? bb1 : bb9)
+bb6[firstDead=-1](<statTemp>$3: NilClass, <statTemp>$4: T.untyped, <gotoDeadTemp>$12: NilClass):
+    <gotoDeadTemp>$12 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <statTemp>$3: NilClass, <exceptionValue>$5: StandardError, <magic>$7: T.class_of(<Magic>)):
+bb7[firstDead=-1](<self>: TestRescue, <statTemp>$3: NilClass, <exceptionValue>$5: StandardError):
     <exceptionValue>$5: NilClass = nil
-    <keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$5: NilClass)
+    <keepForCfgTemp>$7: T.untyped = <keep-alive> <exceptionValue>$5
     <statTemp>$4: T.untyped = <self>: TestRescue.bar()
-    <gotoDeadTemp>$13 -> (NilClass ? bb1 : bb9)
+    <gotoDeadTemp>$12 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<statTemp>$3: NilClass, <statTemp>$4: T.untyped):
-    <gotoDeadTemp>$13: TrueClass = true
-    <gotoDeadTemp>$13 -> (TrueClass ? bb1 : bb9)
+    <gotoDeadTemp>$12: TrueClass = true
+    <gotoDeadTemp>$12 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
@@ -1283,7 +1266,6 @@ method ::TestRescue#parse_ruby_bug_12402 {
 
 bb0[firstDead=-1]():
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <magic>$7: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -1298,14 +1280,14 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](foo: NilClass, <exceptionValue>$3: Exception, <magic>$7: T.class_of(<Magic>)):
-    <cfgAlias>$10: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$11: T::Boolean = <cfgAlias>$10: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$11 -> (T::Boolean ? bb7 : bb8)
+bb3[firstDead=-1](foo: NilClass, <exceptionValue>$3: Exception):
+    <cfgAlias>$9: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$10: T::Boolean = <cfgAlias>$9: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$10 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=2](<self>: TestRescue, <magic>$7: T.class_of(<Magic>)):
+bb4[firstDead=2](<self>: TestRescue):
     <statTemp>$5: T.untyped = <self>: TestRescue.bar()
     foo: T.noreturn = <self>: TestRescue.raise(<statTemp>$5: T.untyped)
     <exceptionValue>$3 = <get-current-exception>
@@ -1313,22 +1295,22 @@ bb4[firstDead=2](<self>: TestRescue, <magic>$7: T.class_of(<Magic>)):
 
 # backedges
 # - bb4
-bb6[firstDead=0](foo: NilClass, <gotoDeadTemp>$12: NilClass):
-    <gotoDeadTemp>$12 -> (<nullptr> ? bb1 : bb9)
+bb6[firstDead=0](foo: NilClass, <gotoDeadTemp>$11: NilClass):
+    <gotoDeadTemp>$11 -> (<nullptr> ? bb1 : bb9)
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<exceptionValue>$3: StandardError, <magic>$7: T.class_of(<Magic>)):
+bb7[firstDead=-1](<exceptionValue>$3: StandardError):
     <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
+    <keepForCfgTemp>$7: T.untyped = <keep-alive> <exceptionValue>$3
     foo: NilClass = nil
-    <gotoDeadTemp>$12 -> (NilClass ? bb1 : bb9)
+    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](foo: NilClass):
-    <gotoDeadTemp>$12: TrueClass = true
-    <gotoDeadTemp>$12 -> (TrueClass ? bb1 : bb9)
+    <gotoDeadTemp>$11: TrueClass = true
+    <gotoDeadTemp>$11 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
@@ -1346,7 +1328,6 @@ method ::TestRescue#parse_ruby_bug_12402_1 {
 bb0[firstDead=-1]():
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
     <statTemp>$3: NilClass = foo
-    <magic>$9: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$5: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -1361,14 +1342,14 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<statTemp>$3: NilClass, <statTemp>$4: NilClass, <exceptionValue>$5: Exception, <magic>$9: T.class_of(<Magic>)):
-    <cfgAlias>$12: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$13: T::Boolean = <cfgAlias>$12: T.class_of(StandardError).===(<exceptionValue>$5: Exception)
-    <isaCheckTemp>$13 -> (T::Boolean ? bb7 : bb8)
+bb3[firstDead=-1](<statTemp>$3: NilClass, <statTemp>$4: NilClass, <exceptionValue>$5: Exception):
+    <cfgAlias>$11: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$12: T::Boolean = <cfgAlias>$11: T.class_of(StandardError).===(<exceptionValue>$5: Exception)
+    <isaCheckTemp>$12 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=2](<self>: TestRescue, <statTemp>$3: NilClass, <magic>$9: T.class_of(<Magic>)):
+bb4[firstDead=2](<self>: TestRescue, <statTemp>$3: NilClass):
     <statTemp>$7: T.untyped = <self>: TestRescue.bar()
     <statTemp>$4: T.noreturn = <self>: TestRescue.raise(<statTemp>$7: T.untyped)
     <exceptionValue>$5 = <get-current-exception>
@@ -1376,22 +1357,22 @@ bb4[firstDead=2](<self>: TestRescue, <statTemp>$3: NilClass, <magic>$9: T.class_
 
 # backedges
 # - bb4
-bb6[firstDead=0](<statTemp>$3: NilClass, <statTemp>$4: NilClass, <gotoDeadTemp>$14: NilClass):
-    <gotoDeadTemp>$14 -> (<nullptr> ? bb1 : bb9)
+bb6[firstDead=0](<statTemp>$3: NilClass, <statTemp>$4: NilClass, <gotoDeadTemp>$13: NilClass):
+    <gotoDeadTemp>$13 -> (<nullptr> ? bb1 : bb9)
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<statTemp>$3: NilClass, <exceptionValue>$5: StandardError, <magic>$9: T.class_of(<Magic>)):
+bb7[firstDead=-1](<statTemp>$3: NilClass, <exceptionValue>$5: StandardError):
     <exceptionValue>$5: NilClass = nil
-    <keepForCfgTemp>$10: Sorbet::Private::Static::Void = <magic>$9: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$5: NilClass)
+    <keepForCfgTemp>$9: T.untyped = <keep-alive> <exceptionValue>$5
     <statTemp>$4: NilClass = nil
-    <gotoDeadTemp>$14 -> (NilClass ? bb1 : bb9)
+    <gotoDeadTemp>$13 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<statTemp>$3: NilClass, <statTemp>$4: NilClass):
-    <gotoDeadTemp>$14: TrueClass = true
-    <gotoDeadTemp>$14 -> (TrueClass ? bb1 : bb9)
+    <gotoDeadTemp>$13: TrueClass = true
+    <gotoDeadTemp>$13 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
@@ -1412,7 +1393,6 @@ bb0[firstDead=-1]():
     []$3: T.untyped = <self>: TestRescue.foo()
     []$4: Integer(0) = 0
     <statTemp>$9: T.untyped = []$3: T.untyped.[]([]$4: Integer(0))
-    <magic>$17: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$13: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$13 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -1427,14 +1407,14 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <statTemp>$12: NilClass, <exceptionValue>$13: Exception, <magic>$17: T.class_of(<Magic>)):
-    <cfgAlias>$20: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$21: T::Boolean = <cfgAlias>$20: T.class_of(StandardError).===(<exceptionValue>$13: Exception)
-    <isaCheckTemp>$21 -> (T::Boolean ? bb7 : bb8)
+bb3[firstDead=-1]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <statTemp>$12: NilClass, <exceptionValue>$13: Exception):
+    <cfgAlias>$19: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$20: T::Boolean = <cfgAlias>$19: T.class_of(StandardError).===(<exceptionValue>$13: Exception)
+    <isaCheckTemp>$20 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=2](<self>: TestRescue, []$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <magic>$17: T.class_of(<Magic>)):
+bb4[firstDead=2](<self>: TestRescue, []$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped):
     <statTemp>$15: T.untyped = <self>: TestRescue.bar()
     <statTemp>$12: T.noreturn = <self>: TestRescue.raise(<statTemp>$15: T.untyped)
     <exceptionValue>$13 = <get-current-exception>
@@ -1442,22 +1422,22 @@ bb4[firstDead=2](<self>: TestRescue, []$3: T.untyped, []$4: Integer(0), <statTem
 
 # backedges
 # - bb4
-bb6[firstDead=0]([]$3: NilClass, []$4: NilClass, <statTemp>$9: NilClass, <statTemp>$12: NilClass, <gotoDeadTemp>$22: NilClass):
-    <gotoDeadTemp>$22 -> (<nullptr> ? bb1 : bb9)
+bb6[firstDead=0]([]$3: NilClass, []$4: NilClass, <statTemp>$9: NilClass, <statTemp>$12: NilClass, <gotoDeadTemp>$21: NilClass):
+    <gotoDeadTemp>$21 -> (<nullptr> ? bb1 : bb9)
 
 # backedges
 # - bb3
-bb7[firstDead=-1]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <exceptionValue>$13: StandardError, <magic>$17: T.class_of(<Magic>)):
+bb7[firstDead=-1]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <exceptionValue>$13: StandardError):
     <exceptionValue>$13: NilClass = nil
-    <keepForCfgTemp>$18: Sorbet::Private::Static::Void = <magic>$17: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$13: NilClass)
+    <keepForCfgTemp>$17: T.untyped = <keep-alive> <exceptionValue>$13
     <statTemp>$12: NilClass = nil
-    <gotoDeadTemp>$22 -> (NilClass ? bb1 : bb9)
+    <gotoDeadTemp>$21 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <statTemp>$12: NilClass):
-    <gotoDeadTemp>$22: TrueClass = true
-    <gotoDeadTemp>$22 -> (TrueClass ? bb1 : bb9)
+    <gotoDeadTemp>$21: TrueClass = true
+    <gotoDeadTemp>$21 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
