@@ -319,14 +319,14 @@ public:
         setPackageLocs(ctx, original.name.loc(), original.symbol);
     }
 
-    static ast::ParsedFile run(core::GlobalState &gs, ast::ParsedFile f) {
+    static void run(core::GlobalState &gs, ast::ParsedFile &f) {
         if (!f.file.data(gs).isPackage()) {
-            return f;
+            return;
         }
 
         auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
         if (!pkgName.exists()) {
-            return f;
+            return;
         }
 
         const auto &package = gs.packageDB().getPackageInfo(pkgName);
@@ -356,8 +356,6 @@ public:
                 pass.recursiveExportSymbol(gs, true, pkgTestRoot);
             }
         }
-
-        return f;
     }
 };
 
@@ -636,7 +634,7 @@ std::vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, Worke
     {
         Timer timeit(gs.tracer(), "visibility_checker.propagate_visibility");
         for (auto &f : files) {
-            f = PropagateVisibility::run(gs, std::move(f));
+            PropagateVisibility::run(gs, f);
         }
     }
 
