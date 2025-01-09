@@ -99,7 +99,7 @@ INSN(SolveConstraint) : public Instruction {
 public:
     LocalRef send;
     std::shared_ptr<core::SendAndBlockLink> link;
-    SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link, LocalRef send) : send(send), link(link) {
+    SolveConstraint(std::shared_ptr<core::SendAndBlockLink> link, LocalRef send) : send(send), link(std::move(link)) {
         categoryCounterInc("cfg", "solveconstraint");
     };
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
@@ -121,7 +121,7 @@ public:
 
     Send(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core::LocOffsets funLoc, uint16_t numPosArgs,
          const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> &&argLocs, bool isPrivateOk = false,
-         const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
+         std::shared_ptr<core::SendAndBlockLink> link = nullptr);
 
     core::LocOffsets locWithoutBlock(core::LocOffsets bindLoc);
 
@@ -216,7 +216,7 @@ INSN(LoadYieldParams) : public Instruction {
 public:
     std::shared_ptr<core::SendAndBlockLink> link;
 
-    LoadYieldParams(const std::shared_ptr<core::SendAndBlockLink> &link) : link(link) {
+    LoadYieldParams(std::shared_ptr<core::SendAndBlockLink> link) : link(std::move(link)) {
         categoryCounterInc("cfg", "loadyieldparams");
     };
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
