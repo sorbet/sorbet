@@ -66,7 +66,8 @@ public:
         // The number of files that would be checked in the fast path.
         size_t totalChanged = 0;
 
-        // True when we should use the incremental namer.
+        // True when we should use the incremental namer, which happens if a symbol name changed and we brought in
+        // additional related files to check.
         bool useIncrementalNamer = false;
 
         // Extra files that need to be typechecked because the file mentions the name of one of the changed symbols.
