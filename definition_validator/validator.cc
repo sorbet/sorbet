@@ -1081,9 +1081,11 @@ private:
 
             auto indentedMethodDefinition = defineInheritedAbstractMethod(ctx, sym, proto, classOrModuleIndent);
             if (singleLineAndNoBody) {
-                edits.emplace_back(insertAt, fmt::format("\n{}", indentedMethodDefinition));
+                edits.emplace_back(
+                    core::AutocorrectSuggestion::Edit{insertAt, fmt::format("\n{}", indentedMethodDefinition)});
             } else {
-                edits.emplace_back(insertAt, fmt::format("{}\n{}", classOrModuleIndent, indentedMethodDefinition));
+                edits.emplace_back(core::AutocorrectSuggestion::Edit{
+                    insertAt, fmt::format("{}\n{}", classOrModuleIndent, indentedMethodDefinition)});
             }
         }
 
