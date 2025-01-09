@@ -1085,7 +1085,7 @@ private:
                     core::AutocorrectSuggestion::Edit{insertAt, fmt::format("\n{}", indentedMethodDefinition)});
             } else {
                 edits.emplace_back(core::AutocorrectSuggestion::Edit{
-                    insertAt, fmt::format("{}\n{}", classOrModuleIndent, indentedMethodDefinition)});
+                    insertAt, fmt::format("{}\n{}", indentedMethodDefinition, classOrModuleIndent)});
             }
         }
 
