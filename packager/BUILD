@@ -25,5 +25,6 @@ cc_library(
         "//common",
         "//common/concurrency",
         "//core",
+        "@rapidjson",
     ],
 )

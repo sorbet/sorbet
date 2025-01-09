@@ -15,6 +15,7 @@
 #include "core/errors/packager.h"
 #include "core/packages/MangledName.h"
 #include "core/packages/PackageInfo.h"
+#include "rapidjson/writer.h"
 #include <algorithm>
 #include <cctype>
 #include <sstream>
@@ -2017,65 +2018,9 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
 
 namespace {
 
-class ImportFormatter final {
-    const core::GlobalState &gs;
-
-public:
-    ImportFormatter(const core::GlobalState &gs) : gs(gs) {}
-
-    void operator()(std::string *out, const vector<core::NameRef> &name) const {
-        fmt::format_to(back_inserter(*out), "\"{}\"", absl::StrJoin(name, "::", core::packages::NameFormatter(gs)));
-    }
-};
-
-class FileListFormatter final {
-    const core::GlobalState &gs;
-
-public:
-    FileListFormatter(const core::GlobalState &gs) : gs(gs) {}
-
-    void operator()(std::string *out, core::FileRef file) const {
-        out->append("\"");
-        out->append(file.data(gs).path());
-        out->append("\"");
-    }
-};
-
 struct PackageFiles {
     vector<core::FileRef> files;
     vector<core::FileRef> testFiles;
-};
-
-class PackageInfoFormatter final {
-    const core::GlobalState &gs;
-    const UnorderedMap<core::packages::MangledName, PackageFiles> &packageFiles;
-
-public:
-    PackageInfoFormatter(const core::GlobalState &gs,
-                         const UnorderedMap<core::packages::MangledName, PackageFiles> &packageFiles)
-        : gs(gs), packageFiles(packageFiles) {}
-
-    void operator()(std::string *out, core::packages::MangledName mangledName) const {
-        const auto &pkg = gs.packageDB().getPackageInfo(mangledName);
-        out->append("{");
-        out->append("\"name\":");
-        fmt::format_to(back_inserter(*out), "\"{}\",",
-                       absl::StrJoin(pkg.fullName(), "::", core::packages::NameFormatter(gs)));
-        out->append("\"imports\":[");
-        fmt::format_to(back_inserter(*out), "{}", absl::StrJoin(pkg.imports(), ",", ImportFormatter(gs)));
-        out->append("],\"testImports\":[");
-        fmt::format_to(back_inserter(*out), "{}", absl::StrJoin(pkg.testImports(), ",", ImportFormatter(gs)));
-        out->append("],\"files\":[");
-        const auto it = packageFiles.find(mangledName);
-        if (it != packageFiles.end()) {
-            fmt::format_to(back_inserter(*out), "{}", absl::StrJoin(it->second.files, ",", FileListFormatter(gs)));
-        }
-        out->append("], \"testFiles\":[");
-        if (it != packageFiles.end()) {
-            fmt::format_to(back_inserter(*out), "{}", absl::StrJoin(it->second.testFiles, ",", FileListFormatter(gs)));
-        }
-        out->append("]}");
-    }
 };
 
 } // namespace
@@ -2096,12 +2041,61 @@ void Packager::dumpPackageInfo(const core::GlobalState &gs, std::string outputFi
         }
     }
 
-    fmt::memory_buffer out;
-    fmt::format_to(back_inserter(out), "[");
-    fmt::format_to(back_inserter(out), "{}",
-                   absl::StrJoin(pkgDB.packages(), ",", PackageInfoFormatter(gs, packageFiles)));
-    fmt::format_to(back_inserter(out), "]");
-    FileOps::write(outputFile, fmt::to_string(out));
+    rapidjson::StringBuffer result;
+    rapidjson::Writer writer(result);
+
+    writer.StartArray();
+
+    for (auto mangledName : pkgDB.packages()) {
+        const auto &pkg = gs.packageDB().getPackageInfo(mangledName);
+
+        writer.StartObject();
+
+        writer.String("name");
+        writer.String(absl::StrJoin(pkg.fullName(), "::", core::packages::NameFormatter(gs)));
+
+        writer.String("imports");
+        writer.StartArray();
+        for (auto &import : pkg.imports()) {
+            writer.String(absl::StrJoin(import, "::", core::packages::NameFormatter(gs)));
+        }
+        writer.EndArray();
+
+        writer.String("testImports");
+        writer.StartArray();
+        for (auto &import : pkg.testImports()) {
+            writer.String(absl::StrJoin(import, "::", core::packages::NameFormatter(gs)));
+        }
+        writer.EndArray();
+
+        const auto it = packageFiles.find(mangledName);
+
+        writer.String("files");
+        writer.StartArray();
+        if (it != packageFiles.end()) {
+            for (auto file : it->second.files) {
+                auto path = file.data(gs).path();
+                writer.String(path.data(), path.size());
+            }
+        }
+        writer.EndArray();
+
+        writer.String("testFiles");
+        writer.StartArray();
+        if (it != packageFiles.end()) {
+            for (auto file : it->second.testFiles) {
+                auto path = file.data(gs).path();
+                writer.String(path.data(), path.size());
+            }
+        }
+        writer.EndArray();
+
+        writer.EndObject();
+    }
+
+    writer.EndArray();
+
+    FileOps::write(outputFile, result.GetString());
 }
 
 } // namespace sorbet::packager
