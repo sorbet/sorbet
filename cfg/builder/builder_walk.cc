@@ -682,32 +682,32 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         auto newCctx = cctx.withTarget(blockrv)
                                            .withBlockBreakTarget(cctx.target)
                                            .withLoopScope(headerBlock, postBlock, true)
-                                           .withSendAndBlockLink(std::move(link));
+                                           .withSendAndBlockLink(link);
                         if (isKernelLambda(s)) {
                             newCctx.isInsideLambda = true;
                         }
                         blockLast = walk(newCctx, s.block()->body, argBlock);
-                        if (blockLast != cctx.inWhat.deadBlock()) {
-                            LocalRef dead = cctx.newTemporary(core::Names::blockReturnTemp());
+                    }
+                    if (blockLast != cctx.inWhat.deadBlock()) {
+                        LocalRef dead = cctx.newTemporary(core::Names::blockReturnTemp());
 
-                            core::LocOffsets blockReturnLoc = s.block()->loc;
-                            if (blockLast->exprs.empty() || isa_instruction<LoadSelf>(blockLast->exprs.back().value) ||
-                                isa_instruction<YieldLoadArg>(blockLast->exprs.back().value)) {
-                                auto blockEndPos = blockReturnLoc.copyEndWithZeroLength();
-                                auto endKwLoc = cctx.ctx.locAt(blockEndPos).adjustLen(cctx.ctx, -3, 3);
-                                auto endBraceLoc = cctx.ctx.locAt(blockEndPos).adjustLen(cctx.ctx, -1, 1);
-                                if (endKwLoc.source(cctx.ctx) == "end") {
-                                    blockReturnLoc = endKwLoc.offsets();
-                                } else if (endBraceLoc.source(cctx.ctx) == "}") {
-                                    blockReturnLoc = endBraceLoc.offsets();
-                                }
-                            } else {
-                                blockReturnLoc = blockLast->exprs.back().loc;
+                        core::LocOffsets blockReturnLoc = s.block()->loc;
+                        if (blockLast->exprs.empty() || isa_instruction<LoadSelf>(blockLast->exprs.back().value) ||
+                            isa_instruction<YieldLoadArg>(blockLast->exprs.back().value)) {
+                            auto blockEndPos = blockReturnLoc.copyEndWithZeroLength();
+                            auto endKwLoc = cctx.ctx.locAt(blockEndPos).adjustLen(cctx.ctx, -3, 3);
+                            auto endBraceLoc = cctx.ctx.locAt(blockEndPos).adjustLen(cctx.ctx, -1, 1);
+                            if (endKwLoc.source(cctx.ctx) == "end") {
+                                blockReturnLoc = endKwLoc.offsets();
+                            } else if (endBraceLoc.source(cctx.ctx) == "}") {
+                                blockReturnLoc = endBraceLoc.offsets();
                             }
-
-                            synthesizeExpr(blockLast, dead, blockReturnLoc,
-                                           make_insn<BlockReturn>(std::move(newCctx.link), blockrv));
+                        } else {
+                            blockReturnLoc = blockLast->exprs.back().loc;
                         }
+
+                        synthesizeExpr(blockLast, dead, blockReturnLoc,
+                                       make_insn<BlockReturn>(std::move(link), blockrv));
                     }
 
                     unconditionalJump(blockLast, headerBlock, cctx.inWhat, s.loc);
