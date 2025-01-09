@@ -120,15 +120,8 @@ public:
     std::shared_ptr<core::SendAndBlockLink> link;
 
     Send(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core::LocOffsets funLoc, uint16_t numPosArgs,
-         const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> &&argLocs,
-         bool isPrivateOk = false);
-
-    Send(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core::LocOffsets funLoc, uint16_t numPosArgs,
-         const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> &&argLocs, bool isPrivateOk,
-         const std::shared_ptr<core::SendAndBlockLink> &link)
-        : Send(recv, receiverLoc, fun, funLoc, numPosArgs, args, std::move(argLocs), isPrivateOk) {
-        this->link = link;
-    }
+         const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> &&argLocs, bool isPrivateOk = false,
+         const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
 
     core::LocOffsets locWithoutBlock(core::LocOffsets bindLoc);
 
