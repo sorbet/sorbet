@@ -119,10 +119,9 @@ string LoadSelf::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) 
 }
 
 Send::Send(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core::LocOffsets funLoc, uint16_t numPosArgs,
-           const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> &&argLocs, bool isPrivateOk,
-           const shared_ptr<core::SendAndBlockLink> &link)
+           const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> &&argLocs, bool isPrivateOk)
     : isPrivateOk(isPrivateOk), numPosArgs(numPosArgs), fun(fun), recv(recv), funLoc(funLoc), receiverLoc(receiverLoc),
-      argLocs(std::move(argLocs)), link(move(link)) {
+      argLocs(std::move(argLocs)), link(nullptr) {
     ENFORCE(numPosArgs <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs,
             args.size());
 
