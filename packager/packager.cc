@@ -279,6 +279,92 @@ public:
     explicit PackageInfoImpl(const PackageInfoImpl &) = default;
     PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;
 
+    // What order should these packages be in the import list?
+    // Returns -1 if a should come before b, 0 if they are equivalent, and 1 if a should come after b.
+    //
+    // This method replicates the logic used at Stripe to order packages and thus has all of the associated "quirks".
+    // In particular, the ordering in a given package is a function of the strictness level of the package, and it is
+    // not a simple "false < layered < layered_dag < dag" ordering. The ordering is as follows:
+    // For strictDependenciesLevel::False:
+    // - layering violations
+    // - imports to 'false' packages
+    // - imports to 'layered' or stricter packages
+    // For strictDependenciesLevel::Layered and LayeredDag:
+    // - layering violations
+    // - imports to 'false' packages
+    // - imports to 'layered' or 'layered_dag' packages
+    // - imports to 'dag' packages
+    // For strictDependenciesLevel::Dag:
+    // - layering violations
+    // - imports to 'false', 'layered', or 'layered_dag' packages
+    // - imports to 'dag' packages
+    // TODO(neil): explain the rationale behind this ordering
+    // Within each group by strictness, packages are sorted by alphabetical order.
+    // TODO(neil): implement alphabetical sort.
+    int orderByStrictness(const core::packages::PackageDB &packageDB, const PackageInfo &a,
+                          const PackageInfo &b) const {
+        if (!strictDependenciesLevel().has_value() || !a.strictDependenciesLevel().has_value() ||
+            !b.strictDependenciesLevel().has_value() || !a.layer().has_value() || !b.layer().has_value()) {
+            return 0;
+        }
+        // Layering violations always come first
+        if (causesLayeringViolation(packageDB, a)) {
+            if (causesLayeringViolation(packageDB, b)) {
+                return 0;
+            } else {
+                return -1;
+            }
+        }
+
+        auto aStrictDependenciesLevel = a.strictDependenciesLevel().value().first;
+        auto bStrictDependenciesLevel = b.strictDependenciesLevel().value().first;
+        switch (strictDependenciesLevel().value().first) {
+            case core::packages::StrictDependenciesLevel::False: {
+                // Sort order: Layering violations, false, layered or stricter
+                switch (aStrictDependenciesLevel) {
+                    case core::packages::StrictDependenciesLevel::False:
+                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::False ? 0 : -1;
+                    case core::packages::StrictDependenciesLevel::Layered:
+                    case core::packages::StrictDependenciesLevel::LayeredDag:
+                    case core::packages::StrictDependenciesLevel::Dag:
+                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::False ? 1 : 0;
+                }
+            }
+            case core::packages::StrictDependenciesLevel::Layered:
+            case core::packages::StrictDependenciesLevel::LayeredDag: {
+                // Sort order: Layering violations, false, layered or layered_dag, dag
+                switch (aStrictDependenciesLevel) {
+                    case core::packages::StrictDependenciesLevel::False:
+                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::False ? 0 : -1;
+                    case core::packages::StrictDependenciesLevel::Layered:
+                    case core::packages::StrictDependenciesLevel::LayeredDag:
+                        switch (bStrictDependenciesLevel) {
+                            case core::packages::StrictDependenciesLevel::False:
+                                return 1;
+                            case core::packages::StrictDependenciesLevel::Layered:
+                            case core::packages::StrictDependenciesLevel::LayeredDag:
+                                return 0;
+                            case core::packages::StrictDependenciesLevel::Dag:
+                                return -1;
+                        }
+                    case core::packages::StrictDependenciesLevel::Dag:
+                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::Dag ? 0 : 1;
+                }
+            }
+            case core::packages::StrictDependenciesLevel::Dag: {
+                // Sort order: Layering violations, false or layered or layered_dag, dag
+                switch (aStrictDependenciesLevel) {
+                    case core::packages::StrictDependenciesLevel::False:
+                    case core::packages::StrictDependenciesLevel::Layered:
+                    case core::packages::StrictDependenciesLevel::LayeredDag:
+                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::Dag ? -1 : 0;
+                    case core::packages::StrictDependenciesLevel::Dag:
+                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::Dag ? 0 : 1;
+                }
+            }
+        }
+    }
+
     optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                     bool isTestImport) const {
         auto &info = PackageInfoImpl::from(pkg);
