@@ -370,6 +370,7 @@ public:
         auto &info = PackageInfoImpl::from(pkg);
         auto insertionLoc = core::Loc::none(loc.file());
         if (!importedPackageNames.empty()) {
+            packager::PackageName const *importToInsertAfter = nullptr;
             for (auto &import : importedPackageNames) {
                 if (import.name == info.name) {
                     if (!isTestImport && import.type == core::packages::ImportType::Test) {
@@ -379,10 +380,38 @@ public:
                         return nullopt;
                     }
                 }
+
+                if (!gs.packageDB().enforceLayering()) {
+                    importToInsertAfter = &import.name;
+                    continue;
+                }
+
+                auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
+                if (!importInfo.exists()) {
+                    importToInsertAfter = &import.name;
+                    continue;
+                }
+
+                if (isTestImport) {
+                    // Test imports should always come at the end of the import list
+                    importToInsertAfter = &import.name;
+                } else {
+                    auto compareResult = orderByStrictness(gs.packageDB(), info, importInfo);
+                    if (compareResult == 1 || compareResult == 0) {
+                        importToInsertAfter = &import.name;
+                    }
+                }
             }
-            // first let's try adding it to the end of the imports.
-            auto lastOffset = importedPackageNames.back().name.loc;
-            insertionLoc = core::Loc{loc.file(), lastOffset.copyEndWithZeroLength()};
+            if (!importToInsertAfter) {
+                // Insert before the first import
+                core::Loc beforePackageName = {loc.file(), importedPackageNames.front().name.loc};
+                auto [beforeImport, numWhitespace] = beforePackageName.findStartOfLine(gs);
+                auto endOfPrevLine = beforePackageName.adjust(gs, -numWhitespace - 1, 0);
+                insertionLoc =
+                    core::Loc{loc.file(), endOfPrevLine.copyWithZeroLength().offsets().copyEndWithZeroLength()};
+            } else {
+                insertionLoc = core::Loc{loc.file(), importToInsertAfter->loc.copyEndWithZeroLength()};
+            }
         } else {
             // if we don't have any imports, then we can try adding it
             // either before the first export, or if we have no
@@ -460,6 +489,7 @@ public:
         return {suggestion};
     }
 
+    // TODO(neil): move import to the correct place in the import list
     core::AutocorrectSuggestion convertTestImport(const core::GlobalState &gs, const PackageInfoImpl &pkg,
                                                   core::Loc importLoc) const {
         auto [lineStart, _] = importLoc.findStartOfLine(gs);
