@@ -910,10 +910,14 @@ public:
         absl::Span<PtrT> span;
 
         KwPairSpan begin() const {
+            ENFORCE(span.size() % 2 == 0);
+
             return KwPairSpan{span};
         }
 
         KwPairSpan end() const {
+            ENFORCE(span.size() % 2 == 0);
+
             return KwPairSpan{absl::MakeSpan(span.end(), span.end())};
         }
 
