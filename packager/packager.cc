@@ -282,18 +282,19 @@ public:
     optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                     bool isTestImport) const {
         auto &info = PackageInfoImpl::from(pkg);
-        auto it = absl::c_find_if(importedPackageNames, [&info](auto &import) { return import.name == info.name; });
-        if (it != importedPackageNames.end()) {
-            if (!isTestImport && it->type == core::packages::ImportType::Test) {
-                return convertTestImport(gs, info, core::Loc(fullLoc().file(), it->name.loc));
-            }
-            // we already import this, and if so, don't return an autocorrect
-            return nullopt;
-        }
-
         auto insertionLoc = core::Loc::none(loc.file());
-        // first let's try adding it to the end of the imports.
         if (!importedPackageNames.empty()) {
+            for (auto &import : importedPackageNames) {
+                if (import.name == info.name) {
+                    if (!isTestImport && import.type == core::packages::ImportType::Test) {
+                        return convertTestImport(gs, info, core::Loc(fullLoc().file(), import.name.loc));
+                    } else {
+                        // we already import this, and if so, don't return an autocorrect
+                        return nullopt;
+                    }
+                }
+            }
+            // first let's try adding it to the end of the imports.
             auto lastOffset = importedPackageNames.back().name.loc;
             insertionLoc = core::Loc{loc.file(), lastOffset.copyEndWithZeroLength()};
         } else {
