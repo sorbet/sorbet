@@ -17,6 +17,9 @@ echo "-- sanity-checking package with --stripe-packages"
   --extra-package-files-directory-prefix-underscore="${test_path}/other/" \
   "$test_path" 2>&1 || true
 
+cat "$rbis/package-info.json"
+echo
+
 show_output() {
   local name=$1
   local label=$2
