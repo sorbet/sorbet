@@ -2,7 +2,6 @@ method ::Object#main {
 
 bb0[firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -16,7 +15,7 @@ bb1[firstDead=-1]():
 # - bb0
 # - bb4
 bb3[firstDead=-1](<self>: Object, <returnMethodTemp>$2: T.untyped):
-    <gotoDeadTemp>$6: TrueClass = true
+    <gotoDeadTemp>$5: TrueClass = true
     <unconditional> -> bb6
 
 # backedges
@@ -29,9 +28,9 @@ bb4[firstDead=-1](<self>: Object):
 # backedges
 # - bb3
 # - bb4
-bb6[firstDead=-1](<self>: Object, <returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$6: T.nilable(TrueClass)):
-    <throwAwayTemp>$7: T.untyped = <self>: Object.b()
-    <gotoDeadTemp>$6 -> (T.nilable(TrueClass) ? bb1 : bb7)
+bb6[firstDead=-1](<self>: Object, <returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$5: T.nilable(TrueClass)):
+    <throwAwayTemp>$6: T.untyped = <self>: Object.b()
+    <gotoDeadTemp>$5 -> (T.nilable(TrueClass) ? bb1 : bb7)
 
 # backedges
 # - bb6

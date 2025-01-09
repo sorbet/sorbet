@@ -868,9 +868,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 auto ensureBody = cctx.inWhat.freshBlock(cctx.loops);
                 unconditionalJump(elseBody, ensureBody, cctx.inWhat, a.loc);
 
-                auto magic = cctx.newTemporary(core::Names::magic());
-                synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
-
                 for (auto &expr : a.rescueCases) {
                     auto *rescueCase = ast::cast_tree<ast::RescueCase>(expr);
                     auto caseBody = cctx.inWhat.freshBlock(cctx.loops);
@@ -898,13 +895,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                    make_insn<Literal>(core::Types::nilClass()));
 
                     auto res = cctx.newTemporary(core::Names::keepForCfgTemp());
-                    auto isPrivateOk = false;
-                    auto args = {exceptionValue};
-                    auto argLocs = {what.loc()};
-                    synthesizeExpr(caseBody, res, rescueCase->loc,
-                                   make_insn<Send>(magic, rescueCase->loc, core::Names::keepForCfg(),
-                                                   core::LocOffsets::none(), args.size(), args, std::move(argLocs),
-                                                   isPrivateOk));
+                    synthesizeExpr(caseBody, res, rescueCase->loc, make_insn<KeepAlive>(exceptionValue));
 
                     if (exceptions.empty()) {
                         // rescue without a class catches StandardError

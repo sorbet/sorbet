@@ -393,7 +393,6 @@ NameDef names[] = {
     {"args"},
     {"Elem", "Elem", true},
     {"keepForIde", "keep_for_ide"},
-    {"keepForCfg", "<keep-for-cfg>"},
     {"retry", "<retry>"},
     {"unresolvedAncestors", "<unresolved-ancestors>"},
     {"defineTopClassOrModule", "<define-top-class-or-module>"},

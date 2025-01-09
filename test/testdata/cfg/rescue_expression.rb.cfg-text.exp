@@ -2,7 +2,6 @@ method ::Object#foo {
 
 bb0[firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
-    <magic>$8: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -17,16 +16,16 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<returnMethodTemp>$2: NilClass, <exceptionValue>$3: Exception, <magic>$8: T.class_of(<Magic>)):
-    <cfgAlias>$13: T.class_of(MyException) = alias <C MyException>
-    <statTemp>$11: MyException = <cfgAlias>$13: T.class_of(MyException).new()
-    <exceptionClassTemp>$10: T.class_of(MyException) = <statTemp>$11: MyException.class()
-    <isaCheckTemp>$14: T::Boolean = <exceptionClassTemp>$10: T.class_of(MyException).===(<exceptionValue>$3: Exception)
-    <isaCheckTemp>$14 -> (T::Boolean ? bb7 : bb8)
+bb3[firstDead=-1](<returnMethodTemp>$2: NilClass, <exceptionValue>$3: Exception):
+    <cfgAlias>$12: T.class_of(MyException) = alias <C MyException>
+    <statTemp>$10: MyException = <cfgAlias>$12: T.class_of(MyException).new()
+    <exceptionClassTemp>$9: T.class_of(MyException) = <statTemp>$10: MyException.class()
+    <isaCheckTemp>$13: T::Boolean = <exceptionClassTemp>$9: T.class_of(MyException).===(<exceptionValue>$3: Exception)
+    <isaCheckTemp>$13 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=3](<self>: Object, <magic>$8: T.class_of(<Magic>)):
+bb4[firstDead=3](<self>: Object):
     <cfgAlias>$7: T.class_of(MyException) = alias <C MyException>
     <statTemp>$5: MyException = <cfgAlias>$7: T.class_of(MyException).new()
     <returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$5: MyException)
@@ -35,22 +34,22 @@ bb4[firstDead=3](<self>: Object, <magic>$8: T.class_of(<Magic>)):
 
 # backedges
 # - bb4
-bb6[firstDead=0](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$15: NilClass):
-    <gotoDeadTemp>$15 -> (<nullptr> ? bb1 : bb9)
+bb6[firstDead=0](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$14: NilClass):
+    <gotoDeadTemp>$14 -> (<nullptr> ? bb1 : bb9)
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<exceptionValue>$3: MyException, <magic>$8: T.class_of(<Magic>)):
+bb7[firstDead=-1](<exceptionValue>$3: MyException):
     <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$9: Sorbet::Private::Static::Void = <magic>$8: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
+    <keepForCfgTemp>$8: T.untyped = <keep-alive> <exceptionValue>$3
     <returnMethodTemp>$2: Integer(3) = 3
-    <gotoDeadTemp>$15 -> (NilClass ? bb1 : bb9)
+    <gotoDeadTemp>$14 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: NilClass):
-    <gotoDeadTemp>$15: TrueClass = true
-    <gotoDeadTemp>$15 -> (TrueClass ? bb1 : bb9)
+    <gotoDeadTemp>$14: TrueClass = true
+    <gotoDeadTemp>$14 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
