@@ -168,7 +168,8 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
 void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMethod, core::MethodRef method) {
     auto methodData = method.data(ctx);
     auto methodLoc = methodData->loc();
-    if (methodData->flags.isOverloaded) {
+    auto &methodFlags = methodData->flags;
+    if (methodFlags.isOverloaded) {
         // Don't try to check overloaded methods; It's not immediately clear how
         // to match overloads against their superclass definitions. Since we
         // Only permit overloading in the stdlib for now, this is no great loss.
@@ -177,25 +178,26 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
     auto superMethodData = superMethod.data(ctx);
     auto superMethodLoc = superMethodData->loc();
-    if ((methodData->flags.isPrivate && (superMethodData->flags.isProtected || superMethodData->isMethodPublic())) ||
-        (methodData->flags.isProtected && superMethodData->isMethodPublic())) {
+    auto &superMethodFlags = superMethodData->flags;
+    if ((methodFlags.isPrivate && (superMethodFlags.isProtected || superMethodData->isMethodPublic())) ||
+        (methodFlags.isProtected && superMethodData->isMethodPublic())) {
         if (auto e = ctx.state.beginError(methodLoc, core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("Method `{}` is {} in `{}` but not in `{}`", methodData->name.show(ctx),
-                        methodData->flags.isPrivate ? "private" : "protected", methodData->owner.show(ctx),
+                        methodFlags.isPrivate ? "private" : "protected", methodData->owner.show(ctx),
                         superMethodData->owner.show(ctx));
             e.addErrorLine(superMethodLoc, "Base method defined here");
 
-            auto len = methodData->flags.isPrivate ? 8 : 10;
+            auto len = methodFlags.isPrivate ? 8 : 10;
             auto loc = methodLoc.adjustLen(ctx, -len, len);
-            if (loc.source(ctx) == (methodData->flags.isPrivate ? "private " : "protected ")) {
+            if (loc.source(ctx) == (methodFlags.isPrivate ? "private " : "protected ")) {
                 e.replaceWith("Replace with public", loc, "public ");
             }
         }
     }
 
-    if (superMethodData->flags.isGenericMethod != methodData->flags.isGenericMethod && methodData->hasSig()) {
+    if (superMethodFlags.isGenericMethod != methodFlags.isGenericMethod && methodData->hasSig()) {
         if (auto e = ctx.state.beginError(methodLoc, core::errors::Resolver::BadMethodOverride)) {
-            if (superMethodData->flags.isGenericMethod) {
+            if (superMethodFlags.isGenericMethod) {
                 e.setHeader("{} method `{}` must declare the same number of type parameters as the base method",
                             implementationOf(ctx, superMethod), superMethod.show(ctx));
             } else {
@@ -209,8 +211,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
     unique_ptr<core::TypeConstraint> _constr;
     auto *constr = &core::TypeConstraint::EmptyFrozenConstraint;
-    if (methodData->flags.isGenericMethod) {
-        ENFORCE(superMethodData->flags.isGenericMethod);
+    if (methodFlags.isGenericMethod) {
+        ENFORCE(superMethodFlags.isGenericMethod);
         const auto &methodTypeArguments = methodData->typeArguments();
         const auto &superMethodTypeArguments = superMethodData->typeArguments();
         if (methodTypeArguments.size() != superMethodTypeArguments.size()) {
