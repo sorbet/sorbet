@@ -295,18 +295,14 @@ private:
     public:
         bool seenUnresolved = false;
 
-        void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
-            auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
+        void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &original) {
             seenUnresolved |= !isAlreadyResolved(ctx, original);
         };
     };
 
     static bool isFullyResolved(core::Context ctx, const ast::ExpressionPtr &expression) {
         ResolutionChecker checker;
-        ast::ExpressionPtr dummy(expression.getTagged());
-        ast::TreeWalk::apply(ctx, checker, dummy);
-        ENFORCE(dummy == expression);
-        dummy.release();
+        ast::ConstTreeWalk::apply(ctx, checker, expression);
         return !checker.seenUnresolved;
     }
 

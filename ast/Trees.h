@@ -136,10 +136,6 @@ public:
 
     ExpressionPtr(std::nullptr_t) noexcept : ExpressionPtr() {}
 
-    // Construction from a tagged pointer. This is needed for:
-    // * ResolveConstantsWalk::isFullyResolved
-    explicit ExpressionPtr(tagged_storage ptr) : ptr(ptr) {}
-
     ~ExpressionPtr() {
         if (ptr != 0) {
             deleteTagged(tag(), get());
@@ -188,12 +184,6 @@ public:
     void *get() const noexcept {
         auto val = ptr & PTR_MASK;
         return reinterpret_cast<void *>(val >> 16);
-    }
-
-    // Fetch the tagged pointer. This is needed for:
-    // * ResolveConstantsWalk::isFullyResolved
-    tagged_storage getTagged() const noexcept {
-        return ptr;
     }
 
     explicit operator bool() const noexcept {
