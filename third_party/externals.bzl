@@ -12,9 +12,8 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "prism",
-        url = "https://github.com/ruby/prism/archive/v1.2.0.zip",
-        sha256 = "f398cdb0ed9e5f9b8f7127a8c180ed6a8a611ad4612dcdae8a91ebfc5ee0ed7c",
-        strip_prefix = "prism-1.2.0",
+        url = "https://github.com/Shopify/sorbet/releases/download/test-release-artifacts/prism-release-artifacts-new.tar.gz",
+        sha256 = "58d93c7fd7dc5fa5a3adc4df4ea714a8982e720c10abce5f5e1d561860a3ba7f",
         build_file = "@com_stripe_ruby_typer//third_party:prism.BUILD",
     )
 
