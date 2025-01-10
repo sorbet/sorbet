@@ -5,9 +5,6 @@ on:
     branches: [prism]
   pull_request:
     branches: [prism]
-env:
-  RUBY_ROOT: '/opt/hostedtoolcache/Ruby/3.3.0/x64'
-
 jobs:
   tests:
     runs-on: ubuntu-latest

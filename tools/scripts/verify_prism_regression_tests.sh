@@ -2,7 +2,7 @@
 set -euo pipefail
 
 echo "Building Sorbet..."
-./bazel build //main:sorbet --config=dbg --define RUBY_PATH=$RUBY_ROOT
+./bazel build //main:sorbet --config=dbg
 
 echo "Verifying parse trees..."
 
