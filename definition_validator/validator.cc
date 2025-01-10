@@ -534,9 +534,16 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
         }
     }
 
-    if (overriddenMethods.size() == 0 && methodFlags.isOverride && !methodFlags.isIncompatibleOverride) {
+    if (overriddenMethods.empty() && methodFlags.isOverride && !methodFlags.isIncompatibleOverride) {
         if (auto e = ctx.state.beginError(methodLoc, core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Method `{}` is marked `{}` but does not override anything", methodName, "override");
+            if (methodFlags.isRewriterSynthesized && !ast::MethodDef::Flags().isAttrBestEffortUIOnly) {
+                auto isSetter = methodData->name.isSetter(ctx);
+                auto methodType = isSetter ? "writer" : "reader";
+                e.setHeader("Method `{}` is marked `{}` but the parent only defines a {} method", methodName,
+                            "override", methodType);
+            } else {
+                e.setHeader("Method `{}` is marked `{}` but does not override anything", methodName, "override");
+            }
         }
     }
 
