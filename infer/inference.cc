@@ -239,7 +239,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 }
 
                 if (unreachableInstruction != nullptr) {
-                    auto *send = cfg::cast_instruction<cfg::Send>(*unreachableInstruction);
+                    auto send = cfg::cast_instruction<cfg::Send>(*unreachableInstruction);
                     if (dueToSafeNavigation && send != nullptr) {
                         if (auto e = ctx.state.beginError(locForUnreachable,
                                                           core::errors::Infer::UnnecessarySafeNavigation)) {
@@ -253,7 +253,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         }
                     } else if (auto e =
                                    ctx.state.beginError(locForUnreachable, core::errors::Infer::DeadBranchInferencer)) {
-                        auto *ident = cfg::cast_instruction<cfg::Ident>(*unreachableInstruction);
+                        auto ident = cfg::cast_instruction<cfg::Ident>(*unreachableInstruction);
 
                         bool andAndOrOr = false;
                         if (ident != nullptr) {
