@@ -238,21 +238,25 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             // pull constants out of the block
             ConstantMover constantMover;
             ast::ExpressionPtr body = move(send->block()->body);
-            ast::TreeWalk::apply(ctx, constantMover, body);
+
+            // we don't need to make a new body if the original one was empty
+            if (!ast::isa_tree<ast::EmptyTree>(body)) {
+                ast::TreeWalk::apply(ctx, constantMover, body);
+
+                // add the destructuring statements to the block if they're present
+                if (!destructuringStmts.empty()) {
+                    ast::InsSeq::STATS_store stmts;
+                    for (auto &stmt : destructuringStmts) {
+                        stmts.emplace_back(stmt.deepCopy());
+                    }
+                    body = ast::MK::InsSeq(body.loc(), std::move(stmts), std::move(body));
+                }
+            }
 
             // pull the arg and the iteratee in and synthesize `iterate.each { |arg| body }`
             ast::MethodDef::ARGS_store new_args;
             for (auto &arg : args) {
                 new_args.emplace_back(arg.deepCopy());
-            }
-
-            // add the destructuring statements to the block if they're present
-            if (!destructuringStmts.empty()) {
-                ast::InsSeq::STATS_store stmts;
-                for (auto &stmt : destructuringStmts) {
-                    stmts.emplace_back(stmt.deepCopy());
-                }
-                body = ast::MK::InsSeq(body.loc(), std::move(stmts), std::move(body));
             }
 
             auto blk = ast::MK::Block(send->block()->loc, move(body), std::move(new_args));
