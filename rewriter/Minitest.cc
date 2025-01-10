@@ -207,14 +207,16 @@ ast::ExpressionPtr getIteratee(ast::ExpressionPtr &exp) {
 }
 
 ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
-                                       ast::MethodDef::ARGS_store &args, ast::InsSeq::STATS_store destructuringStmts,
+                                       const ast::MethodDef::ARGS_store &args,
+                                       absl::Span<const ast::ExpressionPtr> destructuringStmts,
                                        ast::ExpressionPtr &iteratee, bool insideDescribe);
 
 // this applies to each statement contained within a `test_each`: if it's an `it`-block, then convert it appropriately,
 // otherwise flag an error about it
 ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName,
-                                ast::InsSeq::STATS_store &destructuringStmts, ast::ExpressionPtr stmt,
-                                ast::MethodDef::ARGS_store &args, ast::ExpressionPtr &iteratee, bool insideDescribe) {
+                                absl::Span<const ast::ExpressionPtr> destructuringStmts, ast::ExpressionPtr stmt,
+                                const ast::MethodDef::ARGS_store &args, ast::ExpressionPtr &iteratee,
+                                bool insideDescribe) {
     // this statement must be a send
     if (auto *send = ast::cast_tree<ast::Send>(stmt)) {
         auto correctBlockArity = send->hasBlock() && send->block()->args.size() == 0;
@@ -262,8 +264,8 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             // add back any moved constants
             return constantMover.addConstantsToExpression(send->loc, move(method));
         } else if (send->fun == core::Names::describe() && send->numPosArgs() == 1 && correctBlockArity) {
-            return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args,
-                                       std::move(destructuringStmts), iteratee,
+            return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args, destructuringStmts,
+                                       iteratee,
                                        /* insideDescribe */ true);
         } else if (insideDescribe && send->fun == core::Names::let() && send->numPosArgs() == 1 && correctBlockArity &&
                    ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
@@ -338,25 +340,26 @@ bool isDestructuringInsSeq(core::GlobalState &gs, const ast::MethodDef::ARGS_sto
 
 // this just walks the body of a `test_each` and tries to transform every statement
 ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
-                                       ast::MethodDef::ARGS_store &args, ast::InsSeq::STATS_store destructuringStmts,
+                                       const ast::MethodDef::ARGS_store &args,
+                                       absl::Span<const ast::ExpressionPtr> destructuringStmts,
                                        ast::ExpressionPtr &iteratee, bool insideDescribe) {
     if (auto *bodySeq = ast::cast_tree<ast::InsSeq>(body)) {
         if (isDestructuringInsSeq(ctx, args, bodySeq)) {
             ENFORCE(destructuringStmts.empty(), "Nested destructuring statements");
-            destructuringStmts.reserve(bodySeq->stats.size());
-            std::move(bodySeq->stats.begin(), bodySeq->stats.end(), std::back_inserter(destructuringStmts));
-            return prepareTestEachBody(ctx, eachName, std::move(bodySeq->expr), args, std::move(destructuringStmts),
+            return prepareTestEachBody(ctx, eachName, std::move(bodySeq->expr), args, absl::MakeSpan(bodySeq->stats),
                                        iteratee, insideDescribe);
         }
 
         for (auto &exp : bodySeq->stats) {
-            exp = runUnderEach(ctx, eachName, destructuringStmts, std::move(exp), args, iteratee, insideDescribe);
+            exp = runUnderEach(ctx, eachName, absl::MakeSpan(destructuringStmts), std::move(exp), args, iteratee,
+                               insideDescribe);
         }
 
-        bodySeq->expr =
-            runUnderEach(ctx, eachName, destructuringStmts, std::move(bodySeq->expr), args, iteratee, insideDescribe);
+        bodySeq->expr = runUnderEach(ctx, eachName, absl::MakeSpan(destructuringStmts), std::move(bodySeq->expr), args,
+                                     iteratee, insideDescribe);
     } else {
-        body = runUnderEach(ctx, eachName, destructuringStmts, std::move(body), args, iteratee, insideDescribe);
+        body = runUnderEach(ctx, eachName, absl::MakeSpan(destructuringStmts), std::move(body), args, iteratee,
+                            insideDescribe);
     }
 
     return body;
@@ -386,14 +389,12 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         // can freely copy into methoddef scope
         auto iteratee = getIteratee(send->getPosArg(0));
         // and then reconstruct the send but with a modified body
-        return ast::MK::Send(
-            send->loc, ast::MK::Self(send->recv.loc()), send->fun, send->funLoc, 1,
-            ast::MK::SendArgs(move(send->getPosArg(0)),
-                              ast::MK::Block(block->loc,
-                                             prepareTestEachBody(ctx, send->fun, std::move(block->body), block->args,
-                                                                 {}, iteratee, insideDescribe),
-                                             std::move(block->args))),
-            send->flags);
+        auto body =
+            prepareTestEachBody(ctx, send->fun, std::move(block->body), block->args, {}, iteratee, insideDescribe);
+        return ast::MK::Send(send->loc, ast::MK::Self(send->recv.loc()), send->fun, send->funLoc, 1,
+                             ast::MK::SendArgs(move(send->getPosArg(0)),
+                                               ast::MK::Block(block->loc, std::move(body), std::move(block->args))),
+                             send->flags);
     }
 
     if (send->fun == core::Names::testEachHash() && send->numKwArgs() > 0) {
