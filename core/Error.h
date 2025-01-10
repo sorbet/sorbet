@@ -53,20 +53,20 @@ struct ErrorLine {
     LocDisplay displayLoc;
 
     ErrorLine(Loc loc, std::string formattedMessage, LocDisplay displayLoc = LocDisplay::Shown)
-        : loc(loc), formattedMessage(move(formattedMessage)), displayLoc(displayLoc){};
+        : loc(loc), formattedMessage(std::move(formattedMessage)), displayLoc(displayLoc){};
 
     // Use this (instead of the constructor) if you want `{}` to mean "turn this cyan if should use
     // colors, or just backticks otherwise".
     template <typename... Args> static ErrorLine from(Loc loc, fmt::format_string<Args...> msg, Args &&...args) {
         std::string formatted = ErrorColors::format(msg, std::forward<Args>(args)...);
-        return ErrorLine(loc, move(formatted));
+        return ErrorLine(loc, std::move(formatted));
     }
 
     // You should ALMOST ALWAYS prefer the variant above that takes a Loc.
     // The best error messages show context associated with locations.
     template <typename... Args> static ErrorLine fromWithoutLoc(fmt::format_string<Args...> msg, Args &&...args) {
         std::string formatted = ErrorColors::format(msg, std::forward<Args>(args)...);
-        return ErrorLine(core::Loc::none(), move(formatted), LocDisplay::Hidden);
+        return ErrorLine(core::Loc::none(), std::move(formatted), LocDisplay::Hidden);
     }
     std::string toString(const GlobalState &gs, bool color = true) const;
 };
@@ -126,8 +126,8 @@ public:
     std::string toString(const GlobalState &gs) const;
     Error(Loc loc, ErrorClass what, std::string header, std::vector<ErrorSection> sections,
           std::vector<AutocorrectSuggestion> autocorrects, bool isSilenced)
-        : loc(loc), what(what), header(move(header)), isSilenced(isSilenced), autocorrects(move(autocorrects)),
-          sections(sections) {
+        : loc(loc), what(what), header(std::move(header)), isSilenced(isSilenced),
+          autocorrects(std::move(autocorrects)), sections(sections) {
         ENFORCE(this->header.empty() || this->header.back() != '.', "Error headers should not end with a period");
         ENFORCE(this->header.find('\n') == std::string::npos, "{} has a newline in it", this->header);
     }
@@ -187,7 +187,7 @@ public:
 
     template <typename... Args> void setHeader(fmt::format_string<Args...> msg, Args &&...args) {
         std::string formatted = ErrorColors::format(msg, std::forward<Args>(args)...);
-        _setHeader(move(formatted));
+        _setHeader(std::move(formatted));
     }
     void addErrorSections(const ErrorSection::Collector &&errorDetailsCollector);
 
@@ -195,7 +195,7 @@ public:
     template <typename... Args>
     void replaceWith(const std::string &title, Loc loc, fmt::format_string<Args...> replacement, Args &&...args) {
         std::string formatted = fmt::format(replacement, std::forward<Args>(args)...);
-        addAutocorrect(AutocorrectSuggestion{title, {AutocorrectSuggestion::Edit{loc, move(formatted)}}});
+        addAutocorrect(AutocorrectSuggestion{title, {AutocorrectSuggestion::Edit{loc, std::move(formatted)}}});
     }
     void didYouMean(const std::string &replacement, Loc loc);
 
