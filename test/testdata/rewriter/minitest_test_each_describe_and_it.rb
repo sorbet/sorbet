@@ -17,7 +17,7 @@ class Test
     end
 
     it "a" do
-      T.reveal_type(a) # error: Revealed type: `NilClass`
+      T.reveal_type(a) # error: Revealed type: `Integer`
     end
 
   end
