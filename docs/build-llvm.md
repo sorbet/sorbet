@@ -41,6 +41,13 @@ llvm/utils/release/test-release.sh \
 #
 ```
 
+> [!WARNING]
+>
+> The commands above include debug info in the runtime libraries (like ASAN),
+> which include the path where you cloned llvm-project to. You might want to
+> clone to `/opt` instead of `$HOME`, or else figure out how to suitably
+> normalize those paths out of the final artifact.
+
 The release tarball is at `final/*.tar.xz`.
 
 The build took over 2 hours to create on a devbox (I just know that the first
