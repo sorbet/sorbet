@@ -536,9 +536,24 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
 
     if (overriddenMethods.empty() && methodFlags.isOverride && !methodFlags.isIncompatibleOverride) {
         if (auto e = ctx.state.beginError(methodLoc, core::errors::Resolver::BadMethodOverride)) {
-            if (methodFlags.isRewriterSynthesized && !ast::MethodDef::Flags().isAttrBestEffortUIOnly) {
-                auto isSetter = methodData->name.isSetter(ctx);
-                auto methodType = isSetter ? "writer" : "reader";
+            auto name = methodData->name;
+            auto isSetter = name.isSetter(ctx);
+            auto oppositeMethodName = isSetter ? name.lookupWithoutEq(ctx) : name.lookupWithEq(ctx);
+            bool parentHasOtherMethod = false;
+            auto parent = klassData->superClass();
+            if (parent.exists() && parent.data(ctx)->findMethod(ctx, oppositeMethodName).exists()) {
+                parentHasOtherMethod = true;
+            }
+            if (!parentHasOtherMethod) {
+                for (const auto &mixin : klassData->mixins()) {
+                    if (mixin.data(ctx)->findMethod(ctx, oppositeMethodName).exists()) {
+                        parentHasOtherMethod = true;
+                        break;
+                    }
+                }
+            }
+            if (parentHasOtherMethod) {
+                auto methodType = isSetter ? "reader" : "writer";
                 e.setHeader("Method `{}` is marked `{}` but the parent only defines a {} method", methodName,
                             "override", methodType);
             } else {

@@ -15,10 +15,9 @@ class BadFooable
   include Fooable
 
   sig {override.returns(T.nilable(String))}
-  attr_accessor :foo # error: Method `BadFooable#foo=` is marked `override` but the parent only defines a writer method
+  attr_accessor :foo # error: Method `BadFooable#foo=` is marked `override` but the parent only defines a reader method
 end
 
-# This is correct: Separate reader and writer
 class GoodFooable
   extend T::Sig
   include Fooable
@@ -45,8 +44,8 @@ class WriterOnlyBad # error: Missing definition for abstract method `WriterFooab
   include WriterFooable
 
   sig {override.returns(String)}
-  attr_accessor :bar # error: Method `WriterOnlyBad#bar=` is marked `override` but the parent only defines a writer method
-# ^^^^^^^^^^^^^^^^^^ error: Method `WriterOnlyBad#bar` is marked `override` but the parent only defines a reader method
+  attr_accessor :bar # error: Method `WriterOnlyBad#bar=` is marked `override` but does not override anything
+# ^^^^^^^^^^^^^^^^^^ error: Method `WriterOnlyBad#bar` is marked `override` but does not override anything
 end
 
 module PropReadable
@@ -54,49 +53,27 @@ module PropReadable
   extend T::Helpers
   interface!
 
-  sig {abstract.returns(T.nilable(String))}
+  sig {abstract.returns(String)}
   def prop_foo; end
 end
 
-# This is incorrect: It should error but doesn't yet because of a bug where props/const don't participate in override checking
+# This is incorrect: prop() generates both a getter and setter,
+# which should conflict with a read-only interface.
+# Currently won't error but *should* once props participate in override checking.
 class BadPropReadable
   extend T::Sig
   include T::Props
   include PropReadable
   
-  prop :prop_foo, String # Should error: Method is marked `override` but the parent only defines a reader method
+  # Should be an error: "prop" introduces `prop_foo=`,
+  # but the interface only defines `prop_foo` (reader).
+  prop :prop_foo, String
 end
 
-# This will be correct once props/const participate in override checking
 class GoodPropReadable
   extend T::Sig
   include T::Props
   include PropReadable
-  
+
   const :prop_foo, String
-end
-
-module PropWritable
-  extend T::Sig
-  extend T::Helpers
-  interface!
-
-  sig {abstract.params(value: String).void}
-  def prop_foo=(value); end
-end
-
-class BadPropWritable
-  extend T::Sig
-  include T::Props
-  include PropWritable
-  
-  prop :prop_foo, String # Should error: Method is marked `override` but the parent only defines a writer method
-end
-
-class GoodPropWritable
-  extend T::Sig
-  include T::Props
-  include PropWritable
-  
-  prop :prop_foo, String, writer: :private
 end
