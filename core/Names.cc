@@ -402,6 +402,15 @@ NameRef NameRef::lookupWithEq(const GlobalState &gs) const {
     return gs.lookupNameUTF8(nameEq);
 }
 
+NameRef NameRef::lookupWithoutEq(const GlobalState &gs) const {
+    auto name = this->dataUtf8(gs);
+    string nameWithoutEq = absl::StrCat(name->utf8);
+    if (nameWithoutEq.back() == '=') {
+        nameWithoutEq.pop_back();
+    }
+    return gs.lookupNameUTF8(nameWithoutEq);
+}
+
 bool NameRef::isSetter(const GlobalState &gs) const {
     if (this->kind() != NameKind::UTF8) {
         return false;
