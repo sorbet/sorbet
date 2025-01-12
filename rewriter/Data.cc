@@ -76,8 +76,8 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
     ast::Send::ARGS_store sigArgs;
     ast::ClassDef::RHS_store body;
 
-    for (int i = 0; i < send->numPosArgs(); i++) {
-        auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(i));
+    for (auto &arg : send->posArgs()) {
+        auto *sym = ast::cast_tree<ast::Literal>(arg);
         if (!sym || !sym->isName()) {
             return empty;
         }
