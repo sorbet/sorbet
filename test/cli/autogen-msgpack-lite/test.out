@@ -1,5 +1,5 @@
 --- autogen.txt start ---
-# ParsedFile: test/cli/autogen-path-prefix/file_with_no_dot
+# ParsedFile: test/cli/autogen-msgpack-lite/file_with_no_dot
 requires: []
 ## defs:
 [def id=0]
@@ -12,16 +12,16 @@ requires: []
  name=[HotdogGenerator]
  nesting=[]
  resolved=[HotdogGenerator]
- loc=autogen-path-prefix/file_with_no_dot:8
+ loc=autogen-msgpack-lite/file_with_no_dot:8
  is_defining_ref=0
 [ref id=1]
  scope=[]
  name=[HotdogConsumer]
  nesting=[]
  resolved=[HotdogConsumer]
- loc=autogen-path-prefix/file_with_no_dot:10
+ loc=autogen-msgpack-lite/file_with_no_dot:10
  is_defining_ref=0
-# ParsedFile: test/cli/autogen-path-prefix/hotdog_consumer.rb
+# ParsedFile: test/cli/autogen-msgpack-lite/hotdog_consumer.rb
 requires: []
 ## defs:
 [def id=0]
@@ -39,9 +39,9 @@ requires: []
  name=[HotdogConsumer]
  nesting=[]
  resolved=[HotdogConsumer]
- loc=autogen-path-prefix/hotdog_consumer.rb:3
+ loc=autogen-msgpack-lite/hotdog_consumer.rb:3
  is_defining_ref=1
-# ParsedFile: test/cli/autogen-path-prefix/hotdog_generator.rb
+# ParsedFile: test/cli/autogen-msgpack-lite/hotdog_generator.rb
 requires: []
 ## defs:
 [def id=0]
@@ -59,8 +59,8 @@ requires: []
  name=[HotdogGenerator]
  nesting=[]
  resolved=[HotdogGenerator]
- loc=autogen-path-prefix/hotdog_generator.rb:3
+ loc=autogen-msgpack-lite/hotdog_generator.rb:3
  is_defining_ref=1
 --- autogen.txt end ---
 
-6dbf3772d0c8000f9c773ab3bd0e5923c27d241a  autogen.msgpack
+c92b078e975a7a6676387c9416d9af62c6e86213  autogen.msgpack
