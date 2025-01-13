@@ -213,7 +213,15 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
 
     result.path = TypecheckingPath::Fast;
     logger.debug("Taking fast path");
-    timeit.setTag("path_chosen", "fast");
+
+    // Using the incremental name indicates that we changed a symbol that affects an unrelated file, and thus traversed
+    // the file table to determine if we can still take the fast path.
+    if (result.files.useIncrementalNamer) {
+        timeit.setTag("path_chosen", "fast+incremental_namer");
+    } else {
+        timeit.setTag("path_chosen", "fast");
+    }
+
     return result;
 }
 
