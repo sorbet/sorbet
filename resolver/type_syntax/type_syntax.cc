@@ -784,46 +784,45 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             return TypeSyntax::ResultType{core::Types::any(ctx, result.type, core::Types::nilClass()), result.rebind};
         }
         case core::Names::all().rawId(): {
-            if (send.numPosArgs() < 2 || send.hasKwArgs()) {
-                checkTypeFunArity(ctx, send, 2, SIZE_MAX);
+            auto posArgs = send.posArgs();
+            if (posArgs.size() < 2 || send.hasKwArgs()) {
                 checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            auto maybeResult = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
+            auto maybeResult = getResultTypeWithSelfTypeParams(ctx, posArgs[0], sig, args);
             if (!maybeResult.has_value()) {
                 return nullopt;
             }
             auto result = move(maybeResult.value());
-            int i = 1;
-            while (i < send.numPosArgs()) {
-                auto maybeResult = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(i), sig, args);
+            auto remainingArgs = posArgs.subspan(1);
+            for (auto &arg : remainingArgs) {
+                auto maybeResult = getResultTypeWithSelfTypeParams(ctx, arg, sig, args);
                 if (!maybeResult.has_value()) {
                     return nullopt;
                 }
                 result = core::Types::all(ctx, result, move(maybeResult.value()));
-                i++;
             }
             return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
         }
         case core::Names::any().rawId(): {
-            if (send.numPosArgs() < 2 || send.hasKwArgs()) {
+            auto posArgs = send.posArgs();
+            if (posArgs.size() < 2 || send.hasKwArgs()) {
                 checkTypeFunArity(ctx, send, 2, SIZE_MAX);
                 checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            auto maybeResult = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
+            auto maybeResult = getResultTypeWithSelfTypeParams(ctx, posArgs[0], sig, args);
             if (!maybeResult.has_value()) {
                 return nullopt;
             }
             auto result = move(maybeResult.value());
-            int i = 1;
-            while (i < send.numPosArgs()) {
-                auto maybeResult = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(i), sig, args);
+            auto remainingArgs = posArgs.subspan(1);
+            for (auto &arg : remainingArgs) {
+                auto maybeResult = getResultTypeWithSelfTypeParams(ctx, arg, sig, args);
                 if (!maybeResult.has_value()) {
                     return nullopt;
                 }
                 result = core::Types::any(ctx, result, move(maybeResult.value()));
-                i++;
             }
             return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
         }
@@ -882,17 +881,17 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            if (arr->elems.empty()) {
+
+            auto arrayElements = absl::MakeSpan(arr->elems);
+            if (arrayElements.empty()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("enum([]) is invalid");
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            auto result = getResultLiteral(ctx, arr->elems[0]);
-            int i = 1;
-            while (i < arr->elems.size()) {
-                result = core::Types::any(ctx, result, getResultLiteral(ctx, arr->elems[i]));
-                i++;
+            auto result = getResultLiteral(ctx, arrayElements[0]);
+            for (auto &e : arrayElements.subspan(1)) {
+                result = core::Types::any(ctx, result, getResultLiteral(ctx, e));
             }
             return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
         }
