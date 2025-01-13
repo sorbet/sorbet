@@ -11,7 +11,7 @@ namespace sorbet::autogen {
 
 void MsgpackWriterLite::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
                                        const AutogenConfig &autogenCfg) {
-    mpack_start_array(writer, defAttrs[version].size());
+    mpack_start_array(writer, defAttrs.size());
 
     // raw_full_name
     auto raw_full_name = pf.showFullName(ctx, def.id);
@@ -29,7 +29,7 @@ void MsgpackWriterLite::packDefinition(mpack_writer_t *writer, core::Context ctx
 }
 
 void MsgpackWriterLite::packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref) {
-    mpack_start_array(writer, refAttrs[version].size());
+    mpack_start_array(writer, refAttrs.size());
 
     // name
     packNames(writer, ref.name.nameParts);
@@ -47,8 +47,8 @@ void MsgpackWriterLite::packReference(mpack_writer_t *writer, core::Context ctx,
 }
 
 MsgpackWriterLite::MsgpackWriterLite(int version)
-    : MsgpackWriter(version), version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)),
-      defAttrs(defAttrMap.at(version)), pfAttrs(parsedFileAttrMap.at(version)) {}
+    : MsgpackWriterBase(assertValidVersion(version), refAttrMap.at(version), defAttrMap.at(version),
+                        parsedFileAttrMap.at(version)) {}
 
 string MsgpackWriterLite::pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg) {
     char *body;
