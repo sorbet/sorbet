@@ -176,7 +176,7 @@ string ParsedFile::toMsgpack(core::Context ctx, int version, const AutogenConfig
 
         return write.pack(ctx, *this, autogenCfg);
     } else {
-        MsgpackWriter write(version);
+        MsgpackWriterFull write(version);
 
         return write.pack(ctx, *this, autogenCfg);
     }
@@ -186,7 +186,7 @@ string ParsedFile::msgpackGlobalHeader(int version, size_t numFiles, const Autog
     if (autogenCfg.msgpackSkipReferenceMetadata) {
         return MsgpackWriterLite::msgpackGlobalHeader(version, numFiles);
     } else {
-        return MsgpackWriter::msgpackGlobalHeader(version, numFiles);
+        return MsgpackWriterFull::msgpackGlobalHeader(version, numFiles);
     }
 }
 

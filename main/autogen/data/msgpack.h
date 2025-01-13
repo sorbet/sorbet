@@ -8,7 +8,7 @@
 
 namespace sorbet::autogen {
 
-class MsgpackWriter {
+class MsgpackWriterFull {
 protected:
     int version;
     const std::vector<std::string> &refAttrs;
@@ -41,7 +41,7 @@ protected:
     }
 
 public:
-    MsgpackWriter(int version);
+    MsgpackWriterFull(int version);
 
     static std::string msgpackGlobalHeader(int version, size_t numFiles);
     virtual std::string pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg);
@@ -49,7 +49,7 @@ public:
 
 // Lightweight version of writer that skips all reference metadata like expression ranges, inheritance information,
 // typing information, etc. Reduces size by ~37% for Stripe code.
-class MsgpackWriterLite : public MsgpackWriter {
+class MsgpackWriterLite : public MsgpackWriterFull {
 private:
     int version;
     const std::vector<std::string> &refAttrs;

@@ -47,7 +47,7 @@ void MsgpackWriterLite::packReference(mpack_writer_t *writer, core::Context ctx,
 }
 
 MsgpackWriterLite::MsgpackWriterLite(int version)
-    : MsgpackWriter(version), version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)),
+    : MsgpackWriterFull(version), version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)),
       defAttrs(defAttrMap.at(version)), pfAttrs(parsedFileAttrMap.at(version)) {}
 
 string MsgpackWriterLite::pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg) {
