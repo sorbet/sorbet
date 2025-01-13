@@ -9,7 +9,7 @@
 using namespace std;
 namespace sorbet::autogen {
 
-void MsgpackWriterFull::packName(mpack_writer_t *writer, core::NameRef nm) {
+void MsgpackWriterBase::packName(mpack_writer_t *writer, core::NameRef nm) {
     uint32_t id;
     typename decltype(symbolIds)::value_type v{nm, 0};
     auto [it, inserted] = symbolIds.insert(v);
@@ -23,7 +23,7 @@ void MsgpackWriterFull::packName(mpack_writer_t *writer, core::NameRef nm) {
     mpack_write_u32(writer, id);
 }
 
-void MsgpackWriterFull::packNames(mpack_writer_t *writer, vector<core::NameRef> &names) {
+void MsgpackWriterBase::packNames(mpack_writer_t *writer, vector<core::NameRef> &names) {
     mpack_start_array(writer, names.size());
     for (auto nm : names) {
         packName(writer, nm);
@@ -35,13 +35,17 @@ void packString(mpack_writer_t *writer, string_view str) {
     mpack_write_str(writer, str.data(), str.size());
 }
 
-void MsgpackWriterFull::packBool(mpack_writer_t *writer, bool b) {
+void MsgpackWriterBase::packBool(mpack_writer_t *writer, bool b) {
     if (b) {
         mpack_write_true(writer);
     } else {
         mpack_write_false(writer);
     }
 }
+
+MsgpackWriterBase::MsgpackWriterBase(int version, const std::vector<std::string> &refAttrs,
+                                     const std::vector<std::string> &defAttrs, const std::vector<std::string> &pfAttrs)
+    : version(version), refAttrs(refAttrs), defAttrs(defAttrs), pfAttrs(pfAttrs) {}
 
 void MsgpackWriterFull::packReferenceRef(mpack_writer_t *writer, ReferenceRef ref) {
     if (!ref.exists()) {
@@ -77,7 +81,7 @@ void MsgpackWriterFull::packRange(mpack_writer_t *writer, uint32_t begin, uint32
 }
 
 void MsgpackWriterFull::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
-                                   const AutogenConfig &autogenCfg) {
+                                       const AutogenConfig &autogenCfg) {
     mpack_start_array(writer, defAttrs[version].size());
 
     // raw_full_name
@@ -156,8 +160,8 @@ void MsgpackWriterFull::packReference(mpack_writer_t *writer, core::Context ctx,
 }
 
 MsgpackWriterFull::MsgpackWriterFull(int version)
-    : version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)), defAttrs(defAttrMap.at(version)),
-      pfAttrs(parsedFileAttrMap.at(version)) {}
+    : MsgpackWriterBase(assertValidVersion(version), refAttrMap.at(version), defAttrMap.at(version),
+                        parsedFileAttrMap.at(version)) {}
 
 void writeSymbols(core::Context ctx, mpack_writer_t *writer, const vector<core::NameRef> &symbols) {
     mpack_start_array(writer, symbols.size());
