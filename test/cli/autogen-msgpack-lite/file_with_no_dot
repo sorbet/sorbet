@@ -1,0 +1,10 @@
+# typed: true
+
+require_relative 'hotdog_generator'
+require_relative 'hotdog_consumer'
+
+puts 'This is indeed a ruby file'
+
+hotdogs = 5.times.flat_map { HotdogGenerator.make_hotdogs }
+
+HotdogConsumer.eat(hotdogs)
