@@ -112,8 +112,8 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         }
     }
 
-    for (int i = 0; i < send->numPosArgs(); i++) {
-        auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(i));
+    for (auto &arg : send->posArgs()) {
+        auto *sym = ast::cast_tree<ast::Literal>(arg);
         if (!sym || !sym->isSymbol()) {
             return empty;
         }

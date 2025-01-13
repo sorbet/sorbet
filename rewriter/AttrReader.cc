@@ -235,9 +235,7 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
     bool usedPrevSig = false;
 
     if (makeReader) {
-        const auto numPosArgs = send->numPosArgs();
-        for (auto i = 0; i < numPosArgs; ++i) {
-            auto &arg = send->getPosArg(i);
+        for (auto &arg : send->posArgs()) {
             auto [name, argLoc] = getName(ctx, arg);
             if (!name.exists()) {
                 return empty;
@@ -260,9 +258,7 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
     }
 
     if (makeWriter) {
-        const auto numPosArgs = send->numPosArgs();
-        for (auto i = 0; i < numPosArgs; ++i) {
-            auto &arg = send->getPosArg(i);
+        for (auto &arg : send->posArgs()) {
             auto [name, argLoc] = getName(ctx, arg);
             if (!name.exists()) {
                 return empty;
