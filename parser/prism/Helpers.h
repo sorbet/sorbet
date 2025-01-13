@@ -6,6 +6,12 @@ extern "C" {
 #include "prism.h"
 }
 
+template <> struct fmt::formatter<pm_node_type> : formatter<const char *> {
+    auto format(pm_node_type type, format_context &ctx) const {
+        return formatter<const char *>::format(pm_node_type_to_str(type), ctx);
+    }
+};
+
 namespace sorbet::parser::Prism {
 
 // This templated `PrismNodeTypeHelper` type and its specializations work as a lookup-table that associates
