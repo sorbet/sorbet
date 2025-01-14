@@ -348,7 +348,7 @@ public:
             def.type = Definition::Type::Alias;
             // since this is a `post`- method, then we've already created a `Reference` for the constant on the
             // RHS. Mark this `Definition` as an alias for it.
-            ENFORCE(!refMap.empty(rhs));
+            ENFORCE(!refMap.empty());
             def.aliased_ref = refMap[rhs];
         } else if (lhs->symbol.exists() && lhs->symbol.isTypeAlias(ctx)) {
             // if the LHS has already been annotated as a type alias by the namer, the definition is (by definition,
@@ -361,7 +361,7 @@ public:
 
         // We also should already have a `Reference` for the name of this constant (because this is running after the
         // pre-traversal of the constant) so find that
-        ENFORCE(!refMap.empty(lhs));
+        ENFORCE(!refMap.empty());
         auto &ref = refs[refMap[lhs].id()];
         // ...and mark that this is the defining ref for that one
         def.defining_ref = ref.id;
