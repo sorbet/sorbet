@@ -52,7 +52,7 @@ class AutogenWalk {
     }
 
     // Convert a constant literal into a fully qualified name
-    vector<core::NameRef> constantName(core::Context ctx, ast::ConstantLit &cnstRef) {
+    vector<core::NameRef> constantName(core::Context ctx, const ast::ConstantLit &cnstRef) {
         vector<core::NameRef> out;
         auto *cnst = &cnstRef;
         while (cnst != nullptr && cnst->original != nullptr) {
@@ -93,9 +93,7 @@ public:
         autogenCfg = &autogenConfig;
     }
 
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
-
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &original) {
         if (!ast::isa_tree<ast::ConstantLit>(original.name)) {
             return;
         }
@@ -123,14 +121,14 @@ public:
                          !absl::c_any_of(autogenCfg->behaviorAllowedInRBIsPaths,
                                          [&](auto &allowedPath) { return absl::StartsWith(filePath, allowedPath); });
 
-        def.defines_behavior = !ignoreRBI && sorbet::ast::BehaviorHelpers::checkClassDefinesBehavior(tree);
+        def.defines_behavior = !ignoreRBI && sorbet::ast::BehaviorHelpers::checkClassDefinesBehavior(original);
 
         // TODO: ref.parent_of, def.parent_ref
         // TODO: expression_range
 
         // we're 'pre-traversing' the constant literal here (instead of waiting for the walk to get to it naturally)
         // which means that we'll have entered in a `Reference` for it already.
-        ast::TreeWalk::apply(ctx, *this, original.name);
+        ast::ConstTreeWalk::apply(ctx, *this, original.name);
         // ...find the reference we just created for it
         auto it = refMap.find(original.name.get());
         ENFORCE(it != refMap.end());
@@ -148,7 +146,7 @@ public:
         if (original.kind == ast::ClassDef::Kind::Class && !original.ancestors.empty()) {
             // we need to do name resolution for that class "outside" of the class body, so handle this before we've
             // modified the current scoping
-            ast::TreeWalk::apply(ctx, *this, *ait);
+            ast::ConstTreeWalk::apply(ctx, *this, *ait);
             ++ait;
         }
 
@@ -158,10 +156,10 @@ public:
 
         // ...and then run the treemap over all the includes and extends
         for (; ait != original.ancestors.end(); ++ait) {
-            ast::TreeWalk::apply(ctx, *this, *ait);
+            ast::ConstTreeWalk::apply(ctx, *this, *ait);
         }
         for (auto &ancst : original.singletonAncestors) {
-            ast::TreeWalk::apply(ctx, *this, ancst);
+            ast::ConstTreeWalk::apply(ctx, *this, ancst);
         }
 
         // and now that we've processed all the ancestors, we should have created references for them all, so traverse
@@ -188,9 +186,7 @@ public:
         }
     }
 
-    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
-
+    void postTransformClassDef(core::Context ctx, const ast::ClassDef &original) {
         if (!ast::isa_tree<ast::ConstantLit>(original.name)) {
             // if the name of the class wasn't a constant, then we didn't run the `preTransformClassDef` step anyway, so
             // just skip it
@@ -202,11 +198,11 @@ public:
         scopeTypes.pop_back();
     }
 
-    void preTransformBlock(core::Context ctx, ast::ExpressionPtr &block) {
+    void preTransformBlock(core::Context ctx, const ast::Block &block) {
         scopeTypes.emplace_back(ScopeType::Block);
     }
 
-    void postTransformBlock(core::Context ctx, ast::ExpressionPtr &block) {
+    void postTransformBlock(core::Context ctx, const ast::Block &block) {
         scopeTypes.pop_back();
     }
 
@@ -261,9 +257,7 @@ public:
         }
     }
 
-    void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
-
+    void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &original) {
         if (!ignoring.empty()) {
             // this is an `include` or an `extend` which already got handled in `preTransformClassDef`
             // (in which case don't handle it again)
@@ -278,7 +272,7 @@ public:
             return;
         }
 
-        auto entry = make_pair(tree.loc(), original.symbol);
+        auto entry = make_pair(original.loc, original.symbol);
         if (seenRefsByLoc.contains(entry)) {
             return;
         }
@@ -308,12 +302,10 @@ public:
             ref.parentKind = ClassKind::Class;
         }
         // now, add it to the refmap
-        refMap[tree.get()] = ref.id;
+        refMap[&original] = ref.id;
     }
 
-    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &original = ast::cast_tree_nonnull<ast::Assign>(tree);
-
+    void postTransformAssign(core::Context ctx, const ast::Assign &original) {
         // autogen only cares about constant assignments/definitions, so bail otherwise
         auto *lhs = ast::cast_tree<ast::ConstantLit>(original.lhs);
         if (lhs == nullptr || lhs->original == nullptr) {
@@ -382,30 +374,27 @@ public:
         def.is_empty = false;
     }
 
-    void preTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto *original = ast::cast_tree<ast::Send>(tree);
-
+    void preTransformSend(core::Context ctx, const ast::Send &original) {
         bool inBlock = !scopeTypes.empty() && scopeTypes.back() == ScopeType::Block;
         // Ignore include/extend sends iff they are directly at the class/module level.
         // These cases are handled in `preTransformClassDef`.
         // Do not ignore in block scope so that we a ref to the included module is still rendered.
-        if (!inBlock && original->recv.isSelfReference() &&
-            (original->fun == core::Names::include() || original->fun == core::Names::extend())) {
-            ignoring.emplace_back(original);
+        if (!inBlock && original.recv.isSelfReference() &&
+            (original.fun == core::Names::include() || original.fun == core::Names::extend())) {
+            ignoring.emplace_back(&original);
         }
         // This means it's a `require`; mark it as such
-        if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->numPosArgs() == 1) {
-            auto *lit = ast::cast_tree<ast::Literal>(original->getPosArg(0));
+        if (original.flags.isPrivateOk && original.fun == core::Names::require() && original.numPosArgs() == 1) {
+            auto *lit = ast::cast_tree<ast::Literal>(original.getPosArg(0));
             if (lit && lit->isString()) {
                 requireStatements.emplace_back(lit->asString());
             }
         }
     }
 
-    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto *original = ast::cast_tree<ast::Send>(tree);
+    void postTransformSend(core::Context ctx, const ast::Send &original) {
         // if this send was something we were ignoring (i.e. an `include` or `require`) then pop this
-        if (!ignoring.empty() && ignoring.back() == original) {
+        if (!ignoring.empty() && ignoring.back() == &original) {
             ignoring.pop_back();
         }
     }
@@ -427,7 +416,7 @@ public:
 ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const AutogenConfig &autogenCfg,
                              const CRCBuilder &crcBuilder) {
     AutogenWalk walk(autogenCfg);
-    ast::TreeWalk::apply(ctx, walk, tree.tree);
+    ast::ConstTreeWalk::apply(ctx, walk, tree.tree);
     auto pf = walk.parsedFile();
     pf.path = string(tree.file.data(ctx).path());
     auto src = tree.file.data(ctx).source();
