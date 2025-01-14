@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "absl/types/span.h"
 #include "common/StableStringStorage.h"
 
 #include "builder.hh"
@@ -16,39 +17,43 @@ namespace ruby_parser {
 struct node_list {
     node_list() = default;
     node_list(ForeignPtr node) {
-        nodes.emplace_back(node);
+        nodes_.emplace_back(node);
     }
 
     node_list &operator=(const ForeignPtr &other) = delete;
     node_list &operator=(ForeignPtr &&other) = delete;
 
     inline size_t size() const {
-        return nodes.size();
+        return nodes_.size();
     }
 
     inline bool empty() const {
-        return nodes.empty();
+        return nodes_.empty();
     }
 
     inline void emplace_back(const ForeignPtr &ptr) {
-        nodes.emplace_back(ptr);
+        nodes_.emplace_back(ptr);
     }
 
     inline void push_front(const ForeignPtr &ptr) {
-        nodes.insert(nodes.begin(), ptr);
+        nodes_.insert(nodes_.begin(), ptr);
     }
 
-    inline ForeignPtr &at(size_t n) {
-        return nodes.at(n);
+    inline absl::Span<const ForeignPtr> nodes() const {
+        return absl::MakeSpan(nodes_);
+    }
+
+    inline ForeignPtr at(size_t n) const {
+        return nodes_.at(n);
     }
 
     inline void concat(node_list *other) {
-        nodes.insert(nodes.end(), std::make_move_iterator(other->nodes.begin()),
-                     std::make_move_iterator(other->nodes.end()));
+        nodes_.insert(nodes_.end(), std::make_move_iterator(other->nodes_.begin()),
+                      std::make_move_iterator(other->nodes_.end()));
     }
 
 protected:
-    std::vector<ForeignPtr> nodes;
+    std::vector<ForeignPtr> nodes_;
 };
 
 struct delimited_node_list {

@@ -78,17 +78,17 @@ void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic,
         return;
     }
 
+    auto diagnosticMessage = (diagnostic.severity == DiagnosticSeverity::Information)
+                                 ? fmt::format("untyped: {}", diagnostic.message)
+                                 : fmt::format("error: {}", diagnostic.message);
+
     ADD_FAIL_CHECK_AT(
         filename.c_str(), diagnostic.range->start->line + 1,
         fmt::format(
             "{}Found unexpected error:\n{}\nNote: If there is already an assertion for this error, then this is a "
             "duplicate error. Change the assertion to `# error-with-dupes: <error message>` if the duplicate is "
             "expected.",
-            errorPrefix,
-            prettyPrintRangeComment(
-                sourceLine, *diagnostic.range,
-                fmt::format(diagnostic.severity == DiagnosticSeverity::Information ? "untyped: {}" : "error: {}",
-                            diagnostic.message))));
+            errorPrefix, prettyPrintRangeComment(sourceLine, *diagnostic.range, diagnosticMessage)));
 }
 string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const string &filename,
                      int line) {
@@ -287,6 +287,7 @@ const UnorderedMap<
         {"extra-package-files-directory-prefix-slash-deprecated", StringPropertyAssertion::make},
         {"extra-package-files-directory-prefix-slash", StringPropertyAssertion::make},
         {"allow-relaxed-packager-checks-for", StringPropertyAssertion::make},
+        {"packager-layers", StringPropertyAssertions::make},
         {"implementation", ImplementationAssertion::make},
         {"find-implementation", FindImplementationAssertion::make},
         {"show-symbol", ShowSymbolAssertion::make},
@@ -296,11 +297,17 @@ const UnorderedMap<
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
 const UnorderedSet<string> ignoredAssertionLabels = {
-    "typed",         "TODO",
-    "linearization", "commented-out-error",
-    "Note",          "See",
-    "packaged",      "rubyfmt-force-exit",
-    "compiled",      "exclude-from-file-update",
+    "typed",
+    "TODO",
+    "linearization",
+    "commented-out-error",
+    "Note",
+    "NOTE",
+    "See",
+    "packaged",
+    "rubyfmt-force-exit",
+    "compiled",
+    "exclude-from-file-update",
 };
 
 constexpr string_view NOTHING_LABEL = "(nothing)"sv;
@@ -525,15 +532,13 @@ bool UntypedAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File
 bool UntypedAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
     // The error message must contain `message`.
     if (diagnostic.severity != DiagnosticSeverity::Information || diagnostic.message.find(message) == string::npos) {
-        ADD_FAIL_CHECK_AT(
-            filename.c_str(), range->start->line + 1,
-            fmt::format(
-                "{}Expected information diagnostic of form:\n{}\nFound diagnostic:\n{}", errorPrefix,
-                prettyPrintRangeComment(sourceLine, *range, toString()),
-                prettyPrintRangeComment(
-                    sourceLine, *diagnostic.range,
-                    fmt::format(diagnostic.severity == DiagnosticSeverity::Information ? "untyped: {}" : "error: {}",
-                                diagnostic.message))));
+        auto diagnosticMessage = (diagnostic.severity == DiagnosticSeverity::Information)
+                                     ? fmt::format("untyped: {}", diagnostic.message)
+                                     : fmt::format("error: {}", diagnostic.message);
+        ADD_FAIL_CHECK_AT(filename.c_str(), range->start->line + 1,
+                          fmt::format("{}Expected information diagnostic of form:\n{}\nFound diagnostic:\n{}",
+                                      errorPrefix, prettyPrintRangeComment(sourceLine, *range, toString()),
+                                      prettyPrintRangeComment(sourceLine, *diagnostic.range, diagnosticMessage)));
         return false;
     }
     return true;
@@ -578,7 +583,7 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
 
     auto source = file->source();
     auto filename = string(file->path());
-    auto &lineBreaks = file->lineBreaks();
+    auto lineBreaks = file->lineBreaks();
 
     for (auto lineBreak : lineBreaks) {
         // Ignore first line break entry.

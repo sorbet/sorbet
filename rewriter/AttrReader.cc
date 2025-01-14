@@ -33,7 +33,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Exp
             if (validAttr) {
                 res = nameRef;
             } else {
-                if (auto e = ctx.beginError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
+                if (auto e = ctx.beginIndexerError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
                     e.setHeader("Bad attribute name \"{}\"", absl::CEscape(shortName));
                 }
                 res = core::Names::empty();
@@ -52,7 +52,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Exp
         }
     }
     if (!res.exists()) {
-        if (auto e = ctx.beginError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
+        if (auto e = ctx.beginIndexerError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
             e.setHeader("arg must be a Symbol or String");
         }
     }
@@ -121,7 +121,7 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, ast::S
     auto *cur = body;
     while (cur != nullptr) {
         if (cur->fun == core::Names::typeParameters()) {
-            if (auto e = ctx.beginError(sig->loc, core::errors::Rewriter::BadAttrType)) {
+            if (auto e = ctx.beginIndexerError(sig->loc, core::errors::Rewriter::BadAttrType)) {
                 e.setHeader("The type for an `{}` cannot contain `{}`", attrFun.show(ctx), "type_parameters");
             }
             auto &arg = body->getPosArg(0);
@@ -235,9 +235,7 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
     bool usedPrevSig = false;
 
     if (makeReader) {
-        const auto numPosArgs = send->numPosArgs();
-        for (auto i = 0; i < numPosArgs; ++i) {
-            auto &arg = send->getPosArg(i);
+        for (auto &arg : send->posArgs()) {
             auto [name, argLoc] = getName(ctx, arg);
             if (!name.exists()) {
                 return empty;
@@ -260,9 +258,7 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
     }
 
     if (makeWriter) {
-        const auto numPosArgs = send->numPosArgs();
-        for (auto i = 0; i < numPosArgs; ++i) {
-            auto &arg = send->getPosArg(i);
+        for (auto &arg : send->posArgs()) {
             auto [name, argLoc] = getName(ctx, arg);
             if (!name.exists()) {
                 return empty;

@@ -1,4 +1,5 @@
 #include "absl/strings/str_cat.h"
+#include "common/strings/formatting.h"
 #include "core/core.h"
 
 using namespace std;
@@ -6,7 +7,11 @@ using namespace std;
 namespace sorbet::core::source_generator {
 
 core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &type, core::SymbolRef inWhat,
-                            core::TypePtr receiver, const core::TypeConstraint *constr) {
+                            core::TypePtr receiver) {
+    if (type == nullptr) {
+        return core::Types::untypedUntracked();
+    }
+
     auto resultType = type;
     if (core::is_proxy_type(receiver)) {
         receiver = receiver.underlying(gs);
@@ -15,15 +20,6 @@ core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &ty
         /* instantiate generic classes */
         resultType = core::Types::resultTypeAsSeenFrom(gs, resultType, inWhat.enclosingClass(gs), applied->klass,
                                                        applied->targs);
-    }
-    if (!resultType) {
-        resultType = core::Types::untypedUntracked();
-    }
-    if (receiver) {
-        resultType = core::Types::replaceSelfType(gs, resultType, receiver); // instantiate self types
-    }
-    if (constr) {
-        resultType = core::Types::instantiate(gs, resultType, *constr); // instantiate generic methods
     }
     return resultType;
 }
@@ -34,7 +30,7 @@ constexpr int MAX_PRETTY_SIG_ARGS = 4;
 constexpr int MAX_PRETTY_WIDTH = 80;
 
 string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, const core::TypePtr &receiver,
-                          core::TypePtr retType, const core::TypeConstraint *constraint, const ShowOptions options) {
+                          const ShowOptions options) {
     ENFORCE(method.exists());
     ENFORCE(method.data(gs)->dealiasMethod(gs) == method);
     // handle this case anyways so that we don't crash in prod when this method is misused
@@ -42,13 +38,10 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
         return "";
     }
 
-    if (!retType) {
-        retType = getResultType(gs, method.data(gs)->resultType, method, receiver, constraint);
-    }
+    auto retType = getResultType(gs, method.data(gs)->resultType, method, receiver);
     string methodReturnType =
         (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType.show(gs, options), ")");
     vector<string> typeAndArgNames;
-
     vector<string> flags;
     auto sym = method.data(gs);
     string sigCall = "sig";
@@ -69,9 +62,8 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     for (auto &argSym : method.data(gs)->arguments) {
         // Don't display synthetic arguments (like blk).
         if (!argSym.isSyntheticBlockArgument()) {
-            typeAndArgNames.emplace_back(
-                absl::StrCat(argSym.argumentName(gs), ": ",
-                             getResultType(gs, argSym.type, method, receiver, constraint).show(gs, options)));
+            typeAndArgNames.emplace_back(absl::StrCat(
+                argSym.argumentName(gs), ": ", getResultType(gs, argSym.type, method, receiver).show(gs, options)));
         }
     }
 
@@ -79,23 +71,35 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     if (!flags.empty()) {
         flagString = fmt::format("{}.", fmt::join(flags, "."));
     }
+    string typeParamString = "";
+    if (!sym->typeArguments().empty()) {
+        typeParamString =
+            fmt::format("type_parameters({}).", fmt::map_join(sym->typeArguments(), ", ", [&](const auto &typeParam) {
+                            return typeParam.data(gs)->name.showAsSymbolLiteral(gs);
+                        }));
+    }
     string paramsString = "";
     if (!typeAndArgNames.empty()) {
         paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
     }
 
-    auto oneline = fmt::format("{} {{ {}{}{} }}", sigCall, flagString, paramsString, methodReturnType);
-    if (oneline.size() <= MAX_PRETTY_WIDTH && typeAndArgNames.size() <= MAX_PRETTY_SIG_ARGS) {
-        return oneline;
+    auto oneline = sigCall.size() + flagString.size() + paramsString.size() + methodReturnType.size() + 5;
+    if (oneline <= MAX_PRETTY_WIDTH && typeAndArgNames.size() <= MAX_PRETTY_SIG_ARGS) {
+        return fmt::format("{} {{ {}{}{}{} }}", sigCall, flagString, typeParamString, paramsString, methodReturnType);
     }
-
+    if (!sym->typeArguments().empty()) {
+        typeParamString = fmt::format("type_parameters({})\n  .",
+                                      fmt::map_join(sym->typeArguments(), ", ", [&](const auto &typeParam) {
+                                          return typeParam.data(gs)->name.showAsSymbolLiteral(gs);
+                                      }));
+    }
     if (!flags.empty()) {
         flagString = fmt::format("{}\n  .", fmt::join(flags, "\n  ."));
     }
     if (!typeAndArgNames.empty()) {
         paramsString = fmt::format("params(\n    {}\n  )\n  .", fmt::join(typeAndArgNames, ",\n    "));
     }
-    return fmt::format("{} do\n  {}{}{}\nend", sigCall, flagString, paramsString, methodReturnType);
+    return fmt::format("{} do\n  {}{}{}{}\nend", sigCall, flagString, typeParamString, paramsString, methodReturnType);
 }
 
 string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, const ShowOptions options) {
@@ -188,11 +192,9 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, c
 }
 
 string prettyTypeForMethod(const core::GlobalState &gs, core::MethodRef method, const core::TypePtr &receiver,
-                           const core::TypePtr &retType, const core::TypeConstraint *constraint,
                            const ShowOptions options) {
-    return fmt::format(
-        "{}\n{}", prettySigForMethod(gs, method.data(gs)->dealiasMethod(gs), receiver, retType, constraint, options),
-        prettyDefForMethod(gs, method, options));
+    return fmt::format("{}\n{}", prettySigForMethod(gs, method.data(gs)->dealiasMethod(gs), receiver, options),
+                       prettyDefForMethod(gs, method, options));
 }
 
 } // namespace sorbet::core::source_generator

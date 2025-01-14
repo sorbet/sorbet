@@ -176,10 +176,14 @@ public:
         return cond;
     }
 
+    // Record a diagnostic error, and set internal state that will emit an `error` token on the next DIAGCHECK.
+    // Use this function if there's no reasonable tree that can be returned, as it will trigger the parser to
+    // throw away arbitrary amounts of the input tree, potentially leading to LSP taking the slow path unnecessarily.
     void error_without_recovery(ruby_parser::dclass err, core::LocOffsets loc, std::string data = "") {
         driver_->external_diagnostic(ruby_parser::dlevel::ERROR, err, loc.beginPos(), loc.endPos(), data);
     }
 
+    // Record a diagnostic only, don't modify any internal state that could cause the tree to be discarded.
     void error(ruby_parser::dclass err, core::LocOffsets loc, std::string data = "") {
         auto range = ruby_parser::diagnostic::range(loc.beginPos(), loc.endPos());
         driver_->diagnostics.emplace_back(ruby_parser::dlevel::ERROR, err, std::move(range), data);
@@ -194,7 +198,7 @@ public:
             auto name_str = id->name.shortName(gs_);
             if (isNumberedParameterName(name_str) && driver_->lex.context.allowNumparams) {
                 if (driver_->numparam_stack.seen_ordinary_params()) {
-                    error_without_recovery(ruby_parser::dclass::OrdinaryParamDefined, id->loc);
+                    error(ruby_parser::dclass::OrdinaryParamDefined, id->loc);
                 }
 
                 auto raw_numparam_stack = driver_->numparam_stack.stackCopy();
@@ -212,7 +216,7 @@ public:
                         auto outer_scope_has_numparams = outer_scope.max > 0;
 
                         if (outer_scope_has_numparams) {
-                            error_without_recovery(ruby_parser::dclass::NumparamUsedInOuterScope, node->loc);
+                            error(ruby_parser::dclass::NumparamUsedInOuterScope, node->loc);
                         } else {
                             // for now it's ok, but an outer scope can also be a block
                             // like proc { _1; proc { proc { proc { _2}}}}
@@ -230,7 +234,7 @@ public:
 
             auto last_char = name_str.back();
             if (last_char == '?' || last_char == '!') {
-                error_without_recovery(ruby_parser::dclass::InvalidIdToGet, id->loc, std::string(name_str));
+                error(ruby_parser::dclass::InvalidIdToGet, id->loc, std::string(name_str));
             }
 
             if (driver_->lex.is_declared(name_str)) {
@@ -259,7 +263,7 @@ public:
 
     unique_ptr<Node> args(const token *begin, sorbet::parser::NodeVec args, const token *end, bool check_args) {
         if (check_args) {
-            UnorderedMap<std::string, core::LocOffsets> map;
+            UnorderedMap<core::NameRef, core::LocOffsets> map;
             checkDuplicateArgs(args, map);
         }
 
@@ -282,7 +286,7 @@ public:
             }
         }
         if (forwardArg && restArg) {
-            error_without_recovery(ruby_parser::dclass::ForwardArgAfterRestArg, args[0].get()->loc);
+            error(ruby_parser::dclass::ForwardArgAfterRestArg, args[0].get()->loc);
         }
     }
 
@@ -408,7 +412,7 @@ public:
         core::LocOffsets loc = receiver->loc.join(selectorLoc);
         if ((dot != nullptr) && dot->view() == "&.") {
             if (masgn) {
-                error_without_recovery(ruby_parser::dclass::CSendInLHSOfMAsgn, tokLoc(dot));
+                error(ruby_parser::dclass::CSendInLHSOfMAsgn, tokLoc(dot));
             }
             return make_unique<CSend>(loc, std::move(receiver), method, selectorLoc, sorbet::parser::NodeVec());
         }
@@ -529,9 +533,9 @@ public:
         }
         if (callargs != nullptr && !callargs->empty()) {
             if (auto *bp = parser::cast_node<BlockPass>(callargs->back().get())) {
-                error_without_recovery(ruby_parser::dclass::BlockAndBlockarg, bp->loc);
+                error(ruby_parser::dclass::BlockAndBlockarg, bp->loc);
             } else if (auto *fa = parser::cast_node<ForwardedArgs>(callargs->back().get())) {
-                error_without_recovery(ruby_parser::dclass::BlockAndBlockarg, fa->loc);
+                error(ruby_parser::dclass::BlockAndBlockarg, fa->loc);
             }
         }
 
@@ -924,7 +928,7 @@ public:
         core::LocOffsets loc = head->loc.join(tokLoc(end));
 
         if (isLiteralNode(*(head->definee.get()))) {
-            error_without_recovery(ruby_parser::dclass::SingletonLiteral, head->definee->loc);
+            error(ruby_parser::dclass::SingletonLiteral, head->definee->loc);
         }
         checkReservedForNumberedParameters(head->name.toString(gs_), declLoc);
 
@@ -1003,7 +1007,7 @@ public:
     }
 
     unique_ptr<Node> hash_pattern(const token *begin, sorbet::parser::NodeVec kwargs, const token *end) {
-        UnorderedMap<std::string, core::LocOffsets> map;
+        UnorderedMap<core::NameRef, core::LocOffsets> map;
         checkDuplicateArgs(kwargs, map);
         auto loc = collectionLoc(kwargs);
         if (begin != nullptr) {
@@ -1715,10 +1719,10 @@ public:
             return out;
         }
 
-        auto *args = const_cast<node_list *>(cargs);
-        out.reserve(args->size());
-        for (int i = 0; i < args->size(); i++) {
-            out.emplace_back(cast_node(args->at(i)));
+        auto nodes = cargs->nodes();
+        out.reserve(nodes.size());
+        for (auto node : nodes) {
+            out.emplace_back(cast_node(node));
         }
         return out;
     }
@@ -1735,45 +1739,59 @@ public:
 
     bool hasCircularArgumentReferences(const Node *node, std::string_view name) {
         if (name == driver_->current_arg_stack.top()) {
-            error_without_recovery(ruby_parser::dclass::CircularArgumentReference, node->loc, std::string(name));
+            error(ruby_parser::dclass::CircularArgumentReference, node->loc, std::string(name));
             return true;
         }
         return false;
     }
 
-    void checkDuplicateArgs(sorbet::parser::NodeVec &args, UnorderedMap<std::string, core::LocOffsets> &map) {
+    void checkDuplicateArgs(sorbet::parser::NodeVec &args, UnorderedMap<core::NameRef, core::LocOffsets> &map) {
+        int pos = -1;
         for (auto &this_arg : args) {
+            ++pos;
+
             if (auto *arg = parser::cast_node<Arg>(this_arg.get())) {
-                checkDuplicateArg(arg->name.toString(gs_), arg->loc, map);
+                hasDuplicateArg(arg->name, arg->loc, map);
             } else if (auto *optarg = parser::cast_node<Optarg>(this_arg.get())) {
-                checkDuplicateArg(optarg->name.toString(gs_), optarg->loc, map);
+                hasDuplicateArg(optarg->name, optarg->loc, map);
             } else if (auto *restarg = parser::cast_node<Restarg>(this_arg.get())) {
-                checkDuplicateArg(restarg->name.toString(gs_), restarg->loc, map);
+                hasDuplicateArg(restarg->name, restarg->loc, map);
             } else if (auto *blockarg = parser::cast_node<Blockarg>(this_arg.get())) {
-                checkDuplicateArg(blockarg->name.toString(gs_), blockarg->loc, map);
+                hasDuplicateArg(blockarg->name, blockarg->loc, map);
             } else if (auto *kwarg = parser::cast_node<Kwarg>(this_arg.get())) {
-                checkDuplicateArg(kwarg->name.toString(gs_), kwarg->loc, map);
+                if (hasDuplicateArg(kwarg->name, kwarg->loc, map)) {
+                    kwarg->name = gs_.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, kwarg->name, pos);
+                }
             } else if (auto *kwoptarg = parser::cast_node<Kwoptarg>(this_arg.get())) {
-                checkDuplicateArg(kwoptarg->name.toString(gs_), kwoptarg->loc, map);
+                if (hasDuplicateArg(kwoptarg->name, kwoptarg->loc, map)) {
+                    kwoptarg->name = gs_.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, kwoptarg->name, pos);
+                }
             } else if (auto *kwrestarg = parser::cast_node<Kwrestarg>(this_arg.get())) {
-                checkDuplicateArg(kwrestarg->name.toString(gs_), kwrestarg->loc, map);
+                hasDuplicateArg(kwrestarg->name, kwrestarg->loc, map);
             } else if (auto *shadowarg = parser::cast_node<Shadowarg>(this_arg.get())) {
-                checkDuplicateArg(shadowarg->name.toString(gs_), shadowarg->loc, map);
+                hasDuplicateArg(shadowarg->name, shadowarg->loc, map);
             } else if (auto *mlhs = parser::cast_node<Mlhs>(this_arg.get())) {
                 checkDuplicateArgs(mlhs->exprs, map);
             }
         }
     }
 
-    void checkDuplicateArg(std::string this_name, core::LocOffsets this_loc,
-                           UnorderedMap<std::string, core::LocOffsets> &map) {
+    bool hasDuplicateArg(core::NameRef this_name, core::LocOffsets this_loc,
+                         UnorderedMap<core::NameRef, core::LocOffsets> &map) {
         auto that_arg_loc_it = map.find(this_name);
 
         if (that_arg_loc_it == map.end()) {
             map[this_name] = this_loc;
-        } else if (argNameCollides(this_name)) {
-            error_without_recovery(ruby_parser::dclass::DuplicateArgument, this_loc, this_name);
+            return false;
         }
+
+        // Only report an error if this name doesn't start with an `_`, but still report it as being a duplicate of
+        // another argument, for the purpose of mangling. The Ruby VM silences these errors.
+        if (this_name.shortName(gs_)[0] != '_') {
+            error(ruby_parser::dclass::DuplicateArgument, this_loc, this_name.toString(gs_));
+        }
+
+        return true;
     }
 
     void checkDuplicatePatternVariable(std::string name, core::LocOffsets loc) {
@@ -1829,11 +1847,6 @@ public:
         return res;
     }
 
-    bool argNameCollides(std::string name) {
-        // Ignore everything beginning with underscore.
-        return (name[0] != '_');
-    }
-
     bool isLiteralNode(parser::Node &node) {
         return parser::isa_node<Integer>(&node) || parser::isa_node<String>(&node) ||
                parser::isa_node<DString>(&node) || parser::isa_node<Symbol>(&node) ||
@@ -1844,9 +1857,8 @@ public:
     void checkAssignmentToNumberedParameters(std::string_view name, core::LocOffsets loc) {
         if (driver_->lex.context.allowNumparams && isNumberedParameterName(name) &&
             driver_->numparam_stack.seen_numparams()) {
-            std::cout << "Assignment error" << std::endl;
             core::Loc location = core::Loc(file_, loc);
-            if (auto e = gs_.beginError(location, core::errors::Parser::AssignmentToNumparamError)) {
+            if (auto e = gs_.beginIndexerError(location, core::errors::Parser::AssignmentToNumparamError)) {
                 e.setHeader("cannot assign to numbered parameter `{}`", name);
                 e.addErrorNote("Reserved numbered parameter names are not allowed starting with Ruby 3.0. Use `{}` to "
                                "disable this check",
@@ -1861,7 +1873,7 @@ public:
         if (isNumberedParameterName(name)) {
             core::Loc location = core::Loc(file_, loc);
 
-            if (auto e = gs_.beginError(location, core::errors::Parser::ReservedForNumparamError)) {
+            if (auto e = gs_.beginIndexerError(location, core::errors::Parser::ReservedForNumparamError)) {
                 std::string replacement = fmt::format("arg{}", name[1]);
 
                 e.setHeader("{} is reserved for numbered parameter", name);

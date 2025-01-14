@@ -12,7 +12,7 @@
 class Array
   extend T::Sig
   sig {returns(T.untyped)}
-  def sum; end
+  def sum; end # error: Method `Array#sum` redefined without matching argument count
 end
 
 T.reveal_type(T::Array[Integer].new.sum) # error: `T.untyped`

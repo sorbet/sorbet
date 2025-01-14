@@ -21,10 +21,13 @@ namespace {
 
 string getRootPath(const shared_ptr<LSPOutput> &output, const options::Options &opts,
                    const shared_ptr<spdlog::logger> &logger) {
-    if (opts.rawInputDirNames.size() != 1) {
-        auto msg =
-            fmt::format("Sorbet's language server requires a single input directory. However, {} are configured: [{}]",
-                        opts.rawInputDirNames.size(), absl::StrJoin(opts.rawInputDirNames, ", "));
+    if (opts.rawInputDirNames.empty() ||
+        (opts.rawInputDirNames.size() > 1 && !opts.forciblySilenceLspMultipleDirError)) {
+        string msg = opts.forciblySilenceLspMultipleDirError
+                         ? "Sorbet's language server requires at least one input directory."
+                         : "Sorbet's language server requires a single input directory.";
+        msg += fmt::format(" However, {} are configured: [{}]", opts.rawInputDirNames.size(),
+                           absl::StrJoin(opts.rawInputDirNames, ", "));
         logger->error(msg);
         auto params = make_unique<ShowMessageParams>(MessageType::Error, msg);
         output->write(make_unique<LSPMessage>(
@@ -179,7 +182,7 @@ string LSPConfiguration::remoteName2Local(string_view encodedUri) const {
     string uri = urlDecode(encodedUri);
 
     if (!isUriInWorkspace(uri) && !isSorbetUri(uri)) {
-        logger->error("Unrecognized URI received from client: {}", uri);
+        logger->error(R"(msg="Unrecognized URI received from client" uri="{}")", absl::CEscape(uri));
         return string(uri);
     }
 

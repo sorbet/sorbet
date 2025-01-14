@@ -18,17 +18,10 @@ bool Inference::willRun(core::Context ctx, core::LocOffsets loc, core::MethodRef
     }
 
     const auto &methodData = method.data(ctx);
-    auto name = methodData->name;
-    auto isMangleRenameOverload = name.kind() == core::NameKind::UNIQUE &&
-                                  name.dataUnique(ctx)->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload;
-    if (isMangleRenameOverload || methodData->flags.isOverloaded) {
+    if (methodData->flags.isOverloaded) {
         if (auto e = ctx.beginError(loc, core::errors::Infer::TypecheckOverloadBody)) {
             e.setHeader("Refusing to typecheck `{}` against an overloaded signature", method.show(ctx));
             auto overloadMethod = method;
-            if (isMangleRenameOverload) {
-                overloadMethod =
-                    methodData->owner.data(ctx)->findMember(ctx, name.dataUnique(ctx)->original).asMethodRef();
-            }
             e.addErrorLine(overloadMethod.data(ctx)->loc(), "Given an overloaded signature here");
             e.addErrorNote("Overloads are only supported in RBI files.\n"
                            "    To silence this error, mark this file `{}`\n"
@@ -189,7 +182,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         current.setUninitializedVarsToNil(ctx, cfg->symbol.data(ctx)->loc());
 
         for (auto &blockArg : bb->args) {
-            current.getAndFillTypeAndOrigin(ctx, blockArg);
+            current.getAndFillTypeAndOrigin(blockArg);
         }
 
         visited[bb->id] = true;
@@ -250,7 +243,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     if (dueToSafeNavigation && send != nullptr) {
                         if (auto e = ctx.state.beginError(locForUnreachable,
                                                           core::errors::Infer::UnnecessarySafeNavigation)) {
-                            auto ty = current.getAndFillTypeAndOrigin(ctx, send->args[0]);
+                            const auto &ty = current.getAndFillTypeAndOrigin(send->args[0]);
 
                             e.setHeader("Used `{}` operator on `{}`, which can never be nil", "&.", ty.type.show(ctx));
                             e.addErrorSection(ty.explainGot(ctx, current.locForUninitialized()));
@@ -322,7 +315,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                                               *ctx.state.suggestUnsafe, bexitLoc.source(ctx).value());
                             }
 
-                            auto ty = prevEnv.getTypeAndOrigin(ctx, cond.variable);
+                            const auto &ty = prevEnv.getTypeAndOrigin(cond.variable);
                             e.addErrorSection(ty.explainGot(ctx, prevEnv.locForUninitialized()));
                         }
 
@@ -371,7 +364,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
         if (!current.isDead) {
             ENFORCE(bb->firstDeadInstructionIdx == -1);
-            auto bexitTpo = current.getAndFillTypeAndOrigin(ctx, bb->bexit.cond);
+            const auto &bexitTpo = current.getAndFillTypeAndOrigin(bb->bexit.cond);
             if (bexitTpo.type.isUntyped()) {
                 auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, bexitTpo.type);
                 if (auto e = ctx.beginError(bb->bexit.loc, what)) {

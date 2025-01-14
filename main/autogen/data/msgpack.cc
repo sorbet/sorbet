@@ -9,7 +9,7 @@
 using namespace std;
 namespace sorbet::autogen {
 
-void MsgpackWriter::packName(mpack_writer_t *writer, core::NameRef nm) {
+void MsgpackWriterBase::packName(mpack_writer_t *writer, core::NameRef nm) {
     uint32_t id;
     typename decltype(symbolIds)::value_type v{nm, 0};
     auto [it, inserted] = symbolIds.insert(v);
@@ -23,7 +23,7 @@ void MsgpackWriter::packName(mpack_writer_t *writer, core::NameRef nm) {
     mpack_write_u32(writer, id);
 }
 
-void MsgpackWriter::packNames(mpack_writer_t *writer, vector<core::NameRef> &names) {
+void MsgpackWriterBase::packNames(mpack_writer_t *writer, vector<core::NameRef> &names) {
     mpack_start_array(writer, names.size());
     for (auto nm : names) {
         packName(writer, nm);
@@ -35,7 +35,7 @@ void packString(mpack_writer_t *writer, string_view str) {
     mpack_write_str(writer, str.data(), str.size());
 }
 
-void MsgpackWriter::packBool(mpack_writer_t *writer, bool b) {
+void MsgpackWriterBase::packBool(mpack_writer_t *writer, bool b) {
     if (b) {
         mpack_write_true(writer);
     } else {
@@ -43,7 +43,11 @@ void MsgpackWriter::packBool(mpack_writer_t *writer, bool b) {
     }
 }
 
-void MsgpackWriter::packReferenceRef(mpack_writer_t *writer, ReferenceRef ref) {
+MsgpackWriterBase::MsgpackWriterBase(int version, const std::vector<std::string> &refAttrs,
+                                     const std::vector<std::string> &defAttrs, const std::vector<std::string> &pfAttrs)
+    : version(version), refAttrs(refAttrs), defAttrs(defAttrs), pfAttrs(pfAttrs) {}
+
+void MsgpackWriterFull::packReferenceRef(mpack_writer_t *writer, ReferenceRef ref) {
     if (!ref.exists()) {
         mpack_write_nil(writer);
     } else {
@@ -51,7 +55,7 @@ void MsgpackWriter::packReferenceRef(mpack_writer_t *writer, ReferenceRef ref) {
     }
 }
 
-void MsgpackWriter::packDefinitionRef(mpack_writer_t *writer, DefinitionRef ref) {
+void MsgpackWriterFull::packDefinitionRef(mpack_writer_t *writer, DefinitionRef ref) {
     if (!ref.exists()) {
         mpack_write_nil(writer);
     } else {
@@ -59,7 +63,7 @@ void MsgpackWriter::packDefinitionRef(mpack_writer_t *writer, DefinitionRef ref)
     }
 }
 
-void MsgpackWriter::packRange(mpack_writer_t *writer, uint32_t begin, uint32_t end) {
+void MsgpackWriterFull::packRange(mpack_writer_t *writer, uint32_t begin, uint32_t end) {
     if (version <= 4) {
         mpack_write_u64(writer, ((uint64_t)begin << 32) | end);
     } else {
@@ -76,9 +80,9 @@ void MsgpackWriter::packRange(mpack_writer_t *writer, uint32_t begin, uint32_t e
     }
 }
 
-void MsgpackWriter::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
-                                   const AutogenConfig &autogenCfg) {
-    mpack_start_array(writer, defAttrs[version].size());
+void MsgpackWriterFull::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
+                                       const AutogenConfig &autogenCfg) {
+    mpack_start_array(writer, defAttrs.size());
 
     // raw_full_name
     auto raw_full_name = pf.showFullName(ctx, def.id);
@@ -110,8 +114,8 @@ void MsgpackWriter::packDefinition(mpack_writer_t *writer, core::Context ctx, Pa
     mpack_finish_array(writer);
 }
 
-void MsgpackWriter::packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref) {
-    mpack_start_array(writer, refAttrs[version].size());
+void MsgpackWriterFull::packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref) {
+    mpack_start_array(writer, refAttrs.size());
 
     // scope
     packDefinitionRef(writer, ref.scope.id());
@@ -155,9 +159,9 @@ void MsgpackWriter::packReference(mpack_writer_t *writer, core::Context ctx, Par
     mpack_finish_array(writer);
 }
 
-MsgpackWriter::MsgpackWriter(int version)
-    : version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)), defAttrs(defAttrMap.at(version)),
-      pfAttrs(parsedFileAttrMap.at(version)) {}
+MsgpackWriterFull::MsgpackWriterFull(int version)
+    : MsgpackWriterBase(assertValidVersion(version), refAttrMap.at(version), defAttrMap.at(version),
+                        parsedFileAttrMap.at(version)) {}
 
 void writeSymbols(core::Context ctx, mpack_writer_t *writer, const vector<core::NameRef> &symbols) {
     mpack_start_array(writer, symbols.size());
@@ -168,7 +172,7 @@ void writeSymbols(core::Context ctx, mpack_writer_t *writer, const vector<core::
     mpack_finish_array(writer);
 }
 
-string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg) {
+string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg) {
     char *body;
     size_t bodySize;
     mpack_writer_t writer;
@@ -337,7 +341,7 @@ string buildGlobalHeader(int version, int serializedVersion, size_t numFiles, co
     return header;
 }
 
-string MsgpackWriter::msgpackGlobalHeader(int version, size_t numFiles) {
+string MsgpackWriterFull::msgpackGlobalHeader(int version, size_t numFiles) {
     const vector<string> &pfAttrs = parsedFileAttrMap.at(version);
     const vector<string> &refAttrs = refAttrMap.at(version);
     const vector<string> &defAttrs = defAttrMap.at(version);
@@ -345,7 +349,7 @@ string MsgpackWriter::msgpackGlobalHeader(int version, size_t numFiles) {
     return buildGlobalHeader(version, version, numFiles, refAttrs, defAttrs, pfAttrs);
 }
 
-const map<int, vector<string>> MsgpackWriter::parsedFileAttrMap{
+const map<int, vector<string>> MsgpackWriterFull::parsedFileAttrMap{
     {
         5,
         {
@@ -367,7 +371,7 @@ const map<int, vector<string>> MsgpackWriter::parsedFileAttrMap{
     },
 };
 
-const map<int, vector<string>> MsgpackWriter::refAttrMap{
+const map<int, vector<string>> MsgpackWriterFull::refAttrMap{
     {5,
      {
          "scope",
@@ -396,7 +400,7 @@ const map<int, vector<string>> MsgpackWriter::refAttrMap{
      }},
 };
 
-const map<int, vector<string>> MsgpackWriter::defAttrMap{
+const map<int, vector<string>> MsgpackWriterFull::defAttrMap{
     {
         5,
         {

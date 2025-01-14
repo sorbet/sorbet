@@ -64,11 +64,9 @@ In most cases, it's possible to implement one method in terms of the other. For
 example, with our `find_one`/`find_many` example above:
 
 ```ruby
-sig { params(id: String).returns(MyModel) }
-def find_one(id)
-  result = find_many([id])
-  raise "find_many did not return a single result" unless result.size == 1
-  result.fetch(0)
+sig { params(ids: T::Array[String]).returns(T::Array[MyModel]) }
+def find_many(ids)
+  ids.map { |id| find_one(id) }
 end
 ```
 

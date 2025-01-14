@@ -320,18 +320,6 @@ UnorderedMap<string, core::StrictLevel> extractStrictnessOverrides(string fileNa
     return result;
 }
 
-void buildAutogenCacheOptions(cxxopts::Options &options, const string &section) {
-    options.add_options(section)("autogen-constant-cache-file",
-                                 "Location of the cache file used to determine if it's safe to skip autogen. If "
-                                 "this is not provided, autogen will always run.",
-                                 cxxopts::value<string>()->default_value(""));
-    options.add_options(section)("autogen-changed-files",
-                                 "List of files which have changed since the last autogen run. If a cache file is "
-                                 "also provided, autogen may exit early if it determines that these files could "
-                                 "not have affected the output of autogen.",
-                                 cxxopts::value<vector<string>>());
-}
-
 cxxopts::Options
 buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders) {
     // Used to populate default options.
@@ -347,6 +335,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     }
     options.set_width(defaultCols);
 
+    // TODO(neil): we should mention how vector options work/can be used.
+    // (ie. that they can be passed as both `--arg 1 --arg 2` and `--arg 1,2`)
     // ----- INPUT -------------------------------------------------------- {{{
     section = groupToString(Group::INPUT);
     options.add_options(section)("files", "Input files", cxxopts::value<vector<string>>());
@@ -552,6 +542,11 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "End users should prefer to use `--enable-all-beta-lsp-features`, instead.)");
     options.add_options(section)("enable-all-beta-lsp-features",
                                  "Enable (expected-to-be-non-crashy) early-access LSP features.");
+    options.add_options(section)(
+        "forcibly-silence-lsp-multiple-dir-error",
+        "Allow the LSP to start with multiple `--dir` options by silencing the error. (WARNING: This flag does not "
+        "address the known issues with multiple directory support in LSP mode. You are likely to encounter unexpected "
+        "behavior.)");
     // }}}
 
     // ----- PERFORMANCE -------------------------------------------------- {{{
@@ -627,6 +622,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Packages which are allowed to ignore the restrictions set by `visible_to` "
                                  "and `export` directives",
                                  cxxopts::value<vector<string>>(), "<name>");
+    options.add_options(section)(
+        "packager-layers",
+        "Valid layer names for packages, ordered lowest to highest. Passing this flag also enables layering checks.",
+        cxxopts::value<vector<string>>()->implicit_value("library,application"), "<layer-name>");
     options.add_options(section)("package-skip-rbi-export-enforcement",
                                  "Constants defined in RBIs in these directories (and no others) can be exported",
                                  cxxopts::value<vector<string>>(), "<dir>");
@@ -635,7 +634,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
     section = groupToString(Group::STRIPE_AUTOGEN);
     options.add_options(section)("autogen-version", "Autogen version to output", cxxopts::value<int>());
-    buildAutogenCacheOptions(options, section);
     options.add_options(section)("autogen-subclasses-parent",
                                  "Parent classes for which generate a list of subclasses. "
                                  "This option must be used in conjunction with -p autogen-subclasses",
@@ -678,26 +676,14 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                    "--print=<format>:<file>\n"
                    "Most of these formats are unstable, for internal-use only.\n\n"
                    "Stable: [");
-    auto first = true;
-    for (auto it = partitioned_print_options.begin(); it != stableEnd; it++) {
-        if (first) {
-            first = false;
-        } else {
-            fmt::format_to(std::back_inserter(print_help), ", ");
-        }
-        fmt::format_to(std::back_inserter(print_help), it->option);
-    }
+    fmt::format_to(
+        std::back_inserter(print_help), "{}",
+        fmt::map_join(partitioned_print_options.begin(), stableEnd, ", ", [](const auto &it) { return it.option; }));
     fmt::format_to(std::back_inserter(print_help), "]\n\n"
                                                    "Unstable: [");
-    first = true;
-    for (auto it = stableEnd; it != partitioned_print_options.end(); it++) {
-        if (first) {
-            first = false;
-        } else {
-            fmt::format_to(std::back_inserter(print_help), ", ");
-        }
-        fmt::format_to(std::back_inserter(print_help), it->option);
-    }
+    fmt::format_to(
+        std::back_inserter(print_help), "{}",
+        fmt::map_join(stableEnd, partitioned_print_options.end(), ", ", [](const auto &it) { return it.option; }));
     options.add_options(section)("p,print", to_string(print_help), cxxopts::value<vector<string>>(), "<format>");
     // }}}
 
@@ -790,12 +776,6 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
         }
     }
     return true;
-}
-void extractAutogenConstCacheConfig(cxxopts::ParseResult &raw, AutogenConstCacheConfig &cfg) {
-    cfg.cacheFile = raw["autogen-constant-cache-file"].as<string>();
-    if (raw.count("autogen-changed-files") > 0) {
-        cfg.changedFiles = raw["autogen-changed-files"].as<vector<string>>();
-    }
 }
 
 Phase extractStopAfter(cxxopts::ParseResult &raw, shared_ptr<spdlog::logger> logger) {
@@ -959,6 +939,7 @@ void readOptions(Options &opts,
         opts.lspDocumentHighlightEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
+        opts.forciblySilenceLspMultipleDirError = raw["forcibly-silence-lsp-multiple-dir-error"].as<bool>();
         opts.rubyfmtPath = raw["rubyfmt-path"].as<string>();
         if (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>()) {
             if (!FileOps::exists(opts.rubyfmtPath)) {
@@ -1081,8 +1062,6 @@ void readOptions(Options &opts,
             logger->error("-p untyped-blame:<output-path> must also include --track-untyped");
             throw EarlyReturnWithCode(1);
         }
-
-        extractAutogenConstCacheConfig(raw, opts.autogenConstantCacheConfig);
 
         opts.noErrorCount = raw["no-error-count"].as<bool>();
         opts.noStdlib = raw["no-stdlib"].as<bool>();
@@ -1216,6 +1195,24 @@ void readOptions(Options &opts,
                     throw EarlyReturnWithCode(1);
                 }
                 opts.allowRelaxedPackagerChecksFor.emplace_back(ns);
+            }
+        }
+
+        if (raw.count("packager-layers")) {
+            if (opts.stripePackages) {
+                // TODO(neil): This regex was picked on a whim, so open to changing to be more or less restrictive based
+                // on feedback/usecases.
+                std::regex layerValid("[a-zA-Z0-9]+");
+                for (const string &layer : raw["packager-layers"].as<vector<string>>()) {
+                    if (!std::regex_match(layer, layerValid)) {
+                        logger->error("--packager-layers must contain items that are alphanumeric.");
+                        throw EarlyReturnWithCode(1);
+                    }
+                    opts.packagerLayers.emplace_back(layer);
+                }
+            } else {
+                logger->error("--packager-layers can only be specified in --stripe-packages mode");
+                throw EarlyReturnWithCode(1);
             }
         }
 
@@ -1373,21 +1370,6 @@ void readOptions(Options &opts,
     } catch (cxxopts::OptionParseException &e) {
         logger->info("{}. To see all available options pass `--help`.", e.what());
         throw EarlyReturnWithCode(1);
-    }
-}
-
-bool readAutogenConstCacheOptions(AutogenConstCacheConfig &cfg, int argc, const char *argv[],
-                                  shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
-    cxxopts::Options options("sorbet", "Typechecker for Ruby");
-    options.allow_unrecognised_options(); // Don't raise error on other options
-    buildAutogenCacheOptions(options, " === Stripe autogen");
-
-    try {
-        cxxopts::ParseResult raw = options.parse(argc, argv);
-        extractAutogenConstCacheConfig(raw, cfg);
-        return true;
-    } catch (cxxopts::OptionParseException &e) {
-        return false;
     }
 }
 

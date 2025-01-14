@@ -715,11 +715,6 @@ bool MetaType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const 
     return false;
 }
 
-TypePtr MetaType::_approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
-    // dispatchCall is invoked on them in resolver
-    return nullptr;
-}
-
 TypePtr MetaType::underlying(const GlobalState &gs) const {
     return Types::Object();
 }
@@ -783,13 +778,8 @@ TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
     return res;
 }
 
-SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags, int rubyRegionId)
-    : argFlags(move(argFlags)), fun(fun), rubyRegionId(rubyRegionId) {}
-
-shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
-    auto copy = *this;
-    return make_shared<SendAndBlockLink>(move(copy));
-}
+SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags)
+    : argFlags(move(argFlags)), fun(fun) {}
 
 optional<int> SendAndBlockLink::fixedArity() const {
     optional<int> arity = 0;
@@ -950,7 +940,7 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
                                    "T.unsafe");
                     auto locSource = loc.source(gs);
                     if (locSource.has_value()) {
-                        e.replaceWith("Wrap in `T.unsafe`", loc, fmt::format("T.unsafe({})", locSource.value()));
+                        e.replaceWith("Wrap in `T.unsafe`", loc, "T.unsafe({})", locSource.value());
                     }
                 }
             }
@@ -1003,7 +993,9 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
 // again by infer).
 
 TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, uint16_t numPosArgs,
-                                  const InlinedVector<const TypeAndOrigins *, 2> &args, ClassOrModuleRef genericClass) {
+                                  const InlinedVector<const TypeAndOrigins *, 2> &args, ClassOrModuleRef genericClass,
+                                  ErrorClass genericArgumentCountMismatchError,
+                                  ErrorClass genericArgumentKeywordArgsError) {
     genericClass = genericClass.maybeUnwrapBuiltinGenericForwarder();
 
     int arity;
@@ -1020,7 +1012,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
         auto end = locs.args.back().endPos();
         core::Loc kwargsLoc{locs.file, begin, end};
 
-        if (auto e = gs.beginError(kwargsLoc, errors::Infer::GenericArgumentKeywordArgs)) {
+        if (auto e = gs.beginError(kwargsLoc, genericArgumentKeywordArgsError)) {
             e.setHeader("Keyword arguments given to `{}`", genericClass.show(gs));
             // offer an autocorrect to turn the keyword args into a hash if there is no double-splat
             if (numKwArgs % 2 == 0 && kwargsLoc.exists()) {
@@ -1044,7 +1036,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
         auto squareBracketsLoc = core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
         auto errLoc =
             !locs.args.empty() ? core::Loc(locs.file, locs.args.front().join(locs.args.back())) : squareBracketsLoc;
-        if (auto e = gs.beginError(errLoc, errors::Infer::GenericArgumentCountMismatch)) {
+        if (auto e = gs.beginError(errLoc, genericArgumentCountMismatchError)) {
             if (arity == 0) {
                 if (genericClass.data(gs)->typeMembers().empty()) {
                     e.setHeader("`{}` is not a generic class, but was given type parameters", genericClass.show(gs));
@@ -1135,6 +1127,15 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
     return make_type<MetaType>(make_type<AppliedType>(genericClass, move(targs)));
 }
 
+DispatchArgs::DispatchArgs(NameRef name, const CallLocs &locs, uint16_t numPosArgs,
+                           InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &selfType,
+                           const TypeAndOrigins &fullType, const TypePtr &thisType, const SendAndBlockLink *block,
+                           Loc originForUninitialized, bool isPrivateOk, bool suppressErrors,
+                           NameRef enclosingMethodForSuper)
+    : name(name), locs(locs), numPosArgs(numPosArgs), args(args), selfType(selfType), fullType(fullType),
+      thisType(thisType), block(block), originForUninitialized(originForUninitialized), isPrivateOk(isPrivateOk),
+      suppressErrors(suppressErrors), enclosingMethodForSuper(enclosingMethodForSuper) {}
+
 Loc DispatchArgs::blockLoc(const GlobalState &gs) const {
     ENFORCE(this->block != nullptr);
     auto blockLoc = core::Loc(locs.file, argsLoc().endPos(), callLoc().endPos());
@@ -1162,13 +1163,6 @@ DispatchArgs DispatchArgs::withThisRef(const TypePtr &newThisRef) const {
                         args,        selfType,       fullType,
                         newThisRef,  block,          originForUninitialized,
                         isPrivateOk, suppressErrors, enclosingMethodForSuper};
-}
-
-DispatchArgs DispatchArgs::withErrorsSuppressed() const {
-    return DispatchArgs{name,        locs,     numPosArgs,
-                        args,        selfType, fullType,
-                        thisType,    block,    originForUninitialized,
-                        isPrivateOk, true,     enclosingMethodForSuper};
 }
 
 DispatchResult DispatchResult::merge(const GlobalState &gs, DispatchResult::Combinator kind, DispatchResult &&left,

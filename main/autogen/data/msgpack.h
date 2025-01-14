@@ -8,7 +8,7 @@
 
 namespace sorbet::autogen {
 
-class MsgpackWriter {
+class MsgpackWriterBase {
 protected:
     int version;
     const std::vector<std::string> &refAttrs;
@@ -18,14 +18,25 @@ protected:
     std::vector<core::NameRef> symbols;
     UnorderedMap<core::NameRef, uint32_t> symbolIds;
 
+    void packName(mpack_writer_t *writer, core::NameRef nm);
+    void packNames(mpack_writer_t *writer, std::vector<core::NameRef> &names);
+    void packBool(mpack_writer_t *writer, bool b);
+
+    virtual void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
+                                const AutogenConfig &autogenCfg) = 0;
+    virtual void packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref) = 0;
+
+    MsgpackWriterBase(int version, const std::vector<std::string> &refAttrs, const std::vector<std::string> &defAttrs,
+                      const std::vector<std::string> &pfAttrs);
+};
+
+class MsgpackWriterFull : public MsgpackWriterBase {
+protected:
     static const std::map<int, std::vector<std::string>> refAttrMap;
     static const std::map<int, std::vector<std::string>> defAttrMap;
     static const std::map<int, std::vector<std::string>> parsedFileAttrMap;
 
     // a bunch of helpers
-    void packName(mpack_writer_t *writer, core::NameRef nm);
-    void packNames(mpack_writer_t *writer, std::vector<core::NameRef> &names);
-    void packBool(mpack_writer_t *writer, bool b);
     void packReferenceRef(mpack_writer_t *writer, ReferenceRef ref);
     void packDefinitionRef(mpack_writer_t *writer, DefinitionRef ref);
     void packRange(mpack_writer_t *writer, uint32_t begin, uint32_t end);
@@ -41,7 +52,7 @@ protected:
     }
 
 public:
-    MsgpackWriter(int version);
+    MsgpackWriterFull(int version);
 
     static std::string msgpackGlobalHeader(int version, size_t numFiles);
     virtual std::string pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg);
@@ -49,13 +60,8 @@ public:
 
 // Lightweight version of writer that skips all reference metadata like expression ranges, inheritance information,
 // typing information, etc. Reduces size by ~37% for Stripe code.
-class MsgpackWriterLite : public MsgpackWriter {
+class MsgpackWriterLite : public MsgpackWriterBase {
 private:
-    int version;
-    const std::vector<std::string> &refAttrs;
-    const std::vector<std::string> &defAttrs;
-    const std::vector<std::string> &pfAttrs;
-
     static const std::map<int, std::vector<std::string>> refAttrMap;
     static const std::map<int, std::vector<std::string>> defAttrMap;
     static const std::map<int, std::vector<std::string>> parsedFileAttrMap;

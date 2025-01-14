@@ -48,8 +48,9 @@ Loc::Detail Loc::offset2Pos(const File &file, uint32_t off) {
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
         ENFORCE_NO_TIMER(false);
     }
-    auto it = absl::c_lower_bound(file.lineBreaks(), off);
-    if (it == file.lineBreaks().begin()) {
+    auto lineBreaks = file.lineBreaks();
+    auto it = absl::c_lower_bound(lineBreaks, off);
+    if (it == lineBreaks.begin()) {
         pos.line = 1;
         pos.column = off + 1;
         return pos;
@@ -62,7 +63,7 @@ Loc::Detail Loc::offset2Pos(const File &file, uint32_t off) {
 
 optional<uint32_t> Loc::pos2Offset(const File &file, Loc::Detail pos) {
     auto l = pos.line - 1;
-    auto &lineBreaks = file.lineBreaks();
+    auto lineBreaks = file.lineBreaks();
     if (!(0 <= l && l < lineBreaks.size())) {
         return nullopt;
     }

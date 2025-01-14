@@ -13,16 +13,15 @@ private:
 
     std::vector<core::ClassOrModuleRef> classStack;
 
-    std::vector<core::NameRef> result_;
+    std::vector<core::NameRef> &result_;
 
 public:
-    FieldFinder(core::ClassOrModuleRef target, ast::UnresolvedIdent::Kind queryKind);
+    FieldFinder(core::ClassOrModuleRef target, ast::UnresolvedIdent::Kind queryKind,
+                std::vector<core::NameRef> &result);
 
     void postTransformUnresolvedIdent(core::Context ctx, const ast::UnresolvedIdent &ident);
     void preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef);
     void postTransformClassDef(core::Context ctx, const ast::ClassDef &classDef);
-
-    const std::vector<core::NameRef> &result() const;
 };
 }; // namespace sorbet::realmain::lsp
 

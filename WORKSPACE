@@ -92,17 +92,6 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
 
-load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
-
-rules_rust_dependencies()
-
-rust_register_toolchains(
-    edition = "2021",
-    versions = [
-        "1.58.1",
-    ],
-)
-
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()

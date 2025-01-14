@@ -5,11 +5,9 @@ class Main
 
   sig {returns(String)}
   def implicit_return_via_else
-    if T.unsafe(nil)
-      return 'yep'
-    end
+    if T.unsafe(nil); return 'yep'; end
+  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `String` but found `NilClass` for method result type
   end
-# ^^^ error: Expected `String` but found `NilClass` for method result type
 
   sig {returns(String)}
   def implicit_return_non_empty_cont_block

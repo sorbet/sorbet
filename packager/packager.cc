@@ -15,6 +15,7 @@
 #include "core/errors/packager.h"
 #include "core/packages/MangledName.h"
 #include "core/packages/PackageInfo.h"
+#include "rapidjson/writer.h"
 #include <algorithm>
 #include <cctype>
 #include <sstream>
@@ -31,13 +32,44 @@ bool isTestNamespace(const core::NameRef ns) {
     return ns == core::packages::PackageDB::TEST_NAMESPACE;
 }
 
-bool visibilityApplies(const core::packages::VisibleTo vt, absl::Span<const core::NameRef> name) {
+bool visibilityApplies(const core::packages::VisibleTo &vt, absl::Span<const core::NameRef> name) {
     if (vt.visibleToType == core::packages::VisibleToType::Wildcard) {
         // a wildcard will match if it's a proper prefix of the package name
         return vt.packageName == name.subspan(0, vt.packageName.size());
     } else {
         // otherwise it needs to be the same
         return vt.packageName == name;
+    }
+}
+
+string buildValidLayersStr(const core::GlobalState &gs) {
+    auto validLayers = gs.packageDB().layers();
+    ENFORCE(validLayers.size() > 0);
+    if (validLayers.size() == 1) {
+        return string(validLayers.front().shortName(gs));
+    }
+    string result = "";
+    for (int i = 0; i < validLayers.size() - 1; i++) {
+        if (validLayers.size() > 2) {
+            result += core::ErrorColors::format("`{}`, ", validLayers[i].shortName(gs));
+        } else {
+            result += core::ErrorColors::format("`{}` ", validLayers[i].shortName(gs));
+        }
+    }
+    result += core::ErrorColors::format("or `{}`", validLayers.back().shortName(gs));
+    return result;
+}
+
+string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level) {
+    switch (level) {
+        case core::packages::StrictDependenciesLevel::False:
+            return "false";
+        case core::packages::StrictDependenciesLevel::Layered:
+            return "layered";
+        case core::packages::StrictDependenciesLevel::LayeredDag:
+            return "layered_dag";
+        case core::packages::StrictDependenciesLevel::Dag:
+            return "dag";
     }
 }
 
@@ -126,12 +158,12 @@ struct Export {
 // [X Y]
 // [X Y Z]
 class LexNext final {
-    const vector<core::NameRef> &names;
+    absl::Span<const core::NameRef> names;
 
 public:
     LexNext(const vector<core::NameRef> &names) : names(names) {}
 
-    bool operator<(const vector<core::NameRef> &rhs) const {
+    bool operator<(absl::Span<const core::NameRef> rhs) const {
         // Lexicographic comparison:
         for (auto lhsIt = names.begin(), rhsIt = rhs.begin(); lhsIt != names.end() && rhsIt != rhs.end();
              ++lhsIt, ++rhsIt) {
@@ -141,6 +173,10 @@ public:
                 return false;
             }
         }
+
+        // This is where this implementation differs from `std::lexicographic_compare`: if one name is the prefix of
+        // another they're considered equal, wheras `std::lexicographic_compare` would return `true` if the LHS
+        // was shorter.
         return false;
     }
 
@@ -155,12 +191,12 @@ public:
         return name.mangledName;
     }
 
-    const vector<core::NameRef> &fullName() const {
-        return name.fullName.parts;
+    absl::Span<const core::NameRef> fullName() const {
+        return absl::MakeSpan(name.fullName.parts);
     }
 
-    const std::vector<std::string> &pathPrefixes() const {
-        return packagePathPrefixes;
+    absl::Span<const std::string> pathPrefixes() const {
+        return absl::MakeSpan(packagePathPrefixes);
     }
 
     core::Loc fullLoc() const {
@@ -210,8 +246,11 @@ public:
     bool visibleToTests_ = false;
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel = nullopt;
+    optional<pair<core::NameRef, core::LocOffsets>> layer = nullopt;
+    // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
+    optional<int> sccID = nullopt;
 
-    // PackageInfoImpl is the only implementation of PackageInfoImpl
+    // PackageInfoImpl is the only implementation of PackageInfo
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
         ENFORCE(pkg.exists());
         return reinterpret_cast<const PackageInfoImpl &>(pkg); // TODO is there a more idiomatic way to do this?
@@ -539,7 +578,7 @@ const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRe
 
 // Binary search to find a packages index in the global packages list
 uint16_t findPackageIndex(core::Context ctx, const PackageInfoImpl &pkg) {
-    auto &packages = ctx.state.packageDB().packages();
+    auto packages = ctx.state.packageDB().packages();
     return std::lower_bound(packages.begin(), packages.end(), pkg.fullName(),
                             [ctx](auto pkgName, auto &curFileFullName) {
                                 auto &pkg = ctx.state.packageDB().getPackageInfo(pkgName);
@@ -564,8 +603,8 @@ uint16_t findPackageIndex(core::Context ctx, const PackageInfoImpl &pkg) {
 class PackageNamespaces final {
     using Bound = pair<uint16_t, uint16_t>;
 
-    const vector<core::packages::MangledName> &packages; // Mangled names sorted lexicographically
-    const PackageInfoImpl &filePkg;                      // Package for current file
+    const absl::Span<const core::packages::MangledName> packages; // Mangled names sorted lexicographically
+    const PackageInfoImpl &filePkg;                               // Package for current file
     // Current bounds:
     uint16_t begin;
     uint16_t end;
@@ -994,14 +1033,11 @@ struct PackageSpecBodyWalk {
     PackageInfoImpl &info;
     vector<Export> exported;
     bool foundFirstPackageSpec = false;
+    bool foundLayerDeclaration = false;
+    bool foundStrictDependenciesDeclaration = false;
 
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-
-        // Ignore methods
-        if (send.fun == core::Names::keepDef() || send.fun == core::Names::keepSelfDef()) {
-            return;
-        }
 
         // Disallowed methods
         if (send.fun == core::Names::extend() || send.fun == core::Names::include()) {
@@ -1013,9 +1049,7 @@ struct PackageSpecBodyWalk {
 
         // Sanity check arguments for unrecognized methods
         if (!isSpecMethod(send)) {
-            const auto numPosArgs = send.numPosArgs();
-            for (auto i = 0; i < numPosArgs; ++i) {
-                auto &arg = send.getPosArg(i);
+            for (auto &arg : send.posArgs()) {
                 if (!ast::isa_tree<ast::Literal>(arg)) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Packager::InvalidPackageExpression)) {
                         e.setHeader("Invalid expression in package: Arguments to functions must be literals");
@@ -1037,10 +1071,9 @@ struct PackageSpecBodyWalk {
             // null indicates an invalid import.
             if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 // Transform: `import Foo` -> `import <PackageSpecRegistry>::Foo`
-                auto importArg = move(send.getPosArg(0));
-                send.removePosArg(0);
-                ENFORCE(send.numPosArgs() == 0);
-                send.addPosArg(prependName(move(importArg)));
+                auto &posArg = send.getPosArg(0);
+                auto importArg = move(posArg);
+                posArg = prependName(move(importArg));
 
                 info.importedPackageNames.emplace_back(getPackageName(ctx, target), method2ImportType(send));
             }
@@ -1048,10 +1081,9 @@ struct PackageSpecBodyWalk {
 
         if (send.fun == core::Names::restrictToService() && send.numPosArgs() == 1) {
             // Transform: `restrict_to_service Foo` -> `restrict_to_service <PackageSpecRegistry>::Foo`
-            auto importArg = move(send.getPosArg(0));
-            send.removePosArg(0);
-            ENFORCE(send.numPosArgs() == 0);
-            send.addPosArg(prependName(move(importArg)));
+            auto &posArg = send.getPosArg(0);
+            auto importArg = move(posArg);
+            posArg = prependName(move(importArg));
         }
 
         if (send.fun == core::Names::exportAll() && send.numPosArgs() == 0) {
@@ -1082,10 +1114,9 @@ struct PackageSpecBodyWalk {
                 }
 
                 if (auto *recv = verifyConstant(ctx, send.fun, target->recv)) {
+                    auto &posArg = send.getPosArg(0);
                     auto importArg = move(target->recv);
-                    send.removePosArg(0);
-                    ENFORCE(send.numPosArgs() == 0);
-                    send.addPosArg(prependName(move(importArg)));
+                    posArg = prependName(move(importArg));
                     info.visibleTo_.emplace_back(getPackageName(ctx, recv), core::packages::VisibleToType::Wildcard);
                 } else {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
@@ -1095,21 +1126,30 @@ struct PackageSpecBodyWalk {
                     return;
                 }
             } else if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
-                auto importArg = move(send.getPosArg(0));
-                send.removePosArg(0);
-                ENFORCE(send.numPosArgs() == 0);
-                send.addPosArg(prependName(move(importArg)));
+                auto &posArg = send.getPosArg(0);
+                auto importArg = move(posArg);
+                posArg = prependName(move(importArg));
 
                 info.visibleTo_.emplace_back(getPackageName(ctx, target), core::packages::VisibleToType::Normal);
             }
         }
 
         if (send.fun == core::Names::strictDependencies()) {
+            foundStrictDependenciesDeclaration = true;
+            if (!ctx.state.packageDB().enforceLayering()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
+                    e.setHeader("Found `{}` annotation, but `{}` was not passed", send.fun.show(ctx),
+                                "--packager-layers");
+                    e.addErrorNote("Use `{}` to define the valid layers, or `{}` to use the default layers "
+                                   "of `{}` and `{}`",
+                                   "--packager-layers=foo,bar", "--packager-layers", "library", "application");
+                }
+                return;
+            }
             if (info.strictDependenciesLevel.has_value()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
-                    e.addErrorLine(ctx.locAt(info.strictDependenciesLevel.value().second),
-                                   "Previous declaration found here");
+                    e.addErrorLine(ctx.locAt(info.strictDependenciesLevel.value().second), "Previously declared here");
                     e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
                 }
                 return;
@@ -1123,6 +1163,40 @@ struct PackageSpecBodyWalk {
                     if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidStrictDependencies)) {
                         e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}`, or `{}`", send.fun.show(ctx),
                                     "'false'", "'layered'", "'layered_dag'", "'dag'");
+                    }
+                }
+            }
+        }
+
+        if (send.fun == core::Names::layer()) {
+            foundLayerDeclaration = true;
+            if (!ctx.state.packageDB().enforceLayering()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidLayer)) {
+                    e.setHeader("Found `{}` annotation, but `{}` was not passed", send.fun.show(ctx),
+                                "--packager-layers");
+                    e.addErrorNote("Use `{}` to define the valid layers, or `{}` to use the default layers "
+                                   "of `{}` and `{}`",
+                                   "--packager-layers=foo,bar", "--packager-layers", "library", "application");
+                }
+                return;
+            }
+            if (info.layer.has_value()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidLayer)) {
+                    e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
+                    e.addErrorLine(ctx.locAt(info.layer.value().second), "Previously declared here");
+                    e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
+                }
+                return;
+            }
+
+            if (send.numPosArgs() > 0) {
+                auto parsedValue = parseLayerOption(ctx.state, send.getPosArg(0));
+                if (parsedValue.has_value()) {
+                    info.layer = make_pair(parsedValue.value(), send.getPosArg(0).loc());
+                } else {
+                    if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidLayer)) {
+                        e.setHeader("Argument to `{}` must be one of: {}", send.fun.show(ctx),
+                                    buildValidLayersStr(ctx.state));
                     }
                 }
             }
@@ -1278,6 +1352,19 @@ private:
 
         return nullopt;
     }
+
+    optional<core::NameRef> parseLayerOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
+        auto validLayers = gs.packageDB().layers();
+        auto *lit = ast::cast_tree<ast::Literal>(arg);
+        if (!lit || !lit->isString()) {
+            return nullopt;
+        }
+        auto value = lit->asString();
+        if (absl::c_find(validLayers, value) != validLayers.end()) {
+            return value;
+        }
+        return nullopt;
+    }
 };
 
 unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::ParsedFile &package) {
@@ -1364,6 +1451,18 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     PackageSpecBodyWalk bodyWalk(info);
     core::Context ctx(gs, core::Symbols::root(), package.file);
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
+    if (gs.packageDB().enforceLayering()) {
+        if (!bodyWalk.foundLayerDeclaration) {
+            if (auto e = ctx.beginError(info.name.loc, core::errors::Packager::InvalidLayer)) {
+                e.setHeader("This package does not declare a `{}`", "layer");
+            }
+        }
+        if (!bodyWalk.foundStrictDependenciesDeclaration) {
+            if (auto e = ctx.beginError(info.name.loc, core::errors::Packager::InvalidStrictDependencies)) {
+                e.setHeader("This package does not declare a `{}` level", "strict_dependencies");
+            }
+        }
+    }
     bodyWalk.finalize(ctx);
 }
 
@@ -1417,34 +1516,31 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
 
     for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
         // Project_FooBar -- munge with underscore
-        string additionalDirPath = absl::StrCat(prefix, dirNameFromShortName, "/");
-        info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
+        info->packagePathPrefixes.emplace_back(absl::StrCat(prefix, dirNameFromShortName, "/"));
     }
 
     for (const string &prefix : extraPackageFilesDirectorySlashDeprecatedPrefixes) {
         // project/Foo_bar -- convert camel-case to snake-case and munge with slash
-        std::stringstream ss;
-        ss << prefix;
+        std::string additionalDirPath;
+        additionalDirPath.reserve(prefix.size() + 2 * dirNameFromShortName.length() + 1);
+        additionalDirPath += prefix;
         for (int i = 0; i < dirNameFromShortName.length(); i++) {
             if (dirNameFromShortName[i] == '_') {
-                ss << '/';
+                additionalDirPath.push_back('/');
             } else if (i == 0 || dirNameFromShortName[i - 1] == '_') {
                 // Capitalizing first letter in each directory name to avoid conflicts with ignored directories,
                 // which tend to be all lower case
-                char upper = std::toupper(dirNameFromShortName[i]);
-                ss << std::move(upper);
+                additionalDirPath.push_back(std::toupper(dirNameFromShortName[i]));
             } else {
                 if (isupper(dirNameFromShortName[i])) {
-                    ss << '_'; // snake-case munging
+                    additionalDirPath.push_back('_'); // snake-case munging
                 }
 
-                char lower = std::tolower(dirNameFromShortName[i]);
-                ss << std::move(lower);
+                additionalDirPath.push_back(std::tolower(dirNameFromShortName[i]));
             }
         }
-        ss << '/';
+        additionalDirPath.push_back('/');
 
-        std::string additionalDirPath(ss.str());
         info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
     }
 
@@ -1456,9 +1552,225 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     return info;
 }
 
+// Metadata for Tarjan's algorithm
+// https://www.cs.cmu.edu/~15451-f18/lectures/lec19-DFS-strong-components.pdf provides a good overview of the
+// algorithm.
+const int UNVISITED = 0;
+struct NodeInfo {
+    // A given package's index in the DFS traversal; ie. when it was first visited. The default value of 0 means the
+    // package hasn't been visited yet.
+    int index = UNVISITED;
+    // The lowest index reachable from a given package (in the same SCC) by following any number of tree edges
+    // and at most one back/cross edge
+    int lowLink = 0;
+    // Fast way to check if a package is on the stack
+    bool onStack = false;
+};
+
+struct ComputeSCCsMetadata {
+    int nextIndex = 1;
+    int nextSCCId = 0;
+    UnorderedMap<core::packages::MangledName, NodeInfo> nodeMap;
+    // As we visit packages, we push them onto the stack. Once we find the "root" of an SCC, we can use the stack to
+    // determine all packages in the SCC.
+    std::vector<core::packages::MangledName> stack;
+};
+
+// DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
+// detecting SCCs.
+void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::packages::MangledName pkgName,
+                   NodeInfo &infoAtEntry) {
+    auto *pkgInfoPtr = gs.packageDB().getPackageInfoNonConst(pkgName);
+    if (!pkgInfoPtr) {
+        // This is to handle the case where the user imports a package that doesn't exist.
+        return;
+    }
+    auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
+
+    infoAtEntry.index = metadata.nextIndex;
+    infoAtEntry.lowLink = metadata.nextIndex;
+    metadata.nextIndex++;
+    metadata.stack.push_back(pkgName);
+    infoAtEntry.onStack = true;
+
+    for (auto &i : pkgInfo.importedPackageNames) {
+        if (i.type == ImportType::Test) {
+            continue;
+        }
+        // We need to be careful with this; it's not valid after a call to `strongConnect`,
+        // because our reference might disappear from underneath us during that call.
+        auto &importInfo = metadata.nodeMap[i.name.mangledName];
+        if (importInfo.index == UNVISITED) {
+            // This is a tree edge (ie. a forward edge that we haven't visited yet).
+            strongConnect(gs, metadata, i.name.mangledName, importInfo);
+
+            // Need to re-lookup for the reason above.
+            auto &importInfo = metadata.nodeMap[i.name.mangledName];
+            if (importInfo.index == UNVISITED) {
+                // This is to handle early return above.
+                continue;
+            }
+            // Since we can follow any number of tree edges for lowLink, the lowLink of child is valid for this package
+            // too.
+            //
+            // Note that we cannot use `infoAtEntry` here because it might have been invalidated.
+            auto &pkgLink = metadata.nodeMap[pkgName].lowLink;
+            pkgLink = std::min(pkgLink, importInfo.lowLink);
+        } else if (importInfo.onStack) {
+            // This is a back edge (edge to ancestor) or cross edge (edge to a different subtree). Since we can only
+            // follow at most one back/cross edge, the best update we can make to lowlink of the current package is the
+            // child's index.
+            //
+            // Note that we cannot use `infoAtEntry` here because it might have been invalidated.
+            auto &pkgLink = metadata.nodeMap[pkgName].lowLink;
+            pkgLink = std::min(pkgLink, importInfo.index);
+        }
+        // If the child package is already visited and not on the stack, it's in a different SCC, so no update to the
+        // lowlink.
+    }
+
+    // We cannot re-use `infoAtEntry` here because `nodeMap` might have been re-allocated and
+    // invalidate our reference.
+    auto &ourInfo = metadata.nodeMap[pkgName];
+    if (ourInfo.index == ourInfo.lowLink) {
+        // This is the root of an SCC. This means that all packages on the stack from this package to the top of the top
+        // of the stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them the same
+        // SCC ID.
+        core::packages::MangledName poppedPkgName;
+        do {
+            poppedPkgName = metadata.stack.back();
+            metadata.stack.pop_back();
+            metadata.nodeMap[poppedPkgName].onStack = false;
+            PackageInfoImpl &poppedPkgInfo =
+                PackageInfoImpl::from(*(gs.packageDB().getPackageInfoNonConst(poppedPkgName)));
+            poppedPkgInfo.sccID = metadata.nextSCCId;
+        } while (poppedPkgName != pkgName);
+        metadata.nextSCCId++;
+    }
+}
+
+// Tarjan's algorithm for finding strongly connected components
+// NOTE: This function must be called every time a non-test import is added or removed from a package.
+// It is relatively fast, so calling it on every __package.rb edit is an okay overapproximation for simplicity.
+void computeSCCs(core::GlobalState &gs) {
+    Timer timeit(gs.tracer(), "packager::computeSCCs");
+    ComputeSCCsMetadata metadata;
+    auto allPackages = gs.packageDB().packages();
+    metadata.stack.reserve(allPackages.size());
+    metadata.nodeMap.reserve(allPackages.size());
+    for (auto package : allPackages) {
+        auto &info = metadata.nodeMap[package];
+        if (info.index == UNVISITED) {
+            strongConnect(gs, metadata, package, info);
+        }
+    }
+}
+
+void validateLayering(const core::Context &ctx, const Import &i) {
+    if (i.type == ImportType::Test) {
+        return;
+    }
+
+    const auto &packageDB = ctx.state.packageDB();
+    ENFORCE(packageDB.getPackageInfo(i.name.mangledName).exists())
+    ENFORCE(packageDB.getPackageForFile(ctx, ctx.file).exists())
+    auto &thisPkg = PackageInfoImpl::from(packageDB.getPackageForFile(ctx, ctx.file));
+    auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name.mangledName));
+    ENFORCE(thisPkg.sccID.has_value(), "computeSCCs should already have been called and set sccID");
+    ENFORCE(otherPkg.sccID.has_value(), "computeSCCs should already have been called and set sccID");
+
+    if (!thisPkg.strictDependenciesLevel.has_value() || !otherPkg.strictDependenciesLevel.has_value() ||
+        !thisPkg.layer.has_value() || !otherPkg.layer.has_value()) {
+        return;
+    }
+
+    if (thisPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::False) {
+        return;
+    }
+
+    auto pkgLayer = thisPkg.layer.value().first;
+    auto otherPkgLayer = otherPkg.layer.value().first;
+    auto pkgLayerIndex = packageDB.layerIndex(pkgLayer);
+    auto otherPkgLayerIndex = packageDB.layerIndex(otherPkgLayer);
+
+    if (pkgLayerIndex < otherPkgLayerIndex) {
+        if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
+            e.setHeader("Layering violation: cannot import `{}` (in layer `{}`) from `{}` (in layer `{}`)",
+                        otherPkg.show(ctx), otherPkgLayer.show(ctx), thisPkg.show(ctx), pkgLayer.show(ctx));
+            e.addErrorLine(core::Loc(thisPkg.loc.file(), thisPkg.layer.value().second), "`{}`'s `{}` declared here",
+                           thisPkg.show(ctx), "layer");
+            e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.layer.value().second), "`{}`'s `{}` declared here",
+                           otherPkg.show(ctx), "layer");
+            // TODO: if the import is unused (ie. there are no references in this package to the imported package),
+            // autocorrect to delete import
+        }
+    }
+
+    core::packages::StrictDependenciesLevel otherPkgExpectedLevel = core::packages::StrictDependenciesLevel::Layered;
+
+    if (thisPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::Dag) {
+        otherPkgExpectedLevel = core::packages::StrictDependenciesLevel::Dag;
+    }
+
+    if (otherPkg.strictDependenciesLevel.value().first < otherPkgExpectedLevel) {
+        if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
+            e.setHeader("Strict dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
+                        "import", strictDependenciesLevelToString(otherPkgExpectedLevel));
+            e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel.value().second),
+                           "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
+            // TODO: if the import is unused (ie. there are no references in this package to the imported package),
+            // autocorrect to delete import
+            // TODO: if the imported package can be trivially upgraded to the required level (ex. it's at 'false' but
+            // has no layering violations), autocorrect to do so
+        }
+    }
+
+    if (thisPkg.strictDependenciesLevel.value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
+        if (thisPkg.sccID == otherPkg.sccID) {
+            if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
+                auto level =
+                    fmt::format("strict_dependencies '{}'",
+                                strictDependenciesLevelToString(thisPkg.strictDependenciesLevel.value().first));
+                e.setHeader("Strict dependencies violation: importing `{}` will put `{}` into a cycle, which is not "
+                            "valid at `{}`",
+                            otherPkg.show(ctx), thisPkg.show(ctx), level);
+            }
+            // TODO: if the import is unused (ie. there are no references in this package to the imported package),
+            // autocorrect to delete import
+        }
+    }
+}
+
+void validateVisibility(const core::Context &ctx, const Import i) {
+    ENFORCE(ctx.state.packageDB().getPackageInfo(i.name.mangledName).exists())
+    ENFORCE(ctx.state.packageDB().getPackageForFile(ctx, ctx.file).exists())
+    auto &absPkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
+    auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.name.mangledName);
+
+    const auto &visibleTo = otherPkg.visibleTo();
+    if (visibleTo.empty() && !otherPkg.visibleToTests()) {
+        return;
+    }
+
+    if (otherPkg.visibleToTests() && i.type == ImportType::Test) {
+        return;
+    }
+
+    bool allowed =
+        absl::c_any_of(visibleTo, [&absPkg](const auto &other) { return visibilityApplies(other, absPkg.fullName()); });
+
+    if (!allowed) {
+        if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
+            e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
+                        otherPkg.show(ctx), absPkg.show(ctx));
+            e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
+                           "visible_to", otherPkg.show(ctx));
+        }
+    }
+}
+
 } // namespace
 
-// Validate that the package file is marked `# typed: strict`.
 void validatePackage(core::Context ctx) {
     const auto &packageDB = ctx.state.packageDB();
     auto &absPkg = packageDB.getPackageForFile(ctx, ctx.file);
@@ -1468,47 +1780,36 @@ void validatePackage(core::Context ctx) {
         return;
     }
 
-    auto &pkgInfo = PackageInfoImpl::from(absPkg);
-    bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
-
-    if (!skipImportVisibilityCheck) {
-        for (auto &i : pkgInfo.importedPackageNames) {
-            auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
-
-            // this might mean the other package doesn't exist, but that
-            // should have been caught already
-            if (!otherPkg.exists()) {
-                continue;
-            }
-
-            const auto &visibleTo = otherPkg.visibleTo();
-            if (visibleTo.empty() && !otherPkg.visibleToTests()) {
-                continue;
-            }
-
-            if (otherPkg.visibleToTests() && i.type == ImportType::Test) {
-                continue;
-            }
-
-            bool allowed = absl::c_any_of(otherPkg.visibleTo(), [&absPkg](const auto &other) {
-                return visibilityApplies(other, absPkg.fullName());
-            });
-
-            if (!allowed) {
-                if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
-                    e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
-                                otherPkg.show(ctx), absPkg.show(ctx));
-                    e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
-                                   "visible_to", otherPkg.show(ctx));
-                }
-            }
-        }
-    }
-
     // Sanity check: __package.rb files _must_ be typed: strict
     if (ctx.file.data(ctx).originalSigil < core::StrictLevel::Strict) {
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::PackageFileMustBeStrict)) {
             e.setHeader("Package files must be at least `{}`", "# typed: strict");
+            // TODO(neil): Autocorrect to update the sigil?
+        }
+    }
+
+    auto &pkgInfo = PackageInfoImpl::from(absPkg);
+    bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
+    auto enforceLayering = ctx.state.packageDB().enforceLayering();
+
+    if (skipImportVisibilityCheck && !enforceLayering) {
+        return;
+    }
+
+    for (auto &i : pkgInfo.importedPackageNames) {
+        auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+
+        // this might mean the other package doesn't exist, but that should have been caught already
+        if (!otherPkg.exists()) {
+            continue;
+        }
+
+        if (enforceLayering) {
+            validateLayering(ctx, i);
+        }
+
+        if (!skipImportVisibilityCheck) {
+            validateVisibility(ctx, i);
         }
     }
 }
@@ -1647,6 +1948,10 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
             taskq->push(i, 1);
         }
 
+        if (gs.packageDB().enforceLayering()) {
+            computeSCCs(gs);
+        }
+
         workers.multiplexJob("rewritePackagesAndFiles", [&gs, &files, &barrier, taskq]() {
             Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
             size_t idx;
@@ -1671,90 +1976,51 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
     }
 }
 
-// TODO(jez) Parallelize this
-vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, vector<ast::ParsedFile> files) {
+vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, vector<ast::ParsedFile> files,
+                                                 WorkerPool &workers) {
     // Note: This will only run if packages have not been changed (byte-for-byte equality).
     // TODO(nroman-stripe) This could be further incrementalized to avoid processing all packages by
     // building in an understanding of the dependencies between packages.
     Timer timeit(gs.tracer(), "packager.runIncremental");
-    for (auto &file : files) {
-        core::Context ctx(gs, core::Symbols::root(), file.file);
-        if (file.file.data(gs).isPackage()) {
-            // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
-            // report some syntactic packager errors.
-            auto info = definePackage(gs, file);
-            if (info != nullptr) {
-                rewritePackageSpec(gs, file, *info);
-            }
-            validatePackage(ctx);
-        } else {
-            validatePackagedFile(ctx, file.tree);
-        }
+
+    auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
+    absl::BlockingCounter barrier(max(workers.size(), 1));
+
+    for (size_t i = 0; i < files.size(); ++i) {
+        taskq->push(i, 1);
     }
+    workers.multiplexJob("validatePackagesAndFiles", [&gs, &files, &barrier, taskq]() {
+        size_t idx;
+        for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
+            if (!result.gotItem()) {
+                continue;
+            }
+
+            ast::ParsedFile &file = files[idx];
+            core::Context ctx(gs, core::Symbols::root(), file.file);
+            if (file.file.data(gs).isPackage()) {
+                // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
+                // report some syntactic packager errors.
+                auto info = definePackage(gs, file);
+                if (info != nullptr) {
+                    rewritePackageSpec(gs, file, *info);
+                }
+                validatePackage(ctx);
+            } else {
+                validatePackagedFile(ctx, file.tree);
+            }
+        }
+        barrier.DecrementCount();
+    });
+    barrier.Wait();
     return files;
 }
 
 namespace {
 
-class ImportFormatter final {
-    const core::GlobalState &gs;
-
-public:
-    ImportFormatter(const core::GlobalState &gs) : gs(gs) {}
-
-    void operator()(std::string *out, const vector<core::NameRef> &name) const {
-        fmt::format_to(back_inserter(*out), "\"{}\"", absl::StrJoin(name, "::", core::packages::NameFormatter(gs)));
-    }
-};
-
-class FileListFormatter final {
-    const core::GlobalState &gs;
-
-public:
-    FileListFormatter(const core::GlobalState &gs) : gs(gs) {}
-
-    void operator()(std::string *out, core::FileRef file) const {
-        out->append("\"");
-        out->append(file.data(gs).path());
-        out->append("\"");
-    }
-};
-
 struct PackageFiles {
     vector<core::FileRef> files;
     vector<core::FileRef> testFiles;
-};
-
-class PackageInfoFormatter final {
-    const core::GlobalState &gs;
-    const UnorderedMap<core::packages::MangledName, PackageFiles> &packageFiles;
-
-public:
-    PackageInfoFormatter(const core::GlobalState &gs,
-                         const UnorderedMap<core::packages::MangledName, PackageFiles> &packageFiles)
-        : gs(gs), packageFiles(packageFiles) {}
-
-    void operator()(std::string *out, core::packages::MangledName mangledName) const {
-        const auto &pkg = gs.packageDB().getPackageInfo(mangledName);
-        out->append("{{");
-        out->append("\"name\":");
-        fmt::format_to(back_inserter(*out), "\"{}\",",
-                       absl::StrJoin(pkg.fullName(), "::", core::packages::NameFormatter(gs)));
-        out->append("\"imports\":[");
-        fmt::format_to(back_inserter(*out), absl::StrJoin(pkg.imports(), ",", ImportFormatter(gs)));
-        out->append("],\"testImports\":[");
-        fmt::format_to(back_inserter(*out), absl::StrJoin(pkg.testImports(), ",", ImportFormatter(gs)));
-        out->append("],\"files\":[");
-        const auto it = packageFiles.find(mangledName);
-        if (it != packageFiles.end()) {
-            fmt::format_to(back_inserter(*out), absl::StrJoin(it->second.files, ",", FileListFormatter(gs)));
-        }
-        out->append("], \"testFiles\":[");
-        if (it != packageFiles.end()) {
-            fmt::format_to(back_inserter(*out), absl::StrJoin(it->second.testFiles, ",", FileListFormatter(gs)));
-        }
-        out->append("]}}");
-    }
 };
 
 } // namespace
@@ -1775,11 +2041,61 @@ void Packager::dumpPackageInfo(const core::GlobalState &gs, std::string outputFi
         }
     }
 
-    fmt::memory_buffer out;
-    fmt::format_to(back_inserter(out), "[");
-    fmt::format_to(back_inserter(out), absl::StrJoin(pkgDB.packages(), ",", PackageInfoFormatter(gs, packageFiles)));
-    fmt::format_to(back_inserter(out), "]");
-    FileOps::write(outputFile, fmt::to_string(out));
+    rapidjson::StringBuffer result;
+    rapidjson::Writer writer(result);
+
+    writer.StartArray();
+
+    for (auto mangledName : pkgDB.packages()) {
+        const auto &pkg = gs.packageDB().getPackageInfo(mangledName);
+
+        writer.StartObject();
+
+        writer.String("name");
+        writer.String(absl::StrJoin(pkg.fullName(), "::", core::packages::NameFormatter(gs)));
+
+        writer.String("imports");
+        writer.StartArray();
+        for (auto &import : pkg.imports()) {
+            writer.String(absl::StrJoin(import, "::", core::packages::NameFormatter(gs)));
+        }
+        writer.EndArray();
+
+        writer.String("testImports");
+        writer.StartArray();
+        for (auto &import : pkg.testImports()) {
+            writer.String(absl::StrJoin(import, "::", core::packages::NameFormatter(gs)));
+        }
+        writer.EndArray();
+
+        const auto it = packageFiles.find(mangledName);
+
+        writer.String("files");
+        writer.StartArray();
+        if (it != packageFiles.end()) {
+            for (auto file : it->second.files) {
+                auto path = file.data(gs).path();
+                writer.String(path.data(), path.size());
+            }
+        }
+        writer.EndArray();
+
+        writer.String("testFiles");
+        writer.StartArray();
+        if (it != packageFiles.end()) {
+            for (auto file : it->second.testFiles) {
+                auto path = file.data(gs).path();
+                writer.String(path.data(), path.size());
+            }
+        }
+        writer.EndArray();
+
+        writer.EndObject();
+    }
+
+    writer.EndArray();
+
+    FileOps::write(outputFile, result.GetString());
 }
 
 } // namespace sorbet::packager

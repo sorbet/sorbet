@@ -43,7 +43,7 @@ bool isEmptyParseResult(const core::GlobalState &gs, const ast::ExpressionPtr &t
 
 unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_ptr<core::GlobalState> &lgs,
                                                  core::UsageHash usageHash, ast::ParsedFile file) {
-    if (file.file.data(*lgs).hasParseErrors()) {
+    if (file.file.data(*lgs).hasIndexErrors()) {
         if (isEmptyParseResult(*lgs, file.tree)) {
             rapidjson::StringBuffer result;
             rapidjson::Writer<rapidjson::StringBuffer> writer(result);
@@ -118,7 +118,7 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
 }
 }; // namespace
 
-void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spdlog::logger &logger,
+void Hashing::computeFileHashes(absl::Span<const shared_ptr<core::File>> files, spdlog::logger &logger,
                                 WorkerPool &workers, const realmain::options::Options &opts) {
     Timer timeit(logger, "computeFileHashes");
     auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(files.size());

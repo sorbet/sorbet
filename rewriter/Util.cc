@@ -25,12 +25,11 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
             // T.proc.params takes inlined keyword argument pairs, and can't handle kwsplat
             ast::Send::ARGS_store args;
 
-            const auto numKwArgs = send->numKwArgs();
-            for (auto i = 0; i < numKwArgs; ++i) {
-                ENFORCE(ast::isa_tree<ast::Literal>(send->getKwKey(i)));
-                args.emplace_back(send->getKwKey(i).deepCopy());
+            for (auto [key, value] : send->kwArgPairs()) {
+                ENFORCE(ast::isa_tree<ast::Literal>(key));
+                args.emplace_back(key.deepCopy());
 
-                auto dupedValue = ASTUtil::dupType(send->getKwValue(i));
+                auto dupedValue = ASTUtil::dupType(value);
                 if (dupedValue == nullptr) {
                     return nullptr;
                 }
@@ -200,7 +199,9 @@ template <typename T> T *castSigImpl(T *send) {
     auto *block = send->block();
     ENFORCE(block);
     auto *body = ast::cast_tree<ast::Send>(block->body);
-    while (body != nullptr && (body->fun == core::Names::checked() || body->fun == core::Names::onFailure())) {
+    while (body != nullptr && (body->fun == core::Names::checked() || body->fun == core::Names::onFailure() ||
+                               body->fun == core::Names::override_() || body->fun == core::Names::overridable() ||
+                               body->fun == core::Names::abstract())) {
         body = ast::cast_tree<ast::Send>(body->recv);
     }
     if (body != nullptr && (body->fun == core::Names::void_() || body->fun == core::Names::returns())) {
@@ -246,10 +247,9 @@ ast::ExpressionPtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
     ast::Hash::ENTRY_store keys;
     ast::Hash::ENTRY_store values;
 
-    const auto numKwArgs = send->numKwArgs();
-    for (auto i = 0; i < numKwArgs; ++i) {
-        keys.emplace_back(send->getKwKey(i).deepCopy());
-        values.emplace_back(send->getKwValue(i).deepCopy());
+    for (auto [key, value] : send->kwArgPairs()) {
+        keys.emplace_back(key.deepCopy());
+        values.emplace_back(value.deepCopy());
     }
 
     // handle a double-splat or a hash literal as the last argument

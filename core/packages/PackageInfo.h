@@ -1,6 +1,8 @@
 #ifndef SORBET_CORE_PACKAGES_PACKAGEINFO_H
 #define SORBET_CORE_PACKAGES_PACKAGEINFO_H
 
+#include "absl/types/span.h"
+
 #include "core/NameRef.h"
 #include "core/SymbolRef.h"
 #include "core/packages/MangledName.h"
@@ -39,14 +41,14 @@ struct VisibleTo {
     VisibleToType visibleToType;
 
     VisibleTo(std::vector<core::NameRef> packageName, VisibleToType visibleToType)
-        : packageName(packageName), visibleToType(visibleToType){};
+        : packageName(std::move(packageName)), visibleToType(visibleToType){};
 };
 
 class PackageInfo {
 public:
     virtual MangledName mangledName() const = 0;
-    virtual const std::vector<core::NameRef> &fullName() const = 0;
-    virtual const std::vector<std::string> &pathPrefixes() const = 0;
+    virtual absl::Span<const core::NameRef> fullName() const = 0;
+    virtual absl::Span<const std::string> pathPrefixes() const = 0;
     virtual std::vector<std::vector<core::NameRef>> exports() const = 0;
     virtual std::vector<std::vector<core::NameRef>> imports() const = 0;
     virtual std::vector<std::vector<core::NameRef>> testImports() const = 0;
@@ -90,7 +92,7 @@ public:
 
     // Utilities:
 
-    static bool lexCmp(const std::vector<core::NameRef> &lhs, const std::vector<core::NameRef> &rhs);
+    static bool lexCmp(absl::Span<const core::NameRef> lhs, absl::Span<const core::NameRef> rhs);
 };
 
 // Information about the imports of a package. The imports are split into two categories, packages whose name falls

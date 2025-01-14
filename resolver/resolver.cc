@@ -295,18 +295,14 @@ private:
     public:
         bool seenUnresolved = false;
 
-        void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
-            auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
+        void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &original) {
             seenUnresolved |= !isAlreadyResolved(ctx, original);
         };
     };
 
     static bool isFullyResolved(core::Context ctx, const ast::ExpressionPtr &expression) {
         ResolutionChecker checker;
-        ast::ExpressionPtr dummy(expression.getTagged());
-        ast::TreeWalk::apply(ctx, checker, dummy);
-        ENFORCE(dummy == expression);
-        dummy.release();
+        ast::ConstTreeWalk::apply(ctx, checker, expression);
         return !checker.seenUnresolved;
     }
 
@@ -402,7 +398,7 @@ private:
 
     struct PackageStub {
         core::packages::MangledName packageId;
-        vector<core::NameRef> fullName;
+        absl::Span<const core::NameRef> fullName;
 
         PackageStub(const core::packages::PackageInfo &info)
             : packageId{info.mangledName()}, fullName{info.fullName()} {}
@@ -2869,7 +2865,7 @@ class ResolveTypeMembersAndFieldsWalk {
         // If this string _begins_ with `::`, then the first fragment will be an empty string; in multiple places
         // below, we'll check to find out whether the first part is `""` or not, which means we're testing whether
         // the string did or did not begin with `::`.
-        vector<string> parts = absl::StrSplit(shortName, "::");
+        vector<string_view> parts = absl::StrSplit(shortName, "::");
 
         core::SymbolRef current;
         for (auto part : parts) {
@@ -4016,17 +4012,12 @@ public:
         bool isOverloaded = job.isOverloaded;
         auto originalName = mdef.symbol.data(ctx)->name;
 
-        bool existingIsAlreadyMangled =
-            originalName.kind() == core::NameKind::UNIQUE &&
-            originalName.dataUnique(ctx)->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload;
-        if (isOverloaded && !existingIsAlreadyMangled) {
-            ctx.state.mangleRenameForOverload(mdef.symbol, originalName);
-        }
-        if (existingIsAlreadyMangled) {
-            originalName = originalName.dataUnique(ctx)->original;
-        }
+        // Propagate the overloadedness to the original definition's symbol.
+        mdef.symbol.data(ctx)->flags.isOverloaded = isOverloaded;
 
-        int i = -1;
+        // Unique overload names must have an index that's > 0 associated with them, so we start `i` at `0` to ensure
+        // that the first iteration of the loop it's at `1`.
+        int i = 0;
         std::optional<OverloadedMethodSigInformation> combinedInfo;
         std::vector<OverloadedMethodArgInformation> args;
         for (auto &sig : sigs) {
@@ -4039,7 +4030,8 @@ public:
 
                 overloadSym.data(ctx)->setMethodVisibility(mdef.symbol.data(ctx)->methodVisibility());
                 overloadSym.data(ctx)->intrinsicOffset = mdef.symbol.data(ctx)->intrinsicOffset;
-                if (i != sigs.size() - 1) {
+                // We don't mark the last sig as overloaded to indicate that this is the last one in the chain.
+                if (i != sigs.size()) {
                     overloadSym.data(ctx)->flags.isOverloaded = true;
                 }
             } else {

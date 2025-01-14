@@ -268,10 +268,8 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 typeArgSpec.loc = ctx.locAt(arg.loc());
             }
 
-            const auto numKwArgs = tsend->numKwArgs();
-            for (auto i = 0; i < numKwArgs; ++i) {
-                auto &kwkey = tsend->getKwKey(i);
-                if (auto e = ctx.beginError(kwkey.loc(), core::errors::Resolver::InvalidMethodSignature)) {
+            for (auto [key, _value] : tsend->kwArgPairs()) {
+                if (auto e = ctx.beginError(key.loc(), core::errors::Resolver::InvalidMethodSignature)) {
                     e.setHeader("Malformed `{}`: Type parameters are specified with symbols", "sig");
                 }
             }
@@ -408,10 +406,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                     // TODO(trevor) add an error for this
                 }
 
-                auto end = send->numKwArgs();
-                for (auto i = 0; i < end; ++i) {
-                    auto &key = send->getKwKey(i);
-                    auto &value = send->getKwValue(i);
+                for (auto [key, value] : send->kwArgPairs()) {
                     auto *lit = ast::cast_tree<ast::Literal>(key);
                     if (lit && lit->isSymbol()) {
                         core::NameRef name = lit->asSymbol();
@@ -460,10 +455,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 }
 
                 if (send->hasKwArgs()) {
-                    auto end = send->numKwArgs();
-                    for (auto i = 0; i < end; ++i) {
-                        auto &key = send->getKwKey(i);
-                        auto &value = send->getKwValue(i);
+                    for (auto [key, value] : send->kwArgPairs()) {
                         auto lit = ast::cast_tree<ast::Literal>(key);
                         if (lit && lit->isSymbol()) {
                             if (lit->asSymbol() == core::Names::allowIncompatible()) {
@@ -792,46 +784,45 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             return TypeSyntax::ResultType{core::Types::any(ctx, result.type, core::Types::nilClass()), result.rebind};
         }
         case core::Names::all().rawId(): {
-            if (send.numPosArgs() < 2 || send.hasKwArgs()) {
-                checkTypeFunArity(ctx, send, 2, SIZE_MAX);
+            auto posArgs = send.posArgs();
+            if (posArgs.size() < 2 || send.hasKwArgs()) {
                 checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            auto maybeResult = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
+            auto maybeResult = getResultTypeWithSelfTypeParams(ctx, posArgs[0], sig, args);
             if (!maybeResult.has_value()) {
                 return nullopt;
             }
             auto result = move(maybeResult.value());
-            int i = 1;
-            while (i < send.numPosArgs()) {
-                auto maybeResult = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(i), sig, args);
+            auto remainingArgs = posArgs.subspan(1);
+            for (auto &arg : remainingArgs) {
+                auto maybeResult = getResultTypeWithSelfTypeParams(ctx, arg, sig, args);
                 if (!maybeResult.has_value()) {
                     return nullopt;
                 }
                 result = core::Types::all(ctx, result, move(maybeResult.value()));
-                i++;
             }
             return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
         }
         case core::Names::any().rawId(): {
-            if (send.numPosArgs() < 2 || send.hasKwArgs()) {
+            auto posArgs = send.posArgs();
+            if (posArgs.size() < 2 || send.hasKwArgs()) {
                 checkTypeFunArity(ctx, send, 2, SIZE_MAX);
                 checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            auto maybeResult = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
+            auto maybeResult = getResultTypeWithSelfTypeParams(ctx, posArgs[0], sig, args);
             if (!maybeResult.has_value()) {
                 return nullopt;
             }
             auto result = move(maybeResult.value());
-            int i = 1;
-            while (i < send.numPosArgs()) {
-                auto maybeResult = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(i), sig, args);
+            auto remainingArgs = posArgs.subspan(1);
+            for (auto &arg : remainingArgs) {
+                auto maybeResult = getResultTypeWithSelfTypeParams(ctx, arg, sig, args);
                 if (!maybeResult.has_value()) {
                     return nullopt;
                 }
                 result = core::Types::any(ctx, result, move(maybeResult.value()));
-                i++;
             }
             return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
         }
@@ -890,17 +881,17 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            if (arr->elems.empty()) {
+
+            auto arrayElements = absl::MakeSpan(arr->elems);
+            if (arrayElements.empty()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("enum([]) is invalid");
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            auto result = getResultLiteral(ctx, arr->elems[0]);
-            int i = 1;
-            while (i < arr->elems.size()) {
-                result = core::Types::any(ctx, result, getResultLiteral(ctx, arr->elems[i]));
-                i++;
+            auto result = getResultLiteral(ctx, arrayElements[0]);
+            for (auto &e : arrayElements.subspan(1)) {
+                result = core::Types::any(ctx, result, getResultLiteral(ctx, e));
             }
             return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
         }
@@ -1398,22 +1389,18 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             argLocs.emplace_back(arg.loc());
         }
 
-        const auto numKwArgs = s.numKwArgs();
-        for (auto i = 0; i < numKwArgs; ++i) {
-            auto &kw = s.getKwKey(i);
-            auto &val = s.getKwValue(i);
-
+        for (auto [key, value] : s.kwArgPairs()) {
             // Fill the keyword and val args in with a dummy type. We don't want to parse this as type
             // syntax because we already know it's garbage.
             // But we still want to record some sort of arg (for the loc specifically) so
             // that the calls.cc intrinsic can craft an autocorrect.
-            auto &kwtao = holders.emplace_back(core::Types::untypedUntracked(), ctx.locAt(kw.loc()));
+            auto &kwtao = holders.emplace_back(core::Types::untypedUntracked(), ctx.locAt(key.loc()));
             targs.emplace_back(&kwtao);
-            argLocs.emplace_back(kw.loc());
+            argLocs.emplace_back(key.loc());
 
-            auto &valtao = holders.emplace_back(core::Types::untypedUntracked(), ctx.locAt(val.loc()));
+            auto &valtao = holders.emplace_back(core::Types::untypedUntracked(), ctx.locAt(value.loc()));
             targs.emplace_back(&valtao);
-            argLocs.emplace_back(val.loc());
+            argLocs.emplace_back(value.loc());
         }
 
         if (auto *splat = s.kwSplat()) {
@@ -1453,7 +1440,9 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         auto genericClass = corrected.asClassOrModuleRef();
         ENFORCE_NO_TIMER(genericClass.exists());
         core::CallLocs locs{ctx.file, s.loc, s.recv.loc(), s.funLoc, argLocs};
-        auto out = core::Types::applyTypeArguments(ctx, locs, s.numPosArgs(), targs, genericClass);
+        auto out = core::Types::applyTypeArguments(ctx, locs, s.numPosArgs(), targs, genericClass,
+                                                   core::errors::Resolver::GenericArgumentCountMismatch,
+                                                   core::errors::Resolver::GenericArgumentKeywordArgs);
 
         if (out.isUntyped()) {
             // Using a generic untyped type here will lead to incorrect handling of global state hashing,

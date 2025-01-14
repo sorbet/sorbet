@@ -286,38 +286,38 @@ public:
     }
 
     // See documentation on _nonClassConstants
-    const std::vector<FoundDefinitionRef> &nonClassConstants() const {
-        return _nonClassConstants;
+    absl::Span<const FoundDefinitionRef> nonClassConstants() const {
+        return absl::MakeSpan(_nonClassConstants);
     }
 
     // See documentation on _klasses
-    const std::vector<FoundClass> &klasses() const {
-        return _klasses;
+    absl::Span<const FoundClass> klasses() const {
+        return absl::MakeSpan(_klasses);
     }
 
     // See documentation on _methods
-    const std::vector<FoundMethod> &methods() const {
-        return _methods;
+    absl::Span<const FoundMethod> methods() const {
+        return absl::MakeSpan(_methods);
     }
 
     // See documentation on _modifiers
-    const std::vector<FoundModifier> &modifiers() const {
-        return _modifiers;
+    absl::Span<const FoundModifier> modifiers() const {
+        return absl::MakeSpan(_modifiers);
     }
 
     // See documentation on _fields
-    const std::vector<FoundField> &fields() const {
-        return _fields;
+    absl::Span<const FoundField> fields() const {
+        return absl::MakeSpan(_fields);
     }
 
     // See documentation on _staticFields
-    const std::vector<FoundStaticField> &staticFields() const {
-        return _staticFields;
+    absl::Span<const FoundStaticField> staticFields() const {
+        return absl::MakeSpan(_staticFields);
     }
 
     // See documentation on _typeMembers
-    const std::vector<FoundTypeMember> &typeMembers() const {
-        return _typeMembers;
+    absl::Span<const FoundTypeMember> typeMembers() const {
+        return absl::MakeSpan(_typeMembers);
     }
 
     friend FoundDefinitionRef;

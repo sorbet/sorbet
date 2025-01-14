@@ -1,6 +1,4 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("//third_party:ruby_externals.bzl", "register_ruby_dependencies")
-load("//third_party/openssl:system_openssl_repository.bzl", "system_openssl_repository")
 
 # We define our externals here instead of directly in WORKSPACE
 def register_sorbet_dependencies():
@@ -43,10 +41,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "spdlog",
-        url = "https://github.com/gabime/spdlog/archive/eb3220622e73a4889eee355ffa37972b3cac3df5.zip",  # v1.9.2
-        sha256 = "b7570488bdd94ab6d3653bc324d8ed7976d9f3a2f035eb2e969ebcaad3b0d5c7",
+        url = "https://github.com/gabime/spdlog/archive/8e5613379f5140fefb0b60412fbf1f5406e7c7f8.zip",  # v1.15.0
+        sha256 = "86d0688c088f6cad36533c731e8377882d1cb0d05508afa3e624d3c0e7cf92af",
         build_file = "@com_stripe_ruby_typer//third_party:spdlog.BUILD",
-        strip_prefix = "spdlog-eb3220622e73a4889eee355ffa37972b3cac3df5",
+        strip_prefix = "spdlog-8e5613379f5140fefb0b60412fbf1f5406e7c7f8",
     )
 
     # We don't use this directly, but protobuf will skip defining its own
@@ -82,10 +80,13 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "lmdb",
-        url = "https://github.com/DarkDimius/lmdb/archive/75766ec2b663b360be8eea9730a7adc0d252ce7e.zip",
-        sha256 = "bd120470d62c6f3433f80bb9841f09f158924081eb0c3236da6e8d1a0976eccc",
+        url = "https://github.com/LMDB/lmdb/archive/da9aeda08c3ff710a0d47d61a079f5a905b0a10a.zip",
+        sha256 = "893a324b60c6465edcf7feb7dafacb3d5f5803649f1b5de6f453b3a6d9e2bb97",
         build_file = "@com_stripe_ruby_typer//third_party:lmdb.BUILD",
-        strip_prefix = "lmdb-75766ec2b663b360be8eea9730a7adc0d252ce7e",
+        strip_prefix = "lmdb-da9aeda08c3ff710a0d47d61a079f5a905b0a10a",
+        patches = [
+            "@com_stripe_ruby_typer//third_party:lmdb/strdup.patch",
+        ],
     )
 
     http_archive(
@@ -286,27 +287,6 @@ def register_sorbet_dependencies():
         strip_prefix = "cpp-subprocess-9c624ce4e3423cce9f148bafbae56abfd6437ea0",
     )
 
-    system_openssl_repository(
-        name = "system_ssl_darwin",
-        build_file = "@com_stripe_ruby_typer//third_party/openssl:darwin.BUILD",
-        openssl_dirs = [
-            "/usr/local/opt/openssl@1.1",
-            "/opt/homebrew/opt/openssl@1.1",
-            "/usr/local/opt/openssl",
-            "/opt/homebrew/opt/openssl",
-        ],
-    )
-
-    # If we ever want to search multiple paths, we can likely use the
-    # `system_openssl_repository` repository rule like above. But I figure that
-    # right now if it ain't broke don't fix it, so I've left this using
-    # new_local_repository.
-    native.new_local_repository(
-        name = "system_ssl_linux",
-        path = "/usr",
-        build_file = "@com_stripe_ruby_typer//third_party/openssl:linux.BUILD",
-    )
-
     http_archive(
         name = "bazel_skylib",
         sha256 = "cd55a062e763b9349921f0f5db8c3933288dc8ba4f76dd9416aac68acee3cb94",
@@ -343,5 +323,3 @@ def register_sorbet_dependencies():
         sha256 = "47b61d25dd52bdaa1d571dab6705d076f05ba3d7a1bbbfed36145f8281c0403f",
         strip_prefix = "rules_foreign_cc-d74623f0ad47f4e375de81baa454eb106715a416",
     )
-
-    register_ruby_dependencies()

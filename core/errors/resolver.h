@@ -83,6 +83,8 @@ constexpr ErrorClass HasAttachedClassIncluded{5074, StrictLevel::False};
 constexpr ErrorClass TypeAliasToTypeMember{5075, StrictLevel::False};
 constexpr ErrorClass TNilableArity{5076, StrictLevel::False};
 constexpr ErrorClass UnsupportedLiteralType{5077, StrictLevel::False};
+constexpr ErrorClass GenericArgumentCountMismatch{5078, StrictLevel::True};
+constexpr ErrorClass GenericArgumentKeywordArgs{5079, StrictLevel::False};
 } // namespace sorbet::core::errors::Resolver
 
 #endif

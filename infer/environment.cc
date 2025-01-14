@@ -400,7 +400,7 @@ bool Environment::hasType(core::Context ctx, cfg::LocalRef symbol) const {
     return fnd->second.typeAndOrigins.type != nullptr;
 }
 
-const core::TypeAndOrigins &Environment::getTypeAndOrigin(core::Context ctx, cfg::LocalRef symbol) const {
+const core::TypeAndOrigins &Environment::getTypeAndOrigin(cfg::LocalRef symbol) const {
     auto fnd = _vars.find(symbol);
     if (fnd == _vars.end()) {
         return uninitialized;
@@ -409,9 +409,8 @@ const core::TypeAndOrigins &Environment::getTypeAndOrigin(core::Context ctx, cfg
     return fnd->second.typeAndOrigins;
 }
 
-const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(core::Context ctx,
-                                                                 cfg::VariableUseSite &symbol) const {
-    const auto &ret = getTypeAndOrigin(ctx, symbol.variable);
+const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(cfg::VariableUseSite &symbol) const {
+    const auto &ret = getTypeAndOrigin(symbol.variable);
     symbol.type = ret.type;
     return ret;
 }
@@ -782,7 +781,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
             return;
         }
 
-        core::TypeAndOrigins tp = getTypeAndOrigin(ctx, cond);
+        core::TypeAndOrigins tp = getTypeAndOrigin(cond);
         tp.origins.emplace_back(loc);
         if (tp.type.isUntyped()) {
             tp.type = core::Types::falsyTypes();
@@ -795,7 +794,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
         }
         setTypeAndOrigin(cond, tp);
     } else {
-        core::TypeAndOrigins tp = getTypeAndOrigin(ctx, cond);
+        core::TypeAndOrigins tp = getTypeAndOrigin(cond);
         tp.origins.emplace_back(loc);
         tp.type = core::Types::dropSubtypesOf(ctx, tp.type, core::Types::falsySymbols());
         if (tp.type.isBottom()) {
@@ -818,7 +817,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
         if (!filter.contains(typeTested.first)) {
             continue;
         }
-        core::TypeAndOrigins tp = getTypeAndOrigin(ctx, typeTested.first);
+        core::TypeAndOrigins tp = getTypeAndOrigin(typeTested.first);
         auto glbbed = core::Types::all(ctx, tp.type, typeTested.second);
         if (tp.type != glbbed) {
             tp.origins.emplace_back(loc);
@@ -835,7 +834,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
         if (!filter.contains(typeTested.first)) {
             continue;
         }
-        core::TypeAndOrigins tp = getTypeAndOrigin(ctx, typeTested.first);
+        core::TypeAndOrigins tp = getTypeAndOrigin(typeTested.first);
         tp.origins.emplace_back(loc);
 
         if (!tp.type.isUntyped()) {
@@ -854,7 +853,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
     this->isDead |= other.isDead;
     for (auto &pair : _vars) {
         auto var = pair.first;
-        const auto &otherTO = other.getTypeAndOrigin(ctx, var);
+        const auto &otherTO = other.getTypeAndOrigin(var);
         auto &thisTO = pair.second.typeAndOrigins;
         if (thisTO.type != nullptr) {
             thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
@@ -924,18 +923,20 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
         for (cfg::BasicBlock *parent : bb->backEdges) {
             auto &other = envs[parent->id];
             auto otherPin = other.pinnedTypes.find(var);
-            if (otherPin != other.pinnedTypes.end()) {
-                if (tp.type != nullptr) {
-                    tp.type = core::Types::any(ctx, tp.type, otherPin->second.type);
-                    for (auto origin : otherPin->second.origins) {
-                        if (!absl::c_linear_search(tp.origins, origin)) {
-                            tp.origins.emplace_back(origin);
-                        }
+            if (otherPin == other.pinnedTypes.end()) {
+                continue;
+            }
+
+            if (tp.type != nullptr) {
+                tp.type = core::Types::any(ctx, tp.type, otherPin->second.type);
+                for (auto origin : otherPin->second.origins) {
+                    if (!absl::c_linear_search(tp.origins, origin)) {
+                        tp.origins.emplace_back(origin);
                     }
-                    tp.type.sanityCheck(ctx);
-                } else {
-                    tp = otherPin->second;
                 }
+                tp.type.sanityCheck(ctx);
+            } else {
+                tp = otherPin->second;
             }
         }
 
@@ -949,7 +950,7 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
     this->isDead = other.isDead;
     for (auto &pair : _vars) {
         auto var = pair.first;
-        pair.second.typeAndOrigins = other.getTypeAndOrigin(ctx, var);
+        pair.second.typeAndOrigins = other.getTypeAndOrigin(var);
         pair.second.knowledge.replace(var, typeTestsWithVar, other.getKnowledge(var, false));
         pair.second.knownTruthy = other.getKnownTruthy(var);
     }
@@ -1025,10 +1026,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 args.reserve(send.args.size());
                 for (cfg::VariableUseSite &arg : send.args) {
-                    args.emplace_back(&getAndFillTypeAndOrigin(ctx, arg));
+                    args.emplace_back(&getAndFillTypeAndOrigin(arg));
                 }
 
-                const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(ctx, send.recv);
+                const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(send.recv);
                 if (send.link) {
                     checkFullyDefined = false;
                 }
@@ -1042,7 +1043,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 core::DispatchArgs dispatchArgs{send.fun,        locs,
                                                 send.numPosArgs, args,
                                                 recvType.type,   recvType,
-                                                recvType.type,   send.link,
+                                                recvType.type,   send.link.get(),
                                                 ownerLoc,        send.isPrivateOk,
                                                 suppressErrors,  inWhat.symbol.data(ctx)->name};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
@@ -1119,7 +1120,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             const auto &curPkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
                             if (curPkg.exists() && !curPkg.ownsSymbol(ctx, klass)) {
                                 if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PackagePrivateMethod)) {
-                                    auto &curPkgName = curPkg.fullName();
+                                    auto curPkgName = curPkg.fullName();
                                     // TODO (aadi-stripe, add name of owning package to message).
                                     e.setHeader(
                                         "Method `{}` on `{}` is package-private and cannot be called from package `{}`",
@@ -1181,9 +1182,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         }
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx,
-                        core::lsp::SendResponse(retainedResult, send.argLocs, fun, ctx.owner.asMethodRef(),
-                                                send.isPrivateOk, ctx.file, bind.loc, send.receiverLoc, send.funLoc));
+                        ctx, core::lsp::SendResponse(retainedResult, send.argLocs, fun, ctx.owner.asMethodRef(),
+                                                     send.isPrivateOk, ctx.file, bind.loc, send.receiverLoc,
+                                                     send.funLoc, locWithoutBlock));
                 }
                 if (send.link) {
                     send.link->result = move(retainedResult);
@@ -1195,7 +1196,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::Ident &i) {
-                const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i.what);
+                const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what);
                 tp.type = typeAndOrigin.type;
                 tp.origins = typeAndOrigin.origins;
 
@@ -1205,8 +1206,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                       ctx.owner.asMethodRef(), ctx.locAt(inWhat.loc)));
                 }
 
-                ENFORCE(ctx.file.data(ctx).hasParseErrors() || !tp.origins.empty(),
-                        "Inferencer did not assign location");
+                ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
             },
             [&](cfg::Alias &a) {
                 core::SymbolRef symbol = a.what.dealias(ctx);
@@ -1288,6 +1288,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     } else {
                         type = core::Types::instantiate(ctx, main.returnTypeBeforeSolve, *main.constr);
                     }
+                    // Write back into the DispatchResult so that retained results affect LSP queries.
+                    // (Note that the SendResponse has already been pushed, with a shared_ptr to the
+                    // DispatchResult we're mutating here)
+                    i.link->result->returnType = type;
                 } else {
                     type = i.link->result->returnType;
                 }
@@ -1391,7 +1395,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // TODO: handle kwsplats here as well.
                 if (i.flags.isRepeated) {
                     if (i.argId == 0) {
-                        const core::TypeAndOrigins &argsType = getAndFillTypeAndOrigin(ctx, i.yieldParam);
+                        const core::TypeAndOrigins &argsType = getAndFillTypeAndOrigin(i.yieldParam);
                         tp.type = argsType.type;
                     } else {
                         tp.type = core::Types::untyped(core::Symbols::Magic_UntypedSource_YieldLoadArg());
@@ -1402,7 +1406,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 // Fetch the type for the argument out of the parameters for the block
                 // by simulating a blockParam[i] call.
-                const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(ctx, i.yieldParam);
+                const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(i.yieldParam);
 
                 if (recvType.type.isUntyped()) {
                     // This avoids reporting an untyped usage for ->(x) { 0 }. Sorbet would
@@ -1427,7 +1431,6 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     const auto numPosArgs = 1;
                     const auto suppressErrors = true;
                     const auto isPrivateOk = true;
-                    const std::shared_ptr<const core::SendAndBlockLink> block = nullptr;
                     core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),
                                                     locs,
                                                     numPosArgs,
@@ -1435,7 +1438,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                     recvType.type,
                                                     recvType,
                                                     recvType.type,
-                                                    block,
+                                                    nullptr,
                                                     ctx.locAt(bind.loc),
                                                     isPrivateOk,
                                                     suppressErrors,
@@ -1455,7 +1458,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.type = core::Types::bottom();
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
 
-                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
+                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(i.what);
                 if (methodReturnType == core::Types::void_()) {
                     methodReturnType = core::Types::top();
                 }
@@ -1494,7 +1497,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 ENFORCE(i.link);
                 ENFORCE(i.link->result->main.blockReturnType != nullptr);
 
-                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
+                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(i.what);
                 auto expectedType = i.link->result->main.blockReturnType;
                 if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
                     expectedType = core::Types::top();
@@ -1543,7 +1546,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 }
             },
             [&](cfg::TAbsurd &i) {
-                const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i.what.variable);
+                const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what.variable);
 
                 if (auto e = ctx.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
                     if (typeAndOrigin.type.isUntyped()) {
@@ -1608,7 +1611,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     noLoopChecking = true;
                 }
 
-                const core::TypeAndOrigins &ty = getAndFillTypeAndOrigin(ctx, c.value);
+                const core::TypeAndOrigins &ty = getAndFillTypeAndOrigin(c.value);
                 ENFORCE(c.cast != core::Names::uncheckedLet() && c.cast != core::Names::bind() &&
                         c.cast != core::Names::syntheticBind());
 
@@ -1699,12 +1702,12 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             }
             tp.type = core::Types::untypedUntracked();
         }
-        ENFORCE(ctx.file.data(ctx).hasParseErrors() || !tp.origins.empty(), "Inferencer did not assign location");
+        ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
 
         if (!noLoopChecking && loopCount != bindMinLoops) {
             auto pin = pinnedTypes.find(bind.bind.variable);
             const core::TypeAndOrigins &cur =
-                (pin != pinnedTypes.end()) ? pin->second : getTypeAndOrigin(ctx, bind.bind.variable);
+                (pin != pinnedTypes.end()) ? pin->second : getTypeAndOrigin(bind.bind.variable);
 
             // TODO(jez) What should we do about untyped code and pinning?
             core::ErrorSection::Collector errorDetailsCollector;
@@ -1857,7 +1860,7 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
         result.origins.emplace_back(main.rebindLoc);
         return result;
     } else {
-        return getTypeAndOrigin(ctx, fallback);
+        return getTypeAndOrigin(fallback);
     }
 }
 

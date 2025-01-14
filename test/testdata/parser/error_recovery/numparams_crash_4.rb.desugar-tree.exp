@@ -1,0 +1,7 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <emptyTree>::<C Kernel>.lambda() do |_1|
+    _1
+  end
+
+  <self>._1()
+end

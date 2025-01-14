@@ -50,13 +50,91 @@ LSPFileUpdates LSPFileUpdates::copy() const {
     return copy;
 }
 
+namespace {
+
+// Returns `true` if the two containers share a value, and `false` otherwise. This requires that the two containers are
+// sorted, which is also a requirement of using `absl::c_set_intersetion`, so this is a drop-in replacement when the
+// resulting set isn't needed.
+//
+// This is adapted from
+// https://github.com/llvm/llvm-project/blob/b89e774672678ef26baf8f94c616f43551d29428/libcxx/include/__algorithm/set_intersection.h#L47-L123
+// and modified to return early when any intersection is found.
+bool intersects(const std::vector<core::WithoutUniqueNameHash> &changed,
+                const std::vector<core::WithoutUniqueNameHash> &used) {
+    auto changedIt = changed.begin();
+    auto changedEnd = changed.end();
+    auto usedIt = used.begin();
+    auto usedEnd = used.end();
+
+    bool prevEqual = false;
+
+    while (usedIt != usedEnd) {
+        auto changedNext = std::lower_bound(changedIt, changedEnd, *usedIt);
+        std::swap(changedNext, changedIt);
+        bool changedEqual = changedNext == changedIt;
+
+        // If we didn't advance `changedIt`, and the previous lower_bound call for `used` also didn't advance `usedIt`,
+        // we've found a match.
+        if (changedEqual && prevEqual) {
+            return true;
+        }
+        prevEqual = changedEqual;
+
+        if (changedIt == changedEnd) {
+            break;
+        }
+
+        auto usedNext = std::lower_bound(usedIt, usedEnd, *changedIt);
+        std::swap(usedNext, usedIt);
+        bool usedEqual = usedNext == usedIt;
+
+        // If we didn't advance `usedIt`, and the previous lower_bound call for `changed` also didn't advance
+        // `changedIt`, we've found a match.
+        if (usedEqual && prevEqual) {
+            return true;
+        }
+        prevEqual = usedEqual;
+    }
+
+    return false;
+}
+
+// An output iterator that only writes out the `nameHash` component of a `SymbolHash`. This allows us to avoid
+// materializing a vector of `WithoutUniqueNameHash` when we're only interested in the `nameHash` components.
+class NameHashOutputIterator final {
+public:
+    using container_type = std::vector<core::WithoutUniqueNameHash>;
+
+    NameHashOutputIterator(container_type &container) : container{container} {}
+
+    NameHashOutputIterator &operator=(const core::SymbolHash &symHash) {
+        container.emplace_back(symHash.nameHash);
+        return *this;
+    }
+
+    NameHashOutputIterator &operator++() {
+        return *this;
+    }
+
+    NameHashOutputIterator &operator*() {
+        return *this;
+    }
+
+private:
+    container_type &container;
+};
+
+} // namespace
+
 LSPFileUpdates::FastPathFilesToTypecheckResult
 LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
                                          const vector<shared_ptr<core::File>> &updatedFiles,
                                          const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) {
+    UnorderedMap<core::FileRef, size_t> changedFiles;
+    std::vector<core::WithoutUniqueNameHash> changedSymbolNameHashes;
+
     FastPathFilesToTypecheckResult result;
     Timer timeit(config.logger, "compute_fast_path_file_set");
-    vector<core::SymbolHash> changedRetypecheckableSymbolHashes;
     auto idx = -1;
     for (const auto &updatedFile : updatedFiles) {
         idx++;
@@ -97,22 +175,23 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         // This will insert two entries into `retypecheckableSymbolHashes` for each changed method, but they
         // will get deduped later.
         absl::c_set_symmetric_difference(oldRetypecheckableSymbolHashes, newRetypecheckableSymbolHashes,
-                                         std::back_inserter(changedRetypecheckableSymbolHashes));
+                                         NameHashOutputIterator(changedSymbolNameHashes));
 
-        result.changedFiles.emplace(fref, idx);
+        changedFiles.emplace(fref, idx);
     }
 
-    result.changedSymbolNameHashes.reserve(changedRetypecheckableSymbolHashes.size());
-    absl::c_transform(changedRetypecheckableSymbolHashes, std::back_inserter(result.changedSymbolNameHashes),
-                      [](const auto &symhash) { return symhash.nameHash; });
-    core::WithoutUniqueNameHash::sortAndDedupe(result.changedSymbolNameHashes);
+    result.totalChanged = changedFiles.size();
 
-    if (result.changedSymbolNameHashes.empty()) {
+    if (changedSymbolNameHashes.empty()) {
         // Optimization--skip the loop over every file in the project (`gs.getFiles()`) if
         // the set of changed symbols is empty (e.g., running a completion request inside a
         // method body)
         return result;
     }
+
+    result.useIncrementalNamer = true;
+
+    core::WithoutUniqueNameHash::sortAndDedupe(changedSymbolNameHashes);
 
     int i = -1;
     for (auto &oldFile : gs.getFiles()) {
@@ -122,7 +201,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         }
 
         auto ref = core::FileRef(i);
-        if (result.changedFiles.contains(ref)) {
+        if (changedFiles.contains(ref)) {
             continue;
         }
 
@@ -137,17 +216,14 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         }
 
         ENFORCE(oldFile->getFileHash() != nullptr);
-        const auto &oldHash = *oldFile->getFileHash();
-        vector<core::WithoutUniqueNameHash> intersection;
-        absl::c_set_intersection(result.changedSymbolNameHashes, oldHash.usages.nameHashes,
-                                 std::back_inserter(intersection));
-        if (intersection.empty()) {
+        if (!intersects(changedSymbolNameHashes, oldFile->getFileHash()->usages.nameHashes)) {
             continue;
         }
 
-        result.extraFiles.emplace_back(ref);
+        result.extraFiles.emplace_back(ref.data(gs).path());
+        result.totalChanged += 1;
 
-        if (result.changedFiles.size() + result.extraFiles.size() > (2 * config.opts.lspMaxFilesOnFastPath)) {
+        if (result.totalChanged > (2 * config.opts.lspMaxFilesOnFastPath)) {
             // Short circuit, as a performance optimization.
             // (gs.getFiles() is usually 3-4 orders of magnitude larger than lspMaxFilesOnFastPath)
             //
@@ -183,11 +259,6 @@ LSPFileUpdates::FastPathFilesToTypecheckResult
 LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
                                          const vector<shared_ptr<core::File>> &updatedFiles) {
     return fastPathFilesToTypecheck(gs, config, updatedFiles, EMPTY_CONST_MAP);
-}
-
-LSPFileUpdates::FastPathFilesToTypecheckResult
-LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config) const {
-    return fastPathFilesToTypecheck(gs, config, this->updatedFiles);
 }
 
 } // namespace sorbet::realmain::lsp

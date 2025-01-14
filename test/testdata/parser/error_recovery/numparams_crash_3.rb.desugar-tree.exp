@@ -1,0 +1,7 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.foo() do ||
+    :bar
+  end
+
+  <self>._1()
+end

@@ -1,5 +1,6 @@
 #include "core/packages/PackageDB.h"
 #include "absl/strings/match.h"
+#include "absl/types/span.h"
 #include "common/sort/sort.h"
 #include "core/AutocorrectSuggestion.h"
 #include "core/GlobalState.h"
@@ -16,14 +17,14 @@ public:
         return MangledName();
     }
 
-    const vector<core::NameRef> &fullName() const {
+    absl::Span<const core::NameRef> fullName() const {
         notImplemented();
-        return emptyName;
+        return absl::Span<const core::NameRef>();
     }
 
-    const vector<string> &pathPrefixes() const {
+    absl::Span<const string> pathPrefixes() const {
         notImplemented();
-        return prefixes;
+        return absl::Span<const string>();
     }
 
     unique_ptr<PackageInfo> deepCopy() const {
@@ -88,9 +89,6 @@ public:
     ~NonePackage() {}
 
 private:
-    const vector<string> prefixes;
-    const vector<core::NameRef> emptyName;
-
     void notImplemented() const {
         ENFORCE(false, "Not implemented for NonePackage");
     }
@@ -118,8 +116,8 @@ MangledName PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
     ENFORCE(!frozen);
     ENFORCE(writerThread == this_thread::get_id(), "PackageDB writes are not thread safe");
     auto nr = pkg->mangledName();
-    auto prev = packages_.find(nr);
-    if (prev == packages_.end()) {
+    auto [it, newlyInserted] = packages_.insert({nr, nullptr});
+    if (newlyInserted) {
         for (const auto &prefix : pkg->pathPrefixes()) {
             packagesByPathPrefix[prefix] = nr;
         }
@@ -129,10 +127,10 @@ MangledName PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
         // we always run slow-path and fully rebuild the set of packages. In some cases, the LSP
         // fast-path may re-run on an unchanged package file. Sanity check to ensure the loc and
         // prefixes are the same.
-        ENFORCE(prev->second->declLoc() == pkg->declLoc());
-        ENFORCE(prev->second->pathPrefixes() == pkg->pathPrefixes());
+        ENFORCE(it->second->declLoc() == pkg->declLoc());
+        ENFORCE(it->second->pathPrefixes() == pkg->pathPrefixes());
     }
-    packages_[nr] = move(pkg);
+    it->second = move(pkg);
     ENFORCE(mangledNames.size() == packages_.size());
     return nr;
 }
@@ -205,24 +203,46 @@ const PackageInfo &PackageDB::getPackageInfo(MangledName mangledName) const {
     return *it->second;
 }
 
-const vector<MangledName> &PackageDB::packages() const {
-    return mangledNames;
+PackageInfo *PackageDB::getPackageInfoNonConst(MangledName mangledName) {
+    auto it = packages_.find(mangledName);
+    if (it == packages_.end()) {
+        return nullptr;
+    }
+    return it->second.get();
 }
 
-const std::vector<std::string> &PackageDB::skipRBIExportEnforcementDirs() const {
-    return skipRBIExportEnforcementDirs_;
+absl::Span<const MangledName> PackageDB::packages() const {
+    return absl::MakeSpan(mangledNames);
 }
 
-const std::vector<std::string> &PackageDB::extraPackageFilesDirectoryUnderscorePrefixes() const {
-    return extraPackageFilesDirectoryUnderscorePrefixes_;
+absl::Span<const std::string> PackageDB::skipRBIExportEnforcementDirs() const {
+    return absl::MakeSpan(skipRBIExportEnforcementDirs_);
 }
 
-const std::vector<std::string> &PackageDB::extraPackageFilesDirectorySlashDeprecatedPrefixes() const {
-    return extraPackageFilesDirectorySlashDeprecatedPrefixes_;
+absl::Span<const core::NameRef> PackageDB::layers() const {
+    return absl::MakeSpan(layers_);
 }
 
-const std::vector<std::string> &PackageDB::extraPackageFilesDirectorySlashPrefixes() const {
-    return extraPackageFilesDirectorySlashPrefixes_;
+const int PackageDB::layerIndex(core::NameRef layer) const {
+    auto findResult = absl::c_find(layers_, layer);
+    ENFORCE(findResult != layers_.end());
+    return std::distance(layers_.begin(), findResult);
+}
+
+const bool PackageDB::enforceLayering() const {
+    return !layers_.empty();
+}
+
+absl::Span<const std::string> PackageDB::extraPackageFilesDirectoryUnderscorePrefixes() const {
+    return absl::MakeSpan(extraPackageFilesDirectoryUnderscorePrefixes_);
+}
+
+absl::Span<const std::string> PackageDB::extraPackageFilesDirectorySlashDeprecatedPrefixes() const {
+    return absl::MakeSpan(extraPackageFilesDirectorySlashDeprecatedPrefixes_);
+}
+
+absl::Span<const std::string> PackageDB::extraPackageFilesDirectorySlashPrefixes() const {
+    return absl::MakeSpan(extraPackageFilesDirectorySlashPrefixes_);
 }
 
 const std::string_view PackageDB::errorHint() const {

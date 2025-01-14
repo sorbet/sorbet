@@ -12,23 +12,33 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retType,
-                        const core::DispatchResult &dispatchResult, const unique_ptr<core::TypeConstraint> &constraint,
+string methodInfoString(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
                         const core::ShowOptions options) {
     string contents;
     auto start = &dispatchResult;
-    ;
+
     while (start != nullptr) {
         auto &component = start->main;
         if (component.method.exists()) {
             if (!contents.empty()) {
                 contents += "\n";
             }
-            contents = absl::StrCat(contents, core::source_generator::prettyTypeForMethod(gs, component.method,
-                                                                                          component.receiver, retType,
-                                                                                          constraint.get(), options));
+            contents = absl::StrCat(
+                move(contents), "# ", component.method.show(gs), ":\n",
+                core::source_generator::prettyTypeForMethod(gs, component.method, component.receiver, options));
         }
         start = start->secondary.get();
+    }
+
+    // contents being empty implies that there were no components that existed, which means that
+    // there was an error. We don't show any hover results, so that the only thing that's shown on
+    // hover is any relevant diagnostics (e.g., we could show `result type: T.untyped` but for
+    // errors that would just be misleading--people might think the problem is _caused_ by untyped,
+    // but the untyped is an artifact of how we recover from errors).
+    if (!contents.empty()) {
+        // Reads from returnType on the overall DispatchResult, which will have aggregated all the
+        // components (e.g., unions and intersections)
+        contents = absl::StrCat(move(contents), "\n\n# result type:\n", dispatchResult.returnType.showWithMoreInfo(gs));
     }
 
     return contents;
@@ -88,18 +98,13 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
                 }
             }
 
-            auto retType = s->dispatchResult->returnType;
-            auto &constraint = s->dispatchResult->main.constr;
-            if (constraint) {
-                retType = core::Types::instantiate(gs, retType, *constraint);
-            }
             if (s->dispatchResult->main.method.exists() &&
                 s->dispatchResult->main.method.data(gs)->owner == core::Symbols::MagicSingleton()) {
                 // Most <Magic>.<foo> are not meant to be exposed to the user. Instead, just show
                 // the result type.
-                typeString = retType.showWithMoreInfo(gs);
+                typeString = s->dispatchResult->returnType.showWithMoreInfo(gs);
             } else {
-                typeString = methodInfoString(gs, retType, *s->dispatchResult, constraint, options);
+                typeString = methodInfoString(gs, *s->dispatchResult, options);
             }
         }
     } else if (auto c = resp->isConstant()) {
@@ -125,8 +130,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             }
         }
 
-        typeString =
-            core::source_generator::prettyTypeForMethod(gs, d->symbol, nullptr, d->retType.type, nullptr, options);
+        typeString = core::source_generator::prettyTypeForMethod(gs, d->symbol, nullptr, options);
     } else if (resp->isField()) {
         const auto &origins = resp->getTypeAndOrigins().origins;
         for (auto loc : origins) {

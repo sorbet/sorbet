@@ -12,7 +12,7 @@ test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` htt
 test/cli/errors/errors.rb:15: Expected `T.any(T::Class[T.anything], Exception, String)` but found `Integer` for argument `arg0` https://srb.help/7002
     .. |    raise arg # raise is defined by stdlib
                   ^^^
-  Expected `T.any(T::Class[T.anything], Exception, String)` for argument `arg0` of method `Kernel#raise (overload.1)`:
+  Expected `T.any(T::Class[T.anything], Exception, String)` for argument `arg0` of method `Kernel#raise (overload.2)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED:
       NN |        arg0: T.any(T::Class[T.anything], Exception, String),
                   ^^^^
@@ -44,12 +44,12 @@ test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` 
     test/cli/errors/errors.rb:29:
     .. |          nil
                   ^^^
+    test/cli/errors/errors.rb:30:
+    .. |        when 2
+    .. |          2
     test/cli/errors/errors.rb:31:
     .. |          2
                   ^
-    test/cli/errors/errors.rb:26: Possibly uninitialized (`NilClass`) in:
-    .. |  def main(foo)
-          ^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     test/cli/errors/errors.rb:33: Replace with `T.must(a)`
     .. |    bar(a)
@@ -69,7 +69,7 @@ test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` htt
 test/cli/errors/errors.rb:15: Expected `T.any(T::Class[T.anything], Exception, String)` but found `Integer` for argument `arg0` https://srb.help/7002
     .. |    raise arg # raise is defined by stdlib
                   ^^^
-  Expected `T.any(T::Class[T.anything], Exception, String)` for argument `arg0` of method `Kernel#raise (overload.1)`:
+  Expected `T.any(T::Class[T.anything], Exception, String)` for argument `arg0` of method `Kernel#raise (overload.2)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED:
       NN |        arg0: T.any(T::Class[T.anything], Exception, String),
                   ^^^^
@@ -101,12 +101,12 @@ test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` 
     test/cli/errors/errors.rb:29:
     .. |          nil
                   ^^^
+    test/cli/errors/errors.rb:30:
+    .. |        when 2
+    .. |          2
     test/cli/errors/errors.rb:31:
     .. |          2
                   ^
-    test/cli/errors/errors.rb:26: Possibly uninitialized (`NilClass`) in:
-    .. |  def main(foo)
-          ^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     test/cli/errors/errors.rb:33: Replace with `T.must(a)`
     .. |    bar(a)
@@ -126,7 +126,7 @@ test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` htt
 test/cli/errors/errors.rb:15: Expected `T.any(T::Class[T.anything], Exception, String)` but found `Integer` for argument `arg0` https://srb.help/7002
     .. |    raise arg # raise is defined by stdlib
                   ^^^
-  Expected `T.any(T::Class[T.anything], Exception, String)` for argument `arg0` of method `Kernel#raise (overload.1)`:
+  Expected `T.any(T::Class[T.anything], Exception, String)` for argument `arg0` of method `Kernel#raise (overload.2)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED:
       NN |        arg0: T.any(T::Class[T.anything], Exception, String),
                   ^^^^
@@ -158,12 +158,12 @@ test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` 
     test/cli/errors/errors.rb:29:
     .. |          nil
                   ^^^
+    test/cli/errors/errors.rb:30:
+    .. |        when 2
+    .. |          2
     test/cli/errors/errors.rb:31:
     .. |          2
                   ^
-    test/cli/errors/errors.rb:26: Possibly uninitialized (`NilClass`) in:
-    .. |  def main(foo)
-          ^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     test/cli/errors/errors.rb:33: Replace with `T.must(a)`
     .. |    bar(a)

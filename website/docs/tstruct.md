@@ -480,4 +480,63 @@ reference [these docs](http://go/chalk-odm-docs) to learn more.
 
 Other users of `sorbet-runtime` are not encouraged to use these options.
 
+## Runtime type checking gotchas
+
+In addition to those mentioned in the [`from_hash` gotchas](#from_hash-gotchas)
+section, there are gaps in how runtime checking for `T::Struct` props works
+versus normal methods with `sig` annotations. These differences are due to
+[`T::Struct`'s historical context](#legacy-code-and-historical-context) and are
+hard to evolve short of making breaking changes.
+
+- For performance, `prop` and `const` getter methods do not do runtime checking.
+  Specifically, getter methods for `prop` and `const` are defined with
+  `attr_reader`, which creates methods whose performance is optimized by the
+  Ruby VM.
+
+  The assumption is that types are validated on initialization and via calls to
+  setter methods. Attempts to write directly into the instance variables backing
+  a prop are not validated:
+
+  ```ruby
+  class A < T::Struct; prop :foo, Integer; end
+  a = A.new(foo: 0)
+  a.instance_variable_set(:@foo, 'not an int')
+  p(a.foo) # no runtime exception, evaluates to a String
+  ```
+
+  (Do not directly set instance variables `T::Struct`. Always go through the
+  corresponding setter method.)
+
+- Methods defined via `prop` and `const` do not have runtime signature objects.
+  This means that methods like
+  [`call_validation_error_handler`](tconfiguration.md#errors-from-invalid-method-calls)
+  will not yield a `signature` for prop calls that fail to type check because
+  there isn't one.
+
+- Because `prop`- and `const`-defined methods do not have signature objects,
+  changing the
+  [default `checked` level](runtime.md#checked-whether-to-check-in-the-first-place)
+  does not affect runtime checking for these methods. Constructors and setter
+  methods are always runtime checked.
+
+- Constructors and setter methods check standard library generic container types
+  recursively:
+
+  ```ruby
+  class A < T::Struct; prop :foo, T::Array[Integer]; end
+  A.new(foo: [0, 'not int']) # runtime exception: all elements must be Integer
+  ```
+
+  This contrasts with other
+  [standard library generic classes](stdlib-generics.md#generics-and-runtime-checks),
+  where the generic types are erased. (For user-defined generic classes, the
+  generic types are always erased, even for `prop` methods.) This is not
+  configurable.
+
+  The reasoning: partly historical (too many existing usages depended on being
+  able to validate types of third-party APIs by coercing it into `T::Struct` and
+  assuming it would raise a `TypeError`), partly design (it's worth being really
+  sure that data structures hold what they say they hold, especially if we want
+  to skip runtime checks on getter methods).
+
 [legacy]: #legacy-code-and-historical-context

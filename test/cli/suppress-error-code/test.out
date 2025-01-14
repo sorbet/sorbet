@@ -1,7 +1,7 @@
 test/cli/suppress-error-code/suppress-error-code.rb:3: Expected `Integer` but found `String("1")` for argument `arg0` https://srb.help/7002
      3 |1 + "1"
             ^^^
-  Expected `Integer` for argument `arg0` of method `Integer#+`:
+  Expected `Integer` for argument `arg0` of method `Integer#+ (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
       NN |        arg0: Integer,
                   ^^^^

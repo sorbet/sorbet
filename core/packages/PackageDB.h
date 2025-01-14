@@ -1,6 +1,8 @@
 #ifndef SORBET_CORE_PACKAGES_PACKAGEDB_H
 #define SORBET_CORE_PACKAGES_PACKAGEDB_H
 
+#include "absl/types/span.h"
+
 #include "common/common.h"
 #include "core/Files.h"
 #include "core/Names.h"
@@ -35,6 +37,7 @@ public:
 
     const PackageInfo &getPackageForFile(const core::GlobalState &gs, core::FileRef file) const;
     const PackageInfo &getPackageInfo(MangledName mangledName) const;
+    PackageInfo *getPackageInfoNonConst(MangledName mangledName);
 
     // Lookup `PackageInfo` from the string representation of the un-mangled package name.
     const PackageInfo &getPackageInfo(const core::GlobalState &gs, std::string_view str) const;
@@ -42,7 +45,7 @@ public:
     // Get mangled names for all packages.
     // Packages are ordered lexicographically with respect to the NameRef's that make up their
     // namespaces.
-    const std::vector<MangledName> &packages() const;
+    absl::Span<const MangledName> packages() const;
 
     PackageDB deepCopy() const;
 
@@ -59,10 +62,17 @@ public:
         return this->enabled_;
     }
 
-    const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes() const;
-    const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
-    const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes() const;
-    const std::vector<std::string> &skipRBIExportEnforcementDirs() const;
+    absl::Span<const std::string> extraPackageFilesDirectoryUnderscorePrefixes() const;
+    absl::Span<const std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
+    absl::Span<const std::string> extraPackageFilesDirectorySlashPrefixes() const;
+    absl::Span<const std::string> skipRBIExportEnforcementDirs() const;
+    // Possible layers for packages to be in. The layers are ordered lowest to highest.
+    // Ie. {'util', 'app'} means that code in `app` can call code in `util`, but code in `util` cannot call code in
+    // `app`.
+    absl::Span<const core::NameRef> layers() const;
+    const int layerIndex(core::NameRef layer) const;
+    // TODO(neil): this is more than just layering, also checks for strict dependencies. Maybe rename?
+    const bool enforceLayering() const;
 
     const std::string_view errorHint() const;
     bool allowRelaxedPackagerChecksFor(const MangledName mangledName) const;
@@ -75,6 +85,7 @@ private:
     std::string errorHint_;
     std::vector<std::string> skipRBIExportEnforcementDirs_;
     std::vector<MangledName> allowRelaxedPackagerChecksFor_;
+    std::vector<core::NameRef> layers_;
 
     // This vector is kept in sync with the size of the file table in the global state by
     // `Packager::setPackageNameOnFiles`. A `FileRef` being out of bounds in this vector is treated as the file having

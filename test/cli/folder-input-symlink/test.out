@@ -1,0 +1,60 @@
+------------------------------------------------------------------------
+{
+ "files": [
+  {
+   "path": "./bar.rb",
+   "strict": "False",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "./foo.rb",
+   "strict": "False",
+   "min_error_level": "Max"
+  }
+ ]
+}
+------------------------------------------------------------------------
+{
+ "files": [
+  {
+   "path": "./bar.rb",
+   "strict": "False",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "./foo.rb",
+   "strict": "False",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "./references/bar.rb",
+   "strict": "False",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "./references/lib/baz.rb",
+   "strict": "False",
+   "min_error_level": "Max"
+  }
+ ]
+}
+------------------------------------------------------------------------
+{
+ "files": [
+  {
+   "path": "./bar.rb",
+   "strict": "False",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "./foo.rb",
+   "strict": "False",
+   "min_error_level": "Max"
+  },
+  {
+   "path": "./references/lib/baz.rb",
+   "strict": "False",
+   "min_error_level": "Max"
+  }
+ ]
+}

@@ -51,7 +51,7 @@ ast::Send *asEnumsDo(ast::ExpressionPtr &stat) {
 }
 
 void badConst(core::MutableContext ctx, core::LocOffsets headerLoc, core::LocOffsets line1Loc) {
-    if (auto e = ctx.beginError(headerLoc, core::errors::Rewriter::BadTEnumSyntax)) {
+    if (auto e = ctx.beginIndexerError(headerLoc, core::errors::Rewriter::BadTEnumSyntax)) {
         e.setHeader("All non-enum constants in a `{}` must be defined after the `{}` block", "T::Enum", "enums do");
         e.addErrorLine(ctx.locAt(line1Loc), "Enclosing definition here");
     }
@@ -148,7 +148,7 @@ std::optional<ProcessStatResult> processStat(core::MutableContext ctx, ast::Clas
     }
 
     if (fromWhere != FromWhere::Inside) {
-        if (auto e = ctx.beginError(stat.loc(), core::errors::Rewriter::BadTEnumSyntax)) {
+        if (auto e = ctx.beginIndexerError(stat.loc(), core::errors::Rewriter::BadTEnumSyntax)) {
             e.setHeader("Definition of enum value `{}` must be within the `{}` block for this `{}`",
                         lhs->cnst.show(ctx), "enums do", "T::Enum");
             e.addErrorLine(ctx.locAt(klass->declLoc), "Enclosing definition here");
@@ -219,7 +219,7 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     for (auto &stat : oldRHS) {
         if (auto enumsDo = asEnumsDo(stat)) {
             if (fromWhere != FromWhere::Before) {
-                if (auto e = ctx.beginError(stat.loc(), core::errors::Rewriter::BadTEnumSyntax)) {
+                if (auto e = ctx.beginIndexerError(stat.loc(), core::errors::Rewriter::BadTEnumSyntax)) {
                     e.setHeader("Duplicate `{}` block in `{}`", "enums do", "T::Enum");
                     e.addErrorLine(enumsDoLoc, "Previous `{}` block here", "enums do");
                 }

@@ -70,11 +70,7 @@ template <typename... TArgs> [[noreturn]] bool Exception::raise(fmt::format_stri
     Exception::failInFuzzer();
     std::string message = fmt::format(fmt, std::forward<TArgs>(args)...);
 
-    if (message.size() > 0) {
-        fatalLogger->error("Exception::raise(): {}\n", message);
-    } else {
-        fatalLogger->error("Exception::raise() (sadly without a message)\n");
-    }
+    fatalLogger->error("Exception::raise() msg=\"{}\"\n", message);
     printBacktrace();
     stopInDebugger();
     throw SorbetException(message);

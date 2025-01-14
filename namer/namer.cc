@@ -1,6 +1,8 @@
 #include "namer/namer.h"
+#include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
+#include "absl/synchronization/blocking_counter.h"
 #include "ast/ArgParsing.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
@@ -36,19 +38,6 @@ struct ParsedFileWithIdx {
     ParsedFileWithIdx &operator=(const ParsedFileWithIdx &job) = delete;
     ParsedFileWithIdx(ParsedFileWithIdx &&job) = default;
     ParsedFileWithIdx &operator=(ParsedFileWithIdx &&job) = default;
-};
-
-struct SymbolFinderResult {
-    ast::ParsedFile tree;
-    unique_ptr<core::FoundDefinitions> names;
-
-    SymbolFinderResult() = default;
-    SymbolFinderResult(ast::ParsedFile &&tree, unique_ptr<core::FoundDefinitions> names)
-        : tree(move(tree)), names(move(names)) {}
-    SymbolFinderResult(const SymbolFinderResult &result) = delete;
-    SymbolFinderResult &operator=(const SymbolFinderResult &result) = delete;
-    SymbolFinderResult(SymbolFinderResult &&result) = default;
-    SymbolFinderResult &operator=(SymbolFinderResult &&result) = default;
 };
 
 using AllFoundDefinitions = vector<pair<core::FileRef, unique_ptr<core::FoundDefinitions>>>;
@@ -414,29 +403,6 @@ public:
                 }
                 break;
             }
-            case core::Names::keepDef().rawId(): {
-                // ^ visibility toggle doesn't look at `self.*` methods, only instance methods
-                // (need to use `class << self` to use nullary private with singleton class methods)
-
-                if (original.numPosArgs() != 3) {
-                    break;
-                }
-
-                ENFORCE(!methodVisiStack.empty());
-                if (!methodVisiStack.back().has_value()) {
-                    break;
-                }
-
-                auto recv = ast::cast_tree<ast::ConstantLit>(original.recv);
-                if (recv == nullptr || recv->symbol != core::Symbols::Sorbet_Private_Static()) {
-                    break;
-                }
-
-                auto methodName = unwrapLiteralToMethodName(ctx, original.getPosArg(1));
-                foundDefs->addModifier(methodVisiStack.back()->withTarget(methodName));
-
-                break;
-            }
             case core::Names::aliasMethod().rawId(): {
                 if (ownerIsMethod) {
                     break;
@@ -537,25 +503,6 @@ public:
             return sym->asSymbol();
         } else if (auto *def = ast::cast_tree<ast::RuntimeMethodDefinition>(expr)) {
             return def->name;
-        } else if (auto send = ast::cast_tree<ast::Send>(expr)) {
-            if (send->fun != core::Names::keepDef() && send->fun != core::Names::keepSelfDef()) {
-                return core::NameRef::noName();
-            }
-
-            auto recv = ast::cast_tree<ast::ConstantLit>(send->recv);
-            if (recv == nullptr) {
-                return core::NameRef::noName();
-            }
-
-            if (recv->symbol != core::Symbols::Sorbet_Private_Static()) {
-                return core::NameRef::noName();
-            }
-
-            if (send->numPosArgs() != 3) {
-                return core::NameRef::noName();
-            }
-
-            return unwrapLiteralToMethodName(ctx, send->getPosArg(1));
         } else {
             ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
             return core::NameRef::noName();
@@ -854,16 +801,6 @@ private:
         // we know right now that pos >= arguments.size() because otherwise we would have hit the early return at the
         // beginning of this method
         auto &argInfo = ctx.state.enterMethodArgumentSymbol(ctx.locAt(parsedArg.loc), ctx.owner.asMethodRef(), name);
-        // if enterMethodArgumentSymbol did not emplace a new argument into the list, then it means it's reusing an
-        // existing one, which means we've seen a repeated kwarg (as it treats identically named kwargs as
-        // identical). We know that we need to match the arity of the function as written, so if we don't have as many
-        // arguments as we expect, clone the one we got back from enterMethodArgumentSymbol in the position we expect
-        if (methodData->arguments.size() == pos) {
-            auto argCopy = argInfo.deepCopy();
-            argCopy.name = ctx.state.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, argInfo.name, pos + 1);
-            methodData->arguments.emplace_back(move(argCopy));
-            return;
-        }
         // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
         // from enterMethodArgumentSymbol
         ENFORCE(methodData->arguments.size() >= pos + 1);
@@ -906,22 +843,12 @@ private:
 
     bool paramsMatch(core::MutableContext ctx, core::MethodRef method, const vector<core::ParsedArg> &parsedArgs) {
         auto sym = method.data(ctx)->dealiasMethod(ctx);
-        if (sym.data(ctx)->arguments.size() != parsedArgs.size()) {
-            return false;
-        }
-        for (int i = 0; i < parsedArgs.size(); i++) {
-            auto &methodArg = parsedArgs[i];
-            auto &symArg = sym.data(ctx)->arguments[i];
-
-            if (symArg.flags.isKeyword != methodArg.flags.isKeyword ||
-                symArg.flags.isBlock != methodArg.flags.isBlock ||
-                symArg.flags.isRepeated != methodArg.flags.isRepeated ||
-                (symArg.flags.isKeyword && symArg.name != methodArg.local._name)) {
-                return false;
-            }
-        }
-
-        return true;
+        return absl::c_equal(parsedArgs, sym.data(ctx)->arguments, [](const auto &methodArg, const auto &symArg) {
+            return symArg.flags.isKeyword == methodArg.flags.isKeyword &&
+                   symArg.flags.isBlock == methodArg.flags.isBlock &&
+                   symArg.flags.isRepeated == methodArg.flags.isRepeated &&
+                   (!symArg.flags.isKeyword || symArg.name == methodArg.local._name);
+        });
     }
 
     void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<core::ParsedArg> &parsedArgs) {
@@ -1062,27 +989,6 @@ private:
     core::MethodRef insertMethod(core::MutableContext ctx, const core::FoundMethod &method) {
         auto symbol = defineMethod(ctx, method);
         auto name = symbol.data(ctx)->name;
-        if (name.kind() == core::NameKind::UNIQUE &&
-            name.dataUnique(ctx)->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload) {
-            // These name kinds are only created in resolver, which means that we must be running on
-            // the fast path but not with the incremental namer.
-            // If we let the rest of insertMethod run, it will mark this method as public even if it was
-            // already private. Then modifyMethod will attempt to mark a method private by name
-            // (instead of by name and arity hash), which will have the effect of NOT re-marking the
-            // MangleRenameOverload method as private (it will remain public). Then later in
-            // resolver, the visibility of the MangleRenameOverload is propagated to all overloads,
-            // which will make them all public.
-            //
-            // Any case where the visibility would have actually changed would have come via an
-            // edit, which would then trigger an incremental namer run. So we know that this
-            // typecheck is only for the purpose of e.g. answering a hover, and we don't actually
-            // need to mutate GlobalState for any changes. So we can just short circuit.
-            //
-            // One way to change this in the future might be to make FoundModifier attempt to record
-            // something about the method arity in addition to just the method's name. But for the
-            // time being this hack suffices. (See the commit where this comment was added a test)
-            return symbol;
-        }
 
         // Methods defined at the top level default to private (on Object)
         // Also, the `initialize` method defaults to private
@@ -1508,7 +1414,6 @@ private:
         if (memberNameToHash.kind() == core::NameKind::UNIQUE) {
             auto &uniqueData = memberNameToHash.dataUnique(ctx);
             if (uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRename ||
-                uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload ||
                 uniqueData->uniqueNameKind == core::UniqueNameKind::Overload) {
                 memberNameToHash = uniqueData->original;
             }
@@ -2002,8 +1907,7 @@ public:
                                             asgn.loc.copyWithZeroLength(),
                                             ast::MK::Block0(asgn.loc, ast::MK::Untyped(asgn.loc)));
 
-            return handleAssignment(ctx,
-                                    ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
+            return handleAssignment(ctx, ast::MK::Assign(asgn.loc, move(asgn.lhs), move(send)));
         }
 
         if (isBadHasAttachedClass(ctx, typeName->cnst)) {
@@ -2030,6 +1934,25 @@ public:
             }
         }
 
+        // Prevent a crash by validating the arguments before we do any symbol lookups or manipulations
+        if (send->hasPosArgs() || send->hasKwArgs() || send->block() != nullptr) {
+            if (send->numPosArgs() > 1) {
+                auto extraArgsLoc = send->getPosArg(1).loc().join(send->getPosArg(send->numPosArgs() - 1).loc());
+                if (auto e = ctx.beginError(extraArgsLoc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Too many arguments in `{}` definition for `{}`", send->fun.show(ctx),
+                                typeName->cnst.show(ctx));
+                    auto firstArgLoc = send->getPosArg(0).loc();
+                    auto argsLoc = send->argsLoc();
+                    auto replacementRange = core::Loc(ctx.file, firstArgLoc.endPos(), argsLoc.endPos());
+                    e.replaceWith("Delete extra args", replacementRange, "");
+                }
+                auto send = ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
+                                                asgn.loc.copyWithZeroLength(),
+                                                ast::MK::Block0(asgn.loc, ast::MK::Untyped(asgn.loc)));
+                return handleAssignment(ctx, ast::MK::Assign(asgn.loc, move(asgn.lhs), move(send)));
+            }
+        }
+
         bool isTypeTemplate = send->fun == core::Names::typeTemplate();
         auto onSymbol =
             isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx) : ctx.owner;
@@ -2042,99 +1965,83 @@ public:
         // `A::B = type_member` syntax)
         asgn.lhs = ast::make_expression<ast::ConstantLit>(asgn.lhs.loc(), sym, move(asgn.lhs));
 
-        if (send->hasPosArgs() || send->hasKwArgs() || send->block() != nullptr) {
-            if (send->numPosArgs() > 1) {
-                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                    e.setHeader("Too many args in type definition");
+        if (send->hasKwArgs()) {
+            const auto numKwArgs = send->numKwArgs();
+            auto kwArgsLoc = ctx.locAt(send->getKwKey(0).loc().join(send->getKwValue(numKwArgs - 1).loc()));
+            if (auto e = ctx.state.beginError(kwArgsLoc, core::errors::Namer::OldTypeMemberSyntax)) {
+                e.setHeader("The `{}` syntax for bounds has changed to use a block instead of keyword args",
+                            send->fun.show(ctx));
+
+                if (kwArgsLoc.exists() && send->block() == nullptr) {
+                    lazyTypeMemberAutocorrect(ctx, e, send, kwArgsLoc);
+                } else {
+                    e.addErrorNote("Provide these keyword args in a block that returns a `{}` literal", "Hash");
                 }
-                auto send = ast::MK::Send1(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
-                                           asgn.loc.copyWithZeroLength(), ast::MK::Untyped(asgn.loc));
-                return handleAssignment(
-                    ctx, ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
             }
+        }
 
-            if (send->hasKwArgs()) {
-                const auto numKwArgs = send->numKwArgs();
-                auto kwArgsLoc = ctx.locAt(send->getKwKey(0).loc().join(send->getKwValue(numKwArgs - 1).loc()));
-                if (auto e = ctx.state.beginError(kwArgsLoc, core::errors::Namer::OldTypeMemberSyntax)) {
-                    e.setHeader("The `{}` syntax for bounds has changed to use a block instead of keyword args",
-                                send->fun.show(ctx));
+        if (send->block() != nullptr) {
+            bool fixed = false;
+            bool bounded = false;
 
-                    if (kwArgsLoc.exists() && send->block() == nullptr) {
-                        lazyTypeMemberAutocorrect(ctx, e, send, kwArgsLoc);
-                    } else {
-                        e.addErrorNote("Provide these keyword args in a block that returns a `{}` literal", "Hash");
+            if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
+                for (const auto &keyExpr : hash->keys) {
+                    const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+                    if (key == nullptr || !key->isSymbol()) {
+                        if (auto e = ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
+                            e.setHeader("Hash provided in block to `{}` must have symbol keys", send->fun.show(ctx));
+                        }
+                        return tree;
                     }
-                }
-            }
 
-            if (send->block() != nullptr) {
-                bool fixed = false;
-                bool bounded = false;
+                    switch (key->asSymbol().rawId()) {
+                        case core::Names::fixed().rawId():
+                            fixed = true;
+                            break;
 
-                if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
-                    for (const auto &keyExpr : hash->keys) {
-                        const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
-                        if (key == nullptr || !key->isSymbol()) {
+                        case core::Names::lower().rawId():
+                        case core::Names::upper().rawId():
+                            bounded = true;
+                            break;
+
+                        default:
                             if (auto e = ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
-                                e.setHeader("Hash provided in block to `{}` must have symbol keys",
+                                e.setHeader("Unknown key `{}` provided in block to `{}`", key->asSymbol().show(ctx),
                                             send->fun.show(ctx));
                             }
                             return tree;
-                        }
-
-                        switch (key->asSymbol().rawId()) {
-                            case core::Names::fixed().rawId():
-                                fixed = true;
-                                break;
-
-                            case core::Names::lower().rawId():
-                            case core::Names::upper().rawId():
-                                bounded = true;
-                                break;
-
-                            default:
-                                if (auto e =
-                                        ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
-                                    e.setHeader("Unknown key `{}` provided in block to `{}`", key->asSymbol().show(ctx),
-                                                send->fun.show(ctx));
-                                }
-                                return tree;
-                        }
-                    }
-                } else {
-                    if (auto e =
-                            ctx.beginError(send->block()->body.loc(), core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Block given to `{}` must contain a single `{}` literal", send->fun.show(ctx),
-                                    "Hash");
-                        return tree;
                     }
                 }
-
-                // one of fixed or bounds were provided
-                if (fixed != bounded) {
-                    asgn.lhs = ast::MK::Constant(asgn.lhs.loc(), sym);
-
-                    // Leave it in the tree for the resolver to chew on.
+            } else {
+                if (auto e = ctx.beginError(send->block()->body.loc(), core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Block given to `{}` must contain a single `{}` literal", send->fun.show(ctx), "Hash");
                     return tree;
-                } else if (fixed) {
-                    // both fixed and bounds were specified
-                    if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Type member is defined with bounds and `{}`", "fixed");
-                    }
-                } else {
-                    if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Missing required param `{}`", "fixed");
-                    }
                 }
             }
 
-            if (send->numPosArgs() > 0) {
-                auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
-                if (!lit || !lit->isSymbol()) {
-                    if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Invalid param, must be a :symbol");
-                    }
+            // one of fixed or bounds were provided
+            if (fixed != bounded) {
+                asgn.lhs = ast::MK::Constant(asgn.lhs.loc(), sym);
+
+                // Leave it in the tree for the resolver to chew on.
+                return tree;
+            } else if (fixed) {
+                // both fixed and bounds were specified
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Type member is defined with bounds and `{}`", "fixed");
+                }
+            } else {
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Missing required param `{}`", "fixed");
+                }
+            }
+        }
+
+        if (send->numPosArgs() > 0) {
+            auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
+            if (!lit || !lit->isSymbol()) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Invalid param, must be a :symbol");
                 }
             }
         }
@@ -2175,42 +2082,32 @@ public:
 
 AllFoundDefinitions findSymbols(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.findSymbols");
-    auto resultq = make_shared<BlockingBoundedQueue<pair<size_t, SymbolFinderResult>>>(trees.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<ParsedFileWithIdx>>(trees.size());
+    auto taskq = make_shared<ConcurrentBoundedQueue<size_t>>(trees.size());
+    absl::BlockingCounter barrier(max(workers.size(), 1));
     AllFoundDefinitions allFoundDefinitions(trees.size());
-    size_t idx = 0;
-    for (auto &tree : trees) {
-        fileq->push(ParsedFileWithIdx(move(tree), idx++), 1);
+
+    for (size_t i = 0, size = trees.size(); i < size; ++i) {
+        taskq->push(i, 1);
     }
 
-    workers.multiplexJob("findSymbols", [&gs, fileq, resultq]() {
+    workers.multiplexJob("findSymbols", [&gs, &barrier, &allFoundDefinitions, trees, taskq]() {
         Timer timeit(gs.tracer(), "naming.findSymbolsWorker");
         SymbolFinder finder;
-        ParsedFileWithIdx job;
-        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+        size_t idx;
+        for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
             if (result.gotItem()) {
-                Timer timeit(gs.tracer(), "naming.findSymbolsOne",
-                             {{"file", string(job.parsedFile.file.data(gs).path())}});
-                core::Context ctx(gs, core::Symbols::root(), job.parsedFile.file);
-                ast::TreeWalk::apply(ctx, finder, job.parsedFile.tree);
-                auto threadResult = SymbolFinderResult(move(job.parsedFile), finder.getAndClearFoundDefinitions());
-                resultq->push({job.idx, move(threadResult)}, 1);
+                auto &parsedFile = trees[idx];
+                Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", string(parsedFile.file.data(gs).path())}});
+                core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
+                ast::TreeWalk::apply(ctx, finder, parsedFile.tree);
+                allFoundDefinitions[idx] = make_pair(parsedFile.file, finder.getAndClearFoundDefinitions());
             }
         }
+
+        barrier.DecrementCount();
     });
 
-    {
-        pair<size_t, SymbolFinderResult> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            if (result.gotItem()) {
-                auto fref = threadResult.second.tree.file;
-                trees[threadResult.first] = move(threadResult.second.tree);
-                allFoundDefinitions[threadResult.first] = make_pair(fref, move(threadResult.second.names));
-            }
-        }
-    }
+    barrier.Wait();
 
     return allFoundDefinitions;
 }
@@ -2357,38 +2254,31 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
 
 void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
-    auto resultq = make_shared<BlockingBoundedQueue<ParsedFileWithIdx>>(trees.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<ParsedFileWithIdx>>(trees.size());
-    size_t idx = 0;
-    for (auto &tree : trees) {
-        fileq->push(ParsedFileWithIdx(move(tree), idx++), 1);
+    auto taskq = make_shared<ConcurrentBoundedQueue<size_t>>(trees.size());
+    absl::BlockingCounter barrier(max(workers.size(), 1));
+
+    for (size_t i = 0, size = trees.size(); i < size; ++i) {
+        taskq->push(i, 1);
     }
 
-    workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq]() {
+    workers.multiplexJob("symbolizeTrees", [&gs, &barrier, trees, taskq]() {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
         TreeSymbolizer inserter;
-        ParsedFileWithIdx job;
-        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+        size_t idx;
+        for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
             if (result.gotItem()) {
+                auto &parsedFile = trees[idx];
                 Timer timeit(gs.tracer(), "naming.symbolizeTreesOne",
-                             {{"file", string(job.parsedFile.file.data(gs).path())}});
-                core::Context ctx(gs, core::Symbols::root(), job.parsedFile.file);
-                ast::TreeWalk::apply(ctx, inserter, job.parsedFile.tree);
-                resultq->push(move(job), 1);
+                             {{"file", string(parsedFile.file.data(gs).path())}});
+                core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
+                ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
             }
         }
+
+        barrier.DecrementCount();
     });
 
-    {
-        ParsedFileWithIdx threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            if (result.gotItem()) {
-                trees[threadResult.idx] = move(threadResult.parsedFile);
-            }
-        }
-    }
+    barrier.Wait();
 }
 
 } // namespace

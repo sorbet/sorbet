@@ -20,13 +20,14 @@ private:
     static void removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg,
                                   const std::vector<UIntSet> &blockArgs);
     static void markLoopHeaders(core::Context ctx, CFG &cfg);
-    static int topoSortFwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);
+    static std::vector<int> topoSortFwd(std::vector<BasicBlock *> &target, int numBlocks, BasicBlock *currentBB);
     static void conditionalJump(BasicBlock *from, LocalRef cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
                                 core::LocOffsets loc);
     static void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocOffsets loc);
     static void jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc);
     static void synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets loc, InstructionPtr inst);
     static BasicBlock *walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method);
+    static BasicBlock *walkEmptyTreeInIf(CFGContext cctx, core::LocOffsets loc, BasicBlock *current);
     static BasicBlock *walkBlockReturn(CFGContext cctx, core::LocOffsets loc, ast::ExpressionPtr &expr,
                                        BasicBlock *current);
     static std::tuple<LocalRef, BasicBlock *, BasicBlock *>
@@ -58,7 +59,7 @@ public:
     CFGContext withBlockBreakTarget(LocalRef blockBreakTarget);
     CFGContext withLoopBreakTarget(LocalRef blockBreakTarget);
     CFGContext withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope, bool insideRubyBlock = false);
-    CFGContext withSendAndBlockLink(const std::shared_ptr<core::SendAndBlockLink> &link);
+    CFGContext withSendAndBlockLink(std::shared_ptr<core::SendAndBlockLink> link);
 
     LocalRef newTemporary(core::NameRef name);
 

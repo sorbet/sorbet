@@ -1,4 +1,5 @@
 #include "ast/Trees.h"
+#include "absl/strings/escaping.h"
 #include "absl/synchronization/blocking_counter.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
@@ -304,12 +305,21 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
     if (this->symbol != core::Symbols::StubModule()) {
         return nullopt;
     }
-    ENFORCE(this->resolutionScopes != nullptr && !this->resolutionScopes->empty(), "loc={}", this->loc.showRaw(ctx));
 
     vector<core::NameRef> namesFailedToResolve;
     auto *nested = this;
     {
-        while (!nested->resolutionScopes->front().exists()) {
+        while (true) {
+            if (nested->resolutionScopes == nullptr || nested->resolutionScopes->empty()) [[unlikely]] {
+                ENFORCE(false);
+                fatalLogger->error(R"(msg="Bad fullUnresolvedPath" loc="{}")", ctx.locAt(this->loc).showRaw(ctx));
+                fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
+            }
+
+            if (nested->resolutionScopes->front().exists()) {
+                break;
+            }
+
             auto *orig = cast_tree<UnresolvedConstantLit>(nested->original);
             ENFORCE(orig);
             namesFailedToResolve.emplace_back(orig->cnst);
@@ -1069,12 +1079,6 @@ void Send::insertPosArg(uint16_t index, ExpressionPtr arg) {
     ENFORCE(index <= numPosArgs_);
     this->args.emplace(this->args.begin() + index, std::move(arg));
     this->numPosArgs_++;
-}
-
-void Send::removePosArg(uint16_t index) {
-    ENFORCE(index < numPosArgs_);
-    this->args.erase(this->args.begin() + index);
-    this->numPosArgs_--;
 }
 
 void Send::setBlock(ExpressionPtr block) {

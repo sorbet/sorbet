@@ -217,12 +217,26 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     Timer timeit(config->logger, "fast_path");
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
-    auto result = updates.fastPathFilesToTypecheck(*gs, *config);
-    config->logger->debug("Added {} files that were not part of the edit to the update set", result.extraFiles.size());
+
+    std::vector<core::FileRef> toTypecheck;
+    toTypecheck.reserve(updates.fastPathExtraFiles.size() + updates.updatedFiles.size());
+    for (auto &path : updates.fastPathExtraFiles) {
+        auto fref = gs->findFileByPath(path);
+        ENFORCE(fref.exists());
+        toTypecheck.emplace_back(fref);
+    }
+
+    config->logger->debug("Added {} files that were not part of the edit to the update set", toTypecheck.size());
     UnorderedMap<core::FileRef, core::FoundDefHashes> oldFoundHashesForFiles;
-    auto toTypecheck = move(result.extraFiles);
-    auto shouldRunIncrementalNamer = !result.changedSymbolNameHashes.empty();
-    for (auto [fref, idx] : result.changedFiles) {
+    auto shouldRunIncrementalNamer = updates.fastPathUseIncrementalNamer;
+    for (auto &file : updates.updatedFiles) {
+        auto fref = gs->findFileByPath(file->path());
+        ENFORCE(fref.exists(), "New files are not supported in the fast path");
+
+        if (config->opts.stripePackages && file->isPackage()) {
+            continue;
+        }
+
         if (shouldRunIncrementalNamer) {
             // Only set oldFoundHashesForFiles if we're processing a real edit.
             //
@@ -244,16 +258,16 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             oldFoundHashesForFiles.emplace(fref, move(fref.data(*gs).getFileHash()->foundHashes));
         }
 
-        gs->replaceFile(fref, updates.updatedFiles[idx]);
+        gs->replaceFile(fref, file);
         // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
         fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
 
         toTypecheck.emplace_back(fref);
     }
 
-    UnorderedSet<core::FileRef> packageFiles;
-
     if (shouldRunIncrementalNamer) {
+        std::vector<core::FileRef> packageFiles;
+
         for (auto fref : toTypecheck) {
             // Only need to re-run packager if we're going to delete constants and have to re-define
             // their visibility, which only happens if we're running incrementalNamer.
@@ -271,19 +285,16 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                         continue;
                     }
 
-                    packageFiles.emplace(packageFref);
+                    packageFiles.emplace_back(packageFref);
                 }
             }
         }
-    }
 
-    for (auto packageFref : packageFiles) {
-        if (result.changedFiles.find(packageFref) == result.changedFiles.end()) {
-            toTypecheck.emplace_back(packageFref);
-        }
+        toTypecheck.insert(toTypecheck.end(), packageFiles.begin(), packageFiles.end());
     }
 
     fast_sort(toTypecheck);
+    toTypecheck.erase(std::unique(toTypecheck.begin(), toTypecheck.end()), toTypecheck.end());
 
     config->logger->debug("Running fast path over num_files={}", toTypecheck.size());
     unique_ptr<ShowOperation> op;
@@ -292,22 +303,22 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     }
     ENFORCE(gs->errorQueue->isEmpty());
     vector<ast::ParsedFile> updatedIndexed;
-    for (auto &f : toTypecheck) {
+    for (core::FileRef fref : toTypecheck) {
         // TODO(jvilk): We don't need to re-index files that didn't change.
         // (`updates` has already-indexed trees, but they've been indexed with initialGS, not the
         // `*gs` that we'll be typechecking with. We could do an ast::Substitute here if we had
         // access to `initialGS`, but that's owned by the indexer thread, not this thread.)
-        auto t = pipeline::indexOne(config->opts, *gs, f);
+        auto t = pipeline::indexOne(config->opts, *gs, fref);
         updatedIndexed.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
         updates.updatedFinalGSFileIndexes.push_back(move(t));
 
         // See earlier in the method for an explanation of the isNoopUpdateForRetypecheck check here.
-        if (shouldRunIncrementalNamer && oldFoundHashesForFiles.find(f) == oldFoundHashesForFiles.end()) {
+        if (shouldRunIncrementalNamer && !oldFoundHashesForFiles.contains(fref)) {
             // This is an extra file that we need to typecheck which was not part of the original
             // edited files, so whatever it happens to have in foundMethodHashes is still "old"
             // (but we can't use `move` to steal it like before, because we're not replacing the
             // whole file).
-            oldFoundHashesForFiles.emplace(f, f.data(*gs).getFileHash()->foundHashes);
+            oldFoundHashesForFiles.emplace(fref, fref.data(*gs).getFileHash()->foundHashes);
         }
     }
 
@@ -669,6 +680,7 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
         ENFORCE(fref.exists());
         ENFORCE(fref.id() < indexed.size());
         auto &index = indexed[fref.id()];
+
         // Note: `index.tree` can be null if the file is a stdlib file.
         noop.updatedFileIndexes.push_back({(index.tree ? index.tree.deepCopy() : nullptr), index.file});
         noop.updatedFiles.push_back(gs->getFiles()[fref.id()]);

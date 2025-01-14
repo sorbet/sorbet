@@ -722,13 +722,24 @@ MethodRef findConcreteMethodTransitiveInternal(const GlobalState &gs, ClassOrMod
     }
 
     MethodRef result = owner.data(gs)->findMethod(gs, name);
+    if (result.exists() && result.data(gs)->flags.isOverloaded) {
+        auto overloadName = gs.lookupNameUnique(UniqueNameKind::Overload, name, 1);
+        result = owner.data(gs)->findMethod(gs, overloadName);
+    }
+
     if (result.exists() && !result.data(gs)->flags.isAbstract) {
         return result;
     }
 
-    for (auto it = owner.data(gs)->mixins().begin(); it != owner.data(gs)->mixins().end(); ++it) {
-        ENFORCE(it->exists());
-        result = it->data(gs)->findMethod(gs, name);
+    for (auto sym : owner.data(gs)->mixins()) {
+        ENFORCE(sym.exists());
+        result = sym.data(gs)->findMethod(gs, name);
+
+        if (result.exists() && result.data(gs)->flags.isOverloaded) {
+            auto overloadName = gs.lookupNameUnique(UniqueNameKind::Overload, name, 1);
+            result = owner.data(gs)->findMethod(gs, overloadName);
+        }
+
         if (result.exists() && !result.data(gs)->flags.isAbstract) {
             return result;
         }
@@ -750,7 +761,7 @@ SymbolRef ClassOrModule::findParentMemberTransitiveInternal(const GlobalState &g
                                                             bool dealias) const {
     SymbolRef result;
     if (flags.isLinearizationComputed) {
-        for (auto it = this->mixins().begin(); it != this->mixins().end(); ++it) {
+        for (auto it = this->mixins().begin(), end = this->mixins().end(); it != end; ++it) {
             ENFORCE(it->exists());
             result = dealias ? it->data(gs)->findMember(gs, name) : it->data(gs)->findMemberNoDealias(name);
             if (result.exists()) {
@@ -758,7 +769,7 @@ SymbolRef ClassOrModule::findParentMemberTransitiveInternal(const GlobalState &g
             }
         }
     } else {
-        for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
+        for (auto it = this->mixins().rbegin(), end = this->mixins().rend(); it != end; ++it) {
             ENFORCE(it->exists());
             result = it->data(gs)->findMemberTransitiveInternal(gs, name, maxDepth - 1, dealias);
             if (result.exists()) {
@@ -2284,22 +2295,22 @@ void Method::sanityCheck(const GlobalState &gs) const {
 
     ENFORCE_NO_TIMER(current == current2);
     for (auto &tp : typeArguments()) {
-        ENFORCE_NO_TIMER(tp.data(gs)->name.exists(), name.toString(gs) + " has a member symbol without a name");
-        ENFORCE_NO_TIMER(tp.exists(), name.toString(gs) + "." + tp.data(gs)->name.toString(gs) +
-                                          " corresponds to a core::Symbols::noTypeArgument()");
+        ENFORCE_NO_TIMER(tp.data(gs)->name.exists(), "{} has a member symbol without a name", name.toString(gs));
+        ENFORCE_NO_TIMER(tp.exists(), "{}.{} corresponds to a core::Symbols::noTypeArgument()", name.toString(gs),
+                         tp.data(gs)->name.toString(gs));
     }
 
     // There should always either be a block argument at the end, or the method should be an alias
-    ENFORCE_NO_TIMER(!this->arguments.empty(), ref(gs).show(gs));
+    ENFORCE_NO_TIMER(!this->arguments.empty(), "{}", ref(gs).show(gs));
 
     if (isa_type<AliasType>(this->resultType)) {
         // The arguments of an alias method don't mean anything. When calling a method alias,
         // we dealias the symbol and use those arguments.
         //
         // This leaves the alias method's arguments vector free for us to stash some information. See resolver.
-        ENFORCE_NO_TIMER(absl::c_all_of(this->arguments, [](const auto &arg) { return arg.flags.isKeyword; }),
+        ENFORCE_NO_TIMER(absl::c_all_of(this->arguments, [](const auto &arg) { return arg.flags.isKeyword; }), "{}",
                          ref(gs).show(gs));
-        ENFORCE_NO_TIMER(absl::c_all_of(this->arguments, [](const auto &arg) { return arg.flags.isKeyword; }),
+        ENFORCE_NO_TIMER(absl::c_all_of(this->arguments, [](const auto &arg) { return arg.flags.isKeyword; }), "{}",
                          ref(gs).show(gs));
     }
 }

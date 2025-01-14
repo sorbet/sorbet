@@ -19,8 +19,11 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
             BasicBlock *bb = it->get();
             auto *const thenb = bb->bexit.thenb;
             auto *const elseb = bb->bexit.elseb;
+
+            // Only consider removing nodes that aren't the entry or dead block.
             if (bb != cfg.deadBlock() && bb != cfg.entry()) {
-                if (bb->backEdges.empty()) { // remove non reachable
+                // When nothing jumps to this block, we can remove it.
+                if (bb->backEdges.empty()) {
                     thenb->backEdges.erase(remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                            thenb->backEdges.end());
                     if (elseb != thenb) {
@@ -44,60 +47,100 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
             if (thenb == elseb) {
                 // Remove condition from unconditional jumps
                 bb->bexit.cond = LocalRef::unconditional();
-            }
-            if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb &&
-                bb->rubyRegionId == thenb->rubyRegionId) { // can be squashed together
-                if (thenb->backEdges.size() == 1 && thenb->outerLoops == bb->outerLoops) {
-                    bb->exprs.insert(bb->exprs.end(), make_move_iterator(thenb->exprs.begin()),
-                                     make_move_iterator(thenb->exprs.end()));
-                    thenb->backEdges.clear();
-                    bb->bexit.cond.variable = thenb->bexit.cond.variable;
-                    bb->bexit.thenb = thenb->bexit.thenb;
-                    bb->bexit.elseb = thenb->bexit.elseb;
-                    bb->bexit.loc = thenb->bexit.loc;
-                    bb->bexit.thenb->backEdges.emplace_back(bb);
-                    if (bb->bexit.thenb != bb->bexit.elseb) {
-                        bb->bexit.elseb->backEdges.emplace_back(bb);
+
+                // These two simplifications only apply on unconditional jumps that:
+                //
+                // 1. Are not to the dead block
+                // 2. Are not a back edge to the parent
+                // 3. Do not differ in their outerLoops values
+                //
+                // The third condition is important to avoid situations where we might duplicate a loop header.
+                // Duplicating a loop header will potentially invalidate the cached `forwardsTopoSort` traversal, and
+                // throw off inference by causing values to look nilable after loops that don't use them.
+                if (thenb != cfg.deadBlock() && thenb != bb && thenb->outerLoops == bb->outerLoops) {
+                    // If this is the only block that jumps to `thenb`, we can squish it into `bb` and disconnect it
+                    // from the graph.
+                    if (thenb->backEdges.size() == 1) {
+                        bb->exprs.insert(bb->exprs.end(), make_move_iterator(thenb->exprs.begin()),
+                                         make_move_iterator(thenb->exprs.end()));
+                        thenb->backEdges.clear();
+                        bb->bexit.cond.variable = thenb->bexit.cond.variable;
+                        bb->bexit.thenb = thenb->bexit.thenb;
+                        bb->bexit.elseb = thenb->bexit.elseb;
+                        bb->bexit.loc = thenb->bexit.loc;
+                        bb->bexit.thenb->backEdges.emplace_back(bb);
+                        if (bb->bexit.thenb != bb->bexit.elseb) {
+                            bb->bexit.elseb->backEdges.emplace_back(bb);
+                        }
+                        changed = true;
+                        sanityCheck(ctx, cfg);
+                        continue;
                     }
-                    changed = true;
-                    sanityCheck(ctx, cfg);
-                    continue;
-                } else if (thenb->bexit.cond.variable != LocalRef::blockCall() && thenb->exprs.empty()) {
-                    // Don't remove block headers
-                    bb->bexit.cond.variable = thenb->bexit.cond.variable;
-                    bb->bexit.thenb = thenb->bexit.thenb;
-                    bb->bexit.elseb = thenb->bexit.elseb;
-                    bb->bexit.loc = thenb->bexit.loc;
-                    thenb->backEdges.erase(remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
-                                           thenb->backEdges.end());
-                    bb->bexit.thenb->backEdges.emplace_back(bb);
-                    if (bb->bexit.thenb != bb->bexit.elseb) {
-                        bb->bexit.elseb->backEdges.emplace_back(bb);
+
+                    // `thenb` is a candidate for having its condition inlined into `bb` when:
+                    //
+                    // 1. Its condition is not `blockCall`, indicating that the `thenb` branch is actually the block
+                    //    body given to a send
+                    // 2. Its expressions are empty
+                    if (thenb->bexit.cond.variable != LocalRef::blockCall() && thenb->exprs.empty()) {
+                        // Don't remove block headers
+                        bb->bexit.cond.variable = thenb->bexit.cond.variable;
+                        bb->bexit.thenb = thenb->bexit.thenb;
+                        bb->bexit.elseb = thenb->bexit.elseb;
+                        bb->bexit.loc = thenb->bexit.loc;
+                        thenb->backEdges.erase(remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
+                                               thenb->backEdges.end());
+                        bb->bexit.thenb->backEdges.emplace_back(bb);
+                        if (bb->bexit.thenb != bb->bexit.elseb) {
+                            bb->bexit.elseb->backEdges.emplace_back(bb);
+                        }
+                        changed = true;
+                        sanityCheck(ctx, cfg);
+                        continue;
                     }
-                    changed = true;
-                    sanityCheck(ctx, cfg);
-                    continue;
                 }
             }
-            if (thenb != cfg.deadBlock() && bb->rubyRegionId == thenb->rubyRegionId && thenb->exprs.empty() &&
-                thenb->bexit.thenb == thenb->bexit.elseb && bb->bexit.thenb != thenb->bexit.thenb) {
+
+            // Now we consider shortcutting the `thenb` and `elseb` blocks in turn, which is only valid when the block:
+            //
+            // 1. Is not the dead block
+            // 2. Has no expressions
+            // 3. Contains an unconditional jump out
+            // 4. Does not jump back to itself.
+            //
+            // These conditions are very similar to how we decide to inline the bexit of an unconditional jump above,
+            // but for when we're looking to prune out intermediate nodes from one path of a conditional jump.
+
+            if (thenb != cfg.deadBlock() && thenb->exprs.empty() && thenb->bexit.isUnconditional() &&
+                bb->bexit.thenb != thenb->bexit.thenb) {
                 // shortcut then
                 bb->bexit.thenb = thenb->bexit.thenb;
-                thenb->bexit.thenb->backEdges.emplace_back(bb);
+                bb->bexit.thenb->backEdges.emplace_back(bb);
                 thenb->backEdges.erase(remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                        thenb->backEdges.end());
+                // Update unconditional jumps
+                if (thenb == elseb) {
+                    bb->bexit.elseb = bb->bexit.thenb;
+                }
+
                 changed = true;
                 sanityCheck(ctx, cfg);
                 continue;
             }
-            if (elseb != cfg.deadBlock() && bb->rubyRegionId == thenb->rubyRegionId && elseb->exprs.empty() &&
-                elseb->bexit.thenb == elseb->bexit.elseb && bb->bexit.elseb != elseb->bexit.elseb) {
+
+            if (elseb != cfg.deadBlock() && elseb->exprs.empty() && elseb->bexit.isUnconditional() &&
+                bb->bexit.elseb != elseb->bexit.elseb) {
                 // shortcut else
                 sanityCheck(ctx, cfg);
                 bb->bexit.elseb = elseb->bexit.elseb;
                 bb->bexit.elseb->backEdges.emplace_back(bb);
                 elseb->backEdges.erase(remove(elseb->backEdges.begin(), elseb->backEdges.end(), bb),
                                        elseb->backEdges.end());
+                // Update unconditional jumps
+                if (thenb == elseb) {
+                    bb->bexit.thenb = bb->bexit.elseb;
+                }
+
                 changed = true;
                 sanityCheck(ctx, cfg);
                 continue;
@@ -410,22 +453,80 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
     return upperBounds1;
 }
 
-int CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {
-    // ENFORCE(!marked[currentBB]) // graph is cyclic!
-    if (currentBB->fwdId != -1) {
-        return nextFree;
-    } else {
-        currentBB->fwdId = -2;
-        if (currentBB->bexit.thenb->outerLoops >= currentBB->bexit.elseb->outerLoops) {
-            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.elseb);
-            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.thenb);
-        } else {
-            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.thenb);
-            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.elseb);
+namespace {
+
+// The marker for nodes that the post-order traversal has not yet encountered.
+constexpr int UNVISITED = -1;
+
+// The marker for nodes that the post-order traversal is processing the children of (this implies that the node is
+// somewhere in the work queue).
+constexpr int PROCESSING = -2;
+
+struct WorkItem {
+    enum class Event { Enter, Exit };
+
+    BasicBlock *block;
+    Event event;
+
+    explicit WorkItem(BasicBlock *block) : block{block}, event{Event::Enter} {}
+};
+
+} // namespace
+
+std::vector<int> CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int numBlocks, BasicBlock *entryBB) {
+    ENFORCE(target.empty(), "The output vector must be empty to start with");
+
+    target.reserve(numBlocks);
+
+    std::vector<int> forwardIndex(numBlocks, UNVISITED);
+    std::vector<WorkItem> work;
+
+    // Arbitrary, could use tuning
+    work.reserve(10);
+
+    work.emplace_back(entryBB);
+
+    while (!work.empty()) {
+        auto [block, event] = work.back();
+
+        switch (event) {
+            case WorkItem::Event::Enter: {
+                // Have we seen this node already through another path?
+                if (forwardIndex[block->id] != UNVISITED) {
+                    work.pop_back();
+                    continue;
+                }
+
+                // Ensure that we record this node on the way back out, mark it as visited, and enqueue its successors.
+                work.back().event = WorkItem::Event::Exit;
+
+                forwardIndex[block->id] = PROCESSING;
+
+                if (forwardIndex[block->bexit.thenb->id] == UNVISITED) {
+                    work.emplace_back(block->bexit.thenb);
+                }
+
+                if (!block->bexit.isUnconditional() && forwardIndex[block->bexit.elseb->id] == UNVISITED) {
+                    work.emplace_back(block->bexit.elseb);
+                }
+
+                break;
+            }
+
+            case WorkItem::Event::Exit: {
+                ENFORCE(forwardIndex[block->id] == PROCESSING);
+
+                forwardIndex[block->id] = target.size();
+                target.emplace_back(block);
+                work.pop_back();
+
+                break;
+            }
         }
-        target[nextFree] = currentBB;
-        currentBB->fwdId = nextFree;
-        return nextFree + 1;
     }
+
+    target.shrink_to_fit();
+
+    return forwardIndex;
 }
 } // namespace sorbet::cfg

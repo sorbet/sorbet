@@ -1,6 +1,7 @@
 #!/bin/bash
 script="$1"
 expect="$2"
+update="$3"
 
 export ASAN_SYMBOLIZER_PATH=`pwd`/external/llvm_toolchain_15_0_7/bin/llvm-symbolizer
 
@@ -9,6 +10,9 @@ if ! diff "$expect" -u <("$script"); then
 ================================================================================
 There were differences in the captured output when running this CLI test.
 To make this output the expected output, run this and commit the changes:
+./bazel test //test/cli:$3
+
+To update all cli tests in bulk, run this and commit the changes:
 ./bazel test //test/cli:update
 EOF
   exit 1

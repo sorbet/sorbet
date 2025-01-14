@@ -332,6 +332,27 @@ sig {params(_a: String, _b: Integer).void} # ok
 def foo(_a, _b); end
 ```
 
+## 3012
+
+There was an anonymous rest argument defined in the block parameter list.
+
+```ruby
+[1,2,3].each do |*|
+  T.unsafe(self).p(*)
+end
+```
+
+The anonymous rest argument may only refer to method parameters, and uses of it
+will generate runtime syntax errors if it's used in the context of a block that
+defines it. This can be resolved by naming the rest argument parameter in the
+block:
+
+```ruby
+[1,2,3].each do |*args|
+  T.unsafe(self).p(*args)
+end
+```
+
 ## 3501
 
 Sorbet has special support for understanding Ruby's `attr_reader`,
@@ -542,6 +563,37 @@ This error code is from an old Sorbet version. It's equivalent to error 4023:
 
 The `has_attached_class!` annotation cannot be given a contravariant `:in`
 annotation because `T.attached_class` is only allowed in output positions.
+
+## 3515
+
+This error indicates that a `prop` or `const` has already been defined with the
+name provided. For example:
+
+```ruby
+class Info < T::Struct
+  const :name, String
+  const :age, Integer
+  prop :age, Float
+end
+```
+
+In this case, the `:age` prop has been defined twice on lines 3 and 4, and this
+error will be raised on the occurrence on line 4.
+
+While these errors exist, the first occurrence of the conflicting name will be
+used when computing a typed initializer for static typechecking purposes. For
+the example above, the initializer would look as though it was defined with the
+following signature:
+
+```ruby
+class Info < T::struct
+  ...
+  sig {params(name: String, age: Integer).void}
+  def initialize(name:, age:)
+    ...
+  end
+end
+```
 
 ## 3702
 
@@ -883,6 +935,82 @@ The 4 possible values are:
 - `'layered'`
 - `'layered_dag'`
 - `'dag'`
+
+## 3725
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) and
+> [go/layers](http://go/layers) for more.
+
+All packages have a `layer`, which is used when checking for layering
+violations. See [3726](#3726).
+
+<!-- TODO(neil): Replace [3726](#3726) with a link to layering/strict_deps documentation when we write that. -->
+
+```ruby
+class MyPackage < PackageSpec
+  strict_dependencies 'false'
+  layer 'library'
+end
+```
+
+You can choose the valid layers using the `--packager-layers` command line flag.
+For example, the following specifies that there are three valid layers: `util`,
+`lib` and `app`, ordered lowest to highest.
+
+```bash
+srb tc --packager-layers util,lib,app
+```
+
+Note that the order matters here. Passing the option as above means that in
+`layered` (or stricter), packages in the `app` layer can import those in `util`
+or `lib`, but packages in the `util` layer cannot import those in `lib` or
+`app`.
+
+If the flag is passed with no argument, then the default valid layers are
+`library` and `application`.
+
+## 3726
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) and
+> [go/layers](http://go/layers) for more.
+
+If a package is at `strict_dependencies 'layered'` or stricter, all packages it
+imports must be in the same or lower layer. For example, given
+`--packager-layers util,lib,app`, all imports for a package with layer `lib`
+must either also have layer `lib`, or have layer `util` (but not layer `app`).
+
+Note: `test_import`s are not checked for layering violations.
+
+## 3727
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) and
+> [go/strict-dependencies](http://go/strict-dependencies) for more.
+
+If a package is at `strict_dependencies 'layered'` or stricter, all packages it
+imports must also be at `strict_dependencies 'layered'`.
+
+If a package is at `strict_dependencies 'layered_dag'` or stricter, it cannot be
+part of a cycle of dependencies. For example, the following is invalid:
+
+```ruby
+class A < PackageSpec
+  strict_dependencies 'layered_dag'
+  import B # error: importing B will put A into a cycle, which is not valid at strict_dependencies level layered_dag
+end
+
+class B < PackageSpec
+  strict_dependencies 'layered'
+  import A
+end
+```
+
+Additionally, if a package is at `strict_dependencies 'dag'`, all packages it
+imports must also be at `strict_dependencies 'dag'`.
+
+Note: `test_import`s are not checked for strict dependency violations.
 
 ## 4001
 
@@ -1307,6 +1435,19 @@ assignment and a class definition for a given constant, you can either:
 
 The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a
 Ruby `class`. For more, see the docs: [`T.attached_class`](attached-class.md).
+
+## 4024
+
+Two keyword arguments to a method definition or block have been given the same
+name:
+
+```ruby
+def foo(x:, x:)
+end
+```
+
+You can resolve this error by giving a different name to one of the conflicting
+arguments.
 
 ## 5001
 
@@ -3227,6 +3368,22 @@ There are two options:
   direction = Direction.deserialize(direction_symbol)
   move(direction)
   ```
+
+## 5078
+
+This error is functionally equivalent to error [7010](#7010). It is reported
+during the inference stage, while 5078 is reported during the resolver stage.
+
+For detailed information and examples, please refer to the documentation for
+error [7010](#7010).
+
+## 5079
+
+This error is functionally equivalent to error [7032](#7032). It is reported
+during the inference stage, while 5079 is reported during the resolver stage.
+
+For detailed information and examples, please refer to the documentation for
+error [7032](#7032).
 
 ## 6001
 

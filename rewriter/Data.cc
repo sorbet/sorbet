@@ -66,7 +66,7 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
     }
 
     if (!ast::MK::isRootScope(recv->scope) || recv->cnst != core::Names::Constants::Data() ||
-        send->fun != core::Names::define() || !send->hasPosArgs()) {
+        send->fun != core::Names::define() || send->hasKwArgs() || send->hasKwSplat()) {
         return empty;
     }
 
@@ -76,8 +76,8 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
     ast::Send::ARGS_store sigArgs;
     ast::ClassDef::RHS_store body;
 
-    for (int i = 0; i < send->numPosArgs(); i++) {
-        auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(i));
+    for (auto &arg : send->posArgs()) {
+        auto *sym = ast::cast_tree<ast::Literal>(arg);
         if (!sym || !sym->isName()) {
             return empty;
         }
@@ -85,7 +85,7 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
         auto symLoc = sym->loc;
         auto strname = name.shortName(ctx);
         if (!strname.empty() && strname.back() == '=') {
-            if (auto e = ctx.beginError(symLoc, core::errors::Rewriter::InvalidStructMember)) {
+            if (auto e = ctx.beginIndexerError(symLoc, core::errors::Rewriter::InvalidStructMember)) {
                 e.setHeader("Data member `{}` cannot end with an equal", strname);
             }
         }

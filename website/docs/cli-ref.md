@@ -240,6 +240,11 @@ Usage:
       --enable-all-beta-lsp-features
                                 Enable (expected-to-be-non-crashy) early-access LSP
                                 features.
+      --forcibly-silence-lsp-multiple-dir-error
+                                Allow the LSP to start with multiple `--dir` options by
+                                silencing the error. (WARNING: This flag does not address
+                                the known issues with multiple directory support in LSP
+                                mode. You are likely to encounter unexpected behavior.)
 
 ```
 
@@ -309,6 +314,9 @@ Usage:
       --allow-relaxed-packager-checks-for <name>
                                 Packages which are allowed to ignore the restrictions set
                                 by `visible_to` and `export` directives
+      --packager-layers [=<layer-name>(=library,application)]
+                                Valid layer names for packages, ordered lowest to
+                                highest. Passing this flag also enables layering checks.
       --package-skip-rbi-export-enforcement <dir>
                                 Constants defined in RBIs in these directories (and no
                                 others) can be exported
@@ -319,15 +327,6 @@ Usage:
 
 ```plaintext
       --autogen-version arg     Autogen version to output
-      --autogen-constant-cache-file arg
-                                Location of the cache file used to determine if it's safe
-                                to skip autogen. If this is not provided, autogen will
-                                always run. (default: "")
-      --autogen-changed-files arg
-                                List of files which have changed since the last autogen
-                                run. If a cache file is also provided, autogen may exit
-                                early if it determines that these files could not have
-                                affected the output of autogen.
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of subclasses.
                                 This option must be used in conjunction with -p

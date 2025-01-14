@@ -114,7 +114,7 @@ constexpr int MAX_PRETTY_SIG_ARGS = 4;
 // iff a `def` would be this wide or wider, expand it to be a multi-line def.
 constexpr int MAX_PRETTY_WIDTH = 80;
 
-core::SymbolRef lookupFQN(const core::GlobalState &gs, const vector<core::NameRef> &fqn) {
+core::SymbolRef lookupFQN(const core::GlobalState &gs, absl::Span<const core::NameRef> fqn) {
     core::SymbolRef scope = core::Symbols::root();
     for (auto name : fqn) {
         if (scope.isClassOrModule()) {
@@ -1162,8 +1162,11 @@ private:
 
     static core::ClassOrModuleRef getPkgTestNamespace(const core::GlobalState &gs,
                                                       const core::packages::PackageInfo &pkg) {
-        vector<core::NameRef> fullName = pkg.fullName();
-        fullName.insert(fullName.begin(), core::Names::Constants::Test());
+        auto origName = pkg.fullName();
+        vector<core::NameRef> fullName;
+        fullName.reserve(origName.size() + 1);
+        fullName.push_back(core::Names::Constants::Test());
+        fullName.insert(fullName.end(), origName.begin(), origName.end());
         return lookupFQN(gs, fullName).asClassOrModuleRef();
     }
 
@@ -1261,7 +1264,7 @@ public:
 UnorderedSet<core::ClassOrModuleRef> RBIGenerator::buildPackageNamespace(core::GlobalState &gs, WorkerPool &workers) {
     const auto &packageDB = gs.packageDB();
 
-    auto &packages = packageDB.packages();
+    auto packages = packageDB.packages();
 
     if (packages.empty()) {
         Exception::raise("No packages found?");
@@ -1272,14 +1275,17 @@ UnorderedSet<core::ClassOrModuleRef> RBIGenerator::buildPackageNamespace(core::G
     UnorderedSet<core::ClassOrModuleRef> packageNamespaces;
     for (auto package : packages) {
         auto &pkg = packageDB.getPackageInfo(package);
-        vector<core::NameRef> fullName = pkg.fullName();
-        auto packageNamespace = lookupFQN(gs, fullName);
+        auto origName = pkg.fullName();
+        auto packageNamespace = lookupFQN(gs, origName);
         // Might not exist if package has no files.
         if (packageNamespace.exists()) {
             packageNamespaces.insert(packageNamespace.asClassOrModuleRef());
         }
 
-        fullName.insert(fullName.begin(), testNamespace);
+        vector<core::NameRef> fullName;
+        fullName.reserve(origName.size() + 1);
+        fullName.push_back(testNamespace);
+        fullName.insert(fullName.end(), origName.begin(), origName.end());
         auto testPackageNamespace = lookupFQN(gs, fullName);
         if (testPackageNamespace.exists()) {
             packageNamespaces.insert(testPackageNamespace.asClassOrModuleRef());
@@ -1297,45 +1303,32 @@ RBIGenerator::RBIOutput RBIGenerator::runOnce(const core::GlobalState &gs, core:
     return exporter.emit();
 }
 
-void RBIGenerator::run(core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
+void RBIGenerator::run(const core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
                        string outputDir, WorkerPool &workers) {
     absl::BlockingCounter threadBarrier(std::max(workers.size(), 1));
 
     const auto &packageDB = gs.packageDB();
-    auto &packages = packageDB.packages();
+    auto packages = packageDB.packages();
     auto inputq = make_shared<ConcurrentBoundedQueue<core::packages::MangledName>>(packages.size());
     for (auto package : packages) {
         inputq->push(move(package), 1);
     }
 
-    workers.multiplexJob(
-        "RBIGenerator", [inputq, outputDir, &threadBarrier, &rogs = std::as_const(gs), &packageNamespaces]() {
-            core::packages::MangledName job;
-            for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
-                if (result.gotItem()) {
-                    auto output = runOnce(rogs, job, packageNamespaces);
-                    if (!output.rbi.empty()) {
-                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".package.rbi"), output.rbi);
-                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".deps.json"),
-                                       output.rbiPackageDependencies);
-                    }
-
-                    if (!output.testRBI.empty()) {
-                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.package.rbi"),
-                                       output.testRBI);
-                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.deps.json"),
-                                       output.testRBIPackageDependencies);
-                    }
-                }
+    workers.multiplexJob("RBIGenerator", [inputq, outputDir, &threadBarrier, &gs, &packageNamespaces]() {
+        core::packages::MangledName job;
+        for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
+            if (result.gotItem()) {
+                runSinglePackage(gs, packageNamespaces, job, outputDir);
             }
-            threadBarrier.DecrementCount();
-        });
+        }
+        threadBarrier.DecrementCount();
+    });
     threadBarrier.Wait();
 }
 
-void RBIGenerator::runSinglePackage(core::GlobalState &gs,
+void RBIGenerator::runSinglePackage(const core::GlobalState &gs,
                                     const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
-                                    core::packages::MangledName package, string outputDir, WorkerPool &workers) {
+                                    core::packages::MangledName package, string outputDir) {
     auto output = runOnce(gs, package, packageNamespaces);
     if (!output.rbi.empty()) {
         FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".package.rbi"), output.rbi);

@@ -105,4 +105,4 @@ requires: []
  loc=test/cli/autogen_print_rbi/behavior_allowed.rbi:4
  is_defining_ref=1
 
-3edd3bac9519dd6fb62387f94cf4eeac0ff5d33e  autogen5.msgpack
+d359e4247f922bc0b467303a673e13ddb3e74fb1  autogen5.msgpack

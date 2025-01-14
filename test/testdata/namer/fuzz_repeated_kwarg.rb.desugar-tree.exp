@@ -1,0 +1,41 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def f1<<todo method>>(x, x, &<blk>)
+    <emptyTree>
+  end
+
+  def f2<<todo method>>(x, x = 0, &<blk>)
+    <emptyTree>
+  end
+
+  def f3<<todo method>>(x:, x$1:, &<blk>)
+    <emptyTree>
+  end
+
+  def f4<<todo method>>(x:, x$1: = nil, &<blk>)
+    <emptyTree>
+  end
+
+  def f5<<todo method>>(x, x$1:, &<blk>)
+    <emptyTree>
+  end
+
+  def f6<<todo method>>(x, x$1: = nil, &<blk>)
+    <emptyTree>
+  end
+
+  def f7<<todo method>>(x = 0, x$1: = nil, &<blk>)
+    <emptyTree>
+  end
+
+  def f8<<todo method>>(this, this$1:, &<blk>)
+    <emptyTree>
+  end
+
+  def f9<<todo method>>(x, y, z, x, &<blk>)
+    <emptyTree>
+  end
+
+  l1 = <self>.lambda() do |y, y|
+    <emptyTree>
+  end
+end

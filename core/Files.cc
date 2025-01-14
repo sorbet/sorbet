@@ -107,7 +107,7 @@ bool File::isPackagePath(string_view path) {
 }
 
 File::Flags::Flags(string_view path)
-    : cached(false), hasParseErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)),
+    : cached(false), hasIndexErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)),
       isPackage(isPackagePath(path)), isOpenInClient(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
@@ -220,12 +220,12 @@ void File::setIsOpenInClient(bool isOpenInClient) {
     this->flags.isOpenInClient = isOpenInClient;
 }
 
-vector<int> &File::lineBreaks() const {
+absl::Span<const int> File::lineBreaks() const {
     ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);
     auto ptr = atomic_load(&lineBreaks_);
     if (ptr != nullptr) {
-        return *ptr;
+        return absl::MakeSpan(*ptr);
     } else {
         auto my = make_shared<vector<int>>(findLineBreaks(this->source_));
         atomic_compare_exchange_weak(&lineBreaks_, &ptr, my);
@@ -238,7 +238,7 @@ int File::lineCount() const {
 }
 
 string_view File::getLine(int i) const {
-    auto &lineBreaks = this->lineBreaks();
+    auto lineBreaks = this->lineBreaks();
     ENFORCE(i < lineBreaks.size());
     ENFORCE(i > 0);
     auto start = lineBreaks[i - 1] + 1;
@@ -276,12 +276,12 @@ bool File::isPackageRBI() const {
     return flags.isPackageRBI;
 }
 
-bool File::hasParseErrors() const {
-    return flags.hasParseErrors;
+bool File::hasIndexErrors() const {
+    return flags.hasIndexErrors;
 }
 
-void File::setHasParseErrors(bool value) {
-    flags.hasParseErrors = value;
+void File::setHasIndexErrors(bool value) {
+    flags.hasIndexErrors = value;
 }
 
 bool File::cached() const {

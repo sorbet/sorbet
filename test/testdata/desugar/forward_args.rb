@@ -18,6 +18,27 @@ class Foo
   def foo4(*args, **kwargs, &block)
     T.unsafe(self).bar(*[1, 2, 3], *args, **kwargs, &block)
   end
+
+  def foo5(*)
+    [1,2,3].each do |*|
+                   # ^ error: Anonymous rest parameter
+      T.unsafe(self).p(*)
+    end
+  end
+
+  def foo6(*args)
+    [1,2,3].each do |*|
+                   # ^ error: Anonymous rest parameter
+      T.unsafe(self).p(*)
+    end
+  end
+
+  def foo7(*)
+    [1,2,3].each do |*args|
+      # This use is fine, as it refers to the anonymous rest args of the method.
+      T.unsafe(self).p(*)
+    end
+  end
 end
 
 Foo.new.foo

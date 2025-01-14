@@ -258,7 +258,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
 
     if (isTNilableTUntyped(ret.type)) {
         auto loc = ret.type.loc();
-        if (auto e = ctx.beginError(loc, core::errors::Rewriter::NilableUntyped)) {
+        if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::NilableUntyped)) {
             e.setHeader("`{}` is the same as `{}`", "T.nilable(T.untyped)", "T.untyped");
             e.replaceWith("Use `T.untyped`", ctx.locAt(loc), "T.untyped");
 
@@ -303,7 +303,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                 ret.computedByMethodNameLoc = lit->loc;
                 ret.computedByMethodName = lit->asSymbol();
             } else {
-                if (auto e = ctx.beginError(val.loc(), core::errors::Rewriter::ComputedBySymbol)) {
+                if (auto e = ctx.beginIndexerError(val.loc(), core::errors::Rewriter::ComputedBySymbol)) {
                     e.setHeader("Value for `{}` must be a symbol literal", "computed_by");
                 }
             }
@@ -316,7 +316,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             if (auto body = ASTUtil::thunkBody(ctx, ret.foreign)) {
                 ret.foreign = std::move(body);
             } else {
-                if (auto e = ctx.beginError(ret.foreign.loc(), core::errors::Rewriter::PropForeignStrict)) {
+                if (auto e = ctx.beginIndexerError(ret.foreign.loc(), core::errors::Rewriter::PropForeignStrict)) {
                     e.setHeader("The argument to `{}` must be a lambda", "foreign:");
                     auto foreignLoc = core::Loc{ctx.file, ret.foreign.loc()};
                     if (auto foreignSource = foreignLoc.source(ctx)) {
@@ -586,6 +586,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceNodes;
     replaceNodes.reserve(klass->rhs.size());
     vector<PropInfo> props;
+    UnorderedMap<core::NameRef, uint32_t> seenProps;
     for (auto &stat : klass->rhs) {
         auto *send = ast::cast_tree<ast::Send>(stat);
         if (send == nullptr) {
@@ -597,11 +598,24 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         }
 
         if (!propInfo->isImmutable && syntacticSuperClass == SyntacticSuperClass::TImmutableStruct) {
-            if (auto e = ctx.beginError(propInfo->loc, core::errors::Rewriter::InvalidStructMember)) {
+            if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::InvalidStructMember)) {
                 e.setHeader("Cannot use `{}` in an immutable struct", "prop");
                 e.replaceWith("Use `const`", ctx.locAt(propInfo->loc), "const");
             }
             continue;
+        }
+
+        if (wantTypedInitialize(syntacticSuperClass)) {
+            auto it = seenProps.find(propInfo->name);
+            if (it != seenProps.end()) {
+                if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::DuplicateProp)) {
+                    auto headerProp = fmt::format("{} {}", propInfo->isImmutable ? "const" : "prop",
+                                                  propInfo->name.showAsSymbolLiteral(ctx));
+                    e.setHeader("The `{}` is defined multiple times", headerProp);
+                    e.addErrorLine(ctx.locAt(props[it->second].loc), "Originally defined here");
+                }
+                continue;
+            }
         }
 
         auto processed = processProp(ctx, propInfo.value(), propContext);
@@ -611,6 +625,8 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         nodes.emplace_back(ensureWithoutAccessors(propInfo.value(), send));
         nodes.insert(nodes.end(), make_move_iterator(processed.begin()), make_move_iterator(processed.end()));
         replaceNodes[stat.get()] = std::move(nodes);
+
+        seenProps[propInfo->name] = props.size();
         props.emplace_back(std::move(propInfo.value()));
     }
     auto oldRHS = std::move(klass->rhs);

@@ -1,0 +1,70 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  class <emptyTree>::<C Test><<C <todo sym>>> < (::<todo sym>)
+    def self.test_each<<todo method>>(iter, &blk)
+      <emptyTree>
+    end
+
+    def self.it<<todo method>>(name, &blk)
+      <emptyTree>
+    end
+
+    def self.describe<<todo method>>(name, &blk)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <it 'b'><<todo method>>(&<blk>)
+      [[1, 2], [3, 4]].each() do |<destructure>$2|
+        begin
+          begin
+            <assignTemp>$3 = <destructure>$2
+            <assignTemp>$4 = ::<Magic>.<expand-splat>(<assignTemp>$3, 2, 0)
+            a = <assignTemp>$4.[](0)
+            b = <assignTemp>$4.[](1)
+            <assignTemp>$3
+          end
+          <emptyTree>::<C T>.reveal_type(a)
+        end
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <it 'a'><<todo method>>(&<blk>)
+      [[1, 2], [3, 4]].each() do |<destructure>$2|
+        begin
+          begin
+            <assignTemp>$3 = <destructure>$2
+            <assignTemp>$4 = ::<Magic>.<expand-splat>(<assignTemp>$3, 2, 0)
+            a = <assignTemp>$4.[](0)
+            b = <assignTemp>$4.[](1)
+            <assignTemp>$3
+          end
+          <emptyTree>::<C T>.reveal_type(a)
+        end
+      end
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of self.test_each>
+
+    <runtime method definition of self.it>
+
+    <runtime method definition of self.describe>
+
+    <self>.test_each([[1, 2], [3, 4]]) do |<destructure>$2|
+      begin
+        <runtime method definition of <it 'b'>>
+        <runtime method definition of <it 'a'>>
+      end
+    end
+  end
+end

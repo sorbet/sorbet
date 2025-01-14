@@ -219,7 +219,8 @@ public:
     // something that look like type syntax in a method body.
     static TypePtr applyTypeArguments(const GlobalState &gs, const CallLocs &locs, uint16_t numPosArgs,
                                       const InlinedVector<const TypeAndOrigins *, 2> &args,
-                                      ClassOrModuleRef genericClass);
+                                      ClassOrModuleRef genericClass, ErrorClass genericArgumentCountMismatchError,
+                                      ErrorClass genericArgumentKeywordArgsError);
 };
 
 struct Intrinsic {
@@ -570,6 +571,7 @@ public:
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
     std::string showValue(const GlobalState &gs) const;
+    static std::string showAsSymbolLiteral(const GlobalState &gs, NameRef name);
     uint32_t hash(const GlobalState &gs) const;
 
     bool equals(const NamedLiteralType &rhs) const;
@@ -920,7 +922,6 @@ public:
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
 
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr underlying(const GlobalState &gs) const;
 };
 CheckSize(MetaType, 16, 8);
@@ -932,12 +933,10 @@ public:
     SendAndBlockLink(SendAndBlockLink &&) = default;
     std::vector<ArgInfo::ArgFlags> argFlags;
     core::NameRef fun;
-    int rubyRegionId;
     std::shared_ptr<DispatchResult> result;
 
-    SendAndBlockLink(NameRef fun, std::vector<ArgInfo::ArgFlags> &&argFlags, int rubyRegionId);
+    SendAndBlockLink(NameRef fun, std::vector<ArgInfo::ArgFlags> &&argFlags);
     std::optional<int> fixedArity() const;
-    std::shared_ptr<SendAndBlockLink> duplicate();
 };
 
 class TypeAndOrigins final {
@@ -993,9 +992,9 @@ struct DispatchArgs {
     uint16_t numPosArgs;
     InlinedVector<const TypeAndOrigins *, 2> &args;
     const TypePtr &selfType;
-    const TypeAndOrigins fullType;
+    const TypeAndOrigins &fullType;
     const TypePtr &thisType;
-    const std::shared_ptr<const SendAndBlockLink> &block;
+    const SendAndBlockLink *const block;
     Loc originForUninitialized;
     bool isPrivateOk;
     // Do not produce dispatch-related errors while evaluating the call. This is a performance optimization, as there
@@ -1004,6 +1003,10 @@ struct DispatchArgs {
     bool suppressErrors;
     NameRef enclosingMethodForSuper;
 
+    DispatchArgs(NameRef name, const CallLocs &locs, uint16_t numPosArgs,
+                 InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &selfType,
+                 const TypeAndOrigins &fullType, const TypePtr &thisType, const SendAndBlockLink *block,
+                 Loc originForUninitialized, bool isPrivateOk, bool suppressErrors, NameRef enclosingMethodForSuper);
     DispatchArgs(const DispatchArgs &) = delete;
     DispatchArgs &operator=(const DispatchArgs &) = delete;
 
@@ -1053,7 +1056,6 @@ struct DispatchArgs {
 
     DispatchArgs withSelfAndThisRef(const TypePtr &newSelfRef) const;
     DispatchArgs withThisRef(const TypePtr &newThisRef) const;
-    DispatchArgs withErrorsSuppressed() const;
 };
 
 struct DispatchComponent {

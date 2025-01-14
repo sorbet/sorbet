@@ -56,6 +56,8 @@ bison(
     bison_options = [
         "-Wno-empty-rule",
         "-Wno-precedence",
+        "-Werror=conflicts-rr",
+        "-Werror=conflicts-sr",
     ],
 )
 
@@ -65,6 +67,8 @@ bison(
     bison_options = [
         "-Wno-empty-rule",
         "-Wno-precedence",
+        "-Werror=conflicts-rr",
+        "-Werror=conflicts-sr",
         "--debug",
     ],
 )
@@ -126,5 +130,6 @@ cc_library(
     deps = [
         "//common",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:span",
     ],
 )

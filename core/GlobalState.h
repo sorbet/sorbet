@@ -162,16 +162,17 @@ public:
     FileRef findFileByPath(std::string_view path) const;
 
     const packages::PackageDB &packageDB() const;
+    packages::PackageDB &packageDB();
     void setPackagerOptions(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                             const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                             const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                             const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
-                            const std::vector<std::string> &skipImportVisibilityCheckFor, std::string errorHint);
+                            const std::vector<std::string> &skipImportVisibilityCheckFor,
+                            const std::vector<std::string> &packagerLayers, std::string errorHint);
     packages::UnfreezePackages unfreezePackages();
 
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
     void mangleRenameMethod(MethodRef what, NameRef origName);
-    void mangleRenameForOverload(MethodRef what, NameRef origName);
     // NOTE: You likely want to use mangleRenameMethod not deleteMethodSymbol, unless you know what you're doing.
     // See the comment on the implementation for more.
     void deleteMethodSymbol(MethodRef what);
@@ -227,6 +228,10 @@ public:
 
     ErrorBuilder beginError(Loc loc, ErrorClass what) const;
     void _error(std::unique_ptr<Error> error) const;
+
+    // A version of `beginError` that's specific to the index phase of the pipeline, as it will record that index errors
+    // have been seen on the file associated with the loc.
+    ErrorBuilder beginIndexerError(Loc loc, ErrorClass what);
 
     int totalErrors() const;
     bool wasModified() const;
@@ -289,7 +294,7 @@ public:
     void trace(std::string_view msg) const;
 
     std::unique_ptr<LocalSymbolTableHashes> hash() const;
-    const std::vector<std::shared_ptr<File>> &getFiles() const;
+    absl::Span<const std::shared_ptr<File>> getFiles() const;
 
     // Contains a string to be used as the base of the error URL.
     // The error code is appended to this string.
@@ -374,8 +379,6 @@ private:
 
     SymbolRef lookupSymbolWithKind(ClassOrModuleRef owner, NameRef name, SymbolRef::Kind kind,
                                    SymbolRef defaultReturnValue, bool ignoreKind = false) const;
-
-    void mangleRenameMethodInternal(MethodRef what, NameRef origName, UniqueNameKind kind);
 
     std::string toStringWithOptions(bool showFull, bool showRaw) const;
 };

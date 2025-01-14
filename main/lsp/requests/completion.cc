@@ -299,8 +299,7 @@ vector<core::NameRef> allSimilarLocalNames(const core::GlobalState &gs, const ve
 }
 
 string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatchResult, core::MethodRef maybeAlias,
-                     const core::TypePtr &receiverType, const core::TypeConstraint *constraint, uint16_t totalArgs,
-                     core::Loc queryLoc) {
+                     const core::TypePtr &receiverType, uint16_t totalArgs, core::Loc queryLoc) {
     fmt::memory_buffer result;
     auto shortName = maybeAlias.data(gs)->name.shortName(gs);
     auto isSetter = maybeAlias.data(gs)->name.isSetter(gs);
@@ -353,8 +352,7 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
             fmt::format_to(std::back_inserter(argBuf), "{}: ", argSym.name.shortName(gs));
         }
         if (argSym.type) {
-            auto resultType =
-                core::source_generator::getResultType(gs, argSym.type, method, receiverType, constraint).show(gs);
+            auto resultType = core::source_generator::getResultType(gs, argSym.type, method, receiverType).show(gs);
             fmt::format_to(std::back_inserter(argBuf), "${{{}:{}}}", nextTabstop++, resultType);
         } else {
             fmt::format_to(std::back_inserter(argBuf), "${{{}}}", nextTabstop++);
@@ -379,8 +377,8 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
                 auto targs_it = appliedType->targs.begin();
                 targs_it++;
                 blkArgs = fmt::format(" |{}|", fmt::map_join(targs_it, appliedType->targs.end(), ", ", [&](auto targ) {
-                                          auto resultType = core::source_generator::getResultType(
-                                              gs, targ, method, receiverType, constraint);
+                                          auto resultType =
+                                              core::source_generator::getResultType(gs, targ, method, receiverType);
                                           return fmt::format("${{{}:{}}}", nextTabstop++, resultType.show(gs));
                                       }));
             }
@@ -607,12 +605,12 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typecheck
         auto resolved = typechecker.getResolved(files);
 
         // Instantiate fieldFinder outside loop so that result accumulates over every time we TreeWalk::apply
-        FieldFinder fieldFinder(klass, kind);
+        std::vector<core::NameRef> fields;
+        FieldFinder fieldFinder(klass, kind, fields);
         for (auto &t : resolved) {
             auto ctx = core::Context(gs, core::Symbols::root(), t.file);
             ast::ConstTreeWalk::apply(ctx, fieldFinder, t.tree);
         }
-        auto fields = fieldFinder.result();
 
         // TODO: this does prefix matching for instance/class variables, but our
         // completion for locals matches anywhere in the name
@@ -646,13 +644,13 @@ vector<core::NameRef> localNamesForMethod(LSPTypecheckerDelegate &typechecker, c
     auto resolved = typechecker.getResolved(files);
 
     // Instantiate localVarFinder outside loop so that result accumualates over every time we TreeWalk::apply
-    LocalVarFinder localVarFinder(method, queryLoc);
+    std::vector<core::NameRef> result;
+    LocalVarFinder localVarFinder(method, queryLoc, result);
     for (auto &t : resolved) {
         auto ctx = core::Context(gs, core::Symbols::root(), t.file);
         ast::ConstTreeWalk::apply(ctx, localVarFinder, t.tree);
     }
 
-    auto result = localVarFinder.result();
     fast_sort(result, [&gs](const auto &left, const auto &right) {
         // Sort by actual name, not by NameRef id
         if (left != right) {
@@ -965,8 +963,7 @@ vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const c
 
     for (auto &[methodName, similarMethods] : similarMethodsByName) {
         if (methodName.kind() == core::NameKind::UNIQUE &&
-            (methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename ||
-             methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload)) {
+            methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename) {
             // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
             // unique names, because we want each overload to show up but those use unique names.
             continue;
@@ -974,6 +971,12 @@ vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const c
 
         // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
         auto similarMethod = similarMethods[0];
+
+        // We'll find all overloaded names as well as the original def's name, so if this is the original def of an
+        // overload chain, skip it.
+        if (similarMethod.method.data(gs)->flags.isOverloaded && !methodName.isOverloadName(gs)) {
+            continue;
+        }
 
         if (similarMethod.method.data(gs)->flags.isPrivate && !isPrivateOk) {
             continue;
@@ -1022,11 +1025,12 @@ unique_ptr<CompletionItem> CompletionTask::getCompletionItemForUntyped(const cor
     return item;
 }
 
-unique_ptr<CompletionItem>
-CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, core::DispatchResult &dispatchResult,
-                                           core::MethodRef maybeAlias, const core::TypePtr &receiverType,
-                                           const core::TypeConstraint *constraint, core::Loc queryLoc,
-                                           string_view prefix, size_t sortIdx, uint16_t totalArgs) const {
+unique_ptr<CompletionItem> CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker,
+                                                                      core::DispatchResult &dispatchResult,
+                                                                      core::MethodRef maybeAlias,
+                                                                      const core::TypePtr &receiverType,
+                                                                      core::Loc queryLoc, string_view prefix,
+                                                                      size_t sortIdx, uint16_t totalArgs) const {
     const auto &gs = typechecker.state();
     ENFORCE(maybeAlias.exists());
     auto clientConfig = config.getClientConfig();
@@ -1055,7 +1059,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     string replacementText;
     if (supportsSnippets) {
         item->insertTextFormat = InsertTextFormat::Snippet;
-        replacementText = methodSnippet(gs, dispatchResult, maybeAlias, receiverType, constraint, totalArgs, queryLoc);
+        replacementText = methodSnippet(gs, dispatchResult, maybeAlias, receiverType, totalArgs, queryLoc);
     } else {
         item->insertTextFormat = InsertTextFormat::PlainText;
         replacementText = label;
@@ -1073,7 +1077,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
         documentation = findDocumentation(whatFile.data(gs).source(), what.data(gs)->loc().beginPos());
     }
 
-    auto prettyType = core::source_generator::prettyTypeForMethod(gs, maybeAlias, receiverType, nullptr, constraint,
+    auto prettyType = core::source_generator::prettyTypeForMethod(gs, maybeAlias, receiverType,
                                                                   core::ShowOptions().withUseValidSyntax());
     item->documentation = formatRubyMarkup(markupKind, prettyType, documentation);
 
@@ -1206,18 +1210,9 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
             items.push_back(getCompletionItemForUntyped(gs, params.queryLoc, items.size(), "(call site is T.untyped)"));
         } else {
             for (auto &similarMethod : dedupedSimilarMethods) {
-                // Even though we might have one or more TypeConstraints on the DispatchResult that triggered this
-                // completion request, those constraints are the result of solving the current method. These new methods
-                // we're about to suggest are their own methods with their own type variables, so it doesn't make sense
-                // to use the old constraint for the new methods.
-                //
-                // What this means in practice is that the prettified `sig` in the completion documentation will show
-                // `T.type_parameter(:U)` instead of a solved type.
-                auto constr = nullptr;
-
                 items.push_back(getCompletionItemForMethod(
                     typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType,
-                    constr, params.queryLoc, params.prefix, items.size(), params.forMethods->totalArgs));
+                    params.queryLoc, params.prefix, items.size(), params.forMethods->totalArgs));
             }
         }
     }
@@ -1276,7 +1271,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
         if (enableTypedFalseCompletionNudges) {
             ENFORCE(fref.exists());
             auto level = fref.data(gs).strictLevel;
-            if (!fref.data(gs).hasParseErrors() && level < core::StrictLevel::True) {
+            if (!fref.data(gs).hasIndexErrors() && level < core::StrictLevel::True) {
                 items.emplace_back(
                     getCompletionItemForUntyped(gs, queryLoc, 0, "(file is not `# typed: true` or higher)"));
                 response->result = make_unique<CompletionList>(false, move(items));

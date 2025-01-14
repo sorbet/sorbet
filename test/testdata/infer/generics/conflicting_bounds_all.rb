@@ -29,8 +29,8 @@ end
 sig {
   type_parameters(:U)
   .params(x: T.all(BadLower[T.type_parameter(:U)], BadUpper[T.type_parameter(:U)])).void
-  #                         ^^^^^^^^^^^^^^^^^^^^ error: `T.type_parameter(:<todo typeargument>)` is not a supertype of lower bound of type member `::BadLower::A`
-  #                                                         ^^^^^^^^^^^^^^^^^^^^ error: `T.type_parameter(:<todo typeargument>)` is not a subtype of upper bound of type member `::BadUpper::A`
+  #                         ^^^^^^^^^^^^^^^^^^^^ error: `T.type_parameter(:"<todo typeargument>")` is not a supertype of lower bound of type member `::BadLower::A`
+  #                                                         ^^^^^^^^^^^^^^^^^^^^ error: `T.type_parameter(:"<todo typeargument>")` is not a subtype of upper bound of type member `::BadUpper::A`
 }
 def example2(x)
   T.reveal_type(x) # error: `T.all(BadLower[T.untyped], BadUpper[T.untyped])`

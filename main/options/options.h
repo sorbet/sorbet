@@ -182,6 +182,7 @@ struct Options {
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes;
     std::vector<std::string> allowRelaxedPackagerChecksFor;
+    std::vector<std::string> packagerLayers;
     std::string typedSource = "";
     std::string cacheDir = "";
     // This configured both maximum filesystem db size and max virtual memory usage
@@ -256,7 +257,6 @@ struct Options {
     // When set, msgpack serialization of references skips extra metadata like inheritance information and expression
     // ranges.
     bool autogenMsgpackSkipReferenceMetadata;
-    AutogenConstCacheConfig autogenConstantCacheConfig;
 
     // List of directories not available editor-side. References to files in these directories should be sent via
     // sorbet: URIs to clients that support them.
@@ -270,6 +270,7 @@ struct Options {
     bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
     bool lspExtractToVariableEnabled = false;
+    bool forciblySilenceLspMultipleDirError = false;
     // Enables out-of-order reference checking
     bool outOfOrderReferenceChecksEnabled = false;
     core::TrackUntyped trackUntyped = core::TrackUntyped::Nowhere;
@@ -313,10 +314,6 @@ void readOptions(
     Options &, std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> &configuredExtensions,
     int argc, char *argv[],
     const std::vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
-    std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
-
-bool readAutogenConstCacheOptions(
-    AutogenConstCacheConfig &cfg, int argc, const char *argv[],
     std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
 
 void flushPrinters(Options &);

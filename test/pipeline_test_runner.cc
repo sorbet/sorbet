@@ -269,8 +269,11 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
         handler.addObserved(*gs, "rewrite-tree", [&]() { return rewritten.tree.toString(*gs); });
         handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return rewritten.tree.showRaw(*gs); });
 
-        core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
-        localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewritten)));
+        {
+            core::UnfreezeNameTable nameTableAccess(*gs); // possibly enters mangled names
+            core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
+            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewritten)));
+        }
 
         handler.addObserved(*gs, "index-tree", [&]() { return localNamed.tree.toString(*gs); });
         handler.addObserved(*gs, "index-tree-raw", [&]() { return localNamed.tree.showRaw(*gs); });
@@ -310,12 +313,16 @@ void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAss
         allowRelaxedPackagerChecksFor.emplace_back(allowRelaxedPackager.value());
     }
 
+    std::vector<std::string> defaultLayers = {};
+    auto packagerLayers = StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
+
     {
         core::UnfreezeNameTable packageNS(*gs);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-        gs->setPackagerOptions(
-            extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
-            extraPackageFilesDirectorySlashPrefixes, {}, allowRelaxedPackagerChecksFor, "PACKAGE_ERROR_HINT");
+        gs->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
+                               extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                               extraPackageFilesDirectorySlashPrefixes, {}, allowRelaxedPackagerChecksFor,
+                               packagerLayers, "PACKAGE_ERROR_HINT");
     }
 }
 
@@ -830,7 +837,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     if (enablePackager) {
         absl::c_stable_partition(trees, [&](const auto &pf) { return pf.file.isPackage(*gs); });
-        trees = packager::Packager::runIncremental(*gs, move(trees));
+        trees = packager::Packager::runIncremental(*gs, move(trees), *workers);
         for (auto &tree : trees) {
             handler.addObserved(*gs, "package-tree", [&]() {
                 return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));

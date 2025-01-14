@@ -503,12 +503,26 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
     if (klassData->superClass().exists()) {
         auto superMethod = klassData->superClass().data(ctx)->findMethodTransitive(ctx, name);
         if (superMethod.exists()) {
+            if (superMethod.data(ctx)->flags.isOverloaded) {
+                ENFORCE(!superMethod.data(ctx)->name.isOverloadName(ctx));
+                auto overload = ctx.state.lookupNameUnique(core::UniqueNameKind::Overload, name, 1);
+                superMethod = superMethod.data(ctx)->owner.data(ctx)->findMethod(ctx, overload);
+                ENFORCE(superMethod.exists());
+            }
+
             overriddenMethods.emplace_back(superMethod);
         }
     }
     for (const auto &mixin : klassData->mixins()) {
         auto superMethod = mixin.data(ctx)->findMethod(ctx, name);
         if (superMethod.exists()) {
+            if (superMethod.data(ctx)->flags.isOverloaded) {
+                ENFORCE(!superMethod.data(ctx)->name.isOverloadName(ctx));
+                auto overload = ctx.state.lookupNameUnique(core::UniqueNameKind::Overload, name, 1);
+                superMethod = superMethod.data(ctx)->owner.data(ctx)->findMethod(ctx, overload);
+                ENFORCE(superMethod.exists());
+            }
+
             overriddenMethods.emplace_back(superMethod);
         }
     }
@@ -983,26 +997,21 @@ private:
         }
     }
 
-    core::AutocorrectSuggestion::Edit defineInheritedAbstractMethod(const core::GlobalState &gs,
-                                                                    const core::ClassOrModuleRef sym,
-                                                                    const core::MethodRef abstractMethodRef,
-                                                                    const core::Loc insertAt, const string &format,
-                                                                    const string &classOrModuleIndent) {
+    string defineInheritedAbstractMethod(const core::GlobalState &gs, const core::ClassOrModuleRef sym,
+                                         const core::MethodRef abstractMethodRef, const string &classOrModuleIndent) {
         auto showOptions = core::ShowOptions().withUseValidSyntax().withConcretizeIfAbstract();
         if (sym.data(gs)->attachedClass(gs).exists()) {
             showOptions = showOptions.withForceSelfPrefix();
         }
-        auto resultType = abstractMethodRef.data(gs)->resultType;
-        auto methodDefinition = core::source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr, resultType,
-                                                                            nullptr, showOptions);
+        auto methodDefinition =
+            core::source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr, showOptions);
 
         vector<string> indentedLines;
         absl::c_transform(
             absl::StrSplit(methodDefinition, "\n"), std::back_inserter(indentedLines),
             [classOrModuleIndent](auto &line) -> string { return fmt::format("{}  {}", classOrModuleIndent, line); });
         auto indentedMethodDefinition = absl::StrJoin(indentedLines, "\n");
-
-        return core::AutocorrectSuggestion::Edit{insertAt, fmt::format(format, indentedMethodDefinition)};
+        return indentedMethodDefinition;
     }
 
     void validateAbstract(const core::Context ctx, core::ClassOrModuleRef sym, const ast::ClassDef &classDef) {
@@ -1046,10 +1055,10 @@ private:
         auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfLine(ctx);
         string classOrModuleIndent(indentLength, ' ');
         auto insertAt = endLoc.adjust(ctx, -indentLength, 0);
-        auto format = "{}\n" + classOrModuleIndent;
 
         vector<core::AutocorrectSuggestion::Edit> edits;
-        if (hasSingleLineDefinition && hasEmptyBody) {
+        bool singleLineAndNoBody = hasSingleLineDefinition && hasEmptyBody;
+        if (singleLineAndNoBody) {
             // First, break the class/module definition up onto multiple lines.
             auto endRange = classOrModuleDeclaredAt.copyEndWithZeroLength().join(classOrModuleEndsAt);
             edits.emplace_back(
@@ -1059,7 +1068,6 @@ private:
             // body rather than the bottom. This is a trick to ensure that we put the new methods within the new
             // class/module body that we just created.
             insertAt = classOrModuleDeclaredAt.copyEndWithZeroLength();
-            format = "\n{}";
         }
 
         for (auto proto : missingAbstractMethods) {
@@ -1071,7 +1079,14 @@ private:
                 continue;
             }
 
-            edits.emplace_back(defineInheritedAbstractMethod(ctx, sym, proto, insertAt, format, classOrModuleIndent));
+            auto indentedMethodDefinition = defineInheritedAbstractMethod(ctx, sym, proto, classOrModuleIndent);
+            if (singleLineAndNoBody) {
+                edits.emplace_back(
+                    core::AutocorrectSuggestion::Edit{insertAt, fmt::format("\n{}", indentedMethodDefinition)});
+            } else {
+                edits.emplace_back(core::AutocorrectSuggestion::Edit{
+                    insertAt, fmt::format("{}\n{}", indentedMethodDefinition, classOrModuleIndent)});
+            }
         }
 
         if (edits.empty()) {
@@ -1097,7 +1112,14 @@ private:
                 continue;
             }
 
-            auto concreteMethodRef = sym.data(ctx)->findConcreteMethodTransitive(ctx, proto.data(ctx)->name);
+            // Overload signatures all have unique names, so to find the name of the concrete implementation we need to
+            // use the original name, not the unique one.
+            auto protoName = proto.data(ctx)->name;
+            if (protoName.isOverloadName(ctx)) {
+                protoName = protoName.dataUnique(ctx)->original;
+            }
+
+            auto concreteMethodRef = sym.data(ctx)->findConcreteMethodTransitive(ctx, protoName);
             if (concreteMethodRef.exists()) {
                 continue;
             }
@@ -1207,7 +1229,7 @@ public:
 } // namespace
 
 ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
-    Timer timeit(ctx.state.tracer(), "validateSymbols");
+    Timer timeit(ctx.state.tracer(), "validateSymbols", {{"file", string(tree.file.data(ctx).path())}});
 
     ValidateWalk validate(tree.tree);
     ast::TreeWalk::apply(ctx, validate, tree.tree);

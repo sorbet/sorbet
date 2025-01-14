@@ -146,10 +146,26 @@ def main
       # ^^^^^^ hover: The docs for BigFoo
 
   foo = BigFoo.new
-  #            ^^^ hover: sig { returns(BigFoo) }
+  #            ^^^ hover: sig { void }
   #            ^^^ hover: private def initialize; end
+  BigFoo.new.itself
+  #            ^ hover: sig { returns(T.self_type) }
   hoo = BigFoo::LittleFoo1.new
-                         # ^^^ hover: sig { returns(BigFoo::LittleFoo1) }
+  #                        ^^^ hover-line: 2 # BigFoo::LittleFoo1#initialize:
+  #                        ^^^ hover-line: 3 sig { returns(T.untyped) }
+  #                        ^^^ hover-line: 4 private def initialize; end
+  #                        ^^^ hover-line: 6 # result type:
+  #                        ^^^ hover-line: 7 BigFoo::LittleFoo1
+
   raise "error message"
-  # ^ hover-line: 4     arg0: T.any(T::Class[T.anything], Exception, String)
+  # ^ hover-line: 2 # Kernel#raise (overload.2):
+  # ^ hover-line: 3 sig do
+  # ^ hover-line: 4   params(
+  # ^ hover-line: 5     arg0: T.any(T::Class[T.anything], Exception, String)
+  # ^ hover-line: 6   )
+  # ^ hover-line: 7   .returns(T.noreturn)
+  # ^ hover-line: 8 end
+  # ^ hover-line: 9 def raise (overload.2)(arg0=…); end
+  # ^ hover-line: 11 # result type:
+  # ^ hover-line: 12 T.noreturn
 end

@@ -72,18 +72,18 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
     auto path = config.remoteName2Local(params->textDocument->uri);
 
     auto maybeFileContents = preprocessor.maybeGetFileContents(path);
-    string_view sourceView;
-    if (maybeFileContents.has_value()) {
-        sourceView = maybeFileContents.value();
-    } else if (sorbet::FileOps::exists(path)) {
-        // If the requested file path isn't in the workspace,
-        // we won't be able to load it, in which case
-        // we leave sourceView as empty and this becomes a no-op
-
-        // In this case, the request is for a file that's
-        // not open in the IDE, so we read it from disk instead
-        sourceView = sorbet::FileOps::read(path);
+    if (!maybeFileContents.has_value()) {
+        // If we weren't already tracking the file, don't format it. If we were to load the file from disk and format
+        // it, we would be potentially loading a version that doesn't include any of the changes the client made, and
+        // formatting that version and sending it back would throw away any changes that had been made. In the future if
+        // we decide to track changes on ignored files, we could rethink returning an error here, but for now this is
+        // the safest response.
+        response->error =
+            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, "Unable to format ignored/unknown file");
+        config.output->write(move(response));
+        return;
     }
+    std::string_view sourceView = maybeFileContents.value();
 
     // Don't format `__package.rb` files, since currently formatting them
     // can potentially break some pay-server tooling

@@ -563,7 +563,15 @@ class Reline::GeneralIO
   def self.ungetc(c); end
   def self.win?; end
 end
-class Reline::ANSI
+class Reline::IO
+  def self.decide_io_gate; end
+  def dumb?; end
+  def win?; end
+  def reset_color_sequence; end
+  def read_single_char(keyseq_timeout); end
+  RESET_COLOR = T.let(T.unsafe(nil), String)
+end
+class Reline::ANSI < Reline::IO
   def self.clear_screen; end
   def self.cursor_pos; end
   def self.deprep(otio); end
@@ -592,6 +600,8 @@ class Reline::ANSI
   def self.show_cursor; end
   def self.ungetc(c); end
   def self.win?; end
+  def self.set_default_key_bindings_ansi_cursor(config); end
+  def self.with_raw_input(); end
 end
 class Reline::ConfigEncodingConversionError < StandardError
 end

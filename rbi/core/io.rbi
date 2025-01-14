@@ -1380,10 +1380,11 @@ class IO < Object
     params(
         sep: T.nilable(String),
         limit: Integer,
+        chomp: T::Boolean,
     )
     .returns(T.nilable(String))
   end
-  def gets(sep=T.unsafe(nil), limit=T.unsafe(nil)); end
+  def gets(sep=T.unsafe(nil), limit=T.unsafe(nil), chomp: false); end
 
   # Returns a new [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object (a
   # stream) for the given integer file descriptor `fd` and `mode` string. `opt`
