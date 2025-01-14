@@ -198,9 +198,8 @@ bool Tracing::storeTraces(const CounterState &counters, const string &fileName, 
     // continually append new entries to the file.
     if (strict) {
         result.Put(']');
-    } else {
-        result.Put('\n');
     }
+    result.Put('\n');
 
     FileOps::append(fileName, result.GetString());
     return true;
