@@ -8,7 +8,7 @@ class Tracing {
 public:
     Tracing() = delete;
 
-    static bool storeTraces(const CounterState &counters, const std::string &fileName);
+    static bool storeTraces(const CounterState &counters, const std::string &fileName, bool strict = false);
 };
 } // namespace sorbet::web_tracer_framework
 

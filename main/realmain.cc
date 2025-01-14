@@ -914,7 +914,7 @@ int realmain(int argc, char *argv[]) {
         StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix + ".counters");
     }
     if (!opts.webTraceFile.empty()) {
-        web_tracer_framework::Tracing::storeTraces(counters, opts.webTraceFile);
+        web_tracer_framework::Tracing::storeTraces(counters, opts.webTraceFile, opts.webTraceFileStrict);
     }
 
     if (!opts.metricsFile.empty()) {

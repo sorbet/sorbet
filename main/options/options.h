@@ -258,6 +258,7 @@ struct Options {
     std::string inlineInput; // passed via -e
     std::string debugLogFile;
     std::string webTraceFile;
+    bool webTraceFileStrict = false;
     std::string inlineRBIInput; // passed via --e-rbi
 
     // Path to an RBI whose contents should be minimized by subtracting parts that Sorbet already

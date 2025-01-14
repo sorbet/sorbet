@@ -554,6 +554,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("web-trace-file",
                                  "Generate a trace into <file> in the Trace Event Format (used by chrome://tracing)",
                                  cxxopts::value<string>()->default_value(empty.webTraceFile), "<file>");
+    options.add_options(section)("web-trace-file-strict", "Whether to close the toplevel array in `--web-trace-file`",
+                                 cxxopts::value<bool>());
     options.add_options(section)("cache-dir", "Use <dir> to cache certain data. Will create <dir> if it does not exist",
                                  cxxopts::value<string>()->default_value(empty.cacheDir), "<dir>");
     options.add_options(section)("max-cache-size-bytes",
@@ -1107,6 +1109,7 @@ void readOptions(Options &opts,
         opts.metricsPrefix = raw["metrics-prefix"].as<string>();
         opts.debugLogFile = raw["debug-log-file"].as<string>();
         opts.webTraceFile = raw["web-trace-file"].as<string>();
+        opts.webTraceFileStrict = raw["web-trace-file-strict"].as<bool>();
         {
             // parse extra sfx/datadog tags
             auto stringToParse = raw["metrics-extra-tags"].as<string>();

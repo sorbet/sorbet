@@ -253,6 +253,7 @@ Usage:
 ```plaintext
       --web-trace-file <file>   Generate a trace into <file> in the Trace Event Format
                                 (used by chrome://tracing) (default: "")
+      --web-trace-file-strict   Whether to close the toplevel array in `--web-trace-file`
       --cache-dir <dir>         Use <dir> to cache certain data. Will create <dir> if it
                                 does not exist (default: "")
       --max-cache-size-bytes <bytes>
