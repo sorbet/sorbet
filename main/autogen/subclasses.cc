@@ -36,6 +36,40 @@ bool Subclasses::isFileIgnored(const std::string &path, const std::vector<std::s
     return false;
 };
 
+void Subclasses::ChildInfo::mergeDefiningRefWith(core::Loc loc) {
+    if (!defining_ref.has_value()) {
+        defining_ref.emplace(loc);
+        return;
+    }
+
+    auto f1 = defining_ref->file();
+    auto f2 = loc.file();
+
+    // Take the loc earlier by file.
+    if (f1.id() < f2.id()) {
+        return;
+    }
+
+    if (f2.id() < f1.id()) {
+        defining_ref.emplace(loc);
+        return;
+    }
+
+    auto begin1 = defining_ref->beginPos();
+    auto begin2 = loc.beginPos();
+
+    if (begin1 < begin2) {
+        return;
+    }
+
+    if (begin2 > begin1) {
+        defining_ref.emplace(loc);
+        return;
+    }
+
+    // Assume that there is nothing to do here.
+}
+
 // Get all subclasses defined in a particular ParsedFile
 optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, const ParsedFile &pf,
                                                         const vector<string> &absoluteIgnorePatterns,
@@ -55,11 +89,21 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, const
         }
 
         auto &mapEntry = out[ref.sym.dealias(ctx)];
-        mapEntry.entries.insert(defn.data(pf).sym.asClassOrModuleRef());
+        auto &info = mapEntry.entries[defn.data(pf).sym.asClassOrModuleRef()];
+        info.mergeDefiningRefWith(ctx.locAt(ref.definitionLoc));
         mapEntry.classKind = ref.parentKind;
     }
 
     return out;
+}
+
+void Subclasses::mergeInto(Subclasses::Entries &out, const Subclasses::Entries &entries) {
+    for (auto &[sym, info] : entries) {
+        auto &symInfo = out[sym];
+        if (info.defining_ref.has_value()) {
+            symInfo.mergeDefiningRefWith(info.defining_ref.value());
+        }
+    }
 }
 
 // Generate all descendants of a parent class
@@ -73,11 +117,11 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
     const Subclasses::Entries &children = fnd->second.entries;
 
     Subclasses::Entries out;
-    out.insert(children.begin(), children.end());
-    for (const auto &childRef : children) {
+    mergeInto(out, children);
+    for (const auto &[childRef, _info] : children) {
         auto descendants = Subclasses::descendantsOf(childMap, childRef);
         if (descendants) {
-            out.insert(descendants->entries.begin(), descendants->entries.end());
+            mergeInto(out, descendants->entries);
         }
     }
 
@@ -103,8 +147,7 @@ void Subclasses::patchChildMap(const core::GlobalState &gs, Subclasses::Map &chi
     auto riskSafeMachineRef = getConstantRef(gs, "Opus::Risk::Model::Mixins::RiskSafeMachine");
     if (!safeMachineRef.exists() || !riskSafeMachineRef.exists())
         return;
-    childMap[safeMachineRef].entries.insert(childMap[riskSafeMachineRef].entries.begin(),
-                                            childMap[riskSafeMachineRef].entries.end());
+    mergeInto(childMap[safeMachineRef].entries, childMap[riskSafeMachineRef].entries);
 }
 
 vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, const Subclasses::Map &descendantsMap,
@@ -123,8 +166,9 @@ vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, con
         descendantsMapSerialized.emplace_back(fmt::format("{} {}", type, parentName));
 
         auto subclassesStart = descendantsMapSerialized.size();
-        for (const auto &childRef : children.entries) {
-            string_view path = gs.getPrintablePath(childRef.data(gs)->loc().file().data(gs).path());
+        for (const auto &[childRef, info] : children.entries) {
+            auto loc = info.defining_ref.value_or(childRef.data(gs)->loc());
+            string_view path = gs.getPrintablePath(loc.file().data(gs).path());
             string childName = childRef.show(gs);
             auto type = childRef.data(gs)->isClass() ? "class" : "module";
             descendantsMapSerialized.emplace_back(fmt::format(" {} {} {}", type, childName, path));

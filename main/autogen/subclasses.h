@@ -7,16 +7,28 @@ namespace sorbet::autogen {
 
 class Subclasses final {
 public:
-    using Entries = UnorderedSet<core::ClassOrModuleRef>;
+    // A set of child classes for a particular parent.
+    struct ChildInfo {
+        std::optional<core::Loc> defining_ref;
+
+        void mergeDefiningRefWith(core::Loc loc);
+    };
+
+    using Entries = UnorderedMap<core::ClassOrModuleRef, ChildInfo>;
+
     struct SubclassInfo {
+        // This is weird, because this is information about the *parent*, not the child.
         ClassKind classKind = ClassKind::Module;
         Entries entries;
 
         SubclassInfo() = default;
         SubclassInfo(ClassKind classKind, Entries entries) : classKind(classKind), entries(std::move(entries)){};
     };
+
+    // Map between the subclass seen to information about the parent class
     using Map = UnorderedMap<core::SymbolRef, SubclassInfo>;
 
+    static void mergeInto(Entries &out, const Entries &entries);
     static std::optional<Subclasses::Map> listAllSubclasses(core::Context ctx, const ParsedFile &pf,
                                                             const std::vector<std::string> &absoluteIgnorePatterns,
                                                             const std::vector<std::string> &relativeIgnorePattern);
