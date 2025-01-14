@@ -887,7 +887,7 @@ public:
 ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, ast::ParsedFile what,
                                                         int prohibitedLinesStart, int prohibitedLinesEnd) {
     DefinitionLinesDenylistEnforcer enforcer(what.file, prohibitedLinesStart, prohibitedLinesEnd);
-    ast::TreeWalk::apply(core::Context(gs, core::Symbols::root(), what.file), enforcer, what.tree);
+    ast::ConstTreeWalk::apply(core::Context(gs, core::Symbols::root(), what.file), enforcer, what.tree);
     return what;
 }
 
