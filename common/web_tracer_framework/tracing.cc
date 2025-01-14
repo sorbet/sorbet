@@ -36,7 +36,7 @@ void endLine(rapidjson::StringBuffer &result, rapidjson::Writer<rapidjson::Strin
 
 // Super rudimentary support for outputting trace files in Google's Trace Event Format
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
-bool Tracing::storeTraces(const CounterState &counters, const string &fileName) {
+bool Tracing::storeTraces(const CounterState &counters, const string &fileName, bool strict) {
     rapidjson::StringBuffer result;
     rapidjson::Writer<rapidjson::StringBuffer> writer(result);
 
@@ -193,8 +193,14 @@ bool Tracing::storeTraces(const CounterState &counters, const string &fileName) 
         endLine(result, writer);
     }
 
-    // Explicitly don't put matching closing ], so that we can open it up and start appending to it if it exists.
-    result.Put('\n');
+    // Strict generation is useful when generating this file for non-Perfetto tools; non-strict
+    // is useful for general forgetfulness and for doing tracing when LSP is active, as LSP will
+    // continually append new entries to the file.
+    if (strict) {
+        result.Put(']');
+    } else {
+        result.Put('\n');
+    }
 
     FileOps::append(fileName, result.GetString());
     return true;
