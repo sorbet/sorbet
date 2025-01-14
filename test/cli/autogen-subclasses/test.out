@@ -12,4 +12,4 @@ module Opus::Mixin
  module Opus::MixedModule a.rb
 class Opus::Parent
  class Opus::Child a.rb
- class Opus::DupChild dup_child.rb
+ class Opus::DupChild a.rb

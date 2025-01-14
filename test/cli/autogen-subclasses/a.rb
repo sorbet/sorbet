@@ -1,7 +1,10 @@
 # typed: true
 
 module Opus
-  class DupChild < Parent; end
+  class DupChild < Parent
+    def defines_behavior
+    end
+  end
   class Child < Parent; end
   class IgnoredChild < IgnoredParent; end
 end
