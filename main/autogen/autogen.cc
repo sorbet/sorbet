@@ -33,10 +33,10 @@ class AutogenWalk {
     const AutogenConfig *autogenCfg;
 
     enum class ScopeType { Class, Block };
-    vector<ast::Send *> ignoring;
+    vector<const ast::Send *> ignoring;
     vector<ScopeType> scopeTypes;
 
-    UnorderedMap<void *, ReferenceRef> refMap;
+    UnorderedMap<const ast::ConstantLit *, ReferenceRef> refMap;
 
     UnorderedSet<pair<core::LocOffsets, core::SymbolRef>> seenRefsByLoc;
 
@@ -94,7 +94,8 @@ public:
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ClassDef &original) {
-        if (!ast::isa_tree<ast::ConstantLit>(original.name)) {
+        auto *name = ast::cast_tree<ast::ConstantLit>(original.name);
+        if (name == nullptr) {
             return;
         }
         scopeTypes.emplace_back(ScopeType::Class);
@@ -130,7 +131,7 @@ public:
         // which means that we'll have entered in a `Reference` for it already.
         ast::ConstTreeWalk::apply(ctx, *this, original.name);
         // ...find the reference we just created for it
-        auto it = refMap.find(original.name.get());
+        auto it = refMap.find(name);
         ENFORCE(it != refMap.end());
         // ...so we can use that reference as the 'defining reference'
         def.defining_ref = it->second;
@@ -172,7 +173,7 @@ public:
             }
 
             // ...find the references
-            auto it = refMap.find(ancst.get());
+            auto it = refMap.find(cnst);
             if (it == refMap.end()) {
                 continue;
             }
@@ -347,8 +348,8 @@ public:
             def.type = Definition::Type::Alias;
             // since this is a `post`- method, then we've already created a `Reference` for the constant on the
             // RHS. Mark this `Definition` as an alias for it.
-            ENFORCE(refMap.count(original.rhs.get()));
-            def.aliased_ref = refMap[original.rhs.get()];
+            ENFORCE(refMap.count(rhs));
+            def.aliased_ref = refMap[rhs];
         } else if (lhs->symbol.exists() && lhs->symbol.isTypeAlias(ctx)) {
             // if the LHS has already been annotated as a type alias by the namer, the definition is (by definition,
             // hah) a type alias.
@@ -360,8 +361,8 @@ public:
 
         // We also should already have a `Reference` for the name of this constant (because this is running after the
         // pre-traversal of the constant) so find that
-        ENFORCE(refMap.count(original.lhs.get()));
-        auto &ref = refs[refMap[original.lhs.get()].id()];
+        ENFORCE(refMap.count(lhs));
+        auto &ref = refs[refMap[lhs].id()];
         // ...and mark that this is the defining ref for that one
         def.defining_ref = ref.id;
         // ...we also store the new symbol reference
