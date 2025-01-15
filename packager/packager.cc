@@ -278,12 +278,10 @@ public:
     optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                     bool isTestImport) const {
         auto &info = PackageInfoImpl::from(pkg);
-        for (auto &import : importedPackageNames) {
-            if (import.name != info.name) {
-                continue;
-            }
-            if (!isTestImport && import.type == ImportType::Test) {
-                return convertTestImport(gs, info, core::Loc(fullLoc().file(), import.name.loc));
+        auto it = absl::c_find_if(importedPackageNames, [&info](auto &import) { return import.name == info.name; });
+        if (it != importedPackageNames.end()) {
+            if (!isTestImport && it->type == ImportType::Test) {
+                return convertTestImport(gs, info, core::Loc(fullLoc().file(), it->name.loc));
             }
             // we already import this, and if so, don't return an autocorrect
             return nullopt;
