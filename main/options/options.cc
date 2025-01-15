@@ -736,8 +736,8 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
     if (raw.count("print") == 0) {
         return true;
     }
-    vector<string> printOpts = raw["print"].as<vector<string>>();
-    for (auto opt : printOpts) {
+    const vector<string> &printOpts = raw["print"].as<vector<string>>();
+    for (string_view opt : printOpts) {
         string outPath;
         auto pos = opt.find(":");
         if (pos != string::npos) {
@@ -861,7 +861,7 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("allowed-extension") > 0) {
-            auto exts = raw["allowed-extension"].as<vector<string>>();
+            const auto &exts = raw["allowed-extension"].as<vector<string>>();
             opts.allowedExtensions.insert(exts.begin(), exts.end());
         } else {
             opts.allowedExtensions.emplace(".rb");
@@ -869,7 +869,7 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("ignore") > 0) {
-            auto rawIgnorePatterns = raw["ignore"].as<vector<string>>();
+            const auto &rawIgnorePatterns = raw["ignore"].as<vector<string>>();
             parseIgnorePatterns(rawIgnorePatterns, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
         }
 
@@ -878,7 +878,7 @@ void readOptions(Options &opts,
 
         opts.pathPrefix = raw["remove-path-prefix"].as<string>();
         if (raw.count("files") > 0) {
-            auto rawFiles = raw["files"].as<vector<string>>();
+            const auto &rawFiles = raw["files"].as<vector<string>>();
             struct stat s;
             for (auto &file : rawFiles) {
                 if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
@@ -891,13 +891,13 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("file") > 0) {
-            auto files = raw["file"].as<vector<string>>();
+            const auto &files = raw["file"].as<vector<string>>();
             opts.rawInputFileNames.insert(opts.rawInputFileNames.end(), files.begin(), files.end());
             opts.inputFileNames.insert(opts.inputFileNames.end(), files.begin(), files.end());
         }
 
         if (raw.count("dir") > 0) {
-            auto rawDirs = raw["dir"].as<vector<string>>();
+            const auto &rawDirs = raw["dir"].as<vector<string>>();
             for (auto &dir : rawDirs) {
                 // Since we don't stat here, we're unsure if the directory exists / is a directory.
                 addFilesFromDir(opts, dir, *workerPool, logger);
@@ -937,7 +937,7 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
-            auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
+            const auto &lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
             // Convert all of these dirs into absolute ignore patterns that begin with '/'.
             for (auto &dir : lspDirsMissingFromClient) {
                 string pNormalized = dir;
@@ -999,13 +999,13 @@ void readOptions(Options &opts,
                 logger->error("autogen-subclasses-parent must be used with -p autogen-subclasses");
                 throw EarlyReturnWithCode(1);
             }
-            for (string parentClassName : raw["autogen-subclasses-parent"].as<vector<string>>()) {
+            for (const string &parentClassName : raw["autogen-subclasses-parent"].as<vector<string>>()) {
                 opts.autogenSubclassesParents.emplace_back(parentClassName);
             }
         }
 
         if (raw.count("autogen-subclasses-ignore") > 0) {
-            auto rawIgnorePatterns = raw["autogen-subclasses-ignore"].as<vector<string>>();
+            const auto &rawIgnorePatterns = raw["autogen-subclasses-ignore"].as<vector<string>>();
             for (auto &p : rawIgnorePatterns) {
                 string_view pNormalized = stripTrailingSlashes(p);
                 if (p.at(0) == '/') {
@@ -1259,18 +1259,19 @@ void readOptions(Options &opts,
         opts.typedSuper = raw["typed-super"].as<bool>();
 
         if (raw.count("suppress-payload-superclass-redefinition-for") > 0) {
-            for (auto childClassName : raw["suppress-payload-superclass-redefinition-for"].as<vector<string>>()) {
+            for (const auto &childClassName :
+                 raw["suppress-payload-superclass-redefinition-for"].as<vector<string>>()) {
                 opts.suppressPayloadSuperclassRedefinitionFor.emplace_back(childClassName);
             }
         }
 
         if (raw.count("isolate-error-code") > 0) {
-            auto rawList = raw["isolate-error-code"].as<vector<int>>();
+            const auto &rawList = raw["isolate-error-code"].as<vector<int>>();
             opts.isolateErrorCode.insert(rawList.begin(), rawList.end());
         }
 
         if (raw.count("suppress-error-code") > 0) {
-            auto rawList = raw["suppress-error-code"].as<vector<int>>();
+            const auto &rawList = raw["suppress-error-code"].as<vector<int>>();
             opts.suppressErrorCode.insert(rawList.begin(), rawList.end());
         }
 
