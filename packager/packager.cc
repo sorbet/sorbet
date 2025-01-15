@@ -296,15 +296,22 @@ public:
             // if we don't have any imports, then we can try adding it
             // either before the first export, or if we have no
             // exports, then right before the final `end`
-            uint32_t exportLoc;
+            int64_t exportLoc;
             if (!exports_.empty()) {
                 exportLoc = exports_.front().fqn.loc.beginPos() - "export "sv.size() - 1;
             } else {
                 exportLoc = loc.endPos() - "end"sv.size() - 1;
             }
+
+            std::string_view file_source = loc.file().data(gs).source();
+
+            // Defensively guard against the first export loc or the package's loc being invalid.
+            if (exportLoc <= 0 || exportLoc >= file_source.size()) {
+                return nullopt;
+            }
+
             // we want to find the end of the last non-empty line, so
             // let's do something gross: walk backward until we find non-whitespace
-            std::string_view file_source = loc.file().data(gs).source();
             while (isspace(file_source[exportLoc])) {
                 exportLoc--;
                 // this shouldn't happen in a well-formatted
@@ -313,7 +320,7 @@ public:
                     return nullopt;
                 }
             }
-            insertionLoc = {loc.file(), exportLoc + 1, exportLoc + 1};
+            insertionLoc = core::Loc(loc.file(), exportLoc + 1, exportLoc + 1);
         }
         ENFORCE(insertionLoc.exists());
 
