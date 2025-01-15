@@ -1,6 +1,7 @@
 #include "common/FileOps.h"
 #include "common/counters/Counters.h"
 
+#include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_replace.h"
 #include "common/JSON.h"
@@ -193,15 +194,22 @@ bool Tracing::storeTraces(const CounterState &counters, const string &fileName, 
         endLine(result, writer);
     }
 
+    string output = result.GetString();
+
     // Strict generation is useful when generating this file for non-Perfetto tools; non-strict
     // is useful for general forgetfulness and for doing tracing when LSP is active, as LSP will
     // continually append new entries to the file.
     if (strict) {
-        result.Put(']');
+        // The endLine call above will have appended ",\n"; we want to make `result` valid JSON,
+        // so we need to strip the ",".
+        if (absl::EndsWith(output, ",\n")) {
+            output[output.size() - 2] = '\n';
+            output[output.size() - 1] = ']';
+        }
     }
-    result.Put('\n');
+    output += '\n';
 
-    FileOps::append(fileName, result.GetString());
+    FileOps::append(fileName, output);
     return true;
 }
 } // namespace sorbet::web_tracer_framework
