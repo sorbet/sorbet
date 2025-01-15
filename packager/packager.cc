@@ -304,7 +304,7 @@ public:
             }
             // we want to find the end of the last non-empty line, so
             // let's do something gross: walk backward until we find non-whitespace
-            const auto &file_source = loc.file().data(gs).source();
+            std::string_view file_source = loc.file().data(gs).source();
             while (isspace(file_source[exportLoc])) {
                 exportLoc--;
                 // this shouldn't happen in a well-formatted
