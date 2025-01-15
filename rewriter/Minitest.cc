@@ -436,8 +436,14 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             ancestors.emplace_back(ast::MK::Self(arg.loc()));
         } else {
             // Avoid subclassing self when it's a module, as that will produce an error.
-            // Question: should we synthesize something like `include self` into the class body in this case?
             ancestors.emplace_back(ast::MK::Constant(arg.loc(), core::Symbols::todo()));
+
+            // Note: For cases like `module M; describe '' {}; end`, minitest does not treat `M` as
+            // an ancestor of the dynamically-created class. Instead, it treats `Minitest::Spec` as
+            // an ancestor, which we're choosing not to model so that this rewriter pass works for
+            // RSpec specs too. This means users might have to add extra `include` lines in their
+            // describe bodies to convince Sorbet what's available, but at least it won't say that
+            // Minitest::Spec is an ancestor for RSpec tests.
         }
 
         const bool bodyIsClass = true;
