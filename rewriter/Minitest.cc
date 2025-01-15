@@ -379,7 +379,6 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     if (!send->recv.isSelfReference()) {
         return nullptr;
     }
-    fmt::print(stderr, "isClass={}\n", isClass);
 
     if ((send->fun == core::Names::testEach() || send->fun == core::Names::testEachHash()) && send->numPosArgs() == 1) {
         if ((send->fun == core::Names::testEach() && block->args.size() < 1) ||
