@@ -96,7 +96,19 @@ def junk
 end
 
 
+module Helper
+  def foo; end
+end
+
 module Mod
   class C
+  end
+
+  describe 'something' do # error: does not derive from `Class`
+    include Helper
+
+    it 'foo' do
+      foo
+    end
   end
 end
