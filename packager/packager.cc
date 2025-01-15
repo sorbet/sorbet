@@ -307,6 +307,7 @@ public:
 
             // Defensively guard against the first export loc or the package's loc being invalid.
             if (exportLoc <= 0 || exportLoc >= file_source.size()) {
+                ENFORCE(false, "Failed to find a valid starting loc");
                 return nullopt;
             }
 
