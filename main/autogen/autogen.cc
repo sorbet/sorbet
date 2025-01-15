@@ -135,12 +135,15 @@ public:
         ENFORCE(it != refMap.end());
         // ...so we can use that reference as the 'defining reference'
         def.defining_ref = it->second;
-        // ...we also grab the symbol reference of the defining reference
-        def.sym = refs[it->second.id()].sym;
-        // update that reference with the relevant metadata so we know 1. it's the defining ref and 2. it encompasses
-        // the entire class, not just the constant name
-        refs[it->second.id()].is_defining_ref = true;
-        refs[it->second.id()].definitionLoc = original.loc;
+        {
+            auto &ref = refs[it->second.id()];
+            // ...we also grab the symbol reference of the defining reference
+            def.sym = ref.sym;
+            // update that reference with the relevant metadata so we know 1. it's the defining ref and 2. it encompasses
+            // the entire class, not just the constant name
+            ref.is_defining_ref = true;
+            ref.definitionLoc = original.loc;
+        }
 
         auto ait = original.ancestors.begin();
         // if this is a class, then the first ancestor is the parent class
