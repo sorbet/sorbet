@@ -379,6 +379,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     if (!send->recv.isSelfReference()) {
         return nullptr;
     }
+    fmt::print(stderr, "isClass={}\n", isClass);
 
     if ((send->fun == core::Names::testEach() || send->fun == core::Names::testEachHash()) && send->numPosArgs() == 1) {
         if ((send->fun == core::Names::testEach() && block->args.size() < 1) ||
@@ -431,10 +432,13 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto argString = to_s(ctx, arg);
         ast::ClassDef::ANCESTORS_store ancestors;
 
-        // Avoid subclassing the containing context when it's a module, as that will produce an error in typed: false
-        // files
+        // First ancestor is the superclass
         if (isClass) {
             ancestors.emplace_back(ast::MK::Self(arg.loc()));
+        } else {
+            // Avoid subclassing self when it's a module, as that will produce an error.
+            // Question: should we synthesize something like `include self` into the class body in this case?
+            ancestors.emplace_back(ast::MK::Constant(arg.loc(), core::Symbols::todo()));
         }
 
         const bool bodyIsClass = true;

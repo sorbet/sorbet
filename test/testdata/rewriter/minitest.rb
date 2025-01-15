@@ -104,7 +104,7 @@ module Mod
   class C
   end
 
-  describe 'something' do # error: does not derive from `Class`
+  describe 'something' do
     include Helper
 
     it 'foo' do
