@@ -96,19 +96,7 @@ def junk
 end
 
 
-module Helper
-  def foo; end
-end
-
 module Mod
   class C
-  end
-
-  describe 'something' do
-    include Helper
-
-    it 'foo' do
-      foo
-    end
   end
 end

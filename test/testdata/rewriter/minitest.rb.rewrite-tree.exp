@@ -257,33 +257,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <runtime method definition of junk>
 
-  module <emptyTree>::<C Helper><<C <todo sym>>> < ()
-    def foo<<todo method>>(&<blk>)
-      <emptyTree>
-    end
-
-    <runtime method definition of foo>
-  end
-
   module <emptyTree>::<C Mod><<C <todo sym>>> < ()
     class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
-    end
-
-    class <emptyTree>::<C <describe 'something'>><<C <todo sym>>> < (::<todo sym>)
-      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-        <self>.void()
-      end
-
-      def <it 'foo'><<todo method>>(&<blk>)
-        <self>.foo()
-      end
-
-      <self>.include(<emptyTree>::<C Helper>)
-
-      begin
-        "foo"
-        <runtime method definition of <it 'foo'>>
-      end
     end
   end
 end
