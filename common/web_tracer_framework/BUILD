@@ -16,3 +16,19 @@ cc_library(
         "@rapidjson",
     ],
 )
+
+cc_test(
+    name = "tracing_test",
+    size = "small",
+    srcs = glob(["test/*.cc"]),
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        ":tracing",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
+    ],
+)
