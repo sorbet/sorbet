@@ -8,6 +8,7 @@ class Tracing {
     friend class TracingTestHelper;
 
     static std::string stateToJSONL(const CounterState &counters, pid_t pid, microseconds now);
+    static std::string jsonlToJSON(const std::string &jsonl, bool needsOpeningBracket, bool strictClosing);
 
 public:
     Tracing() = delete;

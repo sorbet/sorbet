@@ -187,16 +187,10 @@ string Tracing::stateToJSONL(const CounterState &counters, pid_t pid, microsecon
     return result.GetString();
 }
 
-// Super rudimentary support for outputting trace files in Google's Trace Event Format
-// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
-bool Tracing::storeTraces(const CounterState &counters, const string &fileName, bool strict) {
-    auto now = Timer::clock_gettime_coarse();
-    auto pid = getpid();
-
-    string jsonl = stateToJSONL(counters, pid, now);
+string Tracing::jsonlToJSON(const string &jsonl, bool needsOpeningBracket, bool strictClosing) {
     string result;
 
-    if (!FileOps::exists(fileName)) {
+    if (needsOpeningBracket) {
         result += "[\n";
     }
 
@@ -205,7 +199,7 @@ bool Tracing::storeTraces(const CounterState &counters, const string &fileName, 
     // Strict generation is useful when generating this file for non-Perfetto tools; non-strict
     // is useful for general forgetfulness and for doing tracing when LSP is active, as LSP will
     // continually append new entries to the file.
-    if (strict) {
+    if (strictClosing) {
         // Generating the JSONL will have appended ",\n"; we want to make `result` valid JSON,
         // so we need to strip the ",".
         if (absl::EndsWith(result, ",\n")) {
@@ -214,6 +208,18 @@ bool Tracing::storeTraces(const CounterState &counters, const string &fileName, 
         }
     }
     result += '\n';
+
+    return result;
+}
+
+// Super rudimentary support for outputting trace files in Google's Trace Event Format
+// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
+bool Tracing::storeTraces(const CounterState &counters, const string &fileName, bool strict) {
+    auto now = Timer::clock_gettime_coarse();
+    auto pid = getpid();
+
+    string jsonl = stateToJSONL(counters, pid, now);
+    string result = jsonlToJSON(jsonl, !FileOps::exists(fileName), strict);
 
     FileOps::append(fileName, result);
     return true;
