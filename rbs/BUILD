@@ -16,6 +16,7 @@ cc_library(
         "//ast",
         "//common",
         "//core",
+        "//rewriter/util",
         "@rbs_parser",
     ],
 )

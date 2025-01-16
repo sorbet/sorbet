@@ -438,8 +438,7 @@ public:
     }
 
     static ExpressionPtr T_Array(core::LocOffsets loc) {
-        return UnresolvedConstantParts(loc, EmptyTree(),
-                                       {core::Names::Constants::T(), core::Names::Constants::Array()});
+        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Array()});
     }
 
     static ExpressionPtr T_Boolean(core::LocOffsets loc) {
@@ -448,12 +447,11 @@ public:
     }
 
     static ExpressionPtr T_Class(core::LocOffsets loc) {
-        return UnresolvedConstantParts(loc, EmptyTree(),
-                                       {core::Names::Constants::T(), core::Names::Constants::Class()});
+        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Class()});
     }
 
     static ExpressionPtr T_Hash(core::LocOffsets loc) {
-        return UnresolvedConstantParts(loc, EmptyTree(), {core::Names::Constants::T(), core::Names::Constants::Hash()});
+        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Hash()});
     }
 
     static ExpressionPtr T_Proc(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr ret) {
@@ -469,7 +467,7 @@ public:
     }
 
     static ExpressionPtr T_Set(core::LocOffsets loc) {
-        return UnresolvedConstantParts(loc, EmptyTree(), {core::Names::Constants::T(), core::Names::Constants::Set()});
+        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Set()});
     }
 
     static ExpressionPtr ZSuper(core::LocOffsets loc, core::NameRef method) {
