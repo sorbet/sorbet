@@ -1,4 +1,5 @@
 #include "doctest/doctest.h"
+// has to go first as it violates our requirements
 #include "absl/algorithm/container.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
@@ -35,7 +36,7 @@ public:
 
     static std::string generateJSON(pid_t pid, microseconds now, bool strict) {
         CounterState state(TracingTestHelper::generateCounterState());
-        
+
         std::string jsonl = Tracing::stateToJSONL(state, pid, now);
 
         // The first line of `jsonl` is going to contain information about the Sorbet
@@ -57,7 +58,7 @@ public:
         std::vector<std::string> lines = absl::StrSplit(jsonl, '\n');
         {
             // Don't sort empty lines.
-            auto it = absl::c_find_if(lines, [](const auto& line) { return line.empty(); });
+            auto it = absl::c_find_if(lines, [](const auto &line) { return line.empty(); });
             CHECK_NE(it, lines.end());
             CHECK_EQ(it + 1, lines.end());
             fast_sort_range(lines.begin(), it);
@@ -103,4 +104,4 @@ TEST_SUITE("Tracing") {
     }
 }
 
-}
+} // namespace sorbet::web_tracer_framework
