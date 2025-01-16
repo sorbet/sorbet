@@ -431,10 +431,19 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto argString = to_s(ctx, arg);
         ast::ClassDef::ANCESTORS_store ancestors;
 
-        // Avoid subclassing the containing context when it's a module, as that will produce an error in typed: false
-        // files
+        // First ancestor is the superclass
         if (isClass) {
             ancestors.emplace_back(ast::MK::Self(arg.loc()));
+        } else {
+            // Avoid subclassing self when it's a module, as that will produce an error.
+            ancestors.emplace_back(ast::MK::Constant(arg.loc(), core::Symbols::todo()));
+
+            // Note: For cases like `module M; describe '' {}; end`, minitest does not treat `M` as
+            // an ancestor of the dynamically-created class. Instead, it treats `Minitest::Spec` as
+            // an ancestor, which we're choosing not to model so that this rewriter pass works for
+            // RSpec specs too. This means users might have to add extra `include` lines in their
+            // describe bodies to convince Sorbet what's available, but at least it won't say that
+            // Minitest::Spec is an ancestor for RSpec tests.
         }
 
         const bool bodyIsClass = true;
