@@ -35,19 +35,9 @@ void endLine(rapidjson::StringBuffer &result, rapidjson::Writer<rapidjson::Strin
 
 } // namespace
 
-// Super rudimentary support for outputting trace files in Google's Trace Event Format
-// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
-bool Tracing::storeTraces(const CounterState &counters, const string &fileName, bool strict) {
+string Tracing::stateToJSONL(const CounterState &counters, pid_t pid, microseconds now) {
     rapidjson::StringBuffer result;
     rapidjson::Writer<rapidjson::StringBuffer> writer(result);
-
-    auto now = Timer::clock_gettime_coarse();
-    auto pid = getpid();
-
-    if (!FileOps::exists(fileName)) {
-        result.Put('[');
-        result.Put('\n');
-    }
 
     // header / meta information
     {
@@ -194,22 +184,38 @@ bool Tracing::storeTraces(const CounterState &counters, const string &fileName, 
         endLine(result, writer);
     }
 
-    string output = result.GetString();
+    return result.GetString();
+}
+
+// Super rudimentary support for outputting trace files in Google's Trace Event Format
+// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
+bool Tracing::storeTraces(const CounterState &counters, const string &fileName, bool strict) {
+    auto now = Timer::clock_gettime_coarse();
+    auto pid = getpid();
+
+    string jsonl = stateToJSONL(counters, pid, now);
+    string result;
+
+    if (!FileOps::exists(fileName)) {
+        result += "[\n";
+    }
+
+    result += jsonl;
 
     // Strict generation is useful when generating this file for non-Perfetto tools; non-strict
     // is useful for general forgetfulness and for doing tracing when LSP is active, as LSP will
     // continually append new entries to the file.
     if (strict) {
-        // The endLine call above will have appended ",\n"; we want to make `result` valid JSON,
+        // Generating the JSONL will have appended ",\n"; we want to make `result` valid JSON,
         // so we need to strip the ",".
-        if (absl::EndsWith(output, ",\n")) {
-            output[output.size() - 2] = '\n';
-            output[output.size() - 1] = ']';
+        if (absl::EndsWith(result, ",\n")) {
+            result[result.size() - 2] = '\n';
+            result[result.size() - 1] = ']';
         }
     }
-    output += '\n';
+    result += '\n';
 
-    FileOps::append(fileName, output);
+    FileOps::append(fileName, result);
     return true;
 }
 } // namespace sorbet::web_tracer_framework

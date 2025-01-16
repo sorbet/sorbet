@@ -5,6 +5,8 @@
 
 namespace sorbet::web_tracer_framework {
 class Tracing {
+    static std::string stateToJSONL(const CounterState &counters, pid_t pid, microseconds now);
+
 public:
     Tracing() = delete;
 
