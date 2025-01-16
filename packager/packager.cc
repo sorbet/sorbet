@@ -406,7 +406,7 @@ public:
                 // Insert before the first import
                 core::Loc beforePackageName = {loc.file(), importedPackageNames.front().name.loc};
                 auto [beforeImport, numWhitespace] = beforePackageName.findStartOfLine(gs);
-                auto endOfPrevLine = beforePackageName.adjust(gs, -numWhitespace - 1, 0);
+                auto endOfPrevLine = beforeImport.adjust(gs, -numWhitespace - 1, 0);
                 insertionLoc =
                     core::Loc{loc.file(), endOfPrevLine.copyWithZeroLength().offsets().copyEndWithZeroLength()};
             } else {
