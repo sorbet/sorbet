@@ -1,4 +1,5 @@
 #include "doctest/doctest.h"
+#include "absl/algorithm/container.h"
 #include "common/counters/Counters_impl.h"
 #include "common/web_tracer_framework/tracing.h"
 
@@ -26,6 +27,16 @@ public:
         CounterState state(TracingTestHelper::generateCounterState());
         
         std::string jsonl = Tracing::stateToJSONL(state, pid, now);
+
+        // The first line of `jsonl` is going to contain information about the Sorbet
+        // version.  We don't really care about that, and handling that would make the
+        // test harness significantly more complicated, so just strip it off.
+        auto it = absl::c_find(jsonl, '\n');
+        CHECK_NE(it, jsonl.end());
+        CHECK_NE(it + 1, jsonl.end());
+
+        jsonl.erase(jsonl.begin(), it + 1);
+
         const bool needsOpeningBracket = true;
         return Tracing::jsonlToJSON(jsonl, needsOpeningBracket, strict);
     }
