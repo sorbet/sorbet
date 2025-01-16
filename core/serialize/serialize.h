@@ -10,6 +10,10 @@ public:
 
     static constexpr std::string_view GLOBAL_STATE_KEY = "GlobalState";
 
+    // Serialize only the name table from a global state. This is suffient for deserializing trees that have only been
+    // through the indexing, as they won't have any symbols present.
+    static std::vector<uint8_t> storeNameTable(const GlobalState &gs);
+
     // Serialize a global state.
     static std::vector<uint8_t> store(const GlobalState &gs);
 
@@ -23,6 +27,9 @@ public:
 
     // Serializes an AST and file hash.
     static std::vector<uint8_t> storeTree(const core::File &file, const ast::ParsedFile &tree);
+
+    // Augment a global state with the name table stored in the cache.
+    static void loadNameTable(GlobalState &gs, const uint8_t *const data);
 
     static void loadGlobalState(GlobalState &gs, const uint8_t *const data);
 
