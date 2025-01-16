@@ -278,18 +278,16 @@ public:
     optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                     bool isTestImport) const {
         auto &info = PackageInfoImpl::from(pkg);
-        for (auto &import : importedPackageNames) {
-            if (import.name != info.name) {
-                continue;
-            }
-            if (!isTestImport && import.type == ImportType::Test) {
-                return convertTestImport(gs, info, core::Loc(fullLoc().file(), import.name.loc));
+        auto it = absl::c_find_if(importedPackageNames, [&info](auto &import) { return import.name == info.name; });
+        if (it != importedPackageNames.end()) {
+            if (!isTestImport && it->type == ImportType::Test) {
+                return convertTestImport(gs, info, core::Loc(fullLoc().file(), it->name.loc));
             }
             // we already import this, and if so, don't return an autocorrect
             return nullopt;
         }
 
-        core::Loc insertionLoc = loc.adjust(gs, core::INVALID_POS_LOC, core::INVALID_POS_LOC);
+        auto insertionLoc = core::Loc::none(loc.file());
         // first let's try adding it to the end of the imports.
         if (!importedPackageNames.empty()) {
             auto lastOffset = importedPackageNames.back().name.loc;
@@ -298,15 +296,23 @@ public:
             // if we don't have any imports, then we can try adding it
             // either before the first export, or if we have no
             // exports, then right before the final `end`
-            uint32_t exportLoc;
+            int64_t exportLoc;
             if (!exports_.empty()) {
                 exportLoc = exports_.front().fqn.loc.beginPos() - "export "sv.size() - 1;
             } else {
                 exportLoc = loc.endPos() - "end"sv.size() - 1;
             }
+
+            std::string_view file_source = loc.file().data(gs).source();
+
+            // Defensively guard against the first export loc or the package's loc being invalid.
+            if (exportLoc <= 0 || exportLoc >= file_source.size()) {
+                ENFORCE(false, "Failed to find a valid starting loc");
+                return nullopt;
+            }
+
             // we want to find the end of the last non-empty line, so
             // let's do something gross: walk backward until we find non-whitespace
-            const auto &file_source = loc.file().data(gs).source();
             while (isspace(file_source[exportLoc])) {
                 exportLoc--;
                 // this shouldn't happen in a well-formatted
@@ -315,7 +321,7 @@ public:
                     return nullopt;
                 }
             }
-            insertionLoc = {loc.file(), exportLoc + 1, exportLoc + 1};
+            insertionLoc = core::Loc(loc.file(), exportLoc + 1, exportLoc + 1);
         }
         ENFORCE(insertionLoc.exists());
 
