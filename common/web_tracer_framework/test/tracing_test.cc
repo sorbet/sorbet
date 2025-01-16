@@ -10,11 +10,18 @@ public:
     static std::unique_ptr<CounterImpl> generateCounterStateImpl() {
         auto impl = std::make_unique<CounterImpl>();
 
-        impl->counterAdd("example", 5);
+        // Deliberately output these in non-alphabetical order to maybe encourage the
+        // linker to output the strings in such a way as to motivate the sorting below.
         impl->counterAdd("other", 6);
+        impl->counterAdd("example", 5);
 
-        impl->categoryCounterAdd("adt", "state1", 5);
-        impl->categoryCounterAdd("adt", "state2", 6);
+        // Don't test categoryCounterAdd because the generation of `args` is
+        // non-deterministic, based on wherever the linker decided to output the strings
+        // for the counter names.
+
+        // Don't test timingAdd; there's a lot to setup.  If you are motivated to add
+        // testing for timingAdd, you will probably have to forego testing `args` and
+        // `tags` for the same reason as categoryCounterAdd.
 
         return impl;
     }
