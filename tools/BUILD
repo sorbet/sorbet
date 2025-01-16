@@ -37,6 +37,7 @@ compilation_database(
         "//common/strings:strings",
         "//common/timers:timers",
         "//common/web_tracer_framework:tracing",
+        "//common/web_tracer_framework:tracing_test",
         "//core:core",
         "//core:core_test",
         "//core:generate_names",

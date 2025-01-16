@@ -41,7 +41,7 @@ class Proto;
 namespace web_tracer_framework {
 class Tracing;
 class TracingTestHelper;
-}
+} // namespace web_tracer_framework
 
 namespace test::lsp {
 class CounterStateDatabase;
