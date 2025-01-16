@@ -77,7 +77,13 @@ TEST_SUITE("Tracing") {
         const bool strict = false;
         std::string json = TracingTestHelper::generateJSON(pid, now, strict);
 
-        CHECK_EQ("[]", json);
+        // clang-format off
+        CHECK_EQ("[\n"
+                 "{\"name\":\"example\",\"ph\":\"C\",\"ts\":20200928.000,\"pid\":1729,\"args\":{\"value\":\"5\"}},\n"
+                 "{\"name\":\"other\",\"ph\":\"C\",\"ts\":20200928.000,\"pid\":1729,\"args\":{\"value\":\"6\"}},\n"
+                 "\n"
+                 , json);
+        // clang-format on
     }
 
     TEST_CASE("storeTraces strict") {
@@ -87,7 +93,13 @@ TEST_SUITE("Tracing") {
         const bool strict = true;
         std::string json = TracingTestHelper::generateJSON(pid, now, strict);
 
-        CHECK_EQ("[]", json);
+        // clang-format off
+        CHECK_EQ("[\n"
+                 "{\"name\":\"example\",\"ph\":\"C\",\"ts\":20200928.000,\"pid\":1729,\"args\":{\"value\":\"5\"}},\n"
+                 "{\"name\":\"other\",\"ph\":\"C\",\"ts\":20200928.000,\"pid\":1729,\"args\":{\"value\":\"6\"}}\n"
+                 "]\n"
+                 , json);
+        // clang-format on
     }
 }
 
