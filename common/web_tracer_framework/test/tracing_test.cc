@@ -1,6 +1,9 @@
 #include "doctest/doctest.h"
 #include "absl/algorithm/container.h"
+#include "absl/strings/str_join.h"
+#include "absl/strings/str_split.h"
 #include "common/counters/Counters_impl.h"
+#include "common/sort/sort.h"
 #include "common/web_tracer_framework/tracing.h"
 
 namespace sorbet::web_tracer_framework {
@@ -38,11 +41,28 @@ public:
         // The first line of `jsonl` is going to contain information about the Sorbet
         // version.  We don't really care about that, and handling that would make the
         // test harness significantly more complicated, so just strip it off.
-        auto it = absl::c_find(jsonl, '\n');
-        CHECK_NE(it, jsonl.end());
-        CHECK_NE(it + 1, jsonl.end());
+        {
+            auto it = absl::c_find(jsonl, '\n');
+            CHECK_NE(it, jsonl.end());
+            CHECK_NE(it + 1, jsonl.end());
 
-        jsonl.erase(jsonl.begin(), it + 1);
+            jsonl.erase(jsonl.begin(), it + 1);
+            CHECK_NE(jsonl[0], '\n');
+        }
+
+        // The remaining lines will be counters, but we need to sort them; the implementation
+        // stores them based on the hashes of the string pointers, and that in turn depends
+        // on the vagaries of where the linker decided to put the string constants for the
+        // counter names.
+        std::vector<std::string> lines = absl::StrSplit(jsonl, '\n');
+        {
+            // Don't sort empty lines.
+            auto it = absl::c_find_if(lines, [](const auto& line) { return line.empty(); });
+            CHECK_NE(it, lines.end());
+            CHECK_EQ(it + 1, lines.end());
+            fast_sort_range(lines.begin(), it);
+            jsonl = absl::StrJoin(lines, "\n");
+        }
 
         const bool needsOpeningBracket = true;
         return Tracing::jsonlToJSON(jsonl, needsOpeningBracket, strict);
