@@ -19,5 +19,8 @@ constexpr ErrorClass NilableUntyped{3512, StrictLevel::False};
 // constexpr ErrorClass HasAttachedClassInClass{3513, StrictLevel::False};
 constexpr ErrorClass ContravariantHasAttachedClass{3514, StrictLevel::False};
 constexpr ErrorClass DuplicateProp{3515, StrictLevel::True};
+
+constexpr ErrorClass RBSError{3550, StrictLevel::True}; // let's reserve 3550-3559 for RBS related errors
+
 } // namespace sorbet::core::errors::Rewriter
 #endif
