@@ -22,10 +22,12 @@ public:
         return CounterState{generateCounterStateImpl()};
     }
 
-    static std::string generateJSONL(pid_t pid, microseconds now) {
+    static std::string generateJSON(pid_t pid, microseconds now, bool strict) {
         CounterState state(TracingTestHelper::generateCounterState());
         
-        return Tracing::stateToJSONL(state, pid, now);
+        std::string jsonl = Tracing::stateToJSONL(state, pid, now);
+        const bool needsOpeningBracket = true;
+        return Tracing::jsonlToJSON(jsonl, needsOpeningBracket, strict);
     }
 };
 
@@ -34,7 +36,8 @@ TEST_SUITE("Tracing") {
         pid_t pid = 1729;
         microseconds now{20200928};
 
-        std::string jsonl = TracingTestHelper::generateJSONL(pid, now);
+        const bool strict = false;
+        std::string json = TracingTestHelper::generateJSON(pid, now, strict);
 
         CHECK_EQ("[]", json);
     }
@@ -43,7 +46,8 @@ TEST_SUITE("Tracing") {
         pid_t pid = 1729;
         microseconds now{20200928};
 
-        std::string jsonl = TracingTestHelper::generateJSONL(pid, now);
+        const bool strict = true;
+        std::string json = TracingTestHelper::generateJSON(pid, now, strict);
 
         CHECK_EQ("[]", json);
     }
