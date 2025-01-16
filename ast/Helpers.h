@@ -382,6 +382,27 @@ public:
         return Send1(loc, T(loc), core::Names::classOf(), loc, std::move(value));
     }
 
+    static ExpressionPtr All(core::LocOffsets loc, Send::ARGS_store args) {
+        return Send(loc, T(loc), core::Names::all(), loc, args.size(), std::move(args));
+    }
+
+    static ExpressionPtr Any(core::LocOffsets loc, Send::ARGS_store args) {
+        return Send(loc, T(loc), core::Names::any(), loc, args.size(), std::move(args));
+    }
+
+    static ExpressionPtr Anything(core::LocOffsets loc) {
+        return Send0(loc, T(loc), core::Names::anything(), loc);
+    }
+
+    static ExpressionPtr AttachedClass(core::LocOffsets loc) {
+        return Send0(loc, T(loc), core::Names::attachedClass(), loc);
+    }
+
+    static ExpressionPtr Cast(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
+        return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value), core::Names::cast(),
+                                               std::move(type));
+    }
+
     static ExpressionPtr Let(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
         return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value), core::Names::let(),
                                                std::move(type));
@@ -390,6 +411,14 @@ public:
     static ExpressionPtr AssertType(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
         return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value), core::Names::assertType(),
                                                std::move(type));
+    }
+
+    static ExpressionPtr NoReturn(core::LocOffsets loc) {
+        return Send0(loc, T(loc), core::Names::noreturn(), loc);
+    }
+
+    static ExpressionPtr SelfType(core::LocOffsets loc) {
+        return Send0(loc, T(loc), core::Names::selfType(), loc);
     }
 
     static ExpressionPtr Unsafe(core::LocOffsets loc, ExpressionPtr inner) {
@@ -408,9 +437,39 @@ public:
         return Send1(loc, T(loc), core::Names::nilable(), loc, std::move(arg));
     }
 
+    static ExpressionPtr T_Array(core::LocOffsets loc) {
+        return UnresolvedConstantParts(loc, EmptyTree(),
+                                       {core::Names::Constants::T(), core::Names::Constants::Array()});
+    }
+
     static ExpressionPtr T_Boolean(core::LocOffsets loc) {
         static constexpr core::NameRef parts[2] = {core::Names::Constants::T(), core::Names::Constants::Boolean()};
         return UnresolvedConstantParts(loc, parts);
+    }
+
+    static ExpressionPtr T_Class(core::LocOffsets loc) {
+        return UnresolvedConstantParts(loc, EmptyTree(),
+                                       {core::Names::Constants::T(), core::Names::Constants::Class()});
+    }
+
+    static ExpressionPtr T_Hash(core::LocOffsets loc) {
+        return UnresolvedConstantParts(loc, EmptyTree(), {core::Names::Constants::T(), core::Names::Constants::Hash()});
+    }
+
+    static ExpressionPtr T_Proc(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr ret) {
+        auto proc = Send0(loc, T(loc), core::Names::proc(), loc);
+        auto params = Params(loc, std::move(proc), std::move(args));
+        return Send1(loc, std::move(params), core::Names::returns(), loc, std::move(ret));
+    }
+
+    static ExpressionPtr T_ProcVoid(core::LocOffsets loc, Send::ARGS_store args) {
+        auto proc = Send0(loc, T(loc), core::Names::proc(), loc);
+        auto params = Params(loc, std::move(proc), std::move(args));
+        return Send0(loc, std::move(params), core::Names::void_(), loc);
+    }
+
+    static ExpressionPtr T_Set(core::LocOffsets loc) {
+        return UnresolvedConstantParts(loc, EmptyTree(), {core::Names::Constants::T(), core::Names::Constants::Set()});
     }
 
     static ExpressionPtr ZSuper(core::LocOffsets loc, core::NameRef method) {
