@@ -1,6 +1,7 @@
 #include "common/FileOps.h"
 #include "common/counters/Counters.h"
 
+#include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_replace.h"
 #include "common/JSON.h"
@@ -34,19 +35,9 @@ void endLine(rapidjson::StringBuffer &result, rapidjson::Writer<rapidjson::Strin
 
 } // namespace
 
-// Super rudimentary support for outputting trace files in Google's Trace Event Format
-// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
-bool Tracing::storeTraces(const CounterState &counters, const string &fileName, bool strict) {
+string Tracing::stateToJSONL(const CounterState &counters, pid_t pid, microseconds now) {
     rapidjson::StringBuffer result;
     rapidjson::Writer<rapidjson::StringBuffer> writer(result);
-
-    auto now = Timer::clock_gettime_coarse();
-    auto pid = getpid();
-
-    if (!FileOps::exists(fileName)) {
-        result.Put('[');
-        result.Put('\n');
-    }
 
     // header / meta information
     {
@@ -193,15 +184,44 @@ bool Tracing::storeTraces(const CounterState &counters, const string &fileName, 
         endLine(result, writer);
     }
 
+    return result.GetString();
+}
+
+string Tracing::jsonlToJSON(const string &jsonl, bool needsOpeningBracket, bool strictClosing) {
+    string result;
+
+    if (needsOpeningBracket) {
+        result += "[\n";
+    }
+
+    result += jsonl;
+
     // Strict generation is useful when generating this file for non-Perfetto tools; non-strict
     // is useful for general forgetfulness and for doing tracing when LSP is active, as LSP will
     // continually append new entries to the file.
-    if (strict) {
-        result.Put(']');
+    if (strictClosing) {
+        // Generating the JSONL will have appended ",\n"; we want to make `result` valid JSON,
+        // so we need to strip the ",".
+        if (absl::EndsWith(result, ",\n")) {
+            result[result.size() - 2] = '\n';
+            result[result.size() - 1] = ']';
+        }
     }
-    result.Put('\n');
+    result += '\n';
 
-    FileOps::append(fileName, result.GetString());
+    return result;
+}
+
+// Super rudimentary support for outputting trace files in Google's Trace Event Format
+// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
+bool Tracing::storeTraces(const CounterState &counters, const string &fileName, bool strict) {
+    auto now = Timer::clock_gettime_coarse();
+    auto pid = getpid();
+
+    string jsonl = stateToJSONL(counters, pid, now);
+    string result = jsonlToJSON(jsonl, !FileOps::exists(fileName), strict);
+
+    FileOps::append(fileName, result);
     return true;
 }
 } // namespace sorbet::web_tracer_framework
