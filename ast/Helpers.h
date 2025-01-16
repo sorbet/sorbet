@@ -465,6 +465,30 @@ public:
         return send->fun == core::Names::new_() && send->recv.isSelfReference();
     }
 
+    static bool isT(const ast::ExpressionPtr &expr) {
+        bool result = false;
+
+        typecase(
+            expr,
+            [&](const ast::UnresolvedConstantLit &t) {
+                result = t.cnst == core::Names::Constants::T() && ast::MK::isRootScope(t.scope);
+            },
+            [&](const ast::ConstantLit &c) { result = c.symbol == core::Symbols::T(); },
+            [&](const ast::ExpressionPtr &e) { result = false; });
+
+        return result;
+    }
+
+    static bool isTNilable(const ast::ExpressionPtr &expr) {
+        auto nilable = ast::cast_tree<ast::Send>(expr);
+        return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv);
+    }
+
+    static bool isTUntyped(const ast::ExpressionPtr &expr) {
+        auto send = ast::cast_tree<ast::Send>(expr);
+        return send != nullptr && send->fun == core::Names::untyped() && isT(send->recv);
+    }
+
     static core::NameRef arg2Name(const ExpressionPtr &arg) {
         auto *cursor = &arg;
         while (true) {
