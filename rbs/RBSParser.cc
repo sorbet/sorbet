@@ -11,11 +11,15 @@ std::unique_ptr<MethodType> RBSParser::parseSignature(core::Context ctx, Comment
     };
 
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
-    lexstate *lexer = alloc_lexer(rbsString, encoding, 0, comment.string.size());
-    parserstate *parser = alloc_parser(lexer, 0, comment.string.size());
+
+    auto lexer = std::unique_ptr<lexstate, void (*)(lexstate *)>(
+        alloc_lexer(rbsString, encoding, 0, comment.string.size()), [](lexstate *p) { free(p); });
+
+    auto parser = std::unique_ptr<parserstate, void (*)(parserstate *)>(
+        alloc_parser(lexer.get(), 0, comment.string.size()), [](parserstate *p) { free(p); });
 
     rbs_methodtype_t *rbsMethodType = nullptr;
-    parse_method_type(parser, &rbsMethodType);
+    parse_method_type(parser.get(), &rbsMethodType);
 
     if (parser->error) {
         core::LocOffsets offset{
@@ -30,9 +34,6 @@ std::unique_ptr<MethodType> RBSParser::parseSignature(core::Context ctx, Comment
         return nullptr;
     }
 
-    free(parser);
-    free(lexer);
-
     return std::make_unique<MethodType>(comment.loc, rbsMethodType);
 }
 
@@ -45,11 +46,14 @@ std::unique_ptr<Type> RBSParser::parseType(core::Context ctx, Comment comment) {
 
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
-    lexstate *lexer = alloc_lexer(rbsString, encoding, 0, comment.string.size());
-    parserstate *parser = alloc_parser(lexer, 0, comment.string.size());
+    auto lexer = std::unique_ptr<lexstate, void (*)(lexstate *)>(
+        alloc_lexer(rbsString, encoding, 0, comment.string.size()), [](lexstate *p) { free(p); });
+
+    auto parser = std::unique_ptr<parserstate, void (*)(parserstate *)>(
+        alloc_parser(lexer.get(), 0, comment.string.size()), [](parserstate *p) { free(p); });
 
     rbs_node_t *rbsType = nullptr;
-    parse_type(parser, &rbsType);
+    parse_type(parser.get(), &rbsType);
 
     if (parser->error) {
         core::LocOffsets offset{
@@ -63,9 +67,6 @@ std::unique_ptr<Type> RBSParser::parseType(core::Context ctx, Comment comment) {
 
         return nullptr;
     }
-
-    free(parser);
-    free(lexer);
 
     return std::make_unique<Type>(comment.loc, rbsType);
 }
