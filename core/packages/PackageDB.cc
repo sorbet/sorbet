@@ -81,6 +81,16 @@ public:
         return vector<VisibleTo>();
     }
 
+    optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
+        notImplemented();
+        return nullopt;
+    }
+
+    optional<pair<core::NameRef, core::LocOffsets>> layer() const {
+        notImplemented();
+        return nullopt;
+    }
+
     std::optional<ImportType> importsPackage(MangledName mangledName) const {
         notImplemented();
         return nullopt;

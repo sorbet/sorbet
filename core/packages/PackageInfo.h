@@ -54,6 +54,9 @@ public:
     virtual std::vector<std::vector<core::NameRef>> testImports() const = 0;
     virtual std::vector<VisibleTo> visibleTo() const = 0;
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
+    virtual std::optional<std::pair<core::packages::StrictDependenciesLevel, core::LocOffsets>>
+    strictDependenciesLevel() const = 0;
+    virtual std::optional<std::pair<core::NameRef, core::LocOffsets>> layer() const = 0;
     virtual core::Loc fullLoc() const = 0;
     virtual core::Loc declLoc() const = 0;
     virtual bool exists() const final;
