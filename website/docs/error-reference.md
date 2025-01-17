@@ -595,6 +595,13 @@ class Info < T::struct
 end
 ```
 
+## 3550
+
+> This error is specific to RBS support when using the
+> `--enable-experimental-rbs-signatures` flag.
+
+This error is raised when a RBS signature comment contains a syntax error.
+
 ## 3702
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
