@@ -311,6 +311,10 @@ def register_sorbet_dependencies():
         strip_prefix = "rules_foreign_cc-d74623f0ad47f4e375de81baa454eb106715a416",
     )
 
+    # The current implementation of the `ruby/rbs` parser requires a Ruby VM to run.
+    # Shopify is currently working on removing the Ruby dependency.
+    # In the meantime, we pull the RBS parser from the `shopify` fork of the `rbs` gem
+    # while we're upstreaming their changes.
     http_archive(
         name = "rbs_parser",
         url = "https://github.com/shopify/rbs/archive/8ddd49486c74aff543ce429a235512d0eb8cc573.zip",
