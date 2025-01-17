@@ -438,6 +438,7 @@ int realmain(int argc, char *argv[]) {
     gs->semanticExtensions = move(extensions);
     vector<ast::ParsedFile> indexed;
 
+    gs->rbsSignaturesEnabled = opts.rbsSignaturesEnabled;
     gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
 
     logger->trace("building initial global state");

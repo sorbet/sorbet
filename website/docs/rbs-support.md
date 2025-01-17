@@ -5,6 +5,8 @@ sidebar_label: RBS Support
 ---
 
 > This feature is experimental and might be changed or removed without notice.
+> To enable it pass the `--enable-experimental-rbs-signatures` option to Sorbet
+> or add it to your `sorbet/config`.
 
 Sorbet supports [RBS](https://github.com/ruby/rbs) syntax using comments in the
 source code using the `#:` prefix:

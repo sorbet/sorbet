@@ -254,6 +254,7 @@ const UnorderedMap<
         {"uniquely-defined-behavior", BooleanPropertyAssertion::make},
         {"check-out-of-order-constant-references", BooleanPropertyAssertion::make},
         {"enable-packager", BooleanPropertyAssertion::make},
+        {"enable-experimental-rbs-signatures", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
         {"experimental-ruby3-keyword-args", BooleanPropertyAssertion::make},
         {"typed-super", BooleanPropertyAssertion::make},

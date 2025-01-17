@@ -28,6 +28,7 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
         gs.suppressErrorClass(sorbet::core::errors::Resolver::OutOfOrderConstantAccess.code);
     }
 
+    gs.rbsSignaturesEnabled = options.rbsSignaturesEnabled;
     gs.requiresAncestorEnabled = options.requiresAncestorEnabled;
     gs.ruby3KeywordArgs = options.ruby3KeywordArgs;
     gs.typedSuper = options.typedSuper;

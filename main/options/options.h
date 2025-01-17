@@ -252,6 +252,9 @@ struct Options {
     bool outOfOrderReferenceChecksEnabled = false;
     core::TrackUntyped trackUntyped = core::TrackUntyped::Nowhere;
 
+    // Enable experimental support for RBS signatures
+    bool rbsSignaturesEnabled = false;
+
     // Experimental feature `requires_ancestor`
     bool requiresAncestorEnabled = false;
 

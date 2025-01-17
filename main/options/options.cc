@@ -450,6 +450,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("experimental-ruby3-keyword-args",
                                  "Enforce use of new (Ruby 3.0-style) keyword arguments. (incomplete and experimental)",
                                  cxxopts::value<bool>());
+    options.add_options(section)("enable-experimental-rbs-signatures",
+                                 "Enable experimental support for RBS signatures");
     options.add_options(section)("enable-experimental-requires-ancestor",
                                  "Enable experimental `requires_ancestor` annotation");
     options.add_options(section)("uniquely-defined-behavior",
@@ -913,6 +915,7 @@ void readOptions(Options &opts,
         opts.inputFileNames.erase(unique(opts.inputFileNames.begin(), opts.inputFileNames.end()),
                                   opts.inputFileNames.end());
 
+        opts.rbsSignaturesEnabled = raw["enable-experimental-rbs-signatures"].as<bool>();
         opts.requiresAncestorEnabled = raw["enable-experimental-requires-ancestor"].as<bool>();
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();

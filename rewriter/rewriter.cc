@@ -204,7 +204,12 @@ ast::ExpressionPtr Rewriter::run(core::MutableContext ctx, ast::ExpressionPtr tr
     auto ast = std::move(tree);
 
     Rewriterer rewriter;
-    ast = RBSSignatures::run(ctx, std::move(ast));
+
+    if (ctx.state.rbsSignaturesEnabled) {
+        // This rewriter must run before the others, because it creates signatures that other rewriters depend on.
+        ast = RBSSignatures::run(ctx, std::move(ast));
+    }
+
     ast::TreeWalk::apply(ctx, rewriter, ast);
     // This AST flattening pass requires that we mutate the AST in a way that our previous DSL passes were not designed
     // around, which is why it runs all at once and is not expressed as a `patch` method like the other DSL passes. This

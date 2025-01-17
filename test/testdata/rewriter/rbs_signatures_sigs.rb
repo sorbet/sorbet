@@ -1,4 +1,5 @@
 # typed: strict
+# enable-experimental-rbs-signatures: true
 
 extend T::Sig
 

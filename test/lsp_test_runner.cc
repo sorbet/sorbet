@@ -552,6 +552,8 @@ TEST_CASE("LSPTest") {
             BooleanPropertyAssertion::getValue("uniquely-defined-behavior", assertions).value_or(false);
         opts->outOfOrderReferenceChecksEnabled =
             BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false);
+        opts->rbsSignaturesEnabled =
+            BooleanPropertyAssertion::getValue("enable-experimental-rbs-signatures", assertions).value_or(false);
         opts->requiresAncestorEnabled =
             BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
         opts->lspExtractToVariableEnabled =
