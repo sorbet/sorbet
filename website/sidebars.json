@@ -72,7 +72,8 @@
       "tuples",
       "shapes",
       "overloads",
-      "requires-ancestor"
+      "requires-ancestor",
+      "rbs-support"
     ]
   },
   "talks": {
