@@ -3,7 +3,7 @@
 
 namespace sorbet::rbs {
 
-std::unique_ptr<MethodType> RBSParser::parseSignature(core::Context ctx, Comment comment) {
+std::optional<MethodType> RBSParser::parseSignature(core::Context ctx, Comment comment) {
     rbs_string_t rbsString = {
         .start = comment.string.data(),
         .end = comment.string.data() + comment.string.size(),
@@ -31,10 +31,10 @@ std::unique_ptr<MethodType> RBSParser::parseSignature(core::Context ctx, Comment
             e.setHeader("Failed to parse RBS signature ({})", parser->error->message);
         }
 
-        return nullptr;
+        return std::nullopt;
     }
 
-    return std::make_unique<MethodType>(comment.loc, rbsMethodType);
+    return MethodType{comment.loc, std::unique_ptr<rbs_methodtype_t>(rbsMethodType)};
 }
 
 std::unique_ptr<Type> RBSParser::parseType(core::Context ctx, Comment comment) {

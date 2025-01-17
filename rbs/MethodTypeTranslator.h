@@ -14,8 +14,7 @@ public:
      * For example the signature comment `#: () -> void` will be translated as `sig { void }`.
      */
     static sorbet::ast::ExpressionPtr methodSignature(core::MutableContext ctx, sorbet::ast::MethodDef *methodDef,
-                                                      std::unique_ptr<MethodType> type,
-                                                      std::vector<Comment> annotations);
+                                                      MethodType type, std::vector<Comment> annotations);
 
     /**
      * Convert an RBS attribute type comment to a Sorbet signature.

@@ -22,16 +22,9 @@ struct Comment {
 /**
  * A parsed RBS method type.
  */
-class MethodType {
-public:
+struct MethodType {
     core::LocOffsets loc;
-    rbs_methodtype_t *node;
-
-    MethodType(core::LocOffsets loc, rbs_methodtype_t *node) : loc(loc), node(node) {}
-
-    ~MethodType() {
-        free(node);
-    }
+    std::unique_ptr<rbs_methodtype_t> node;
 };
 
 /**

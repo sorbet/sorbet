@@ -13,7 +13,7 @@ public:
      *
      * This is used to parse comments like `#: () -> void` found on method definitions.
      */
-    static std::unique_ptr<MethodType> parseSignature(core::Context ctx, Comment comment);
+    static std::optional<MethodType> parseSignature(core::Context ctx, Comment comment);
 
     /**
      * Parse an RBS type string into a RBS AST node.

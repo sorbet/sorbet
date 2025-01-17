@@ -87,25 +87,25 @@ void collectKeywords(core::MutableContext ctx, core::LocOffsets docLoc, rbs_hash
 
 sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ctx,
                                                                  sorbet::ast::MethodDef *methodDef,
-                                                                 std::unique_ptr<MethodType> methodType,
+                                                                 MethodType methodType,
                                                                  std::vector<Comment> annotations) {
-    rbs_methodtype_t *node = methodType->node;
+    rbs_methodtype_t *node = methodType.node.get();
 
     if (node->type->type != RBS_TYPES_FUNCTION) {
-        auto errLoc = TypeTranslator::nodeLoc(methodType->loc, node->type);
+        auto errLoc = TypeTranslator::nodeLoc(methodType.loc, node->type);
         if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSError)) {
             e.setHeader("Unexpected node type `{}` in method signature, expected `{}`", rbs_node_type_name(node->type),
                         "Function");
         }
 
-        return ast::MK::Untyped(methodType->loc);
+        return ast::MK::Untyped(methodType.loc);
     }
 
     // Collect type parameters
 
     std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams;
     for (rbs_node_list_node_t *list_node = node->type_params->head; list_node != nullptr; list_node = list_node->next) {
-        auto loc = TypeTranslator::nodeLoc(methodType->loc, list_node->node);
+        auto loc = TypeTranslator::nodeLoc(methodType.loc, list_node->node);
 
         if (list_node->node->type != RBS_AST_TYPEPARAM) {
             if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSError)) {
@@ -127,22 +127,22 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
     rbs_types_function_t *functionType = (rbs_types_function_t *)node->type;
     std::vector<RBSArg> args;
 
-    collectArgs(ctx, methodType->loc, functionType->required_positionals, args, false);
+    collectArgs(ctx, methodType.loc, functionType->required_positionals, args, false);
 
     rbs_node_list_t *optionalPositionals = functionType->optional_positionals;
     if (optionalPositionals && optionalPositionals->length > 0) {
-        collectArgs(ctx, methodType->loc, optionalPositionals, args, false);
+        collectArgs(ctx, methodType.loc, optionalPositionals, args, false);
     }
 
     rbs_node_t *restPositionals = functionType->rest_positionals;
     if (restPositionals) {
         if (restPositionals->type != RBS_TYPES_FUNCTION_PARAM) {
-            if (auto e = ctx.beginError(methodType->loc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(methodType.loc, core::errors::Rewriter::RBSError)) {
                 e.setHeader("Unexpected node type `{}` in rest positional argument, expected `{}`",
                             rbs_node_type_name(restPositionals), "FunctionParam");
             }
         } else {
-            auto loc = TypeTranslator::nodeLoc(methodType->loc, restPositionals);
+            auto loc = TypeTranslator::nodeLoc(methodType.loc, restPositionals);
             auto node = (rbs_types_function_param_t *)restPositionals;
             auto arg = RBSArg{loc, node->name, node->type, false};
             args.emplace_back(arg);
@@ -151,23 +151,23 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
 
     rbs_node_list_t *trailingPositionals = functionType->trailing_positionals;
     if (trailingPositionals && trailingPositionals->length > 0) {
-        collectArgs(ctx, methodType->loc, trailingPositionals, args, false);
+        collectArgs(ctx, methodType.loc, trailingPositionals, args, false);
     }
 
     // Collect keywords
 
-    collectKeywords(ctx, methodType->loc, functionType->required_keywords, args, false);
-    collectKeywords(ctx, methodType->loc, functionType->optional_keywords, args, false);
+    collectKeywords(ctx, methodType.loc, functionType->required_keywords, args, false);
+    collectKeywords(ctx, methodType.loc, functionType->optional_keywords, args, false);
 
     rbs_node_t *restKeywords = functionType->rest_keywords;
     if (restKeywords) {
         if (restKeywords->type != RBS_TYPES_FUNCTION_PARAM) {
-            if (auto e = ctx.beginError(methodType->loc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(methodType.loc, core::errors::Rewriter::RBSError)) {
                 e.setHeader("Unexpected node type `{}` in rest keyword argument, expected `{}`",
                             rbs_node_type_name(restKeywords), "FunctionParam");
             }
         } else {
-            auto loc = TypeTranslator::nodeLoc(methodType->loc, restKeywords);
+            auto loc = TypeTranslator::nodeLoc(methodType.loc, restKeywords);
             auto node = (rbs_types_function_param_t *)restKeywords;
             auto arg = RBSArg{loc, node->name, node->type, false};
             args.emplace_back(arg);
@@ -179,7 +179,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
     rbs_types_block_t *block = node->block;
     if (block) {
         // TODO: RBS doesn't have location on blocks yet
-        auto arg = RBSArg{methodType->loc, nullptr, (rbs_node_t *)block, false};
+        auto arg = RBSArg{methodType.loc, nullptr, (rbs_node_t *)block, false};
         args.emplace_back(arg);
     }
 
@@ -200,7 +200,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
             name = expressionName(ctx, &methodDef->args[i]);
         }
 
-        auto type = TypeTranslator::toRBI(ctx, typeParams, arg.type, methodType->loc);
+        auto type = TypeTranslator::toRBI(ctx, typeParams, arg.type, methodType.loc);
         if (arg.optional) {
             type = ast::MK::Nilable(arg.loc, std::move(type));
         }
@@ -213,7 +213,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
 
     // Build the sig
 
-    auto sigBuilder = ast::MK::Self(methodType->loc);
+    auto sigBuilder = ast::MK::Self(methodType.loc);
     bool isFinal = false;
 
     for (auto &annotation : annotations) {
@@ -238,46 +238,45 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
         for (auto &param : typeParams) {
             typeParamsStore.emplace_back(ast::MK::Symbol(param.first, param.second));
         }
-        sigBuilder = ast::MK::Send(methodType->loc, std::move(sigBuilder), core::Names::typeParameters(),
-                                   methodType->loc, typeParamsStore.size(), std::move(typeParamsStore));
+        sigBuilder = ast::MK::Send(methodType.loc, std::move(sigBuilder), core::Names::typeParameters(), methodType.loc,
+                                   typeParamsStore.size(), std::move(typeParamsStore));
     }
 
     if (sigParams.size() > 0) {
-        sigBuilder = ast::MK::Send(methodType->loc, std::move(sigBuilder), core::Names::params(), methodType->loc, 0,
+        sigBuilder = ast::MK::Send(methodType.loc, std::move(sigBuilder), core::Names::params(), methodType.loc, 0,
                                    std::move(sigParams));
     }
 
     rbs_node_t *returnValue = functionType->return_type;
     if (returnValue->type == RBS_TYPES_BASES_VOID) {
-        auto loc = TypeTranslator::nodeLoc(methodType->loc, returnValue);
+        auto loc = TypeTranslator::nodeLoc(methodType.loc, returnValue);
         sigBuilder = ast::MK::Send0(loc, std::move(sigBuilder), core::Names::void_(), loc);
     } else {
-        auto returnType = TypeTranslator::toRBI(ctx, typeParams, returnValue, methodType->loc);
-        sigBuilder = ast::MK::Send1(methodType->loc, std::move(sigBuilder), core::Names::returns(), methodType->loc,
+        auto returnType = TypeTranslator::toRBI(ctx, typeParams, returnValue, methodType.loc);
+        sigBuilder = ast::MK::Send1(methodType.loc, std::move(sigBuilder), core::Names::returns(), methodType.loc,
                                     std::move(returnType));
     }
 
     auto sigArgs = Send::ARGS_store();
-    sigArgs.emplace_back(ast::MK::Constant(methodType->loc, core::Symbols::T_Sig_WithoutRuntime()));
+    sigArgs.emplace_back(ast::MK::Constant(methodType.loc, core::Symbols::T_Sig_WithoutRuntime()));
     if (isFinal) {
-        sigArgs.emplace_back(ast::MK::Symbol(methodType->loc, core::Names::final_()));
+        sigArgs.emplace_back(ast::MK::Symbol(methodType.loc, core::Names::final_()));
     }
 
-    auto sig =
-        ast::MK::Send(methodType->loc, ast::MK::Constant(methodType->loc, core::Symbols::Sorbet_Private_Static()),
-                      core::Names::sig(), methodType->loc, sigArgs.size(), std::move(sigArgs));
+    auto sig = ast::MK::Send(methodType.loc, ast::MK::Constant(methodType.loc, core::Symbols::Sorbet_Private_Static()),
+                             core::Names::sig(), methodType.loc, sigArgs.size(), std::move(sigArgs));
 
     auto sigSend = ast::cast_tree<ast::Send>(sig);
-    sigSend->setBlock(ast::MK::Block0(methodType->loc, std::move(sigBuilder)));
+    sigSend->setBlock(ast::MK::Block0(methodType.loc, std::move(sigBuilder)));
     sigSend->flags.isRewriterSynthesized = true;
 
     return sig;
 }
 
 sorbet::ast::ExpressionPtr MethodTypeTranslator::attrSignature(core::MutableContext ctx, sorbet::ast::Send *send,
-                                                               std::unique_ptr<Type> attrType) {
+                                                               Type attrType) {
     auto typeParams = std::vector<std::pair<core::LocOffsets, core::NameRef>>();
-    auto sigBuilder = ast::MK::Self(attrType->loc);
+    auto sigBuilder = ast::MK::Self(attrType.loc);
 
     if (send->fun == core::Names::attrWriter()) {
         ENFORCE(send->numPosArgs() >= 1);
@@ -286,20 +285,20 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::attrSignature(core::MutableCont
         auto name = rewriter::ASTUtil::getAttrName(ctx, send->fun, send->getPosArg(0));
         Send::ARGS_store sigArgs;
         sigArgs.emplace_back(ast::MK::Symbol(name.second, name.first));
-        sigArgs.emplace_back(TypeTranslator::toRBI(ctx, typeParams, attrType->node, attrType->loc));
-        sigBuilder = ast::MK::Send(attrType->loc, std::move(sigBuilder), core::Names::params(), attrType->loc, 0,
+        sigArgs.emplace_back(TypeTranslator::toRBI(ctx, typeParams, attrType.node.get(), attrType.loc));
+        sigBuilder = ast::MK::Send(attrType.loc, std::move(sigBuilder), core::Names::params(), attrType.loc, 0,
                                    std::move(sigArgs));
     }
 
-    auto returnType = TypeTranslator::toRBI(ctx, typeParams, attrType->node, attrType->loc);
-    sigBuilder = ast::MK::Send1(attrType->loc, std::move(sigBuilder), core::Names::returns(), attrType->loc,
+    auto returnType = TypeTranslator::toRBI(ctx, typeParams, attrType.node.get(), attrType.loc);
+    sigBuilder = ast::MK::Send1(attrType.loc, std::move(sigBuilder), core::Names::returns(), attrType.loc,
                                 std::move(returnType));
 
-    auto sig = ast::MK::Send1(attrType->loc, ast::MK::Constant(attrType->loc, core::Symbols::Sorbet_Private_Static()),
-                              core::Names::sig(), attrType->loc,
-                              ast::MK::Constant(attrType->loc, core::Symbols::T_Sig_WithoutRuntime()));
+    auto sig = ast::MK::Send1(attrType.loc, ast::MK::Constant(attrType.loc, core::Symbols::Sorbet_Private_Static()),
+                              core::Names::sig(), attrType.loc,
+                              ast::MK::Constant(attrType.loc, core::Symbols::T_Sig_WithoutRuntime()));
     auto sigSend = ast::cast_tree<ast::Send>(sig);
-    sigSend->setBlock(ast::MK::Block0(attrType->loc, std::move(sigBuilder)));
+    sigSend->setBlock(ast::MK::Block0(attrType.loc, std::move(sigBuilder)));
     sigSend->flags.isRewriterSynthesized = true;
 
     return sig;
