@@ -76,8 +76,7 @@ bool retainGlobalState(core::GlobalState &gs, const unique_ptr<OwnedKeyValueStor
     // optimization we can skip that when nothing has been modified.
     if (gs.wasModified()) {
         gs.kvstoreUuid = Random::uniformU4();
-        kvstore->write(core::serialize::Serializer::GLOBAL_STATE_KEY,
-                       core::serialize::Serializer::storePayloadAndNameTable(gs));
+        kvstore->write(core::serialize::Serializer::GLOBAL_STATE_KEY, core::serialize::Serializer::storeNameTable(gs));
     }
 
     return true;
