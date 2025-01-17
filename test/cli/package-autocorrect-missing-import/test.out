@@ -30,8 +30,8 @@ foo_class.rb:7: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    __package.rb:6: Inserted `import Foo::Bar::OtherPackage`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
+    __package.rb:8: Inserted `import Foo::Bar::OtherPackage`
+     8 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
 
 foo_class.rb:8: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
@@ -41,8 +41,8 @@ foo_class.rb:8: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    __package.rb:6: Inserted `import Foo::Bar::OtherPackage`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
+    __package.rb:8: Inserted `import Foo::Bar::OtherPackage`
+     8 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
 
 foo_class.rb:14: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
@@ -52,8 +52,8 @@ foo_class.rb:14: `Foo::Bar::OtherPackage::OtherClass` resolves but its package i
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    __package.rb:6: Inserted `import Foo::Bar::OtherPackage`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
+    __package.rb:8: Inserted `import Foo::Bar::OtherPackage`
+     8 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
 
 foo_class.rb:17: `Test::Foo::Bar::OtherPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
@@ -67,8 +67,8 @@ foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolves but its package
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    __package.rb:6: Inserted `test_import Foo::Bar::OtherPackage`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
+    __package.rb:8: Inserted `test_import Foo::Bar::OtherPackage`
+     8 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
 
 foo.test.rb:6: `Foo::Bar::OtherPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
@@ -78,8 +78,8 @@ foo.test.rb:6: `Foo::Bar::OtherPackage::ImportMeTestOnly` resolves but its packa
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    __package.rb:6: Inserted `test_import Foo::Bar::OtherPackage`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
+    __package.rb:8: Inserted `test_import Foo::Bar::OtherPackage`
+     8 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
 Errors: 7
 
@@ -90,6 +90,8 @@ Errors: 7
 # enable-packager: true
 
 class Foo::MyPackage < PackageSpec
+  layer 'lib'
+  strict_dependencies 'layered'
   # import Foo::Bar::OtherPackage ## MISSING!
   import Foo::Bar::OtherPackage
 end
