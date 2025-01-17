@@ -179,7 +179,7 @@ int lexer::compare_indent_level(token_t left, token_t right) {
     const auto rightLineStart = right->lineStart();
 
     // optimization: tokens start on same line
-    if (leftStart == rightStart) {
+    if (leftLineStart == rightLineStart) {
         return 0;
     }
 
