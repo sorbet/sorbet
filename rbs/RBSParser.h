@@ -20,7 +20,7 @@ public:
      *
      * This is used to parse comments like `#: Integer` found on attribute accessors.
      */
-    static std::unique_ptr<Type> parseType(core::Context ctx, Comment comment);
+    static std::optional<Type> parseType(core::Context ctx, Comment comment);
 };
 
 } // namespace sorbet::rbs

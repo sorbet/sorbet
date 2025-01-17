@@ -21,8 +21,7 @@ public:
      *
      * For example the attribute type comment `#: Integer` will be translated as `sig { returns(Integer) }`.
      */
-    static sorbet::ast::ExpressionPtr attrSignature(core::MutableContext ctx, sorbet::ast::Send *send,
-                                                    std::unique_ptr<Type> type);
+    static sorbet::ast::ExpressionPtr attrSignature(core::MutableContext ctx, sorbet::ast::Send *send, Type type);
 };
 
 } // namespace sorbet::rbs

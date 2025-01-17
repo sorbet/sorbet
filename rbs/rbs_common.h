@@ -30,16 +30,9 @@ struct MethodType {
 /**
  * A parsed RBS type.
  */
-class Type {
-public:
+struct Type {
     core::LocOffsets loc;
-    rbs_node_t *node;
-
-    Type(core::LocOffsets loc, rbs_node_t *node) : loc(loc), node(node) {}
-
-    ~Type() {
-        free(node);
-    }
+    std::unique_ptr<rbs_node_t> node;
 };
 
 } // namespace sorbet::rbs

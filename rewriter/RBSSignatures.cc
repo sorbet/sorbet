@@ -190,7 +190,7 @@ class RBSSignaturesWalk {
 
         for (auto &signature : attrComments.signatures) {
             if (auto rbsType = rbs::RBSParser::parseType(ctx, signature)) {
-                auto sig = rbs::MethodTypeTranslator::attrSignature(ctx, send, std::move(rbsType));
+                auto sig = rbs::MethodTypeTranslator::attrSignature(ctx, send, std::move(rbsType.value()));
                 classDef->rhs.emplace_back(std::move(sig));
             }
         }
