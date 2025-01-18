@@ -901,14 +901,14 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         }
                         Literal *lit;
                         if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol()) {
-                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), locZeroLen, 4,
+                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                            std::move(sendargs), flags);
                             ast::cast_tree_nonnull<ast::Send>(res).setBlock(
                                 symbol2Proc(dctx, std::move(convertedBlock)));
                         } else {
                             sendargs.emplace_back(std::move(convertedBlock));
-                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlock(), locZeroLen, 5,
-                                           std::move(sendargs), flags);
+                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlock(), send->methodLoc,
+                                           5, std::move(sendargs), flags);
                         }
                     }
                     result = std::move(res);
@@ -985,8 +985,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         res = MK::Send(loc, std::move(rec), send->method, send->methodLoc, numPosArgs, std::move(args),
                                        flags);
                     } else {
-                        auto method = MK::Literal(
-                            loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), send->method));
+                        auto method = MK::Symbol(locZeroLen, send->method);
                         ExpressionPtr convertedBlock;
                         if (anonymousBlockPass) {
                             ENFORCE(block == nullptr, "encountered a block while processing an anonymous block pass");
@@ -1012,8 +1011,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                                 sendargs.emplace_back(std::move(arg));
                             }
 
-                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithBlock(), locZeroLen, numPosArgs,
-                                           std::move(sendargs), flags);
+                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithBlock(), send->methodLoc,
+                                           numPosArgs, std::move(sendargs), flags);
                         }
                     }
 
