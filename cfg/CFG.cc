@@ -108,28 +108,28 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
                 blockReads.add(bind.bind.variable.id());
             }
 
-            if (auto *v = cast_instruction<Ident>(bind.value)) {
+            if (auto v = cast_instruction<Ident>(bind.value)) {
                 blockReads.add(v->what.id());
-            } else if (auto *v = cast_instruction<Send>(bind.value)) {
+            } else if (auto v = cast_instruction<Send>(bind.value)) {
                 blockReads.add(v->recv.variable.id());
                 for (auto &arg : v->args) {
                     blockReads.add(arg.variable.id());
                 }
-            } else if (auto *v = cast_instruction<TAbsurd>(bind.value)) {
+            } else if (auto v = cast_instruction<TAbsurd>(bind.value)) {
                 blockReads.add(v->what.variable.id());
-            } else if (auto *v = cast_instruction<Return>(bind.value)) {
+            } else if (auto v = cast_instruction<Return>(bind.value)) {
                 blockReads.add(v->what.variable.id());
-            } else if (auto *v = cast_instruction<BlockReturn>(bind.value)) {
+            } else if (auto v = cast_instruction<BlockReturn>(bind.value)) {
                 blockReads.add(v->what.variable.id());
-            } else if (auto *v = cast_instruction<Cast>(bind.value)) {
+            } else if (auto v = cast_instruction<Cast>(bind.value)) {
                 blockReads.add(v->value.variable.id());
-            } else if (auto *v = cast_instruction<LoadSelf>(bind.value)) {
+            } else if (auto v = cast_instruction<LoadSelf>(bind.value)) {
                 blockReads.add(v->fallback.id());
-            } else if (auto *v = cast_instruction<SolveConstraint>(bind.value)) {
+            } else if (auto v = cast_instruction<SolveConstraint>(bind.value)) {
                 blockReads.add(v->send.id());
-            } else if (auto *v = cast_instruction<YieldLoadArg>(bind.value)) {
+            } else if (auto v = cast_instruction<YieldLoadArg>(bind.value)) {
                 blockReads.add(v->yieldParam.variable.id());
-            } else if (auto *v = cast_instruction<KeepAlive>(bind.value)) {
+            } else if (auto v = cast_instruction<KeepAlive>(bind.value)) {
                 blockReads.add(v->what.id());
             }
 

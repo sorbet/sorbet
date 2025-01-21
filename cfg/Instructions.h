@@ -339,6 +339,10 @@ class InstructionPtr final {
         return i;
     }
 
+    uint16_t tagMaybeZero() const noexcept {
+        return ptr & TAG_MASK;
+    }
+
 public:
     // Required for typecase
     template <class To> static bool isa(const InstructionPtr &insn);
@@ -405,6 +409,47 @@ public:
         return (this->ptr & SYNTHETIC_FLAG) != 0;
     }
 
+    template <class To> struct TaggedValue {
+    private:
+        To *value;
+        bool isValid;
+
+    public:
+        explicit TaggedValue(To *p, bool valid) noexcept : value(p), isValid(valid) {}
+
+        explicit operator bool() const noexcept {
+            return isValid;
+        }
+
+        To *operator->() const noexcept {
+            return value;
+        }
+
+        operator To *() const noexcept {
+            return value;
+        }
+
+        bool operator==(std::nullptr_t) const noexcept {
+            return value == nullptr;
+        }
+
+        bool operator!=(std::nullptr_t) const noexcept {
+            return value != nullptr;
+        }
+    };
+
+    template <class To> TaggedValue<To> as_instruction() {
+        bool isValid = tagMaybeZero() == uint16_t(InsnToTag<To>::value);
+        auto *ptr = isValid ? reinterpret_cast<To *>(get()) : nullptr;
+        return TaggedValue<To>(ptr, isValid);
+    }
+
+    template <class To> TaggedValue<const To> as_instruction() const {
+        bool isValid = tagMaybeZero() == uint16_t(InsnToTag<To>::value);
+        auto *ptr = isValid ? reinterpret_cast<const To *>(get()) : nullptr;
+        return TaggedValue<const To>(ptr, isValid);
+    }
+
     void setSynthetic() noexcept {
         this->ptr |= SYNTHETIC_FLAG;
     }
@@ -414,31 +459,25 @@ public:
 };
 
 template <class To> bool isa_instruction(const InstructionPtr &what) {
-    return what != nullptr && what.tag() == InsnToTag<To>::value;
+    return bool(what.as_instruction<To>());
 }
 
-template <class To> To *cast_instruction(InstructionPtr &what) {
+template <class To> InstructionPtr::TaggedValue<To> cast_instruction(InstructionPtr &what) {
     static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
     static_assert(std::is_assignable<Instruction *&, To *>::value,
                   "Ill Formed To, has to be a subclass of Instruction");
-    if (isa_instruction<To>(what)) {
-        return reinterpret_cast<To *>(what.get());
-    }
-    return nullptr;
+    return what.as_instruction<To>();
 }
 
-template <class To> const To *cast_instruction(const InstructionPtr &what) {
+template <class To> InstructionPtr::TaggedValue<const To> cast_instruction(const InstructionPtr &what) {
     static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
     static_assert(std::is_assignable<Instruction *&, To *>::value,
                   "Ill Formed To, has to be a subclass of Instruction");
-    if (isa_instruction<To>(what)) {
-        return reinterpret_cast<const To *>(what.get());
-    }
-    return nullptr;
+    return what.as_instruction<To>();
 }
 
 template <class To> inline bool InstructionPtr::isa(const InstructionPtr &what) {
-    return isa_instruction<To>(what);
+    return bool(what.as_instruction<To>());
 }
 template <> inline bool InstructionPtr::isa<InstructionPtr>(const InstructionPtr &what) {
     return true;
