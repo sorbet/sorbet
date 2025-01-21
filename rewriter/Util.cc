@@ -219,7 +219,7 @@ ast::Send *ASTUtil::castSig(ast::ExpressionPtr &expr) {
         return nullptr;
     }
 
-    return castSigImpl(send);
+    return castSigImpl(send.get());
 }
 
 const ast::Send *ASTUtil::castSig(const ast::ExpressionPtr &expr) {
@@ -228,7 +228,7 @@ const ast::Send *ASTUtil::castSig(const ast::ExpressionPtr &expr) {
         return nullptr;
     }
 
-    return castSigImpl(send);
+    return castSigImpl(send.get());
 }
 
 ast::Send *ASTUtil::castSig(ast::Send *expr) {

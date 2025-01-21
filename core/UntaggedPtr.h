@@ -15,6 +15,10 @@ public:
         return isValid;
     }
 
+    To *get() const noexcept {
+        return value;
+    }
+
     To *operator->() const noexcept {
         return value;
     }
