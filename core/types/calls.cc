@@ -480,26 +480,25 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     }
 
     { // keep only candidates that have a block iff we are passing one
-        for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
-            const auto &[candidate, _arity, constr] = *it;
+        auto it = std::remove_if(leftCandidates.begin(), leftCandidates.end(), [&gs, hasBlock](auto &c) -> bool {
+            const auto &[candidate, _arity, constr] = c;
             const auto &args = candidate.data(gs)->arguments;
             ENFORCE(!args.empty(), "Should at least have a block argument.");
             const auto &lastArg = args.back();
             auto mentionsBlockArg = !lastArg.isSyntheticBlockArgument();
             if (hasBlock) {
                 if (!mentionsBlockArg || lastArg.type == Types::nilClass()) {
-                    it = leftCandidates.erase(it);
-                    continue;
+                    return true;
                 }
             } else {
                 if (mentionsBlockArg && lastArg.type != nullptr &&
                     (!lastArg.type.isFullyDefined() || !Types::isSubType(gs, Types::nilClass(), lastArg.type))) {
-                    it = leftCandidates.erase(it);
-                    continue;
+                    return true;
                 }
             }
-            ++it;
-        }
+            return false;
+        });
+        leftCandidates.erase(it, leftCandidates.end());
     }
 
     { // keep only candidates with closest arity
