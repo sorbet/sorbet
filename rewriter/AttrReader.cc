@@ -122,7 +122,7 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, ast::S
     // Loop down the chain of recv's until we get to the inner 'sig' node.
     auto *block = sig->block();
     auto body = ast::cast_tree<ast::Send>(block->body);
-    auto *cur = body;
+    auto cur = body;
     while (cur != nullptr) {
         if (cur->fun == core::Names::typeParameters()) {
             if (auto e = ctx.beginIndexerError(sig->loc, core::errors::Rewriter::BadAttrType)) {

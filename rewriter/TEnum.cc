@@ -68,7 +68,7 @@ ast::Send *findSelfNew(ast::ExpressionPtr &assignRhs) {
             return nullptr;
         }
 
-        auto *magicSelfNew = rhs;
+        auto magicSelfNew = rhs;
         if (rhs->fun == core::Names::let()) {
             auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(rhs->recv);
             if (recv == nullptr) {
