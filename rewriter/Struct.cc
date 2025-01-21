@@ -16,7 +16,7 @@ namespace sorbet::rewriter {
 namespace {
 
 bool isKeywordInitKey(const core::GlobalState &gs, const ast::ExpressionPtr &node) {
-    if (auto *lit = ast::cast_tree<ast::Literal>(node)) {
+    if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isSymbol() && lit->asSymbol() == core::Names::keywordInit();
     }
     return false;
@@ -101,7 +101,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
             return empty;
         }
 
-        if (auto *lit = ast::cast_tree<ast::Literal>(send->getKwValue(0))) {
+        if (auto lit = ast::cast_tree<ast::Literal>(send->getKwValue(0))) {
             if (lit->isTrue(ctx)) {
                 keywordInit = true;
             } else if (!lit->isFalse(ctx)) {
@@ -113,7 +113,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
     }
 
     for (auto &arg : send->posArgs()) {
-        auto *sym = ast::cast_tree<ast::Literal>(arg);
+        auto sym = ast::cast_tree<ast::Literal>(arg);
         if (!sym || !sym->isSymbol()) {
             return empty;
         }
@@ -182,7 +182,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
 
         if (auto *block = send->block()) {
             // Steal the trees, because the run is going to remove the original send node from the tree anyway.
-            if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
+            if (auto insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
                 for (auto &&stat : insSeq->stats) {
                     body.emplace_back(move(stat));
                 }

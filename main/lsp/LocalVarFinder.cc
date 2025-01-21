@@ -27,7 +27,7 @@ void LocalVarFinder::preTransformBlock(core::Context ctx, const ast::Block &bloc
 void LocalVarFinder::postTransformAssign(core::Context ctx, const ast::Assign &assign) {
     ENFORCE(!methodStack.empty());
 
-    auto *local = ast::cast_tree<ast::Local>(assign.lhs);
+    auto local = ast::cast_tree<ast::Local>(assign.lhs);
     if (local == nullptr) {
         return;
     }

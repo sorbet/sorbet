@@ -165,17 +165,17 @@ void DefLocSaver::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tr
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
     if (ast::isa_tree<ast::EmptyTree>(classDef.name)) {
         ENFORCE(classDef.symbol == core::Symbols::root());
-    } else if (auto *ident = ast::cast_tree<ast::UnresolvedIdent>(classDef.name)) {
+    } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(classDef.name)) {
         ENFORCE(ident->name == core::Names::singleton());
     } else {
         // The `<root>` class we wrap all code with uses EmptyTree for the ClassDef::name field.
-        auto *lit = ast::cast_tree<ast::ConstantLit>(classDef.name);
+        auto lit = ast::cast_tree<ast::ConstantLit>(classDef.name);
         matchesQuery(ctx, lit, lspQuery, lit->symbol);
     }
 
     if (classDef.kind == ast::ClassDef::Kind::Class && !classDef.ancestors.empty() &&
         shouldLeaveAncestorForIDE(classDef.ancestors.front())) {
-        auto *lit = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front());
+        auto lit = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front());
         matchesQuery(ctx, lit, lspQuery, lit->symbol);
     }
 }

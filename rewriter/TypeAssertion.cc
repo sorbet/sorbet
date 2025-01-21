@@ -7,7 +7,7 @@ namespace sorbet::rewriter {
 
 namespace {
 bool isT(const ast::ExpressionPtr &expr) {
-    auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    auto t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (t == nullptr || t->cnst != core::Names::Constants::T()) {
         return false;
     }

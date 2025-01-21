@@ -256,7 +256,7 @@ public:
             return;
         }
 
-        auto *lit = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
+        auto lit = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
         if (lit == nullptr || lit->symbol == core::Symbols::StubModule()) {
             // We don't raise an explicit error here, as this is one of two cases:
             //   1. Export is given a non-constant argument
@@ -544,7 +544,7 @@ public:
             return;
         }
 
-        auto *lit = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
+        auto lit = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
         if (lit == nullptr) {
             // We don't raise an explicit error here, for the same reasons as in PropagateVisibility::postTransformSend.
             return;

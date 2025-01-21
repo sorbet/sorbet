@@ -85,7 +85,7 @@ vector<ast::ExpressionPtr> Delegate::run(core::MutableContext ctx, const ast::Se
 
     vector<ast::ExpressionPtr> methodStubs;
     for (auto &arg : send->posArgs()) {
-        auto *lit = ast::cast_tree<ast::Literal>(arg);
+        auto lit = ast::cast_tree<ast::Literal>(arg);
         if (!lit || !lit->isSymbol()) {
             return empty;
         }

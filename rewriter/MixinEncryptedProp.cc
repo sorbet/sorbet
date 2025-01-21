@@ -46,7 +46,7 @@ vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast
     }
 
     auto loc = send->loc;
-    auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(0));
+    auto sym = ast::cast_tree<ast::Literal>(send->getPosArg(0));
     if (!sym || !sym->isSymbol()) {
         return empty;
     }
@@ -59,7 +59,7 @@ vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast
     ast::ExpressionPtr rules;
     rules = ASTUtil::mkKwArgsHash(send);
 
-    if (auto *hash = ast::cast_tree<ast::Hash>(rules)) {
+    if (auto hash = ast::cast_tree<ast::Hash>(rules)) {
         if (ASTUtil::hasTruthyHashValue(ctx, *hash, core::Names::immutable())) {
             isImmutable = true;
         }

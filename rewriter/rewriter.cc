@@ -40,7 +40,7 @@ class Rewriterer {
 
 public:
     void postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
+        auto classDef = ast::cast_tree<ast::ClassDef>(tree);
 
         auto isClass = classDef->kind == ast::ClassDef::Kind::Class;
 
@@ -179,7 +179,7 @@ public:
     // NOTE: this case differs from the `Send` typecase branch in `postTransformClassDef` above, as it will apply to all
     // sends, not just those that are present in the RHS of a `ClassDef`.
     void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        auto *send = ast::cast_tree<ast::Send>(tree);
+        auto send = ast::cast_tree<ast::Send>(tree);
 
         if (ClassNew::run(ctx, send)) {
             return;

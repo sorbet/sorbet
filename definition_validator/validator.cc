@@ -463,7 +463,7 @@ constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &
         return nullopt;
     }
 
-    auto *blockBody = ast::cast_tree<ast::Send>(block->body);
+    auto blockBody = ast::cast_tree<ast::Send>(block->body);
     ENFORCE(blockBody != nullptr);
     auto insertLoc = ctx.locAt(blockBody->loc.copyWithZeroLength());
 
@@ -788,7 +788,7 @@ void validateSuperClass(core::Context ctx, const core::ClassOrModuleRef sym, con
         return;
     }
 
-    if (auto *cnst = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front())) {
+    if (auto cnst = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front())) {
         if (cnst->symbol == core::Symbols::todo()) {
             return;
         }
@@ -1047,7 +1047,7 @@ private:
 
         auto hasEmptyBody = classDef.rhs.empty();
         if (classDef.rhs.size() == 1) {
-            if (auto *mdef = ast::cast_tree<ast::MethodDef>(classDef.rhs[0])) {
+            if (auto mdef = ast::cast_tree<ast::MethodDef>(classDef.rhs[0])) {
                 hasEmptyBody = ast::isa_tree<ast::EmptyTree>(mdef->rhs);
             }
         }
@@ -1199,7 +1199,7 @@ public:
             return;
         }
 
-        auto *id = ast::cast_tree<ast::ConstantLit>(send.recv);
+        auto id = ast::cast_tree<ast::ConstantLit>(send.recv);
         if (id == nullptr || !id->symbol.exists() || !id->symbol.isClassOrModule()) {
             return;
         }

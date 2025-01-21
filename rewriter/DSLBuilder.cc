@@ -43,7 +43,7 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
     if (send->numPosArgs() < 2) {
         return empty;
     }
-    auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(0));
+    auto sym = ast::cast_tree<ast::Literal>(send->getPosArg(0));
     if (sym == nullptr || !sym->isSymbol()) {
         return empty;
     }
@@ -59,7 +59,7 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
     }
 
     ast::ExpressionPtr optsTree = ASTUtil::mkKwArgsHash(send);
-    if (auto *opts = ast::cast_tree<ast::Hash>(optsTree)) {
+    if (auto opts = ast::cast_tree<ast::Hash>(optsTree)) {
         if (ASTUtil::hasHashValue(ctx, *opts, core::Names::default_())) {
             nilable = false;
         }

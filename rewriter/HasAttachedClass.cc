@@ -14,7 +14,7 @@ vector<ast::ExpressionPtr> HasAttachedClass::run(core::MutableContext ctx, bool 
 
     if (send->numPosArgs() > 0) {
         const auto &arg0 = send->posArgs()[0];
-        if (const auto *lit = ast::cast_tree<ast::Literal>(arg0)) {
+        if (const auto lit = ast::cast_tree<ast::Literal>(arg0)) {
             if (lit->isSymbol() && lit->asSymbol() == core::Names::contravariant()) {
                 if (auto e = ctx.beginIndexerError(arg0.loc(), core::errors::Rewriter::ContravariantHasAttachedClass)) {
                     e.setHeader("`{}` cannot be declared `{}`, only invariant or `{}`",

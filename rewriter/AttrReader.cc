@@ -18,7 +18,7 @@ namespace {
 pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::ExpressionPtr &name) {
     core::LocOffsets loc;
     core::NameRef res;
-    if (auto *lit = ast::cast_tree<ast::Literal>(name)) {
+    if (auto lit = ast::cast_tree<ast::Literal>(name)) {
         if (lit->isSymbol()) {
             res = lit->asSymbol();
             loc = lit->loc;
@@ -63,7 +63,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Exp
 // either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
 // users, but we don't know that information in the Rewriter passes.
 bool isT(const ast::ExpressionPtr &expr) {
-    auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    auto t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (t == nullptr || t->cnst != core::Names::Constants::T()) {
         return false;
     }
@@ -71,7 +71,7 @@ bool isT(const ast::ExpressionPtr &expr) {
 }
 
 bool isTNilableOrUntyped(const ast::ExpressionPtr &expr) {
-    auto *send = ast::cast_tree<ast::Send>(expr);
+    auto send = ast::cast_tree<ast::Send>(expr);
     return send != nullptr && (send->fun == core::Names::nilable() || send->fun == core::Names::untyped()) &&
            isT(send->recv);
 }
@@ -121,7 +121,7 @@ ast::ExpressionPtr dupReturnsType(ast::Send *sharedSig) {
 void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, ast::Send *sig) {
     // Loop down the chain of recv's until we get to the inner 'sig' node.
     auto *block = sig->block();
-    auto *body = ast::cast_tree<ast::Send>(block->body);
+    auto body = ast::cast_tree<ast::Send>(block->body);
     auto *cur = body;
     while (cur != nullptr) {
         if (cur->fun == core::Names::typeParameters()) {
@@ -142,7 +142,7 @@ ast::ExpressionPtr toWriterSigForName(ast::Send *sharedSig, const core::NameRef 
 
     // There's a bit of work here because deepCopy gives us back an Expression when we know it's a Send.
     ast::ExpressionPtr sigExpr = sharedSig->deepCopy();
-    auto *sig = ast::cast_tree<ast::Send>(sigExpr);
+    auto sig = ast::cast_tree<ast::Send>(sigExpr);
     ENFORCE(sig != nullptr, "Just deep copied this, so it should be non-null");
 
     auto *body = findSendReturns(sig);

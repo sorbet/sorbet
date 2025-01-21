@@ -8,18 +8,18 @@ namespace sorbet::rewriter {
 namespace {
 
 bool isTSigWithoutRuntime(ast::ExpressionPtr &expr) {
-    if (auto *cnst = ast::cast_tree<ast::ConstantLit>(expr)) {
+    if (auto cnst = ast::cast_tree<ast::ConstantLit>(expr)) {
         return cnst->symbol == core::Symbols::T_Sig_WithoutRuntime();
     } else {
-        auto *withoutRuntime = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+        auto withoutRuntime = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
         if (withoutRuntime == nullptr || withoutRuntime->cnst != core::Names::Constants::WithoutRuntime()) {
             return false;
         }
-        auto *sig = ast::cast_tree<ast::UnresolvedConstantLit>(withoutRuntime->scope);
+        auto sig = ast::cast_tree<ast::UnresolvedConstantLit>(withoutRuntime->scope);
         if (sig == nullptr || sig->cnst != core::Names::Constants::Sig()) {
             return false;
         }
-        auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(sig->scope);
+        auto t = ast::cast_tree<ast::UnresolvedConstantLit>(sig->scope);
         return t != nullptr && t->cnst == core::Names::Constants::T() && ast::MK::isRootScope(t->scope);
     }
 }

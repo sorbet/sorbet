@@ -22,7 +22,7 @@ bool shouldExtract(core::Context ctx, const ast::ExpressionPtr &what) {
         return false;
     }
 
-    if (auto *asgn = ast::cast_tree<ast::Assign>(what)) {
+    if (auto asgn = ast::cast_tree<ast::Assign>(what)) {
         return !ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs);
     }
 
@@ -71,7 +71,7 @@ public:
         ENFORCE(classes.size() > classStack.back());
         ENFORCE(classes[classStack.back()] == nullptr);
 
-        auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
+        auto classDef = ast::cast_tree<ast::ClassDef>(tree);
         auto inits = extractClassInit(ctx, classDef);
 
         core::MethodRef sym;

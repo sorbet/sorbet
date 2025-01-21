@@ -22,15 +22,15 @@ bool doesExtendConcern(core::MutableContext ctx, ast::ClassDef *klass) {
                 if (!send.hasPosArgs()) {
                     return;
                 }
-                auto *firstArg = ast::cast_tree<ast::UnresolvedConstantLit>(send.getPosArg(0));
+                auto firstArg = ast::cast_tree<ast::UnresolvedConstantLit>(send.getPosArg(0));
                 if (firstArg == nullptr) {
                     return;
                 }
-                auto *firstArgScope = ast::cast_tree<ast::UnresolvedConstantLit>(firstArg->scope);
+                auto firstArgScope = ast::cast_tree<ast::UnresolvedConstantLit>(firstArg->scope);
                 if (firstArgScope == nullptr) {
                     return;
                 }
-                auto *outerScope = ast::cast_tree<ast::UnresolvedConstantLit>(firstArgScope->scope);
+                auto outerScope = ast::cast_tree<ast::UnresolvedConstantLit>(firstArgScope->scope);
                 if (outerScope != nullptr) {
                     return;
                 }
@@ -69,7 +69,7 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
     vector<ast::ExpressionPtr> stats;
     ast::ExpressionPtr classMethodsNode;
     for (auto &stat : klass->rhs) {
-        if (auto *send = ast::cast_tree<ast::Send>(stat)) {
+        if (auto send = ast::cast_tree<ast::Send>(stat)) {
             if (send->fun == core::Names::classMethods()) { // class_methods do ... end
                 if (!send->hasBlock()) {
                     continue;
@@ -80,7 +80,7 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
                 if (classMethodsNode) {
                     // ClassMethods module already exists. Let's add the block as one of its members
                     auto *block = send->block();
-                    auto *classDef = ast::cast_tree<ast::ClassDef>(classMethodsNode);
+                    auto classDef = ast::cast_tree<ast::ClassDef>(classMethodsNode);
 
                     if (auto insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
                         for (auto &stat : insSeq->stats) {
@@ -110,12 +110,12 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
                 }
                 continue;
             }
-        } else if (auto *mod = ast::cast_tree<ast::ClassDef>(stat)) {
+        } else if (auto mod = ast::cast_tree<ast::ClassDef>(stat)) {
             auto name = ast::cast_tree<ast::UnresolvedConstantLit>(mod->name);
             if (name && name->cnst == core::Names::Constants::ClassMethods()) {
                 if (classMethodsNode) {
                     // ClassMethods module already exists. Let's add mod->rhs into existing module
-                    auto *classDef = ast::cast_tree<ast::ClassDef>(classMethodsNode);
+                    auto classDef = ast::cast_tree<ast::ClassDef>(classMethodsNode);
                     for (auto &elem : mod->rhs) {
                         classDef->rhs.emplace_back(std::move(elem));
                     }

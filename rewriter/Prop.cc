@@ -16,17 +16,17 @@ namespace {
 // either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
 // users, but we don't know that information in the Rewriter passes.
 bool isT(const ast::ExpressionPtr &expr) {
-    auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    auto t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return t != nullptr && t->cnst == core::Names::Constants::T() && ast::MK::isRootScope(t->scope);
 }
 
 bool isTNilable(const ast::ExpressionPtr &expr) {
-    auto *nilable = ast::cast_tree<ast::Send>(expr);
+    auto nilable = ast::cast_tree<ast::Send>(expr);
     return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv);
 }
 
 bool isTUntyped(const ast::ExpressionPtr &expr) {
-    auto *send = ast::cast_tree<ast::Send>(expr);
+    auto send = ast::cast_tree<ast::Send>(expr);
     return send != nullptr && send->fun == core::Names::untyped() && isT(send->recv);
 }
 
@@ -40,17 +40,17 @@ bool isTNilableTUntyped(const ast::ExpressionPtr &expr) {
 }
 
 bool isTStruct(const ast::ExpressionPtr &expr) {
-    auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->cnst == core::Names::Constants::Struct() && isT(struct_->scope);
 }
 
 bool isTInexactStruct(const ast::ExpressionPtr &expr) {
-    auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->cnst == core::Names::Constants::InexactStruct() && isT(struct_->scope);
 }
 
 bool isTImmutableStruct(const ast::ExpressionPtr &expr) {
-    auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->cnst == core::Names::Constants::ImmutableStruct() && isT(struct_->scope);
 }
 
@@ -215,7 +215,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         if (!send->hasPosArgs()) {
             return nullopt;
         }
-        auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(0));
+        auto sym = ast::cast_tree<ast::Literal>(send->getPosArg(0));
         if (!sym || !sym->isSymbol()) {
             return nullopt;
         }
@@ -264,7 +264,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
 
             bool addDefault = true;
             if (rulesTree != nullptr) {
-                auto *rules = ast::cast_tree<ast::Hash>(rulesTree);
+                auto rules = ast::cast_tree<ast::Hash>(rulesTree);
                 addDefault = !ASTUtil::hasHashValue(ctx, *rules, core::Names::default_());
             }
 
@@ -279,7 +279,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     }
     // ----- Parse any extra options -----
     if (rulesTree) {
-        auto *rules = ast::cast_tree<ast::Hash>(rulesTree);
+        auto rules = ast::cast_tree<ast::Hash>(rulesTree);
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::immutable())) {
             ret.isImmutable = true;
         }
@@ -507,12 +507,12 @@ ast::ExpressionPtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send 
     auto withoutAccessors = ast::MK::Symbol(send->loc, core::Names::withoutAccessors());
     auto true_ = ast::MK::True(send->loc);
 
-    auto *copy = ast::cast_tree<ast::Send>(result);
+    auto copy = ast::cast_tree<ast::Send>(result);
     if (copy->hasKwArgs() || !copy->hasPosArgs()) {
         // append to the inline keyword arguments of the send
         copy->addKwArg(move(withoutAccessors), move(true_));
     } else {
-        if (auto *hash = ast::cast_tree<ast::Hash>(copy->getPosArg(copy->numPosArgs() - 1))) {
+        if (auto hash = ast::cast_tree<ast::Hash>(copy->getPosArg(copy->numPosArgs() - 1))) {
             hash->keys.emplace_back(move(withoutAccessors));
             hash->values.emplace_back(move(true_));
         } else {
@@ -588,7 +588,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     vector<PropInfo> props;
     UnorderedMap<core::NameRef, uint32_t> seenProps;
     for (auto &stat : klass->rhs) {
-        auto *send = ast::cast_tree<ast::Send>(stat);
+        auto send = ast::cast_tree<ast::Send>(stat);
         if (send == nullptr) {
             continue;
         }

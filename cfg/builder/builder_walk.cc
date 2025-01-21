@@ -124,7 +124,7 @@ bool isKernelLambda(ast::Send &s) {
     //
     // We could revisit this in the future but for now let's be conservative.
 
-    auto *cnst = ast::cast_tree<ast::ConstantLit>(s.recv);
+    auto cnst = ast::cast_tree<ast::ConstantLit>(s.recv);
     return cnst != nullptr && cnst->symbol == core::Symbols::Kernel();
 }
 
@@ -184,13 +184,13 @@ InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
 }
 
 ast::Send *isKernelProcOrLambda(ast::ExpressionPtr &expr) {
-    auto *send = ast::cast_tree<ast::Send>(expr);
+    auto send = ast::cast_tree<ast::Send>(expr);
     if (send == nullptr || send->hasNonBlockArgs() ||
         (send->fun != core::Names::lambda() && send->fun != core::Names::proc())) {
         return nullptr;
     }
 
-    auto *recv = ast::cast_tree<ast::ConstantLit>(send->recv);
+    auto recv = ast::cast_tree<ast::ConstantLit>(send->recv);
     if (recv == nullptr || recv->symbol != core::Symbols::Kernel()) {
         return nullptr;
     }
@@ -435,7 +435,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 synthesizeExpr(current, cctx.target, a.loc, make_insn<Ident>(aliasName));
 
                 if (a.original) {
-                    auto *orig = ast::cast_tree<ast::UnresolvedConstantLit>(a.original);
+                    auto orig = ast::cast_tree<ast::UnresolvedConstantLit>(a.original);
                     // Empirically, these are the only two cases we've needed so far to service the
                     // LSP requests we want (hover and completion), but that doesn't mean these are
                     // the **only** we'll ever want.
@@ -642,7 +642,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                 continue;
                             }
 
-                            if (auto *opt = ast::cast_tree<ast::OptionalArg>(blockArgs[i])) {
+                            if (auto opt = ast::cast_tree<ast::OptionalArg>(blockArgs[i])) {
                                 auto *presentBlock = cctx.inWhat.freshBlock(bodyLoops);
                                 auto *missingBlock = cctx.inWhat.freshBlock(bodyLoops);
 
@@ -869,11 +869,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 unconditionalJump(elseBody, ensureBody, cctx.inWhat, a.loc);
 
                 for (auto &expr : a.rescueCases) {
-                    auto *rescueCase = ast::cast_tree<ast::RescueCase>(expr);
+                    auto rescueCase = ast::cast_tree<ast::RescueCase>(expr);
                     auto caseBody = cctx.inWhat.freshBlock(cctx.loops);
                     auto &exceptions = rescueCase->exceptions;
                     auto added = false;
-                    auto *local = ast::cast_tree<ast::Local>(rescueCase->var);
+                    auto local = ast::cast_tree<ast::Local>(rescueCase->var);
                     ENFORCE(local != nullptr, "rescue case var not a local?");
 
                     auto localVar = cctx.inWhat.enterLocal(local->localVariable);
