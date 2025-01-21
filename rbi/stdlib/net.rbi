@@ -4345,6 +4345,14 @@ class Net::IMAP::Address < Struct
   def self.new(*_); end
 end
 
+class Net::IMAP::DataLite < Data
+  def initialize(data); end
+
+  def encode_with(coder); end
+
+  def init_with(coder); end
+end
+
 class Net::IMAP::CommandData < Net::IMAP::DataLite
   def initialize(data); end
 
