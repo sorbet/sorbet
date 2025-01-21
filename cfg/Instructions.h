@@ -440,18 +440,14 @@ public:
 
     template <class To> TaggedValue<To> as_instruction() {
         bool isValid = tagMaybeZero() == uint16_t(InsnToTag<To>::value);
-        if (!isValid) {
-            return TaggedValue<To>(nullptr, isValid);
-        }
-        return TaggedValue<To>(reinterpret_cast<To *>(get()), isValid);
+        auto *ptr = isValid ? reinterpret_cast<To *>(get()) : nullptr;
+        return TaggedValue<To>(ptr, isValid);
     }
 
     template <class To> TaggedValue<const To> as_instruction() const {
         bool isValid = tagMaybeZero() == uint16_t(InsnToTag<To>::value);
-        if (!isValid) {
-            return TaggedValue<const To>(nullptr, isValid);
-        }
-        return TaggedValue<const To>(reinterpret_cast<const To *>(get()), isValid);
+        auto *ptr = isValid ? reinterpret_cast<const To *>(get()) : nullptr;
+        return TaggedValue<const To>(ptr, isValid);
     }
 
     void setSynthetic() noexcept {
