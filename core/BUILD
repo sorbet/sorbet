@@ -20,6 +20,7 @@ cc_library(
     hdrs = [
         "KwPair.h",
         "NameSubstitution.h",
+        "UntaggedPtr.h",
         "core.h",
     ] + glob([
         "errors/*.h",
