@@ -995,8 +995,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         } else {
                             convertedBlock = node2TreeImpl(dctx, std::move(block));
                         }
-                        Literal *lit;
-                        if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol()) {
+                        if (auto lit = cast_tree<Literal>(convertedBlock); lit && lit->isSymbol()) {
                             res = MK::Send(loc, std::move(rec), send->method, send->methodLoc, numPosArgs,
                                            std::move(args), flags);
                             ast::cast_tree_nonnull<ast::Send>(res).setBlock(
