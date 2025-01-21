@@ -235,8 +235,11 @@ core::NameRef maybeTypedSuper(DesugarContext dctx) {
 }
 
 bool isStringLit(DesugarContext dctx, ExpressionPtr &expr) {
-    Literal *lit;
-    return (lit = cast_tree<Literal>(expr)) && lit->isString();
+    if (auto lit = cast_tree<Literal>(expr)) {
+        return lit->isString();
+    }
+
+    return false;
 }
 
 ExpressionPtr mergeStrings(DesugarContext dctx, core::LocOffsets loc,
@@ -899,8 +902,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         } else {
                             convertedBlock = node2TreeImpl(dctx, std::move(block));
                         }
-                        Literal *lit;
-                        if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol()) {
+                        if (auto lit = cast_tree<Literal>(convertedBlock); lit->isSymbol()) {
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                            std::move(sendargs), flags);
                             ast::cast_tree_nonnull<ast::Send>(res).setBlock(
