@@ -8,6 +8,7 @@
 #include "core/LocalVariable.h"
 #include "core/SymbolRef.h"
 #include "core/Types.h"
+#include "core/UntaggedPtr.h"
 #include <memory>
 #include <vector>
 
@@ -132,6 +133,10 @@ private:
         }
     }
 
+    uint16_t tagMaybeZero() const noexcept {
+        return ptr & TAG_MASK;
+    }
+
 public:
     constexpr ExpressionPtr() noexcept : ptr(0) {}
 
@@ -207,6 +212,18 @@ public:
         return ptr != 0;
     }
 
+    template <class To> core::UntaggedPtr<To> as_tree() {
+        bool isValid = tagMaybeZero() == uint16_t(ExpressionToTag<To>::value);
+        auto *ptr = isValid ? reinterpret_cast<To *>(get()) : nullptr;
+        return core::UntaggedPtr<To>(ptr, isValid);
+    }
+
+    template <class To> core::UntaggedPtr<const To> as_tree() const {
+        bool isValid = tagMaybeZero() == uint16_t(ExpressionToTag<To>::value);
+        auto *ptr = isValid ? reinterpret_cast<const To *>(get()) : nullptr;
+        return core::UntaggedPtr<const To>(ptr, isValid);
+    }
+
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
@@ -274,25 +291,17 @@ public:
 };
 
 template <class To> bool isa_tree(const ExpressionPtr &what) {
-    return what != nullptr && what.tag() == ExpressionToTag<To>::value;
+    return bool(what.as_tree<To>());
 }
 
 bool isa_reference(const ExpressionPtr &what);
 
-template <class To> To *cast_tree(ExpressionPtr &what) {
-    if (isa_tree<To>(what)) {
-        return reinterpret_cast<To *>(what.get());
-    } else {
-        return nullptr;
-    }
+template <class To> core::UntaggedPtr<To> cast_tree(ExpressionPtr &what) {
+    return what.as_tree<To>();
 }
 
-template <class To> const To *cast_tree(const ExpressionPtr &what) {
-    if (isa_tree<To>(what)) {
-        return reinterpret_cast<To *>(what.get());
-    } else {
-        return nullptr;
-    }
+template <class To> core::UntaggedPtr<const To> cast_tree(const ExpressionPtr &what) {
+    return what.as_tree<To>();
 }
 
 // We disallow casting on temporary values because the lifetime of the returned value is
