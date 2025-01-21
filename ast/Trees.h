@@ -4,6 +4,7 @@
 #include "common/common.h"
 #include "core/Context.h"
 #include "core/FoundDefinitions.h"
+#include "core/KwPair.h"
 #include "core/LocalVariable.h"
 #include "core/SymbolRef.h"
 #include "core/Types.h"
@@ -889,60 +890,16 @@ public:
     // Remove all arguments to the function, including the block argument.
     void clearArgs();
 
-    template <typename PtrT> struct KwPair {
-        PtrT &key;
-        PtrT &value;
-    };
-
-    // We're going to use this type to encapsulate both the span over the kwargs,
-    // and also as the iterator type over that selfsame span.
-    template <typename PtrT> struct KwPairSpan {
-        absl::Span<PtrT> span;
-
-        KwPairSpan begin() const {
-            ENFORCE(span.size() % 2 == 0);
-
-            return KwPairSpan{span};
-        }
-
-        KwPairSpan end() const {
-            ENFORCE(span.size() % 2 == 0);
-
-            return KwPairSpan{absl::MakeSpan(span.end(), span.end())};
-        }
-
-        KwPair<PtrT> operator*() {
-            return KwPair<PtrT>{span[0], span[1]};
-        }
-
-        KwPairSpan &operator++() {
-            span = span.subspan(2);
-            return *this;
-        }
-
-        KwPairSpan operator++(int) {
-            return KwPairSpan{span.subspan(2)};
-        }
-
-        bool operator==(const KwPairSpan &other) const {
-            return span.begin() == other.span.begin();
-        }
-
-        bool operator!=(const KwPairSpan &other) const {
-            return span.begin() != other.span.begin();
-        }
-    };
-
-    KwPairSpan<ExpressionPtr> kwArgPairs() {
+    core::KwPairSpan<ExpressionPtr> kwArgPairs() {
         const auto pairs = numKwArgs();
         auto i = args.begin() + numPosArgs_;
-        return KwPairSpan<ExpressionPtr>{absl::MakeSpan(i, i + pairs * 2)};
+        return core::KwPairSpan<ExpressionPtr>{absl::MakeSpan(i, i + pairs * 2)};
     }
 
-    KwPairSpan<const ExpressionPtr> kwArgPairs() const {
+    core::KwPairSpan<const ExpressionPtr> kwArgPairs() const {
         const auto pairs = numKwArgs();
         auto i = args.begin() + numPosArgs_;
-        return KwPairSpan<const ExpressionPtr>{absl::MakeSpan(i, i + pairs * 2)};
+        return core::KwPairSpan<const ExpressionPtr>{absl::MakeSpan(i, i + pairs * 2)};
     }
 
     // Get the ith keyword argument key. Indices begin at 0, regardless of the number of positional arguments.

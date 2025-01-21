@@ -4,6 +4,7 @@
 #include "common/sort/sort.h"
 #include "common/typecase.h"
 #include "core/GlobalState.h"
+#include "core/KwPair.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/TypeConstraint.h"
@@ -2067,9 +2068,12 @@ public:
         // Going to overwrite the return type later in MetaType::dispatchCall
         targs.emplace_back(core::Types::todo());
 
-        for (size_t i = 1; i < args.args.size(); i += 2) {
-            auto unwrappedType = Types::unwrapType(gs, args.argLoc(i), args.args[i]->type);
+        core::KwPairSpan<const TypeAndOrigins *> kwspan{absl::MakeSpan(args.args)};
+        size_t i = 1;
+        for (auto [_key, value] : kwspan) {
+            auto unwrappedType = Types::unwrapType(gs, args.argLoc(i), value->type);
             targs.emplace_back(move(unwrappedType));
+            i += 2;
         }
 
         res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
@@ -2295,9 +2299,10 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         ENFORCE(args.args.size() % 2 == 0);
 
-        for (int i = 0; i < args.args.size(); i += 2) {
-            if (!isa_type<NamedLiteralType>(args.args[i]->type) && !isa_type<IntegerLiteralType>(args.args[i]->type) &&
-                !isa_type<FloatLiteralType>(args.args[i]->type)) {
+        KwPairSpan<const TypeAndOrigins *> kwspan{absl::MakeSpan(args.args)};
+        for (auto [key, _value] : kwspan) {
+            if (!isa_type<NamedLiteralType>(key->type) && !isa_type<IntegerLiteralType>(key->type) &&
+                !isa_type<FloatLiteralType>(key->type)) {
                 res.returnType = Types::hashOfUntyped(Symbols::Magic_UntypedSource_buildHash());
                 return;
             }
@@ -2307,9 +2312,9 @@ public:
         vector<TypePtr> values;
         keys.reserve(args.args.size() / 2);
         values.reserve(args.args.size() / 2);
-        for (int i = 0; i < args.args.size(); i += 2) {
-            keys.emplace_back(args.args[i]->type);
-            values.emplace_back(args.args[i + 1]->type);
+        for (auto [key, value] : kwspan) {
+            keys.emplace_back(key->type);
+            values.emplace_back(value->type);
         }
         res.returnType = make_type<ShapeType>(move(keys), move(values));
     }
@@ -3532,18 +3537,18 @@ public:
         };
 
         // inlined keyword arguments first
-        for (auto i = 0; i < numKwargs; i += 2) {
-            auto &keyType = args.args[i]->type;
+        for (auto [key, value] : core::KwPairSpan<const TypeAndOrigins *>{absl::MakeSpan(&args.args[0], numKwargs)}) {
+            auto &keyType = key->type;
             if (!isa_type<NamedLiteralType>(keyType)) {
                 return;
             }
 
-            auto key = cast_type_nonnull<NamedLiteralType>(keyType);
-            if (key.literalKind != NamedLiteralType::LiteralTypeKind::Symbol) {
+            auto keylit = cast_type_nonnull<NamedLiteralType>(keyType);
+            if (keylit.literalKind != NamedLiteralType::LiteralTypeKind::Symbol) {
                 return;
             }
 
-            addShapeEntry(keyType, args.args[i + 1]->type);
+            addShapeEntry(keyType, value->type);
         }
 
         // then kwsplat

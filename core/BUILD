@@ -18,6 +18,7 @@ cc_library(
         "Names_gen.cc",
     ],
     hdrs = [
+        "KwPair.h",
         "NameSubstitution.h",
         "core.h",
     ] + glob([
