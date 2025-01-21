@@ -391,7 +391,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
 ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
     auto loc = expr.loc();
     core::NameRef temp = dctx.freshNameUnique(core::Names::blockPassTemp());
-    Literal lit = cast_tree<Literal>(expr);
+    auto lit = cast_tree<Literal>(expr);
     ENFORCE(lit && lit->isSymbol());
 
     // &:foo => {|*temp| (temp[0]).foo(*tmp[1, LONG_MAX]) }
