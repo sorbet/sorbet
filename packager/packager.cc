@@ -245,8 +245,17 @@ public:
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
 
-    optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel = nullopt;
-    optional<pair<core::NameRef, core::LocOffsets>> layer = nullopt;
+    optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_ = nullopt;
+    optional<pair<core::NameRef, core::LocOffsets>> layer_ = nullopt;
+
+    optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
+        return strictDependenciesLevel_;
+    }
+
+    optional<pair<core::NameRef, core::LocOffsets>> layer() const {
+        return layer_;
+    }
+
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
     optional<int> sccID = nullopt;
 
@@ -1152,10 +1161,10 @@ struct PackageSpecBodyWalk {
                 }
                 return;
             }
-            if (info.strictDependenciesLevel.has_value()) {
+            if (info.strictDependenciesLevel_.has_value()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
-                    e.addErrorLine(ctx.locAt(info.strictDependenciesLevel.value().second), "Previously declared here");
+                    e.addErrorLine(ctx.locAt(info.strictDependenciesLevel_.value().second), "Previously declared here");
                     e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
                 }
                 return;
@@ -1164,7 +1173,7 @@ struct PackageSpecBodyWalk {
             if (send.numPosArgs() > 0) {
                 auto parsedValue = parseStrictDependenciesOption(send.getPosArg(0));
                 if (parsedValue.has_value()) {
-                    info.strictDependenciesLevel = make_pair(parsedValue.value(), send.getPosArg(0).loc());
+                    info.strictDependenciesLevel_ = make_pair(parsedValue.value(), send.getPosArg(0).loc());
                 } else {
                     if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidStrictDependencies)) {
                         e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}`, or `{}`", send.fun.show(ctx),
@@ -1186,10 +1195,10 @@ struct PackageSpecBodyWalk {
                 }
                 return;
             }
-            if (info.layer.has_value()) {
+            if (info.layer_.has_value()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidLayer)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
-                    e.addErrorLine(ctx.locAt(info.layer.value().second), "Previously declared here");
+                    e.addErrorLine(ctx.locAt(info.layer_.value().second), "Previously declared here");
                     e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
                 }
                 return;
@@ -1198,7 +1207,7 @@ struct PackageSpecBodyWalk {
             if (send.numPosArgs() > 0) {
                 auto parsedValue = parseLayerOption(ctx.state, send.getPosArg(0));
                 if (parsedValue.has_value()) {
-                    info.layer = make_pair(parsedValue.value(), send.getPosArg(0).loc());
+                    info.layer_ = make_pair(parsedValue.value(), send.getPosArg(0).loc());
                 } else {
                     if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidLayer)) {
                         e.setHeader("Argument to `{}` must be one of: {}", send.fun.show(ctx),
@@ -1685,17 +1694,17 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     ENFORCE(thisPkg.sccID.has_value(), "computeSCCs should already have been called and set sccID");
     ENFORCE(otherPkg.sccID.has_value(), "computeSCCs should already have been called and set sccID");
 
-    if (!thisPkg.strictDependenciesLevel.has_value() || !otherPkg.strictDependenciesLevel.has_value() ||
-        !thisPkg.layer.has_value() || !otherPkg.layer.has_value()) {
+    if (!thisPkg.strictDependenciesLevel().has_value() || !otherPkg.strictDependenciesLevel().has_value() ||
+        !thisPkg.layer().has_value() || !otherPkg.layer().has_value()) {
         return;
     }
 
-    if (thisPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::False) {
+    if (thisPkg.strictDependenciesLevel().value().first == core::packages::StrictDependenciesLevel::False) {
         return;
     }
 
-    auto pkgLayer = thisPkg.layer.value().first;
-    auto otherPkgLayer = otherPkg.layer.value().first;
+    auto pkgLayer = thisPkg.layer().value().first;
+    auto otherPkgLayer = otherPkg.layer().value().first;
     auto pkgLayerIndex = packageDB.layerIndex(pkgLayer);
     auto otherPkgLayerIndex = packageDB.layerIndex(otherPkgLayer);
 
@@ -1703,9 +1712,9 @@ void validateLayering(const core::Context &ctx, const Import &i) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
             e.setHeader("Layering violation: cannot import `{}` (in layer `{}`) from `{}` (in layer `{}`)",
                         otherPkg.show(ctx), otherPkgLayer.show(ctx), thisPkg.show(ctx), pkgLayer.show(ctx));
-            e.addErrorLine(core::Loc(thisPkg.loc.file(), thisPkg.layer.value().second), "`{}`'s `{}` declared here",
+            e.addErrorLine(core::Loc(thisPkg.loc.file(), thisPkg.layer().value().second), "`{}`'s `{}` declared here",
                            thisPkg.show(ctx), "layer");
-            e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.layer.value().second), "`{}`'s `{}` declared here",
+            e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.layer().value().second), "`{}`'s `{}` declared here",
                            otherPkg.show(ctx), "layer");
             // TODO: if the import is unused (ie. there are no references in this package to the imported package),
             // autocorrect to delete import
@@ -1714,15 +1723,15 @@ void validateLayering(const core::Context &ctx, const Import &i) {
 
     core::packages::StrictDependenciesLevel otherPkgExpectedLevel = core::packages::StrictDependenciesLevel::Layered;
 
-    if (thisPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::Dag) {
+    if (thisPkg.strictDependenciesLevel().value().first == core::packages::StrictDependenciesLevel::Dag) {
         otherPkgExpectedLevel = core::packages::StrictDependenciesLevel::Dag;
     }
 
-    if (otherPkg.strictDependenciesLevel.value().first < otherPkgExpectedLevel) {
+    if (otherPkg.strictDependenciesLevel().value().first < otherPkgExpectedLevel) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
             e.setHeader("Strict dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
                         "import", strictDependenciesLevelToString(otherPkgExpectedLevel));
-            e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel.value().second),
+            e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel().value().second),
                            "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
             // TODO: if the import is unused (ie. there are no references in this package to the imported package),
             // autocorrect to delete import
@@ -1731,12 +1740,12 @@ void validateLayering(const core::Context &ctx, const Import &i) {
         }
     }
 
-    if (thisPkg.strictDependenciesLevel.value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
+    if (thisPkg.strictDependenciesLevel().value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
         if (thisPkg.sccID == otherPkg.sccID) {
             if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
                 auto level =
                     fmt::format("strict_dependencies '{}'",
-                                strictDependenciesLevelToString(thisPkg.strictDependenciesLevel.value().first));
+                                strictDependenciesLevelToString(thisPkg.strictDependenciesLevel().value().first));
                 e.setHeader("Strict dependencies violation: importing `{}` will put `{}` into a cycle, which is not "
                             "valid at `{}`",
                             otherPkg.show(ctx), thisPkg.show(ctx), level);
