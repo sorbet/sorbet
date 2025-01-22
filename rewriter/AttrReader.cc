@@ -90,9 +90,11 @@ ast::Send *findSendReturns(ast::Send *sharedSig) {
 }
 
 bool hasNilableOrUntypedReturns(ast::ExpressionPtr &sharedSig) {
-    ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
+    auto *sig = ASTUtil::castSig(sharedSig);
 
-    auto *body = findSendReturns(ASTUtil::castSig(sharedSig));
+    ENFORCE(sig != nullptr, "We weren't given a send node that's a valid signature");
+
+    auto *body = findSendReturns(sig);
 
     ENFORCE(body->fun == core::Names::returns());
     if (body->numPosArgs() != 1) {
@@ -102,9 +104,11 @@ bool hasNilableOrUntypedReturns(ast::ExpressionPtr &sharedSig) {
 }
 
 ast::ExpressionPtr dupReturnsType(ast::Send *sharedSig) {
-    ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
+    auto *sig = ASTUtil::castSig(sharedSig);
 
-    auto *body = findSendReturns(ASTUtil::castSig(sharedSig));
+    ENFORCE(sig != nullptr, "We weren't given a send node that's a valid signature");
+
+    auto *body = findSendReturns(sig);
 
     ENFORCE(body->fun == core::Names::returns());
     if (body->numPosArgs() != 1) {
