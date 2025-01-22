@@ -11,6 +11,7 @@ namespace sorbet::payload {
 void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain::options::Options &options,
                               const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     if (kvstore) {
+        ENFORCE(!options.noStdlib, "--no-stdlib and --cache-dir are incompatible");
         auto maybeGsBytes = kvstore->read(core::serialize::Serializer::GLOBAL_STATE_KEY);
         if (maybeGsBytes.data != nullptr) {
             Timer timeit(gs->tracer(), "read_global_state.kvstore");
