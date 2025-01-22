@@ -1,0 +1,30 @@
+test.rb:3: Revealed type: `T.class_of(Net::BufferedIO)` https://srb.help/7014
+     3 |T.reveal_type(Net::BufferedIO)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T.class_of(Net::BufferedIO)` originating from:
+    test.rb:3:
+     3 |T.reveal_type(Net::BufferedIO)
+                      ^^^^^^^^^^^^^^^
+Errors: 1
+--no-stdlib is incompatible with --cache-dir. Ignoring cache
+test.rb:3: Unable to resolve constant `BufferedIO` https://srb.help/5002
+     3 |T.reveal_type(Net::BufferedIO)
+                      ^^^^^^^^^^^^^^^
+
+test.rb:3: Revealed type: `T.untyped` https://srb.help/7014
+     3 |T.reveal_type(Net::BufferedIO)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T.untyped` originating from:
+    test.rb:3:
+     3 |T.reveal_type(Net::BufferedIO)
+                      ^^^^^^^^^^^^^^^
+
+test.rb:3: Too many arguments provided for method `T.reveal_type`. Expected: `0`, got: `1` https://srb.help/7004
+     3 |T.reveal_type(Net::BufferedIO)
+                      ^^^^^^^^^^^^^^^
+    ???: `reveal_type` defined here
+  Autocorrect: Use `-a` to autocorrect
+    test.rb:3: Delete
+     3 |T.reveal_type(Net::BufferedIO)
+                      ^^^^^^^^^^^^^^^
+Errors: 3
