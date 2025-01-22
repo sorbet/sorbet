@@ -64,20 +64,12 @@ void MsgpackWriterFull::packDefinitionRef(mpack_writer_t *writer, DefinitionRef 
 }
 
 void MsgpackWriterFull::packRange(mpack_writer_t *writer, uint32_t begin, uint32_t end) {
-    if (version <= 4) {
-        mpack_write_u64(writer, ((uint64_t)begin << 32) | end);
-    } else {
-        // The above scheme almost certainly implies that the value written
-        // will be larger than 2**32 and therefore will take up a full nine
-        // bytes of space in the msgpack file.
-        //
-        // Writing the values as individual u32s means that each can take
-        // advantage of being written as a fixuint/u8/u16/u32 in the output;
-        // the length of the range will be usually a fixuint or a u8, resulting
-        // in even smaller output than writing the endpoint of the range.
-        mpack_write_u32(writer, begin);
-        mpack_write_u32(writer, end - begin);
-    }
+    // Writing the values as individual u32s means that each can take
+    // advantage of being written as a fixuint/u8/u16/u32 in the output;
+    // the length of the range will be usually a fixuint or a u8, resulting
+    // in even smaller output than writing the endpoint of the range.
+    mpack_write_u32(writer, begin);
+    mpack_write_u32(writer, end - begin);
 }
 
 void MsgpackWriterFull::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
@@ -124,16 +116,7 @@ void MsgpackWriterFull::packReference(mpack_writer_t *writer, core::Context ctx,
     packNames(writer, ref.name.nameParts);
 
     // nesting
-    if (version >= 6) {
-        mpack_write_u32(writer, ref.nestingId);
-    } else {
-        auto &nesting = pf.nestings[ref.nestingId];
-        mpack_start_array(writer, nesting.size());
-        for (auto &scope : nesting) {
-            packDefinitionRef(writer, scope.id());
-        }
-        mpack_finish_array(writer);
-    }
+    mpack_write_u32(writer, ref.nestingId);
 
     // expression_range
     auto expression_range = ctx.locAt(ref.definitionLoc).position(ctx);
@@ -144,7 +127,7 @@ void MsgpackWriterFull::packReference(mpack_writer_t *writer, core::Context ctx,
     // resolved
     if (ref.resolved.empty()) {
         mpack_write_nil(writer);
-    } else if (version >= 6 && absl::c_equal(ref.name.nameParts, ref.resolved.nameParts)) {
+    } else if (absl::c_equal(ref.name.nameParts, ref.resolved.nameParts)) {
         mpack_write_true(writer);
     } else {
         packNames(writer, ref.resolved.nameParts);
@@ -178,8 +161,6 @@ string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenC
     mpack_writer_t writer;
     mpack_writer_init_growable(&writer, &body, &bodySize);
 
-    bool symbolsInBody = version >= 6;
-
     mpack_start_array(&writer, 6);
 
     mpack_write_true(&writer); // did_resolution
@@ -211,17 +192,15 @@ string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenC
         }
         mpack_finish_array(&temporaryWriter);
 
-        if (version >= 6) {
-            mpack_start_array(&temporaryWriter, pf.nestings.size());
-            for (auto &nesting : pf.nestings) {
-                mpack_start_array(&temporaryWriter, nesting.size());
-                for (auto &scope : nesting) {
-                    packDefinitionRef(&temporaryWriter, scope.id());
-                }
-                mpack_finish_array(&temporaryWriter);
+        mpack_start_array(&temporaryWriter, pf.nestings.size());
+        for (auto &nesting : pf.nestings) {
+            mpack_start_array(&temporaryWriter, nesting.size());
+            for (auto &scope : nesting) {
+                packDefinitionRef(&temporaryWriter, scope.id());
             }
             mpack_finish_array(&temporaryWriter);
         }
+        mpack_finish_array(&temporaryWriter);
 
         mpack_start_array(&temporaryWriter, pf.refs.size());
         for (auto &ref : pf.refs) {
@@ -230,9 +209,7 @@ string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenC
         mpack_finish_array(&temporaryWriter);
     }
 
-    if (symbolsInBody) {
-        writeSymbols(ctx, &writer, symbols);
-    }
+    writeSymbols(ctx, &writer, symbols);
 
     mpack_writer_destroy(&temporaryWriter);
     mpack_write_object_bytes(&writer, temporary, temporarySize);
@@ -249,35 +226,28 @@ string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenC
 
     mpack_start_array(&writer, pfAttrs.size());
 
-    if (!symbolsInBody) {
-        writeSymbols(ctx, &writer, symbols);
+    uint32_t value = 0;
+    switch (pf.tree.file.data(ctx).strictLevel) {
+        case sorbet::core::StrictLevel::Ignore:
+            value = 1;
+            break;
+        case sorbet::core::StrictLevel::False:
+            value = 2;
+            break;
+        case sorbet::core::StrictLevel::True:
+            value = 3;
+            break;
+        case sorbet::core::StrictLevel::Strict:
+            value = 4;
+            break;
+        case sorbet::core::StrictLevel::Strong:
+            value = 5;
+            break;
+        default:
+            // Default value already set at 0.
+            break;
     }
-
-    if (version >= 6) {
-        uint32_t value = 0;
-
-        switch (pf.tree.file.data(ctx).strictLevel) {
-            case sorbet::core::StrictLevel::Ignore:
-                value = 1;
-                break;
-            case sorbet::core::StrictLevel::False:
-                value = 2;
-                break;
-            case sorbet::core::StrictLevel::True:
-                value = 3;
-                break;
-            case sorbet::core::StrictLevel::Strict:
-                value = 4;
-                break;
-            case sorbet::core::StrictLevel::Strong:
-                value = 5;
-                break;
-            default:
-                // Default value already set at 0.
-                break;
-        }
-        mpack_write_u32(&writer, value);
-    }
+    mpack_write_u32(&writer, value);
 
     mpack_write_u32(&writer, pf.refs.size());
     mpack_write_u32(&writer, pf.defs.size());
@@ -351,15 +321,6 @@ string MsgpackWriterFull::msgpackGlobalHeader(int version, size_t numFiles) {
 
 const map<int, vector<string>> MsgpackWriterFull::parsedFileAttrMap{
     {
-        5,
-        {
-            "symbols",
-            "ref_count",
-            "def_count",
-            "defs_and_refs_size",
-        },
-    },
-    {
         6,
         {
             "typed_level",
@@ -372,19 +333,6 @@ const map<int, vector<string>> MsgpackWriterFull::parsedFileAttrMap{
 };
 
 const map<int, vector<string>> MsgpackWriterFull::refAttrMap{
-    {5,
-     {
-         "scope",
-         "name",
-         "nesting",
-         "expr_range_start",
-         "expr_range_len",
-         "expr_pos_range_start",
-         "expr_pos_range_len",
-         "resolved",
-         "is_defining_ref",
-         "parent_of",
-     }},
     {6,
      {
          "scope",
@@ -401,18 +349,6 @@ const map<int, vector<string>> MsgpackWriterFull::refAttrMap{
 };
 
 const map<int, vector<string>> MsgpackWriterFull::defAttrMap{
-    {
-        5,
-        {
-            "raw_full_name",
-            "type",
-            "defines_behavior",
-            "is_empty",
-            "parent_ref",
-            "aliased_ref",
-            "defining_ref",
-        },
-    },
     {
         6,
         {
