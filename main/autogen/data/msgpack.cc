@@ -252,9 +252,7 @@ string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenC
     mpack_write_u32(&writer, pf.refs.size());
     mpack_write_u32(&writer, pf.defs.size());
 
-    if (symbolsInBody) {
-        mpack_write_u32(&writer, symbols.size());
-    }
+    mpack_write_u32(&writer, symbols.size());
 
     // v5 and up record the size of the parsed file's body to enable fast skipping
     // of the entire data chunk, rather than reading and discarding
