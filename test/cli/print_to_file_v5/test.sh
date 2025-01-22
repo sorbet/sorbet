@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eu
 
-main/sorbet --silence-dev-message --stop-after namer --autogen-version=5 \
+main/sorbet --silence-dev-message --stop-after namer --autogen-version=6 \
   -p autogen:autogen.txt -p autogen-msgpack:autogen.msgpack \
   test/cli/print_to_file_v5/*.rb
 
