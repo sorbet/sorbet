@@ -64,7 +64,7 @@ struct ParsedSig {
 struct TypeSyntaxArgs {
     const bool allowSelfType;
     const bool allowRebind;
-    enum class TypeMember {
+    enum class TypeMember : uint8_t {
         Allowed,
         BannedInTypeMember,
         BannedInTypeAlias,
