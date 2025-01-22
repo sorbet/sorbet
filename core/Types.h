@@ -145,7 +145,6 @@ public:
     static TypePtr approximateSubtract(const GlobalState &gs, const TypePtr &from, const TypePtr &what);
     static bool canBeTruthy(const GlobalState &gs, const TypePtr &what);
     static bool canBeFalsy(const GlobalState &gs, const TypePtr &what);
-    enum class Combinator { OR, AND };
 
     static TypePtr resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef fromWhat,
                                         ClassOrModuleRef inWhat, const std::vector<TypePtr> &targs);
