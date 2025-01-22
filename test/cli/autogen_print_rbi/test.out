@@ -1,4 +1,4 @@
-Version 5:
+Version 6:
 # ParsedFile: test/cli/autogen_print_rbi/a.rb
 requires: []
 ## defs:
@@ -105,4 +105,4 @@ requires: []
  loc=test/cli/autogen_print_rbi/behavior_allowed.rbi:4
  is_defining_ref=1
 
-d359e4247f922bc0b467303a673e13ddb3e74fb1  autogen5.msgpack
+aef1aa9433f51f3e1c2fae492fcde49998feec11  autogen6.msgpack
