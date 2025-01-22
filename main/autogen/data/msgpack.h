@@ -26,6 +26,8 @@ protected:
                                 const AutogenConfig &autogenCfg) = 0;
     virtual void packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref) = 0;
 
+    static int validateVersion(int version, int lo, int hi);
+
     MsgpackWriterBase(int version, const std::vector<std::string> &refAttrs, const std::vector<std::string> &defAttrs,
                       const std::vector<std::string> &pfAttrs);
 };
@@ -44,11 +46,7 @@ protected:
                                 const AutogenConfig &autogenCfg);
     virtual void packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref);
     static int assertValidVersion(int version) {
-        if (version < AutogenVersion::MIN_VERSION || version > AutogenVersion::MAX_VERSION) {
-            Exception::raise("msgpack version {} not in available range [{}, {}]", version, AutogenVersion::MIN_VERSION,
-                             AutogenVersion::MAX_VERSION);
-        }
-        return version;
+        return validateVersion(version, AutogenVersion::MIN_VERSION, AutogenVersion::MAX_VERSION);
     }
 
 public:
@@ -68,11 +66,8 @@ private:
 
     static int assertValidVersion(int version) {
         // Lite Msgpack writer is only supported after version 6.
-        if (version < 6 && version > AutogenVersion::MAX_VERSION) {
-            Exception::raise("msgpack version {} not in available range [6, {}]", version, 6,
-                             AutogenVersion::MAX_VERSION);
-        }
-        return version;
+        static_assert(AutogenVersion::MIN_VERSION >= 6);
+        return validateVersion(version, AutogenVersion::MIN_VERSION, AutogenVersion::MAX_VERSION);
     }
 
     void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,

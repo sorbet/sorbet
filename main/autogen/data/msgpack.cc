@@ -43,6 +43,13 @@ void MsgpackWriterBase::packBool(mpack_writer_t *writer, bool b) {
     }
 }
 
+int MsgpackWriterBase::validateVersion(int version, int lo, int hi) {
+    if (version < lo || version > hi) {
+        Exception::raise("msgpack version {} not in available range [{}, {}]", version, lo, hi);
+    }
+    return version;
+}
+
 MsgpackWriterBase::MsgpackWriterBase(int version, const std::vector<std::string> &refAttrs,
                                      const std::vector<std::string> &defAttrs, const std::vector<std::string> &pfAttrs)
     : version(version), refAttrs(refAttrs), defAttrs(defAttrs), pfAttrs(pfAttrs) {}
