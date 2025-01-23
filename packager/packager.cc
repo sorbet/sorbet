@@ -121,16 +121,11 @@ struct PackageName {
     }
 };
 
-enum class ImportType : uint8_t {
-    Normal,
-    Test, // test_import
-};
-
 struct Import {
     PackageName name;
-    ImportType type;
+    core::packages::ImportType type;
 
-    Import(PackageName &&name, ImportType type) : name(std::move(name)), type(type) {}
+    Import(PackageName &&name, core::packages::ImportType type) : name(std::move(name)), type(type) {}
 };
 
 struct Export {
@@ -289,7 +284,7 @@ public:
         auto &info = PackageInfoImpl::from(pkg);
         auto it = absl::c_find_if(importedPackageNames, [&info](auto &import) { return import.name == info.name; });
         if (it != importedPackageNames.end()) {
-            if (!isTestImport && it->type == ImportType::Test) {
+            if (!isTestImport && it->type == core::packages::ImportType::Test) {
                 return convertTestImport(gs, info, core::Loc(fullLoc().file(), it->name.loc));
             }
             // we already import this, and if so, don't return an autocorrect
@@ -396,7 +391,7 @@ public:
     vector<vector<core::NameRef>> imports() const {
         vector<vector<core::NameRef>> rv;
         for (auto &i : importedPackageNames) {
-            if (i.type == ImportType::Normal) {
+            if (i.type == core::packages::ImportType::Normal) {
                 rv.emplace_back(i.name.fullName.parts);
             }
         }
@@ -405,7 +400,7 @@ public:
     vector<vector<core::NameRef>> testImports() const {
         vector<vector<core::NameRef>> rv;
         for (auto &i : importedPackageNames) {
-            if (i.type == ImportType::Test) {
+            if (i.type == core::packages::ImportType::Test) {
                 rv.emplace_back(i.name.fullName.parts);
             }
         }
@@ -430,12 +425,7 @@ public:
             return nullopt;
         }
 
-        switch (imp->type) {
-            case ImportType::Normal:
-                return core::packages::ImportType::Normal;
-            case ImportType::Test:
-                return core::packages::ImportType::Test;
-        }
+        return imp->type;
     }
 };
 
@@ -1309,12 +1299,12 @@ struct PackageSpecBodyWalk {
         }
     }
 
-    ImportType method2ImportType(const ast::Send &send) const {
+    core::packages::ImportType method2ImportType(const ast::Send &send) const {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
-                return ImportType::Normal;
+                return core::packages::ImportType::Normal;
             case core::Names::testImport().rawId():
-                return ImportType::Test;
+                return core::packages::ImportType::Test;
             default:
                 ENFORCE(false);
                 Exception::notImplemented();
@@ -1497,10 +1487,10 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
                                        core::errors::Packager::NoSelfImport)) {
                 string import_;
                 switch (importedPackageName.type) {
-                    case ImportType::Normal:
+                    case core::packages::ImportType::Normal:
                         import_ = "import";
                         break;
-                    case ImportType::Test:
+                    case core::packages::ImportType::Test:
                         import_ = "test_import";
                         break;
                 }
@@ -1609,7 +1599,7 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
     infoAtEntry.onStack = true;
 
     for (auto &i : pkgInfo.importedPackageNames) {
-        if (i.type == ImportType::Test) {
+        if (i.type == core::packages::ImportType::Test) {
             continue;
         }
         // We need to be careful with this; it's not valid after a call to `strongConnect`,
@@ -1682,7 +1672,7 @@ void computeSCCs(core::GlobalState &gs) {
 }
 
 void validateLayering(const core::Context &ctx, const Import &i) {
-    if (i.type == ImportType::Test) {
+    if (i.type == core::packages::ImportType::Test) {
         return;
     }
 
@@ -1767,7 +1757,7 @@ void validateVisibility(const core::Context &ctx, const Import i) {
         return;
     }
 
-    if (otherPkg.visibleToTests() && i.type == ImportType::Test) {
+    if (otherPkg.visibleToTests() && i.type == core::packages::ImportType::Test) {
         return;
     }
 
