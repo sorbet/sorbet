@@ -1012,56 +1012,43 @@ void SerializerImpl::pickleNameTable(Pickler &p, const GlobalState &gs) {
 }
 
 void SerializerImpl::unpickleNameTable(UnPickler &p, GlobalState &result) {
-    vector<UTF8Name> utf8Names(std::move(result.utf8Names));
-    utf8Names.clear();
-    vector<ConstantName> constantNames(std::move(result.constantNames));
-    constantNames.clear();
-    vector<UniqueName> uniqueNames(std::move(result.uniqueNames));
-    uniqueNames.clear();
-    vector<GlobalState::Bucket> namesByHash(std::move(result.namesByHash));
-    namesByHash.clear();
+    result.utf8Names.clear();
+    result.constantNames.clear();
+    result.uniqueNames.clear();
+    result.namesByHash.clear();
 
     {
         Timer timeit(result.tracer(), "readNames");
 
         int namesSize = p.getU4();
         ENFORCE_NO_TIMER(namesSize > 0);
-        utf8Names.reserve(nextPowerOfTwo(namesSize));
+        result.utf8Names.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
-            utf8Names.emplace_back(unpickleUTF8Name(p, result));
+            result.utf8Names.emplace_back(unpickleUTF8Name(p, result));
         }
         namesSize = p.getU4();
         ENFORCE_NO_TIMER(namesSize > 0);
-        constantNames.reserve(nextPowerOfTwo(namesSize));
+        result.constantNames.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
-            constantNames.emplace_back(unpickleConstantName(p, result));
+            result.constantNames.emplace_back(unpickleConstantName(p, result));
         }
         namesSize = p.getU4();
         ENFORCE_NO_TIMER(namesSize > 0);
-        uniqueNames.reserve(nextPowerOfTwo(namesSize));
+        result.uniqueNames.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
-            uniqueNames.emplace_back(unpickleUniqueName(p, result));
+            result.uniqueNames.emplace_back(unpickleUniqueName(p, result));
         }
     }
 
     {
         Timer timeit(result.tracer(), "readNameTable");
         int namesByHashSize = p.getU4();
-        namesByHash.reserve(namesByHashSize);
+        result.namesByHash.reserve(namesByHashSize);
         for (int i = 0; i < namesByHashSize; i++) {
             auto hash = p.getU4();
             auto value = p.getU4();
-            namesByHash.emplace_back(GlobalState::Bucket{hash, value});
+            result.namesByHash.emplace_back(GlobalState::Bucket{hash, value});
         }
-    }
-
-    {
-        Timer timeit(result.tracer(), "moveNames");
-
-        result.utf8Names = std::move(utf8Names);
-        result.constantNames = std::move(constantNames);
-        result.uniqueNames = std::move(uniqueNames);
-        result.namesByHash = std::move(namesByHash);
     }
 }
 
