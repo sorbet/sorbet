@@ -53,7 +53,7 @@ MsgpackWriterBase::MsgpackWriterBase(int version, const std::vector<std::string>
                                      const std::vector<std::string> &defAttrs, const std::vector<std::string> &pfAttrs)
     : version(version), refAttrs(refAttrs), defAttrs(defAttrs), pfAttrs(pfAttrs) {}
 
-void MsgpackWriterFull::packReferenceRef(mpack_writer_t *writer, ReferenceRef ref) {
+void MsgpackWriterBase::packReferenceRef(mpack_writer_t *writer, ReferenceRef ref) {
     if (!ref.exists()) {
         mpack_write_nil(writer);
     } else {
@@ -61,7 +61,7 @@ void MsgpackWriterFull::packReferenceRef(mpack_writer_t *writer, ReferenceRef re
     }
 }
 
-void MsgpackWriterFull::packDefinitionRef(mpack_writer_t *writer, DefinitionRef ref) {
+void MsgpackWriterBase::packDefinitionRef(mpack_writer_t *writer, DefinitionRef ref) {
     if (!ref.exists()) {
         mpack_write_nil(writer);
     } else {
