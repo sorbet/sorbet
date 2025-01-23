@@ -1093,7 +1093,7 @@ std::vector<uint8_t> Serializer::storePayloadAndNameTable(const GlobalState &gs)
     return p.result();
 }
 
-void Serializer::loadNameTable(GlobalState &gs, const uint8_t *const data) {
+void Serializer::loadAndOverwriteNameTable(GlobalState &gs, const uint8_t *const data) {
     UnPickler p(data, gs.tracer());
 
     if (p.getU4() != Serializer::VERSION) {
