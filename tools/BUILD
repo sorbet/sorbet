@@ -62,6 +62,7 @@ compilation_database(
         "//main:sorbet-orig",
         "//main/autogen:autogen",
         "//main/autogen/data:data",
+        "//main/autogen/data:data_test",
         "//main/cache:cache",
         "//main/cache:cache-orig",
         "//main/lsp:error_reporter_test",

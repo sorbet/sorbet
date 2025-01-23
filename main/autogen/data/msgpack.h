@@ -51,10 +51,6 @@ protected:
 
 class MsgpackWriterFull : public MsgpackWriterBase {
 protected:
-    static const std::map<int, std::vector<std::string>> refAttrMap;
-    static const std::map<int, std::vector<std::string>> defAttrMap;
-    static const std::map<int, std::vector<std::string>> parsedFileAttrMap;
-
     // a bunch of helpers
     void packRange(mpack_writer_t *writer, uint32_t begin, uint32_t end);
     virtual void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
@@ -65,6 +61,10 @@ protected:
     }
 
 public:
+    static const std::map<int, std::vector<std::string>> refAttrMap;
+    static const std::map<int, std::vector<std::string>> defAttrMap;
+    static const std::map<int, std::vector<std::string>> parsedFileAttrMap;
+
     MsgpackWriterFull(int version);
 
     static std::string msgpackGlobalHeader(int version, size_t numFiles);
@@ -75,10 +75,6 @@ public:
 // typing information, etc. Reduces size by ~37% for Stripe code.
 class MsgpackWriterLite : public MsgpackWriterBase {
 private:
-    static const std::map<int, std::vector<std::string>> refAttrMap;
-    static const std::map<int, std::vector<std::string>> defAttrMap;
-    static const std::map<int, std::vector<std::string>> parsedFileAttrMap;
-
     static int assertValidVersion(int version) {
         // Lite Msgpack writer is only supported after version 6.
         static_assert(AutogenVersion::MIN_VERSION >= 6);
@@ -90,6 +86,10 @@ private:
     void packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref);
 
 public:
+    static const std::map<int, std::vector<std::string>> refAttrMap;
+    static const std::map<int, std::vector<std::string>> defAttrMap;
+    static const std::map<int, std::vector<std::string>> parsedFileAttrMap;
+
     MsgpackWriterLite(int version);
 
     static std::string msgpackGlobalHeader(int version, size_t numFiles);
