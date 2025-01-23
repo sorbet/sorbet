@@ -26,6 +26,8 @@ protected:
                                 const AutogenConfig &autogenCfg) = 0;
     virtual void packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref) = 0;
 
+    void writeSymbols(core::Context ctx, mpack_writer_t *writer, const std::vector<core::NameRef> &symbols);
+
     static int validateVersion(int version, int lo, int hi);
 
     MsgpackWriterBase(int version, const std::vector<std::string> &refAttrs, const std::vector<std::string> &defAttrs,
@@ -95,7 +97,6 @@ public:
 };
 
 void packString(mpack_writer_t *writer, std::string_view str);
-void writeSymbols(core::Context ctx, mpack_writer_t *writer, const std::vector<core::NameRef> &symbols);
 std::string buildGlobalHeader(int version, int serializedVersion, size_t numFiles,
                               const std::vector<std::string> &refAttrs, const std::vector<std::string> &defAttrs,
                               const std::vector<std::string> &pfAttrs);

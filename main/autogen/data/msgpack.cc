@@ -149,7 +149,7 @@ MsgpackWriterFull::MsgpackWriterFull(int version)
     : MsgpackWriterBase(assertValidVersion(version), refAttrMap.at(version), defAttrMap.at(version),
                         parsedFileAttrMap.at(version)) {}
 
-void writeSymbols(core::Context ctx, mpack_writer_t *writer, const vector<core::NameRef> &symbols) {
+void MsgpackWriterBase::writeSymbols(core::Context ctx, mpack_writer_t *writer, const vector<core::NameRef> &symbols) {
     MsgpackArray scope(writer, symbols.size());
     for (auto sym : symbols) {
         auto str = sym.shortName(ctx);
