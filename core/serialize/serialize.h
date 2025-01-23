@@ -8,7 +8,7 @@ class Serializer {
 public:
     static const uint32_t VERSION = 6;
 
-    static constexpr std::string_view GLOBAL_STATE_KEY = "GlobalState";
+    static constexpr std::string_view NAME_TABLE_KEY = "NameTable";
 
     // Serialize only the name table from a global state. This is suffient for deserializing trees that have only been
     // through the indexing, as they won't have any non-well-known symbols present.
