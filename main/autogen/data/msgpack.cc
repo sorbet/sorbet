@@ -338,6 +338,16 @@ const map<int, vector<string>> MsgpackWriterFull::parsedFileAttrMap{
             "body_size",
         },
     },
+    {
+        7,
+        {
+            "typed_level",
+            "ref_count",
+            "def_count",
+            "sym_count",
+            "body_size",
+        },
+    },
 };
 
 const map<int, vector<string>> MsgpackWriterFull::refAttrMap{
@@ -354,21 +364,44 @@ const map<int, vector<string>> MsgpackWriterFull::refAttrMap{
          "is_defining_ref",
          "parent_of",
      }},
+    {7,
+     {
+         "scope",
+         "name",
+         "nesting",
+         "expr_range_start",
+         "expr_range_len",
+         "expr_pos_range_start",
+         "expr_pos_range_len",
+         "resolved",
+         "is_defining_ref",
+         "parent_of",
+     }},
 };
 
-const map<int, vector<string>> MsgpackWriterFull::defAttrMap{
-    {
-        6,
-        {
-            "raw_full_name",
-            "type",
-            "defines_behavior",
-            "is_empty",
-            "parent_ref",
-            "aliased_ref",
-            "defining_ref",
-        },
-    },
-};
+const map<int, vector<string>> MsgpackWriterFull::defAttrMap{{
+                                                                 6,
+                                                                 {
+                                                                     "raw_full_name",
+                                                                     "type",
+                                                                     "defines_behavior",
+                                                                     "is_empty",
+                                                                     "parent_ref",
+                                                                     "aliased_ref",
+                                                                     "defining_ref",
+                                                                 },
+                                                             },
+                                                             {
+                                                                 7,
+                                                                 {
+                                                                     "raw_full_name",
+                                                                     "type",
+                                                                     "defines_behavior",
+                                                                     "is_empty",
+                                                                     "parent_ref",
+                                                                     "aliased_ref",
+                                                                     "defining_ref",
+                                                                 },
+                                                             }};
 
 } // namespace sorbet::autogen

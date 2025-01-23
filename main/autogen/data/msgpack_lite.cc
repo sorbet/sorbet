@@ -17,6 +17,12 @@ void MsgpackWriterLite::packDefinition(mpack_writer_t *writer, core::Context ctx
     auto raw_full_name = pf.showFullName(ctx, def.id);
     packNames(writer, raw_full_name);
 
+    // type
+    if (version >= 7) {
+        auto defType = def.type;
+        mpack_write_u8(writer, static_cast<uint64_t>(defType));
+    }
+
     // defines_behavior
     packBool(writer, def.defines_behavior);
     const auto &filePath = ctx.file.data(ctx).path();
@@ -24,10 +30,23 @@ void MsgpackWriterLite::packDefinition(mpack_writer_t *writer, core::Context ctx
                 absl::c_any_of(autogenCfg.behaviorAllowedInRBIsPaths,
                                [&](auto &allowedPath) { return absl::StartsWith(filePath, allowedPath); }),
             "RBI files should never define behavior");
+
+    if (version >= 7) {
+        // parent_ref
+        packReferenceRef(writer, def.parent_ref);
+
+        // defining_ref
+        packReferenceRef(writer, def.defining_ref);
+    }
 }
 
 void MsgpackWriterLite::packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref) {
     MsgpackArray refArray(writer, refAttrs.size());
+
+    // scope
+    if (version >= 7) {
+        packDefinitionRef(writer, ref.scope.id());
+    }
 
     // name
     packNames(writer, ref.name.nameParts);
@@ -39,6 +58,11 @@ void MsgpackWriterLite::packReference(mpack_writer_t *writer, core::Context ctx,
         mpack_write_true(writer);
     } else {
         packNames(writer, ref.resolved.nameParts);
+    }
+
+    // is_defining_ref
+    if (version >= 7) {
+        packBool(writer, ref.is_defining_ref);
     }
 }
 
@@ -140,25 +164,41 @@ string MsgpackWriterLite::msgpackGlobalHeader(int version, size_t numFiles) {
     return buildGlobalHeader(version, serializedVersion, numFiles, refAttrs, defAttrs, pfAttrs);
 }
 
-const map<int, vector<string>> MsgpackWriterLite::parsedFileAttrMap{
-    {
-        6,
-        {
-            "ref_count",
-            "def_count",
-            "sym_count",
-            "body_size",
-        },
-    },
-};
+const map<int, vector<string>> MsgpackWriterLite::parsedFileAttrMap{{
+                                                                        6,
+                                                                        {
+                                                                            "ref_count",
+                                                                            "def_count",
+                                                                            "sym_count",
+                                                                            "body_size",
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        7,
+                                                                        {
+                                                                            "ref_count",
+                                                                            "def_count",
+                                                                            "sym_count",
+                                                                            "body_size",
+                                                                        },
+                                                                    }};
 
-const map<int, vector<string>> MsgpackWriterLite::refAttrMap{
-    {6,
-     {
-         "name",
-         "resolved",
-     }},
-};
+const map<int, vector<string>> MsgpackWriterLite::refAttrMap{{
+                                                                 6,
+                                                                 {
+                                                                     "name",
+                                                                     "resolved",
+                                                                 },
+                                                             },
+                                                             {
+                                                                 7,
+                                                                 {
+                                                                     "scope",
+                                                                     "name",
+                                                                     "resolved",
+                                                                     "is_defining_ref",
+                                                                 },
+                                                             }};
 
 const map<int, vector<string>> MsgpackWriterLite::defAttrMap{
     {
@@ -166,6 +206,16 @@ const map<int, vector<string>> MsgpackWriterLite::defAttrMap{
         {
             "raw_full_name",
             "defines_behavior",
+        },
+    },
+    {
+        7,
+        {
+            "raw_full_name",
+            "type",
+            "defines_behavior",
+            "parent_ref",
+            "defining_ref",
         },
     },
 };
