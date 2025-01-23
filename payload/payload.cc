@@ -66,11 +66,13 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
         if (maybeGsBytes.data != nullptr) {
             Timer timeit(gs->tracer(), "read_name_table.kvstore");
             core::serialize::Serializer::loadNameTable(*gs, maybeGsBytes.data);
-            for (unsigned int i = 1; i < gs->filesUsed(); i++) {
-                core::FileRef fref(i);
+            if constexpr (debug_mode) {
+                for (unsigned int i = 1; i < gs->filesUsed(); i++) {
+                    core::FileRef fref(i);
 
-                // We should only see payload files at this point.
-                ENFORCE(fref.dataAllowingUnsafe(*gs).sourceType != core::File::Type::Normal);
+                    // We should only see payload files at this point.
+                    ENFORCE(fref.dataAllowingUnsafe(*gs).sourceType != core::File::Type::Normal);
+                }
             }
         }
     }
