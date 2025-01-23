@@ -11,7 +11,7 @@ public:
     static constexpr std::string_view GLOBAL_STATE_KEY = "GlobalState";
 
     // Serialize only the name table from a global state. This is suffient for deserializing trees that have only been
-    // through the indexing, as they won't have any symbols present.
+    // through the indexing, as they won't have any non-well-known symbols present.
     static std::vector<uint8_t> storeNameTable(const GlobalState &gs);
 
     // Serialize a global state.
