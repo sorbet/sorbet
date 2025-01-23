@@ -64,7 +64,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
     if (kvstore) {
         auto maybeGsBytes = kvstore->read(core::serialize::Serializer::NAME_TABLE_KEY);
         if (maybeGsBytes.data != nullptr) {
-            Timer timeit(gs->tracer(), "read_global_state.kvstore");
+            Timer timeit(gs->tracer(), "read_name_table.kvstore");
             core::serialize::Serializer::loadNameTable(*gs, maybeGsBytes.data);
             for (unsigned int i = 1; i < gs->filesUsed(); i++) {
                 core::FileRef fref(i);
