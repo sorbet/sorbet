@@ -1113,6 +1113,7 @@ void Serializer::loadNameTable(GlobalState &gs, const uint8_t *const data) {
         Exception::raise("Payload version mismatch");
     }
 
+    ENFORCE(gs.kvstoreUuid == 0, "The name table may only be loaded into a fresh GlobalState");
     gs.kvstoreUuid = p.getU4();
 
     SerializerImpl::unpickleNameTable(p, gs);
