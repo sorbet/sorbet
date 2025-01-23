@@ -29,7 +29,7 @@ public:
     static std::vector<uint8_t> storeTree(const core::File &file, const ast::ParsedFile &tree);
 
     // Augment a global state with the name table stored in the cache.
-    static void loadNameTable(GlobalState &gs, const uint8_t *const data);
+    static void loadAndOverwriteNameTable(GlobalState &gs, const uint8_t *const data);
 
     static void loadGlobalState(GlobalState &gs, const uint8_t *const data);
 
