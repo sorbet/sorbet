@@ -21,6 +21,8 @@ protected:
     void packName(mpack_writer_t *writer, core::NameRef nm);
     void packNames(mpack_writer_t *writer, std::vector<core::NameRef> &names);
     void packBool(mpack_writer_t *writer, bool b);
+    void packReferenceRef(mpack_writer_t *writer, ReferenceRef ref);
+    void packDefinitionRef(mpack_writer_t *writer, DefinitionRef ref);
 
     virtual void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
                                 const AutogenConfig &autogenCfg) = 0;
@@ -54,8 +56,6 @@ protected:
     static const std::map<int, std::vector<std::string>> parsedFileAttrMap;
 
     // a bunch of helpers
-    void packReferenceRef(mpack_writer_t *writer, ReferenceRef ref);
-    void packDefinitionRef(mpack_writer_t *writer, DefinitionRef ref);
     void packRange(mpack_writer_t *writer, uint32_t begin, uint32_t end);
     virtual void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
                                 const AutogenConfig &autogenCfg);
