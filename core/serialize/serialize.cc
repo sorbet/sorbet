@@ -26,6 +26,7 @@ const uint32_t Serializer::VERSION;
 class SerializerImpl {
 public:
     static Pickler pickle(const GlobalState &gs, bool payloadOnly = false);
+    static void pickleNameTable(Pickler &p, const GlobalState &gs);
     static void pickle(Pickler &p, const File &what);
     static void pickle(Pickler &p, const UTF8Name &what);
     static void pickle(Pickler &p, const ConstantName &what);
@@ -52,6 +53,7 @@ public:
     static Field unpickleField(UnPickler &p, const GlobalState *gs);
     static TypeParameter unpickleTypeParameter(UnPickler &p, const GlobalState *gs);
     static void unpickleGS(UnPickler &p, GlobalState &result);
+    static void unpickleNameTable(UnPickler &g, GlobalState &result);
     static uint32_t unpickleGSUUID(UnPickler &p);
     static LocOffsets unpickleLocOffsets(UnPickler &p);
     static Loc unpickleLoc(UnPickler &p);
@@ -853,18 +855,7 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
         }
     }
 
-    result.putU4(gs.utf8Names.size());
-    for (const auto &n : gs.utf8Names) {
-        pickle(result, n);
-    }
-    result.putU4(gs.constantNames.size());
-    for (const auto &n : gs.constantNames) {
-        pickle(result, n);
-    }
-    result.putU4(gs.uniqueNames.size());
-    for (const auto &n : gs.uniqueNames) {
-        pickle(result, n);
-    }
+    SerializerImpl::pickleNameTable(result, gs);
 
     result.putU4(gs.classAndModules.size());
     for (const ClassOrModule &s : gs.classAndModules) {
@@ -891,11 +882,6 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
         pickle(result, s);
     }
 
-    result.putU4(gs.namesByHash.size());
-    for (const auto &s : gs.namesByHash) {
-        result.putU4(s.hash);
-        result.putU4(s.rawId);
-    }
     return result;
 }
 
@@ -917,12 +903,6 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
 
     vector<shared_ptr<File>> files(std::move(result.files));
     files.clear();
-    vector<UTF8Name> utf8Names(std::move(result.utf8Names));
-    utf8Names.clear();
-    vector<ConstantName> constantNames(std::move(result.constantNames));
-    constantNames.clear();
-    vector<UniqueName> uniqueNames(std::move(result.uniqueNames));
-    uniqueNames.clear();
     vector<ClassOrModule> classAndModules(std::move(result.classAndModules));
     classAndModules.clear();
     vector<Method> methods(std::move(result.methods));
@@ -933,8 +913,6 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     typeArguments.clear();
     vector<TypeParameter> typeMembers(std::move(result.typeMembers));
     typeMembers.clear();
-    vector<GlobalState::Bucket> namesByHash(std::move(result.namesByHash));
-    namesByHash.clear();
     {
         Timer timeit(result.tracer(), "readFiles");
 
@@ -949,28 +927,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         }
     }
 
-    {
-        Timer timeit(result.tracer(), "readNames");
-
-        int namesSize = p.getU4();
-        ENFORCE_NO_TIMER(namesSize > 0);
-        utf8Names.reserve(nextPowerOfTwo(namesSize));
-        for (int i = 0; i < namesSize; i++) {
-            utf8Names.emplace_back(unpickleUTF8Name(p, result));
-        }
-        namesSize = p.getU4();
-        ENFORCE_NO_TIMER(namesSize > 0);
-        constantNames.reserve(nextPowerOfTwo(namesSize));
-        for (int i = 0; i < namesSize; i++) {
-            constantNames.emplace_back(unpickleConstantName(p, result));
-        }
-        namesSize = p.getU4();
-        ENFORCE_NO_TIMER(namesSize > 0);
-        uniqueNames.reserve(nextPowerOfTwo(namesSize));
-        for (int i = 0; i < namesSize; i++) {
-            uniqueNames.emplace_back(unpickleUniqueName(p, result));
-        }
-    }
+    unpickleNameTable(p, result);
 
     {
         Timer timeit(result.tracer(), "readSymbols");
@@ -1011,17 +968,6 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         }
     }
 
-    {
-        Timer timeit(result.tracer(), "readNameTable");
-        int namesByHashSize = p.getU4();
-        namesByHash.reserve(namesByHashSize);
-        for (int i = 0; i < namesByHashSize; i++) {
-            auto hash = p.getU4();
-            auto value = p.getU4();
-            namesByHash.emplace_back(GlobalState::Bucket{hash, value});
-        }
-    }
-
     UnorderedMap<string, FileRef> fileRefByPath;
     int i = 0;
     for (auto &f : files) {
@@ -1035,17 +981,75 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         Timer timeit(result.tracer(), "moving");
         result.fileRefByPath = std::move(fileRefByPath);
         result.files = std::move(files);
-        result.utf8Names = std::move(utf8Names);
-        result.constantNames = std::move(constantNames);
-        result.uniqueNames = std::move(uniqueNames);
         result.classAndModules = std::move(classAndModules);
         result.methods = std::move(methods);
         result.fields = std::move(fields);
         result.typeArguments = std::move(typeArguments);
         result.typeMembers = std::move(typeMembers);
-        result.namesByHash = std::move(namesByHash);
     }
     result.sanityCheck();
+}
+
+void SerializerImpl::pickleNameTable(Pickler &p, const GlobalState &gs) {
+    p.putU4(gs.utf8Names.size());
+    for (const auto &n : gs.utf8Names) {
+        pickle(p, n);
+    }
+    p.putU4(gs.constantNames.size());
+    for (const auto &n : gs.constantNames) {
+        pickle(p, n);
+    }
+    p.putU4(gs.uniqueNames.size());
+    for (const auto &n : gs.uniqueNames) {
+        pickle(p, n);
+    }
+
+    p.putU4(gs.namesByHash.size());
+    for (const auto &s : gs.namesByHash) {
+        p.putU4(s.hash);
+        p.putU4(s.rawId);
+    }
+}
+
+void SerializerImpl::unpickleNameTable(UnPickler &p, GlobalState &result) {
+    result.utf8Names.clear();
+    result.constantNames.clear();
+    result.uniqueNames.clear();
+    result.namesByHash.clear();
+
+    {
+        Timer timeit(result.tracer(), "readNames");
+
+        int namesSize = p.getU4();
+        ENFORCE_NO_TIMER(namesSize > 0);
+        result.utf8Names.reserve(nextPowerOfTwo(namesSize));
+        for (int i = 0; i < namesSize; i++) {
+            result.utf8Names.emplace_back(unpickleUTF8Name(p, result));
+        }
+        namesSize = p.getU4();
+        ENFORCE_NO_TIMER(namesSize > 0);
+        result.constantNames.reserve(nextPowerOfTwo(namesSize));
+        for (int i = 0; i < namesSize; i++) {
+            result.constantNames.emplace_back(unpickleConstantName(p, result));
+        }
+        namesSize = p.getU4();
+        ENFORCE_NO_TIMER(namesSize > 0);
+        result.uniqueNames.reserve(nextPowerOfTwo(namesSize));
+        for (int i = 0; i < namesSize; i++) {
+            result.uniqueNames.emplace_back(unpickleUniqueName(p, result));
+        }
+    }
+
+    {
+        Timer timeit(result.tracer(), "readNameTable");
+        int namesByHashSize = p.getU4();
+        result.namesByHash.reserve(namesByHashSize);
+        for (int i = 0; i < namesByHashSize; i++) {
+            auto hash = p.getU4();
+            auto value = p.getU4();
+            result.namesByHash.emplace_back(GlobalState::Bucket{hash, value});
+        }
+    }
 }
 
 void SerializerImpl::pickle(Pickler &p, LocOffsets loc) {
@@ -1071,6 +1075,14 @@ LocOffsets SerializerImpl::unpickleLocOffsets(UnPickler &p) {
     return LocOffsets{start, start + length};
 }
 
+vector<uint8_t> Serializer::storeNameTable(const GlobalState &gs) {
+    Pickler p;
+    p.putU4(Serializer::VERSION);
+    p.putU4(gs.kvstoreUuid);
+    SerializerImpl::pickleNameTable(p, gs);
+    return p.result();
+}
+
 vector<uint8_t> Serializer::store(const GlobalState &gs) {
     Pickler p = SerializerImpl::pickle(gs);
     return p.result();
@@ -1079,6 +1091,39 @@ vector<uint8_t> Serializer::store(const GlobalState &gs) {
 std::vector<uint8_t> Serializer::storePayloadAndNameTable(const GlobalState &gs) {
     Pickler p = SerializerImpl::pickle(gs, true);
     return p.result();
+}
+
+void Serializer::loadAndOverwriteNameTable(GlobalState &gs, const uint8_t *const data) {
+    UnPickler p(data, gs.tracer());
+
+    if (p.getU4() != Serializer::VERSION) {
+        Exception::raise("Payload version mismatch");
+    }
+
+    ENFORCE(gs.kvstoreUuid == 0, "The name table may only be loaded into a fresh GlobalState");
+    gs.kvstoreUuid = p.getU4();
+
+    SerializerImpl::unpickleNameTable(p, gs);
+
+    // Check that well-known names are consistent with what the payload would expect.
+    if constexpr (debug_mode) {
+        // The name of the Sorbet class is well-known, and the name is generated by core/tools/generate_names.cc. If
+        // this doesn't match up, something has gone seriously wrong with name table serialization.
+        ENFORCE(core::Symbols::Sorbet().data(gs)->name == core::Names::Constants::Sorbet());
+        ENFORCE(core::Names::Constants::Sorbet().kind() == core::NameKind::CONSTANT);
+        auto name = core::Symbols::Sorbet().data(gs)->name.dataCnst(gs)->original;
+        ENFORCE(name.kind() == core::NameKind::UTF8);
+        ENFORCE(name.dataUtf8(gs)->utf8 == "Sorbet");
+
+        // Array#bsearch is defined in the payload rbis with no overloads. If that changes, pick a new method that's
+        // defined in an rbi, but on a well-known class.
+        ENFORCE(core::Symbols::T_Array().data(gs)->name.kind() == core::NameKind::CONSTANT);
+        auto bsearch = gs.lookupMethodSymbol(core::Symbols::Array(), gs.lookupNameUTF8("bsearch"));
+        ENFORCE(bsearch.exists());
+        name = bsearch.data(gs)->name;
+        ENFORCE(name.kind() == core::NameKind::UTF8);
+        ENFORCE(name.dataUtf8(gs)->utf8 == "bsearch");
+    }
 }
 
 void Serializer::loadGlobalState(GlobalState &gs, const uint8_t *const data) {

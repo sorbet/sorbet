@@ -10,22 +10,8 @@ namespace sorbet::payload {
 
 void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain::options::Options &options,
                               const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    if (kvstore) {
-        ENFORCE(!options.noStdlib, "--no-stdlib and --cache-dir are incompatible");
-        auto maybeGsBytes = kvstore->read(core::serialize::Serializer::GLOBAL_STATE_KEY);
-        if (maybeGsBytes.data != nullptr) {
-            Timer timeit(gs->tracer(), "read_global_state.kvstore");
-            core::serialize::Serializer::loadGlobalState(*gs, maybeGsBytes.data);
-            for (unsigned int i = 1; i < gs->filesUsed(); i++) {
-                core::FileRef fref(i);
-                if (fref.dataAllowingUnsafe(*gs).sourceType == core::File::Type::Normal) {
-                    gs = core::GlobalState::markFileAsTombStone(move(gs), fref);
-                }
-            }
-            return;
-        }
-    }
     if (options.noStdlib) {
+        ENFORCE(kvstore == nullptr, "--no-stdlib and --cache-dir are incompatible");
         gs->initEmpty();
         return;
     }
@@ -72,6 +58,24 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
         "Payload defined `{}` type arguments, which is greater than the expected maximum of `{}`. Consider updating "
         "`PAYLOAD_MAX_TYPE_ARGUMENT_COUNT` in `GlobalState`.",
         gs->typeArgumentsUsed(), core::GlobalState::PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
+
+    // We can use the kvstore to read in the cached name table. We read this in after the payload has been initialized,
+    // as the cached name table will extend the payload's existing table when the sorbet versions match.
+    if (kvstore) {
+        auto maybeGsBytes = kvstore->read(core::serialize::Serializer::NAME_TABLE_KEY);
+        if (maybeGsBytes.data != nullptr) {
+            Timer timeit(gs->tracer(), "read_name_table.kvstore");
+            core::serialize::Serializer::loadAndOverwriteNameTable(*gs, maybeGsBytes.data);
+            if constexpr (debug_mode) {
+                for (unsigned int i = 1; i < gs->filesUsed(); i++) {
+                    core::FileRef fref(i);
+
+                    // We should only see payload files at this point.
+                    ENFORCE(fref.dataAllowingUnsafe(*gs).sourceType != core::File::Type::Normal);
+                }
+            }
+        }
+    }
 }
 
 } // namespace sorbet::payload
