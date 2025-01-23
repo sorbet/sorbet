@@ -174,7 +174,8 @@ string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenC
 
         // requires
         {
-            MsgpackArray requires(&writer, pf.requireStatements.size());
+            MsgpackArray
+                requires(&writer, pf.requireStatements.size());
             for (auto nm : pf.requireStatements) {
                 packString(&writer, nm.show(ctx));
             }
@@ -222,7 +223,6 @@ string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenC
         mpack_writer_destroy(&temporaryWriter);
         mpack_write_object_bytes(&writer, temporary, temporarySize);
         MPACK_FREE(temporary);
-
     }
 
     mpack_writer_destroy(&writer);
@@ -237,24 +237,24 @@ string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenC
 
         uint32_t value = 0;
         switch (pf.tree.file.data(ctx).strictLevel) {
-        case sorbet::core::StrictLevel::Ignore:
-            value = 1;
-            break;
-        case sorbet::core::StrictLevel::False:
-            value = 2;
-            break;
-        case sorbet::core::StrictLevel::True:
-            value = 3;
-            break;
-        case sorbet::core::StrictLevel::Strict:
-            value = 4;
-            break;
-        case sorbet::core::StrictLevel::Strong:
-            value = 5;
-            break;
-        default:
-            // Default value already set at 0.
-            break;
+            case sorbet::core::StrictLevel::Ignore:
+                value = 1;
+                break;
+            case sorbet::core::StrictLevel::False:
+                value = 2;
+                break;
+            case sorbet::core::StrictLevel::True:
+                value = 3;
+                break;
+            case sorbet::core::StrictLevel::Strict:
+                value = 4;
+                break;
+            case sorbet::core::StrictLevel::Strong:
+                value = 5;
+                break;
+            default:
+                // Default value already set at 0.
+                break;
         }
         mpack_write_u32(&writer, value);
 
