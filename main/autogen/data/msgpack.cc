@@ -80,7 +80,11 @@ void MsgpackWriterFull::packRange(mpack_writer_t *writer, uint32_t begin, uint32
 
 void MsgpackWriterFull::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
                                        const AutogenConfig &autogenCfg) {
-    MsgpackArray defsArray(writer, defAttrs.size());
+    std::optional<MsgpackArray> defsArray;
+
+    if (version <= 6) {
+        defsArray.emplace(writer, defAttrs.size());
+    }
 
     // raw_full_name
     auto raw_full_name = pf.showFullName(ctx, def.id);
@@ -112,7 +116,11 @@ void MsgpackWriterFull::packDefinition(mpack_writer_t *writer, core::Context ctx
 }
 
 void MsgpackWriterFull::packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref) {
-    MsgpackArray refArray(writer, refAttrs.size());
+    std::optional<MsgpackArray> refArray;
+
+    if (version <= 6) {
+        refArray.emplace(writer, refAttrs.size());
+    }
 
     // scope
     packDefinitionRef(writer, ref.scope.id());

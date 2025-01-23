@@ -11,7 +11,11 @@ namespace sorbet::autogen {
 
 void MsgpackWriterLite::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
                                        const AutogenConfig &autogenCfg) {
-    MsgpackArray defArray(writer, defAttrs.size());
+    std::optional<MsgpackArray> defArray;
+
+    if (version <= 6) {
+        defArray.emplace(writer, defAttrs.size());
+    }
 
     // raw_full_name
     auto raw_full_name = pf.showFullName(ctx, def.id);
@@ -41,7 +45,11 @@ void MsgpackWriterLite::packDefinition(mpack_writer_t *writer, core::Context ctx
 }
 
 void MsgpackWriterLite::packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref) {
-    MsgpackArray refArray(writer, refAttrs.size());
+    std::optional<MsgpackArray> refArray;
+
+    if (version <= 6) {
+        refArray.emplace(writer, refAttrs.size());
+    }
 
     // scope
     if (version >= 7) {
