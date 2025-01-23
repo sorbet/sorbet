@@ -30,6 +30,19 @@ protected:
 
     MsgpackWriterBase(int version, const std::vector<std::string> &refAttrs, const std::vector<std::string> &defAttrs,
                       const std::vector<std::string> &pfAttrs);
+
+    class MsgpackArray {
+        mpack_writer_t *writer;
+
+    public:
+        MsgpackArray(mpack_writer_t *writer, size_t sz) : writer(writer) {
+            mpack_start_array(writer, sz);
+        }
+
+        ~MsgpackArray() {
+            mpack_finish_array(writer);
+        }
+    };
 };
 
 class MsgpackWriterFull : public MsgpackWriterBase {
