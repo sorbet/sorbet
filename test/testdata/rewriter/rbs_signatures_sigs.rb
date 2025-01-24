@@ -3,12 +3,12 @@
 
 extend T::Sig
 
-module P1; end
-module P2; end
-module P3; end
-module P4; end
-module P5; end
-module P6; end
+class P1; end
+class P2; end
+class P3; end
+class P4; end
+class P5; end
+class P6; end
 
 # Parse errors
 
@@ -41,44 +41,58 @@ def method1; T.unsafe(nil); end # error: The method `method1` does not have a `s
 
 #: -> String
 def method2; T.unsafe(nil); end
+T.reveal_type(method2) # error: Revealed type: `String`
 
 #: -> String
 def method3; T.unsafe(nil); end
+T.reveal_type(method3) # error: Revealed type: `String`
 
 #:      -> String
 def method4; T.unsafe(nil); end
+T.reveal_type(method4) # error: Revealed type: `String`
 
 # some comment
 #: -> String
 # some comment
 def method5; T.unsafe(nil); end
+T.reveal_type(method5) # error: Revealed type: `String`
 
   #: -> String
 # ^^^^^^^^^^^^ error: Unused type annotation. No method def before next annotation
   #: -> void
   def method6; T.unsafe(nil); end
+  T.reveal_type(method6) # error: Revealed type: `Sorbet::Private::Static::Void`
 
 #: (P1) -> void
 def method7(p1)
   T.reveal_type(p1) # error: Revealed type: `P1`
 end
+method7(P1.new)
+method7(42) # error: Expected `P1` but found `Integer(42)` for argument `P1`
 
 #: (P1, P2) -> void
 def method8(p1, p2)
   T.reveal_type(p1) # error: Revealed type: `P1`
   T.reveal_type(p2) # error: Revealed type: `P2`
 end
+method8(P1.new, 42) # error: Expected `P2` but found `Integer(42)` for argument `P2`
+
 
 #: (?Integer) -> void
 def method9(p1 = 42)
   T.reveal_type(p1) # error: Revealed type: `Integer`
 end
+method9
+method9(42)
 
-#: (?P1?, P2) -> void
-def method10(p1 = nil, p2)
-  T.reveal_type(p1) # error: Revealed type: `T.nilable(P1)`
-  T.reveal_type(p2) # error: Revealed type: `P2`
+#: (P1, ?P2?) -> void
+def method10(p1, p2 = nil)
+  T.reveal_type(p1) # error: Revealed type: `P1`
+  T.reveal_type(p2) # error: Revealed type: `T.nilable(P2)`
 end
+method10(P1.new, nil)
+method10(P1.new, P2.new)
+method10(P1.new)
 
 # Named args
 
@@ -86,6 +100,8 @@ end
 def method11(x)
   T.reveal_type(x) # error: Revealed type: `String`
 end
+method11("foo")
+method11(42) # error: Expected `String` but found `Integer(42)` for argument `String x`
 
 #: (String x) -> String
 #   ^^^^^^^^ error: Unknown argument name `x`
@@ -131,6 +147,9 @@ def method17(p1, p2 = nil, *p3, p4:, p5: nil, **p6, &block)
   T.reveal_type(p6) # error: Revealed type: `T::Hash[Symbol, P6]`
   T.reveal_type(block) # error: Revealed type: `T.proc.void`
 end
+method17(P1.new, P2.new, P3.new, p4: 42, p5: P5.new, p6: P6.new) {} # error: Expected `P4` but found `Integer(42)` for argument `p4`
+method17(P1.new, P2.new, P3.new, p4: P4.new, p5: 42, p6: P6.new) {} # error: Expected `T.nilable(P5)` but found `Integer(42)` for argument `p5`
+method17(P1.new, P2.new, P3.new, p4: P4.new, p5: P5.new, p6: 42) {} # error: Expected `P6` but found `Integer(42)` for argument `P6`
 
 #: ?{ -> void } -> void
 def method18(&block)
@@ -142,6 +161,7 @@ def method19(x)
   T.reveal_type(x) # error: Revealed type: `T.all(Object, T.type_parameter(:X) (of Object#method19))`
   x.class
 end
+T.reveal_type(method19(42)) # error: Revealed type: `T::Class[Integer]`
 
 #: ?{ (?) -> untyped } -> void
 def method20(&block)
