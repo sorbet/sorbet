@@ -17,6 +17,7 @@ namespace sorbet::rbs {
 struct Comment {
     core::LocOffsets loc;    // The location of the comment in the file
     std::string_view string; // The type string (excluding the `#: ` prefix)
+                             // this is only a view on the string owned by the File.source() data.
 };
 
 /**
