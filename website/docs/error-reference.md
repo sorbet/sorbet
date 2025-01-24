@@ -600,7 +600,23 @@ end
 > This error is specific to RBS support when using the
 > `--enable-experimental-rbs-signatures` flag.
 
+RBS Internal error: this error is raised when the RBS parser returns an
+unexpected node while parsing a RBS signature comment.
+
+## 3551
+
+> This error is specific to RBS support when using the
+> `--enable-experimental-rbs-signatures` flag.
+
 This error is raised when a RBS signature comment contains a syntax error.
+
+## 3552
+
+> This error is specific to RBS support when using the
+> `--enable-experimental-rbs-signatures` flag.
+
+This error is raised when a RBS signature comment contains a feature not yet
+supported by Sorbet.
 
 ## 3702
 

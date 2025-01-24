@@ -20,7 +20,10 @@ constexpr ErrorClass NilableUntyped{3512, StrictLevel::False};
 constexpr ErrorClass ContravariantHasAttachedClass{3514, StrictLevel::False};
 constexpr ErrorClass DuplicateProp{3515, StrictLevel::True};
 
-constexpr ErrorClass RBSError{3550, StrictLevel::True}; // let's reserve 3550-3559 for RBS related errors
+// Let's reserve 3550-3559 for RBS related errors
+constexpr ErrorClass RBSInternalError{3550, StrictLevel::True};
+constexpr ErrorClass RBSSyntaxError{3551, StrictLevel::True};
+constexpr ErrorClass RBSUnsupported{3552, StrictLevel::True};
 
 } // namespace sorbet::core::errors::Rewriter
 #endif

@@ -27,7 +27,7 @@ std::optional<MethodType> RBSParser::parseSignature(core::Context ctx, Comment c
             comment.loc.beginPos() + parser->error->token.range.end.char_pos + 2,
         };
 
-        if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSError)) {
+        if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSSyntaxError)) {
             e.setHeader("Failed to parse RBS signature ({})", parser->error->message);
         }
 
@@ -61,7 +61,7 @@ std::optional<Type> RBSParser::parseType(core::Context ctx, Comment comment) {
             comment.loc.beginPos() + parser->error->token.range.end.char_pos + 2,
         };
 
-        if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSError)) {
+        if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSSyntaxError)) {
             e.setHeader("Failed to parse RBS type ({})", parser->error->message);
         }
 

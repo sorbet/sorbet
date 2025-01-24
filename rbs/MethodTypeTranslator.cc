@@ -26,7 +26,7 @@ core::NameRef expressionName(core::MutableContext ctx, const ast::ExpressionPtr 
             [&](const ast::OptionalArg &p) { cursor = &p.expr; }, [&](const ast::RestArg &p) { cursor = &p.expr; },
             [&](const ast::KeywordArg &p) { cursor = &p.expr; }, [&](const ast::BlockArg &p) { cursor = &p.expr; },
             [&](const ast::ExpressionPtr &p) {
-                if (auto e = ctx.beginError(expr->loc(), core::errors::Rewriter::RBSError)) {
+                if (auto e = ctx.beginError(expr->loc(), core::errors::Rewriter::RBSInternalError)) {
                     e.setHeader("Unexpected expression type: {}", p.showRaw(ctx));
                 }
 
@@ -47,7 +47,7 @@ struct RBSArg {
 void collectArgs(core::MutableContext ctx, core::LocOffsets docLoc, rbs_node_list_t *field, std::vector<RBSArg> &args) {
     for (rbs_node_list_node_t *list_node = field->head; list_node != nullptr; list_node = list_node->next) {
         if (list_node->node->type != RBS_TYPES_FUNCTION_PARAM) {
-            if (auto e = ctx.beginError(docLoc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(docLoc, core::errors::Rewriter::RBSInternalError)) {
                 e.setHeader("Unexpected node type `{}` in function parameter list, expected `{}`",
                             rbs_node_type_name(list_node->node), "FunctionParam");
             }
@@ -64,7 +64,7 @@ void collectArgs(core::MutableContext ctx, core::LocOffsets docLoc, rbs_node_lis
 void collectKeywords(core::MutableContext ctx, core::LocOffsets docLoc, rbs_hash_t *field, std::vector<RBSArg> &args) {
     for (rbs_hash_node_t *hash_node = field->head; hash_node != nullptr; hash_node = hash_node->next) {
         if (hash_node->key->type != RBS_AST_SYMBOL) {
-            if (auto e = ctx.beginError(docLoc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(docLoc, core::errors::Rewriter::RBSInternalError)) {
                 e.setHeader("Unexpected node type `{}` in keyword argument name, expected `{}`",
                             rbs_node_type_name(hash_node->key), "Symbol");
             }
@@ -72,7 +72,7 @@ void collectKeywords(core::MutableContext ctx, core::LocOffsets docLoc, rbs_hash
         }
 
         if (hash_node->value->type != RBS_TYPES_FUNCTION_PARAM) {
-            if (auto e = ctx.beginError(docLoc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(docLoc, core::errors::Rewriter::RBSInternalError)) {
                 e.setHeader("Unexpected node type `{}` in keyword argument value, expected `{}`",
                             rbs_node_type_name(hash_node->value), "FunctionParam");
             }
@@ -96,7 +96,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
 
     if (node->type->type != RBS_TYPES_FUNCTION) {
         auto errLoc = TypeTranslator::nodeLoc(methodType.loc, node->type);
-        if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSError)) {
+        if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSInternalError)) {
             e.setHeader("Unexpected node type `{}` in method signature, expected `{}`", rbs_node_type_name(node->type),
                         "Function");
         }
@@ -111,7 +111,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
         auto loc = TypeTranslator::nodeLoc(methodType.loc, list_node->node);
 
         if (list_node->node->type != RBS_AST_TYPEPARAM) {
-            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSInternalError)) {
                 e.setHeader("Unexpected node type `{}` in type parameter list, expected `{}`",
                             rbs_node_type_name(list_node->node), "TypeParam");
             }
@@ -140,7 +140,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
     rbs_node_t *restPositionals = functionType->rest_positionals;
     if (restPositionals) {
         if (restPositionals->type != RBS_TYPES_FUNCTION_PARAM) {
-            if (auto e = ctx.beginError(methodType.loc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(methodType.loc, core::errors::Rewriter::RBSInternalError)) {
                 e.setHeader("Unexpected node type `{}` in rest positional argument, expected `{}`",
                             rbs_node_type_name(restPositionals), "FunctionParam");
             }
@@ -165,7 +165,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
     rbs_node_t *restKeywords = functionType->rest_keywords;
     if (restKeywords) {
         if (restKeywords->type != RBS_TYPES_FUNCTION_PARAM) {
-            if (auto e = ctx.beginError(methodType.loc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(methodType.loc, core::errors::Rewriter::RBSInternalError)) {
                 e.setHeader("Unexpected node type `{}` in rest keyword argument, expected `{}`",
                             rbs_node_type_name(restKeywords), "FunctionParam");
             }

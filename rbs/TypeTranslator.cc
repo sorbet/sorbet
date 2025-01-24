@@ -32,7 +32,7 @@ sorbet::ast::ExpressionPtr typeNameType(core::MutableContext ctx,
             rbs_node_t *node = list_node->node;
 
             if (node->type != RBS_AST_SYMBOL) {
-                if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSError)) {
+                if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSInternalError)) {
                     e.setHeader("Unexpected node type `{}` in type name, expected `{}`", rbs_node_type_name(node),
                                 "Symbol");
                 }
@@ -160,7 +160,7 @@ sorbet::ast::ExpressionPtr functionType(core::MutableContext ctx,
         sorbet::ast::ExpressionPtr innerType;
 
         if (paramNode->type != RBS_TYPES_FUNCTION_PARAM) {
-            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSInternalError)) {
                 e.setHeader("Unexpected node type `{}` in function parameter type, expected `{}`",
                             rbs_node_type_name(paramNode), "FunctionParam");
             }
@@ -201,7 +201,7 @@ sorbet::ast::ExpressionPtr procType(core::MutableContext ctx,
         }
         default: {
             auto errLoc = TypeTranslator::nodeLoc(docLoc, functionTypeNode);
-            if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSInternalError)) {
                 e.setHeader("Unexpected node type `{}` in proc type, expected `{}`",
                             rbs_node_type_name(functionTypeNode), "Function");
             }
@@ -235,7 +235,7 @@ sorbet::ast::ExpressionPtr blockType(core::MutableContext ctx,
         }
         default: {
             auto errLoc = TypeTranslator::nodeLoc(docLoc, functionTypeNode);
-            if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSInternalError)) {
                 e.setHeader("Unexpected node type `{}` in block type, expected `{}`",
                             rbs_node_type_name(functionTypeNode), "Function");
             }
@@ -295,7 +295,7 @@ sorbet::ast::ExpressionPtr recordType(core::MutableContext ctx,
                 break;
             }
             default: {
-                if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSError)) {
+                if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSInternalError)) {
                     e.setHeader("Unexpected node type `{}` in record key type, expected `{}`",
                                 rbs_node_type_name(hash_node->key), "Symbol");
                 }
@@ -304,7 +304,7 @@ sorbet::ast::ExpressionPtr recordType(core::MutableContext ctx,
         }
 
         if (hash_node->value->type != RBS_TYPES_RECORD_FIELDTYPE) {
-            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSInternalError)) {
                 e.setHeader("Unexpected node type `{}` in record value type, expected `{}`",
                             rbs_node_type_name(hash_node->value), "RecordFieldtype");
             }
@@ -344,7 +344,7 @@ sorbet::ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
     switch (node->type) {
         case RBS_TYPES_ALIAS: {
             auto loc = TypeTranslator::nodeLoc(docLoc, node);
-            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS aliases are not supported yet");
             }
             return ast::MK::Untyped(docLoc);
@@ -357,7 +357,7 @@ sorbet::ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
             return ast::MK::NoReturn(docLoc);
         case RBS_TYPES_BASES_CLASS: {
             auto loc = TypeTranslator::nodeLoc(docLoc, node);
-            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS type `{}` is not supported yet", "class");
             }
             return ast::MK::Untyped(docLoc);
@@ -382,7 +382,7 @@ sorbet::ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
             return functionType(ctx, typeParams, (rbs_types_function_t *)node, docLoc);
         case RBS_TYPES_INTERFACE: {
             auto loc = TypeTranslator::nodeLoc(docLoc, node);
-            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS interfaces are not supported yet");
             }
             return ast::MK::Untyped(docLoc);
@@ -391,7 +391,7 @@ sorbet::ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
             return intersectionType(ctx, typeParams, (rbs_types_intersection_t *)node, docLoc);
         case RBS_TYPES_LITERAL: {
             auto loc = TypeTranslator::nodeLoc(docLoc, node);
-            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS literal types are not supported yet");
             }
             return ast::MK::Untyped(docLoc);
@@ -410,7 +410,7 @@ sorbet::ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
             return variableType(ctx, (rbs_types_variable_t *)node, docLoc);
         default: {
             auto errLoc = TypeTranslator::nodeLoc(docLoc, node);
-            if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSError)) {
+            if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSInternalError)) {
                 e.setHeader("Unexpected node type `{}`", rbs_node_type_name(node));
             }
 
