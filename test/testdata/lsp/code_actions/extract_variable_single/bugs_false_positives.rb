@@ -5,12 +5,6 @@
 # This file contain cases where we should disallow the user from extracting to variable,
 # but incorrectly allow it.
 
-/W[aeiou]rd/i
-#           ^ apply-code-action: [A] Extract Variable (this occurrence only)
-
-  /A[aeiou]rd/m
-#  ^^^^^^^^^^ apply-code-action: [B] Extract Variable (this occurrence only)
-
 class A < T::Struct
   prop :x, Integer
 #      ^^ apply-code-action: [C] Extract Variable (this occurrence only)
