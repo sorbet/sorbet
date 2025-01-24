@@ -42,11 +42,9 @@ struct RBSArg {
     core::LocOffsets loc;
     rbs_ast_symbol_t *name;
     rbs_node_t *type;
-    bool optional;
 };
 
-void collectArgs(core::MutableContext ctx, core::LocOffsets docLoc, rbs_node_list_t *field, std::vector<RBSArg> &args,
-                 bool optional) {
+void collectArgs(core::MutableContext ctx, core::LocOffsets docLoc, rbs_node_list_t *field, std::vector<RBSArg> &args) {
     for (rbs_node_list_node_t *list_node = field->head; list_node != nullptr; list_node = list_node->next) {
         if (list_node->node->type != RBS_TYPES_FUNCTION_PARAM) {
             if (auto e = ctx.beginError(docLoc, core::errors::Rewriter::RBSError)) {
@@ -58,13 +56,12 @@ void collectArgs(core::MutableContext ctx, core::LocOffsets docLoc, rbs_node_lis
 
         auto loc = TypeTranslator::nodeLoc(docLoc, list_node->node);
         auto node = (rbs_types_function_param_t *)list_node->node;
-        auto arg = RBSArg{loc, node->name, node->type, optional};
+        auto arg = RBSArg{loc, node->name, node->type};
         args.emplace_back(arg);
     }
 }
 
-void collectKeywords(core::MutableContext ctx, core::LocOffsets docLoc, rbs_hash_t *field, std::vector<RBSArg> &args,
-                     bool optional) {
+void collectKeywords(core::MutableContext ctx, core::LocOffsets docLoc, rbs_hash_t *field, std::vector<RBSArg> &args) {
     for (rbs_hash_node_t *hash_node = field->head; hash_node != nullptr; hash_node = hash_node->next) {
         if (hash_node->key->type != RBS_AST_SYMBOL) {
             if (auto e = ctx.beginError(docLoc, core::errors::Rewriter::RBSError)) {
@@ -84,7 +81,7 @@ void collectKeywords(core::MutableContext ctx, core::LocOffsets docLoc, rbs_hash
 
         rbs_ast_symbol_t *keyNode = (rbs_ast_symbol_t *)hash_node->key;
         rbs_types_function_param_t *valueNode = (rbs_types_function_param_t *)hash_node->value;
-        auto arg = RBSArg{docLoc, keyNode, valueNode->type, optional};
+        auto arg = RBSArg{docLoc, keyNode, valueNode->type};
         args.emplace_back(arg);
     }
 }
@@ -133,11 +130,11 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
     rbs_types_function_t *functionType = (rbs_types_function_t *)node->type;
     std::vector<RBSArg> args;
 
-    collectArgs(ctx, methodType.loc, functionType->required_positionals, args, false);
+    collectArgs(ctx, methodType.loc, functionType->required_positionals, args);
 
     rbs_node_list_t *optionalPositionals = functionType->optional_positionals;
     if (optionalPositionals && optionalPositionals->length > 0) {
-        collectArgs(ctx, methodType.loc, optionalPositionals, args, false);
+        collectArgs(ctx, methodType.loc, optionalPositionals, args);
     }
 
     rbs_node_t *restPositionals = functionType->rest_positionals;
@@ -150,20 +147,20 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
         } else {
             auto loc = TypeTranslator::nodeLoc(methodType.loc, restPositionals);
             auto node = (rbs_types_function_param_t *)restPositionals;
-            auto arg = RBSArg{loc, node->name, node->type, false};
+            auto arg = RBSArg{loc, node->name, node->type};
             args.emplace_back(arg);
         }
     }
 
     rbs_node_list_t *trailingPositionals = functionType->trailing_positionals;
     if (trailingPositionals && trailingPositionals->length > 0) {
-        collectArgs(ctx, methodType.loc, trailingPositionals, args, false);
+        collectArgs(ctx, methodType.loc, trailingPositionals, args);
     }
 
     // Collect keywords
 
-    collectKeywords(ctx, methodType.loc, functionType->required_keywords, args, false);
-    collectKeywords(ctx, methodType.loc, functionType->optional_keywords, args, false);
+    collectKeywords(ctx, methodType.loc, functionType->required_keywords, args);
+    collectKeywords(ctx, methodType.loc, functionType->optional_keywords, args);
 
     rbs_node_t *restKeywords = functionType->rest_keywords;
     if (restKeywords) {
@@ -175,7 +172,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
         } else {
             auto loc = TypeTranslator::nodeLoc(methodType.loc, restKeywords);
             auto node = (rbs_types_function_param_t *)restKeywords;
-            auto arg = RBSArg{loc, node->name, node->type, false};
+            auto arg = RBSArg{loc, node->name, node->type};
             args.emplace_back(arg);
         }
     }
@@ -185,7 +182,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
     rbs_types_block_t *block = node->block;
     if (block) {
         // TODO: RBS doesn't have location on blocks yet
-        auto arg = RBSArg{methodType.loc, nullptr, (rbs_node_t *)block, false};
+        auto arg = RBSArg{methodType.loc, nullptr, (rbs_node_t *)block};
         args.emplace_back(arg);
     }
 
@@ -207,10 +204,6 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
         }
 
         auto type = TypeTranslator::toRBI(ctx, typeParams, arg.type, methodType.loc);
-        if (arg.optional) {
-            type = ast::MK::Nilable(arg.loc, std::move(type));
-        }
-
         sigParams.emplace_back(ast::MK::Symbol(arg.loc, name));
         sigParams.emplace_back(std::move(type));
     }
