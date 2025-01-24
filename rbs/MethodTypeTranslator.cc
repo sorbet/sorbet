@@ -14,20 +14,26 @@ namespace {
 
 core::NameRef expressionName(core::MutableContext ctx, const ast::ExpressionPtr *expr) {
     core::NameRef name;
+    auto cursor = expr;
 
-    typecase(
-        *expr, [&](const ast::UnresolvedIdent &p) { name = p.name; },
-        [&](const ast::OptionalArg &p) { name = expressionName(ctx, &p.expr); },
-        [&](const ast::RestArg &p) { name = expressionName(ctx, &p.expr); },
-        [&](const ast::KeywordArg &p) { name = expressionName(ctx, &p.expr); },
-        [&](const ast::BlockArg &p) { name = expressionName(ctx, &p.expr); },
-        [&](const ast::ExpressionPtr &p) {
-            if (auto e = ctx.beginError(expr->loc(), core::errors::Rewriter::RBSError)) {
-                e.setHeader("Unexpected expression type: {}", p.showRaw(ctx));
-            }
+    while (cursor != nullptr) {
+        typecase(
+            *cursor,
+            [&](const ast::UnresolvedIdent &p) {
+                name = p.name;
+                cursor = nullptr;
+            },
+            [&](const ast::OptionalArg &p) { cursor = &p.expr; }, [&](const ast::RestArg &p) { cursor = &p.expr; },
+            [&](const ast::KeywordArg &p) { cursor = &p.expr; }, [&](const ast::BlockArg &p) { cursor = &p.expr; },
+            [&](const ast::ExpressionPtr &p) {
+                if (auto e = ctx.beginError(expr->loc(), core::errors::Rewriter::RBSError)) {
+                    e.setHeader("Unexpected expression type: {}", p.showRaw(ctx));
+                }
 
-            name = ctx.state.enterNameUTF8("<error>");
-        });
+                name = ctx.state.enterNameUTF8("<error>");
+                cursor = nullptr;
+            });
+    }
 
     return name;
 }
