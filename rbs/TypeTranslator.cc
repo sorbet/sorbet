@@ -48,7 +48,7 @@ sorbet::ast::ExpressionPtr typeNameType(core::MutableContext ctx,
     }
 
     rbs_constant_t *name = rbs_constant_pool_id_to_constant(fake_constant_pool, typeName->name->constant_id);
-    std::string nameStr(name->start, name->length);
+    std::string_view nameStr(name->start, name->length);
 
     if (typePath == nullptr || typePath->length == 0) {
         if (nameStr == "Array" && isGeneric) {
@@ -278,20 +278,18 @@ sorbet::ast::ExpressionPtr recordType(core::MutableContext ctx,
     auto valuesStore = Hash::ENTRY_store();
 
     for (rbs_hash_node_t *hash_node = node->all_fields->head; hash_node != nullptr; hash_node = hash_node->next) {
-        std::string keyStr;
-
         switch (hash_node->key->type) {
             case RBS_AST_SYMBOL: {
                 rbs_ast_symbol_t *keyNode = (rbs_ast_symbol_t *)hash_node->key;
                 rbs_constant_t *keyString = rbs_constant_pool_id_to_constant(fake_constant_pool, keyNode->constant_id);
-                keyStr = std::string(keyString->start, keyString->length);
+                std::string_view keyStr(keyString->start, keyString->length);
                 auto keyName = ctx.state.enterNameUTF8(keyStr);
                 keysStore.emplace_back(ast::MK::Symbol(loc, keyName));
                 break;
             }
             case RBS_AST_STRING: {
                 rbs_ast_string_t *keyNode = (rbs_ast_string_t *)hash_node->key;
-                keyStr = std::string(keyNode->string.start);
+                std::string_view keyStr(keyNode->string.start);
                 auto keyName = ctx.state.enterNameUTF8(keyStr);
                 keysStore.emplace_back(ast::MK::String(loc, keyName));
                 break;
@@ -325,7 +323,7 @@ sorbet::ast::ExpressionPtr recordType(core::MutableContext ctx,
 sorbet::ast::ExpressionPtr variableType(core::MutableContext ctx, rbs_types_variable_t *node, core::LocOffsets loc) {
     rbs_ast_symbol_t *symbol = (rbs_ast_symbol_t *)node->name;
     rbs_constant_t *constant = rbs_constant_pool_id_to_constant(fake_constant_pool, symbol->constant_id);
-    std::string string(constant->start, constant->length);
+    std::string_view string(constant->start, constant->length);
     auto name = ctx.state.enterNameUTF8(string);
     return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::typeParameter(), loc, ast::MK::Symbol(loc, name));
 }

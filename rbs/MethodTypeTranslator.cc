@@ -124,7 +124,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
 
         auto node = (rbs_ast_typeparam_t *)list_node->node;
         rbs_constant_t *constant = rbs_constant_pool_id_to_constant(fake_constant_pool, node->name->constant_id);
-        std::string string(constant->start, constant->length);
+        std::string_view string(constant->start, constant->length);
         typeParams.emplace_back(loc, ctx.state.enterNameUTF8(string));
     }
 
@@ -199,7 +199,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
             // The RBS arg is named in the signature, so we use the explicit name used
             rbs_constant_t *nameConstant =
                 rbs_constant_pool_id_to_constant(fake_constant_pool, nameSymbol->constant_id);
-            std::string nameStr(nameConstant->start, nameConstant->length);
+            std::string_view nameStr(nameConstant->start, nameConstant->length);
             name = ctx.state.enterNameUTF8(nameStr);
         } else {
             // The RBS arg is not named in the signature, so we get it from the method definition
