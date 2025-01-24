@@ -223,14 +223,14 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
     bool isFinal = false;
 
     for (auto &annotation : annotations) {
-        if (annotation.string == "@final") {
+        if (annotation.string == "final") {
             isFinal = true;
-        } else if (annotation.string == "@abstract") {
+        } else if (annotation.string == "abstract") {
             sigBuilder = ast::MK::Send0(annotation.loc, std::move(sigBuilder), core::Names::abstract(), annotation.loc);
-        } else if (annotation.string == "@override") {
+        } else if (annotation.string == "override") {
             sigBuilder =
                 ast::MK::Send0(annotation.loc, std::move(sigBuilder), core::Names::override_(), annotation.loc);
-        } else if (annotation.string == "@override(allow_incompatible: true)") {
+        } else if (annotation.string == "override(allow_incompatible: true)") {
             Send::ARGS_store overrideArgs;
             overrideArgs.emplace_back(ast::MK::Symbol(annotation.loc, core::Names::allowIncompatible()));
             overrideArgs.emplace_back(ast::MK::True(annotation.loc));

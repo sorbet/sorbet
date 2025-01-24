@@ -107,17 +107,15 @@ class RBSSignaturesWalk {
 
             // Handle a RBS sig annotation `#: SomeRBS`
             else if (absl::StartsWith(line, "#:")) {
-                // Account for whitespace before comment e.g
-                // # abc -> "abc"
-                // #abc -> "abc"
-                // int skip_after_hash = absl::StartsWith(line, "#: ") ? 3 : 2;
-
+                // Account for whitespace before the annotation e.g
+                // #: abc -> "abc"
+                // #:abc -> "abc"
                 int lineSize = line.size();
                 auto rbsSignature = rbs::Comment{
                     core::LocOffsets{index, index + lineSize},
-                    line.substr(line.find("#:") + 2),
+                    line.substr(2),
                 };
-                signatures.insert(signatures.begin(), rbsSignature);
+                signatures.emplace_back(rbsSignature);
             }
 
             // Handle RDoc annotations `# @abstract`
@@ -125,9 +123,9 @@ class RBSSignaturesWalk {
                 int lineSize = line.size();
                 auto annotation = rbs::Comment{
                     core::LocOffsets{index, index + lineSize},
-                    line.substr(line.find("# ") + 2),
+                    line.substr(3),
                 };
-                annotations.insert(annotations.begin(), annotation);
+                annotations.emplace_back(annotation);
             }
 
             // Ignore other comments
@@ -140,6 +138,9 @@ class RBSSignaturesWalk {
                 break;
             }
         }
+
+        std::reverse(annotations.begin(), annotations.end());
+        std::reverse(signatures.begin(), signatures.end());
 
         return Comments{annotations, signatures};
     }
