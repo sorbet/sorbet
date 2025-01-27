@@ -290,7 +290,16 @@ public:
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         if (send.fun == core::Names::orAsgn() || send.fun == core::Names::andAsgn() ||
             send.fun == core::Names::opAsgn()) {
+            ENFORCE(send.numPosArgs() >= 1);
             skipLocExact(send.getPosArg(0).loc());
+        }
+
+        if (auto constantLit = ast::cast_tree<ast::ConstantLit>(send.recv)) {
+            if (constantLit->symbol == core::Symbols::Regexp() && send.fun == core::Names::new_()) {
+                ENFORCE(send.numPosArgs() >= 2);
+                skipLocRange(send.getPosArg(0).loc());
+                skipLocRange(send.getPosArg(1).loc());
+            }
         }
     }
 };

@@ -133,3 +133,10 @@ def multi_stat_selection
   1 + 1; 2 + 2
 # ^^^^^^^^^^^^ apply-code-action: [A] Extract Variable (this occurrence only)
 end
+
+/W[aeiou]rd/i
+#           ^ apply-code-action: [A] Extract Variable (this occurrence only)
+
+  /A[aeiou]rd/m
+#  ^^^^^^^^^^ apply-code-action: [A] Extract Variable (this occurrence only)
+
