@@ -439,26 +439,22 @@ public:
         auto importType = this->package.importsPackage(otherPackage);
         if (!importType.has_value()) {
             // We failed to import the package that defines the symbol
-            bool layeringViolation = false;
-            auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-            auto strictDepsLevel = this->package.strictDependenciesLevel();
-            std::string errorMessage;
-            bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
-            if (!isTestImport && db.enforceLayering() && strictDepsLevel.has_value() &&
-                strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&
-                this->package.causesLayeringViolation(db, pkg)) {
-                layeringViolation = true;
-                errorMessage = core::ErrorColors::format("`{}` resolves but its package cannot be imported because "
-                                                         "importing it would cause a layering violation",
-                                                         lit.symbol.show(ctx));
-            } else {
-                errorMessage =
-                    core::ErrorColors::format("`{}` resolves but its package is not imported", lit.symbol.show(ctx));
-            }
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::MissingImport)) {
-                e.setHeader(errorMessage);
-                e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                if (!layeringViolation) {
+                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+                bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
+                auto strictDepsLevel = this->package.strictDependenciesLevel();
+                bool layeringViolation =
+                    !isTestImport && db.enforceLayering() && strictDepsLevel.has_value() &&
+                    strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&
+                    this->package.causesLayeringViolation(db, pkg);
+                if (layeringViolation) {
+                    e.setHeader("`{}` resolves but its package cannot be imported because "
+                                "importing it would cause a layering violation",
+                                lit.symbol.show(ctx));
+                    e.addErrorLine(pkg.declLoc(), "Exported from package here");
+                } else {
+                    e.setHeader("`{}` resolves but its package is not imported", lit.symbol.show(ctx));
+                    e.addErrorLine(pkg.declLoc(), "Exported from package here");
                     if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
                         e.addAutocorrect(std::move(exp.value()));
                     }

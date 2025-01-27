@@ -430,11 +430,19 @@ public:
 
     // Is it a layering violation to import otherPkg from this package?
     bool causesLayeringViolation(const core::packages::PackageDB &packageDB, const PackageInfo &otherPkg) const {
-        if (!layer().has_value() || !otherPkg.layer().has_value()) {
+        if (!otherPkg.layer().has_value()) {
             return false;
         }
+
+        return causesLayeringViolation(packageDB, otherPkg.layer().value().first);
+    }
+
+    bool causesLayeringViolation(const core::packages::PackageDB &packageDB, core::NameRef otherPkgLayer) const {
+        if (!layer().has_value()) {
+            return false;
+        }
+
         auto pkgLayer = layer().value().first;
-        auto otherPkgLayer = otherPkg.layer().value().first;
         auto pkgLayerIndex = packageDB.layerIndex(pkgLayer);
         auto otherPkgLayerIndex = packageDB.layerIndex(otherPkgLayer);
 
@@ -1709,7 +1717,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     auto pkgLayer = thisPkg.layer().value().first;
     auto otherPkgLayer = otherPkg.layer().value().first;
 
-    if (thisPkg.causesLayeringViolation(packageDB, otherPkg)) {
+    if (thisPkg.causesLayeringViolation(packageDB, otherPkgLayer)) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
             e.setHeader("Layering violation: cannot import `{}` (in layer `{}`) from `{}` (in layer `{}`)",
                         otherPkg.show(ctx), otherPkgLayer.show(ctx), thisPkg.show(ctx), pkgLayer.show(ctx));
