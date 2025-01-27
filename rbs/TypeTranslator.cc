@@ -1,6 +1,7 @@
 #include "TypeTranslator.h"
 #include "ast/Helpers.h"
 #include "core/GlobalState.h"
+#include "core/errors/internal.h"
 #include "core/errors/rewriter.h"
 
 using namespace sorbet::ast;
@@ -31,13 +32,8 @@ sorbet::ast::ExpressionPtr typeNameType(core::MutableContext ctx,
         for (rbs_node_list_node *list_node = typePath->head; list_node != nullptr; list_node = list_node->next) {
             rbs_node_t *node = list_node->node;
 
-            if (node->type != RBS_AST_SYMBOL) {
-                if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSInternalError)) {
-                    e.setHeader("Unexpected node type `{}` in type name, expected `{}`", rbs_node_type_name(node),
-                                "Symbol");
-                }
-                continue;
-            }
+            ENFORCE(node->type == RBS_AST_SYMBOL, "Unexpected node type `{}` in type name, expected `{}`",
+                    rbs_node_type_name(node), "Symbol");
 
             rbs_ast_symbol_t *symbol = (rbs_ast_symbol_t *)node;
             rbs_constant_t *name = rbs_constant_pool_id_to_constant(fake_constant_pool, symbol->constant_id);
@@ -160,7 +156,7 @@ sorbet::ast::ExpressionPtr functionType(core::MutableContext ctx,
         sorbet::ast::ExpressionPtr innerType;
 
         if (paramNode->type != RBS_TYPES_FUNCTION_PARAM) {
-            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSInternalError)) {
+            if (auto e = ctx.beginError(loc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in function parameter type, expected `{}`",
                             rbs_node_type_name(paramNode), "FunctionParam");
             }
@@ -201,7 +197,7 @@ sorbet::ast::ExpressionPtr procType(core::MutableContext ctx,
         }
         default: {
             auto errLoc = TypeTranslator::nodeLoc(docLoc, functionTypeNode);
-            if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSInternalError)) {
+            if (auto e = ctx.beginError(errLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in proc type, expected `{}`",
                             rbs_node_type_name(functionTypeNode), "Function");
             }
@@ -235,7 +231,7 @@ sorbet::ast::ExpressionPtr blockType(core::MutableContext ctx,
         }
         default: {
             auto errLoc = TypeTranslator::nodeLoc(docLoc, functionTypeNode);
-            if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSInternalError)) {
+            if (auto e = ctx.beginError(errLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in block type, expected `{}`",
                             rbs_node_type_name(functionTypeNode), "Function");
             }
@@ -295,7 +291,7 @@ sorbet::ast::ExpressionPtr recordType(core::MutableContext ctx,
                 break;
             }
             default: {
-                if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSInternalError)) {
+                if (auto e = ctx.beginError(loc, core::errors::Internal::InternalError)) {
                     e.setHeader("Unexpected node type `{}` in record key type, expected `{}`",
                                 rbs_node_type_name(hash_node->key), "Symbol");
                 }
@@ -304,7 +300,7 @@ sorbet::ast::ExpressionPtr recordType(core::MutableContext ctx,
         }
 
         if (hash_node->value->type != RBS_TYPES_RECORD_FIELDTYPE) {
-            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSInternalError)) {
+            if (auto e = ctx.beginError(loc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in record value type, expected `{}`",
                             rbs_node_type_name(hash_node->value), "RecordFieldtype");
             }
@@ -410,7 +406,7 @@ sorbet::ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
             return variableType(ctx, (rbs_types_variable_t *)node, docLoc);
         default: {
             auto errLoc = TypeTranslator::nodeLoc(docLoc, node);
-            if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSInternalError)) {
+            if (auto e = ctx.beginError(errLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}`", rbs_node_type_name(node));
             }
 
