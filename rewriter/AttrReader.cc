@@ -28,15 +28,19 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Exp
         } else if (lit->isString()) {
             core::NameRef nameRef = lit->asString();
             auto shortName = nameRef.shortName(ctx);
-            bool validAttr = (isalpha(shortName.front()) || shortName.front() == '_') &&
+            bool validAttr = !shortName.empty() && (isalpha(shortName.front()) || shortName.front() == '_') &&
                              absl::c_all_of(shortName, [](char c) { return isalnum(c) || c == '_'; });
             if (validAttr) {
                 res = nameRef;
             } else {
                 if (auto e = ctx.beginIndexerError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
-                    e.setHeader("Bad attribute name \"{}\"", absl::CEscape(shortName));
+                    if (shortName.empty()) {
+                        e.setHeader("Attribute names must be non-empty");
+                    } else {
+                        e.setHeader("Bad attribute name \"{}\"", absl::CEscape(shortName));
+                    }
                 }
-                res = core::Names::empty();
+                return make_pair(core::NameRef::noName(), lit->loc);
             }
             loc = lit->loc;
             DEBUG_ONLY({
