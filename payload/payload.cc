@@ -16,13 +16,13 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
         return;
     }
 
-    const uint8_t *const nameTablePayload = getNameTablePayload;
-    if (nameTablePayload == nullptr) {
+    const uint8_t *const payload = getSorbetPayload;
+    if (payload == nullptr) {
         Timer timeit(gs->tracer(), "read_global_state.source");
         sorbet::rbi::populateRBIsInto(gs);
     } else {
         Timer timeit(gs->tracer(), "read_global_state.binary");
-        core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);
+        core::serialize::Serializer::loadGlobalState(*gs, payload);
     }
     ENFORCE(gs->utf8NamesUsed() < core::GlobalState::PAYLOAD_MAX_UTF8_NAME_COUNT,
             "Payload defined `{}` UTF8 names, which is greater than the expected maximum of `{}`. Consider updating "

@@ -370,7 +370,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
         gs->initEmpty();
     } else {
-        core::serialize::Serializer::loadGlobalState(*gs, getNameTablePayload);
+        core::serialize::Serializer::loadGlobalState(*gs, getSorbetPayload);
     }
 
     if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {

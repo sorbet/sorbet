@@ -154,7 +154,7 @@ TEST_CASE("CloneSubstitutePayload") {
     auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
     sorbet::core::GlobalState gs(errorQueue);
-    sorbet::core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
+    sorbet::core::serialize::Serializer::loadGlobalState(gs, getSorbetPayload);
 
     auto c1 = gs.deepCopy();
     auto c2 = gs.deepCopy();
