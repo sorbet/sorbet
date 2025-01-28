@@ -138,6 +138,11 @@ string MsgpackWriterLite::pack(core::Context ctx, ParsedFile &pf, const AutogenC
     {
         MsgpackArray attributes(&writer, pfAttrs.size());
 
+        if (version >= 7) {
+            uint32_t value = strictLevelToInt(pf.tree.file.data(ctx).strictLevel);
+            mpack_write_u32(&writer, value);
+        }
+
         mpack_write_u32(&writer, pf.refs.size());
         mpack_write_u32(&writer, pf.defs.size());
         mpack_write_u32(&writer, symbols.size());
@@ -184,6 +189,7 @@ const map<int, vector<string>> MsgpackWriterLite::parsedFileAttrMap{{
                                                                     {
                                                                         7,
                                                                         {
+                                                                            "typed_level",
                                                                             "ref_count",
                                                                             "def_count",
                                                                             "sym_count",

@@ -34,6 +34,32 @@ void packString(mpack_writer_t *writer, string_view str) {
     mpack_write_str(writer, str.data(), str.size());
 }
 
+uint32_t MsgpackWriterBase::strictLevelToInt(core::StrictLevel strictLevel) {
+    uint32_t value = 0;
+    switch (strictLevel) {
+        case sorbet::core::StrictLevel::Ignore:
+            value = 1;
+            break;
+        case sorbet::core::StrictLevel::False:
+            value = 2;
+            break;
+        case sorbet::core::StrictLevel::True:
+            value = 3;
+            break;
+        case sorbet::core::StrictLevel::Strict:
+            value = 4;
+            break;
+        case sorbet::core::StrictLevel::Strong:
+            value = 5;
+            break;
+        default:
+            // Default value already set at 0.
+            break;
+    }
+
+    return value;
+}
+
 void MsgpackWriterBase::packBool(mpack_writer_t *writer, bool b) {
     if (b) {
         mpack_write_true(writer);
@@ -243,27 +269,7 @@ string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenC
     {
         MsgpackArray headerArray(&writer, pfAttrs.size());
 
-        uint32_t value = 0;
-        switch (pf.tree.file.data(ctx).strictLevel) {
-            case sorbet::core::StrictLevel::Ignore:
-                value = 1;
-                break;
-            case sorbet::core::StrictLevel::False:
-                value = 2;
-                break;
-            case sorbet::core::StrictLevel::True:
-                value = 3;
-                break;
-            case sorbet::core::StrictLevel::Strict:
-                value = 4;
-                break;
-            case sorbet::core::StrictLevel::Strong:
-                value = 5;
-                break;
-            default:
-                // Default value already set at 0.
-                break;
-        }
+        uint32_t value = strictLevelToInt(pf.tree.file.data(ctx).strictLevel);
         mpack_write_u32(&writer, value);
 
         mpack_write_u32(&writer, pf.refs.size());

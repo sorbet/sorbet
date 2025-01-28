@@ -3,6 +3,8 @@
 // has to go first because it violates our poisons
 #include "mpack/mpack.h"
 
+#include "core/StrictLevel.h"
+
 #include "main/autogen/data/definitions.h"
 #include "main/autogen/data/version.h"
 
@@ -23,6 +25,8 @@ protected:
     void packBool(mpack_writer_t *writer, bool b);
     void packReferenceRef(mpack_writer_t *writer, ReferenceRef ref);
     void packDefinitionRef(mpack_writer_t *writer, DefinitionRef ref);
+
+    uint32_t strictLevelToInt(core::StrictLevel strictLevel);
 
     virtual void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
                                 const AutogenConfig &autogenCfg) = 0;
