@@ -901,28 +901,24 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
 
     result.kvstoreUuid = p.getU4();
 
-    vector<shared_ptr<File>> files(std::move(result.files));
-    files.clear();
-    vector<ClassOrModule> classAndModules(std::move(result.classAndModules));
-    classAndModules.clear();
-    vector<Method> methods(std::move(result.methods));
-    methods.clear();
-    vector<Field> fields(std::move(result.fields));
-    fields.clear();
-    vector<TypeParameter> typeArguments(std::move(result.typeArguments));
-    typeArguments.clear();
-    vector<TypeParameter> typeMembers(std::move(result.typeMembers));
-    typeMembers.clear();
+    result.files.clear();
+    result.fileRefByPath.clear();
+    result.classAndModules.clear();
+    result.methods.clear();
+    result.fields.clear();
+    result.typeArguments.clear();
+    result.typeMembers.clear();
+
     {
         Timer timeit(result.tracer(), "readFiles");
 
         int filesSize = p.getU4();
-        files.reserve(filesSize);
+        result.files.reserve(filesSize);
         for (int i = 0; i < filesSize; i++) {
             if (i == 0) {
-                files.emplace_back();
+                result.files.emplace_back();
             } else {
-                files.emplace_back(unpickleFile(p));
+                result.files.emplace_back(unpickleFile(p));
             }
         }
     }
@@ -934,59 +930,48 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
 
         int classAndModuleSize = p.getU4();
         ENFORCE_NO_TIMER(classAndModuleSize > 0);
-        classAndModules.reserve(nextPowerOfTwo(classAndModuleSize));
+        result.classAndModules.reserve(nextPowerOfTwo(classAndModuleSize));
         for (int i = 0; i < classAndModuleSize; i++) {
-            classAndModules.emplace_back(unpickleClassOrModule(p, &result));
+            result.classAndModules.emplace_back(unpickleClassOrModule(p, &result));
         }
 
         int methodSize = p.getU4();
         ENFORCE_NO_TIMER(methodSize > 0);
-        methods.reserve(nextPowerOfTwo(methodSize));
+        result.methods.reserve(nextPowerOfTwo(methodSize));
         for (int i = 0; i < methodSize; i++) {
-            methods.emplace_back(unpickleMethod(p, &result));
+            result.methods.emplace_back(unpickleMethod(p, &result));
         }
 
         int fieldSize = p.getU4();
         ENFORCE_NO_TIMER(fieldSize > 0);
-        fields.reserve(nextPowerOfTwo(fieldSize));
+        result.fields.reserve(nextPowerOfTwo(fieldSize));
         for (int i = 0; i < fieldSize; i++) {
-            fields.emplace_back(unpickleField(p, &result));
+            result.fields.emplace_back(unpickleField(p, &result));
         }
 
         int typeArgumentSize = p.getU4();
         ENFORCE_NO_TIMER(typeArgumentSize > 0);
-        typeArguments.reserve(nextPowerOfTwo(typeArgumentSize));
+        result.typeArguments.reserve(nextPowerOfTwo(typeArgumentSize));
         for (int i = 0; i < typeArgumentSize; i++) {
-            typeArguments.emplace_back(unpickleTypeParameter(p, &result));
+            result.typeArguments.emplace_back(unpickleTypeParameter(p, &result));
         }
 
         int typeMemberSize = p.getU4();
         ENFORCE_NO_TIMER(typeMemberSize > 0);
-        typeMembers.reserve(nextPowerOfTwo(typeMemberSize));
+        result.typeMembers.reserve(nextPowerOfTwo(typeMemberSize));
         for (int i = 0; i < typeMemberSize; i++) {
-            typeMembers.emplace_back(unpickleTypeParameter(p, &result));
+            result.typeMembers.emplace_back(unpickleTypeParameter(p, &result));
         }
     }
 
-    UnorderedMap<string, FileRef> fileRefByPath;
     int i = 0;
-    for (auto &f : files) {
+    for (auto &f : result.files) {
         if (f && !f->path().empty()) {
-            fileRefByPath[string(f->path())] = FileRef(i);
+            result.fileRefByPath[string(f->path())] = FileRef(i);
         }
         i++;
     }
 
-    {
-        Timer timeit(result.tracer(), "moving");
-        result.fileRefByPath = std::move(fileRefByPath);
-        result.files = std::move(files);
-        result.classAndModules = std::move(classAndModules);
-        result.methods = std::move(methods);
-        result.fields = std::move(fields);
-        result.typeArguments = std::move(typeArguments);
-        result.typeMembers = std::move(typeMembers);
-    }
     result.sanityCheck();
 }
 
