@@ -75,12 +75,12 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
                                                                  sorbet::ast::MethodDef *methodDef,
                                                                  MethodType methodType,
                                                                  std::vector<Comment> annotations) {
-    rbs_methodtype_t *node = methodType.node.get();
+    const auto &node = *methodType.node;
 
-    if (node->type->type != RBS_TYPES_FUNCTION) {
-        auto errLoc = TypeTranslator::nodeLoc(methodType.loc, node->type);
+    if (node.type->type != RBS_TYPES_FUNCTION) {
+        auto errLoc = TypeTranslator::nodeLoc(methodType.loc, node.type);
         if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSUnsupported)) {
-            e.setHeader("Unexpected node type `{}` in method signature, expected `{}`", rbs_node_type_name(node->type),
+            e.setHeader("Unexpected node type `{}` in method signature, expected `{}`", rbs_node_type_name(node.type),
                         "Function");
         }
 
@@ -90,7 +90,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
     // Collect type parameters
 
     std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams;
-    for (rbs_node_list_node_t *list_node = node->type_params->head; list_node != nullptr; list_node = list_node->next) {
+    for (rbs_node_list_node_t *list_node = node.type_params->head; list_node != nullptr; list_node = list_node->next) {
         auto loc = TypeTranslator::nodeLoc(methodType.loc, list_node->node);
 
         ENFORCE(list_node->node->type == RBS_AST_TYPEPARAM,
@@ -105,7 +105,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
 
     // Collect positionals
 
-    rbs_types_function_t *functionType = (rbs_types_function_t *)node->type;
+    auto *functionType = (rbs_types_function_t *)node.type;
     std::vector<RBSArg> args;
 
     collectArgs(ctx, methodType.loc, functionType->required_positionals, args);
@@ -151,7 +151,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
 
     // Collect block
 
-    rbs_types_block_t *block = node->block;
+    auto *block = node.block;
     if (block) {
         // TODO: RBS doesn't have location on blocks yet
         auto arg = RBSArg{methodType.loc, nullptr, (rbs_node_t *)block};
