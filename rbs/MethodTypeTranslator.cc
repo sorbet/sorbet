@@ -1,10 +1,11 @@
-#include "MethodTypeTranslator.h"
-#include "TypeTranslator.h"
+#include "rbs/MethodTypeTranslator.h"
+
 #include "absl/strings/escaping.h"
 #include "ast/Helpers.h"
 #include "core/GlobalState.h"
 #include "core/errors/internal.h"
 #include "core/errors/rewriter.h"
+#include "rbs/TypeTranslator.h"
 #include "rewriter/util/Util.h"
 
 using namespace sorbet::ast;
