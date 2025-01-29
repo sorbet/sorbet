@@ -1,7 +1,7 @@
 #include "rewriter/Mattr.h"
 #include "ast/Helpers.h"
 #include "core/GlobalState.h"
-#include "rewriter/utils/Utils.h"
+#include "rewriter/util/Util.h"
 
 using namespace std;
 
