@@ -15,49 +15,64 @@ namespace sorbet::rewriter {
 
 namespace {
 
-pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::ExpressionPtr &name) {
+bool validAttrName(std::string_view name) {
+    return !name.empty() && (isalpha(name.front()) || name.front() == '_') &&
+           absl::c_all_of(name, [](char c) { return isalnum(c) || c == '_'; });
+}
+
+pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, const ast::ExpressionPtr &name) {
     core::LocOffsets loc;
     core::NameRef res;
     if (auto lit = ast::cast_tree<ast::Literal>(name)) {
         if (lit->isSymbol()) {
             res = lit->asSymbol();
+            auto shortName = res.shortName(ctx);
+            if (!validAttrName(shortName)) {
+                if (auto e = ctx.beginIndexerError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
+                    if (shortName.empty()) {
+                        e.setHeader("Attribute names must be non-empty");
+                    } else {
+                        e.setHeader("Bad attribute name `{}`", absl::CEscape(shortName));
+                    }
+                }
+                return make_pair(core::NameRef::noName(), lit->loc);
+            }
+
             loc = lit->loc;
             ENFORCE(ctx.locAt(loc).exists());
             ENFORCE(ctx.locAt(loc).source(ctx).value().size() > 1 && ctx.locAt(loc).source(ctx).value()[0] == ':');
             loc = core::LocOffsets{loc.beginPos() + 1, loc.endPos()};
         } else if (lit->isString()) {
-            core::NameRef nameRef = lit->asString();
-            auto shortName = nameRef.shortName(ctx);
-            bool validAttr = !shortName.empty() && (isalpha(shortName.front()) || shortName.front() == '_') &&
-                             absl::c_all_of(shortName, [](char c) { return isalnum(c) || c == '_'; });
-            if (validAttr) {
-                res = nameRef;
-            } else {
+            res = lit->asString();
+            auto shortName = res.shortName(ctx);
+            if (!validAttrName(shortName)) {
                 if (auto e = ctx.beginIndexerError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
                     if (shortName.empty()) {
                         e.setHeader("Attribute names must be non-empty");
                     } else {
-                        e.setHeader("Bad attribute name \"{}\"", absl::CEscape(shortName));
+                        e.setHeader("Bad attribute name `{}`", absl::CEscape(shortName));
                     }
                 }
                 return make_pair(core::NameRef::noName(), lit->loc);
             }
+
             loc = lit->loc;
             DEBUG_ONLY({
                 auto l = ctx.locAt(loc);
                 ENFORCE(l.exists());
                 auto source = l.source(ctx).value();
                 ENFORCE(source.size() > 2);
-                ENFORCE(source[0] == '"' || source[0] == '\'');
+                auto firstChar = source[0];
+                ENFORCE(firstChar == '"' || firstChar == '\'');
                 auto lastChar = source[source.size() - 1];
-                ENFORCE(lastChar == '"' || lastChar == '\'');
+                ENFORCE(lastChar == firstChar);
             });
             loc = core::LocOffsets{loc.beginPos() + 1, loc.endPos() - 1};
         }
     }
     if (!res.exists()) {
         if (auto e = ctx.beginIndexerError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
-            e.setHeader("arg must be a Symbol or String");
+            e.setHeader("Arg must be a Symbol or String");
         }
     }
     return make_pair(res, loc);
