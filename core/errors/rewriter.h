@@ -21,8 +21,8 @@ constexpr ErrorClass ContravariantHasAttachedClass{3514, StrictLevel::False};
 constexpr ErrorClass DuplicateProp{3515, StrictLevel::True};
 
 // Let's reserve 3550-3559 for RBS related errors
-constexpr ErrorClass RBSSyntaxError{3550, StrictLevel::True};
-constexpr ErrorClass RBSUnsupported{3551, StrictLevel::True};
+constexpr ErrorClass RBSSyntaxError{3550, StrictLevel::False};
+constexpr ErrorClass RBSUnsupported{3551, StrictLevel::False};
 
 } // namespace sorbet::core::errors::Rewriter
 #endif
