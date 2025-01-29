@@ -4,6 +4,7 @@
 #include "common/sort/sort.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/ConvertToSingletonClassMethod.h"
+#include "main/lsp/ExtractMethod.h"
 #include "main/lsp/ExtractVariable.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
@@ -312,6 +313,24 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 }
 
                 // TODO(neil): trigger a rename for newVariable
+            }
+        }
+        if (config.opts.lspExtractToMethodEnabled) {
+            MethodExtractor methodExtractor(loc);
+            vector<unique_ptr<TextDocumentEdit>> documentEdits;
+            {
+                Timer timeit(gs.tracer(), "Extract to Method");
+                documentEdits = methodExtractor.getExtractEdits(typechecker, config);
+            }
+            if (!documentEdits.empty()) {
+                auto action = make_unique<CodeAction>("Extract Method");
+                action->kind = CodeActionKind::RefactorExtract;
+
+                auto workspaceEdit = make_unique<WorkspaceEdit>();
+                workspaceEdit->documentChanges = move(documentEdits);
+
+                action->edit = move(workspaceEdit);
+                result.emplace_back(move(action));
             }
         }
     }
