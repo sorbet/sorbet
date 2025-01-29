@@ -14,7 +14,7 @@ namespace sorbet::rbs {
 
 namespace {
 
-core::NameRef expressionName(core::MutableContext ctx, const ast::ExpressionPtr *expr) {
+core::NameRef expressionName(const ast::ExpressionPtr *expr) {
     core::NameRef name;
     auto cursor = expr;
 
@@ -27,14 +27,7 @@ core::NameRef expressionName(core::MutableContext ctx, const ast::ExpressionPtr 
             },
             [&](const ast::OptionalArg &p) { cursor = &p.expr; }, [&](const ast::RestArg &p) { cursor = &p.expr; },
             [&](const ast::KeywordArg &p) { cursor = &p.expr; }, [&](const ast::BlockArg &p) { cursor = &p.expr; },
-            [&](const ast::ExpressionPtr &p) {
-                if (auto e = ctx.beginError(expr->loc(), core::errors::Internal::InternalError)) {
-                    e.setHeader("Unexpected expression type: {}", p.showRaw(ctx));
-                }
-
-                name = ctx.state.enterNameUTF8("<error>");
-                cursor = nullptr;
-            });
+            [&](const ast::ExpressionPtr &p) { Exception::raise("Unexpected expression type: {}", p.nodeName()); });
     }
 
     return name;
@@ -179,7 +172,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
             name = ctx.state.enterNameUTF8(nameStr);
         } else {
             // The RBS arg is not named in the signature, so we get it from the method definition
-            name = expressionName(ctx, &methodDef->args[i]);
+            name = expressionName(&methodDef->args[i]);
         }
 
         auto type = TypeTranslator::toRBI(ctx, typeParams, arg.type, methodType.loc);
