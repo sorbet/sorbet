@@ -33,7 +33,7 @@ bool isEmptyParseResult(const core::GlobalState &gs, const ast::ExpressionPtr &t
         return true;
     }
 
-    auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
+    auto classDef = ast::cast_tree<ast::ClassDef>(tree);
     if (classDef == nullptr || classDef->symbol != core::Symbols::root()) {
         return false;
     }

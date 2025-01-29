@@ -12,7 +12,7 @@ private:
     T &subst;
 
     void substClassName(core::MutableContext ctx, ExpressionPtr &node) {
-        auto *constLit = cast_tree<UnresolvedConstantLit>(node);
+        auto constLit = cast_tree<UnresolvedConstantLit>(node);
         if (constLit == nullptr) { // uncommon case. something is strange
             if (isa_tree<EmptyTree>(node)) {
                 return;
@@ -41,7 +41,7 @@ private:
     }
 
     core::NameRef unwrapLiteralToName(ExpressionPtr &arg) {
-        auto *literal = cast_tree<Literal>(arg);
+        auto literal = cast_tree<Literal>(arg);
         if (literal == nullptr || !literal->isName()) {
             return core::NameRef::noName();
         }

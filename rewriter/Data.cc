@@ -22,7 +22,7 @@ bool isMissingInitialize(const core::GlobalState &gs, const ast::Send *send) {
 
     auto block = send->block();
 
-    if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
+    if (auto insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
         auto methodDef = ast::cast_tree<ast::MethodDef>(insSeq->expr);
 
         if (methodDef && methodDef->name == core::Names::initialize()) {
@@ -77,7 +77,7 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
     ast::ClassDef::RHS_store body;
 
     for (auto &arg : send->posArgs()) {
-        auto *sym = ast::cast_tree<ast::Literal>(arg);
+        auto sym = ast::cast_tree<ast::Literal>(arg);
         if (!sym || !sym->isName()) {
             return empty;
         }
@@ -111,7 +111,7 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
 
     if (auto *block = send->block()) {
         // Steal the trees, because the run is going to remove the original send node from the tree anyway.
-        if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
+        if (auto insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
             for (auto &&stat : insSeq->stats) {
                 body.emplace_back(move(stat));
             }

@@ -526,9 +526,9 @@ ast::ExpressionPtr prependName(ast::ExpressionPtr scope) {
 
 bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit *cnst) {
     while (cnst != nullptr) {
-        if (auto *scope = ast::cast_tree<ast::ConstantLit>(cnst->scope)) {
+        if (auto scope = ast::cast_tree<ast::ConstantLit>(cnst->scope)) {
             return scope->symbol == core::Symbols::PackageSpecRegistry();
-        } else if (auto *scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope)) {
+        } else if (auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope)) {
             return startsWithPackageSpecRegistry(scope);
         } else {
             return false;
@@ -826,7 +826,7 @@ public:
             return;
         }
 
-        auto *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
+        auto constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
         if (constantLit == nullptr) {
             return;
         }
@@ -864,7 +864,7 @@ public:
             }
         }
 
-        auto *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
+        auto constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
         if (constantLit == nullptr) {
             return;
         }
@@ -877,7 +877,7 @@ public:
             errorDepth++;
             return;
         }
-        auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
+        auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
 
         if (lhs != nullptr && rootConsts == 0) {
             pushConstantLit(ctx, lhs);
@@ -961,7 +961,7 @@ private:
         auto prevDepth = namespaces.depth();
         while (lit != nullptr) {
             tmpNameParts.emplace_back(lit->cnst, lit->loc);
-            auto *scope = ast::cast_tree<ast::ConstantLit>(lit->scope);
+            auto scope = ast::cast_tree<ast::ConstantLit>(lit->scope);
             lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
             if (scope != nullptr) {
                 ENFORCE(lit == nullptr);
@@ -987,7 +987,7 @@ private:
             if (rootConsts == 0) {
                 namespaces.popName();
             }
-            auto *scope = ast::cast_tree<ast::ConstantLit>(lit->scope);
+            auto scope = ast::cast_tree<ast::ConstantLit>(lit->scope);
             lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
             if (scope != nullptr) {
                 ENFORCE(lit == nullptr);
@@ -1215,7 +1215,7 @@ struct PackageSpecBodyWalk {
             return;
         }
 
-        auto *nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
+        auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
         if (nameTree == nullptr) {
             // Already reported an error
             return;
@@ -1339,7 +1339,7 @@ struct PackageSpecBodyWalk {
 
 private:
     optional<core::packages::StrictDependenciesLevel> parseStrictDependenciesOption(ast::ExpressionPtr &arg) {
-        auto *lit = ast::cast_tree<ast::Literal>(arg);
+        auto lit = ast::cast_tree<ast::Literal>(arg);
         if (!lit || !lit->isString()) {
             return nullopt;
         }
@@ -1360,7 +1360,7 @@ private:
 
     optional<core::NameRef> parseLayerOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
         auto validLayers = gs.packageDB().layers();
-        auto *lit = ast::cast_tree<ast::Literal>(arg);
+        auto lit = ast::cast_tree<ast::Literal>(arg);
         if (!lit || !lit->isString()) {
             return nullopt;
         }
@@ -1393,7 +1393,7 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
             continue;
         }
 
-        auto *packageSpecClass = ast::cast_tree<ast::ClassDef>(rootStmt);
+        auto packageSpecClass = ast::cast_tree<ast::ClassDef>(rootStmt);
         if (packageSpecClass == nullptr) {
             // No error here; let this be reported in the tree walk later as a bad node type,
             // or at the end of this function if no PackageSpec is found.
@@ -1413,7 +1413,7 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
             continue;
         }
 
-        auto *nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(packageSpecClass->name);
+        auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(packageSpecClass->name);
         if (!validatePackageName(ctx, nameTree)) {
             reportedError = true;
             continue;

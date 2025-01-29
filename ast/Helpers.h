@@ -135,27 +135,27 @@ public:
     }
 
     static ExpressionPtr cpRef(ExpressionPtr &name) {
-        if (auto *nm = cast_tree<UnresolvedIdent>(name)) {
+        if (auto nm = cast_tree<UnresolvedIdent>(name)) {
             return make_expression<UnresolvedIdent>(nm->loc, nm->kind, nm->name);
-        } else if (auto *nm = cast_tree<ast::Local>(name)) {
+        } else if (auto nm = cast_tree<ast::Local>(name)) {
             return make_expression<ast::Local>(nm->loc, nm->localVariable);
         }
         Exception::notImplemented();
     }
 
     static ExpressionPtr Assign(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs) {
-        if (auto *s = cast_tree<ast::Send>(lhs)) {
+        if (auto s = cast_tree<ast::Send>(lhs)) {
             // the LHS might be a send of the form x.y=(), in which case we add the RHS to the arguments list and get
             // x.y=(rhs)
             s->addPosArg(std::move(rhs));
             return lhs;
-        } else if (auto *seq = cast_tree<ast::InsSeq>(lhs)) {
+        } else if (auto seq = cast_tree<ast::InsSeq>(lhs)) {
             // the LHS might be a sequence, which means that it's the result of a safe navigation operator, like
             //   { $t = x; if $t == nil then nil else $t.y=() }
             // in which case we just need to dril down into the else-case of the condition and add the rhs to the send
             //   { $t = x; if $t == nil then nil else $t.y=(rhs)
-            if (auto *cond = cast_tree<ast::If>(seq->expr)) {
-                if (auto *s = cast_tree<ast::Send>(cond->elsep)) {
+            if (auto cond = cast_tree<ast::If>(seq->expr)) {
+                if (auto s = cast_tree<ast::Send>(cond->elsep)) {
                     s->addPosArg(std::move(rhs));
                     return lhs;
                 }
@@ -455,7 +455,7 @@ public:
     }
 
     static bool isMagicClass(ExpressionPtr &expr) {
-        if (auto *recv = cast_tree<ConstantLit>(expr)) {
+        if (auto recv = cast_tree<ConstantLit>(expr)) {
             return recv->symbol == core::Symbols::Magic();
         } else {
             return false;
@@ -469,7 +469,7 @@ public:
     static core::NameRef arg2Name(const ExpressionPtr &arg) {
         auto *cursor = &arg;
         while (true) {
-            if (auto *local = cast_tree<UnresolvedIdent>(*cursor)) {
+            if (auto local = cast_tree<UnresolvedIdent>(*cursor)) {
                 ENFORCE(local->kind == UnresolvedIdent::Kind::Local);
                 return local->name;
             }
@@ -490,7 +490,7 @@ public:
     static ast::Local const *arg2Local(const ast::ExpressionPtr &arg) {
         auto *cursor = &arg;
         while (true) {
-            if (auto *local = ast::cast_tree<ast::Local>(*cursor)) {
+            if (auto local = ast::cast_tree<ast::Local>(*cursor)) {
                 // Buried deep within every argument is a Local
                 return local;
             }

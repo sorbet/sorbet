@@ -96,12 +96,12 @@ namespace {
  */
 
 bool isT(ast::ExpressionPtr &expr) {
-    auto *tMod = ast::cast_tree<ast::ConstantLit>(expr);
+    auto tMod = ast::cast_tree<ast::ConstantLit>(expr);
     return tMod && tMod->symbol == core::Symbols::T();
 }
 
 bool isTClassOf(ast::ExpressionPtr &expr) {
-    auto *send = ast::cast_tree<ast::Send>(expr);
+    auto send = ast::cast_tree<ast::Send>(expr);
 
     if (send == nullptr) {
         return false;
@@ -349,7 +349,7 @@ private:
 
             return result;
         }
-        if (auto *id = ast::cast_tree<ast::ConstantLit>(c.scope)) {
+        if (auto id = ast::cast_tree<ast::ConstantLit>(c.scope)) {
             auto sym = id->symbol;
             if (!sym.exists()) {
                 // Still waiting for scope to be resolved. Don't mark resolutionFailed yet, just
@@ -645,7 +645,7 @@ private:
             auto *cursor = out;
             bool isRootReference = false;
             while (cursor != nullptr) {
-                auto *original = ast::cast_tree<ast::UnresolvedConstantLit>(cursor->original);
+                auto original = ast::cast_tree<ast::UnresolvedConstantLit>(cursor->original);
                 if (original == nullptr) {
                     isRootReference = cursor->symbol == core::Symbols::root();
                     break;
@@ -733,7 +733,7 @@ private:
         bool alreadyReported = false;
         job.out->resolutionScopes = make_unique<ast::ConstantLit::ResolutionScopes>();
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
-        if (auto *id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
+        if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
             auto originalScope = id->symbol.dealias(ctx);
             if (originalScope == core::Symbols::StubModule()) {
                 // If we were trying to resolve some literal like C::D but `C` itself was already stubbed,
@@ -1125,7 +1125,7 @@ private:
                 }
             }
 
-            auto *id = ast::cast_tree<ast::ConstantLit>(arg);
+            auto id = ast::cast_tree<ast::ConstantLit>(arg);
 
             if (id == nullptr || !id->symbol.exists()) {
                 if (auto e = gs.beginError(core::Loc(todo.file, send->loc),
@@ -1242,7 +1242,7 @@ private:
         auto blockLoc = core::Loc(todo.file, block->body.loc());
         core::ClassOrModuleRef symbol = core::Symbols::StubModule();
 
-        if (auto *constant = ast::cast_tree<ast::ConstantLit>(block->body)) {
+        if (auto constant = ast::cast_tree<ast::ConstantLit>(block->body)) {
             if (constant->symbol.exists() && constant->symbol.isClassOrModule()) {
                 symbol = constant->symbol.asClassOrModuleRef();
             }
@@ -1252,7 +1252,7 @@ private:
             ENFORCE(send);
 
             if (send->numPosArgs() == 1) {
-                if (auto *argClass = ast::cast_tree<ast::ConstantLit>(send->getPosArg(0))) {
+                if (auto argClass = ast::cast_tree<ast::ConstantLit>(send->getPosArg(0))) {
                     if (argClass->symbol.exists() && argClass->symbol.isClassOrModule()) {
                         if (argClass->symbol == owner) {
                             if (auto e = gs.beginError(blockLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
@@ -1301,7 +1301,7 @@ private:
         job.isSuperclass = isSuperclass;
         job.isInclude = isInclude;
 
-        if (auto *cnst = ast::cast_tree<ast::ConstantLit>(ancestor)) {
+        if (auto cnst = ast::cast_tree<ast::ConstantLit>(ancestor)) {
             auto sym = cnst->symbol;
             if (sym.exists() && sym.isTypeAlias(ctx)) {
                 if (auto e = ctx.beginError(cnst->loc, core::errors::Resolver::DynamicSuperclass)) {
@@ -1336,11 +1336,11 @@ private:
     }
 
     void walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
-        if (auto *c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
+        if (auto c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
             walkUnresolvedConstantLit(ctx, c->scope);
             auto loc = c->loc;
             auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
-            auto *constant = ast::cast_tree<ast::ConstantLit>(out);
+            auto constant = ast::cast_tree<ast::ConstantLit>(out);
             ConstantResolutionItem job{nesting_, constant};
             if (resolveConstantJob(ctx, job)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
@@ -1552,7 +1552,7 @@ public:
     void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
-        auto *id = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
+        auto id = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
         if (id == nullptr || !id->symbol.isStaticField(ctx)) {
             return;
         }
@@ -1583,7 +1583,7 @@ public:
             }
         }
 
-        auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
+        auto send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send != nullptr && send->fun == core::Names::typeAlias()) {
             if (!send->hasBlock()) {
                 // if we have an invalid (i.e. nullary) call to TypeAlias, then we'll treat it as a type alias for
@@ -1625,7 +1625,7 @@ public:
             }
         }
 
-        auto *rhs = ast::cast_tree<ast::ConstantLit>(asgn.rhs);
+        auto rhs = ast::cast_tree<ast::ConstantLit>(asgn.rhs);
         if (rhs == nullptr) {
             return;
         }
@@ -2505,11 +2505,11 @@ class ResolveTypeMembersAndFieldsWalk {
         core::Loc lowerBoundTypeLoc;
         core::Loc upperBoundTypeLoc;
         if (rhs->block() != nullptr) {
-            if (const auto *hash = ast::cast_tree<ast::Hash>(rhs->block()->body)) {
+            if (const auto hash = ast::cast_tree<ast::Hash>(rhs->block()->body)) {
                 int i = -1;
                 for (const auto &keyExpr : hash->keys) {
                     i++;
-                    const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+                    const auto key = ast::cast_tree<ast::Literal>(keyExpr);
                     if (key == nullptr || !key->isSymbol()) {
                         // Namer reported an error already
                         continue;
@@ -2759,7 +2759,7 @@ class ResolveTypeMembersAndFieldsWalk {
     }
 
     ast::UnresolvedIdent *unwrapFieldAssign(ast::Assign &asgn) {
-        auto *uid = ast::cast_tree<ast::UnresolvedIdent>(asgn.lhs);
+        auto uid = ast::cast_tree<ast::UnresolvedIdent>(asgn.lhs);
         if (uid == nullptr) {
             return nullptr;
         }
@@ -2779,11 +2779,11 @@ class ResolveTypeMembersAndFieldsWalk {
         }
 
         auto *recur = &asgn.rhs;
-        while (auto *outer = ast::cast_tree<ast::InsSeq>(*recur)) {
+        while (auto outer = ast::cast_tree<ast::InsSeq>(*recur)) {
             recur = &outer->expr;
         }
 
-        auto *cast = ast::cast_tree<ast::Cast>(*recur);
+        auto cast = ast::cast_tree<ast::Cast>(*recur);
         if (cast == nullptr) {
             return false;
         }
@@ -2832,7 +2832,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
         auto stringLoc = send.getPosArg(1).loc();
 
-        auto *literalNode = ast::cast_tree<ast::Literal>(send.getPosArg(1));
+        auto literalNode = ast::cast_tree<ast::Literal>(send.getPosArg(1));
         if (literalNode == nullptr) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                 e.setHeader("`{}` only accepts string literals", method);
@@ -2948,7 +2948,7 @@ public:
         }
 
         for (const auto &ancestor : klass.ancestors) {
-            auto *ancestorCnst = ast::cast_tree<ast::ConstantLit>(ancestor);
+            auto ancestorCnst = ast::cast_tree<ast::ConstantLit>(ancestor);
             if (ancestorCnst == nullptr) {
                 continue;
             }
@@ -3062,11 +3062,11 @@ public:
     }
 
     void postTransformCast(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto *cast = ast::cast_tree<ast::Cast>(tree);
+        auto cast = ast::cast_tree<ast::Cast>(tree);
         if (cast->cast == core::Names::assumeType()) {
             // This cast was not written by the user. Before we attempt to parse it as a type, let's
             // make sure that it's even possible to be valid.
-            auto *cnst = ast::cast_tree<ast::ConstantLit>(cast->typeExpr);
+            auto cnst = ast::cast_tree<ast::ConstantLit>(cast->typeExpr);
             ENFORCE(cnst != nullptr, "Rewriter should always use const for typeExpr, which should now be resolved");
 
             // Dealias to mimic how type_syntax parsing will work for constant lit node (e.g., want
@@ -3112,7 +3112,7 @@ public:
                 break;
         }
 
-        if (auto *id = ast::cast_tree<ast::ConstantLit>(send.recv)) {
+        if (auto id = ast::cast_tree<ast::ConstantLit>(send.recv)) {
             if (id->symbol != core::Symbols::T() && id->symbol != core::Symbols::T_NonForcingConstants()) {
                 return;
             }
@@ -3215,13 +3215,13 @@ public:
             return;
         }
 
-        auto *id = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
+        auto id = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
         if (id == nullptr || !id->symbol.exists()) {
             return;
         }
 
         auto sym = id->symbol;
-        auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
+        auto send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send && (sym.isTypeAlias(ctx) || sym.isTypeMember())) {
             ENFORCE(!sym.isTypeMember() || send->recv.isSelfReference());
 

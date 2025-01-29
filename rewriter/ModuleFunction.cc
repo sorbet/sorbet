@@ -87,7 +87,7 @@ vector<ast::ExpressionPtr> ModuleFunction::rewriteDefn(core::MutableContext ctx,
 
     // as well as a public static copy of the method signature
     if (prevStat) {
-        if (auto *sig = ast::cast_tree<ast::Send>(*prevStat)) {
+        if (auto sig = ast::cast_tree<ast::Send>(*prevStat)) {
             if (sig->fun == core::Names::sig()) {
                 stats.emplace_back(sig->deepCopy());
             }
@@ -95,7 +95,7 @@ vector<ast::ExpressionPtr> ModuleFunction::rewriteDefn(core::MutableContext ctx,
     }
     auto moduleCopy = expr.deepCopy();
     ENFORCE(moduleCopy, "Should be non-nil.");
-    auto *newDefn = ast::cast_tree<ast::MethodDef>(moduleCopy);
+    auto newDefn = ast::cast_tree<ast::MethodDef>(moduleCopy);
     newDefn->flags.isSelfMethod = true;
     newDefn->flags.isRewriterSynthesized = true;
     stats.emplace_back(move(moduleCopy));

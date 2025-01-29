@@ -14,14 +14,14 @@ bool isCommand(core::MutableContext ctx, ast::ClassDef *klass) {
     if (klass->kind != ast::ClassDef::Kind::Class || klass->ancestors.empty()) {
         return false;
     }
-    auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(klass->ancestors.front());
+    auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(klass->ancestors.front());
     if (cnst == nullptr) {
         return false;
     }
     if (cnst->cnst != core::Names::Constants::Command()) {
         return false;
     }
-    auto *scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope);
+    auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope);
     if (scope == nullptr) {
         return false;
     }
@@ -45,7 +45,7 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
     ast::ExpressionPtr *callptr = nullptr;
 
     for (auto &stat : klass->rhs) {
-        auto *mdef = ast::cast_tree<ast::MethodDef>(stat);
+        auto mdef = ast::cast_tree<ast::MethodDef>(stat);
         if (mdef == nullptr) {
             continue;
         }
@@ -70,7 +70,7 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
     // This could in principle be `resolver::TypeSyntax::isSig`, but we don't
     // want to depend on the internals of the resolver, or accidentally rely on
     // passes that happen between here and the resolver.
-    auto *sig = ast::cast_tree<ast::Send>(klass->rhs[i - 1]);
+    auto sig = ast::cast_tree<ast::Send>(klass->rhs[i - 1]);
     if (sig == nullptr || sig->fun != core::Names::sig()) {
         return;
     }

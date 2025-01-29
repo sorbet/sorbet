@@ -107,7 +107,7 @@ string ExpressionPtr::toStringWithTabs(const core::GlobalState &gs, int tabs) co
 }
 
 bool ExpressionPtr::isSelfReference() const {
-    if (auto *local = cast_tree<Local>(*this)) {
+    if (auto local = cast_tree<Local>(*this)) {
         return local->localVariable == core::LocalVariable::selfVariable();
     }
     return false;
@@ -320,7 +320,7 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
                 break;
             }
 
-            auto *orig = cast_tree<UnresolvedConstantLit>(nested->original);
+            auto orig = cast_tree<UnresolvedConstantLit>(nested->original);
             ENFORCE(orig);
             namesFailedToResolve.emplace_back(orig->cnst);
             nested = ast::cast_tree<ast::ConstantLit>(orig->scope);
@@ -328,7 +328,7 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
             ENFORCE(nested->symbol == core::Symbols::StubModule());
             ENFORCE(!nested->resolutionScopes->empty());
         }
-        auto *orig = cast_tree<UnresolvedConstantLit>(nested->original);
+        auto orig = cast_tree<UnresolvedConstantLit>(nested->original);
         ENFORCE(orig);
         namesFailedToResolve.emplace_back(orig->cnst);
         absl::c_reverse(namesFailedToResolve);

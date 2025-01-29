@@ -158,7 +158,7 @@ void checkBlockRestArg(DesugarContext dctx, const MethodDef::ARGS_store &args) {
     }
 
     auto &rest = cast_tree_nonnull<RestArg>(*it);
-    if (auto *local = cast_tree<UnresolvedIdent>(rest.expr)) {
+    if (auto local = cast_tree<UnresolvedIdent>(rest.expr)) {
         if (local->name != core::Names::star()) {
             return;
         }
@@ -184,14 +184,14 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
         // This must have been a csend; That will have been desugared
         // into an insseq with an If in the expression.
         res = std::move(recv);
-        auto *is = cast_tree<InsSeq>(res);
+        auto is = cast_tree<InsSeq>(res);
         if (!is) {
             if (auto e = dctx.ctx.beginIndexerError(blockLoc, core::errors::Desugar::UnsupportedNode)) {
                 e.setHeader("No body in block");
             }
             return MK::EmptyTree();
         }
-        auto *iff = cast_tree<If>(is->expr);
+        auto iff = cast_tree<If>(is->expr);
         ENFORCE(iff != nullptr, "DesugarBlock: failed to find If");
         send = cast_tree<Send>(iff->elsep);
         ENFORCE(send != nullptr, "DesugarBlock: failed to find Send");
@@ -235,8 +235,11 @@ core::NameRef maybeTypedSuper(DesugarContext dctx) {
 }
 
 bool isStringLit(DesugarContext dctx, ExpressionPtr &expr) {
-    Literal *lit;
-    return (lit = cast_tree<Literal>(expr)) && lit->isString();
+    if (auto lit = cast_tree<Literal>(expr)) {
+        return lit->isString();
+    }
+
+    return false;
 }
 
 ExpressionPtr mergeStrings(DesugarContext dctx, core::LocOffsets loc,
@@ -388,7 +391,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
 ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
     auto loc = expr.loc();
     core::NameRef temp = dctx.freshNameUnique(core::Names::blockPassTemp());
-    Literal *lit = cast_tree<Literal>(expr);
+    auto lit = cast_tree<Literal>(expr);
     ENFORCE(lit && lit->isSymbol());
 
     // &:foo => {|*temp| (temp[0]).foo(*tmp[1, LONG_MAX]) }
@@ -567,12 +570,12 @@ ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node
 }
 
 Send *asTLet(ExpressionPtr &arg) {
-    auto *send = cast_tree<Send>(arg);
+    auto send = cast_tree<Send>(arg);
     if (send == nullptr || send->fun != core::Names::let() || send->numPosArgs() < 2) {
         return nullptr;
     }
 
-    auto *recv = cast_tree<UnresolvedConstantLit>(send->recv);
+    auto recv = cast_tree<UnresolvedConstantLit>(send->recv);
     if (recv == nullptr || recv->cnst != core::Names::Constants::T() || !isa_tree<EmptyTree>(recv->scope)) {
         return nullptr;
     }
@@ -878,7 +881,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto kwargs = node2TreeImpl(dctx, std::move(kwArray));
                     auto method = MK::Symbol(locZeroLen, send->method);
 
-                    if (auto *array = cast_tree<Array>(kwargs)) {
+                    if (auto array = cast_tree<Array>(kwargs)) {
                         DuplicateHashKeyCheck::checkSendArgs(dctx, 0, array->elems);
                     }
 
@@ -899,8 +902,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         } else {
                             convertedBlock = node2TreeImpl(dctx, std::move(block));
                         }
-                        Literal *lit;
-                        if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol()) {
+                        if (auto lit = cast_tree<Literal>(convertedBlock); lit && lit->isSymbol()) {
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                            std::move(sendargs), flags);
                             ast::cast_tree_nonnull<ast::Send>(res).setBlock(
@@ -993,8 +995,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         } else {
                             convertedBlock = node2TreeImpl(dctx, std::move(block));
                         }
-                        Literal *lit;
-                        if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol()) {
+                        if (auto lit = cast_tree<Literal>(convertedBlock); lit && lit->isSymbol()) {
                             res = MK::Send(loc, std::move(rec), send->method, send->methodLoc, numPosArgs,
                                            std::move(args), flags);
                             ast::cast_tree_nonnull<ast::Send>(res).setBlock(
@@ -1201,8 +1202,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 } else {
                     auto andAndTemp = dctx.freshNameUnique(core::Names::andAnd());
 
-                    auto *lhsSend = ast::cast_tree<ast::Send>(lhs);
-                    auto *rhsSend = ast::cast_tree<ast::Send>(rhs);
+                    auto lhsSend = ast::cast_tree<ast::Send>(lhs);
+                    auto rhsSend = ast::cast_tree<ast::Send>(rhs);
 
                     ExpressionPtr thenp;
                     if (lhsSend != nullptr && rhsSend != nullptr) {
@@ -2158,7 +2159,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                 auto varLoc = varExpr.loc();
                 auto var = core::NameRef::noName();
-                if (auto *id = cast_tree<UnresolvedIdent>(varExpr)) {
+                if (auto id = cast_tree<UnresolvedIdent>(varExpr)) {
                     if (id->kind == UnresolvedIdent::Kind::Local) {
                         var = id->name;
                         varExpr.reset(nullptr);
@@ -2321,7 +2322,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             [&](parser::Defined *defined) {
                 auto value = node2TreeImpl(dctx, std::move(defined->value));
                 auto loc = value.loc();
-                auto *ident = cast_tree<UnresolvedIdent>(value);
+                auto ident = cast_tree<UnresolvedIdent>(value);
                 if (ident &&
                     (ident->kind == UnresolvedIdent::Kind::Instance || ident->kind == UnresolvedIdent::Kind::Class)) {
                     auto methodName = ident->kind == UnresolvedIdent::Kind::Instance ? core::Names::definedInstanceVar()

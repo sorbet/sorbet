@@ -287,7 +287,7 @@ private:
 
         for (auto &arg : cast_tree_nonnull<MethodDef>(v).args) {
             // Only OptionalArgs have subexpressions within them.
-            if (auto *optArg = cast_tree<OptionalArg>(arg)) {
+            if (auto optArg = cast_tree<OptionalArg>(arg)) {
                 CALL_MAP(optArg->default_, ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol));
             }
         }
@@ -454,7 +454,7 @@ private:
 
         for (auto &arg : cast_tree_nonnull<Block>(v).args) {
             // Only OptionalArgs have subexpressions within them.
-            if (auto *optArg = cast_tree<OptionalArg>(arg)) {
+            if (auto optArg = cast_tree<OptionalArg>(arg)) {
                 CALL_MAP(optArg->default_, ctx);
             }
         }

@@ -54,7 +54,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
                              std::move(args));
     }
 
-    auto *ident = ast::cast_tree<ast::ConstantLit>(orig);
+    auto ident = ast::cast_tree<ast::ConstantLit>(orig);
     if (ident) {
         auto orig = dupType(ident->original);
         if (ident->original && !orig) {
@@ -63,7 +63,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         return ast::make_expression<ast::ConstantLit>(ident->loc, ident->symbol, std::move(orig));
     }
 
-    auto *arrayLit = ast::cast_tree<ast::Array>(orig);
+    auto arrayLit = ast::cast_tree<ast::Array>(orig);
     if (arrayLit != nullptr) {
         auto elems = ast::Array::ENTRY_store{};
         for (const auto &elem : arrayLit->elems) {
@@ -78,7 +78,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         return ast::MK::Array(arrayLit->loc, std::move(elems));
     }
 
-    auto *hashLit = ast::cast_tree<ast::Hash>(orig);
+    auto hashLit = ast::cast_tree<ast::Hash>(orig);
     if (hashLit != nullptr) {
         auto keys = ast::Hash::ENTRY_store{};
         auto values = ast::Hash::ENTRY_store{};
@@ -86,7 +86,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         for (size_t i = 0; i < hashLit->keys.size(); i++) {
             const auto &key = hashLit->keys[i];
 
-            auto *keyLit = ast::cast_tree<ast::Literal>(key);
+            auto keyLit = ast::cast_tree<ast::Literal>(key);
             if (keyLit == nullptr) {
                 return nullptr;
             }
@@ -104,17 +104,17 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         return ast::MK::Hash(hashLit->loc, std::move(keys), std::move(values));
     }
 
-    auto *cons = ast::cast_tree<ast::UnresolvedConstantLit>(orig);
+    auto cons = ast::cast_tree<ast::UnresolvedConstantLit>(orig);
     if (!cons) {
         return nullptr;
     }
 
-    auto *scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cons->scope);
+    auto scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cons->scope);
     if (!scopeCnst) {
         if (ast::isa_tree<ast::EmptyTree>(cons->scope)) {
             return ast::MK::UnresolvedConstant(cons->loc, ast::MK::EmptyTree(), cons->cnst);
         }
-        auto *id = ast::cast_tree<ast::ConstantLit>(cons->scope);
+        auto id = ast::cast_tree<ast::ConstantLit>(cons->scope);
         if (id == nullptr) {
             return nullptr;
         }
@@ -130,7 +130,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
 
 bool ASTUtil::hasHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name) {
     for (const auto &keyExpr : hash.keys) {
-        auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+        auto key = ast::cast_tree<ast::Literal>(keyExpr);
         if (key && key->isSymbol() && key->asSymbol() == name) {
             return true;
         }
@@ -142,9 +142,9 @@ bool ASTUtil::hasTruthyHashValue(core::MutableContext ctx, const ast::Hash &hash
     int i = -1;
     for (const auto &keyExpr : hash.keys) {
         i++;
-        auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+        auto key = ast::cast_tree<ast::Literal>(keyExpr);
         if (key && key->isSymbol() && key->asSymbol() == name) {
-            auto *val = ast::cast_tree<ast::Literal>(hash.values[i]);
+            auto val = ast::cast_tree<ast::Literal>(hash.values[i]);
             if (!val) {
                 // All non-literals are truthy
                 return true;
@@ -163,7 +163,7 @@ pair<ast::ExpressionPtr, ast::ExpressionPtr> ASTUtil::extractHashValue(core::Mut
     int i = -1;
     for (auto &keyExpr : hash.keys) {
         i++;
-        auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+        auto key = ast::cast_tree<ast::Literal>(keyExpr);
         if (key && key->isSymbol() && key->asSymbol() == name) {
             auto key = std::move(keyExpr);
             auto value = std::move(hash.values[i]);
@@ -198,7 +198,7 @@ template <typename T> T *castSigImpl(T *send) {
     }
     auto *block = send->block();
     ENFORCE(block);
-    auto *body = ast::cast_tree<ast::Send>(block->body);
+    auto body = ast::cast_tree<ast::Send>(block->body);
     while (body != nullptr && (body->fun == core::Names::checked() || body->fun == core::Names::onFailure() ||
                                body->fun == core::Names::override_() || body->fun == core::Names::overridable() ||
                                body->fun == core::Names::abstract())) {
@@ -214,21 +214,21 @@ template <typename T> T *castSigImpl(T *send) {
 } // namespace
 
 ast::Send *ASTUtil::castSig(ast::ExpressionPtr &expr) {
-    auto *send = ast::cast_tree<ast::Send>(expr);
+    auto send = ast::cast_tree<ast::Send>(expr);
     if (send == nullptr) {
         return nullptr;
     }
 
-    return castSigImpl(send);
+    return castSigImpl(send.get());
 }
 
 const ast::Send *ASTUtil::castSig(const ast::ExpressionPtr &expr) {
-    auto *send = ast::cast_tree<ast::Send>(expr);
+    auto send = ast::cast_tree<ast::Send>(expr);
     if (send == nullptr) {
         return nullptr;
     }
 
-    return castSigImpl(send);
+    return castSigImpl(send.get());
 }
 
 ast::Send *ASTUtil::castSig(ast::Send *expr) {
@@ -255,8 +255,8 @@ ast::ExpressionPtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
     // handle a double-splat or a hash literal as the last argument
     bool explicitEmptyHash = false;
     if (send->hasKwSplat() || !send->hasKwArgs()) {
-        if (auto *hash = ast::cast_tree<ast::Hash>(send->hasKwSplat() ? *send->kwSplat()
-                                                                      : send->getPosArg(send->numPosArgs() - 1))) {
+        if (auto hash = ast::cast_tree<ast::Hash>(send->hasKwSplat() ? *send->kwSplat()
+                                                                     : send->getPosArg(send->numPosArgs() - 1))) {
             explicitEmptyHash = hash->keys.empty();
             for (auto i = 0; i < hash->keys.size(); ++i) {
                 keys.emplace_back(hash->keys[i].deepCopy());
@@ -293,7 +293,7 @@ namespace {
 
 // Returns `true` when the expression passed is an UnresolvedConstantLit with the name `Kernel` and no additional scope.
 bool isKernel(const ast::ExpressionPtr &expr) {
-    if (auto *constRecv = ast::cast_tree<ast::UnresolvedConstantLit>(expr)) {
+    if (auto constRecv = ast::cast_tree<ast::UnresolvedConstantLit>(expr)) {
         return ast::isa_tree<ast::EmptyTree>(constRecv->scope) && constRecv->cnst == core::Names::Constants::Kernel();
     }
     return false;
@@ -302,7 +302,7 @@ bool isKernel(const ast::ExpressionPtr &expr) {
 } // namespace
 
 ast::ExpressionPtr ASTUtil::thunkBody(core::MutableContext ctx, ast::ExpressionPtr &node) {
-    auto *send = ast::cast_tree<ast::Send>(node);
+    auto send = ast::cast_tree<ast::Send>(node);
     if (send == nullptr) {
         return nullptr;
     }

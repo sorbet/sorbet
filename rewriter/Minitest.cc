@@ -32,8 +32,8 @@ public:
     }
 
     void postTransformAssign(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        auto *asgn = ast::cast_tree<ast::Assign>(tree);
-        if (auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs)) {
+        auto asgn = ast::cast_tree<ast::Assign>(tree);
+        if (auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs)) {
             if (ast::isa_tree<ast::UnresolvedConstantLit>(asgn->rhs)) {
                 movedConstants.emplace_back(move(tree));
                 tree = ast::MK::EmptyTree();
@@ -68,14 +68,14 @@ public:
     // we move sends if they are other minitest `describe` blocks, as those end up being classes anyway: consequently,
     // we treat those the same way we treat classes
     void preTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        auto *send = ast::cast_tree<ast::Send>(tree);
+        auto send = ast::cast_tree<ast::Send>(tree);
         if (send->recv.isSelfReference() && send->numPosArgs() == 1 && send->fun == core::Names::describe()) {
             classDepth++;
         }
     }
 
     void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        auto *send = ast::cast_tree<ast::Send>(tree);
+        auto send = ast::cast_tree<ast::Send>(tree);
         if (send->recv.isSelfReference() && send->numPosArgs() == 1 && send->fun == core::Names::describe()) {
             classDepth--;
             if (classDepth == 0) {
@@ -109,7 +109,7 @@ public:
 
 ast::ExpressionPtr addSigVoid(ast::ExpressionPtr expr) {
     core::LocOffsets declLoc;
-    if (auto *mdef = ast::cast_tree<ast::MethodDef>(expr)) {
+    if (auto mdef = ast::cast_tree<ast::MethodDef>(expr)) {
         declLoc = mdef->declLoc;
     } else {
         ENFORCE(false, "Added a sig to something that wasn't a method def");
@@ -174,12 +174,12 @@ string to_s(core::Context ctx, ast::ExpressionPtr &arg) {
 bool canMoveIntoMethodDef(const ast::ExpressionPtr &exp) {
     if (ast::isa_tree<ast::Literal>(exp)) {
         return true;
-    } else if (auto *list = ast::cast_tree<ast::Array>(exp)) {
+    } else if (auto list = ast::cast_tree<ast::Array>(exp)) {
         return absl::c_all_of(list->elems, [](auto &elem) { return canMoveIntoMethodDef(elem); });
-    } else if (auto *hash = ast::cast_tree<ast::Hash>(exp)) {
+    } else if (auto hash = ast::cast_tree<ast::Hash>(exp)) {
         return absl::c_all_of(hash->keys, [](auto &elem) { return canMoveIntoMethodDef(elem); }) &&
                absl::c_all_of(hash->values, [](auto &elem) { return canMoveIntoMethodDef(elem); });
-    } else if (auto *send = ast::cast_tree<ast::Send>(exp)) {
+    } else if (auto send = ast::cast_tree<ast::Send>(exp)) {
         if (!canMoveIntoMethodDef(send->recv)) {
             return false;
         }
@@ -218,7 +218,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                                 const ast::MethodDef::ARGS_store &args, ast::ExpressionPtr &iteratee,
                                 bool insideDescribe) {
     // this statement must be a send
-    if (auto *send = ast::cast_tree<ast::Send>(stmt)) {
+    if (auto send = ast::cast_tree<ast::Send>(stmt)) {
         auto correctBlockArity = send->hasBlock() && send->block()->args.size() == 0;
         // the send must be a call to `it` with a single argument (the test name) and a block with no arguments
         if ((send->fun == core::Names::it() && send->numPosArgs() == 1 && correctBlockArity) ||
@@ -295,7 +295,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
 }
 
 bool isDestructuringArg(core::GlobalState &gs, const ast::MethodDef::ARGS_store &args, const ast::ExpressionPtr &expr) {
-    auto *local = ast::cast_tree<ast::UnresolvedIdent>(expr);
+    auto local = ast::cast_tree<ast::UnresolvedIdent>(expr);
     if (local == nullptr || local->kind != ast::UnresolvedIdent::Kind::Local) {
         return false;
     }
@@ -306,7 +306,7 @@ bool isDestructuringArg(core::GlobalState &gs, const ast::MethodDef::ARGS_store 
     }
 
     return absl::c_find_if(args, [name](auto &argExpr) {
-               auto *arg = ast::cast_tree<ast::UnresolvedIdent>(argExpr);
+               auto arg = ast::cast_tree<ast::UnresolvedIdent>(argExpr);
                return arg && arg->name == name;
            }) != args.end();
 }
@@ -332,12 +332,12 @@ bool isDestructuringArg(core::GlobalState &gs, const ast::MethodDef::ARGS_store 
 // plus desugared destruturing assignments."
 bool isDestructuringInsSeq(core::GlobalState &gs, const ast::MethodDef::ARGS_store &args, ast::InsSeq *body) {
     return absl::c_all_of(body->stats, [&gs, &args](auto &stat) {
-        auto *insSeq = ast::cast_tree<ast::InsSeq>(stat);
+        auto insSeq = ast::cast_tree<ast::InsSeq>(stat);
         if (insSeq == nullptr) {
             return false;
         }
 
-        auto *assign = ast::cast_tree<ast::Assign>(insSeq->stats.front());
+        auto assign = ast::cast_tree<ast::Assign>(insSeq->stats.front());
         return assign && isDestructuringArg(gs, args, assign->rhs);
     });
 }
@@ -347,7 +347,7 @@ ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef e
                                        const ast::MethodDef::ARGS_store &args,
                                        absl::Span<const ast::ExpressionPtr> destructuringStmts,
                                        ast::ExpressionPtr &iteratee, bool insideDescribe) {
-    if (auto *bodySeq = ast::cast_tree<ast::InsSeq>(body)) {
+    if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body)) {
         if (isDestructuringInsSeq(ctx, args, bodySeq)) {
             ENFORCE(destructuringStmts.empty(), "Nested destructuring statements");
             return prepareTestEachBody(ctx, eachName, std::move(bodySeq->expr), args, absl::MakeSpan(bodySeq->stats),

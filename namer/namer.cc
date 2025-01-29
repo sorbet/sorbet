@@ -95,7 +95,7 @@ class SymbolFinder {
     vector<optional<core::FoundModifier>> methodVisiStack = {nullopt};
 
     void findClassModifiers(core::Context ctx, core::FoundDefinitionRef klass, const ast::ExpressionPtr &line) {
-        auto *send = ast::cast_tree<ast::Send>(line);
+        auto send = ast::cast_tree<ast::Send>(line);
         if (send == nullptr) {
             return;
         }
@@ -146,7 +146,7 @@ class SymbolFinder {
     }
 
     core::FoundDefinitionRef defineScope(core::FoundDefinitionRef owner, const ast::ExpressionPtr &node) {
-        if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
+        if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
             auto sym = id->symbol;
             ENFORCE(sym.exists());
@@ -182,7 +182,7 @@ public:
         found.loc = klass.loc;
         found.declLoc = klass.declLoc;
 
-        auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
+        auto ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
             found.owner = getOwner();
             found.name = ident->name;
@@ -342,7 +342,7 @@ public:
         }
 
         if (sendArgs.size() == 1) {
-            if (auto *array = ast::cast_tree<ast::Array>(sendArgs[0])) {
+            if (auto array = ast::cast_tree<ast::Array>(sendArgs[0])) {
                 for (auto &e : array->elems) {
                     addMethodModifier(ctx, modifierName, e);
                 }
@@ -501,7 +501,7 @@ public:
                 return core::NameRef::noName();
             }
             return sym->asSymbol();
-        } else if (auto *def = ast::cast_tree<ast::RuntimeMethodDefinition>(expr)) {
+        } else if (auto def = ast::cast_tree<ast::RuntimeMethodDefinition>(expr)) {
             return def->name;
         } else {
             ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
@@ -550,7 +550,7 @@ public:
         if (send->hasPosArgs() || send->block() != nullptr) {
             // If there are positional arguments, there might be a variance annotation
             if (send->numPosArgs() > 0) {
-                auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
+                auto lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
                 if (lit != nullptr && lit->isSymbol()) {
                     found.varianceName = lit->asSymbol();
                     found.litLoc = lit->loc;
@@ -558,9 +558,9 @@ public:
             }
 
             if (send->block() != nullptr) {
-                if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
+                if (const auto hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
                     for (const auto &keyExpr : hash->keys) {
-                        const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+                        const auto key = ast::cast_tree<ast::Literal>(keyExpr);
                         if (key != nullptr && key->isSymbol()) {
                             switch (key->asSymbol().rawId()) {
                                 case core::Names::fixed().rawId():
@@ -597,7 +597,7 @@ public:
 
     // Returns `true` if `asgn` is a field declaration.
     bool handleFieldDeclaration(core::Context ctx, const ast::Assign &asgn) {
-        auto *uid = ast::cast_tree<ast::UnresolvedIdent>(asgn.lhs);
+        auto uid = ast::cast_tree<ast::UnresolvedIdent>(asgn.lhs);
         if (uid == nullptr) {
             return false;
         }
@@ -607,11 +607,11 @@ public:
         }
 
         auto *recur = &asgn.rhs;
-        while (auto *outer = ast::cast_tree<ast::InsSeq>(*recur)) {
+        while (auto outer = ast::cast_tree<ast::InsSeq>(*recur)) {
             recur = &outer->expr;
         }
 
-        auto *cast = ast::cast_tree<ast::Cast>(*recur);
+        auto cast = ast::cast_tree<ast::Cast>(*recur);
         if (cast == nullptr) {
             return false;
         }
@@ -641,12 +641,12 @@ public:
             return;
         }
 
-        auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
+        auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs == nullptr) {
             return;
         }
 
-        auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
+        auto send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send == nullptr) {
             fillAssign(ctx, asgn);
         } else if (!send->recv.isSelfReference()) {
@@ -1664,10 +1664,10 @@ class TreeSymbolizer {
                                      bool firstName) {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
         if (constLit == nullptr) {
-            if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
+            if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
                 return id->symbol.dealias(ctx);
             }
-            if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node)) {
+            if (auto uid = ast::cast_tree<ast::UnresolvedIdent>(node)) {
                 if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
                     if (auto e = ctx.beginError(node.loc(), core::errors::Namer::DynamicConstant)) {
                         e.setHeader("Unsupported constant scope");
@@ -1726,7 +1726,7 @@ public:
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
-        auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
+        auto ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
 
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
             ENFORCE(ident->kind == ast::UnresolvedIdent::Kind::Class);
@@ -1888,9 +1888,9 @@ public:
 
     ast::ExpressionPtr handleTypeMemberDefinition(core::Context ctx, ast::ExpressionPtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
-        auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
+        auto send = ast::cast_tree<ast::Send>(asgn.rhs);
         ENFORCE(send != nullptr);
-        const auto *typeName = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
+        const auto typeName = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         ENFORCE(typeName != nullptr);
 
         if (!ctx.owner.isClassOrModule()) {
@@ -1984,9 +1984,9 @@ public:
             bool fixed = false;
             bool bounded = false;
 
-            if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
+            if (const auto hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
                 for (const auto &keyExpr : hash->keys) {
-                    const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+                    const auto key = ast::cast_tree<ast::Literal>(keyExpr);
                     if (key == nullptr || !key->isSymbol()) {
                         if (auto e = ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
                             e.setHeader("Hash provided in block to `{}` must have symbol keys", send->fun.show(ctx));
@@ -2038,7 +2038,7 @@ public:
         }
 
         if (send->numPosArgs() > 0) {
-            auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
+            auto lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
             if (!lit || !lit->isSymbol()) {
                 if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Invalid param, must be a :symbol");
@@ -2052,12 +2052,12 @@ public:
     void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
-        auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
+        auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs == nullptr) {
             return;
         }
 
-        auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
+        auto send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send == nullptr) {
             tree = handleAssignment(ctx, std::move(tree));
         } else if (!send->recv.isSelfReference()) {

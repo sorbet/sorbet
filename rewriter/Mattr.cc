@@ -63,7 +63,7 @@ vector<ast::ExpressionPtr> Mattr::run(core::MutableContext ctx, const ast::Send 
     }
 
     auto optionsTree = ASTUtil::mkKwArgsHash(send);
-    if (auto *options = ast::cast_tree<ast::Hash>(optionsTree)) {
+    if (auto options = ast::cast_tree<ast::Hash>(optionsTree)) {
         for (int i = 0; i < options->keys.size(); i++) {
             auto &key = options->keys[i];
             auto &value = options->values[i];
@@ -89,7 +89,7 @@ vector<ast::ExpressionPtr> Mattr::run(core::MutableContext ctx, const ast::Send 
 
     vector<ast::ExpressionPtr> result;
     for (int i = 0; i < symbolArgsBound; i++) {
-        auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(i));
+        auto lit = ast::cast_tree<ast::Literal>(send->getPosArg(i));
         if (!lit || !lit->isSymbol()) {
             return empty;
         }

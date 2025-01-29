@@ -23,14 +23,14 @@ bool isTEnum(core::MutableContext ctx, ast::ClassDef *klass) {
     if (klass->kind != ast::ClassDef::Kind::Class || klass->ancestors.empty()) {
         return false;
     }
-    auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(klass->ancestors.front());
+    auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(klass->ancestors.front());
     if (cnst == nullptr) {
         return false;
     }
     if (cnst->cnst != core::Names::Constants::Enum()) {
         return false;
     }
-    auto *scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope);
+    auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope);
     if (scope == nullptr) {
         return false;
     }
@@ -41,7 +41,7 @@ bool isTEnum(core::MutableContext ctx, ast::ClassDef *klass) {
 }
 
 ast::Send *asEnumsDo(ast::ExpressionPtr &stat) {
-    auto *send = ast::cast_tree<ast::Send>(stat);
+    auto send = ast::cast_tree<ast::Send>(stat);
 
     if (send != nullptr && send->hasBlock() && send->fun == core::Names::enums()) {
         return send;
@@ -58,7 +58,7 @@ void badConst(core::MutableContext ctx, core::LocOffsets headerLoc, core::LocOff
 }
 
 ast::Send *findSelfNew(ast::ExpressionPtr &assignRhs) {
-    auto *rhs = ast::cast_tree<ast::Send>(assignRhs);
+    auto rhs = ast::cast_tree<ast::Send>(assignRhs);
     if (rhs != nullptr) {
         if (rhs->fun != core::Names::new_() && rhs->fun != core::Names::let()) {
             return nullptr;
@@ -68,7 +68,7 @@ ast::Send *findSelfNew(ast::ExpressionPtr &assignRhs) {
             return nullptr;
         }
 
-        auto *magicSelfNew = rhs;
+        auto magicSelfNew = rhs;
         if (rhs->fun == core::Names::let()) {
             auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(rhs->recv);
             if (recv == nullptr) {
@@ -92,7 +92,7 @@ ast::Send *findSelfNew(ast::ExpressionPtr &assignRhs) {
         return magicSelfNew;
     }
 
-    auto *cast = ast::cast_tree<ast::Cast>(assignRhs);
+    auto cast = ast::cast_tree<ast::Cast>(assignRhs);
     if (cast == nullptr) {
         return nullptr;
     }
@@ -107,12 +107,12 @@ struct ProcessStatResult {
 
 std::optional<ProcessStatResult> processStat(core::MutableContext ctx, ast::ClassDef *klass, ast::ExpressionPtr &stat,
                                              FromWhere fromWhere) {
-    auto *asgn = ast::cast_tree<ast::Assign>(stat);
+    auto asgn = ast::cast_tree<ast::Assign>(stat);
     if (asgn == nullptr) {
         return {};
     }
 
-    auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs);
+    auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs);
     if (lhs == nullptr) {
         return {};
     }
@@ -140,7 +140,7 @@ std::optional<ProcessStatResult> processStat(core::MutableContext ctx, ast::Clas
     if (selfNew->numPosArgs() == 0 && selfNew->onlyPosArgs()) {
         serializeType = core::Types::String();
     } else if (selfNew->numPosArgs() == 1) {
-        if (auto *selfNewArg = ast::cast_tree<ast::Literal>(selfNew->getPosArg(0))) {
+        if (auto selfNewArg = ast::cast_tree<ast::Literal>(selfNew->getPosArg(0))) {
             // If the enum has exactly one variant that has a literal passed (ex. "a"),
             // then its type will be String("a"), but we want a ClassType as the return type.
             serializeType = core::Types::dropLiteral(ctx, selfNewArg->value);

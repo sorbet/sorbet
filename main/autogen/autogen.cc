@@ -94,7 +94,7 @@ public:
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ClassDef &original) {
-        auto *name = ast::cast_tree<ast::ConstantLit>(original.name);
+        auto name = ast::cast_tree<ast::ConstantLit>(original.name);
         if (name == nullptr) {
             return;
         }
@@ -166,7 +166,7 @@ public:
         // and now that we've processed all the ancestors, we should have created references for them all, so traverse
         // them once again...
         for (auto &ancst : original.ancestors) {
-            auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst);
+            auto cnst = ast::cast_tree<ast::ConstantLit>(ancst);
             if (cnst == nullptr || cnst->original == nullptr) {
                 // ignore them if they're not statically-known ancestors (i.e. not constants)
                 continue;
@@ -308,7 +308,7 @@ public:
 
     void postTransformAssign(core::Context ctx, const ast::Assign &original) {
         // autogen only cares about constant assignments/definitions, so bail otherwise
-        auto *lhs = ast::cast_tree<ast::ConstantLit>(original.lhs);
+        auto lhs = ast::cast_tree<ast::ConstantLit>(original.lhs);
         if (lhs == nullptr || lhs->original == nullptr) {
             return;
         }
@@ -343,7 +343,7 @@ public:
         def.id = defs.size() - 1;
 
         // if the RHS is _also_ a constant, then this is an alias
-        auto *rhs = ast::cast_tree<ast::ConstantLit>(original.rhs);
+        auto rhs = ast::cast_tree<ast::ConstantLit>(original.rhs);
         if (rhs && rhs->symbol.exists() && !rhs->symbol.isTypeAlias(ctx)) {
             def.type = Definition::Type::Alias;
             // since this is a `post`- method, then we've already created a `Reference` for the constant on the
@@ -386,7 +386,7 @@ public:
         }
         // This means it's a `require`; mark it as such
         if (original.flags.isPrivateOk && original.fun == core::Names::require() && original.numPosArgs() == 1) {
-            auto *lit = ast::cast_tree<ast::Literal>(original.getPosArg(0));
+            auto lit = ast::cast_tree<ast::Literal>(original.getPosArg(0));
             if (lit && lit->isString()) {
                 requireStatements.emplace_back(lit->asString());
             }

@@ -42,12 +42,12 @@ vector<ast::ExpressionPtr> runDefDelegator(core::MutableContext ctx, const ast::
         return methodStubs;
     }
 
-    auto *accessor = ast::cast_tree<ast::Literal>(send->getPosArg(0));
+    auto accessor = ast::cast_tree<ast::Literal>(send->getPosArg(0));
     if (!accessor || !accessor->isName()) {
         return methodStubs;
     }
 
-    auto *method = ast::cast_tree<ast::Literal>(send->getPosArg(1));
+    auto method = ast::cast_tree<ast::Literal>(send->getPosArg(1));
     if (!method || !method->isSymbol()) {
         return methodStubs;
     }
@@ -55,7 +55,7 @@ vector<ast::ExpressionPtr> runDefDelegator(core::MutableContext ctx, const ast::
     core::NameRef methodName = method->asSymbol();
 
     if (send->numPosArgs() == 3) {
-        auto *alias = ast::cast_tree<ast::Literal>(send->getPosArg(2));
+        auto alias = ast::cast_tree<ast::Literal>(send->getPosArg(2));
         if (!alias || !alias->isSymbol()) {
             return methodStubs;
         }
@@ -87,13 +87,13 @@ vector<ast::ExpressionPtr> runDefDelegators(core::MutableContext ctx, const ast:
         return methodStubs;
     }
 
-    auto *accessor = ast::cast_tree<ast::Literal>(send->getPosArg(0));
+    auto accessor = ast::cast_tree<ast::Literal>(send->getPosArg(0));
     if (!accessor || !accessor->isName()) {
         return methodStubs;
     }
 
     for (int i = 1, numPosArgs = send->numPosArgs(); i < numPosArgs; ++i) {
-        auto *method = ast::cast_tree<ast::Literal>(send->getPosArg(i));
+        auto method = ast::cast_tree<ast::Literal>(send->getPosArg(i));
         // Skip method names that we don't understand, but continue to emit
         // desugared calls for the ones we do.
         if (!method || !method->isSymbol()) {

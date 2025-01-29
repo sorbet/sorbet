@@ -165,7 +165,7 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const
         return;
     }
 
-    auto *bodyBlock = ast::cast_tree<ast::Send>(block->body);
+    auto bodyBlock = ast::cast_tree<ast::Send>(block->body);
     checkSigReturnType(ctx, bodyBlock);
 
     // walk through, find the `params()` invocation, and get its hash
@@ -177,7 +177,7 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const
     // build a lookup table that maps from names to the types they have
     UnorderedMap<core::NameRef, const ast::ExpressionPtr *> argTypeMap;
     for (auto [key, value] : params->kwArgPairs()) {
-        auto *argName = ast::cast_tree<ast::Literal>(key);
+        auto argName = ast::cast_tree<ast::Literal>(key);
         if (argName->isSymbol()) {
             argTypeMap[argName->asSymbol()] = &value;
         }
@@ -185,7 +185,7 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const
 
     UnorderedMap<core::NameRef, ArgKind> argKindMap;
     for (const auto &arg : methodDef->args) {
-        const auto *restArg = ast::cast_tree<ast::RestArg>(arg);
+        const auto restArg = ast::cast_tree<ast::RestArg>(arg);
         if (restArg == nullptr) {
             argKindMap[ast::MK::arg2Name(arg)] = ArgKind::Plain;
         } else if (ast::isa_tree<ast::KeywordArg>(restArg->expr)) {

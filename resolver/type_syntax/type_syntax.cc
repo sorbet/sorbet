@@ -96,7 +96,7 @@ core::TypePtr getResultLiteral(core::Context ctx, const ast::ExpressionPtr &expr
 bool isTProc(core::Context ctx, const ast::Send *send) {
     while (send != nullptr) {
         if (send->fun == core::Names::proc()) {
-            if (auto *rcv = ast::cast_tree<ast::ConstantLit>(send->recv)) {
+            if (auto rcv = ast::cast_tree<ast::ConstantLit>(send->recv)) {
                 return rcv->symbol == core::Symbols::T();
             }
         }
@@ -133,14 +133,14 @@ namespace {
 
 // When a sig was given with multiple statements, autocorrect it to a single chained send.
 void addMultiStatementSigAutocorrect(core::Context ctx, core::ErrorBuilder &e, const ast::ExpressionPtr &blockBody) {
-    auto *insseq = ast::cast_tree<ast::InsSeq>(blockBody);
+    auto insseq = ast::cast_tree<ast::InsSeq>(blockBody);
     if (insseq == nullptr) {
         return;
     }
 
     vector<core::LocOffsets> locs;
     for (auto &expr : insseq->stats) {
-        auto *send = ast::cast_tree<ast::Send>(expr);
+        auto send = ast::cast_tree<ast::Send>(expr);
         if (send == nullptr || !send->loc.exists()) {
             return;
         }
@@ -149,7 +149,7 @@ void addMultiStatementSigAutocorrect(core::Context ctx, core::ErrorBuilder &e, c
     }
 
     {
-        auto *send = ast::cast_tree<ast::Send>(insseq->expr);
+        auto send = ast::cast_tree<ast::Send>(insseq->expr);
         if (send == nullptr || !send->loc.exists()) {
             return;
         }
@@ -210,7 +210,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
         ENFORCE(sigSend.fun == core::Names::sig());
         auto *block = sigSend.block();
         ENFORCE(block);
-        auto *blockBody = ast::cast_tree<ast::Send>(block->body);
+        auto blockBody = ast::cast_tree<ast::Send>(block->body);
         if (blockBody) {
             send = blockBody;
         } else {
@@ -242,7 +242,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 break;
             }
             for (auto &arg : tsend->posArgs()) {
-                auto *c = ast::cast_tree<ast::Literal>(arg);
+                auto c = ast::cast_tree<ast::Literal>(arg);
                 if (c == nullptr) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Unexpected `{}`: Type parameters are specified with symbols", arg.nodeName());
@@ -389,7 +389,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
 
                         // when the first argument is a hash, emit an autocorrect to remove the braces
                         if (send->numPosArgs() == 1) {
-                            if (auto *hash = ast::cast_tree<ast::Hash>(send->getPosArg(0))) {
+                            if (auto hash = ast::cast_tree<ast::Hash>(send->getPosArg(0))) {
                                 // TODO(jez) Use Loc::adjust here
                                 auto loc = core::Loc(ctx.file, hash->loc.beginPos(), hash->loc.endPos());
                                 if (auto locSource = loc.source(ctx)) {
@@ -407,7 +407,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 }
 
                 for (auto [key, value] : send->kwArgPairs()) {
-                    auto *lit = ast::cast_tree<ast::Literal>(key);
+                    auto lit = ast::cast_tree<ast::Literal>(key);
                     if (lit && lit->isSymbol()) {
                         core::NameRef name = lit->asSymbol();
                         auto maybeResultAndBind = getResultTypeAndBindWithSelfTypeParams(
@@ -613,7 +613,7 @@ void checkUnexpectedKwargs(core::Context ctx, const ast::Send &send) {
 
 core::ClassOrModuleRef sendLooksLikeBadTypeApplication(core::Context ctx, const ast::Send &send) {
     core::SymbolRef maybeScopeClass;
-    if (auto *recv = ast::cast_tree<ast::ConstantLit>(send.recv)) {
+    if (auto recv = ast::cast_tree<ast::ConstantLit>(send.recv)) {
         maybeScopeClass = recv->symbol;
     } else if (send.recv.isSelfReference()) {
         // Let's not try to reinvent constant resolution here and just pick a heuristic that tends to
@@ -671,7 +671,7 @@ optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Sen
         return core::Symbols::untyped();
     }
 
-    auto *obj = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
+    auto obj = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
     if (!obj) {
         if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
             auto maybeType = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
@@ -771,7 +771,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 // > X = T.type_alias {T.untyped}
                 // > Y = T.type_alias {T.nilable(X)}
                 //
-                auto *arg = ast::cast_tree<ast::Send>(send.getPosArg(0));
+                auto arg = ast::cast_tree<ast::Send>(send.getPosArg(0));
                 if (arg != nullptr && arg->fun == core::Names::untyped() && !arg->hasPosArgs() && !arg->hasKwArgs()) {
                     if (auto e = ctx.beginError(send.loc, core::errors::Resolver::NilableUntyped)) {
                         e.setHeader("`{}` is the same as `{}`", "T.nilable(T.untyped)", "T.untyped");
@@ -1328,7 +1328,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         }
 
         core::SymbolRef appliedKlass;
-        if (auto *recvi = ast::cast_tree<ast::ConstantLit>(s.recv)) {
+        if (auto recvi = ast::cast_tree<ast::ConstantLit>(s.recv)) {
             if (recvi->symbol == core::Symbols::T()) {
                 if (auto res = interpretTCombinator(ctx, s, sigBeingParsed, args)) {
                     return move(res.value());
@@ -1346,7 +1346,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             }
 
             appliedKlass = recvi->symbol;
-        } else if (auto *recvi = ast::cast_tree<ast::Send>(s.recv)) {
+        } else if (auto recvi = ast::cast_tree<ast::Send>(s.recv)) {
             if (recvi->fun != core::Names::classOf() || s.fun != core::Names::squareBrackets()) {
                 return reportUnknownTypeSyntaxError(ctx, s, move(result));
             }

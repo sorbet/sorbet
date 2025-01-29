@@ -816,7 +816,7 @@ public:
 
     void preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
         if (classDef.kind == ast::ClassDef::Kind::Class && !classDef.ancestors.empty()) {
-            auto *lit = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front());
+            auto lit = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front());
             auto unresolvedPath = lit->fullUnresolvedPath(ctx);
             if (unresolvedPath.has_value()) {
                 unresolvedConstants.emplace_back(fmt::format(

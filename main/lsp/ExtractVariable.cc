@@ -122,8 +122,8 @@ class LocSearchWalk {
         // that was desugared to an if inside the else. In that case, insert into the else would be invalid, so let's
         // skip it. If there's a more specific scope, we'll insert there, and if there isn't, we'll insert outside the
         // if.
-        if (const ast::If *if_ = ast::cast_tree<ast::If>(node)) {
-            if (const ast::If *elsif = ast::cast_tree<ast::If>(if_->elsep)) {
+        if (auto if_ = ast::cast_tree<ast::If>(node)) {
+            if (auto elsif = ast::cast_tree<ast::If>(if_->elsep)) {
                 if (elsif->loc.exists() && elsif->loc.contains(targetLoc.offsets())) {
                     return;
                 }
