@@ -1,3 +1,4 @@
+# -- test/testdata/cfg/default_args_cases.rb --
 # typed: true
 
 class Test
@@ -49,3 +50,4 @@ class Test
     #                           ^^^^^^^^^^^^^^^^^^^^^^^ error: Argument does not have asserted type `Integer`
   end
 end
+# ------------------------------
