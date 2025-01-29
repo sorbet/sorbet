@@ -304,8 +304,7 @@ tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext c
 
     if (argInfo.type != nullptr) {
         auto tmp = cctx.newTemporary(core::Names::castTemp());
-        synthesizeExpr(defaultNext, tmp, defLoc,
-                       make_insn<Cast>(result, core::LocOffsets::none(), argInfo.type, core::Names::let()));
+        synthesizeExpr(defaultNext, tmp, defLoc, make_insn<Cast>(result, defLoc, argInfo.type, core::Names::let()));
         cctx.inWhat.minLoops[tmp.id()] = CFG::MIN_LOOP_LET;
     }
 
