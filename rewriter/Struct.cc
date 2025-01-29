@@ -6,7 +6,7 @@
 #include "core/Names.h"
 #include "core/core.h"
 #include "core/errors/rewriter.h"
-#include "rewriter/Util.h"
+#include "rewriter/utils/Utils.h"
 #include "rewriter/rewriter.h"
 
 using namespace std;

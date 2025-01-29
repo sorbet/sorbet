@@ -1,8 +1,7 @@
-#include "rewriter/Util.h"
+#include "rewriter/utils/Utils.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/core.h"
-#include "rewriter/rewriter.h"
 
 using namespace std;
 

@@ -4,7 +4,7 @@
 #include "ast/ast.h"
 #include "core/core.h"
 #include "core/errors/rewriter.h"
-#include "rewriter/Util.h"
+#include "rewriter/utils/Utils.h"
 
 using namespace std;
 namespace sorbet::rewriter {

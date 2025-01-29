@@ -20,5 +20,6 @@ cc_library(
         "//ast/verifier",
         "//common",
         "//core",
+        "//rewriter/utils",
     ],
 )
