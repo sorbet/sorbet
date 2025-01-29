@@ -1,7 +1,9 @@
 #include "rewriter/utils/Utils.h"
+#include "absl/strings/escaping.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/core.h"
+#include "core/errors/rewriter.h"
 
 using namespace std;
 
@@ -320,6 +322,73 @@ ast::ExpressionPtr ASTUtil::thunkBody(core::MutableContext ctx, ast::ExpressionP
         return nullptr;
     }
     return std::move(block->body);
+}
+
+namespace {
+
+bool validAttrName(std::string_view name) {
+    return !name.empty() && (isalpha(name.front()) || name.front() == '_') &&
+           absl::c_all_of(name, [](char c) { return isalnum(c) || c == '_'; });
+}
+
+} // namespace
+
+pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext ctx, const ast::ExpressionPtr &name) {
+    core::LocOffsets loc;
+    core::NameRef res;
+    if (auto lit = ast::cast_tree<ast::Literal>(name)) {
+        if (lit->isSymbol()) {
+            res = lit->asSymbol();
+            auto shortName = res.shortName(ctx);
+            if (!validAttrName(shortName)) {
+                if (auto e = ctx.beginIndexerError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
+                    if (shortName.empty()) {
+                        e.setHeader("Attribute names must be non-empty");
+                    } else {
+                        e.setHeader("Bad attribute name `{}`", absl::CEscape(shortName));
+                    }
+                }
+                return make_pair(core::NameRef::noName(), lit->loc);
+            }
+
+            loc = lit->loc;
+            ENFORCE(ctx.locAt(loc).exists());
+            ENFORCE(ctx.locAt(loc).source(ctx).value().size() > 1 && ctx.locAt(loc).source(ctx).value()[0] == ':');
+            loc = core::LocOffsets{loc.beginPos() + 1, loc.endPos()};
+        } else if (lit->isString()) {
+            res = lit->asString();
+            auto shortName = res.shortName(ctx);
+            if (!validAttrName(shortName)) {
+                if (auto e = ctx.beginIndexerError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
+                    if (shortName.empty()) {
+                        e.setHeader("Attribute names must be non-empty");
+                    } else {
+                        e.setHeader("Bad attribute name `{}`", absl::CEscape(shortName));
+                    }
+                }
+                return make_pair(core::NameRef::noName(), lit->loc);
+            }
+
+            loc = lit->loc;
+            DEBUG_ONLY({
+                auto l = ctx.locAt(loc);
+                ENFORCE(l.exists());
+                auto source = l.source(ctx).value();
+                ENFORCE(source.size() > 2);
+                auto firstChar = source[0];
+                ENFORCE(firstChar == '"' || firstChar == '\'');
+                auto lastChar = source[source.size() - 1];
+                ENFORCE(lastChar == firstChar);
+            });
+            loc = core::LocOffsets{loc.beginPos() + 1, loc.endPos() - 1};
+        }
+    }
+    if (!res.exists()) {
+        if (auto e = ctx.beginIndexerError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
+            e.setHeader("Arg must be a Symbol or String");
+        }
+    }
+    return make_pair(res, loc);
 }
 
 } // namespace sorbet::rewriter
