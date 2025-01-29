@@ -383,19 +383,19 @@ public:
     }
 
     static ExpressionPtr All(core::LocOffsets loc, Send::ARGS_store args) {
-        return Send(loc, T(loc), core::Names::all(), loc, args.size(), std::move(args));
+        return Send(loc, T(loc), core::Names::all(), loc.copyWithZeroLength(), args.size(), std::move(args));
     }
 
     static ExpressionPtr Any(core::LocOffsets loc, Send::ARGS_store args) {
-        return Send(loc, T(loc), core::Names::any(), loc, args.size(), std::move(args));
+        return Send(loc, T(loc), core::Names::any(), loc.copyWithZeroLength(), args.size(), std::move(args));
     }
 
     static ExpressionPtr Anything(core::LocOffsets loc) {
-        return Send0(loc, T(loc), core::Names::anything(), loc);
+        return Send0(loc, T(loc), core::Names::anything(), loc.copyWithZeroLength());
     }
 
     static ExpressionPtr AttachedClass(core::LocOffsets loc) {
-        return Send0(loc, T(loc), core::Names::attachedClass(), loc);
+        return Send0(loc, T(loc), core::Names::attachedClass(), loc.copyWithZeroLength());
     }
 
     static ExpressionPtr Cast(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
@@ -414,11 +414,11 @@ public:
     }
 
     static ExpressionPtr NoReturn(core::LocOffsets loc) {
-        return Send0(loc, T(loc), core::Names::noreturn(), loc);
+        return Send0(loc, T(loc), core::Names::noreturn(), loc.copyWithZeroLength());
     }
 
     static ExpressionPtr SelfType(core::LocOffsets loc) {
-        return Send0(loc, T(loc), core::Names::selfType(), loc);
+        return Send0(loc, T(loc), core::Names::selfType(), loc.copyWithZeroLength());
     }
 
     static ExpressionPtr Unsafe(core::LocOffsets loc, ExpressionPtr inner) {
@@ -455,15 +455,15 @@ public:
     }
 
     static ExpressionPtr T_Proc(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr ret) {
-        auto proc = Send0(loc, T(loc), core::Names::proc(), loc);
+        auto proc = Send0(loc, T(loc), core::Names::proc(), loc.copyWithZeroLength());
         auto params = Params(loc, std::move(proc), std::move(args));
-        return Send1(loc, std::move(params), core::Names::returns(), loc, std::move(ret));
+        return Send1(loc, std::move(params), core::Names::returns(), loc.copyWithZeroLength(), std::move(ret));
     }
 
     static ExpressionPtr T_ProcVoid(core::LocOffsets loc, Send::ARGS_store args) {
-        auto proc = Send0(loc, T(loc), core::Names::proc(), loc);
+        auto proc = Send0(loc, T(loc), core::Names::proc(), loc.copyWithZeroLength());
         auto params = Params(loc, std::move(proc), std::move(args));
-        return Send0(loc, std::move(params), core::Names::void_(), loc);
+        return Send0(loc, std::move(params), core::Names::void_(), loc.copyWithZeroLength());
     }
 
     static ExpressionPtr T_Set(core::LocOffsets loc) {
