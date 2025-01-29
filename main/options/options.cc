@@ -519,6 +519,11 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "files that do not exist on the client. References to files in these directories will be sent "
         "as `sorbet:` URIs to clients that understand them.",
         cxxopts::value<vector<string>>(), "<path>");
+    options.add_options(section)(
+        "forcibly-silence-lsp-multiple-dir-error",
+        "Allow the LSP to start with multiple `--dir` options by silencing the error. (WARNING: This flag does not "
+        "address the known issues with multiple directory support in LSP mode. You are likely to encounter unexpected "
+        "behavior.)");
     // }}}
 
     // ----- LSP FEATURES ------------------------------------------------- {{{
@@ -542,11 +547,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "End users should prefer to use `--enable-all-beta-lsp-features`, instead.)");
     options.add_options(section)("enable-all-beta-lsp-features",
                                  "Enable (expected-to-be-non-crashy) early-access LSP features.");
-    options.add_options(section)(
-        "forcibly-silence-lsp-multiple-dir-error",
-        "Allow the LSP to start with multiple `--dir` options by silencing the error. (WARNING: This flag does not "
-        "address the known issues with multiple directory support in LSP mode. You are likely to encounter unexpected "
-        "behavior.)");
     // }}}
 
     // ----- PERFORMANCE -------------------------------------------------- {{{
