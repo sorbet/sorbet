@@ -36,7 +36,7 @@ public:
 
     /// Fetch the name and loc of a symbol or string literal, that's suitable for an `attr`, `attr_reader`,
     /// `attr_writer`, or `attr_accessor`
-    static std::pair<core::NameRef, core::LocOffsets> getAttrName(core::MutableContext ctx,
+    static std::pair<core::NameRef, core::LocOffsets> getAttrName(core::MutableContext ctx, core::NameRef attrFun,
                                                                   const ast::ExpressionPtr &name);
 
     ASTUtil() = delete;

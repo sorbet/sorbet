@@ -1,5 +1,4 @@
 #include "rewriter/util/Util.h"
-#include "absl/strings/escaping.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/core.h"
@@ -333,7 +332,8 @@ bool validAttrName(std::string_view name) {
 
 } // namespace
 
-pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext ctx, const ast::ExpressionPtr &name) {
+pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext ctx, core::NameRef attrFun,
+                                                           const ast::ExpressionPtr &name) {
     core::LocOffsets loc;
     core::NameRef res;
     if (auto lit = ast::cast_tree<ast::Literal>(name)) {
@@ -345,7 +345,7 @@ pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext 
                     if (shortName.empty()) {
                         e.setHeader("Attribute names must be non-empty");
                     } else {
-                        e.setHeader("Bad attribute name `{}`", absl::CEscape(shortName));
+                        e.setHeader("Bad attribute name `{}`", shortName);
                     }
                 }
                 return make_pair(core::NameRef::noName(), lit->loc);
@@ -363,7 +363,7 @@ pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext 
                     if (shortName.empty()) {
                         e.setHeader("Attribute names must be non-empty");
                     } else {
-                        e.setHeader("Bad attribute name `{}`", absl::CEscape(shortName));
+                        e.setHeader("Bad attribute name `{}`", shortName);
                     }
                 }
                 return make_pair(core::NameRef::noName(), lit->loc);
@@ -385,7 +385,7 @@ pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext 
     }
     if (!res.exists()) {
         if (auto e = ctx.beginIndexerError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
-            e.setHeader("Arg must be a Symbol or String");
+            e.setHeader("Argument to `{}` must be a Symbol or String", attrFun.shortName(ctx));
         }
     }
     return make_pair(res, loc);

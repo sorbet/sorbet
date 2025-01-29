@@ -193,7 +193,7 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
 
     if (makeReader) {
         for (auto &arg : send->posArgs()) {
-            auto [name, argLoc] = ASTUtil::getAttrName(ctx, arg);
+            auto [name, argLoc] = ASTUtil::getAttrName(ctx, send->fun, arg);
             if (!name.exists()) {
                 return empty;
             }
@@ -216,7 +216,7 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
 
     if (makeWriter) {
         for (auto &arg : send->posArgs()) {
-            auto [name, argLoc] = ASTUtil::getAttrName(ctx, arg);
+            auto [name, argLoc] = ASTUtil::getAttrName(ctx, send->fun, arg);
             if (!name.exists()) {
                 return empty;
             }
