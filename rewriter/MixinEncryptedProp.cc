@@ -18,7 +18,7 @@ ast::ExpressionPtr mkNilableEncryptedValue(core::MutableContext ctx, core::LocOf
         core::Names::Constants::Encryptable(), core::Names::Constants::EncryptedValue(),
     };
 
-    return ASTUtil::mkNilable(loc, ast::MK::UnresolvedConstantParts(loc, ast::MK::EmptyTree(), parts));
+    return ASTUtil::mkNilable(loc, ast::MK::UnresolvedConstantParts(loc, parts));
 }
 
 ast::ExpressionPtr mkNilableString(core::LocOffsets loc) {
