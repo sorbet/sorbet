@@ -1,3 +1,4 @@
+# -- test/testdata/cfg/default_args_cases.rb --
 # typed: true
 
 class Test
@@ -45,7 +46,8 @@ class Test
   def returns_nilable_integer = 5
 
   sig { params(x: Integer).void }
-  def takes_optional_integer(x: returns_nilable_integer)
+  def takes_optional_integer(x: T.must(returns_nilable_integer))
     #                           ^^^^^^^^^^^^^^^^^^^^^^^ error: Argument does not have asserted type `Integer`
   end
 end
+# ------------------------------
