@@ -86,6 +86,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
 
         return ast::MK::EmptyTree();
     }
+    auto *functionType = (rbs_types_function_t *)node.type;
 
     // Collect type parameters
 
@@ -105,7 +106,6 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
 
     // Collect positionals
 
-    auto *functionType = (rbs_types_function_t *)node.type;
     std::vector<RBSArg> args;
 
     collectArgs(ctx, methodType.loc, functionType->required_positionals, args);
