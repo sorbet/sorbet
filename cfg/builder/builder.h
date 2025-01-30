@@ -34,6 +34,8 @@ private:
     walkDefault(CFGContext cctx, int argIndex, const core::ArgInfo &argInfo, LocalRef argLocal, core::LocOffsets argLoc,
                 ast::ExpressionPtr &def, BasicBlock *presentCont, BasicBlock *defaultCont);
     static BasicBlock *joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b);
+    static BasicBlock *buildExceptionHandler(CFGContext cctx, ast::ExpressionPtr &ex, BasicBlock *caseBody,
+                                             cfg::LocalRef exceptionValue, BasicBlock *rescueHandlersBlock);
 };
 
 class CFGContext {

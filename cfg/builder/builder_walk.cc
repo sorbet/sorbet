@@ -311,6 +311,29 @@ tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext c
     return {result, presentNext, defaultNext};
 }
 
+BasicBlock *CFGBuilder::buildExceptionHandler(CFGContext cctx, ast::ExpressionPtr &ex, BasicBlock *caseBody,
+                                              cfg::LocalRef exceptionValue, BasicBlock *rescueHandlersBlock) {
+    auto loc = ex.loc();
+    auto exceptionClass = cctx.newTemporary(core::Names::exceptionClassTemp());
+    rescueHandlersBlock = walk(cctx.withTarget(exceptionClass), ex, rescueHandlersBlock);
+
+    auto isaCheck = cctx.newTemporary(core::Names::isaCheckTemp());
+    InlinedVector<cfg::LocalRef, 2> args;
+    InlinedVector<core::LocOffsets, 2> argLocs = {loc};
+    args.emplace_back(exceptionValue);
+
+    auto isPrivateOk = false;
+    rescueHandlersBlock->exprs.emplace_back(isaCheck, loc,
+                                            make_insn<Send>(exceptionClass, loc, core::Names::tripleEq(),
+                                                            loc.copyWithZeroLength(), args.size(), args,
+                                                            std::move(argLocs), isPrivateOk));
+
+    auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops);
+    conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
+
+    return otherHandlerBlock;
+}
+
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
  * store result of evaluation into `target`. Returns basic block in which evaluation should proceed.
  */
@@ -872,7 +895,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     auto rescueCase = ast::cast_tree<ast::RescueCase>(expr);
                     auto caseBody = cctx.inWhat.freshBlock(cctx.loops);
                     auto &exceptions = rescueCase->exceptions;
-                    auto added = false;
                     auto local = ast::cast_tree<ast::Local>(rescueCase->var);
                     ENFORCE(local != nullptr, "rescue case var not a local?");
 
@@ -899,32 +921,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                     if (exceptions.empty()) {
                         // rescue without a class catches StandardError
-                        exceptions.emplace_back(
-                            ast::MK::Constant(rescueCase->var.loc(), core::Symbols::StandardError()));
-                        added = true;
-                    }
-                    for (auto &ex : exceptions) {
-                        auto loc = ex.loc();
-                        auto exceptionClass = cctx.newTemporary(core::Names::exceptionClassTemp());
-                        rescueHandlersBlock = walk(cctx.withTarget(exceptionClass), ex, rescueHandlersBlock);
-
-                        auto isaCheck = cctx.newTemporary(core::Names::isaCheckTemp());
-                        InlinedVector<cfg::LocalRef, 2> args;
-                        InlinedVector<core::LocOffsets, 2> argLocs = {loc};
-                        args.emplace_back(exceptionValue);
-
-                        auto isPrivateOk = false;
-                        rescueHandlersBlock->exprs.emplace_back(
-                            isaCheck, loc,
-                            make_insn<Send>(exceptionClass, loc, core::Names::tripleEq(), loc.copyWithZeroLength(),
-                                            args.size(), args, std::move(argLocs), isPrivateOk));
-
-                        auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops);
-                        conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
-                        rescueHandlersBlock = otherHandlerBlock;
-                    }
-                    if (added) {
-                        exceptions.pop_back();
+                        auto ex = ast::MK::Constant(rescueCase->var.loc(), core::Symbols::StandardError());
+                        rescueHandlersBlock =
+                            buildExceptionHandler(cctx, ex, caseBody, exceptionValue, rescueHandlersBlock);
+                    } else {
+                        for (auto &ex : exceptions) {
+                            rescueHandlersBlock =
+                                buildExceptionHandler(cctx, ex, caseBody, exceptionValue, rescueHandlersBlock);
+                        }
                     }
 
                     caseBody = walk(cctx, rescueCase->body, caseBody);
