@@ -985,7 +985,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 } else if (c.cast == core::Names::bind() || c.cast == core::Names::syntheticBind()) {
                     auto isSynthetic = c.cast == core::Names::syntheticBind();
                     if (c.arg.isSelfReference()) {
-                        auto self = cctx.inWhat.enterLocal(core::LocalVariable::selfVariable());
+                        auto self = LocalRef::selfVariable();
                         auto &inserted = current->exprs.emplace_back(
                             self, c.loc, make_insn<Cast>(tmp, argLoc, c.type, core::Names::cast()));
                         if (isSynthetic) {
