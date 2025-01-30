@@ -409,7 +409,8 @@ public:
     }
 
     static ExpressionPtr T_Boolean(core::LocOffsets loc) {
-        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Boolean()});
+        static constexpr core::NameRef parts[2] = {core::Names::Constants::T(), core::Names::Constants::Boolean()};
+        return UnresolvedConstantParts(loc, parts);
     }
 
     static ExpressionPtr ZSuper(core::LocOffsets loc, core::NameRef method) {
