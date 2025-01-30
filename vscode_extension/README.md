@@ -1,48 +1,23 @@
 # Ruby Sorbet for VS Code
 
-## Features:
+This extension only works in projects that have adopted Sorbet. For
+instructions, see here:
 
-Provides Ruby editor features using the Sorbet language server:
+- <https://sorbet.org/docs/adopting>
 
-- Live typechecking
-- Types and documentation on hover
-- Go-to-definition
-- Find all references in workspace
-- Workspace symbol search
-- Autocompletion of methods, local variables, keywords, and `sig`s.
+The docs for the Sorbet extension for VS Code live here:
 
-## Getting started
+- <https://sorbet.org/docs/vscode>
 
-By default, this extension attempts to use a Sorbet language server
-that it launches using `bundle exec srb typecheck --lsp`.
+The Sorbet extension for VS Code is powered by the [language server
+protocol](https://microsoft.github.io/language-server-protocol/) (LSP). Sorbet's
+support for LSP is documented here:
 
-In a Ruby environment that includes the `sorbet` gem, where `srb init` has been
-run as per [Sorbet's "Getting Started" documentation](https://sorbet.org/docs/adopting),
-this is often sufficient to get started with the Sorbet language server in
-_typed files_ (i.e., those marked as `#typed: true` or stricter).
-
-Use `sorbet.lspConfigs` to customize how the Sorbet language server is launched.
-If VSCode settings are checked into source control, users may wish to set
-`sorbet.userLspConfigs` globally to avoid dirtying/modifying their local
-`.vscode/settings.json`. (Configs from `sorbet.userLspConfigs` override those from
-`sorbet.lspConfigs` with matching ids.)
-
-Read the [documentation on the Sorbet website](https://sorbet.org/docs/vscode)
-for further information.
-
-## Caveats/Disclaimers
-
-- The Sorbet language server does not provide language support for symbols
-  in untyped files (i.e., those ignored or effectively marked `# typed: false`).
-  See [the Sorbet CLI docs](https://sorbet.org/docs/cli) for more information
-  about how to change the scope of files considered by Sorbet scope.
-
-- Sorbet's language server supports flags to enable beta-testing
-  and experimental features; users should be aware that these features
-  are constantly in flux, may occasionally be wildly incompatible with
-  this extension, and are likely to change without notice.
+- <https://sorbet.org/docs/lsp>
 
 ## Developing on this Extension
 
-See [docs/lsp-dev-guide.md](../docs/lsp-dev-guide.md) for
-information on how to get started with LSP and VS Code extension development.
+See [docs/lsp-dev-guide.md] for information on how to get started with LSP and
+VS Code extension development.
+
+[docs/lsp-dev-guide.md]: https://github.com/sorbet/sorbet/blob/master/docs/lsp-dev-guide.md
