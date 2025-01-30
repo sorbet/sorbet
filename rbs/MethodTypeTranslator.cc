@@ -193,6 +193,9 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
             isFinal = true;
         } else if (annotation.string == "abstract") {
             sigBuilder = ast::MK::Send0(annotation.loc, std::move(sigBuilder), core::Names::abstract(), annotation.loc);
+        } else if (annotation.string == "overridable") {
+            sigBuilder =
+                ast::MK::Send0(annotation.loc, std::move(sigBuilder), core::Names::overridable(), annotation.loc);
         } else if (annotation.string == "override") {
             sigBuilder =
                 ast::MK::Send0(annotation.loc, std::move(sigBuilder), core::Names::override_(), annotation.loc);
