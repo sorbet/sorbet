@@ -34,6 +34,16 @@ end
  #  ^ error: Failed to parse RBS signature (expected a token `pARROW`)
   def parse_error4(p1, p2); end # error: The method `parse_error4` does not have a `sig`
 
+# Sig mismatch
+
+#: (P1) -> void
+def sig_mismatch1(p1, p2); end
+#                     ^^ error: Malformed `sig`. Type not specified for argument `p2`
+
+#: (foo: P1) -> void # error: Unknown argument name `foo`
+def sig_mismatch2(p1); end
+#                 ^^ error: Malformed `sig`. Type not specified for argument `p1`
+
 # Sigs
 
 # We do not create any RBI if there is no RBS sigs
