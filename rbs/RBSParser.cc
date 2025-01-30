@@ -1,4 +1,4 @@
-#include "RBSParser.h"
+#include "rbs/RBSParser.h"
 #include "core/errors/rewriter.h"
 
 namespace sorbet::rbs {

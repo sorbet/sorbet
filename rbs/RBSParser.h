@@ -2,7 +2,7 @@
 #define RBS_PARSER_H
 
 #include "core/Context.h"
-#include "rbs_common.h"
+#include "rbs/rbs_common.h"
 
 namespace sorbet::rbs {
 
