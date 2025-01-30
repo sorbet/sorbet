@@ -12,7 +12,7 @@ namespace sorbet::rewriter {
 namespace {
 
 ast::ExpressionPtr mkNilableEncryptedValue(core::MutableContext ctx, core::LocOffsets loc) {
-    auto parts = vector<core::NameRef>{
+    static constexpr core::NameRef parts[6] = {
         core::Names::Constants::Opus(),        core::Names::Constants::DB(),
         core::Names::Constants::Model(),       core::Names::Constants::Mixins(),
         core::Names::Constants::Encryptable(), core::Names::Constants::EncryptedValue(),
