@@ -80,9 +80,9 @@ void collectKeywords(core::MutableContext ctx, core::LocOffsets docLoc, rbs_hash
 } // namespace
 
 sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ctx,
-                                                                 sorbet::ast::MethodDef *methodDef,
-                                                                 MethodType methodType,
-                                                                 std::vector<Comment> annotations) {
+                                                                 const sorbet::ast::MethodDef *methodDef,
+                                                                 const MethodType methodType,
+                                                                 const std::vector<Comment> &annotations) {
     const auto &node = *methodType.node;
 
     if (node.type->type != RBS_TYPES_FUNCTION) {
@@ -252,8 +252,8 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
     return sig;
 }
 
-sorbet::ast::ExpressionPtr MethodTypeTranslator::attrSignature(core::MutableContext ctx, sorbet::ast::Send *send,
-                                                               Type attrType) {
+sorbet::ast::ExpressionPtr MethodTypeTranslator::attrSignature(core::MutableContext ctx, const sorbet::ast::Send *send,
+                                                               const Type attrType) {
     auto typeParams = std::vector<std::pair<core::LocOffsets, core::NameRef>>();
     auto sigBuilder = ast::MK::Self(attrType.loc.copyWithZeroLength());
 
