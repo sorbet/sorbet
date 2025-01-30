@@ -217,7 +217,7 @@ public:
         return make_expression<UnresolvedConstantLit>(loc, std::move(scope), name);
     }
 
-    static ExpressionPtr UnresolvedConstantParts(core::LocOffsets loc, const std::vector<core::NameRef> &parts) {
+    static ExpressionPtr UnresolvedConstantParts(core::LocOffsets loc, absl::Span<const core::NameRef> parts) {
         auto result = EmptyTree();
         for (const auto part : parts) {
             result = UnresolvedConstant(loc, std::move(result), part);
