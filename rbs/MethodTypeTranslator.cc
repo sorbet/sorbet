@@ -212,6 +212,8 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
 
     if (typeParams.size() > 0) {
         Send::ARGS_store typeParamsStore;
+        typeParamsStore.reserve(typeParams.size());
+
         for (auto &param : typeParams) {
             typeParamsStore.emplace_back(ast::MK::Symbol(param.first, param.second));
         }
