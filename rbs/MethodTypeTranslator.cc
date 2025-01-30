@@ -160,6 +160,8 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
     }
 
     Send::ARGS_store sigParams;
+    sigParams.reserve(args.size() * 2);
+
     for (int i = 0; i < args.size(); i++) {
         auto &arg = args[i];
         core::NameRef name;
