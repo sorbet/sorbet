@@ -325,9 +325,23 @@ ast::ExpressionPtr ASTUtil::thunkBody(core::MutableContext ctx, ast::ExpressionP
 
 namespace {
 
-bool validAttrName(std::string_view name) {
-    return !name.empty() && (isalpha(name.front()) || name.front() == '_') &&
-           absl::c_all_of(name, [](char c) { return isalnum(c) || c == '_'; });
+bool validAttrName(core::MutableContext ctx, core::LocOffsets loc, core::NameRef name) {
+    auto shortName = name.shortName(ctx);
+
+    auto validName = !shortName.empty() && (isalpha(shortName.front()) || shortName.front() == '_') &&
+                     absl::c_all_of(shortName, [](char c) { return isalnum(c) || c == '_'; });
+
+    if (!validName) {
+        if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::BadAttrArg)) {
+            if (shortName.empty()) {
+                e.setHeader("Attribute names must be non-empty");
+            } else {
+                e.setHeader("Bad attribute name `{}`", shortName);
+            }
+        }
+    }
+
+    return validName;
 }
 
 } // namespace
@@ -339,15 +353,7 @@ pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext 
     if (auto lit = ast::cast_tree<ast::Literal>(name)) {
         if (lit->isSymbol()) {
             res = lit->asSymbol();
-            auto shortName = res.shortName(ctx);
-            if (!validAttrName(shortName)) {
-                if (auto e = ctx.beginIndexerError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
-                    if (shortName.empty()) {
-                        e.setHeader("Attribute names must be non-empty");
-                    } else {
-                        e.setHeader("Bad attribute name `{}`", shortName);
-                    }
-                }
+            if (!validAttrName(ctx, loc, res)) {
                 return make_pair(core::NameRef::noName(), lit->loc);
             }
 
@@ -357,15 +363,7 @@ pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext 
             loc = core::LocOffsets{loc.beginPos() + 1, loc.endPos()};
         } else if (lit->isString()) {
             res = lit->asString();
-            auto shortName = res.shortName(ctx);
-            if (!validAttrName(shortName)) {
-                if (auto e = ctx.beginIndexerError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
-                    if (shortName.empty()) {
-                        e.setHeader("Attribute names must be non-empty");
-                    } else {
-                        e.setHeader("Bad attribute name `{}`", shortName);
-                    }
-                }
+            if (!validAttrName(ctx, loc, res)) {
                 return make_pair(core::NameRef::noName(), lit->loc);
             }
 
