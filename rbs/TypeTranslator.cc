@@ -1,4 +1,4 @@
-#include "TypeTranslator.h"
+#include "rbs/TypeTranslator.h"
 #include "ast/Helpers.h"
 #include "core/GlobalState.h"
 #include "core/errors/internal.h"

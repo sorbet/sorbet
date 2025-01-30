@@ -2,7 +2,7 @@
 #define RBS_TYPE_TRANSLATOR_H
 
 #include "ast/ast.h"
-#include "rbs_common.h"
+#include "rbs/rbs_common.h"
 #include <memory>
 
 namespace sorbet::rbs {
