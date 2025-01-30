@@ -353,21 +353,21 @@ pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext 
     if (auto lit = ast::cast_tree<ast::Literal>(name)) {
         if (lit->isSymbol()) {
             res = lit->asSymbol();
+            loc = lit->loc;
             if (!validAttrName(ctx, loc, res)) {
                 return make_pair(core::NameRef::noName(), lit->loc);
             }
 
-            loc = lit->loc;
             ENFORCE(ctx.locAt(loc).exists());
             ENFORCE(ctx.locAt(loc).source(ctx).value().size() > 1 && ctx.locAt(loc).source(ctx).value()[0] == ':');
             loc = core::LocOffsets{loc.beginPos() + 1, loc.endPos()};
         } else if (lit->isString()) {
             res = lit->asString();
+            loc = lit->loc;
             if (!validAttrName(ctx, loc, res)) {
                 return make_pair(core::NameRef::noName(), lit->loc);
             }
 
-            loc = lit->loc;
             DEBUG_ONLY({
                 auto l = ctx.locAt(loc);
                 ENFORCE(l.exists());
