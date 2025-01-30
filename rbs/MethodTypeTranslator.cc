@@ -84,7 +84,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
                         "Function");
         }
 
-        return ast::MK::Untyped(methodType.loc);
+        return ast::MK::EmptyTree();
     }
 
     // Collect type parameters
