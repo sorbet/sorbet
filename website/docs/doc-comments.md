@@ -49,6 +49,19 @@ This works for constants as well:
 X = 42
 ```
 
+It also works for instance variables, as long as they've
+[been declared](type-annotations.md#declaring-class-and-instance-variables) (or
+[had their type inferred](type-annotations.md#limitations-on-instance-variable-inference)):
+
+```ruby
+class A
+  def initialize
+    # Documentation for @foo
+    @foo = T.let(0, Integer)
+  end
+end
+```
+
 ### Markdown support
 
 Sorbet's language server will send documentation in Markdown format if the
@@ -110,6 +123,16 @@ def foo; end
 # This comment IS a documentation comment, because there is no blank line.
 def bar; end
 ```
+
+It doesn't matter whether the doc comment comes before or after a `sig`:
+
+```ruby
+sig { void }
+# This comment IS a documentation comment, even though it's in the middle
+def foo; end
+```
+
+(But the same "no blank line between comment and def" logic applies.)
 
 If something is defined in multiple files, for example once in a Ruby source
 file and once in an [RBI file](rbi.md), or a namespace which is reopened in

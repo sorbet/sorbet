@@ -40,6 +40,10 @@ To get Sorbet working with watchman, there are three options:
     only read files from disk at startup, and afterwards will only see contents
     of files that have been opened or changed in the editor.
 
+Note that watchman requires a project to be version controlled (e.g. have a
+`.git` folder in the project root) or have a `.watchmanconfig` file at the root
+of the project. Without one of these, watchman will not start successfully.
+
 "Why watchman?" See [A note on watchman](#a-note-on-watchman) below.
 
 ### A single input directory
