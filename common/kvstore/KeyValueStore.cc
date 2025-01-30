@@ -191,7 +191,7 @@ int OwnedKeyValueStore::commit() {
     int rc = 0;
     for (auto &txn : txnState->readers) {
         auto rci = mdb_txn_commit(txn.second);
-        if (rc != 0) {
+        if (rc == 0) {
             // Take the first non-zero rc
             rc = rci;
         }
