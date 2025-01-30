@@ -13,9 +13,9 @@ bool hasTypeParam(core::MutableContext ctx, std::vector<std::pair<core::LocOffse
     return absl::c_any_of(typeParams, [&](const auto &param) { return param.second.toString(ctx.state) == name; });
 }
 
-sorbet::ast::ExpressionPtr typeNameType(core::MutableContext ctx,
-                                        std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
-                                        rbs_typename_t *typeName, bool isGeneric, core::LocOffsets loc) {
+ast::ExpressionPtr typeNameType(core::MutableContext ctx,
+                                std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                rbs_typename_t *typeName, bool isGeneric, core::LocOffsets loc) {
     rbs_node_list *typePath = typeName->rbs_namespace->path;
 
     ast::ExpressionPtr parent;
@@ -64,9 +64,9 @@ sorbet::ast::ExpressionPtr typeNameType(core::MutableContext ctx,
     return ast::MK::UnresolvedConstant(loc, std::move(parent), nameConstant);
 }
 
-sorbet::ast::ExpressionPtr classInstanceType(core::MutableContext ctx,
-                                             std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
-                                             rbs_types_classinstance_t *node, core::LocOffsets loc) {
+ast::ExpressionPtr classInstanceType(core::MutableContext ctx,
+                                     std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                     rbs_types_classinstance_t *node, core::LocOffsets loc) {
     auto offsets = TypeTranslator::nodeLoc(loc, (rbs_node_t *)node);
     auto argsValue = node->args;
     auto isGeneric = argsValue != nullptr && argsValue->length > 0;
@@ -86,17 +86,17 @@ sorbet::ast::ExpressionPtr classInstanceType(core::MutableContext ctx,
     return typeConstant;
 }
 
-sorbet::ast::ExpressionPtr classSingletonType(core::MutableContext ctx,
-                                              std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
-                                              rbs_types_classsingleton_t *node, core::LocOffsets loc) {
+ast::ExpressionPtr classSingletonType(core::MutableContext ctx,
+                                      std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                      rbs_types_classsingleton_t *node, core::LocOffsets loc) {
     auto offsets = TypeTranslator::nodeLoc(loc, (rbs_node_t *)node);
     auto innerType = typeNameType(ctx, typeParams, node->name, false, offsets);
     return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::classOf(), loc, std::move(innerType));
 }
 
-sorbet::ast::ExpressionPtr unionType(core::MutableContext ctx,
-                                     std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
-                                     rbs_types_union_t *node, core::LocOffsets loc) {
+ast::ExpressionPtr unionType(core::MutableContext ctx,
+                             std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                             rbs_types_union_t *node, core::LocOffsets loc) {
     auto typesStore = ast::Send::ARGS_store();
 
     for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
@@ -107,9 +107,9 @@ sorbet::ast::ExpressionPtr unionType(core::MutableContext ctx,
     return ast::MK::Any(loc, std::move(typesStore));
 }
 
-sorbet::ast::ExpressionPtr intersectionType(core::MutableContext ctx,
-                                            std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
-                                            rbs_types_intersection_t *node, core::LocOffsets loc) {
+ast::ExpressionPtr intersectionType(core::MutableContext ctx,
+                                    std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                    rbs_types_intersection_t *node, core::LocOffsets loc) {
     auto typesStore = ast::Send::ARGS_store();
 
     for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
@@ -120,9 +120,9 @@ sorbet::ast::ExpressionPtr intersectionType(core::MutableContext ctx,
     return ast::MK::All(loc, std::move(typesStore));
 }
 
-sorbet::ast::ExpressionPtr optionalType(core::MutableContext ctx,
-                                        std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
-                                        rbs_types_optional_t *node, core::LocOffsets loc) {
+ast::ExpressionPtr optionalType(core::MutableContext ctx,
+                                std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                rbs_types_optional_t *node, core::LocOffsets loc) {
     auto innerType = TypeTranslator::toRBI(ctx, typeParams, node->type, loc);
 
     if (ast::MK::isTUntyped(innerType)) {
@@ -132,7 +132,7 @@ sorbet::ast::ExpressionPtr optionalType(core::MutableContext ctx,
     return ast::MK::Nilable(loc, std::move(innerType));
 }
 
-sorbet::ast::ExpressionPtr voidType(core::MutableContext ctx, rbs_types_bases_void_t *node, core::LocOffsets loc) {
+ast::ExpressionPtr voidType(core::MutableContext ctx, rbs_types_bases_void_t *node, core::LocOffsets loc) {
     auto cSorbet = ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Sorbet());
     auto cPrivate = ast::MK::UnresolvedConstant(loc, std::move(cSorbet), core::Names::Constants::Private());
     auto cStatic = ast::MK::UnresolvedConstant(loc, std::move(cPrivate), core::Names::Constants::Static());
@@ -140,9 +140,9 @@ sorbet::ast::ExpressionPtr voidType(core::MutableContext ctx, rbs_types_bases_vo
     return ast::MK::UnresolvedConstant(loc, std::move(cStatic), core::Names::Constants::Void());
 }
 
-sorbet::ast::ExpressionPtr functionType(core::MutableContext ctx,
-                                        std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
-                                        rbs_types_function_t *node, core::LocOffsets loc) {
+ast::ExpressionPtr functionType(core::MutableContext ctx,
+                                std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                rbs_types_function_t *node, core::LocOffsets loc) {
     auto paramsStore = ast::Send::ARGS_store();
     int i = 0;
     for (rbs_node_list_node *list_node = node->required_positionals->head; list_node != nullptr;
@@ -151,7 +151,7 @@ sorbet::ast::ExpressionPtr functionType(core::MutableContext ctx,
         paramsStore.emplace_back(ast::MK::Symbol(loc, argName));
 
         rbs_node_t *paramNode = list_node->node;
-        sorbet::ast::ExpressionPtr innerType;
+        ast::ExpressionPtr innerType;
 
         if (paramNode->type != RBS_TYPES_FUNCTION_PARAM) {
             if (auto e = ctx.beginError(loc, core::errors::Internal::InternalError)) {
@@ -178,9 +178,9 @@ sorbet::ast::ExpressionPtr functionType(core::MutableContext ctx,
     return ast::MK::T_Proc(loc, std::move(paramsStore), std::move(returnType));
 }
 
-sorbet::ast::ExpressionPtr procType(core::MutableContext ctx,
-                                    std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
-                                    rbs_types_proc_t *node, core::LocOffsets docLoc) {
+ast::ExpressionPtr procType(core::MutableContext ctx,
+                            std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams, rbs_types_proc_t *node,
+                            core::LocOffsets docLoc) {
     auto loc = TypeTranslator::nodeLoc(docLoc, (rbs_node_t *)node);
     auto function = ast::MK::Untyped(loc);
 
@@ -212,9 +212,9 @@ sorbet::ast::ExpressionPtr procType(core::MutableContext ctx,
     return function;
 }
 
-sorbet::ast::ExpressionPtr blockType(core::MutableContext ctx,
-                                     std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
-                                     rbs_types_block_t *node, core::LocOffsets docLoc) {
+ast::ExpressionPtr blockType(core::MutableContext ctx,
+                             std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                             rbs_types_block_t *node, core::LocOffsets docLoc) {
     auto loc = TypeTranslator::nodeLoc(docLoc, (rbs_node_t *)node);
     auto function = ast::MK::Untyped(loc);
 
@@ -252,9 +252,9 @@ sorbet::ast::ExpressionPtr blockType(core::MutableContext ctx,
     return function;
 }
 
-sorbet::ast::ExpressionPtr tupleType(core::MutableContext ctx,
-                                     std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
-                                     rbs_types_tuple_t *node, core::LocOffsets loc) {
+ast::ExpressionPtr tupleType(core::MutableContext ctx,
+                             std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                             rbs_types_tuple_t *node, core::LocOffsets loc) {
     auto typesStore = ast::Array::ENTRY_store();
 
     for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
@@ -265,9 +265,9 @@ sorbet::ast::ExpressionPtr tupleType(core::MutableContext ctx,
     return ast::MK::Array(loc, std::move(typesStore));
 }
 
-sorbet::ast::ExpressionPtr recordType(core::MutableContext ctx,
-                                      std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
-                                      rbs_types_record_t *node, core::LocOffsets loc) {
+ast::ExpressionPtr recordType(core::MutableContext ctx,
+                              std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                              rbs_types_record_t *node, core::LocOffsets loc) {
     auto keysStore = ast::Hash::ENTRY_store();
     auto valuesStore = ast::Hash::ENTRY_store();
 
@@ -314,7 +314,7 @@ sorbet::ast::ExpressionPtr recordType(core::MutableContext ctx,
     return ast::MK::Hash(loc, std::move(keysStore), std::move(valuesStore));
 }
 
-sorbet::ast::ExpressionPtr variableType(core::MutableContext ctx, rbs_types_variable_t *node, core::LocOffsets loc) {
+ast::ExpressionPtr variableType(core::MutableContext ctx, rbs_types_variable_t *node, core::LocOffsets loc) {
     rbs_ast_symbol_t *symbol = (rbs_ast_symbol_t *)node->name;
     rbs_constant_t *constant = rbs_constant_pool_id_to_constant(fake_constant_pool, symbol->constant_id);
     std::string_view string(constant->start, constant->length);
@@ -332,9 +332,9 @@ core::LocOffsets TypeTranslator::nodeLoc(core::LocOffsets offset, rbs_node_t *no
     };
 }
 
-sorbet::ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
-                                                 std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
-                                                 rbs_node_t *node, core::LocOffsets docLoc) {
+ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
+                                         std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                         rbs_node_t *node, core::LocOffsets docLoc) {
     switch (node->type) {
         case RBS_TYPES_ALIAS: {
             auto loc = TypeTranslator::nodeLoc(docLoc, node);
