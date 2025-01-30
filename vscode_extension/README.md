@@ -1,5 +1,22 @@
 # Ruby Sorbet for VS Code
 
+## Features
+
+This extension provides language-aware IDE features for Ruby projects that use
+Sorbet. It includes features like the following:
+
+- Diagnostics (errors) that update as you type
+- Hover tooltips, to show types and documentation
+- Go to Definition/Find All References support
+- Autocompletion
+- Code Actions for refactoring
+- Quick Fixes for errors
+
+For a full list of features, see the "Editor Features" section of
+[the Sorbet docs](https://sorbet.org/docs/vscode).
+
+## Documentation
+
 This extension only works in projects that have adopted Sorbet. For
 instructions, see here:
 
@@ -9,9 +26,9 @@ The docs for the Sorbet extension for VS Code live here:
 
 - <https://sorbet.org/docs/vscode>
 
-The Sorbet extension for VS Code is powered by the [language server
-protocol](https://microsoft.github.io/language-server-protocol/) (LSP). Sorbet's
-support for LSP is documented here:
+The Sorbet extension for VS Code is powered by the
+[language server protocol](https://microsoft.github.io/language-server-protocol/)
+(LSP). Sorbet's support for LSP is documented here:
 
 - <https://sorbet.org/docs/lsp>
 
