@@ -217,9 +217,8 @@ public:
         return make_expression<UnresolvedConstantLit>(loc, std::move(scope), name);
     }
 
-    static ExpressionPtr UnresolvedConstantParts(core::LocOffsets loc, ExpressionPtr scope,
-                                                 const std::vector<core::NameRef> &parts) {
-        auto result = std::move(scope);
+    static ExpressionPtr UnresolvedConstantParts(core::LocOffsets loc, const std::vector<core::NameRef> &parts) {
+        auto result = EmptyTree();
         for (const auto part : parts) {
             result = UnresolvedConstant(loc, std::move(result), part);
         }
@@ -410,8 +409,7 @@ public:
     }
 
     static ExpressionPtr T_Boolean(core::LocOffsets loc) {
-        return UnresolvedConstantParts(loc, EmptyTree(),
-                                       {core::Names::Constants::T(), core::Names::Constants::Boolean()});
+        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Boolean()});
     }
 
     static ExpressionPtr ZSuper(core::LocOffsets loc, core::NameRef method) {
