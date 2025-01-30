@@ -255,10 +255,24 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
 sorbet::ast::ExpressionPtr MethodTypeTranslator::attrSignature(core::MutableContext ctx, sorbet::ast::Send *send,
                                                                Type attrType) {
     auto typeParams = std::vector<std::pair<core::LocOffsets, core::NameRef>>();
-    auto sigBuilder = ast::MK::Self(attrType.loc);
+    auto sigBuilder = ast::MK::Self(attrType.loc.copyWithZeroLength());
 
     if (send->fun == core::Names::attrWriter()) {
-        ENFORCE(send->numPosArgs() >= 1);
+        if (send->numPosArgs() == 0) {
+            if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::RBSUnsupported)) {
+                e.setHeader("RBS signatures do not support attr_writer without arguments");
+            }
+
+            return ast::MK::EmptyTree();
+        }
+
+        if (send->numPosArgs() > 1) {
+            if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::RBSUnsupported)) {
+                e.setHeader("RBS signatures for attr_writer do not support multiple arguments");
+            }
+
+            return ast::MK::EmptyTree();
+        }
 
         // For attr writer, we need to add the param to the sig
         auto name = rewriter::ASTUtil::getAttrName(ctx, send->fun, send->getPosArg(0));
