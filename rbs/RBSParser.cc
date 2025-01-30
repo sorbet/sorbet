@@ -3,13 +3,16 @@
 
 namespace sorbet::rbs {
 
-std::optional<MethodType> RBSParser::parseSignature(core::Context ctx, Comment comment) {
-    rbs_string_t rbsString = {
-        .start = comment.string.data(),
-        .end = comment.string.data() + comment.string.size(),
+rbs_string_t makeRBSString(const std::string_view &str) {
+    return {
+        .start = str.data(),
+        .end = str.data() + str.size(),
         .type = rbs_string_t::RBS_STRING_SHARED,
     };
+}
 
+std::optional<MethodType> RBSParser::parseSignature(core::Context ctx, Comment comment) {
+    rbs_string_t rbsString = makeRBSString(comment.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
     auto lexer = std::unique_ptr<lexstate, void (*)(lexstate *)>(
@@ -38,12 +41,7 @@ std::optional<MethodType> RBSParser::parseSignature(core::Context ctx, Comment c
 }
 
 std::optional<Type> RBSParser::parseType(core::Context ctx, Comment comment) {
-    rbs_string_t rbsString = {
-        .start = comment.string.data(),
-        .end = comment.string.data() + comment.string.size(),
-        .type = rbs_string_t::RBS_STRING_SHARED,
-    };
-
+    rbs_string_t rbsString = makeRBSString(comment.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
     auto lexer = std::unique_ptr<lexstate, void (*)(lexstate *)>(
