@@ -4,8 +4,6 @@
 #include "core/errors/internal.h"
 #include "core/errors/rewriter.h"
 
-using namespace sorbet::ast;
-
 namespace sorbet::rbs {
 
 namespace {
@@ -75,7 +73,7 @@ sorbet::ast::ExpressionPtr classInstanceType(core::MutableContext ctx,
     auto typeConstant = typeNameType(ctx, typeParams, node->name, isGeneric, offsets);
 
     if (isGeneric) {
-        auto argsStore = Send::ARGS_store();
+        auto argsStore = ast::Send::ARGS_store();
         for (rbs_node_list_node *list_node = argsValue->head; list_node != nullptr; list_node = list_node->next) {
             auto argType = TypeTranslator::toRBI(ctx, typeParams, list_node->node, loc);
             argsStore.emplace_back(std::move(argType));
@@ -99,7 +97,7 @@ sorbet::ast::ExpressionPtr classSingletonType(core::MutableContext ctx,
 sorbet::ast::ExpressionPtr unionType(core::MutableContext ctx,
                                      std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
                                      rbs_types_union_t *node, core::LocOffsets loc) {
-    auto typesStore = Send::ARGS_store();
+    auto typesStore = ast::Send::ARGS_store();
 
     for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
         auto innerType = TypeTranslator::toRBI(ctx, typeParams, list_node->node, loc);
@@ -112,7 +110,7 @@ sorbet::ast::ExpressionPtr unionType(core::MutableContext ctx,
 sorbet::ast::ExpressionPtr intersectionType(core::MutableContext ctx,
                                             std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
                                             rbs_types_intersection_t *node, core::LocOffsets loc) {
-    auto typesStore = Send::ARGS_store();
+    auto typesStore = ast::Send::ARGS_store();
 
     for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
         auto innerType = TypeTranslator::toRBI(ctx, typeParams, list_node->node, loc);
@@ -145,7 +143,7 @@ sorbet::ast::ExpressionPtr voidType(core::MutableContext ctx, rbs_types_bases_vo
 sorbet::ast::ExpressionPtr functionType(core::MutableContext ctx,
                                         std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
                                         rbs_types_function_t *node, core::LocOffsets loc) {
-    auto paramsStore = Send::ARGS_store();
+    auto paramsStore = ast::Send::ARGS_store();
     int i = 0;
     for (rbs_node_list_node *list_node = node->required_positionals->head; list_node != nullptr;
          list_node = list_node->next) {
@@ -257,7 +255,7 @@ sorbet::ast::ExpressionPtr blockType(core::MutableContext ctx,
 sorbet::ast::ExpressionPtr tupleType(core::MutableContext ctx,
                                      std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
                                      rbs_types_tuple_t *node, core::LocOffsets loc) {
-    auto typesStore = Array::ENTRY_store();
+    auto typesStore = ast::Array::ENTRY_store();
 
     for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
         auto innerType = TypeTranslator::toRBI(ctx, typeParams, list_node->node, loc);
@@ -270,8 +268,8 @@ sorbet::ast::ExpressionPtr tupleType(core::MutableContext ctx,
 sorbet::ast::ExpressionPtr recordType(core::MutableContext ctx,
                                       std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
                                       rbs_types_record_t *node, core::LocOffsets loc) {
-    auto keysStore = Hash::ENTRY_store();
-    auto valuesStore = Hash::ENTRY_store();
+    auto keysStore = ast::Hash::ENTRY_store();
+    auto valuesStore = ast::Hash::ENTRY_store();
 
     for (rbs_hash_node_t *hash_node = node->all_fields->head; hash_node != nullptr; hash_node = hash_node->next) {
         switch (hash_node->key->type) {

@@ -8,8 +8,6 @@
 #include "rbs/TypeTranslator.h"
 #include "rewriter/util/Util.h"
 
-using namespace sorbet::ast;
-
 namespace sorbet::rbs {
 
 namespace {
@@ -159,7 +157,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
         args.emplace_back(arg);
     }
 
-    Send::ARGS_store sigParams;
+    ast::Send::ARGS_store sigParams;
     sigParams.reserve(args.size() * 2);
 
     for (int i = 0; i < args.size(); i++) {
@@ -202,7 +200,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
             sigBuilder =
                 ast::MK::Send0(annotation.loc, std::move(sigBuilder), core::Names::override_(), annotation.loc);
         } else if (annotation.string == "override(allow_incompatible: true)") {
-            Send::ARGS_store overrideArgs;
+            ast::Send::ARGS_store overrideArgs;
             overrideArgs.emplace_back(ast::MK::Symbol(annotation.loc, core::Names::allowIncompatible()));
             overrideArgs.emplace_back(ast::MK::True(annotation.loc));
             sigBuilder = ast::MK::Send(annotation.loc, std::move(sigBuilder), core::Names::override_(), annotation.loc,
@@ -211,7 +209,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
     }
 
     if (typeParams.size() > 0) {
-        Send::ARGS_store typeParamsStore;
+        ast::Send::ARGS_store typeParamsStore;
         typeParamsStore.reserve(typeParams.size());
 
         for (auto &param : typeParams) {
@@ -236,7 +234,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
                                     std::move(returnType));
     }
 
-    auto sigArgs = Send::ARGS_store();
+    auto sigArgs = ast::Send::ARGS_store();
     sigArgs.emplace_back(ast::MK::Constant(methodType.loc, core::Symbols::T_Sig_WithoutRuntime()));
     if (isFinal) {
         sigArgs.emplace_back(ast::MK::Symbol(methodType.loc, core::Names::final_()));
@@ -276,7 +274,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::attrSignature(core::MutableCont
 
         // For attr writer, we need to add the param to the sig
         auto name = rewriter::ASTUtil::getAttrName(ctx, send->fun, send->getPosArg(0));
-        Send::ARGS_store sigArgs;
+        ast::Send::ARGS_store sigArgs;
         sigArgs.emplace_back(ast::MK::Symbol(name.second, name.first));
         sigArgs.emplace_back(TypeTranslator::toRBI(ctx, typeParams, attrType.node.get(), attrType.loc));
         sigBuilder = ast::MK::Send(attrType.loc, std::move(sigBuilder), core::Names::params(), attrType.loc, 0,
