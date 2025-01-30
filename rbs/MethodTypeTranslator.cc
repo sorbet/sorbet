@@ -40,6 +40,10 @@ struct RBSArg {
 };
 
 void collectArgs(core::MutableContext ctx, core::LocOffsets docLoc, rbs_node_list_t *field, std::vector<RBSArg> &args) {
+    if (field == nullptr || field->length == 0) {
+        return;
+    }
+
     for (rbs_node_list_node_t *list_node = field->head; list_node != nullptr; list_node = list_node->next) {
         ENFORCE(list_node->node->type == RBS_TYPES_FUNCTION_PARAM,
                 "Unexpected node type `{}` in function parameter list, expected `{}`",
@@ -53,6 +57,10 @@ void collectArgs(core::MutableContext ctx, core::LocOffsets docLoc, rbs_node_lis
 }
 
 void collectKeywords(core::MutableContext ctx, core::LocOffsets docLoc, rbs_hash_t *field, std::vector<RBSArg> &args) {
+    if (field == nullptr) {
+        return;
+    }
+
     for (rbs_hash_node_t *hash_node = field->head; hash_node != nullptr; hash_node = hash_node->next) {
         ENFORCE(hash_node->key->type == RBS_AST_SYMBOL,
                 "Unexpected node type `{}` in keyword argument name, expected `{}`", rbs_node_type_name(hash_node->key),
@@ -109,11 +117,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
     std::vector<RBSArg> args;
 
     collectArgs(ctx, methodType.loc, functionType->required_positionals, args);
-
-    rbs_node_list_t *optionalPositionals = functionType->optional_positionals;
-    if (optionalPositionals && optionalPositionals->length > 0) {
-        collectArgs(ctx, methodType.loc, optionalPositionals, args);
-    }
+    collectArgs(ctx, methodType.loc, functionType->optional_positionals, args);
 
     rbs_node_t *restPositionals = functionType->rest_positionals;
     if (restPositionals) {
@@ -127,10 +131,7 @@ sorbet::ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableCo
         args.emplace_back(arg);
     }
 
-    rbs_node_list_t *trailingPositionals = functionType->trailing_positionals;
-    if (trailingPositionals && trailingPositionals->length > 0) {
-        collectArgs(ctx, methodType.loc, trailingPositionals, args);
-    }
+    collectArgs(ctx, methodType.loc, functionType->trailing_positionals, args);
 
     // Collect keywords
 
