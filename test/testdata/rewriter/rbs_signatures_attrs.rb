@@ -19,6 +19,10 @@ class Foo
   #: Integer
   attr_writer # error: RBS signatures do not support attr_writer without arguments
 
+  #: -> Integer
+  #  ^^ error: Failed to parse RBS type (unexpected token for simple type)
+  attr_reader :quux3 # error: The method `quux3` does not have a `sig`
+
   #: -> void
   def initialize
     @foo = T.let(1, Integer)
@@ -27,6 +31,7 @@ class Foo
     @qux = T.let(4, T.nilable(Integer))
     @quux1 = T.let(5, Integer)
     @quux2 = T.let(6, Integer)
+    @quux3 = T.let(7, Integer)
   end
 end
 
