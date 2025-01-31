@@ -102,6 +102,7 @@ compilation_database(
         "//resolver:resolver",
         "//resolver/type_syntax:type_syntax",
         "//rewriter:rewriter",
+        "//rewriter/util:util",
         "//sorbet_version:sorbet_version",
         "//test:backtrace-test-error",
         "//test:backtrace-test-raise",

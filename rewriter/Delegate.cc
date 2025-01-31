@@ -1,7 +1,7 @@
 #include "rewriter/Delegate.h"
 #include "ast/Helpers.h"
 #include "core/GlobalState.h"
-#include "rewriter/Util.h"
+#include "rewriter/util/Util.h"
 #include <optional>
 
 using namespace std;

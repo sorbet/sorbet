@@ -31,7 +31,7 @@ test/cli/errors-skip-cache/atoi.rb:3: Unsupported integer literal: `368934881474
         ^^^^^^^^^^^^^^^^^^^^
 Errors: 1
 ====first run (cold cache)====
-test/cli/errors-skip-cache/attributes.rb:6: Bad attribute name "bad attribute name" https://srb.help/3501
+test/cli/errors-skip-cache/attributes.rb:6: Bad attribute name `bad attribute name` https://srb.help/3501
      6 |  attr "bad attribute name"
                ^^^^^^^^^^^^^^^^^^^^
 
@@ -40,7 +40,7 @@ test/cli/errors-skip-cache/attributes.rb:8: The type for an `attr` cannot contai
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 2
 ====second run (warm cache)====
-test/cli/errors-skip-cache/attributes.rb:6: Bad attribute name "bad attribute name" https://srb.help/3501
+test/cli/errors-skip-cache/attributes.rb:6: Bad attribute name `bad attribute name` https://srb.help/3501
      6 |  attr "bad attribute name"
                ^^^^^^^^^^^^^^^^^^^^
 

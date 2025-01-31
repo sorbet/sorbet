@@ -1,8 +1,8 @@
-#include "rewriter/Util.h"
+#include "rewriter/util/Util.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/core.h"
-#include "rewriter/rewriter.h"
+#include "core/errors/rewriter.h"
 
 using namespace std;
 
@@ -321,6 +321,72 @@ ast::ExpressionPtr ASTUtil::thunkBody(core::MutableContext ctx, ast::ExpressionP
         return nullptr;
     }
     return std::move(block->body);
+}
+
+namespace {
+
+bool validAttrName(core::MutableContext ctx, core::LocOffsets loc, core::NameRef name) {
+    auto shortName = name.shortName(ctx);
+
+    auto validName = !shortName.empty() && (isalpha(shortName.front()) || shortName.front() == '_') &&
+                     absl::c_all_of(shortName, [](char c) { return isalnum(c) || c == '_'; });
+
+    if (!validName) {
+        if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::BadAttrArg)) {
+            if (shortName.empty()) {
+                e.setHeader("Attribute names must be non-empty");
+            } else {
+                e.setHeader("Bad attribute name `{}`", shortName);
+            }
+        }
+    }
+
+    return validName;
+}
+
+} // namespace
+
+pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext ctx, core::NameRef attrFun,
+                                                           const ast::ExpressionPtr &name) {
+    core::LocOffsets loc;
+    core::NameRef res;
+    if (auto lit = ast::cast_tree<ast::Literal>(name)) {
+        if (lit->isSymbol()) {
+            res = lit->asSymbol();
+            loc = lit->loc;
+            if (!validAttrName(ctx, loc, res)) {
+                return make_pair(core::NameRef::noName(), lit->loc);
+            }
+
+            ENFORCE(ctx.locAt(loc).exists());
+            ENFORCE(ctx.locAt(loc).source(ctx).value().size() > 1 && ctx.locAt(loc).source(ctx).value()[0] == ':');
+            loc = core::LocOffsets{loc.beginPos() + 1, loc.endPos()};
+        } else if (lit->isString()) {
+            res = lit->asString();
+            loc = lit->loc;
+            if (!validAttrName(ctx, loc, res)) {
+                return make_pair(core::NameRef::noName(), lit->loc);
+            }
+
+            DEBUG_ONLY({
+                auto l = ctx.locAt(loc);
+                ENFORCE(l.exists());
+                auto source = l.source(ctx).value();
+                ENFORCE(source.size() > 2);
+                auto firstChar = source[0];
+                ENFORCE(firstChar == '"' || firstChar == '\'');
+                auto lastChar = source[source.size() - 1];
+                ENFORCE(lastChar == firstChar);
+            });
+            loc = core::LocOffsets{loc.beginPos() + 1, loc.endPos() - 1};
+        }
+    }
+    if (!res.exists()) {
+        if (auto e = ctx.beginIndexerError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
+            e.setHeader("Argument to `{}` must be a Symbol or String", attrFun.shortName(ctx));
+        }
+    }
+    return make_pair(res, loc);
 }
 
 } // namespace sorbet::rewriter
