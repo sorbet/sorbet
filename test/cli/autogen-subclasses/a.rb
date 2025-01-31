@@ -1,7 +1,10 @@
 # typed: true
 
 module Opus
-  class DupChild < Parent; end
+  class DupChild < Parent
+    def defines_behavior
+    end
+  end
   class Child < Parent; end
   class IgnoredChild < IgnoredParent; end
 end
@@ -25,8 +28,6 @@ class Opus::MixedDescendant # Mixes in Opus::Mixed via Opus::MixedModule
 end
 
 class OtherChild < NonexistentParent; end
-
-class Opus::DupChild < Opus::Parent; end # Only appears once in output
 
 class Opus::Risk::Model::Mixins::RiskSafeMachine; end
 
