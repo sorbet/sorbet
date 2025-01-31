@@ -107,15 +107,7 @@ class LocalNameInserter {
                     named.flags.shadow = true;
                     cursor = &shadow.expr;
                 },
-                [&](const ast::Local &local) {
-                    auto name =
-                        mangleKeyword(ctx, seen, local.loc, named.flags.keyword, local.localVariable._name, pos);
-                    named.name = name;
-                    named.local = enterLocal(name);
-                    named.loc = local.loc;
-                    *cursor = ast::make_expression<ast::Local>(local.loc, named.local);
-                    cursor = nullptr;
-                });
+                [&](const ast::Local &local) { Exception::raise("Local variable found in argument list"); });
         }
 
         named.expr = move(arg);
