@@ -58,6 +58,7 @@
       "server-status",
       "lsp-typed-level",
       "go-to-def",
+      "hover",
       "autocompletion",
       "code-actions",
       "outline",

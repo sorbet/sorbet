@@ -479,45 +479,6 @@ If the errors are not persistent:
 If you arrive at a set of edits that mess up the diagnostics, please file a bug
 on the [issue tracker](https://github.com/sorbet/sorbet/issues).
 
-### Hover
-
-#### When I hover on something, VS Code shows "Loading..."
-
-Is Sorbet still typechecking or initializing? If so, this is expected behavior;
-Sorbet cannot show you type information until it finishes catching up with your
-edits. "Loading..." should get replaced with hover information once the status
-bar displays "Sorbet: Typechecking in background" or "Sorbet: Idle".
-
-#### Hover doesn't work / hover isn't showing information for my file
-
-Is the file untyped (`# typed: false` or `ignore`)? Hover only works in typed
-files. You will need to make your file `# typed: true`.
-
-Does the file have a syntax error? If so, you need to resolve it before hover
-will work again.
-
-If the file is typed, Sorbet is "Idle", and hover isn't working, try to
-reproduce the problem on https://sorbet.run and file a bug on the
-[issue tracker](https://github.com/sorbet/sorbet/issues).
-
-#### Hover is showing incorrect type information for something.
-
-Does your file have a syntax error? If so, resolve it before proceeding.
-
-If the problem persists with your syntax errors fixed, you may have found a bug
-in Sorbet! Check to see if it's in the GitHub issue tracker. If you don't see
-anything relevant there, try to golf the problem down to something small on
-https://sorbet.run and file a bug on the
-[issue tracker](https://github.com/sorbet/sorbet/issues).
-
-Is this an instance or class variable? The variable
-[_must_ be defined with `T.let`](/docs/type-annotations#declaring-class-and-instance-variables),
-and the documentation must precede the `T.let`. Otherwise, Sorbet doesn’t see
-that variable as having ever been defined.
-
-Otherwise, try to reproduce the issue on https://sorbet.run/ and file a bug on
-the [issue tracker](https://github.com/sorbet/sorbet/issues).
-
 ### Find all References
 
 #### Find all References is not working / Find all References is missing some expected results.
