@@ -3052,10 +3052,8 @@ public:
         }
     }
 
-    void postTransformLocal(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &local = ast::cast_tree_nonnull<ast::Local>(tree);
+    void postTransformSelf(core::Context ctx, ast::ExpressionPtr &tree) {
         if (trackDependencies_ && nestedBlockCounts.back() > 0 &&
-            local.localVariable == core::LocalVariable::selfVariable() &&
             !ctx.owner.enclosingClass(ctx).data(ctx)->typeMembers().empty()) {
             dependencies_.emplace_back(ctx.owner);
         }
