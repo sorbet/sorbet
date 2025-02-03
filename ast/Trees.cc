@@ -108,10 +108,7 @@ string ExpressionPtr::toStringWithTabs(const core::GlobalState &gs, int tabs) co
 }
 
 bool ExpressionPtr::isSelfReference() const {
-    if (auto local = cast_tree<Local>(*this)) {
-        return local->localVariable == core::LocalVariable::selfVariable();
-    }
-    return false;
+    return isa_tree<Self>(*this);
 }
 
 void ExpressionPtr::resetToEmpty(EmptyTree *expr) noexcept {
