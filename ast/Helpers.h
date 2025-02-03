@@ -179,7 +179,7 @@ public:
     }
 
     static ExpressionPtr Self(core::LocOffsets loc) {
-        return make_expression<ast::Local>(loc, core::LocalVariable::selfVariable());
+        return make_expression<ast::Self>(loc);
     }
 
     static ExpressionPtr InsSeq(core::LocOffsets loc, InsSeq::STATS_store stats, ExpressionPtr expr) {
