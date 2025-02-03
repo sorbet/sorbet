@@ -10,7 +10,7 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-bool isCommand(core::MutableContext ctx, ast::ClassDef *klass) {
+bool isCommand(const ast::ClassDef *klass) {
     if (klass->kind != ast::ClassDef::Kind::Class || klass->ancestors.empty()) {
         return false;
     }
@@ -36,7 +36,7 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
         return;
     }
 
-    if (!isCommand(ctx, klass)) {
+    if (!isCommand(klass)) {
         return;
     }
 
