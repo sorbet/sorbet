@@ -17,9 +17,7 @@ ClassDef{
       rhs = Rescue{
         body = Send{
           flags = {privateOk}
-          recv = Local{
-            localVariable = <U <self>>
-          }
+          recv = Self
           fun = <U a>
           block = nullptr
           pos_args = 0
@@ -36,9 +34,7 @@ ClassDef{
             }
             body = Send{
               flags = {privateOk}
-              recv = Local{
-                localVariable = <U <self>>
-              }
+              recv = Self
               fun = <U b>
               block = nullptr
               pos_args = 0
@@ -49,9 +45,7 @@ ClassDef{
         ]
         else = Send{
           flags = {privateOk}
-          recv = Local{
-            localVariable = <U <self>>
-          }
+          recv = Self
           fun = <U c>
           block = nullptr
           pos_args = 0
@@ -60,9 +54,7 @@ ClassDef{
         }
         ensure = Send{
           flags = {privateOk}
-          recv = Local{
-            localVariable = <U <self>>
-          }
+          recv = Self
           fun = <U d>
           block = nullptr
           pos_args = 0
@@ -114,18 +106,14 @@ ClassDef{
 
     Send{
       flags = {privateOk}
-      recv = Local{
-        localVariable = <U <self>>
-      }
+      recv = Self
       fun = <U puts>
       block = nullptr
       pos_args = 1
       args = [
         Send{
           flags = {privateOk}
-          recv = Local{
-            localVariable = <U <self>>
-          }
+          recv = Self
           fun = <U foo>
           block = nullptr
           pos_args = 0

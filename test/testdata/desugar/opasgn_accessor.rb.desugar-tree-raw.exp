@@ -21,9 +21,7 @@ ClassDef{
       rhs = [
         Send{
           flags = {privateOk}
-          recv = Local{
-            localVariable = <U <self>>
-          }
+          recv = Self
           fun = <U extend>
           block = nullptr
           pos_args = 1
@@ -40,18 +38,14 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = Local{
-            localVariable = <U <self>>
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
             ]
             body = Send{
               flags = {privateOk}
-              recv = Local{
-                localVariable = <U <self>>
-              }
+              recv = Self
               fun = <U returns>
               block = nullptr
               pos_args = 1
@@ -82,9 +76,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = Local{
-            localVariable = <U <self>>
-          }
+          recv = Self
           fun = <U attr_accessor>
           block = nullptr
           pos_args = 1
