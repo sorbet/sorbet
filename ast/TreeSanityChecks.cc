@@ -247,4 +247,7 @@ void RuntimeMethodDefinition::_sanityCheck() {
     ENFORCE(name.exists());
 }
 
+void Self::_sanityCheck() {
+}
+
 } // namespace sorbet::ast

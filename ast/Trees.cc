@@ -371,6 +371,11 @@ RuntimeMethodDefinition::RuntimeMethodDefinition(core::LocOffsets loc, core::Nam
     _sanityCheck();
 }
 
+Self::Self(core::LocOffsets loc) : loc(loc) {
+    categoryCounterInc("trees", "self");
+    _sanityCheck();
+}
+
 EmptyTree::EmptyTree() : loc(core::LocOffsets::none()) {
     categoryCounterInc("trees", "emptytree");
     _sanityCheck();
@@ -997,6 +1002,14 @@ std::string RuntimeMethodDefinition::showRaw(const core::GlobalState &gs, int ta
     return this->toStringWithTabs(gs, tabs);
 }
 
+std::string Self::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
+    return "<self>";
+}
+
+std::string Self::showRaw(const core::GlobalState &gs, int tabs) const {
+    return "Self";
+}
+
 const ast::Block *Send::block() const {
     if (hasBlock()) {
         auto block = ast::cast_tree<ast::Block>(this->args.back());
@@ -1460,6 +1473,10 @@ string BlockArg::nodeName() const {
 
 string RuntimeMethodDefinition::nodeName() const {
     return "RuntimeMethodDefinition";
+}
+
+string Self::nodeName() const {
+    return "Self";
 }
 
 ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};
