@@ -275,6 +275,7 @@ pipeline_tests(
             "testdata/parser/misc.rb",
             "testdata/parser/offset0.rb",
             "testdata/parser/ruby_25.rb",
+            "testdata/parser/kwargs.rb",
             "testdata/lsp/completion/bad_arguments.rb",
             "testdata/lsp/completion/bad_list_elems.rb",
             "testdata/lsp/completion/case_1.rb",
@@ -283,8 +284,11 @@ pipeline_tests(
             "testdata/lsp/completion/missing_const_name.rb",
             "testdata/lsp/completion/missing_fun.rb",
             "testdata/lsp/completion/self_receiver.rb",
+            "testdata/lsp/duplicate_kwarg.rb",
             "testdata/namer/fuzz_repeated_kwarg.rb",
             "testdata/deviations/keyword_method_names.rb",
+            "testdata/rewriter/minitest_empty_test_each.rb",
+            "testdata/infer/crash_after_parse_errors.rb",
 
             # Sorbets' parser incorrectly accepts invalid syntax
             "testdata/desugar/pattern_matching_hash.rb", # See https://github.com/Shopify/sorbet/issues/362
