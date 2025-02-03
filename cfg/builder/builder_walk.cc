@@ -559,7 +559,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     }
 
                     auto &posArg0 = s.getPosArg(0);
-                    if (!ast::isa_tree<ast::Local>(posArg0) && !ast::isa_tree<ast::UnresolvedIdent>(posArg0)) {
+                    if (!ast::isa_tree<ast::Local>(posArg0) && !ast::isa_tree<ast::UnresolvedIdent>(posArg0) && !ast::isa_tree<ast::Self>(posArg0)) {
                         if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
                             // Providing a send is the most common way T.absurd is misused, so we provide a
                             // little extra hint in the error message in that case.
