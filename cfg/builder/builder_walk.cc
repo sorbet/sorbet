@@ -478,6 +478,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                             make_insn<Ident>(cctx.inWhat.enterLocal(a.localVariable)));
                 ret = current;
             },
+            [&](const ast::Self &a) {
+                current->exprs.emplace_back(cctx.target, a.loc, make_insn<Ident>(LocalRef::selfVariable()));
+                ret = current;
+            },
             [&](ast::Assign &a) {
                 LocalRef lhs;
                 if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a.lhs)) {
