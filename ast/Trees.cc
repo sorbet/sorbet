@@ -51,6 +51,7 @@ namespace sorbet::ast {
         CASE_STATEMENT(CASE_BODY, Block)                   \
         CASE_STATEMENT(CASE_BODY, InsSeq)                  \
         CASE_STATEMENT(CASE_BODY, RuntimeMethodDefinition) \
+        CASE_STATEMENT(CASE_BODY, Self)                    \
     }
 
 void ExpressionPtr::deleteTagged(Tag tag, void *ptr) noexcept {

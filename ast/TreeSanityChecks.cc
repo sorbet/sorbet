@@ -44,6 +44,7 @@ void ExpressionPtr::_sanityCheck() const {
         SANITY_CHECK(Block)
         SANITY_CHECK(InsSeq)
         SANITY_CHECK(RuntimeMethodDefinition)
+        SANITY_CHECK(Self)
     }
 #undef SANITY_CHECK
 }

@@ -1459,6 +1459,12 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             break;
         }
 
+        case ast::Tag::Self: {
+            auto &a = ast::cast_tree_nonnull<ast::Self>(what);
+            pickle(p, a.loc);
+            break;
+        }
+
         default:
             Exception::raise("Unimplemented AST Node: {}", what.nodeName());
             break;
@@ -1725,6 +1731,10 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             NameRef name = unpickleNameRef(p);
             auto isSelfMethod = p.getU1();
             return ast::make_expression<ast::RuntimeMethodDefinition>(loc, name, isSelfMethod);
+        }
+        case ast::Tag::Self: {
+            auto loc = unpickleLocOffsets(p);
+            return ast::make_expression<ast::Self>(loc);
         }
     }
 
