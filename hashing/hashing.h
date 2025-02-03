@@ -49,8 +49,8 @@ public:
      * Note: ASTs are returned in `FileRef` order (not input order).
      */
     static std::vector<ast::ParsedFile>
-    indexAndComputeFileHashes(core::GlobalState &gs, const realmain::options::Options &opts,
-                              spdlog::logger &logger, absl::Span<core::FileRef> files, WorkerPool &workers,
+    indexAndComputeFileHashes(core::GlobalState &gs, const realmain::options::Options &opts, spdlog::logger &logger,
+                              absl::Span<core::FileRef> files, WorkerPool &workers,
                               const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 };
 } // namespace sorbet::hashing
