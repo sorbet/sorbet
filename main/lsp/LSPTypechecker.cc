@@ -92,7 +92,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
             indexed.resize(initialGS->filesUsed());
 
             auto asts = hashing::Hashing::indexAndComputeFileHashes(
-                initialGS, config->opts, *config->logger, absl::Span<core::FileRef>(inputFiles), workers, ownedKvstore);
+                *initialGS, config->opts, *config->logger, absl::Span<core::FileRef>(inputFiles), workers, ownedKvstore);
             // asts are in fref order, but we (currently) don't index and compute file hashes for payload files, so
             // vector index != FileRef ID. Fix that by slotting them into `indexed`.
             for (auto &ast : asts) {
