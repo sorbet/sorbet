@@ -524,18 +524,14 @@ ast::ExpressionPtr prependName(ast::ExpressionPtr scope) {
     return scope;
 }
 
-bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit *cnst) {
-    while (cnst != nullptr) {
-        if (auto scope = ast::cast_tree<ast::ConstantLit>(cnst->scope)) {
-            return scope->symbol == core::Symbols::PackageSpecRegistry();
-        } else if (auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope)) {
-            return startsWithPackageSpecRegistry(scope);
-        } else {
-            return false;
-        }
+bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit &cnst) {
+    if (auto scope = ast::cast_tree<ast::ConstantLit>(cnst.scope)) {
+        return scope->symbol == core::Symbols::PackageSpecRegistry();
+    } else if (auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst.scope)) {
+        return startsWithPackageSpecRegistry(*scope);
+    } else {
+        return false;
     }
-
-    return false;
 }
 
 ast::ExpressionPtr prependRoot(ast::ExpressionPtr scope) {
@@ -1221,7 +1217,7 @@ struct PackageSpecBodyWalk {
             return;
         }
 
-        if (startsWithPackageSpecRegistry(nameTree)) {
+        if (startsWithPackageSpecRegistry(*nameTree)) {
             this->foundFirstPackageSpec = true;
         } else if (this->foundFirstPackageSpec) {
             if (auto e = ctx.beginError(classDef.declLoc, core::errors::Packager::MultiplePackagesInOneFile)) {
