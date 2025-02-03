@@ -166,12 +166,12 @@ void Hashing::computeFileHashes(absl::Span<const shared_ptr<core::File>> files, 
     }
 }
 
-vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::GlobalState> &gs,
+vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(core::GlobalState &gs,
                                                            const realmain::options::Options &opts,
                                                            spdlog::logger &logger, absl::Span<core::FileRef> files,
                                                            WorkerPool &workers,
                                                            const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    auto asts = realmain::pipeline::index(*gs, files, opts, workers, kvstore);
+    auto asts = realmain::pipeline::index(gs, files, opts, workers, kvstore);
     ENFORCE_NO_TIMER(asts.size() == files.size());
 
     // Below, we rewrite ASTs to an empty GlobalState and use them for hashing.
@@ -182,11 +182,10 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
 
     logger.trace("Computing state hashes for {} files", asts.size());
 
-    const core::GlobalState &sharedGs = *gs;
     auto resultq =
         make_shared<BlockingBoundedQueue<vector<pair<core::FileRef, unique_ptr<const core::FileHash>>>>>(asts.size());
     Timer timeit(logger, "computeFileHashes");
-    workers.multiplexJob("lspStateHash", [fileq, resultq, &asts, &sharedGs, &logger, &opts]() {
+    workers.multiplexJob("lspStateHash", [fileq, resultq, &asts, &sharedGs = std::as_const(gs), &logger, &opts]() {
         unique_ptr<Timer> timeit;
         vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
         int processedByThread = 0;
@@ -226,7 +225,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {
                 for (auto &a : threadResult) {
-                    a.first.data(*gs).setFileHash(move(a.second));
+                    a.first.data(gs).setFileHash(move(a.second));
                 }
             }
         }

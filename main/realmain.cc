@@ -689,7 +689,7 @@ int realmain(int argc, char *argv[]) {
                 inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
 
                 if (!opts.storeState.empty() || opts.forceHashing) {
-                    indexed = hashing::Hashing::indexAndComputeFileHashes(gs, opts, *logger, inputPackageFiles,
+                    indexed = hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, inputPackageFiles,
                                                                           *workers, kvstore);
                 } else {
                     indexed = pipeline::index(*gs, inputPackageFiles, opts, *workers, kvstore);
@@ -711,7 +711,7 @@ int realmain(int argc, char *argv[]) {
             auto nonPackageIndexed =
                 (!opts.storeState.empty() || opts.forceHashing)
                     // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
-                    ? hashing::Hashing::indexAndComputeFileHashes(gs, opts, *logger, inputFilesSpan, *workers, kvstore)
+                    ? hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, inputFilesSpan, *workers, kvstore)
                     : pipeline::index(*gs, inputFilesSpan, opts, *workers, kvstore);
 
             // Cache these before any pipeline::package rewrites, so that the cache is still usable
