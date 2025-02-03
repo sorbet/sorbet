@@ -217,6 +217,7 @@ Rescue::Rescue(core::LocOffsets loc, ExpressionPtr body, RESCUE_CASE_store rescu
 
 Local::Local(core::LocOffsets loc, core::LocalVariable localVariable1) : loc(loc), localVariable(localVariable1) {
     categoryCounterInc("trees", "local");
+    ENFORCE(localVariable != core::LocalVariable::selfVariable(), "use a Self node");
     _sanityCheck();
 }
 
