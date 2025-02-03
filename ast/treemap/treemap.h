@@ -97,6 +97,8 @@ public:
     GENERATE_HAS_MEMBER_VISITOR(preTransformLiteral, arg_types, VISITOR_ARG_TYPE(Literal));                 \
     GENERATE_HAS_MEMBER_VISITOR(preTransformRuntimeMethodDefinition, arg_types,                             \
                                 VISITOR_ARG_TYPE(RuntimeMethodDefinition));                                 \
+    GENERATE_HAS_MEMBER_VISITOR(preTransformSelf, arg_types,                                                \
+                                VISITOR_ARG_TYPE(Self));                                                    \
                                                                                                             \
     GENERATE_POSTPONE_PRECLASS(ExpressionPtr, arg_types, VISITOR_ARG_TYPE(ExpressionPtr));                  \
     GENERATE_POSTPONE_PRECLASS(ClassDef, arg_types, VISITOR_ARG_TYPE(ClassDef));                            \
@@ -139,7 +141,8 @@ public:
     GENERATE_POSTPONE_POSTCLASS(Block, arg_types, VISITOR_ARG_TYPE(Block));                                 \
     GENERATE_POSTPONE_POSTCLASS(InsSeq, arg_types, VISITOR_ARG_TYPE(InsSeq));                               \
     GENERATE_POSTPONE_POSTCLASS(Cast, arg_types, VISITOR_ARG_TYPE(Cast));                                   \
-    GENERATE_POSTPONE_POSTCLASS(RuntimeMethodDefinition, arg_types, VISITOR_ARG_TYPE(RuntimeMethodDefinition));
+    GENERATE_POSTPONE_POSTCLASS(RuntimeMethodDefinition, arg_types, VISITOR_ARG_TYPE(RuntimeMethodDefinition)); \
+    GENERATE_POSTPONE_POSTCLASS(Self, arg_types, VISITOR_ARG_TYPE(Self));
 
 // Used to indicate that TreeMap has already reported location for this exception
 struct ReportedRubyException {
@@ -492,6 +495,10 @@ private:
         CALL_POST(RuntimeMethodDefinition);
     }
 
+    return_type mapSelf(arg_type v, CTX ctx) {
+        CALL_POST(Self);
+    }
+
     return_type mapIt(arg_type what, CTX ctx) {
         if (what == nullptr) {
             if constexpr (Kind == TreeMapKind::Map) {
@@ -624,6 +631,9 @@ private:
 
                 case Tag::RuntimeMethodDefinition:
                     return mapRuntimeMethodDefinition(Funcs::pass(what), ctx);
+
+                case Tag::Self:
+                    return mapSelf(Funcs::pass(what), ctx);
             }
         } catch (SorbetException &e) {
             auto loc = what.loc();
