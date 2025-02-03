@@ -119,7 +119,7 @@ void ExpressionPtr::resetToEmpty(EmptyTree *expr) noexcept {
 bool isa_reference(const ExpressionPtr &what) {
     return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<RestArg>(what) ||
            isa_tree<KeywordArg>(what) || isa_tree<OptionalArg>(what) || isa_tree<BlockArg>(what) ||
-           isa_tree<ShadowArg>(what);
+           isa_tree<ShadowArg>(what) || isa_tree<Self>(what);
 }
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64

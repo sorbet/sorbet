@@ -139,6 +139,8 @@ public:
             return make_expression<UnresolvedIdent>(nm->loc, nm->kind, nm->name);
         } else if (auto nm = cast_tree<ast::Local>(name)) {
             return make_expression<ast::Local>(nm->loc, nm->localVariable);
+        } else if (auto self = cast_tree<ast::Self>(name)) {
+            return make_expression<ast::Self>(self->loc);
         }
         Exception::notImplemented();
     }
