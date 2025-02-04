@@ -537,8 +537,8 @@ private:
 
     static core::ClassOrModuleRef stubConstant(core::MutableContext ctx, core::ClassOrModuleRef owner,
                                                ast::ConstantLit *out, bool possibleGenericType) {
-        auto symbol = ctx.state.enterClassSymbol(ctx.locAt(out->loc), owner,
-                                                 ast::cast_tree<ast::UnresolvedConstantLit>(out->original)->cnst);
+        auto symbol = ctx.state.enterClassSymbol(
+            ctx.locAt(out->loc), owner, ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(out->original).cnst);
 
         auto data = symbol.data(ctx);
         data->setIsModule(true); // This is what would happen in finalizeAncestors
@@ -1690,7 +1690,7 @@ public:
         int depth = 0;
         ast::ConstantLit *scope = exp;
         while (scope->original && (scope = ast::cast_tree<ast::ConstantLit>(
-                                       ast::cast_tree<ast::UnresolvedConstantLit>(scope->original)->scope))) {
+                                       ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(scope->original).scope))) {
             depth += 1;
         }
         return depth;

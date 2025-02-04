@@ -320,17 +320,15 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
                 break;
             }
 
-            auto orig = cast_tree<UnresolvedConstantLit>(nested->original);
-            ENFORCE(orig);
-            namesFailedToResolve.emplace_back(orig->cnst);
-            nested = ast::cast_tree<ast::ConstantLit>(orig->scope);
+            auto &orig = cast_tree_nonnull<UnresolvedConstantLit>(nested->original);
+            namesFailedToResolve.emplace_back(orig.cnst);
+            nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
             ENFORCE(nested);
             ENFORCE(nested->symbol == core::Symbols::StubModule());
             ENFORCE(!nested->resolutionScopes->empty());
         }
-        auto orig = cast_tree<UnresolvedConstantLit>(nested->original);
-        ENFORCE(orig);
-        namesFailedToResolve.emplace_back(orig->cnst);
+        auto &orig = cast_tree_nonnull<UnresolvedConstantLit>(nested->original);
+        namesFailedToResolve.emplace_back(orig.cnst);
         absl::c_reverse(namesFailedToResolve);
     }
     auto prefix = nested->resolutionScopes->front();
