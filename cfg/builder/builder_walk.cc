@@ -458,16 +458,16 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 synthesizeExpr(current, cctx.target, a.loc, make_insn<Ident>(aliasName));
 
                 if (a.original) {
-                    auto orig = ast::cast_tree<ast::UnresolvedConstantLit>(a.original);
+                    auto &orig = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(a.original);
                     // Empirically, these are the only two cases we've needed so far to service the
                     // LSP requests we want (hover and completion), but that doesn't mean these are
                     // the **only** we'll ever want.
-                    if (ast::isa_tree<ast::ConstantLit>(orig->scope)) {
+                    if (ast::isa_tree<ast::ConstantLit>(orig.scope)) {
                         LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
-                        current = walk(cctx.withTarget(deadSym), orig->scope, current);
-                    } else if (ast::isa_tree<ast::Send>(orig->scope)) {
+                        current = walk(cctx.withTarget(deadSym), orig.scope, current);
+                    } else if (ast::isa_tree<ast::Send>(orig.scope)) {
                         LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
-                        current = walk(cctx.withTarget(deadSym), orig->scope, current);
+                        current = walk(cctx.withTarget(deadSym), orig.scope, current);
                     }
                 }
 
