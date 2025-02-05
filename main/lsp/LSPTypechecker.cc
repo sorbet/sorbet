@@ -298,9 +298,9 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     toTypecheck.erase(std::unique(toTypecheck.begin(), toTypecheck.end()), toTypecheck.end());
 
     config->logger->debug("Running fast path over num_files={}", toTypecheck.size());
-    unique_ptr<ShowOperation> op;
+    std::optional<ShowOperation> op;
     if (toTypecheck.size() > config->opts.lspMaxFilesOnFastPath / 2) {
-        op = make_unique<ShowOperation>(*config, ShowOperation::Kind::FastPath);
+        op.emplace(*config, ShowOperation::Kind::FastPath);
     }
     ENFORCE(gs->errorQueue->isEmpty());
     vector<ast::ParsedFile> updatedIndexed;
@@ -412,7 +412,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
             "runSlowPath can only be called from the typechecker thread.");
 
     auto &logger = config->logger;
-    unique_ptr<ShowOperation> slowPathOp = make_unique<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
+    auto slowPathOp = std::make_optional<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
     Timer timeit(logger, "slow_path");
     ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast || config->disableFastPath);
     ENFORCE(updates.updatedGS.has_value());
@@ -513,8 +513,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
         if (cancelable) {
             // Inform users that Sorbet should be responsive now.
             // Explicitly end previous operation before beginning next operation.
-            slowPathOp = nullptr;
-            slowPathOp = make_unique<ShowOperation>(*config, ShowOperation::Kind::SlowPathNonBlocking);
+            slowPathOp.emplace(*config, ShowOperation::Kind::SlowPathNonBlocking);
         }
         // Report how long the slow path blocks preemption.
         timeit.clone("slow_path.blocking_time");
