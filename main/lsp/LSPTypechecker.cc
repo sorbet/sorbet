@@ -412,7 +412,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
             "runSlowPath can only be called from the typechecker thread.");
 
     auto &logger = config->logger;
-    std::optional<ShowOperation> slowPathOp = ShowOperation(*config, ShowOperation::Kind::SlowPathBlocking);
+    auto slowPathOp = std::make_optional<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
     Timer timeit(logger, "slow_path");
     ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast || config->disableFastPath);
     ENFORCE(updates.updatedGS.has_value());
