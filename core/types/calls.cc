@@ -2950,7 +2950,7 @@ public:
                 core::Types::isSubType(gs, suggestType, core::Types::trueClass())) {
                 suggestType = core::Types::Boolean();
             }
-    
+
             e.setHeader("The {} variable `{}` must be declared using `{}` when specifying `{}`", fieldKind, fieldName,
                         "T.let", "# typed: strict");
             auto replaceLoc = args.argLoc(0);
