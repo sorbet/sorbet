@@ -259,7 +259,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             oldFoundHashesForFiles.emplace(fref, move(fref.data(*gs).getFileHash()->foundHashes));
         }
 
-        gs->replaceFile(fref, file);
+        gs->replaceFile(fref, std::move(file));
         // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
         fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
 
@@ -338,12 +338,12 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 }
 
 namespace {
-ast::ParsedFile updateFile(core::GlobalState &gs, const shared_ptr<core::File> &file, const options::Options &opts) {
+ast::ParsedFile updateFile(core::GlobalState &gs, shared_ptr<core::File> file, const options::Options &opts) {
     core::FileRef fref = gs.findFileByPath(file->path());
     if (fref.exists()) {
-        gs.replaceFile(fref, file);
+        gs.replaceFile(fref, std::move(file));
     } else {
-        fref = gs.enterFile(file);
+        fref = gs.enterFile(std::move(file));
     }
     fref.data(gs).strictLevel = pipeline::decideStrictLevel(gs, fref, opts);
     return pipeline::indexOne(opts, gs, fref);
@@ -438,7 +438,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
             auto &gs = *finalGS;
             core::UnfreezeFileTable fileTableAccess(gs);
             for (auto &file : updates.updatedFiles) {
-                auto parsedFile = updateFile(gs, file, config->opts);
+                auto parsedFile = updateFile(gs, std::move(file), config->opts);
                 if (parsedFile.tree) {
                     indexedCopies.emplace_back(ast::ParsedFile{parsedFile.tree.deepCopy(), parsedFile.file});
                     updatedFiles.insert(parsedFile.file.id());

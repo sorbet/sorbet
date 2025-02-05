@@ -303,11 +303,11 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
             auto fref = initialGS->findFileByPath(file->path());
             if (fref.exists()) {
                 newlyEvictedFiles[fref] = initialGS->getFiles()[fref.id()];
-                initialGS->replaceFile(fref, file);
+                initialGS->replaceFile(fref, std::move(file));
             } else {
                 // This file update adds a new file to GlobalState.
                 update.hasNewFiles = true;
-                fref = initialGS->enterFile(file);
+                fref = initialGS->enterFile(std::move(file));
                 fref.data(*initialGS).strictLevel = pipeline::decideStrictLevel(*initialGS, fref, config->opts);
             }
             frefs.emplace_back(fref);

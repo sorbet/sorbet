@@ -64,7 +64,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     vector<core::FileRef> inputFiles;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
-        auto file = gs->enterFile(string("fuzz.rb"), inputData);
+        auto file = gs->enterFile("fuzz.rb", inputData);
         inputFiles.emplace_back(file);
         file.data(*gs).strictLevel = core::StrictLevel::True;
     }

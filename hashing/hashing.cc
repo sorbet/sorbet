@@ -96,7 +96,7 @@ core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<cor
     lgs->suppressPayloadSuperclassRedefinitionFor = hashingOpts.suppressPayloadSuperclassRedefinitionFor;
     {
         core::UnfreezeFileTable fileTableAccess(*lgs);
-        auto fref = lgs->enterFile(forWhat);
+        auto fref = lgs->enterFile(std::move(forWhat));
         fref.data(*lgs).strictLevel = realmain::pipeline::decideStrictLevel(*lgs, fref, opts());
         return fref;
     }

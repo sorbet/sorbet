@@ -76,11 +76,10 @@ TEST_CASE("NotifiesVSCodeWhenFileHasErrors") {
     auto cs = makeConfig();
     ErrorReporter er(cs);
     auto epoch = 0;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
     core::FileRef fref;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
-        fref = gs->enterFile(file);
+        fref = gs->enterFile(make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch));
     }
     auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
 
@@ -113,11 +112,10 @@ TEST_CASE("ReportsEmptyErrorsToVSCodeIfFilePreviouslyHadErrors") {
     ErrorReporter er(cs);
     auto epoch = 0;
     auto newEpoch = 1;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
     core::FileRef fref;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
-        fref = gs->enterFile(file);
+        fref = gs->enterFile(make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch));
     }
 
     auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
@@ -154,11 +152,10 @@ TEST_CASE("DoesNotReportToVSCodeWhenFileNeverHadErrors") {
     ErrorReporter er(cs);
     auto epoch = 0;
     auto newEpoch = 1;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
     core::FileRef fref;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
-        fref = gs->enterFile(file);
+        fref = gs->enterFile(make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch));
     }
     auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
     vector<unique_ptr<core::Error>> emptyErrorList;
@@ -183,11 +180,10 @@ TEST_CASE("ErrorReporterIgnoresErrorsFromOldEpochs") {
     auto initialEpoch = 0;
     auto slowPathEpoch = 1;
     auto latestEpoch = 2;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, initialEpoch);
     core::FileRef fref;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
-        fref = gs->enterFile(file);
+        fref = gs->enterFile(make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, initialEpoch));
     }
     auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
     vector<unique_ptr<core::Error>> emptyErrorList;
@@ -222,11 +218,10 @@ TEST_CASE("FirstAndLastLatencyReporting") {
     auto cs = makeConfig();
     ErrorReporter er(cs);
     auto epoch = 0;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
     core::FileRef fref;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
-        fref = gs->enterFile(file);
+        fref = gs->enterFile(make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch));
     }
     auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
 
@@ -275,11 +270,10 @@ TEST_CASE("FirstAndLastLatencyAboutEqualWhenNoErrors") {
     auto cs = makeConfig();
     ErrorReporter er(cs);
     auto epoch = 0;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
     core::FileRef fref;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
-        fref = gs->enterFile(file);
+        fref = gs->enterFile(make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch));
     }
 
     vector<unique_ptr<core::Error>> emptyErrorList;
@@ -317,11 +311,10 @@ TEST_CASE("FirstAndLastLatencyNotReportedWhenEpochIsCancelled") {
     auto cs = makeConfig();
     ErrorReporter er(cs);
     auto epoch = 0;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
     core::FileRef fref;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
-        fref = gs->enterFile(file);
+        fref = gs->enterFile(make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch));
     }
     auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
 
@@ -351,14 +344,12 @@ TEST_CASE("filesWithErrorsSince") {
     ErrorReporter er(cs);
     auto epoch = 0;
     auto requestedEpoch = 3;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
-    auto fileWithoutErrors = make_shared<core::File>("bar.rb", "bar", core::File::Type::Normal, epoch);
     core::FileRef fref;
     core::FileRef frefWithoutErrors;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
-        fref = gs->enterFile(file);
-        frefWithoutErrors = gs->enterFile(fileWithoutErrors);
+        fref = gs->enterFile(make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch));
+        frefWithoutErrors = gs->enterFile(make_shared<core::File>("bar.rb", "bar", core::File::Type::Normal, epoch));
     }
 
     vector<unique_ptr<core::Error>> errors;
@@ -396,17 +387,14 @@ TEST_CASE("Global error limit") {
 
     ErrorReporter er(cs);
     auto epoch = 0;
-    auto file1 = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
-    auto file2 = make_shared<core::File>("bar.rb", "bar", core::File::Type::Normal, epoch);
-    auto file3 = make_shared<core::File>("baz.rb", "baz", core::File::Type::Normal, epoch);
     core::FileRef fref1;
     core::FileRef fref2;
     core::FileRef fref3;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
-        fref1 = gs->enterFile(file1);
-        fref2 = gs->enterFile(file2);
-        fref3 = gs->enterFile(file3);
+        fref1 = gs->enterFile(make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch));
+        fref2 = gs->enterFile(make_shared<core::File>("bar.rb", "bar", core::File::Type::Normal, epoch));
+        fref3 = gs->enterFile(make_shared<core::File>("baz.rb", "baz", core::File::Type::Normal, epoch));
     }
 
     vector<unique_ptr<core::Error>> errorsFile1;
