@@ -148,7 +148,7 @@ public:
     /**
      * Returns a copy of the indexed tree that has been run through the incremental resolver.
      */
-    std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs, WorkerPool &workers) const;
+    std::vector<ast::ParsedFile> getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers) const;
 
     /**
      * Returns the currently active GlobalState.
@@ -219,7 +219,7 @@ public:
     std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs) const;
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;
     const ast::ParsedFile &getIndexed(core::FileRef fref) const;
-    std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const;
+    std::vector<ast::ParsedFile> getResolved(absl::Span<const core::FileRef> frefs) const;
     ast::ExpressionPtr getLocalVarTrees(core::FileRef fref) const;
     const core::GlobalState &state() const;
 
