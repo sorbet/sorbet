@@ -38,11 +38,28 @@ class UndoState;
 class LSPTypechecker final {
     /** Contains the ID of the thread responsible for typechecking. */
     std::thread::id typecheckerThreadId;
-    /** GlobalState used for typechecking. */
+    /**
+     * GlobalState used for typechecking. It is replaced during indexing on the slow path, and is always replaced with
+     * a GlobalState that derives from the one created during LSP initialization. This derivation is guaranteed by
+     * passing a copy of that GlobalState to the indexer thread at the end of initialization, and then copying that
+     * GlobalState back over to the typechecker to use as the starting point for the next slow path.
+     */
     std::unique_ptr<core::GlobalState> gs;
-    /** Trees that have been indexed (with initialGS) and can be reused between different runs */
+    /**
+     * Trees that have been indexed with the GlobalState that was originally supplied during initialization
+     * (initialGS). As all values of this->gs will derive from that initial GlobalState, none of these trees will be
+     * re-indexed for subsequent slow path runs. An additional consequence of this->gs deriving from the initialization
+     * value of GlobalState is that they will continue to be valid when used with this->gs (see the comment on this->gs
+     * for an explanation of how this derivation is ensured). Finally, this vector will never be updated after the
+     * indexing done during initialization, and represents a snapshot of the workspace when LSP was started.
+     */
     std::vector<ast::ParsedFile> indexed;
-    /** Trees that have been indexed (with finalGS) and can be reused between different runs */
+    /**
+     * Trees that have been indexed after LSP initialization, which means that they may have names that are not present
+     * in the name table of that original GlobalState (initialGS). This is a sparse diff of indexed trees to
+     * this->indexed, and should be consulted before this->indexed for the most up-to-date view of the workspace. This
+     * lookup strategy is implemented by this->getIndexed. All of the trees in this map are valid to use with this->gs.
+     */
     UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
 
     /** Set only when typechecking is happening on the slow path. Contains all of the state needed to restore
@@ -118,12 +135,13 @@ public:
      */
     ast::ExpressionPtr getLocalVarTrees(core::FileRef fref) const;
     /**
-     * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).
+     * Returns the most up-to-date indexed tree for the file ref. The tree will either come from this->indexed if it has
+     * not been modified since the LSP process has been initialized, or from this->indexedFinalGS if it has been.
      */
     const ast::ParsedFile &getIndexed(core::FileRef fref) const;
 
     /**
-     * Returns the parsed files for the given files, including resolver.
+     * Returns a copy of the indexed tree that has been run through the incremental resolver.
      */
     std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs, WorkerPool &workers) const;
 
