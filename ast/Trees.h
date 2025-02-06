@@ -1137,9 +1137,9 @@ public:
     // For resolved symbols, `resolutionScopes` is null.
     using ResolutionScopes = InlinedVector<core::SymbolRef, 1>;
     std::unique_ptr<ResolutionScopes> resolutionScopes;
-    ExpressionPtr original;
+    std::unique_ptr<UnresolvedConstantLit> original;
 
-    ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, ExpressionPtr original);
+    ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
 
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
