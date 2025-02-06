@@ -8,6 +8,19 @@
 using namespace std;
 
 namespace sorbet::core::packages {
+std::string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level) {
+    switch (level) {
+        case core::packages::StrictDependenciesLevel::False:
+            return "false";
+        case core::packages::StrictDependenciesLevel::Layered:
+            return "layered";
+        case core::packages::StrictDependenciesLevel::LayeredDag:
+            return "layered_dag";
+        case core::packages::StrictDependenciesLevel::Dag:
+            return "dag";
+    }
+}
+
 bool PackageInfo::exists() const {
     return mangledName().exists();
 }
