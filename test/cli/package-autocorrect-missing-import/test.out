@@ -1,23 +1,23 @@
-foo_class.rb:15: Unable to resolve constant `MyClass` https://srb.help/5002
-    15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+foo_class.rb:17: Unable to resolve constant `MyClass` https://srb.help/5002
+    17 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
           ^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    foo_class.rb:15: Replaced with `Class`
-    15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+    foo_class.rb:17: Replaced with `Class`
+    17 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
           ^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: `Class` defined here
     NN |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    foo_class.rb:15: Replaced with `T::Class`
-    15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+    foo_class.rb:17: Replaced with `T::Class`
+    17 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
           ^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#LCENSORED: `T::Class` defined here
       NN |module T::Class
           ^^^^^^^^^^^^^^^
   Autocorrect: Done
-    foo_class.rb:15: Replaced with `Digest::Class`
-    15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+    foo_class.rb:17: Replaced with `Digest::Class`
+    17 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
           ^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/digest.rbi#LCENSORED: `Digest::Class` defined here
       NN |class Digest::Class
@@ -30,8 +30,8 @@ foo_class.rb:7: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    __package.rb:6: Inserted `import Foo::Bar::OtherPackage`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
+    __package.rb:8: Inserted `import Foo::Bar::OtherPackage`
+     8 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
 
 foo_class.rb:8: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
@@ -41,24 +41,49 @@ foo_class.rb:8: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    __package.rb:6: Inserted `import Foo::Bar::OtherPackage`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
+    __package.rb:8: Inserted `import Foo::Bar::OtherPackage`
+     8 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
 
-foo_class.rb:14: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
-    14 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
+foo_class.rb:9: `Foo::Bar::AppPackage::OtherClass` resolves but its package cannot be imported because importing it would cause a layering violation https://srb.help/3718
+     9 |      Foo::Bar::AppPackage::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_package/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::AppPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+foo_class.rb:10: `Foo::Bar::AppPackage::OtherClass` resolves but its package cannot be imported because importing it would cause a layering violation https://srb.help/3718
+    10 |      Bar::AppPackage::OtherClass # resolves via `module Foo`
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_package/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::AppPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+foo_class.rb:16: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
+    16 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     other/__package.rb:3: Exported from package here
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    __package.rb:6: Inserted `import Foo::Bar::OtherPackage`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
+    __package.rb:8: Inserted `import Foo::Bar::OtherPackage`
+     8 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
 
-foo_class.rb:17: `Test::Foo::Bar::OtherPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
-    17 |  Test::Foo::Bar::OtherPackage::TestUtil
+foo_class.rb:19: `Test::Foo::Bar::OtherPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    19 |  Test::Foo::Bar::OtherPackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+foo_class.rb:21: `Foo::Bar::AppPackage::OtherClass` resolves but its package cannot be imported because importing it would cause a layering violation https://srb.help/3718
+    21 |  Foo::Bar::AppPackage::OtherClass # resolves via root
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_package/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::AppPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+foo_class.rb:23: `Test::Foo::Bar::AppPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    23 |  Test::Foo::Bar::AppPackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::OtherPackage::TestUtil
@@ -67,8 +92,8 @@ foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolves but its package
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    __package.rb:6: Inserted `test_import Foo::Bar::OtherPackage`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
+    __package.rb:8: Inserted `test_import Foo::Bar::OtherPackage`
+     8 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
 
 foo.test.rb:6: `Foo::Bar::OtherPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
@@ -78,10 +103,32 @@ foo.test.rb:6: `Foo::Bar::OtherPackage::ImportMeTestOnly` resolves but its packa
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    __package.rb:6: Inserted `test_import Foo::Bar::OtherPackage`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
+    __package.rb:8: Inserted `test_import Foo::Bar::OtherPackage`
+     8 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
-Errors: 7
+
+foo.test.rb:8: `Test::Foo::Bar::AppPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+     8 |  Test::Foo::Bar::AppPackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_package/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::AppPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    __package.rb:8: Inserted `test_import Foo::Bar::AppPackage`
+     8 |  # import Foo::Bar::OtherPackage ## MISSING!
+                                                     ^
+
+foo.test.rb:10: `Foo::Bar::AppPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
+    10 |  Foo::Bar::AppPackage::ImportMeTestOnly
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_package/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::AppPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    __package.rb:8: Inserted `test_import Foo::Bar::AppPackage`
+     8 |  # import Foo::Bar::OtherPackage ## MISSING!
+                                                     ^
+Errors: 13
 
 --------------------------------------------------------------------------
 
@@ -90,6 +137,8 @@ Errors: 7
 # enable-packager: true
 
 class Foo::MyPackage < PackageSpec
+  layer 'lib'
+  strict_dependencies 'layered'
   # import Foo::Bar::OtherPackage ## MISSING!
   import Foo::Bar::OtherPackage
 end

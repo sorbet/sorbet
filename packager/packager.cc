@@ -427,6 +427,27 @@ public:
 
         return imp->type;
     }
+
+    // Is it a layering violation to import otherPkg from this package?
+    bool causesLayeringViolation(const core::packages::PackageDB &packageDB, const PackageInfo &otherPkg) const {
+        if (!otherPkg.layer().has_value()) {
+            return false;
+        }
+
+        return causesLayeringViolation(packageDB, otherPkg.layer().value().first);
+    }
+
+    bool causesLayeringViolation(const core::packages::PackageDB &packageDB, core::NameRef otherPkgLayer) const {
+        if (!layer().has_value()) {
+            return false;
+        }
+
+        auto pkgLayer = layer().value().first;
+        auto pkgLayerIndex = packageDB.layerIndex(pkgLayer);
+        auto otherPkgLayerIndex = packageDB.layerIndex(otherPkgLayer);
+
+        return pkgLayerIndex < otherPkgLayerIndex;
+    }
 };
 
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.
@@ -1691,10 +1712,8 @@ void validateLayering(const core::Context &ctx, const Import &i) {
 
     auto pkgLayer = thisPkg.layer().value().first;
     auto otherPkgLayer = otherPkg.layer().value().first;
-    auto pkgLayerIndex = packageDB.layerIndex(pkgLayer);
-    auto otherPkgLayerIndex = packageDB.layerIndex(otherPkgLayer);
 
-    if (pkgLayerIndex < otherPkgLayerIndex) {
+    if (thisPkg.causesLayeringViolation(packageDB, otherPkgLayer)) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
             e.setHeader("Layering violation: cannot import `{}` (in layer `{}`) from `{}` (in layer `{}`)",
                         otherPkg.show(ctx), otherPkgLayer.show(ctx), thisPkg.show(ctx), pkgLayer.show(ctx));

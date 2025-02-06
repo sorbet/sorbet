@@ -441,11 +441,23 @@ public:
             // We failed to import the package that defines the symbol
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::MissingImport)) {
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                e.setHeader("`{}` resolves but its package is not imported", lit.symbol.show(ctx));
                 bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
-                e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
-                    e.addAutocorrect(std::move(exp.value()));
+                auto strictDepsLevel = this->package.strictDependenciesLevel();
+                bool layeringViolation =
+                    !isTestImport && db.enforceLayering() && strictDepsLevel.has_value() &&
+                    strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&
+                    this->package.causesLayeringViolation(db, pkg);
+                if (layeringViolation) {
+                    e.setHeader("`{}` resolves but its package cannot be imported because "
+                                "importing it would cause a layering violation",
+                                lit.symbol.show(ctx));
+                    e.addErrorLine(pkg.declLoc(), "Exported from package here");
+                } else {
+                    e.setHeader("`{}` resolves but its package is not imported", lit.symbol.show(ctx));
+                    e.addErrorLine(pkg.declLoc(), "Exported from package here");
+                    if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
+                        e.addAutocorrect(std::move(exp.value()));
+                    }
                 }
 
                 if (!ctx.file.data(ctx).isPackaged()) {
