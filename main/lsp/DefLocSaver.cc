@@ -103,7 +103,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
     // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
     auto symbol = symbolBeforeDealias.dealias(ctx);
     while (lit && symbol.exists() && lit->original) {
-        auto &unresolved = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(lit->original);
+        auto &unresolved = *lit->original;
         if (lspQuery.matchesLoc(ctx.locAt(lit->loc)) || lspQuery.matchesSymbol(symbol) ||
             lspQuery.matchesSymbol(symbolBeforeDealias)) {
             // This basically approximates the cfg::Alias case from Environment::processBinding.
