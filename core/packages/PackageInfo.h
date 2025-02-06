@@ -38,6 +38,8 @@ enum class StrictDependenciesLevel {
     Dag,
 };
 
+std::string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level);
+
 struct VisibleTo {
     std::vector<core::NameRef> packageName;
     VisibleToType visibleToType;
