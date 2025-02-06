@@ -41,6 +41,7 @@ public:
     static void pickle(Pickler &p, core::LocOffsets loc);
     static void pickle(Pickler &p, core::Loc loc);
     static void pickle(Pickler &p, shared_ptr<const FileHash> fh);
+    static void pickle(Pickler &p, const ast::UnresolvedConstantLit &lit);
 
     static shared_ptr<File> unpickleFile(UnPickler &p);
     static UTF8Name unpickleUTF8Name(UnPickler &p, GlobalState &gs);
@@ -60,6 +61,7 @@ public:
     static ast::ExpressionPtr unpickleExpr(UnPickler &p, const GlobalState &);
     static NameRef unpickleNameRef(UnPickler &p);
     static unique_ptr<const FileHash> unpickleFileHash(UnPickler &p);
+    static unique_ptr<ast::UnresolvedConstantLit> unpickleUnresolvedConstantLit(UnPickler &p, const GlobalState &gs);
 
     SerializerImpl() = delete;
 };
@@ -1155,6 +1157,12 @@ ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File 
     return SerializerImpl::unpickleExpr(p, gs);
 }
 
+void SerializerImpl::pickle(Pickler &p, const ast::UnresolvedConstantLit &lit) {
+    pickle(p, lit.loc);
+    p.putU4(lit.cnst.rawId());
+    pickle(p, lit.scope);
+}
+
 void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
     if (what == nullptr) {
         p.putU4(0);
@@ -1237,9 +1245,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::UnresolvedConstantLit: {
             auto &a = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(what);
-            pickle(p, a.loc);
-            p.putU4(a.cnst.rawId());
-            pickle(p, a.scope);
+            pickle(p, a);
             break;
         }
 
@@ -1447,7 +1453,12 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             auto &a = ast::cast_tree_nonnull<ast::ConstantLit>(what);
             pickle(p, a.loc);
             p.putU4(a.symbol.rawId());
-            pickle(p, a.original);
+            if (a.original == nullptr) {
+                p.putU4(0);
+            } else {
+                p.putU4(uint32_t(ast::Tag::UnresolvedConstantLit));
+                pickle(p, *a.original);
+            }
             break;
         }
 
@@ -1463,6 +1474,13 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             Exception::raise("Unimplemented AST Node: {}", what.nodeName());
             break;
     }
+}
+
+unique_ptr<ast::UnresolvedConstantLit> SerializerImpl::unpickleUnresolvedConstantLit(UnPickler &p, const GlobalState &gs) {
+    auto loc = unpickleLocOffsets(p);
+    NameRef cnst = unpickleNameRef(p);
+    auto scope = unpickleExpr(p, gs);
+    return std::make_unique<ast::UnresolvedConstantLit>(loc, std::move(scope), cnst);
 }
 
 ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalState &gs) {
@@ -1524,10 +1542,8 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             return ast::MK::If(loc, std::move(cond), std::move(thenp), std::move(elsep));
         }
         case ast::Tag::UnresolvedConstantLit: {
-            auto loc = unpickleLocOffsets(p);
-            NameRef cnst = unpickleNameRef(p);
-            auto scope = unpickleExpr(p, gs);
-            return ast::MK::UnresolvedConstant(loc, std::move(scope), cnst);
+            auto ptr = unpickleUnresolvedConstantLit(p, gs);
+            return ast::ExpressionPtr::fromUnique(std::move(ptr));
         }
         case ast::Tag::Local: {
             auto loc = unpickleLocOffsets(p);
@@ -1717,7 +1733,11 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
         case ast::Tag::ConstantLit: {
             auto loc = unpickleLocOffsets(p);
             auto sym = SymbolRef::fromRaw(p.getU4());
-            auto orig = unpickleExpr(p, gs);
+            auto litTag = p.getU4();
+            std::unique_ptr<ast::UnresolvedConstantLit> orig;
+            if (litTag == uint32_t(ast::Tag::UnresolvedConstantLit)) {
+                orig = unpickleUnresolvedConstantLit(p, gs);
+            }
             return ast::make_expression<ast::ConstantLit>(loc, sym, std::move(orig));
         }
         case ast::Tag::RuntimeMethodDefinition: {
