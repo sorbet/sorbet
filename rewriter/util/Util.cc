@@ -9,7 +9,7 @@ using namespace std;
 namespace sorbet::rewriter {
 
 namespace {
-ast::ExpressionPtr dupUnresolvedConstantLit(const ast::UnresolvedConstantLit *cons) {
+unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::UnresolvedConstantLit *cons) {
     if (!cons) {
         return nullptr;
     }
@@ -17,20 +17,20 @@ ast::ExpressionPtr dupUnresolvedConstantLit(const ast::UnresolvedConstantLit *co
     auto scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cons->scope);
     if (!scopeCnst) {
         if (ast::isa_tree<ast::EmptyTree>(cons->scope)) {
-            return ast::MK::UnresolvedConstant(cons->loc, ast::MK::EmptyTree(), cons->cnst);
+            return make_unique<ast::UnresolvedConstantLit>(cons->loc, ast::MK::EmptyTree(), cons->cnst);
         }
         auto id = ast::cast_tree<ast::ConstantLit>(cons->scope);
         if (id == nullptr) {
             return nullptr;
         }
         ENFORCE(id->symbol == core::Symbols::root());
-        return ast::MK::UnresolvedConstant(cons->loc, ASTUtil::dupType(cons->scope), cons->cnst);
+        return make_unique<ast::UnresolvedConstantLit>(cons->loc, ASTUtil::dupType(cons->scope), cons->cnst);
     }
     auto scope = ASTUtil::dupType(cons->scope);
     if (scope == nullptr) {
         return nullptr;
     }
-    return ast::MK::UnresolvedConstant(cons->loc, std::move(scope), cons->cnst);
+    return make_unique<ast::UnresolvedConstantLit>(cons->loc, std::move(scope), cons->cnst);
 }
 }
 
@@ -86,7 +86,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         if (ident->original && !orig) {
             return nullptr;
         }
-        return ast::make_expression<ast::ConstantLit>(ident->loc, ident->symbol, orig.toUnique<ast::UnresolvedConstantLit>());
+        return ast::make_expression<ast::ConstantLit>(ident->loc, ident->symbol, std::move(orig));
     }
 
     auto arrayLit = ast::cast_tree<ast::Array>(orig);
@@ -130,7 +130,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         return ast::MK::Hash(hashLit->loc, std::move(keys), std::move(values));
     }
 
-    return dupUnresolvedConstantLit(ast::cast_tree<ast::UnresolvedConstantLit>(orig).get());
+    return ast::ExpressionPtr::fromUnique(dupUnresolvedConstantLit(ast::cast_tree<ast::UnresolvedConstantLit>(orig).get()));
 }
 
 bool ASTUtil::hasHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name) {
