@@ -668,8 +668,7 @@ vector<core::NameRef> localNamesForMethod(LSPTypecheckerDelegate &typechecker, c
 
 core::MethodRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const core::Loc queryLoc) {
     const auto &gs = typechecker.state();
-    auto files = vector<core::FileRef>{queryLoc.file()};
-    auto resolved = typechecker.getResolved(files);
+    auto resolved = typechecker.getResolved({queryLoc.file()});
 
     NextMethodFinder nextMethodFinder(queryLoc);
     for (auto &t : resolved) {

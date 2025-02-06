@@ -719,7 +719,7 @@ const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
     return indexed[id];
 }
 
-vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> &frefs, WorkerPool &workers) const {
+vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     vector<ast::ParsedFile> updatedIndexed;
 
@@ -808,7 +808,7 @@ const ast::ParsedFile &LSPTypecheckerDelegate::getIndexed(core::FileRef fref) co
     return typechecker.getIndexed(fref);
 }
 
-std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(const std::vector<core::FileRef> &frefs) const {
+std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(absl::Span<const core::FileRef> frefs) const {
     return typechecker.getResolved(frefs, workers);
 }
 
