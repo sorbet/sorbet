@@ -1308,8 +1308,7 @@ private:
                 }
                 return;
             }
-            ENFORCE(sym.exists() ||
-                    ast::isa_tree<ast::ConstantLit>(cnst->original->scope) ||
+            ENFORCE(sym.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original->scope) ||
                     ast::isa_tree<ast::EmptyTree>(cnst->original->scope));
             if (isSuperclass && sym == core::Symbols::todo()) {
                 // This is the case where the superclass is empty, for example: `class A; end`
@@ -1320,7 +1319,8 @@ private:
             auto loc = ancestor.loc();
             auto enclosingClass = ctx.owner.enclosingClass(ctx);
             auto nw = ast::MK::UnresolvedConstant(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
-            auto out = ast::make_expression<ast::ConstantLit>(loc, enclosingClass, nw.toUnique<ast::UnresolvedConstantLit>());
+            auto out =
+                ast::make_expression<ast::ConstantLit>(loc, enclosingClass, nw.toUnique<ast::UnresolvedConstantLit>());
             job.ancestor = ast::cast_tree<ast::ConstantLit>(out);
             ancestor = std::move(out);
         } else if (ast::isa_tree<ast::EmptyTree>(ancestor)) {
@@ -1336,7 +1336,8 @@ private:
         if (auto c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
             walkUnresolvedConstantLit(ctx, c->scope);
             auto loc = c->loc;
-            auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), tree.toUnique<ast::UnresolvedConstantLit>());
+            auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(),
+                                                              tree.toUnique<ast::UnresolvedConstantLit>());
             auto constant = ast::cast_tree<ast::ConstantLit>(out);
             ConstantResolutionItem job{nesting_, constant};
             if (resolveConstantJob(ctx, job)) {

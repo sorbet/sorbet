@@ -32,7 +32,7 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
     }
     return make_unique<ast::UnresolvedConstantLit>(cons->loc, std::move(scope), cons->cnst);
 }
-}
+} // namespace
 
 ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
     auto send = ast::cast_tree<ast::Send>(orig);
@@ -130,7 +130,8 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         return ast::MK::Hash(hashLit->loc, std::move(keys), std::move(values));
     }
 
-    return ast::ExpressionPtr::fromUnique(dupUnresolvedConstantLit(ast::cast_tree<ast::UnresolvedConstantLit>(orig).get()));
+    return ast::ExpressionPtr::fromUnique(
+        dupUnresolvedConstantLit(ast::cast_tree<ast::UnresolvedConstantLit>(orig).get()));
 }
 
 bool ASTUtil::hasHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name) {

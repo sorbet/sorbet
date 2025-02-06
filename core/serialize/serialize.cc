@@ -1476,7 +1476,8 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
     }
 }
 
-unique_ptr<ast::UnresolvedConstantLit> SerializerImpl::unpickleUnresolvedConstantLit(UnPickler &p, const GlobalState &gs) {
+unique_ptr<ast::UnresolvedConstantLit> SerializerImpl::unpickleUnresolvedConstantLit(UnPickler &p,
+                                                                                     const GlobalState &gs) {
     auto loc = unpickleLocOffsets(p);
     NameRef cnst = unpickleNameRef(p);
     auto scope = unpickleExpr(p, gs);
