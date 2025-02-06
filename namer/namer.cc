@@ -1702,7 +1702,7 @@ class TreeSymbolizer {
         // NameInserter should have created this symbol
         ENFORCE(existing.exists());
 
-        node = ast::make_expression<ast::ConstantLit>(constLit->loc, existing, std::move(node));
+        node = ast::make_expression<ast::ConstantLit>(constLit->loc, existing, node.toUnique<ast::UnresolvedConstantLit>());
         return existing;
     }
 
@@ -1823,7 +1823,7 @@ public:
         core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
         ENFORCE(cnst.exists());
         auto loc = lhs.loc;
-        asgn.lhs = ast::make_expression<ast::ConstantLit>(loc, cnst, std::move(asgn.lhs));
+        asgn.lhs = ast::make_expression<ast::ConstantLit>(loc, cnst, asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
 
         return tree;
     }
@@ -1963,7 +1963,7 @@ public:
         // Simulates how squashNames in handleAssignment also creates a ConstantLit
         // (simpler than squashNames, because type members are not allowed to use any sort of
         // `A::B = type_member` syntax)
-        asgn.lhs = ast::make_expression<ast::ConstantLit>(asgn.lhs.loc(), sym, move(asgn.lhs));
+        asgn.lhs = ast::make_expression<ast::ConstantLit>(asgn.lhs.loc(), sym, asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
 
         if (send->hasKwArgs()) {
             const auto numKwArgs = send->numKwArgs();
