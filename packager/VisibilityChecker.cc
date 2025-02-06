@@ -445,15 +445,41 @@ public:
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                 bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
                 auto strictDepsLevel = this->package.strictDependenciesLevel();
+                auto importStrictDepsLevel = pkg.strictDependenciesLevel();
                 bool layeringViolation =
                     !isTestImport && db.enforceLayering() && strictDepsLevel.has_value() &&
                     strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&
                     this->package.causesLayeringViolation(db, pkg);
-                if (layeringViolation) {
+                bool strictDependenciesTooLow =
+                    !isTestImport && db.enforceLayering() && importStrictDepsLevel.has_value() &&
+                    importStrictDepsLevel.value().first < this->package.minimumStrictDependenciesLevel();
+                // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
+                // layering/strict_dependencies issues.
+                if (layeringViolation && strictDependenciesTooLow) {
                     e.setHeader(
                         "`{}` resolves but its package is not imported. However, it cannot be automatically imported "
-                        "because importing it would cause a layering violation",
-                        lit.symbol().show(ctx));
+                        "because importing it would cause a layering violation and its `{}` is too low",
+                        lit.symbol().show(ctx), "strict_dependencies");
+                } else if (layeringViolation) {
+                    e.setHeader("`{}` resolves but its package is not imported. However, it cannot be automatically "
+                                "imported because importing it would cause a layering violation",
+                                lit.symbol().show(ctx));
+                } else if (strictDependenciesTooLow) {
+                    e.setHeader("`{}` resolves but its package is not imported. However, it cannot be automatically "
+                                "imported  because its `{}` is too low",
+                                lit.symbol().show(ctx), "strict_dependencies");
+                } else {
+                    e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
+                    e.addErrorLine(pkg.declLoc(), "Exported from package here");
+                    if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
+                        e.addAutocorrect(std::move(exp.value()));
+                        if (!db.errorHint().empty()) {
+                            e.addErrorNote("{}", db.errorHint());
+                        }
+                    }
+                }
+
+                if (layeringViolation) {
                     ENFORCE(pkg.layer().has_value(), "causesLayeringViolation should return false if layer is not set");
                     ENFORCE(this->package.layer().has_value(),
                             "causesLayeringViolation should return false if layer is not set");
@@ -462,13 +488,13 @@ public:
                         "Package `{}` must be at most layer `{}` (to match package `{}`) but is currently layer `{}`",
                         pkg.show(ctx), this->package.layer().value().first.show(ctx), this->package.show(ctx),
                         pkg.layer().value().first.show(ctx));
-                    // TODO(neil): link to a doc that would help the user resolve this.
-                } else {
-                    e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
-                    e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                    if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
-                        e.addAutocorrect(std::move(exp.value()));
-                    }
+                }
+
+                if (strictDependenciesTooLow) {
+                    ENFORCE(importStrictDepsLevel.has_value(),
+                            "strictDependenciesTooLow should be false if strict_dependencies level is not set");
+                    e.addErrorLine(core::Loc(pkg.declLoc().file(), importStrictDepsLevel.value().second),
+                                   "`{}`'s `{}` level declared here", pkg.show(ctx), "strict_dependencies");
                 }
 
                 if (!ctx.file.data(ctx).isPackaged()) {
@@ -476,10 +502,6 @@ public:
                         "A `{}` file is allowed to define constants outside of the package's namespace,\n    "
                         "but must still respect its enclosing package's imports.",
                         "# packaged: false");
-                }
-
-                if (!db.errorHint().empty()) {
-                    e.addErrorNote("{}", db.errorHint());
                 }
             }
         } else if (*importType == core::packages::ImportType::Test && !this->insideTestFile) {
