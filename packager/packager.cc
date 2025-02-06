@@ -573,6 +573,23 @@ public:
 
         return pkgLayerIndex < otherPkgLayerIndex;
     }
+
+    // What is the minimum strict dependencies level that this package's imports must have?
+    core::packages::StrictDependenciesLevel minimumStrictDependenciesLevel() const {
+        if (!strictDependenciesLevel().has_value()) {
+            return core::packages::StrictDependenciesLevel::False;
+        }
+
+        switch (strictDependenciesLevel().value().first) {
+            case core::packages::StrictDependenciesLevel::False:
+                return core::packages::StrictDependenciesLevel::False;
+            case core::packages::StrictDependenciesLevel::Layered:
+            case core::packages::StrictDependenciesLevel::LayeredDag:
+                return core::packages::StrictDependenciesLevel::Layered;
+            case core::packages::StrictDependenciesLevel::Dag:
+                return core::packages::StrictDependenciesLevel::Dag;
+        }
+    }
 };
 
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.
@@ -1852,11 +1869,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
         }
     }
 
-    core::packages::StrictDependenciesLevel otherPkgExpectedLevel = core::packages::StrictDependenciesLevel::Layered;
-
-    if (thisPkg.strictDependenciesLevel().value().first == core::packages::StrictDependenciesLevel::Dag) {
-        otherPkgExpectedLevel = core::packages::StrictDependenciesLevel::Dag;
-    }
+    core::packages::StrictDependenciesLevel otherPkgExpectedLevel = thisPkg.minimumStrictDependenciesLevel();
 
     if (otherPkg.strictDependenciesLevel().value().first < otherPkgExpectedLevel) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
