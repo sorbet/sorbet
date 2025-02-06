@@ -248,16 +248,14 @@ public:
         swap(this->ptr, other.ptr);
     }
 
-    template <typename E>
-    static ExpressionPtr fromUnique(std::unique_ptr<E> ptr) noexcept {
+    template <typename E> static ExpressionPtr fromUnique(std::unique_ptr<E> ptr) noexcept {
         if (ptr == nullptr) {
             return nullptr;
         }
         return ExpressionPtr(ExpressionToTag<E>::value, ptr.release());
     }
 
-    template <typename E>
-    std::unique_ptr<E> toUnique() noexcept {
+    template <typename E> std::unique_ptr<E> toUnique() noexcept {
         if (this->ptr == 0) {
             return nullptr;
         }
