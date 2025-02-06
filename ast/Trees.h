@@ -247,6 +247,25 @@ public:
         using std::swap;
         swap(this->ptr, other.ptr);
     }
+
+    template <typename E>
+    static ExpressionPtr fromUnique(std::unique_ptr<E> ptr) noexcept {
+        if (ptr == nullptr) {
+            return nullptr;
+        }
+        return ExpressionPtr(ExpressionToTag<E>::value, ptr.release());
+    }
+
+    template <typename E>
+    std::unique_ptr<E> toUnique() noexcept {
+        if (this->ptr == 0) {
+            return nullptr;
+        }
+        auto p = as_tree<E>();
+        ENFORCE(p);
+        release();
+        return std::unique_ptr<E>(p.get());
+    }
 };
 
 template <class E, typename... Args> ExpressionPtr make_expression(Args &&...args) {
