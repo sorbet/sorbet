@@ -1288,16 +1288,16 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         }
 
                         auto message = ErrorColors::format("");
-;
-                        if (a1i.show(gs) == "String" || a1i.show(gs) == "Integer" || a1i.show(gs) == "Hash" || a1i.show(gs) == "Array") {
+                        ;
+                        if (a1i.show(gs) == "String" || a1i.show(gs) == "Integer" || a1i.show(gs) == "Hash" ||
+                            a1i.show(gs) == "Array") {
                             auto owner = idxTypeMember.data(gs)->owner.show(gs);
                             auto memberName = idxTypeMember.data(gs)->name.show(gs);
                             message = ErrorColors::format("`{}` is not {} `{}` for {} type of `{}`", a1i.show(gs),
-                                                            joiningText, a2j.show(gs), memberName, owner);
+                                                          joiningText, a2j.show(gs), memberName, owner);
                         } else {
-                            
                             message = ErrorColors::format("`{}` is not {} `{}` for {} type member `{}`", a1i.show(gs),
-                                                            joiningText, a2j.show(gs), variance, idxTypeMember.show(gs));
+                                                          joiningText, a2j.show(gs), variance, idxTypeMember.show(gs));
                         }
                         subCollector.message = message;
                         errorDetailsCollector.addErrorDetails(std::move(subCollector));
