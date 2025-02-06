@@ -53,7 +53,7 @@ TEST_CASE("TestOffset2Pos2Offset") {
     for (auto &tc : cases) {
         auto name = string("case: ") + to_string(i);
         INFO(name);
-        FileRef f = gs.enterFile(move(name), tc.src);
+        FileRef f = gs.enterFile(name, tc.src);
 
         auto detail = Loc::offset2Pos(f.data(gs), tc.off.value());
 
@@ -103,7 +103,7 @@ TEST_CASE("TestPos2OffsetNull") {
     int i = 0;
     for (auto &tc : cases) {
         auto name = string("case: ") + to_string(i);
-        FileRef f = gs.enterFile(move(name), tc.src);
+        FileRef f = gs.enterFile(name, tc.src);
 
         auto actualOffset = Loc::pos2Offset(f.data(gs), Loc::Detail{tc.line, tc.col});
 
@@ -117,7 +117,7 @@ TEST_CASE("Errors") {
     GlobalState gs(errorQueue);
     gs.initEmpty();
     UnfreezeFileTable fileTableAccess(gs);
-    FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
+    FileRef f = gs.enterFile("a/foo.rb", string("def foo\n  hi\nend\n"));
     if (auto e = gs.beginError(Loc{f, 0, 3}, errors::Internal::InternalError)) {
         e.setHeader("Use of metavariable: `{}`", "foo");
     }
