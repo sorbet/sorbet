@@ -1453,6 +1453,9 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             auto &a = ast::cast_tree_nonnull<ast::ConstantLit>(what);
             pickle(p, a.loc);
             p.putU4(a.symbol.rawId());
+            // This encoding is the same encoding that would be used if we were
+            // serializing an UnresolvedConstantLit as an ExpressionPtr, nullptr
+            // and all.
             if (a.original == nullptr) {
                 p.putU4(0);
             } else {
@@ -1738,6 +1741,8 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             std::unique_ptr<ast::UnresolvedConstantLit> orig;
             if (litTag == uint32_t(ast::Tag::UnresolvedConstantLit)) {
                 orig = unpickleUnresolvedConstantLit(p, gs);
+            } else if (litTag != 0) {
+                Exception::raise("Unknown tag for `ConstantLit::original`: {}", litTag);
             }
             return ast::make_expression<ast::ConstantLit>(loc, sym, std::move(orig));
         }
