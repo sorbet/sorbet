@@ -127,7 +127,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
         const bool isIncremental = false;
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
-        committed = runSlowPath(move(updates), workers, errorFlusher, /* cancelable */ false);
+        committed = runSlowPath(move(updates), workers, errorFlusher, SlowPathMode::Init);
         epoch.committed = committed;
     }
     ENFORCE(committed);
@@ -191,7 +191,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
             commitFileUpdates(updates, /* cancelable */ false);
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
-            committed = runSlowPath(move(updates), workers, errorFlusher, /* cancelable */ true);
+            committed = runSlowPath(move(updates), workers, errorFlusher, SlowPathMode::Cancelable);
         }
         epoch.committed = committed;
     }
@@ -407,9 +407,11 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
 }
 
 bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
-                                 shared_ptr<core::ErrorFlusher> errorFlusher, bool cancelable) {
+                                 shared_ptr<core::ErrorFlusher> errorFlusher, LSPTypechecker::SlowPathMode mode) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runSlowPath can only be called from the typechecker thread.");
+
+    bool cancelable = mode == SlowPathMode::Cancelable;
 
     auto &logger = config->logger;
     auto slowPathOp = std::make_optional<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
@@ -434,7 +436,10 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
         vector<ast::ParsedFile> indexedCopies;
 
         // Index the updated files using finalGS.
-        {
+        if (!updates.updatedFiles.empty()) {
+            // Initialization does its own indexing, so we shouldn't see any file updates from that path.
+            ENFORCE(mode != SlowPathMode::Init);
+
             auto &gs = *finalGS;
             core::UnfreezeFileTable fileTableAccess(gs);
             for (auto &file : updates.updatedFiles) {
