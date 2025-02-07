@@ -592,6 +592,25 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
     ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFiles.size());
     for (auto &ast : updates.updatedFileIndexes) {
         const int id = ast.file.id();
+
+        DEBUG_ONLY({
+            // When typechecking on the fast path, the trees in `updatedFileIndexes` will have been indexed with the
+            // GlobalState that's owned by the indexer and not `this->gs`. As we will be moving those trees into
+            // `this->indexed`, we need to ensure that there is also a version of that tree in the
+            // `this->indexedFinalGS` map that acts as an overlay for `this->indexed`. Ensuring that the overlay is
+            // correctly populated is what allows us to hold on to the indexer's version of the tree for the next
+            // slow path, but also handle fast path requests for modified files.
+            if (updates.typecheckingPath == TypecheckingPath::Fast) {
+                // We don't support package files on the fast path, so package files won't have a tree indexed with
+                // `this->gs` present in `updatedFinalGSFileIndexes`.
+                if (!this->config->opts.stripePackages || !ast.file.data(*this->gs).isPackage()) {
+                    auto indexedForTypechecker = absl::c_any_of(
+                        updates.updatedFinalGSFileIndexes, [id](auto &updated) { return updated.file.id() == id; });
+                    ENFORCE(indexedForTypechecker);
+                }
+            }
+        });
+
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
         }
