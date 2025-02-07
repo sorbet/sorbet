@@ -446,13 +446,17 @@ public:
                 bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
                 auto strictDepsLevel = this->package.strictDependenciesLevel();
                 auto importStrictDepsLevel = pkg.strictDependenciesLevel();
-                bool layeringViolation =
-                    !isTestImport && db.enforceLayering() && strictDepsLevel.has_value() &&
-                    strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&
-                    this->package.causesLayeringViolation(db, pkg);
-                bool strictDependenciesTooLow =
-                    !isTestImport && db.enforceLayering() && importStrictDepsLevel.has_value() &&
-                    importStrictDepsLevel.value().first < this->package.minimumStrictDependenciesLevel();
+                bool layeringViolation = false;
+                bool strictDependenciesTooLow = false;
+                if (!isTestImport && db.enforceLayering()) {
+                    layeringViolation =
+                        strictDepsLevel.has_value() &&
+                        strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&
+                        this->package.causesLayeringViolation(db, pkg);
+                    strictDependenciesTooLow =
+                        importStrictDepsLevel.has_value() &&
+                        importStrictDepsLevel.value().first < this->package.minimumStrictDependenciesLevel();
+                }
                 // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
                 // layering/strict_dependencies issues.
                 if (layeringViolation && strictDependenciesTooLow) {
