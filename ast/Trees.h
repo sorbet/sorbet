@@ -247,6 +247,23 @@ public:
         using std::swap;
         swap(this->ptr, other.ptr);
     }
+
+    template <typename E> static ExpressionPtr fromUnique(std::unique_ptr<E> ptr) noexcept {
+        if (ptr == nullptr) {
+            return nullptr;
+        }
+        return ExpressionPtr(ExpressionToTag<E>::value, ptr.release());
+    }
+
+    template <typename E> std::unique_ptr<E> toUnique() noexcept {
+        if (this->ptr == 0) {
+            return nullptr;
+        }
+        auto p = as_tree<E>();
+        ENFORCE(p);
+        release();
+        return std::unique_ptr<E>(p.get());
+    }
 };
 
 template <class E, typename... Args> ExpressionPtr make_expression(Args &&...args) {
@@ -1118,9 +1135,9 @@ public:
     // For resolved symbols, `resolutionScopes` is null.
     using ResolutionScopes = InlinedVector<core::SymbolRef, 1>;
     std::unique_ptr<ResolutionScopes> resolutionScopes;
-    ExpressionPtr original;
+    std::unique_ptr<UnresolvedConstantLit> original;
 
-    ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, ExpressionPtr original);
+    ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
 
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;

@@ -343,7 +343,7 @@ private:
     }
 
     static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job) {
-        auto &c = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
+        auto &c = *job.out->original;
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             auto result = resolveLhs(ctx, job.scope, c.cnst);
 
@@ -433,7 +433,7 @@ private:
                     return true;
                 }
 
-                auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original);
+                auto &original = *cnst->original;
                 if (original.cnst != *it) {
                     return false;
                 }
@@ -537,8 +537,7 @@ private:
 
     static core::ClassOrModuleRef stubConstant(core::MutableContext ctx, core::ClassOrModuleRef owner,
                                                ast::ConstantLit *out, bool possibleGenericType) {
-        auto symbol = ctx.state.enterClassSymbol(
-            ctx.locAt(out->loc), owner, ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(out->original).cnst);
+        auto symbol = ctx.state.enterClassSymbol(ctx.locAt(out->loc), owner, out->original->cnst);
 
         auto data = symbol.data(ctx);
         data->setIsModule(true); // This is what would happen in finalizeAncestors
@@ -607,7 +606,7 @@ private:
                 continue;
             }
 
-            auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(base->original);
+            auto &original = *base->original;
             if (importStubs.packageExportsConstant(prefix, original.cnst)) {
                 ENFORCE(cursor->scope.isClassOrModule());
                 return cursor->scope.asClassOrModuleRef();
@@ -645,7 +644,7 @@ private:
             auto *cursor = out;
             bool isRootReference = false;
             while (cursor != nullptr) {
-                auto original = ast::cast_tree<ast::UnresolvedConstantLit>(cursor->original);
+                auto original = cursor->original.get();
                 if (original == nullptr) {
                     isRootReference = cursor->symbol == core::Symbols::root();
                     break;
@@ -702,7 +701,7 @@ private:
                     auto loc = resolvedField.data(ctx)->loc();
                     if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
                         e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
-                        e.addErrorLine(ctx.locAt(job.out->original.loc()), "Type alias used here");
+                        e.addErrorLine(ctx.locAt(job.out->original->loc), "Type alias used here");
                     }
 
                     resolvedField.data(gs)->resultType = core::Types::untyped(resolved);
@@ -732,7 +731,7 @@ private:
 
         bool alreadyReported = false;
         job.out->resolutionScopes = make_unique<ast::ConstantLit::ResolutionScopes>();
-        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
+        auto &original = *job.out->original;
         if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
             auto originalScope = id->symbol.dealias(ctx);
             if (originalScope == core::Symbols::StubModule()) {
@@ -768,7 +767,7 @@ private:
         // export site. Ignore resolution failures in the aliases/modules created by packaging to
         // avoid this resulting in duplicate errors.
         if (!constantNameMissing && !alreadyReported) {
-            if (auto e = ctx.beginError(job.out->original.loc(), core::errors::Resolver::StubConstant)) {
+            if (auto e = ctx.beginError(original.loc, core::errors::Resolver::StubConstant)) {
                 e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
                 auto foundCommonTypo = false;
                 if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
@@ -1309,11 +1308,8 @@ private:
                 }
                 return;
             }
-            ENFORCE(sym.exists() ||
-                    ast::isa_tree<ast::ConstantLit>(
-                        ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original).scope) ||
-                    ast::isa_tree<ast::EmptyTree>(
-                        ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original).scope));
+            ENFORCE(sym.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original->scope) ||
+                    ast::isa_tree<ast::EmptyTree>(cnst->original->scope));
             if (isSuperclass && sym == core::Symbols::todo()) {
                 // This is the case where the superclass is empty, for example: `class A; end`
                 return;
@@ -1323,7 +1319,8 @@ private:
             auto loc = ancestor.loc();
             auto enclosingClass = ctx.owner.enclosingClass(ctx);
             auto nw = ast::MK::UnresolvedConstant(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
-            auto out = ast::make_expression<ast::ConstantLit>(loc, enclosingClass, std::move(nw));
+            auto out =
+                ast::make_expression<ast::ConstantLit>(loc, enclosingClass, nw.toUnique<ast::UnresolvedConstantLit>());
             job.ancestor = ast::cast_tree<ast::ConstantLit>(out);
             ancestor = std::move(out);
         } else if (ast::isa_tree<ast::EmptyTree>(ancestor)) {
@@ -1339,7 +1336,8 @@ private:
         if (auto c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
             walkUnresolvedConstantLit(ctx, c->scope);
             auto loc = c->loc;
-            auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
+            auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(),
+                                                              tree.toUnique<ast::UnresolvedConstantLit>());
             auto constant = ast::cast_tree<ast::ConstantLit>(out);
             ConstantResolutionItem job{nesting_, constant};
             if (resolveConstantJob(ctx, job)) {
@@ -1689,8 +1687,7 @@ public:
     static int constantDepth(ast::ConstantLit *exp) {
         int depth = 0;
         ast::ConstantLit *scope = exp;
-        while (scope->original && (scope = ast::cast_tree<ast::ConstantLit>(
-                                       ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(scope->original).scope))) {
+        while (scope->original && (scope = ast::cast_tree<ast::ConstantLit>(scope->original->scope))) {
             depth += 1;
         }
         return depth;

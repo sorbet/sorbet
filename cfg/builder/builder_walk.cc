@@ -458,7 +458,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 synthesizeExpr(current, cctx.target, a.loc, make_insn<Ident>(aliasName));
 
                 if (a.original) {
-                    auto &orig = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(a.original);
+                    auto &orig = *a.original;
                     // Empirically, these are the only two cases we've needed so far to service the
                     // LSP requests we want (hover and completion), but that doesn't mean these are
                     // the **only** we'll ever want.

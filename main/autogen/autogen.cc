@@ -56,7 +56,7 @@ class AutogenWalk {
         vector<core::NameRef> out;
         auto *cnst = &cnstRef;
         while (cnst != nullptr && cnst->original != nullptr) {
-            auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original);
+            auto &original = *cnst->original;
             out.emplace_back(original.cnst);
             cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
 
@@ -211,7 +211,7 @@ public:
     bool isCBaseConstant(const ast::ConstantLit &cnstRef) {
         auto *cnst = &cnstRef;
         while (cnst != nullptr && cnst->original != nullptr) {
-            auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original);
+            auto &original = *cnst->original;
             cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
         }
         if (cnst && cnst->symbol == core::Symbols::root()) {
