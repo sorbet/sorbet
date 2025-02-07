@@ -50,15 +50,24 @@ class LSPTypechecker final {
      * (initialGS). As all values of this->gs will derive from that initial GlobalState, none of these trees will be
      * re-indexed for subsequent slow path runs. An additional consequence of this->gs deriving from the initialization
      * value of GlobalState is that they will continue to be valid when used with this->gs (see the comment on this->gs
-     * for an explanation of how this derivation is ensured). Finally, this vector will never be updated after the
-     * indexing done during initialization, and represents a snapshot of the workspace when LSP was started.
+     * for an explanation of how this derivation is ensured).
+     *
+     * WARNING:
+     * Updates to this vector can happen through this->commitFileUpdates and LSPFileUpdates::updatedFileIndexes, however
+     * those updates will only be valid when used with the indexer's GlobalState. As a result it is absolutely necessary
+     * to ensure that any updates to this vector are either already valid with this->gs, or have a corresponding tree in
+     * this->indexedFinalGS, as otherwise there is a possibility that the tree used will reference names that aren't
+     * consistent with this->gs. Once a slow path is kicked off this problem will resolve itself, as this->gs will be
+     * re-initialized with a copy of the indexer's GlobalState, making all of the names stored in the trees of
+     * this->indexed valid again.
      */
     std::vector<ast::ParsedFile> indexed;
     /**
-     * Trees that have been indexed after LSP initialization, which means that they may have names that are not present
-     * in the name table of that original GlobalState (initialGS). This is a sparse diff of indexed trees to
-     * this->indexed, and should be consulted before this->indexed for the most up-to-date view of the workspace. This
-     * lookup strategy is implemented by this->getIndexed. All of the trees in this map are valid to use with this->gs.
+     * Trees that have been indexed with this->gs between slow path runs, which means that they may have names that are
+     * not present in the name table of the indexer. This is a sparse diff of trees indexed by position in
+     * this->indexed, and should be consulted before this->indexed when looking up trees. Pelase see the WARNING section
+     * of the comment on this->indexed for more context about why. This lookup strategy is implemented by
+     * this->getIndexed. All of the trees in this map are valid to use with this->gs.
      */
     UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
 
