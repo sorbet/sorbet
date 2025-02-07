@@ -182,15 +182,15 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
     if ((methodFlags.isPrivate && (superMethodFlags.isProtected || superMethodData->isMethodPublic())) ||
         (methodFlags.isProtected && superMethodData->isMethodPublic())) {
         if (auto e = ctx.state.beginError(methodLoc, core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Method `{}` is {} in `{}` but not in `{}`", methodData->name.show(ctx),
-                        methodFlags.isPrivate ? "private" : "protected", methodData->owner.show(ctx),
-                        superMethodData->owner.show(ctx));
+            auto modifier = methodData->flags.isPrivate ? "private" : "protected";
+            e.setHeader("Method `{}` is {} in `{}` but not in `{}`", methodData->name.show(ctx), modifier,
+                        methodData->owner.show(ctx), superMethodData->owner.show(ctx));
             e.addErrorLine(superMethodLoc, "Base method defined here");
 
-            auto len = methodFlags.isPrivate ? 8 : 10;
-            auto loc = methodLoc.adjustLen(ctx, -len, len);
-            if (loc.source(ctx) == (methodFlags.isPrivate ? "private " : "protected ")) {
-                e.replaceWith("Replace with public", loc, "public ");
+            auto len = methodData->flags.isPrivate ? 7 : 9;
+            auto loc = methodLoc.adjustLen(ctx, -(len + 1), len);
+            if (loc.source(ctx) == modifier) {
+                e.replaceWith("Replace with public", loc, "public");
             }
         }
     }
