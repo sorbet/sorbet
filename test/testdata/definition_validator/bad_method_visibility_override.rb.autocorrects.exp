@@ -13,7 +13,19 @@ class AbstractClassVisibility
   def bar; end
 
   sig {abstract.returns(Object)}
-  def self.class_foo; end
+  private def baz; end
+
+  sig {abstract.returns(Object)}
+  protected def qux; end
+
+  sig {abstract.returns(Object)}
+  protected def quux; end
+
+  sig {abstract.returns(Object)}
+  private def quuz; end
+
+  sig {abstract.returns(Object)}
+  protected def corge; end
 end
 
 class ImplVisibility < AbstractClassVisibility
@@ -24,8 +36,19 @@ class ImplVisibility < AbstractClassVisibility
         # ^^^^^^^ error: Method `bar` is private in `ImplVisibility` but not in `AbstractClassVisibility`
 
   sig {override.returns(Object)}
-  def self.class_foo; end
-  # error: Method `class_foo` is private in `T.class_of(ImplVisibility)` but not in `T.class_of(AbstractClassVisibility)`
-  private_class_method :class_foo
+  protected def baz; end
+
+  sig {override.returns(Object)}
+  public def qux; end
+        # ^^^^^^^ error: Method `qux` is private in `ImplVisibility` but not in `AbstractClassVisibility`
+
+  sig {override.returns(Object)}
+  protected def quux; end
+
+  sig {override.returns(Object)}
+  private def quuz; end
+
+  sig {override.returns(Object)}
+  protected def corge; end
 end
 # ------------------------------
