@@ -2946,8 +2946,7 @@ public:
             }
 
             // For boolean types, suggest T::Boolean instead of TrueClass/FalseClass
-            if (core::Types::isSubType(gs, suggestType, core::Types::falseClass()) ||
-                core::Types::isSubType(gs, suggestType, core::Types::trueClass())) {
+            if (!suggestType.isUntyped()) {
                 suggestType = core::Types::Boolean();
             }
 
