@@ -1,0 +1,23 @@
+test/testdata/infer/boolean_type_suggestion.rb:6: Constants must have type annotations https://srb.help/7027
+     6 |  X = true # error: Constants must have type annotations
+          ^
+    Autocorrect: Done
+    test/testdata/infer/boolean_type_suggestion.rb:6: Replaced with T.let(true, T::Boolean)
+     6 |  X = true # error: Constants must have type annotations
+          ^^^^^^^
+
+test/testdata/infer/boolean_type_suggestion.rb:7: Constants must have type annotations https://srb.help/7027
+     7 |  Y = false # error: Constants must have type annotations
+          ^
+    Autocorrect: Done
+    test/testdata/infer/boolean_type_suggestion.rb:7: Replaced with T.let(false, T::Boolean)
+     7 |  Y = false # error: Constants must have type annotations
+          ^^^^^^^^
+
+test/testdata/infer/boolean_type_suggestion.rb:10: Constants must have type annotations https://srb.help/7027
+    10 |  Z = T.unsafe(nil) # error: Constants must have type annotations
+          ^
+    Autocorrect: Done
+    test/testdata/infer/boolean_type_suggestion.rb:10: Replaced with T.let(T.unsafe(nil), T.untyped)
+    10 |  Z = T.unsafe(nil) # error: Constants must have type annotations
+          ^^^^^^^^^^^^^^^
