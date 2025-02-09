@@ -8,7 +8,7 @@ class A
 
   sig {void}
   def initialize
-    @x = T.let(T.unsafe(nil), T.untyped) # error: must be declared using `T.let
+    @x = T.unsafe(nil) # error: must be declared using `T.let`
   end
 end
 # ------------------------------
