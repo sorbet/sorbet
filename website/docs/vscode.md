@@ -37,11 +37,11 @@ As long as it does not say "Sorbet: Disabled," then Sorbet is working. See
 
 The extension is not active. Here are some steps to try:
 
-- Is a Ruby file open? The Sorbet extension does not active until at least one
+- Is a Ruby file open? The Sorbet extension does not activate until at least one
   Ruby file is open.
 
-- Make sure the VS Code window wide enough to display the entire contents of the
-  status bar.
+- Make sure the VS Code window is wide enough to display the entire contents of
+  the status bar.
 
 - Do not use VS Code's
   [multi-root workspaces](https://code.visualstudio.com/docs/editor/multi-root-workspaces).
@@ -240,7 +240,8 @@ flag is not passed by default. To pass it, change the
 
 The Sorbet extension includes various logs designed to help developers
 troubleshoot problems in the Sorbet extension itself. Use this command to
-control how verbose the log
+control how verbose Sorbet's log should be. It may also be helpful to enable
+[logging at VS Code's language client level](https://github.com/sorbet/sorbet/blob/master/docs/lsp-dev-guide.md#by-trying-it-in-a-client).
 
 ### `>Sorbet: Copy Symbol to Clipboard`
 
@@ -274,7 +275,7 @@ See [Highlighting untyped code](highlight-untyped.md)
 ### `` >Sorbet: Toggle the autocomplete nudge in `typed: false` files ``
 
 [``>Sorbet: Toggle the autocomplete nudge in `typed: false` files``]:
-  #sorbet-toggle-the-autocomplete-nudge-in-typed-false-files
+  #-sorbet-toggle-the-autocomplete-nudge-in-typed-false-files-
 
 By default, Sorbet shows a completion item in `# typed: false` files when there
 are no completion results due to the file being `# typed: false`, like this:
@@ -427,7 +428,7 @@ See [Highlighting untyped code](highlight-untyped.md)
 
 ### `sorbet.typedFalseCompletionNudges`
 
-Whether to enable `# typed: false` completion nudges.
+Whether to enable `# typed: false` completion nudges. Defaults to `true`.
 
 See [``>Sorbet: Toggle the autocomplete nudge in `typed: false` files``].
 
@@ -475,6 +476,10 @@ If the errors are not persistent:
   Sorbet (click on Sorbet in the status bar, and click on Restart Sorbet).
 - If the diagnostics become fixed, then you might have discovered a bug in
   Sorbet.
+- Another thing to check is whether the Problems tab in VS Code has the same
+  errors as what Sorbet would report when run from the command line (assuming
+  all files have been saved). If the list of errors is different, this usually
+  represents a bug in Sorbet (so long as Sorbet is "Idle" in the IDE).
 
 If you arrive at a set of edits that mess up the diagnostics, please file a bug
 on the [issue tracker](https://github.com/sorbet/sorbet/issues).
