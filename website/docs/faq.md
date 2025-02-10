@@ -43,6 +43,11 @@ are two options:
 If you're having problems making a change to Sorbet, we're happy to help on
 Slack! See the [Community](/community) page for an invite link.
 
+Be sure to also check out our
+[Versioning policy for standard library RBIs](rbi.md#versioning-for-standard-library-rbis),
+which basically says that in general, Sorbet's RBIs for the standard library aim
+to be a superset of everything that gem defines (past and present).
+
 [rbi-folder]: https://github.com/sorbet/sorbet/tree/master/rbi
 
 ## What's the difference between `T.let`, `T.cast`, and `T.unsafe`?
