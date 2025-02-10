@@ -1,0 +1,20 @@
+# typed: strict
+# selective-apply-code-action: quickfix
+
+class BooleanTypeSuggestion1
+    extend T::Sig
+
+    sig { void }
+    def initialize
+      @a = T.let(false, T::Boolean)
+    end
+end
+
+class BooleanTypeSuggestion2
+    extend T::Sig
+
+    sig { void }
+    def initialize
+      @a = T.let(true, T::Boolean)
+    end
+end 
