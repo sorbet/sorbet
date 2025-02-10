@@ -298,8 +298,8 @@ public:
     // - layering violations
     // - imports to 'false', 'layered', or 'layered_dag' packages
     // - imports to 'dag' packages
-    // TODO(neil): explain the rationale behind this ordering
-    // Within each group by strictness, packages are sorted by alphabetical order.
+    // TODO(neil): explain the rationale behind this ordering (ie. why is not the simple "false < layered < layered_dag
+    // < dag" ordering)
     // TODO(neil): implement alphabetical sort.
     int orderByStrictness(const core::packages::PackageDB &packageDB, const PackageInfo &a,
                           const PackageInfo &b) const {

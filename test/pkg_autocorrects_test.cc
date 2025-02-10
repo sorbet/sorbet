@@ -4,6 +4,7 @@
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
+#include "common/strings/formatting.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
 #include "core/NameSubstitution.h"
@@ -25,16 +26,14 @@ string examplePackagePath = "example/__package.rb";
 namespace sorbet {
 string makePackageRB(string name, string strictDeps, string layer, vector<string> imports = {},
                      vector<string> exports = {}) {
-    string importList = "";
-    for (auto &import : imports) {
-        importList += fmt::format("  import {}\n", import);
-    }
     return fmt::format("class {} < PackageSpec\n"
                        "  strict_dependencies '{}'\n"
                        "  layer '{}'\n"
                        "{}"
                        "end\n",
-                       name, strictDeps, layer, importList);
+                       name, strictDeps, layer, fmt::map_join(imports, "", [&](const auto &import) {
+                           return fmt::format("  import {}\n", import);
+                       }));
 }
 
 string falsePackageA = makePackageRB("FalsePackageA", "false", "lib");
