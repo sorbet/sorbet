@@ -594,11 +594,19 @@ TEST_CASE("Edge cases") {
     string appPackage = makePackageRB("AppPackage", "false", "app", {});
     string appPackagePath = "app_pkg/__package.rb";
 
+    string packageWithComments = "class HasComments < PackageSpec\n"
+                                 "  layer 'app'\n"
+                                 "  strict_dependencies 'false'\n"
+                                 "  import FalsePackageA # a comment\n"
+                                 "end\n";
+    string packageWithCommentsPath = "has_comments/__package.rb";
+
     auto parsedFiles = enterPackages(gs, {{packageWithFakeImportPath, packageWithFakeImport},
                                           {falsePackageAPath, falsePackageA},
                                           {layeredPackageAPath, layeredPackageA},
                                           {libPackagePath, libPackage},
-                                          {appPackagePath, appPackage}});
+                                          {appPackagePath, appPackage},
+                                          {packageWithCommentsPath, packageWithComments}});
 
     {
         // Import list contains non-existent package
@@ -625,6 +633,25 @@ TEST_CASE("Edge cases") {
         string expected = makePackageRB("LibPackage", "false", "lib", {"AppPackage", "FalsePackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
         auto replaced = addImport->applySingleEditForTesting(libPackage);
+        CHECK_EQ(expected, replaced);
+    }
+
+    {
+        // Import list with comments in it
+        auto &hasCommentsPkg = getPackageForFile(gs, parsedFiles[5].file);
+        ENFORCE(hasCommentsPkg.exists());
+        auto &layeredPkgA = getPackageForFile(gs, parsedFiles[2].file);
+        ENFORCE(layeredPkgA.exists());
+
+        auto addImport = hasCommentsPkg.addImport(gs, layeredPkgA, false);
+        string expected = "class HasComments < PackageSpec\n"
+                          "  layer 'app'\n"
+                          "  strict_dependencies 'false'\n"
+                          "  import FalsePackageA\n"
+                          "  import LayeredPackageA # a comment\n"
+                          "end\n";
+        ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+        auto replaced = addImport->applySingleEditForTesting(packageWithComments);
         CHECK_EQ(expected, replaced);
     }
 }
