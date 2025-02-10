@@ -373,12 +373,23 @@ public:
                                                     bool isTestImport) const {
         auto &info = PackageInfoImpl::from(pkg);
         auto insertionLoc = core::Loc::none(loc.file());
+        optional<core::AutocorrectSuggestion::Edit> deleteTestImportEdit = nullopt;
         if (!importedPackageNames.empty()) {
             packager::PackageName const *importToInsertAfter = nullptr;
             for (auto &import : importedPackageNames) {
                 if (import.name == info.name) {
                     if (!isTestImport && import.type == core::packages::ImportType::Test) {
-                        return convertTestImport(gs, info, core::Loc(fullLoc().file(), import.name.loc));
+                        // There's already a test import for this package, so we'll convert it to a regular import.
+                        // importToInsertAfter already tracks where we need to insert the import.
+                        // So we can craft an edit to delete the `test_import` line, and then use the regular logic for
+                        // adding an import to insert the `import`.
+                        auto importLoc = core::Loc(fullLoc().file(), import.name.loc);
+                        auto [lineStart, numWhitespace] = importLoc.findStartOfLine(gs);
+                        auto beginPos =
+                            lineStart.adjust(gs, -numWhitespace, 0).beginPos(); // -numWhitespace for the indentation
+                        auto endPos = importLoc.endPos();
+                        core::Loc replaceLoc(importLoc.file(), beginPos, endPos);
+                        deleteTestImportEdit = {replaceLoc, ""};
                     } else {
                         // we already import this, and if so, don't return an autocorrect
                         return nullopt;
@@ -453,12 +464,15 @@ public:
         }
         ENFORCE(insertionLoc.exists());
 
-        // now find the appropriate place for it, specifically by
-        // finding the import that directly precedes it, if any
-        core::AutocorrectSuggestion suggestion(
-            fmt::format("Import `{}` in package `{}`", info.name.toString(gs), name.toString(gs)),
-            {{insertionLoc,
-              fmt::format("\n  {} {}", isTestImport ? "test_import" : "import", info.name.toString(gs))}});
+        auto packageToImport = info.name.toString(gs);
+        auto suggestionTitle = fmt::format("Import `{}` in package `{}`", packageToImport, name.toString(gs));
+        vector<core::AutocorrectSuggestion::Edit> edits = {
+            {insertionLoc, fmt::format("\n  {} {}", isTestImport ? "test_import" : "import", packageToImport)}};
+        if (deleteTestImportEdit.has_value()) {
+            edits.push_back(deleteTestImportEdit.value());
+            suggestionTitle = fmt::format("Convert `{}` to `{}`", "test_import", "import");
+        }
+        core::AutocorrectSuggestion suggestion(suggestionTitle, edits);
         return {suggestion};
     }
 
@@ -495,15 +509,6 @@ public:
         core::AutocorrectSuggestion suggestion(fmt::format("Export `{}` in package `{}`", strName, name.toString(gs)),
                                                {{insertionLoc, fmt::format("\n  export {}", strName)}});
         return {suggestion};
-    }
-
-    // TODO(neil): move import to the correct place in the import list
-    core::AutocorrectSuggestion convertTestImport(const core::GlobalState &gs, const PackageInfoImpl &pkg,
-                                                  core::Loc importLoc) const {
-        auto [lineStart, _] = importLoc.findStartOfLine(gs);
-        core::Loc replaceLoc(importLoc.file(), lineStart.beginPos(), importLoc.endPos());
-        return core::AutocorrectSuggestion(fmt::format("Convert `{}` to `{}`", "test_import", "import"),
-                                           {{replaceLoc, fmt::format("import {}", pkg.name.toString(gs))}});
     }
 
     vector<vector<core::NameRef>> exports() const {
