@@ -484,41 +484,6 @@ If the errors are not persistent:
 If you arrive at a set of edits that mess up the diagnostics, please file a bug
 on the [issue tracker](https://github.com/sorbet/sorbet/issues).
 
-### Find all References
-
-#### Find all References is not working / Find all References is missing some expected results.
-
-Make sure that Sorbet is running. You should see "Sorbet: Idle" in VS Code's
-status bar. Otherwise, see
-[Feature support by strictness level](lsp-typed-level.md).
-
-If the information in that document doesn't apply (e.g., the current file is
-`# typed: true` or higher), check whether the expression is `T.untyped`. See
-[Troubleshooting](troubleshooting.md) for more information.
-
-#### Find all References is slow.
-
-The speed of Find all References depends on how many files contain an identifier
-with the same name, as we use that information as a first-pass filter over the
-source files before refining to actual references. For example, searching for
-references to a class's `initialize` will involve a scan over most files in a
-project even if the specific `initialize` you are looking for is only used in
-one file.
-
-Find all References also waits for "Typechecking in background..." to complete
-so that it does not contend with typechecking for CPU time.
-
-#### Find all References brought me to a file that I cannot edit.
-
-These features may return results in type definitions for core Ruby libraries,
-which are baked directly into the Sorbet executable and are not present on the
-file system.
-
-In order to display these files in your editor and to support navigating through
-them, we've configured the Sorbet extension to display them in this read-only
-view. Note that certain extension features, like hover and Go to Definition,
-will not function in some of these special files.
-
 ## Reporting metrics
 
 > Sorbet does not require metrics gathering for full functionality. If you are

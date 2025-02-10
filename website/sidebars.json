@@ -60,6 +60,7 @@
       "go-to-def",
       "hover",
       "autocompletion",
+      "references",
       "code-actions",
       "outline",
       "doc-comments",
