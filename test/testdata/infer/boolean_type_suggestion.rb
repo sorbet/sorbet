@@ -6,8 +6,7 @@ class BooleanTypeSuggestion1
 
     sig { void }
     def initialize
-      @a = false
-    # ^^ error: The instance variable `@a` must be declared using `T.let` when specifying `# typed: strict`
+      @a = false # error: The instance variable `@a` must be declared using `T.let` when specifying `# typed: strict`
     end
 end
 
@@ -16,7 +15,6 @@ class BooleanTypeSuggestion2
 
     sig { void }
     def initialize
-      @a = true
-    # ^^ error: The instance variable `@a` must be declared using `T.let` when specifying `# typed: strict`
+      @a = true # error: The instance variable `@a` must be declared using `T.let` when specifying `# typed: strict`
     end
 end
