@@ -1007,6 +1007,8 @@ class JSON::Ext::Parser
   def source; end
 end
 
+class JSON::Ext::ParserConfig
+end
 
 # The base exception for [`JSON`](https://docs.ruby-lang.org/en/2.7.0/JSON.html)
 # errors.
