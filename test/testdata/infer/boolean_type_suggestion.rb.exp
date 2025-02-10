@@ -14,10 +14,18 @@ test/testdata/infer/boolean_type_suggestion.rb:7: Constants must have type annot
      7 |  Y = false # error: Constants must have type annotations
           ^^^^^^^^
 
-test/testdata/infer/boolean_type_suggestion.rb:10: Constants must have type annotations https://srb.help/7027
-    10 |  Z = T.unsafe(nil) # error: Constants must have type annotations
+test/testdata/infer/boolean_type_suggestion.rb:11: Constants must have type annotations https://srb.help/7027
+    11 |  Z = T.let(nil, BoundedType) # error: Constants must have type annotations
           ^
     Autocorrect: Done
-    test/testdata/infer/boolean_type_suggestion.rb:10: Replaced with T.let(T.unsafe(nil), T.untyped)
-    10 |  Z = T.unsafe(nil) # error: Constants must have type annotations
+    test/testdata/infer/boolean_type_suggestion.rb:11: Replaced with T.let(T.let(nil, BoundedType), BoundedType)
+    11 |  Z = T.let(nil, BoundedType) # error: Constants must have type annotations
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/testdata/infer/boolean_type_suggestion.rb:14: Constants must have type annotations https://srb.help/7027
+    14 |  W = T.unsafe(nil) # error: Constants must have type annotations
+          ^
+    Autocorrect: Done
+    test/testdata/infer/boolean_type_suggestion.rb:14: Replaced with T.let(T.unsafe(nil), T.untyped)
+    14 |  W = T.unsafe(nil) # error: Constants must have type annotations
           ^^^^^^^^^^^^^^^
