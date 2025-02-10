@@ -301,8 +301,7 @@ ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, std::uniq
     _sanityCheck();
 }
 
-optional<pair<core::SymbolRef, vector<core::NameRef>>>
-ConstantLit::fullUnresolvedPath(const core::Context ctx) const {
+optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolvedPath(const core::Context ctx) const {
     if (this->symbol() != core::Symbols::StubModule()) {
         return nullopt;
     }
