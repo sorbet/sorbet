@@ -4,6 +4,17 @@
  * https://docusaurus.io/docs/en/api-pages#styles
  */
 
+/**
+ * Once the text gets this small, the additional bottom margin just makes it
+ * harder to see that there was a heading there at all, versus just a bold
+ * sentence.
+ */
+h4,
+h5,
+h6 {
+  margin-bottom: 0;
+}
+
 /*
  * Docusaurus uses blockquote to show warnings / yellow callouts.
  * Sometimes, we don't want this.
