@@ -2946,8 +2946,7 @@ public:
             }
 
             // For boolean types, suggest T::Boolean instead of TrueClass/FalseClass
-            if (suggestType == core::Types::falseClass() || 
-                suggestType == core::Types::trueClass()) {
+            if (suggestType == core::Types::falseClass() || suggestType == core::Types::trueClass()) {
                 suggestType = core::Types::Boolean();
             }
 
