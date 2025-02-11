@@ -327,8 +327,8 @@ ast::ExpressionPtr recordType(core::MutableContext ctx, const vector<pair<core::
 ast::ExpressionPtr variableType(core::MutableContext ctx, rbs_types_variable_t *node, core::LocOffsets loc) {
     rbs_ast_symbol_t *symbol = (rbs_ast_symbol_t *)node->name;
     rbs_constant_t *constant = rbs_constant_pool_id_to_constant(fake_constant_pool, symbol->constant_id);
-    string_view string(constant->start, constant->length);
-    auto name = ctx.state.enterNameUTF8(string);
+    string_view str(constant->start, constant->length);
+    auto name = ctx.state.enterNameUTF8(str);
     return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::typeParameter(), loc, ast::MK::Symbol(loc, name));
 }
 

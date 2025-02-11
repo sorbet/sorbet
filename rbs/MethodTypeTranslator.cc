@@ -107,8 +107,8 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
 
         auto node = (rbs_ast_typeparam_t *)list_node->node;
         rbs_constant_t *constant = rbs_constant_pool_id_to_constant(fake_constant_pool, node->name->constant_id);
-        string_view string(constant->start, constant->length);
-        typeParams.emplace_back(loc, ctx.state.enterNameUTF8(string));
+        string_view str(constant->start, constant->length);
+        typeParams.emplace_back(loc, ctx.state.enterNameUTF8(str));
     }
 
     // Collect positionals
