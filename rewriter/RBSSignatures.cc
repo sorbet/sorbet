@@ -167,7 +167,7 @@ class RBSSignaturesWalk {
             return false;
         }
 
-        if (!ast::cast_tree<ast::MethodDef>(send->posArgs()[0])) {
+        if (!ast::cast_tree<ast::MethodDef>(send->getPosArg(0))) {
             return false;
         }
 
