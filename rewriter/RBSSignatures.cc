@@ -14,6 +14,8 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
+namespace {
+
 /**
  * A collection of annotations and signatures comments found on a method definition.
  */
@@ -224,10 +226,13 @@ public:
     }
 };
 
+} // namespace
+
 ast::ExpressionPtr RBSSignatures::run(core::MutableContext ctx, ast::ExpressionPtr tree) {
     RBSSignaturesWalk rbs_translate(ctx);
     ast::TreeWalk::apply(ctx, rbs_translate, tree);
 
     return tree;
 }
+
 }; // namespace sorbet::rewriter
