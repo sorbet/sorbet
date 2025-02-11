@@ -13,6 +13,13 @@ rbs_string_t makeRBSString(const string_view &str) {
     };
 }
 
+core::LocOffsets makeLocOffsets(const Comment &comment, const token &token) {
+    return {
+        comment.loc.beginPos() + token.range.start.char_pos + 2,
+        comment.loc.beginPos() + token.range.end.char_pos + 2,
+    };
+}
+
 optional<MethodType> RBSParser::parseSignature(core::Context ctx, Comment comment) {
     rbs_string_t rbsString = makeRBSString(comment.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
@@ -27,11 +34,7 @@ optional<MethodType> RBSParser::parseSignature(core::Context ctx, Comment commen
     parse_method_type(parser.get(), &rbsMethodType);
 
     if (parser->error) {
-        core::LocOffsets offset{
-            comment.loc.beginPos() + parser->error->token.range.start.char_pos + 2,
-            comment.loc.beginPos() + parser->error->token.range.end.char_pos + 2,
-        };
-
+        core::LocOffsets offset = makeLocOffsets(comment, parser->error->token);
         if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSSyntaxError)) {
             e.setHeader("Failed to parse RBS signature ({})", parser->error->message);
         }
@@ -56,11 +59,7 @@ optional<Type> RBSParser::parseType(core::Context ctx, Comment comment) {
     parse_type(parser.get(), &rbsType);
 
     if (parser->error) {
-        core::LocOffsets offset{
-            comment.loc.beginPos() + parser->error->token.range.start.char_pos + 2,
-            comment.loc.beginPos() + parser->error->token.range.end.char_pos + 2,
-        };
-
+        core::LocOffsets offset = makeLocOffsets(comment, parser->error->token);
         if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSSyntaxError)) {
             e.setHeader("Failed to parse RBS type ({})", parser->error->message);
         }
