@@ -34,78 +34,41 @@ def foo(x)
 end
 ```
 
-### Method signatures
+### Quick reference
 
-Positional arguments names may or may not be specified:
+Most RBS features can be used and will be translated to equivalent Sorbet syntax
+during type checking:
 
-```ruby
-#: (Integer x) -> void
-def foo(x); end
+| Feature              | RBS syntax                               | Sorbet syntax                          |
+| -------------------- | ---------------------------------------- | -------------------------------------- |
+| Class instance type  | `Foo`                                    | `Foo`                                  |
+| Class singleton type | `singleton(Foo)`                         | `T.class_of(Foo)`                      |
+| Union type           | <span><code>Foo &#124; Bar</code></span> | `T.any(Foo, Bar)`                      |
+| Intersection type    | `Foo & Bar`                              | `T.all(Foo, Bar)`                      |
+| Optional type        | `Foo?`                                   | `T.nilable(Foo)`                       |
+| Boolean type         | `bool`                                   | `T::Boolean`                           |
+| Nil type             | `nil`                                    | `NilClass`                             |
+| Top type             | `top`                                    | `T.anything`                           |
+| Bottom type          | `bot`                                    | `T.noreturn`                           |
+| Void type            | `void`                                   | `void`                                 |
+| Generic type         | `Foo[Bar]`                               | `Foo[Bar]`                             |
+| Tuple type           | `[Foo, Bar]`                             | `[Foo, Bar]`                           |
+| Shape type           | `{ a: Foo, b: Bar }`                     | `{ a: Foo, b: Bar }`                   |
+| Proc type            | `^(Foo) -> Bar`                          | `T.proc.params(arg: Foo).returns(Bar)` |
 
-#: (Integer) -> void
-def bar(x); end
-```
+### Attribute accessor types
 
-For keyword arguments, the names must be specified:
-
-```ruby
-#: (x: Integer) -> void
-def foo(x:); end
-```
-
-Optional positional and keyword arguments must be prefixed with `?`:
-
-```ruby
-#: (?Integer) -> void
-def foo(x = 42); end
-
-#: (Integer ?x) -> void
-def bar(x = 42); end
-
-#: (?x: Integer) -> void
-def baz(x: 42); end
-```
-
-#### Block parameters
-
-Block parameters can be specified using the `{}` syntax:
+Attribute accessors can be annotated with RBS types:
 
 ```ruby
-#: (Integer) { (Integer) -> String } -> void
-def foo(x, &block); end
-```
+#: String
+attr_reader :foo
 
-Optional block parameters must be prefixed with `?`:
+#: Integer
+attr_writer :bar
 
-```ruby
-#: (Integer) ?{ (Integer) -> String } -> void
-def bar(x, &block); end
-```
-
-Self binding for blocks can be specified using the `[self]` syntax:
-
-```ruby
-#: (Integer) { (Integer) [self: Foo] -> String } -> void
-def baz(x, &block); end
-```
-
-#### Proc parameters
-
-Proc parameters can be specified using the `^` syntax:
-
-```ruby
-#: (Integer, ^(Integer) -> String) -> void
-def baz(x, proc); end
-```
-
-#### Generic methods
-
-For generic methods, the type parameters must be specified using the `[]`
-syntax:
-
-```ruby
-#: [X] (X) -> Class[X]
-def foo(x); end
+#: String
+attr_accessor :baz
 ```
 
 #### Annotations
@@ -144,43 +107,6 @@ def qux1(x); end
 sig(:final) { params(x: Integer).void }
 def qux2(x); end
 ```
-
-### Attribute accessor types
-
-Attribute accessors can be annotated with RBS types:
-
-```ruby
-#: String
-attr_reader :foo
-
-#: Integer
-attr_writer :bar
-
-#: String
-attr_accessor :baz
-```
-
-### Quick reference
-
-Most RBS features can be used and will be translated to equivalent Sorbet syntax
-during type checking:
-
-| Feature              | RBS syntax                               | Sorbet syntax                          |
-| -------------------- | ---------------------------------------- | -------------------------------------- |
-| Class instance type  | `Foo`                                    | `Foo`                                  |
-| Class singleton type | `singleton(Foo)`                         | `T.class_of(Foo)`                      |
-| Union type           | <span><code>Foo &#124; Bar</code></span> | `T.any(Foo, Bar)`                      |
-| Intersection type    | `Foo & Bar`                              | `T.all(Foo, Bar)`                      |
-| Optional type        | `Foo?`                                   | `T.nilable(Foo)`                       |
-| Boolean type         | `bool`                                   | `T::Boolean`                           |
-| Nil type             | `nil`                                    | `NilClass`                             |
-| Top type             | `top`                                    | `T.anything`                           |
-| Bottom type          | `bot`                                    | `T.noreturn`                           |
-| Void type            | `void`                                   | `void`                                 |
-| Generic type         | `Foo[Bar]`                               | `Foo[Bar]`                             |
-| Tuple type           | `[Foo, Bar]`                             | `[Foo, Bar]`                           |
-| Shape type           | `{ a: Foo, b: Bar }`                     | `{ a: Foo, b: Bar }`                   |
-| Proc type            | `^(Foo) -> Bar`                          | `T.proc.params(arg: Foo).returns(Bar)` |
 
 ### Special behaviors
 
