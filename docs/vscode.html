@@ -83,10 +83,10 @@ bar.</p>
 <h4><a class="anchor" aria-hidden="true" id="im-not-seeing-sorbet--in-the-status-bar"></a><a href="#im-not-seeing-sorbet--in-the-status-bar" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>I’m not seeing “Sorbet: …” in the status bar</h4>
 <p>The extension is not active. Here are some steps to try:</p>
 <ul>
-<li><p>Is a Ruby file open? The Sorbet extension does not activate until at least one
+<li><p>Is a Ruby file open? The Sorbet extension does not active until at least one
 Ruby file is open.</p></li>
-<li><p>Make sure the VS Code window is wide enough to display the entire contents of
-the status bar.</p></li>
+<li><p>Make sure the VS Code window wide enough to display the entire contents of the
+status bar.</p></li>
 <li><p>Do not use VS Code’s
 <a href="https://code.visualstudio.com/docs/editor/multi-root-workspaces">multi-root workspaces</a>.
 The Sorbet extension does not support this feature.</p></li>
@@ -214,8 +214,7 @@ flag is not passed by default. To pass it, change the
 <h3><a class="anchor" aria-hidden="true" id="sorbet-set-log-level"></a><a href="#sorbet-set-log-level" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>&gt;Sorbet: Set Log Level...</code></h3>
 <p>The Sorbet extension includes various logs designed to help developers
 troubleshoot problems in the Sorbet extension itself. Use this command to
-control how verbose Sorbet’s log should be. It may also be helpful to enable
-<a href="https://github.com/sorbet/sorbet/blob/master/docs/lsp-dev-guide.md#by-trying-it-in-a-client">logging at VS Code’s language client level</a>.</p>
+control how verbose the log</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbet-copy-symbol-to-clipboard"></a><a href="#sorbet-copy-symbol-to-clipboard" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>&gt;Sorbet: Copy Symbol to Clipboard</code></h3>
 <p>Copies the fully-qualified name of the symbol under the cursor to the clipboard.</p>
 <p>This feature is powered by a custom extension to the LSP specification:
@@ -339,8 +338,8 @@ selected configuration will take precedence over this setting.</p>
 <p>Whether to highlight untyped, and where. Defaults to <code>&quot;nowhere&quot;</code>.</p>
 <p>See <a href="/docs/highlight-untyped">Highlighting untyped code</a></p>
 <h3><a class="anchor" aria-hidden="true" id="sorbettypedfalsecompletionnudges"></a><a href="#sorbettypedfalsecompletionnudges" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>sorbet.typedFalseCompletionNudges</code></h3>
-<p>Whether to enable <code># typed: false</code> completion nudges. Defaults to <code>true</code>.</p>
-<p>See <a href="#-sorbet-toggle-the-autocomplete-nudge-in-typed-false-files-"><code>&gt;Sorbet: Toggle the autocomplete nudge in `typed: false` files</code></a>.</p>
+<p>Whether to enable <code># typed: false</code> completion nudges.</p>
+<p>See <a href="#sorbet-toggle-the-autocomplete-nudge-in-typed-false-files"><code>&gt;Sorbet: Toggle the autocomplete nudge in `typed: false` files</code></a>.</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbetconfigfilepatterns"></a><a href="#sorbetconfigfilepatterns" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>sorbet.configFilePatterns</code></h3>
 <p>A list of workspace file patterns that contribute to Sorbet’s configuration.
 Changes to any of those files should trigger a restart of any actively running
@@ -372,10 +371,6 @@ display “Sorbet: Idle.” before judging the diagnostics.</li>
 Sorbet (click on Sorbet in the status bar, and click on Restart Sorbet).</li>
 <li>If the diagnostics become fixed, then you might have discovered a bug in
 Sorbet.</li>
-<li>Another thing to check is whether the Problems tab in VS Code has the same
-errors as what Sorbet would report when run from the command line (assuming
-all files have been saved). If the list of errors is different, this usually
-represents a bug in Sorbet (so long as Sorbet is “Idle” in the IDE).</li>
 </ul>
 <p>If you arrive at a set of edits that mess up the diagnostics, please file a bug
 on the <a href="https://github.com/sorbet/sorbet/issues">issue tracker</a>.</p>
