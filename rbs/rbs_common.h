@@ -21,7 +21,7 @@ struct Comment {
 };
 
 /**
- * A parsed RBS method type.
+ * A parsed RBS method type, this is the equivalent of a `sig` block  on a method with vanilla Sorbet.
  */
 struct MethodType {
     core::LocOffsets loc;
@@ -29,7 +29,7 @@ struct MethodType {
 };
 
 /**
- * A parsed RBS type.
+ * A parsed RBS type, this is the equivalent of a `sig` block on an attribute accessor with vanilla Sorbet.
  */
 struct Type {
     core::LocOffsets loc;
