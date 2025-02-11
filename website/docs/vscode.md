@@ -254,7 +254,7 @@ This feature is powered by a custom extension to the LSP specification:
 
 The same feature is also available as a right-click context menu item:
 
-<video autoplay loop muted playsinline width="597">
+<video autoplay loop muted playsinline style="max-width: 597px;">
   <source src="/img/copy-symbol.mp4" type="video/mp4">
 </video>
 
