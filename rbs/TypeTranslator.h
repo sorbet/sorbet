@@ -17,7 +17,7 @@ public:
      * - `(A | B)` -> `T.any(A, B)`
      */
     static ast::ExpressionPtr toRBI(core::MutableContext ctx,
-                                    std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                    const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
                                     rbs_node_t *node, core::LocOffsets loc);
 
     /**

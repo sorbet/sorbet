@@ -8,13 +8,13 @@ namespace sorbet::rbs {
 
 namespace {
 
-bool hasTypeParam(core::MutableContext ctx, std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+bool hasTypeParam(core::MutableContext ctx, const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
                   std::string_view name) {
     return absl::c_any_of(typeParams, [&](const auto &param) { return param.second.toString(ctx.state) == name; });
 }
 
 ast::ExpressionPtr typeNameType(core::MutableContext ctx,
-                                std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
                                 rbs_typename_t *typeName, bool isGeneric, core::LocOffsets loc) {
     rbs_node_list *typePath = typeName->rbs_namespace->path;
 
@@ -78,7 +78,7 @@ ast::ExpressionPtr typeNameType(core::MutableContext ctx,
 }
 
 ast::ExpressionPtr classInstanceType(core::MutableContext ctx,
-                                     std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                     const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
                                      rbs_types_classinstance_t *node, core::LocOffsets loc) {
     auto offsets = TypeTranslator::nodeLoc(loc, (rbs_node_t *)node);
     auto argsValue = node->args;
@@ -100,7 +100,7 @@ ast::ExpressionPtr classInstanceType(core::MutableContext ctx,
 }
 
 ast::ExpressionPtr classSingletonType(core::MutableContext ctx,
-                                      std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                      const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
                                       rbs_types_classsingleton_t *node, core::LocOffsets loc) {
     auto offsets = TypeTranslator::nodeLoc(loc, (rbs_node_t *)node);
     auto innerType = typeNameType(ctx, typeParams, node->name, false, offsets);
@@ -108,7 +108,7 @@ ast::ExpressionPtr classSingletonType(core::MutableContext ctx,
 }
 
 ast::ExpressionPtr unionType(core::MutableContext ctx,
-                             std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                             const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
                              rbs_types_union_t *node, core::LocOffsets loc) {
     auto typesStore = ast::Send::ARGS_store();
 
@@ -121,7 +121,7 @@ ast::ExpressionPtr unionType(core::MutableContext ctx,
 }
 
 ast::ExpressionPtr intersectionType(core::MutableContext ctx,
-                                    std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                    const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
                                     rbs_types_intersection_t *node, core::LocOffsets loc) {
     auto typesStore = ast::Send::ARGS_store();
 
@@ -134,7 +134,7 @@ ast::ExpressionPtr intersectionType(core::MutableContext ctx,
 }
 
 ast::ExpressionPtr optionalType(core::MutableContext ctx,
-                                std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
                                 rbs_types_optional_t *node, core::LocOffsets loc) {
     auto innerType = TypeTranslator::toRBI(ctx, typeParams, node->type, loc);
 
@@ -154,7 +154,7 @@ ast::ExpressionPtr voidType(core::MutableContext ctx, rbs_types_bases_void_t *no
 }
 
 ast::ExpressionPtr functionType(core::MutableContext ctx,
-                                std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
                                 rbs_types_function_t *node, core::LocOffsets loc) {
     auto paramsStore = ast::Send::ARGS_store();
     int i = 0;
@@ -192,8 +192,8 @@ ast::ExpressionPtr functionType(core::MutableContext ctx,
 }
 
 ast::ExpressionPtr procType(core::MutableContext ctx,
-                            std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams, rbs_types_proc_t *node,
-                            core::LocOffsets docLoc) {
+                            const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
+                            rbs_types_proc_t *node, core::LocOffsets docLoc) {
     auto loc = TypeTranslator::nodeLoc(docLoc, (rbs_node_t *)node);
     auto function = ast::MK::Untyped(loc);
 
@@ -226,7 +226,7 @@ ast::ExpressionPtr procType(core::MutableContext ctx,
 }
 
 ast::ExpressionPtr blockType(core::MutableContext ctx,
-                             std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                             const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
                              rbs_types_block_t *node, core::LocOffsets docLoc) {
     auto loc = TypeTranslator::nodeLoc(docLoc, (rbs_node_t *)node);
     auto function = ast::MK::Untyped(loc);
@@ -266,7 +266,7 @@ ast::ExpressionPtr blockType(core::MutableContext ctx,
 }
 
 ast::ExpressionPtr tupleType(core::MutableContext ctx,
-                             std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                             const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
                              rbs_types_tuple_t *node, core::LocOffsets loc) {
     auto typesStore = ast::Array::ENTRY_store();
 
@@ -279,7 +279,7 @@ ast::ExpressionPtr tupleType(core::MutableContext ctx,
 }
 
 ast::ExpressionPtr recordType(core::MutableContext ctx,
-                              std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                              const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
                               rbs_types_record_t *node, core::LocOffsets loc) {
     auto keysStore = ast::Hash::ENTRY_store();
     auto valuesStore = ast::Hash::ENTRY_store();
@@ -346,7 +346,7 @@ core::LocOffsets TypeTranslator::nodeLoc(core::LocOffsets offset, rbs_node_t *no
 }
 
 ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
-                                         std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                         const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
                                          rbs_node_t *node, core::LocOffsets docLoc) {
     switch (node->type) {
         case RBS_TYPES_ALIAS: {
