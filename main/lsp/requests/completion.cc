@@ -668,13 +668,11 @@ vector<core::NameRef> localNamesForMethod(LSPTypecheckerDelegate &typechecker, c
 
 core::MethodRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const core::Loc queryLoc) {
     const auto &gs = typechecker.state();
-    auto resolved = typechecker.getResolved({queryLoc.file()});
+    auto resolved = typechecker.getResolved(queryLoc.file());
 
     NextMethodFinder nextMethodFinder(queryLoc);
-    for (auto &t : resolved) {
-        auto ctx = core::Context(gs, core::Symbols::root(), t.file);
-        ast::ConstTreeWalk::apply(ctx, nextMethodFinder, t.tree);
-    }
+    auto ctx = core::Context(gs, core::Symbols::root(), resolved.file);
+    ast::ConstTreeWalk::apply(ctx, nextMethodFinder, resolved.tree);
 
     return nextMethodFinder.result();
 }

@@ -167,9 +167,8 @@ vector<unique_ptr<TextEdit>> moveMethod(LSPTypecheckerDelegate &typechecker, con
 
     auto fref = definition.termLoc.file();
 
-    auto trees = typechecker.getResolved({fref});
-    ENFORCE(!trees.empty());
-    auto &rootTree = trees[0].tree;
+    auto resolvedTree = typechecker.getResolved({fref});
+    auto &rootTree = resolvedTree.tree;
 
     auto sigAndMethodLocs = methodLocs(gs, rootTree, definition.symbol, fref);
     if (!sigAndMethodLocs.has_value()) {

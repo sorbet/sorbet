@@ -757,6 +757,19 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileR
     return pipeline::incrementalResolve(*gs, move(updatedIndexed), move(foundHashesForFiles), config->opts, workers);
 }
 
+ast::ParsedFile LSPTypechecker::getResolved(core::FileRef fref, WorkerPool &workers) const {
+    std::vector<ast::ParsedFile> trees = this->getResolved(std::initializer_list<core::FileRef>{fref}, workers);
+
+    ENFORCE(trees.size() == 1);
+    // This is defensive. We should always get a tree back for files that have been through the slow path, but just in
+    // case we catch that here and return an empty tree.
+    if (trees.size() != 1) {
+        return ast::ParsedFile{nullptr, fref};
+    } else {
+        return std::move(trees.front());
+    }
+}
+
 const core::GlobalState &LSPTypechecker::state() const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     return *gs;
@@ -829,6 +842,10 @@ const ast::ParsedFile &LSPTypecheckerDelegate::getIndexed(core::FileRef fref) co
 
 std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(absl::Span<const core::FileRef> frefs) const {
     return typechecker.getResolved(frefs, workers);
+}
+
+ast::ParsedFile LSPTypecheckerDelegate::getResolved(core::FileRef fref) const {
+    return typechecker.getResolved(fref, workers);
 }
 
 ast::ExpressionPtr LSPTypecheckerDelegate::getLocalVarTrees(core::FileRef fref) const {
