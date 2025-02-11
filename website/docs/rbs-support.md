@@ -168,7 +168,8 @@ def foo(x); end
 
 #### Literal types
 
-Literal types are not supported, use the equivalent class instance type instead:
+Sorbet does not support RBS's concept of "literal types". The next best thing is
+to use the literal's underlying type instead:
 
 - `1` is `Integer`
 - `"foo"` is `String`
@@ -176,3 +177,5 @@ Literal types are not supported, use the equivalent class instance type instead:
 - `true` is `TrueClass`
 - `false` is `FalseClass`
 - `nil` is `NilClass`
+
+You can also consider using [`T.::Enum`](tenum.md).
