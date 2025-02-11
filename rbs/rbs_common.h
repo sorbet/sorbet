@@ -1,5 +1,5 @@
-#ifndef RBS_COMMON_H
-#define RBS_COMMON_H
+#ifndef SORBET_RBS_COMMON_H
+#define SORBET_RBS_COMMON_H
 
 extern "C" {
 #include "include/rbs.h"
@@ -40,4 +40,4 @@ core::LocOffsets locFromRange(core::LocOffsets loc, const range &range);
 
 } // namespace sorbet::rbs
 
-#endif // RBS_COMMON_H
+#endif // SORBET_RBS_COMMON_H
