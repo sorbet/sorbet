@@ -36,7 +36,6 @@ struct Comments {
 };
 
 class RBSSignaturesWalk {
-    // TODO: review and clean up
     Comments findRBSComments(string_view sourceCode, core::LocOffsets loc) {
         vector<rbs::Comment> annotations;
         vector<rbs::Comment> signatures;
