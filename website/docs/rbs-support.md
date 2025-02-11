@@ -130,8 +130,9 @@ argument stays `Array`.
 
 #### Class types
 
-The `class` type in RBS is context sensitive and Sorbet does not support this
-feature yet. Instead, use the equivalent Sorbet syntax:
+The `class` type in RBS is context sensitive (depends on the class where it is
+used) and Sorbet does not support this feature yet. Instead, use the equivalent
+Sorbet syntax:
 
 ```ruby
 class Foo
