@@ -25,15 +25,20 @@ string examplePackagePath = "example/__package.rb";
 
 namespace sorbet {
 string makePackageRB(string name, string strictDeps, string layer, vector<string> imports = {},
-                     vector<string> exports = {}) {
+                     vector<string> testImports = {}) {
+    auto importList =
+        fmt::map_join(imports, "", [&](const auto &import) { return fmt::format("  import {}\n", import); });
+
+    auto testImportList = fmt::map_join(
+        testImports, "", [&](const auto &testImport) { return fmt::format("  test_import {}\n", testImport); });
+
     return fmt::format("class {} < PackageSpec\n"
                        "  strict_dependencies '{}'\n"
                        "  layer '{}'\n"
                        "{}"
+                       "{}"
                        "end\n",
-                       name, strictDeps, layer, fmt::map_join(imports, "", [&](const auto &import) {
-                           return fmt::format("  import {}\n", import);
-                       }));
+                       name, strictDeps, layer, importList, testImportList);
 }
 
 string falsePackageA = makePackageRB("FalsePackageA", "false", "lib");
@@ -601,12 +606,18 @@ TEST_CASE("Edge cases") {
                                  "end\n";
     string packageWithCommentsPath = "has_comments/__package.rb";
 
+    string packageWithTestImports =
+        makePackageRB("HasTestImports", "dag", "app", {}, {"FalsePackageA", "LayeredPackageA"});
+    string packageWithTestImportsPath = "has_test_imports/__package.rb";
+
     auto parsedFiles = enterPackages(gs, {{packageWithFakeImportPath, packageWithFakeImport},
                                           {falsePackageAPath, falsePackageA},
                                           {layeredPackageAPath, layeredPackageA},
                                           {libPackagePath, libPackage},
                                           {appPackagePath, appPackage},
-                                          {packageWithCommentsPath, packageWithComments}});
+                                          {packageWithCommentsPath, packageWithComments},
+                                          {packageWithTestImportsPath, packageWithTestImports},
+                                          {dagPackageAPath, dagPackageA}});
 
     {
         // Import list contains non-existent package
@@ -652,6 +663,20 @@ TEST_CASE("Edge cases") {
                           "end\n";
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
         auto replaced = addImport->applySingleEditForTesting(packageWithComments);
+        CHECK_EQ(expected, replaced);
+    }
+
+    {
+        // Add import to a package with a bunch of test imports
+        auto &hasTestImportsPkg = getPackageForFile(gs, parsedFiles[6].file);
+        ENFORCE(hasTestImportsPkg.exists());
+        auto &dagPkgA = getPackageForFile(gs, parsedFiles[7].file);
+        ENFORCE(dagPkgA.exists());
+
+        auto addImport = hasTestImportsPkg.addImport(gs, dagPkgA, false);
+        string expected =
+            makePackageRB("HasTestImports", "dag", "app", {"DagPackageA"}, {"FalsePackageA", "LayeredPackageA"});
+        auto replaced = addImport->applySingleEditForTesting(packageWithTestImports);
         CHECK_EQ(expected, replaced);
     }
 }

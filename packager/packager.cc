@@ -289,24 +289,37 @@ public:
     // - layering violations
     // - imports to 'false' packages
     // - imports to 'layered' or stricter packages
+    // - test imports
     // For strictDependenciesLevel::Layered and LayeredDag:
     // - layering violations
     // - imports to 'false' packages
     // - imports to 'layered' or 'layered_dag' packages
     // - imports to 'dag' packages
+    // - test imports
     // For strictDependenciesLevel::Dag:
     // - layering violations
     // - imports to 'false', 'layered', or 'layered_dag' packages
     // - imports to 'dag' packages
+    // - test imports
     // TODO(neil): explain the rationale behind this ordering (ie. why is not the simple "false < layered < layered_dag
     // < dag" ordering)
     // TODO(neil): implement alphabetical sort.
-    int orderByStrictness(const core::packages::PackageDB &packageDB, const PackageInfo &a,
-                          const PackageInfo &b) const {
+    int orderByStrictness(const core::packages::PackageDB &packageDB, const PackageInfo &a, bool aIsTestImport,
+                          const PackageInfo &b, bool bIsTestImport) const {
         if (!strictDependenciesLevel().has_value() || !a.strictDependenciesLevel().has_value() ||
             !b.strictDependenciesLevel().has_value() || !a.layer().has_value() || !b.layer().has_value()) {
             return 0;
         }
+
+        // Test imports always come last, and aren't sorted by `strict_dependencies`
+        if (aIsTestImport && bIsTestImport) {
+            return 0;
+        } else if (aIsTestImport && !bIsTestImport) {
+            return 1;
+        } else if (!aIsTestImport && bIsTestImport) {
+            return -1;
+        }
+
         // Layering violations always come first
         if (causesLayeringViolation(packageDB, a)) {
             if (causesLayeringViolation(packageDB, b)) {
@@ -392,14 +405,10 @@ public:
                     continue;
                 }
 
-                if (isTestImport) {
-                    // Test imports should always come at the end of the import list
+                auto compareResult = orderByStrictness(gs.packageDB(), info, isTestImport, importInfo,
+                                                       import.type == core::packages::ImportType::Test);
+                if (compareResult == 1 || compareResult == 0) {
                     importToInsertAfter = &import.name;
-                } else {
-                    auto compareResult = orderByStrictness(gs.packageDB(), info, importInfo);
-                    if (compareResult == 1 || compareResult == 0) {
-                        importToInsertAfter = &import.name;
-                    }
                 }
             }
             if (!importToInsertAfter) {
