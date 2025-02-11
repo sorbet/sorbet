@@ -25,6 +25,21 @@ namespace sorbet::core {
 
 using namespace std;
 
+namespace {
+// We create types pretty freely during inference, and even small programs can create a
+// large amount of types; see test/testdata/infer/is_subtype_timeout.rb for an example.
+// Recording counters for these types can take up a substantial amount of time for such
+// tests, and so we disable counting them altogether even in debug builds.
+//
+// If you want to compute a histogram of types, flip this to true and rebuild.
+constexpr bool countTypeAllocations = false;
+void recordAllocatedType(ConstExprStr kind) {
+    if constexpr (countTypeAllocations) {
+        categoryCounterInc("types.allocated", kind);
+    }
+}
+} // namespace
+
 TypePtr Types::top() {
     return make_type<ClassType>(Symbols::top());
 }
@@ -359,7 +374,7 @@ std::optional<int> Types::getProcArity(const AppliedType &type) {
 }
 
 ClassType::ClassType(ClassOrModuleRef symbol) : symbol(symbol) {
-    categoryCounterInc("types.allocated", "classtype");
+    recordAllocatedType("classtype");
     ENFORCE(symbol.exists());
 }
 
@@ -373,9 +388,9 @@ void sanityCheckProxyType(const GlobalState &gs, TypePtr underlying) {
 NamedLiteralType::NamedLiteralType(ClassOrModuleRef klass, NameRef val)
     : name(val), literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
     if (klass == Symbols::String()) {
-        categoryCounterInc("types.allocated", "literaltype.string");
+        recordAllocatedType("literaltype.string");
     } else {
-        categoryCounterInc("types.allocated", "literaltype.symbol");
+        recordAllocatedType("literaltype.symbol");
     }
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
 }
@@ -400,7 +415,7 @@ TypePtr NamedLiteralType::underlying(const GlobalState &gs) const {
 }
 
 IntegerLiteralType::IntegerLiteralType(int64_t val) : value(val) {
-    categoryCounterInc("types.allocated", "literalintegertype");
+    recordAllocatedType("literalintegertype");
 }
 
 TypePtr IntegerLiteralType::underlying(const GlobalState &gs) const {
@@ -408,7 +423,7 @@ TypePtr IntegerLiteralType::underlying(const GlobalState &gs) const {
 }
 
 FloatLiteralType::FloatLiteralType(double val) : value(val) {
-    categoryCounterInc("types.allocated", "floatliteraltype");
+    recordAllocatedType("floatliteraltype");
 }
 
 TypePtr FloatLiteralType::underlying(const GlobalState &gs) const {
@@ -416,12 +431,12 @@ TypePtr FloatLiteralType::underlying(const GlobalState &gs) const {
 }
 
 TupleType::TupleType(vector<TypePtr> elements) : elems(move(elements)) {
-    categoryCounterInc("types.allocated", "tupletype");
+    recordAllocatedType("tupletype");
     histogramInc("tupletype.elems", this->elems.size());
 }
 
 AndType::AndType(const TypePtr &left, const TypePtr &right) : left(move(left)), right(move(right)) {
-    categoryCounterInc("types.allocated", "andtype");
+    recordAllocatedType("andtype");
 }
 
 void NamedLiteralType::_sanityCheck(const GlobalState &gs) const {
@@ -456,7 +471,7 @@ bool FloatLiteralType::equals(const FloatLiteralType &rhs) const {
 }
 
 OrType::OrType(const TypePtr &left, const TypePtr &right) : left(move(left)), right(move(right)) {
-    categoryCounterInc("types.allocated", "ortype");
+    recordAllocatedType("ortype");
 }
 
 void TupleType::_sanityCheck(const GlobalState &gs) const {
@@ -472,7 +487,7 @@ ShapeType::ShapeType(vector<TypePtr> keys, vector<TypePtr> values) : keys(move(k
                     : this->keys) {
         ENFORCE(isa_type<NamedLiteralType>(k) || isa_type<IntegerLiteralType>(k) || isa_type<FloatLiteralType>(k));
     };);
-    categoryCounterInc("types.allocated", "shapetype");
+    recordAllocatedType("shapetype");
     histogramInc("shapetype.keys", this->keys.size());
 }
 
@@ -558,7 +573,7 @@ void ShapeType::_sanityCheck(const GlobalState &gs) const {
 }
 
 AliasType::AliasType(SymbolRef other) : symbol(other) {
-    categoryCounterInc("types.allocated", "aliastype");
+    recordAllocatedType("aliastype");
 }
 
 void AndType::_sanityCheck(const GlobalState &gs) const {
@@ -708,7 +723,7 @@ bool TypeVar::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
 }
 
 MetaType::MetaType(const TypePtr &wrapped) : wrapped(move(wrapped)) {
-    categoryCounterInc("types.allocated", "metattype");
+    recordAllocatedType("metattype");
 }
 
 bool MetaType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
@@ -720,7 +735,7 @@ TypePtr MetaType::underlying(const GlobalState &gs) const {
 }
 
 TypeVar::TypeVar(TypeArgumentRef sym) : sym(sym) {
-    categoryCounterInc("types.allocated", "typevar");
+    recordAllocatedType("typevar");
 }
 
 void TypeVar::_sanityCheck(const GlobalState &gs) const {
@@ -747,11 +762,11 @@ bool AppliedType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) con
 
 LambdaParam::LambdaParam(const TypeMemberRef definition, TypePtr lowerBound, TypePtr upperBound)
     : definition(definition), lowerBound(lowerBound), upperBound(upperBound) {
-    categoryCounterInc("types.allocated", "lambdatypeparam");
+    recordAllocatedType("lambdatypeparam");
 }
 
 SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition) {
-    categoryCounterInc("types.allocated", "selftypeparam");
+    recordAllocatedType("selftypeparam");
 }
 
 bool LambdaParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
@@ -803,10 +818,10 @@ TypePtr TupleType::elementType(const GlobalState &gs) const {
 }
 
 SelfType::SelfType() {
-    categoryCounterInc("types.allocated", "selftype");
+    recordAllocatedType("selftype");
 };
 AppliedType::AppliedType(ClassOrModuleRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
-    categoryCounterInc("types.allocated", "appliedtype");
+    recordAllocatedType("appliedtype");
     histogramInc("appliedtype.targs", this->targs.size());
 }
 
