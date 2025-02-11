@@ -2638,8 +2638,11 @@ class ResolveTypeMembersAndFieldsWalk {
         ENFORCE(lambdaParam != nullptr);
 
         if (isTodo(lambdaParam->lowerBound)) {
-            lambdaParam->upperBound = sym.data(ctx)->unsafeComputeExternalType(ctx);
-            lambdaParam->lowerBound = core::Types::bottom();
+            auto data = sym.data(ctx);
+            auto externalType = data->unsafeComputeExternalType(ctx);
+            lambdaParam->upperBound = externalType;
+            // Allow treating `T.attached_class` as the class itself in final classes
+            lambdaParam->lowerBound = data->flags.isFinal ? externalType : core::Types::bottom();
         }
 
         // If all of the singleton members have been resolved, attempt to
