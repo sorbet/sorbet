@@ -13,14 +13,18 @@ public:
      *
      * This is used to parse comments like `#: () -> void` found on method definitions.
      */
-    static std::optional<MethodType> parseSignature(core::Context ctx, Comment comment);
+    static std::pair<std::optional<MethodType>, std::optional<ParseError>> parseSignature(core::Context ctx,
+                                                                                          Comment comment);
 
     /**
      * Parse an RBS type string into a RBS AST node.
      *
      * This is used to parse comments like `#: Integer` found on attribute accessors.
+     *
+     * @param isAccessorType - Whether the type is being parsed for an attribute accessor, which
+     *                        will produce tailored error messages.
      */
-    static std::optional<Type> parseType(core::Context ctx, Comment comment);
+    static std::pair<std::optional<Type>, std::optional<ParseError>> parseType(core::Context ctx, Comment comment);
 };
 
 } // namespace sorbet::rbs

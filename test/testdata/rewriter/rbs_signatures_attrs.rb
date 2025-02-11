@@ -20,7 +20,7 @@ class Foo
   attr_writer # error: RBS signatures do not support attr_writer without arguments
 
   #: -> Integer
-  #  ^^ error: Failed to parse RBS type (unexpected token for simple type)
+  #  ^^ error: Using a method signature on an accessor is not allowed, use a bare type instead
   attr_reader :quux3 # error: The method `quux3` does not have a `sig`
 
   #: -> void

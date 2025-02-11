@@ -36,6 +36,14 @@ struct Type {
     std::unique_ptr<rbs_node_t> node;
 };
 
+/**
+ * An error that occurred while parsing an RBS type or method signature.
+ */
+struct ParseError {
+    core::LocOffsets loc;
+    std::string message;
+};
+
 core::LocOffsets locFromRange(core::LocOffsets loc, const range &range);
 
 } // namespace sorbet::rbs

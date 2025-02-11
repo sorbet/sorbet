@@ -1,5 +1,4 @@
 #include "rbs/RBSParser.h"
-#include "core/errors/rewriter.h"
 
 using namespace std;
 
@@ -13,7 +12,7 @@ rbs_string_t makeRBSString(const string_view &str) {
     };
 }
 
-optional<MethodType> RBSParser::parseSignature(core::Context ctx, Comment comment) {
+pair<optional<MethodType>, optional<ParseError>> RBSParser::parseSignature(core::Context ctx, Comment comment) {
     rbs_string_t rbsString = makeRBSString(comment.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
@@ -28,17 +27,14 @@ optional<MethodType> RBSParser::parseSignature(core::Context ctx, Comment commen
 
     if (parser->error) {
         core::LocOffsets offset = locFromRange(comment.loc, parser->error->token.range);
-        if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSSyntaxError)) {
-            e.setHeader("Failed to parse RBS signature ({})", parser->error->message);
-        }
 
-        return nullopt;
+        return make_pair(nullopt, ParseError{offset, parser->error->message});
     }
 
-    return MethodType{comment.loc, unique_ptr<rbs_methodtype_t>(rbsMethodType)};
+    return make_pair(MethodType{comment.loc, unique_ptr<rbs_methodtype_t>(rbsMethodType)}, nullopt);
 }
 
-optional<Type> RBSParser::parseType(core::Context ctx, Comment comment) {
+pair<optional<Type>, optional<ParseError>> RBSParser::parseType(core::Context ctx, Comment comment) {
     rbs_string_t rbsString = makeRBSString(comment.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
@@ -53,14 +49,11 @@ optional<Type> RBSParser::parseType(core::Context ctx, Comment comment) {
 
     if (parser->error) {
         core::LocOffsets offset = locFromRange(comment.loc, parser->error->token.range);
-        if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSSyntaxError)) {
-            e.setHeader("Failed to parse RBS type ({})", parser->error->message);
-        }
 
-        return nullopt;
+        return make_pair(nullopt, ParseError{offset, parser->error->message});
     }
 
-    return Type{comment.loc, unique_ptr<rbs_node_t>(rbsType)};
+    return make_pair(Type{comment.loc, unique_ptr<rbs_node_t>(rbsType)}, nullopt);
 }
 
 } // namespace sorbet::rbs
