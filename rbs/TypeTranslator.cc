@@ -48,12 +48,23 @@ ast::ExpressionPtr typeNameType(core::MutableContext ctx,
         if (isGeneric) {
             if (nameStr == "Array") {
                 return ast::MK::T_Array(loc);
+            } else if (nameStr == "Class") {
+                return ast::MK::T_Class(loc);
+            } else if (nameStr == "Enumerable") {
+                return ast::MK::T_Enumerable(loc);
+            } else if (nameStr == "Enumerator") {
+                return ast::MK::T_Enumerator(loc);
+                // TODO: support lazy and chain enumerator
+                // } else if (nameRef == core::Names::Constants::EnumeratorLazy()) {
+                //     return ast::MK::T_Enumerator_Lazy(loc);
+                // } else if (nameRef == core::Names::Constants::EnumeratorChain()) {
+                //     return ast::MK::T_Enumerator_Chain(loc);
             } else if (nameStr == "Hash") {
                 return ast::MK::T_Hash(loc);
             } else if (nameStr == "Set") {
                 return ast::MK::T_Set(loc);
-            } else if (nameStr == "Class") {
-                return ast::MK::T_Class(loc);
+            } else if (nameStr == "Range") {
+                return ast::MK::T_Range(loc);
             }
         } else if (hasTypeParam(ctx, typeParams, nameStr)) {
             auto name = ctx.state.enterNameUTF8(nameStr);

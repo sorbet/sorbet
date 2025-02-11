@@ -454,6 +454,14 @@ public:
         return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Hash()});
     }
 
+    static ExpressionPtr T_Enumerable(core::LocOffsets loc) {
+        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Enumerable()});
+    }
+
+    static ExpressionPtr T_Enumerator(core::LocOffsets loc) {
+        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Enumerator()});
+    }
+
     static ExpressionPtr T_Proc(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr ret) {
         auto proc = Send0(loc, T(loc), core::Names::proc(), loc.copyWithZeroLength());
         auto params = Params(loc, std::move(proc), std::move(args));
@@ -464,6 +472,10 @@ public:
         auto proc = Send0(loc, T(loc), core::Names::proc(), loc.copyWithZeroLength());
         auto params = Params(loc, std::move(proc), std::move(args));
         return Send0(loc, std::move(params), core::Names::void_(), loc.copyWithZeroLength());
+    }
+
+    static ExpressionPtr T_Range(core::LocOffsets loc) {
+        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Range()});
     }
 
     static ExpressionPtr T_Set(core::LocOffsets loc) {
