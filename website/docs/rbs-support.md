@@ -1,7 +1,7 @@
 ---
 id: rbs-support
-title: RBS Support
-sidebar_label: RBS Support
+title: RBS comments support
+sidebar_label: RBS comments support
 ---
 
 > This feature is experimental and might be changed or removed without notice.
