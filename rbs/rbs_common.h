@@ -36,6 +36,8 @@ struct Type {
     std::unique_ptr<rbs_node_t> node;
 };
 
+core::LocOffsets locFromRange(core::LocOffsets loc, const range &range);
+
 } // namespace sorbet::rbs
 
 #endif // RBS_COMMON_H

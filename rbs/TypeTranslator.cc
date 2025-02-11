@@ -82,7 +82,7 @@ ast::ExpressionPtr typeNameType(core::MutableContext ctx,
 ast::ExpressionPtr classInstanceType(core::MutableContext ctx,
                                      const vector<pair<core::LocOffsets, core::NameRef>> &typeParams,
                                      rbs_types_classinstance_t *node, core::LocOffsets loc) {
-    auto offsets = TypeTranslator::nodeLoc(loc, (rbs_node_t *)node);
+    auto offsets = locFromRange(loc, ((rbs_node_t *)node)->location->rg);
     auto argsValue = node->args;
     auto isGeneric = argsValue != nullptr && argsValue->length > 0;
     auto typeConstant = typeNameType(ctx, typeParams, node->name, isGeneric, offsets);
@@ -104,7 +104,7 @@ ast::ExpressionPtr classInstanceType(core::MutableContext ctx,
 ast::ExpressionPtr classSingletonType(core::MutableContext ctx,
                                       const vector<pair<core::LocOffsets, core::NameRef>> &typeParams,
                                       rbs_types_classsingleton_t *node, core::LocOffsets loc) {
-    auto offsets = TypeTranslator::nodeLoc(loc, (rbs_node_t *)node);
+    auto offsets = locFromRange(loc, ((rbs_node_t *)node)->location->rg);
     auto innerType = typeNameType(ctx, typeParams, node->name, false, offsets);
     return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::classOf(), loc, move(innerType));
 }
@@ -194,7 +194,7 @@ ast::ExpressionPtr functionType(core::MutableContext ctx,
 
 ast::ExpressionPtr procType(core::MutableContext ctx, const vector<pair<core::LocOffsets, core::NameRef>> &typeParams,
                             rbs_types_proc_t *node, core::LocOffsets docLoc) {
-    auto loc = TypeTranslator::nodeLoc(docLoc, (rbs_node_t *)node);
+    auto loc = locFromRange(docLoc, ((rbs_node_t *)node)->location->rg);
     auto function = ast::MK::Untyped(loc);
 
     rbs_node_t *functionTypeNode = node->type;
@@ -207,7 +207,7 @@ ast::ExpressionPtr procType(core::MutableContext ctx, const vector<pair<core::Lo
             return function;
         }
         default: {
-            auto errLoc = TypeTranslator::nodeLoc(docLoc, functionTypeNode);
+            auto errLoc = locFromRange(docLoc, functionTypeNode->location->rg);
             if (auto e = ctx.beginError(errLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in proc type, expected `{}`",
                             rbs_node_type_name(functionTypeNode), "Function");
@@ -217,7 +217,7 @@ ast::ExpressionPtr procType(core::MutableContext ctx, const vector<pair<core::Lo
 
     rbs_node_t *selfNode = node->self_type;
     if (selfNode != nullptr) {
-        auto selfLoc = TypeTranslator::nodeLoc(loc, selfNode);
+        auto selfLoc = locFromRange(loc, selfNode->location->rg);
         auto selfType = TypeTranslator::toRBI(ctx, typeParams, selfNode, selfLoc);
         function = ast::MK::Send1(loc, move(function), core::Names::bind(), loc, move(selfType));
     }
@@ -227,7 +227,7 @@ ast::ExpressionPtr procType(core::MutableContext ctx, const vector<pair<core::Lo
 
 ast::ExpressionPtr blockType(core::MutableContext ctx, const vector<pair<core::LocOffsets, core::NameRef>> &typeParams,
                              rbs_types_block_t *node, core::LocOffsets docLoc) {
-    auto loc = TypeTranslator::nodeLoc(docLoc, (rbs_node_t *)node);
+    auto loc = locFromRange(docLoc, ((rbs_node_t *)node)->location->rg);
     auto function = ast::MK::Untyped(loc);
 
     rbs_node_t *functionTypeNode = node->type;
@@ -240,7 +240,7 @@ ast::ExpressionPtr blockType(core::MutableContext ctx, const vector<pair<core::L
             return function;
         }
         default: {
-            auto errLoc = TypeTranslator::nodeLoc(docLoc, functionTypeNode);
+            auto errLoc = locFromRange(docLoc, functionTypeNode->location->rg);
             if (auto e = ctx.beginError(errLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in block type, expected `{}`",
                             rbs_node_type_name(functionTypeNode), "Function");
@@ -252,7 +252,7 @@ ast::ExpressionPtr blockType(core::MutableContext ctx, const vector<pair<core::L
 
     rbs_node_t *selfNode = node->self_type;
     if (selfNode != nullptr) {
-        auto selfLoc = TypeTranslator::nodeLoc(docLoc, selfNode);
+        auto selfLoc = locFromRange(docLoc, selfNode->location->rg);
         auto selfType = TypeTranslator::toRBI(ctx, typeParams, selfNode, selfLoc);
         function = ast::MK::Send1(selfLoc, move(function), core::Names::bind(), selfLoc, move(selfType));
     }
@@ -334,20 +334,12 @@ ast::ExpressionPtr variableType(core::MutableContext ctx, rbs_types_variable_t *
 
 } // namespace
 
-core::LocOffsets TypeTranslator::nodeLoc(core::LocOffsets offset, rbs_node_t *node) {
-    auto loc = node->location;
-    return core::LocOffsets{
-        offset.beginPos() + loc->rg.start.char_pos + 2,
-        offset.beginPos() + loc->rg.end.char_pos + 2,
-    };
-}
-
 ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
                                          const vector<pair<core::LocOffsets, core::NameRef>> &typeParams,
                                          rbs_node_t *node, core::LocOffsets docLoc) {
     switch (node->type) {
         case RBS_TYPES_ALIAS: {
-            auto loc = TypeTranslator::nodeLoc(docLoc, node);
+            auto loc = locFromRange(docLoc, node->location->rg);
             if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS aliases are not supported yet");
             }
@@ -360,7 +352,7 @@ ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
         case RBS_TYPES_BASES_BOTTOM:
             return ast::MK::NoReturn(docLoc);
         case RBS_TYPES_BASES_CLASS: {
-            auto loc = TypeTranslator::nodeLoc(docLoc, node);
+            auto loc = locFromRange(docLoc, node->location->rg);
             if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS type `{}` is not supported yet", "class");
             }
@@ -385,7 +377,7 @@ ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
         case RBS_TYPES_FUNCTION:
             return functionType(ctx, typeParams, (rbs_types_function_t *)node, docLoc);
         case RBS_TYPES_INTERFACE: {
-            auto loc = TypeTranslator::nodeLoc(docLoc, node);
+            auto loc = locFromRange(docLoc, node->location->rg);
             if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS interfaces are not supported yet");
             }
@@ -394,7 +386,7 @@ ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
         case RBS_TYPES_INTERSECTION:
             return intersectionType(ctx, typeParams, (rbs_types_intersection_t *)node, docLoc);
         case RBS_TYPES_LITERAL: {
-            auto loc = TypeTranslator::nodeLoc(docLoc, node);
+            auto loc = locFromRange(docLoc, node->location->rg);
             if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS literal types are not supported yet");
             }
@@ -413,7 +405,7 @@ ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
         case RBS_TYPES_VARIABLE:
             return variableType(ctx, (rbs_types_variable_t *)node, docLoc);
         default: {
-            auto errLoc = TypeTranslator::nodeLoc(docLoc, node);
+            auto errLoc = locFromRange(docLoc, node->location->rg);
             if (auto e = ctx.beginError(errLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}`", rbs_node_type_name(node));
             }

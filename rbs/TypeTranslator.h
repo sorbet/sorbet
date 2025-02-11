@@ -19,11 +19,6 @@ public:
     static ast::ExpressionPtr toRBI(core::MutableContext ctx,
                                     const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
                                     rbs_node_t *node, core::LocOffsets loc);
-
-    /**
-     * Get the location offset from a RBS location.
-     */
-    static core::LocOffsets nodeLoc(core::LocOffsets offset, rbs_node_t *node);
 };
 
 } // namespace sorbet::rbs

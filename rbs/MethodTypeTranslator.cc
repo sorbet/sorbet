@@ -49,7 +49,7 @@ void collectArgs(core::MutableContext ctx, core::LocOffsets docLoc, rbs_node_lis
                 "Unexpected node type `{}` in function parameter list, expected `{}`",
                 rbs_node_type_name(list_node->node), "FunctionParam");
 
-        auto loc = TypeTranslator::nodeLoc(docLoc, list_node->node);
+        auto loc = locFromRange(docLoc, list_node->node->location->rg);
         auto node = (rbs_types_function_param_t *)list_node->node;
         auto arg = RBSArg{loc, node->name, node->type};
         args.emplace_back(arg);
@@ -85,7 +85,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
     const auto &node = *methodType.node;
 
     if (node.type->type != RBS_TYPES_FUNCTION) {
-        auto errLoc = TypeTranslator::nodeLoc(methodType.loc, node.type);
+        auto errLoc = locFromRange(methodType.loc, node.type->location->rg);
         if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSUnsupported)) {
             e.setHeader("Unexpected node type `{}` in method signature, expected `{}`", rbs_node_type_name(node.type),
                         "Function");
@@ -99,7 +99,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
 
     vector<pair<core::LocOffsets, core::NameRef>> typeParams;
     for (rbs_node_list_node_t *list_node = node.type_params->head; list_node != nullptr; list_node = list_node->next) {
-        auto loc = TypeTranslator::nodeLoc(methodType.loc, list_node->node);
+        auto loc = locFromRange(methodType.loc, list_node->node->location->rg);
 
         ENFORCE(list_node->node->type == RBS_AST_TYPEPARAM,
                 "Unexpected node type `{}` in type parameter list, expected `{}`", rbs_node_type_name(list_node->node),
@@ -124,7 +124,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
                 "Unexpected node type `{}` in rest positional argument, expected `{}`",
                 rbs_node_type_name(restPositionals), "FunctionParam");
 
-        auto loc = TypeTranslator::nodeLoc(methodType.loc, restPositionals);
+        auto loc = locFromRange(methodType.loc, restPositionals->location->rg);
         auto node = (rbs_types_function_param_t *)restPositionals;
         auto arg = RBSArg{loc, node->name, node->type};
         args.emplace_back(arg);
@@ -143,7 +143,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
                 "Unexpected node type `{}` in rest keyword argument, expected `{}`", rbs_node_type_name(restKeywords),
                 "FunctionParam");
 
-        auto loc = TypeTranslator::nodeLoc(methodType.loc, restKeywords);
+        auto loc = locFromRange(methodType.loc, restKeywords->location->rg);
         auto node = (rbs_types_function_param_t *)restKeywords;
         auto arg = RBSArg{loc, node->name, node->type};
         args.emplace_back(arg);
@@ -225,7 +225,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
 
     rbs_node_t *returnValue = functionType->return_type;
     if (returnValue->type == RBS_TYPES_BASES_VOID) {
-        auto loc = TypeTranslator::nodeLoc(methodType.loc, returnValue);
+        auto loc = locFromRange(methodType.loc, returnValue->location->rg);
         sigBuilder = ast::MK::Send0(loc, move(sigBuilder), core::Names::void_(), loc);
     } else {
         auto returnType = TypeTranslator::toRBI(ctx, typeParams, returnValue, methodType.loc);
