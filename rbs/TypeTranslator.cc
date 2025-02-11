@@ -341,7 +341,7 @@ ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
         case RBS_TYPES_ALIAS: {
             auto loc = locFromRange(docLoc, node->location->rg);
             if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
-                e.setHeader("RBS aliases are not supported yet");
+                e.setHeader("RBS aliases are not supported");
             }
             return ast::MK::Untyped(docLoc);
         }
@@ -354,7 +354,7 @@ ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
         case RBS_TYPES_BASES_CLASS: {
             auto loc = locFromRange(docLoc, node->location->rg);
             if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
-                e.setHeader("RBS type `{}` is not supported yet", "class");
+                e.setHeader("RBS type `{}` is not supported", "class");
             }
             return ast::MK::Untyped(docLoc);
         }
@@ -379,7 +379,7 @@ ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
         case RBS_TYPES_INTERFACE: {
             auto loc = locFromRange(docLoc, node->location->rg);
             if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
-                e.setHeader("RBS interfaces are not supported yet");
+                e.setHeader("RBS interfaces are not supported");
             }
             return ast::MK::Untyped(docLoc);
         }
@@ -388,7 +388,7 @@ ast::ExpressionPtr TypeTranslator::toRBI(core::MutableContext ctx,
         case RBS_TYPES_LITERAL: {
             auto loc = locFromRange(docLoc, node->location->rg);
             if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
-                e.setHeader("RBS literal types are not supported yet");
+                e.setHeader("RBS literal types are not supported");
             }
             return ast::MK::Untyped(docLoc);
         }

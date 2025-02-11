@@ -93,7 +93,7 @@ T.reveal_type(BaseType2.base_type2) # error: Revealed type: `BaseType2`
 
 # TODO: unsupported
 #: -> class
-#     ^^^^^ error: RBS type `class` is not supported yet
+#     ^^^^^ error: RBS type `class` is not supported
 def base_type3; T.unsafe(nil); end
 T.reveal_type(base_type3) # error: Revealed type: `T.untyped`
 
@@ -215,21 +215,21 @@ T.reveal_type(base_type_last) # error: This code is unreachable
 # Alias types (not yet supported)
 
 #: -> foo
-#     ^^^ error: RBS aliases are not supported yet
+#     ^^^ error: RBS aliases are not supported
 def alias_type1; T.unsafe(nil); end
 
 # TODO: unsupported
 # Interface types (not yet supported)
 
 #: -> _A
-#     ^^ error: RBS interfaces are not supported yet
+#     ^^ error: RBS interfaces are not supported
 def interface_type1; T.unsafe(nil); end
 
 # TODO: unsupported
 # Literal types (not yet supported)
 
 #: -> "foo"
-#     ^^^^^ error: RBS literal types are not supported yet
+#     ^^^^^ error: RBS literal types are not supported
 def literal_type1; T.unsafe(nil); end
 
 # TODO: unsupported
