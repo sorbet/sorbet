@@ -45,14 +45,16 @@ ast::ExpressionPtr typeNameType(core::MutableContext ctx,
     std::string_view nameStr(name->start, name->length);
 
     if (typePath == nullptr || typePath->length == 0) {
-        if (nameStr == "Array" && isGeneric) {
-            return ast::MK::T_Array(loc);
-        } else if (nameStr == "Hash" && isGeneric) {
-            return ast::MK::T_Hash(loc);
-        } else if (nameStr == "Set" && isGeneric) {
-            return ast::MK::T_Set(loc);
-        } else if (nameStr == "Class" && isGeneric) {
-            return ast::MK::T_Class(loc);
+        if (isGeneric) {
+            if (nameStr == "Array") {
+                return ast::MK::T_Array(loc);
+            } else if (nameStr == "Hash") {
+                return ast::MK::T_Hash(loc);
+            } else if (nameStr == "Set") {
+                return ast::MK::T_Set(loc);
+            } else if (nameStr == "Class") {
+                return ast::MK::T_Class(loc);
+            }
         } else if (hasTypeParam(ctx, typeParams, nameStr)) {
             auto name = ctx.state.enterNameUTF8(nameStr);
             return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::typeParameter(), loc, ast::MK::Symbol(loc, name));
