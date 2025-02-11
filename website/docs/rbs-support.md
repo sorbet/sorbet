@@ -39,22 +39,22 @@ end
 Most RBS features can be used and will be translated to equivalent Sorbet syntax
 during type checking:
 
-| Feature              | RBS syntax                               | Sorbet syntax                          |
-| -------------------- | ---------------------------------------- | -------------------------------------- |
-| Class instance type  | `Foo`                                    | `Foo`                                  |
-| Class singleton type | `singleton(Foo)`                         | `T.class_of(Foo)`                      |
-| Union type           | <span><code>Foo &#124; Bar</code></span> | `T.any(Foo, Bar)`                      |
-| Intersection type    | `Foo & Bar`                              | `T.all(Foo, Bar)`                      |
-| Optional type        | `Foo?`                                   | `T.nilable(Foo)`                       |
-| Boolean type         | `bool`                                   | `T::Boolean`                           |
-| Nil type             | `nil`                                    | `NilClass`                             |
-| Top type             | `top`                                    | `T.anything`                           |
-| Bottom type          | `bot`                                    | `T.noreturn`                           |
-| Void type            | `void`                                   | `void`                                 |
-| Generic type         | `Foo[Bar]`                               | `Foo[Bar]`                             |
-| Tuple type           | `[Foo, Bar]`                             | `[Foo, Bar]`                           |
-| Shape type           | `{ a: Foo, b: Bar }`                     | `{ a: Foo, b: Bar }`                   |
-| Proc type            | `^(Foo) -> Bar`                          | `T.proc.params(arg: Foo).returns(Bar)` |
+| RBS Feature            | RBS syntax                               | Sorbet syntax                                           |
+| ---------------------- | ---------------------------------------- | ------------------------------------------------------- |
+| [Class instance type]  | `Foo`                                    | [`Foo`](class-types.md)                                 |
+| [Class singleton type] | `singleton(Foo)`                         | [`T.class_of(Foo)`](class-of.md)                        |
+| [Union type]           | <span><code>Foo &#124; Bar</code></span> | [`T.any(Foo, Bar)`](union-types.md)                     |
+| [Intersection type]    | `Foo & Bar`                              | [`T.all(Foo, Bar)`](intersection-types.md)              |
+| [Optional type]        | `Foo?`                                   | [`T.nilable(Foo)`](nilable-types.md)                    |
+| [Boolean type]         | `bool`                                   | [`T::Boolean`](class-types.md#booleans)                 |
+| [Nil type]             | `nil`                                    | [`NilClass`](class-types.md#nil)                        |
+| [Top type]             | `top`                                    | [`T.anything`](anything.md)                             |
+| [Bottom type]          | `bot`                                    | [`T.noreturn`](noreturn.md)                             |
+| [Void type]            | `void`                                   | [`void`](sigs.md#returns--void-annotating-return-types) |
+| [Generic type]         | `Foo[Bar]`                               | [`Foo[Bar]`](generics.md)                               |
+| [Tuple type]           | `[Foo, Bar]`                             | [`[Foo, Bar]`](tuples.md)                               |
+| [Shape type]           | `{ a: Foo, b: Bar }`                     | [`{ a: Foo, b: Bar }`](shapes.md)                       |
+| [Proc type]            | `^(Foo) -> Bar`                          | [`T.proc.params(arg: Foo).returns(Bar)`](procs.md)      |
 
 ### Attribute accessor types
 
@@ -180,3 +180,25 @@ to use the literal's underlying type instead:
 - `nil` is `NilClass`
 
 You can also consider using [`T.::Enum`](tenum.md).
+
+[Class instance type]:
+  https://github.com/ruby/rbs/blob/master/docs/syntax.md#class-instance-type
+[Class singleton type]:
+  https://github.com/ruby/rbs/blob/master/docs/syntax.md#class-singleton-type
+[Union type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#union-type
+[Intersection type]:
+  https://github.com/ruby/rbs/blob/master/docs/syntax.md#intersection-type
+[Optional type]:
+  https://github.com/ruby/rbs/blob/master/docs/syntax.md#optional-type
+[Boolean type]:
+  https://github.com/ruby/rbs/blob/master/docs/syntax.md#bool-or-boolish
+[Nil type]:
+  https://github.com/ruby/rbs/blob/master/docs/syntax.md#nil-or-nilclass
+[Top type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types
+[Bottom type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types
+[Void type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types
+[Generic type]:
+  https://github.com/ruby/rbs/blob/master/docs/syntax.md#type-variable
+[Tuple type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#tuple-type
+[Shape type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#record-type
+[Proc type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#proc-type
