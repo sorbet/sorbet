@@ -8,6 +8,8 @@
 #include "rbs/TypeTranslator.h"
 #include "rewriter/util/Util.h"
 
+using namespace std;
+
 namespace sorbet::rbs {
 
 namespace {
@@ -37,7 +39,7 @@ struct RBSArg {
     rbs_node_t *type;
 };
 
-void collectArgs(core::MutableContext ctx, core::LocOffsets docLoc, rbs_node_list_t *field, std::vector<RBSArg> &args) {
+void collectArgs(core::MutableContext ctx, core::LocOffsets docLoc, rbs_node_list_t *field, vector<RBSArg> &args) {
     if (field == nullptr || field->length == 0) {
         return;
     }
@@ -54,7 +56,7 @@ void collectArgs(core::MutableContext ctx, core::LocOffsets docLoc, rbs_node_lis
     }
 }
 
-void collectKeywords(core::MutableContext ctx, core::LocOffsets docLoc, rbs_hash_t *field, std::vector<RBSArg> &args) {
+void collectKeywords(core::MutableContext ctx, core::LocOffsets docLoc, rbs_hash_t *field, vector<RBSArg> &args) {
     if (field == nullptr) {
         return;
     }
@@ -79,7 +81,7 @@ void collectKeywords(core::MutableContext ctx, core::LocOffsets docLoc, rbs_hash
 
 ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ctx, const ast::MethodDef *methodDef,
                                                          const MethodType methodType,
-                                                         const std::vector<Comment> &annotations) {
+                                                         const vector<Comment> &annotations) {
     const auto &node = *methodType.node;
 
     if (node.type->type != RBS_TYPES_FUNCTION) {
@@ -95,7 +97,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
 
     // Collect type parameters
 
-    std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams;
+    vector<pair<core::LocOffsets, core::NameRef>> typeParams;
     for (rbs_node_list_node_t *list_node = node.type_params->head; list_node != nullptr; list_node = list_node->next) {
         auto loc = TypeTranslator::nodeLoc(methodType.loc, list_node->node);
 
@@ -105,13 +107,13 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
 
         auto node = (rbs_ast_typeparam_t *)list_node->node;
         rbs_constant_t *constant = rbs_constant_pool_id_to_constant(fake_constant_pool, node->name->constant_id);
-        std::string_view string(constant->start, constant->length);
+        string_view string(constant->start, constant->length);
         typeParams.emplace_back(loc, ctx.state.enterNameUTF8(string));
     }
 
     // Collect positionals
 
-    std::vector<RBSArg> args;
+    vector<RBSArg> args;
 
     collectArgs(ctx, methodType.loc, functionType->required_positionals, args);
     collectArgs(ctx, methodType.loc, functionType->optional_positionals, args);
@@ -168,7 +170,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
             // The RBS arg is named in the signature, so we use the explicit name used
             rbs_constant_t *nameConstant =
                 rbs_constant_pool_id_to_constant(fake_constant_pool, nameSymbol->constant_id);
-            std::string_view nameStr(nameConstant->start, nameConstant->length);
+            string_view nameStr(nameConstant->start, nameConstant->length);
             name = ctx.state.enterNameUTF8(nameStr);
         } else {
             // The RBS arg is not named in the signature, so we get it from the method definition
@@ -177,7 +179,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
 
         auto type = TypeTranslator::toRBI(ctx, typeParams, arg.type, methodType.loc);
         sigParams.emplace_back(ast::MK::Symbol(arg.loc, name));
-        sigParams.emplace_back(std::move(type));
+        sigParams.emplace_back(move(type));
     }
 
     ENFORCE(sigParams.size() % 2 == 0, "Sig params must be arg name/type pairs");
@@ -191,19 +193,17 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
         if (annotation.string == "final") {
             isFinal = true;
         } else if (annotation.string == "abstract") {
-            sigBuilder = ast::MK::Send0(annotation.loc, std::move(sigBuilder), core::Names::abstract(), annotation.loc);
+            sigBuilder = ast::MK::Send0(annotation.loc, move(sigBuilder), core::Names::abstract(), annotation.loc);
         } else if (annotation.string == "overridable") {
-            sigBuilder =
-                ast::MK::Send0(annotation.loc, std::move(sigBuilder), core::Names::overridable(), annotation.loc);
+            sigBuilder = ast::MK::Send0(annotation.loc, move(sigBuilder), core::Names::overridable(), annotation.loc);
         } else if (annotation.string == "override") {
-            sigBuilder =
-                ast::MK::Send0(annotation.loc, std::move(sigBuilder), core::Names::override_(), annotation.loc);
+            sigBuilder = ast::MK::Send0(annotation.loc, move(sigBuilder), core::Names::override_(), annotation.loc);
         } else if (annotation.string == "override(allow_incompatible: true)") {
             ast::Send::ARGS_store overrideArgs;
             overrideArgs.emplace_back(ast::MK::Symbol(annotation.loc, core::Names::allowIncompatible()));
             overrideArgs.emplace_back(ast::MK::True(annotation.loc));
-            sigBuilder = ast::MK::Send(annotation.loc, std::move(sigBuilder), core::Names::override_(), annotation.loc,
-                                       0, std::move(overrideArgs));
+            sigBuilder = ast::MK::Send(annotation.loc, move(sigBuilder), core::Names::override_(), annotation.loc, 0,
+                                       move(overrideArgs));
         }
     }
 
@@ -214,23 +214,23 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
         for (auto &param : typeParams) {
             typeParamsStore.emplace_back(ast::MK::Symbol(param.first, param.second));
         }
-        sigBuilder = ast::MK::Send(methodType.loc, std::move(sigBuilder), core::Names::typeParameters(), methodType.loc,
-                                   typeParamsStore.size(), std::move(typeParamsStore));
+        sigBuilder = ast::MK::Send(methodType.loc, move(sigBuilder), core::Names::typeParameters(), methodType.loc,
+                                   typeParamsStore.size(), move(typeParamsStore));
     }
 
     if (sigParams.size() > 0) {
-        sigBuilder = ast::MK::Send(methodType.loc, std::move(sigBuilder), core::Names::params(), methodType.loc, 0,
-                                   std::move(sigParams));
+        sigBuilder =
+            ast::MK::Send(methodType.loc, move(sigBuilder), core::Names::params(), methodType.loc, 0, move(sigParams));
     }
 
     rbs_node_t *returnValue = functionType->return_type;
     if (returnValue->type == RBS_TYPES_BASES_VOID) {
         auto loc = TypeTranslator::nodeLoc(methodType.loc, returnValue);
-        sigBuilder = ast::MK::Send0(loc, std::move(sigBuilder), core::Names::void_(), loc);
+        sigBuilder = ast::MK::Send0(loc, move(sigBuilder), core::Names::void_(), loc);
     } else {
         auto returnType = TypeTranslator::toRBI(ctx, typeParams, returnValue, methodType.loc);
-        sigBuilder = ast::MK::Send1(methodType.loc, std::move(sigBuilder), core::Names::returns(), methodType.loc,
-                                    std::move(returnType));
+        sigBuilder =
+            ast::MK::Send1(methodType.loc, move(sigBuilder), core::Names::returns(), methodType.loc, move(returnType));
     }
 
     auto sigArgs = ast::Send::ARGS_store();
@@ -240,10 +240,10 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
     }
 
     auto sig = ast::MK::Send(methodType.loc, ast::MK::Constant(methodType.loc, core::Symbols::Sorbet_Private_Static()),
-                             core::Names::sig(), methodType.loc, sigArgs.size(), std::move(sigArgs));
+                             core::Names::sig(), methodType.loc, sigArgs.size(), move(sigArgs));
 
     auto sigSend = ast::cast_tree<ast::Send>(sig);
-    sigSend->setBlock(ast::MK::Block0(methodType.loc, std::move(sigBuilder)));
+    sigSend->setBlock(ast::MK::Block0(methodType.loc, move(sigBuilder)));
     sigSend->flags.isRewriterSynthesized = true;
 
     return sig;
@@ -251,7 +251,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
 
 ast::ExpressionPtr MethodTypeTranslator::attrSignature(core::MutableContext ctx, const ast::Send *send,
                                                        const Type attrType) {
-    auto typeParams = std::vector<std::pair<core::LocOffsets, core::NameRef>>();
+    auto typeParams = vector<pair<core::LocOffsets, core::NameRef>>();
     auto sigBuilder = ast::MK::Self(attrType.loc.copyWithZeroLength());
 
     if (send->fun == core::Names::attrWriter()) {
@@ -276,19 +276,18 @@ ast::ExpressionPtr MethodTypeTranslator::attrSignature(core::MutableContext ctx,
         ast::Send::ARGS_store sigArgs;
         sigArgs.emplace_back(ast::MK::Symbol(name.second, name.first));
         sigArgs.emplace_back(TypeTranslator::toRBI(ctx, typeParams, attrType.node.get(), attrType.loc));
-        sigBuilder = ast::MK::Send(attrType.loc, std::move(sigBuilder), core::Names::params(), attrType.loc, 0,
-                                   std::move(sigArgs));
+        sigBuilder =
+            ast::MK::Send(attrType.loc, move(sigBuilder), core::Names::params(), attrType.loc, 0, move(sigArgs));
     }
 
     auto returnType = TypeTranslator::toRBI(ctx, typeParams, attrType.node.get(), attrType.loc);
-    sigBuilder = ast::MK::Send1(attrType.loc, std::move(sigBuilder), core::Names::returns(), attrType.loc,
-                                std::move(returnType));
+    sigBuilder = ast::MK::Send1(attrType.loc, move(sigBuilder), core::Names::returns(), attrType.loc, move(returnType));
 
     auto sig = ast::MK::Send1(attrType.loc, ast::MK::Constant(attrType.loc, core::Symbols::Sorbet_Private_Static()),
                               core::Names::sig(), attrType.loc,
                               ast::MK::Constant(attrType.loc, core::Symbols::T_Sig_WithoutRuntime()));
     auto sigSend = ast::cast_tree<ast::Send>(sig);
-    sigSend->setBlock(ast::MK::Block0(attrType.loc, std::move(sigBuilder)));
+    sigSend->setBlock(ast::MK::Block0(attrType.loc, move(sigBuilder)));
     sigSend->flags.isRewriterSynthesized = true;
 
     return sig;

@@ -23,21 +23,21 @@ struct Comments {
      *
      * Annotations are formatted as `@some_annotation`.
      */
-    std::vector<rbs::Comment> annotations;
+    vector<rbs::Comment> annotations;
 
     /**
      * RBS signature comments found on a method definition.
      *
      * Signatures are formatted as `#: () -> void`.
      */
-    std::vector<rbs::Comment> signatures;
+    vector<rbs::Comment> signatures;
 };
 
 class RBSSignaturesWalk {
     // TODO: review and clean up
     Comments findRBSComments(string_view sourceCode, core::LocOffsets loc) {
-        std::vector<rbs::Comment> annotations;
-        std::vector<rbs::Comment> signatures;
+        vector<rbs::Comment> annotations;
+        vector<rbs::Comment> signatures;
 
         uint32_t beginIndex = loc.beginPos();
 
@@ -45,7 +45,7 @@ class RBSSignaturesWalk {
         string_view preDefinition = sourceCode.substr(0, sourceCode.rfind('\n', beginIndex));
 
         // Get all the lines before it
-        std::vector<string_view> all_lines = absl::StrSplit(preDefinition, '\n');
+        vector<string_view> all_lines = absl::StrSplit(preDefinition, '\n');
 
         // We compute the current position in the source so we know the location of each comment
         uint32_t index = beginIndex;
@@ -139,8 +139,8 @@ class RBSSignaturesWalk {
             }
         }
 
-        std::reverse(annotations.begin(), annotations.end());
-        std::reverse(signatures.begin(), signatures.end());
+        reverse(annotations.begin(), annotations.end());
+        reverse(signatures.begin(), signatures.end());
 
         return Comments{annotations, signatures};
     }
@@ -179,9 +179,9 @@ class RBSSignaturesWalk {
 
         for (auto &signature : methodComments.signatures) {
             if (auto rbsMethodType = rbs::RBSParser::parseSignature(ctx, signature)) {
-                auto sig = rbs::MethodTypeTranslator::methodSignature(ctx, methodDef, std::move(rbsMethodType.value()),
+                auto sig = rbs::MethodTypeTranslator::methodSignature(ctx, methodDef, move(rbsMethodType.value()),
                                                                       methodComments.annotations);
-                classDef->rhs.emplace_back(std::move(sig));
+                classDef->rhs.emplace_back(move(sig));
             }
         }
     }
@@ -191,8 +191,8 @@ class RBSSignaturesWalk {
 
         for (auto &signature : attrComments.signatures) {
             if (auto rbsType = rbs::RBSParser::parseType(ctx, signature)) {
-                auto sig = rbs::MethodTypeTranslator::attrSignature(ctx, send, std::move(rbsType.value()));
-                classDef->rhs.emplace_back(std::move(sig));
+                auto sig = rbs::MethodTypeTranslator::attrSignature(ctx, send, move(rbsType.value()));
+                classDef->rhs.emplace_back(move(sig));
             }
         }
     }
@@ -203,7 +203,7 @@ public:
     void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto classDef = ast::cast_tree<ast::ClassDef>(tree);
 
-        auto oldRHS = std::move(classDef->rhs);
+        auto oldRHS = move(classDef->rhs);
         classDef->rhs.clear();
         classDef->rhs.reserve(oldRHS.size());
 
@@ -219,7 +219,7 @@ public:
                 }
             }
 
-            classDef->rhs.emplace_back(std::move(stat));
+            classDef->rhs.emplace_back(move(stat));
         }
     }
 };
