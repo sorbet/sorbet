@@ -312,7 +312,9 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
         while (true) {
             if (nested->resolutionScopes == nullptr || nested->resolutionScopes->empty()) [[unlikely]] {
                 ENFORCE(false);
-                fatalLogger->error(R"(msg="Bad fullUnresolvedPath" loc="{}")", ctx.locAt(this->loc).showRaw(ctx));
+                bool hasScopes = nested->resolutionScopes != nullptr;
+                fatalLogger->error(R"(msg="Bad fullUnresolvedPath" loc="{}" hasScopes={})",
+                                   ctx.locAt(this->loc).showRaw(ctx), hasScopes);
                 fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
             }
 
