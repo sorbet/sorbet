@@ -30,6 +30,8 @@ namespace {
 // large amount of types; see test/testdata/infer/is_subtype_timeout.rb for an example.
 // Recording counters for these types can take up a substantial amount of time for such
 // tests, and so we disable counting them altogether even in debug builds.
+//
+// If you want to compute a histogram of types, flip this to true and rebuild.
 constexpr bool countTypeAllocations = false;
 void recordAllocatedType(ConstExprStr kind) {
     if constexpr (countTypeAllocations) {
