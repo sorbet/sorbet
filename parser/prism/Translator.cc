@@ -302,8 +302,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // Unlike `-[Integer]`, Prism treats `~[Integer]` as a method call
             // But Sorbet's legacy parser treats both `~[Integer]` and `-[Integer]` as integer literals
             if (name == "~" && parser::cast_node<parser::Integer>(receiver.get())) {
-                std::string valueString(reinterpret_cast<const char *>(callNode->base.location.start),
-                                        callNode->base.location.end - callNode->base.location.start);
+                std::string valueString(sliceLocation(callNode->base.location));
 
                 return std::make_unique<parser::Integer>(location, std::move(valueString));
             }
@@ -582,12 +581,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_FLOAT_NODE: { // A floating point number literal, e.g. `1.23`
             auto floatNode = down_cast<pm_float_node>(node);
-            auto nodeLoc = floatNode->base.location;
-
-            auto *start = nodeLoc.start;
-            auto *end = nodeLoc.end;
-
-            std::string valueString(reinterpret_cast<const char *>(start), end - start);
+            std::string valueString(sliceLocation(floatNode->base.location));
 
             return make_unique<parser::Float>(location, move(valueString));
         }
@@ -675,13 +669,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_IMAGINARY_NODE: { // An imaginary number literal, like `1.0i`, `+1.0i`, or `-1.0i`
             auto imaginaryNode = down_cast<pm_imaginary_node>(node);
-            pm_location_t loc = imaginaryNode->base.location;
-
-            const uint8_t *start = loc.start;
-            const uint8_t *end = loc.end;
-
             // Create a string_view of the value without the trailing 'i'
-            auto value = std::string_view(reinterpret_cast<const char *>(start), end - start - 1);
+            auto value = sliceLocation(imaginaryNode->base.location);
+            value = value.substr(0, value.size() - 1);
 
             ENFORCE(!value.empty());
 
@@ -761,13 +751,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_INTEGER_NODE: { // An integer literal, e.g., `123`, `0xcafe`, `0b1010`, etc.
             auto intNode = down_cast<pm_integer_node>(node);
-            auto nodeLoc = intNode->base.location;
-
-            auto *start = nodeLoc.start;
-            auto *end = nodeLoc.end;
-
             // For normal integers, retain the original valueString including any sign
-            std::string valueString(reinterpret_cast<const char *>(start), end - start);
+            std::string valueString(sliceLocation(intNode->base.location));
 
             ENFORCE(!valueString.empty());
 
@@ -1124,13 +1109,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // Note: in `1/2r`, only the `2r` is part of the `PM_RATIONAL_NODE`.
             // The `1/` is just divison of an integer.
             auto *rationalNode = down_cast<pm_rational_node>(node);
-            pm_location_t loc = rationalNode->base.location;
-
-            const uint8_t *start = loc.start;
-            const uint8_t *end = loc.end;
 
             // `-1` drops the trailing `r` end of the value
-            auto value = std::string_view(reinterpret_cast<const char *>(start), end - start - 1);
+            auto value = sliceLocation(rationalNode->base.location);
+            value = value.substr(0, value.size() - 1);
 
             return make_unique<parser::Rational>(location, value);
         }
@@ -1920,10 +1902,15 @@ template <typename SorbetNode> unique_ptr<SorbetNode> Translator::translateSimpl
 
 // Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
 unique_ptr<parser::Regopt> Translator::translateRegexpOptions(pm_location_t closingLoc) {
-    auto start = closingLoc.start + 1; // one character after the closing `/`
-    auto length = closingLoc.end - start;
+    auto length = closingLoc.end - closingLoc.start;
 
-    auto options = (length > 0) ? std::string_view(reinterpret_cast<const char *>(start), length) : std::string_view();
+    std::string_view options;
+
+    if (length > 0) {
+        options = sliceLocation(closingLoc).substr(1); // one character after the closing `/`
+    } else {
+        options = std::string_view();
+    }
 
     return make_unique<parser::Regopt>(translateLoc(closingLoc), options);
 }
@@ -1943,6 +1930,10 @@ unique_ptr<parser::Regexp> Translator::translateRegexp(pm_string_t unescaped, co
     auto options = translateRegexpOptions(closingLoc);
 
     return make_unique<parser::Regexp>(location, move(parts), move(options));
+}
+
+std::string_view Translator::sliceLocation(pm_location_t loc) {
+    return std::string_view(reinterpret_cast<const char *>(loc.start), loc.end - loc.start);
 }
 
 // Creates a `parser::Mlhs` for either a `PM_MULTI_WRITE_NODE` or `PM_MULTI_TARGET_NODE`.

@@ -95,6 +95,8 @@ private:
     parser::NodeVec patternTranslateMulti(pm_node_list prismNodes);
     void patternTranslateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);
 
+    std::string_view sliceLocation(pm_location_t loc);
+
     // Context management helpers. These return a copy of `this` with some change to the context.
     Translator enterMethodDef();
 };
