@@ -462,6 +462,16 @@ public:
         return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Enumerator()});
     }
 
+    static ExpressionPtr T_Enumerator_Lazy(core::LocOffsets loc) {
+        return UnresolvedConstantParts(
+            loc, {core::Names::Constants::T(), core::Names::Constants::Enumerator(), core::Names::Constants::Lazy()});
+    }
+
+    static ExpressionPtr T_Enumerator_Chain(core::LocOffsets loc) {
+        return UnresolvedConstantParts(
+            loc, {core::Names::Constants::T(), core::Names::Constants::Enumerator(), core::Names::Constants::Chain()});
+    }
+
     static ExpressionPtr T_Proc(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr ret) {
         auto proc = Send0(loc, T(loc), core::Names::proc(), loc.copyWithZeroLength());
         auto params = Params(loc, std::move(proc), std::move(args));

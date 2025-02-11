@@ -21,6 +21,7 @@ ast::ExpressionPtr typeNameType(core::MutableContext ctx,
     rbs_node_list *typePath = typeName->rbs_namespace->path;
 
     ast::ExpressionPtr parent;
+    vector<core::NameRef> pathNames;
 
     if (typeName->rbs_namespace->absolute) {
         parent = ast::MK::Constant(loc, core::Symbols::root());
@@ -39,6 +40,7 @@ ast::ExpressionPtr typeNameType(core::MutableContext ctx,
             rbs_constant_t *name = rbs_constant_pool_id_to_constant(fake_constant_pool, symbol->constant_id);
             string pathNameStr(name->start, name->length);
             auto pathNameConst = ctx.state.enterNameConstant(pathNameStr);
+            pathNames.emplace_back(pathNameConst);
             parent = ast::MK::UnresolvedConstant(loc, move(parent), pathNameConst);
         }
     }
@@ -46,8 +48,9 @@ ast::ExpressionPtr typeNameType(core::MutableContext ctx,
     rbs_constant_t *name = rbs_constant_pool_id_to_constant(fake_constant_pool, typeName->name->constant_id);
     string_view nameStr(name->start, name->length);
     auto nameConstant = ctx.state.enterNameConstant(nameStr);
+    pathNames.emplace_back(nameConstant);
 
-    if (typePath == nullptr || typePath->length == 0) {
+    if (pathNames.size() == 1) {
         if (isGeneric) {
             if (nameConstant == core::Names::Constants::Array()) {
                 return ast::MK::T_Array(loc);
@@ -57,11 +60,6 @@ ast::ExpressionPtr typeNameType(core::MutableContext ctx,
                 return ast::MK::T_Enumerable(loc);
             } else if (nameConstant == core::Names::Constants::Enumerator()) {
                 return ast::MK::T_Enumerator(loc);
-                // TODO: support lazy and chain enumerator
-                // } else if (nameRef == core::Names::Constants::EnumeratorLazy()) {
-                //     return ast::MK::T_Enumerator_Lazy(loc);
-                // } else if (nameRef == core::Names::Constants::EnumeratorChain()) {
-                //     return ast::MK::T_Enumerator_Chain(loc);
             } else if (nameConstant == core::Names::Constants::Hash()) {
                 return ast::MK::T_Hash(loc);
             } else if (nameConstant == core::Names::Constants::Set()) {
@@ -72,6 +70,14 @@ ast::ExpressionPtr typeNameType(core::MutableContext ctx,
         } else if (hasTypeParam(ctx, typeParams, nameConstant)) {
             return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::typeParameter(), loc,
                                   ast::MK::Symbol(loc, nameConstant));
+        }
+    } else if (pathNames.size() == 2 && isGeneric) {
+        if (pathNames[0] == core::Names::Constants::Enumerator()) {
+            if (pathNames[1] == core::Names::Constants::Lazy()) {
+                return ast::MK::T_Enumerator_Lazy(loc);
+            } else if (pathNames[1] == core::Names::Constants::Chain()) {
+                return ast::MK::T_Enumerator_Chain(loc);
+            }
         }
     }
 
