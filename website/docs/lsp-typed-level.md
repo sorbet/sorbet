@@ -41,7 +41,7 @@ under the cursor:
 
 <!-- TODO(jez) Should we have links to these LSP features eventually? -->
 
-- Hover (`textDocument/hover`)
+- [Hover](hover.md) (`textDocument/hover`)
 - [Go to Definition](go-to-def.md) (`textDocument/definition`)
 - [Go to Type Definition](go-to-def.md#definition-vs-type-definition)
   (`textDocument/typeDefinition`)
