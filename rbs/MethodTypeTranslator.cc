@@ -177,7 +177,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
             name = expressionName(&methodDef->args[i]);
         }
 
-        auto type = TypeTranslator::toRBI(ctx, typeParams, arg.type, methodType.loc);
+        auto type = TypeTranslator::toExpressionPtr(ctx, typeParams, arg.type, methodType.loc);
         sigParams.emplace_back(ast::MK::Symbol(arg.loc, name));
         sigParams.emplace_back(move(type));
     }
@@ -228,7 +228,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
         auto loc = locFromRange(methodType.loc, returnValue->location->rg);
         sigBuilder = ast::MK::Send0(loc, move(sigBuilder), core::Names::void_(), loc);
     } else {
-        auto returnType = TypeTranslator::toRBI(ctx, typeParams, returnValue, methodType.loc);
+        auto returnType = TypeTranslator::toExpressionPtr(ctx, typeParams, returnValue, methodType.loc);
         sigBuilder =
             ast::MK::Send1(methodType.loc, move(sigBuilder), core::Names::returns(), methodType.loc, move(returnType));
     }
@@ -275,12 +275,12 @@ ast::ExpressionPtr MethodTypeTranslator::attrSignature(core::MutableContext ctx,
         auto name = rewriter::ASTUtil::getAttrName(ctx, send->fun, send->getPosArg(0));
         ast::Send::ARGS_store sigArgs;
         sigArgs.emplace_back(ast::MK::Symbol(name.second, name.first));
-        sigArgs.emplace_back(TypeTranslator::toRBI(ctx, typeParams, attrType.node.get(), attrType.loc));
+        sigArgs.emplace_back(TypeTranslator::toExpressionPtr(ctx, typeParams, attrType.node.get(), attrType.loc));
         sigBuilder =
             ast::MK::Send(attrType.loc, move(sigBuilder), core::Names::params(), attrType.loc, 0, move(sigArgs));
     }
 
-    auto returnType = TypeTranslator::toRBI(ctx, typeParams, attrType.node.get(), attrType.loc);
+    auto returnType = TypeTranslator::toExpressionPtr(ctx, typeParams, attrType.node.get(), attrType.loc);
     sigBuilder = ast::MK::Send1(attrType.loc, move(sigBuilder), core::Names::returns(), attrType.loc, move(returnType));
 
     auto sig = ast::MK::Send1(attrType.loc, ast::MK::Constant(attrType.loc, core::Symbols::Sorbet_Private_Static()),
