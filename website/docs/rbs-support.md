@@ -110,13 +110,21 @@ def qux2(x); end
 
 ### Special behaviors
 
-Generic `Array`, `Hash`, `Set`, and `Class` types are translated to their `T::`
-Sorbet types equivalent:
+Generic types like `Array` or `Hash` are translated to their `T::` Sorbet types
+equivalent:
 
 - `Array[Integer]` is translated to `T::Array[Integer]`
-- `Hash[String, Integer]` is translated to `T::Hash[String, Integer]`
-- `Set[Integer]` is translated to `T::Set[Integer]`
 - `Class[Integer]` is translated to `T.class_of(Integer)`
+- `Enumerable[Integer]` is translated to `T::Enumerable[Integer]`
+- `Enumerator[Integer]` is translated to `T::Enumerator[Integer]`
+- `Enumerator::Lazy[Integer]` is translated to `T::Enumerator::Lazy[Integer]`
+- `Enumerator::Chain[Integer]` is translated to `T::Enumerator::Chain[Integer]`
+- `Hash[String, Integer]` is translated to `T::Hash[String, Integer]`
+- `Range[Integer]` is translated to `T::Range[Integer]`
+- `Set[Integer]` is translated to `T::Set[Integer]`
+
+Note that non-generic types are not translated, so `Array` without a type
+argument stays `Array`.
 
 ### Unsupported features
 
