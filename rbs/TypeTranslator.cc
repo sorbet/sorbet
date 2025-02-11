@@ -11,8 +11,8 @@ namespace sorbet::rbs {
 namespace {
 
 bool hasTypeParam(core::MutableContext ctx, const vector<pair<core::LocOffsets, core::NameRef>> &typeParams,
-                  string_view name) {
-    return absl::c_any_of(typeParams, [&](const auto &param) { return param.second.toString(ctx.state) == name; });
+                  core::NameRef name) {
+    return absl::c_any_of(typeParams, [&](const auto &param) { return param.second == name; });
 }
 
 ast::ExpressionPtr typeNameType(core::MutableContext ctx,
@@ -45,36 +45,35 @@ ast::ExpressionPtr typeNameType(core::MutableContext ctx,
 
     rbs_constant_t *name = rbs_constant_pool_id_to_constant(fake_constant_pool, typeName->name->constant_id);
     string_view nameStr(name->start, name->length);
+    auto nameConstant = ctx.state.enterNameConstant(nameStr);
 
     if (typePath == nullptr || typePath->length == 0) {
         if (isGeneric) {
-            if (nameStr == "Array") {
+            if (nameConstant == core::Names::Constants::Array()) {
                 return ast::MK::T_Array(loc);
-            } else if (nameStr == "Class") {
+            } else if (nameConstant == core::Names::Constants::Class()) {
                 return ast::MK::T_Class(loc);
-            } else if (nameStr == "Enumerable") {
+            } else if (nameConstant == core::Names::Constants::Enumerable()) {
                 return ast::MK::T_Enumerable(loc);
-            } else if (nameStr == "Enumerator") {
+            } else if (nameConstant == core::Names::Constants::Enumerator()) {
                 return ast::MK::T_Enumerator(loc);
                 // TODO: support lazy and chain enumerator
                 // } else if (nameRef == core::Names::Constants::EnumeratorLazy()) {
                 //     return ast::MK::T_Enumerator_Lazy(loc);
                 // } else if (nameRef == core::Names::Constants::EnumeratorChain()) {
                 //     return ast::MK::T_Enumerator_Chain(loc);
-            } else if (nameStr == "Hash") {
+            } else if (nameConstant == core::Names::Constants::Hash()) {
                 return ast::MK::T_Hash(loc);
-            } else if (nameStr == "Set") {
+            } else if (nameConstant == core::Names::Constants::Set()) {
                 return ast::MK::T_Set(loc);
-            } else if (nameStr == "Range") {
+            } else if (nameConstant == core::Names::Constants::Range()) {
                 return ast::MK::T_Range(loc);
             }
-        } else if (hasTypeParam(ctx, typeParams, nameStr)) {
-            auto name = ctx.state.enterNameUTF8(nameStr);
-            return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::typeParameter(), loc, ast::MK::Symbol(loc, name));
+        } else if (hasTypeParam(ctx, typeParams, nameConstant)) {
+            return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::typeParameter(), loc,
+                                  ast::MK::Symbol(loc, nameConstant));
         }
     }
-
-    auto nameConstant = ctx.state.enterNameConstant(nameStr);
 
     return ast::MK::UnresolvedConstant(loc, move(parent), nameConstant);
 }

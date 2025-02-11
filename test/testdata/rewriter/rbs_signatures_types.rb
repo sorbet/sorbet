@@ -116,20 +116,40 @@ T.reveal_type(base_type7) # error: Revealed type: `Sorbet::Private::Static::Void
 # Generic types
 
 #: -> Array[Integer]
-def generic_type1; T.unsafe(nil); end
-T.reveal_type(generic_type1) # error: Revealed type: `T::Array[Integer]`
+def generic_type_array; T.unsafe(nil); end
+T.reveal_type(generic_type_array) # error: Revealed type: `T::Array[Integer]`
+
+#: -> Class[Integer]
+def generic_type_class; T.unsafe(nil); end
+T.reveal_type(generic_type_class) # error: Revealed type: `T::Class[Integer]`
+
+#: -> Enumerable[Integer]
+def generic_type_enumerable; T.unsafe(nil); end
+T.reveal_type(generic_type_enumerable) # error: Revealed type: `T::Enumerable[Integer]`
+
+#: -> Enumerator[Integer]
+def generic_type_enumerator; T.unsafe(nil); end
+T.reveal_type(generic_type_enumerator) # error: Revealed type: `T::Enumerator[Integer]`
 
 #: -> Hash[String, Integer]
-def generic_type2; T.unsafe(nil); end
-T.reveal_type(generic_type2) # error: Revealed type: `T::Hash[String, Integer]`
+def generic_type_hash; T.unsafe(nil); end
+T.reveal_type(generic_type_hash) # error: Revealed type: `T::Hash[String, Integer]`
+
+#: -> Set[Integer]
+def generic_type_set; T.unsafe(nil); end
+T.reveal_type(generic_type_set) # error: Revealed type: `T::Set[Integer]`
+
+#: -> Range[Integer]
+def generic_type_range; T.unsafe(nil); end
+T.reveal_type(generic_type_range) # error: Revealed type: `T::Range[Integer]`
 
 #: -> T::Array[Integer]
-def generic_type3; T.unsafe(nil); end
-T.reveal_type(generic_type1) # error: Revealed type: `T::Array[Integer]`
+def generic_type_t_array; T.unsafe(nil); end
+T.reveal_type(generic_type_t_array) # error: Revealed type: `T::Array[Integer]`
 
 #: -> T::Hash[String, Integer]
-def generic_type4; T.unsafe(nil); end
-T.reveal_type(generic_type2) # error: Revealed type: `T::Hash[String, Integer]`
+def generic_type_t_hash; T.unsafe(nil); end
+T.reveal_type(generic_type_t_hash) # error: Revealed type: `T::Hash[String, Integer]`
 
 class GenericType1
   extend T::Generic
