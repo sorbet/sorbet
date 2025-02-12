@@ -10,7 +10,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       opts.each() do |k|
         <emptyTree>::<C T>.reveal_type(k)
       end
-      opts.each() do |k|
+      opts.each() do |k, *<restargs>|
         <emptyTree>::<C T>.reveal_type(k)
       end
       opts.each() do |k, _|
