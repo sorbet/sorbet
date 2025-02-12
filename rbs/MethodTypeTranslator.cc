@@ -262,6 +262,8 @@ ast::ExpressionPtr MethodTypeTranslator::attrSignature(core::MutableContext ctx,
         return ast::MK::EmptyTree();
     }
 
+    auto returnType = TypeTranslator::toExpressionPtr(ctx, typeParams, attrType.node.get(), attrType.loc);
+
     if (send->fun == core::Names::attrWriter()) {
         if (send->numPosArgs() > 1) {
             if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::RBSUnsupported)) {
@@ -275,12 +277,11 @@ ast::ExpressionPtr MethodTypeTranslator::attrSignature(core::MutableContext ctx,
         auto name = rewriter::ASTUtil::getAttrName(ctx, send->fun, send->getPosArg(0));
         ast::Send::ARGS_store sigArgs;
         sigArgs.emplace_back(ast::MK::Symbol(name.second, name.first));
-        sigArgs.emplace_back(TypeTranslator::toExpressionPtr(ctx, typeParams, attrType.node.get(), attrType.loc));
+        sigArgs.emplace_back(returnType.deepCopy());
         sigBuilder =
             ast::MK::Send(attrType.loc, move(sigBuilder), core::Names::params(), attrType.loc, 0, move(sigArgs));
     }
 
-    auto returnType = TypeTranslator::toExpressionPtr(ctx, typeParams, attrType.node.get(), attrType.loc);
     sigBuilder = ast::MK::Send1(attrType.loc, move(sigBuilder), core::Names::returns(), attrType.loc, move(returnType));
 
     auto sig = ast::MK::Send1(attrType.loc, ast::MK::Constant(attrType.loc, core::Symbols::Sorbet_Private_Static()),
