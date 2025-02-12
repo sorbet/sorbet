@@ -639,6 +639,11 @@ For more information, watch [this section](https://youtu.be/2g9R7PUCEXo?t=2022)
 from Matz's RubyConf 2019 keynote, which talks about his plans for typing in
 Ruby 3.
 
+> **February 2025 update**: We're experimenting with limited support for RBS
+> signatures as comments. This feature is protected by the
+> `--enable-experimental-rbs-signatures` flag. See the
+> [RBS support](rbs-support.md) page for more details.
+
 ## Can I use Sorbet for duck typed code?
 
 No. You can use an [interface](abstract.md) instead, or `T.untyped` if you do
