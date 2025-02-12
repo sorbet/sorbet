@@ -5,7 +5,17 @@
 namespace sorbet::rewriter {
 
 /**
- * TODO
+ * This class rewrites RBS signatures comments into Sorbet signatures.
+ *
+ * So this:
+ *
+ *     #: (Integer) -> String
+ *     def foo(x); end
+ *
+ * Will be rewritten to:
+ *
+ *     sig { params(x: Integer).returns(String) }
+ *     def foo(x); end
  */
 class RBSSignatures final {
 public:
