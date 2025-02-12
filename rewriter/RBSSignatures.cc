@@ -224,12 +224,12 @@ public:
     RBSSignaturesWalk(core::MutableContext ctx) {}
 
     void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        auto classDef = ast::cast_tree<ast::ClassDef>(tree);
+        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         auto newRHS = ast::ClassDef::RHS_store();
-        newRHS.reserve(classDef->rhs.size());
+        newRHS.reserve(classDef.rhs.size());
 
-        for (auto &stat : classDef->rhs) {
+        for (auto &stat : classDef.rhs) {
             if (auto methodDef = ast::cast_tree<ast::MethodDef>(stat)) {
                 transformMethodDef(ctx, newRHS, methodDef);
             } else if (auto send = ast::cast_tree<ast::Send>(stat)) {
@@ -244,7 +244,7 @@ public:
             newRHS.emplace_back(move(stat));
         }
 
-        classDef->rhs = move(newRHS);
+        classDef.rhs = move(newRHS);
     }
 };
 
