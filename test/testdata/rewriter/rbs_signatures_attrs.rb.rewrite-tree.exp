@@ -94,6 +94,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.attr_writer()
 
+    <self>.attr_reader()
+
+    <self>.attr_accessor()
+
     <runtime method definition of quux3>
 
     <runtime method definition of initialize>

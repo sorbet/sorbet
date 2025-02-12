@@ -17,7 +17,13 @@ class Foo
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: The method `quux2=` does not have a `sig`
 
   #: Integer
-  attr_writer # error: RBS signatures do not support attr_writer without arguments
+  attr_writer # error: RBS signatures do not support accessor without arguments
+
+  #: Integer
+  attr_reader # error: RBS signatures do not support accessor without arguments
+
+  #: Integer
+  attr_accessor # error: RBS signatures do not support accessor without arguments
 
   #: -> Integer
   #  ^^ error: Using a method signature on an accessor is not allowed, use a bare type instead

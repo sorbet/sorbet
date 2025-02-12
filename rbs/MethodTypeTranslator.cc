@@ -254,15 +254,15 @@ ast::ExpressionPtr MethodTypeTranslator::attrSignature(core::MutableContext ctx,
     auto typeParams = vector<pair<core::LocOffsets, core::NameRef>>();
     auto sigBuilder = ast::MK::Self(attrType.loc.copyWithZeroLength());
 
-    if (send->fun == core::Names::attrWriter()) {
-        if (send->numPosArgs() == 0) {
-            if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::RBSUnsupported)) {
-                e.setHeader("RBS signatures do not support attr_writer without arguments");
-            }
-
-            return ast::MK::EmptyTree();
+    if (send->numPosArgs() == 0) {
+        if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::RBSUnsupported)) {
+            e.setHeader("RBS signatures do not support accessor without arguments");
         }
 
+        return ast::MK::EmptyTree();
+    }
+
+    if (send->fun == core::Names::attrWriter()) {
         if (send->numPosArgs() > 1) {
             if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS signatures for attr_writer do not support multiple arguments");
