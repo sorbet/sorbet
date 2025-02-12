@@ -22,8 +22,9 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
 
 std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, const std::vector<std::string> &files);
 
-std::vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> files, const options::Options &opts,
-                                   WorkerPool &workers, const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
+std::vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<const core::FileRef> files,
+                                   const options::Options &opts, WorkerPool &workers,
+                                   const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 
 size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileRef> files);
 void unpartitionPackageFiles(std::vector<ast::ParsedFile> &packageFiles,
