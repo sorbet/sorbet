@@ -4,6 +4,8 @@
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_replace.h"
 #include "common/FileOps.h"
+#include "common/kvstore/KeyValueStore.h"
+#include "main/cache/cache.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
@@ -294,6 +296,10 @@ void LSPConfiguration::markInitialized() {
 
 bool LSPConfiguration::isInitialized() const {
     return initialized.load();
+}
+
+std::unique_ptr<const OwnedKeyValueStore> LSPConfiguration::getKvStore() const {
+    return cache::maybeCreateKeyValueStore(this->logger, this->opts);
 }
 
 const LSPClientConfiguration &LSPConfiguration::getClientConfig() const {
