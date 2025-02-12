@@ -250,8 +250,8 @@ public:
 } // namespace
 
 ast::ExpressionPtr RBSSignatures::run(core::MutableContext ctx, ast::ExpressionPtr tree) {
-    RBSSignaturesWalk rbs_translate(ctx);
-    ast::TreeWalk::apply(ctx, rbs_translate, tree);
+    RBSSignaturesWalk rbsTranslate(ctx);
+    ast::TreeWalk::apply(ctx, rbsTranslate, tree);
 
     return tree;
 }
