@@ -159,21 +159,26 @@ class RBSSignaturesWalk {
     }
 
     // Check if the send is a visibility modifier e.g `public`, `protected`, `private` before a method definition
-    bool isVisibility(ast::Send *send) {
+    // and return the method definition if it is
+    ast::MethodDef *asVisibilityWrappedMethod(ast::Send *send) {
         if (!send->recv.isSelfReference()) {
-            return false;
+            return nullptr;
         }
 
         if (send->posArgs().size() != 1) {
-            return false;
+            return nullptr;
         }
 
         if (!ast::cast_tree<ast::MethodDef>(send->getPosArg(0))) {
-            return false;
+            return nullptr;
         }
 
         core::NameRef name = send->fun;
-        return name == core::Names::public_() || name == core::Names::protected_() || name == core::Names::private_();
+        if (name == core::Names::public_() || name == core::Names::protected_() || name == core::Names::private_()) {
+            return ast::cast_tree<ast::MethodDef>(send->getPosArg(0));
+        }
+
+        return nullptr;
     }
 
     void transformMethodDef(core::MutableContext ctx, ast::ClassDef::RHS_store &newRHS, ast::MethodDef *methodDef) {
@@ -235,8 +240,7 @@ public:
             } else if (auto send = ast::cast_tree<ast::Send>(stat)) {
                 if (isAccessor(send)) {
                     transformAccessor(ctx, newRHS, send);
-                } else if (isVisibility(send)) {
-                    auto methodDef = ast::cast_tree<ast::MethodDef>(send->posArgs()[0]);
+                } else if (auto methodDef = asVisibilityWrappedMethod(send)) {
                     transformMethodDef(ctx, newRHS, methodDef);
                 }
             }
