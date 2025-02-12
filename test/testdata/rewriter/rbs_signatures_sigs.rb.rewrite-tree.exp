@@ -1,0 +1,480 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def parse_error1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  def parse_error4<<todo method>>(p1, p2, &<blk>)
+    <emptyTree>
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:p1, <emptyTree>::<C P1>).void()
+  end
+
+  def sig_mismatch1<<todo method>>(p1, p2, &<blk>)
+    <emptyTree>
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:foo, <emptyTree>::<C P1>).void()
+  end
+
+  def sig_mismatch2<<todo method>>(p1, &<blk>)
+    <emptyTree>
+  end
+
+  def method1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def method2<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def method3<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def method4<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def method5<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.void()
+  end
+
+  def method6<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:p1, <emptyTree>::<C P1>).void()
+  end
+
+  def method7<<todo method>>(p1, &<blk>)
+    <emptyTree>::<C T>.reveal_type(p1)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:p1, <emptyTree>::<C P1>, :p2, <emptyTree>::<C P2>).void()
+  end
+
+  def method8<<todo method>>(p1, p2, &<blk>)
+    begin
+      <emptyTree>::<C T>.reveal_type(p1)
+      <emptyTree>::<C T>.reveal_type(p2)
+    end
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:p1, <emptyTree>::<C Integer>).void()
+  end
+
+  def method9<<todo method>>(p1 = 42, &<blk>)
+    <emptyTree>::<C T>.reveal_type(p1)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:p1, <emptyTree>::<C P1>, :p2, ::T.nilable(<emptyTree>::<C P2>)).void()
+  end
+
+  def method10<<todo method>>(p1, p2 = nil, &<blk>)
+    begin
+      <emptyTree>::<C T>.reveal_type(p1)
+      <emptyTree>::<C T>.reveal_type(p2)
+    end
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:x, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+  end
+
+  def method11<<todo method>>(x, &<blk>)
+    <emptyTree>::<C T>.reveal_type(x)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:x, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+  end
+
+  def named_args2<<todo method>>(y, &<blk>)
+    <emptyTree>::<C T>.reveal_type(y)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:foo, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+  end
+
+  def method12<<todo method>>(y, &<blk>)
+    <emptyTree>::<C T>.reveal_type(y)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:x, ::T.nilable(<emptyTree>::<C String>)).void()
+  end
+
+  def method13<<todo method>>(x, &<blk>)
+    <emptyTree>::<C T>.reveal_type(x)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:x, <emptyTree>::<C String>).void()
+  end
+
+  def method14<<todo method>>(x, &<blk>)
+    <emptyTree>::<C T>.reveal_type(x)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:x, <emptyTree>::<C String>).void()
+  end
+
+  def method15<<todo method>>(x = nil, &<blk>)
+    <emptyTree>::<C T>.reveal_type(x)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:x, ::T.nilable(<emptyTree>::<C String>)).void()
+  end
+
+  def method16<<todo method>>(x = nil, &<blk>)
+    <emptyTree>::<C T>.reveal_type(x)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:p1, <emptyTree>::<C P1>, :p2, ::T.nilable(<emptyTree>::<C P2>), :p3, <emptyTree>::<C P3>, :p4, <emptyTree>::<C P4>, :p5, ::T.nilable(<emptyTree>::<C P5>), :p6, <emptyTree>::<C P6>, :block, ::T.proc().void()).void()
+  end
+
+  def method17<<todo method>>(p1, p2 = nil, *p3, p4:, p5: = nil, *p6:, &block)
+    begin
+      <emptyTree>::<C T>.reveal_type(p1)
+      <emptyTree>::<C T>.reveal_type(p2)
+      <emptyTree>::<C T>.reveal_type(p3)
+      <emptyTree>::<C T>.reveal_type(p4)
+      <emptyTree>::<C T>.reveal_type(p5)
+      <emptyTree>::<C T>.reveal_type(p6)
+      <emptyTree>::<C T>.reveal_type(block)
+    end
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:block, ::T.nilable(::T.proc().void())).void()
+  end
+
+  def method18<<todo method>>(&block)
+    <emptyTree>::<C T>.reveal_type(block)
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.type_parameters(:X).params(:x, ::T.all(::T.type_parameter(:X), <emptyTree>::<C Object>)).returns(<emptyTree>::<C T>::<C Class>.[](::T.type_parameter(:X)))
+  end
+
+  def method19<<todo method>>(x, &<blk>)
+    begin
+      <emptyTree>::<C T>.reveal_type(x)
+      x.class()
+    end
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:block, ::T.untyped()).void()
+  end
+
+  def method20<<todo method>>(&block)
+    <emptyTree>::<C T>.reveal_type(block)
+  end
+
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  class <emptyTree>::<C P1><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  class <emptyTree>::<C P2><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  class <emptyTree>::<C P3><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  class <emptyTree>::<C P4><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  class <emptyTree>::<C P5><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  class <emptyTree>::<C P6><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  <runtime method definition of parse_error1>
+
+  class <emptyTree>::<C ParseError2><<C <todo sym>>> < (::<todo sym>)
+    def parse_error2<<todo method>>(p1, p2, &<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of parse_error2>
+
+    class <emptyTree>::<C ParseError3><<C <todo sym>>> < (::<todo sym>)
+      def parse_error3<<todo method>>(p1, p2, &<blk>)
+        <emptyTree>
+      end
+
+      <runtime method definition of parse_error3>
+    end
+  end
+
+  <runtime method definition of parse_error4>
+
+  <runtime method definition of sig_mismatch1>
+
+  <runtime method definition of sig_mismatch2>
+
+  <runtime method definition of method1>
+
+  <runtime method definition of method2>
+
+  <emptyTree>::<C T>.reveal_type(<self>.method2())
+
+  <runtime method definition of method3>
+
+  <emptyTree>::<C T>.reveal_type(<self>.method3())
+
+  <runtime method definition of method4>
+
+  <emptyTree>::<C T>.reveal_type(<self>.method4())
+
+  <runtime method definition of method5>
+
+  <emptyTree>::<C T>.reveal_type(<self>.method5())
+
+  <runtime method definition of method6>
+
+  <emptyTree>::<C T>.reveal_type(<self>.method6())
+
+  <runtime method definition of method7>
+
+  <self>.method7(<emptyTree>::<C P1>.new())
+
+  <self>.method7(42)
+
+  <runtime method definition of method8>
+
+  <self>.method8(<emptyTree>::<C P1>.new(), 42)
+
+  <runtime method definition of method9>
+
+  <self>.method9()
+
+  <self>.method9(42)
+
+  <runtime method definition of method10>
+
+  <self>.method10(<emptyTree>::<C P1>.new(), nil)
+
+  <self>.method10(<emptyTree>::<C P1>.new(), <emptyTree>::<C P2>.new())
+
+  <self>.method10(<emptyTree>::<C P1>.new())
+
+  <runtime method definition of method11>
+
+  <self>.method11("foo")
+
+  <self>.method11(42)
+
+  <runtime method definition of named_args2>
+
+  <runtime method definition of method12>
+
+  <runtime method definition of method13>
+
+  <runtime method definition of method14>
+
+  <runtime method definition of method15>
+
+  <runtime method definition of method16>
+
+  <runtime method definition of method17>
+
+  <self>.method17(<emptyTree>::<C P1>.new(), <emptyTree>::<C P2>.new(), <emptyTree>::<C P3>.new(), :p4, 42, :p5, <emptyTree>::<C P5>.new(), :p6, <emptyTree>::<C P6>.new()) do ||
+    <emptyTree>
+  end
+
+  <self>.method17(<emptyTree>::<C P1>.new(), <emptyTree>::<C P2>.new(), <emptyTree>::<C P3>.new(), :p4, <emptyTree>::<C P4>.new(), :p5, 42, :p6, <emptyTree>::<C P6>.new()) do ||
+    <emptyTree>
+  end
+
+  <self>.method17(<emptyTree>::<C P1>.new(), <emptyTree>::<C P2>.new(), <emptyTree>::<C P3>.new(), :p4, <emptyTree>::<C P4>.new(), :p5, <emptyTree>::<C P5>.new(), :p6, 42) do ||
+    <emptyTree>
+  end
+
+  <runtime method definition of method18>
+
+  <runtime method definition of method19>
+
+  <emptyTree>::<C T>.reveal_type(<self>.method19(42))
+
+  <runtime method definition of method20>
+
+  class <emptyTree>::<C FooProc><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:p, ::T.proc().returns(<emptyTree>::<C Integer>), :block, ::T.nilable(::T.proc().params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>).bind(<emptyTree>::<C FooProc>))).void()
+    end
+
+    def initialize<<todo method>>(p: = <emptyTree>::<C Kernel>.lambda() do ||
+        42
+      end, &block)
+      begin
+        <emptyTree>::<C T>.reveal_type(p)
+        <emptyTree>::<C T>.reveal_type(block)
+        <emptyTree>::<C T>.reveal_type(p.call())
+        <emptyTree>::<C T>.reveal_type(begin
+            <assignTemp>$2 = block
+            if ::NilClass.===(<assignTemp>$2)
+              ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$2)
+            else
+              <assignTemp>$2.call(42)
+            end
+          end)
+      end
+    end
+
+    <runtime method definition of initialize>
+  end
+
+  <emptyTree>::<C FooProc>.new() do |foo|
+    begin
+      <emptyTree>::<C T>.reveal_type(<self>)
+      <emptyTree>::<C T>.reveal_type(foo)
+      "foo"
+    end
+  end
+
+  module <emptyTree>::<C Annotations><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.abstract().returns(<emptyTree>::<C Integer>)
+    end
+
+    def method1<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.override().returns(<emptyTree>::<C Integer>)
+    end
+
+    def method2<<todo method>>(&<blk>)
+      <emptyTree>::<C T>.unsafe(nil)
+    end
+
+    <runtime method definition of method1>
+
+    <runtime method definition of method2>
+
+    class <emptyTree>::<C Parent><<C <todo sym>>> < (::<todo sym>)
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params(:x, <emptyTree>::<C Integer>).void()
+      end
+
+      def method<<todo method>>(x, &<blk>)
+        <emptyTree>::<C T>.reveal_type(x)
+      end
+
+      <runtime method definition of method>
+    end
+
+    class <emptyTree>::<C OverrideIncompatible><<C <todo sym>>> < (<emptyTree>::<C Parent>)
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.override().params(:x, <emptyTree>::<C String>).void()
+      end
+
+      def method<<todo method>>(x, &<blk>)
+        <emptyTree>::<C T>.reveal_type(x)
+      end
+
+      <runtime method definition of method>
+    end
+
+    class <emptyTree>::<C OverrideAllowIncompatible><<C <todo sym>>> < (<emptyTree>::<C Parent>)
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.override(:allow_incompatible, true).params(:x, <emptyTree>::<C String>).void()
+      end
+
+      def method<<todo method>>(x, &<blk>)
+        <emptyTree>::<C T>.reveal_type(x)
+      end
+
+      <runtime method definition of method>
+    end
+
+    class <emptyTree>::<C Final><<C <todo sym>>> < (::<todo sym>)
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime, :final) do ||
+        <self>.void()
+      end
+
+      def foo<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+      <self>.final!()
+
+      <runtime method definition of foo>
+    end
+  end
+
+  class <emptyTree>::<C Visibility><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:x, <emptyTree>::<C Integer>).void()
+    end
+
+    def method1<<todo method>>(x, &<blk>)
+      <emptyTree>::<C T>.reveal_type(x)
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:x, <emptyTree>::<C Integer>).void()
+    end
+
+    def method2<<todo method>>(x, &<blk>)
+      <emptyTree>::<C T>.reveal_type(x)
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:x, <emptyTree>::<C Integer>).void()
+    end
+
+    def method3<<todo method>>(x, &<blk>)
+      <emptyTree>::<C T>.reveal_type(x)
+    end
+
+    <self>.private(<runtime method definition of method1>)
+
+    <self>.protected(<runtime method definition of method2>)
+
+    <self>.public(<runtime method definition of method3>)
+  end
+end

@@ -46,14 +46,14 @@ def sig_mismatch2(p1); end
 
 # Sigs
 
-# We do not create any RBI if there is no RBS sigs
+# We do not create any sig if there is no RBS comment
 def method1; T.unsafe(nil); end # error: The method `method1` does not have a `sig`
 
 #: -> String
 def method2; T.unsafe(nil); end
 T.reveal_type(method2) # error: Revealed type: `String`
 
-#: -> String
+#:-> String
 def method3; T.unsafe(nil); end
 T.reveal_type(method3) # error: Revealed type: `String`
 
