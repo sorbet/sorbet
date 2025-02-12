@@ -174,7 +174,9 @@ class RBSSignaturesWalk {
         }
 
         core::NameRef name = send->fun;
-        if (name == core::Names::public_() || name == core::Names::protected_() || name == core::Names::private_()) {
+        if (name == core::Names::public_() || name == core::Names::protected_() || name == core::Names::private_() ||
+            name == core::Names::privateClassMethod() || name == core::Names::publicClassMethod() ||
+            name == core::Names::packagePrivate() || name == core::Names::packagePrivateClassMethod()) {
             return ast::cast_tree<ast::MethodDef>(send->getPosArg(0));
         }
 
