@@ -176,7 +176,7 @@ class RBSSignaturesWalk {
         return name == core::Names::public_() || name == core::Names::protected_() || name == core::Names::private_();
     }
 
-    void transformMethodDef(core::MutableContext ctx, ast::ClassDef *classDef, ast::MethodDef *methodDef) {
+    void transformMethodDef(core::MutableContext ctx, ast::ClassDef::RHS_store &newRHS, ast::MethodDef *methodDef) {
         auto methodComments = findRBSComments(ctx.file.data(ctx).source(), methodDef->loc);
 
         for (auto &signature : methodComments.signatures) {
@@ -184,7 +184,7 @@ class RBSSignaturesWalk {
             if (rbsMethodType.first) {
                 auto sig = rbs::MethodTypeTranslator::methodSignature(ctx, methodDef, move(rbsMethodType.first.value()),
                                                                       methodComments.annotations);
-                classDef->rhs.emplace_back(move(sig));
+                newRHS.emplace_back(move(sig));
             } else {
                 ENFORCE(rbsMethodType.second);
                 if (auto e = ctx.beginError(rbsMethodType.second->loc, core::errors::Rewriter::RBSSyntaxError)) {
@@ -194,14 +194,14 @@ class RBSSignaturesWalk {
         }
     }
 
-    void transformAccessor(core::MutableContext ctx, ast::ClassDef *classDef, ast::Send *send) {
+    void transformAccessor(core::MutableContext ctx, ast::ClassDef::RHS_store &newRHS, ast::Send *send) {
         auto attrComments = findRBSComments(ctx.file.data(ctx).source(), send->loc);
 
         for (auto &signature : attrComments.signatures) {
             auto rbsType = rbs::RBSParser::parseType(ctx, signature);
             if (rbsType.first) {
                 auto sig = rbs::MethodTypeTranslator::attrSignature(ctx, send, move(rbsType.first.value()));
-                classDef->rhs.emplace_back(move(sig));
+                newRHS.emplace_back(move(sig));
             } else {
                 ENFORCE(rbsType.second);
 
@@ -226,24 +226,25 @@ public:
     void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto classDef = ast::cast_tree<ast::ClassDef>(tree);
 
-        auto oldRHS = move(classDef->rhs);
-        classDef->rhs.clear();
-        classDef->rhs.reserve(oldRHS.size());
+        auto newRHS = ast::ClassDef::RHS_store();
+        newRHS.reserve(classDef->rhs.size());
 
-        for (auto &stat : oldRHS) {
+        for (auto &stat : classDef->rhs) {
             if (auto methodDef = ast::cast_tree<ast::MethodDef>(stat)) {
-                transformMethodDef(ctx, classDef, methodDef);
+                transformMethodDef(ctx, newRHS, methodDef);
             } else if (auto send = ast::cast_tree<ast::Send>(stat)) {
                 if (isAccessor(send)) {
-                    transformAccessor(ctx, classDef, send);
+                    transformAccessor(ctx, newRHS, send);
                 } else if (isVisibility(send)) {
                     auto methodDef = ast::cast_tree<ast::MethodDef>(send->posArgs()[0]);
-                    transformMethodDef(ctx, classDef, methodDef);
+                    transformMethodDef(ctx, newRHS, methodDef);
                 }
             }
 
-            classDef->rhs.emplace_back(move(stat));
+            newRHS.emplace_back(move(stat));
         }
+
+        classDef->rhs = move(newRHS);
     }
 };
 
