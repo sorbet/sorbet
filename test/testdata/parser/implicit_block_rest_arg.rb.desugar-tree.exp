@@ -1,0 +1,21 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  <self>.sig() do ||
+    <self>.params(:opts, <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C String>, <emptyTree>::<C Integer>)).void()
+  end
+
+  def example<<todo method>>(opts, &<blk>)
+    begin
+      opts.each() do |k|
+        <emptyTree>::<C T>.reveal_type(k)
+      end
+      opts.each() do |k|
+        <emptyTree>::<C T>.reveal_type(k)
+      end
+      opts.each() do |k, _|
+        <emptyTree>::<C T>.reveal_type(k)
+      end
+    end
+  end
+end
