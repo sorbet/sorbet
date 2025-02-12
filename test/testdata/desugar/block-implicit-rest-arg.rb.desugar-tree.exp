@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  <self>.call() do |m, a|
+  <self>.call() do |m, a, *<restargs>|
     <self>.stuff()
   end
 end
