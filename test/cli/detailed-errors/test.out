@@ -120,6 +120,34 @@ intersection.rb:52: Argument does not have asserted type `T.all(M1, M2, M3, M4)`
       `C134` is not a subtype of `T.all(M1, M2)` (the left side of the `T.all`)
         `C134` is not a subtype of `M2` (the right side of the `T.all`)
 
+class_of.rb:10: Expected `T::Class[IFoo]` but found `T.class_of(IFoo)` for argument `klass` https://srb.help/7002
+    10 |takes_t_class_ifoo(IFoo)
+                           ^^^^
+  Expected `T::Class[IFoo]` for argument `klass` of method `Object#takes_t_class_ifoo`:
+    class_of.rb:6:
+     6 |sig { params(klass: T::Class[IFoo]).void }
+                     ^^^^^
+  Got `T.class_of(IFoo)` originating from:
+    class_of.rb:10:
+    10 |takes_t_class_ifoo(IFoo)
+                           ^^^^
+  Detailed explanation:
+    `T.class_of(IFoo)` represents a module singleton class type, which is a `Module`, not a `Class`. See the `T.class_of` docs.
+
+class_of.rb:21: Expected `T::Class[IFooWithTT]` but found `T.class_of(IFooWithTT)` for argument `klass` https://srb.help/7002
+    21 |takes_t_class_ifoo_with_tm(IFooWithTT)
+                                   ^^^^^^^^^^
+  Expected `T::Class[IFooWithTT]` for argument `klass` of method `Object#takes_t_class_ifoo_with_tm`:
+    class_of.rb:17:
+    17 |sig { params(klass: T::Class[IFooWithTT]).void }
+                     ^^^^^
+  Got `T.class_of(IFooWithTT)` originating from:
+    class_of.rb:21:
+    21 |takes_t_class_ifoo_with_tm(IFooWithTT)
+                                   ^^^^^^^^^^
+  Detailed explanation:
+    `T.class_of(IFooWithTT)` represents a module singleton class type, which is a `Module`, not a `Class`. See the `T.class_of` docs.
+
 shapes.rb:10: Expected `{a: Integer, b: String}` but found `{}` for argument `x` https://srb.help/7002
     10 |takes_shape({})
                     ^^
@@ -290,18 +318,4 @@ tuples.rb:18: Expected `[Integer, String]` but found `[String("")]` for argument
     tuples.rb:18:
     18 |takes_tuple([''])
                     ^^^^
-
-class_of.rb:10: Expected `T::Class[IFoo]` but found `T.class_of(IFoo)` for argument `klass` https://srb.help/7002
-    10 |takes_t_class_ifoo(IFoo)
-                           ^^^^
-  Expected `T::Class[IFoo]` for argument `klass` of method `Object#takes_t_class_ifoo`:
-    class_of.rb:6:
-     6 |sig { params(klass: T::Class[IFoo]).void }
-                     ^^^^^
-  Got `T.class_of(IFoo)` originating from:
-    class_of.rb:10:
-    10 |takes_t_class_ifoo(IFoo)
-                           ^^^^
-  Detailed explanation:
-    `T.class_of(IFoo)` represents a module singleton class type, which is a `Module`, not a `Class`. See the `T.class_of` docs.
-Errors: 25
+Errors: 26

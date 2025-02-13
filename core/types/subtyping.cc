@@ -1044,10 +1044,23 @@ bool classSymbolIsAsGoodAs(const GlobalState &gs, ClassOrModuleRef c1, ClassOrMo
     return c1 == c2 || c1.data(gs)->derivesFrom(gs, c2);
 }
 
+bool isModuleSingletonClass(const GlobalState &gs, ClassOrModuleRef sym) {
+    auto maybeAttachedClass = sym.data(gs)->attachedClass(gs);
+    return maybeAttachedClass.exists() && maybeAttachedClass.data(gs)->isModule();
+}
+
+string moduleSingletonError(string_view tp) {
+    return ErrorColors::format(
+        "`{}` represents a module singleton class type, which is a `{}`, not a `{}`. See the `{}` docs.", tp, "Module",
+        "Class", "T.class_of");
+}
+
 void doesNotDeriveFrom(const GlobalState &gs, ErrorSection::Collector &errorDetailsCollector, ClassOrModuleRef left,
                        ClassOrModuleRef right) {
     auto subCollector = errorDetailsCollector.newCollector();
-    auto message = ErrorColors::format("`{}` does not derive from `{}`", left.show(gs), right.show(gs));
+    auto message = right == Symbols::Class() && isModuleSingletonClass(gs, left)
+                       ? moduleSingletonError(left.show(gs))
+                       : ErrorColors::format("`{}` does not derive from `{}`", left.show(gs), right.show(gs));
     subCollector.message = message;
     errorDetailsCollector.addErrorDetails(move(subCollector));
 }
@@ -1310,15 +1323,12 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                 return false;
             }
             const auto &c1 = cast_type_nonnull<ClassType>(t1);
-            auto maybeAttachedClass = c1.symbol.data(gs)->attachedClass(gs);
-            if (!maybeAttachedClass.exists() || !maybeAttachedClass.data(gs)->isModule()) {
+            if (!isModuleSingletonClass(gs, c1.symbol)) {
                 return false;
             }
 
             auto subCollector = errorDetailsCollector.newCollector();
-            subCollector.message = ErrorColors::format(
-                "`{}` represents a module singleton class type, which is a `{}`, not a `{}`. See the `{}` docs.",
-                t1.show(gs), "Module", "Class", "T.class_of");
+            subCollector.message = moduleSingletonError(t1.show(gs));
             errorDetailsCollector.addErrorDetails(move(subCollector));
         }
 
