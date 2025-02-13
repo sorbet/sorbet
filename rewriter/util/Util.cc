@@ -16,7 +16,7 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
 
     auto scopeCnst = cons->scopeAs<ast::UnresolvedConstantLit>();
     if (!scopeCnst) {
-        if (ast::isa_tree<ast::EmptyTree>(cons->scope)) {
+        if (!cons->hasScope()) {
             return make_unique<ast::UnresolvedConstantLit>(cons->loc, ast::MK::EmptyTree(), cons->cnst);
         }
         auto id = cons->scopeAs<ast::ConstantLit>();
@@ -304,7 +304,7 @@ namespace {
 // Returns `true` when the expression passed is an UnresolvedConstantLit with the name `Kernel` and no additional scope.
 bool isKernel(const ast::ExpressionPtr &expr) {
     if (auto constRecv = ast::cast_tree<ast::UnresolvedConstantLit>(expr)) {
-        return ast::isa_tree<ast::EmptyTree>(constRecv->scope) && constRecv->cnst == core::Names::Constants::Kernel();
+        return !constRecv->hasScope() && constRecv->cnst == core::Names::Constants::Kernel();
     }
     return false;
 }
