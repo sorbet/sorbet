@@ -45,7 +45,7 @@ vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *
         return empty;
     }
 
-    if (!ast::isa_tree<ast::EmptyTree>(recv->scope) || recv->cnst != core::Names::Constants::Class() ||
+    if (recv->hasScope() || recv->cnst != core::Names::Constants::Class() ||
         send->fun != core::Names::new_()) {
         return empty;
     }
@@ -103,7 +103,7 @@ bool ClassNew::run(core::MutableContext ctx, ast::Send *send) {
         return false;
     }
 
-    if (!ast::isa_tree<ast::EmptyTree>(recv->scope) || recv->cnst != core::Names::Constants::Class() ||
+    if (recv->hasScope() || recv->cnst != core::Names::Constants::Class() ||
         send->fun != core::Names::new_()) {
         return false;
     }
