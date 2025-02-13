@@ -317,10 +317,8 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
     UnorderedMap<core::SymbolRef, ASTSymbolInfo> defMapping;
     SymbolFileLocSaver saver{fref, defMapping};
     core::Context ctx{gs, core::Symbols::root(), fref};
-    auto resolved = typechecker.getResolved({fref});
-    for (auto &f : resolved) {
-        ast::ShallowWalk::apply(ctx, saver, f.tree);
-    }
+    auto resolved = typechecker.getResolved(fref);
+    ast::ShallowWalk::apply(ctx, saver, resolved.tree);
 
     for (auto ref : candidates) {
         auto data = symbolRef2DocumentSymbol(gs, ref, fref, defMapping, forced);

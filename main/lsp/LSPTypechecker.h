@@ -155,9 +155,14 @@ public:
     const ast::ParsedFile &getIndexed(core::FileRef fref) const;
 
     /**
-     * Returns a copy of the indexed tree that has been run through the incremental resolver.
+     * Returns copies of the indexed trees that have been run through the incremental resolver.
      */
     std::vector<ast::ParsedFile> getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers) const;
+
+    /**
+     * Returns a copy of the indexed tree that has been run through the incremental resolver.
+     */
+    ast::ParsedFile getResolved(core::FileRef fref, WorkerPool &workers) const;
 
     /**
      * Returns the currently active GlobalState.
@@ -229,7 +234,9 @@ public:
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;
     const ast::ParsedFile &getIndexed(core::FileRef fref) const;
     std::vector<ast::ParsedFile> getResolved(absl::Span<const core::FileRef> frefs) const;
+    ast::ParsedFile getResolved(core::FileRef fref) const;
     ast::ExpressionPtr getLocalVarTrees(core::FileRef fref) const;
+
     const core::GlobalState &state() const;
 
     void updateGsFromOptions(const DidChangeConfigurationParams &options) const;
