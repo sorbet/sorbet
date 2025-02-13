@@ -44,6 +44,9 @@ def sig_mismatch1(p1, p2); end
 def sig_mismatch2(p1); end
 #                 ^^ error: Malformed `sig`. Type not specified for argument `p1`
 
+#: (P1, P2, P3) -> void # error: RBS signature has more parameters than in the method definition
+def sig_mismatch3; end # error: The method `sig_mismatch3` does not have a `sig`
+
 # Sigs
 
 # We do not create any sig if there is no RBS comment

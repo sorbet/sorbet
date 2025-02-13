@@ -23,6 +23,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
+  def sig_mismatch3<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
   def method1<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
@@ -251,6 +255,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <runtime method definition of sig_mismatch1>
 
   <runtime method definition of sig_mismatch2>
+
+  <runtime method definition of sig_mismatch3>
 
   <runtime method definition of method1>
 

@@ -173,6 +173,14 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
             string_view nameStr(nameConstant->start, nameConstant->length);
             name = ctx.state.enterNameUTF8(nameStr);
         } else {
+            if (i >= methodDef->args.size()) {
+                if (auto e = ctx.beginError(methodType.loc, core::errors::Rewriter::RBSParameterMismatch)) {
+                    e.setHeader("RBS signature has more parameters than in the method definition");
+                }
+
+                return ast::MK::EmptyTree();
+            }
+
             // The RBS arg is not named in the signature, so we get it from the method definition
             name = expressionName(&methodDef->args[i]);
         }
