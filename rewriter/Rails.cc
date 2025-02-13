@@ -29,7 +29,7 @@ void Rails::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     if (name->cnst != core::Names::Constants::Migration()) {
         return;
     }
-    auto name2 = ast::cast_tree<ast::UnresolvedConstantLit>(name->scope);
+    auto name2 = name->scopeAs<ast::UnresolvedConstantLit>();
     if (!name2) {
         return;
     }

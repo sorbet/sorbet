@@ -26,11 +26,11 @@ bool doesExtendConcern(core::MutableContext ctx, ast::ClassDef *klass) {
                 if (firstArg == nullptr) {
                     return;
                 }
-                auto firstArgScope = ast::cast_tree<ast::UnresolvedConstantLit>(firstArg->scope);
+                auto firstArgScope = firstArg->scopeAs<ast::UnresolvedConstantLit>();
                 if (firstArgScope == nullptr) {
                     return;
                 }
-                auto outerScope = ast::cast_tree<ast::UnresolvedConstantLit>(firstArgScope->scope);
+                auto outerScope = firstArgScope->scopeAs<ast::UnresolvedConstantLit>();
                 if (outerScope != nullptr) {
                     return;
                 }

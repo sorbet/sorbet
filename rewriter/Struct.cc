@@ -42,7 +42,7 @@ void selfScopeToEmptyTree(ast::UnresolvedConstantLit &cnst) {
         return;
     }
 
-    if (auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst.scope)) {
+    if (auto scope = cnst.scopeAs<ast::UnresolvedConstantLit>()) {
         selfScopeToEmptyTree(*scope);
         return;
     }

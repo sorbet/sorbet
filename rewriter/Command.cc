@@ -21,7 +21,7 @@ bool isCommand(const ast::ClassDef *klass) {
     if (cnst->cnst != core::Names::Constants::Command()) {
         return false;
     }
-    auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope);
+    auto scope = cnst->scopeAs<ast::UnresolvedConstantLit>();
     if (scope == nullptr) {
         return false;
     }

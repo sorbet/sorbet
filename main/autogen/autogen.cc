@@ -58,7 +58,7 @@ class AutogenWalk {
         while (cnst != nullptr && cnst->original() != nullptr) {
             auto &original = *cnst->original();
             out.emplace_back(original.cnst);
-            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
+            cnst = original.scopeAs<ast::ConstantLit>();
 
             // If any part of the constant literal scope is a class alias, the final name should be scoped
             // under the *dealiased* scope. This allows subconstants-of-aliases to be referenced
@@ -212,7 +212,7 @@ public:
         auto *cnst = &cnstRef;
         while (cnst != nullptr && cnst->original() != nullptr) {
             auto &original = *cnst->original();
-            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
+            cnst = original.scopeAs<ast::ConstantLit>();
         }
         if (cnst && cnst->symbol() == core::Symbols::root()) {
             return true;

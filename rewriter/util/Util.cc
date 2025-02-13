@@ -14,12 +14,12 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
         return nullptr;
     }
 
-    auto scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cons->scope);
+    auto scopeCnst = cons->scopeAs<ast::UnresolvedConstantLit>();
     if (!scopeCnst) {
         if (ast::isa_tree<ast::EmptyTree>(cons->scope)) {
             return make_unique<ast::UnresolvedConstantLit>(cons->loc, ast::MK::EmptyTree(), cons->cnst);
         }
-        auto id = ast::cast_tree<ast::ConstantLit>(cons->scope);
+        auto id = cons->scopeAs<ast::ConstantLit>();
         if (id == nullptr) {
             return nullptr;
         }

@@ -30,7 +30,7 @@ bool isTEnum(core::MutableContext ctx, ast::ClassDef *klass) {
     if (cnst->cnst != core::Names::Constants::Enum()) {
         return false;
     }
-    auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope);
+    auto scope = cnst->scopeAs<ast::UnresolvedConstantLit>();
     if (scope == nullptr) {
         return false;
     }

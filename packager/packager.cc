@@ -604,7 +604,7 @@ bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) 
             }
             valid = false;
         }
-        constLit = ast::cast_tree<ast::UnresolvedConstantLit>(constLit->scope);
+        constLit = constLit->scopeAs<ast::UnresolvedConstantLit>();
     }
 
     return valid;
@@ -615,7 +615,7 @@ FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::Unresolve
     fqn.loc = ctx.locAt(constantLit->loc);
     while (constantLit != nullptr) {
         fqn.parts.emplace_back(constantLit->cnst);
-        constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(constantLit->scope);
+        constantLit = constantLit->scopeAs<ast::UnresolvedConstantLit>();
     }
     reverse(fqn.parts.begin(), fqn.parts.end());
     ENFORCE(!fqn.parts.empty());
@@ -662,7 +662,7 @@ void mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
 ast::ExpressionPtr prependName(ast::ExpressionPtr scope) {
     auto lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
     ENFORCE(lastConstLit != nullptr);
-    while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
+    while (auto constLit = lastConstLit->scopeAs<ast::UnresolvedConstantLit>()) {
         lastConstLit = constLit;
     }
     lastConstLit->scope =
@@ -671,9 +671,9 @@ ast::ExpressionPtr prependName(ast::ExpressionPtr scope) {
 }
 
 bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit &cnst) {
-    if (auto scope = ast::cast_tree<ast::ConstantLit>(cnst.scope)) {
+    if (auto scope = cnst.scopeAs<ast::ConstantLit>()) {
         return scope->symbol() == core::Symbols::PackageSpecRegistry();
-    } else if (auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst.scope)) {
+    } else if (auto scope = cnst.scopeAs<ast::UnresolvedConstantLit>()) {
         return startsWithPackageSpecRegistry(*scope);
     } else {
         return false;
@@ -682,7 +682,7 @@ bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit &cnst) {
 
 ast::ExpressionPtr prependRoot(ast::ExpressionPtr scope) {
     auto *lastConstLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(scope);
-    while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
+    while (auto constLit = lastConstLit->scopeAs<ast::UnresolvedConstantLit>()) {
         lastConstLit = constLit;
     }
     auto loc = lastConstLit->scope.loc();
@@ -1103,8 +1103,8 @@ private:
         auto prevDepth = namespaces.depth();
         while (lit != nullptr) {
             tmpNameParts.emplace_back(lit->cnst, lit->loc);
-            auto scope = ast::cast_tree<ast::ConstantLit>(lit->scope);
-            lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
+            auto scope = lit->scopeAs<ast::ConstantLit>();
+            lit = lit->scopeAs<ast::UnresolvedConstantLit>();
             if (scope != nullptr) {
                 ENFORCE(lit == nullptr);
                 ENFORCE(scope->symbol() == core::Symbols::root());
@@ -1129,8 +1129,8 @@ private:
             if (rootConsts == 0) {
                 namespaces.popName();
             }
-            auto scope = ast::cast_tree<ast::ConstantLit>(lit->scope);
-            lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
+            auto scope = lit->scopeAs<ast::ConstantLit>();
+            lit = lit->scopeAs<ast::UnresolvedConstantLit>();
             if (scope != nullptr) {
                 ENFORCE(lit == nullptr);
                 ENFORCE(scope->symbol() == core::Symbols::root());

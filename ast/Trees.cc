@@ -343,7 +343,7 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
 
             auto &orig = *nested->original();
             namesFailedToResolve.emplace_back(orig.cnst);
-            nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
+            nested = orig.scopeAs<ast::ConstantLit>();
             ENFORCE(nested);
             ENFORCE(nested->symbol() == core::Symbols::StubModule());
             ENFORCE(!nested->resolutionScopes()->empty());

@@ -15,11 +15,11 @@ bool isTSigWithoutRuntime(ast::ExpressionPtr &expr) {
         if (withoutRuntime == nullptr || withoutRuntime->cnst != core::Names::Constants::WithoutRuntime()) {
             return false;
         }
-        auto sig = ast::cast_tree<ast::UnresolvedConstantLit>(withoutRuntime->scope);
+        auto sig = withoutRuntime->scopeAs<ast::UnresolvedConstantLit>();
         if (sig == nullptr || sig->cnst != core::Names::Constants::Sig()) {
             return false;
         }
-        auto t = ast::cast_tree<ast::UnresolvedConstantLit>(sig->scope);
+        auto t = sig->scopeAs<ast::UnresolvedConstantLit>();
         return t != nullptr && t->cnst == core::Names::Constants::T() && ast::MK::isRootScope(t->scope);
     }
 }
