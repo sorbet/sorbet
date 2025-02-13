@@ -3,7 +3,7 @@ sig do
   params(
     build_group: String,
     type
-  # ^^^^ error: positional arg "type" after keyword arg
+  # ^^^^ parser-error: positional arg "type" after keyword arg
   # ^^^^ error: Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>
   # ^^^^ error: Unknown argument name `type`
     filter: T.nilable(String),

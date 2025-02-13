@@ -8,4 +8,4 @@ sig {params(x: A).void}
 def foo(x)
   puts x
   x.
-end # error: unexpected token "end"
+end # parser-error: unexpected token "end"

@@ -5,8 +5,8 @@
 class A
   def foo(aaa, bbb)
     # trailing space is intentional
-    if # error: Hint: this "if" token might not be properly closed
+    if # parser-error: Hint: this "if" token might not be properly closed
     #  ^ completion: (nothing)
     puts 'after'
   end
-end # error: unexpected token "end of file"
+end # parser-error: unexpected token "end of file"

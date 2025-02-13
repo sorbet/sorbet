@@ -1,2 +1,2 @@
 # typed: true
-0_ # error: trailing `_` in number
+0_ # parser-error: trailing `_` in number

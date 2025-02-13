@@ -19,4 +19,4 @@ begin
   # ^ completion: example, ...
   # ^ apply-completion: [A] item: 0
 
-end # error: unexpected token "end"
+end # parser-error: unexpected token "end"

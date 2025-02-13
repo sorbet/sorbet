@@ -2,23 +2,23 @@
 
 class A
   def test0
-    x = if # error: unexpected token "if"
+    x = if # parser-error: unexpected token "if"
   end
 
   def test1
-    x = if x # error: Hint: this "if" token might not be properly closed
+    x = if x # parser-error: Hint: this "if" token might not be properly closed
   end
 
   def test2
-    x = if x. # error: Hint: this "if" token might not be properly closed
+    x = if x. # parser-error: Hint: this "if" token might not be properly closed
   end
-# ^^^ error: unexpected token "end"
+# ^^^ parser-error: unexpected token "end"
 
   def test3
-    x = if x.f # error: Hint: this "if" token might not be properly closed
+    x = if x.f # parser-error: Hint: this "if" token might not be properly closed
   end
 
   def test3
-    x = if x.f() # error: Hint: this "if" token might not be properly closed
+    x = if x.f() # parser-error: Hint: this "if" token might not be properly closed
   end
-end # error: unexpected token "end of file"
+end # parser-error: unexpected token "end of file"

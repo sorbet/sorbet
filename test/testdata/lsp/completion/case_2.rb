@@ -10,15 +10,15 @@ class ConstantCompletion
 
   def self.test1(x)
     puts 'before'
-    case x # error: Hint: this "case" token might not be properly closed
-    when ConstantCompletion:: # error: expected constant name following "::"
+    case x # parser-error: Hint: this "case" token might not be properly closed
+    when ConstantCompletion:: # parser-error: expected constant name following "::"
     #                        ^ completion: A, B
     puts 'hello'
   end
 
   def self.test2(x)
     puts 'before'
-    case x # error: Hint: this "case" token might not be properly closed
+    case x # parser-error: Hint: this "case" token might not be properly closed
     when ConstantCompletion::
     #                        ^ completion: A, B, ...
     puts('hello')
@@ -26,7 +26,7 @@ class ConstantCompletion
 
   def self.test3(x)
     puts 'before'
-    case x # error: Hint: this "case" token might not be properly closed
+    case x # parser-error: Hint: this "case" token might not be properly closed
     when ConstantCompletion:: # error: Unable to resolve constant `Opus`
     #                        ^ completion: A, B, ...
     Opus::Log.info('hello')
@@ -34,9 +34,9 @@ class ConstantCompletion
 
   def self.test4(x)
     puts 'before'
-    case x # error: Hint: this "case" token might not be properly closed
+    case x # parser-error: Hint: this "case" token might not be properly closed
     when ConstantCompletion::
     #                        ^ completion: A, B, ...
     y = nil # error: Setter method `y=` does not exist on `T.class_of(ConstantCompletion)`
   end
-end # error: unexpected token "end of file"
+end # parser-error: unexpected token "end of file"

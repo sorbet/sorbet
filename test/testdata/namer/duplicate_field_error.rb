@@ -9,7 +9,7 @@ class A
                          # ^ error: Unknown argument name `x`
   def initialize(x:, x: nil)
                    # ^^ error: Malformed `sig`
-                   # ^^^^^^ error: duplicate argument name x
+                   # ^^^^^^ parser-error: duplicate argument name x
     @x = T.let(x, T.nilable(String))
        # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Argument does not have asserted type
     @x = T.let(x, T.nilable(String))

@@ -4,7 +4,7 @@ module
   def foo(xyz)
     self.
     #    ^ completion: (nothing)
-  end # error: unexpected token
+  end # parser-error: unexpected token
 end
 
 class A

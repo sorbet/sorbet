@@ -1,10 +1,10 @@
 # typed: true
 
-class A # error: Hint: this "class" token is not closed before the end of the file
+class A # parser-error: Hint: this "class" token is not closed before the end of the file
   extend T::Sig
 
   sig {params(x: Integer).void}
-  def foo(x) # error: Hint: this "def" token is not closed before the end of the file
+  def foo(x) # parser-error: Hint: this "def" token is not closed before the end of the file
     puts(x)
 
   # We get a double-reported error here because of the naive/greedy
@@ -15,7 +15,7 @@ class A # error: Hint: this "class" token is not closed before the end of the fi
   # Reporting an error twice seems less bad than failing to parse entirely.
   sig {void}
   def bar
-# ^^^ error: Hint: this "def" token is not closed before the end of the file
-# ^^^ error: Hint: this "def" token is not closed before the end of the file
+# ^^^ parser-error: Hint: this "def" token is not closed before the end of the file
+# ^^^ parser-error: Hint: this "def" token is not closed before the end of the file
 
-  puts 'after' # error: unexpected token "end of file"
+  puts 'after' # parser-error: unexpected token "end of file"

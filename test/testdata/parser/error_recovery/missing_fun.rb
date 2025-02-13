@@ -2,12 +2,12 @@
 
 def test_method_without_fun_name(x)
   x.
-end # error: unexpected token
+end # parser-error: unexpected token
 
 def test_method_without_fun_name_plus_before(x)
   before = 1
   x.
-end # error: unexpected token
+end # parser-error: unexpected token
 
 def test_method_without_fun_name_plus_after(x)
   x.

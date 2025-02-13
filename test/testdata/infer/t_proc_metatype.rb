@@ -17,7 +17,7 @@ xs = T::Array[T.proc.params(x: String, y:).void].new
 T.reveal_type(xs) # error: `T::Array[T.proc.params(arg0: String, arg1: T.untyped).void]`
 
 xs = T::Array[T.proc.params(y: x: String).void].new
-#                           ^^ error: unexpected token tLABEL
+#                           ^^ parser-error: unexpected token tLABEL
 T.reveal_type(xs) # error: `T::Array[T.proc.params(arg0: T.untyped, arg1: String).void]`
 
 args = T::Array[T.untyped].new

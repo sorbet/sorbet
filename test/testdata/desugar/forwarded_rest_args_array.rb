@@ -6,5 +6,5 @@ def forwarded_rest_args(*)
 end
 
 def start_dotdotdot(*, ...)
-  #                 ^ error: ... after rest argument
+  #                 ^ parser-error: ... after rest argument
 end

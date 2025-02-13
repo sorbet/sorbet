@@ -6,9 +6,9 @@
 
 class A
   X = [1,
-    # ^ error: unterminated "["
+    # ^ parser-error: unterminated "["
   sig {void}
   def bar
-# ^^^ error: unexpected token "def"
+# ^^^ parser-error: unexpected token "def"
   end
-end # error: unexpected token "end"
+end # parser-error: unexpected token "end"

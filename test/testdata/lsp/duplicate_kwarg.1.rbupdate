@@ -2,9 +2,9 @@
 # assert-fast-path: duplicate_kwarg.rb
 
 def foo(x:, x: nil)
-          # ^^^^^^ error: duplicate argument name x
+          # ^^^^^^ parser-error: duplicate argument name x
 end
 
 def bar(x, y:, y: nil)
-             # ^^^^^^ error: duplicate argument name y
+             # ^^^^^^ parser-error: duplicate argument name y
 end

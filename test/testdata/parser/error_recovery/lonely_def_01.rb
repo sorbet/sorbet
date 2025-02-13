@@ -1,10 +1,10 @@
 # typed: false
-class A # error: class definition in method body
+class A # parser-error: class definition in method body
   sig {void}
   def
-# ^^^ error: Hint: this "def" token might not be followed by a method name
-# ^^^ error: Hint: this "def" token might not be properly closed
+# ^^^ parser-error: Hint: this "def" token might not be followed by a method name
+# ^^^ parser-error: Hint: this "def" token might not be properly closed
 
-  sig {void} # error: unexpected token tLCURLY
+  sig {void} # parser-error: unexpected token tLCURLY
   def example; end
 end

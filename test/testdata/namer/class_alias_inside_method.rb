@@ -6,7 +6,7 @@ module A
 
   sig {params(x: C1).returns(NilClass)}
   def f(x)
-    C2 = C1 # error: dynamic constant assignment
+    C2 = C1 # parser-error: dynamic constant assignment
     nil
   end
 end

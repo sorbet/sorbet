@@ -1,7 +1,7 @@
 # typed: true
 
-module A # error: Hint: this "module" token is not closed before the end of the file
+module A # parser-error: Hint: this "module" token is not closed before the end of the file
   module B
     module C
     end
-  end # error: unexpected token "end of file"
+  end # parser-error: unexpected token "end of file"

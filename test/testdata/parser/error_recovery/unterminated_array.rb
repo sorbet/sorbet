@@ -3,13 +3,13 @@
 class A
   def f
     [1,
-  #   ^ error: unexpected token ","
-  # ^ error: unterminated "["
+  #   ^ parser-error: unexpected token ","
+  # ^ parser-error: unterminated "["
     puts "hi"
   end
   def g
     [
-  # ^ error: unterminated "["
+  # ^ parser-error: unterminated "["
   end
   def h
     puts "ho"
@@ -20,14 +20,14 @@ class B
   def q
     puts "ho"
     [
-  # ^ error: unterminated "["
+  # ^ parser-error: unterminated "["
   end
   def r
     puts "hi"
   end
   def s
     puts ([] + [)
-             # ^ error: unterminated "["
+             # ^ parser-error: unterminated "["
   end
   def t
     puts "hi"

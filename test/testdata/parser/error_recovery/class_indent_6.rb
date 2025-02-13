@@ -5,6 +5,6 @@ class F
   end
 
   class Inner
-# ^^^^^ error: Hint: this "class" token might not be properly closed
+# ^^^^^ parser-error: Hint: this "class" token might not be properly closed
     puts 'hello'
-end # error: unexpected token "end of file"
+end # parser-error: unexpected token "end of file"

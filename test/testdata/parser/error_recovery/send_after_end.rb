@@ -14,7 +14,7 @@ def foo
   x.end
 
   x.
-    end # error: unexpected token
+    end # parser-error: unexpected token
 
   x.if
-end # error: unexpected token
+end # parser-error: unexpected token

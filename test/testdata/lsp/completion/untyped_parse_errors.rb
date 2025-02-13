@@ -3,4 +3,4 @@
 class A
   e.
   # ^ completion: (nothing)
-end # error: unexpected token
+end # parser-error: unexpected token

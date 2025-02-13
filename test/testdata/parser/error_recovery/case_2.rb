@@ -4,12 +4,12 @@ class A
   puts 'before'
 
   def test1
-    case # error: "case" statement must at least have one "when" clause
+    case # parser-error: "case" statement must at least have one "when" clause
     end
   end
 
   def test2
-    case x # error: "case" statement must at least have one "when" clause
+    case x # parser-error: "case" statement must at least have one "when" clause
     end
   end
 

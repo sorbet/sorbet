@@ -1,2 +1,2 @@
 # typed: true
-"\xg3" # error: invalid hex escape
+"\xg3" # parser-error: invalid hex escape
