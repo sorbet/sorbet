@@ -916,6 +916,11 @@ void readOptions(Options &opts,
                                   opts.inputFileNames.end());
 
         opts.rbsSignaturesEnabled = raw["enable-experimental-rbs-signatures"].as<bool>();
+        if (opts.rbsSignaturesEnabled && !opts.cacheDir.empty()) {
+            logger->error("--enable-experimental-rbs-signatures is incompatible with --cache-dir. Ignoring cache");
+            opts.cacheDir = "";
+        }
+
         opts.requiresAncestorEnabled = raw["enable-experimental-requires-ancestor"].as<bool>();
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
