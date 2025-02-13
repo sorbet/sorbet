@@ -1115,6 +1115,10 @@ public:
 
     UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst);
 
+    bool hasScope() const {
+        return !isa_tree<EmptyTree>(this->scope);
+    }
+
     template <class T>
     core::UntaggedPtr<T> scopeAs() {
         return cast_tree<T>(this->scope);
