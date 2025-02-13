@@ -527,7 +527,7 @@ public:
     }
 
     static bool isRootScoped(const ast::UnresolvedConstantLit &lit) {
-        if (ast::isa_tree<ast::EmptyTree>(lit.scope)) {
+        if (!lit.hasScope()) {
             return true;
         }
         auto root = ast::cast_tree<ast::ConstantLit>(lit.scope);
