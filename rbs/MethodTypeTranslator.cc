@@ -70,9 +70,10 @@ void collectKeywords(core::MutableContext ctx, core::LocOffsets docLoc, rbs_hash
                 "Unexpected node type `{}` in keyword argument value, expected `{}`",
                 rbs_node_type_name(hash_node->value), "FunctionParam");
 
+        auto loc = locFromRange(docLoc, hash_node->key->location->rg);
         rbs_ast_symbol_t *keyNode = (rbs_ast_symbol_t *)hash_node->key;
         rbs_types_function_param_t *valueNode = (rbs_types_function_param_t *)hash_node->value;
-        auto arg = RBSArg{docLoc, keyNode, valueNode->type};
+        auto arg = RBSArg{loc, keyNode, valueNode->type};
         args.emplace_back(arg);
     }
 }
