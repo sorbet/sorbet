@@ -20,7 +20,7 @@ bool isTSigWithoutRuntime(ast::ExpressionPtr &expr) {
             return false;
         }
         auto t = sig->scopeAs<ast::UnresolvedConstantLit>();
-        return t != nullptr && t->cnst == core::Names::Constants::T() && ast::MK::isRootScope(t->scope);
+        return t != nullptr && t->cnst == core::Names::Constants::T() && ast::MK::isRootScoped(*t);
     }
 }
 

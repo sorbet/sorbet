@@ -72,7 +72,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         return empty;
     }
 
-    if (!ast::MK::isRootScope(recv->scope) || recv->cnst != core::Symbols::Struct().data(ctx)->name ||
+    if (!ast::MK::isRootScoped(*recv) || recv->cnst != core::Symbols::Struct().data(ctx)->name ||
         send->fun != core::Names::new_() || (!send->hasPosArgs() && !send->hasKwArgs())) {
         return empty;
     }

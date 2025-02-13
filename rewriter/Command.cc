@@ -28,7 +28,7 @@ bool isCommand(const ast::ClassDef *klass) {
     if (scope->cnst != core::Names::Constants::Opus()) {
         return false;
     }
-    return ast::MK::isRootScope(scope->scope);
+    return ast::MK::isRootScoped(*scope);
 }
 
 void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {

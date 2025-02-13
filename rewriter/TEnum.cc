@@ -37,7 +37,7 @@ bool isTEnum(core::MutableContext ctx, ast::ClassDef *klass) {
     if (scope->cnst != core::Names::Constants::T()) {
         return false;
     }
-    return ast::MK::isRootScope(scope->scope);
+    return ast::MK::isRootScoped(*scope);
 }
 
 ast::Send *asEnumsDo(ast::ExpressionPtr &stat) {
