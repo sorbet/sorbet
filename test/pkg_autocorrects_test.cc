@@ -596,7 +596,7 @@ TEST_CASE("Edge cases") {
     string libPackage = makePackageRB("LibPackage", "false", "lib", {"FalsePackageA"});
     string libPackagePath = "lib_pkg/__package.rb";
 
-    string appPackage = makePackageRB("AppPackage", "false", "app", {});
+    string appPackage = makePackageRB("AppPackage", "layered", "app", {});
     string appPackagePath = "app_pkg/__package.rb";
 
     string packageWithComments = "class HasComments < PackageSpec\n"
@@ -610,6 +610,9 @@ TEST_CASE("Edge cases") {
         makePackageRB("HasTestImports", "dag", "app", {}, {"FalsePackageA", "LayeredPackageA"});
     string packageWithTestImportsPath = "has_test_imports/__package.rb";
 
+    string packageWithLayeringViolations = makePackageRB("HasLayeringViolations", "false", "lib", {"AppPackage"});
+    string packageWithLayeringViolationsPath = "has_layering_violations/__package.rb";
+
     auto parsedFiles = enterPackages(gs, {{packageWithFakeImportPath, packageWithFakeImport},
                                           {falsePackageAPath, falsePackageA},
                                           {layeredPackageAPath, layeredPackageA},
@@ -617,7 +620,8 @@ TEST_CASE("Edge cases") {
                                           {appPackagePath, appPackage},
                                           {packageWithCommentsPath, packageWithComments},
                                           {packageWithTestImportsPath, packageWithTestImports},
-                                          {dagPackageAPath, dagPackageA}});
+                                          {dagPackageAPath, dagPackageA},
+                                          {packageWithLayeringViolationsPath, packageWithLayeringViolations}});
 
     {
         // Import list contains non-existent package
@@ -677,6 +681,19 @@ TEST_CASE("Edge cases") {
         string expected =
             makePackageRB("HasTestImports", "dag", "app", {"DagPackageA"}, {"FalsePackageA", "LayeredPackageA"});
         auto replaced = addImport->applySingleEditForTesting(packageWithTestImports);
+        CHECK_EQ(expected, replaced);
+    }
+
+    {
+        // Add import to a package with layering violations
+        auto &hasLayeringViolationsPkg = getPackageForFile(gs, parsedFiles[8].file);
+        ENFORCE(hasLayeringViolationsPkg.exists());
+        auto &falsePkgA = getPackageForFile(gs, parsedFiles[1].file);
+        ENFORCE(falsePkgA.exists());
+
+        auto addImport = hasLayeringViolationsPkg.addImport(gs, falsePkgA, false);
+        string expected = makePackageRB("HasLayeringViolations", "false", "lib", {"AppPackage", "FalsePackageA"});
+        auto replaced = addImport->applySingleEditForTesting(packageWithLayeringViolations);
         CHECK_EQ(expected, replaced);
     }
 }

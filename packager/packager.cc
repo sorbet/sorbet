@@ -321,12 +321,12 @@ public:
         }
 
         // Layering violations always come first
-        if (causesLayeringViolation(packageDB, a)) {
-            if (causesLayeringViolation(packageDB, b)) {
-                return 0;
-            } else {
-                return -1;
-            }
+        if (causesLayeringViolation(packageDB, a) && causesLayeringViolation(packageDB, b)) {
+            return 0;
+        } else if (causesLayeringViolation(packageDB, a) && !causesLayeringViolation(packageDB, b)) {
+            return -1;
+        } else if (!causesLayeringViolation(packageDB, a) && causesLayeringViolation(packageDB, b)) {
+            return 1;
         }
 
         auto aStrictDependenciesLevel = a.strictDependenciesLevel().value().first;
