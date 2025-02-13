@@ -690,8 +690,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return translate(implicitNode->value);
         }
         case PM_IMPLICIT_REST_NODE: { // An implicit splat, like the `,` in `a, = 1, 2, 3`
-            unreachable("PM_IMPLICIT_REST_NODE is handled separately as part of PM_MULTI_WRITE_NODE and "
-                        "PM_MULTI_TARGET_NODE, see their implementations for details.");
+            auto restLoc = core::LocOffsets{location.beginLoc + 1, location.beginLoc + 1};
+            return make_unique<parser::Restarg>(restLoc, core::Names::restargs(), restLoc);
         }
         case PM_INDEX_AND_WRITE_NODE: { // And-assignment to an index, e.g. `a[i] &&= false`
             return translateOpAssignment<pm_index_and_write_node, parser::AndAsgn, void>(node);
