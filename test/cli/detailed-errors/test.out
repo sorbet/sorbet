@@ -146,7 +146,7 @@ class_of.rb:21: Expected `T::Class[IFooWithTT]` but found `T.class_of(IFooWithTT
     21 |takes_t_class_ifoo_with_tm(IFooWithTT)
                                    ^^^^^^^^^^
   Detailed explanation:
-    `T.class_of(IFooWithTT)` does not derive from `Class`
+    `T.class_of(IFooWithTT)` represents a module singleton class type, which is a `Module`, not a `Class`. See the `T.class_of` docs.
 
 shapes.rb:10: Expected `{a: Integer, b: String}` but found `{}` for argument `x` https://srb.help/7002
     10 |takes_shape({})
