@@ -170,6 +170,7 @@ struct builder {
     ForeignPtr (*rescue_body)(SelfPtr builder, const token *rescue, ForeignPtr excList, const token *assoc,
                               ForeignPtr excVar, const token *then, ForeignPtr body);
     ForeignPtr (*restarg)(SelfPtr builder, const token *star, const token *name);
+    ForeignPtr (*implicit_restarg)(SelfPtr builder, const token *trailingComma);
     ForeignPtr (*self_)(SelfPtr builder, const token *tok);
     ForeignPtr (*shadowarg)(SelfPtr builder, const token *name);
     ForeignPtr (*splat)(SelfPtr builder, const token *star, ForeignPtr arg);

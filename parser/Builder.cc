@@ -1498,6 +1498,12 @@ public:
         return make_unique<Restarg>(loc, nm, nameLoc);
     }
 
+    unique_ptr<Node> implicit_restarg(const token *trailingComma) {
+        auto loc = tokLoc(trailingComma).copyEndWithZeroLength();
+        auto name = core::Names::restargs();
+        return make_unique<Restarg>(loc, name, loc);
+    }
+
     unique_ptr<Node> self_(const token *tok) {
         return make_unique<Self>(tokLoc(tok));
     }
@@ -2593,6 +2599,11 @@ ForeignPtr restarg(SelfPtr builder, const token *star, const token *name) {
     return build->toForeign(build->restarg(star, name));
 }
 
+ForeignPtr implicit_restarg(SelfPtr builder, const token *trailingComma) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->implicit_restarg(trailingComma));
+}
+
 ForeignPtr self_(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
     return build->toForeign(build->self_(tok));
@@ -2838,6 +2849,7 @@ struct ruby_parser::builder Builder::interface = {
     regexp_options,
     rescue_body,
     restarg,
+    implicit_restarg,
     self_,
     shadowarg,
     splat,
