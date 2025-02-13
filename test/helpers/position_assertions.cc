@@ -241,6 +241,7 @@ const UnorderedMap<
     assertionConstructors = {
         {"untyped", UntypedAssertion::make},
         {"error", ErrorAssertion::make},
+        {"parser-error", ParserErrorAssertion::make},
         {"error-with-dupes", ErrorAssertion::make},
         {"usage", UsageAssertion::make},
         {"import", ImportAssertion::make},
@@ -482,6 +483,21 @@ string ErrorAssertion::toString() const {
 }
 
 bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
+    REQUIRE(diagnostic.code.has_value());
+
+    auto *code = std::get_if<int>(&diagnostic.code.value());
+    REQUIRE_NE(code, nullptr);
+
+    // Parser errors must be specified with the `parse-error` annotation.
+    if (*code >= 2000 && *code < 3000) {
+        ADD_FAIL_CHECK_AT(filename.c_str(), range->start->line + 1,
+                          fmt::format("{}Found `error` annotation for a parser error, use `parser-error` instead:\n{}",
+                                      errorPrefix,
+                                      prettyPrintRangeComment(sourceLine, *diagnostic.range,
+                                                              fmt::format("error: {}", diagnostic.message))));
+        return false;
+    }
+
     // The error message must contain `message`.
     if (diagnostic.message.find(message) == string::npos) {
         ADD_FAIL_CHECK_AT(filename.c_str(), range->start->line + 1,
@@ -492,6 +508,56 @@ bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine,
         return false;
     }
     return true;
+}
+
+ParserErrorAssertion::ParserErrorAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                           string_view message)
+    : RangeAssertion(filename, range, assertionLine), message(message) {}
+
+shared_ptr<ParserErrorAssertion> ParserErrorAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                            int assertionLine, string_view assertionContents,
+                                                            string_view assertionType) {
+    return make_shared<ParserErrorAssertion>(filename, range, assertionLine, assertionContents);
+}
+
+string ParserErrorAssertion::toString() const {
+    return fmt::format("parser-error: {}", message);
+}
+
+bool ParserErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
+    REQUIRE(diagnostic.code.has_value());
+
+    auto *code = std::get_if<int>(&diagnostic.code.value());
+    REQUIRE_NE(code, nullptr);
+
+    // Parser errors must be specified with the `parse-error` annotation.
+    if (*code < 2000 || *code >= 3000) {
+        ADD_FAIL_CHECK_AT(
+            filename.c_str(), range->start->line + 1,
+            fmt::format("{}Found `parser-error` annotation for a non-parser error, use `error` instead:\n{}",
+                        errorPrefix,
+                        prettyPrintRangeComment(sourceLine, *diagnostic.range,
+                                                fmt::format("parser-error: {}", diagnostic.message))));
+        return false;
+    }
+
+    // The error message must contain `message`.
+    if (diagnostic.message.find(message) == string::npos) {
+        ADD_FAIL_CHECK_AT(filename.c_str(), range->start->line + 1,
+                          fmt::format("{}Expected error of form:\n{}\nFound error:\n{}", errorPrefix,
+                                      prettyPrintRangeComment(sourceLine, *range, toString()),
+                                      prettyPrintRangeComment(sourceLine, *diagnostic.range,
+                                                              fmt::format("parser-error: {}", diagnostic.message))));
+        return false;
+    }
+    return true;
+}
+
+bool ParserErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>> &files,
+                                    vector<shared_ptr<ParserErrorAssertion>> errorAssertions,
+                                    map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
+                                    string errorPrefix) {
+    return checkAllInner<ParserErrorAssertion>(files, errorAssertions, filenamesAndDiagnostics, errorPrefix);
 }
 
 UntypedAssertion::UntypedAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
@@ -538,6 +604,17 @@ RangeAssertion::getErrorAssertions(const vector<shared_ptr<RangeAssertion>> &ass
     vector<shared_ptr<ErrorAssertion>> rv;
     for (auto assertion : assertions) {
         if (auto assertionOfType = dynamic_pointer_cast<ErrorAssertion>(assertion)) {
+            rv.push_back(assertionOfType);
+        }
+    }
+    return rv;
+}
+
+vector<shared_ptr<ParserErrorAssertion>>
+RangeAssertion::getParserErrorAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
+    vector<shared_ptr<ParserErrorAssertion>> rv;
+    for (auto assertion : assertions) {
+        if (auto assertionOfType = dynamic_pointer_cast<ParserErrorAssertion>(assertion)) {
             rv.push_back(assertionOfType);
         }
     }
