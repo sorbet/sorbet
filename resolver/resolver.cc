@@ -344,7 +344,7 @@ private:
 
     static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job) {
         auto &c = *job.out->original();
-        if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
+        if (!c.hasScope()) {
             auto result = resolveLhs(ctx, job.scope, c.cnst);
 
             return result;
@@ -768,7 +768,7 @@ private:
             if (auto e = ctx.beginError(original.loc, core::errors::Resolver::StubConstant)) {
                 e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
                 auto foundCommonTypo = false;
-                if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
+                if (!original.hasScope()) {
                     for (const auto &[from, to] : COMMON_TYPOS) {
                         if (from == original.cnst) {
                             e.didYouMean(to, ctx.locAt(job.out->loc()));
@@ -1307,8 +1307,8 @@ private:
                 }
                 return;
             }
-            ENFORCE(sym.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original()->scope) ||
-                    ast::isa_tree<ast::EmptyTree>(cnst->original()->scope));
+            ENFORCE(sym.exists() || !cnst->original()->hasScope() ||
+                    ast::isa_tree<ast::ConstantLit>(cnst->original()->scope));
             if (isSuperclass && sym == core::Symbols::todo()) {
                 // This is the case where the superclass is empty, for example: `class A; end`
                 return;
