@@ -651,7 +651,7 @@ public:
             fillAssign(ctx, asgn);
         } else if (!send->recv.isSelfReference()) {
             handleAssignment(ctx, asgn);
-        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope)) {
+        } else if (lhs->hasScope()) {
             handleAssignment(ctx, asgn);
         } else {
             switch (send->fun.rawId()) {
@@ -2061,7 +2061,7 @@ public:
             tree = handleAssignment(ctx, std::move(tree));
         } else if (!send->recv.isSelfReference()) {
             tree = handleAssignment(ctx, std::move(tree));
-        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope)) {
+        } else if (lhs->hasScope()) {
             tree = handleAssignment(ctx, std::move(tree));
         } else {
             switch (send->fun.rawId()) {
