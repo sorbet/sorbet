@@ -5,10 +5,11 @@ namespace sorbet::core {
 
 template <class To> struct UntaggedPtr {
 private:
-    To *value;
-    bool isValid;
+    To *value = nullptr;
+    bool isValid = false;
 
 public:
+    UntaggedPtr() noexcept = default;
     explicit UntaggedPtr(To *p, bool valid) noexcept : value(p), isValid(valid) {}
 
     explicit operator bool() const noexcept {
