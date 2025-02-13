@@ -1115,6 +1115,16 @@ public:
 
     UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst);
 
+    template <class T>
+    core::UntaggedPtr<T> scopeAs() {
+        return cast_tree<T>(this->scope);
+    }
+
+    template <class T>
+    core::UntaggedPtr<const T> scopeAs() const {
+        return cast_tree<T>(this->scope);
+    }
+
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
