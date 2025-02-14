@@ -62,7 +62,10 @@ unique_ptr<Diagnostic> errorToDiagnostic(const core::GlobalState &gs, const core
     if (!error.loc.exists()) {
         return nullptr;
     }
-    return make_unique<Diagnostic>(Range::fromLoc(gs, error.loc), error.header);
+
+    auto diag = make_unique<Diagnostic>(Range::fromLoc(gs, error.loc), error.header);
+    diag->code.emplace(error.what.code);
+    return diag;
 }
 
 TEST_CASE("WhitequarkParserTest") {
@@ -175,7 +178,8 @@ TEST_CASE("WhitequarkParserTest") {
             auto path = error->loc.file().data(gs).path();
             diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
         }
-        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
+        ParserErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getParserErrorAssertions(assertions),
+                                       diagnostics);
     }
 
     MESSAGE("errors OK");
