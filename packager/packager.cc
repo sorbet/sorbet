@@ -721,6 +721,10 @@ bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::Ex
         return false;
     }
 
+    if (!target->hasScope()) {
+        return true;
+    }
+
     return recursiveVerifyConstant(ctx, fun, root, target->scope());
 }
 
