@@ -461,15 +461,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                 if (a.original()) {
                     auto &orig = *a.original();
-                    // Empirically, these are the only two cases we've needed so far to service the
-                    // LSP requests we want (hover and completion), but that doesn't mean these are
-                    // the **only** we'll ever want.
-                    if (ast::isa_tree<ast::ConstantLit>(orig.scope)) {
-                        LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
-                        current = walk(cctx.withTarget(deadSym), orig.scope, current);
-                    } else if (ast::isa_tree<ast::Send>(orig.scope)) {
-                        LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
-                        current = walk(cctx.withTarget(deadSym), orig.scope, current);
+                    if (orig.hasScope()) {
+                        // Empirically, these are the only two cases we've needed so far to service the
+                        // LSP requests we want (hover and completion), but that doesn't mean these are
+                        // the **only** we'll ever want.
+                        if (ast::isa_tree<ast::ConstantLit>(orig.scope)) {
+                            LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
+                            current = walk(cctx.withTarget(deadSym), orig.scope, current);
+                        } else if (ast::isa_tree<ast::Send>(orig.scope)) {
+                            LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
+                            current = walk(cctx.withTarget(deadSym), orig.scope, current);
+                        }
                     }
                 }
 

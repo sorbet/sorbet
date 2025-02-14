@@ -1160,7 +1160,12 @@ ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File 
 void SerializerImpl::pickle(Pickler &p, const ast::UnresolvedConstantLit &lit) {
     pickle(p, lit.loc);
     p.putU4(lit.cnst.rawId());
-    pickle(p, lit.scope);
+    if (lit.hasScope()) {
+        p.putU4(1);
+        pickle(p, lit.scope);
+    } else {
+        p.putU4(0);
+    }
 }
 
 void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
@@ -1490,7 +1495,13 @@ unique_ptr<ast::UnresolvedConstantLit> SerializerImpl::unpickleUnresolvedConstan
                                                                                      const GlobalState &gs) {
     auto loc = unpickleLocOffsets(p);
     NameRef cnst = unpickleNameRef(p);
-    auto scope = unpickleExpr(p, gs);
+    ast::ExpressionPtr scope;
+    bool hasScope = p.getU4();
+    if (hasScope) {
+        scope = unpickleExpr(p, gs);
+    } else {
+        scope = ast::make_expression<ast::EmptyTree>();
+    }
     return std::make_unique<ast::UnresolvedConstantLit>(loc, std::move(scope), cnst);
 }
 
