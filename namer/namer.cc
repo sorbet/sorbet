@@ -153,7 +153,11 @@ class SymbolFinder {
             return foundDefs->addSymbol(sym.asClassOrModuleRef());
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
             core::FoundClass found;
-            found.owner = defineScope(owner, constLit->scope);
+            if (constLit->hasScope()) {
+                found.owner = defineScope(owner, constLit->scope);
+            } else {
+                found.owner = owner;
+            }
             found.name = constLit->cnst;
             found.loc = constLit->loc;
             found.declLoc = constLit->loc;
@@ -189,7 +193,11 @@ public:
         } else {
             if (klass.symbol == core::Symbols::todo()) {
                 const auto &constLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(klass.name);
-                found.owner = defineScope(getOwner(), constLit.scope);
+                if (constLit.hasScope()) {
+                    found.owner = defineScope(getOwner(), constLit.scope);
+                } else {
+                    found.owner = getOwner();
+                }
                 found.name = constLit.cnst;
             } else {
                 // Desugar populates a top-level root() ClassDef.
@@ -298,7 +306,11 @@ public:
             return true;
         }
         if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
-            return isValidAncestor(lit->scope);
+            if (lit->hasScope()) {
+                return isValidAncestor(lit->scope);
+            } else {
+                return true;
+            }
         }
         return false;
     }
@@ -513,7 +525,11 @@ public:
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
         core::FoundStaticField found;
-        found.owner = defineScope(getOwner(), lhs.scope);
+        if (lhs.hasScope()) {
+            found.owner = defineScope(getOwner(), lhs.scope);
+        } else {
+            found.owner = getOwner();
+        }
         found.name = lhs.cnst;
         found.asgnLoc = asgn.loc;
         found.lhsLoc = lhs.loc;
@@ -1688,7 +1704,7 @@ class TreeSymbolizer {
         }
 
         const bool firstNameRecursive = false;
-        auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
+        auto newOwner = constLit->hasScope() ? squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive) : owner;
         ENFORCE(newOwner.exists());
 
         core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
@@ -1811,7 +1827,8 @@ public:
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
-        auto maybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
+        auto owner = contextClass(ctx, ctx.owner);
+        auto maybeScope = lhs.hasScope() ? squashNames(ctx, owner, lhs.scope) : owner;
         ENFORCE(maybeScope.exists());
 
         if (!maybeScope.isClassOrModule()) {
