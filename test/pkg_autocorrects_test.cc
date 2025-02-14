@@ -14,6 +14,7 @@
 #include "parser/parser.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
+#include "test/helpers/MockFileSystem.h"
 
 using namespace std;
 
@@ -24,6 +25,15 @@ string examplePackage = "class ExamplePackage < PackageSpec\nend\n";
 string examplePackagePath = "example/__package.rb";
 
 namespace sorbet {
+string applySuggestion(const core::GlobalState &gs, core::AutocorrectSuggestion suggestion) {
+    test::MockFileSystem fs("");
+    // Assumption: all the edits are in the same file
+    auto fileRef = suggestion.edits[0].loc.file();
+    fs.writeFile(string(fileRef.data(gs).path()), fileRef.data(gs).source());
+    auto result = core::AutocorrectSuggestion::apply(gs, fs, {suggestion});
+    return result[fileRef];
+}
+
 string makePackageRB(string name, string strictDeps, string layer, vector<string> imports = {},
                      vector<string> testImports = {}) {
     auto importList =
@@ -37,7 +47,7 @@ string makePackageRB(string name, string strictDeps, string layer, vector<string
                        "  layer '{}'\n"
                        "{}"
                        "{}"
-                       "end\n",
+                       "end",
                        name, strictDeps, layer, importList, testImportList);
 }
 
@@ -135,7 +145,7 @@ TEST_CASE("Simple add import") {
 
     auto addImport = myPkg.addImport(gs, examplePkg, false);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addImport->applySingleEditForTesting(pkg_source);
+    auto replaced = applySuggestion(gs, *addImport);
     CHECK_EQ(expected, replaced);
 }
 
@@ -161,7 +171,7 @@ TEST_CASE("Simple test import") {
 
     auto addImport = myPkg.addImport(gs, examplePkg, true);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addImport->applySingleEditForTesting(pkg_source);
+    auto replaced = applySuggestion(gs, *addImport);
     CHECK_EQ(expected, replaced);
 }
 
@@ -187,7 +197,7 @@ TEST_CASE("Add import with only existing exports") {
 
     auto addImport = myPkg.addImport(gs, examplePkg, false);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addImport->applySingleEditForTesting(pkg_source);
+    auto replaced = applySuggestion(gs, *addImport);
     CHECK_EQ(expected, replaced);
 }
 
@@ -219,7 +229,7 @@ TEST_CASE("Add import and test_import to package with imports and test imports")
                           "end\n";
         auto addImport = myPkg.addImport(gs, examplePkg, false);
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -233,7 +243,7 @@ TEST_CASE("Add import and test_import to package with imports and test imports")
                           "end\n";
         auto addImport = myPkg.addImport(gs, examplePkg, true);
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 }
@@ -260,7 +270,7 @@ TEST_CASE("Add test import with only existing exports") {
 
     auto addImport = myPkg.addImport(gs, examplePkg, true);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addImport->applySingleEditForTesting(pkg_source);
+    auto replaced = applySuggestion(gs, *addImport);
     CHECK_EQ(expected, replaced);
 }
 
@@ -284,7 +294,7 @@ TEST_CASE("Add import to package with neither imports nor exports") {
 
     auto addImport = myPkg.addImport(gs, examplePkg, false);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addImport->applySingleEditForTesting(pkg_source);
+    auto replaced = applySuggestion(gs, *addImport);
     CHECK_EQ(expected, replaced);
 }
 
@@ -308,7 +318,7 @@ TEST_CASE("Add test import to package with neither imports nor exports") {
 
     auto addImport = myPkg.addImport(gs, examplePkg, true);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addImport->applySingleEditForTesting(pkg_source);
+    auto replaced = applySuggestion(gs, *addImport);
     CHECK_EQ(expected, replaced);
 }
 
@@ -331,7 +341,7 @@ TEST_CASE("Simple add export") {
 
     auto addExport = myPkg.addExport(gs, getConstantRef(gs, {"MyPackage", "NewExport"}));
     ENFORCE(addExport, "Expected to get an autocorrect from `addExport`");
-    auto replaced = addExport->applySingleEditForTesting(pkg_source);
+    auto replaced = applySuggestion(gs, *addExport);
     CHECK_EQ(expected, replaced);
 }
 
@@ -368,7 +378,7 @@ TEST_CASE("Add imports to strict_dependencies 'false' package") {
             makePackageRB("MyPackage", "false", "app",
                           {"FalsePackageA", "FalsePackageB", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -380,7 +390,7 @@ TEST_CASE("Add imports to strict_dependencies 'false' package") {
             makePackageRB("MyPackage", "false", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA", "LayeredPackageB"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -392,7 +402,7 @@ TEST_CASE("Add imports to strict_dependencies 'false' package") {
             "MyPackage", "false", "app",
             {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA", "LayeredDagPackageB"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -404,7 +414,7 @@ TEST_CASE("Add imports to strict_dependencies 'false' package") {
             makePackageRB("MyPackage", "false", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA", "DagPackageB"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 }
@@ -441,7 +451,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered' package") {
             makePackageRB("MyPackage", "layered", "app",
                           {"FalsePackageA", "FalsePackageB", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -453,7 +463,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered' package") {
             makePackageRB("MyPackage", "layered", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "LayeredPackageB", "DagPackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -465,7 +475,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered' package") {
             "MyPackage", "layered", "app",
             {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "LayeredDagPackageB", "DagPackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -477,7 +487,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered' package") {
             makePackageRB("MyPackage", "layered", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA", "DagPackageB"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 }
@@ -514,7 +524,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered_dag' package") {
             makePackageRB("MyPackage", "layered_dag", "app",
                           {"FalsePackageA", "FalsePackageB", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -526,7 +536,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered_dag' package") {
             makePackageRB("MyPackage", "layered_dag", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "LayeredPackageB", "DagPackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -538,7 +548,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered_dag' package") {
             "MyPackage", "layered_dag", "app",
             {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "LayeredDagPackageB", "DagPackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -550,7 +560,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered_dag' package") {
             makePackageRB("MyPackage", "layered_dag", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA", "DagPackageB"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 }
@@ -587,7 +597,7 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
             makePackageRB("MyPackage", "dag", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "FalsePackageB", "DagPackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -599,7 +609,7 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
             makePackageRB("MyPackage", "dag", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "LayeredPackageB", "DagPackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -611,7 +621,7 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
             "MyPackage", "dag", "app",
             {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "LayeredDagPackageB", "DagPackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -623,7 +633,7 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
             makePackageRB("MyPackage", "dag", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA", "DagPackageB"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 }
@@ -680,7 +690,7 @@ TEST_CASE("Edge cases") {
         auto addImport = fakeImportPkg.addImport(gs, layeredPkgA, false);
         string expected = makePackageRB("HasFakeImport", "false", "app", {"FakeImport", "LayeredPackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(packageWithFakeImport);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -694,7 +704,7 @@ TEST_CASE("Edge cases") {
         auto addImport = libPkg.addImport(gs, appPkg, false);
         string expected = makePackageRB("LibPackage", "false", "lib", {"AppPackage", "FalsePackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(libPackage);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -713,7 +723,7 @@ TEST_CASE("Edge cases") {
                           "  import LayeredPackageA # a comment\n"
                           "end\n";
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-        auto replaced = addImport->applySingleEditForTesting(packageWithComments);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -727,7 +737,7 @@ TEST_CASE("Edge cases") {
         auto addImport = hasTestImportsPkg.addImport(gs, dagPkgA, false);
         string expected =
             makePackageRB("HasTestImports", "dag", "app", {"DagPackageA"}, {"FalsePackageA", "LayeredPackageA"});
-        auto replaced = addImport->applySingleEditForTesting(packageWithTestImports);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 
@@ -740,7 +750,7 @@ TEST_CASE("Edge cases") {
 
         auto addImport = hasLayeringViolationsPkg.addImport(gs, falsePkgA, false);
         string expected = makePackageRB("HasLayeringViolations", "false", "lib", {"AppPackage", "FalsePackageA"});
-        auto replaced = addImport->applySingleEditForTesting(packageWithLayeringViolations);
+        auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
 }
