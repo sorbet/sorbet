@@ -27,7 +27,8 @@ bool isTestMessage(const LSPMessage &msg) {
 // on the client side." Only keep the newest diagnostics for a file.
 void updateDiagnostics(const LSPConfiguration &config, UnorderedMap<string, string> &testFileUris,
                        vector<unique_ptr<LSPMessage>> &responses,
-                       map<string, vector<unique_ptr<Diagnostic>>> &diagnostics) {
+                       map<string, vector<unique_ptr<Diagnostic>>> &diagnostics,
+                       map<string, vector<unique_ptr<Diagnostic>>> &parserDiagnostics) {
     for (auto &response : responses) {
         if (isTestMessage(*response)) {
             continue;
@@ -46,11 +47,18 @@ void updateDiagnostics(const LSPConfiguration &config, UnorderedMap<string, stri
         }
 
         // Will explicitly overwrite older diagnostics that are irrelevant.
-        vector<unique_ptr<Diagnostic>> copiedDiagnostics;
+        diagnostics[filename].clear();
+        parserDiagnostics[filename].clear();
         for (const auto &d : diagnosticParams->diagnostics) {
-            copiedDiagnostics.push_back(d->copy());
+            ENFORCE(d->code.has_value());
+            auto *code = std::get_if<int>(&d->code.value());
+            ENFORCE(code != nullptr);
+            if (*code >= 2000 && *code < 3000) {
+                parserDiagnostics[filename].push_back(d->copy());
+            } else {
+                diagnostics[filename].push_back(d->copy());
+            }
         }
-        diagnostics[filename] = move(copiedDiagnostics);
     }
 }
 
@@ -650,6 +658,7 @@ TEST_CASE("LSPTest") {
 
     // filename => diagnostics for file (persist for fast path tests)
     map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
+    map<string, vector<unique_ptr<Diagnostic>>> parserDiagnostics;
 
     // Tell LSP that the new files now have the contents from the test files on disk.
     {
@@ -668,15 +677,19 @@ TEST_CASE("LSPTest") {
                 updates.push_back(makeChange(testFileUris[filename], textDocContents, 2 + i));
             }
             auto responses = getLSPResponsesFor(*lspWrapper, move(updates));
-            updateDiagnostics(config, testFileUris, responses, diagnostics);
+            updateDiagnostics(config, testFileUris, responses, diagnostics, parserDiagnostics);
             bool errorAssertionsPassed = ErrorAssertion::checkAll(
                 test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
+
+            bool parserErrorAssertionsPassed = ParserErrorAssertion::checkAll(
+                test.sourceFileContents, RangeAssertion::getParserErrorAssertions(assertions), parserDiagnostics,
+                errorPrefixes[i]);
 
             bool untypedAssertionsPassed =
                 UntypedAssertion::checkAll(test.sourceFileContents, RangeAssertion::getUntypedAssertions(assertions),
                                            diagnostics, errorPrefixes[i]);
 
-            slowPathPassed = errorAssertionsPassed && untypedAssertionsPassed;
+            slowPathPassed = errorAssertionsPassed && parserErrorAssertionsPassed && untypedAssertionsPassed;
         }
     }
 
@@ -936,7 +949,7 @@ TEST_CASE("LSPTest") {
                     }
                 });
 
-            updateDiagnostics(config, testFileUris, responses, diagnostics);
+            updateDiagnostics(config, testFileUris, responses, diagnostics, parserDiagnostics);
 
             for (auto &update : updates) {
                 auto originalFile = test.folder + update.first;
@@ -944,10 +957,12 @@ TEST_CASE("LSPTest") {
                 testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[originalFile], updateFile);
             }
 
-            const bool passed = ErrorAssertion::checkAll(
+            const bool errorAssertionPassed = ErrorAssertion::checkAll(
                 updatesAndContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefix);
+            const bool parserErrorAssertionPassed = ParserErrorAssertion::checkAll(
+                updatesAndContents, RangeAssertion::getParserErrorAssertions(assertions), parserDiagnostics, errorPrefix);
 
-            if (!passed) {
+            if (!errorAssertionPassed || !parserErrorAssertionPassed) {
                 // Abort if an update fails its assertions, as subsequent updates will likely fail as well.
                 break;
             }
