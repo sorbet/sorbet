@@ -1226,11 +1226,6 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
     }
     auto queryLoc = maybeQueryLoc.value();
 
-    auto resolved = typechecker.getResolved(queryLoc.file());
-    if (resolved.tree == nullptr) {
-        return response;
-    }
-
     auto result = LSPQuery::byLoc(config, typechecker, uri, pos, LSPMethod::TextDocumentCompletion, false);
 
     if (result.error) {
@@ -1244,6 +1239,13 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
     if (queryResponses.empty()) {
         auto prevTwoChars = queryLoc.adjust(gs, -2, 0);
         if (prevTwoChars.source(gs) == "##") {
+            // This is the only path that needs the resolved tree when the query response is empty, so to avoid
+            // resolving the tree for the other cases we explicitly request it here.
+            auto resolved = typechecker.getResolved(queryLoc.file());
+            if (resolved.tree == nullptr) {
+                return response;
+            }
+
             auto item = trySuggestYardSnippet(typechecker, config.getClientConfig(), queryLoc, resolved);
             if (item != nullptr) {
                 items.emplace_back(std::move(item));
@@ -1269,6 +1271,12 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
     }
 
     auto resp = move(queryResponses[0]);
+
+    // All of the remaining cases require a resolved tree, so we eagerly request it here.
+    auto resolved = typechecker.getResolved(queryLoc.file());
+    if (resolved.tree == nullptr) {
+        return response;
+    }
 
     if (auto sendResp = resp->isSend()) {
         auto callerSideName = sendResp->callerSideName;
