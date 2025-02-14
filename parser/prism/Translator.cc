@@ -11,17 +11,10 @@ using std::unique_ptr;
 namespace sorbet::parser::Prism {
 
 // Indicates that a particular code path should never be reached, with an explanation of why.
-// Throws a `sorbet::SorbetException` in debug mode, and is undefined behaviour otherwise.
+// Throws a `sorbet::SorbetException` when triggered to help with debugging.
 template <typename... TArgs>
 [[noreturn]] void unreachable(fmt::format_string<TArgs...> reason_format_str, TArgs &&...args) {
-    if constexpr (sorbet::debug_mode) {
-        Exception::raise(reason_format_str, std::forward<TArgs>(args)...);
-    } else {
-        // Basically a backport of C++23's `std::unreachable()`:
-        // > `ABSL_UNREACHABLE()` is an unreachable statement.  A program which reaches
-        // > one has undefined behavior, and the compiler may optimize accordingly.
-        ABSL_UNREACHABLE();
-    }
+    Exception::raise(reason_format_str, std::forward<TArgs>(args)...);
 }
 
 template <typename PrismAssignmentNode, typename SorbetLHSNode>
