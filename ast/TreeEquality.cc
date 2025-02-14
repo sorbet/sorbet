@@ -271,7 +271,11 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
             if (a->cnst != b->cnst) {
                 return false;
             }
-            return structurallyEqual(gs, avoid, a->scope, b->scope, file);
+            if (a->hasScope() && b->hasScope()) {
+                return structurallyEqual(gs, avoid, a->scope, b->scope, file);
+            }
+
+            return !a->hasScope() && !b->hasScope();
         }
 
         case Tag::ConstantLit: {
@@ -286,7 +290,11 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
                 if (alit.cnst != blit.cnst) {
                     return false;
                 }
-                return structurallyEqual(gs, avoid, alit.scope, blit.scope, file);
+                if (alit.hasScope() && blit.hasScope()) {
+                    return structurallyEqual(gs, avoid, alit.scope, blit.scope, file);
+                }
+
+                return !alit.hasScope() && !blit.hasScope();
             } else if (!a->original() && !b->original()) {
                 // This occurs when the constant is created using MK::Constant instead of MK::UnresolvedConstant
                 // (original points to the UnresolvedConstantLit that created this ConstantLit)
