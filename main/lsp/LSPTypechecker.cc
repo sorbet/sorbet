@@ -761,13 +761,8 @@ ast::ParsedFile LSPTypechecker::getResolved(core::FileRef fref, WorkerPool &work
     std::vector<ast::ParsedFile> trees = this->getResolved(std::initializer_list<core::FileRef>{fref}, workers);
 
     ENFORCE(trees.size() == 1);
-    // This is defensive. We should always get a tree back for files that have been through the slow path, but just in
-    // case we catch that here and return an empty tree.
-    if (trees.size() != 1) {
-        return ast::ParsedFile{nullptr, fref};
-    } else {
-        return std::move(trees.front());
-    }
+    // We explicitly use `.at(0)` so that we see a crash if the above ENFORCE is violated in a release build.
+    return std::move(trees.at(0));
 }
 
 const core::GlobalState &LSPTypechecker::state() const {
