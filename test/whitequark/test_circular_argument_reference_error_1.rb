@@ -1,3 +1,3 @@
 # typed: true
 
-def m(foo: foo) end # error: circular argument reference foo
+def m(foo: foo) end # parser-error: circular argument reference foo

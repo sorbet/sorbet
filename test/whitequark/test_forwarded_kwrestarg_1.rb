@@ -1,3 +1,3 @@
 # typed: true
 
-def foo; bar(**); end # error: no anonymous keyword rest parameter
+def foo; bar(**); end # parser-error: no anonymous keyword rest parameter

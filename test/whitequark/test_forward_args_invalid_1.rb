@@ -1,3 +1,3 @@
 # typed: true
 
-foo do |...| end # error: unexpected token "..."
+foo do |...| end # parser-error: unexpected token "..."

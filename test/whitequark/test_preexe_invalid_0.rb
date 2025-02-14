@@ -1,3 +1,3 @@
 # typed: true
 
-def f; BEGIN{}; end # error: BEGIN in method
+def f; BEGIN{}; end # parser-error: BEGIN in method

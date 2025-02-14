@@ -1,3 +1,3 @@
 # typed: true
 
-m "#{'x'}" {} # error: unexpected token tLCURLY
+m "#{'x'}" {} # parser-error: unexpected token tLCURLY

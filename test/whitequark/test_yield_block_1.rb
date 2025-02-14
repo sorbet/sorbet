@@ -1,3 +1,3 @@
 # typed: true
 
-yield(&foo) # error: block given to yield
+yield(&foo) # parser-error: block given to yield

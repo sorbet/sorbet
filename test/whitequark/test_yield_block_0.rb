@@ -1,3 +1,3 @@
 # typed: true
 
-yield foo do end # error: block given to yield
+yield foo do end # parser-error: block given to yield

@@ -1,3 +1,3 @@
 # typed: true
 
-*a&.A = 0 # error: &. inside multiple assignment destination
+*a&.A = 0 # parser-error: &. inside multiple assignment destination

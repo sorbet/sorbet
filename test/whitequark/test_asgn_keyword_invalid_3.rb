@@ -1,3 +1,3 @@
 # typed: true
 
-false = foo # error: cannot assign to a keyword
+false = foo # parser-error: cannot assign to a keyword

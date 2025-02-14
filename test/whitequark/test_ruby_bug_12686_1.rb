@@ -1,3 +1,3 @@
 # typed: true
 
-f(g rescue nil) # error: unexpected token kRESCUE_MOD
+f(g rescue nil) # parser-error: unexpected token kRESCUE_MOD

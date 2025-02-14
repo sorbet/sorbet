@@ -1,3 +1,3 @@
 # typed: true
 
-def foo; bar(*); end # error: no anonymous rest parameter
+def foo; bar(*); end # parser-error: no anonymous rest parameter

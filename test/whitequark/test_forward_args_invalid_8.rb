@@ -1,3 +1,3 @@
 # typed: true
 
-def foo(...); yield(...); end # error: unexpected token ")"
+def foo(...); yield(...); end # parser-error: unexpected token ")"

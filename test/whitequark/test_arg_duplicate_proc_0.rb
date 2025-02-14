@@ -1,3 +1,3 @@
 # typed: true
 
-proc{|a,a|} # error: duplicate argument name
+proc{|a,a|} # parser-error: duplicate argument name

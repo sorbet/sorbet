@@ -1,3 +1,3 @@
 # typed: true
 
-def foo(@abc); end # error: formal argument cannot be an instance variable
+def foo(@abc); end # parser-error: formal argument cannot be an instance variable

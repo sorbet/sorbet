@@ -1,3 +1,3 @@
 # typed: true
 
-def foo(...); [...]; end # error: unexpected token "]"
+def foo(...); [...]; end # parser-error: unexpected token "]"

@@ -1,3 +1,3 @@
 # typed: true
 
-:@@ # error: `@@` is not allowed as a class variable name
+:@@ # parser-error: `@@` is not allowed as a class variable name

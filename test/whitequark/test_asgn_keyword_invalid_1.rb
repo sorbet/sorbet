@@ -1,3 +1,3 @@
 # typed: true
 
-self = foo # error: cannot assign to a keyword
+self = foo # parser-error: cannot assign to a keyword

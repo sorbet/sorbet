@@ -1,3 +1,3 @@
 # typed: true
 
-def foo(aa, aa=1); end # error: duplicate argument name
+def foo(aa, aa=1); end # parser-error: duplicate argument name

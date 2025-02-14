@@ -1,3 +1,3 @@
 # typed: true
 
-0 in [a, a] # error: duplicate variable name a
+0 in [a, a] # parser-error: duplicate variable name a

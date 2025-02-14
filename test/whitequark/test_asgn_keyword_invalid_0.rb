@@ -1,3 +1,3 @@
 # typed: true
 
-nil = foo # error: cannot assign to a keyword
+nil = foo # parser-error: cannot assign to a keyword

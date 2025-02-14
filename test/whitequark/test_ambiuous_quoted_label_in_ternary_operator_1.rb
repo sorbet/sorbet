@@ -1,4 +1,4 @@
 # typed: true
 
 a ? b | '': nil
-#     ^ error: missing arg to "|" operator
+#     ^ parser-error: missing arg to "|" operator

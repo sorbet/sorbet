@@ -1,3 +1,3 @@
 # typed: true
 
-{"#{x}":} # error: unexpected token tRCURLY
+{"#{x}":} # parser-error: unexpected token tRCURLY

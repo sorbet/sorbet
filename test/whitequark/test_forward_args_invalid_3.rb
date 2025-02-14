@@ -1,3 +1,3 @@
 # typed: true
 
-def foo(x,y,z); bar(...); end # error: unexpected token "..."
+def foo(x,y,z); bar(...); end # parser-error: unexpected token "..."

@@ -1,3 +1,3 @@
 # typed: true
 
-m { |foo: foo| }  # error: circular argument reference foo
+m { |foo: foo| }  # parser-error: circular argument reference foo

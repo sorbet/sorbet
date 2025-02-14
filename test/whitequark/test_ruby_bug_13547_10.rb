@@ -1,3 +1,3 @@
 # typed: true
 
-m 0...1 {} # error: unexpected token tLCURLY
+m 0...1 {} # parser-error: unexpected token tLCURLY

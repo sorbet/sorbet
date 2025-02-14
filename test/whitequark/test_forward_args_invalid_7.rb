@@ -1,3 +1,3 @@
 # typed: true
 
-->(...) {} # error: unexpected token "..."
+->(...) {} # parser-error: unexpected token "..."

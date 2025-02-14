@@ -1,5 +1,5 @@
 # typed: true
 
 module << foo; nil; end
-#      ^^ error: unexpected token "<<"
-#                   ^^^ error: unexpected token "end"
+#      ^^ parser-error: unexpected token "<<"
+#                   ^^^ parser-error: unexpected token "end"
