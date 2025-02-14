@@ -642,9 +642,11 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndB
     // Send a no-op to clear out the pipeline.
     assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
                            {
-                               {"foo.rb", 2, "unexpected token"},
                                {"bar.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
                                {"baz.rb", 5, "Expected `String` but found `Integer` for method result type"},
+                           },
+                           {
+                               {"foo.rb", 2, "unexpected token"},
                            });
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
                          /* assertUniqueStartTimes */ false);
@@ -749,9 +751,13 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") 
 
     // Send fence to clear out the pipeline.
     assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
-                           {{"foo.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
-                            {"bar.rb", 1, "Hint: this \"class\" token is not closed before the end of the file"},
-                            {"bar.rb", 6, "unexpected"}});
+                           {
+                               {"foo.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
+                           },
+                           {
+                               {"bar.rb", 1, "Hint: this \"class\" token is not closed before the end of the file"},
+                               {"bar.rb", 6, "unexpected"},
+                           });
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
                          /* assertUniqueStartTimes */ false);
 }

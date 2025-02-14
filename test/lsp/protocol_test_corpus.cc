@@ -889,6 +889,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ReportsSyntaxErrors") {
                                             "end\n"
                                             "\n",
                                             2)),
+                           {},
                            {
                                {"foo.rb", 1, "class definition in method body"},
                                {"foo.rb", 2, "unexpected token \";\""},

@@ -36,6 +36,8 @@ protected:
     UnorderedMap<std::string, std::shared_ptr<core::File>> sourceFileContents;
     // Currently active diagnostics, specifically using map to enforce sort order on filename.
     std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> diagnostics;
+    // Currently active parser diagnostics, specifically using map to enforce sort order on filename.
+    std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> parserDiagnostics;
     // Emulated file system.
     std::shared_ptr<sorbet::test::MockFileSystem> fs;
 
@@ -95,10 +97,11 @@ protected:
 
     std::unique_ptr<LSPMessage> readAsync();
 
-    void assertErrorDiagnostics(std::vector<std::unique_ptr<LSPMessage>> messages,
-                                std::vector<ExpectedDiagnostic> expected);
+    void assertErrorDiagnostics(absl::Span<const std::unique_ptr<LSPMessage>> messages,
+                                std::vector<ExpectedDiagnostic> expected,
+                                std::vector<ExpectedDiagnostic> expectedParser = {});
 
-    void assertUntypedDiagnostics(std::vector<std::unique_ptr<LSPMessage>> messages,
+    void assertUntypedDiagnostics(absl::Span<const std::unique_ptr<LSPMessage>> messages,
                                   std::vector<ExpectedDiagnostic> expected);
 
     std::string readFile(std::string_view uri);
