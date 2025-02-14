@@ -4,6 +4,7 @@
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/NameSubstitution.h"
+#include "core/TrailingObjects.h"
 #include "core/TypePtr.h"
 #include "core/Unfreeze.h"
 #include "core/core.h"
@@ -322,6 +323,32 @@ TEST_SUITE("TypePtr") {
                 CHECK_EQ(values.first, TypePtrTestHelper::inlinedValue(type));
             }
         }
+    }
+}
+
+class TOTestNeedsAlignment final : public TrailingObjects<TOTestNeedsAlignment, int> {
+public:
+    uint16_t member;
+};
+
+class TOTestSufficientlyAligned final : public TrailingObjects<TOTestSufficientlyAligned, int> {
+public:
+    uint64_t member;
+};
+
+TEST_SUITE("TrailingObjects") {
+    TEST_CASE("trailing objects need alignment") {
+        CHECK_EQ(alignof(TOTestNeedsAlignment), 4);
+        CHECK_EQ(4, TOTestNeedsAlignment::totalSizeToAlloc<int>(0));
+        CHECK_EQ(8, TOTestNeedsAlignment::totalSizeToAlloc<int>(1));
+        CHECK_EQ(12, TOTestNeedsAlignment::totalSizeToAlloc<int>(2));
+    }
+
+    TEST_CASE("base object over-aligned for trailing objects") {
+        CHECK_EQ(alignof(TOTestSufficientlyAligned), 8);
+        CHECK_EQ(8, TOTestSufficientlyAligned::totalSizeToAlloc<int>(0));
+        CHECK_EQ(12, TOTestSufficientlyAligned::totalSizeToAlloc<int>(1));
+        CHECK_EQ(16, TOTestSufficientlyAligned::totalSizeToAlloc<int>(2));
     }
 }
 
