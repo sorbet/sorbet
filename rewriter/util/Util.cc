@@ -24,9 +24,9 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
             return nullptr;
         }
         ENFORCE(id->symbol() == core::Symbols::root());
-        return make_unique<ast::UnresolvedConstantLit>(cons->loc, ASTUtil::dupType(cons->scope), cons->cnst);
+        return make_unique<ast::UnresolvedConstantLit>(cons->loc, ASTUtil::dupType(cons->scope_), cons->cnst);
     }
-    auto scope = ASTUtil::dupType(cons->scope);
+    auto scope = ASTUtil::dupType(cons->scope_);
     if (scope == nullptr) {
         return nullptr;
     }

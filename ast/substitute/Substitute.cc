@@ -28,7 +28,7 @@ private:
                 break;
             }
 
-            cur = &constLit->scope;
+            cur = &constLit->scope_;
         }
     }
 
@@ -165,7 +165,7 @@ public:
         auto &original = cast_tree_nonnull<UnresolvedConstantLit>(tree);
         original.cnst = subst.substituteSymbolName(original.cnst);
         if (original.hasScope()) {
-            substClassName(ctx, original.scope);
+            substClassName(ctx, original.scope_);
         }
     }
 

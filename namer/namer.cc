@@ -154,7 +154,7 @@ class SymbolFinder {
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
             core::FoundClass found;
             if (constLit->hasScope()) {
-                found.owner = defineScope(owner, constLit->scope);
+                found.owner = defineScope(owner, constLit->scope_);
             } else {
                 found.owner = owner;
             }
@@ -194,7 +194,7 @@ public:
             if (klass.symbol == core::Symbols::todo()) {
                 const auto &constLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(klass.name);
                 if (constLit.hasScope()) {
-                    found.owner = defineScope(getOwner(), constLit.scope);
+                    found.owner = defineScope(getOwner(), constLit.scope_);
                 } else {
                     found.owner = getOwner();
                 }
@@ -307,7 +307,7 @@ public:
         }
         if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
             if (lit->hasScope()) {
-                return isValidAncestor(lit->scope);
+                return isValidAncestor(lit->scope_);
             } else {
                 return true;
             }
@@ -526,7 +526,7 @@ public:
 
         core::FoundStaticField found;
         if (lhs.hasScope()) {
-            found.owner = defineScope(getOwner(), lhs.scope);
+            found.owner = defineScope(getOwner(), lhs.scope_);
         } else {
             found.owner = getOwner();
         }
@@ -1704,7 +1704,7 @@ class TreeSymbolizer {
         }
 
         const bool firstNameRecursive = false;
-        auto newOwner = constLit->hasScope() ? squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive) : owner;
+        auto newOwner = constLit->hasScope() ? squashNamesInner(ctx, owner, constLit->scope_, firstNameRecursive) : owner;
         ENFORCE(newOwner.exists());
 
         core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
@@ -1828,7 +1828,7 @@ public:
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
         auto owner = contextClass(ctx, ctx.owner);
-        auto maybeScope = lhs.hasScope() ? squashNames(ctx, owner, lhs.scope) : owner;
+        auto maybeScope = lhs.hasScope() ? squashNames(ctx, owner, lhs.scope_) : owner;
         ENFORCE(maybeScope.exists());
 
         if (!maybeScope.isClassOrModule()) {

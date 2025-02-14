@@ -1111,22 +1111,22 @@ public:
     const core::LocOffsets loc;
 
     core::NameRef cnst;
-    ExpressionPtr scope;
+    ExpressionPtr scope_;
 
     UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst);
 
     bool hasScope() const {
-        return !isa_tree<EmptyTree>(this->scope);
+        return !isa_tree<EmptyTree>(this->scope_);
     }
 
     template <class T>
     core::UntaggedPtr<T> scopeAs() {
-        return cast_tree<T>(this->scope);
+        return cast_tree<T>(this->scope_);
     }
 
     template <class T>
     core::UntaggedPtr<const T> scopeAs() const {
-        return cast_tree<T>(this->scope);
+        return cast_tree<T>(this->scope_);
     }
 
     ExpressionPtr deepCopy() const;

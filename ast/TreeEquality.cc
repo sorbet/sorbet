@@ -272,7 +272,7 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
                 return false;
             }
             if (a->hasScope() && b->hasScope()) {
-                return structurallyEqual(gs, avoid, a->scope, b->scope, file);
+                return structurallyEqual(gs, avoid, a->scope_, b->scope_, file);
             }
 
             return !a->hasScope() && !b->hasScope();
@@ -291,7 +291,7 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
                     return false;
                 }
                 if (alit.hasScope() && blit.hasScope()) {
-                    return structurallyEqual(gs, avoid, alit.scope, blit.scope, file);
+                    return structurallyEqual(gs, avoid, alit.scope_, blit.scope_, file);
                 }
 
                 return !alit.hasScope() && !blit.hasScope();

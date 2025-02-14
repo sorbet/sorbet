@@ -23,17 +23,17 @@ bool isTNilableTUntyped(const ast::ExpressionPtr &expr) {
 
 bool isTStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return struct_ != nullptr && struct_->cnst == core::Names::Constants::Struct() && struct_->hasScope() && ast::MK::isT(struct_->scope);
+    return struct_ != nullptr && struct_->cnst == core::Names::Constants::Struct() && struct_->hasScope() && ast::MK::isT(struct_->scope_);
 }
 
 bool isTInexactStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return struct_ != nullptr && struct_->cnst == core::Names::Constants::InexactStruct() && struct_->hasScope() && ast::MK::isT(struct_->scope);
+    return struct_ != nullptr && struct_->cnst == core::Names::Constants::InexactStruct() && struct_->hasScope() && ast::MK::isT(struct_->scope_);
 }
 
 bool isTImmutableStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return struct_ != nullptr && struct_->cnst == core::Names::Constants::ImmutableStruct() && struct_->hasScope() && ast::MK::isT(struct_->scope);
+    return struct_ != nullptr && struct_->cnst == core::Names::Constants::ImmutableStruct() && struct_->hasScope() && ast::MK::isT(struct_->scope_);
 }
 
 enum class SyntacticSuperClass {
