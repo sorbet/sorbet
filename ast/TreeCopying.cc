@@ -156,9 +156,9 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
         case Tag::UnresolvedConstantLit: {
             auto *exp = reinterpret_cast<const UnresolvedConstantLit *>(tree);
             if (exp->hasScope()) {
-                return make_expression<UnresolvedConstantLit>(exp->loc, deepCopy(avoid, exp->scope()), exp->cnst);
+                return UnresolvedConstantLit::make(exp->loc, deepCopy(avoid, exp->scope()), exp->cnst);
             } else {
-                return make_expression<UnresolvedConstantLit>(exp->loc, make_expression<EmptyTree>(), exp->cnst);
+                return UnresolvedConstantLit::make(exp->loc, make_expression<EmptyTree>(), exp->cnst);
             }
         }
 
@@ -166,9 +166,7 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
             auto *exp = reinterpret_cast<const ConstantLit *>(tree);
             std::unique_ptr<UnresolvedConstantLit> originalC;
             if (auto *original = exp->original()) {
-                originalC =
-                    make_unique<UnresolvedConstantLit>(original->loc, deepCopy(avoid, original->scope())), original->cnst);
-                return make_expression<ConstantLit>(exp->symbol(), move(originalC));
+                originalC = UnresolvedConstantLit::make_unique(exp->original->loc, deepCopy(avoid, exp->original->scope()), exp->original->cnst);
             }
 
             return make_expression<ConstantLit>(exp->loc(), exp->symbol());

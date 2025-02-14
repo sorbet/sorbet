@@ -302,10 +302,33 @@ Literal::Literal(core::LocOffsets loc, const core::TypePtr &value) : loc(loc), v
     _sanityCheck();
 }
 
-UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst)
-    : loc(loc), cnst(cnst), scope_(std::move(scope)) {
+UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, core::NameRef cnst, bool hasScope)
+    : loc(loc), cnst(cnst), hasScope_(hasScope) {
     categoryCounterInc("trees", "constantlit");
-    _sanityCheck();
+    // The object is not yet fully constructed, so no _sanityCheck here.
+}
+
+UnresolvedConstantLit *UnresolvedConstantLit::make_raw(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst) {
+    bool hasScope = !isa_tree<EmptyTree>(scope);
+    void *memory = ::operator new(totalSizeToAlloc<ExpressionPtr>(size_t(hasScope)));
+    UnresolvedConstantLit *p = new (memory) UnresolvedConstantLit(loc, cnst, hasScope);
+    if (hasScope) {
+        // We can't call `p->scope()` here because the memory underlying the storage for
+        // `scope()` is uninitialized.
+        std::uninitialized_move_n(&scope, 1, p->getTrailingObjects<ExpressionPtr>());
+    }
+    p->_sanityCheck();
+    return p;
+}
+
+unique_ptr<UnresolvedConstantLit> UnresolvedConstantLit::make_unique(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst) {
+    auto *p = make_raw(loc, std::move(scope), cnst);
+    return unique_ptr<UnresolvedConstantLit>(p);
+}
+
+ExpressionPtr UnresolvedConstantLit::make(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst) {
+    auto *p = make_raw(loc, std::move(scope), cnst);
+    return ExpressionPtr(ExpressionToTag<UnresolvedConstantLit>::value, p);
 }
 
 ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol) : storage(loc, symbol) {

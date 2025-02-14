@@ -17,20 +17,20 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
     auto scopeCnst = cons->scopeAs<ast::UnresolvedConstantLit>();
     if (!scopeCnst) {
         if (!cons->hasScope()) {
-            return make_unique<ast::UnresolvedConstantLit>(cons->loc, ast::MK::EmptyTree(), cons->cnst);
+            return ast::UnresolvedConstantLit::make_unique(cons->loc, ast::MK::EmptyTree(), cons->cnst);
         }
         auto id = cons->scopeAs<ast::ConstantLit>();
         if (id == nullptr) {
             return nullptr;
         }
         ENFORCE(id->symbol() == core::Symbols::root());
-        return make_unique<ast::UnresolvedConstantLit>(cons->loc, ASTUtil::dupType(cons->scope()), cons->cnst);
+        return ast::UnresolvedConstantLit::make_unique(cons->loc, ASTUtil::dupType(cons->scope()), cons->cnst);
     }
     auto scope = ASTUtil::dupType(cons->scope());
     if (scope == nullptr) {
         return nullptr;
     }
-    return make_unique<ast::UnresolvedConstantLit>(cons->loc, std::move(scope), cons->cnst);
+    return ast::UnresolvedConstantLit::make_unique(cons->loc, std::move(scope), cons->cnst);
 }
 } // namespace
 

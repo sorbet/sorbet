@@ -1502,7 +1502,7 @@ unique_ptr<ast::UnresolvedConstantLit> SerializerImpl::unpickleUnresolvedConstan
     } else {
         scope = ast::make_expression<ast::EmptyTree>();
     }
-    return std::make_unique<ast::UnresolvedConstantLit>(loc, std::move(scope), cnst);
+    return ast::UnresolvedConstantLit::make_unique(loc, std::move(scope), cnst);
 }
 
 ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalState &gs) {

@@ -216,7 +216,7 @@ public:
     }
 
     static ExpressionPtr UnresolvedConstant(core::LocOffsets loc, ExpressionPtr scope, core::NameRef name) {
-        return make_expression<UnresolvedConstantLit>(loc, std::move(scope), name);
+        return UnresolvedConstantLit::make(loc, std::move(scope), name);
     }
 
     static ExpressionPtr UnresolvedConstantParts(core::LocOffsets loc, absl::Span<const core::NameRef> parts) {

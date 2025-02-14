@@ -135,7 +135,7 @@ TEST_CASE("CountTrees") {
     auto methodDef = ast::make_expression<ast::MethodDef>(loc.offsets(), loc.offsets(), methodSym, name,
                                                           std::move(args), std::move(rhs), flags);
     auto emptyTree = ast::MK::EmptyTree();
-    auto cnst = ast::make_expression<ast::UnresolvedConstantLit>(loc.offsets(), std::move(emptyTree), name);
+    auto cnst = ast::UnresolvedConstantLit::make(loc.offsets(), std::move(emptyTree), name);
 
     ast::ClassDef::RHS_store classrhs;
     classrhs.emplace_back(std::move(methodDef));

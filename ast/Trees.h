@@ -7,6 +7,7 @@
 #include "core/KwPair.h"
 #include "core/LocalVariable.h"
 #include "core/SymbolRef.h"
+#include "core/TrailingObjects.h"
 #include "core/Types.h"
 #include "core/UntaggedPtr.h"
 #include <memory>
@@ -73,6 +74,7 @@ enum class Tag {
 template <typename T> struct ExpressionToTag;
 
 class EmptyTree;
+class UnresolvedConstantLit;
 
 class ExpressionPtr {
 public:
@@ -94,6 +96,7 @@ private:
     tagged_storage ptr;
 
     template <typename E, typename... Args> friend ExpressionPtr make_expression(Args &&...);
+    friend UnresolvedConstantLit;
 
     static tagged_storage tagPtr(Tag tag, void *expr) {
         ENFORCE(static_cast<size_t>(tag) != 0);
@@ -1106,30 +1109,37 @@ public:
 };
 CheckSize(Literal, 16, 8);
 
-EXPRESSION(UnresolvedConstantLit) {
+EXPRESSION(UnresolvedConstantLit) : private core::TrailingObjects<UnresolvedConstantLit, ExpressionPtr> {
+    friend core::TrailingObjects<UnresolvedConstantLit, ExpressionPtr>;
+
 public:
     const core::LocOffsets loc;
 
     core::NameRef cnst;
 
 private:
-    ExpressionPtr scope_;
+    bool hasScope_;
+
+    UnresolvedConstantLit(core::LocOffsets loc, core::NameRef cnst, bool hasScope);
+
+    static UnresolvedConstantLit *make_raw(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst);
 
 public:
-    UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst);
+    static ExpressionPtr make(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst);
+    static std::unique_ptr<UnresolvedConstantLit> make_unique(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst);
 
     bool hasScope() const {
-        return !isa_tree<EmptyTree>(this->scope_);
+        return hasScope_;
     }
 
     ExpressionPtr &scope() {
         ENFORCE(hasScope());
-        return this->scope_;
+        return *this->getTrailingObjects<ExpressionPtr>();
     }
 
     const ExpressionPtr &scope() const {
         ENFORCE(hasScope());
-        return this->scope_;
+        return *this->getTrailingObjects<ExpressionPtr>();
     }
 
     template <class T>
@@ -1138,7 +1148,7 @@ public:
             return core::UntaggedPtr<T>();
         }
 
-        return cast_tree<T>(this->scope_);
+        return cast_tree<T>(this->scope());
     }
 
     template <class T>
@@ -1147,7 +1157,7 @@ public:
             return core::UntaggedPtr<const T>();
         }
 
-        return cast_tree<T>(this->scope_);
+        return cast_tree<T>(this->scope());
     }
 
     ExpressionPtr deepCopy() const;
@@ -1159,7 +1169,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(UnresolvedConstantLit, 24, 8);
+CheckSize(UnresolvedConstantLit, 16, 8);
 
 EXPRESSION(ConstantLit) {
 private:
