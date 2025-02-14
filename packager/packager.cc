@@ -661,12 +661,21 @@ void mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
 
 void prependName(ast::ExpressionPtr &scope) {
     auto lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
+    auto *lastScope = &scope;
     ENFORCE(lastConstLit != nullptr);
-    while (auto constLit = lastConstLit->scopeAs<ast::UnresolvedConstantLit>()) {
+    while (lastConstLit->hasScope()) {
+        lastScope = &lastConstLit->scope();
+
+        auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(*lastScope);
+        if (constLit == nullptr) {
+            break;
+        }
+
         lastConstLit = constLit;
     }
-    lastConstLit->scope() =
-        ast::MK::Constant(lastConstLit->scope().loc().copyWithZeroLength(), core::Symbols::PackageSpecRegistry());
+
+    *lastScope =
+        ast::MK::UnresolvedConstant(lastConstLit->loc, ast::MK::Constant(lastScope->loc().copyWithZeroLength(), core::Symbols::PackageSpecRegistry()), lastConstLit->cnst);
 }
 
 bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit &cnst) {
@@ -680,12 +689,22 @@ bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit &cnst) {
 }
 
 void prependRoot(ast::ExpressionPtr &scope) {
-    auto *lastConstLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(scope);
-    while (auto constLit = lastConstLit->scopeAs<ast::UnresolvedConstantLit>()) {
+    auto lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
+    auto *lastScope = &scope;
+    ENFORCE(lastConstLit != nullptr);
+    while (lastConstLit->hasScope()) {
+        lastScope = &lastConstLit->scope();
+
+        auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(*lastScope);
+        if (constLit == nullptr) {
+            break;
+        }
+
         lastConstLit = constLit;
     }
-    auto loc = lastConstLit->scope().loc();
-    lastConstLit->scope() = ast::MK::Constant(loc, core::Symbols::root());
+
+    auto loc = lastScope->loc();
+    *lastScope = ast::MK::UnresolvedConstant(lastConstLit->loc, ast::MK::Constant(loc.copyWithZeroLength(), core::Symbols::root()), lastConstLit->cnst);
 }
 
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
