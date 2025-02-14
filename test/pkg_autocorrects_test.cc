@@ -755,4 +755,46 @@ TEST_CASE("Edge cases") {
     }
 }
 
+TEST_CASE("Convert test_import to import") {
+    core::GlobalState gs(errorQueue);
+    gs.initEmpty();
+    {
+        core::UnfreezeNameTable packageNS(gs);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
+        gs.setPackagerOptions({}, {}, {}, {}, {}, {"lib", "app"}, "");
+    }
+
+    string myPackage =
+        makePackageRB("MyPackage", "layered", "app", {"FalsePackageA", "DagPackageA"}, {"LayeredPackageA"});
+    string myPackagePath = "my_package/__package.rb";
+
+    auto parsedFiles = enterPackages(gs, {{myPackagePath, myPackage},
+                                          {falsePackageAPath, falsePackageA},
+                                          {layeredPackageAPath, layeredPackageA},
+                                          {dagPackageAPath, dagPackageA}});
+
+    {
+        auto &myPkg = getPackageForFile(gs, parsedFiles[0].file);
+        ENFORCE(myPkg.exists());
+        auto &layeredPkgA = getPackageForFile(gs, parsedFiles[2].file);
+        ENFORCE(layeredPkgA.exists());
+
+        auto addImport = myPkg.addImport(gs, layeredPkgA, false);
+        string expected = "class MyPackage < PackageSpec\n"
+                          "  strict_dependencies 'layered'\n"
+                          "  layer 'app'\n"
+                          "  import FalsePackageA\n"
+                          "  import LayeredPackageA\n"
+                          "  import DagPackageA\n"
+                          // This extra line is not great, but if we change the autocorrect to delete the '\n'
+                          // after the test_import, the autocorrect show the next line in the preview, which would
+                          // make the user think that entire next line will be deleted, which is incorrect.
+                          "\n"
+                          "end";
+        ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+        auto replaced = applySuggestion(gs, *addImport);
+        CHECK_EQ(expected, replaced);
+    }
+}
+
 } // namespace sorbet
