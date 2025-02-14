@@ -713,7 +713,7 @@ string EmptyTree::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
 }
 
 string UnresolvedConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return fmt::format("{}::{}", this->scope_.toStringWithTabs(gs, tabs), this->cnst.toString(gs));
+    return fmt::format("{}::{}", this->scope().toStringWithTabs(gs, tabs), this->cnst.toString(gs));
 }
 
 string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) const {
@@ -723,7 +723,7 @@ string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) con
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "cnst = {}\n", this->cnst.showRaw(gs));
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "scope = {}\n", this->scope_.showRaw(gs, tabs + 1));
+    fmt::format_to(std::back_inserter(buf), "scope = {}\n", this->scope().showRaw(gs, tabs + 1));
     printTabs(buf, tabs);
     fmt::format_to(std::back_inserter(buf), "}}");
     return fmt::to_string(buf);

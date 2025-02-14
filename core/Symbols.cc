@@ -544,7 +544,7 @@ MethodRef ClassOrModule::findMethod(const GlobalState &gs, NameRef name) const {
 }
 
 SymbolRef ClassOrModule::findMemberNoDealias(NameRef name) const {
-    histogramInc("find_member_scope_size", members().size());
+    histogramInc("find_member_scope()size", members().size());
     auto fnd = members().find(name);
     if (fnd == members().end()) {
         return Symbols::noSymbol();

@@ -1138,7 +1138,7 @@ public:
             return core::UntaggedPtr<T>();
         }
 
-        return cast_tree<T>(this->scope());
+        return cast_tree<T>(this->scope_);
     }
 
     template <class T>
@@ -1147,7 +1147,7 @@ public:
             return core::UntaggedPtr<const T>();
         }
 
-        return cast_tree<T>(this->scope());
+        return cast_tree<T>(this->scope_);
     }
 
     ExpressionPtr deepCopy() const;

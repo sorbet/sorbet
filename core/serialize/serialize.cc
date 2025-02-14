@@ -1162,7 +1162,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::UnresolvedConstantLit &lit) {
     p.putU4(lit.cnst.rawId());
     if (lit.hasScope()) {
         p.putU4(1);
-        pickle(p, lit.scope_);
+        pickle(p, lit.scope());
     } else {
         p.putU4(0);
     }

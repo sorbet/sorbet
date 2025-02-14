@@ -530,7 +530,7 @@ public:
         if (!lit.hasScope()) {
             return true;
         }
-        auto root = ast::cast_tree<ast::ConstantLit>(lit.scope_);
+        auto root = ast::cast_tree<ast::ConstantLit>(lit.scope());
         return root != nullptr && root->symbol() == core::Symbols::root();
     }
 

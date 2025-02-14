@@ -2344,7 +2344,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     if (!lit->hasScope()) {
                         break;
                     }
-                    value = std::move(lit->scope_);
+                    value = std::move(lit->scope());
                 }
                 absl::c_reverse(args);
 

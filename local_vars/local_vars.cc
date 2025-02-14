@@ -486,7 +486,7 @@ class LocalNameInserter {
     void walkConstantLit(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
             if (lit->hasScope()) {
-                walkConstantLit(ctx, lit->scope_);
+                walkConstantLit(ctx, lit->scope());
             }
         } else if (ast::isa_tree<ast::EmptyTree>(tree) || ast::isa_tree<ast::ConstantLit>(tree)) {
             // Do nothing.
