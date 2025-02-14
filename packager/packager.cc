@@ -659,7 +659,7 @@ void mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
     }
 }
 
-ast::ExpressionPtr prependName(ast::ExpressionPtr scope) {
+void prependName(ast::ExpressionPtr &scope) {
     auto lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
     ENFORCE(lastConstLit != nullptr);
     while (auto constLit = lastConstLit->scopeAs<ast::UnresolvedConstantLit>()) {
@@ -667,7 +667,6 @@ ast::ExpressionPtr prependName(ast::ExpressionPtr scope) {
     }
     lastConstLit->scope() =
         ast::MK::Constant(lastConstLit->scope().loc().copyWithZeroLength(), core::Symbols::PackageSpecRegistry());
-    return scope;
 }
 
 bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit &cnst) {
@@ -680,14 +679,13 @@ bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit &cnst) {
     }
 }
 
-ast::ExpressionPtr prependRoot(ast::ExpressionPtr scope) {
+void prependRoot(ast::ExpressionPtr &scope) {
     auto *lastConstLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(scope);
     while (auto constLit = lastConstLit->scopeAs<ast::UnresolvedConstantLit>()) {
         lastConstLit = constLit;
     }
     auto loc = lastConstLit->scope().loc();
     lastConstLit->scope() = ast::MK::Constant(loc, core::Symbols::root());
-    return scope;
 }
 
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
@@ -1210,7 +1208,7 @@ struct PackageSpecBodyWalk {
             if (auto target = verifyConstant(ctx, core::Names::export_(), send.getPosArg(0))) {
                 exported.emplace_back(getFullyQualifiedName(ctx, target));
                 auto &arg = send.getPosArg(0);
-                arg = prependRoot(std::move(arg));
+                prependRoot(arg);
             }
         }
 
@@ -1219,8 +1217,7 @@ struct PackageSpecBodyWalk {
             if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 // Transform: `import Foo` -> `import <PackageSpecRegistry>::Foo`
                 auto &posArg = send.getPosArg(0);
-                auto importArg = move(posArg);
-                posArg = prependName(move(importArg));
+                prependName(posArg);
 
                 info.importedPackageNames.emplace_back(getPackageName(ctx, target), method2ImportType(send));
             }
@@ -1229,8 +1226,7 @@ struct PackageSpecBodyWalk {
         if (send.fun == core::Names::restrictToService() && send.numPosArgs() == 1) {
             // Transform: `restrict_to_service Foo` -> `restrict_to_service <PackageSpecRegistry>::Foo`
             auto &posArg = send.getPosArg(0);
-            auto importArg = move(posArg);
-            posArg = prependName(move(importArg));
+            prependName(posArg);
         }
 
         if (send.fun == core::Names::exportAll() && send.numPosArgs() == 0) {
@@ -1262,8 +1258,8 @@ struct PackageSpecBodyWalk {
 
                 if (auto *recv = verifyConstant(ctx, send.fun, target->recv)) {
                     auto &posArg = send.getPosArg(0);
-                    auto importArg = move(target->recv);
-                    posArg = prependName(move(importArg));
+                    posArg = move(target->recv);
+                    prependName(posArg);
                     info.visibleTo_.emplace_back(getPackageName(ctx, recv), core::packages::VisibleToType::Wildcard);
                 } else {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
@@ -1274,8 +1270,7 @@ struct PackageSpecBodyWalk {
                 }
             } else if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto &posArg = send.getPosArg(0);
-                auto importArg = move(posArg);
-                posArg = prependName(move(importArg));
+                prependName(posArg);
 
                 info.visibleTo_.emplace_back(getPackageName(ctx, target), core::packages::VisibleToType::Normal);
             }
@@ -1571,7 +1566,7 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
         //
         // Other than being able to say "we don't mutate the trees in packager" there's not much
         // value in going that far (even namer mutates the trees; the packager fills a similar role).
-        packageSpecClass->name = prependName(move(packageSpecClass->name));
+        prependName(packageSpecClass->name);
 
         // Pre-resolve the super class. This makes it easier to detect that this is a package
         // spec-related class def in later passes without having to recursively walk up the constant
