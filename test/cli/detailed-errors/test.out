@@ -330,7 +330,7 @@ attached_class.rb:8: Expected `T.attached_class (of AttachedClassA)` but found `
     attached_class.rb:8:
      8 |    AttachedClassA.new
             ^^^^^^^^^^^^^^^^^^
-  Note:
+  Detailed explanation:
     `AttachedClassA` is incompatible with `T.attached_class (of AttachedClassA)` because when this method is called on a subclass `T.attached_class (of AttachedClassA)` will represent a more specific subclass, meaning `AttachedClassA` will not be specific enough. See https://sorbet.org/docs/attached-class for more.
 
 attached_class.rb:17: Expected `T::Array[T.attached_class (of AttachedClassB)]` but found `[AttachedClassB]` for method result type https://srb.help/7005
@@ -346,4 +346,5 @@ attached_class.rb:17: Expected `T::Array[T.attached_class (of AttachedClassB)]` 
             ^^^^^^^^^^^^^^^^^^^^
   Detailed explanation:
     `AttachedClassB` is not a subtype of `T.attached_class (of AttachedClassB)` for covariant type member `Array::Elem`
+      `AttachedClassB` is incompatible with `T.attached_class (of AttachedClassB)` because when this method is called on a subclass `T.attached_class (of AttachedClassB)` will represent a more specific subclass, meaning `AttachedClassB` will not be specific enough. See https://sorbet.org/docs/attached-class for more.
 Errors: 28

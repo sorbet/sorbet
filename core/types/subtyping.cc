@@ -1065,6 +1065,33 @@ void doesNotDeriveFrom(const GlobalState &gs, ErrorSection::Collector &errorDeta
     errorDetailsCollector.addErrorDetails(move(subCollector));
 }
 
+void checkForAttachedClassHint(const GlobalState &gs, ErrorSection::Collector &errorDetailsCollector,
+                               const ClassType left, const SelfTypeParam right) {
+    if (right.definition.name(gs) != Names::Constants::AttachedClass()) {
+        return;
+    }
+
+    auto attachedClass = left.symbol.data(gs)->lookupSingletonClass(gs);
+    if (!attachedClass.exists()) {
+        return;
+    }
+
+    if (attachedClass != right.definition.owner(gs).asClassOrModuleRef()) {
+        return;
+    }
+
+    auto gotStr = left.show(gs);
+    auto expectedStr = right.show(gs);
+    auto subCollector = errorDetailsCollector.newCollector();
+    auto message = ErrorColors::format(
+        "`{}` is incompatible with `{}` because when this method is called on a subclass `{}` will represent a more "
+        "specific subclass, meaning `{}` will not be specific enough. See https://sorbet.org/docs/attached-class for "
+        "more.",
+        gotStr, expectedStr, expectedStr, gotStr);
+    subCollector.message = message;
+    errorDetailsCollector.addErrorDetails(move(subCollector));
+}
+
 void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypePtr &ty, const TypePtr &blame) {
     ENFORCE(blame.isUntyped());
     if (is_proxy_type(ty)) {
@@ -1178,8 +1205,15 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             if (!isSelfTypeT1) {
                 auto self2 = cast_type_nonnull<SelfTypeParam>(t2);
                 if (auto *lambdaParam = cast_type<LambdaParam>(self2.definition.resultType(gs))) {
-                    return Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode,
-                                                           errorDetailsCollector);
+                    auto result = Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode,
+                                                                  errorDetailsCollector);
+                    if constexpr (shouldAddErrorDetails) {
+                        if (!result && isa_type<ClassType>(t1)) {
+                            checkForAttachedClassHint(gs, errorDetailsCollector, cast_type_nonnull<ClassType>(t1),
+                                                      self2);
+                        }
+                    }
+                    return result;
                 } else {
                     return false;
                 }
