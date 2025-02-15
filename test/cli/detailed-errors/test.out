@@ -318,4 +318,32 @@ tuples.rb:18: Expected `[Integer, String]` but found `[String("")]` for argument
     tuples.rb:18:
     18 |takes_tuple([''])
                     ^^^^
-Errors: 26
+
+attached_class.rb:8: Expected `T.attached_class (of AttachedClassA)` but found `AttachedClassA` for method result type https://srb.help/7005
+     8 |    AttachedClassA.new
+            ^^^^^^^^^^^^^^^^^^
+  Expected `T.attached_class (of AttachedClassA)` for result type of method `make`:
+    attached_class.rb:7:
+     7 |  def self.make
+          ^^^^^^^^^^^^^
+  Got `AttachedClassA` originating from:
+    attached_class.rb:8:
+     8 |    AttachedClassA.new
+            ^^^^^^^^^^^^^^^^^^
+  Note:
+    `AttachedClassA` is incompatible with `T.attached_class (of AttachedClassA)` because when this method is called on a subclass `T.attached_class (of AttachedClassA)` will represent a more specific subclass, meaning `AttachedClassA` will not be specific enough. See https://sorbet.org/docs/attached-class for more.
+
+attached_class.rb:17: Expected `T::Array[T.attached_class (of AttachedClassB)]` but found `[AttachedClassB]` for method result type https://srb.help/7005
+    17 |    [AttachedClassB.new]
+            ^^^^^^^^^^^^^^^^^^^^
+  Expected `T::Array[T.attached_class (of AttachedClassB)]` for result type of method `make`:
+    attached_class.rb:16:
+    16 |  def self.make
+          ^^^^^^^^^^^^^
+  Got `[AttachedClassB] (1-tuple)` originating from:
+    attached_class.rb:17:
+    17 |    [AttachedClassB.new]
+            ^^^^^^^^^^^^^^^^^^^^
+  Detailed explanation:
+    `AttachedClassB` is not a subtype of `T.attached_class (of AttachedClassB)` for covariant type member `Array::Elem`
+Errors: 28
