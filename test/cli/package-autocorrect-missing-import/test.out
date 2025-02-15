@@ -45,19 +45,19 @@ foo_class.rb:8: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is
      8 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
 
-foo_class.rb:9: `Foo::Bar::AppPackage::OtherClass` resolves but its package cannot be imported because importing it would cause a layering violation https://srb.help/3718
+foo_class.rb:9: `Foo::Bar::AppPackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because importing it would cause a layering violation https://srb.help/3718
      9 |      Foo::Bar::AppPackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    app_package/__package.rb:3: Exported from package here
-     3 |class Foo::Bar::AppPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_package/__package.rb:4: Package `Foo::Bar::AppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     4 |  layer 'app'
+                ^^^^^
 
-foo_class.rb:10: `Foo::Bar::AppPackage::OtherClass` resolves but its package cannot be imported because importing it would cause a layering violation https://srb.help/3718
+foo_class.rb:10: `Foo::Bar::AppPackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because importing it would cause a layering violation https://srb.help/3718
     10 |      Bar::AppPackage::OtherClass # resolves via `module Foo`
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    app_package/__package.rb:3: Exported from package here
-     3 |class Foo::Bar::AppPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_package/__package.rb:4: Package `Foo::Bar::AppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     4 |  layer 'app'
+                ^^^^^
 
 foo_class.rb:16: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
     16 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
@@ -74,12 +74,12 @@ foo_class.rb:19: `Test::Foo::Bar::OtherPackage::TestUtil` is defined in a test n
     19 |  Test::Foo::Bar::OtherPackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-foo_class.rb:21: `Foo::Bar::AppPackage::OtherClass` resolves but its package cannot be imported because importing it would cause a layering violation https://srb.help/3718
+foo_class.rb:21: `Foo::Bar::AppPackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because importing it would cause a layering violation https://srb.help/3718
     21 |  Foo::Bar::AppPackage::OtherClass # resolves via root
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    app_package/__package.rb:3: Exported from package here
-     3 |class Foo::Bar::AppPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_package/__package.rb:4: Package `Foo::Bar::AppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     4 |  layer 'app'
+                ^^^^^
 
 foo_class.rb:23: `Test::Foo::Bar::AppPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
     23 |  Test::Foo::Bar::AppPackage::TestUtil
