@@ -205,9 +205,9 @@ TEST_CASE("Add import to package with imports and test imports") {
     string expected = "class MyPackage < PackageSpec\n"
                       "  import A\n"
                       "  import B\n"
+                      "  import ExamplePackage\n"
                       "  test_import C\n"
                       "  test_import D\n"
-                      "  import ExamplePackage\n"
                       "end\n";
 
     auto parsedFiles =
