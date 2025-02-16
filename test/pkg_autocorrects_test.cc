@@ -191,7 +191,7 @@ TEST_CASE("Add import with only existing exports") {
     CHECK_EQ(expected, replaced);
 }
 
-TEST_CASE("Add import to package with imports and test imports") {
+TEST_CASE("Add import and test_import to package with imports and test imports") {
     core::GlobalState gs(errorQueue);
     gs.initEmpty();
 
@@ -202,14 +202,6 @@ TEST_CASE("Add import to package with imports and test imports") {
                         "  test_import D\n"
                         "end\n";
 
-    string expected = "class MyPackage < PackageSpec\n"
-                      "  import A\n"
-                      "  import B\n"
-                      "  import ExamplePackage\n"
-                      "  test_import C\n"
-                      "  test_import D\n"
-                      "end\n";
-
     auto parsedFiles =
         enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
     auto &examplePkg = getPackageForFile(gs, parsedFiles[0].file);
@@ -217,10 +209,33 @@ TEST_CASE("Add import to package with imports and test imports") {
     ENFORCE(examplePkg.exists());
     ENFORCE(myPkg.exists());
 
-    auto addImport = myPkg.addImport(gs, examplePkg, false);
-    ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addImport->applySingleEditForTesting(pkg_source);
-    CHECK_EQ(expected, replaced);
+    {
+        string expected = "class MyPackage < PackageSpec\n"
+                          "  import A\n"
+                          "  import B\n"
+                          "  import ExamplePackage\n"
+                          "  test_import C\n"
+                          "  test_import D\n"
+                          "end\n";
+        auto addImport = myPkg.addImport(gs, examplePkg, false);
+        ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        CHECK_EQ(expected, replaced);
+    }
+
+    {
+        string expected = "class MyPackage < PackageSpec\n"
+                          "  import A\n"
+                          "  import B\n"
+                          "  test_import C\n"
+                          "  test_import D\n"
+                          "  test_import ExamplePackage\n"
+                          "end\n";
+        auto addImport = myPkg.addImport(gs, examplePkg, true);
+        ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+        auto replaced = addImport->applySingleEditForTesting(pkg_source);
+        CHECK_EQ(expected, replaced);
+    }
 }
 
 TEST_CASE("Add test import with only existing exports") {
