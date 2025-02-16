@@ -2,9 +2,12 @@ main_lib/lib.rb:8: Used `test_import` constant `Project::TestOnly::SomeHelper` i
      8 |  Project::TestOnly::SomeHelper.new
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    main_lib/__package.rb:7: Replace with `import Project::TestOnly`
+    main_lib/__package.rb:6: Insert `import Project::TestOnly`
+     6 |  import Project::Util
+                              ^
+    main_lib/__package.rb:7: Delete
      7 |  test_import Project::TestOnly
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     test_only/__package.rb:5: Defined here
      5 |class Project::TestOnly < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
