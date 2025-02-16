@@ -191,6 +191,38 @@ TEST_CASE("Add import with only existing exports") {
     CHECK_EQ(expected, replaced);
 }
 
+TEST_CASE("Add import to package with imports and test imports") {
+    core::GlobalState gs(errorQueue);
+    gs.initEmpty();
+
+    string pkg_source = "class MyPackage < PackageSpec\n"
+                        "  import A\n"
+                        "  import B\n"
+                        "  test_import C\n"
+                        "  test_import D\n"
+                        "end\n";
+
+    string expected = "class MyPackage < PackageSpec\n"
+                      "  import A\n"
+                      "  import B\n"
+                      "  test_import C\n"
+                      "  test_import D\n"
+                      "  import ExamplePackage\n"
+                      "end\n";
+
+    auto parsedFiles =
+        enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
+    auto &examplePkg = getPackageForFile(gs, parsedFiles[0].file);
+    auto &myPkg = getPackageForFile(gs, parsedFiles[1].file);
+    ENFORCE(examplePkg.exists());
+    ENFORCE(myPkg.exists());
+
+    auto addImport = myPkg.addImport(gs, examplePkg, false);
+    ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = addImport->applySingleEditForTesting(pkg_source);
+    CHECK_EQ(expected, replaced);
+}
+
 TEST_CASE("Add test import with only existing exports") {
     core::GlobalState gs(errorQueue);
     gs.initEmpty();
