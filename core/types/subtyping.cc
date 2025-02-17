@@ -1092,6 +1092,18 @@ void checkForAttachedClassHint(const GlobalState &gs, ErrorSection::Collector &e
     errorDetailsCollector.addErrorDetails(move(subCollector));
 }
 
+void metaTypeErrorDetails(core::ErrorSection::Collector &errorDetailsCollector) {
+    auto subCollector = errorDetailsCollector.newCollector();
+    auto message =
+        ErrorColors::format("It looks like you're using Sorbet type syntax in a runtime value position. If you "
+                            "really mean to use types as values, use `{}` to hide the type syntax from the type "
+                            "checker. Otherwise, you 're likely using the type system in a way it wasn' t meant to "
+                            "be used.",
+                            "T::Utils.coerce");
+    subCollector.message = message;
+    errorDetailsCollector.addErrorDetails(move(subCollector));
+}
+
 void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypePtr &ty, const TypePtr &blame) {
     ENFORCE(blame.isUntyped());
     if (is_proxy_type(ty)) {
@@ -1349,7 +1361,14 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
     }
     if (auto *a2 = cast_type<AppliedType>(t2)) {
         if (is_proxy_type(t1)) {
-            return Types::isSubTypeUnderConstraint(gs, constr, t1.underlying(gs), t2, mode, errorDetailsCollector);
+            auto result =
+                Types::isSubTypeUnderConstraint(gs, constr, t1.underlying(gs), t2, mode, errorDetailsCollector);
+            if constexpr (shouldAddErrorDetails) {
+                if (!result && isa_type<MetaType>(t1)) {
+                    metaTypeErrorDetails(errorDetailsCollector);
+                }
+            }
+            return result;
         }
 
         if constexpr (shouldAddErrorDetails) {
@@ -1477,6 +1496,10 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     if (m2 == nullptr) {
                         // is a literal a subtype of a different kind of proxy
                         result = false;
+                        if constexpr (shouldAddErrorDetails) {
+                            // TODO: test for this
+                            metaTypeErrorDetails(errorDetailsCollector);
+                        }
                         return;
                     }
 
@@ -1490,7 +1513,15 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         } else {
             // only 1st is proxy
             TypePtr und = t1.underlying(gs);
-            return isSubTypeUnderConstraintSingle(gs, constr, mode, und, t2, errorDetailsCollector);
+            auto result = isSubTypeUnderConstraintSingle(gs, constr, mode, und, t2, errorDetailsCollector);
+            if constexpr (shouldAddErrorDetails) {
+                if (!result) {
+                    // TODO: test for this
+                    metaTypeErrorDetails(errorDetailsCollector);
+                }
+            }
+            return result;
+            // If false, "type syntax in a runtime value position" error details
         }
     } else if (is_proxy_type(t2)) {
         // only 2nd is proxy
