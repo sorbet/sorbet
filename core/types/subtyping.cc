@@ -1371,6 +1371,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
 
     if (is_proxy_type(t1)) {
         if (is_proxy_type(t2)) {
+            // both are proxy
             bool result;
             // TODO: simply compare as memory regions
             typecase(
@@ -1486,13 +1487,13 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                                                          m2->wrapped, errorDetailsCollector);
                 });
             return result;
-            // both are proxy
         } else {
             // only 1st is proxy
             TypePtr und = t1.underlying(gs);
             return isSubTypeUnderConstraintSingle(gs, constr, mode, und, t2, errorDetailsCollector);
         }
     } else if (is_proxy_type(t2)) {
+        // only 2nd is proxy
         // non-proxies are never subtypes of proxies.
         return false;
     } else {
