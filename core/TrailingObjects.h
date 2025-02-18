@@ -7,6 +7,12 @@
 // minor tweaks to bring in the very few things the original header needs from the
 // rest of LLVM's infrastructure.
 //
+// The license block from the original file:
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
 // LLVM's documentation is reproduced below.
 
 /// This header defines support for implementing classes that have
