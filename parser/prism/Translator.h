@@ -88,6 +88,7 @@ private:
 
     template <typename PrismLhsNode, typename SorbetLHSNode>
     std::unique_ptr<parser::Node> translateConst(PrismLhsNode *node, bool replaceWithDynamicConstAssign = false);
+    core::NameRef translateConstantName(pm_constant_id_t constant_id);
 
     // Pattern-matching
     // ... variations of the main translation functions for pattern-matching related nodes.
