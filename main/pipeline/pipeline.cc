@@ -239,11 +239,14 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
 
             bool stopAfterParser = opts.stopAfterPhase == options::Phase::PARSER;
 
-            if (parser == options::Parser::SORBET) {
-                parseTree = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
-            } else if (parser == options::Parser::PRISM) {
-                parseTree = runPrismParser(lgs, file, stopAfterParser, print);
-            } // Any other option would have been handled in the options parser
+            switch (parser) {
+                case options::Parser::SORBET:
+                    parseTree = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
+                    break;
+                case options::Parser::PRISM:
+                    parseTree = runPrismParser(lgs, file, stopAfterParser, print);
+                    break;
+            }
 
             if (stopAfterParser) {
                 return emptyParsedFile(file);

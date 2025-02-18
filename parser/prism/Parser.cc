@@ -2,12 +2,12 @@
 
 namespace sorbet::parser::Prism {
 
-pm_parser_t *Parser::get_raw_parser_pointer() {
+pm_parser_t *Parser::getRawParserPointer() {
     return &storage->parser;
 }
 
 Node Parser::parse_root() {
-    pm_node_t *root = pm_parse(get_raw_parser_pointer());
+    pm_node_t *root = pm_parse(getRawParserPointer());
     return Node{*this, root};
 };
 

@@ -222,15 +222,19 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
         }
 
         unique_ptr<parser::Node> nodes;
-        if (parser == realmain::options::Parser::SORBET) {
-            std::cout << "Parsing with sorbet" << std::endl;
-            core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
+        switch (parser) {
+            case realmain::options::Parser::SORBET: {
+                std::cout << "Parsing with sorbet" << std::endl;
+                core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
-            auto settings = parser::Parser::Settings{};
-            nodes = parser::Parser::run(*gs, file, settings);
-        } else if (parser == realmain::options::Parser::PRISM) {
-            std::cout << "Parsing with prism" << std::endl;
-            nodes = realmain::pipeline::runPrismParser(*gs, file, false, {});
+                auto settings = parser::Parser::Settings{};
+                nodes = parser::Parser::run(*gs, file, settings);
+                break;
+            }
+            case realmain::options::Parser::PRISM:
+                std::cout << "Parsing with prism" << std::endl;
+                nodes = realmain::pipeline::runPrismParser(*gs, file, false, {});
+                break;
         }
 
         handler.drainErrors(*gs);

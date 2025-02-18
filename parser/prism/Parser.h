@@ -72,7 +72,7 @@ public:
     void collectErrors();
 
 private:
-    pm_parser_t *get_raw_parser_pointer();
+    pm_parser_t *getRawParserPointer();
 };
 
 class Node final {
@@ -80,7 +80,7 @@ class Node final {
         Parser parser;
 
         void operator()(pm_node_t *node) {
-            pm_node_destroy(parser.get_raw_parser_pointer(), node);
+            pm_node_destroy(parser.getRawParserPointer(), node);
         }
     };
 
@@ -95,7 +95,7 @@ class Node final {
     Node(const Node &) = delete;            // Copy constructor
     Node &operator=(const Node &) = delete; // Copy assignment
 
-    pm_node_t *get_raw_node_pointer() const {
+    pm_node_t *getRawNodePointer() const {
         return node.get();
     }
 };

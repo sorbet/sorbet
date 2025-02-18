@@ -1,8 +1,8 @@
 #ifndef SORBET_PARSER_PRISM_TRANSLATOR_H
 #define SORBET_PARSER_PRISM_TRANSLATOR_H
 
-#include "../Node.h" // To clarify: these are Sorbet Parser nodes, not Prism ones.
 #include "core/errors/parser.h"
+#include "parser/Node.h" // To clarify: these are Sorbet Parser nodes, not Prism ones.
 #include "parser/prism/Parser.h"
 #include <memory>
 

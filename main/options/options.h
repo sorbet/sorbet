@@ -121,13 +121,6 @@ const std::vector<ParserOptions> parser_options({
     {"prism", Parser::PRISM},
 });
 
-struct AutogenConstCacheConfig {
-    // A file which contains a cache that can be used to potentially skip autogen
-    std::string cacheFile;
-    // A list of files which have changed since the last autogen run.
-    std::vector<std::string> changedFiles;
-};
-
 namespace {
 
 #if !defined(EMSCRIPTEN)
