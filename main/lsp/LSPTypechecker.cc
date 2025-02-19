@@ -82,14 +82,14 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
 
     // Initialization typecheck is not cancelable.
     // TODO(jvilk): Make it preemptible.
-    SlowPathResult result;
     {
         const bool isIncremental = false;
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
-        result = runSlowPath(std::move(updates), std::move(kvstore), workers, errorFlusher, SlowPathMode::Init);
+        auto result = runSlowPath(std::move(updates), std::move(kvstore), workers, errorFlusher, SlowPathMode::Init);
         epoch.committed = true;
         ENFORCE(std::holds_alternative<std::unique_ptr<core::GlobalState>>(result));
+        initialGS = std::move(std::get<std::unique_ptr<core::GlobalState>>(result));
     }
 
     // Unblock the indexer now that its state is fully initialized.
@@ -97,8 +97,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
         absl::MutexLock lck{queue.getMutex()};
 
         // ensure that the next task we process initializes the indexer
-        auto initTask = std::make_unique<IndexerInitializationTask>(
-            *config, std::move(std::get<std::unique_ptr<core::GlobalState>>(result)));
+        auto initTask = std::make_unique<IndexerInitializationTask>(*config, std::move(initialGS));
         queue.tasks().push_front(std::move(initTask));
     }
 
