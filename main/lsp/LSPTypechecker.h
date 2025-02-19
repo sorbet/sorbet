@@ -99,7 +99,7 @@ class LSPTypechecker final {
      *   the result will be committed, and the indexer needs a copy of the GlobalState to be taken after indexing, we
      *   return that copy as the result of the slow path.
      * - Cancelable indicates that the slow path may be canceled before it completes. As this mode does not require a
-     *   copy of the typechecker's GlobalState to be returned, and the slow path operation may be canceleld, we return a
+     *   copy of the typechecker's GlobalState to be returned, and the slow path operation may be canceled, we return a
      *   boolean indicating whether or not the result of the slow path was committed.
      */
     using SlowPathResult = std::variant<std::unique_ptr<core::GlobalState>, bool>;
