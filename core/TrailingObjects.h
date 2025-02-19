@@ -5,7 +5,9 @@
 
 // This file is largely copied from LLVM's llvm/Support/TrailingObjects.h, with some
 // minor tweaks to bring in the very few things the original header needs from the
-// rest of LLVM's infrastructure.
+// rest of LLVM's infrastructure.  The original version was:
+//
+// https://github.com/llvm/llvm-project/blob/llvmorg-12.0.0/llvm/include/llvm/Support/TrailingObjects.h
 //
 // The license block from the original file:
 //
