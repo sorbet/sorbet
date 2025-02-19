@@ -168,8 +168,8 @@ void Hashing::computeFileHashes(absl::Span<const shared_ptr<core::File>> files, 
 
 vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(core::GlobalState &gs,
                                                            const realmain::options::Options &opts,
-                                                           spdlog::logger &logger, absl::Span<core::FileRef> files,
-                                                           WorkerPool &workers,
+                                                           spdlog::logger &logger,
+                                                           absl::Span<const core::FileRef> files, WorkerPool &workers,
                                                            const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     auto asts = realmain::pipeline::index(gs, files, opts, workers, kvstore);
     ENFORCE_NO_TIMER(asts.size() == files.size());
