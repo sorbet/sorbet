@@ -15,6 +15,33 @@
 // See https://llvm.org/LICENSE.txt for license information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
+// A couple of notes on usage:
+//
+// 1. The TrailingObjects class only concerns itself with the computations for how
+//    much space to allocate and how to access the trailing objects; it does not
+//    perform any initialization of the objects themselves.  That is up to the
+//    inheriting class.
+//
+// 2. As a corollary to that, the memory that you would need to access in the
+//    constructor is completely uninitialized, so you will have to use either
+//    placement `new` or functions like `std::uninitialized_{copy,move}{,_n}`
+//    to initialize the trailing objects.
+//
+// 3. Similarly, any destruction of the trailing objects is entirely up to the
+//    inheriting class; you will have to manually write out the calls to the
+//    destructors.  (You cannot farm this out to TrailingObjects itself, because
+//    at the point when `~TrailingObjects` would be called, the subclass object
+//    technically does not exist anymore, so you cannot call methods -- e.g. the
+//    methods to determine how many trailing objects there are -- on the subclass
+//    object.)
+//
+// 4. Given that classes using TrailingObjects will want to call
+//    `totalSizeToAlloc` to account for any trailing objects that need to be
+//    allocated, and then call placement `new`, you will probably want to hide all
+//    of that complexity behind a static factory function of some kind, and
+//    therefore the constructor(s) of the class you are implementing should likely
+//    be `private`.
+//
 // LLVM's documentation is reproduced below.
 
 /// This header defines support for implementing classes that have
