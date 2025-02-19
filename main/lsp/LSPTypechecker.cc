@@ -73,64 +73,24 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
     LSPFileUpdates updates;
 
     // Initialize the global state for the indexer
-    {
-        initialGS->trackUntyped = currentConfig.getClientConfig().enableHighlightUntyped;
-        // Temporarily replace error queue, as it asserts that the same thread that created it uses it and we're
-        // going to use it on typechecker thread for this one operation.
-        auto savedErrorQueue = initialGS->errorQueue;
-        initialGS->errorQueue = make_shared<core::ErrorQueue>(savedErrorQueue->logger, savedErrorQueue->tracer,
-                                                              make_shared<core::NullFlusher>());
-
-        vector<ast::ParsedFile> indexed;
-        Timer timeit(config->logger, "initial_index");
-        ShowOperation op(*config, ShowOperation::Kind::Indexing);
-        vector<core::FileRef> inputFiles;
-        unique_ptr<const OwnedKeyValueStore> ownedKvstore = cache::ownIfUnchanged(*initialGS, move(kvstore));
-        {
-            Timer timeit(config->logger, "reIndexFromFileSystem");
-            inputFiles = pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
-            indexed.resize(initialGS->filesUsed());
-
-            auto asts = hashing::Hashing::indexAndComputeFileHashes(*initialGS, config->opts, *config->logger,
-                                                                    absl::Span<core::FileRef>(inputFiles), workers,
-                                                                    ownedKvstore);
-            // asts are in fref order, but we (currently) don't index and compute file hashes for payload files, so
-            // vector index != FileRef ID. Fix that by slotting them into `indexed`.
-            for (auto &ast : asts) {
-                int id = ast.file.id();
-                ENFORCE_NO_TIMER(id < indexed.size());
-                indexed[id] = move(ast);
-            }
-        }
-
-        cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(ownedKvstore)), config->opts, *initialGS,
-                                             workers, indexed);
-
-        ENFORCE_NO_TIMER(indexed.size() == initialGS->filesUsed());
-
-        updates.epoch = 0;
-        updates.typecheckingPath = TypecheckingPath::Slow;
-        updates.updatedFileIndexes = move(indexed);
-        updates.updatedGS = initialGS->deepCopy();
-
-        // Restore error queue, as initialGS will be used on the LSPLoop thread from now on.
-        initialGS->errorQueue = move(savedErrorQueue);
-    }
+    initialGS->trackUntyped = currentConfig.getClientConfig().enableHighlightUntyped;
 
     // We should always initialize with epoch 0.
-    this->initialized = true;
-    this->indexed = move(updates.updatedFileIndexes);
+    updates.epoch = 0;
+    updates.typecheckingPath = TypecheckingPath::Slow;
+    updates.updatedGS = std::move(initialGS);
+
     // Initialization typecheck is not cancelable.
     // TODO(jvilk): Make it preemptible.
-    auto committed = false;
     {
         const bool isIncremental = false;
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
-        committed = runSlowPath(move(updates), workers, errorFlusher, SlowPathMode::Init);
-        epoch.committed = committed;
+        auto result = runSlowPath(std::move(updates), std::move(kvstore), workers, errorFlusher, SlowPathMode::Init);
+        epoch.committed = true;
+        ENFORCE(std::holds_alternative<std::unique_ptr<core::GlobalState>>(result));
+        initialGS = std::move(std::get<std::unique_ptr<core::GlobalState>>(result));
     }
-    ENFORCE(committed);
 
     // Unblock the indexer now that its state is fully initialized.
     {
@@ -191,7 +151,9 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
             commitFileUpdates(updates, /* cancelable */ false);
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
-            committed = runSlowPath(move(updates), workers, errorFlusher, SlowPathMode::Cancelable);
+            auto result = runSlowPath(move(updates), nullptr, workers, errorFlusher, SlowPathMode::Cancelable);
+            ENFORCE(std::holds_alternative<bool>(result));
+            committed = std::get<bool>(result);
         }
         epoch.committed = committed;
     }
@@ -406,10 +368,15 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
     return epochManager.wasTypecheckingCanceled();
 }
 
-bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
-                                 shared_ptr<core::ErrorFlusher> errorFlusher, LSPTypechecker::SlowPathMode mode) {
+LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates updates,
+                                                           std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers,
+                                                           shared_ptr<core::ErrorFlusher> errorFlusher,
+                                                           LSPTypechecker::SlowPathMode mode) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runSlowPath can only be called from the typechecker thread.");
+
+    // This is populated when running in `SlowPathMode::Init`.
+    std::unique_ptr<core::GlobalState> indexedState;
 
     bool cancelable = mode == SlowPathMode::Cancelable;
 
@@ -425,13 +392,60 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
 
     auto finalGS = move(updates.updatedGS.value());
     const uint32_t epoch = updates.epoch;
-    // Replace error queue with one that is owned by this thread.
-    finalGS->errorQueue =
-        make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer, errorFlusher);
     auto &epochManager = *finalGS->epochManager;
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
-    const bool committed = epochManager.tryCommitEpoch(*finalGS, epoch, cancelable, preemptManager, [&]() -> void {
+    auto committed = epochManager.tryCommitEpoch(*finalGS, epoch, cancelable, preemptManager, [&]() -> void {
+        // Replace error queue with one that is owned by this thread.
+        auto savedErrorQueue = std::exchange(
+            finalGS->errorQueue,
+            make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer, errorFlusher));
+
+        // We're initializing an empty global state from the kvstore, if it's valid.
+        if (mode == SlowPathMode::Init) {
+            ENFORCE(!this->initialized);
+            Timer timeit(config->logger, "initial_index");
+
+            ShowOperation op(*config, ShowOperation::Kind::Indexing);
+
+            std::unique_ptr<const OwnedKeyValueStore> ownedKvstore =
+                cache::ownIfUnchanged(*finalGS, std::move(kvstore));
+
+            {
+                Timer timeit(config->logger, "reIndexFromFileSystem");
+
+                auto inputFiles = pipeline::reserveFiles(finalGS, config->opts.inputFileNames);
+                this->indexed.clear();
+                this->indexed.resize(finalGS->filesUsed());
+
+                auto asts = hashing::Hashing::indexAndComputeFileHashes(*finalGS, config->opts, *config->logger,
+                                                                        absl::Span<core::FileRef>(inputFiles), workers,
+                                                                        ownedKvstore);
+                // asts are in fref order, but we (currently) don't index and compute file hashes for payload files, so
+                // vector index != FileRef ID. Fix that by slotting them into `indexed`.
+                for (auto &ast : asts) {
+                    int id = ast.file.id();
+                    ENFORCE_NO_TIMER(id < this->indexed.size());
+                    this->indexed[id] = std::move(ast);
+                }
+            }
+
+            cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)), config->opts,
+                                                 *finalGS, workers, indexed);
+
+            ENFORCE_NO_TIMER(indexed.size() == finalGS->filesUsed());
+
+            // At this point finalGS has a name table that's initialized enough for the indexer thread, so we make a
+            // copy to pass back over.
+            indexedState = finalGS->deepCopy();
+            indexedState->errorQueue = std::move(savedErrorQueue);
+
+            this->initialized = true;
+        } else {
+            // If we're not initializing, there's no need to hold on to the old error queue.
+            savedErrorQueue = nullptr;
+        }
+
         UnorderedSet<int> updatedFiles;
         vector<ast::ParsedFile> indexedCopies;
 
@@ -573,7 +587,16 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
         ENFORCE(cancelable);
         logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", updates.epoch);
     }
-    return committed;
+
+    switch (mode) {
+        case SlowPathMode::Init:
+            ENFORCE(committed);
+            ENFORCE(indexedState != nullptr);
+            return indexedState;
+        case SlowPathMode::Cancelable:
+            ENFORCE(indexedState == nullptr);
+            return committed;
+    }
 }
 
 void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled) {
