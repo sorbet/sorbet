@@ -86,7 +86,11 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         if (ident->original && !orig) {
             return nullptr;
         }
-        return ast::make_expression<ast::ConstantLit>(ident->loc, ident->symbol(), std::move(orig));
+        if (orig == nullptr) {
+            return ast::make_expression<ast::ConstantLit>(ident->loc, ident->symbol());
+        }
+
+        return ast::make_expression<ast::ConstantLit>(ident->symbol(), std::move(orig));
     }
 
     auto arrayLit = ast::cast_tree<ast::Array>(orig);

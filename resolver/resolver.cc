@@ -1319,7 +1319,7 @@ private:
             auto enclosingClass = ctx.owner.enclosingClass(ctx);
             auto nw = ast::MK::UnresolvedConstant(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
             auto out =
-                ast::make_expression<ast::ConstantLit>(loc, enclosingClass, nw.toUnique<ast::UnresolvedConstantLit>());
+                ast::make_expression<ast::ConstantLit>(enclosingClass, nw.toUnique<ast::UnresolvedConstantLit>());
             job.ancestor = ast::cast_tree<ast::ConstantLit>(out);
             ancestor = std::move(out);
         } else if (ast::isa_tree<ast::EmptyTree>(ancestor)) {
@@ -1334,8 +1334,7 @@ private:
     void walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         if (auto c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
             walkUnresolvedConstantLit(ctx, c->scope);
-            auto loc = c->loc;
-            auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(),
+            auto out = ast::make_expression<ast::ConstantLit>(core::Symbols::noSymbol(),
                                                               tree.toUnique<ast::UnresolvedConstantLit>());
             auto constant = ast::cast_tree<ast::ConstantLit>(out);
             ConstantResolutionItem job{nesting_, constant};

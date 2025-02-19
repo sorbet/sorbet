@@ -1577,9 +1577,8 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
         // Pre-resolve the super class. This makes it easier to detect that this is a package
         // spec-related class def in later passes without having to recursively walk up the constant
         // lit's scope to find if it starts with <PackageSpecRegistry>.
-        auto superClassLoc = packageSpecClass->ancestors[0].loc();
         packageSpecClass->ancestors[0] = ast::make_expression<ast::ConstantLit>(
-            superClassLoc, core::Symbols::PackageSpec(),
+            core::Symbols::PackageSpec(),
             packageSpecClass->ancestors[0].toUnique<ast::UnresolvedConstantLit>());
 
         info = make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),

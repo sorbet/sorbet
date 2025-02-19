@@ -1239,10 +1239,13 @@ public:
 private:
     ResolutionScopesOrSymbol resolutionScopesOrSymbol;
 
+    ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
+
 public:
     std::unique_ptr<UnresolvedConstantLit> original;
 
-    ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
+    ConstantLit(core::LocOffsets loc, core::SymbolRef symbol);
+    ConstantLit(core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
 
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;

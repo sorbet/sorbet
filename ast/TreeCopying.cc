@@ -164,8 +164,10 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
             if (exp->original) {
                 originalC = make_unique<UnresolvedConstantLit>(
                     exp->original->loc, deepCopy(avoid, exp->original->scope), exp->original->cnst);
+                return make_expression<ConstantLit>(exp->symbol(), move(originalC));
             }
-            return make_expression<ConstantLit>(exp->loc, exp->symbol(), move(originalC));
+
+            return make_expression<ConstantLit>(exp->loc, exp->symbol());
         }
 
         case Tag::ZSuperArgs: {

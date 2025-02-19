@@ -295,6 +295,14 @@ UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr
     _sanityCheck();
 }
 
+ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol)
+    : ConstantLit(loc, symbol, nullptr) {
+}
+
+ConstantLit::ConstantLit(core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original)
+    : ConstantLit(original->loc, symbol, std::move(original)) {
+}
+
 ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original)
     : loc(loc), resolutionScopesOrSymbol(symbol), original(std::move(original)) {
     categoryCounterInc("trees", "resolvedconstantlit");
