@@ -696,7 +696,7 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
 [infer]: #infer
 
 <!-- IRs -->
-[`parser::Node`]: #parser
+[`parser::Node`]: ../parser/Node.h 
 [`ast::Expression`]: ../ast/Trees.h
 [`cfg::CFG`]: ../cfg/CFG.h
 
