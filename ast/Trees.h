@@ -1174,7 +1174,7 @@ private:
 
 public:
     ResolutionScopesOrSymbol() noexcept : ptr(tagSymbol(core::Symbols::noSymbol())) {}
-    ResolutionScopesOrSymbol(core::SymbolRef symbol) noexcept : ptr(tagSymbol(symbol)) {}
+    explicit ResolutionScopesOrSymbol(core::SymbolRef symbol) noexcept : ptr(tagSymbol(symbol)) {}
 
     ResolutionScopesOrSymbol(const ResolutionScopesOrSymbol &) = delete;
     ResolutionScopesOrSymbol &operator=(const ResolutionScopesOrSymbol &) = delete;
@@ -1257,7 +1257,7 @@ public:
     }
 
     void setSymbol(core::SymbolRef symbol) {
-        resolutionScopesOrSymbol = symbol;
+        resolutionScopesOrSymbol = ResolutionScopesOrSymbol(symbol);
     }
 
     std::vector<core::SymbolRef> *resolutionScopes() {
