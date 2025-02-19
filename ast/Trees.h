@@ -1257,6 +1257,7 @@ public:
     }
 
     void setSymbol(core::SymbolRef symbol) {
+        ENFORCE(symbol != core::Symbols::StubModule());
         resolutionScopesOrSymbol = ResolutionScopesOrSymbol(symbol);
     }
 
