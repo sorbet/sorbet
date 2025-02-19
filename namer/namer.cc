@@ -148,7 +148,7 @@ class SymbolFinder {
     core::FoundDefinitionRef defineScope(core::FoundDefinitionRef owner, const ast::ExpressionPtr &node) {
         if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
-            auto sym = id->symbol;
+            auto sym = id->symbol();
             ENFORCE(sym.exists());
             return foundDefs->addSymbol(sym.asClassOrModuleRef());
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
@@ -580,7 +580,7 @@ public:
 
         typecase(
             s.recv, [&](const ast::UnresolvedConstantLit &c) { result = c.cnst == core::Names::Constants::T(); },
-            [&](const ast::ConstantLit &c) { result = c.symbol == core::Symbols::T(); },
+            [&](const ast::ConstantLit &c) { result = c.symbol() == core::Symbols::T(); },
             [&](const ast::ExpressionPtr &_default) { result = false; });
 
         return result;
@@ -1665,7 +1665,7 @@ class TreeSymbolizer {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
         if (constLit == nullptr) {
             if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
-                return id->symbol.dealias(ctx);
+                return id->symbol().dealias(ctx);
             }
             if (auto uid = ast::cast_tree<ast::UnresolvedIdent>(node)) {
                 if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {

@@ -97,7 +97,7 @@ bool isTProc(core::Context ctx, const ast::Send *send) {
     while (send != nullptr) {
         if (send->fun == core::Names::proc()) {
             if (auto rcv = ast::cast_tree<ast::ConstantLit>(send->recv)) {
-                return rcv->symbol == core::Symbols::T();
+                return rcv->symbol() == core::Symbols::T();
             }
         }
         send = ast::cast_tree<ast::Send>(send->recv);
@@ -122,7 +122,7 @@ bool TypeSyntax::isSig(core::Context ctx, const ast::Send &send) {
         return false;
     }
 
-    if (recv != nullptr && recv->symbol == core::Symbols::Sorbet_Private_Static()) {
+    if (recv != nullptr && recv->symbol() == core::Symbols::Sorbet_Private_Static()) {
         return true;
     }
 
@@ -614,7 +614,7 @@ void checkUnexpectedKwargs(core::Context ctx, const ast::Send &send) {
 core::ClassOrModuleRef sendLooksLikeBadTypeApplication(core::Context ctx, const ast::Send &send) {
     core::SymbolRef maybeScopeClass;
     if (auto recv = ast::cast_tree<ast::ConstantLit>(send.recv)) {
-        maybeScopeClass = recv->symbol;
+        maybeScopeClass = recv->symbol();
     } else if (send.recv.isSelfReference()) {
         // Let's not try to reinvent constant resolution here and just pick a heuristic that tends to
         // work in some cases and is simple.
@@ -692,7 +692,7 @@ optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Sen
         }
         return core::Symbols::untyped();
     }
-    auto maybeAliased = obj->symbol;
+    auto maybeAliased = obj->symbol();
     if (maybeAliased.isTypeAlias(ctx)) {
         if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
             e.setHeader("T.class_of can't be used with a T.type_alias");
@@ -1109,7 +1109,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         result.type = core::make_type<core::ShapeType>(move(keys), move(values));
     } else if (ast::isa_tree<ast::ConstantLit>(expr)) {
         const auto &i = ast::cast_tree_nonnull<ast::ConstantLit>(expr);
-        auto maybeAliased = i.symbol;
+        auto maybeAliased = i.symbol();
         ENFORCE(maybeAliased.exists());
 
         if (maybeAliased.isTypeAlias(ctx)) {
@@ -1329,7 +1329,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
 
         core::SymbolRef appliedKlass;
         if (auto recvi = ast::cast_tree<ast::ConstantLit>(s.recv)) {
-            if (recvi->symbol == core::Symbols::T()) {
+            if (recvi->symbol() == core::Symbols::T()) {
                 if (auto res = interpretTCombinator(ctx, s, sigBeingParsed, args)) {
                     return move(res.value());
                 } else {
@@ -1337,7 +1337,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                 }
             }
 
-            if (recvi->symbol == core::Symbols::Magic() && s.fun == core::Names::callWithSplat()) {
+            if (recvi->symbol() == core::Symbols::Magic() && s.fun == core::Names::callWithSplat()) {
                 if (auto e = ctx.beginError(s.recv.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Malformed type declaration: splats cannot be used in types");
                 }
@@ -1345,14 +1345,14 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                 return result;
             }
 
-            appliedKlass = recvi->symbol;
+            appliedKlass = recvi->symbol();
         } else if (auto recvi = ast::cast_tree<ast::Send>(s.recv)) {
             if (recvi->fun != core::Names::classOf() || s.fun != core::Names::squareBrackets()) {
                 return reportUnknownTypeSyntaxError(ctx, s, move(result));
             }
 
             auto recviRecvi = ast::cast_tree<ast::ConstantLit>(recvi->recv);
-            if (recviRecvi == nullptr || recviRecvi->symbol != core::Symbols::T()) {
+            if (recviRecvi == nullptr || recviRecvi->symbol() != core::Symbols::T()) {
                 return reportUnknownTypeSyntaxError(ctx, s, move(result));
             }
 

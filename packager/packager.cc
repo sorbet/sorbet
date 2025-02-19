@@ -673,7 +673,7 @@ ast::ExpressionPtr prependName(ast::ExpressionPtr scope) {
 
 bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit &cnst) {
     if (auto scope = ast::cast_tree<ast::ConstantLit>(cnst.scope)) {
-        return scope->symbol == core::Symbols::PackageSpecRegistry();
+        return scope->symbol() == core::Symbols::PackageSpecRegistry();
     } else if (auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst.scope)) {
         return startsWithPackageSpecRegistry(*scope);
     } else {
@@ -1108,7 +1108,7 @@ private:
             lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
             if (scope != nullptr) {
                 ENFORCE(lit == nullptr);
-                ENFORCE(scope->symbol == core::Symbols::root());
+                ENFORCE(scope->symbol() == core::Symbols::root());
                 rootConsts++;
             }
         }
@@ -1134,7 +1134,7 @@ private:
             lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
             if (scope != nullptr) {
                 ENFORCE(lit == nullptr);
-                ENFORCE(scope->symbol == core::Symbols::root());
+                ENFORCE(scope->symbol() == core::Symbols::root());
                 rootConsts--;
             }
         }

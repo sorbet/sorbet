@@ -108,7 +108,7 @@ pair<LocalRef, bool> unresolvedIdent2Local(CFGContext cctx, const ast::Unresolve
 
 bool sendRecvIsT(ast::Send &s) {
     if (auto cnst = ast::cast_tree<ast::ConstantLit>(s.recv)) {
-        return cnst->symbol == core::Symbols::T();
+        return cnst->symbol() == core::Symbols::T();
     } else {
         return false;
     }
@@ -125,7 +125,7 @@ bool isKernelLambda(ast::Send &s) {
     // We could revisit this in the future but for now let's be conservative.
 
     auto cnst = ast::cast_tree<ast::ConstantLit>(s.recv);
-    return cnst != nullptr && cnst->symbol == core::Symbols::Kernel();
+    return cnst != nullptr && cnst->symbol() == core::Symbols::Kernel();
 }
 
 InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
@@ -191,7 +191,7 @@ ast::Send *isKernelProcOrLambda(ast::ExpressionPtr &expr) {
     }
 
     auto recv = ast::cast_tree<ast::ConstantLit>(send->recv);
-    if (recv == nullptr || recv->symbol != core::Symbols::Kernel()) {
+    if (recv == nullptr || recv->symbol() != core::Symbols::Kernel()) {
         return nullptr;
     }
 
@@ -449,10 +449,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
             [&](ast::ConstantLit &a) {
                 auto aliasName = cctx.newTemporary(core::Names::cfgAlias());
-                if (a.symbol == core::Symbols::StubModule()) {
+                if (a.symbol() == core::Symbols::StubModule()) {
                     current->exprs.emplace_back(aliasName, a.loc, make_insn<Alias>(core::Symbols::untyped()));
                 } else {
-                    current->exprs.emplace_back(aliasName, a.loc, make_insn<Alias>(a.symbol));
+                    current->exprs.emplace_back(aliasName, a.loc, make_insn<Alias>(a.symbol()));
                 }
 
                 synthesizeExpr(current, cctx.target, a.loc, make_insn<Ident>(aliasName));
@@ -481,7 +481,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](ast::Assign &a) {
                 LocalRef lhs;
                 if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a.lhs)) {
-                    lhs = global2Local(cctx, lhsIdent->symbol);
+                    lhs = global2Local(cctx, lhsIdent->symbol());
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a.lhs)) {
                     lhs = cctx.inWhat.enterLocal(lhsLocal->localVariable);
                 } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a.lhs)) {
