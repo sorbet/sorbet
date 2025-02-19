@@ -67,7 +67,7 @@ class LSPTypechecker final {
      * not present in the name table of the indexer. This is a sparse diff of trees indexed by position in
      * this->indexed, and should be consulted before this->indexed when looking up trees. Pelase see the WARNING section
      * of the comment on this->indexed for more context about why. This lookup strategy is implemented by
-     * this->getIndexed. All of the trees in this map are valid to use with this->gs.
+     * this->getResolved. All of the trees in this map are valid to use with this->gs.
      */
     UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
 
@@ -148,11 +148,6 @@ public:
      * need particularly fine-grained fidelity in the AST (precludes rewriter).
      */
     ast::ExpressionPtr getLocalVarTrees(core::FileRef fref) const;
-    /**
-     * Returns the most up-to-date indexed tree for the file ref. The tree will either come from this->indexed if it has
-     * not been modified since the LSP process has been initialized, or from this->indexedFinalGS if it has been.
-     */
-    const ast::ParsedFile &getIndexed(core::FileRef fref) const;
 
     /**
      * Returns copies of the indexed trees that have been run through the incremental resolver.
@@ -232,7 +227,6 @@ public:
     void typecheckOnFastPath(LSPFileUpdates updates, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
     std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs) const;
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;
-    const ast::ParsedFile &getIndexed(core::FileRef fref) const;
     std::vector<ast::ParsedFile> getResolved(absl::Span<const core::FileRef> frefs) const;
     ast::ParsedFile getResolved(core::FileRef fref) const;
     ast::ExpressionPtr getLocalVarTrees(core::FileRef fref) const;

@@ -728,24 +728,24 @@ ast::ExpressionPtr LSPTypechecker::getLocalVarTrees(core::FileRef fref) const {
     return local_vars::LocalVars::run(*gs, {move(afterDesugar), fref}).tree;
 }
 
-const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
-    const auto id = fref.id();
-    auto treeFinalGS = indexedFinalGS.find(id);
-    if (treeFinalGS != indexedFinalGS.end()) {
-        return treeFinalGS->second;
-    }
-    ENFORCE(id < indexed.size());
-    return indexed[id];
-}
-
 vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     vector<ast::ParsedFile> updatedIndexed;
 
     for (auto fref : frefs) {
-        auto &indexed = getIndexed(fref);
-        if (indexed.tree) {
-            updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
+        const auto id = fref.id();
+        auto treeFinalGS = this->indexedFinalGS.find(id);
+        if (treeFinalGS != this->indexedFinalGS.end()) {
+            auto &indexed = treeFinalGS->second;
+            if (indexed.tree) {
+                updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
+            }
+        } else {
+            ENFORCE(id < this->indexed.size());
+            auto &indexed = this->indexed[id];
+            if (indexed.tree) {
+                updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
+            }
         }
     }
 
@@ -829,10 +829,6 @@ std::vector<std::unique_ptr<core::Error>> LSPTypecheckerDelegate::retypecheck(st
 LSPQueryResult LSPTypecheckerDelegate::query(const core::lsp::Query &q,
                                              const std::vector<core::FileRef> &filesForQuery) const {
     return typechecker.query(q, filesForQuery, workers);
-}
-
-const ast::ParsedFile &LSPTypecheckerDelegate::getIndexed(core::FileRef fref) const {
-    return typechecker.getIndexed(fref);
 }
 
 std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(absl::Span<const core::FileRef> frefs) const {
