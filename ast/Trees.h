@@ -1134,7 +1134,7 @@ public:
     using tagged_storage = uint64_t;
 
 private:
-    enum class Tag {
+    enum class Tag : uint8_t {
         Symbol = 1,
         ResolutionScopes = 2,
     };
