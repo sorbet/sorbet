@@ -117,9 +117,9 @@ class LSPTypechecker final {
     /** Commits the given file updates to LSPTypechecker. Does not send diagnostics. */
     void commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled);
 
-    /** Deep copy all entries in `indexed` that contain ASTs, except for those with IDs in the ignore set. Returns true
-     * on success, false if the operation was canceled. */
-    bool copyIndexed(WorkerPool &workers, const UnorderedSet<int> &ignore, std::vector<ast::ParsedFile> &out) const;
+    /** Deep copy all entries in `indexed` that contain ASTs. Returns true on success, false if the operation was
+     * canceled. */
+    bool copyIndexed(WorkerPool &workers, std::vector<ast::ParsedFile> &out) const;
 
 public:
     LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
