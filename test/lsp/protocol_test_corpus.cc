@@ -968,7 +968,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "OverloadedStdlibSymbolWithMonkeyPatches") {
     assertErrorDiagnostics(send(*openFile(loc->uri, kernelRBIText)), {});
 }
 
-TEST_CASE_FIXTURE(ProtocolTest, "JumpToDefStdlibRbif") {
+TEST_CASE_FIXTURE(ProtocolTest, "JumpToDefStdlibRbi") {
     const bool supportsMarkdown = false;
     const bool supportsCodeActionResolve = true;
     auto initOptions = make_unique<SorbetInitializationOptions>();
@@ -990,14 +990,18 @@ TEST_CASE_FIXTURE(ProtocolTest, "JumpToDefStdlibRbif") {
     }
     auto &loc = *it;
     REQUIRE(absl::StartsWith(loc->uri, "sorbet:https://github.com/"));
+    auto uri = absl::StrReplaceAll(loc->uri, {{"https://github.com/", "https%3A//github.com/"}});
 
     // Read and load in integer.rbi
-    auto integerRBIText = readFile(loc->uri);
+    auto integerRBIText = readFile(uri);
 
-    assertErrorDiagnostics(send(*openFile(loc->uri, integerRBIText)), {});
+    std::vector<std::unique_ptr<LSPMessage>> requests;
+    requests.push_back(codeAction(uri, 0, 0));
+    requests.push_back(codeAction(uri, 7, 0));
+    requests.push_back(documentSymbol(uri));
+    requests.push_back(openFile(loc->uri, integerRBIText));
 
-    // Calling documentSymbols tests that our handling of payload files in LSPTypechecker::getResolved is correct.
-    assertErrorDiagnostics(send(*documentSymbol(loc->uri)), {});
+    auto msgs = send(std::move(requests));
 }
 
 } // namespace sorbet::test::lsp
