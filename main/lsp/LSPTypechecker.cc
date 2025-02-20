@@ -783,15 +783,9 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileR
 ast::ParsedFile LSPTypechecker::getResolved(core::FileRef fref, WorkerPool &workers) const {
     std::vector<ast::ParsedFile> trees = this->getResolved(std::initializer_list<core::FileRef>{fref}, workers);
 
-    if (trees.empty()) {
-        // This case can happen if the associated file ref was to a payload file, in which case the tree will be
-        // `nullptr` in `this->indexed` and not added to the vector produced by the multi-file version of
-        // `this-fgetResolved`.
-        return ast::ParsedFile{nullptr, fref};
-    } else {
-        ENFORCE(trees.size() == 1);
-        return std::move(trees.front());
-    }
+    ENFORCE(trees.size() == 1);
+    // We explicitly use `.at(0)` so that we see a crash if the above ENFORCE is violated in a release build.
+    return std::move(trees.at(0));
 }
 
 const core::GlobalState &LSPTypechecker::state() const {
