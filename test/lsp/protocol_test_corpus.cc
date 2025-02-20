@@ -968,4 +968,36 @@ TEST_CASE_FIXTURE(ProtocolTest, "OverloadedStdlibSymbolWithMonkeyPatches") {
     assertErrorDiagnostics(send(*openFile(loc->uri, kernelRBIText)), {});
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "JumpToDefStdlibRbif") {
+    const bool supportsMarkdown = false;
+    const bool supportsCodeActionResolve = true;
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->supportsSorbetURIs = true;
+    assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(initOptions)), {});
+
+    assertErrorDiagnostics(send(*openFile("test.rb", "# typed: true\n"
+                                                     "\n"
+                                                     "X = T.let(10, Integer)\n"
+                                                     "")),
+                           {});
+
+    // Lookup the definition of `Integer` on the `X = T.let...` line of `test.rb`.
+    auto locs = getDefinitions("test.rb", 2, 15);
+    REQUIRE(!locs.empty());
+    auto it = absl::c_find_if(locs, [](auto &loc) { return absl::StrContains(loc->uri, "integer.rbi"); });
+    if (it == locs.end()) {
+        FAIL_CHECK("Didn't find `integer.rbi` in locs list");
+    }
+    auto &loc = *it;
+    REQUIRE(absl::StartsWith(loc->uri, "sorbet:https://github.com/"));
+
+    // Read and load in integer.rbi
+    auto integerRBIText = readFile(loc->uri);
+
+    assertErrorDiagnostics(send(*openFile(loc->uri, integerRBIText)), {});
+
+    // Calling documentSymbols tests that our handling of payload files in LSPTypechecker::getResolved is correct.
+    assertErrorDiagnostics(send(*documentSymbol(loc->uri)), {});
+}
+
 } // namespace sorbet::test::lsp
