@@ -552,7 +552,7 @@ public:
             [&](const ast::UnresolvedConstantLit &t) {
                 result = t.cnst == core::Names::Constants::T() && ast::MK::isRootScope(t.scope);
             },
-            [&](const ast::ConstantLit &c) { result = c.symbol == core::Symbols::T(); },
+            [&](const ast::ConstantLit &c) { result = c.symbol() == core::Symbols::T(); },
             [&](const ast::ExpressionPtr &e) { result = false; });
 
         return result;
