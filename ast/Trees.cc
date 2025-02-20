@@ -98,7 +98,7 @@ template <> struct LocGetter<ConstantLit> {
         return reinterpret_cast<ConstantLit *>(ptr)->loc();
     }
 };
-}
+} // namespace
 
 core::LocOffsets ExpressionPtr::loc() const {
     auto *ptr = get();
@@ -309,8 +309,7 @@ UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr
     _sanityCheck();
 }
 
-ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol)
-    : storage(loc, symbol) {
+ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol) : storage(loc, symbol) {
     categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();
 }

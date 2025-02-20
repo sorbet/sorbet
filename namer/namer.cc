@@ -1702,8 +1702,7 @@ class TreeSymbolizer {
         // NameInserter should have created this symbol
         ENFORCE(existing.exists());
 
-        node = ast::make_expression<ast::ConstantLit>(existing,
-                                                      node.toUnique<ast::UnresolvedConstantLit>());
+        node = ast::make_expression<ast::ConstantLit>(existing, node.toUnique<ast::UnresolvedConstantLit>());
         return existing;
     }
 
@@ -1963,8 +1962,7 @@ public:
         // Simulates how squashNames in handleAssignment also creates a ConstantLit
         // (simpler than squashNames, because type members are not allowed to use any sort of
         // `A::B = type_member` syntax)
-        asgn.lhs = ast::make_expression<ast::ConstantLit>(sym,
-                                                          asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
+        asgn.lhs = ast::make_expression<ast::ConstantLit>(sym, asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
 
         if (send->hasKwArgs()) {
             const auto numKwArgs = send->numKwArgs();

@@ -162,8 +162,8 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
             auto *exp = reinterpret_cast<const ConstantLit *>(tree);
             std::unique_ptr<UnresolvedConstantLit> originalC;
             if (auto *original = exp->original()) {
-                originalC = make_unique<UnresolvedConstantLit>(
-                    original->loc, deepCopy(avoid, original->scope), original->cnst);
+                originalC =
+                    make_unique<UnresolvedConstantLit>(original->loc, deepCopy(avoid, original->scope), original->cnst);
                 return make_expression<ConstantLit>(exp->symbol(), move(originalC));
             }
 

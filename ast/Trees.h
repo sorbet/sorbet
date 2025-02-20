@@ -1229,85 +1229,85 @@ private:
 
         ~Storage() {
             switch (tag()) {
-            case Tag::KnownSymbol: {
-                // ptr1 just holds the raw ID for the symbol, so only delete LocOffsets.
-                auto *p = reinterpret_cast<core::LocOffsets *>(&ptr2);
-                p->~LocOffsets();
-                break;
-            }
-            case Tag::ResolvedSymbol: {
-                // ptr1 just holds the raw ID for the symbol.
-                auto *ucl = original();
-                delete ucl;
-                break;
-            }
-            case Tag::FailedResolutionSymbol: {
-                auto *scopes = resolutionScopes();
-                delete scopes;
-                auto *ucl = original();
-                delete ucl;
-                break;
-            }
+                case Tag::KnownSymbol: {
+                    // ptr1 just holds the raw ID for the symbol, so only delete LocOffsets.
+                    auto *p = reinterpret_cast<core::LocOffsets *>(&ptr2);
+                    p->~LocOffsets();
+                    break;
+                }
+                case Tag::ResolvedSymbol: {
+                    // ptr1 just holds the raw ID for the symbol.
+                    auto *ucl = original();
+                    delete ucl;
+                    break;
+                }
+                case Tag::FailedResolutionSymbol: {
+                    auto *scopes = resolutionScopes();
+                    delete scopes;
+                    auto *ucl = original();
+                    delete ucl;
+                    break;
+                }
             }
         }
 
         UnresolvedConstantLit *original() {
             switch (tag()) {
-            case Tag::KnownSymbol:
-                return nullptr;
-            case Tag::ResolvedSymbol:
-            case Tag::FailedResolutionSymbol:
-                return reinterpret_cast<UnresolvedConstantLit *>(ptr2);
+                case Tag::KnownSymbol:
+                    return nullptr;
+                case Tag::ResolvedSymbol:
+                case Tag::FailedResolutionSymbol:
+                    return reinterpret_cast<UnresolvedConstantLit *>(ptr2);
             }
         }
 
         const UnresolvedConstantLit *original() const {
             switch (tag()) {
-            case Tag::KnownSymbol:
-                return nullptr;
-            case Tag::ResolvedSymbol:
-            case Tag::FailedResolutionSymbol:
-                return reinterpret_cast<const UnresolvedConstantLit *>(ptr2);
+                case Tag::KnownSymbol:
+                    return nullptr;
+                case Tag::ResolvedSymbol:
+                case Tag::FailedResolutionSymbol:
+                    return reinterpret_cast<const UnresolvedConstantLit *>(ptr2);
             }
         }
 
         core::LocOffsets loc() const {
             switch (tag()) {
-            case Tag::KnownSymbol:
-                return *reinterpret_cast<const core::LocOffsets *>(&ptr2);
-            case Tag::ResolvedSymbol:
-            case Tag::FailedResolutionSymbol:
-                return original()->loc;
+                case Tag::KnownSymbol:
+                    return *reinterpret_cast<const core::LocOffsets *>(&ptr2);
+                case Tag::ResolvedSymbol:
+                case Tag::FailedResolutionSymbol:
+                    return original()->loc;
             }
         }
 
         core::SymbolRef symbol() const {
             switch (tag()) {
-            case Tag::KnownSymbol:
-            case Tag::ResolvedSymbol:
-                return core::SymbolRef::fromRaw(static_cast<uint32_t>(untaggedPtr1()));
-            case Tag::FailedResolutionSymbol:
-                return core::Symbols::StubModule();
+                case Tag::KnownSymbol:
+                case Tag::ResolvedSymbol:
+                    return core::SymbolRef::fromRaw(static_cast<uint32_t>(untaggedPtr1()));
+                case Tag::FailedResolutionSymbol:
+                    return core::Symbols::StubModule();
             }
         }
 
         std::vector<core::SymbolRef> *resolutionScopes() {
             switch (tag()) {
-            case Tag::KnownSymbol:
-            case Tag::ResolvedSymbol:
-                return nullptr;
-            case Tag::FailedResolutionSymbol:
-                return reinterpret_cast<std::vector<core::SymbolRef> *>(untaggedPtr1());
+                case Tag::KnownSymbol:
+                case Tag::ResolvedSymbol:
+                    return nullptr;
+                case Tag::FailedResolutionSymbol:
+                    return reinterpret_cast<std::vector<core::SymbolRef> *>(untaggedPtr1());
             }
         }
 
         const std::vector<core::SymbolRef> *resolutionScopes() const {
             switch (tag()) {
-            case Tag::KnownSymbol:
-            case Tag::ResolvedSymbol:
-                return nullptr;
-            case Tag::FailedResolutionSymbol:
-                return reinterpret_cast<const std::vector<core::SymbolRef> *>(untaggedPtr1());
+                case Tag::KnownSymbol:
+                case Tag::ResolvedSymbol:
+                    return nullptr;
+                case Tag::FailedResolutionSymbol:
+                    return reinterpret_cast<const std::vector<core::SymbolRef> *>(untaggedPtr1());
             }
         }
 

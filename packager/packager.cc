@@ -1578,8 +1578,7 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
         // spec-related class def in later passes without having to recursively walk up the constant
         // lit's scope to find if it starts with <PackageSpecRegistry>.
         packageSpecClass->ancestors[0] = ast::make_expression<ast::ConstantLit>(
-            core::Symbols::PackageSpec(),
-            packageSpecClass->ancestors[0].toUnique<ast::UnresolvedConstantLit>());
+            core::Symbols::PackageSpec(), packageSpecClass->ancestors[0].toUnique<ast::UnresolvedConstantLit>());
 
         info = make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),
                                             ctx.locAt(packageSpecClass->declLoc));
