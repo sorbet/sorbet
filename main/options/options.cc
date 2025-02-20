@@ -451,7 +451,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Enforce use of new (Ruby 3.0-style) keyword arguments. (incomplete and experimental)",
                                  cxxopts::value<bool>());
     options.add_options(section)("enable-experimental-rbs-signatures",
-                                 "Enable experimental support for RBS signatures");
+                                 "Enable experimental support for RBS signatures as inline comments");
     options.add_options(section)("enable-experimental-requires-ancestor",
                                  "Enable experimental `requires_ancestor` annotation");
     options.add_options(section)("uniquely-defined-behavior",
