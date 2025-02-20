@@ -343,7 +343,7 @@ private:
     }
 
     static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job) {
-        auto &c = *job.out->original;
+        auto &c = *job.out->original();
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             auto result = resolveLhs(ctx, job.scope, c.cnst);
 
@@ -433,7 +433,7 @@ private:
                     return true;
                 }
 
-                auto &original = *cnst->original;
+                auto &original = *cnst->original();
                 if (original.cnst != *it) {
                     return false;
                 }
@@ -537,7 +537,7 @@ private:
 
     static core::ClassOrModuleRef stubConstant(core::MutableContext ctx, core::ClassOrModuleRef owner,
                                                ast::ConstantLit *out, bool possibleGenericType) {
-        auto symbol = ctx.state.enterClassSymbol(ctx.locAt(out->loc()), owner, out->original->cnst);
+        auto symbol = ctx.state.enterClassSymbol(ctx.locAt(out->loc()), owner, out->original()->cnst);
 
         auto data = symbol.data(ctx);
         data->setIsModule(true); // This is what would happen in finalizeAncestors
@@ -606,7 +606,7 @@ private:
                 continue;
             }
 
-            auto &original = *base->original;
+            auto &original = *base->original();
             if (importStubs.packageExportsConstant(prefix, original.cnst)) {
                 ENFORCE(cursor->scope.isClassOrModule());
                 return cursor->scope.asClassOrModuleRef();
@@ -644,7 +644,7 @@ private:
             auto *cursor = out;
             bool isRootReference = false;
             while (cursor != nullptr) {
-                auto original = cursor->original.get();
+                auto original = cursor->original();
                 if (original == nullptr) {
                     isRootReference = cursor->symbol() == core::Symbols::root();
                     break;
@@ -701,7 +701,7 @@ private:
                     auto loc = resolvedField.data(ctx)->loc();
                     if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
                         e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
-                        e.addErrorLine(ctx.locAt(job.out->original->loc), "Type alias used here");
+                        e.addErrorLine(ctx.locAt(job.out->original()->loc), "Type alias used here");
                     }
 
                     resolvedField.data(gs)->resultType = core::Types::untyped(resolved);
@@ -729,7 +729,7 @@ private:
 
         bool alreadyReported = false;
         job.out->markUnresolved();
-        auto &original = *job.out->original;
+        auto &original = *job.out->original();
         if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
             auto originalScope = id->symbol().dealias(ctx);
             if (originalScope == core::Symbols::StubModule()) {
@@ -1307,8 +1307,8 @@ private:
                 }
                 return;
             }
-            ENFORCE(sym.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original->scope) ||
-                    ast::isa_tree<ast::EmptyTree>(cnst->original->scope));
+            ENFORCE(sym.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original()->scope) ||
+                    ast::isa_tree<ast::EmptyTree>(cnst->original()->scope));
             if (isSuperclass && sym == core::Symbols::todo()) {
                 // This is the case where the superclass is empty, for example: `class A; end`
                 return;
@@ -1685,7 +1685,11 @@ public:
     static int constantDepth(ast::ConstantLit *exp) {
         int depth = 0;
         ast::ConstantLit *scope = exp;
-        while (scope->original && (scope = ast::cast_tree<ast::ConstantLit>(scope->original->scope))) {
+        while (auto original = scope->original()) {
+            scope = ast::cast_tree<ast::ConstantLit>(original->scope);
+            if (!scope) {
+                break;
+            }
             depth += 1;
         }
         return depth;

@@ -82,8 +82,8 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
 
     auto ident = ast::cast_tree<ast::ConstantLit>(orig);
     if (ident) {
-        auto orig = dupUnresolvedConstantLit(ident->original.get());
-        if (ident->original && !orig) {
+        auto orig = dupUnresolvedConstantLit(ident->original());
+        if (ident->original() && !orig) {
             return nullptr;
         }
         if (orig == nullptr) {

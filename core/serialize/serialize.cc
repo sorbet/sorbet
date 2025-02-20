@@ -1456,11 +1456,12 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             // This encoding is the same encoding that would be used if we were
             // serializing an UnresolvedConstantLit as an ExpressionPtr, nullptr
             // and all.
-            if (a.original == nullptr) {
+            auto *original = a.original();
+            if (original == nullptr) {
                 p.putU4(0);
             } else {
                 p.putU4(uint32_t(ast::Tag::UnresolvedConstantLit));
-                pickle(p, *a.original);
+                pickle(p, *original);
             }
             break;
         }

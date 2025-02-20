@@ -1236,12 +1236,11 @@ EXPRESSION(ConstantLit) {
 private:
     const core::LocOffsets loc_;
     ResolutionScopesOrSymbol resolutionScopesOrSymbol;
+    std::unique_ptr<UnresolvedConstantLit> original_;
 
     ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
 
 public:
-    std::unique_ptr<UnresolvedConstantLit> original;
-
     ConstantLit(core::LocOffsets loc, core::SymbolRef symbol);
     ConstantLit(core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
 
@@ -1277,6 +1276,14 @@ public:
     // Marks this constant as unresolved and allocates a vector for `resolutionScopes`.
     void markUnresolved() {
         return resolutionScopesOrSymbol.markUnresolved();
+    }
+
+    UnresolvedConstantLit *original() {
+        return original_.get();
+    }
+
+    const UnresolvedConstantLit *original() const {
+        return original_.get();
     }
 
     void _sanityCheck();

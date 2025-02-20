@@ -318,7 +318,7 @@ ConstantLit::ConstantLit(core::SymbolRef symbol, std::unique_ptr<UnresolvedConst
 }
 
 ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original)
-    : loc_(loc), resolutionScopesOrSymbol(symbol), original(std::move(original)) {
+    : loc_(loc), resolutionScopesOrSymbol(symbol), original_(std::move(original)) {
     categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();
 }
@@ -345,14 +345,14 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
                 break;
             }
 
-            auto &orig = *nested->original;
+            auto &orig = *nested->original_;
             namesFailedToResolve.emplace_back(orig.cnst);
             nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
             ENFORCE(nested);
             ENFORCE(nested->symbol() == core::Symbols::StubModule());
             ENFORCE(!nested->resolutionScopes()->empty());
         }
-        auto &orig = *nested->original;
+        auto &orig = *nested->original_;
         namesFailedToResolve.emplace_back(orig.cnst);
         absl::c_reverse(namesFailedToResolve);
     }
@@ -732,7 +732,7 @@ string ConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) cons
     if (symbol().exists() && symbol() != core::Symbols::StubModule()) {
         return this->symbol().showFullName(gs);
     }
-    return "Unresolved: " + this->original->toStringWithTabs(gs, tabs);
+    return "Unresolved: " + this->original_->toStringWithTabs(gs, tabs);
 }
 
 string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) const {
@@ -744,7 +744,7 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) const {
                    this->symbol().showFullName(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "orig = {}\n",
-                   this->original ? this->original->showRaw(gs, tabs + 1) : "nullptr");
+                   this->original_ ? this->original_->showRaw(gs, tabs + 1) : "nullptr");
     // If resolutionScopes isn't null, it should not be empty.
     ENFORCE(resolutionScopes() == nullptr || !resolutionScopes()->empty());
     if (resolutionScopes() != nullptr && !resolutionScopes()->empty()) {
