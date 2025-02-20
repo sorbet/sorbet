@@ -110,14 +110,32 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         }
     }
 
+    UnorderedSet<core::NameRef> seenNames;
     for (auto &arg : send->posArgs()) {
-        auto sym = ast::cast_tree<ast::Literal>(arg);
-        if (!sym || !sym->isSymbol()) {
+        auto lit = ast::cast_tree<ast::Literal>(arg);
+        if (!lit) {
             return empty;
         }
-        core::NameRef name = sym->asSymbol();
-        auto symLoc = sym->loc;
-        auto strname = name.shortName(ctx);
+
+        std::string strname;
+        if (lit->isSymbol()) {
+            strname = lit->asSymbol().show(ctx);
+        } else if (lit->isString()) {
+            strname = lit->asString().show(ctx);
+        } else {
+            return empty;
+        }
+
+        core::NameRef name = ctx.state.enterNameUTF8(strname);
+
+        if (seenNames.find(name) != seenNames.end()) {
+            if (auto e = ctx.beginError(lit->loc, core::errors::Rewriter::InvalidStructMember)) {
+                e.setHeader("Duplicate member '{}' in Struct definition", name.show(ctx));
+            }
+            return empty;
+        }
+        seenNames.insert(name);
+        auto symLoc = lit->loc;
         if (!strname.empty() && strname.back() == '=') {
             if (auto e = ctx.beginIndexerError(symLoc, core::errors::Rewriter::InvalidStructMember)) {
                 e.setHeader("Struct member `{}` cannot end with an equal", strname);
