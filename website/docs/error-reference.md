@@ -27,7 +27,7 @@ This is one of three docs aimed at helping answer common questions about Sorbet:
 1.  [Frequently Asked Questions](faq.md)
 1.  [Sorbet Error Reference](error-reference.md) (this doc)
 
-This page contains tips and tricks for common errors from `srb`.
+This page contains tips and tricks for common errors from Sorbet.
 
 ## 1001
 

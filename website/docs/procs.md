@@ -16,7 +16,7 @@ At present, all parameters are assumed to be required positional
 parameters—`T.proc` types cannot declare optional nor keyword parameters.
 
 Types of procs are not checked at all at runtime (whereas methods are), and
-serve only as hints to `srb` statically (and for documentation).
+serve only as hints to Sorbet statically (and for documentation).
 
 Here's a larger example:
 
