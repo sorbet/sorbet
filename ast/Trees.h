@@ -1234,6 +1234,46 @@ CheckSize(ResolutionScopesOrSymbol, 8, 8);
 
 EXPRESSION(ConstantLit) {
 private:
+    // This is a lot of complexity, but codebases can have a large number of resolved constants,
+    // so we put in some work to ensure that these take up the minimal amount of space possible.
+    //
+    // A ConstantLit can be in one of three states:
+    //
+    // 1. A known constant that we create ourselves (e.g. core::Symbols::root()).  This requires
+    //    12 bytes of storage:
+    //
+    //    struct KnownInternalSymbol {
+    //        core::SymbolRef sym;
+    //        core::LocOffsets loc;
+    //    };
+    //
+    //    The loc is actually important to propagate information into later passes and to ensure
+    //    that various ENFORCEs around loc consistency hold.
+    //
+    // 2. A resolved constant.  We cheat a little bit here because this is actually encompassing
+    //    both a constant that we are attempting to resolve and a constant that we have finished
+    //    resolving.  This requires 12 bytes of storage, 16 after alignment:
+    //
+    //    struct ResolvedSymbol {
+    //        core::SymbolRef sym;
+    //        std::unique_ptr<UnresolvedConstantLit> original;
+    //    };
+    //
+    //    The loc for this constant is derivable from `original`.
+    //
+    // 3. A constant that we attempted to resolve, but resolution failed.  This requires 16
+    //    bytes of storage.
+    //
+    //    struct FailedResolutionSymbol {
+    //        std::unique_ptr<std::vector<core::SymbolRef>> resolutionScopes;
+    //        std::unique_ptr<UnresolvedConstantLit> original;
+    //    };
+    //
+    //    We transition the second case -- where the second case is representing a symbol that
+    //    is in the process of resolving -- to this case, and then we never transition out.
+    //
+    // We can represent all three of these in 16 bytes of space by doing a bunch of manual
+    // pointer tagging.
     const core::LocOffsets loc_;
     ResolutionScopesOrSymbol resolutionScopesOrSymbol;
     std::unique_ptr<UnresolvedConstantLit> original_;
