@@ -396,73 +396,77 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates update
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
     auto committed = epochManager.tryCommitEpoch(*finalGS, epoch, cancelable, preemptManager, [&]() -> void {
+        UnorderedSet<int> updatedFiles;
+        vector<ast::ParsedFile> indexedCopies;
+
         // Replace error queue with one that is owned by this thread.
         auto savedErrorQueue = std::exchange(
             finalGS->errorQueue,
             make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer, errorFlusher));
 
-        // We're initializing an empty global state from the kvstore, if it's valid.
-        if (mode == SlowPathMode::Init) {
-            ENFORCE(!this->initialized);
-            Timer timeit(config->logger, "initial_index");
+        switch (mode) {
+            case SlowPathMode::Init: {
+                ENFORCE(!this->initialized);
+                Timer timeit(config->logger, "initial_index");
 
-            ShowOperation op(*config, ShowOperation::Kind::Indexing);
+                ShowOperation op(*config, ShowOperation::Kind::Indexing);
 
-            std::unique_ptr<const OwnedKeyValueStore> ownedKvstore =
-                cache::ownIfUnchanged(*finalGS, std::move(kvstore));
+                std::unique_ptr<const OwnedKeyValueStore> ownedKvstore =
+                    cache::ownIfUnchanged(*finalGS, std::move(kvstore));
 
-            {
-                Timer timeit(config->logger, "reIndexFromFileSystem");
+                {
+                    Timer timeit(config->logger, "reIndexFromFileSystem");
 
-                auto inputFiles = pipeline::reserveFiles(finalGS, config->opts.inputFileNames);
-                this->indexed.clear();
-                this->indexed.resize(finalGS->filesUsed());
+                    auto inputFiles = pipeline::reserveFiles(finalGS, config->opts.inputFileNames);
+                    this->indexed.clear();
+                    this->indexed.resize(finalGS->filesUsed());
 
-                auto asts = hashing::Hashing::indexAndComputeFileHashes(*finalGS, config->opts, *config->logger,
-                                                                        absl::Span<core::FileRef>(inputFiles), workers,
-                                                                        ownedKvstore);
-                // asts are in fref order, but we (currently) don't index and compute file hashes for payload files, so
-                // vector index != FileRef ID. Fix that by slotting them into `indexed`.
-                for (auto &ast : asts) {
-                    int id = ast.file.id();
-                    ENFORCE_NO_TIMER(id < this->indexed.size());
-                    this->indexed[id] = std::move(ast);
+                    auto asts = hashing::Hashing::indexAndComputeFileHashes(*finalGS, config->opts, *config->logger,
+                                                                            absl::Span<core::FileRef>(inputFiles),
+                                                                            workers, ownedKvstore);
+                    // asts are in fref order, but we (currently) don't index and compute file hashes for payload files,
+                    // so vector index != FileRef ID. Fix that by slotting them into `indexed`.
+                    for (auto &ast : asts) {
+                        int id = ast.file.id();
+                        ENFORCE_NO_TIMER(id < this->indexed.size());
+                        this->indexed[id] = std::move(ast);
+                    }
                 }
+
+                cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)), config->opts,
+                                                     *finalGS, workers, indexed);
+
+                ENFORCE_NO_TIMER(indexed.size() == finalGS->filesUsed());
+
+                // At this point finalGS has a name table that's initialized enough for the indexer thread, so we make a
+                // copy to pass back over.
+                indexedState = finalGS->deepCopy();
+                indexedState->errorQueue = std::move(savedErrorQueue);
+
+                this->initialized = true;
+
+                break;
             }
 
-            cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)), config->opts,
-                                                 *finalGS, workers, indexed);
+            case SlowPathMode::Cancelable: {
+                // If we're not initializing, there's no need to hold on to the old error queue.
+                savedErrorQueue = nullptr;
 
-            ENFORCE_NO_TIMER(indexed.size() == finalGS->filesUsed());
-
-            // At this point finalGS has a name table that's initialized enough for the indexer thread, so we make a
-            // copy to pass back over.
-            indexedState = finalGS->deepCopy();
-            indexedState->errorQueue = std::move(savedErrorQueue);
-
-            this->initialized = true;
-        } else {
-            // If we're not initializing, there's no need to hold on to the old error queue.
-            savedErrorQueue = nullptr;
-        }
-
-        UnorderedSet<int> updatedFiles;
-        vector<ast::ParsedFile> indexedCopies;
-
-        // Index the updated files using finalGS.
-        if (!updates.updatedFiles.empty()) {
-            // Initialization does its own indexing, so we shouldn't see any file updates from that path.
-            ENFORCE(mode != SlowPathMode::Init);
-
-            auto &gs = *finalGS;
-            core::UnfreezeFileTable fileTableAccess(gs);
-            for (auto &file : updates.updatedFiles) {
-                auto parsedFile = updateFile(gs, std::move(file), config->opts);
-                if (parsedFile.tree) {
-                    indexedCopies.emplace_back(ast::ParsedFile{parsedFile.tree.deepCopy(), parsedFile.file});
-                    updatedFiles.insert(parsedFile.file.id());
+                // Index the updated files using finalGS.
+                if (!updates.updatedFiles.empty()) {
+                    auto &gs = *finalGS;
+                    core::UnfreezeFileTable fileTableAccess(gs);
+                    for (auto &file : updates.updatedFiles) {
+                        auto parsedFile = updateFile(gs, std::move(file), config->opts);
+                        if (parsedFile.tree) {
+                            indexedCopies.emplace_back(ast::ParsedFile{parsedFile.tree.deepCopy(), parsedFile.file});
+                            updatedFiles.insert(parsedFile.file.id());
+                        }
+                        updates.updatedFinalGSFileIndexes.push_back(move(parsedFile));
+                    }
                 }
-                updates.updatedFinalGSFileIndexes.push_back(move(parsedFile));
+
+                break;
             }
         }
 
