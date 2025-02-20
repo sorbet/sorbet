@@ -1451,7 +1451,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::ConstantLit: {
             auto &a = ast::cast_tree_nonnull<ast::ConstantLit>(what);
-            pickle(p, a.loc);
+            pickle(p, a.loc());
             p.putU4(a.symbol().rawId());
             // This encoding is the same encoding that would be used if we were
             // serializing an UnresolvedConstantLit as an ExpressionPtr, nullptr

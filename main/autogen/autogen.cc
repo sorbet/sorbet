@@ -273,7 +273,7 @@ public:
             return;
         }
 
-        auto entry = make_pair(original.loc, original.symbol());
+        auto entry = make_pair(original.loc(), original.symbol());
         if (seenRefsByLoc.contains(entry)) {
             return;
         }
@@ -283,12 +283,12 @@ public:
         auto &ref = refs.emplace_back();
         ref.id = refs.size() - 1;
         setNestingAndScope(ref, original);
-        ref.loc = original.loc;
+        ref.loc = original.loc();
 
         // the reference location is the location of constant, but this might get updated if the reference corresponds
         // to the definition of the constant, because in that case we'll later on extend the location to cover the whole
         // class or assignment
-        ref.definitionLoc = original.loc;
+        ref.definitionLoc = original.loc();
         ref.name = QualifiedName::fromFullName(constantName(ctx, original));
         auto sym = original.symbol();
         ref.sym = sym;

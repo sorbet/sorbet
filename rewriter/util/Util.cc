@@ -87,7 +87,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
             return nullptr;
         }
         if (orig == nullptr) {
-            return ast::make_expression<ast::ConstantLit>(ident->loc, ident->symbol());
+            return ast::make_expression<ast::ConstantLit>(ident->loc(), ident->symbol());
         }
 
         return ast::make_expression<ast::ConstantLit>(ident->symbol(), std::move(orig));

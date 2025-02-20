@@ -1233,10 +1233,8 @@ public:
 CheckSize(ResolutionScopesOrSymbol, 8, 8);
 
 EXPRESSION(ConstantLit) {
-public:
-    const core::LocOffsets loc;
-
 private:
+    const core::LocOffsets loc_;
     ResolutionScopesOrSymbol resolutionScopesOrSymbol;
 
     ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
@@ -1254,6 +1252,10 @@ public:
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
     std::string nodeName() const;
     std::optional<std::pair<core::SymbolRef, std::vector<core::NameRef>>> fullUnresolvedPath(core::Context ctx) const;
+
+    core::LocOffsets loc() const {
+        return loc_;
+    }
 
     core::SymbolRef symbol() const {
         return resolutionScopesOrSymbol.symbol();

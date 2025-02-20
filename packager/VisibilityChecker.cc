@@ -384,7 +384,7 @@ public:
 
         // If the imported symbol comes from the test namespace, we must also be in the test namespace.
         if (otherFile.data(ctx).isPackagedTest() && !this->insideTestFile) {
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedTestOnlyName)) {
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                 e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
                             litSymbol.show(ctx));
             }
@@ -408,7 +408,7 @@ public:
 
         // Did we use a constant that wasn't exported?
         if (!isExported && !db.allowRelaxedPackagerChecksFor(this->package.mangledName())) {
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedPackagePrivateName)) {
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                 e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
                 auto definedHereLoc = litSymbol.loc(ctx);
@@ -441,7 +441,7 @@ public:
         auto importType = this->package.importsPackage(otherPackage);
         if (!importType.has_value()) {
             // We failed to import the package that defines the symbol
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::MissingImport)) {
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                 bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
                 auto strictDepsLevel = this->package.strictDependenciesLevel();
@@ -484,7 +484,7 @@ public:
             }
         } else if (*importType == core::packages::ImportType::Test && !this->insideTestFile) {
             // We used a symbol from a `test_import` in a non-test context
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedTestOnlyName)) {
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                 e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                 if (auto exp = this->package.addImport(ctx, pkg, false)) {

@@ -696,14 +696,14 @@ optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Sen
     if (maybeAliased.isTypeAlias(ctx)) {
         if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
             e.setHeader("T.class_of can't be used with a T.type_alias");
-            maybeSuggestTClass(ctx, e, send.loc, obj->loc);
+            maybeSuggestTClass(ctx, e, send.loc, obj->loc());
         }
         return core::Symbols::untyped();
     }
     if (maybeAliased.isTypeMember()) {
         if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
             e.setHeader("T.class_of can't be used with a T.type_member");
-            maybeSuggestTClass(ctx, e, send.loc, obj->loc);
+            maybeSuggestTClass(ctx, e, send.loc, obj->loc());
         }
         return core::Symbols::untyped();
     }
@@ -711,7 +711,7 @@ optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Sen
     if (sym.isStaticField(ctx)) {
         if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
             e.setHeader("T.class_of can't be used with a constant field");
-            maybeSuggestTClass(ctx, e, send.loc, obj->loc);
+            maybeSuggestTClass(ctx, e, send.loc, obj->loc());
         }
         return core::Symbols::untyped();
     }
@@ -1145,10 +1145,10 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                 auto level = klass.isLegacyStdlibGeneric() || klass == core::Symbols::Class()
                                  ? core::errors::Resolver::GenericClassWithoutTypeArgsStdlib
                                  : core::errors::Resolver::GenericClassWithoutTypeArgs;
-                if (auto e = ctx.beginError(i.loc, level)) {
+                if (auto e = ctx.beginError(i.loc(), level)) {
                     e.setHeader("Malformed type declaration. Generic class without type arguments `{}`",
                                 klass.show(ctx));
-                    core::TypeErrorDiagnostics::insertTypeArguments(ctx, e, klass, ctx.locAt(i.loc));
+                    core::TypeErrorDiagnostics::insertTypeArguments(ctx, e, klass, ctx.locAt(i.loc()));
                 }
             }
             if (klass == core::Symbols::StubModule()) {
@@ -1209,7 +1209,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                         // constructors like `Types::any` do not expect to see bound variables, and will panic.
                         result.type = core::make_type<core::SelfTypeParam>(sym);
                     } else {
-                        if (auto e = ctx.beginError(i.loc, core::errors::Resolver::TypeMemberScopeMismatch)) {
+                        if (auto e = ctx.beginError(i.loc(), core::errors::Resolver::TypeMemberScopeMismatch)) {
                             string typeSource = isTypeTemplate ? "type_template" : "type_member";
                             string typeStr = usedOnSourceClass ? symData->name.show(ctx) : sym.show(ctx);
 
@@ -1246,7 +1246,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                     break;
                 }
                 case TypeSyntaxArgs::TypeMember::BannedInTypeAlias:
-                    if (auto e = ctx.beginError(i.loc, core::errors::Resolver::TypeAliasToTypeMember)) {
+                    if (auto e = ctx.beginError(i.loc(), core::errors::Resolver::TypeAliasToTypeMember)) {
                         const auto &owner = tm.data(ctx)->owner.asClassOrModuleRef().data(ctx);
                         auto memTem = owner->attachedClass(ctx).exists() ? "type_template" : "type_member";
                         e.setHeader("Defining a `{}` to a generic `{}` is not allowed", "type_alias", memTem);
@@ -1260,7 +1260,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                     break;
                 case TypeSyntaxArgs::TypeMember::BannedInTypeMember:
                     // a type member has occurred in a context that doesn't allow them
-                    if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    if (auto e = ctx.beginError(i.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
                         auto flavor = isTypeTemplate ? "type_template"sv : "type_member"sv;
                         e.setHeader("`{}` `{}` is not allowed in this context", flavor, sym.show(ctx));
                     }
@@ -1268,14 +1268,14 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                     break;
             }
         } else if (sym.isStaticField(ctx)) {
-            if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+            if (auto e = ctx.beginError(i.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Constant `{}` is not a class or type alias", maybeAliased.show(ctx));
                 e.addErrorLine(sym.loc(ctx), "If you are trying to define a type alias, you should use `{}` here",
                                "T.type_alias");
             }
             result.type = core::Types::untypedUntracked();
         } else {
-            if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+            if (auto e = ctx.beginError(i.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Malformed type declaration. Not a class type `{}`", maybeAliased.show(ctx));
             }
             result.type = core::Types::untypedUntracked();

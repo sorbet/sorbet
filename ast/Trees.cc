@@ -86,12 +86,26 @@ string ExpressionPtr::showRaw(const core::GlobalState &gs, int tabs) const {
 #undef SHOW_RAW
 }
 
+namespace {
+template <typename T> struct LocGetter {
+    static core::LocOffsets loc(void *ptr) {
+        return reinterpret_cast<T *>(ptr)->loc;
+    }
+};
+
+template <> struct LocGetter<ConstantLit> {
+    static core::LocOffsets loc(void *ptr) {
+        return reinterpret_cast<ConstantLit *>(ptr)->loc();
+    }
+};
+}
+
 core::LocOffsets ExpressionPtr::loc() const {
     auto *ptr = get();
 
     ENFORCE(ptr != nullptr);
 
-#define CASE(name) return reinterpret_cast<name *>(ptr)->loc;
+#define CASE(name) return LocGetter<name>::loc(ptr);
     GENERATE_TAG_SWITCH(tag(), CASE)
 #undef CASE
 }
@@ -304,7 +318,7 @@ ConstantLit::ConstantLit(core::SymbolRef symbol, std::unique_ptr<UnresolvedConst
 }
 
 ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original)
-    : loc(loc), resolutionScopesOrSymbol(symbol), original(std::move(original)) {
+    : loc_(loc), resolutionScopesOrSymbol(symbol), original(std::move(original)) {
     categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();
 }
@@ -323,7 +337,7 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
                 ENFORCE(false);
                 bool hasScopes = nested->resolutionScopes() != nullptr;
                 fatalLogger->error(R"(msg="Bad fullUnresolvedPath" loc="{}" hasScopes={})",
-                                   ctx.locAt(this->loc).showRaw(ctx), hasScopes);
+                                   ctx.locAt(this->loc_).showRaw(ctx), hasScopes);
                 fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
             }
 
