@@ -382,6 +382,27 @@ public:
         return Send1(loc, T(loc), core::Names::classOf(), loc, std::move(value));
     }
 
+    static ExpressionPtr All(core::LocOffsets loc, Send::ARGS_store args) {
+        return Send(loc, T(loc), core::Names::all(), loc.copyWithZeroLength(), args.size(), std::move(args));
+    }
+
+    static ExpressionPtr Any(core::LocOffsets loc, Send::ARGS_store args) {
+        return Send(loc, T(loc), core::Names::any(), loc.copyWithZeroLength(), args.size(), std::move(args));
+    }
+
+    static ExpressionPtr Anything(core::LocOffsets loc) {
+        return Send0(loc, T(loc), core::Names::anything(), loc.copyWithZeroLength());
+    }
+
+    static ExpressionPtr AttachedClass(core::LocOffsets loc) {
+        return Send0(loc, T(loc), core::Names::attachedClass(), loc.copyWithZeroLength());
+    }
+
+    static ExpressionPtr Cast(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
+        return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value), core::Names::cast(),
+                                               std::move(type));
+    }
+
     static ExpressionPtr Let(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
         return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value), core::Names::let(),
                                                std::move(type));
@@ -390,6 +411,14 @@ public:
     static ExpressionPtr AssertType(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
         return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value), core::Names::assertType(),
                                                std::move(type));
+    }
+
+    static ExpressionPtr NoReturn(core::LocOffsets loc) {
+        return Send0(loc, T(loc), core::Names::noreturn(), loc.copyWithZeroLength());
+    }
+
+    static ExpressionPtr SelfType(core::LocOffsets loc) {
+        return Send0(loc, T(loc), core::Names::selfType(), loc.copyWithZeroLength());
     }
 
     static ExpressionPtr Unsafe(core::LocOffsets loc, ExpressionPtr inner) {
@@ -408,9 +437,59 @@ public:
         return Send1(loc, T(loc), core::Names::nilable(), loc, std::move(arg));
     }
 
+    static ExpressionPtr T_Array(core::LocOffsets loc) {
+        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Array()});
+    }
+
     static ExpressionPtr T_Boolean(core::LocOffsets loc) {
         static constexpr core::NameRef parts[2] = {core::Names::Constants::T(), core::Names::Constants::Boolean()};
         return UnresolvedConstantParts(loc, parts);
+    }
+
+    static ExpressionPtr T_Class(core::LocOffsets loc) {
+        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Class()});
+    }
+
+    static ExpressionPtr T_Hash(core::LocOffsets loc) {
+        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Hash()});
+    }
+
+    static ExpressionPtr T_Enumerable(core::LocOffsets loc) {
+        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Enumerable()});
+    }
+
+    static ExpressionPtr T_Enumerator(core::LocOffsets loc) {
+        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Enumerator()});
+    }
+
+    static ExpressionPtr T_Enumerator_Lazy(core::LocOffsets loc) {
+        return UnresolvedConstantParts(
+            loc, {core::Names::Constants::T(), core::Names::Constants::Enumerator(), core::Names::Constants::Lazy()});
+    }
+
+    static ExpressionPtr T_Enumerator_Chain(core::LocOffsets loc) {
+        return UnresolvedConstantParts(
+            loc, {core::Names::Constants::T(), core::Names::Constants::Enumerator(), core::Names::Constants::Chain()});
+    }
+
+    static ExpressionPtr T_Proc(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr ret) {
+        auto proc = Send0(loc, T(loc), core::Names::proc(), loc.copyWithZeroLength());
+        auto params = Params(loc, std::move(proc), std::move(args));
+        return Send1(loc, std::move(params), core::Names::returns(), loc.copyWithZeroLength(), std::move(ret));
+    }
+
+    static ExpressionPtr T_ProcVoid(core::LocOffsets loc, Send::ARGS_store args) {
+        auto proc = Send0(loc, T(loc), core::Names::proc(), loc.copyWithZeroLength());
+        auto params = Params(loc, std::move(proc), std::move(args));
+        return Send0(loc, std::move(params), core::Names::void_(), loc.copyWithZeroLength());
+    }
+
+    static ExpressionPtr T_Range(core::LocOffsets loc) {
+        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Range()});
+    }
+
+    static ExpressionPtr T_Set(core::LocOffsets loc) {
+        return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Set()});
     }
 
     static ExpressionPtr ZSuper(core::LocOffsets loc, core::NameRef method) {
@@ -463,6 +542,30 @@ public:
 
     static bool isSelfNew(ast::Send *send) {
         return send->fun == core::Names::new_() && send->recv.isSelfReference();
+    }
+
+    static bool isT(const ast::ExpressionPtr &expr) {
+        bool result = false;
+
+        typecase(
+            expr,
+            [&](const ast::UnresolvedConstantLit &t) {
+                result = t.cnst == core::Names::Constants::T() && ast::MK::isRootScope(t.scope);
+            },
+            [&](const ast::ConstantLit &c) { result = c.symbol == core::Symbols::T(); },
+            [&](const ast::ExpressionPtr &e) { result = false; });
+
+        return result;
+    }
+
+    static bool isTNilable(const ast::ExpressionPtr &expr) {
+        auto nilable = ast::cast_tree<ast::Send>(expr);
+        return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv);
+    }
+
+    static bool isTUntyped(const ast::ExpressionPtr &expr) {
+        auto send = ast::cast_tree<ast::Send>(expr);
+        return send != nullptr && send->fun == core::Names::untyped() && isT(send->recv);
     }
 
     static core::NameRef arg2Name(const ExpressionPtr &arg) {

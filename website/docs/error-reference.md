@@ -595,6 +595,33 @@ class Info < T::struct
 end
 ```
 
+## 3550
+
+> This error is specific to RBS support when using the
+> `--enable-experimental-rbs-signatures` flag.
+
+This error is raised when a RBS signature comment contains a syntax error. See
+the
+[RBS syntax reference](https://github.com/ruby/rbs/blob/master/docs/syntax.md)
+for more details on the RBS syntax.
+
+## 3551
+
+> This error is specific to RBS support when using the
+> `--enable-experimental-rbs-signatures` flag.
+
+This error is raised when a RBS signature comment contains a feature not
+supported by Sorbet. See
+[RBS support limitations](rbs-support.md#unsupported-features) for more details.
+
+## 3552
+
+> This error is specific to RBS support when using the
+> `--enable-experimental-rbs-signatures` flag.
+
+This error is raised when a RBS signature comment has more parameters than the
+method definition it represents.
+
 ## 3702
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are

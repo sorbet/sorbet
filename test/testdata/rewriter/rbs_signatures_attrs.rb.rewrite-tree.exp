@@ -1,0 +1,115 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      @foo
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C Integer>))
+    end
+
+    def bar<<todo method>>(&<blk>)
+      @bar
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C Integer>))
+    end
+
+    def baz<<todo method>>(&<blk>)
+      @baz
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:bar, ::T.nilable(<emptyTree>::<C Integer>)).returns(::T.nilable(<emptyTree>::<C Integer>))
+    end
+
+    def bar=<<todo method>>(bar, &<blk>)
+      @bar = bar
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:baz, ::T.nilable(<emptyTree>::<C Integer>)).returns(::T.nilable(<emptyTree>::<C Integer>))
+    end
+
+    def baz=<<todo method>>(baz, &<blk>)
+      @baz = baz
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:qux, ::T.nilable(<emptyTree>::<C Integer>)).returns(::T.nilable(<emptyTree>::<C Integer>))
+    end
+
+    def qux=<<todo method>>(qux, &<blk>)
+      @qux = qux
+    end
+
+    def quux1=<<todo method>>(quux1, &<blk>)
+      @quux1 = quux1
+    end
+
+    def quux2=<<todo method>>(quux2, &<blk>)
+      @quux2 = quux2
+    end
+
+    def quux3<<todo method>>(&<blk>)
+      @quux3
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def initialize<<todo method>>(&<blk>)
+      begin
+        @foo = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
+        @bar = <cast:let>(2, <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+        @baz = <cast:let>(3, <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+        @qux = <cast:let>(4, <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+        @quux1 = <cast:let>(5, <todo sym>, <emptyTree>::<C Integer>)
+        @quux2 = <cast:let>(6, <todo sym>, <emptyTree>::<C Integer>)
+        @quux3 = <cast:let>(7, <todo sym>, <emptyTree>::<C Integer>)
+      end
+    end
+
+    <runtime method definition of foo>
+
+    <runtime method definition of bar>
+
+    <runtime method definition of baz>
+
+    <runtime method definition of bar=>
+
+    <runtime method definition of baz=>
+
+    <runtime method definition of qux=>
+
+    <runtime method definition of quux1=>
+
+    <runtime method definition of quux2=>
+
+    <self>.attr_writer()
+
+    <self>.attr_reader()
+
+    <self>.attr_accessor()
+
+    <runtime method definition of quux3>
+
+    <runtime method definition of initialize>
+  end
+
+  x = <emptyTree>::<C Foo>.new()
+
+  <emptyTree>::<C T>.reveal_type(x.foo())
+
+  <emptyTree>::<C T>.reveal_type(x.bar())
+
+  <emptyTree>::<C T>.reveal_type(x.baz())
+
+  x.qux=("")
+end

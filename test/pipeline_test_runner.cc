@@ -352,6 +352,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
 
+    gs->rbsSignaturesEnabled =
+        BooleanPropertyAssertion::getValue("enable-experimental-rbs-signatures", assertions).value_or(false);
     gs->requiresAncestorEnabled =
         BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
     gs->ruby3KeywordArgs =

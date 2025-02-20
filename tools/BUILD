@@ -99,6 +99,7 @@ compilation_database(
         "//payload/text:some",
         "//payload/text:text",
         "//rbi:generate_procs",
+        "//rbs:rbs",
         "//resolver:resolver",
         "//resolver/type_syntax:type_syntax",
         "//rewriter:rewriter",

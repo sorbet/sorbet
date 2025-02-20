@@ -148,6 +148,9 @@ Usage:
       --experimental-ruby3-keyword-args
                                 Enforce use of new (Ruby 3.0-style) keyword arguments.
                                 (incomplete and experimental)
+      --enable-experimental-rbs-signatures
+                                Enable experimental support for RBS signatures as inline
+                                comments
       --enable-experimental-requires-ancestor
                                 Enable experimental `requires_ancestor` annotation
       --uniquely-defined-behavior
