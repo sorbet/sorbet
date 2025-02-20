@@ -7,49 +7,12 @@ using namespace std;
 
 namespace sorbet::core {
 
-namespace {
-
-[[nodiscard]] bool checkForAttachedClassHint(const GlobalState &gs, ErrorBuilder &e, const SelfTypeParam expected,
-                                             const ClassType got) {
-    if (expected.definition.name(gs) != Names::Constants::AttachedClass()) {
-        return false;
-    }
-
-    auto attachedClass = got.symbol.data(gs)->lookupSingletonClass(gs);
-    if (!attachedClass.exists()) {
-        return false;
-    }
-
-    if (attachedClass != expected.definition.owner(gs).asClassOrModuleRef()) {
-        return false;
-    }
-
-    auto gotStr = got.show(gs);
-    auto expectedStr = expected.show(gs);
-    e.addErrorNote(
-        "`{}` is incompatible with `{}` because when this method is called on a subclass `{}` will represent a more "
-        "specific subclass, meaning `{}` will not be specific enough. See https://sorbet.org/docs/attached-class for "
-        "more.",
-        gotStr, expectedStr, expectedStr, gotStr);
-    return true;
-}
-} // namespace
-
 void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e,
                                                const ErrorSection::Collector &collector, const TypePtr &expected,
                                                const TypePtr &got) {
     e.addErrorSections(std::move(collector));
     // TODO: the rest of this function should eventually be moved to isSubTypeUnderConstraint,
     // as calls to collector.addErrorDetails
-    auto expectedSelfTypeParam = isa_type<SelfTypeParam>(expected);
-    auto gotClassType = isa_type<ClassType>(got);
-    if (expectedSelfTypeParam && gotClassType) {
-        if (checkForAttachedClassHint(gs, e, cast_type_nonnull<SelfTypeParam>(expected),
-                                      cast_type_nonnull<ClassType>(got))) {
-            return;
-        }
-    }
-
     if (isa_type<MetaType>(got) && !isa_type<MetaType>(expected)) {
         e.addErrorNote(
             "It looks like you're using Sorbet type syntax in a runtime value position.\n"
