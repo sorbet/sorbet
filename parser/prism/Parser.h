@@ -13,7 +13,7 @@ extern "C" {
 
 namespace sorbet::parser::Prism {
 
-class Node;
+class ProgramNodeContainer;
 
 class ParseError {
 public:
@@ -51,7 +51,7 @@ struct ParserStorage {
 };
 
 class Parser final {
-    friend class Node;
+    friend class ProgramNodeContainer;
     friend struct NodeDeleter;
 
     std::shared_ptr<ParserStorage> storage;
@@ -64,7 +64,7 @@ public:
     Parser(const Parser &) = default;
     Parser &operator=(const Parser &) = default;
 
-    Node parse_root();
+    ProgramNodeContainer parse_root();
     core::LocOffsets translateLocation(pm_location_t location);
     std::string_view resolveConstant(pm_constant_id_t constant_id);
     std::string_view extractString(pm_string_t *string);
@@ -75,7 +75,9 @@ private:
     pm_parser_t *getRawParserPointer();
 };
 
-class Node final {
+// This class holds a pointer to the parser and a pointer to the root node of Prism's AST
+// It's main purpose is to provide a way to clean up the AST nodes
+class ProgramNodeContainer final {
     struct NodeDeleter {
         Parser parser;
 
@@ -90,10 +92,10 @@ class Node final {
     Parser parser;
     std::unique_ptr<pm_node_t, NodeDeleter> node;
 
-    Node(Parser parser, pm_node_t *node) : parser{parser}, node{node, NodeDeleter{parser}} {}
+    ProgramNodeContainer(Parser parser, pm_node_t *node) : parser{parser}, node{node, NodeDeleter{parser}} {}
 
-    Node(const Node &) = delete;            // Copy constructor
-    Node &operator=(const Node &) = delete; // Copy assignment
+    ProgramNodeContainer(const ProgramNodeContainer &) = delete;            // Copy constructor
+    ProgramNodeContainer &operator=(const ProgramNodeContainer &) = delete; // Copy assignment
 
     pm_node_t *getRawNodePointer() const {
         return node.get();

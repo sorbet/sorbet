@@ -138,7 +138,7 @@ unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef fil
     core::UnfreezeNameTable nameTableAccess(gs);
 
     Prism::Parser parser{source};
-    Prism::Node root = parser.parse_root();
+    Prism::ProgramNodeContainer root = parser.parse_root();
 
     if (stopAfterParser) {
         return std::unique_ptr<parser::Node>();

@@ -47,7 +47,7 @@ public:
 
     // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
     std::unique_ptr<parser::Node> translate(pm_node_t *node);
-    std::unique_ptr<parser::Node> translate(const Node &node);
+    std::unique_ptr<parser::Node> translate(const ProgramNodeContainer &container);
 
 private:
     // Private constructor used only for creating child translators

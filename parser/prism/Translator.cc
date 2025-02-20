@@ -1350,8 +1350,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
     }
 }
 
-unique_ptr<parser::Node> Translator::translate(const Node &node) {
-    return translate(node.getRawNodePointer());
+unique_ptr<parser::Node> Translator::translate(const ProgramNodeContainer &container) {
+    return translate(container.getRawNodePointer());
 }
 
 core::LocOffsets Translator::translateLoc(pm_location_t loc) {
