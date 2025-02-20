@@ -311,15 +311,6 @@ public:
             return 0;
         }
 
-        // Test imports always come last, and aren't sorted by `strict_dependencies`
-        if (aIsTestImport && bIsTestImport) {
-            return 0;
-        } else if (aIsTestImport && !bIsTestImport) {
-            return 1;
-        } else if (!aIsTestImport && bIsTestImport) {
-            return -1;
-        }
-
         // Layering violations always come first
         if (causesLayeringViolation(packageDB, a) && causesLayeringViolation(packageDB, b)) {
             return 0;
@@ -392,6 +383,14 @@ public:
                         // we already import this, and if so, don't return an autocorrect
                         return nullopt;
                     }
+                }
+
+                // Test imports always come last, and aren't sorted by `strict_dependencies`
+                if (isTestImport) {
+                    importToInsertAfter = &import.name;
+                    continue;
+                } else if (import.type == core::packages::ImportType::Test) {
+                    continue;
                 }
 
                 if (!gs.packageDB().enforceLayering()) {
