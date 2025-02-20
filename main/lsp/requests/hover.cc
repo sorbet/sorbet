@@ -91,11 +91,14 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
         if (s->funLoc().exists() && s->funLoc().contains(queryLoc)) {
             auto start = s->dispatchResult.get();
-            if (start != nullptr && start->main.method.exists() && !start->main.receiver.isUntyped()) {
-                auto loc = start->main.method.data(gs)->loc();
-                if (loc.exists()) {
-                    documentationLocations.emplace_back(loc);
+            while (start != nullptr) {
+                if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
+                    auto loc = start->main.method.data(gs)->loc();
+                    if (loc.exists()) {
+                        documentationLocations.emplace_back(loc);
+                    }
                 }
+                start = start->secondary.get();
             }
 
             if (s->dispatchResult->main.method.exists() &&
