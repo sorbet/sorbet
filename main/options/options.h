@@ -106,6 +106,21 @@ enum class Phase {
     INFERENCER,
 };
 
+enum class Parser {
+    PRISM,
+    SORBET,
+};
+
+struct ParserOptions {
+    std::string option;
+    Parser flag;
+};
+
+const std::vector<ParserOptions> parser_options({
+    {"sorbet", Parser::SORBET},
+    {"prism", Parser::PRISM},
+});
+
 namespace {
 
 #if !defined(EMSCRIPTEN)
@@ -120,6 +135,7 @@ constexpr size_t MAX_CACHE_SIZE_BYTES = 1L * 1024 * 1024 * 1024; // 1 GiB
 struct Options {
     Printers print;
     Phase stopAfterPhase = Phase::INFERENCER;
+    Parser parser = Parser::SORBET;
     bool noStdlib = false;
 
     // Should we monitor STDOUT for HUP and exit if it hangs up. This is a
