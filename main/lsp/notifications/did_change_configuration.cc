@@ -26,7 +26,7 @@ void DidChangeConfigurationTask::run(LSPTypecheckerDelegate &tc) {
         openFileRefs.push_back(tc.state().findFileByPath(path));
     }
     auto updates = tc.getNoopUpdate(openFileRefs);
-    updates.epoch = epoch;
+    updates->epoch = epoch;
     tc.typecheckOnFastPath(std::move(updates), {});
 }
 } // namespace sorbet::realmain::lsp
