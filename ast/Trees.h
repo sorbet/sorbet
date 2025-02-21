@@ -1145,7 +1145,7 @@ private:
     //
     // 2. A resolved constant.  We cheat a little bit here because this is actually encompassing
     //    both a constant that we are attempting to resolve and a constant that we have finished
-    //    resolving.  This requires 12 bytes of storage, 16 after alignment:
+    //    resolving.  This requires 16 bytes of storage due to alignment requirements:
     //
     //    struct ResolvedSymbol {
     //        core::SymbolRef sym;
