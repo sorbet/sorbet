@@ -346,10 +346,12 @@ void TestedKnowledge::removeReferencesToVar(cfg::LocalRef var) {
 }
 
 void TestedKnowledge::emitKnowledgeSizeMetric() const {
-    histogramInc("infer.knowledge.truthy.yes.size", _truthy->yesTypeTests.size());
-    histogramInc("infer.knowledge.truthy.no.size", _truthy->noTypeTests.size());
-    histogramInc("infer.knowledge.falsy.yes.size", _falsy->yesTypeTests.size());
-    histogramInc("infer.knowledge.falsy.no.size", _falsy->noTypeTests.size());
+    // Counting these turns out to be rather slow for tests; if you're curious to
+    // see the numbers, you can uncomment these and recompile.
+    // histogramInc("infer.knowledge.truthy.yes.size", _truthy->yesTypeTests.size());
+    // histogramInc("infer.knowledge.truthy.no.size", _truthy->noTypeTests.size());
+    // histogramInc("infer.knowledge.falsy.yes.size", _falsy->yesTypeTests.size());
+    // histogramInc("infer.knowledge.falsy.no.size", _falsy->noTypeTests.size());
 }
 
 void TestedKnowledge::sanityCheck() const {
