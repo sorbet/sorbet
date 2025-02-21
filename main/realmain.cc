@@ -703,9 +703,9 @@ int realmain(int argc, char *argv[]) {
                     *gs, cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs,
                                                               *workers, indexed));
 
-                // First run: only the __package.rb files. This populates the packageDB
+                // Populate the packageDB by processing only the __package.rb files.
                 pipeline::setPackagerOptions(*gs, opts);
-                pipeline::package(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
+                pipeline::buildPackageDB(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
                 // Only need to compute hashes when running to compute a FileHash
                 auto foundHashes = nullptr;
                 auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
@@ -723,8 +723,8 @@ int realmain(int argc, char *argv[]) {
             cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers,
                                                  nonPackageIndexed);
 
-            // Second run: all the other files (the packageDB shouldn't change)
-            pipeline::package(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers);
+            // Now validate all the other files (the packageDB shouldn't change)
+            pipeline::validatePackagedFiles(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers);
 
             // Only need to compute hashes when running to compute a FileHash
             auto foundHashes = nullptr;

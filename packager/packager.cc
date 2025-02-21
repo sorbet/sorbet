@@ -2160,6 +2160,100 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
     return files;
 }
 
+void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
+    ENFORCE(!gs.runningUnderAutogen, "Packager pass does not run in autogen");
+
+    Timer timeit(gs.tracer(), "packager");
+    timeit.setTag("mode", "buildPackageDB");
+
+    findPackages(gs, files);
+    setPackageNameOnFiles(gs, files);
+
+    {
+        Timer timeit(gs.tracer(), "packager.buildPackageDB");
+
+        auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
+        absl::BlockingCounter barrier(max(workers.size(), 1));
+
+        for (size_t i = 0; i < files.size(); ++i) {
+            taskq->push(i, 1);
+        }
+
+        if (gs.packageDB().enforceLayering()) {
+            computeSCCs(gs);
+        }
+
+        workers.multiplexJob("rewritePackagesAndFiles", [&gs, &files, &barrier, taskq]() {
+            Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
+            size_t idx;
+            for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
+                ast::ParsedFile &job = files[idx];
+                if (result.gotItem()) {
+                    auto &file = job.file.data(gs);
+                    core::Context ctx(gs, core::Symbols::root(), job.file);
+
+                    ENFORCE(file.isPackage());
+                    // Defensive
+                    if (!file.isPackage()) {
+                        fatalLogger->error("Non-packaged file given to buildPackageDB: {}", file.path());
+                        continue;
+                    }
+                    validatePackage(ctx);
+                }
+            }
+
+            barrier.DecrementCount();
+        });
+
+        barrier.Wait();
+    }
+}
+
+void Packager::validatePackagedFiles(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
+    ENFORCE(!gs.runningUnderAutogen, "Packager pass does not run in autogen");
+
+    Timer timeit(gs.tracer(), "packager");
+    timeit.setTag("mode", "validatePackagedFile");
+
+    setPackageNameOnFiles(gs, files);
+
+    {
+        Timer timeit(gs.tracer(), "packager.validatePackagedFiles");
+
+        auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
+        absl::BlockingCounter barrier(max(workers.size(), 1));
+
+        for (size_t i = 0; i < files.size(); ++i) {
+            taskq->push(i, 1);
+        }
+
+        workers.multiplexJob("rewritePackagesAndFiles", [&gs, &files, &barrier, taskq]() {
+            Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
+            size_t idx;
+            for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
+                ast::ParsedFile &job = files[idx];
+                if (result.gotItem()) {
+                    auto &file = job.file.data(gs);
+                    core::Context ctx(gs, core::Symbols::root(), job.file);
+
+                    ENFORCE(!file.isPackage());
+                    // Defensive
+                    if (file.isPackage()) {
+                        fatalLogger->error("__package.rb file given to validatePackagedFiles: {}", file.path());
+                        continue;
+                    }
+
+                    validatePackagedFile(ctx, job.tree);
+                }
+            }
+
+            barrier.DecrementCount();
+        });
+
+        barrier.Wait();
+    }
+}
+
 namespace {
 
 struct PackageFiles {
