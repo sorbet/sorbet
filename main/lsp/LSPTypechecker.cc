@@ -86,7 +86,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
         const bool isIncremental = false;
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
-        auto result = runSlowPath(std::move(updates), std::move(kvstore), workers, errorFlusher, SlowPathMode::Init);
+        auto result = runSlowPath(updates, std::move(kvstore), workers, errorFlusher, SlowPathMode::Init);
         epoch.committed = true;
         ENFORCE(std::holds_alternative<std::unique_ptr<core::GlobalState>>(result));
         initialGS = std::move(std::get<std::unique_ptr<core::GlobalState>>(result));
@@ -104,11 +104,11 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
     config->logger->error("Resuming");
 }
 
-bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
+bool LSPTypechecker::typecheck(std::unique_ptr<LSPFileUpdates> updates, WorkerPool &workers,
                                vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
-    if (updates.canceledSlowPath) {
+    if (updates->canceledSlowPath) {
         // This update canceled the last slow path, so we should have undo state to restore to go to the point _before_
         // that slow path. This should always be the case, but let's not crash release builds.
         ENFORCE(cancellationUndoState != nullptr);
@@ -126,12 +126,12 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
             }
 
             cancellationUndoState = nullptr;
-            auto fastPathDecision = updates.typecheckingPath;
+            auto fastPathDecision = updates->typecheckingPath;
             // Retypecheck all of the files that previously had errors.
-            updates.mergeOlder(getNoopUpdate(oldFilesWithErrors));
+            updates->mergeOlder(*getNoopUpdate(oldFilesWithErrors));
             // The merge operation resets `fastPathDecision`, but we know that retypechecking unchanged files
             // has no influence on the fast path decision.
-            updates.typecheckingPath = fastPathDecision;
+            updates->typecheckingPath = fastPathDecision;
         } else {
             config->logger->debug("[Typechecker] Error: UndoState is missing for update that canceled slow path!");
         }
@@ -139,19 +139,19 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
 
     vector<core::FileRef> filesTypechecked;
     bool committed = true;
-    const bool isFastPath = updates.typecheckingPath == TypecheckingPath::Fast;
-    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates.typecheckingPath, {});
+    const bool isFastPath = updates->typecheckingPath == TypecheckingPath::Fast;
+    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates->typecheckingPath, {});
     {
-        ErrorEpoch epoch(*errorReporter, updates.epoch, isFastPath, move(diagnosticLatencyTimers));
+        ErrorEpoch epoch(*errorReporter, updates->epoch, isFastPath, move(diagnosticLatencyTimers));
 
-        auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
+        auto errorFlusher = make_shared<ErrorFlusherLSP>(updates->epoch, errorReporter);
         if (isFastPath) {
             bool isNoopUpdateForRetypecheck = false;
-            filesTypechecked = runFastPath(updates, workers, errorFlusher, isNoopUpdateForRetypecheck);
-            commitFileUpdates(updates, /* cancelable */ false);
+            filesTypechecked = runFastPath(*updates, workers, errorFlusher, isNoopUpdateForRetypecheck);
+            commitFileUpdates(*updates, /* cancelable */ false);
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
-            auto result = runSlowPath(move(updates), nullptr, workers, errorFlusher, SlowPathMode::Cancelable);
+            auto result = runSlowPath(*updates, nullptr, workers, errorFlusher, SlowPathMode::Cancelable);
             ENFORCE(std::holds_alternative<bool>(result));
             committed = std::get<bool>(result);
         }
@@ -159,7 +159,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     }
 
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
-                      updates.typecheckingPath, move(filesTypechecked));
+                      updates->typecheckingPath, move(filesTypechecked));
     return committed;
 }
 
@@ -368,7 +368,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
     return epochManager.wasTypecheckingCanceled();
 }
 
-LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates updates,
+LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updates,
                                                            std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers,
                                                            shared_ptr<core::ErrorFlusher> errorFlusher,
                                                            LSPTypechecker::SlowPathMode mode) {
@@ -722,8 +722,9 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
 }
 
-LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {
-    LSPFileUpdates noop;
+std::unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {
+    auto result = std::make_unique<LSPFileUpdates>();
+    auto &noop = *result;
     noop.typecheckingPath = TypecheckingPath::Fast;
     // Epoch isn't important for this update.
     noop.epoch = 0;
@@ -736,15 +737,15 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
         noop.updatedFileIndexes.push_back({(index.tree ? index.tree.deepCopy() : nullptr), index.file});
         noop.updatedFiles.push_back(gs->getFiles()[fref.id()]);
     }
-    return noop;
+    return result;
 }
 
 std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef> frefs,
                                                                       WorkerPool &workers) const {
-    LSPFileUpdates updates = getNoopUpdate(move(frefs));
+    auto updates = getNoopUpdate(move(frefs));
     auto errorCollector = make_shared<core::ErrorCollector>();
     bool isNoopUpdateForRetypecheck = true;
-    runFastPath(updates, workers, errorCollector, isNoopUpdateForRetypecheck);
+    runFastPath(*updates, workers, errorCollector, isNoopUpdateForRetypecheck);
 
     return errorCollector->drainErrors();
 }
@@ -845,12 +846,12 @@ void LSPTypecheckerDelegate::resumeTaskQueue(InitializedTask &task) {
     this->queue.resume();
 }
 
-void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates,
+void LSPTypecheckerDelegate::typecheckOnFastPath(std::unique_ptr<LSPFileUpdates> updates,
                                                  vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
-    if (updates.typecheckingPath != TypecheckingPath::Fast) {
+    if (updates->typecheckingPath != TypecheckingPath::Fast) {
         Exception::raise("Tried to typecheck a slow path edit on the fast path.");
     }
-    auto committed = typechecker.typecheck(move(updates), workers, move(diagnosticLatencyTimers));
+    auto committed = typechecker.typecheck(std::move(updates), workers, move(diagnosticLatencyTimers));
     // Fast path edits can't be canceled.
     ENFORCE(committed);
 }
@@ -887,7 +888,7 @@ void LSPTypecheckerDelegate::updateGsFromOptions(const DidChangeConfigurationPar
     typechecker.updateGsFromOptions(options);
 }
 
-LSPFileUpdates LSPTypecheckerDelegate::getNoopUpdate(std::vector<core::FileRef> frefs) const {
+std::unique_ptr<LSPFileUpdates> LSPTypecheckerDelegate::getNoopUpdate(std::vector<core::FileRef> frefs) const {
     return typechecker.getNoopUpdate(frefs);
 }
 

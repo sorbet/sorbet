@@ -106,7 +106,7 @@ class LSPTypechecker final {
 
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
-    SlowPathResult runSlowPath(LSPFileUpdates updates, std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers,
+    SlowPathResult runSlowPath(LSPFileUpdates &updates, std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers,
                                std::shared_ptr<core::ErrorFlusher> errorFlusher, SlowPathMode mode);
 
     /** Runs incremental typechecking on the provided updates. Returns the final list of files typechecked. */
@@ -139,7 +139,7 @@ public:
      * Typechecks the given input. Returns 'true' if the updates were committed, or 'false' if typechecking was
      * canceled. Distributes work across the given worker pool.
      */
-    bool typecheck(LSPFileUpdates updates, WorkerPool &workers,
+    bool typecheck(std::unique_ptr<LSPFileUpdates> updates, WorkerPool &workers,
                    std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
 
     /**
@@ -207,7 +207,7 @@ public:
      * Get an LSPFileUpdates containing the latest versions of the given files. It's a "no-op" file update because it
      * doesn't actually change anything.
      */
-    LSPFileUpdates getNoopUpdate(std::vector<core::FileRef> frefs) const;
+    std::unique_ptr<LSPFileUpdates> getNoopUpdate(std::vector<core::FileRef> frefs) const;
 };
 
 /**
@@ -241,7 +241,8 @@ public:
 
     void resumeTaskQueue(InitializedTask &task);
 
-    void typecheckOnFastPath(LSPFileUpdates updates, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
+    void typecheckOnFastPath(std::unique_ptr<LSPFileUpdates> updates,
+                             std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
     std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs) const;
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;
     const ast::ParsedFile &getIndexed(core::FileRef fref) const;
@@ -252,7 +253,7 @@ public:
     const core::GlobalState &state() const;
 
     void updateGsFromOptions(const DidChangeConfigurationParams &options) const;
-    LSPFileUpdates getNoopUpdate(std::vector<core::FileRef> frefs) const;
+    std::unique_ptr<LSPFileUpdates> getNoopUpdate(std::vector<core::FileRef> frefs) const;
 };
 } // namespace sorbet::realmain::lsp
 #endif

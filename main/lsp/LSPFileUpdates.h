@@ -62,6 +62,13 @@ public:
      */
     LSPFileUpdates copy() const;
 
+    LSPFileUpdates() = default;
+    LSPFileUpdates(LSPFileUpdates &&other) = default;
+    LSPFileUpdates &operator=(LSPFileUpdates &&other) = default;
+
+    LSPFileUpdates(const LSPFileUpdates &other) = delete;
+    LSPFileUpdates &operator=(const LSPFileUpdates &other) = delete;
+
     struct FastPathFilesToTypecheckResult {
         // The number of files that would be checked in the fast path.
         size_t totalChanged = 0;

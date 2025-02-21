@@ -90,8 +90,8 @@ public:
      * Commits the given edit to `initialGS`, and returns a canonical LSPFileUpdates object containing indexed trees
      * and file hashes. Also handles canceling the running slow path.
      */
-    LSPFileUpdates commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers);
-    LSPFileUpdates commitEdit(SorbetWorkspaceEditParams &edit);
+    std::unique_ptr<LSPFileUpdates> commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers);
+    std::unique_ptr<LSPFileUpdates> commitEdit(SorbetWorkspaceEditParams &edit);
 
     /**
      * Retrieves the file ref for the given file, if exists.
