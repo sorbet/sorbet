@@ -409,7 +409,7 @@ void Minimize::indexAndResolveForMinimize(unique_ptr<core::GlobalState> &sourceG
             "--minimize-to-rbi will yield empty file because {} was already processed by the main pipeline",
             minimizeRBI);
 
-    auto rbiInputFiles = pipeline::reserveFiles(rbiGS, {minimizeRBI});
+    auto rbiInputFiles = pipeline::reserveFiles(*rbiGS, {minimizeRBI});
 
     // I'm ignoring everything relating to caching here, because missing methods is likely
     // to run on a new _unknown.rbi file every time and I didn't want to think about it.
@@ -426,7 +426,7 @@ void Minimize::indexAndResolveForMinimize(unique_ptr<core::GlobalState> &sourceG
     auto canceled = pipeline::name(*rbiGS, absl::Span<ast::ParsedFile>(rbiIndexed), opts, workers, foundHashes);
     ENFORCE(!canceled, "Can only cancel in LSP mode");
 
-    rbiIndexed = move(pipeline::resolve(rbiGS, move(rbiIndexed), opts, workers).result());
+    rbiIndexed = move(pipeline::resolve(*rbiGS, move(rbiIndexed), opts, workers).result());
     if (rbiGS->hadCriticalError()) {
         rbiGS->errorQueue->flushAllErrors(*rbiGS);
     }

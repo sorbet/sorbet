@@ -20,7 +20,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
 ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &gs, core::FileRef file,
                               bool preserveConcreteSyntax);
 
-std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, const std::vector<std::string> &files);
+std::vector<core::FileRef> reserveFiles(core::GlobalState &gs, const std::vector<std::string> &files);
 
 std::vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<const core::FileRef> files,
                                    const options::Options &opts, WorkerPool &workers,
@@ -34,7 +34,7 @@ void setPackagerOptions(core::GlobalState &gs, const options::Options &opts);
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
              WorkerPool &workers);
 
-ast::ParsedFilesOrCancelled nameAndResolve(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
+ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                            const options::Options &opts, WorkerPool &workers,
                                            core::FoundDefHashes *foundHashes);
 
@@ -52,7 +52,7 @@ incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
 [[nodiscard]] bool name(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                         WorkerPool &workers, core::FoundDefHashes *foundHashes);
 
-ast::ParsedFilesOrCancelled resolve(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
+ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                     const options::Options &opts, WorkerPool &workers);
 
 std::vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const std::string &cachePath,
@@ -66,8 +66,7 @@ void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> what, c
                std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt,
                bool presorted = false, bool intentionallyLeakASTs = false);
 
-void printFileTable(std::unique_ptr<core::GlobalState> &gs, const options::Options &opts,
-                    const UnorderedMap<long, long> &untypedUsages);
+void printFileTable(core::GlobalState &gs, const options::Options &opts, const UnorderedMap<long, long> &untypedUsages);
 
 core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
                                     const options::Options &opts);

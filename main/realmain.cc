@@ -578,7 +578,7 @@ int realmain(int argc, char *argv[]) {
             hashing::Hashing::computeFileHashes(gs->getFiles(), *logger, *workers, opts);
         }
 
-        inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames);
+        inputFiles = pipeline::reserveFiles(*gs, opts.inputFileNames);
 
         if (opts.packageRBIGeneration) {
 #ifdef SORBET_REALMAIN_MIN
@@ -629,7 +629,7 @@ int realmain(int argc, char *argv[]) {
             // Indexing package files is by far the most expensive part of rbi generation. If we could instead select
             // only the package files that we know we need to load, it would cut down command-line rbi generation by
             // seconds.
-            auto packageFileRefs = pipeline::reserveFiles(gs, packageFiles);
+            auto packageFileRefs = pipeline::reserveFiles(*gs, packageFiles);
             auto packages = pipeline::index(*gs, absl::Span<core::FileRef>(packageFileRefs), opts, *workers, nullptr);
             {
                 core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*gs);
@@ -759,7 +759,7 @@ int realmain(int argc, char *argv[]) {
             runAutogen(*gs, opts, autogenCfg, *workers, indexed);
 #endif
         } else {
-            indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers).result());
+            indexed = move(pipeline::resolve(*gs, move(indexed), opts, *workers).result());
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
@@ -776,7 +776,7 @@ int realmain(int argc, char *argv[]) {
 
         // getAndClearHistogram ensures that we don't accidentally submit a high-cardinality histogram to statsd
         auto untypedUsages = getAndClearHistogram("untyped.usages");
-        pipeline::printFileTable(gs, opts, untypedUsages);
+        pipeline::printFileTable(*gs, opts, untypedUsages);
 
         if (!opts.minimizeRBI.empty()) {
 #ifdef SORBET_REALMAIN_MIN
