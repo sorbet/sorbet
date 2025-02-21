@@ -13,7 +13,7 @@ extern "C" {
 
 namespace sorbet::parser::Prism {
 
-class ProgramNodeContainer;
+class ParseResult;
 
 class ParseError {
 public:
@@ -51,33 +51,28 @@ struct ParserStorage {
 };
 
 class Parser final {
-    friend class ProgramNodeContainer;
+    friend class ParseResult;
     friend struct NodeDeleter;
 
     std::shared_ptr<ParserStorage> storage;
 
 public:
-    std::vector<ParseError> parseErrors;
-
     Parser(std::string_view source_code) : storage(std::make_shared<ParserStorage>(source_code)) {}
 
     Parser(const Parser &) = default;
     Parser &operator=(const Parser &) = default;
 
-    ProgramNodeContainer parse_root();
+    ParseResult parse_root();
     core::LocOffsets translateLocation(pm_location_t location);
     std::string_view resolveConstant(pm_constant_id_t constant_id);
     std::string_view extractString(pm_string_t *string);
 
-    void collectErrors();
-
 private:
+    std::vector<ParseError> collectErrors();
     pm_parser_t *getRawParserPointer();
 };
 
-// This class holds a pointer to the parser and a pointer to the root node of Prism's AST
-// It's main purpose is to provide a way to clean up the AST nodes
-class ProgramNodeContainer final {
+class ParseResult final {
     struct NodeDeleter {
         Parser parser;
 
@@ -91,11 +86,13 @@ class ProgramNodeContainer final {
 
     Parser parser;
     std::unique_ptr<pm_node_t, NodeDeleter> node;
+    std::vector<ParseError> parseErrors;
 
-    ProgramNodeContainer(Parser parser, pm_node_t *node) : parser{parser}, node{node, NodeDeleter{parser}} {}
+    ParseResult(Parser parser, pm_node_t *node, std::vector<ParseError> parseErrors)
+        : parser{parser}, node{node, NodeDeleter{parser}}, parseErrors{parseErrors} {}
 
-    ProgramNodeContainer(const ProgramNodeContainer &) = delete;            // Copy constructor
-    ProgramNodeContainer &operator=(const ProgramNodeContainer &) = delete; // Copy assignment
+    ParseResult(const ParseResult &) = delete;            // Copy constructor
+    ParseResult &operator=(const ParseResult &) = delete; // Copy assignment
 
     pm_node_t *getRawNodePointer() const {
         return node.get();

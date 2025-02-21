@@ -6,9 +6,9 @@ pm_parser_t *Parser::getRawParserPointer() {
     return &storage->parser;
 }
 
-ProgramNodeContainer Parser::parse_root() {
+ParseResult Parser::parse_root() {
     pm_node_t *root = pm_parse(getRawParserPointer());
-    return ProgramNodeContainer{*this, root};
+    return ParseResult{*this, root, collectErrors()};
 };
 
 core::LocOffsets Parser::translateLocation(pm_location_t location) {
@@ -28,7 +28,8 @@ std::string_view Parser::extractString(pm_string_t *string) {
     return std::string_view(reinterpret_cast<const char *>(pm_string_source(string)), pm_string_length(string));
 }
 
-void Parser::collectErrors() {
+std::vector<ParseError> Parser::collectErrors() {
+    std::vector<ParseError> parseErrors;
     parseErrors.reserve(storage->parser.error_list.size);
 
     auto error_list = storage->parser.error_list;
@@ -42,5 +43,7 @@ void Parser::collectErrors() {
 
         parseErrors.push_back(parseError);
     }
+
+    return parseErrors;
 }
 }; // namespace sorbet::parser::Prism

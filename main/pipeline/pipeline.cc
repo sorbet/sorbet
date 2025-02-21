@@ -138,15 +138,13 @@ unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef fil
     core::UnfreezeNameTable nameTableAccess(gs);
 
     Prism::Parser parser{source};
-    Prism::ProgramNodeContainer root = parser.parse_root();
+    Prism::ParseResult parseResult = parser.parse_root();
 
     if (stopAfterParser) {
         return std::unique_ptr<parser::Node>();
     }
 
-    // Needs to be called after `parse_root()` otherwise there will be no errors to collect
-    parser.collectErrors();
-    auto nodes = Prism::Translator(parser, gs, file).translate(std::move(root));
+    auto nodes = Prism::Translator(parser, gs, file).translate(std::move(parseResult));
 
     if (print.ParseTree.enabled) {
         print.ParseTree.fmt("{}\n", nodes->toStringWithTabs(gs, 0));

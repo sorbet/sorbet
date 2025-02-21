@@ -23,6 +23,9 @@ class Translator final {
     // Needed for reporting diagnostics
     core::FileRef file;
 
+    // The parse errors that occurred while parsing the root node
+    std::vector<ParseError> parseErrors;
+
     // Context variables
     bool isInMethodDef = false;
 
@@ -47,13 +50,14 @@ public:
 
     // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
     std::unique_ptr<parser::Node> translate(pm_node_t *node);
-    std::unique_ptr<parser::Node> translate(const ProgramNodeContainer &container);
+    std::unique_ptr<parser::Node> translate(const ParseResult &parseResult);
 
 private:
     // Private constructor used only for creating child translators
     // uniqueCounterStorage is passed as the minimum integer value and is never used
-    Translator(Parser parser, core::GlobalState &gs, core::FileRef file, bool isInMethodDef, int *uniqueCounter)
-        : parser(parser), gs(gs), file(file), isInMethodDef(isInMethodDef),
+    Translator(Parser parser, core::GlobalState &gs, core::FileRef file, std::vector<ParseError> parseErrors,
+               bool isInMethodDef, int *uniqueCounter)
+        : parser(parser), gs(gs), file(file), parseErrors(parseErrors), isInMethodDef(isInMethodDef),
           uniqueCounterStorage(std::numeric_limits<int>::min()), uniqueCounter(uniqueCounter) {}
     void reportError(core::LocOffsets loc, const std::string &message);
 

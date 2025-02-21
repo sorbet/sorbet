@@ -1339,7 +1339,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // For now, we only report errors when we hit a missing node because we don't want to always report dynamic
             // constant assignment errors
             // TODO: We will improve this in the future when we handle more errored cases
-            for (auto &error : parser.parseErrors) {
+            for (auto &error : parseErrors) {
                 // EOF error is always pointed to the very last line of the file, which can't be expressed in Sorbet's
                 // error comments
                 if (error.id != PM_ERR_UNEXPECTED_TOKEN_CLOSE_CONTEXT) {
@@ -1350,8 +1350,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
     }
 }
 
-unique_ptr<parser::Node> Translator::translate(const ProgramNodeContainer &container) {
-    return translate(container.getRawNodePointer());
+unique_ptr<parser::Node> Translator::translate(const ParseResult &parseResult) {
+    this->parseErrors = parseResult.parseErrors;
+    return translate(parseResult.getRawNodePointer());
 }
 
 core::LocOffsets Translator::translateLoc(pm_location_t loc) {
@@ -1969,7 +1970,7 @@ template <typename PrismNode> std::unique_ptr<parser::Mlhs> Translator::translat
 // Context management methods
 Translator Translator::enterMethodDef() {
     auto isInMethodDef = true;
-    return Translator(parser, gs, file, isInMethodDef, uniqueCounter);
+    return Translator(parser, gs, file, parseErrors, isInMethodDef, uniqueCounter);
 }
 
 void Translator::reportError(core::LocOffsets loc, const std::string &message) {
