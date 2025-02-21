@@ -4776,15 +4776,16 @@ T.reveal_type(result) # => T::Boolean
 
 ## 7052
 
-Occurs when a **positional argument is interpreted as a keyword argument**,
-but has type `T.untyped`. This prevents unintended behavior where
-**an untyped value is mistakenly treated as keyword arguments**,
-potentially causing runtime errors.
+Occurs when a **positional argument is interpreted as a keyword argument**, but
+has type `T.untyped`. This prevents unintended behavior where **an untyped value
+is mistakenly treated as keyword arguments**, potentially causing runtime
+errors.
 
-You can usually fix this by explicitly using keyword args or ensuring
-positional args have appropriate types.
+You can usually fix this by explicitly using keyword args or ensuring positional
+args have appropriate types.
 
 ### **Example**
+
 ```ruby
 # typed: strong
 extend T::Sig
