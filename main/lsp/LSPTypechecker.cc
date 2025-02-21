@@ -336,7 +336,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
     auto committed = epochManager.tryCommitEpoch(*finalGS, epoch, cancelable, preemptManager, [&]() -> void {
-        vector<ast::ParsedFile> indexedCopies;
+        vector<ast::ParsedFile> indexed, nonPackagedIndexed;
 
         // TODO(trevor): there's currently no support for cancellation during indexing
         {
@@ -424,28 +424,64 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                 std::unique_ptr<const OwnedKeyValueStore> ownedKvstore =
                     cache::ownIfUnchanged(*this->gs, std::move(kvstore));
 
-                auto result = hashing::Hashing::indexAndComputeFileHashes(
-                    *this->gs, this->config->opts, *this->config->logger, this->workspaceFiles, workers, ownedKvstore);
-                if (!result.hasResult()) {
-                    return;
+                auto workspaceFilesSpan = absl::MakeSpan(this->workspaceFiles);
+                if (this->config->opts.stripePackages) {
+                    auto numPackageFiles = pipeline::partitionPackageFiles(*this->gs, workspaceFilesSpan);
+                    auto inputPackageFiles = workspaceFilesSpan.first(numPackageFiles);
+                    workspaceFilesSpan = workspaceFilesSpan.subspan(numPackageFiles);
+
+                    {
+                        auto result = hashing::Hashing::indexAndComputeFileHashes(
+                            *this->gs, this->config->opts, *this->config->logger, inputPackageFiles, workers,
+                            ownedKvstore, cancelable);
+                        if (!result.hasResult()) {
+                            return;
+                        }
+                        indexed = std::move(result.result());
+                    }
+
+                    // Only write the cache during initialization to avoid unbounded growth.
+                    if (mode == SlowPathMode::Init) {
+                        // Cache these before any pipeline::package rewrites, so that the cache is still
+                        // usable regardless of whether `--stripe-packages` was passed.
+                        // Want to keep the kvstore around so we can still write to it later.
+                        ownedKvstore = cache::ownIfUnchanged(
+                            *this->gs,
+                            cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
+                                                                 this->config->opts, *this->gs, workers, indexed));
+                    }
+
+                    // First run: only the __package.rb files. This populates the packageDB
+                    pipeline::setPackagerOptions(*this->gs, this->config->opts);
+                    pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers);
                 }
 
-                indexedCopies = std::move(result.result());
+                {
+                    auto result = hashing::Hashing::indexAndComputeFileHashes(*this->gs, this->config->opts,
+                                                                              *this->config->logger, workspaceFilesSpan,
+                                                                              workers, ownedKvstore, cancelable);
+                    if (!result.hasResult()) {
+                        ast::ParsedFilesOrCancelled::cancel(std::move(indexed), workers);
+                        return;
+                    }
+                    nonPackagedIndexed = std::move(result.result());
+                }
 
                 // Only write the cache during initialization to avoid unbounded growth.
                 if (mode == SlowPathMode::Init) {
+                    // Cache these before any pipeline::package rewrites, so that the cache is still usable
+                    // regardless of whether `--stripe-packages` was passed.
                     cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
-                                                         this->config->opts, *this->gs, workers, indexedCopies);
+                                                         this->config->opts, *this->gs, workers, nonPackagedIndexed);
                 }
-            }
 
-            if (epochManager.wasTypecheckingCanceled()) {
-                ENFORCE(mode != SlowPathMode::Init);
-                return;
+                // Second run: all the other files (the packageDB shouldn't change)
+                pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts,
+                                                workers);
             }
 
             if (mode == SlowPathMode::Init) {
-                // At this point finalGS has a name table that's initialized enough for the indexer thread, so we
+                // At this point this->gs has a name table that's initialized enough for the indexer thread, so we
                 // make a copy to pass back over.
                 indexedState = this->gs->deepCopy();
                 indexedState->errorQueue = std::move(savedErrorQueue);
@@ -455,7 +491,6 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
         }
 
         if (epochManager.wasTypecheckingCanceled()) {
-            // Canceled.
             return;
         }
 
@@ -478,21 +513,30 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             }
         }
 
-        pipeline::setPackagerOptions(*gs, config->opts);
-        // TODO(jez) Splitting this like how the pipeline intersperses this with indexing is going
-        // to take more work. Punting for now.
-        pipeline::package(*this->gs, absl::Span<ast::ParsedFile>(indexedCopies), this->config->opts, workers);
+        if (this->config->opts.stripePackages) {
+            // Only need to compute FoundDefHashes when running to compute a FileHash
+            auto foundHashes = nullptr;
+            auto cancelled =
+                pipeline::name(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers, foundHashes);
+            if (cancelled) {
+                ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
+                return;
+            }
+        }
 
         // Only need to compute FoundDefHashes when running to compute a FileHash
         auto foundHashes = nullptr;
         auto canceled =
-            pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexedCopies), config->opts, workers, foundHashes);
+            pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackagedIndexed), config->opts, workers, foundHashes);
         if (canceled) {
-            ast::ParsedFilesOrCancelled::cancel(move(indexedCopies), workers);
+            ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
             return;
         }
 
-        auto maybeResolved = pipeline::resolve(*gs, move(indexedCopies), config->opts, workers);
+        pipeline::unpartitionPackageFiles(indexed, std::move(nonPackagedIndexed));
+        // TODO(jez) At this point, it's not correct to call it `indexed` anymore: we've run namer too
+
+        auto maybeResolved = pipeline::resolve(*gs, move(indexed), config->opts, workers);
         if (!maybeResolved.hasResult()) {
             return;
         }
