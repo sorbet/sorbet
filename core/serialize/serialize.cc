@@ -1451,16 +1451,17 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::ConstantLit: {
             auto &a = ast::cast_tree_nonnull<ast::ConstantLit>(what);
-            pickle(p, a.loc);
+            pickle(p, a.loc());
             p.putU4(a.symbol().rawId());
             // This encoding is the same encoding that would be used if we were
             // serializing an UnresolvedConstantLit as an ExpressionPtr, nullptr
             // and all.
-            if (a.original == nullptr) {
+            auto *original = a.original();
+            if (original == nullptr) {
                 p.putU4(0);
             } else {
                 p.putU4(uint32_t(ast::Tag::UnresolvedConstantLit));
-                pickle(p, *a.original);
+                pickle(p, *original);
             }
             break;
         }
@@ -1741,10 +1742,12 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             std::unique_ptr<ast::UnresolvedConstantLit> orig;
             if (litTag == uint32_t(ast::Tag::UnresolvedConstantLit)) {
                 orig = unpickleUnresolvedConstantLit(p, gs);
+                return ast::make_expression<ast::ConstantLit>(sym, std::move(orig));
             } else if (litTag != 0) {
                 Exception::raise("Unknown tag for `ConstantLit::original`: {}", litTag);
             }
-            return ast::make_expression<ast::ConstantLit>(loc, sym, std::move(orig));
+            ENFORCE(orig == nullptr);
+            return ast::make_expression<ast::ConstantLit>(loc, sym);
         }
         case ast::Tag::RuntimeMethodDefinition: {
             auto loc = unpickleLocOffsets(p);

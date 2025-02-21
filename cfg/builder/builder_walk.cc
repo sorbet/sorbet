@@ -449,16 +449,18 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
             [&](ast::ConstantLit &a) {
                 auto aliasName = cctx.newTemporary(core::Names::cfgAlias());
+                auto loc = a.loc();
+
                 if (a.symbol() == core::Symbols::StubModule()) {
-                    current->exprs.emplace_back(aliasName, a.loc, make_insn<Alias>(core::Symbols::untyped()));
+                    current->exprs.emplace_back(aliasName, loc, make_insn<Alias>(core::Symbols::untyped()));
                 } else {
-                    current->exprs.emplace_back(aliasName, a.loc, make_insn<Alias>(a.symbol()));
+                    current->exprs.emplace_back(aliasName, loc, make_insn<Alias>(a.symbol()));
                 }
 
-                synthesizeExpr(current, cctx.target, a.loc, make_insn<Ident>(aliasName));
+                synthesizeExpr(current, cctx.target, loc, make_insn<Ident>(aliasName));
 
-                if (a.original) {
-                    auto &orig = *a.original;
+                if (a.original()) {
+                    auto &orig = *a.original();
                     // Empirically, these are the only two cases we've needed so far to service the
                     // LSP requests we want (hover and completion), but that doesn't mean these are
                     // the **only** we'll ever want.

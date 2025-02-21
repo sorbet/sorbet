@@ -55,8 +55,8 @@ class AutogenWalk {
     vector<core::NameRef> constantName(core::Context ctx, const ast::ConstantLit &cnstRef) {
         vector<core::NameRef> out;
         auto *cnst = &cnstRef;
-        while (cnst != nullptr && cnst->original != nullptr) {
-            auto &original = *cnst->original;
+        while (cnst != nullptr && cnst->original() != nullptr) {
+            auto &original = *cnst->original();
             out.emplace_back(original.cnst);
             cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
 
@@ -65,7 +65,7 @@ class AutogenWalk {
             // correctly -- otherwise, we'd have missing edges in our static analysis dependency graphs, which
             // drive pre-loading for our Ruby services at Stripe, and also have to jump hoops with complicated
             // heuristics in our package generation tooling to determine whether something was resolved via an alias.
-            if (cnst != nullptr && cnst->original != nullptr) {
+            if (cnst != nullptr && cnst->original() != nullptr) {
                 auto scopeSym = cnst->symbol();
                 if (scopeSym.isStaticField(ctx) && scopeSym.asFieldRef().data(ctx)->isClassAlias()) {
                     auto resolvedScopeName = symbolName(ctx, scopeSym);
@@ -167,7 +167,7 @@ public:
         // them once again...
         for (auto &ancst : original.ancestors) {
             auto cnst = ast::cast_tree<ast::ConstantLit>(ancst);
-            if (cnst == nullptr || cnst->original == nullptr) {
+            if (cnst == nullptr || cnst->original() == nullptr) {
                 // ignore them if they're not statically-known ancestors (i.e. not constants)
                 continue;
             }
@@ -210,8 +210,8 @@ public:
     // `true` if the constant is fully qualified and can be traced back to the root scope, `false` otherwise
     bool isCBaseConstant(const ast::ConstantLit &cnstRef) {
         auto *cnst = &cnstRef;
-        while (cnst != nullptr && cnst->original != nullptr) {
-            auto &original = *cnst->original;
+        while (cnst != nullptr && cnst->original() != nullptr) {
+            auto &original = *cnst->original();
             cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
         }
         if (cnst && cnst->symbol() == core::Symbols::root()) {
@@ -264,7 +264,7 @@ public:
             // (in which case don't handle it again)
             return;
         }
-        if (original.original == nullptr) {
+        if (original.original() == nullptr) {
             return;
         }
         if (original.symbol().name(ctx) == core::Names::Constants::AttachedClass()) {
@@ -273,7 +273,7 @@ public:
             return;
         }
 
-        auto entry = make_pair(original.loc, original.symbol());
+        auto entry = make_pair(original.loc(), original.symbol());
         if (seenRefsByLoc.contains(entry)) {
             return;
         }
@@ -283,12 +283,12 @@ public:
         auto &ref = refs.emplace_back();
         ref.id = refs.size() - 1;
         setNestingAndScope(ref, original);
-        ref.loc = original.loc;
+        ref.loc = original.loc();
 
         // the reference location is the location of constant, but this might get updated if the reference corresponds
         // to the definition of the constant, because in that case we'll later on extend the location to cover the whole
         // class or assignment
-        ref.definitionLoc = original.loc;
+        ref.definitionLoc = original.loc();
         ref.name = QualifiedName::fromFullName(constantName(ctx, original));
         auto sym = original.symbol();
         ref.sym = sym;
@@ -309,7 +309,7 @@ public:
     void postTransformAssign(core::Context ctx, const ast::Assign &original) {
         // autogen only cares about constant assignments/definitions, so bail otherwise
         auto lhs = ast::cast_tree<ast::ConstantLit>(original.lhs);
-        if (lhs == nullptr || lhs->original == nullptr) {
+        if (lhs == nullptr || lhs->original() == nullptr) {
             return;
         }
 

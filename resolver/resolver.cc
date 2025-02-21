@@ -343,7 +343,7 @@ private:
     }
 
     static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job) {
-        auto &c = *job.out->original;
+        auto &c = *job.out->original();
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             auto result = resolveLhs(ctx, job.scope, c.cnst);
 
@@ -433,7 +433,7 @@ private:
                     return true;
                 }
 
-                auto &original = *cnst->original;
+                auto &original = *cnst->original();
                 if (original.cnst != *it) {
                     return false;
                 }
@@ -537,7 +537,7 @@ private:
 
     static core::ClassOrModuleRef stubConstant(core::MutableContext ctx, core::ClassOrModuleRef owner,
                                                ast::ConstantLit *out, bool possibleGenericType) {
-        auto symbol = ctx.state.enterClassSymbol(ctx.locAt(out->loc), owner, out->original->cnst);
+        auto symbol = ctx.state.enterClassSymbol(ctx.locAt(out->loc()), owner, out->original()->cnst);
 
         auto data = symbol.data(ctx);
         data->setIsModule(true); // This is what would happen in finalizeAncestors
@@ -606,7 +606,7 @@ private:
                 continue;
             }
 
-            auto &original = *base->original;
+            auto &original = *base->original();
             if (importStubs.packageExportsConstant(prefix, original.cnst)) {
                 ENFORCE(cursor->scope.isClassOrModule());
                 return cursor->scope.asClassOrModuleRef();
@@ -644,7 +644,7 @@ private:
             auto *cursor = out;
             bool isRootReference = false;
             while (cursor != nullptr) {
-                auto original = cursor->original.get();
+                auto original = cursor->original();
                 if (original == nullptr) {
                     isRootReference = cursor->symbol() == core::Symbols::root();
                     break;
@@ -701,7 +701,7 @@ private:
                     auto loc = resolvedField.data(ctx)->loc();
                     if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
                         e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
-                        e.addErrorLine(ctx.locAt(job.out->original->loc), "Type alias used here");
+                        e.addErrorLine(ctx.locAt(job.out->original()->loc), "Type alias used here");
                     }
 
                     resolvedField.data(gs)->resultType = core::Types::untyped(resolved);
@@ -729,7 +729,7 @@ private:
 
         bool alreadyReported = false;
         job.out->markUnresolved();
-        auto &original = *job.out->original;
+        auto &original = *job.out->original();
         if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
             auto originalScope = id->symbol().dealias(ctx);
             if (originalScope == core::Symbols::StubModule()) {
@@ -771,7 +771,7 @@ private:
                 if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
                     for (const auto &[from, to] : COMMON_TYPOS) {
                         if (from == original.cnst) {
-                            e.didYouMean(to, ctx.locAt(job.out->loc));
+                            e.didYouMean(to, ctx.locAt(job.out->loc()));
                             foundCommonTypo = true;
                             break;
                         }
@@ -815,7 +815,7 @@ private:
                     }
                     for (auto suggestion : suggested) {
                         const auto replacement = suggestion.symbol.show(ctx);
-                        auto replaceLoc = ctx.locAt(job.out->loc);
+                        auto replaceLoc = ctx.locAt(job.out->loc());
                         if (replaceLoc.source(ctx) == replacement) {
                             // The replacement is the same as the original.
                             // This can happen for a number of reasons, usually due to things
@@ -929,10 +929,10 @@ private:
         }
 
         if (rhsSym.isTypeAlias(ctx)) {
-            if (auto e = ctx.beginError(it.rhs->loc, core::errors::Resolver::ReassignsTypeAlias)) {
+            if (auto e = ctx.beginError(it.rhs->loc(), core::errors::Resolver::ReassignsTypeAlias)) {
                 e.setHeader("Reassigning a type alias is not allowed");
                 e.addErrorLine(rhsSym.loc(ctx), "Originally defined here");
-                auto rhsLoc = ctx.locAt(it.rhs->loc);
+                auto rhsLoc = ctx.locAt(it.rhs->loc());
                 if (rhsLoc.exists()) {
                     e.replaceWith("Declare as type alias", rhsLoc, "T.type_alias {{ {} }}", rhsLoc.source(ctx).value());
                 }
@@ -1007,7 +1007,7 @@ private:
                 if (!lastRun) {
                     return false;
                 }
-                if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
+                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
                     e.setHeader("Superclasses and mixins may not be type aliases");
                 }
                 resolved = stubSymbolForAncestor(job);
@@ -1024,7 +1024,7 @@ private:
                     }
                     return false;
                 }
-                if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
+                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
                     e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
                 }
                 resolved = stubSymbolForAncestor(job);
@@ -1033,13 +1033,13 @@ private:
         }
 
         if (resolvedClass == job.klass) {
-            if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
+            if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` is a parent of itself", job.klass.show(ctx));
                 e.addErrorLine(resolvedClass.data(ctx)->loc(), "Class definition");
             }
             resolvedClass = stubSymbolForAncestor(job);
         } else if (resolvedClass.data(ctx)->derivesFrom(ctx, job.klass)) {
-            if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
+            if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
                             job.klass.show(ctx), resolvedClass.show(ctx));
                 e.addErrorLine(job.klass.data(ctx)->loc(), "One definition");
@@ -1064,7 +1064,7 @@ private:
                 auto allowsPayloadParentOverride = suppressPayloadSuperclassRedefinitionFor.contains(job.klass);
 
                 if (!allowsPayloadParentOverride) {
-                    if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {
+                    if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::RedefinitionOfParents)) {
                         e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
                                     job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
                         if (!fileIsPayload && klassDefinedInPayload) {
@@ -1079,7 +1079,7 @@ private:
             }
         } else {
             if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinIndex)) {
-                if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::IncludesNonModule)) {
+                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::IncludesNonModule)) {
                     e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
                                 resolvedClass.show(ctx));
                     e.addErrorLine(resolvedClass.data(ctx)->loc(), "`{}` defined as a class here",
@@ -1131,7 +1131,7 @@ private:
                 }
                 continue;
             }
-            auto idLoc = core::Loc(todo.file, id->loc);
+            auto idLoc = core::Loc(todo.file, id->loc());
             if (!id->symbol().isClassOrModule()) {
                 if (auto e = gs.beginError(idLoc, core::errors::Resolver::InvalidMixinDeclaration)) {
                     e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.show(gs));
@@ -1302,13 +1302,13 @@ private:
         if (auto cnst = ast::cast_tree<ast::ConstantLit>(ancestor)) {
             auto sym = cnst->symbol();
             if (sym.exists() && sym.isTypeAlias(ctx)) {
-                if (auto e = ctx.beginError(cnst->loc, core::errors::Resolver::DynamicSuperclass)) {
+                if (auto e = ctx.beginError(cnst->loc(), core::errors::Resolver::DynamicSuperclass)) {
                     e.setHeader("Superclasses and mixins may not be type aliases");
                 }
                 return;
             }
-            ENFORCE(sym.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original->scope) ||
-                    ast::isa_tree<ast::EmptyTree>(cnst->original->scope));
+            ENFORCE(sym.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original()->scope) ||
+                    ast::isa_tree<ast::EmptyTree>(cnst->original()->scope));
             if (isSuperclass && sym == core::Symbols::todo()) {
                 // This is the case where the superclass is empty, for example: `class A; end`
                 return;
@@ -1319,7 +1319,7 @@ private:
             auto enclosingClass = ctx.owner.enclosingClass(ctx);
             auto nw = ast::MK::UnresolvedConstant(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
             auto out =
-                ast::make_expression<ast::ConstantLit>(loc, enclosingClass, nw.toUnique<ast::UnresolvedConstantLit>());
+                ast::make_expression<ast::ConstantLit>(enclosingClass, nw.toUnique<ast::UnresolvedConstantLit>());
             job.ancestor = ast::cast_tree<ast::ConstantLit>(out);
             ancestor = std::move(out);
         } else if (ast::isa_tree<ast::EmptyTree>(ancestor)) {
@@ -1334,8 +1334,7 @@ private:
     void walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         if (auto c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
             walkUnresolvedConstantLit(ctx, c->scope);
-            auto loc = c->loc;
-            auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(),
+            auto out = ast::make_expression<ast::ConstantLit>(core::Symbols::noSymbol(),
                                                               tree.toUnique<ast::UnresolvedConstantLit>());
             auto constant = ast::cast_tree<ast::ConstantLit>(out);
             ConstantResolutionItem job{nesting_, constant};
@@ -1686,7 +1685,11 @@ public:
     static int constantDepth(ast::ConstantLit *exp) {
         int depth = 0;
         ast::ConstantLit *scope = exp;
-        while (scope->original && (scope = ast::cast_tree<ast::ConstantLit>(scope->original->scope))) {
+        while (auto original = scope->original()) {
+            scope = ast::cast_tree<ast::ConstantLit>(original->scope);
+            if (!scope) {
+                break;
+            }
             depth += 1;
         }
         return depth;
@@ -1961,10 +1964,10 @@ public:
 
         for (auto &todos : todo) {
             fast_sort(todos.items, [](const ConstantResolutionItem &lhs, const ConstantResolutionItem &rhs) -> bool {
-                if (lhs.out->loc == rhs.out->loc) {
+                if (lhs.out->loc() == rhs.out->loc()) {
                     return constantDepth(lhs.out) < constantDepth(rhs.out);
                 }
-                return compareLocOffsets(lhs.out->loc, rhs.out->loc);
+                return compareLocOffsets(lhs.out->loc(), rhs.out->loc());
             });
         }
 
@@ -1973,10 +1976,10 @@ public:
 
         for (auto &todos : todoAncestors) {
             fast_sort(todos.items, [](const AncestorResolutionItem &lhs, const AncestorResolutionItem &rhs) -> bool {
-                if (lhs.ancestor->loc == rhs.ancestor->loc) {
+                if (lhs.ancestor->loc() == rhs.ancestor->loc()) {
                     return constantDepth(lhs.ancestor) < constantDepth(rhs.ancestor);
                 }
-                return compareLocOffsets(lhs.ancestor->loc, rhs.ancestor->loc);
+                return compareLocOffsets(lhs.ancestor->loc(), rhs.ancestor->loc());
             });
         }
 

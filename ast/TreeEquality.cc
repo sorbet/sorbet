@@ -280,14 +280,14 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
             if (a->symbol() != b->symbol()) {
                 return false;
             }
-            if (a->original && b->original) {
-                auto &alit = *a->original;
-                auto &blit = *b->original;
+            if (a->original() && b->original()) {
+                auto &alit = *a->original();
+                auto &blit = *b->original();
                 if (alit.cnst != blit.cnst) {
                     return false;
                 }
                 return structurallyEqual(gs, avoid, alit.scope, blit.scope, file);
-            } else if (!a->original && !b->original) {
+            } else if (!a->original() && !b->original()) {
                 // This occurs when the constant is created using MK::Constant instead of MK::UnresolvedConstant
                 // (original points to the UnresolvedConstantLit that created this ConstantLit)
                 return true;

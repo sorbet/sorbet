@@ -86,12 +86,26 @@ string ExpressionPtr::showRaw(const core::GlobalState &gs, int tabs) const {
 #undef SHOW_RAW
 }
 
+namespace {
+template <typename T> struct LocGetter {
+    static core::LocOffsets loc(void *ptr) {
+        return reinterpret_cast<T *>(ptr)->loc;
+    }
+};
+
+template <> struct LocGetter<ConstantLit> {
+    static core::LocOffsets loc(void *ptr) {
+        return reinterpret_cast<ConstantLit *>(ptr)->loc();
+    }
+};
+} // namespace
+
 core::LocOffsets ExpressionPtr::loc() const {
     auto *ptr = get();
 
     ENFORCE(ptr != nullptr);
 
-#define CASE(name) return reinterpret_cast<name *>(ptr)->loc;
+#define CASE(name) return LocGetter<name>::loc(ptr);
     GENERATE_TAG_SWITCH(tag(), CASE)
 #undef CASE
 }
@@ -295,8 +309,13 @@ UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr
     _sanityCheck();
 }
 
-ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original)
-    : loc(loc), resolutionScopesOrSymbol(symbol), original(std::move(original)) {
+ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol) : storage(loc, symbol) {
+    categoryCounterInc("trees", "resolvedconstantlit");
+    _sanityCheck();
+}
+
+ConstantLit::ConstantLit(core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original)
+    : storage(symbol, std::move(original)) {
     categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();
 }
@@ -315,7 +334,7 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
                 ENFORCE(false);
                 bool hasScopes = nested->resolutionScopes() != nullptr;
                 fatalLogger->error(R"(msg="Bad fullUnresolvedPath" loc="{}" hasScopes={})",
-                                   ctx.locAt(this->loc).showRaw(ctx), hasScopes);
+                                   ctx.locAt(this->loc()).showRaw(ctx), hasScopes);
                 fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
             }
 
@@ -323,14 +342,14 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
                 break;
             }
 
-            auto &orig = *nested->original;
+            auto &orig = *nested->original();
             namesFailedToResolve.emplace_back(orig.cnst);
             nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
             ENFORCE(nested);
             ENFORCE(nested->symbol() == core::Symbols::StubModule());
             ENFORCE(!nested->resolutionScopes()->empty());
         }
-        auto &orig = *nested->original;
+        auto &orig = *nested->original();
         namesFailedToResolve.emplace_back(orig.cnst);
         absl::c_reverse(namesFailedToResolve);
     }
@@ -710,7 +729,7 @@ string ConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) cons
     if (symbol().exists() && symbol() != core::Symbols::StubModule()) {
         return this->symbol().showFullName(gs);
     }
-    return "Unresolved: " + this->original->toStringWithTabs(gs, tabs);
+    return "Unresolved: " + this->original()->toStringWithTabs(gs, tabs);
 }
 
 string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) const {
@@ -722,7 +741,7 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) const {
                    this->symbol().showFullName(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "orig = {}\n",
-                   this->original ? this->original->showRaw(gs, tabs + 1) : "nullptr");
+                   this->original() ? this->original()->showRaw(gs, tabs + 1) : "nullptr");
     // If resolutionScopes isn't null, it should not be empty.
     ENFORCE(resolutionScopes() == nullptr || !resolutionScopes()->empty());
     if (resolutionScopes() != nullptr && !resolutionScopes()->empty()) {
