@@ -117,25 +117,24 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
             return empty;
         }
 
-        std::string strname;
+        core::NameRef name;
         if (lit->isSymbol()) {
-            strname = lit->asSymbol().show(ctx);
+            name = lit->asSymbol();
         } else if (lit->isString()) {
-            strname = lit->asString().show(ctx);
+            name = lit->asString();
         } else {
             return empty;
         }
 
-        core::NameRef name = ctx.state.enterNameUTF8(strname);
-
-        if (seenNames.find(name) != seenNames.end()) {
+        auto [it, inserted] = seenNames.insert(name);
+        if (!inserted) {
             if (auto e = ctx.beginError(lit->loc, core::errors::Rewriter::InvalidStructMember)) {
                 e.setHeader("Duplicate member '{}' in Struct definition", name.show(ctx));
             }
             return empty;
         }
-        seenNames.insert(name);
         auto symLoc = lit->loc;
+        auto strname = name.shortName(ctx);
         if (!strname.empty() && strname.back() == '=') {
             if (auto e = ctx.beginIndexerError(symLoc, core::errors::Rewriter::InvalidStructMember)) {
                 e.setHeader("Struct member `{}` cannot end with an equal", strname);
