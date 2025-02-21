@@ -189,6 +189,11 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
             auto *exp = reinterpret_cast<const RuntimeMethodDefinition *>(tree);
             return make_expression<RuntimeMethodDefinition>(exp->loc, exp->name, exp->isSelfMethod);
         }
+
+        case Tag::Self: {
+            auto *exp = reinterpret_cast<const Self *>(tree);
+            return make_expression<Self>(exp->loc);
+        }
     }
 }
 

@@ -51,6 +51,7 @@ namespace sorbet::ast {
         CASE_STATEMENT(CASE_BODY, Block)                   \
         CASE_STATEMENT(CASE_BODY, InsSeq)                  \
         CASE_STATEMENT(CASE_BODY, RuntimeMethodDefinition) \
+        CASE_STATEMENT(CASE_BODY, Self)                    \
     }
 
 void ExpressionPtr::deleteTagged(Tag tag, void *ptr) noexcept {
@@ -121,10 +122,7 @@ string ExpressionPtr::toStringWithTabs(const core::GlobalState &gs, int tabs) co
 }
 
 bool ExpressionPtr::isSelfReference() const {
-    if (auto local = cast_tree<Local>(*this)) {
-        return local->localVariable == core::LocalVariable::selfVariable();
-    }
-    return false;
+    return isa_tree<Self>(*this);
 }
 
 void ExpressionPtr::resetToEmpty(EmptyTree *expr) noexcept {
@@ -135,7 +133,7 @@ void ExpressionPtr::resetToEmpty(EmptyTree *expr) noexcept {
 bool isa_reference(const ExpressionPtr &what) {
     return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<RestArg>(what) ||
            isa_tree<KeywordArg>(what) || isa_tree<OptionalArg>(what) || isa_tree<BlockArg>(what) ||
-           isa_tree<ShadowArg>(what);
+           isa_tree<ShadowArg>(what) || isa_tree<Self>(what);
 }
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
@@ -233,6 +231,7 @@ Rescue::Rescue(core::LocOffsets loc, ExpressionPtr body, RESCUE_CASE_store rescu
 
 Local::Local(core::LocOffsets loc, core::LocalVariable localVariable1) : loc(loc), localVariable(localVariable1) {
     categoryCounterInc("trees", "local");
+    ENFORCE(localVariable != core::LocalVariable::selfVariable(), "use a Self node");
     _sanityCheck();
 }
 
@@ -387,6 +386,11 @@ InsSeq::InsSeq(core::LocOffsets loc, STATS_store stats, ExpressionPtr expr)
 RuntimeMethodDefinition::RuntimeMethodDefinition(core::LocOffsets loc, core::NameRef name, bool isSelfMethod)
     : loc(loc), name(name), isSelfMethod(isSelfMethod) {
     categoryCounterInc("trees", "runtimemethoddefinition");
+    _sanityCheck();
+}
+
+Self::Self(core::LocOffsets loc) : loc(loc) {
+    categoryCounterInc("trees", "self");
     _sanityCheck();
 }
 
@@ -1016,6 +1020,14 @@ std::string RuntimeMethodDefinition::showRaw(const core::GlobalState &gs, int ta
     return this->toStringWithTabs(gs, tabs);
 }
 
+std::string Self::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
+    return "<self>";
+}
+
+std::string Self::showRaw(const core::GlobalState &gs, int tabs) const {
+    return "Self";
+}
+
 const ast::Block *Send::block() const {
     if (hasBlock()) {
         auto block = ast::cast_tree<ast::Block>(this->args.back());
@@ -1479,6 +1491,10 @@ string BlockArg::nodeName() const {
 
 string RuntimeMethodDefinition::nodeName() const {
     return "RuntimeMethodDefinition";
+}
+
+string Self::nodeName() const {
+    return "Self";
 }
 
 ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};

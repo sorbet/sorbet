@@ -1468,14 +1468,12 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         result.type = core::Types::untypedUntracked();
     } else if (ast::isa_tree<ast::Local>(expr)) {
         const auto &slf = ast::cast_tree_nonnull<ast::Local>(expr);
-        if (expr.isSelfReference()) {
-            result.type = ctxOwnerData->selfType(ctx);
-        } else {
-            if (auto e = ctx.beginError(slf.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                e.setHeader("Unsupported type syntax");
-            }
-            result.type = core::Types::untypedUntracked();
+        if (auto e = ctx.beginError(slf.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+            e.setHeader("Unsupported type syntax");
         }
+        result.type = core::Types::untypedUntracked();
+    } else if (ast::isa_tree<ast::Self>(expr)) {
+        result.type = ctxOwnerData->selfType(ctx);
     } else if (ast::isa_tree<ast::Literal>(expr)) {
         const auto &lit = ast::cast_tree_nonnull<ast::Literal>(expr);
         core::TypePtr underlying;

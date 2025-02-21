@@ -29,9 +29,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U p>
             block = nullptr
             pos_args = 1
@@ -53,9 +51,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U p>
             block = nullptr
             pos_args = 1
@@ -81,9 +77,7 @@ ClassDef{
             stats = [
               Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U p>
                 block = nullptr
                 pos_args = 1
@@ -96,9 +90,7 @@ ClassDef{
             ],
             expr = Send{
               flags = {privateOk}
-              recv = Local{
-                localVariable = <U <self>>
-              }
+              recv = Self
               fun = <U p>
               block = nullptr
               pos_args = 1
@@ -125,9 +117,7 @@ ClassDef{
             stats = [
               Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U p>
                 block = nullptr
                 pos_args = 1
@@ -140,9 +130,7 @@ ClassDef{
             ],
             expr = Send{
               flags = {privateOk}
-              recv = Local{
-                localVariable = <U <self>>
-              }
+              recv = Self
               fun = <U p>
               block = nullptr
               pos_args = 1
@@ -165,9 +153,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U p>
             block = nullptr
             pos_args = 1
@@ -189,9 +175,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U p>
             block = nullptr
             pos_args = 1
@@ -211,9 +195,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U p>
             block = nullptr
             pos_args = 1
@@ -282,9 +264,7 @@ ClassDef{
             block = nullptr
             pos_args = 4
             args = [
-              Local{
-                localVariable = <U <self>>
-              }
+              Self
               Literal{ value = :<super> }
               Local{
                 localVariable = <U <blk>>
@@ -314,9 +294,7 @@ ClassDef{
             block = nullptr
             pos_args = 3
             args = [
-              Local{
-                localVariable = <U <self>>
-              }
+              Self
               Literal{ value = :<super> }
               Local{
                 localVariable = <U <blk>>
@@ -349,9 +327,7 @@ ClassDef{
             block = nullptr
             pos_args = 3
             args = [
-              Local{
-                localVariable = <U <self>>
-              }
+              Self
               Literal{ value = :<super> }
               Local{
                 localVariable = <U <blk>>
@@ -388,9 +364,7 @@ ClassDef{
             block = nullptr
             pos_args = 4
             args = [
-              Local{
-                localVariable = <U <self>>
-              }
+              Self
               Literal{ value = :<super> }
               Local{
                 localVariable = <U <blk>>
@@ -434,9 +408,7 @@ ClassDef{
                 block = nullptr
                 pos_args = 1
                 args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
+                  Self
                 ]
               }
               Literal{ value = :<super> }
@@ -481,9 +453,7 @@ ClassDef{
             block = nullptr
             pos_args = 3
             args = [
-              Local{
-                localVariable = <U <self>>
-              }
+              Self
               Literal{ value = :<super> }
               Local{
                 localVariable = <U <blk>>
@@ -523,9 +493,7 @@ ClassDef{
             block = nullptr
             pos_args = 3
             args = [
-              Local{
-                localVariable = <U <self>>
-              }
+              Self
               Literal{ value = :<super> }
               Local{
                 localVariable = <U blk>
@@ -560,9 +528,7 @@ ClassDef{
                 block = nullptr
                 pos_args = 3
                 args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
+                  Self
                   Literal{ value = :<untypedSuper> }
                   Local{
                     localVariable = <U <blk>>
@@ -619,9 +585,7 @@ ClassDef{
             block = nullptr
             pos_args = 3
             args = [
-              Local{
-                localVariable = <U <self>>
-              }
+              Self
               Literal{ value = :<untypedSuper> }
               Local{
                 localVariable = <U <blk>>

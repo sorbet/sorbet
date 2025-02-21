@@ -19,9 +19,7 @@ ClassDef{
 
     Send{
       flags = {privateOk}
-      recv = Local{
-        localVariable = <U <self>>
-      }
+      recv = Self
       fun = <U foo>
       block = Block {
         args = [
@@ -42,9 +40,7 @@ ClassDef{
 
     Send{
       flags = {privateOk}
-      recv = Local{
-        localVariable = <U <self>>
-      }
+      recv = Self
       fun = <U foo>
       block = Block {
         args = [
@@ -97,9 +93,7 @@ ClassDef{
 
     Send{
       flags = {privateOk}
-      recv = Local{
-        localVariable = <U <self>>
-      }
+      recv = Self
       fun = <U foo>
       block = Block {
         args = [
@@ -136,9 +130,7 @@ ClassDef{
 
     Send{
       flags = {privateOk}
-      recv = Local{
-        localVariable = <U <self>>
-      }
+      recv = Self
       fun = <U foo>
       block = Block {
         args = [
@@ -159,9 +151,7 @@ ClassDef{
 
     Send{
       flags = {privateOk}
-      recv = Local{
-        localVariable = <U <self>>
-      }
+      recv = Self
       fun = <U foo>
       block = Block {
         args = [
@@ -214,9 +204,7 @@ ClassDef{
 
     Send{
       flags = {privateOk}
-      recv = Local{
-        localVariable = <U <self>>
-      }
+      recv = Self
       fun = <U foo>
       block = Block {
         args = [
@@ -373,9 +361,7 @@ ClassDef{
 
     Send{
       flags = {privateOk}
-      recv = Local{
-        localVariable = <U <self>>
-      }
+      recv = Self
       fun = <U foo>
       block = Block {
         args = [

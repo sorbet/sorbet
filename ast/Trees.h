@@ -66,6 +66,7 @@ enum class Tag {
     Block,
     InsSeq,
     RuntimeMethodDefinition,
+    Self,
 };
 
 // A mapping from tree type to its corresponding tag.
@@ -1459,6 +1460,23 @@ public:
     void _sanityCheck();
 };
 CheckSize(RuntimeMethodDefinition, 16, 8);
+
+EXPRESSION(Self) {
+public:
+    const core::LocOffsets loc;
+
+    Self(core::LocOffsets loc);
+
+    ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
+
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
+
+    void _sanityCheck();
+};
+CheckSize(Self, 8, 8);
 
 EXPRESSION(EmptyTree) {
 public:

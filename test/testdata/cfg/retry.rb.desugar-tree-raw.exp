@@ -63,9 +63,7 @@ ClassDef{
               ],
               expr = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U raise>
                 block = nullptr
                 pos_args = 1
@@ -88,9 +86,7 @@ ClassDef{
                 stats = [
                   Send{
                     flags = {privateOk}
-                    recv = Local{
-                      localVariable = <U <self>>
-                    }
+                    recv = Self
                     fun = <U puts>
                     block = nullptr
                     pos_args = 1
@@ -112,9 +108,7 @@ ClassDef{
 
     Send{
       flags = {privateOk}
-      recv = Local{
-        localVariable = <U <self>>
-      }
+      recv = Self
       fun = <U main>
       block = nullptr
       pos_args = 0

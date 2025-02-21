@@ -319,6 +319,10 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
             auto *b = reinterpret_cast<const RuntimeMethodDefinition *>(other);
             return a->name == b->name && a->isSelfMethod == b->isSelfMethod;
         }
+
+        case Tag::Self: {
+            return true;
+        }
     }
 }
 
