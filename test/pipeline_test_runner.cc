@@ -183,19 +183,19 @@ public:
     }
 };
 
-vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core::FileRef> files,
-                              ExpectationHandler &handler, Expectations &test) {
+vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> files, ExpectationHandler &handler,
+                              Expectations &test) {
     vector<ast::ParsedFile> trees;
     for (auto file : files) {
-        auto fileName = FileOps::getFileName(file.data(*gs).path());
-        if (fileName != whitelistedTypedNoneTest && (fileName != packageFileName || !file.data(*gs).source().empty()) &&
-            file.data(*gs).source().find("# typed:") == string::npos) {
-            ADD_FAIL_CHECK_AT(file.data(*gs).path().data(), 1, "Add a `# typed: strict` line to the top of this file");
+        auto fileName = FileOps::getFileName(file.data(gs).path());
+        if (fileName != whitelistedTypedNoneTest && (fileName != packageFileName || !file.data(gs).source().empty()) &&
+            file.data(gs).source().find("# typed:") == string::npos) {
+            ADD_FAIL_CHECK_AT(file.data(gs).path().data(), 1, "Add a `# typed: strict` line to the top of this file");
         }
 
         // if a file is typed: ignore, then we shouldn't try to parse
         // it or do anything with it at all
-        if (file.data(*gs).strictLevel == core::StrictLevel::Ignore) {
+        if (file.data(gs).strictLevel == core::StrictLevel::Ignore) {
             ast::ParsedFile pf{ast::make_expression<ast::EmptyTree>(), file};
             trees.emplace_back(move(pf));
             continue;
@@ -203,55 +203,55 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
 
         unique_ptr<parser::Node> nodes;
         {
-            core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
+            core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
             auto settings = parser::Parser::Settings{};
-            nodes = parser::Parser::run(*gs, file, settings);
+            nodes = parser::Parser::run(gs, file, settings);
         }
 
-        handler.drainErrors(*gs);
-        handler.addObserved(*gs, "parse-tree", [&]() { return nodes->toString(*gs); });
-        handler.addObserved(*gs, "parse-tree-whitequark", [&]() { return nodes->toWhitequark(*gs); });
-        handler.addObserved(*gs, "parse-tree-json", [&]() { return nodes->toJSON(*gs); });
+        handler.drainErrors(gs);
+        handler.addObserved(gs, "parse-tree", [&]() { return nodes->toString(gs); });
+        handler.addObserved(gs, "parse-tree-whitequark", [&]() { return nodes->toWhitequark(gs); });
+        handler.addObserved(gs, "parse-tree-json", [&]() { return nodes->toJSON(gs); });
 
         // Desugarer
         ast::ParsedFile desugared;
         {
-            core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
+            core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            core::MutableContext ctx(*gs, core::Symbols::root(), file);
-            desugared = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
+            core::MutableContext ctx(gs, core::Symbols::root(), file);
+            desugared = testSerialize(gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
         }
 
-        handler.addObserved(*gs, "desugar-tree", [&]() { return desugared.tree.toString(*gs); });
-        handler.addObserved(*gs, "desugar-tree-raw", [&]() { return desugared.tree.showRaw(*gs); });
+        handler.addObserved(gs, "desugar-tree", [&]() { return desugared.tree.toString(gs); });
+        handler.addObserved(gs, "desugar-tree-raw", [&]() { return desugared.tree.showRaw(gs); });
 
         ast::ParsedFile localNamed;
 
         // Rewriter
         ast::ParsedFile rewritten;
         {
-            core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
+            core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
-            bool previous = gs->runningUnderAutogen;
-            gs->runningUnderAutogen = test.expectations.contains("autogen");
+            core::MutableContext ctx(gs, core::Symbols::root(), desugared.file);
+            bool previous = gs.runningUnderAutogen;
+            gs.runningUnderAutogen = test.expectations.contains("autogen");
             rewritten =
-                testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
-            gs->runningUnderAutogen = previous;
+                testSerialize(gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
+            gs.runningUnderAutogen = previous;
         }
 
-        handler.addObserved(*gs, "rewrite-tree", [&]() { return rewritten.tree.toString(*gs); });
-        handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return rewritten.tree.showRaw(*gs); });
+        handler.addObserved(gs, "rewrite-tree", [&]() { return rewritten.tree.toString(gs); });
+        handler.addObserved(gs, "rewrite-tree-raw", [&]() { return rewritten.tree.showRaw(gs); });
 
         {
-            core::UnfreezeNameTable nameTableAccess(*gs); // possibly enters mangled names
-            core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
-            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewritten)));
+            core::UnfreezeNameTable nameTableAccess(gs); // possibly enters mangled names
+            core::MutableContext ctx(gs, core::Symbols::root(), desugared.file);
+            localNamed = testSerialize(gs, local_vars::LocalVars::run(ctx, move(rewritten)));
         }
 
-        handler.addObserved(*gs, "index-tree", [&]() { return localNamed.tree.toString(*gs); });
-        handler.addObserved(*gs, "index-tree-raw", [&]() { return localNamed.tree.showRaw(*gs); });
+        handler.addObserved(gs, "index-tree", [&]() { return localNamed.tree.toString(gs); });
+        handler.addObserved(gs, "index-tree-raw", [&]() { return localNamed.tree.showRaw(gs); });
 
         trees.emplace_back(move(localNamed));
     }
@@ -259,7 +259,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
     return trees;
 }
 
-void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAssertion>> &assertions) {
+void setupPackager(core::GlobalState &gs, vector<shared_ptr<RangeAssertion>> &assertions) {
     vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
     vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
     vector<std::string> extraPackageFilesDirectorySlashPrefixes;
@@ -292,16 +292,16 @@ void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAss
     auto packagerLayers = StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
 
     {
-        core::UnfreezeNameTable packageNS(*gs);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-        gs->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                               extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                               extraPackageFilesDirectorySlashPrefixes, {}, allowRelaxedPackagerChecksFor,
-                               packagerLayers, "PACKAGE_ERROR_HINT");
+        core::UnfreezeNameTable packageNS(gs);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
+        gs.setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
+                              extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                              extraPackageFilesDirectorySlashPrefixes, {}, allowRelaxedPackagerChecksFor,
+                              packagerLayers, "PACKAGE_ERROR_HINT");
     }
 }
 
-void package(unique_ptr<core::GlobalState> &gs, unique_ptr<WorkerPool> &workers, absl::Span<ast::ParsedFile> trees,
+void package(core::GlobalState &gs, unique_ptr<WorkerPool> &workers, absl::Span<ast::ParsedFile> trees,
              ExpectationHandler &handler, vector<shared_ptr<RangeAssertion>> &assertions) {
     auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
 
@@ -310,10 +310,10 @@ void package(unique_ptr<core::GlobalState> &gs, unique_ptr<WorkerPool> &workers,
     }
 
     // Packager runs over all trees.
-    packager::Packager::run(*gs, *workers, trees);
+    packager::Packager::run(gs, *workers, trees);
     for (auto &tree : trees) {
-        handler.addObserved(*gs, "package-tree", [&]() {
-            return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
+        handler.addObserved(gs, "package-tree", [&]() {
+            return fmt::format("# -- {} --\n{}", tree.file.data(gs).path(), tree.tree.toString(gs));
         });
     }
 }
@@ -409,21 +409,21 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     vector<ast::ParsedFile> trees;
     auto filesSpan = absl::Span<core::FileRef>(files);
     if (enablePackager) {
-        setupPackager(gs, assertions);
+        setupPackager(*gs, assertions);
 
         auto numPackageFiles = realmain::pipeline::partitionPackageFiles(*gs, filesSpan);
         auto inputPackageFiles = filesSpan.first(numPackageFiles);
         filesSpan = filesSpan.subspan(numPackageFiles);
 
-        trees = index(gs, inputPackageFiles, handler, test);
+        trees = index(*gs, inputPackageFiles, handler, test);
 
         // First run: only the __package.rb files. This populates the packageDB
-        package(gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
+        package(*gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
         name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
     }
 
-    auto nonPackageTrees = index(gs, filesSpan, handler, test);
-    package(gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
+    auto nonPackageTrees = index(*gs, filesSpan, handler, test);
+    package(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
     name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
 
