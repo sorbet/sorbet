@@ -18,4 +18,3 @@ class TestStructs
     ValidStruct4 = Struct.new(:foo, :bar, keyword_init: true)
   
   end
- 
