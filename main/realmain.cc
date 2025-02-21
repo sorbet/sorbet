@@ -159,10 +159,10 @@ string levelToSigil(core::StrictLevel level) {
     }
 }
 
-core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
-    auto source = file.data(*gs).source();
+core::Loc findTyped(core::GlobalState &gs, core::FileRef file) {
+    auto source = file.data(gs).source();
 
-    if (file.data(*gs).originalSigil == core::StrictLevel::None) {
+    if (file.data(gs).originalSigil == core::StrictLevel::None) {
         if (source.length() >= 2 && source[0] == '#' && source[1] == '!') {
             int newline = source.find("\n", 0);
             return core::Loc(file, newline + 1, newline + 1);
@@ -827,7 +827,7 @@ int realmain(int argc, char *argv[]) {
                     // marked strict.
                     continue;
                 }
-                auto loc = findTyped(gs, file);
+                auto loc = findTyped(*gs, file);
                 if (auto e = gs->beginError(loc, core::errors::Infer::SuggestTyped)) {
                     auto sigil = levelToSigil(minErrorLevel);
                     e.setHeader("You could add `# typed: {}`", sigil);
