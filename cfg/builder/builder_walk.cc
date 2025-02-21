@@ -479,6 +479,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
             [&](const ast::Self &a) {
+                // We still model `self` in the CFG as a local variable, to support `bind`
                 current->exprs.emplace_back(cctx.target, a.loc, make_insn<Ident>(LocalRef::selfVariable()));
                 ret = current;
             },
