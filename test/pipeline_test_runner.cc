@@ -564,7 +564,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         auto gsForMinimize = emptyGs->deepCopy();
         auto opts = realmain::options::Options{};
         auto minimizeRBI = test.folder + test.minimizeRBI;
-        realmain::Minimize::indexAndResolveForMinimize(gs, gsForMinimize, opts, *workers, minimizeRBI);
+        realmain::Minimize::indexAndResolveForMinimize(*gs, *gsForMinimize, opts, *workers, minimizeRBI);
         auto printerConfig = realmain::options::PrinterConfig{};
         printerConfig.enabled = true;
         printerConfig.outputPath = "/dev/null"; // tricks PrinterConfig::print into buffering

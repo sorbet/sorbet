@@ -794,7 +794,7 @@ int realmain(int argc, char *argv[]) {
             // project is a single RBI file.
             optsForMinimize.stripePackages = false;
 
-            Minimize::indexAndResolveForMinimize(gs, gsForMinimize, optsForMinimize, *workers, opts.minimizeRBI);
+            Minimize::indexAndResolveForMinimize(*gs, *gsForMinimize, optsForMinimize, *workers, opts.minimizeRBI);
             Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
 #endif
         }
