@@ -90,7 +90,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         REQUIRE_NE(contents.data, nullptr);
 
         auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*logger, *logger));
-        payload::createInitialGlobalState(gs, *opts, kvstore);
+        payload::createInitialGlobalState(*gs, *opts, kvstore);
 
         // If caching fails, gs gets modified during payload creation.
         CHECK_FALSE(gs->wasModified());
@@ -145,7 +145,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         REQUIRE_NE(updatedFileData.data, nullptr);
 
         auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*logger, *logger));
-        payload::createInitialGlobalState(gs, *opts, kvstore);
+        payload::createInitialGlobalState(*gs, *opts, kvstore);
 
         core::File file{string(filePath), string(updatedFileContents), core::File::Type::Normal};
         auto cachedFile = core::serialize::Serializer::loadTree(*gs, file, updatedFileData.data);
@@ -192,7 +192,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
         REQUIRE_NE(contents.data, nullptr);
 
         auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*nullLogger, *nullLogger));
-        payload::createInitialGlobalState(gs, *opts, kvstore);
+        payload::createInitialGlobalState(*gs, *opts, kvstore);
 
         // If caching fails, gs gets modified during payload creation.
         CHECK_FALSE(gs->wasModified());

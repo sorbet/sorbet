@@ -47,7 +47,7 @@ unique_ptr<core::GlobalState> makeGS() {
     auto gs = make_unique<core::GlobalState>(
         (make_shared<core::ErrorQueue>(*logger, *logger, make_shared<core::NullFlusher>())));
     unique_ptr<const OwnedKeyValueStore> kvstore;
-    payload::createInitialGlobalState(gs, nullOpts, kvstore);
+    payload::createInitialGlobalState(*gs, nullOpts, kvstore);
     return gs;
 }
 

@@ -6,24 +6,23 @@
 using namespace std;
 
 namespace sorbet::rbi {
-void populateRBIsInto(unique_ptr<core::GlobalState> &gs) {
-    gs->initEmpty();
-    gs->ensureCleanStrings = true;
+void populateRBIsInto(core::GlobalState &gs) {
+    gs.initEmpty();
+    gs.ensureCleanStrings = true;
 
     vector<core::FileRef> payloadFiles;
     {
-        core::UnfreezeFileTable fileTableAccess(*gs);
+        core::UnfreezeFileTable fileTableAccess(gs);
         for (auto &p : rbi::all()) {
-            auto file = gs->enterFile(p.first, p.second);
-            file.data(*gs).sourceType = core::File::Type::PayloadGeneration;
+            auto file = gs.enterFile(p.first, p.second);
+            file.data(gs).sourceType = core::File::Type::PayloadGeneration;
             payloadFiles.emplace_back(move(file));
         }
     }
     realmain::options::Options emptyOpts;
     unique_ptr<const OwnedKeyValueStore> kvstore;
-    auto workers = WorkerPool::create(emptyOpts.threads, gs->tracer());
-    auto indexed =
-        realmain::pipeline::index(*gs, absl::Span<core::FileRef>(payloadFiles), emptyOpts, *workers, kvstore);
+    auto workers = WorkerPool::create(emptyOpts.threads, gs.tracer());
+    auto indexed = realmain::pipeline::index(gs, absl::Span<core::FileRef>(payloadFiles), emptyOpts, *workers, kvstore);
 
     // We don't run the payload with any packager options, so we can skip pipeline::package()
 
@@ -33,9 +32,9 @@ void populateRBIsInto(unique_ptr<core::GlobalState> &gs) {
     // '[0].to_set' will typecheck (using text-based payload) but never calculate hashes for the
     // payload files (because neither `--lsp` nor `--store-state` was passed).
     auto foundMethodHashes = nullptr;
-    realmain::pipeline::nameAndResolve(*gs, move(indexed), emptyOpts, *workers, foundMethodHashes);
+    realmain::pipeline::nameAndResolve(gs, move(indexed), emptyOpts, *workers, foundMethodHashes);
     // ^ result is thrown away
-    gs->ensureCleanStrings = false;
+    gs.ensureCleanStrings = false;
 }
 
 } // namespace sorbet::rbi

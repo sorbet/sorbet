@@ -443,7 +443,7 @@ int realmain(int argc, char *argv[]) {
 
     logger->trace("building initial global state");
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(logger, opts);
-    payload::createInitialGlobalState(gs, opts, kvstore);
+    payload::createInitialGlobalState(*gs, opts, kvstore);
     if (opts.silenceErrors) {
         gs->silenceErrors = true;
     }
