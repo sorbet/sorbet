@@ -52,7 +52,7 @@ public:
     static ast::ParsedFilesOrCancelled
     indexAndComputeFileHashes(core::GlobalState &gs, const realmain::options::Options &opts, spdlog::logger &logger,
                               absl::Span<const core::FileRef> files, WorkerPool &workers,
-                              const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
+                              const std::unique_ptr<const OwnedKeyValueStore> &kvstore, bool cancelable = false);
 };
 } // namespace sorbet::hashing
 
