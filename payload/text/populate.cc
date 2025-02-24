@@ -6,24 +6,23 @@
 using namespace std;
 
 namespace sorbet::rbi {
-void populateRBIsInto(unique_ptr<core::GlobalState> &gs) {
-    gs->initEmpty();
-    gs->ensureCleanStrings = true;
+void populateRBIsInto(core::GlobalState &gs) {
+    gs.initEmpty();
+    gs.ensureCleanStrings = true;
 
     vector<core::FileRef> payloadFiles;
     {
-        core::UnfreezeFileTable fileTableAccess(*gs);
+        core::UnfreezeFileTable fileTableAccess(gs);
         for (auto &p : rbi::all()) {
-            auto file = gs->enterFile(p.first, p.second);
-            file.data(*gs).sourceType = core::File::Type::PayloadGeneration;
+            auto file = gs.enterFile(p.first, p.second);
+            file.data(gs).sourceType = core::File::Type::PayloadGeneration;
             payloadFiles.emplace_back(move(file));
         }
     }
     realmain::options::Options emptyOpts;
     unique_ptr<const OwnedKeyValueStore> kvstore;
-    auto workers = WorkerPool::create(emptyOpts.threads, gs->tracer());
-    auto indexed =
-        realmain::pipeline::index(*gs, absl::Span<core::FileRef>(payloadFiles), emptyOpts, *workers, kvstore);
+    auto workers = WorkerPool::create(emptyOpts.threads, gs.tracer());
+    auto indexed = realmain::pipeline::index(gs, absl::Span<core::FileRef>(payloadFiles), emptyOpts, *workers, kvstore);
 
     // We don't run the payload with any packager options, so we can skip pipeline::package()
 
@@ -35,7 +34,7 @@ void populateRBIsInto(unique_ptr<core::GlobalState> &gs) {
     auto foundMethodHashes = nullptr;
     realmain::pipeline::nameAndResolve(gs, move(indexed), emptyOpts, *workers, foundMethodHashes);
     // ^ result is thrown away
-    gs->ensureCleanStrings = false;
+    gs.ensureCleanStrings = false;
 }
 
 } // namespace sorbet::rbi

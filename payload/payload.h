@@ -7,7 +7,7 @@
 
 namespace sorbet::payload {
 
-void createInitialGlobalState(std::unique_ptr<core::GlobalState> &gs, const realmain::options::Options &options,
+void createInitialGlobalState(core::GlobalState &gs, const realmain::options::Options &options,
                               const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 
 } // namespace sorbet::payload

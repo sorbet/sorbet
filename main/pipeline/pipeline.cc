@@ -307,15 +307,15 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
     return what;
 }
 
-vector<core::FileRef> reserveFiles(unique_ptr<core::GlobalState> &gs, const vector<string> &files) {
-    Timer timeit(gs->tracer(), "reserveFiles");
+vector<core::FileRef> reserveFiles(core::GlobalState &gs, const vector<string> &files) {
+    Timer timeit(gs.tracer(), "reserveFiles");
     vector<core::FileRef> ret;
     ret.reserve(files.size());
-    core::UnfreezeFileTable unfreezeFiles(*gs);
+    core::UnfreezeFileTable unfreezeFiles(gs);
     for (auto &f : files) {
-        auto fileRef = gs->findFileByPath(f);
+        auto fileRef = gs.findFileByPath(f);
         if (!fileRef.exists()) {
-            fileRef = gs->reserveFileRef(f);
+            fileRef = gs.reserveFileRef(f);
         }
         ret.emplace_back(move(fileRef));
     }
@@ -942,10 +942,10 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
     return what;
 }
 
-ast::ParsedFilesOrCancelled nameAndResolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
+ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                                            const options::Options &opts, WorkerPool &workers,
                                            core::FoundDefHashes *foundHashes) {
-    auto canceled = name(*gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
+    auto canceled = name(gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
     if (canceled) {
         return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
     }
@@ -953,16 +953,16 @@ ast::ParsedFilesOrCancelled nameAndResolve(unique_ptr<core::GlobalState> &gs, ve
     return resolve(gs, move(what), opts, workers);
 }
 
-ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                    const options::Options &opts, WorkerPool &workers) {
+ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
+                                    WorkerPool &workers) {
     try {
         if (opts.stopAfterPhase != options::Phase::NAMER) {
             ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
             {
-                Timer timeit(gs->tracer(), "resolving");
-                core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
-                core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
-                auto maybeResult = resolver::Resolver::run(*gs, move(what), workers);
+                Timer timeit(gs.tracer(), "resolving");
+                core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
+                core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
+                auto maybeResult = resolver::Resolver::run(gs, move(what), workers);
                 if (!maybeResult.hasResult()) {
                     return maybeResult;
                 }
@@ -971,39 +971,39 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
 
 #ifndef SORBET_REALMAIN_MIN
             if (opts.stripePackages) {
-                Timer timeit(gs->tracer(), "visibility_checker");
-                what = packager::VisibilityChecker::run(*gs, workers, std::move(what));
+                Timer timeit(gs.tracer(), "visibility_checker");
+                what = packager::VisibilityChecker::run(gs, workers, std::move(what));
             }
 #endif
 
             if (opts.stressIncrementalResolver) {
-                auto symbolsBefore = gs->symbolsUsedTotal();
+                auto symbolsBefore = gs.symbolsUsedTotal();
                 for (auto &f : what) {
                     // Shift contents of file past current file's EOF, re-run incrementalResolve, assert that no
                     // locations appear before file's old EOF.
-                    const int prohibitedLines = f.file.data(*gs).source().size();
-                    auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(*gs).source());
-                    auto newFile = make_shared<core::File>(string(f.file.data(*gs).path()), move(newSource),
-                                                           f.file.data(*gs).sourceType);
-                    gs->replaceFile(f.file, move(newFile));
-                    f.file.data(*gs).strictLevel = decideStrictLevel(*gs, f.file, opts);
-                    auto reIndexed = indexOne(opts, *gs, f.file);
+                    const int prohibitedLines = f.file.data(gs).source().size();
+                    auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(gs).source());
+                    auto newFile = make_shared<core::File>(string(f.file.data(gs).path()), move(newSource),
+                                                           f.file.data(gs).sourceType);
+                    gs.replaceFile(f.file, move(newFile));
+                    f.file.data(gs).strictLevel = decideStrictLevel(gs, f.file, opts);
+                    auto reIndexed = indexOne(opts, gs, f.file);
                     vector<ast::ParsedFile> toBeReResolved;
                     toBeReResolved.emplace_back(move(reIndexed));
                     // We don't compute file hashes when running for incrementalResolve.
                     auto foundHashesForFiles = nullopt;
                     auto reresolved =
-                        pipeline::incrementalResolve(*gs, move(toBeReResolved), foundHashesForFiles, opts, workers);
+                        pipeline::incrementalResolve(gs, move(toBeReResolved), foundHashesForFiles, opts, workers);
                     ENFORCE(reresolved.size() == 1);
-                    f = checkNoDefinitionsInsideProhibitedLines(*gs, move(reresolved[0]), 0, prohibitedLines);
+                    f = checkNoDefinitionsInsideProhibitedLines(gs, move(reresolved[0]), 0, prohibitedLines);
                 }
-                ENFORCE(symbolsBefore == gs->symbolsUsedTotal(),
+                ENFORCE(symbolsBefore == gs.symbolsUsedTotal(),
                         "Stressing the incremental resolver should not add any new symbols");
             }
         }
     } catch (SorbetException &) {
         Exception::failInFuzzer();
-        if (auto e = gs->beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
             e.setHeader("Exception resolving (backtrace is above)");
         }
     }
@@ -1011,24 +1011,24 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
     if (opts.print.ResolveTree.enabled || opts.print.ResolveTreeRaw.enabled) {
         for (auto &resolved : what) {
             if (opts.print.ResolveTree.enabled) {
-                opts.print.ResolveTree.fmt("{}\n", resolved.tree.toString(*gs));
+                opts.print.ResolveTree.fmt("{}\n", resolved.tree.toString(gs));
             }
             if (opts.print.ResolveTreeRaw.enabled) {
-                opts.print.ResolveTreeRaw.fmt("{}\n", resolved.tree.showRaw(*gs));
+                opts.print.ResolveTreeRaw.fmt("{}\n", resolved.tree.showRaw(gs));
             }
         }
     }
 
     if (opts.print.SymbolTable.enabled) {
-        opts.print.SymbolTable.fmt("{}\n", gs->toString());
+        opts.print.SymbolTable.fmt("{}\n", gs.toString());
     }
     if (opts.print.SymbolTableRaw.enabled) {
-        opts.print.SymbolTableRaw.fmt("{}\n", gs->showRaw());
+        opts.print.SymbolTableRaw.fmt("{}\n", gs.showRaw());
     }
 
 #ifndef SORBET_REALMAIN_MIN
     if (opts.print.SymbolTableJson.enabled) {
-        auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
+        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
         if (opts.print.SymbolTableJson.outputPath.empty()) {
             core::Proto::toJSON(root, cout);
         } else {
@@ -1038,7 +1038,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         }
     }
     if (opts.print.SymbolTableProto.enabled) {
-        auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
+        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
         if (opts.print.SymbolTableProto.outputPath.empty()) {
             root.SerializeToOstream(&cout);
         } else {
@@ -1048,7 +1048,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         }
     }
     if (opts.print.SymbolTableMessagePack.enabled) {
-        auto root = core::Proto::toProto(*gs, core::Symbols::root(), false);
+        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
         stringstream buf;
         core::Proto::toJSON(root, buf);
         auto str = buf.str();
@@ -1066,7 +1066,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         }
     }
     if (opts.print.SymbolTableFullJson.enabled) {
-        auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
+        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
         if (opts.print.SymbolTableJson.outputPath.empty()) {
             core::Proto::toJSON(root, cout);
         } else {
@@ -1076,7 +1076,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         }
     }
     if (opts.print.SymbolTableFullProto.enabled) {
-        auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
+        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
         if (opts.print.SymbolTableFullProto.outputPath.empty()) {
             root.SerializeToOstream(&cout);
         } else {
@@ -1086,7 +1086,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         }
     }
     if (opts.print.SymbolTableFullMessagePack.enabled) {
-        auto root = core::Proto::toProto(*gs, core::Symbols::root(), true);
+        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
         stringstream buf;
         core::Proto::toJSON(root, buf);
         auto str = buf.str();
@@ -1105,14 +1105,14 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
     }
 #endif
     if (opts.print.SymbolTableFull.enabled) {
-        opts.print.SymbolTableFull.fmt("{}\n", gs->toStringFull());
+        opts.print.SymbolTableFull.fmt("{}\n", gs.toStringFull());
     }
     if (opts.print.SymbolTableFullRaw.enabled) {
-        opts.print.SymbolTableFullRaw.fmt("{}\n", gs->showRawFull());
+        opts.print.SymbolTableFullRaw.fmt("{}\n", gs.showRawFull());
     }
 
     if (opts.print.MissingConstants.enabled) {
-        what = printMissingConstants(*gs, opts, move(what));
+        what = printMissingConstants(gs, opts, move(what));
     }
 
     return ast::ParsedFilesOrCancelled(move(what));
@@ -1253,14 +1253,14 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
     }
 }
 
-void printFileTable(unique_ptr<core::GlobalState> &gs, const options::Options &opts,
+void printFileTable(core::GlobalState &gs, const options::Options &opts,
                     const UnorderedMap<long, long> &untypedUsages) {
 #ifndef SORBET_REALMAIN_MIN
     if (opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled) {
         if (opts.print.FileTableProto.enabled && opts.print.FileTableFullProto.enabled) {
             Exception::raise("file-table-proto and file-table-full-proto are mutually exclusive print options");
         }
-        auto files = core::Proto::filesToProto(*gs, untypedUsages, opts.print.FileTableFullProto.enabled);
+        auto files = core::Proto::filesToProto(gs, untypedUsages, opts.print.FileTableFullProto.enabled);
         if (opts.print.FileTableProto.outputPath.empty()) {
             files.SerializeToOstream(&cout);
         } else {
@@ -1273,7 +1273,7 @@ void printFileTable(unique_ptr<core::GlobalState> &gs, const options::Options &o
         if (opts.print.FileTableJson.enabled && opts.print.FileTableFullJson.enabled) {
             Exception::raise("file-table-json and file-table-full-json are mutually exclusive print options");
         }
-        auto files = core::Proto::filesToProto(*gs, untypedUsages, opts.print.FileTableFullJson.enabled);
+        auto files = core::Proto::filesToProto(gs, untypedUsages, opts.print.FileTableFullJson.enabled);
         if (opts.print.FileTableJson.outputPath.empty()) {
             core::Proto::toJSON(files, cout);
         } else {
@@ -1286,7 +1286,7 @@ void printFileTable(unique_ptr<core::GlobalState> &gs, const options::Options &o
         if (opts.print.FileTableMessagePack.enabled && opts.print.FileTableFullMessagePack.enabled) {
             Exception::raise("file-table-msgpack and file-table-full-msgpack are mutually exclusive print options");
         }
-        auto files = core::Proto::filesToProto(*gs, untypedUsages, opts.print.FileTableFullMessagePack.enabled);
+        auto files = core::Proto::filesToProto(gs, untypedUsages, opts.print.FileTableFullMessagePack.enabled);
         stringstream buf;
         core::Proto::toJSON(files, buf);
         auto str = buf.str();

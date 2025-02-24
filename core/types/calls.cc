@@ -2944,6 +2944,12 @@ public:
                 definingMethodName != core::Names::beforeAngles()) {
                 suggestType = core::Types::any(gs, Types::nilClass(), suggestType);
             }
+
+            // For boolean types, suggest T::Boolean instead of TrueClass/FalseClass
+            if (suggestType == core::Types::falseClass() || suggestType == core::Types::trueClass()) {
+                suggestType = core::Types::Boolean();
+            }
+
             e.setHeader("The {} variable `{}` must be declared using `{}` when specifying `{}`", fieldKind, fieldName,
                         "T.let", "# typed: strict");
             auto replaceLoc = args.argLoc(0);
