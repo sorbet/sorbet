@@ -417,7 +417,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                 {
                     Timer timeit(config->logger, "reIndexFromFileSystem");
 
-                    auto inputFiles = pipeline::reserveFiles(finalGS, config->opts.inputFileNames);
+                    auto inputFiles = pipeline::reserveFiles(*finalGS, config->opts.inputFileNames);
                     this->indexed.clear();
                     this->indexed.resize(finalGS->filesUsed());
 
@@ -515,7 +515,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             return;
         }
 
-        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers);
+        auto maybeResolved = pipeline::resolve(*gs, move(indexedCopies), config->opts, workers);
         if (!maybeResolved.hasResult()) {
             return;
         }
