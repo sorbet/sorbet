@@ -416,9 +416,10 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                     auto asts = hashing::Hashing::indexAndComputeFileHashes(*finalGS, config->opts, *config->logger,
                                                                             absl::Span<core::FileRef>(inputFiles),
                                                                             workers, ownedKvstore);
+                    ENFORCE(asts.hasResult(), "LSP initialization does not support cancellation");
                     // asts are in fref order, but we (currently) don't index and compute file hashes for payload files,
                     // so vector index != FileRef ID. Fix that by slotting them into `indexed`.
-                    for (auto &ast : asts) {
+                    for (auto &ast : asts.result()) {
                         int id = ast.file.id();
                         ENFORCE_NO_TIMER(id < this->indexed.size());
                         this->indexed[id] = std::move(ast);

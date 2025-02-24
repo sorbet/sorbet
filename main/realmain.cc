@@ -632,6 +632,7 @@ int realmain(int argc, char *argv[]) {
             // seconds.
             auto packageFileRefs = pipeline::reserveFiles(*gs, packageFiles);
             auto packages = pipeline::index(*gs, absl::Span<core::FileRef>(packageFileRefs), opts, *workers, nullptr);
+            ENFORCE(packages.hasResult(), "There's no cancellation in batch mode");
             {
                 core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*gs);
                 core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
@@ -642,8 +643,8 @@ int realmain(int argc, char *argv[]) {
                                        opts.packagerLayers, opts.stripePackagesHint);
             }
 
-            packager::Packager::findPackages(*gs, absl::Span<ast::ParsedFile>(packages));
-            packager::Packager::setPackageNameOnFiles(*gs, packages);
+            packager::Packager::findPackages(*gs, absl::MakeSpan(packages.result()));
+            packager::Packager::setPackageNameOnFiles(*gs, absl::MakeSpan(packages.result()));
             packager::Packager::setPackageNameOnFiles(*gs, inputFiles);
 
             if (!opts.singlePackage.empty()) {
@@ -691,10 +692,14 @@ int realmain(int argc, char *argv[]) {
                 inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
 
                 if (!opts.storeState.empty() || opts.forceHashing) {
-                    indexed = hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, inputPackageFiles,
-                                                                          *workers, kvstore);
+                    auto result = hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, inputPackageFiles,
+                                                                              *workers, kvstore);
+                    ENFORCE(result.hasResult(), "There's no cancellation in batch mode");
+                    indexed = std::move(result.result());
                 } else {
-                    indexed = pipeline::index(*gs, inputPackageFiles, opts, *workers, kvstore);
+                    auto result = pipeline::index(*gs, inputPackageFiles, opts, *workers, kvstore);
+                    ENFORCE(result.hasResult(), "There's no cancellation in batch mode");
+                    indexed = std::move(result.result());
                 }
 
                 // Cache these before any pipeline::package rewrites, so that the cache is still
@@ -718,22 +723,23 @@ int realmain(int argc, char *argv[]) {
                     // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
                     ? hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, inputFilesSpan, *workers, kvstore)
                     : pipeline::index(*gs, inputFilesSpan, opts, *workers, kvstore);
+            ENFORCE(nonPackageIndexed.hasResult(), "There's no cancellation in batch mode");
 
             // Cache these before any pipeline::package rewrites, so that the cache is still usable
             // regardless of whether `--stripe-packages` was passed.
             cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers,
-                                                 nonPackageIndexed);
+                                                 nonPackageIndexed.result());
 
             // Now validate all the other files (the packageDB shouldn't change)
-            pipeline::validatePackagedFiles(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers);
+            pipeline::validatePackagedFiles(*gs, absl::MakeSpan(nonPackageIndexed.result()), opts, *workers);
 
             // Only need to compute hashes when running to compute a FileHash
             auto foundHashes = nullptr;
             auto canceled =
-                pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers, foundHashes);
+                pipeline::name(*gs, absl::MakeSpan(nonPackageIndexed.result()), opts, *workers, foundHashes);
             ENFORCE(!canceled, "There's no cancellation in batch mode");
 
-            pipeline::unpartitionPackageFiles(indexed, move(nonPackageIndexed));
+            pipeline::unpartitionPackageFiles(indexed, move(nonPackageIndexed.result()));
             // TODO(jez) At this point, it's not correct to call it `indexed` anymore: we've run namer too
 
             if (gs->hadCriticalError()) {
