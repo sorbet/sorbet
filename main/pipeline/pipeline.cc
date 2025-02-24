@@ -773,6 +773,56 @@ void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const opti
 #endif
 }
 
+// packager intentionally runs outside of rewriter so that its output does not get cached.
+void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
+                    WorkerPool &workers) {
+#ifndef SORBET_REALMAIN_MIN
+    if (!opts.stripePackages) {
+        return;
+    }
+
+    try {
+        packager::Packager::buildPackageDB(gs, workers, what);
+        if (opts.print.Packager.enabled) {
+            for (auto &f : what) {
+                opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());
+                opts.print.Packager.fmt("{}\n", f.tree.toStringWithTabs(gs, 0));
+            }
+        }
+    } catch (SorbetException &) {
+        Exception::failInFuzzer();
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception packaging (backtrace is above)");
+        }
+    }
+#endif
+}
+
+// packager intentionally runs outside of rewriter so that its output does not get cached.
+void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
+                           WorkerPool &workers) {
+#ifndef SORBET_REALMAIN_MIN
+    if (!opts.stripePackages) {
+        return;
+    }
+
+    try {
+        packager::Packager::validatePackagedFiles(gs, workers, what);
+        if (opts.print.Packager.enabled) {
+            for (auto &f : what) {
+                opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());
+                opts.print.Packager.fmt("{}\n", f.tree.toStringWithTabs(gs, 0));
+            }
+        }
+    } catch (SorbetException &) {
+        Exception::failInFuzzer();
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception packaging (backtrace is above)");
+        }
+    }
+#endif
+}
+
 [[nodiscard]] bool name(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                         WorkerPool &workers, core::FoundDefHashes *foundHashes) {
     Timer timeit(gs.tracer(), "name");

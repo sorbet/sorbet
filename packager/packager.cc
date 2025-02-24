@@ -2074,13 +2074,39 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const cor
     }
 }
 
-void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
+namespace {
+
+enum class PackagerMode {
+    PackagesOnly,
+    PackagedFilesOnly,
+    AllFiles,
+};
+
+template <PackagerMode Mode>
+void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
     ENFORCE(!gs.runningUnderAutogen, "Packager pass does not run in autogen");
 
     Timer timeit(gs.tracer(), "packager");
 
-    findPackages(gs, files);
-    setPackageNameOnFiles(gs, files);
+    switch (Mode) {
+        case PackagerMode::PackagesOnly:
+            timeit.setTag("mode", "packages_only");
+            break;
+        case PackagerMode::PackagedFilesOnly:
+            timeit.setTag("mode", "packaged_files_only");
+            break;
+        case PackagerMode::AllFiles:
+            break;
+    }
+
+    constexpr bool buildPackageDB = Mode == PackagerMode::PackagesOnly || Mode == PackagerMode::AllFiles;
+    constexpr bool validatePackagedFiles = Mode == PackagerMode::PackagedFilesOnly || Mode == PackagerMode::AllFiles;
+
+    if constexpr (buildPackageDB) {
+        Packager::findPackages(gs, files);
+    }
+
+    Packager::setPackageNameOnFiles(gs, files);
 
     {
         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
@@ -2092,24 +2118,30 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
             taskq->push(i, 1);
         }
 
-        if (gs.packageDB().enforceLayering()) {
-            computeSCCs(gs);
+        if constexpr (buildPackageDB) {
+            if (gs.packageDB().enforceLayering()) {
+                computeSCCs(gs);
+            }
         }
 
         workers.multiplexJob("rewritePackagesAndFiles", [&gs, &files, &barrier, taskq]() {
             Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
             size_t idx;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
-                ast::ParsedFile &job = files[idx];
-                if (result.gotItem()) {
-                    auto &file = job.file.data(gs);
-                    core::Context ctx(gs, core::Symbols::root(), job.file);
+                if (!result.gotItem()) {
+                    continue;
+                }
 
-                    if (file.isPackage()) {
-                        validatePackage(ctx);
-                    } else {
-                        validatePackagedFile(ctx, job.tree);
-                    }
+                ast::ParsedFile &job = files[idx];
+                auto file = job.file;
+                core::Context ctx(gs, core::Symbols::root(), file);
+
+                if (file.data(gs).isPackage()) {
+                    ENFORCE(buildPackageDB);
+                    validatePackage(ctx);
+                } else {
+                    ENFORCE(validatePackagedFiles);
+                    validatePackagedFile(ctx, job.tree);
                 }
             }
 
@@ -2118,6 +2150,11 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
 
         barrier.Wait();
     }
+}
+} // namespace
+
+void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
+    packageRunCore<PackagerMode::AllFiles>(gs, workers, files);
 }
 
 vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, vector<ast::ParsedFile> files,
@@ -2158,6 +2195,14 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
     });
     barrier.Wait();
     return files;
+}
+
+void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
+    packageRunCore<PackagerMode::PackagesOnly>(gs, workers, files);
+}
+
+void Packager::validatePackagedFiles(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
+    packageRunCore<PackagerMode::PackagedFilesOnly>(gs, workers, files);
 }
 
 namespace {
