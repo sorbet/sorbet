@@ -507,9 +507,10 @@ struct IndexSubstitutionJob {
     IndexSubstitutionJob &operator=(IndexSubstitutionJob &&other) = default;
 };
 
-vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options::Options &opts,
-                                          shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
-                                          WorkerPool &workers, const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+ast::ParsedFilesOrCancelled mergeIndexResults(core::GlobalState &cgs, const options::Options &opts,
+                                              shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
+                                              WorkerPool &workers,
+                                              const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
 
     auto batchq = make_shared<ConcurrentBoundedQueue<IndexSubstitutionJob>>(input->bound);
@@ -567,9 +568,9 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
     return ret;
 }
 
-vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, absl::Span<const core::FileRef> files,
-                                           const options::Options &opts, WorkerPool &workers,
-                                           const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::Span<const core::FileRef> files,
+                                               const options::Options &opts, WorkerPool &workers,
+                                               const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
     for (auto file : files) {
@@ -610,11 +611,10 @@ vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, absl::Span
     return mergeIndexResults(baseGs, opts, resultq, workers, kvstore);
 }
 
-vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<const core::FileRef> files,
-                              const options::Options &opts, WorkerPool &workers,
-                              const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+ast::ParsedFilesOrCancelled index(core::GlobalState &gs, absl::Span<const core::FileRef> files,
+                                  const options::Options &opts, WorkerPool &workers,
+                                  const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     Timer timeit(gs.tracer(), "index");
-    vector<ast::ParsedFile> ret;
     vector<ast::ParsedFile> empty;
 
     if (opts.stopAfterPhase == options::Phase::INIT) {
@@ -625,19 +625,24 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<const core::File
 
     if (files.size() < 3) {
         // Run singlethreaded if only using 2 files
+        std::vector<ast::ParsedFile> parsed;
+        parsed.reserve(files.size());
         for (auto file : files) {
             auto tree = readFileWithStrictnessOverrides(gs, file, opts, kvstore);
             auto parsedFile = indexOne(opts, gs, file, move(tree));
-            ret.emplace_back(move(parsedFile));
+            parsed.emplace_back(move(parsedFile));
         }
-        ENFORCE(files.size() == ret.size());
+        fast_sort(parsed, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
+        ENFORCE(files.size() == parsed.size());
+        return parsed;
     } else {
-        ret = indexSuppliedFiles(gs, files, opts, workers, kvstore);
+        auto ret = indexSuppliedFiles(gs, files, opts, workers, kvstore);
+        if (ret.hasResult()) {
+            // TODO(jez) Do we want this fast_sort here? Is it redundant?
+            fast_sort(ret.result(), [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
+        }
+        return ret;
     }
-
-    // TODO(jez) Do we want this fast_sort here? Is it redundant?
-    fast_sort(ret, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
-    return ret;
 }
 
 namespace {

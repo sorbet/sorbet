@@ -1,6 +1,7 @@
 #ifndef RUBY_TYPER_HASHING_HASHING_H
 #define RUBY_TYPER_HASHING_HASHING_H
 
+#include "ast/Trees.h"
 #include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
 #include "core/Files.h"
@@ -48,7 +49,7 @@ public:
      *
      * Note: ASTs are returned in `FileRef` order (not input order).
      */
-    static std::vector<ast::ParsedFile>
+    static ast::ParsedFilesOrCancelled
     indexAndComputeFileHashes(core::GlobalState &gs, const realmain::options::Options &opts, spdlog::logger &logger,
                               absl::Span<const core::FileRef> files, WorkerPool &workers,
                               const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
