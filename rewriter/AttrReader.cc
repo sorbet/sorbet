@@ -16,11 +16,20 @@ namespace {
 // either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
 // users, but we don't know that information in the Rewriter passes.
 bool isT(const ast::ExpressionPtr &expr) {
-    auto t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    if (t == nullptr || t->cnst != core::Names::Constants::T()) {
-        return false;
-    }
-    return ast::MK::isRootScope(t->scope);
+    auto res = false;
+
+    typecase(
+        expr,
+        [&](const ast::UnresolvedConstantLit &constLit) {
+            // When the `T` was written by the user, we get an UnresolvedConstantLit.
+            res = constLit.cnst == core::Names::Constants::T() && ast::MK::isRootScope(constLit.scope);
+        },
+        [&](const ast::ConstantLit &constLit) {
+            // When the `T` was inserted by `ast::MK::T()`, we get a ConstantLit.
+            res = constLit.symbol() == core::Symbols::T();
+        });
+
+    return res;
 }
 
 bool isTNilableOrUntyped(const ast::ExpressionPtr &expr) {

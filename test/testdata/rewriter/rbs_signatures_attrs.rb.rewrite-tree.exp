@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def bar=<<todo method>>(bar, &<blk>)
-      @bar = bar
+      @bar = <cast:let>(bar, <todo sym>, ::T.nilable(<emptyTree>::<C Integer>))
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def baz=<<todo method>>(baz, &<blk>)
-      @baz = baz
+      @baz = <cast:let>(baz, <todo sym>, ::T.nilable(<emptyTree>::<C Integer>))
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -45,7 +45,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def qux=<<todo method>>(qux, &<blk>)
-      @qux = qux
+      @qux = <cast:let>(qux, <todo sym>, ::T.nilable(<emptyTree>::<C Integer>))
     end
 
     def quux1=<<todo method>>(quux1, &<blk>)
@@ -112,4 +112,38 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(x.baz())
 
   x.qux=("")
+
+  class <emptyTree>::<C AttrRewriter><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C Integer>))
+    end
+
+    def a<<todo method>>(&<blk>)
+      @a
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:a, ::T.nilable(<emptyTree>::<C Integer>)).returns(::T.nilable(<emptyTree>::<C Integer>))
+    end
+
+    def a=<<todo method>>(a, &<blk>)
+      @a = <cast:let>(a, <todo sym>, ::T.nilable(<emptyTree>::<C Integer>))
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def initialize<<todo method>>(&<blk>)
+      <emptyTree>::<C T>.reveal_type(@a)
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of a>
+
+    <runtime method definition of a=>
+
+    <runtime method definition of initialize>
+  end
 end
