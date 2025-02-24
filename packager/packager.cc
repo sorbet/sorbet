@@ -2128,18 +2128,20 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
             Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
             size_t idx;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
-                ast::ParsedFile &job = files[idx];
-                if (result.gotItem()) {
-                    auto &file = job.file.data(gs);
-                    core::Context ctx(gs, core::Symbols::root(), job.file);
+                if (!result.gotItem()) {
+                    continue;
+                }
 
-                    if (file.isPackage()) {
-                        ENFORCE(buildPackageDB);
-                        validatePackage(ctx);
-                    } else {
-                        ENFORCE(validatePackagedFiles);
-                        validatePackagedFile(ctx, job.tree);
-                    }
+                ast::ParsedFile &job = files[idx];
+                auto file = job.file;
+                core::Context ctx(gs, core::Symbols::root(), file);
+
+                if (file.data(gs).isPackage()) {
+                    ENFORCE(buildPackageDB);
+                    validatePackage(ctx);
+                } else {
+                    ENFORCE(validatePackagedFiles);
+                    validatePackagedFile(ctx, job.tree);
                 }
             }
 
