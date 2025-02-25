@@ -457,22 +457,7 @@ public:
                         importStrictDepsLevel.has_value() &&
                         importStrictDepsLevel.value().first < this->package.minimumStrictDependenciesLevel();
                 }
-                // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
-                // layering/strict_dependencies issues.
-                if (layeringViolation && strictDependenciesTooLow) {
-                    e.setHeader(
-                        "`{}` resolves but its package is not imported. However, it cannot be automatically imported "
-                        "because importing it would cause a layering violation and its `{}` is too low",
-                        lit.symbol().show(ctx), "strict_dependencies");
-                } else if (layeringViolation) {
-                    e.setHeader("`{}` resolves but its package is not imported. However, it cannot be automatically "
-                                "imported because importing it would cause a layering violation",
-                                lit.symbol().show(ctx));
-                } else if (strictDependenciesTooLow) {
-                    e.setHeader("`{}` resolves but its package is not imported. However, it cannot be automatically "
-                                "imported because its `{}` is too low",
-                                lit.symbol().show(ctx), "strict_dependencies");
-                } else {
+                if (!layeringViolation && !strictDependenciesTooLow) {
                     e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                     e.addErrorLine(pkg.declLoc(), "Exported from package here");
                     if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
@@ -481,31 +466,50 @@ public:
                             e.addErrorNote("{}", db.errorHint());
                         }
                     }
-                }
+                } else {
+                    // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
+                    // layering/strict_dependencies issues.
+                    std::vector<std::string> reasons;
+                    if (layeringViolation) {
+                        reasons.emplace_back("importing it would cause a layering violation");
+                        ENFORCE(pkg.layer().has_value(),
+                                "causesLayeringViolation should return false if layer is not set");
+                        ENFORCE(this->package.layer().has_value(),
+                                "causesLayeringViolation should return false if layer is not set");
+                        e.addErrorLine(core::Loc(pkg.declLoc().file(), pkg.layer().value().second),
+                                       "Package `{}` must be at most layer `{}` (to match package `{}`) but is "
+                                       "currently layer `{}`",
+                                       pkg.show(ctx), this->package.layer().value().first.show(ctx),
+                                       this->package.show(ctx), pkg.layer().value().first.show(ctx));
+                    }
 
-                if (layeringViolation) {
-                    ENFORCE(pkg.layer().has_value(), "causesLayeringViolation should return false if layer is not set");
-                    ENFORCE(this->package.layer().has_value(),
-                            "causesLayeringViolation should return false if layer is not set");
-                    e.addErrorLine(
-                        core::Loc(pkg.declLoc().file(), pkg.layer().value().second),
-                        "Package `{}` must be at most layer `{}` (to match package `{}`) but is currently layer `{}`",
-                        pkg.show(ctx), this->package.layer().value().first.show(ctx), this->package.show(ctx),
-                        pkg.layer().value().first.show(ctx));
-                }
+                    if (strictDependenciesTooLow) {
+                        reasons.emplace_back(core::ErrorColors::format("its `{}` is too low", "strict_dependencies"));
+                        ENFORCE(importStrictDepsLevel.has_value(),
+                                "strictDependenciesTooLow should be false if strict_dependencies level is not set");
+                        auto requiredStrictDepsLevel = fmt::format("strict_dependencies '{}'",
+                                                                   core::packages::strictDependenciesLevelToString(
+                                                                       this->package.minimumStrictDependenciesLevel()));
+                        auto currentStrictDepsLevel = fmt::format(
+                            "strict_dependencies '{}'",
+                            core::packages::strictDependenciesLevelToString(importStrictDepsLevel.value().first));
+                        e.addErrorLine(core::Loc(pkg.declLoc().file(), importStrictDepsLevel.value().second),
+                                       "`{}` must be at least `{}` but is currently `{}`", pkg.show(ctx),
+                                       requiredStrictDepsLevel, currentStrictDepsLevel);
+                    }
 
-                if (strictDependenciesTooLow) {
-                    ENFORCE(importStrictDepsLevel.has_value(),
-                            "strictDependenciesTooLow should be false if strict_dependencies level is not set");
-                    auto requiredStrictDepsLevel =
-                        fmt::format("strict_dependencies '{}'", core::packages::strictDependenciesLevelToString(
-                                                                    this->package.minimumStrictDependenciesLevel()));
-                    auto currentStrictDepsLevel = fmt::format(
-                        "strict_dependencies '{}'",
-                        core::packages::strictDependenciesLevelToString(importStrictDepsLevel.value().first));
-                    e.addErrorLine(core::Loc(pkg.declLoc().file(), importStrictDepsLevel.value().second),
-                                   "`{}` must be at least `{}` but is currently `{}`", pkg.show(ctx),
-                                   requiredStrictDepsLevel, currentStrictDepsLevel);
+                    ENFORCE(!reasons.empty(), "At least one reason should be present");
+                    std::string reason;
+                    if (reasons.size() == 1) {
+                        reason = reasons[0];
+                    } else if (reasons.size() == 2) {
+                        reason = fmt::format("{} and {}", reasons[0], reasons[1]);
+                    } else {
+                        ENFORCE(false, "At most two reasons should be present");
+                    }
+                    e.setHeader("`{}` resolves but its package is not imported. However, it cannot be automatically "
+                                "imported because {}",
+                                lit.symbol().show(ctx), reason);
                 }
 
                 if (!ctx.file.data(ctx).isPackaged()) {
