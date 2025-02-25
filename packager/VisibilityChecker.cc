@@ -470,7 +470,7 @@ public:
                                 lit.symbol().show(ctx));
                 } else if (strictDependenciesTooLow) {
                     e.setHeader("`{}` resolves but its package is not imported. However, it cannot be automatically "
-                                "imported  because its `{}` is too low",
+                                "imported because its `{}` is too low",
                                 lit.symbol().show(ctx), "strict_dependencies");
                 } else {
                     e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));

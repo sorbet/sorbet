@@ -59,14 +59,14 @@ foo_class.rb:10: `Foo::Bar::AppPackage::OtherClass` resolves but its package is 
      4 |  layer 'app'
                 ^^^^^
 
-foo_class.rb:11: `Foo::Bar::FalsePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported  because its `strict_dependencies` is too low https://srb.help/3718
+foo_class.rb:11: `Foo::Bar::FalsePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because its `strict_dependencies` is too low https://srb.help/3718
     11 |      Foo::Bar::FalsePackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_package/__package.rb:5: `Foo::Bar::FalsePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
      5 |  strict_dependencies 'false'
                               ^^^^^^^
 
-foo_class.rb:12: `Foo::Bar::FalsePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported  because its `strict_dependencies` is too low https://srb.help/3718
+foo_class.rb:12: `Foo::Bar::FalsePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because its `strict_dependencies` is too low https://srb.help/3718
     12 |      Bar::FalsePackage::OtherClass # resolves via `module Foo`
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_package/__package.rb:5: `Foo::Bar::FalsePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
@@ -119,7 +119,7 @@ foo_class.rb:27: `Test::Foo::Bar::AppPackage::TestUtil` is defined in a test nam
     27 |  Test::Foo::Bar::AppPackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-foo_class.rb:29: `Foo::Bar::FalsePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported  because its `strict_dependencies` is too low https://srb.help/3718
+foo_class.rb:29: `Foo::Bar::FalsePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because its `strict_dependencies` is too low https://srb.help/3718
     29 |  Foo::Bar::FalsePackage::OtherClass # resolves via root
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_package/__package.rb:5: `Foo::Bar::FalsePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
