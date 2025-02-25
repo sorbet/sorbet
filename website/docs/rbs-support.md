@@ -46,6 +46,7 @@ during type checking:
 | [Union type]           | <span><code>Foo &#124; Bar</code></span> | [`T.any(Foo, Bar)`](union-types.md)                     |
 | [Intersection type]    | `Foo & Bar`                              | [`T.all(Foo, Bar)`](intersection-types.md)              |
 | [Optional type]        | `Foo?`                                   | [`T.nilable(Foo)`](nilable-types.md)                    |
+| [Untyped type]         | `untyped`                                | [`T.untyped`](untyped.md)                               |
 | [Boolean type]         | `bool`                                   | [`T::Boolean`](class-types.md#booleans)                 |
 | [Nil type]             | `nil`                                    | [`NilClass`](class-types.md#nil)                        |
 | [Top type]             | `top`                                    | [`T.anything`](anything.md)                             |
@@ -190,6 +191,8 @@ You can also consider using [`T.::Enum`](tenum.md).
   https://github.com/ruby/rbs/blob/master/docs/syntax.md#intersection-type
 [Optional type]:
   https://github.com/ruby/rbs/blob/master/docs/syntax.md#optional-type
+[Untyped type]:
+  https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types
 [Boolean type]:
   https://github.com/ruby/rbs/blob/master/docs/syntax.md#bool-or-boolish
 [Nil type]:
