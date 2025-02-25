@@ -318,7 +318,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     // This is populated when running in `SlowPathMode::Init`.
     std::unique_ptr<core::GlobalState> indexedState;
 
-    bool cancelable = mode == SlowPathMode::Cancelable;
+    const bool cancelable = mode == SlowPathMode::Cancelable;
 
     auto &logger = config->logger;
     auto slowPathOp = std::make_optional<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
@@ -411,12 +411,26 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             updates.updatedGS = move(finalGS);
             commitFileUpdates(updates, cancelable);
 
-            // IMPORTANT: We use `this->gs` rather than the moved `finalGS` from this point forward.
+            ENFORCE(gs->lspQuery.isEmpty());
 
-            if (epochManager.wasTypecheckingCanceled()) {
-                ENFORCE(mode != SlowPathMode::Init);
-                return;
+            // Test-only hook: Stall for as long as `slowPathBlocked` is set.
+            {
+                absl::MutexLock lck(&slowPathBlockedMutex);
+                slowPathBlockedMutex.Await(absl::Condition(
+                    +[](bool *slowPathBlocked) -> bool { return !*slowPathBlocked; }, &slowPathBlocked));
             }
+
+            if (gs->sleepInSlowPathSeconds.has_value()) {
+                auto sleepDuration = gs->sleepInSlowPathSeconds.value();
+                for (int i = 0; i < sleepDuration * 10; i++) {
+                    Timer::timedSleep(100ms, *logger, "slow_path.resolve.sleep");
+                    if (epochManager.wasTypecheckingCanceled()) {
+                        break;
+                    }
+                }
+            }
+
+            // IMPORTANT: We use `this->gs` rather than the moved `finalGS` from this point forward.
 
             {
                 Timer timeit(config->logger, "reIndexFromFileSystem");
@@ -494,25 +508,6 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             return;
         }
 
-        ENFORCE(gs->lspQuery.isEmpty());
-
-        // Test-only hook: Stall for as long as `slowPathBlocked` is set.
-        {
-            absl::MutexLock lck(&slowPathBlockedMutex);
-            slowPathBlockedMutex.Await(absl::Condition(
-                +[](bool *slowPathBlocked) -> bool { return !*slowPathBlocked; }, &slowPathBlocked));
-        }
-
-        if (gs->sleepInSlowPathSeconds.has_value()) {
-            auto sleepDuration = gs->sleepInSlowPathSeconds.value();
-            for (int i = 0; i < sleepDuration * 10; i++) {
-                Timer::timedSleep(100ms, *logger, "slow_path.resolve.sleep");
-                if (epochManager.wasTypecheckingCanceled()) {
-                    break;
-                }
-            }
-        }
-
         if (this->config->opts.stripePackages) {
             // Only need to compute FoundDefHashes when running to compute a FileHash
             auto foundHashes = nullptr;
@@ -520,6 +515,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                 pipeline::name(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers, foundHashes);
             if (cancelled) {
                 ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
+                ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
                 return;
             }
         }
@@ -530,6 +526,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackagedIndexed), config->opts, workers, foundHashes);
         if (canceled) {
             ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
+            ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
             return;
         }
 
