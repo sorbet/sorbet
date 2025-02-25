@@ -103,6 +103,8 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
         queue.tasks().push_front(std::move(initTask));
     }
 
+    fmt::println(stderr, "Finished init");
+
     config->logger->error("Resuming");
 }
 
@@ -154,12 +156,14 @@ bool LSPTypechecker::typecheck(std::unique_ptr<LSPFileUpdates> updates, WorkerPo
             commitFileUpdates(*updates, /* cancelable */ false);
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
+            fmt::println(stderr, "Slow path");
             unique_ptr<const OwnedKeyValueStore> kvstore =
                 cache::maybeCreateKeyValueStore(this->config->logger, this->config->opts);
             auto result = runSlowPath(*updates, OwnedKeyValueStore::abort(std::move(kvstore)), workers, errorFlusher,
                                       SlowPathMode::Cancelable);
             ENFORCE(std::holds_alternative<bool>(result));
             committed = std::get<bool>(result);
+            fmt::println(stderr, "Slow done");
         }
         epoch.committed = committed;
     }
@@ -406,6 +410,8 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                 }
             }
 
+            fmt::println(stderr, "indexing {} files", this->workspaceFiles.size());
+
             // Before making preemption or cancelation possible, pre-commit the changes from this slow path so that
             // preempted queries can use them and the code after this lambda can assume that this step happened.
             updates.updatedGS = move(finalGS);
@@ -421,8 +427,10 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             }
 
             if (gs->sleepInSlowPathSeconds.has_value()) {
+                fmt::println(stderr, "sleeping...");
                 auto sleepDuration = gs->sleepInSlowPathSeconds.value();
                 for (int i = 0; i < sleepDuration * 10; i++) {
+                    fmt::println(stderr, "sleeping...");
                     Timer::timedSleep(100ms, *logger, "slow_path.resolve.sleep");
                     if (epochManager.wasTypecheckingCanceled()) {
                         break;
@@ -435,8 +443,14 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             {
                 Timer timeit(config->logger, "reIndexFromFileSystem");
 
+                fmt::println(stderr, "Cancelable? {}", cancelable);
+
+                fmt::println(stderr, "Given kvstore? {}", kvstore != nullptr);
+
                 std::unique_ptr<const OwnedKeyValueStore> ownedKvstore =
                     cache::ownIfUnchanged(*this->gs, std::move(kvstore));
+
+                fmt::println(stderr, "Using kvstore? {}", ownedKvstore != nullptr);
 
                 auto workspaceFilesSpan = absl::MakeSpan(this->workspaceFiles);
                 if (this->config->opts.stripePackages) {
@@ -444,11 +458,13 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                     auto inputPackageFiles = workspaceFilesSpan.first(numPackageFiles);
                     workspaceFilesSpan = workspaceFilesSpan.subspan(numPackageFiles);
 
+                    fmt::println(stderr, "indexing the package db: {} package files", inputPackageFiles.size());
                     {
                         auto result = hashing::Hashing::indexAndComputeFileHashes(
                             *this->gs, this->config->opts, *this->config->logger, inputPackageFiles, workers,
                             ownedKvstore, cancelable);
                         if (!result.hasResult()) {
+                            fmt::println(stderr, "canceled during package file indexing");
                             return;
                         }
                         indexed = std::move(result.result());
@@ -465,17 +481,20 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                                                                  this->config->opts, *this->gs, workers, indexed));
                     }
 
+                    fmt::println(stderr, "building the package db: {} package files", inputPackageFiles.size());
                     // First run: only the __package.rb files. This populates the packageDB
                     pipeline::setPackagerOptions(*this->gs, this->config->opts);
                     pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers);
                 }
 
                 {
+                    fmt::println(stderr, "indexing source files: {} files", workspaceFilesSpan.size());
                     auto result = hashing::Hashing::indexAndComputeFileHashes(*this->gs, this->config->opts,
                                                                               *this->config->logger, workspaceFilesSpan,
                                                                               workers, ownedKvstore, cancelable);
                     if (!result.hasResult()) {
                         ast::ParsedFilesOrCancelled::cancel(std::move(indexed), workers);
+                        fmt::println(stderr, "canceled during non-packaged file indexing");
                         return;
                     }
                     nonPackagedIndexed = std::move(result.result());
@@ -489,6 +508,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                                                          this->config->opts, *this->gs, workers, nonPackagedIndexed);
                 }
 
+                fmt::println(stderr, "validating source files: {} files", workspaceFilesSpan.size());
                 // Second run: all the other files (the packageDB shouldn't change)
                 pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts,
                                                 workers);
@@ -505,10 +525,12 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
         }
 
         if (epochManager.wasTypecheckingCanceled()) {
+            fmt::println(stderr, "canceled after indexing");
             return;
         }
 
         if (this->config->opts.stripePackages) {
+            fmt::println(stderr, "naming packages");
             // Only need to compute FoundDefHashes when running to compute a FileHash
             auto foundHashes = nullptr;
             auto cancelled =
@@ -516,23 +538,28 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             if (cancelled) {
                 ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
                 ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
+                fmt::println(stderr, "canceled running the namer (packages)");
                 return;
             }
         }
 
         // Only need to compute FoundDefHashes when running to compute a FileHash
+        fmt::println(stderr, "namer");
         auto foundHashes = nullptr;
         auto canceled =
             pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackagedIndexed), config->opts, workers, foundHashes);
         if (canceled) {
             ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
             ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
+            fmt::println(stderr, "canceled running the namer");
             return;
         }
 
+        fmt::println(stderr, "unpartition");
         pipeline::unpartitionPackageFiles(indexed, std::move(nonPackagedIndexed));
         // TODO(jez) At this point, it's not correct to call it `indexed` anymore: we've run namer too
 
+        fmt::println(stderr, "resolver");
         auto maybeResolved = pipeline::resolve(*gs, move(indexed), config->opts, workers);
         if (!maybeResolved.hasResult()) {
             return;
@@ -541,6 +568,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
         if (gs->sleepInSlowPathSeconds.has_value()) {
             auto sleepDuration = gs->sleepInSlowPathSeconds.value();
             for (int i = 0; i < sleepDuration * 10; i++) {
+                fmt::println(stderr, "sleeping again");
                 Timer::timedSleep(100ms, *logger, "slow_path.resolve.sleep");
                 if (epochManager.wasTypecheckingCanceled()) {
                     break;
@@ -587,9 +615,12 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             return;
         }
 
+        fmt::println(stderr, "typechecking");
         auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
         const auto presorted = true;
         pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
+
+        fmt::println(stderr, "done!");
     });
 
     // Note: `gs` now holds the value of `finalGS`.
