@@ -66,6 +66,7 @@ bool TypecheckEpochManager::tryCommitEpoch(core::GlobalState &gs, uint32_t epoch
                                            function<void()> typecheck) {
     assertConsistentThread(typecheckingThreadId, "TypecheckEpochManager::tryCommitEpoch", "typechecking");
     if (!isCancelable) {
+        fmt::println(stderr, "tryCommitEpoch: uncancelable");
         typecheck();
         return true;
     }
