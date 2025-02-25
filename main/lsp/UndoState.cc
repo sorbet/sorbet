@@ -24,6 +24,9 @@ void UndoState::recordEvictedState(ast::ParsedFile evictedIndexTree) {
 
 void UndoState::restore(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> &indexed,
                         UnorderedMap<int, ast::ParsedFile> &indexedFinalGS) {
+    // We should never apply this twice, as that would end up dropping the other GlobalState
+    ENFORCE(this->evictedGs != nullptr);
+
     // Replace evicted index trees.
     for (auto &entry : evictedIndexed) {
         indexed[entry.first] = move(entry.second);

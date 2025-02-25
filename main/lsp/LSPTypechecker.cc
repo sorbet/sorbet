@@ -113,8 +113,9 @@ bool LSPTypechecker::typecheck(std::unique_ptr<LSPFileUpdates> updates, WorkerPo
         // that slow path. This should always be the case, but let's not crash release builds.
         ENFORCE(cancellationUndoState != nullptr);
         if (cancellationUndoState != nullptr) {
-            // Restore the previous globalState
-            cancellationUndoState->restore(gs, indexed, indexedFinalGS);
+            // Require that the undo state was restored when the slow path was canceled -- we only need it to be present
+            // for the epoch at this point.
+            ENFORCE(cancellationUndoState->getEvictedGs() == nullptr);
 
             // Prune the new files from list of files to be re-typechecked
             vector<core::FileRef> oldFilesWithErrors;
@@ -586,8 +587,10 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     } else {
         prodCategoryCounterInc("lsp.updates", "slowpath_canceled");
         timeit.setTag("canceled", "true");
-        // Update responsible will use state in `cancellationUndoState` to restore typechecker to the point before
-        // this slow path.
+        // Eagerly restore the state to how it was before this slow path, so that we're not holding the old state for an
+        // arbitrarily long time. The next update will be responsible for freeing the underlying UndoState after it
+        // makes use of the epoch field to determine additional files to include in the edit.
+        cancellationUndoState->restore(gs, indexed, indexedFinalGS);
         ENFORCE(cancelable);
         logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", updates.epoch);
     }
