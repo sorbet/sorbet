@@ -970,23 +970,23 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     auto aPosEnd = args.args.begin() + args.numPosArgs;
 
     while (pit != pend && ait != aPosEnd) {
-        const ArgInfo &spec = *pit;
+        const ArgInfo &param = *pit;
         auto &arg = *ait;
-        if (spec.flags.isKeyword) {
+        if (param.flags.isKeyword) {
             break;
         }
-        if (ait + 1 == aend && hasKwparams && (spec.flags.isDefault || spec.flags.isRepeated) &&
+        if (ait + 1 == aend && hasKwparams && (param.flags.isDefault || param.flags.isRepeated) &&
             Types::approximate(gs, arg->type, *constr).derivesFrom(gs, Symbols::Hash())) {
             break;
         }
 
         auto offset = ait - args.args.begin();
-        if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, *arg, spec, args.selfType, targs,
+        if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, *arg, param, args.selfType, targs,
                                   args.argLoc(offset), args.originForUninitialized, args.args.size() == 1)) {
             result.main.errors.emplace_back(std::move(e));
         }
 
-        if (!spec.flags.isRepeated) {
+        if (!param.flags.isRepeated) {
             ++pit;
         }
         ++ait;
@@ -1286,10 +1286,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
             bool sawKwSplat = false;
             while (kwit != methodData->arguments.end()) {
-                const ArgInfo &spec = *kwit;
-                if (spec.flags.isBlock) {
+                const ArgInfo &kwParam = *kwit;
+                if (kwParam.flags.isBlock) {
                     break;
-                } else if (spec.flags.isRepeated) {
+                } else if (kwParam.flags.isRepeated) {
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
                         auto key = cast_type_nonnull<NamedLiteralType>(*it);
                         auto underlying = key.underlying(gs);
@@ -1308,7 +1308,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         // keyword arguments separately from the ones that come from the kwsplat
                         auto offset = it - hash->keys.begin();
                         TypeAndOrigins tpe{hash->values[offset], kwargsLoc};
-                        if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, spec,
+                        if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, kwParam,
                                                   args.selfType, targs, kwargsLoc, args.originForUninitialized)) {
                             result.main.errors.emplace_back(std::move(e));
                         }
@@ -1325,17 +1325,18 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     auto lit = cast_type_nonnull<NamedLiteralType>(litType);
                     auto underlying = lit.underlying(gs);
                     return cast_type_nonnull<ClassType>(underlying).symbol == Symbols::Symbol() &&
-                           lit.asName() == spec.name;
+                           lit.asName() == kwParam.name;
                 });
                 if (arg == hash->keys.end()) {
-                    if (!spec.flags.isDefault) {
-                        if (auto e = missingArg(gs, args.argsLoc(), args.receiverLoc(), method, spec, symbol, targs)) {
+                    if (!kwParam.flags.isDefault) {
+                        if (auto e =
+                                missingArg(gs, args.argsLoc(), args.receiverLoc(), method, kwParam, symbol, targs)) {
                             result.main.errors.emplace_back(std::move(e));
                         }
                     }
                     continue;
                 }
-                consumed.insert(spec.name);
+                consumed.insert(kwParam.name);
                 // We want the precise location of the kwarg that we are processing.
                 // To do that, we rely on hash->{keys,values} being added in the order
                 // that the kwargs appear in the the call.  We also rely on args from
@@ -1367,7 +1368,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto originLoc = argInBounds ? args.argLoc(kwargOffset) : kwargsLoc;
                 auto argLoc = argInBounds ? args.argLoc(kwargOffset) : args.callLoc();
                 TypeAndOrigins tpe{hash->values[offset], originLoc};
-                if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, spec, args.selfType,
+                if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, kwParam, args.selfType,
                                           targs, argLoc, args.originForUninitialized)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
@@ -1400,11 +1401,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         } else if (kwargs == nullptr) {
             // The method has keyword arguments, but none were provided. Report an error for each missing argument.
-            for (auto &spec : methodData->arguments) {
-                if (!spec.flags.isKeyword || spec.flags.isDefault || spec.flags.isRepeated) {
+            for (auto &param : methodData->arguments) {
+                if (!param.flags.isKeyword || param.flags.isDefault || param.flags.isRepeated) {
                     continue;
                 }
-                if (auto e = missingArg(gs, args.argsLoc(), args.receiverLoc(), method, spec, symbol, targs)) {
+                if (auto e = missingArg(gs, args.argsLoc(), args.receiverLoc(), method, param, symbol, targs)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
             }
@@ -1484,8 +1485,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     if (args.block != nullptr) {
         ENFORCE(!methodData->arguments.empty(), "Every symbol must at least have a block arg: {}", method.show(gs));
-        const auto &bspec = methodData->arguments.back();
-        ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg: {}", method.show(gs));
+        const auto &blockParam = methodData->arguments.back();
+        ENFORCE(blockParam.flags.isBlock, "The last symbol must be the block arg: {}", method.show(gs));
 
         // Only report "does not expect a block" error if the method is defined in a `typed: strict`
         // file or higher and has a sig, which would force the "uses `yield` but does not mention a
@@ -1499,7 +1500,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto file = methodData->loc().file();
             auto blockLoc = args.blockLoc(gs);
             if (file.exists() && file.data(gs).strictLevel >= core::StrictLevel::Strict &&
-                bspec.isSyntheticBlockArgument() && blockLoc.exists() && !blockLoc.empty()) {
+                blockParam.isSyntheticBlockArgument() && blockLoc.exists() && !blockLoc.empty()) {
                 if (auto e = gs.beginError(blockLoc, core::errors::Infer::TakesNoBlock)) {
                     e.setHeader("Method `{}` does not take a block", method.show(gs));
                     for (const auto loc : methodData->locs()) {
@@ -1513,10 +1514,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         }
 
-        TypePtr blockType = Types::resultTypeAsSeenFrom(gs, bspec.type, methodData->owner, symbol, targs);
+        TypePtr blockType = Types::resultTypeAsSeenFrom(gs, blockParam.type, methodData->owner, symbol, targs);
         handleBlockType(gs, component, blockType);
-        component.rebind = bspec.rebind;
-        component.rebindLoc = bspec.loc;
+        component.rebind = blockParam.rebind;
+        component.rebindLoc = blockParam.loc;
     }
 
     TypePtr &resultType = result.returnType;
@@ -2605,11 +2606,11 @@ private:
 
         const auto &methodArgs = dispatchComp.method.data(gs)->arguments;
         ENFORCE(!methodArgs.empty());
-        const auto &bspec = methodArgs.back();
-        ENFORCE(bspec.flags.isBlock);
-        auto for_ = ErrorColors::format("block argument `{}` of method `{}`", bspec.argumentName(gs),
+        const auto &blockParam = methodArgs.back();
+        ENFORCE(blockParam.flags.isBlock);
+        auto for_ = ErrorColors::format("block argument `{}` of method `{}`", blockParam.argumentName(gs),
                                         dispatchComp.method.show(gs));
-        e.addErrorSection(TypeAndOrigins::explainExpected(gs, blockType, bspec.loc, for_));
+        e.addErrorSection(TypeAndOrigins::explainExpected(gs, blockType, blockParam.loc, for_));
     }
 
     static void simulateCall(const GlobalState &gs, const TypeAndOrigins *receiver, const DispatchArgs &innerArgs,
