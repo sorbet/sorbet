@@ -290,7 +290,14 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
     const activeConfig = this.context.configuration.activeLspConfig;
     const [command, ...args] = activeConfig?.command ?? [];
     if (!command) {
-      const msg = `Missing command-line data to start Sorbet. ConfigId:${this.context.configuration.activeLspConfig?.id}`;
+      let msg: string;
+      if (!activeConfig) {
+        msg = "No active Sorbet configuration.";
+        this.status = ServerStatus.DISABLED;
+      } else {
+        msg = `Missing command-line data to start Sorbet. ConfigId:${activeConfig.id}`;
+      }
+
       this.context.log.error(msg);
       return Promise.reject(new Error(msg));
     }
