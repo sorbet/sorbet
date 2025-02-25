@@ -546,15 +546,26 @@ public:
         return send->fun == core::Names::new_() && send->recv.isSelfReference();
     }
 
+    /*
+     * Is this an expression that refers to resolved or unresolved `::T` constant?
+     *
+     * When considering unresolved `::T`, we only consider `::T` with no scope (i.e. `T`) and `::T` with the root scope
+     * (i.e. `::T`). This might not actually refer to the `T` that we define for users, but we don't know that
+     * information at the AST level.
+     */
     static bool isT(const ast::ExpressionPtr &expr) {
         bool result = false;
 
         typecase(
             expr,
             [&](const ast::UnresolvedConstantLit &t) {
+                // When the `T` was written by the user, we get an UnresolvedConstantLit.
                 result = t.cnst == core::Names::Constants::T() && ast::MK::isRootScope(t.scope);
             },
-            [&](const ast::ConstantLit &c) { result = c.symbol() == core::Symbols::T(); },
+            [&](const ast::ConstantLit &c) {
+                // When the `T` was inserted by `ast::MK::T()`, we get a ConstantLit.
+                result = c.symbol() == core::Symbols::T();
+            },
             [&](const ast::ExpressionPtr &e) { result = false; });
 
         return result;
