@@ -163,7 +163,10 @@ export class SorbetStatusProvider implements Disposable {
    * Return current {@link ServerStatus server status}.
    */
   public get serverStatus(): ServerStatus {
-    return this.activeLanguageClient?.status || ServerStatus.DISABLED;
+    return (
+      this.activeLanguageClient?.status ||
+      (this.isStarting ? ServerStatus.RESTARTING : ServerStatus.DISABLED)
+    );
   }
 
   /**

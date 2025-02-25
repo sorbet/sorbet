@@ -1,5 +1,9 @@
 # Version history
 
+## 0.3.38
+- Sorbet can be disabled while in `Restarting` / `Initializing` loop.
+- `Copy Symbol to Clipboard` is enabled only for supported `file` and `sorbet` URI schemes.
+
 ## 0.3.26
 - Add option to toggle the auto-complete nudge in `typed: false` files
 
