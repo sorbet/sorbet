@@ -1081,7 +1081,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     if (kwSplatType.isUntyped()) {
                         // Allow an untyped arg to satisfy all kwargs
                         --aend;
-                        kwargs = Types::untypedUntracked();
+                        kwargs = kwSplatType;
                     } else if (kwSplatType.derivesFrom(gs, Symbols::Hash())) {
                         // This will be an error if the kwsplat hash ends up being used to supply keyword arguments,
                         // however it may also be consumed as a positional arg. Defer raising an error until we're
