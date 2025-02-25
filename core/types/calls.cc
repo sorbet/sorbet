@@ -1066,23 +1066,23 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // arguments in the call when determining whether keyword args are properly
         // typed, below.
         bool kwSplatIsHash = false;
-        TypePtr kwSplatType;
+        TypePtr kwSplatArgType;
         if (hasKwsplat) {
             auto &kwSplatArg = *(aend - 1);
-            kwSplatType = Types::approximate(gs, kwSplatArg->type, *constr);
+            kwSplatArgType = Types::approximate(gs, kwSplatArg->type, *constr);
 
             if (hasKwparams) {
-                if (auto *hash = fromKwargsHash(gs, kwSplatType)) {
+                if (auto *hash = fromKwargsHash(gs, kwSplatArgType)) {
                     absl::c_copy(hash->keys, back_inserter(keys));
                     absl::c_copy(hash->values, back_inserter(values));
                     kwargs = make_type<ShapeType>(move(keys), move(values));
                     --aend;
                 } else {
-                    if (kwSplatType.isUntyped()) {
+                    if (kwSplatArgType.isUntyped()) {
                         // Allow an untyped arg to satisfy all kwargs
                         --aend;
-                        kwargs = kwSplatType;
-                    } else if (kwSplatType.derivesFrom(gs, Symbols::Hash())) {
+                        kwargs = kwSplatArgType;
+                    } else if (kwSplatArgType.derivesFrom(gs, Symbols::Hash())) {
                         // This will be an error if the kwsplat hash ends up being used to supply keyword arguments,
                         // however it may also be consumed as a positional arg. Defer raising an error until we're
                         // certain that it would be used as a keyword args hash below.
@@ -1100,7 +1100,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
             } else {
                 // This function doesn't take keyword arguments, so consume the kwsplat and use the approximated type.
-                kwargs = kwSplatType;
+                kwargs = kwSplatArgType;
                 --aend;
             }
         } else {
@@ -1151,7 +1151,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto hasKwParam = !kwParams.empty();
 
             auto &kwSplatArg = *aend;
-            auto kwSplatTPO = TypeAndOrigins{kwSplatType, kwSplatArg->origins};
+            auto kwSplatTPO = TypeAndOrigins{kwSplatArgType, kwSplatArg->origins};
             auto kwSplatArgLoc = args.argLoc(args.args.size() - 1);
 
             if (hasKwSplatParam && !hasKwParam) {
@@ -1161,7 +1161,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     result.main.errors.emplace_back(std::move(e));
                 }
             } else if (hasKwParam) {
-                auto hashType = isa_type<ShapeType>(kwSplatType) ? kwSplatType.underlying(gs) : kwSplatType;
+                auto hashType = isa_type<ShapeType>(kwSplatArgType) ? kwSplatArgType.underlying(gs) : kwSplatArgType;
                 auto &appliedType = cast_type_nonnull<AppliedType>(hashType);
                 auto kwSplatKeyType = appliedType.targs[0];
                 auto kwSplatValueType = appliedType.targs[1];
