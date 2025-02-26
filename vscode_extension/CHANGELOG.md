@@ -1,5 +1,8 @@
 # Version history
 
+## 0.3.39
+- Fix: `Copy Symbol to Clipboard` fails to be enabled in remote devboxes.
+
 ## 0.3.38
 - Sorbet can be disabled while in `Restarting` / `Initializing` loop.
 - `Copy Symbol to Clipboard` is enabled only for supported `file` and `sorbet` URI schemes.

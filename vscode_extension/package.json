@@ -4,7 +4,7 @@
   "description": "Ruby IDE features, powered by Sorbet.",
   "author": "Stripe Inc.",
   "license": "Apache-2.0",
-  "version": "0.3.38",
+  "version": "0.3.39",
   "publisher": "sorbet",
   "icon": "icon.png",
   "repository": {
@@ -66,7 +66,7 @@
         "command": "sorbet.copySymbolToClipboard",
         "title": "Copy Symbol to Clipboard",
         "category": "Sorbet",
-        "enablement": "editorLangId == ruby && (resourceScheme == file || resourceScheme == sorbet) && !editorHasSelection"
+        "enablement": "editorLangId == ruby && !editorHasSelection && (resourceScheme == file || resourceScheme == sorbet || resourceScheme == vscode-remote)"
       },
       {
         "command": "sorbet.disable",
