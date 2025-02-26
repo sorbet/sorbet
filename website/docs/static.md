@@ -81,8 +81,8 @@ Each strictness level reports all errors at lower levels, plus new errors:
   [`# typed: strong`](strong.md) for more information.
 
 To recap: adding one of these comments to the top of a Ruby file controls which
-errors Sorbet reports or silences in that file. The strictness level only affects
-which errors are reported.
+errors Sorbet reports or silences in that file. The strictness level only
+affects which errors are reported.
 
 > **Note**: Method signatures in `# typed: false` files are _still parsed and
 > used_ by Sorbet if that method is called in other files. Specifically, adding
