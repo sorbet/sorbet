@@ -39,6 +39,7 @@
 #include "packager/rbi_gen.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
+#include "rbs/rbs_common.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -878,6 +879,8 @@ int main(int argc, char *argv[]) {
         printf("--single_test=<filename> argument expected\n");
         return 1;
     }
+
+    rbs_constant_pool_init(RBS_GLOBAL_CONSTANT_POOL, 26);
 
     sorbet::test::singleTest = res["single_test"].as<std::string>();
 

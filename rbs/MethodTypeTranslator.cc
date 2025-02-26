@@ -130,8 +130,9 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
                 "TypeParam");
 
         auto node = (rbs_ast_typeparam_t *)list_node->node;
-        rbs_constant_t *constant = rbs_constant_pool_id_to_constant(fake_constant_pool, node->name->constant_id);
-        string_view str(constant->start, constant->length);
+        rbs_constant_t *constant =
+            rbs_constant_pool_id_to_constant(&methodType.parser->constant_pool, node->name->constant_id);
+        string_view str(reinterpret_cast<const char *>(constant->start), constant->length);
         typeParams.emplace_back(loc, ctx.state.enterNameUTF8(str));
     }
 
@@ -193,8 +194,8 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
         if (nameSymbol) {
             // The RBS arg is named in the signature, so we use the explicit name used
             rbs_constant_t *nameConstant =
-                rbs_constant_pool_id_to_constant(fake_constant_pool, nameSymbol->constant_id);
-            string_view nameStr(nameConstant->start, nameConstant->length);
+                rbs_constant_pool_id_to_constant(&methodType.parser->constant_pool, nameSymbol->constant_id);
+            string_view nameStr(reinterpret_cast<const char *>(nameConstant->start), nameConstant->length);
             name = ctx.state.enterNameUTF8(nameStr);
         } else {
             if (i >= methodDef->args.size()) {
@@ -209,7 +210,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
             name = expressionName(&methodDef->args[i]);
         }
 
-        auto type = TypeTranslator::toExpressionPtr(ctx, typeParams, arg.type, methodType.loc);
+        auto type = TypeTranslator::toExpressionPtr(ctx, typeParams, arg.type, methodType.loc, methodType.parser);
         sigParams.emplace_back(ast::MK::Symbol(arg.loc, name));
         sigParams.emplace_back(move(type));
     }
@@ -242,7 +243,8 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
         auto loc = locFromRange(methodType.loc, returnValue->location->rg);
         sigBuilder = ast::MK::Send0(loc, move(sigBuilder), core::Names::void_(), loc);
     } else {
-        auto returnType = TypeTranslator::toExpressionPtr(ctx, typeParams, returnValue, methodType.loc);
+        auto returnType =
+            TypeTranslator::toExpressionPtr(ctx, typeParams, returnValue, methodType.loc, methodType.parser);
         sigBuilder =
             ast::MK::Send1(methodType.loc, move(sigBuilder), core::Names::returns(), methodType.loc, move(returnType));
     }
@@ -280,7 +282,7 @@ ast::ExpressionPtr MethodTypeTranslator::attrSignature(core::MutableContext ctx,
         return ast::MK::EmptyTree();
     }
 
-    auto returnType = TypeTranslator::toExpressionPtr(ctx, typeParams, attrType.node.get(), attrType.loc);
+    auto returnType = TypeTranslator::toExpressionPtr(ctx, typeParams, attrType.node, attrType.loc, attrType.parser);
 
     if (send->fun == core::Names::attrWriter()) {
         if (send->numPosArgs() > 1) {
