@@ -330,7 +330,7 @@
     "async": "^2.6.4",
     "elegant-spinner": "^2.0.0",
     "minimatch": "^3.0.5",
-    "vscode-languageclient": "7.0.0"
+    "vscode-languageclient": "8.0.1"
   },
   "devDependencies": {
     "@types/elegant-spinner": "^1.0.0",

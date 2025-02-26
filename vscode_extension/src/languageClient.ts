@@ -2,8 +2,10 @@ import { ChildProcess, spawn } from "child_process";
 import { Disposable, Event, EventEmitter, workspace } from "vscode";
 import {
   CloseAction,
+  CloseHandlerResult,
   ErrorAction,
   ErrorHandler,
+  ErrorHandlerResult,
   GenericNotificationHandler,
   LanguageClient,
   RevealOutputChannelOn,
@@ -113,18 +115,8 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
       createClient(context, () => this.startSorbetProcess(), this),
       this.context.metrics,
     );
-    // It's possible for `onReady` to fire after `stop()` is called on the language client. :(
-    this.languageClient.onReady().then(() => {
-      if (this.status !== ServerStatus.ERROR) {
-        // Language client started successfully.
-        this.status = ServerStatus.RUNNING;
-      }
-    });
 
-    this.disposables = [
-      this.languageClient.start(),
-      this.onStatusChangeEmitter,
-    ];
+    this.disposables = [this.onStatusChangeEmitter];
   }
 
   /**
@@ -186,7 +178,9 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
    * Resolves when client is ready to serve requests.
    */
   public onReady(): Promise<void> {
-    return this.languageClient.onReady();
+    // TODO(damolina): DO NOT let double calls
+    // TODO(damolina): It's possible for `onReady` to fire after `stop()` is called on the language client. :(
+    return this.languageClient.start();
   }
 
   /**
@@ -309,18 +303,22 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
    * * It drops all `onReady` subscriptions after restarting, so we won't know when the Sorbet server is running.
    * * It doesn't reset `onReady` state, so we can't even reset our `onReady` callback.
    */
-  public error(): ErrorAction {
+  public error(): ErrorHandlerResult {
     if (this.status !== ServerStatus.ERROR) {
       this.status = ServerStatus.RESTARTING;
       this.restart(RestartReason.CRASH_LC_ERROR);
     }
-    return ErrorAction.Shutdown;
+
+    return {
+      action: ErrorAction.Shutdown,
+      // TODO: message ?
+    };
   }
 
   /**
    * Note: If the VPN is disconnected, then Sorbet will repeatedly fail to start.
    */
-  public closed(): CloseAction {
+  public closed(): CloseHandlerResult {
     if (this.status !== ServerStatus.ERROR) {
       let reason: RestartReason;
       if (this.sorbetProcessExitCode === 11) {
@@ -355,6 +353,9 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
       this.restart(reason);
     }
 
-    return CloseAction.DoNotRestart;
+    return {
+      action: CloseAction.DoNotRestart,
+      // TODO: message ?
+    };
   }
 }

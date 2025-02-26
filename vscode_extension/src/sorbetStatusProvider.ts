@@ -204,9 +204,6 @@ export class SorbetStatusProvider implements Disposable {
       this.context,
       (reason: RestartReason) => this.restartSorbet(reason),
     );
-    // Use property-setter to ensure proper setup.
-    this.activeLanguageClient = newClient;
-
     this.disposables.push(
       newClient.onStatusChange((status: ServerStatus) => {
         // Ignore event if this is not the current client (e.g. old client being shut down).
@@ -219,8 +216,11 @@ export class SorbetStatusProvider implements Disposable {
       }),
     );
 
+    // TODO(damolina): Change to wait for "RUNNING" ?
     // Wait for `ready` before accessing `languageClient`.
     await newClient.onReady();
+    this.activeLanguageClient = newClient;
+
     this.disposables.push(
       newClient.onNotification(
         "sorbet/showOperation",

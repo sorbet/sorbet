@@ -56,6 +56,7 @@ class RecordingMetricsEmitter implements MetricsEmitter {
   }
 }
 
+// Uninitialized client.  Call+await on start to use.
 function createLanguageClient(): LanguageClient {
   // The server is implemented in node
   const serverModule = require.resolve("./testLanguageServer");
@@ -88,8 +89,6 @@ function createLanguageClient(): LanguageClient {
     clientOptions,
   );
 
-  // Start the client. This will also launch the server
-  client.start();
   return client;
 }
 
@@ -114,7 +113,7 @@ suite("LanguageClient", () => {
         createLanguageClient(),
         metricsClient,
       );
-      await client.onReady();
+      await client.start();
       {
         const successResponse = await client.sendRequest("textDocument/hover", {
           textDocument: {
