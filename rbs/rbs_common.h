@@ -25,7 +25,8 @@ struct Comment {
  */
 struct MethodType {
     core::LocOffsets loc;
-    std::unique_ptr<rbs_methodtype_t> node;
+    rbs_methodtype_t *node; // Raw pointer, ownership stays with parser
+    std::shared_ptr<parserstate> parser;
 };
 
 /**
@@ -33,7 +34,8 @@ struct MethodType {
  */
 struct Type {
     core::LocOffsets loc;
-    std::unique_ptr<rbs_node_t> node;
+    rbs_node_t *node; // Raw pointer, ownership stays with parser
+    std::shared_ptr<parserstate> parser;
 };
 
 /**

@@ -39,6 +39,7 @@
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
 #include "payload/payload.h"
+#include "rbs/rbs_common.h"
 #include "resolver/resolver.h"
 #include "sorbet_version/sorbet_version.h"
 #include "spdlog/sinks/rotating_file_sink.h"
@@ -440,6 +441,14 @@ int realmain(int argc, char *argv[]) {
     vector<ast::ParsedFile> indexed;
 
     gs->rbsSignaturesEnabled = opts.rbsSignaturesEnabled;
+
+    if (opts.rbsSignaturesEnabled) {
+        // Matches RBS's initial constant pool size.
+        // This is just an initial size, not the limit of the constant pool.
+        const size_t num_uniquely_interned_strings = 26;
+        rbs_constant_pool_init(RBS_GLOBAL_CONSTANT_POOL, num_uniquely_interned_strings);
+    }
+
     gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
 
     logger->trace("building initial global state");
@@ -866,6 +875,10 @@ int realmain(int argc, char *argv[]) {
                 packager::RBIGenerator::run(*gs, packageNamespaces, opts.packageRBIDir, *workers);
             }
 #endif
+        }
+
+        if (opts.rbsSignaturesEnabled) {
+            rbs_constant_pool_free(RBS_GLOBAL_CONSTANT_POOL);
         }
 
         gs->errorQueue->flushAllErrors(*gs);

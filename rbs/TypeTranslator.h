@@ -18,7 +18,8 @@ public:
      */
     static ast::ExpressionPtr toExpressionPtr(core::MutableContext ctx,
                                               const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
-                                              rbs_node_t *node, core::LocOffsets loc);
+                                              rbs_node_t *node, core::LocOffsets loc,
+                                              const std::shared_ptr<parserstate> &parser);
 };
 
 } // namespace sorbet::rbs
