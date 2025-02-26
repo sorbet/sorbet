@@ -67,9 +67,13 @@ ast::ExpressionPtr typeNameType(core::MutableContext ctx,
             } else if (nameConstant == core::Names::Constants::Range()) {
                 return ast::MK::T_Range(loc);
             }
-        } else if (hasTypeParam(ctx, typeParams, nameConstant)) {
-            return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::typeParameter(), loc,
-                                  ast::MK::Symbol(loc, nameConstant));
+        } else {
+            // The type may refer to a type parameter, so we need to check if it exists as a NameKind::UTF8
+            auto nameUTF8 = ctx.state.enterNameUTF8(nameStr);
+            if (hasTypeParam(ctx, typeParams, nameUTF8)) {
+                return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::typeParameter(), loc,
+                                      ast::MK::Symbol(loc, nameUTF8));
+            }
         }
     } else if (pathNames.size() == 2 && isGeneric) {
         if (pathNames[0] == core::Names::Constants::Enumerator()) {
