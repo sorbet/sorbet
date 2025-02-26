@@ -359,8 +359,8 @@ A.bar
 <p>This is hard to statically analyze, as it involves looking into the body of the
 <code>self.included</code> method, which might have arbitrary computation. As a compromise,
 Sorbet provides a new construct: <code>mixes_in_class_methods</code>. At runtime, it
-behaves as if we’d defined <code>self.included</code> like above, but will declare to <code>srb</code>
-statically what module is being extended.</p>
+behaves as if we’d defined <code>self.included</code> like above, but will declare to
+Sorbet statically what module is being extended.</p>
 <p>We can update our previous example to use <code>mixes_in_class_methods</code>, which lets
 Sorbet catch the runtime error about <code>bar</code> not being defined on <code>A</code>:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>

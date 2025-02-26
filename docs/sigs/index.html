@@ -221,9 +221,9 @@ effect: <code>void</code>:</p>
 </code></pre>
 <p>Using <code>void</code> instead of <code>returns(...)</code> does a number of things:</p>
 <ul>
-<li><p>Statically, <code>srb</code> will let us return any value (for example, returning either
+<li><p>Statically, Sorbet will let us return any value (for example, returning either
 <code>5</code> or <code>nil</code> is valid).</p></li>
-<li><p>Also statically, <code>srb</code> will error when typed code tries to inspect the result
+<li><p>Also statically, Sorbet will error when typed code tries to inspect the result
 of a <code>void</code> method.</p></li>
 <li><p>In the runtime, <code>sorbet-runtime</code> will <em>throw away</em> the result of our method,
 and return a dummy value instead. (All <code>void</code> methods return the same dummy
@@ -323,7 +323,7 @@ step is required, and no special changes to the core language.</p></li>
 <li><p>Runtime checking is a feature.</p>
 <p>In a <a href="/docs/gradual">gradual type system</a> like Sorbet, the static checks can be
 turned off at any time. Having <a href="/docs/runtime">runtime-validated</a> type
-annotations gives greater confidence in the predictions that <code>srb</code>
+annotations gives greater confidence in the predictions that Sorbet
 <a href="/docs/static">makes statically</a>.</p></li>
 <li><p>Type assertions in code would be inevitable.</p>
 <p>Having constructs like <a href="/docs/type-assertions"><code>T.let</code> and <code>T.cast</code></a> work in line
