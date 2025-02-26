@@ -448,6 +448,7 @@ public:
                 auto importStrictDepsLevel = pkg.strictDependenciesLevel();
                 bool layeringViolation = false;
                 bool strictDependenciesTooLow = false;
+                bool causesCycle = false;
                 if (!isTestImport && db.enforceLayering()) {
                     layeringViolation =
                         strictDepsLevel.has_value() &&
@@ -456,8 +457,14 @@ public:
                     strictDependenciesTooLow =
                         importStrictDepsLevel.has_value() &&
                         importStrictDepsLevel.value().first < this->package.minimumStrictDependenciesLevel();
+                    // If there's a path from the imported packaged to this package, then adding the import will close
+                    // the loop and cause a cycle.
+                    causesCycle =
+                        strictDepsLevel.has_value() &&
+                        strictDepsLevel.value().first >= core::packages::StrictDependenciesLevel::LayeredDag &&
+                        pkg.importsTransitively(ctx, this->package);
                 }
-                if (!layeringViolation && !strictDependenciesTooLow) {
+                if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
                     e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                     e.addErrorLine(pkg.declLoc(), "Exported from package here");
                     if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
@@ -470,6 +477,17 @@ public:
                     // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
                     // layering/strict_dependencies issues.
                     std::vector<std::string> reasons;
+                    if (causesCycle) {
+                        reasons.emplace_back(core::ErrorColors::format("importing it would put `{}` into a cycle",
+                                                                       this->package.show(ctx)));
+                        auto currentStrictDepsLevel =
+                            fmt::format("strict_dependencies '{}'",
+                                        core::packages::strictDependenciesLevelToString(strictDepsLevel.value().first));
+                        e.addErrorLine(core::Loc(this->package.declLoc().file(), strictDepsLevel.value().second),
+                                       "`{}` is `{}`, which disallows cycles", this->package.show(ctx),
+                                       currentStrictDepsLevel);
+                    }
+
                     if (layeringViolation) {
                         reasons.emplace_back("importing it would cause a layering violation");
                         ENFORCE(pkg.layer().has_value(),
@@ -504,8 +522,10 @@ public:
                         reason = reasons[0];
                     } else if (reasons.size() == 2) {
                         reason = fmt::format("{} and {}", reasons[0], reasons[1]);
+                    } else if (reasons.size() == 3) {
+                        reason = fmt::format("{}, {}, and {}", reasons[0], reasons[1], reasons[2]);
                     } else {
-                        ENFORCE(false, "At most two reasons should be present");
+                        ENFORCE(false, "At most three reasons should be present");
                     }
                     e.setHeader("`{}` resolves but its package is not imported. However, it cannot be automatically "
                                 "imported because {}",
