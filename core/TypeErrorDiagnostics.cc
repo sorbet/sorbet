@@ -11,18 +11,6 @@ void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuild
                                                const ErrorSection::Collector &collector, const TypePtr &expected,
                                                const TypePtr &got) {
     e.addErrorSections(std::move(collector));
-    // TODO: the rest of this function should eventually be moved to isSubTypeUnderConstraint,
-    // as calls to collector.addErrorDetails
-    if (isa_type<MetaType>(got) && !isa_type<MetaType>(expected)) {
-        e.addErrorNote(
-            "It looks like you're using Sorbet type syntax in a runtime value position.\n"
-            "    If you really mean to use types as values, use `{}` to hide the type syntax from the type checker.\n"
-            "    Otherwise, you're likely using the type system in a way it wasn't meant to be used.",
-            "T::Utils.coerce");
-        return;
-    }
-
-    // TODO(jez) Add more cases
 }
 
 void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc,

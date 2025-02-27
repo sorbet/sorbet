@@ -1268,6 +1268,25 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                                                    errorDetailsCollector);
             }
 
+            if constexpr (shouldAddErrorDetails) {
+                if (m1 != nullptr) {
+                    auto subCollectorLine1 = errorDetailsCollector.newCollector();
+                    subCollectorLine1.message = ErrorColors::format(
+                        "It looks like you're using Sorbet type syntax in a runtime value position.");
+                    errorDetailsCollector.addErrorDetails(move(subCollectorLine1));
+                    auto subCollectorLine2 = errorDetailsCollector.newCollector();
+                    subCollectorLine2.message =
+                        ErrorColors::format("If you really mean to use types as values, use `{}` "
+                                            "to hide the type syntax from the type checker.",
+                                            "T::Utils.coerce");
+                    errorDetailsCollector.addErrorDetails(move(subCollectorLine2));
+                    auto subCollectorLine3 = errorDetailsCollector.newCollector();
+                    subCollectorLine3.message = ErrorColors::format(
+                        "Otherwise, you're likely using the type system in a way it wasn't meant to be used.");
+                    errorDetailsCollector.addErrorDetails(move(subCollectorLine3));
+                }
+            }
+
             return false;
         }
     }
