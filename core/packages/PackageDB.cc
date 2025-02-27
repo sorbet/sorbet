@@ -96,6 +96,11 @@ public:
         return false;
     }
 
+    core::packages::StrictDependenciesLevel minimumStrictDependenciesLevel() const {
+        notImplemented();
+        return core::packages::StrictDependenciesLevel::False;
+    }
+
     std::optional<ImportType> importsPackage(MangledName mangledName) const {
         notImplemented();
         return nullopt;

@@ -60,19 +60,6 @@ string buildValidLayersStr(const core::GlobalState &gs) {
     return result;
 }
 
-string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level) {
-    switch (level) {
-        case core::packages::StrictDependenciesLevel::False:
-            return "false";
-        case core::packages::StrictDependenciesLevel::Layered:
-            return "layered";
-        case core::packages::StrictDependenciesLevel::LayeredDag:
-            return "layered_dag";
-        case core::packages::StrictDependenciesLevel::Dag:
-            return "dag";
-    }
-}
-
 struct FullyQualifiedName {
     vector<core::NameRef> parts;
     core::Loc loc;
@@ -572,6 +559,23 @@ public:
         auto otherPkgLayerIndex = packageDB.layerIndex(otherPkgLayer);
 
         return pkgLayerIndex < otherPkgLayerIndex;
+    }
+
+    // What is the minimum strict dependencies level that this package's imports must have?
+    core::packages::StrictDependenciesLevel minimumStrictDependenciesLevel() const {
+        if (!strictDependenciesLevel().has_value()) {
+            return core::packages::StrictDependenciesLevel::False;
+        }
+
+        switch (strictDependenciesLevel().value().first) {
+            case core::packages::StrictDependenciesLevel::False:
+                return core::packages::StrictDependenciesLevel::False;
+            case core::packages::StrictDependenciesLevel::Layered:
+            case core::packages::StrictDependenciesLevel::LayeredDag:
+                return core::packages::StrictDependenciesLevel::Layered;
+            case core::packages::StrictDependenciesLevel::Dag:
+                return core::packages::StrictDependenciesLevel::Dag;
+        }
     }
 };
 
@@ -1850,16 +1854,12 @@ void validateLayering(const core::Context &ctx, const Import &i) {
         }
     }
 
-    core::packages::StrictDependenciesLevel otherPkgExpectedLevel = core::packages::StrictDependenciesLevel::Layered;
-
-    if (thisPkg.strictDependenciesLevel().value().first == core::packages::StrictDependenciesLevel::Dag) {
-        otherPkgExpectedLevel = core::packages::StrictDependenciesLevel::Dag;
-    }
+    core::packages::StrictDependenciesLevel otherPkgExpectedLevel = thisPkg.minimumStrictDependenciesLevel();
 
     if (otherPkg.strictDependenciesLevel().value().first < otherPkgExpectedLevel) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
             e.setHeader("Strict dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
-                        "import", strictDependenciesLevelToString(otherPkgExpectedLevel));
+                        "import", core::packages::strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel().value().second),
                            "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
             // TODO: if the import is unused (ie. there are no references in this package to the imported package),
@@ -1872,9 +1872,9 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     if (thisPkg.strictDependenciesLevel().value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
         if (thisPkg.sccID == otherPkg.sccID) {
             if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
-                auto level =
-                    fmt::format("strict_dependencies '{}'",
-                                strictDependenciesLevelToString(thisPkg.strictDependenciesLevel().value().first));
+                auto level = fmt::format(
+                    "strict_dependencies '{}'",
+                    core::packages::strictDependenciesLevelToString(thisPkg.strictDependenciesLevel().value().first));
                 e.setHeader("Strict dependencies violation: importing `{}` will put `{}` into a cycle, which is not "
                             "valid at `{}`",
                             otherPkg.show(ctx), thisPkg.show(ctx), level);
