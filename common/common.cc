@@ -168,6 +168,16 @@ string_view sorbet::FileOps::getExtension(string_view path) {
     return path.substr(found + 1);
 }
 
+bool sorbet::FileOps::hasAllowedExtension(std::string_view path, const UnorderedSet<std::string> &extensions) {
+    auto dotLocation = path.rfind('.');
+    if (dotLocation == string_view::npos) {
+        return false;
+    }
+
+    string_view ext = path.substr(dotLocation);
+    return extensions.contains(ext);
+}
+
 int sorbet::FileOps::readFd(int fd, absl::Span<char> output, int timeoutMs) {
     // Prepare to use select()
     fd_set set;
@@ -353,13 +363,7 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                             continue;
                         }
                     } else {
-                        auto dotLocation = nameview.rfind('.');
-                        if (dotLocation == string_view::npos) {
-                            continue;
-                        }
-
-                        string_view ext = nameview.substr(dotLocation);
-                        if (!extensions.contains(ext)) {
+                        if (!sorbet::FileOps::hasAllowedExtension(nameview, extensions)) {
                             continue;
                         }
                     }

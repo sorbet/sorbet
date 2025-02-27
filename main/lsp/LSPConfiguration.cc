@@ -275,13 +275,7 @@ bool LSPConfiguration::isFileIgnored(string_view filePath) const {
 }
 
 bool LSPConfiguration::hasAllowedExtension(std::string_view filePath) const {
-    auto dotLocation = std::string_view(filePath).rfind('.');
-    if (dotLocation == string_view::npos) {
-        return false;
-    }
-
-    auto ext = std::string_view(filePath).substr(dotLocation);
-    return this->opts.allowedExtensions.contains(ext);
+    return FileOps::hasAllowedExtension(filePath, this->opts.allowedExtensions);
 }
 
 bool LSPConfiguration::isSorbetUri(string_view uri) const {
