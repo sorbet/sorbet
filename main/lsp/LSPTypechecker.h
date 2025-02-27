@@ -119,7 +119,7 @@ class LSPTypechecker final {
 
     /** Deep copy all entries in `indexed` that contain ASTs. Returns true on success, false if the operation was
      * canceled. */
-    bool copyIndexed(WorkerPool &workers, std::vector<ast::ParsedFile> &out) const;
+    ast::ParsedFilesOrCancelled copyIndexed(WorkerPool &workers) const;
 
 public:
     LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,

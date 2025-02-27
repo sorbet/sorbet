@@ -299,7 +299,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     return toTypecheck;
 }
 
-bool LSPTypechecker::copyIndexed(WorkerPool &workers, vector<ast::ParsedFile> &out) const {
+ast::ParsedFilesOrCancelled LSPTypechecker::copyIndexed(WorkerPool &workers) const {
     auto &logger = *config->logger;
     Timer timeit(logger, "slow_path.copy_indexes");
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
@@ -335,6 +335,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, vector<ast::ParsedFile> &o
             resultq->push(move(threadResult), processedByThread);
         }
     });
+    std::vector<ast::ParsedFile> out;
     {
         vector<ast::ParsedFile> threadResult;
         out.reserve(indexed.size());
@@ -347,11 +348,17 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, vector<ast::ParsedFile> &o
             }
         }
     }
+
     if (epochManager.wasTypecheckingCanceled()) {
-        return true;
+        return ast::ParsedFilesOrCancelled::cancel(std::move(out), workers);
     }
+
     fast_sort(out, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
-    return epochManager.wasTypecheckingCanceled();
+
+    if (epochManager.wasTypecheckingCanceled()) {
+        return ast::ParsedFilesOrCancelled::cancel(std::move(out), workers);
+    }
+    return out;
 }
 
 LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updates,
@@ -474,9 +481,13 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
 
         // Copy the indexes of unchanged files.
         vector<ast::ParsedFile> indexedCopies;
-        if (copyIndexed(workers, indexedCopies)) {
-            // Canceled.
-            return;
+        {
+            auto result = copyIndexed(workers);
+            if (!result.hasResult()) {
+                // Canceled.
+                return;
+            }
+            indexedCopies = std::move(result.result());
         }
 
         ENFORCE(gs->lspQuery.isEmpty());
