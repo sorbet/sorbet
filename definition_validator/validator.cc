@@ -156,8 +156,7 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
                                superArgs[idx].get().show(ctx), superArgType.show(ctx));
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, superArgType,
-                                                                methodArgType);
+                e.addErrorSections(move(errorDetailsCollector));
             }
         }
         idx++;
@@ -299,8 +298,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                                        req.get().show(ctx), req.get().type.show(ctx));
                         e.addErrorNote(
                             "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, req.get().type,
-                                                                        corresponding->get().type);
+                e.addErrorSections(move(errorDetailsCollector));
                     }
                 }
             } else {
@@ -332,8 +330,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                                        opt.get().show(ctx), opt.get().type.show(ctx));
                         e.addErrorNote(
                             "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, opt.get().type,
-                                                                        corresponding->get().type);
+                e.addErrorSections(move(errorDetailsCollector));
                     }
                 }
             } else if (absl::c_any_of(right.kw.required,
@@ -378,8 +375,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                                left.kw.rest->get().show(ctx), left.kw.rest->get().type.show(ctx));
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, left.kw.rest->get().type,
-                                                                right.kw.rest->get().type);
+                e.addErrorSections(move(errorDetailsCollector));
             }
         }
     }
@@ -421,8 +417,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                                superMethodBlkArg.show(ctx), superMethodBlkArg.type.show(ctx));
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, superMethodBlkArg.type,
-                                                                methodBlkArg.type);
+                e.addErrorSections(move(errorDetailsCollector));
             }
         }
     }
@@ -443,8 +438,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Super method defined here with return type `{}`",
                                superReturn.show(ctx));
                 e.addErrorNote("A method's return type must be a subtype of the return type on the super method.");
-                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, superReturn,
-                                                                methodReturn);
+                e.addErrorSections(move(errorDetailsCollector));
             }
         }
     }

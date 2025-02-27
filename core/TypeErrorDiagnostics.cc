@@ -7,12 +7,6 @@ using namespace std;
 
 namespace sorbet::core {
 
-void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e,
-                                               const ErrorSection::Collector &collector, const TypePtr &expected,
-                                               const TypePtr &got) {
-    e.addErrorSections(std::move(collector));
-}
-
 void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc,
                                             const TypeConstraint &constrOrig, const TypePtr &expectedType,
                                             const TypePtr &actualType) {
