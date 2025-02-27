@@ -8,7 +8,7 @@ import * as assert from "assert";
 import * as sinon from "sinon";
 import { TestLanguageServerSpecialURIs } from "./testLanguageServerSpecialURIs";
 import { instrumentLanguageClient } from "../languageClient.metrics";
-import { MetricClient, MetricsEmitter, Tags } from "../metricsClient";
+import { MetricsClient, MetricsEmitter, Tags } from "../metricsClient";
 
 const enum MetricType {
   Increment,
@@ -94,15 +94,16 @@ function createLanguageClient(): LanguageClient {
 }
 
 suite("LanguageClient", () => {
-  let metricsEmitter: RecordingMetricsEmitter;
-  let metricsClient: sinon.SinonStubbedInstance<MetricClient> & MetricClient;
-
   suite("Metrics", () => {
+    let metricsEmitter: RecordingMetricsEmitter;
+    let metricsClient: sinon.SinonStubbedInstance<MetricsClient> &
+      MetricsClient;
+
     suiteSetup(() => {
       metricsEmitter = new RecordingMetricsEmitter();
       metricsClient = sinon.createStubInstance(
-        MetricClient,
-      ) as sinon.SinonStubbedInstance<MetricClient> & MetricClient;
+        MetricsClient,
+      ) as sinon.SinonStubbedInstance<MetricsClient> & MetricsClient;
       metricsClient.emitTimingMetric.callsFake((name, value, tags) => {
         return metricsEmitter.timing(name, value, tags);
       });

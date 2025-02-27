@@ -56,7 +56,7 @@ export class NoOpApi implements Api {
   static INSTANCE = new NoOpApi();
 }
 
-export class MetricClient {
+export class MetricsClient {
   private apiPromise: Promise<Api | undefined>;
   private readonly context: SorbetExtensionContext;
   private readonly sorbetExtensionVersion: string;

@@ -4,7 +4,7 @@ import * as sinon from "sinon";
 import { createLogStub } from "./testUtils";
 import {
   METRIC_PREFIX,
-  MetricClient,
+  MetricsClient,
   NoOpApi,
   NoOpMetricsEmitter,
 } from "../metricsClient";
@@ -28,7 +28,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
 
     const incrementStub = sinon.stub(NoOpMetricsEmitter.prototype, "increment");
     testRestorables.push(incrementStub);
-    const client = new MetricClient(
+    const client = new MetricsClient(
       <SorbetExtensionContext>{
         configuration: {
           activeLspConfig: undefined,
@@ -60,7 +60,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
 
     const timingStub = sinon.stub(NoOpMetricsEmitter.prototype, "timing");
     testRestorables.push(timingStub);
-    const client = new MetricClient(
+    const client = new MetricsClient(
       <SorbetExtensionContext>{
         configuration: {
           activeLspConfig: undefined,

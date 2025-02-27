@@ -1,5 +1,5 @@
 import { LanguageClient } from "vscode-languageclient/node";
-import { MetricClient } from "./metricsClient";
+import { MetricsClient } from "./metricsClient";
 
 /**
  * Shims the language client object so that all requests sent get timed.
@@ -7,7 +7,7 @@ import { MetricClient } from "./metricsClient";
  */
 export function instrumentLanguageClient(
   client: LanguageClient,
-  metrics: MetricClient,
+  metrics: MetricsClient,
 ): LanguageClient {
   const originalSendRequest = client.sendRequest;
 
