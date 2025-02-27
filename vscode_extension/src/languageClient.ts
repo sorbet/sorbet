@@ -12,10 +12,10 @@ import {
 } from "vscode-languageclient/node";
 
 import { stopProcess } from "./connections";
-import { Tags } from "./metricsClient";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { ServerStatus, RestartReason } from "./types";
 import { backwardsCompatibleTrackUntyped } from "./config";
+import { instrumentLanguageClient } from "./languageClient.metrics";
 
 const VALID_STATE_TRANSITIONS: ReadonlyMap<
   ServerStatus,
@@ -83,40 +83,6 @@ function createClient(
   return client;
 }
 
-/**
- * Shims the language client object so that all requests sent get timed. Exported for tests.
- */
-export function shimLanguageClient(
-  client: LanguageClient,
-  emitTimingMetric: (metric: string, value: number | Date, tags: Tags) => void,
-) {
-  const originalSendRequest = client.sendRequest;
-  client.sendRequest = function(
-    this: LanguageClient,
-    method: any,
-    ...args: any[]
-  ) {
-    const now = new Date();
-    const requestName = typeof method === "string" ? method : method.method;
-    // Replace some special characters with underscores.
-    const sanitizedRequestName = requestName.replace(/[/$]/g, "_");
-    args.unshift(method);
-    const rv = originalSendRequest.apply(this, args as any);
-    const metricName = `latency.${sanitizedRequestName}_ms`;
-    rv.then(
-      () =>
-        // NOTE: This callback is only called if the request succeeds and was _not_ canceled.
-        // If the request is canceled, the promise is rejected.
-        emitTimingMetric(metricName, now, { success: "true" }),
-      () =>
-        // This callback is called if the request failed or was canceled.
-        emitTimingMetric(metricName, now, { success: "false" }),
-    );
-    return rv;
-  };
-  return client;
-}
-
 export type SorbetServerCapabilities = ServerCapabilities & {
   sorbetShowSymbolProvider: boolean;
 };
@@ -143,10 +109,9 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
     this.restart = restart;
     this.wrappedStatus = ServerStatus.INITIALIZING;
 
-    this.languageClient = shimLanguageClient(
+    this.languageClient = instrumentLanguageClient(
       createClient(context, () => this.startSorbetProcess(), this),
-      (metric, value, tags) =>
-        this.context.metrics.emitTimingMetric(metric, value, tags),
+      this.context.metrics,
     );
     // It's possible for `onReady` to fire after `stop()` is called on the language client. :(
     this.languageClient.onReady().then(() => {
