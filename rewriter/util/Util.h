@@ -39,6 +39,9 @@ public:
     static std::pair<core::NameRef, core::LocOffsets> getAttrName(core::MutableContext ctx, core::NameRef attrFun,
                                                                   const ast::ExpressionPtr &name);
 
+    static bool isRootScopedSyntacticConstant(const ast::ExpressionPtr &expr,
+                                              absl::Span<const core::NameRef> constantName);
+
     ASTUtil() = delete;
 };
 } // namespace sorbet::rewriter
