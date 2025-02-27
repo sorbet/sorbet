@@ -321,7 +321,8 @@ UnresolvedConstantLit *UnresolvedConstantLit::make_raw(core::LocOffsets loc, Exp
     return p;
 }
 
-unique_ptr<UnresolvedConstantLit> UnresolvedConstantLit::make_unique(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst) {
+unique_ptr<UnresolvedConstantLit> UnresolvedConstantLit::make_unique(core::LocOffsets loc, ExpressionPtr scope,
+                                                                     core::NameRef cnst) {
     auto *p = make_raw(loc, std::move(scope), cnst);
     return unique_ptr<UnresolvedConstantLit>(p);
 }

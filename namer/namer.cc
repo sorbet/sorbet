@@ -1704,7 +1704,8 @@ class TreeSymbolizer {
         }
 
         const bool firstNameRecursive = false;
-        auto newOwner = constLit->hasScope() ? squashNamesInner(ctx, owner, constLit->scope(), firstNameRecursive) : owner;
+        auto newOwner =
+            constLit->hasScope() ? squashNamesInner(ctx, owner, constLit->scope(), firstNameRecursive) : owner;
         ENFORCE(newOwner.exists());
 
         core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);

@@ -1126,7 +1126,8 @@ private:
 
 public:
     static ExpressionPtr make(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst);
-    static std::unique_ptr<UnresolvedConstantLit> make_unique(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst);
+    static std::unique_ptr<UnresolvedConstantLit> make_unique(core::LocOffsets loc, ExpressionPtr scope,
+                                                              core::NameRef cnst);
 
     bool hasScope() const {
         return hasScope_;
@@ -1142,8 +1143,7 @@ public:
         return *this->getTrailingObjects<ExpressionPtr>();
     }
 
-    template <class T>
-    core::UntaggedPtr<T> scopeAs() {
+    template <class T> core::UntaggedPtr<T> scopeAs() {
         if (!hasScope()) {
             return core::UntaggedPtr<T>();
         }
@@ -1151,8 +1151,7 @@ public:
         return cast_tree<T>(this->scope());
     }
 
-    template <class T>
-    core::UntaggedPtr<const T> scopeAs() const {
+    template <class T> core::UntaggedPtr<const T> scopeAs() const {
         if (!hasScope()) {
             return core::UntaggedPtr<const T>();
         }

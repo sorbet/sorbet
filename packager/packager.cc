@@ -674,8 +674,10 @@ void prependName(ast::ExpressionPtr &scope) {
         lastConstLit = constLit;
     }
 
-    *lastScope =
-        ast::MK::UnresolvedConstant(lastConstLit->loc, ast::MK::Constant(lastScope->loc().copyWithZeroLength(), core::Symbols::PackageSpecRegistry()), lastConstLit->cnst);
+    *lastScope = ast::MK::UnresolvedConstant(
+        lastConstLit->loc,
+        ast::MK::Constant(lastScope->loc().copyWithZeroLength(), core::Symbols::PackageSpecRegistry()),
+        lastConstLit->cnst);
 }
 
 bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit &cnst) {
@@ -704,7 +706,8 @@ void prependRoot(ast::ExpressionPtr &scope) {
     }
 
     auto loc = lastScope->loc();
-    *lastScope = ast::MK::UnresolvedConstant(lastConstLit->loc, ast::MK::Constant(loc.copyWithZeroLength(), core::Symbols::root()), lastConstLit->cnst);
+    *lastScope = ast::MK::UnresolvedConstant(
+        lastConstLit->loc, ast::MK::Constant(loc.copyWithZeroLength(), core::Symbols::root()), lastConstLit->cnst);
 }
 
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
