@@ -6,9 +6,10 @@ import {
 } from "vscode-languageclient/node";
 import { RequestType } from "vscode-languageserver-protocol";
 import * as assert from "assert";
-import { shimLanguageClient } from "../languageClient";
+import * as sinon from "sinon";
 import { TestLanguageServerSpecialURIs } from "./testLanguageServerSpecialURIs";
-import { MetricsEmitter, Tags } from "../metricsClient";
+import { instrumentLanguageClient } from "../languageClient.metrics";
+import { MetricClient, MetricsEmitter, Tags } from "../metricsClient";
 
 const enum MetricType {
   Increment,
@@ -93,16 +94,23 @@ function createLanguageClient(): LanguageClient {
   return client;
 }
 
-let metricsEmitter = new RecordingMetricsEmitter();
 suite("LanguageClient", () => {
+  let metricsEmitter: RecordingMetricsEmitter;
+  let metricsClient: sinon.SinonStubbedInstance<MetricClient>;
+
   suite("Metrics", () => {
     suiteSetup(() => {
       metricsEmitter = new RecordingMetricsEmitter();
+      metricsClient = sinon.createStubInstance(MetricClient);
+      metricsClient.emitTimingMetric.callsFake((name, value, tags) => {
+        return metricsEmitter.timing(name, value, tags);
+      });
     });
+
     test("Shims language clients and records latency metrics", async () => {
-      const client = shimLanguageClient(
+      const client = instrumentLanguageClient(
         createLanguageClient(),
-        metricsEmitter.timing.bind(metricsEmitter),
+        <MetricClient>(<any>metricsClient),
       );
       await client.onReady();
       {
