@@ -62,6 +62,12 @@ public:
                               const std::vector<std::string> &relativeIgnorePatterns);
     static std::string_view getFileName(std::string_view path);
     static std::string_view getExtension(std::string_view path);
+
+    /**
+     * Returns 'true' if the file at the given path has an extension that matches one of those in 'extensions'.
+     */
+    static bool hasAllowedExtension(std::string_view path, const UnorderedSet<std::string> &extensions);
+
     /**
      * Reads data from the given file descriptor, and stores it into the output buffer.
      * Reads up to `output.size()` bytes. Timeout is specified in milliseconds.

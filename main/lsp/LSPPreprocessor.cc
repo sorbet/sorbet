@@ -435,7 +435,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidChangeTextDocumentP
     string_view uri = changeParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
-        if (!config->isFileIgnored(localPath)) {
+        if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath)) {
             string fileContents = changeParams->getSource(getFileContents(localPath));
             auto fileType = core::File::Type::Normal;
             auto &slot = openFiles[localPath];
@@ -455,7 +455,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidOpenTextDocumentPar
     string_view uri = openParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
-        if (!config->isFileIgnored(localPath)) {
+        if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath)) {
             auto fileType = core::File::Type::Normal;
             auto &slot = openFiles[localPath];
             auto file = make_shared<core::File>(move(localPath), move(openParams->textDocument->text), fileType, v);
@@ -474,7 +474,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidCloseTextDocumentPa
     string_view uri = closeParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
-        if (!config->isFileIgnored(localPath)) {
+        if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath)) {
             openFiles.erase(localPath);
             // Use contents of file on disk.
             auto fileType = core::File::Type::Normal;
@@ -493,7 +493,8 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse>
         // Don't append rootPath if it is empty.
         string localPath = !config->rootPath.empty() ? absl::StrCat(config->rootPath, "/", file) : file;
         // Editor contents supersede file system updates.
-        if (!config->isFileIgnored(localPath) && !openFiles.contains(localPath)) {
+        if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath) &&
+            !openFiles.contains(localPath)) {
             auto fileType = core::File::Type::Normal;
             auto fileContents = readFile(localPath, *config->opts.fs);
             edit->updates.push_back(make_shared<core::File>(move(localPath), move(fileContents), fileType, v));

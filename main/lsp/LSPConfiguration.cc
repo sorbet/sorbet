@@ -274,6 +274,10 @@ bool LSPConfiguration::isFileIgnored(string_view filePath) const {
     return FileOps::isFileIgnored(rootPath, filePath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
 }
 
+bool LSPConfiguration::hasAllowedExtension(std::string_view filePath) const {
+    return FileOps::hasAllowedExtension(filePath, this->opts.allowedExtensions);
+}
+
 bool LSPConfiguration::isSorbetUri(string_view uri) const {
     assertHasClientConfig();
     return clientConfig->enableSorbetURIs && absl::StartsWith(uri, sorbetScheme);

@@ -212,7 +212,7 @@ struct Options {
     std::vector<std::string> packageSkipRBIExportEnforcementDirs;
 
     // Contains the allowed extensions Sorbet can parse.
-    UnorderedSet<std::string> allowedExtensions;
+    UnorderedSet<std::string> allowedExtensions = {".rb", ".rbi"};
     // Contains the file names passed in to Sorbet.
     std::vector<std::string> rawInputFileNames;
     // Contains the directory names passed in to Sorbet.
