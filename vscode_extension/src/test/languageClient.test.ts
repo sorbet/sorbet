@@ -4,7 +4,6 @@ import {
   ServerOptions,
   TransportKind,
 } from "vscode-languageclient/node";
-import { RequestType } from "vscode-languageserver-protocol";
 import * as assert from "assert";
 import * as sinon from "sinon";
 import { TestLanguageServerSpecialURIs } from "./testLanguageServerSpecialURIs";
@@ -96,12 +95,14 @@ function createLanguageClient(): LanguageClient {
 
 suite("LanguageClient", () => {
   let metricsEmitter: RecordingMetricsEmitter;
-  let metricsClient: sinon.SinonStubbedInstance<MetricClient>;
+  let metricsClient: sinon.SinonStubbedInstance<MetricClient> & MetricClient;
 
   suite("Metrics", () => {
     suiteSetup(() => {
       metricsEmitter = new RecordingMetricsEmitter();
-      metricsClient = sinon.createStubInstance(MetricClient);
+      metricsClient = sinon.createStubInstance(
+        MetricClient,
+      ) as sinon.SinonStubbedInstance<MetricClient> & MetricClient;
       metricsClient.emitTimingMetric.callsFake((name, value, tags) => {
         return metricsEmitter.timing(name, value, tags);
       });
@@ -110,7 +111,7 @@ suite("LanguageClient", () => {
     test("Shims language clients and records latency metrics", async () => {
       const client = instrumentLanguageClient(
         createLanguageClient(),
-        <MetricClient>(<any>metricsClient),
+        metricsClient,
       );
       await client.onReady();
       {
@@ -124,34 +125,21 @@ suite("LanguageClient", () => {
           (successResponse as any).contents,
           TestLanguageServerSpecialURIs.SUCCESS,
         );
-        const metrics = metricsEmitter.getAndResetMetrics();
-        assert.strictEqual(metrics.length, 1);
-        const m = metrics[0];
-        assert.strictEqual(m[0], MetricType.Timing);
-        assert.strictEqual(m[1], "latency.textDocument_hover_ms");
-        assert.strictEqual(m[3].success, "true");
+        assertTimingMetric(metricsEmitter, "true");
       }
 
       {
-        const successResponse = await client.sendRequest(
-          new RequestType("textDocument/hover"),
-          {
-            textDocument: {
-              uri: TestLanguageServerSpecialURIs.SUCCESS,
-            },
-            position: { line: 1, character: 1 },
+        const successResponse = await client.sendRequest("textDocument/hover", {
+          textDocument: {
+            uri: TestLanguageServerSpecialURIs.SUCCESS,
           },
-        );
+          position: { line: 1, character: 1 },
+        });
         assert.strictEqual(
           (successResponse as any).contents,
           TestLanguageServerSpecialURIs.SUCCESS,
         );
-        const metrics = metricsEmitter.getAndResetMetrics();
-        assert.strictEqual(metrics.length, 1);
-        const m = metrics[0];
-        assert.strictEqual(m[0], MetricType.Timing);
-        assert.strictEqual(m[1], "latency.textDocument_hover_ms");
-        assert.strictEqual(m[3].success, "true");
+        assertTimingMetric(metricsEmitter, "true");
       }
 
       try {
@@ -168,12 +156,7 @@ suite("LanguageClient", () => {
             TestLanguageServerSpecialURIs.FAILURE,
           ) !== -1,
         );
-        const metrics = metricsEmitter.getAndResetMetrics();
-        assert.strictEqual(metrics.length, 1);
-        const m = metrics[0];
-        assert.strictEqual(m[0], MetricType.Timing);
-        assert.strictEqual(m[1], "latency.textDocument_hover_ms");
-        assert.strictEqual(m[3].success, "false");
+        assertTimingMetric(metricsEmitter, "false");
       }
 
       try {
@@ -185,13 +168,23 @@ suite("LanguageClient", () => {
         });
         assert.fail("Request should have failed.");
       } catch (e) {
-        const metrics = metricsEmitter.getAndResetMetrics();
-        assert.strictEqual(metrics.length, 1);
-        const m = metrics[0];
-        assert.strictEqual(m[0], MetricType.Timing);
-        assert.strictEqual(m[1], "latency.textDocument_hover_ms");
-        assert.strictEqual(m[3].success, "false");
+        assertTimingMetric(metricsEmitter, "false");
       }
     });
   });
+
+  function assertTimingMetric(
+    metricsEmitter: RecordingMetricsEmitter,
+    success: "true" | "false",
+  ) {
+    const metrics = metricsEmitter.getAndResetMetrics();
+    assert.strictEqual(metrics.length, 1);
+    assert.strictEqual(typeof metrics[0][2], "number");
+    assert.deepStrictEqual(metrics[0], [
+      MetricType.Timing,
+      "latency.textDocument_hover_ms",
+      metrics[0][2], // Time value is variable.
+      { success },
+    ]);
+  }
 });
