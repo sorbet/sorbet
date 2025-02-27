@@ -863,11 +863,11 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("allowed-extension") > 0) {
+            // Any use of `--allowed-extension` overrides the default.
+            opts.allowedExtensions.clear();
+
             const auto &exts = raw["allowed-extension"].as<vector<string>>();
             opts.allowedExtensions.insert(exts.begin(), exts.end());
-        } else {
-            opts.allowedExtensions.emplace(".rb");
-            opts.allowedExtensions.emplace(".rbi");
         }
 
         if (raw.count("ignore") > 0) {

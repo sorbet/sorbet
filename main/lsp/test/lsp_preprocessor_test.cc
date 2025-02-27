@@ -34,7 +34,6 @@ options::Options makeOptions(string_view rootPath) {
     opts.rawInputDirNames.emplace_back(string(rootPath));
     opts.runLSP = true;
     opts.fs = make_shared<sorbet::test::MockFileSystem>(rootPath);
-    opts.allowedExtensions = {".rb", ".rbi"};
     return opts;
 }
 
