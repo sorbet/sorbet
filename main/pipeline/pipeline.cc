@@ -490,9 +490,10 @@ struct IndexSubstitutionJob {
     IndexSubstitutionJob &operator=(IndexSubstitutionJob &&other) = default;
 };
 
-vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options::Options &opts,
-                                          shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
-                                          WorkerPool &workers, const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+ast::ParsedFilesOrCancelled mergeIndexResults(core::GlobalState &cgs, const options::Options &opts,
+                                              shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
+                                              WorkerPool &workers, const unique_ptr<const OwnedKeyValueStore> &kvstore,
+                                              bool cancelable) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
 
     auto batchq = make_shared<ConcurrentBoundedQueue<IndexSubstitutionJob>>(input->bound);
@@ -517,12 +518,15 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
         Timer timeit(cgs.tracer(), "substituteTrees");
         auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(batchq->bound);
 
-        workers.multiplexJob("substituteTrees", [&cgs, batchq, resultq]() {
+        workers.multiplexJob("substituteTrees", [&cgs, batchq, resultq, cancelable]() {
             Timer timeit(cgs.tracer(), "substituteTreesWorker");
             IndexSubstitutionJob job;
             for (auto result = batchq->try_pop(job); !result.done(); result = batchq->try_pop(job)) {
                 if (result.gotItem()) {
-                    if (job.subst.has_value()) {
+                    const auto isCanceled = cancelable && cgs.epochManager->wasTypecheckingCanceled();
+
+                    // If the slow path has been cancelled, skip substitution to handle the tree dropping in once place.
+                    if (!isCanceled && job.subst.has_value()) {
                         for (auto &tree : job.trees) {
                             auto file = tree.file;
                             if (!file.data(cgs).cached()) {
@@ -548,12 +552,16 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
         }
     }
 
+    if (cancelable && cgs.epochManager->wasTypecheckingCanceled()) {
+        return ast::ParsedFilesOrCancelled::cancel(std::move(ret), workers);
+    }
+
     return ret;
 }
 
-vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, absl::Span<const core::FileRef> files,
-                                           const options::Options &opts, WorkerPool &workers,
-                                           const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::Span<const core::FileRef> files,
+                                               const options::Options &opts, WorkerPool &workers,
+                                               const unique_ptr<const OwnedKeyValueStore> &kvstore, bool cancelable) {
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
     for (auto file : files) {
@@ -562,19 +570,29 @@ vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, absl::Span
 
     std::shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex();
 
-    workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore]() {
+    workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore, cancelable]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
 
         // clone the empty global state to avoid manually re-entering everything, and copy the base filetable so that
         // file sources are available.
         unique_ptr<core::GlobalState> localGs = emptyGs->deepCopy();
+        auto &epochManager = *localGs->epochManager;
 
+        int computedTreesCount = 0;
         IndexThreadResultPack threadResult;
 
         {
             core::FileRef job;
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
+                    // Increment the count even if we're cancelled to ensure that we indicate downstream that all inputs
+                    // have been processed.
+                    computedTreesCount++;
+
+                    // Drain the queue if the slow path gets canceled.
+                    if (cancelable && epochManager.wasTypecheckingCanceled()) {
+                        continue;
+                    }
                     core::FileRef file = job;
                     auto cachedTree = readFileWithStrictnessOverrides(*localGs, file, opts, kvstore);
                     auto parsedFile = indexOne(opts, *localGs, file, move(cachedTree));
@@ -583,22 +601,20 @@ vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, absl::Span
             }
         }
 
-        if (!threadResult.res.trees.empty()) {
+        if (computedTreesCount > 0) {
             threadResult.counters = getAndClearThreadCounters();
             threadResult.res.gs = move(localGs);
-            auto computedTreesCount = threadResult.res.trees.size();
             resultq->push(move(threadResult), computedTreesCount);
         }
     });
 
-    return mergeIndexResults(baseGs, opts, resultq, workers, kvstore);
+    return mergeIndexResults(baseGs, opts, resultq, workers, kvstore, cancelable);
 }
 
-vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<const core::FileRef> files,
-                              const options::Options &opts, WorkerPool &workers,
-                              const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+ast::ParsedFilesOrCancelled index(core::GlobalState &gs, absl::Span<const core::FileRef> files,
+                                  const options::Options &opts, WorkerPool &workers,
+                                  const unique_ptr<const OwnedKeyValueStore> &kvstore, bool cancelable) {
     Timer timeit(gs.tracer(), "index");
-    vector<ast::ParsedFile> ret;
     vector<ast::ParsedFile> empty;
 
     if (opts.stopAfterPhase == options::Phase::INIT) {
@@ -609,19 +625,29 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<const core::File
 
     if (files.size() < 3) {
         // Run singlethreaded if only using 2 files
+        std::vector<ast::ParsedFile> parsed;
+        parsed.reserve(files.size());
         for (auto file : files) {
             auto tree = readFileWithStrictnessOverrides(gs, file, opts, kvstore);
             auto parsedFile = indexOne(opts, gs, file, move(tree));
-            ret.emplace_back(move(parsedFile));
+            parsed.emplace_back(move(parsedFile));
         }
-        ENFORCE(files.size() == ret.size());
-    } else {
-        ret = indexSuppliedFiles(gs, files, opts, workers, kvstore);
-    }
 
-    // TODO(jez) Do we want this fast_sort here? Is it redundant?
-    fast_sort(ret, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
-    return ret;
+        if (cancelable && gs.epochManager->wasTypecheckingCanceled()) {
+            return ast::ParsedFilesOrCancelled::cancel(std::move(parsed), workers);
+        }
+
+        fast_sort(parsed, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
+        ENFORCE(files.size() == parsed.size());
+        return parsed;
+    } else {
+        auto ret = indexSuppliedFiles(gs, files, opts, workers, kvstore, cancelable);
+        if (ret.hasResult()) {
+            // TODO(jez) Do we want this fast_sort here? Is it redundant?
+            fast_sort(ret.result(), [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
+        }
+        return ret;
+    }
 }
 
 namespace {
