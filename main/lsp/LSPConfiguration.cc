@@ -274,6 +274,16 @@ bool LSPConfiguration::isFileIgnored(string_view filePath) const {
     return FileOps::isFileIgnored(rootPath, filePath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
 }
 
+bool LSPConfiguration::hasAllowedExtension(std::string_view filePath) const {
+    auto dotLocation = std::string_view(filePath).rfind('.');
+    if (dotLocation == string_view::npos) {
+        return false;
+    }
+
+    auto ext = std::string_view(filePath).substr(dotLocation);
+    return this->opts.allowedExtensions.contains(ext);
+}
+
 bool LSPConfiguration::isSorbetUri(string_view uri) const {
     assertHasClientConfig();
     return clientConfig->enableSorbetURIs && absl::StartsWith(uri, sorbetScheme);

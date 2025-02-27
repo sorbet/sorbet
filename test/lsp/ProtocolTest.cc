@@ -41,6 +41,7 @@ void ProtocolTest::resetState(std::shared_ptr<realmain::options::Options> opts) 
         lspWrapper = SingleThreadedLSPWrapper::create(rootPath, opts);
     }
     lspWrapper->opts->fs = fs;
+    lspWrapper->opts->allowedExtensions = {".rb", ".rbi"};
     lspWrapper->enableAllExperimentalFeatures();
 }
 

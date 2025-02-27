@@ -543,6 +543,7 @@ TEST_CASE("LSPTest") {
     // Initialize lspWrapper.
     {
         shared_ptr<realmain::options::Options> opts = make_shared<realmain::options::Options>();
+        opts->allowedExtensions = {".rb", ".rbi"};
         opts->noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
         opts->ruby3KeywordArgs =
             BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
