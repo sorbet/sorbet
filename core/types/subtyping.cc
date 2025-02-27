@@ -468,15 +468,6 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     } else {
                         result = lub(gs, l1.underlying(gs), t2.underlying(gs));
                     }
-                },
-                [&](const MetaType &m1) {
-                    if (auto *m2 = cast_type<MetaType>(t2)) {
-                        if (Types::equiv(gs, m1.wrapped, m2->wrapped)) {
-                            result = t1;
-                            return;
-                        }
-                    }
-                    result = lub(gs, m1.underlying(gs), t2.underlying(gs));
                 });
             ENFORCE(result != nullptr);
             return result;
@@ -503,6 +494,18 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             return OrType::make_shared(t1, t2);
         } else {
             return lub(gs, t1, und);
+        }
+    }
+
+    {
+        if (isa_type<MetaType>(t1) || isa_type<MetaType>(t2)) {
+            auto *m1 = cast_type<MetaType>(t1);
+            auto *m2 = cast_type<MetaType>(t2);
+            if (m1 != nullptr && m2 != nullptr && Types::equiv(gs, m1->wrapped, m2->wrapped)) {
+                return t1;
+            }
+
+            return OrType::make_shared(t1, t2);
         }
     }
 
@@ -830,15 +833,6 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     } else {
                         result = Types::bottom();
                     }
-                },
-                [&](const MetaType &m1) {
-                    auto *m2 = cast_type<MetaType>(t2);
-                    ENFORCE(m2 != nullptr);
-                    if (Types::equiv(gs, m1.wrapped, m2->wrapped)) {
-                        result = t1;
-                    } else {
-                        result = Types::bottom();
-                    }
                 });
             ENFORCE(result != nullptr);
             return result;
@@ -855,6 +849,18 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         if (Types::isSubType(gs, t2, t1)) {
             return t2;
         } else {
+            return Types::bottom();
+        }
+    }
+
+    {
+        if (isa_type<MetaType>(t1) || isa_type<MetaType>(t2)) {
+            auto *m1 = cast_type<MetaType>(t1);
+            auto *m2 = cast_type<MetaType>(t2);
+            if (m1 != nullptr && m2 != nullptr && Types::equiv(gs, m1->wrapped, m2->wrapped)) {
+                return t1;
+            }
+
             return Types::bottom();
         }
     }
@@ -1251,6 +1257,21 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         }
     }
 
+    {
+        if (isa_type<MetaType>(t1) || isa_type<MetaType>(t2)) {
+            auto *m1 = cast_type<MetaType>(t1);
+            auto *m2 = cast_type<MetaType>(t2);
+            if (m1 != nullptr && m2 != nullptr) {
+                // TODO(jez) Should this actually run under EmptyFrozenConstraint? Leaving for backwards
+                // compatibility, but maybe we should do this under the `constr` that's in scope.
+                return Types::equivUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, m1->wrapped, m2->wrapped,
+                                                   errorDetailsCollector);
+            }
+
+            return false;
+        }
+    }
+
     if (auto *a1 = cast_type<AppliedType>(t1)) {
         auto *a2 = cast_type<AppliedType>(t2);
         bool result;
@@ -1471,20 +1492,6 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
 
                     auto &l2 = cast_type_nonnull<FloatLiteralType>(t2);
                     result = l1.equals(l2);
-                },
-                [&](const MetaType &m1) {
-                    auto *m2 = cast_type<MetaType>(t2);
-                    if (m2 == nullptr) {
-                        // is a literal a subtype of a different kind of proxy
-                        result = false;
-                        return;
-                    }
-
-                    // TODO(jez) Should this actually run under EmptyFrozenConstraint? Leaving for
-                    // backwards compatibility, but maybe we should do this under the `constr`
-                    // that's in scope.
-                    result = Types::equivUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, m1.wrapped,
-                                                         m2->wrapped, errorDetailsCollector);
                 });
             return result;
         } else {

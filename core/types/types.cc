@@ -730,10 +730,6 @@ bool MetaType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const 
     return false;
 }
 
-TypePtr MetaType::underlying(const GlobalState &gs) const {
-    return Types::Object();
-}
-
 TypeVar::TypeVar(TypeArgumentRef sym) : sym(sym) {
     recordAllocatedType("typevar");
 }

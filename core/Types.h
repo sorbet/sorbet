@@ -295,7 +295,6 @@ inline bool is_proxy_type(const TypePtr &what) {
         case TypePtr::Tag::FloatLiteralType:
         case TypePtr::Tag::ShapeType:
         case TypePtr::Tag::TupleType:
-        case TypePtr::Tag::MetaType:
             return true;
         case TypePtr::Tag::ClassType:
         case TypePtr::Tag::BlamedUntyped:
@@ -309,6 +308,7 @@ inline bool is_proxy_type(const TypePtr &what) {
         case TypePtr::Tag::AliasType:
         case TypePtr::Tag::AppliedType:
         case TypePtr::Tag::TypeVar:
+        case TypePtr::Tag::MetaType:
             return false;
     }
 }
@@ -920,8 +920,6 @@ public:
 
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
-
-    TypePtr underlying(const GlobalState &gs) const;
 };
 CheckSize(MetaType, 16, 8);
 
