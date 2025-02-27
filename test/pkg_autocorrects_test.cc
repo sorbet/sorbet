@@ -789,6 +789,8 @@ TEST_CASE("Convert test_import to import") {
                           // This extra line is not great, but if we change the autocorrect to delete the '\n'
                           // after the test_import, the autocorrect show the next line in the preview, which would
                           // make the user think that entire next line will be deleted, which is incorrect.
+                          // TODO(neil): look into ways to modify the preview so we don't have this problem and we can
+                          // delete the '\n' too
                           "\n"
                           "end";
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
