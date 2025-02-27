@@ -162,6 +162,7 @@ cc_test(
         "//local_vars",
         "//packager",
         "//parser",
+        "//test/helpers",
         "@doctest//doctest",
         "@doctest//doctest:main",
     ],
