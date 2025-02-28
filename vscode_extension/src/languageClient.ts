@@ -2,8 +2,10 @@ import { ChildProcess, spawn } from "child_process";
 import { Disposable, Event, EventEmitter, workspace } from "vscode";
 import {
   CloseAction,
+  CloseHandlerResult,
   ErrorAction,
   ErrorHandler,
+  ErrorHandlerResult,
   GenericNotificationHandler,
   LanguageClient,
   RevealOutputChannelOn,
@@ -21,6 +23,7 @@ const VALID_STATE_TRANSITIONS: ReadonlyMap<
   ServerStatus,
   ReadonlySet<ServerStatus>
 > = new Map<ServerStatus, Set<ServerStatus>>([
+  [ServerStatus.DISABLED, new Set([ServerStatus.INITIALIZING])],
   [
     ServerStatus.INITIALIZING,
     new Set([
@@ -74,6 +77,9 @@ function createClient(
     ],
     outputChannel: context.logOutputChannel,
     initializationOptions,
+    initializationFailedHandler: (_error) => {
+      return true;
+    },
     errorHandler,
     revealOutputChannelOn: context.configuration.revealOutputOnError
       ? RevealOutputChannelOn.Error
@@ -89,10 +95,10 @@ export type SorbetServerCapabilities = ServerCapabilities & {
 
 export class SorbetLanguageClient implements Disposable, ErrorHandler {
   private readonly context: SorbetExtensionContext;
-  private readonly disposables: Disposable[];
   private readonly languageClient: LanguageClient;
   private readonly onStatusChangeEmitter: EventEmitter<ServerStatus>;
   private readonly restart: (reason: RestartReason) => void;
+
   private sorbetProcess?: ChildProcess;
   // Sometimes this is an errno, not a process exit code. This happens when set
   // via the `.on("error")` handler, instead of the `.on("exit")` handler.
@@ -105,48 +111,81 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
     restart: (reason: RestartReason) => void,
   ) {
     this.context = context;
-    this.onStatusChangeEmitter = new EventEmitter<ServerStatus>();
-    this.restart = restart;
-    this.wrappedStatus = ServerStatus.INITIALIZING;
-
     this.languageClient = instrumentLanguageClient(
       createClient(context, () => this.startSorbetProcess(), this),
       this.context.metrics,
     );
-    // It's possible for `onReady` to fire after `stop()` is called on the language client. :(
-    this.languageClient.onReady().then(() => {
-      if (this.status !== ServerStatus.ERROR) {
-        // Language client started successfully.
-        this.status = ServerStatus.RUNNING;
-      }
-    });
+    this.onStatusChangeEmitter = new EventEmitter<ServerStatus>();
+    this.restart = restart;
+    this.wrappedStatus = ServerStatus.DISABLED;
+  }
 
-    this.disposables = [
-      this.languageClient.start(),
-      this.onStatusChangeEmitter,
-    ];
+  public dispose(): void {
+    this.onStatusChangeEmitter.dispose();
+    // No awaiting here as we don't want to block the dispose chain
+    this.stop();
   }
 
   /**
-   * Implements the disposable interface so this object can be added to the context's subscriptions
-   * to keep it alive. Stops the language server and Sorbet processes, and removes UI items.
+   * Sorbet language server {@link SorbetServerCapabilities capabilities}. Only
+   * available when the server has been initialized.
    */
-  public dispose() {
-    Disposable.from(...this.disposables).dispose();
-    this.disposables.length = 0;
+  public get capabilities(): SorbetServerCapabilities | undefined {
+    return <SorbetServerCapabilities | undefined>(
+      this.languageClient.initializeResult?.capabilities
+    );
+  }
+
+  /**
+   * Last error message when {@link status} is {@link ServerStatus.ERROR}.
+   */
+  public get lastError(): string | undefined {
+    return this.wrappedLastError;
+  }
+
+  /**
+   * Resolves when client is ready to serve requests.
+   */
+  public async start(): Promise<void> {
+    if (!this.languageClient.needsStart()) {
+      this.context.log.trace("Ignored unnecessary start request");
+      return;
+    }
+
+    // const x = await this.startSorbetProcess();
+    // createClient(this.context, () => Promise.resolve(x), this);
+
+    // TODO(damolina): DO NOT let double calls
+    // TODO(damolina): It's possible for `onReady` to fire after `stop()` is called on the language client. :(
+    try {
+      await this.languageClient.start();
+      this.status = ServerStatus.RUNNING;
+    } catch (e) {
+      this.context.log.error(`Error starting language client: ${e}`);
+      this.status = ServerStatus.ERROR;
+    }
+  }
+
+  /**
+   * Resolves when client is ready to serve requests.
+   */
+  public async stop(): Promise<void> {
+    if (!this.languageClient.needsStop()) {
+      this.context.log.trace("Ignored unnecessary stop request");
+      return;
+    }
 
     let stopped = false;
-    /*
-     * stop() only invokes the then() callback after the language server
-     * ACKs the stop request.
-     * Stopping can time out if the language client is repeatedly failing to
-     * start (e.g. if network is down, or path to Sorbet is incorrect), or if
-     * Sorbet never ACKs the stop request.
-     * In the former case (which is the common case), VS code stops retrying
-     * the connection after we call stop(), but never invokes our callback.
-     * Thus, our solution is to wait 5 seconds for a callback, and stop the
-     * process if we haven't heard back.
-     */
+
+    //  stop() only resolves after the language server ACKs the stop request.
+    //  Stopping can time out if the language client is repeatedly failing to
+    //  start (e.g. if network is down, or path to Sorbet is incorrect), or if
+    //  Sorbet never ACKs the stop request.
+    //  In the former case (which is the common case), VS code stops retrying
+    //  the connection after we call stop(), but never invokes our callback.
+    //  Thus, our solution is to wait 5 seconds for a callback, and stop the
+    //  process if we haven't heard back.
+
     const stopTimer = setTimeout(() => {
       stopped = true;
       this.context.metrics.emitCountMetric("stop.timed_out", 1);
@@ -156,37 +195,14 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
       this.sorbetProcess = undefined;
     }, 5000);
 
-    this.languageClient.stop().then(() => {
-      if (!stopped) {
-        clearTimeout(stopTimer);
-        this.context.metrics.emitCountMetric("stop.success", 1);
-        this.context.log.info("Sorbet has stopped.");
-      }
-    });
-  }
+    await this.languageClient.stop();
+    this.status = ServerStatus.DISABLED;
 
-  /**
-   * Sorbet language server {@link SorbetServerCapabilities capabilities}. Only
-   * available if the server has been initialized.
-   */
-  public get capabilities(): SorbetServerCapabilities | undefined {
-    return <SorbetServerCapabilities | undefined>(
-      this.languageClient.initializeResult?.capabilities
-    );
-  }
-
-  /**
-   * Contains error message when {@link status} is {@link ServerStatus.ERROR}.
-   */
-  public get lastError(): string | undefined {
-    return this.wrappedLastError;
-  }
-
-  /**
-   * Resolves when client is ready to serve requests.
-   */
-  public onReady(): Promise<void> {
-    return this.languageClient.onReady();
+    if (!stopped) {
+      clearTimeout(stopTimer);
+      this.context.metrics.emitCountMetric("stop.success", 1);
+      this.context.log.info("Sorbet has stopped.");
+    }
   }
 
   /**
@@ -207,7 +223,7 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
   }
 
   /**
-   * Send a request to language server. See {@link LanguageClient.sendRequest}.
+   * Send a request to the language server. See {@link LanguageClient.sendRequest}.
    */
   public sendRequest<TResponse>(
     method: string,
@@ -217,10 +233,10 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
   }
 
   /**
-   * Send a notification to language server. See {@link LanguageClient.sendNotification}.
+   * Send a notification to the language server. See {@link LanguageClient.sendNotification}.
    */
-  public sendNotification(method: string, param: any): void {
-    this.languageClient.sendNotification(method, param);
+  public sendNotification(method: string, param: any): Promise<void> {
+    return this.languageClient.sendNotification(method, param);
   }
 
   /**
@@ -250,55 +266,62 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
    * Runs a Sorbet process using the current active configuration. Debounced so that it runs Sorbet at most every 3 seconds.
    */
   private startSorbetProcess(): Promise<ChildProcess> {
-    this.status = ServerStatus.INITIALIZING;
-    this.context.log.info("Running Sorbet LSP.");
-    const activeConfig = this.context.configuration.activeLspConfig;
-    const [command, ...args] = activeConfig?.command ?? [];
-    if (!command) {
-      let msg: string;
+    return new Promise<ChildProcess>((resolve, reject) => {
+      this.context.log.info("Starting Sorbet LSP …");
+      this.status = ServerStatus.INITIALIZING;
+
+      const activeConfig = this.context.configuration.activeLspConfig;
       if (!activeConfig) {
-        msg = "No active Sorbet configuration.";
-        this.status = ServerStatus.DISABLED;
-      } else {
-        msg = `Missing command-line data to start Sorbet. ConfigId:${activeConfig.id}`;
+        const msg = "No active configuration";
+        this.context.log.error(msg);
+        reject(new Error(msg));
+        return;
       }
 
-      this.context.log.error(msg);
-      return Promise.reject(new Error(msg));
-    }
-
-    this.context.log.debug(` > ${command} ${args.join(" ")}`);
-    this.sorbetProcess = spawn(command, args, {
-      cwd: workspace.rootPath,
-      env: { ...process.env, ...activeConfig?.env },
-    });
-    // N.B.: 'exit' is sometimes not invoked if the process exits with an error/fails to start, as per the Node.js docs.
-    // So, we need to handle both events. ¯\_(ツ)_/¯
-    this.sorbetProcess.on(
-      "exit",
-      (code: number | null, _signal: string | null) => {
-        this.sorbetProcessExitCode = code ?? undefined;
-      },
-    );
-    this.sorbetProcess.on("error", (err?: NodeJS.ErrnoException) => {
-      if (
-        err &&
-        this.status === ServerStatus.INITIALIZING &&
-        err.code === "ENOENT"
-      ) {
-        this.context.metrics.emitCountMetric("error.enoent", 1);
-        // We failed to start the process. The path to Sorbet is likely incorrect.
-        this.wrappedLastError = `Could not start Sorbet with command: '${command} ${args.join(
-          " ",
-        )}'. Encountered error '${
-          err.message
-        }'. Is the path to Sorbet correct?`;
-        this.status = ServerStatus.ERROR;
+      const [command, ...args] = activeConfig.command;
+      if (!command) {
+        const msg = `Missing command configuration. Config:${activeConfig.id}`;
+        this.context.log.error(msg);
+        reject(new Error(msg));
+        return;
       }
-      this.sorbetProcess = undefined;
-      this.sorbetProcessExitCode = err?.errno;
+
+      const cwd = workspace.workspaceFolders?.[0]?.uri.fsPath;
+      if (!cwd) {
+        this.context.log.warning("No workspace folder");
+      } else if (workspace.workspaceFolders!.length > 1) {
+        this.context.log.warning(
+          `Multi-root workspaces are not supported, using first workspace folder: ${cwd}`,
+        );
+      }
+
+      this.context.log.debug(` > ${activeConfig.command.join(" ")}`);
+      this.sorbetProcess = spawn(command, args, {
+        cwd,
+        env: { ...process.env, ...activeConfig.env },
+      })
+        .on("exit", (code: number | null, _signal: string | null) => {
+          this.sorbetProcess = undefined;
+          this.sorbetProcessExitCode = code ?? undefined;
+        })
+        .on("error", (err: NodeJS.ErrnoException) => {
+          if (
+            err.code === "ENOENT" &&
+            this.status === ServerStatus.INITIALIZING
+          ) {
+            this.context.log.error(
+              `Failed to start: ${command}\nError: ${err.message}`,
+            );
+            this.context.metrics.emitCountMetric("error.enoent", 1);
+            this.status = ServerStatus.ERROR;
+          }
+
+          this.sorbetProcess = undefined;
+          this.sorbetProcessExitCode = err?.errno;
+        });
+
+      return resolve(this.sorbetProcess);
     });
-    return Promise.resolve(this.sorbetProcess);
   }
 
   /** ErrorHandler interface */
@@ -309,18 +332,22 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
    * * It drops all `onReady` subscriptions after restarting, so we won't know when the Sorbet server is running.
    * * It doesn't reset `onReady` state, so we can't even reset our `onReady` callback.
    */
-  public error(): ErrorAction {
+  public error(): ErrorHandlerResult {
     if (this.status !== ServerStatus.ERROR) {
       this.status = ServerStatus.RESTARTING;
       this.restart(RestartReason.CRASH_LC_ERROR);
     }
-    return ErrorAction.Shutdown;
+
+    return {
+      action: ErrorAction.Shutdown,
+      // TODO: message ?
+    };
   }
 
   /**
    * Note: If the VPN is disconnected, then Sorbet will repeatedly fail to start.
    */
-  public closed(): CloseAction {
+  public closed(): CloseHandlerResult {
     if (this.status !== ServerStatus.ERROR) {
       let reason: RestartReason;
       if (this.sorbetProcessExitCode === 11) {
@@ -355,6 +382,9 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
       this.restart(reason);
     }
 
-    return CloseAction.DoNotRestart;
+    return {
+      action: CloseAction.DoNotRestart,
+      // TODO: message ?
+    };
   }
 }
