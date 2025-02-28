@@ -730,10 +730,6 @@ bool MetaType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const 
     return false;
 }
 
-TypePtr MetaType::underlying(const GlobalState &gs) const {
-    return Types::Object();
-}
-
 TypeVar::TypeVar(TypeArgumentRef sym) : sym(sym) {
     recordAllocatedType("typevar");
 }
@@ -1102,8 +1098,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
                                 mem.showFullName(gs));
                     e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs), "upper",
                                    memType->upperBound.show(gs));
-                    TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector, memType->upperBound,
-                                                              argType);
+                    e.addErrorSections(move(errorDetailsCollector));
                 }
             }
 
@@ -1117,8 +1112,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
                                 mem.showFullName(gs));
                     e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs), "lower",
                                    memType->lowerBound.show(gs));
-                    TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector2, memType->lowerBound,
-                                                              argType);
+                    e.addErrorSections(move(errorDetailsCollector2));
                 }
             }
 

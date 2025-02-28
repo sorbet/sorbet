@@ -468,15 +468,6 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     } else {
                         result = lub(gs, l1.underlying(gs), t2.underlying(gs));
                     }
-                },
-                [&](const MetaType &m1) {
-                    if (auto *m2 = cast_type<MetaType>(t2)) {
-                        if (Types::equiv(gs, m1.wrapped, m2->wrapped)) {
-                            result = t1;
-                            return;
-                        }
-                    }
-                    result = lub(gs, m1.underlying(gs), t2.underlying(gs));
                 });
             ENFORCE(result != nullptr);
             return result;
@@ -503,6 +494,24 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             return OrType::make_shared(t1, t2);
         } else {
             return lub(gs, t1, und);
+        }
+    }
+
+    {
+        if (isa_type<MetaType>(t1) || isa_type<MetaType>(t2)) {
+            auto *m1 = cast_type<MetaType>(t1);
+            auto *m2 = cast_type<MetaType>(t2);
+            if (m1 != nullptr && m2 != nullptr && Types::equiv(gs, m1->wrapped, m2->wrapped)) {
+                return t1;
+            }
+
+            // This is weird. We used to treat the "underlying" of a MetaType as `Object`.
+            // We should probably _not_ treat it like it has an underlying, to catch mistakes where
+            // people treat runtime types as values, but that's a battle for another day.
+            // We should at least treat it like T::Types::Base, not Object, but again: another day.
+            auto m1underlying = m1 == nullptr ? t1 : Types::Object();
+            auto m2underlying = m2 == nullptr ? t2 : Types::Object();
+            return lub(gs, m1underlying, m2underlying);
         }
     }
 
@@ -830,15 +839,6 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     } else {
                         result = Types::bottom();
                     }
-                },
-                [&](const MetaType &m1) {
-                    auto *m2 = cast_type<MetaType>(t2);
-                    ENFORCE(m2 != nullptr);
-                    if (Types::equiv(gs, m1.wrapped, m2->wrapped)) {
-                        result = t1;
-                    } else {
-                        result = Types::bottom();
-                    }
                 });
             ENFORCE(result != nullptr);
             return result;
@@ -855,6 +855,18 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         if (Types::isSubType(gs, t2, t1)) {
             return t2;
         } else {
+            return Types::bottom();
+        }
+    }
+
+    {
+        if (isa_type<MetaType>(t1) || isa_type<MetaType>(t2)) {
+            auto *m1 = cast_type<MetaType>(t1);
+            auto *m2 = cast_type<MetaType>(t2);
+            if (m1 != nullptr && m2 != nullptr && Types::equiv(gs, m1->wrapped, m2->wrapped)) {
+                return t1;
+            }
+
             return Types::bottom();
         }
     }
@@ -1251,6 +1263,44 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         }
     }
 
+    {
+        if (isa_type<MetaType>(t1) || isa_type<MetaType>(t2)) {
+            auto *m1 = cast_type<MetaType>(t1);
+            auto *m2 = cast_type<MetaType>(t2);
+            if (m1 != nullptr && m2 != nullptr) {
+                // TODO(jez) Should this actually run under EmptyFrozenConstraint? Leaving for backwards
+                // compatibility, but maybe we should do this under the `constr` that's in scope.
+                return Types::equivUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, m1->wrapped, m2->wrapped,
+                                                   errorDetailsCollector);
+            }
+
+            if (m2 == nullptr) {
+                auto res = isSubTypeUnderConstraintSingle(gs, constr, mode, Types::Object(), t2, errorDetailsCollector);
+
+                if constexpr (shouldAddErrorDetails) {
+                    auto subCollectorLine1 = errorDetailsCollector.newCollector();
+                    subCollectorLine1.message = ErrorColors::format(
+                        "It looks like you're using Sorbet type syntax in a runtime value position.");
+                    errorDetailsCollector.addErrorDetails(move(subCollectorLine1));
+                    auto subCollectorLine2 = errorDetailsCollector.newCollector();
+                    subCollectorLine2.message =
+                        ErrorColors::format("If you really mean to use types as values, use `{}` "
+                                            "to hide the type syntax from the type checker.",
+                                            "T::Utils.coerce");
+                    errorDetailsCollector.addErrorDetails(move(subCollectorLine2));
+                    auto subCollectorLine3 = errorDetailsCollector.newCollector();
+                    subCollectorLine3.message = ErrorColors::format(
+                        "Otherwise, you're likely using the type system in a way it wasn't meant to be used.");
+                    errorDetailsCollector.addErrorDetails(move(subCollectorLine3));
+                }
+
+                return res;
+            }
+
+            return false;
+        }
+    }
+
     if (auto *a1 = cast_type<AppliedType>(t1)) {
         auto *a2 = cast_type<AppliedType>(t2);
         bool result;
@@ -1471,20 +1521,6 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
 
                     auto &l2 = cast_type_nonnull<FloatLiteralType>(t2);
                     result = l1.equals(l2);
-                },
-                [&](const MetaType &m1) {
-                    auto *m2 = cast_type<MetaType>(t2);
-                    if (m2 == nullptr) {
-                        // is a literal a subtype of a different kind of proxy
-                        result = false;
-                        return;
-                    }
-
-                    // TODO(jez) Should this actually run under EmptyFrozenConstraint? Leaving for
-                    // backwards compatibility, but maybe we should do this under the `constr`
-                    // that's in scope.
-                    result = Types::equivUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, m1.wrapped,
-                                                         m2->wrapped, errorDetailsCollector);
                 });
             return result;
         } else {
