@@ -7,8 +7,7 @@ test/cli/suggest-kernel/suggest-kernel.rb:14: Method `is_a?` does not exist on `
                     ^
   Note:
     `is_a?` is actually defined as a method on `Kernel`. To call it, either
-    `include Kernel` in this module to ensure the method is always there, or
-    call the method using `Kernel.is_a?` instead.
+    `include Kernel` in this module to ensure the method is always there.
 
 test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `Foo` https://srb.help/7003
      .. |    raise "hi"

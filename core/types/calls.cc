@@ -792,11 +792,18 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     if (objMeth.exists() && objMeth.data(gs)->owner.data(gs)->isModule()) {
                         auto objData = objMeth.data(gs);
                         auto ownerName = objData->owner.data(gs)->name.show(gs);
+
+                        // Only want to suggest for things like `Kernel.raise`, not things like Kernel.is_a?
+                        // (crude heuristic for figuring that out).
+                        auto suggestKernelDot =
+                            args.isPrivateOk ? ErrorColors::format(", or\n    call the method using `{}` instead.",
+                                                                   fmt::format("{}.{}", ownerName, args.name.show(gs)))
+                                             : ".";
+
                         e.addErrorNote("`{}` is actually defined as a method on `{}`. To call it, either\n"
-                                       "    `{}` in this module to ensure the method is always there, or\n"
-                                       "    call the method using `{}` instead.",
+                                       "    `{}` in this module to ensure the method is always there{}",
                                        args.name.show(gs), ownerName, fmt::format("include {}", ownerName),
-                                       fmt::format("{}.{}", ownerName, args.name.show(gs)));
+                                       suggestKernelDot);
                         if (args.receiverLoc().exists() && args.receiverLoc().empty()) {
                             e.replaceWith("Prefix with `Kernel.`", args.receiverLoc(), "Kernel.");
                         }
