@@ -298,7 +298,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                                        req.get().show(ctx), req.get().type.show(ctx));
                         e.addErrorNote(
                             "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                e.addErrorSections(move(errorDetailsCollector));
+                        e.addErrorSections(move(errorDetailsCollector));
                     }
                 }
             } else {
@@ -330,7 +330,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                                        opt.get().show(ctx), opt.get().type.show(ctx));
                         e.addErrorNote(
                             "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                e.addErrorSections(move(errorDetailsCollector));
+                        e.addErrorSections(move(errorDetailsCollector));
                     }
                 }
             } else if (absl::c_any_of(right.kw.required,
