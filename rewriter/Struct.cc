@@ -67,13 +67,11 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         return empty;
     }
 
-    auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv);
-    if (recv == nullptr) {
+    if (!ASTUtil::isRootScopedSyntacticConstant(send->recv, {core::Names::Constants::Struct()})) {
         return empty;
     }
 
-    if (!ast::MK::isRootScope(recv->scope) || recv->cnst != core::Symbols::Struct().data(ctx)->name ||
-        send->fun != core::Names::new_() || (!send->hasPosArgs() && !send->hasKwArgs())) {
+    if (send->fun != core::Names::new_() || (!send->hasPosArgs() && !send->hasKwArgs())) {
         return empty;
     }
 
