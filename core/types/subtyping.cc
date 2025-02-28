@@ -505,7 +505,13 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 return t1;
             }
 
-            return OrType::make_shared(t1, t2);
+            // This is weird. We used to treat the "underlying" of a MetaType as `Object`.
+            // We should probably _not_ treat it like it has an underlying, to catch mistakes where
+            // people treat runtime types as values, but that's a battle for another day.
+            // We should at least treat it like T::Types::Base, not Object, but again: another day.
+            auto m1underlying = m1 == nullptr ? t1 : Types::Object();
+            auto m2underlying = m2 == nullptr ? t2 : Types::Object();
+            return lub(gs, m1underlying, m2underlying);
         }
     }
 
@@ -1268,8 +1274,10 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                                                    errorDetailsCollector);
             }
 
-            if constexpr (shouldAddErrorDetails) {
-                if (m1 != nullptr) {
+            if (m2 == nullptr) {
+                auto res = isSubTypeUnderConstraintSingle(gs, constr, mode, Types::Object(), t2, errorDetailsCollector);
+
+                if constexpr (shouldAddErrorDetails) {
                     auto subCollectorLine1 = errorDetailsCollector.newCollector();
                     subCollectorLine1.message = ErrorColors::format(
                         "It looks like you're using Sorbet type syntax in a runtime value position.");
@@ -1285,6 +1293,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         "Otherwise, you're likely using the type system in a way it wasn't meant to be used.");
                     errorDetailsCollector.addErrorDetails(move(subCollectorLine3));
                 }
+
+                return res;
             }
 
             return false;
