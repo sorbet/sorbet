@@ -64,7 +64,7 @@ export class SorbetStatusProvider implements Disposable {
       }
     }
 
-    // Hook-up new client for clean-up, if any.
+    // Register new client for clean-up, if any.
     if (value) {
       const i = this.disposables.indexOf(value);
       if (i === -1) {
@@ -218,7 +218,7 @@ export class SorbetStatusProvider implements Disposable {
 
     // TODO(damolina): Change to wait for "RUNNING" ?
     // Wait for `ready` before accessing `languageClient`.
-    await newClient.onReady();
+    await newClient.start();
     this.activeLanguageClient = newClient;
 
     this.disposables.push(
@@ -236,11 +236,13 @@ export class SorbetStatusProvider implements Disposable {
 
   /**
    * Stop Sorbet.
-   * @param newStatus Status to report.
+   * @param newStatus Status to report, if any.
    */
-  public async stopSorbet(newStatus: ServerStatus): Promise<void> {
+  public async stopSorbet(newStatus?: ServerStatus): Promise<void> {
     // Use property-setter to ensure proper clean-up.
     this.activeLanguageClient = undefined;
-    this.fireOnStatusChanged({ status: newStatus, stopped: true });
+    if (newStatus) {
+      this.fireOnStatusChanged({ status: newStatus, stopped: true });
+    }
   }
 }

@@ -19,7 +19,7 @@ import { ServerStatus, RestartReason } from "./types";
 /**
  * Extension entrypoint.
  */
-export function activate(context: ExtensionContext) {
+export async function activate(context: ExtensionContext) {
   const sorbetExtensionContext = new SorbetExtensionContext(context);
   sorbetExtensionContext.log.level = getLogLevelFromEnvironment();
 
@@ -96,6 +96,5 @@ export function activate(context: ExtensionContext) {
     ),
   );
 
-  // Start the extension.
-  return sorbetExtensionContext.statusProvider.startSorbet();
+  await sorbetExtensionContext.statusProvider.startSorbet();
 }
