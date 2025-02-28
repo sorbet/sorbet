@@ -1,3 +1,3 @@
 # typed: false
-def # error: Hint: this "def" token might not be followed by a method name
-end # error: unexpected token "end of file"
+def # parser-error: Hint: this "def" token might not be followed by a method name
+end # parser-error: unexpected token "end of file"
