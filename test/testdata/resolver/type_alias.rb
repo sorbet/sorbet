@@ -15,14 +15,14 @@ module Main
 end
 
 module A
-  puts StringAlias
+  puts StringAlias # error: Expected `BasicObject` but found `Runtime object representing type:
 end
 StringAlias = T.type_alias {String}
 
 
 IntegerAlias = T.type_alias {Integer}
 module B
-  puts IntegerAlias
+  puts IntegerAlias # error: Expected `BasicObject` but found `Runtime object representing type:
 end
 
 # Stress-testing nesting / scope resolution of type aliases
@@ -30,17 +30,17 @@ end
 class Outside
   class Inside
     def inside
-      puts RootAlias
-      puts OutsideAlias
-      puts InsideAlias
+      puts RootAlias # error: Expected `BasicObject` but found `Runtime object representing type:
+      puts OutsideAlias # error: Expected `BasicObject` but found `Runtime object representing type:
+      puts InsideAlias # error: Expected `BasicObject` but found `Runtime object representing type:
     end
 
     InsideAlias = T.type_alias {Symbol}
   end
 
   def outside
-    puts RootAlias
-    puts OutsideAlias
+    puts RootAlias # error: Expected `BasicObject` but found `Runtime object representing type:
+    puts OutsideAlias # error: Expected `BasicObject` but found `Runtime object representing type:
     puts InsideAlias # error: Unable to resolve constant `InsideAlias`
   end
 
@@ -48,7 +48,7 @@ class Outside
 end
 
 def main
-  puts RootAlias
+  puts RootAlias # error: Expected `BasicObject` but found `Runtime object representing type:
   puts OutsideAlias # error: Unable to resolve constant `OutsideAlias`
   puts InsideAlias # error: Unable to resolve constant `InsideAlias`
 end

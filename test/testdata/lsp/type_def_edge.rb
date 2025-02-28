@@ -44,7 +44,7 @@ class Wrapper
       #    ^ type: (nothing)
 
       meta = T.nilable(Integer)
-      puts(meta)
+      puts(meta) # error: Expected `BasicObject` but found `Runtime object representing type:
       #    ^ type: (nothing)
     end
 
