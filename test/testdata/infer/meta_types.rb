@@ -7,10 +7,10 @@ class TestMetaType
   def _; end
 
   def testit
-    puts(T::Array[String]) # error: Expected `BasicObject` but found `Runtime object representing type:
+    puts(T::Array[String])
 
     puts(
-      if _ # error: Expected `BasicObject` but found
+      if _
         T::Array[String]
       else
         false
@@ -18,7 +18,7 @@ class TestMetaType
     )
 
     puts(
-          if _ # error: Expected `BasicObject` but found
+          if _
             T::Array[String]
           else
             T::Array[Float]

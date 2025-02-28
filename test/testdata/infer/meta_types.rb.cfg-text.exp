@@ -61,8 +61,8 @@ bb3[firstDead=-1](<self>: TestMetaType):
 # backedges
 # - bb2
 # - bb3
-bb4[firstDead=-1](<self>: TestMetaType, <statTemp>$14: T.any(FalseClass, Runtime object representing type: T::Array[String])):
-    <statTemp>$12: NilClass = <self>: TestMetaType.puts(<statTemp>$14: T.any(FalseClass, Runtime object representing type: T::Array[String]))
+bb4[firstDead=-1](<self>: TestMetaType, <statTemp>$14: Object):
+    <statTemp>$12: NilClass = <self>: TestMetaType.puts(<statTemp>$14: Object)
     <ifTemp>$25: T.untyped = <self>: TestMetaType._()
     <ifTemp>$25 -> (T.untyped ? bb5 : bb6)
 
@@ -87,8 +87,8 @@ bb6[firstDead=-1](<self>: TestMetaType):
 # backedges
 # - bb5
 # - bb6
-bb7[firstDead=2](<self>: TestMetaType, <statTemp>$24: T.any(Runtime object representing type: T::Array[String], Runtime object representing type: T::Array[Float])):
-    <returnMethodTemp>$2: NilClass = <self>: TestMetaType.puts(<statTemp>$24: T.any(Runtime object representing type: T::Array[String], Runtime object representing type: T::Array[Float]))
+bb7[firstDead=2](<self>: TestMetaType, <statTemp>$24: Object):
+    <returnMethodTemp>$2: NilClass = <self>: TestMetaType.puts(<statTemp>$24: Object)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
