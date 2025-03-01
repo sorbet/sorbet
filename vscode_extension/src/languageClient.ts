@@ -43,7 +43,7 @@ export function createClient(
         "Failed to initialize Sorbet language server",
         error instanceof Error ? error : undefined,
       );
-      return true;
+      return false;
     },
     outputChannel: context.logOutputChannel,
     revealOutputChannelOn: context.configuration.revealOutputOnError

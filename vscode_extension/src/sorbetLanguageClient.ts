@@ -135,7 +135,12 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
 
     this.status = ServerStatus.INITIALIZING;
     await this.languageClient.start();
-    this.status = ServerStatus.RUNNING;
+
+    // In case of error (missing Sorbet process), the client might have already
+    // transitioned to Error or Restarting so this should not override that.
+    if (this.status === ServerStatus.INITIALIZING) {
+      this.status = ServerStatus.RUNNING;
+    }
   }
 
   /**
@@ -184,8 +189,7 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
       return;
     }
 
-    const set = VALID_STATE_TRANSITIONS.get(this.status);
-    if (!set?.has(newStatus)) {
+    if (!VALID_STATE_TRANSITIONS.get(this.status)?.has(newStatus)) {
       this.context.log.error(
         `Invalid Sorbet server transition: ${this.status} => ${newStatus}}`,
       );
