@@ -133,7 +133,9 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
       return;
     }
 
+    this.status = ServerStatus.INITIALIZING;
     await this.languageClient.start();
+    this.status = ServerStatus.RUNNING;
   }
 
   /**
@@ -197,7 +199,6 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
    * Runs a Sorbet process using the current active configuration. Debounced so that it runs Sorbet at most every 3 seconds.
    */
   private startSorbetProcess(): Promise<ChildProcess> {
-    this.status = ServerStatus.INITIALIZING;
     this.context.log.info("Running Sorbet LSP.");
     const activeConfig = this.context.configuration.activeLspConfig;
     const [command, ...args] = activeConfig?.command ?? [];
