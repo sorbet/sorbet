@@ -74,6 +74,15 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
     ast::Send::ARGS_store sigArgs;
     ast::ClassDef::RHS_store body;
 
+    if (auto dup = ASTUtil::findDuplicateArg(ctx, send)) {
+        if (auto e = ctx.beginError(dup->secondLoc, core::errors::Rewriter::InvalidStructMember)) {
+            e.setHeader("Duplicate member '{}' in Data definition", dup->name.show(ctx));
+            e.addErrorLine(ctx.locAt(dup->firstLoc), "First occurrence of '{}' in Data definition",
+                           dup->name.show(ctx));
+        }
+        return empty;
+    }
+
     for (auto &arg : send->posArgs()) {
         auto sym = ast::cast_tree<ast::Literal>(arg);
         if (!sym || !sym->isName()) {

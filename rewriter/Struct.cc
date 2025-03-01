@@ -110,30 +110,22 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         }
     }
 
-    UnorderedSet<core::NameRef> seenNames;
+    if (auto dup = ASTUtil::findDuplicateArg(ctx, send)) {
+        if (auto e = ctx.beginError(dup->secondLoc, core::errors::Rewriter::InvalidStructMember)) {
+            e.setHeader("Duplicate member '{}' in Struct definition", dup->name.show(ctx));
+            e.addErrorLine(ctx.locAt(dup->firstLoc), "First occurrence of '{}' in Struct definition",
+                           dup->name.show(ctx));
+        }
+        return empty;
+    }
+
     for (auto &arg : send->posArgs()) {
-        auto lit = ast::cast_tree<ast::Literal>(arg);
-        if (!lit) {
+        auto sym = ast::cast_tree<ast::Literal>(arg);
+        if (!sym || !sym->isSymbol()) {
             return empty;
         }
-
-        core::NameRef name;
-        if (lit->isSymbol()) {
-            name = lit->asSymbol();
-        } else if (lit->isString()) {
-            name = lit->asString();
-        } else {
-            return empty;
-        }
-
-        auto [it, inserted] = seenNames.insert(name);
-        if (!inserted) {
-            if (auto e = ctx.beginError(lit->loc, core::errors::Rewriter::InvalidStructMember)) {
-                e.setHeader("Duplicate member '{}' in Struct definition", name.show(ctx));
-            }
-            return empty;
-        }
-        auto symLoc = lit->loc;
+        core::NameRef name = sym->asSymbol();
+        auto symLoc = sym->loc;
         auto strname = name.shortName(ctx);
         if (!strname.empty() && strname.back() == '=') {
             if (auto e = ctx.beginIndexerError(symLoc, core::errors::Rewriter::InvalidStructMember)) {

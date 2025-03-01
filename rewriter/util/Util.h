@@ -47,6 +47,12 @@ public:
     // 4. Prelude::Opus::Command as `expr` would not match {Constants::Opus(), Constants::Command()}
     static bool isRootScopedSyntacticConstant(const ast::ExpressionPtr &expr,
                                               absl::Span<const core::NameRef> constantName);
+    struct DuplicateArg {
+        core::NameRef name;
+        core::LocOffsets firstLoc;
+        core::LocOffsets secondLoc;
+    };
+    static std::optional<DuplicateArg> findDuplicateArg(core::MutableContext ctx, const ast::Send *send);
 
     ASTUtil() = delete;
 };
