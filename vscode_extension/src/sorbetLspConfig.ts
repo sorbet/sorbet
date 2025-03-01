@@ -61,6 +61,7 @@ export class SorbetLspConfig implements SorbetLspConfigData {
     description: string,
     env: NodeJS.ProcessEnv,
   );
+
   constructor(
     id: string,
     name: string,
@@ -68,6 +69,7 @@ export class SorbetLspConfig implements SorbetLspConfigData {
     env: NodeJS.ProcessEnv,
     command: ReadonlyArray<string>,
   );
+
   constructor(
     idOrData: string | SorbetLspConfigData,
     name: string = "",

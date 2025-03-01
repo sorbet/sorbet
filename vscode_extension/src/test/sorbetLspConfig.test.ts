@@ -40,20 +40,14 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       {},
       ["test_command", "test_arg_1"],
     ),
-    new SorbetLspConfig(
-      "test_id",
-      "test_name",
-      "test_description",
-      {},
-      ["test_command", "test_arg_1"],
-    ),
-    new SorbetLspConfig(
-      "test_id",
-      "test_name",
-      "test_description",
-      {},
-      ["different_test_command", "test_arg_1"],
-    ),
+    new SorbetLspConfig("test_id", "test_name", "test_description", {}, [
+      "test_command",
+      "test_arg_1",
+    ]),
+    new SorbetLspConfig("test_id", "test_name", "test_description", {}, [
+      "different_test_command",
+      "test_arg_1",
+    ]),
     new SorbetLspConfig(
       "test_id",
       "test_name",
