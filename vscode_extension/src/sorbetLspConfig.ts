@@ -17,10 +17,6 @@ export interface SorbetLspConfigData {
    */
   readonly description: string;
   /**
-   * Working directory for {@link command}.
-   */
-  readonly cwd: string;
-  /**
    * Environment variables to set when executing {@link command}.
    */
   readonly env: NodeJS.ProcessEnv;
@@ -47,10 +43,6 @@ export class SorbetLspConfig implements SorbetLspConfigData {
    */
   public readonly description: string;
   /**
-   * Working directory for {@link command}.
-   */
-  public readonly cwd: string;
-  /**
    * Environment variables to set when executing {@link command}.
    */
   public readonly env: NodeJS.ProcessEnv;
@@ -63,29 +55,23 @@ export class SorbetLspConfig implements SorbetLspConfigData {
 
   constructor(id: string, name: string);
   constructor(id: string, name: string, description: string);
-  constructor(id: string, name: string, description: string, cwd: string);
   constructor(
     id: string,
     name: string,
     description: string,
-    cwd: string,
     env: NodeJS.ProcessEnv,
   );
-
   constructor(
     id: string,
     name: string,
     description: string,
-    cwd: string,
     env: NodeJS.ProcessEnv,
     command: ReadonlyArray<string>,
   );
-
   constructor(
     idOrData: string | SorbetLspConfigData,
     name: string = "",
     description: string = "",
-    cwd: string = "",
     env: NodeJS.ProcessEnv = {},
     command: ReadonlyArray<string> = [],
   ) {
@@ -93,14 +79,12 @@ export class SorbetLspConfig implements SorbetLspConfigData {
       this.id = idOrData;
       this.name = name;
       this.description = description;
-      this.cwd = cwd;
       this.env = { ...env };
       this.command = command;
     } else {
       this.id = idOrData.id;
       this.name = idOrData.name;
       this.description = idOrData.description;
-      this.cwd = idOrData.cwd;
       this.env = { ...idOrData.env };
       this.command = [...idOrData.command];
     }
@@ -123,7 +107,6 @@ export class SorbetLspConfig implements SorbetLspConfigData {
       this.id === other.id &&
       this.name === other.name &&
       this.description === other.description &&
-      this.cwd === other.cwd &&
       deepEqualEnv(this.env, other.env) &&
       deepEqual(this.command, other.command)
     );
