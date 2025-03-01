@@ -41,10 +41,6 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       ["test_command", "test_arg_1"],
     ),
     new SorbetLspConfig("test_id", "test_name", "test_description", {}, [
-      "test_command",
-      "test_arg_1",
-    ]),
-    new SorbetLspConfig("test_id", "test_name", "test_description", {}, [
       "different_test_command",
       "test_arg_1",
     ]),
@@ -63,8 +59,8 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
 
   test("isEqualTo(other)", () => {
     assert.ok(config1.isEqualTo(config2));
-    differentConfigs.forEach((c) =>
-      assert.ok(!config1.isEqualTo(c), `Should not equal: ${c}`),
+    differentConfigs.forEach((c, i) =>
+      assert.ok(!config1.isEqualTo(c), `Should not equal[index: ${i}]: ${c}`),
     );
   });
 
