@@ -216,9 +216,8 @@ export class SorbetStatusProvider implements Disposable {
       }),
     );
 
-    // Wait for the client to be ready before advertising it as active.
-    await newClient.start();
     this.activeLanguageClient = newClient;
+    await newClient.start();
 
     this.disposables.push(
       newClient.onNotification(

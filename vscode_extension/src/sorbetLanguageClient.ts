@@ -32,6 +32,7 @@ const VALID_STATE_TRANSITIONS: ReadonlyMap<
     ServerStatus.RUNNING,
     new Set([ServerStatus.ERROR, ServerStatus.RESTARTING]),
   ],
+  [ServerStatus.DISABLED, new Set([ServerStatus.INITIALIZING])],
   // Restarting is a terminal state. The restart occurs by terminating this LanguageClient and creating a new one.
   [ServerStatus.RESTARTING, new Set()],
   // Error is a terminal state for this class.
