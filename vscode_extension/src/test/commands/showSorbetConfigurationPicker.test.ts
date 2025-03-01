@@ -25,7 +25,6 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       id: "test-config-id-active",
       name: "test-config-id-active",
       description: "",
-      cwd: "",
       env: {},
       command: [],
     });
@@ -33,7 +32,6 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       id: "test-config-id",
       name: "test-config-id",
       description: "",
-      cwd: "",
       env: {},
       command: [],
     });
