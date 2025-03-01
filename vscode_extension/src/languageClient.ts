@@ -268,8 +268,15 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
     }
 
     this.context.log.debug(` > ${command} ${args.join(" ")}`);
+    const cwdTemplate = this.context.configuration.activeLspConfig!.cwd;
+    const cwd = cwdTemplate
+      ? cwdTemplate.replace(
+          "${workspaceFolder}", // eslint-disable-line no-template-curly-in-string
+          workspace.rootPath || "",
+        )
+      : workspace.rootPath || "";
     this.sorbetProcess = spawn(command, args, {
-      cwd: workspace.rootPath,
+      cwd,
       env: { ...process.env, ...activeConfig?.env },
     });
     // N.B.: 'exit' is sometimes not invoked if the process exits with an error/fails to start, as per the Node.js docs.
