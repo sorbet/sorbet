@@ -4,7 +4,7 @@ import * as path from "path";
 import * as sinon from "sinon";
 
 import { createLogStub } from "./testUtils";
-import { SorbetLanguageClient } from "../languageClient";
+import { SorbetLanguageClient } from "../sorbetLanguageClient";
 import { LogLevel } from "../log";
 import { SorbetExtensionContext } from "../sorbetExtensionContext";
 import { SorbetContentProvider } from "../sorbetContentProvider";

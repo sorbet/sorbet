@@ -1,5 +1,5 @@
 import { Disposable, Event, EventEmitter } from "vscode";
-import { SorbetLanguageClient } from "./languageClient";
+import { SorbetLanguageClient } from "./sorbetLanguageClient";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { RestartReason, ServerStatus, ShowOperationParams } from "./types";
 
@@ -64,7 +64,7 @@ export class SorbetStatusProvider implements Disposable {
       }
     }
 
-    // Hook-up new client for clean-up, if any.
+    // Register new client for clean-up, if any.
     if (value) {
       const i = this.disposables.indexOf(value);
       if (i === -1) {
@@ -204,9 +204,6 @@ export class SorbetStatusProvider implements Disposable {
       this.context,
       (reason: RestartReason) => this.restartSorbet(reason),
     );
-    // Use property-setter to ensure proper setup.
-    this.activeLanguageClient = newClient;
-
     this.disposables.push(
       newClient.onStatusChange((status: ServerStatus) => {
         // Ignore event if this is not the current client (e.g. old client being shut down).
@@ -219,8 +216,9 @@ export class SorbetStatusProvider implements Disposable {
       }),
     );
 
-    // Wait for `ready` before accessing `languageClient`.
-    await newClient.onReady();
+    this.activeLanguageClient = newClient;
+    await newClient.start();
+
     this.disposables.push(
       newClient.onNotification(
         "sorbet/showOperation",
