@@ -399,4 +399,29 @@ pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext 
     return make_pair(res, loc);
 }
 
+std::optional<ASTUtil::DuplicateArg> ASTUtil::findDuplicateArg(core::MutableContext ctx, const ast::Send *send) {
+    if (!send) {
+        return std::nullopt;
+    }
+
+    UnorderedMap<core::NameRef, core::LocOffsets> seenNames;
+
+    for (auto &arg : send->posArgs()) {
+        auto lit = ast::cast_tree<ast::Literal>(arg);
+        if (!lit || !lit->isName()) {
+            continue;
+        }
+
+        auto name = lit->asName();
+        auto loc = lit->loc;
+
+        auto [it, inserted] = seenNames.emplace(name, loc);
+        if (!inserted) {
+            return DuplicateArg{name, it->second, loc};
+        }
+    }
+
+    return std::nullopt;
+}
+
 } // namespace sorbet::rewriter
