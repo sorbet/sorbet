@@ -266,6 +266,14 @@ public:
     explicit PackageInfoImpl(const PackageInfoImpl &) = default;
     PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;
 
+    int orderByAlphabetical(const PackageInfo &a, const PackageInfo &b) const {
+        auto aFullName = a.fullName();
+        auto bFullName = b.fullName();
+        if (aFullName == bFullName) {
+            return 0;
+        }
+        return core::packages::PackageInfo::lexCmp(aFullName, bFullName) ? -1 : 1;
+    }
     // What order should these packages be in the import list?
     // Returns -1 if a should come before b, 0 if they are equivalent, and 1 if a should come after b.
     //
@@ -288,11 +296,11 @@ public:
     // - imports to 'false', 'layered', or 'layered_dag' packages
     // - imports to 'dag' packages
     // - test imports
+    // Within each group by strictness, packages are sorted by alphabetical order.
     // TODO(neil): explain the rationale behind this ordering (ie. why is not the simple "false < layered < layered_dag
     // < dag" ordering)
-    // TODO(neil): implement alphabetical sort.
-    int orderByStrictness(const core::packages::PackageDB &packageDB, const PackageInfo &a, bool aIsTestImport,
-                          const PackageInfo &b, bool bIsTestImport) const {
+    int orderByStrictnessAndAlphabetical(const core::packages::PackageDB &packageDB, const PackageInfo &a,
+                                         bool aIsTestImport, const PackageInfo &b, bool bIsTestImport) const {
         if (!strictDependenciesLevel().has_value() || !a.strictDependenciesLevel().has_value() ||
             !b.strictDependenciesLevel().has_value() || !a.layer().has_value() || !b.layer().has_value()) {
             return 0;
@@ -300,7 +308,7 @@ public:
 
         // Layering violations always come first
         if (causesLayeringViolation(packageDB, a) && causesLayeringViolation(packageDB, b)) {
-            return 0;
+            return orderByAlphabetical(a, b);
         } else if (causesLayeringViolation(packageDB, a) && !causesLayeringViolation(packageDB, b)) {
             return -1;
         } else if (!causesLayeringViolation(packageDB, a) && causesLayeringViolation(packageDB, b)) {
@@ -314,11 +322,15 @@ public:
                 // Sort order: Layering violations, false, layered or stricter
                 switch (aStrictDependenciesLevel) {
                     case core::packages::StrictDependenciesLevel::False:
-                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::False ? 0 : -1;
+                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::False
+                                   ? orderByAlphabetical(a, b)
+                                   : -1;
                     case core::packages::StrictDependenciesLevel::Layered:
                     case core::packages::StrictDependenciesLevel::LayeredDag:
                     case core::packages::StrictDependenciesLevel::Dag:
-                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::False ? 1 : 0;
+                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::False
+                                   ? 1
+                                   : orderByAlphabetical(a, b);
                 }
             }
             case core::packages::StrictDependenciesLevel::Layered:
@@ -326,7 +338,9 @@ public:
                 // Sort order: Layering violations, false, layered or layered_dag, dag
                 switch (aStrictDependenciesLevel) {
                     case core::packages::StrictDependenciesLevel::False:
-                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::False ? 0 : -1;
+                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::False
+                                   ? orderByAlphabetical(a, b)
+                                   : -1;
                     case core::packages::StrictDependenciesLevel::Layered:
                     case core::packages::StrictDependenciesLevel::LayeredDag:
                         switch (bStrictDependenciesLevel) {
@@ -334,12 +348,14 @@ public:
                                 return 1;
                             case core::packages::StrictDependenciesLevel::Layered:
                             case core::packages::StrictDependenciesLevel::LayeredDag:
-                                return 0;
+                                return orderByAlphabetical(a, b);
                             case core::packages::StrictDependenciesLevel::Dag:
                                 return -1;
                         }
                     case core::packages::StrictDependenciesLevel::Dag:
-                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::Dag ? 0 : 1;
+                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::Dag
+                                   ? orderByAlphabetical(a, b)
+                                   : 1;
                 }
             }
             case core::packages::StrictDependenciesLevel::Dag: {
@@ -348,9 +364,13 @@ public:
                     case core::packages::StrictDependenciesLevel::False:
                     case core::packages::StrictDependenciesLevel::Layered:
                     case core::packages::StrictDependenciesLevel::LayeredDag:
-                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::Dag ? -1 : 0;
+                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::Dag
+                                   ? -1
+                                   : orderByAlphabetical(a, b);
                     case core::packages::StrictDependenciesLevel::Dag:
-                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::Dag ? 0 : 1;
+                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::Dag
+                                   ? orderByAlphabetical(a, b)
+                                   : 1;
                 }
             }
         }
@@ -402,8 +422,8 @@ public:
                     continue;
                 }
 
-                auto compareResult = orderByStrictness(gs.packageDB(), info, isTestImport, importInfo,
-                                                       import.type == core::packages::ImportType::Test);
+                auto compareResult = orderByStrictnessAndAlphabetical(gs.packageDB(), info, isTestImport, importInfo,
+                                                                      import.type == core::packages::ImportType::Test);
                 if (compareResult == 1 || compareResult == 0) {
                     importToInsertAfter = &import.name;
                 }
@@ -1765,32 +1785,32 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
                 // This is to handle early return above.
                 continue;
             }
-            // Since we can follow any number of tree edges for lowLink, the lowLink of child is valid for this package
-            // too.
+            // Since we can follow any number of tree edges for lowLink, the lowLink of child is valid for this
+            // package too.
             //
             // Note that we cannot use `infoAtEntry` here because it might have been invalidated.
             auto &pkgLink = metadata.nodeMap[pkgName].lowLink;
             pkgLink = std::min(pkgLink, importInfo.lowLink);
         } else if (importInfo.onStack) {
             // This is a back edge (edge to ancestor) or cross edge (edge to a different subtree). Since we can only
-            // follow at most one back/cross edge, the best update we can make to lowlink of the current package is the
-            // child's index.
+            // follow at most one back/cross edge, the best update we can make to lowlink of the current package is
+            // the child's index.
             //
             // Note that we cannot use `infoAtEntry` here because it might have been invalidated.
             auto &pkgLink = metadata.nodeMap[pkgName].lowLink;
             pkgLink = std::min(pkgLink, importInfo.index);
         }
-        // If the child package is already visited and not on the stack, it's in a different SCC, so no update to the
-        // lowlink.
+        // If the child package is already visited and not on the stack, it's in a different SCC, so no update to
+        // the lowlink.
     }
 
     // We cannot re-use `infoAtEntry` here because `nodeMap` might have been re-allocated and
     // invalidate our reference.
     auto &ourInfo = metadata.nodeMap[pkgName];
     if (ourInfo.index == ourInfo.lowLink) {
-        // This is the root of an SCC. This means that all packages on the stack from this package to the top of the top
-        // of the stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them the same
-        // SCC ID.
+        // This is the root of an SCC. This means that all packages on the stack from this package to the top of the
+        // top of the stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them
+        // the same SCC ID.
         core::packages::MangledName poppedPkgName;
         do {
             poppedPkgName = metadata.stack.back();
@@ -1869,8 +1889,8 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                            "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
             // TODO: if the import is unused (ie. there are no references in this package to the imported package),
             // autocorrect to delete import
-            // TODO: if the imported package can be trivially upgraded to the required level (ex. it's at 'false' but
-            // has no layering violations), autocorrect to do so
+            // TODO: if the imported package can be trivially upgraded to the required level (ex. it's at 'false'
+            // but has no layering violations), autocorrect to do so
         }
     }
 
