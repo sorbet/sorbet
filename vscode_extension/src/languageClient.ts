@@ -40,7 +40,7 @@ export function createClient(
     initializationOptions,
     initializationFailedHandler: (error) => {
       context.log.error(
-        "Failed to initialize Sorbet language server",
+        "Failed to initialize Sorbet language server.",
         error instanceof Error ? error : undefined,
       );
       return false;
