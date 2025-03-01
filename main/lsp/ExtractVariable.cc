@@ -106,6 +106,7 @@ core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::
 // This tree walk takes a Loc and looks for nodes that have that Loc exactly
 class LocSearchWalk {
     // The selection loc
+    // TODO(neil): change this to LocOffsets
     core::Loc targetLoc;
     // At the end of this walk, we want to return what class/method the matching expression was part of.
     // To do that, we can maintain a stack of classes/method, so that when we get a match, we can capture

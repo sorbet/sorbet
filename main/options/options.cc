@@ -543,6 +543,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
 
     options.add_options(section)("enable-experimental-lsp-extract-to-variable",
                                  "Enable experimental LSP feature: Extract To Variable");
+    options.add_options(section)("enable-experimental-lsp-extract-to-method",
+                                 "Enable experimental LSP feature: Extract To Method");
     options.add_options(section)(
         "enable-all-experimental-lsp-features",
         "Enable every experimental LSP feature. (WARNING: can be crashy; for developer use only. "
@@ -927,6 +929,8 @@ void readOptions(Options &opts,
         opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
         opts.lspExtractToVariableEnabled =
             opts.lspAllBetaFeaturesEnabled || raw["enable-experimental-lsp-extract-to-variable"].as<bool>();
+        opts.lspExtractToMethodEnabled =
+            opts.lspAllBetaFeaturesEnabled || raw["enable-experimental-lsp-extract-to-method"].as<bool>();
         opts.lspDocumentHighlightEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
