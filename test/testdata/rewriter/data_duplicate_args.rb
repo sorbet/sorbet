@@ -13,4 +13,3 @@ class TestData
   
     ValidData3 = Data.define(:foo, "bar")
   end
-  
