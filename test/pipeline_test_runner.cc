@@ -122,7 +122,7 @@ public:
                        shared_ptr<core::ErrorCollector> &errorCollector)
         : test(test), errorQueue(errorQueue), errorCollector(errorCollector){};
 
-    void addObserved(const core::GlobalState &gs, string_view expectationType, std::function<string()> mkExp,
+    void addObserved(core::GlobalState &gs, string_view expectationType, std::function<string()> mkExp,
                      bool addNewline = true) {
         if (test.expectations.contains(expectationType)) {
             got[expectationType].append(mkExp());
@@ -156,7 +156,7 @@ public:
         }
     }
 
-    void drainErrors(const core::GlobalState &gs) {
+    void drainErrors(core::GlobalState &gs) {
         // Moves errors from being owned by GlobalState to having been flushed by the flusher
         // In our case, errorCollector is our error flusher (accumulates a vector, instead of
         // printing to stdout).
@@ -167,16 +167,7 @@ public:
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
     }
 
-    void dropErrors(const core::GlobalState &gs) {
-        // Moves errors from being owned by GlobalState to having been flushed by the flusher
-        // In our case, errorCollector is our error flusher (accumulates a vector, instead of
-        // printing to stdout).
-        errorQueue->flushAllErrors(gs);
-        // Retrieves the collected errors, sets it to empty again, and then drops those errors.
-        auto _newErrors = errorCollector->drainErrors();
-    }
-
-    void clear(const core::GlobalState &gs) {
+    void clear(core::GlobalState &gs) {
         got.clear();
         errorQueue->flushAllErrors(gs);
         auto _newErrors = errorCollector->drainErrors();
