@@ -740,6 +740,12 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
+        if (opts.stopAfterPhase == options::Phase::INDEXING) {
+            for (auto &f : indexed) {
+                f.tree = nullptr;
+            }
+        }
+
         if (gs->runningUnderAutogen) {
 #ifdef SORBET_REALMAIN_MIN
             logger->warn("Autogen is disabled in sorbet-orig for faster builds");
