@@ -1,0 +1,67 @@
+autocorrect-useless-must.rb:3: `T.must` called on `String("1")`, which is never `nil` https://srb.help/7015
+     3 |T.must('1')
+               ^^^
+  Got `String("1")` originating from:
+    autocorrect-useless-must.rb:3:
+     3 |T.must('1')
+               ^^^
+  Autocorrect: Done
+    autocorrect-useless-must.rb:3: Replaced with `'1'`
+     3 |T.must('1')
+        ^^^^^^^^^^^
+
+autocorrect-useless-must.rb:5: `T.must` called on `String`, which is never `nil` https://srb.help/7015
+     5 |T.must('1' + '1').to_i
+               ^^^^^^^^^
+  Got `String` originating from:
+    autocorrect-useless-must.rb:5:
+     5 |T.must('1' + '1').to_i
+               ^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-useless-must.rb:5: Replaced with `'1' + '1'`
+     5 |T.must('1' + '1').to_i
+        ^^^^^^^^^^^^^^^^^
+Errors: 2
+
+--------------------------------------------------------------------------
+
+# typed: strict
+
+'1'
+
+'1' + '1'.to_i
+
+--------------------------------------------------------------------------
+
+autocorrect-useless-must.rb:3: `T.must` called on `String("1")`, which is never `nil` https://srb.help/7015
+     3 |T.must('1')
+               ^^^
+  Got `String("1")` originating from:
+    autocorrect-useless-must.rb:3:
+     3 |T.must('1')
+               ^^^
+  Autocorrect: Done
+    autocorrect-useless-must.rb:3: Replaced with `'1'`
+     3 |T.must('1')
+        ^^^^^^^^^^^
+
+autocorrect-useless-must.rb:5: `T.must` called on `String`, which is never `nil` https://srb.help/7015
+     5 |T.must('1' + '1').to_i
+               ^^^^^^^^^
+  Got `String` originating from:
+    autocorrect-useless-must.rb:5:
+     5 |T.must('1' + '1').to_i
+               ^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-useless-must.rb:5: Replaced with `'1' + '1'`
+     5 |T.must('1' + '1').to_i
+        ^^^^^^^^^^^^^^^^^
+Errors: 2
+
+--------------------------------------------------------------------------
+
+# typed: strict
+
+'1'
+
+'1' + '1'.to_i
