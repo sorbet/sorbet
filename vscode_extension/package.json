@@ -125,7 +125,6 @@
               "id": "stable",
               "name": "Sorbet",
               "description": "Stable Sorbet Ruby IDE features",
-              "cwd": "${workspaceFolder}",
               "command": [
                 "bundle",
                 "exec",
@@ -138,7 +137,6 @@
               "id": "beta",
               "name": "Sorbet (Beta)",
               "description": "Beta Sorbet Ruby IDE features",
-              "cwd": "${workspaceFolder}",
               "command": [
                 "bundle",
                 "exec",
@@ -152,7 +150,6 @@
               "id": "experimental",
               "name": "Sorbet (Experimental)",
               "description": "Experimental Sorbet Ruby IDE features (warning: crashy, for developers only)",
-              "cwd": "${workspaceFolder}",
               "command": [
                 "bundle",
                 "exec",
@@ -184,10 +181,11 @@
                 "type": "string"
               },
               "cwd": {
-                "description": "Current working directory when launching sorbet",
+                "description": "Current working directory when launching Sorbet. *DEPRECATED*: Property has never been used",
                 "type": "string",
                 "format": "uri-reference",
-                "default": "${workspaceFolder}"
+                "default": "${workspaceFolder}",
+                "deprecated": true
               },
               "command": {
                 "description": "Full command line to invoke sorbet",
@@ -225,10 +223,11 @@
                 "type": "string"
               },
               "cwd": {
-                "description": "Current working directory when launching sorbet",
+                "description": "Current working directory when launching Sorbet. *DEPRECATED*: Property has never been used",
                 "type": "string",
                 "format": "uri-reference",
-                "default": "${workspaceFolder}"
+                "default": "${workspaceFolder}",
+                "deprecated": true
               },
               "env": {
                 "description": "Environment variables to set when launching sorbet",
@@ -252,7 +251,6 @@
               "id": "my-custom-configuration",
               "name": "My Custom Sorbet Configuration",
               "description": "A longer description of this Sorbet Configuration for use in hover text",
-              "cwd": "${workspaceFolder}",
               "env": {
                 "MY_ENV_VAR": "my-value"
               },
