@@ -113,19 +113,29 @@ for example. But there are also semantic differences, and RBS syntax reflects
 these differences. Things which are possible to express in RBS syntax have no
 analogue in Sorbet and vice versa. Some examples:</p>
 <ul>
-<li>RBS supports duck typing, but
-<a href="/docs/faq#can-i-use-sorbet-for-duck-typed-code">Sorbet does not</a>, by design</li>
-<li>Sorbet allows singleton classes to be generic (e.g.
-<a href="/docs/generics#type_member--type_template">type_template</a>). RBS has no such
-concept.</li>
+<li>RBS supports duck typing via interfaces (different from Sorbet’s
+<a href="/docs/abstract">interfaces</a>), but
+<a href="/docs/faq#can-i-use-sorbet-for-duck-typed-code">Sorbet does not support duck typing</a>,
+by design.</li>
 <li>Sorbet treats Ruby’s <code>::Class</code> as a generic class, allowing sophisticated
-class-level metaprogramming. RBS does not have syntax to represent this.</li>
+class-level metaprogramming (abstracting over a class’s attached class). In
+turn, all class singleton classes are generic
+(<a href="/docs/class-of#tclass_of-applying-type-arguments-to-a-singleton-class-type"><code>T.class_of(...)[...]</code></a>).
+RBS does not have syntax to represent this.</li>
+<li>By extension, Sorbet allows singleton classes to declare their own generic
+type parameters (with
+<a href="/docs/generics#type_member--type_template">type_template</a>). This also cannot be
+translated from RBS for the same limitation with RBS’s singleton class type
+annotation.</li>
+<li>RBS supports literal value types. Sorbet does not.</li>
 </ul>
 <p>Because of these differences, it’s reasonable to assume that a codebase wishing
 to take full advantage of Sorbet’s unique features will eventually need to have
 annotations that use <code>sig</code> syntax. The moment a method’s annotation needs to use
-Sorbet-only syntax, the entire annotation needs to get rewritten, adding
-friction to the development experience.</p>
+Sorbet-only syntax, the entire annotation needs to get rewritten—it’s not
+possible to embed Sorbet-only syntax within the context of an RBS signature.
+While it is possible for RBS comment signatures to coexist with Sorbet <code>sig</code>
+signatures, needing to flip between them adds development friction.</p>
 <h4><a class="anchor" aria-hidden="true" id="sorbet-has-minimal-influence-over-the-evolution-of-rbs-syntax"></a><a href="#sorbet-has-minimal-influence-over-the-evolution-of-rbs-syntax" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sorbet has minimal influence over the evolution of RBS syntax</h4>
 <p>Sorbet continues to evolve its type syntax. For example, <code>T.anything</code>,
 <code>T::Class</code>, and <code>has_attached_class!</code> are additions to Sorbet which arrived 6
