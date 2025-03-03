@@ -915,6 +915,8 @@ void readOptions(Options &opts,
         opts.inputFileNames.erase(unique(opts.inputFileNames.begin(), opts.inputFileNames.end()),
                                   opts.inputFileNames.end());
 
+        opts.cacheDir = raw["cache-dir"].as<string>();
+
         opts.rbsSignaturesEnabled = raw["enable-experimental-rbs-signatures"].as<bool>();
         if (opts.rbsSignaturesEnabled && !opts.cacheDir.empty()) {
             logger->error("--enable-experimental-rbs-signatures is incompatible with --cache-dir. Ignoring cache");
@@ -958,7 +960,6 @@ void readOptions(Options &opts,
 
         opts.lspErrorCap = raw["lsp-error-cap"].as<int>();
 
-        opts.cacheDir = raw["cache-dir"].as<string>();
         opts.maxCacheSizeBytes = raw["max-cache-size-bytes"].as<size_t>();
         if (!extractPrinters(raw, opts, logger)) {
             throw EarlyReturnWithCode(1);
