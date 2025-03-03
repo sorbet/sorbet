@@ -399,4 +399,21 @@ pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext 
     return make_pair(res, loc);
 }
 
+bool ASTUtil::isRootScopedSyntacticConstant(const ast::ExpressionPtr &expr,
+                                            absl::Span<const core::NameRef> constantName) {
+    auto *p = &expr;
+
+    for (auto it = constantName.rbegin(), end = constantName.rend(); it != end; ++it) {
+        auto ucl = ast::cast_tree<ast::UnresolvedConstantLit>(*p);
+
+        if (ucl == nullptr || ucl->cnst != *it) {
+            return false;
+        }
+
+        p = &ucl->scope;
+    }
+
+    return ast::MK::isRootScope(*p);
+}
+
 } // namespace sorbet::rewriter
