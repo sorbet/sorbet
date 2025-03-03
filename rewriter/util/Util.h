@@ -39,6 +39,13 @@ public:
     static std::pair<core::NameRef, core::LocOffsets> getAttrName(core::MutableContext ctx, core::NameRef attrFun,
                                                                   const ast::ExpressionPtr &name);
 
+    struct DuplicateArg {
+        core::NameRef name;
+        core::LocOffsets firstLoc;
+        core::LocOffsets secondLoc;
+    };
+    static std::optional<DuplicateArg> findDuplicateArg(core::MutableContext ctx, const ast::Send *send);
+
     ASTUtil() = delete;
 };
 } // namespace sorbet::rewriter
