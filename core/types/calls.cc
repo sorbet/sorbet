@@ -1004,6 +1004,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     bool implicitKwsplat = false;
     if (ait != aPosEnd && hasKwparams && args.args.size() == args.numPosArgs) {
         auto splatLoc = args.argLoc(args.args.size() - 1);
+        if ((*ait)->type.isUntyped() && !gs.ruby3KeywordArgs) {
+            auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file, (*ait)->type);
+            if (auto e = gs.beginError(splatLoc, what)) {
+                e.setHeader("Positional argument being interpreted as keyword argument is `{}`", "T.untyped");
+            }
+        }
 
         // If --experimental-ruby3-keyword-args is set, we will treat "**-less" keyword hash argument as an error.
         if (gs.ruby3KeywordArgs) {
