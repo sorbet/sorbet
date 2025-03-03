@@ -1,5 +1,8 @@
 # Version history
 
+## 0.3.40
+- Remove `cwd` from Sorbet configuration.
+
 ## 0.3.39
 - Fix: `Copy Symbol to Clipboard` fails to be enabled in remote devboxes.
 
