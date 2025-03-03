@@ -1,5 +1,8 @@
 # Version history
 
+## 0.3.40
+- Upgrade VS Language Client to [protocol 3.17.3](https://github.com/microsoft/vscode-languageserver-node/blob/main/README.md#3173-protocol-810-json-rpc-810-client-and-810-server)
+
 ## 0.3.39
 - Fix: `Copy Symbol to Clipboard` fails to be enabled in remote devboxes.
 
