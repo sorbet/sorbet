@@ -6,23 +6,38 @@
 
 namespace sorbet::rbs {
 
+struct RBSArg {
+    core::LocOffsets loc;
+    rbs_ast_symbol_t *name;
+    rbs_node_t *type;
+};
+
 class MethodTypeTranslator {
+    core::MutableContext ctx;
+    std::shared_ptr<parserstate> parser;
+
 public:
+    MethodTypeTranslator(core::MutableContext ctx, std::shared_ptr<parserstate> parser) : ctx(ctx), parser(parser) {}
+
     /**
      * Convert an RBS method signature comment to a Sorbet signature.
      *
      * For example the signature comment `#: () -> void` will be translated as `sig { void }`.
      */
-    static ast::ExpressionPtr methodSignature(core::MutableContext ctx, const ast::MethodDef *methodDef,
-                                              const MethodType type, const std::vector<Comment> &annotations);
+    ast::ExpressionPtr methodSignature(const ast::MethodDef *methodDef, const rbs_methodtype_t *methodType,
+                                       const core::LocOffsets &methodTypeLoc, const std::vector<Comment> &annotations);
 
     /**
      * Convert an RBS attribute type comment to a Sorbet signature.
      *
      * For example the attribute type comment `#: Integer` will be translated as `sig { returns(Integer) }`.
      */
-    static ast::ExpressionPtr attrSignature(core::MutableContext ctx, const ast::Send *send, const Type type,
-                                            const std::vector<Comment> &annotations);
+    ast::ExpressionPtr attrSignature(const ast::Send *send, rbs_node_t *type, const core::LocOffsets &typeLoc,
+                                     const std::vector<Comment> &annotations);
+
+private:
+    void collectArgs(core::LocOffsets docLoc, rbs_node_list_t *field, std::vector<RBSArg> &args);
+    void collectKeywords(core::LocOffsets docLoc, rbs_hash_t *field, std::vector<RBSArg> &args);
 };
 
 } // namespace sorbet::rbs

@@ -6,10 +6,7 @@
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 #include "core/errors/rewriter.h"
-#include "rbs/MethodTypeTranslator.h"
-#include "rbs/RBSParser.h"
-#include "rbs/TypeTranslator.h"
-#include <optional>
+#include "rbs/SignatureTranslator.h"
 
 using namespace std;
 
@@ -192,16 +189,10 @@ class RBSSignaturesWalk {
         auto methodComments = findRBSComments(ctx.file.data(ctx).source(), methodDef->loc);
 
         for (auto &signature : methodComments.signatures) {
-            auto rbsMethodType = rbs::RBSParser::parseSignature(ctx, signature);
-            if (rbsMethodType.first) {
-                auto sig = rbs::MethodTypeTranslator::methodSignature(ctx, methodDef, move(rbsMethodType.first.value()),
-                                                                      methodComments.annotations);
+            auto sig =
+                rbs::SignatureTranslator(signature).translateSignature(ctx, methodDef, methodComments.annotations);
+            if (sig) {
                 newRHS.emplace_back(move(sig));
-            } else {
-                ENFORCE(rbsMethodType.second);
-                if (auto e = ctx.beginError(rbsMethodType.second->loc, core::errors::Rewriter::RBSSyntaxError)) {
-                    e.setHeader("Failed to parse RBS signature ({})", rbsMethodType.second->message);
-                }
             }
         }
     }
@@ -210,25 +201,9 @@ class RBSSignaturesWalk {
         auto attrComments = findRBSComments(ctx.file.data(ctx).source(), send->loc);
 
         for (auto &signature : attrComments.signatures) {
-            auto rbsType = rbs::RBSParser::parseType(ctx, signature);
-            if (rbsType.first) {
-                auto sig = rbs::MethodTypeTranslator::attrSignature(ctx, send, move(rbsType.first.value()),
-                                                                    attrComments.annotations);
+            auto sig = rbs::SignatureTranslator(signature).translateType(ctx, send, attrComments.annotations);
+            if (sig) {
                 newRHS.emplace_back(move(sig));
-            } else {
-                ENFORCE(rbsType.second);
-
-                // Before raising a parse error, let's check if the user tried to use a method signature on an accessor
-                auto rbsMethodType = rbs::RBSParser::parseSignature(ctx, signature);
-                if (rbsMethodType.first) {
-                    if (auto e = ctx.beginError(rbsType.second->loc, core::errors::Rewriter::RBSSyntaxError)) {
-                        e.setHeader("Using a method signature on an accessor is not allowed, use a bare type instead");
-                    }
-                } else {
-                    if (auto e = ctx.beginError(rbsType.second->loc, core::errors::Rewriter::RBSSyntaxError)) {
-                        e.setHeader("Failed to parse RBS type ({})", rbsType.second->message);
-                    }
-                }
             }
         }
     }

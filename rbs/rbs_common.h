@@ -20,32 +20,6 @@ struct Comment {
                              // this is only a view on the string owned by the File.source() data.
 };
 
-/**
- * A parsed RBS method type, this is the equivalent of a `sig` block  on a method with vanilla Sorbet.
- */
-struct MethodType {
-    core::LocOffsets loc;
-    rbs_methodtype_t *node; // Raw pointer, ownership stays with parser
-    std::shared_ptr<parserstate> parser;
-};
-
-/**
- * A parsed RBS type, this is the equivalent of a `sig` block on an attribute accessor with vanilla Sorbet.
- */
-struct Type {
-    core::LocOffsets loc;
-    rbs_node_t *node; // Raw pointer, ownership stays with parser
-    std::shared_ptr<parserstate> parser;
-};
-
-/**
- * An error that occurred while parsing an RBS type or method signature.
- */
-struct ParseError {
-    core::LocOffsets loc;
-    std::string message;
-};
-
 core::LocOffsets locFromRange(core::LocOffsets loc, const range &range);
 
 } // namespace sorbet::rbs
