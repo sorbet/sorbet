@@ -1,7 +1,7 @@
 ---
 id: rbs-support
-title: RBS comments support
-sidebar_label: RBS comments support
+title: RBS Comments Support
+sidebar_label: RBS Comments
 ---
 
 > This feature is experimental and might be changed or removed without notice.
@@ -282,13 +282,21 @@ sig(:final) { params(x: Integer).void }
 def qux2(x); end
 ```
 
+Note: these annotations like `@abstract` use normal comments, like `# @abstract`
+(not the special `#:` comment). This makes it possible to reuse any existing
+YARD or RDoc annotations.
+
 ## Special behaviors
+
+The `#:` comment must come **immediately** before the following method
+definition. If there is a blank line between the comment and method definition,
+the comment will be ignored.
 
 Generic types like `Array` or `Hash` are translated to their `T::` Sorbet types
 equivalent:
 
 - `Array[Integer]` is translated to `T::Array[Integer]`
-- `Class[Integer]` is translated to `T.class_of(Integer)`
+- `Class[Integer]` is translated to `T::Class[Integer]`
 - `Enumerable[Integer]` is translated to `T::Enumerable[Integer]`
 - `Enumerator[Integer]` is translated to `T::Enumerator[Integer]`
 - `Enumerator::Lazy[Integer]` is translated to `T::Enumerator::Lazy[Integer]`

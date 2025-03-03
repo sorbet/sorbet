@@ -52,6 +52,11 @@ class RBSSignaturesWalk {
         // We compute the current position in the source so we know the location of each comment
         uint32_t index = beginIndex;
 
+        // NOTE: This is accidentally quadratic.
+        // Instead of looping over all the lines between here and the start of the file, we should
+        // instead track something like the locs of all the expressions in the ClassDef::rhs, and
+        // only scan over the space between the ClassDef::rhs top level items
+
         // Iterate from the last line, to the first line
         for (auto it = all_lines.rbegin(); it != all_lines.rend(); it++) {
             index -= it->size();
