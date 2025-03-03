@@ -69,19 +69,29 @@ for example. But there are also semantic differences, and RBS syntax reflects
 these differences. Things which are possible to express in RBS syntax have no
 analogue in Sorbet and vice versa. Some examples:
 
-- RBS supports duck typing, but
-  [Sorbet does not](faq.md#can-i-use-sorbet-for-duck-typed-code), by design
-- Sorbet allows singleton classes to be generic (e.g.
-  [type_template](generics.md#type_member--type_template)). RBS has no such
-  concept.
+- RBS supports duck typing via interfaces (different from Sorbet's
+  [interfaces](abstract.md)), but
+  [Sorbet does not support duck typing](faq.md#can-i-use-sorbet-for-duck-typed-code),
+  by design.
 - Sorbet treats Ruby's `::Class` as a generic class, allowing sophisticated
-  class-level metaprogramming. RBS does not have syntax to represent this.
+  class-level metaprogramming (abstracting over a class's attached class). In
+  turn, all class singleton classes are generic
+  ([`T.class_of(...)[...]`](class-of.md#tclass_of-applying-type-arguments-to-a-singleton-class-type)).
+  RBS does not have syntax to represent this.
+- By extension, Sorbet allows singleton classes to declare their own generic
+  type parameters (with
+  [type_template](generics.md#type_member--type_template)). This also cannot be
+  translated from RBS for the same limitation with RBS's singleton class type
+  annotation.
+- RBS supports literal value types. Sorbet does not.
 
 Because of these differences, it's reasonable to assume that a codebase wishing
 to take full advantage of Sorbet's unique features will eventually need to have
 annotations that use `sig` syntax. The moment a method's annotation needs to use
-Sorbet-only syntax, the entire annotation needs to get rewritten, adding
-friction to the development experience.
+Sorbet-only syntax, the entire annotation needs to get rewritten—it's not
+possible to embed Sorbet-only syntax within the context of an RBS signature.
+While it is possible for RBS comment signatures to coexist with Sorbet `sig`
+signatures, needing to flip between them adds development friction.
 
 #### Sorbet has minimal influence over the evolution of RBS syntax
 
