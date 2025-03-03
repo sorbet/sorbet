@@ -1,7 +1,8 @@
 # Version history
 
 ## 0.3.40
-- Remove `cwd` from Sorbet configuration.
+- Upgrade VS Language Client to [protocol 3.17.3](https://github.com/microsoft/vscode-languageserver-node/blob/main/README.md#3173-protocol-810-json-rpc-810-client-and-810-server)
+- Remove `cwd` from Sorbet configuration (it has never been used).
 
 ## 0.3.39
 - Fix: `Copy Symbol to Clipboard` fails to be enabled in remote devboxes.
