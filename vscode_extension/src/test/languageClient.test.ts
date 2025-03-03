@@ -56,7 +56,7 @@ class RecordingMetricsEmitter implements MetricsEmitter {
   }
 }
 
-// Uninitialized client. Call start and awaiton it before use.
+// Uninitialized client. Call start and await on it before use.
 function createLanguageClient(): LanguageClient {
   // The server is implemented in node
   const serverModule = require.resolve("./testLanguageServer");

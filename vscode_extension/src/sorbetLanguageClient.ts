@@ -200,7 +200,8 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
   }
 
   /**
-   * Runs a Sorbet process using the current active configuration. Debounced so that it runs Sorbet at most every 3 seconds.
+   * Runs a Sorbet process using the current active configuration. Debounced so that it runs
+   * Sorbet at most every MIN_TIME_BETWEEN_RETRIES_MS.
    */
   private startSorbetProcess(): Promise<ChildProcess> {
     this.context.log.info("Running Sorbet LSP.");
@@ -255,12 +256,6 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
 
   /** ErrorHandler interface */
 
-  /**
-   * LanguageClient has built-in restart capabilities but if it's broken:
-   * * It drops all `onNotification` subscriptions after restarting, so we'll miss ShowNotification updates.
-   * * It drops all `onReady` subscriptions after restarting, so we won't know when the Sorbet server is running.
-   * * It doesn't reset `onReady` state, so we can't even reset our `onReady` callback.
-   */
   public error(): ErrorHandlerResult {
     if (this.status !== ServerStatus.ERROR) {
       this.status = ServerStatus.RESTARTING;
@@ -271,9 +266,6 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
     };
   }
 
-  /**
-   * Note: If the VPN is disconnected, then Sorbet will repeatedly fail to start.
-   */
   public closed(): CloseHandlerResult {
     if (this.status !== ServerStatus.ERROR) {
       let reason: RestartReason;
