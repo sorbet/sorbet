@@ -22,8 +22,8 @@ function setupMocha(): Mocha {
   } else {
     const mocha = new Mocha({
       ui: "tdd",
+      color: true,
     });
-    mocha.useColors(true);
     return mocha;
   }
 }
