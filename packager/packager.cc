@@ -290,19 +290,22 @@ public:
     // - test imports
     // TODO(neil): explain the rationale behind this ordering (ie. why is not the simple "false < layered < layered_dag
     // < dag" ordering)
-    // TODO(neil): implement alphabetical sort.
-    int orderImports(const core::packages::PackageDB &packageDB, const PackageInfo &a, bool aIsTestImport,
-                     const PackageInfo &b, bool bIsTestImport) const {
+    int orderImports(const core::GlobalState &gs, const PackageInfo &a, bool aIsTestImport, const PackageInfo &b,
+                     bool bIsTestImport) const {
         // Test imports always come last, and aren't sorted by `strict_dependencies`
         if (aIsTestImport && bIsTestImport) {
-            return 0;
+            return orderByAlphabetical(gs, a, b);
         } else if (aIsTestImport && !bIsTestImport) {
             return 1;
         } else if (!aIsTestImport && bIsTestImport) {
             return -1;
         } // Neither is a test import
 
-        return orderByStrictness(packageDB, a, b);
+        auto strictnessCompareResult = orderByStrictness(gs.packageDB(), a, b);
+        if (strictnessCompareResult == 0) {
+            return orderByAlphabetical(gs, a, b);
+        }
+        return strictnessCompareResult;
     }
 
     int orderByStrictness(const core::packages::PackageDB &packageDB, const PackageInfo &a,
@@ -373,6 +376,15 @@ public:
         }
     }
 
+    int orderByAlphabetical(const core::GlobalState &gs, const PackageInfo &a, const PackageInfo &b) const {
+        auto aStrName = a.show(gs);
+        auto bStrName = b.show(gs);
+        if (aStrName == bStrName) {
+            return 0;
+        }
+        return aStrName < bStrName ? -1 : 1;
+    }
+
     optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                     bool isTestImport) const {
         auto &info = PackageInfoImpl::from(pkg);
@@ -406,8 +418,8 @@ public:
                     continue;
                 }
 
-                auto compareResult = orderImports(gs.packageDB(), info, isTestImport, importInfo,
-                                                  import.type == core::packages::ImportType::Test);
+                auto compareResult =
+                    orderImports(gs, info, isTestImport, importInfo, import.type == core::packages::ImportType::Test);
                 if (compareResult == 1 || compareResult == 0) {
                     importToInsertAfter = &import.name;
                 }

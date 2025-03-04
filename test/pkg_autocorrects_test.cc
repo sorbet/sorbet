@@ -599,7 +599,7 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
         auto addImport = myPkg.addImport(gs, falsePkgB, false);
         string expected =
             makePackageRB("MyPackage", "dag", "app",
-                          {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "FalsePackageB", "DagPackageA"});
+                          {"FalsePackageA", "FalsePackageB", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
         auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
