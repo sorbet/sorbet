@@ -212,8 +212,12 @@ TEST_CASE("Add import and test_import to package with imports and test imports")
                         "  test_import D\n"
                         "end\n";
 
-    auto parsedFiles =
-        enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
+    auto parsedFiles = enterPackages(gs, {{examplePackagePath, examplePackage},
+                                          {"my_package/__package.rb", pkg_source},
+                                          {"a/__package.rb", "class A < PackageSpec\nend\n"},
+                                          {"b/__package.rb", "class B < PackageSpec\nend\n"},
+                                          {"c/__package.rb", "class C < PackageSpec\nend\n"},
+                                          {"d/__package.rb", "class D < PackageSpec\nend\n"}});
     auto &examplePkg = getPackageForFile(gs, parsedFiles[0].file);
     auto &myPkg = getPackageForFile(gs, parsedFiles[1].file);
     ENFORCE(examplePkg.exists());
