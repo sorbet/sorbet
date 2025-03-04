@@ -347,7 +347,6 @@
     "glob": "^7.1.4",
     "mocha": "^6.2.0",
     "mocha-junit-reporter": "^1.23.1",
-    "power-assert": "^1.2.0",
     "prettier": "^1.19.1",
     "sinon": "^7.5.0",
     "typescript": "^4.6.3",
