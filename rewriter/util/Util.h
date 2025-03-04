@@ -39,6 +39,15 @@ public:
     static std::pair<core::NameRef, core::LocOffsets> getAttrName(core::MutableContext ctx, core::NameRef attrFun,
                                                                   const ast::ExpressionPtr &name);
 
+    // Test if `expr` is a chain of `UnresolvedConstantLit` trees with names equal to `constantName`.
+    //
+    // 1. Opus::Command as `expr` would match {Constants::Opus(), Constants::Command()}
+    // 2. ::Opus::Command as `expr` would match {Constants::Opus(), Constants::Command()}
+    // 3. Opus::Command::DoThing as `expr` would not match {Constants::Opus(), Constants::Command()}
+    // 4. Prelude::Opus::Command as `expr` would not match {Constants::Opus(), Constants::Command()}
+    static bool isRootScopedSyntacticConstant(const ast::ExpressionPtr &expr,
+                                              absl::Span<const core::NameRef> constantName);
+
     ASTUtil() = delete;
 };
 } // namespace sorbet::rewriter
