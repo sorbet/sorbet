@@ -1,3 +1,3 @@
 # typed: true
 
-PackageSpec
+PackageSpec # error: Unable to resolve constant `PackageSpec`

@@ -650,11 +650,6 @@ void populateMangledName(core::GlobalState &gs, PackageName &pName) {
     pName.mangledName = core::packages::MangledName::mangledNameFromParts(gs, pName.fullName.parts);
 }
 
-bool isReferenceToPackageSpec(core::Context ctx, const ast::ExpressionPtr &expr) {
-    auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return constLit != nullptr && constLit->cnst == core::Names::Constants::PackageSpec();
-}
-
 void mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
     // HACKFIX: Tolerate completely empty packages. LSP does not support the notion of a deleted file, and
     // instead replaces deleted files with the empty string. It should really mark files as Tombstones instead.
@@ -1558,8 +1553,10 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
             continue;
         }
 
-        if (!isReferenceToPackageSpec(ctx, packageSpecClass->ancestors[0])) {
-            mustContainPackageDef(ctx, packageSpecClass->ancestors[0].loc());
+        auto &superClass = packageSpecClass->ancestors[0];
+        auto superClassLit = ast::cast_tree<ast::UnresolvedConstantLit>(superClass);
+        if (superClassLit == nullptr || superClassLit->cnst != core::Names::Constants::PackageSpec()) {
+            mustContainPackageDef(ctx, superClass.loc());
             reportedError = true;
             continue;
         }
@@ -1585,8 +1582,8 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
         // Pre-resolve the super class. This makes it easier to detect that this is a package
         // spec-related class def in later passes without having to recursively walk up the constant
         // lit's scope to find if it starts with <PackageSpecRegistry>.
-        packageSpecClass->ancestors[0] = ast::make_expression<ast::ConstantLit>(
-            core::Symbols::PackageSpec(), packageSpecClass->ancestors[0].toUnique<ast::UnresolvedConstantLit>());
+        superClass = ast::make_expression<ast::ConstantLit>(core::Symbols::PackageSpec(),
+                                                            superClass.toUnique<ast::UnresolvedConstantLit>());
 
         info = make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),
                                             ctx.locAt(packageSpecClass->declLoc));
