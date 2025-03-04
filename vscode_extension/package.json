@@ -325,13 +325,10 @@
     "launch": "VSCODE_SORBETEXT_LOG_LEVEL=trace code --extensionDevelopmentPath=$PWD"
   },
   "dependencies": {
-    "async": "^2.6.4",
     "elegant-spinner": "^2.0.0",
-    "minimatch": "^3.0.5",
     "vscode-languageclient": "8.1.0"
   },
   "devDependencies": {
-    "@types/elegant-spinner": "^1.0.0",
     "@types/glob": "^7.1.1",
     "@types/mocha": "^5.2.7",
     "@types/node": "^10.11.7",
