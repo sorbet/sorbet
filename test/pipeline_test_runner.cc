@@ -386,15 +386,17 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         filesSpan = filesSpan.subspan(numPackageFiles);
 
         trees = index(*gs, inputPackageFiles, handler, test);
-
-        // First run: only the __package.rb files. This populates the packageDB
-        package(*gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
-        name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
     }
 
     auto nonPackageTrees = index(*gs, filesSpan, handler, test);
-    package(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
+    name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
     name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
+    // TODO(jez) We're keeping these two calls separate only so we can interleave them the future again.
+    //
+    // Ideally, we would be able to index, name, and package all `__package.rb` files before
+    // doing the same for non-`__package.rb` files.
+    package(*gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
+    package(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
 
     if (opts.cacheSensitiveOptions.stripePackages) {

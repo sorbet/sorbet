@@ -420,12 +420,12 @@ void Minimize::indexAndResolveForMinimize(core::GlobalState &sourceGS, core::Glo
         rbiGS.errorQueue->flushAllErrors(rbiGS);
     }
 
-    // We explicitly disable `stripePackages` in realmain for this call, which makes the packager call a no-op here.
-    pipeline::package(rbiGS, absl::MakeSpan(rbiIndexed.result()), opts, workers);
     // Only need to compute FoundDefHashes when running to compute a FileHash
     auto foundHashes = nullptr;
     auto canceled = pipeline::name(rbiGS, absl::MakeSpan(rbiIndexed.result()), opts, workers, foundHashes);
     ENFORCE(!canceled, "Can only cancel in LSP mode");
+    // We explicitly disable `stripePackages` in realmain for this call, which makes the packager call a no-op here.
+    pipeline::package(rbiGS, absl::MakeSpan(rbiIndexed.result()), opts, workers);
 
     auto resolved = pipeline::resolve(rbiGS, std::move(rbiIndexed.result()), opts, workers);
     ENFORCE(resolved.hasResult(), "Can only cancel in LSP mode");
