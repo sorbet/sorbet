@@ -3,18 +3,17 @@
 
 #include "ast/ast.h"
 #include "rbs/rbs_common.h"
-#include <memory>
 
 namespace sorbet::rbs {
 
 class TypeTranslator {
     core::MutableContext ctx;
     const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams;
-    const std::shared_ptr<parserstate> &parser;
+    Parser parser;
 
 public:
     TypeTranslator(core::MutableContext ctx, const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
-                   const std::shared_ptr<parserstate> &parser)
+                   Parser parser)
         : ctx(ctx), typeParams(typeParams), parser(parser) {}
 
     /**

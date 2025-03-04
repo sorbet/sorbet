@@ -6,6 +6,7 @@ extern "C" {
 }
 
 #include "core/LocOffsets.h"
+#include "rbs/Parser.h"
 
 namespace sorbet::rbs {
 

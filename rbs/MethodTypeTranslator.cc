@@ -121,8 +121,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(const ast::MethodDef *m
                 "TypeParam");
 
         auto node = (rbs_ast_typeparam_t *)list_node->node;
-        rbs_constant_t *constant = rbs_constant_pool_id_to_constant(&parser->constant_pool, node->name->constant_id);
-        string_view str(reinterpret_cast<const char *>(constant->start), constant->length);
+        auto str = parser.resolveConstant(node->name);
         typeParams.emplace_back(loc, ctx.state.enterNameUTF8(str));
     }
 
@@ -183,9 +182,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(const ast::MethodDef *m
 
         if (nameSymbol) {
             // The RBS arg is named in the signature, so we use the explicit name used
-            rbs_constant_t *nameConstant =
-                rbs_constant_pool_id_to_constant(&parser->constant_pool, nameSymbol->constant_id);
-            string_view nameStr(reinterpret_cast<const char *>(nameConstant->start), nameConstant->length);
+            auto nameStr = parser.resolveConstant(nameSymbol);
             name = ctx.state.enterNameUTF8(nameStr);
         } else {
             if (i >= methodDef->args.size()) {

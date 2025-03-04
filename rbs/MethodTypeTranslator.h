@@ -14,10 +14,10 @@ struct RBSArg {
 
 class MethodTypeTranslator {
     core::MutableContext ctx;
-    std::shared_ptr<parserstate> parser;
+    Parser parser;
 
 public:
-    MethodTypeTranslator(core::MutableContext ctx, std::shared_ptr<parserstate> parser) : ctx(ctx), parser(parser) {}
+    MethodTypeTranslator(core::MutableContext ctx, Parser parser) : ctx(ctx), parser(parser) {}
 
     /**
      * Convert an RBS method signature comment to a Sorbet signature.
