@@ -146,4 +146,42 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of initialize>
   end
+
+  class <emptyTree>::<C AttrAnnotations><<C <todo sym>>> < (::<todo sym>)
+    class <emptyTree>::<C Base><<C <todo sym>>> < (::<todo sym>)
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.overridable().returns(::T.nilable(<emptyTree>::<C Integer>))
+      end
+
+      def foo<<todo method>>(&<blk>)
+        @foo
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params(:foo, ::T.nilable(<emptyTree>::<C Integer>)).void()
+      end
+
+      def initialize<<todo method>>(foo = nil, &<blk>)
+        @foo = <cast:let>(foo, <todo sym>, ::T.nilable(<emptyTree>::<C Integer>))
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      <runtime method definition of foo>
+
+      <runtime method definition of initialize>
+    end
+
+    class <emptyTree>::<C Sub><<C <todo sym>>> < (<emptyTree>::<C Base>)
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.override().returns(::T.nilable(<emptyTree>::<C Integer>))
+      end
+
+      def foo<<todo method>>(&<blk>)
+        @foo
+      end
+
+      <runtime method definition of foo>
+    end
+  end
 end
