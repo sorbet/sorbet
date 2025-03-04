@@ -585,11 +585,11 @@ int realmain(int argc, char *argv[]) {
                                                               *workers, indexed));
 
                 // Populate the packageDB by processing only the __package.rb files.
-                pipeline::buildPackageDB(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
                 // Only need to compute hashes when running to compute a FileHash
                 auto foundHashes = nullptr;
                 auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
                 ENFORCE(!canceled, "There's no cancellation in batch mode");
+                pipeline::buildPackageDB(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
             }
 
             auto nonPackageIndexedResult =
@@ -605,13 +605,12 @@ int realmain(int argc, char *argv[]) {
             cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers,
                                                  nonPackageIndexed);
 
-            // Now validate all the other files (the packageDB shouldn't change)
-            pipeline::validatePackagedFiles(*gs, absl::MakeSpan(nonPackageIndexed), opts, *workers);
-
             // Only need to compute hashes when running to compute a FileHash
             auto foundHashes = nullptr;
             auto canceled = pipeline::name(*gs, absl::MakeSpan(nonPackageIndexed), opts, *workers, foundHashes);
             ENFORCE(!canceled, "There's no cancellation in batch mode");
+            // Now validate all the other files (the packageDB shouldn't change)
+            pipeline::validatePackagedFiles(*gs, absl::MakeSpan(nonPackageIndexed), opts, *workers);
 
             pipeline::unpartitionPackageFiles(indexed, move(nonPackageIndexed));
             // TODO(jez) At this point, it's not correct to call it `indexed` anymore: we've run namer too
