@@ -212,7 +212,8 @@ class RBSSignaturesWalk {
         for (auto &signature : attrComments.signatures) {
             auto rbsType = rbs::RBSParser::parseType(ctx, signature);
             if (rbsType.first) {
-                auto sig = rbs::MethodTypeTranslator::attrSignature(ctx, send, move(rbsType.first.value()));
+                auto sig = rbs::MethodTypeTranslator::attrSignature(ctx, send, move(rbsType.first.value()),
+                                                                    attrComments.annotations);
                 newRHS.emplace_back(move(sig));
             } else {
                 ENFORCE(rbsType.second);

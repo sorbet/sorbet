@@ -58,3 +58,24 @@ class AttrRewriter
     T.reveal_type(@a) # error: Revealed type: `T.nilable(Integer)`
   end
 end
+
+class AttrAnnotations
+  class Base
+    extend T::Sig
+
+    # @overridable
+    #: Integer?
+    attr_reader :foo
+
+    #: (Integer?) -> void
+    def initialize(foo = nil)
+      @foo = foo
+    end
+  end
+
+  class Sub < Base
+    # @override
+    #: Integer?
+    attr_reader :foo
+  end
+end

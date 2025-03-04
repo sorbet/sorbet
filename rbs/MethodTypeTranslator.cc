@@ -1,5 +1,6 @@
 #include "rbs/MethodTypeTranslator.h"
 
+#include "absl/algorithm/container.h"
 #include "absl/strings/escaping.h"
 #include "ast/Helpers.h"
 #include "core/GlobalState.h"
@@ -13,6 +14,28 @@ using namespace std;
 namespace sorbet::rbs {
 
 namespace {
+
+ast::ExpressionPtr handleAnnotations(ast::ExpressionPtr sigBuilder, const vector<Comment> &annotations) {
+    for (auto &annotation : annotations) {
+        if (annotation.string == "final") {
+            // no-op, `final` is handled in the `sig()` call later
+        } else if (annotation.string == "abstract") {
+            sigBuilder = ast::MK::Send0(annotation.loc, move(sigBuilder), core::Names::abstract(), annotation.loc);
+        } else if (annotation.string == "overridable") {
+            sigBuilder = ast::MK::Send0(annotation.loc, move(sigBuilder), core::Names::overridable(), annotation.loc);
+        } else if (annotation.string == "override") {
+            sigBuilder = ast::MK::Send0(annotation.loc, move(sigBuilder), core::Names::override_(), annotation.loc);
+        } else if (annotation.string == "override(allow_incompatible: true)") {
+            ast::Send::ARGS_store overrideArgs;
+            overrideArgs.emplace_back(ast::MK::Symbol(annotation.loc, core::Names::allowIncompatible()));
+            overrideArgs.emplace_back(ast::MK::True(annotation.loc));
+            sigBuilder = ast::MK::Send(annotation.loc, move(sigBuilder), core::Names::override_(), annotation.loc, 0,
+                                       move(overrideArgs));
+        }
+    }
+
+    return sigBuilder;
+}
 
 core::NameRef expressionName(const ast::ExpressionPtr *expr) {
     core::NameRef name;
@@ -196,25 +219,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
     // Build the sig
 
     auto sigBuilder = ast::MK::Self(methodType.loc);
-    bool isFinal = false;
-
-    for (auto &annotation : annotations) {
-        if (annotation.string == "final") {
-            isFinal = true;
-        } else if (annotation.string == "abstract") {
-            sigBuilder = ast::MK::Send0(annotation.loc, move(sigBuilder), core::Names::abstract(), annotation.loc);
-        } else if (annotation.string == "overridable") {
-            sigBuilder = ast::MK::Send0(annotation.loc, move(sigBuilder), core::Names::overridable(), annotation.loc);
-        } else if (annotation.string == "override") {
-            sigBuilder = ast::MK::Send0(annotation.loc, move(sigBuilder), core::Names::override_(), annotation.loc);
-        } else if (annotation.string == "override(allow_incompatible: true)") {
-            ast::Send::ARGS_store overrideArgs;
-            overrideArgs.emplace_back(ast::MK::Symbol(annotation.loc, core::Names::allowIncompatible()));
-            overrideArgs.emplace_back(ast::MK::True(annotation.loc));
-            sigBuilder = ast::MK::Send(annotation.loc, move(sigBuilder), core::Names::override_(), annotation.loc, 0,
-                                       move(overrideArgs));
-        }
-    }
+    sigBuilder = handleAnnotations(std::move(sigBuilder), annotations);
 
     if (typeParams.size() > 0) {
         ast::Send::ARGS_store typeParamsStore;
@@ -244,6 +249,9 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
 
     auto sigArgs = ast::Send::ARGS_store();
     sigArgs.emplace_back(ast::MK::Constant(methodType.loc, core::Symbols::T_Sig_WithoutRuntime()));
+
+    bool isFinal = absl::c_any_of(annotations, [](const Comment &annotation) { return annotation.string == "final"; });
+
     if (isFinal) {
         sigArgs.emplace_back(ast::MK::Symbol(methodType.loc, core::Names::final_()));
     }
@@ -259,9 +267,10 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(core::MutableContext ct
 }
 
 ast::ExpressionPtr MethodTypeTranslator::attrSignature(core::MutableContext ctx, const ast::Send *send,
-                                                       const Type attrType) {
+                                                       const Type attrType, const vector<Comment> &annotations) {
     auto typeParams = vector<pair<core::LocOffsets, core::NameRef>>();
     auto sigBuilder = ast::MK::Self(attrType.loc.copyWithZeroLength());
+    sigBuilder = handleAnnotations(std::move(sigBuilder), annotations);
 
     if (send->numPosArgs() == 0) {
         if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::RBSUnsupported)) {
