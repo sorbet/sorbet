@@ -21,29 +21,22 @@ ast::ExpressionPtr SignatureTranslator::translateType(core::MutableContext ctx, 
     rbs_string_t rbsString = makeRBSString(this->signature.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
-    auto parser = std::shared_ptr<parserstate>(alloc_parser(rbsString, encoding, 0, this->signature.string.size()),
-                                               [](parserstate *p) { free_parser(p); });
+    Parser parser(rbsString, encoding);
+    rbs_node_t *rbsType = parser.parseType();
 
-    rbs_node_t *rbsType = nullptr;
-    parse_type(parser.get(), &rbsType);
-
-    if (parser->error) {
-        core::LocOffsets offset = locFromRange(this->signature.loc, parser->error->token.range);
+    if (parser.hasError()) {
+        core::LocOffsets offset = locFromRange(this->signature.loc, parser.getError()->token.range);
         // First parse failed, let's check if the user mistakenly used a method signature on an accessor
-        auto methodParser =
-            std::shared_ptr<parserstate>(alloc_parser(rbsString, encoding, 0, this->signature.string.size()),
-                                         [](parserstate *p) { free_parser(p); });
+        auto methodParser = Parser(rbsString, encoding);
+        methodParser.parseMethodType();
 
-        rbs_methodtype_t *methodRbsType = nullptr;
-        parse_method_type(methodParser.get(), &methodRbsType);
-
-        if (!methodParser->error) {
+        if (!methodParser.hasError()) {
             if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSSyntaxError)) {
                 e.setHeader("Using a method signature on an accessor is not allowed, use a bare type instead");
             }
         } else {
             if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSSyntaxError)) {
-                e.setHeader("Failed to parse RBS type ({})", methodParser->error->message);
+                e.setHeader("Failed to parse RBS type ({})", methodParser.getError()->message);
             }
         }
 
@@ -59,17 +52,14 @@ ast::ExpressionPtr SignatureTranslator::translateSignature(core::MutableContext 
     rbs_string_t rbsString = makeRBSString(this->signature.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
-    auto parser = std::shared_ptr<parserstate>(alloc_parser(rbsString, encoding, 0, this->signature.string.size()),
-                                               [](parserstate *p) { free_parser(p); });
+    Parser parser(rbsString, encoding);
+    rbs_methodtype_t *rbsMethodType = parser.parseMethodType();
 
-    rbs_methodtype_t *rbsMethodType = nullptr;
-    parse_method_type(parser.get(), &rbsMethodType);
-
-    if (parser->error) {
-        core::LocOffsets offset = locFromRange(this->signature.loc, parser->error->token.range);
+    if (parser.hasError()) {
+        core::LocOffsets offset = locFromRange(this->signature.loc, parser.getError()->token.range);
 
         if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSSyntaxError)) {
-            e.setHeader("Failed to parse RBS signature ({})", parser->error->message);
+            e.setHeader("Failed to parse RBS signature ({})", parser.getError()->message);
         }
 
         return nullptr;

@@ -32,16 +32,14 @@ ast::ExpressionPtr TypeTranslator::typeNameType(rbs_typename_t *typeName, bool i
                     rbs_node_type_name(node), "Symbol");
 
             rbs_ast_symbol_t *symbol = (rbs_ast_symbol_t *)node;
-            rbs_constant_t *name = rbs_constant_pool_id_to_constant(&parser->constant_pool, symbol->constant_id);
-            string pathNameStr(reinterpret_cast<const char *>(name->start), name->length);
-            auto pathNameConst = ctx.state.enterNameConstant(pathNameStr);
+            auto nameStr = parser.resolveConstant(symbol);
+            auto pathNameConst = ctx.state.enterNameConstant(nameStr);
             pathNames.emplace_back(pathNameConst);
             parent = ast::MK::UnresolvedConstant(loc, move(parent), pathNameConst);
         }
     }
 
-    rbs_constant_t *name = rbs_constant_pool_id_to_constant(&parser->constant_pool, typeName->name->constant_id);
-    string_view nameStr(reinterpret_cast<const char *>(name->start), name->length);
+    auto nameStr = parser.resolveConstant(typeName->name);
     auto nameConstant = ctx.state.enterNameConstant(nameStr);
     pathNames.emplace_back(nameConstant);
 
@@ -270,9 +268,7 @@ ast::ExpressionPtr TypeTranslator::recordType(rbs_types_record_t *node, core::Lo
         switch (hash_node->key->type) {
             case RBS_AST_SYMBOL: {
                 rbs_ast_symbol_t *keyNode = (rbs_ast_symbol_t *)hash_node->key;
-                rbs_constant_t *keyString =
-                    rbs_constant_pool_id_to_constant(&parser->constant_pool, keyNode->constant_id);
-                string_view keyStr(reinterpret_cast<const char *>(keyString->start), keyString->length);
+                auto keyStr = parser.resolveConstant(keyNode);
                 auto keyName = ctx.state.enterNameUTF8(keyStr);
                 keysStore.emplace_back(ast::MK::Symbol(loc, keyName));
                 break;
@@ -312,9 +308,8 @@ ast::ExpressionPtr TypeTranslator::recordType(rbs_types_record_t *node, core::Lo
 
 ast::ExpressionPtr TypeTranslator::variableType(rbs_types_variable_t *node, core::LocOffsets loc) {
     rbs_ast_symbol_t *symbol = (rbs_ast_symbol_t *)node->name;
-    rbs_constant_t *constant = rbs_constant_pool_id_to_constant(&parser->constant_pool, symbol->constant_id);
-    string_view str(reinterpret_cast<const char *>(constant->start), constant->length);
-    auto name = ctx.state.enterNameUTF8(str);
+    auto nameStr = parser.resolveConstant(symbol);
+    auto name = ctx.state.enterNameUTF8(nameStr);
     return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::typeParameter(), loc, ast::MK::Symbol(loc, name));
 }
 
