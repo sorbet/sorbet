@@ -1,20 +1,11 @@
-Exception::raise() msg="core/packages/PackageDB.cc:113 enforced condition false has failed: Not implemented for NonePackage"
-
-Backtrace:
-sorbet::core::packages::(anonymous namespace)::NonePackage::notImplemented() const (in sorbet) + 264
-sorbet::core::packages::(anonymous namespace)::NonePackage::fullName() const (in sorbet) + 24
-sorbet::core::packages::PackageInfo::getRootSymbolForAutocorrectSearch(sorbet::core::GlobalState const&, sorbet::core::SymbolRef) const (in sorbet) + 100
-sorbet::resolver::(anonymous namespace)::ResolveConstantsWalk::constantResolutionFailed(sorbet::core::GlobalState&, sorbet::core::FileRef, sorbet::resolver::(anonymous namespace)::ResolveConstantsWalk::ConstantResolutionItem&, sorbet::resolver::(anonymous namespace)::ResolveConstantsWalk::ImportStubs const&, int&) (in sorbet) + 4188
-sorbet::resolver::(anonymous namespace)::ResolveConstantsWalk::resolveConstants(sorbet::core::GlobalState&, std::__1::vector<sorbet::ast::ParsedFile, std::__1::allocator<sorbet::ast::ParsedFile>>, sorbet::WorkerPool&) (in sorbet) + 5776
-sorbet::resolver::Resolver::run(sorbet::core::GlobalState&, std::__1::vector<sorbet::ast::ParsedFile, std::__1::allocator<sorbet::ast::ParsedFile>>, sorbet::WorkerPool&) (in sorbet) + 96
-sorbet::realmain::pipeline::resolve(sorbet::core::GlobalState&, std::__1::vector<sorbet::ast::ParsedFile, std::__1::allocator<sorbet::ast::ParsedFile>>, sorbet::realmain::options::Options const&, sorbet::WorkerPool&) (in sorbet) + 356
-sorbet::realmain::realmain(int, char**) (in sorbet) + 14256
-main (in sorbet) + 36
-start (in dyld) + 2840
-
-???: Exception resolving (backtrace is above) https://srb.help/1001
-
 test/cli/not_stripe_packages/__package.rb:2: Unable to resolve constant `DoesNotExist` https://srb.help/5002
      2 |DoesNotExist
         ^^^^^^^^^^^^
-Errors: 2
+  Did you mean `SystemExit`? Use `-a` to autocorrect
+    test/cli/not_stripe_packages/__package.rb:2: Replace with `SystemExit`
+     2 |DoesNotExist
+        ^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/errors.rbi#L560: `SystemExit` defined here
+     560 |class SystemExit < Exception
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 1

@@ -786,6 +786,8 @@ private:
                     auto suggested =
                         suggestScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, original.cnst);
 
+                    // WARNING: This runs package-specific logic even if the `--stripe-packages` flag was not passed!!
+                    // Do not cargo cult this, this is a pattern that we need to get rid of long term!
                     if (ctx.file.data(ctx).isPackage() &&
                         !suggestScope.asClassOrModuleRef().isPackageSpecSymbol(ctx.state)) {
                         // In case the file is a __package.rb file, and the scope is not a PackageSpec-scoped symbol,
@@ -799,15 +801,17 @@ private:
 
                         // Can't use pkg.ownsSymbol since it uses symbol definition locs, which have an edge case that
                         // isn't handled until the VisibilityChecker pass.
-                        const auto pkgRootSymbol = ctx.state.packageDB()
-                                                       .getPackageForFile(ctx.state, ctx.file)
-                                                       .getRootSymbolForAutocorrectSearch(ctx.state, suggestScope);
+                        auto &enclosingPackage = ctx.state.packageDB().getPackageForFile(ctx.state, ctx.file);
+                        if (enclosingPackage.exists()) {
+                            const auto pkgRootSymbol =
+                                enclosingPackage.getRootSymbolForAutocorrectSearch(ctx.state, suggestScope);
 
-                        auto it = std::remove_if(suggested.begin(), suggested.end(),
-                                                 [&pkgRootSymbol, &gs](auto &suggestion) -> bool {
-                                                     return !suggestion.symbol.isUnderNamespace(gs, pkgRootSymbol);
-                                                 });
-                        suggested.erase(it, suggested.end());
+                            auto it = std::remove_if(suggested.begin(), suggested.end(),
+                                                     [&pkgRootSymbol, &gs](auto &suggestion) -> bool {
+                                                         return !suggestion.symbol.isUnderNamespace(gs, pkgRootSymbol);
+                                                     });
+                            suggested.erase(it, suggested.end());
+                        }
                     }
 
                     if (suggested.size() > 3) {
