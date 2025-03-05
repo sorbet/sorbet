@@ -81,6 +81,22 @@ There are some additional stipulations on the use of `abstract!` and
   singleton methods.
 - `abstract!` classes cannot be instantiated (will raise at runtime).
 
+### Why choose `interface!` over `abstract!`?
+
+Apart from the differences listed above, the choice of whether to use
+`interface!` or `abstract!` comes down to preference and circumstance.
+
+An example where the difference matters: people sometimes use `interface!` as
+the starting point for extracting logic across a network boundary into a new
+service. In this case, having implementation logic in the interface would
+complicate an in-progress migration: the logic should either live in the
+soon-to-be-extracted service, or the current service. In cases, like this, the
+line with the `interface!` declaration serves as a great point to capture
+context around **why** the given module is the way it is in a comment.
+
+If no such context exists, and the other differences mentioned above are okay
+for the use case, it's usually fine to switch from `interface!` to `abstract!`.
+
 ## `overridable`: Providing default implementations of methods
 
 Certain abstract classes or interfaces want to provide methods that provide a
