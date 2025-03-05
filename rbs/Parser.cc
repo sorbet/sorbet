@@ -2,6 +2,21 @@
 
 namespace sorbet::rbs {
 
+class RBSLibraryInitializer {
+public:
+    RBSLibraryInitializer() {
+        const size_t num_uniquely_interned_strings = 26;
+        rbs_constant_pool_init(RBS_GLOBAL_CONSTANT_POOL, num_uniquely_interned_strings);
+    }
+
+    ~RBSLibraryInitializer() {
+        rbs_constant_pool_free(RBS_GLOBAL_CONSTANT_POOL);
+    }
+};
+
+// Runs before main and at process exit
+static RBSLibraryInitializer rbsLibraryInitializer;
+
 Parser::Parser(rbs_string_t rbsString, const rbs_encoding_t *encoding)
     : parser(alloc_parser(rbsString, encoding, 0, rbsString.end - rbsString.start), free_parser) {}
 

@@ -880,8 +880,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    rbs_constant_pool_init(RBS_GLOBAL_CONSTANT_POOL, 26);
-
     sorbet::test::singleTest = res["single_test"].as<std::string>();
 
     doctest::Context context(argc, argv);
