@@ -1,4 +1,5 @@
 # typed: strict
+# enable-packager: true
 
 class MyPkg < PackageSpec
   custom_method 'abc'

@@ -4,6 +4,7 @@
 
 # Constant definitions/assignments are not OK
 SomeConstant = PackageSpec # error: Invalid expression in package: `Assign`
+#              ^^^^^^^^^^^ error: Unable to resolve constant `PackageSpec`
 
 class MyPackage < PackageSpec
   extend T::Helpers # error: Invalid expression in package: `extend` is not allowed
