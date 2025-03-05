@@ -187,10 +187,11 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                          ast::ExpressionPtr tree) {
     auto &print = opts.print;
     ast::ParsedFile rewritten{nullptr, file};
+    rewritten.setCached(tree != nullptr);
 
     Timer timeit(lgs.tracer(), "indexOne", {{"file", string(file.data(lgs).path())}});
     try {
-        if (!tree) {
+        if (!rewritten.cached()) {
             // tree isn't cached. Need to start from parser
             if (file.data(lgs).strictLevel == core::StrictLevel::Ignore) {
                 return emptyParsedFile(file);
@@ -481,7 +482,7 @@ struct IndexSubstitutionJob {
     IndexSubstitutionJob(core::GlobalState &to, IndexResult res)
         : threadGs{std::move(res.gs)}, subst{}, trees{std::move(res.trees)} {
         to.mergeFileTable(*this->threadGs);
-        if (absl::c_any_of(this->trees, [this](auto &parsed) { return !parsed.file.data(*this->threadGs).cached(); })) {
+        if (absl::c_any_of(this->trees, [](auto &parsed) { return !parsed.cached(); })) {
             this->subst.emplace(*this->threadGs, to);
         }
     }
@@ -524,9 +525,8 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
                 if (result.gotItem()) {
                     if (job.subst.has_value()) {
                         for (auto &tree : job.trees) {
-                            auto file = tree.file;
-                            if (!file.data(cgs).cached()) {
-                                core::MutableContext ctx(cgs, core::Symbols::root(), file);
+                            if (!tree.cached()) {
+                                core::MutableContext ctx(cgs, core::Symbols::root(), tree.file);
                                 tree = ast::Substitute::run(ctx, *job.subst, move(tree));
                             }
                         }
