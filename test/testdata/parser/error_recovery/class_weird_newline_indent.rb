@@ -2,7 +2,7 @@
 
 class A
   class Inner < Object
-# ^^^^^ error: Hint: this "class" token might not be properly closed
+# ^^^^^ parser-error: Hint: this "class" token might not be properly closed
 
   def method2
   end
@@ -10,7 +10,7 @@ end
 
 class B
   class Inner <
-# ^^^^^ error: Hint: this "class" token might not be properly closed
+# ^^^^^ parser-error: Hint: this "class" token might not be properly closed
     Object
 
   def method2
@@ -19,7 +19,7 @@ end
 
 class C
   class Inner <
-# ^^^^^ error: Hint: this "class" token might not be properly closed
+# ^^^^^ parser-error: Hint: this "class" token might not be properly closed
     Object
     puts 'hello'
 
@@ -29,7 +29,7 @@ end
 
 class D
   class
-# ^^^^^ error: Hint: this "class" token might not be properly closed
+# ^^^^^ parser-error: Hint: this "class" token might not be properly closed
     Inner
 
   def method2
@@ -38,7 +38,7 @@ end
 
 class E
   class
-# ^^^^^ error: Hint: this "class" token might not be properly closed
+# ^^^^^ parser-error: Hint: this "class" token might not be properly closed
     Inner
     puts 'hello'
 
@@ -48,11 +48,11 @@ end
 
 class F
   class
-# ^^^^^ error: Hint: this "class" token might not be properly closed
+# ^^^^^ parser-error: Hint: this "class" token might not be properly closed
     Inner <
       Object
     puts 'hello'
 
   def method2
   end
-end # error: unexpected token "end of file"
+end # parser-error: unexpected token "end of file"

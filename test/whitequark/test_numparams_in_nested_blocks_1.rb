@@ -1,3 +1,3 @@
 # typed: true
 
--> { _1; -> { _2 }; } # error: numbered parameter is already used in an outer scope
+-> { _1; -> { _2 }; } # parser-error: numbered parameter is already used in an outer scope

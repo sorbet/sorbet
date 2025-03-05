@@ -1,3 +1,3 @@
 # typed: true
 
-def foo(...) defined?(...); end # error: unexpected token ")"
+def foo(...) defined?(...); end # parser-error: unexpected token ")"
