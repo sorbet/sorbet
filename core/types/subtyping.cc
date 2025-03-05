@@ -1286,9 +1286,21 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                                 break;
                             }
                         }
-                        auto message = ErrorColors::format("`{}` is not {} `{}` for {} type member `{}`", a1i.show(gs),
-                                                           joiningText, a2j.show(gs), variance, idxTypeMember.show(gs));
-                        subCollector.message = message;
+                        // For proc types, make type member references more user-friendly
+                        if (a2->klass.data(gs)->name.show(gs).compare("Proc1") == 0) {
+                            auto message = ErrorColors::format("`{}` is not {} `{}`", a1i.show(gs), joiningText, a2j.show(gs));
+                            if (variance == "covariant") {
+                                subCollector.message = fmt::format("{} for return type of Proc1", message);
+                            } else if (variance == "contravariant") {
+                                subCollector.message = fmt::format("{} for Arg0 of Proc1", message);
+                            } else {
+                                subCollector.message = message;
+                            }
+                        } else {
+                            auto message = ErrorColors::format("`{}` is not {} `{}` for {} type member `{}`", a1i.show(gs),
+                                                            joiningText, a2j.show(gs), variance, idxTypeMember.show(gs));
+                            subCollector.message = message;
+                        }
                         errorDetailsCollector.addErrorDetails(std::move(subCollector));
                     }
                 } else {
@@ -1439,7 +1451,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     // backwards compatibility, but maybe we should do this under the `constr`
                     // that's in scope.
                     result = Types::equivUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, m1.wrapped,
-                                                         m2->wrapped, errorDetailsCollector);
+                                                       m2->wrapped, errorDetailsCollector);
                 });
             return result;
             // both are proxy
