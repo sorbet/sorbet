@@ -239,8 +239,8 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
         case Tag::Literal: {
             auto *a = reinterpret_cast<const Literal *>(tree);
             auto *b = reinterpret_cast<const Literal *>(other);
-            auto aType = a->value;
-            auto bType = b->value;
+            const auto &aType = a->value;
+            const auto &bType = b->value;
             if (aType.tag() != bType.tag()) {
                 return false;
             }
