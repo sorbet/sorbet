@@ -1561,29 +1561,29 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
             continue;
         }
 
-        auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(packageSpecClass->name);
-        if (!validatePackageName(ctx, nameTree)) {
-            reportedError = true;
-            continue;
-        }
-
         // ---- Mutates the tree ----
-        // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
-        // This removes the PackageSpec's themselves from the top-level namespace
-        //
-        // We can't do this rewrite in rewriter, because this rewrite should only happen if
+        // We can't do these rewrites in rewriter, because this rewrite should only happen if
         // `opts.stripePackages` is set. That would mean we would have to add another cache flavor,
         // which would double the size of Sorbet's disk cache.
         //
         // Other than being able to say "we don't mutate the trees in packager" there's not much
         // value in going that far (even namer mutates the trees; the packager fills a similar role).
-        packageSpecClass->name = prependName(move(packageSpecClass->name));
 
         // Pre-resolve the super class. This makes it easier to detect that this is a package
         // spec-related class def in later passes without having to recursively walk up the constant
         // lit's scope to find if it starts with <PackageSpecRegistry>.
         superClass = ast::make_expression<ast::ConstantLit>(core::Symbols::PackageSpec(),
                                                             superClass.toUnique<ast::UnresolvedConstantLit>());
+
+        auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(packageSpecClass->name);
+        if (!validatePackageName(ctx, nameTree)) {
+            reportedError = true;
+            continue;
+        }
+
+        // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
+        // This removes the PackageSpec's themselves from the top-level namespace
+        packageSpecClass->name = prependName(move(packageSpecClass->name));
 
         info = make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),
                                             ctx.locAt(packageSpecClass->declLoc));
