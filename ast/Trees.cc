@@ -1514,7 +1514,8 @@ ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(std::vector<ParsedFile> &&
             {
                 ast::ParsedFile job;
                 for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                    // Do nothing; allow the destructor of `ast::ParsedFile` to run for `job`.
+                    // Force the destructor of `ast::ExpressionPtr` to run for `job.tree`.
+                    job.tree.reset();
                 }
             }
             threadBarrier.DecrementCount();
