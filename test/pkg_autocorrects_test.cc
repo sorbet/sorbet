@@ -803,4 +803,63 @@ TEST_CASE("Convert test_import to import") {
     }
 }
 
+TEST_CASE("Ordering by alphabetical") {
+    core::GlobalState gs(errorQueue);
+    gs.initEmpty();
+    {
+        core::UnfreezeNameTable packageNS(gs);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
+        gs.setPackagerOptions({}, {}, {}, {}, {}, {"util", "lib", "app"}, "");
+    }
+
+    string myPackage = makePackageRB("MyPackage", "layered", "lib", {"Lib::Foo::B::A"});
+
+    auto parsedFiles =
+        enterPackages(gs, {{"lib/foo/a/__package.rb", makePackageRB("Lib::Foo::A", "layered", "lib")},
+                           {"lib/foo/b/__package.rb", makePackageRB("Lib::Foo::B", "layered", "lib")},
+                           {"lib/foo/b/a/__package.rb", makePackageRB("Lib::Foo::B::A", "layered", "lib")},
+                           {"lib/foo/c/__package.rb", makePackageRB("Lib::Foo::C", "layered", "lib")},
+                           {"lib/foo/d/__package.rb", makePackageRB("Lib::Foo::D", "layered", "app")},
+                           {"my_package/__package.rb", myPackage}});
+
+    {
+        auto &myPkg = getPackageForFile(gs, parsedFiles[5].file);
+        ENFORCE(myPkg.exists());
+        auto &libFooB = getPackageForFile(gs, parsedFiles[1].file);
+        ENFORCE(libFooB.exists());
+
+        string expected = makePackageRB("MyPackage", "layered", "lib", {"Lib::Foo::B", "Lib::Foo::B::A"});
+        auto addImport = myPkg.addImport(gs, libFooB, false);
+        ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+        auto replaced = applySuggestion(gs, *addImport);
+        CHECK_EQ(expected, replaced);
+    }
+
+    {
+        auto &myPkg = getPackageForFile(gs, parsedFiles[5].file);
+        ENFORCE(myPkg.exists());
+        auto &libFooC = getPackageForFile(gs, parsedFiles[3].file);
+        ENFORCE(libFooC.exists());
+
+        string expected = makePackageRB("MyPackage", "layered", "lib", {"Lib::Foo::B::A", "Lib::Foo::C"});
+        auto addImport = myPkg.addImport(gs, libFooC, false);
+        ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+        auto replaced = applySuggestion(gs, *addImport);
+        CHECK_EQ(expected, replaced);
+    }
+
+    {
+        auto &myPkg = getPackageForFile(gs, parsedFiles[5].file);
+        ENFORCE(myPkg.exists());
+        auto &libFooD = getPackageForFile(gs, parsedFiles[4].file);
+        ENFORCE(libFooD.exists());
+
+        string expected = makePackageRB("MyPackage", "layered", "lib", {"Lib::Foo::D", "Lib::Foo::B::A"});
+        auto addImport = myPkg.addImport(gs, libFooD, false);
+        ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+        auto replaced = applySuggestion(gs, *addImport);
+        CHECK_EQ(expected, replaced);
+    }
+}
+
 } // namespace sorbet
