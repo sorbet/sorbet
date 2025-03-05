@@ -76,8 +76,8 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
 
     if (auto dup = ASTUtil::findDuplicateArg(ctx, send)) {
         if (auto e = ctx.beginError(dup->secondLoc, core::errors::Rewriter::InvalidStructMember)) {
-            e.setHeader("Duplicate member '{}' in Data definition", dup->name.show(ctx));
-            e.addErrorLine(ctx.locAt(dup->firstLoc), "First occurrence of '{}' in Data definition",
+            e.setHeader("Duplicate member `{}` in Data definition", dup->name.show(ctx));
+            e.addErrorLine(ctx.locAt(dup->firstLoc), "First occurrence of `{}` in Data definition",
                            dup->name.show(ctx));
         }
         return empty;

@@ -2,13 +2,13 @@
 
 class TestData
   DuplicateData1 = Data.define(:foo, :foo)
-  #                                  ^^^^ error: Duplicate member 'foo' in Data definition
+  #                                  ^^^^ error: Duplicate member `foo` in Data definition
 
   DuplicateData2 = Data.define(:foo, 'foo')
-  #                                  ^^^^^ error: Duplicate member 'foo' in Data definition
+  #                                  ^^^^^ error: Duplicate member `foo` in Data definition
 
   DuplicateData3 = Data.define("FooDataDup", :foo, :bar, :foo)
-  #                                                      ^^^^ error: Duplicate member 'foo' in Data definition
+  #                                                      ^^^^ error: Duplicate member `foo` in Data definition
 
   ValidData1 = Data.define(:foo, :bar)
 
