@@ -44,4 +44,5 @@ bool Parser::hasError() const {
 const error *Parser::getError() const {
     return parser->error;
 }
+
 } // namespace sorbet::rbs

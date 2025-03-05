@@ -39,7 +39,6 @@
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
 #include "payload/payload.h"
-#include "rbs/rbs_common.h"
 #include "resolver/resolver.h"
 #include "sorbet_version/sorbet_version.h"
 #include "spdlog/sinks/rotating_file_sink.h"
