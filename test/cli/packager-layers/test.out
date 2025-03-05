@@ -9,7 +9,9 @@ __package.rb:3: Unable to resolve constant `PackageSpec` https://srb.help/5002
     __package.rb:3: Replace with `Sorbet::Private::Static::PackageSpec`
      3 |class Project::Root < PackageSpec
                               ^^^^^^^^^^^
-    ???: `Sorbet::Private::Static::PackageSpec` defined here
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/packages.rbi#L2: `Sorbet::Private::Static::PackageSpec` defined here
+     2 |class Sorbet::Private::Static::PackageSpec; end
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 __package.rb:4: Method `strict_dependencies` does not exist on `T.class_of(Project::Root)` https://srb.help/7003
      4 |  strict_dependencies 'false'
