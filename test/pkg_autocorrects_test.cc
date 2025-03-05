@@ -212,8 +212,12 @@ TEST_CASE("Add import and test_import to package with imports and test imports")
                         "  test_import D\n"
                         "end\n";
 
-    auto parsedFiles =
-        enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
+    auto parsedFiles = enterPackages(gs, {{examplePackagePath, examplePackage},
+                                          {"my_package/__package.rb", pkg_source},
+                                          {"a/__package.rb", "class A < PackageSpec\nend\n"},
+                                          {"b/__package.rb", "class B < PackageSpec\nend\n"},
+                                          {"c/__package.rb", "class C < PackageSpec\nend\n"},
+                                          {"d/__package.rb", "class D < PackageSpec\nend\n"}});
     auto &examplePkg = getPackageForFile(gs, parsedFiles[0].file);
     auto &myPkg = getPackageForFile(gs, parsedFiles[1].file);
     ENFORCE(examplePkg.exists());
@@ -595,7 +599,7 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
         auto addImport = myPkg.addImport(gs, falsePkgB, false);
         string expected =
             makePackageRB("MyPackage", "dag", "app",
-                          {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "FalsePackageB", "DagPackageA"});
+                          {"FalsePackageA", "FalsePackageB", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
         auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
@@ -793,6 +797,65 @@ TEST_CASE("Convert test_import to import") {
                           // delete the '\n' too
                           "\n"
                           "end";
+        ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+        auto replaced = applySuggestion(gs, *addImport);
+        CHECK_EQ(expected, replaced);
+    }
+}
+
+TEST_CASE("Ordering by alphabetical") {
+    core::GlobalState gs(errorQueue);
+    gs.initEmpty();
+    {
+        core::UnfreezeNameTable packageNS(gs);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
+        gs.setPackagerOptions({}, {}, {}, {}, {}, {"util", "lib", "app"}, "");
+    }
+
+    string myPackage = makePackageRB("MyPackage", "layered", "lib", {"Lib::Foo::B::A"});
+
+    auto parsedFiles =
+        enterPackages(gs, {{"lib/foo/a/__package.rb", makePackageRB("Lib::Foo::A", "layered", "lib")},
+                           {"lib/foo/b/__package.rb", makePackageRB("Lib::Foo::B", "layered", "lib")},
+                           {"lib/foo/b/a/__package.rb", makePackageRB("Lib::Foo::B::A", "layered", "lib")},
+                           {"lib/foo/c/__package.rb", makePackageRB("Lib::Foo::C", "layered", "lib")},
+                           {"lib/foo/d/__package.rb", makePackageRB("Lib::Foo::D", "layered", "app")},
+                           {"my_package/__package.rb", myPackage}});
+
+    {
+        auto &myPkg = getPackageForFile(gs, parsedFiles[5].file);
+        ENFORCE(myPkg.exists());
+        auto &libFooB = getPackageForFile(gs, parsedFiles[1].file);
+        ENFORCE(libFooB.exists());
+
+        string expected = makePackageRB("MyPackage", "layered", "lib", {"Lib::Foo::B", "Lib::Foo::B::A"});
+        auto addImport = myPkg.addImport(gs, libFooB, false);
+        ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+        auto replaced = applySuggestion(gs, *addImport);
+        CHECK_EQ(expected, replaced);
+    }
+
+    {
+        auto &myPkg = getPackageForFile(gs, parsedFiles[5].file);
+        ENFORCE(myPkg.exists());
+        auto &libFooC = getPackageForFile(gs, parsedFiles[3].file);
+        ENFORCE(libFooC.exists());
+
+        string expected = makePackageRB("MyPackage", "layered", "lib", {"Lib::Foo::B::A", "Lib::Foo::C"});
+        auto addImport = myPkg.addImport(gs, libFooC, false);
+        ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+        auto replaced = applySuggestion(gs, *addImport);
+        CHECK_EQ(expected, replaced);
+    }
+
+    {
+        auto &myPkg = getPackageForFile(gs, parsedFiles[5].file);
+        ENFORCE(myPkg.exists());
+        auto &libFooD = getPackageForFile(gs, parsedFiles[4].file);
+        ENFORCE(libFooD.exists());
+
+        string expected = makePackageRB("MyPackage", "layered", "lib", {"Lib::Foo::D", "Lib::Foo::B::A"});
+        auto addImport = myPkg.addImport(gs, libFooD, false);
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
         auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);

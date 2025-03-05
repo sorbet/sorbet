@@ -290,20 +290,40 @@ public:
     // - test imports
     // TODO(neil): explain the rationale behind this ordering (ie. why is not the simple "false < layered < layered_dag
     // < dag" ordering)
-    // TODO(neil): implement alphabetical sort.
-    int orderByStrictness(const core::packages::PackageDB &packageDB, const PackageInfo &a, bool aIsTestImport,
-                          const PackageInfo &b, bool bIsTestImport) const {
-        if (!strictDependenciesLevel().has_value() || !a.strictDependenciesLevel().has_value() ||
-            !b.strictDependenciesLevel().has_value() || !a.layer().has_value() || !b.layer().has_value()) {
+    int orderImports(const core::GlobalState &gs, const PackageInfo &a, bool aIsTestImport, const PackageInfo &b,
+                     bool bIsTestImport) const {
+        // Test imports always come last, and aren't sorted by `strict_dependencies`
+        if (aIsTestImport && bIsTestImport) {
+            return orderByAlphabetical(gs, a, b);
+        } else if (aIsTestImport && !bIsTestImport) {
+            return 1;
+        } else if (!aIsTestImport && bIsTestImport) {
+            return -1;
+        } // Neither is a test import
+
+        auto strictnessCompareResult = orderByStrictness(gs.packageDB(), a, b);
+        if (strictnessCompareResult == 0) {
+            return orderByAlphabetical(gs, a, b);
+        }
+        return strictnessCompareResult;
+    }
+
+    int orderByStrictness(const core::packages::PackageDB &packageDB, const PackageInfo &a,
+                          const PackageInfo &b) const {
+        if (!packageDB.enforceLayering() || !strictDependenciesLevel().has_value() ||
+            !a.strictDependenciesLevel().has_value() || !b.strictDependenciesLevel().has_value() ||
+            !a.layer().has_value() || !b.layer().has_value()) {
             return 0;
         }
 
         // Layering violations always come first
-        if (causesLayeringViolation(packageDB, a) && causesLayeringViolation(packageDB, b)) {
+        auto aCausesLayeringViolation = causesLayeringViolation(packageDB, a.layer().value().first);
+        auto bCausesLayeringViolation = causesLayeringViolation(packageDB, b.layer().value().first);
+        if (aCausesLayeringViolation && bCausesLayeringViolation) {
             return 0;
-        } else if (causesLayeringViolation(packageDB, a) && !causesLayeringViolation(packageDB, b)) {
+        } else if (aCausesLayeringViolation && !bCausesLayeringViolation) {
             return -1;
-        } else if (!causesLayeringViolation(packageDB, a) && causesLayeringViolation(packageDB, b)) {
+        } else if (!aCausesLayeringViolation && bCausesLayeringViolation) {
             return 1;
         }
 
@@ -356,6 +376,15 @@ public:
         }
     }
 
+    int orderByAlphabetical(const core::GlobalState &gs, const PackageInfo &a, const PackageInfo &b) const {
+        auto aStrName = a.show(gs);
+        auto bStrName = b.show(gs);
+        if (aStrName == bStrName) {
+            return 0;
+        }
+        return aStrName < bStrName ? -1 : 1;
+    }
+
     optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                     bool isTestImport) const {
         auto &info = PackageInfoImpl::from(pkg);
@@ -383,27 +412,14 @@ public:
                     }
                 }
 
-                // Test imports always come last, and aren't sorted by `strict_dependencies`
-                if (isTestImport) {
-                    importToInsertAfter = &import.name;
-                    continue;
-                } else if (import.type == core::packages::ImportType::Test) {
-                    continue;
-                }
-
-                if (!gs.packageDB().enforceLayering()) {
-                    importToInsertAfter = &import.name;
-                    continue;
-                }
-
                 auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
                 if (!importInfo.exists()) {
                     importToInsertAfter = &import.name;
                     continue;
                 }
 
-                auto compareResult = orderByStrictness(gs.packageDB(), info, isTestImport, importInfo,
-                                                       import.type == core::packages::ImportType::Test);
+                auto compareResult =
+                    orderImports(gs, info, isTestImport, importInfo, import.type == core::packages::ImportType::Test);
                 if (compareResult == 1 || compareResult == 0) {
                     importToInsertAfter = &import.name;
                 }
