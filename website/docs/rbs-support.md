@@ -4,6 +4,8 @@ title: RBS Comments Support
 sidebar_label: RBS Comments
 ---
 
+## Signature comments
+
 > This feature is experimental and might be changed or removed without notice.
 > To enable it pass the `--enable-experimental-rbs-signatures` option to Sorbet
 > or add it to your `sorbet/config`.
@@ -35,7 +37,7 @@ def foo(x)
 end
 ```
 
-## Caveats
+### Caveats
 
 > Support for this feature is experimental, and we actively discourage depending
 > on it for anything other than to offer feedback to the Sorbet developers.
@@ -43,7 +45,7 @@ end
 There are numerous shortcomings of the comment-based syntax versus `sig` syntax.
 By contrast, the near-sole upside is that the syntax is terser.
 
-### The comment-based syntax is second class
+#### The comment-based syntax is second class
 
 The comment-based syntax uses [RBS syntax](https://github.com/ruby/rbs). RBS is
 an alternative annotation syntax for Ruby. The headline features of RBS:
@@ -58,7 +60,7 @@ an alternative annotation syntax for Ruby. The headline features of RBS:
 However, there are a number of problems which mean that RBS syntax has a
 second-class position in Sorbet:
 
-#### RBS syntax does not match the semantics of Sorbet
+##### RBS syntax does not match the semantics of Sorbet
 
 Sorbet's type annotation syntax evolved differently from the evolution of RBS
 syntax. Unfortunately, this difference is not syntax-deep: it affects the
@@ -93,7 +95,7 @@ possible to embed Sorbet-only syntax within the context of an RBS signature.
 While it is possible for RBS comment signatures to coexist with Sorbet `sig`
 signatures, needing to flip between them adds development friction.
 
-#### Sorbet has minimal influence over the evolution of RBS syntax
+##### Sorbet has minimal influence over the evolution of RBS syntax
 
 Sorbet continues to evolve its type syntax. For example, `T.anything`,
 `T::Class`, and `has_attached_class!` are additions to Sorbet which arrived 6
@@ -107,7 +109,7 @@ Our belief is that syntax matters less than semantics; that "what's possible to
 express in the type system" matters more than "how to express it." Time spent
 bikeshedding syntax detracts from meaningful improvements to the type system.
 
-#### IDE integration is more difficult
+##### IDE integration is more difficult
 
 Sorbet's type syntax doubles as Ruby syntax. Setting aside other benefits of
 reusing Ruby syntax for type annotations (e.g., [runtime checking](runtime.md),
@@ -134,17 +136,6 @@ There are a lot of features that come for free by reusing Ruby syntax:
 
 In fairness, these are technical, implementation considerations, and thus could
 hope to improve one day. But they remain problems today.
-
-#### No support for inline type annotations
-
-At time of writing, there is no support for inline type annotations and
-assertions (e.g., no `T.let` nor `T.cast` alternative).
-
-Even if they do eventually come, they would only apply to a variable declaration
-on its own line. Because Ruby does not have something akin to C-style
-`/* ... */` comments, any comment-based replacement for `T.let` would only
-support trailing comments, meaning only for variable assignments. Meanwhile,
-`T.let` can be used anywhere inside an expression.
 
 #### Performance is worse
 
@@ -196,7 +187,7 @@ not parse straight into Sorbet's internal type representation.
 In large codebases, this adds nontrivial overhead, and is a blocker in the way
 of being able to advocate for using this syntax more widely.
 
-### Runtime checking is a feature
+#### Runtime checking is a feature
 
 > Note that runtime checking of RBS signatures is not implemented, so type
 > safety is reduced.
@@ -213,14 +204,14 @@ For more information on why runtime checking is valuable, see here:
 In fact, runtime checking for signatures is actually load bearing: simply
 disabling runtime checking can make the code change behavior when run.
 
-### The Sorbet docs will continue using Sorbet syntax
+#### The Sorbet docs will continue using Sorbet syntax
 
 There are no plans to rewrite the Sorbet website to present RBS alternatives
 alongside the existing Sorbet syntax. In the mean time, users will need to
 mentally translate from Sorbet syntax to RBS syntax on their own, including
 understanding the cases where there is no suitable RBS replacement.
 
-## Quick reference
+### Quick reference
 
 Most RBS features can be used and will be translated to equivalent Sorbet syntax
 during type checking:
@@ -243,7 +234,7 @@ during type checking:
 | [Shape type]           | `{ a: Foo, b: Bar }`                     | [`{ a: Foo, b: Bar }`](shapes.md)                       |
 | [Proc type]            | `^(Foo) -> Bar`                          | [`T.proc.params(arg: Foo).returns(Bar)`](procs.md)      |
 
-## Attribute accessor types
+### Attribute accessor types
 
 Attribute accessors can be annotated with RBS types:
 
@@ -299,7 +290,7 @@ Note: these annotations like `@abstract` use normal comments, like `# @abstract`
 (not the special `#:` comment). This makes it possible to reuse any existing
 YARD or RDoc annotations.
 
-## Special behaviors
+### Special behaviors
 
 The `#:` comment must come **immediately** before the following method
 definition. If there is a blank line between the comment and method definition,
@@ -321,9 +312,9 @@ equivalent:
 Note that non-generic types are not translated, so `Array` without a type
 argument stays `Array`.
 
-## Unsupported features
+### Unsupported features
 
-### Class types
+#### Class types
 
 The `class` type in RBS is context sensitive (depends on the class where it is
 used) and Sorbet does not support this feature yet. Instead, use the equivalent
@@ -336,7 +327,7 @@ class Foo
 end
 ```
 
-### Interface types
+#### Interface types
 
 Interface types are not supported, use the equivalent Sorbet syntax instead:
 
@@ -351,7 +342,7 @@ end
 def takes_foo(x); end
 ```
 
-### Alias types
+#### Alias types
 
 Alias types are not supported, use the equivalent Sorbet syntax instead:
 
@@ -362,7 +353,7 @@ sig { params(x: Bool).void }
 def foo(x); end
 ```
 
-### Literal types
+#### Literal types
 
 Sorbet does not support RBS's concept of "literal types". The next best thing is
 to use the literal's underlying type instead:
@@ -375,6 +366,56 @@ to use the literal's underlying type instead:
 - `nil` is `NilClass`
 
 You can also consider using [`T.::Enum`](tenum.md).
+
+## Type assertions comments
+
+> This feature is experimental and might be changed or removed without notice.
+> To enable it pass the `--enable-experimental-rbs-assertions` option to Sorbet
+> or add it to your `sorbet/config`.
+
+`T.let` assertions can be expressed using RBS comments:
+
+```ruby
+x = 42 #: Integer
+@x = 42 #: Integer
+X = 42 #: Integer
+```
+
+This is equivalent to:
+
+```ruby
+x = T.let(42, Integer)
+@x = T.let(42, Integer)
+X = T.let(42, Integer)
+```
+
+The comment must be placed at the end of the assignement. Either on the same
+line if the assignment is on a single line, or on the last line if the
+assignment spans multiple lines:
+
+```ruby
+x = [
+  1, 2, 3
+] #: Array[Integer]
+```
+
+The only exception is for HEREDOCs, where the comment may be placed on the first
+line of the HEREDOC:
+
+```ruby
+X = <<~MSG #: String
+  foo
+MSG
+```
+
+### Caveats
+
+Because Ruby does not have something akin to C-style `/* ... */` comments, the
+comment-based syntax only support trailing comments, meaning only for variable
+assignments.
+
+At time of writing, there is no support for other inline type assertions (e.g.,
+no `T.cast` nor `T.must` alternative).
 
 [Class instance type]:
   https://github.com/ruby/rbs/blob/master/docs/syntax.md#class-instance-type
