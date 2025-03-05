@@ -468,15 +468,6 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     } else {
                         result = lub(gs, l1.underlying(gs), t2.underlying(gs));
                     }
-                },
-                [&](const MetaType &m1) {
-                    if (auto *m2 = cast_type<MetaType>(t2)) {
-                        if (Types::equiv(gs, m1.wrapped, m2->wrapped)) {
-                            result = t1;
-                            return;
-                        }
-                    }
-                    result = lub(gs, m1.underlying(gs), t2.underlying(gs));
                 });
             ENFORCE(result != nullptr);
             return result;
@@ -503,6 +494,24 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             return OrType::make_shared(t1, t2);
         } else {
             return lub(gs, t1, und);
+        }
+    }
+
+    {
+        if (isa_type<MetaType>(t1) || isa_type<MetaType>(t2)) {
+            auto *m1 = cast_type<MetaType>(t1);
+            auto *m2 = cast_type<MetaType>(t2);
+            if (m1 != nullptr && m2 != nullptr && Types::equiv(gs, m1->wrapped, m2->wrapped)) {
+                return t1;
+            }
+
+            // This is weird. We used to treat the "underlying" of a MetaType as `Object`.
+            // We should probably _not_ treat it like it has an underlying, to catch mistakes where
+            // people treat runtime types as values, but that's a battle for another day.
+            // We should at least treat it like T::Types::Base, not Object, but again: another day.
+            auto m1underlying = m1 == nullptr ? t1 : Types::Object();
+            auto m2underlying = m2 == nullptr ? t2 : Types::Object();
+            return lub(gs, m1underlying, m2underlying);
         }
     }
 
@@ -830,15 +839,6 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     } else {
                         result = Types::bottom();
                     }
-                },
-                [&](const MetaType &m1) {
-                    auto *m2 = cast_type<MetaType>(t2);
-                    ENFORCE(m2 != nullptr);
-                    if (Types::equiv(gs, m1.wrapped, m2->wrapped)) {
-                        result = t1;
-                    } else {
-                        result = Types::bottom();
-                    }
                 });
             ENFORCE(result != nullptr);
             return result;
@@ -855,6 +855,18 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         if (Types::isSubType(gs, t2, t1)) {
             return t2;
         } else {
+            return Types::bottom();
+        }
+    }
+
+    {
+        if (isa_type<MetaType>(t1) || isa_type<MetaType>(t2)) {
+            auto *m1 = cast_type<MetaType>(t1);
+            auto *m2 = cast_type<MetaType>(t2);
+            if (m1 != nullptr && m2 != nullptr && Types::equiv(gs, m1->wrapped, m2->wrapped)) {
+                return t1;
+            }
+
             return Types::bottom();
         }
     }
@@ -1044,10 +1056,50 @@ bool classSymbolIsAsGoodAs(const GlobalState &gs, ClassOrModuleRef c1, ClassOrMo
     return c1 == c2 || c1.data(gs)->derivesFrom(gs, c2);
 }
 
+bool isModuleSingletonClass(const GlobalState &gs, ClassOrModuleRef sym) {
+    auto maybeAttachedClass = sym.data(gs)->attachedClass(gs);
+    return maybeAttachedClass.exists() && maybeAttachedClass.data(gs)->isModule();
+}
+
+string moduleSingletonError(string_view tp) {
+    return ErrorColors::format(
+        "`{}` represents a module singleton class type, which is a `{}`, not a `{}`. See the `{}` docs.", tp, "Module",
+        "Class", "T.class_of");
+}
+
 void doesNotDeriveFrom(const GlobalState &gs, ErrorSection::Collector &errorDetailsCollector, ClassOrModuleRef left,
                        ClassOrModuleRef right) {
     auto subCollector = errorDetailsCollector.newCollector();
-    auto message = ErrorColors::format("`{}` does not derive from `{}`", left.show(gs), right.show(gs));
+    auto message = right == Symbols::Class() && isModuleSingletonClass(gs, left)
+                       ? moduleSingletonError(left.show(gs))
+                       : ErrorColors::format("`{}` does not derive from `{}`", left.show(gs), right.show(gs));
+    subCollector.message = message;
+    errorDetailsCollector.addErrorDetails(move(subCollector));
+}
+
+void checkForAttachedClassHint(const GlobalState &gs, ErrorSection::Collector &errorDetailsCollector,
+                               const ClassType left, const SelfTypeParam right) {
+    if (right.definition.name(gs) != Names::Constants::AttachedClass()) {
+        return;
+    }
+
+    auto attachedClass = left.symbol.data(gs)->lookupSingletonClass(gs);
+    if (!attachedClass.exists()) {
+        return;
+    }
+
+    if (attachedClass != right.definition.owner(gs).asClassOrModuleRef()) {
+        return;
+    }
+
+    auto gotStr = left.show(gs);
+    auto expectedStr = right.show(gs);
+    auto subCollector = errorDetailsCollector.newCollector();
+    auto message = ErrorColors::format(
+        "`{}` is incompatible with `{}` because when this method is called on a subclass `{}` will represent a more "
+        "specific subclass, meaning `{}` will not be specific enough. See https://sorbet.org/docs/attached-class for "
+        "more.",
+        gotStr, expectedStr, expectedStr, gotStr);
     subCollector.message = message;
     errorDetailsCollector.addErrorDetails(move(subCollector));
 }
@@ -1165,8 +1217,15 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             if (!isSelfTypeT1) {
                 auto self2 = cast_type_nonnull<SelfTypeParam>(t2);
                 if (auto *lambdaParam = cast_type<LambdaParam>(self2.definition.resultType(gs))) {
-                    return Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode,
-                                                           errorDetailsCollector);
+                    auto result = Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode,
+                                                                  errorDetailsCollector);
+                    if constexpr (shouldAddErrorDetails) {
+                        if (!result && isa_type<ClassType>(t1)) {
+                            checkForAttachedClassHint(gs, errorDetailsCollector, cast_type_nonnull<ClassType>(t1),
+                                                      self2);
+                        }
+                    }
+                    return result;
                 } else {
                     return false;
                 }
@@ -1201,6 +1260,44 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                 return false;
             }
             return true;
+        }
+    }
+
+    {
+        if (isa_type<MetaType>(t1) || isa_type<MetaType>(t2)) {
+            auto *m1 = cast_type<MetaType>(t1);
+            auto *m2 = cast_type<MetaType>(t2);
+            if (m1 != nullptr && m2 != nullptr) {
+                // TODO(jez) Should this actually run under EmptyFrozenConstraint? Leaving for backwards
+                // compatibility, but maybe we should do this under the `constr` that's in scope.
+                return Types::equivUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, m1->wrapped, m2->wrapped,
+                                                   errorDetailsCollector);
+            }
+
+            if (m2 == nullptr) {
+                auto res = isSubTypeUnderConstraintSingle(gs, constr, mode, Types::Object(), t2, errorDetailsCollector);
+
+                if constexpr (shouldAddErrorDetails) {
+                    auto subCollectorLine1 = errorDetailsCollector.newCollector();
+                    subCollectorLine1.message = ErrorColors::format(
+                        "It looks like you're using Sorbet type syntax in a runtime value position.");
+                    errorDetailsCollector.addErrorDetails(move(subCollectorLine1));
+                    auto subCollectorLine2 = errorDetailsCollector.newCollector();
+                    subCollectorLine2.message =
+                        ErrorColors::format("If you really mean to use types as values, use `{}` "
+                                            "to hide the type syntax from the type checker.",
+                                            "T::Utils.coerce");
+                    errorDetailsCollector.addErrorDetails(move(subCollectorLine2));
+                    auto subCollectorLine3 = errorDetailsCollector.newCollector();
+                    subCollectorLine3.message = ErrorColors::format(
+                        "Otherwise, you're likely using the type system in a way it wasn't meant to be used.");
+                    errorDetailsCollector.addErrorDetails(move(subCollectorLine3));
+                }
+
+                return res;
+            }
+
+            return false;
         }
     }
 
@@ -1322,15 +1419,12 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                 return false;
             }
             const auto &c1 = cast_type_nonnull<ClassType>(t1);
-            auto maybeAttachedClass = c1.symbol.data(gs)->attachedClass(gs);
-            if (!maybeAttachedClass.exists() || !maybeAttachedClass.data(gs)->isModule()) {
+            if (!isModuleSingletonClass(gs, c1.symbol)) {
                 return false;
             }
 
             auto subCollector = errorDetailsCollector.newCollector();
-            subCollector.message = ErrorColors::format(
-                "`{}` represents a module singleton class type, which is a `{}`, not a `{}`. See the `{}` docs.",
-                t1.show(gs), "Module", "Class", "T.class_of");
+            subCollector.message = moduleSingletonError(t1.show(gs));
             errorDetailsCollector.addErrorDetails(move(subCollector));
         }
 
@@ -1339,6 +1433,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
 
     if (is_proxy_type(t1)) {
         if (is_proxy_type(t2)) {
+            // both are proxy
             bool result;
             // TODO: simply compare as memory regions
             typecase(
@@ -1438,29 +1533,15 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
 
                     auto &l2 = cast_type_nonnull<FloatLiteralType>(t2);
                     result = l1.equals(l2);
-                },
-                [&](const MetaType &m1) {
-                    auto *m2 = cast_type<MetaType>(t2);
-                    if (m2 == nullptr) {
-                        // is a literal a subtype of a different kind of proxy
-                        result = false;
-                        return;
-                    }
-
-                    // TODO(jez) Should this actually run under EmptyFrozenConstraint? Leaving for
-                    // backwards compatibility, but maybe we should do this under the `constr`
-                    // that's in scope.
-                    result = Types::equivUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, m1.wrapped,
-                                                       m2->wrapped, errorDetailsCollector);
                 });
             return result;
-            // both are proxy
         } else {
             // only 1st is proxy
             TypePtr und = t1.underlying(gs);
             return isSubTypeUnderConstraintSingle(gs, constr, mode, und, t2, errorDetailsCollector);
         }
     } else if (is_proxy_type(t2)) {
+        // only 2nd is proxy
         // non-proxies are never subtypes of proxies.
         return false;
     } else {

@@ -239,8 +239,8 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
         case Tag::Literal: {
             auto *a = reinterpret_cast<const Literal *>(tree);
             auto *b = reinterpret_cast<const Literal *>(other);
-            auto aType = a->value;
-            auto bType = b->value;
+            const auto &aType = a->value;
+            const auto &bType = b->value;
             if (aType.tag() != bType.tag()) {
                 return false;
             }
@@ -277,12 +277,17 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
         case Tag::ConstantLit: {
             auto *a = reinterpret_cast<const ConstantLit *>(tree);
             auto *b = reinterpret_cast<const ConstantLit *>(other);
-            if (a->symbol != b->symbol) {
+            if (a->symbol() != b->symbol()) {
                 return false;
             }
-            if (a->original && b->original) {
-                return structurallyEqual(gs, avoid, a->original, b->original, file);
-            } else if (!a->original && !b->original) {
+            if (a->original() && b->original()) {
+                auto &alit = *a->original();
+                auto &blit = *b->original();
+                if (alit.cnst != blit.cnst) {
+                    return false;
+                }
+                return structurallyEqual(gs, avoid, alit.scope, blit.scope, file);
+            } else if (!a->original() && !b->original()) {
                 // This occurs when the constant is created using MK::Constant instead of MK::UnresolvedConstant
                 // (original points to the UnresolvedConstantLit that created this ConstantLit)
                 return true;
@@ -313,6 +318,10 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
             auto *a = reinterpret_cast<const RuntimeMethodDefinition *>(tree);
             auto *b = reinterpret_cast<const RuntimeMethodDefinition *>(other);
             return a->name == b->name && a->isSelfMethod == b->isSelfMethod;
+        }
+
+        case Tag::Self: {
+            return true;
         }
     }
 }

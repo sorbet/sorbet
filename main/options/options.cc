@@ -450,6 +450,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("experimental-ruby3-keyword-args",
                                  "Enforce use of new (Ruby 3.0-style) keyword arguments. (incomplete and experimental)",
                                  cxxopts::value<bool>());
+    options.add_options(section)("enable-experimental-rbs-signatures",
+                                 "Enable experimental support for RBS signatures as inline comments");
     options.add_options(section)("enable-experimental-requires-ancestor",
                                  "Enable experimental `requires_ancestor` annotation");
     options.add_options(section)("uniquely-defined-behavior",
@@ -861,11 +863,11 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("allowed-extension") > 0) {
+            // Any use of `--allowed-extension` overrides the default.
+            opts.allowedExtensions.clear();
+
             const auto &exts = raw["allowed-extension"].as<vector<string>>();
             opts.allowedExtensions.insert(exts.begin(), exts.end());
-        } else {
-            opts.allowedExtensions.emplace(".rb");
-            opts.allowedExtensions.emplace(".rbi");
         }
 
         if (raw.count("ignore") > 0) {
@@ -913,6 +915,14 @@ void readOptions(Options &opts,
         opts.inputFileNames.erase(unique(opts.inputFileNames.begin(), opts.inputFileNames.end()),
                                   opts.inputFileNames.end());
 
+        opts.cacheDir = raw["cache-dir"].as<string>();
+
+        opts.rbsSignaturesEnabled = raw["enable-experimental-rbs-signatures"].as<bool>();
+        if (opts.rbsSignaturesEnabled && !opts.cacheDir.empty()) {
+            logger->error("--enable-experimental-rbs-signatures is incompatible with --cache-dir. Ignoring cache");
+            opts.cacheDir = "";
+        }
+
         opts.requiresAncestorEnabled = raw["enable-experimental-requires-ancestor"].as<bool>();
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
@@ -950,7 +960,6 @@ void readOptions(Options &opts,
 
         opts.lspErrorCap = raw["lsp-error-cap"].as<int>();
 
-        opts.cacheDir = raw["cache-dir"].as<string>();
         opts.maxCacheSizeBytes = raw["max-cache-size-bytes"].as<size_t>();
         if (!extractPrinters(raw, opts, logger)) {
             throw EarlyReturnWithCode(1);

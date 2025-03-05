@@ -58,7 +58,9 @@
       "server-status",
       "lsp-typed-level",
       "go-to-def",
+      "hover",
       "autocompletion",
+      "references",
       "code-actions",
       "outline",
       "doc-comments",
@@ -70,7 +72,8 @@
       "tuples",
       "shapes",
       "overloads",
-      "requires-ancestor"
+      "requires-ancestor",
+      "rbs-support"
     ]
   },
   "talks": {

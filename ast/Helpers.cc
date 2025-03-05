@@ -60,13 +60,13 @@ bool BehaviorHelpers::checkClassDefinesBehavior(const ExpressionPtr &expr) {
 bool BehaviorHelpers::checkClassDefinesBehavior(const ast::ClassDef &klass) {
     for (auto &ancst : klass.ancestors) {
         auto cnst = ast::cast_tree<ast::ConstantLit>(ancst);
-        if (cnst && cnst->original != nullptr) {
+        if (cnst && cnst->original() != nullptr) {
             return true;
         }
     }
     for (auto &ancst : klass.singletonAncestors) {
         auto cnst = ast::cast_tree<ast::ConstantLit>(ancst);
-        if (cnst && cnst->original != nullptr) {
+        if (cnst && cnst->original() != nullptr) {
             return true;
         }
     }

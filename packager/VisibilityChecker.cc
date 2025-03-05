@@ -257,7 +257,7 @@ public:
         }
 
         auto lit = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
-        if (lit == nullptr || lit->symbol == core::Symbols::StubModule()) {
+        if (lit == nullptr || lit->symbol() == core::Symbols::StubModule()) {
             // We don't raise an explicit error here, as this is one of two cases:
             //   1. Export is given a non-constant argument
             //   2. The argument failed to resolve
@@ -265,17 +265,18 @@ public:
             return;
         }
 
-        if (lit->symbol.isClassOrModule()) {
-            auto sym = lit->symbol.asClassOrModuleRef();
-            checkExportPackage(ctx, send.loc, lit->symbol);
+        auto litSymbol = lit->symbol();
+        if (litSymbol.isClassOrModule()) {
+            auto sym = litSymbol.asClassOrModuleRef();
+            checkExportPackage(ctx, send.loc, litSymbol);
             recursiveExportSymbol(ctx, true, sym);
 
             // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would be
             // great to remove this, but this was the behavior of the previous packager implementation.
             exportParentNamespace(ctx, sym.data(ctx)->owner);
-        } else if (lit->symbol.isFieldOrStaticField()) {
-            auto sym = lit->symbol.asFieldRef();
-            checkExportPackage(ctx, send.loc, lit->symbol);
+        } else if (litSymbol.isFieldOrStaticField()) {
+            auto sym = litSymbol.asFieldRef();
+            checkExportPackage(ctx, send.loc, litSymbol);
             sym.data(ctx)->flags.isExported = true;
 
             // When exporting a field, we also export its parent namespace. This is a bit of a hack, and it would be
@@ -283,7 +284,7 @@ public:
             exportParentNamespace(ctx, sym.data(ctx)->owner);
         } else {
             std::string_view kind = ""sv;
-            switch (lit->symbol.kind()) {
+            switch (litSymbol.kind()) {
                 case core::SymbolRef::Kind::ClassOrModule:
                 case core::SymbolRef::Kind::FieldOrStaticField:
                     ENFORCE(false, "ClassOrModule and FieldOrStaticField marked not exportable");
@@ -304,8 +305,8 @@ public:
 
             if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Only classes, modules, or constants may be exported");
-                e.addErrorLine(lit->symbol.loc(ctx), "Defined here");
-                e.addErrorNote("`{}` is a `{}`", lit->symbol.show(ctx), kind);
+                e.addErrorLine(litSymbol.loc(ctx), "Defined here");
+                e.addErrorNote("`{}` is a `{}`", litSymbol.show(ctx), kind);
             }
         }
     }
@@ -369,11 +370,12 @@ public:
 
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
-        if (!lit.symbol.isClassOrModule() && !lit.symbol.isFieldOrStaticField()) {
+        auto litSymbol = lit.symbol();
+        if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
             return;
         }
 
-        auto loc = lit.symbol.loc(ctx);
+        auto loc = litSymbol.loc(ctx);
 
         auto otherFile = loc.file();
         if (!otherFile.exists() || !otherFile.data(ctx).isPackaged()) {
@@ -382,9 +384,9 @@ public:
 
         // If the imported symbol comes from the test namespace, we must also be in the test namespace.
         if (otherFile.data(ctx).isPackagedTest() && !this->insideTestFile) {
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedTestOnlyName)) {
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                 e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
-                            lit.symbol.show(ctx));
+                            litSymbol.show(ctx));
             }
             return;
         }
@@ -398,18 +400,18 @@ public:
         }
 
         bool isExported = false;
-        if (lit.symbol.isClassOrModule()) {
-            isExported = lit.symbol.asClassOrModuleRef().data(ctx)->flags.isExported;
-        } else if (lit.symbol.isFieldOrStaticField()) {
-            isExported = lit.symbol.asFieldRef().data(ctx)->flags.isExported;
+        if (litSymbol.isClassOrModule()) {
+            isExported = litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
+        } else if (litSymbol.isFieldOrStaticField()) {
+            isExported = litSymbol.asFieldRef().data(ctx)->flags.isExported;
         }
 
         // Did we use a constant that wasn't exported?
         if (!isExported && !db.allowRelaxedPackagerChecksFor(this->package.mangledName())) {
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedPackagePrivateName)) {
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                e.setHeader("`{}` resolves but is not exported from `{}`", lit.symbol.show(ctx), pkg.show(ctx));
-                auto definedHereLoc = lit.symbol.loc(ctx);
+                e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
+                auto definedHereLoc = litSymbol.loc(ctx);
                 if (definedHereLoc.file().data(ctx).isRBI()) {
                     e.addErrorSection(core::ErrorSection(
                         core::ErrorColors::format(
@@ -420,7 +422,7 @@ public:
                     e.addErrorLine(definedHereLoc, "Defined here");
                 }
 
-                auto symToExport = lit.symbol;
+                auto symToExport = litSymbol;
                 auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
                 if (enumClass.exists()) {
                     symToExport = enumClass;
@@ -439,13 +441,71 @@ public:
         auto importType = this->package.importsPackage(otherPackage);
         if (!importType.has_value()) {
             // We failed to import the package that defines the symbol
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::MissingImport)) {
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                e.setHeader("`{}` resolves but its package is not imported", lit.symbol.show(ctx));
                 bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
-                e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
-                    e.addAutocorrect(std::move(exp.value()));
+                auto strictDepsLevel = this->package.strictDependenciesLevel();
+                auto importStrictDepsLevel = pkg.strictDependenciesLevel();
+                bool layeringViolation = false;
+                bool strictDependenciesTooLow = false;
+                if (!isTestImport && db.enforceLayering()) {
+                    layeringViolation =
+                        strictDepsLevel.has_value() &&
+                        strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&
+                        this->package.causesLayeringViolation(db, pkg);
+                    strictDependenciesTooLow =
+                        importStrictDepsLevel.has_value() &&
+                        importStrictDepsLevel.value().first < this->package.minimumStrictDependenciesLevel();
+                }
+                // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
+                // layering/strict_dependencies issues.
+                if (layeringViolation && strictDependenciesTooLow) {
+                    e.setHeader(
+                        "`{}` resolves but its package is not imported. However, it cannot be automatically imported "
+                        "because importing it would cause a layering violation and its `{}` is too low",
+                        lit.symbol().show(ctx), "strict_dependencies");
+                } else if (layeringViolation) {
+                    e.setHeader("`{}` resolves but its package is not imported. However, it cannot be automatically "
+                                "imported because importing it would cause a layering violation",
+                                lit.symbol().show(ctx));
+                } else if (strictDependenciesTooLow) {
+                    e.setHeader("`{}` resolves but its package is not imported. However, it cannot be automatically "
+                                "imported because its `{}` is too low",
+                                lit.symbol().show(ctx), "strict_dependencies");
+                } else {
+                    e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
+                    e.addErrorLine(pkg.declLoc(), "Exported from package here");
+                    if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
+                        e.addAutocorrect(std::move(exp.value()));
+                        if (!db.errorHint().empty()) {
+                            e.addErrorNote("{}", db.errorHint());
+                        }
+                    }
+                }
+
+                if (layeringViolation) {
+                    ENFORCE(pkg.layer().has_value(), "causesLayeringViolation should return false if layer is not set");
+                    ENFORCE(this->package.layer().has_value(),
+                            "causesLayeringViolation should return false if layer is not set");
+                    e.addErrorLine(
+                        core::Loc(pkg.declLoc().file(), pkg.layer().value().second),
+                        "Package `{}` must be at most layer `{}` (to match package `{}`) but is currently layer `{}`",
+                        pkg.show(ctx), this->package.layer().value().first.show(ctx), this->package.show(ctx),
+                        pkg.layer().value().first.show(ctx));
+                }
+
+                if (strictDependenciesTooLow) {
+                    ENFORCE(importStrictDepsLevel.has_value(),
+                            "strictDependenciesTooLow should be false if strict_dependencies level is not set");
+                    auto requiredStrictDepsLevel =
+                        fmt::format("strict_dependencies '{}'", core::packages::strictDependenciesLevelToString(
+                                                                    this->package.minimumStrictDependenciesLevel()));
+                    auto currentStrictDepsLevel = fmt::format(
+                        "strict_dependencies '{}'",
+                        core::packages::strictDependenciesLevelToString(importStrictDepsLevel.value().first));
+                    e.addErrorLine(core::Loc(pkg.declLoc().file(), importStrictDepsLevel.value().second),
+                                   "`{}` must be at least `{}` but is currently `{}`", pkg.show(ctx),
+                                   requiredStrictDepsLevel, currentStrictDepsLevel);
                 }
 
                 if (!ctx.file.data(ctx).isPackaged()) {
@@ -454,15 +514,13 @@ public:
                         "but must still respect its enclosing package's imports.",
                         "# packaged: false");
                 }
-
-                if (!db.errorHint().empty()) {
-                    e.addErrorNote("{}", db.errorHint());
-                }
             }
         } else if (*importType == core::packages::ImportType::Test && !this->insideTestFile) {
+            // TODO(neil): we need to do the above "can't import if layering violation/strict_deps violation" check here
+            // too
             // We used a symbol from a `test_import` in a non-test context
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedTestOnlyName)) {
-                e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", lit.symbol.show(ctx));
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                 if (auto exp = this->package.addImport(ctx, pkg, false)) {
                     e.addAutocorrect(std::move(exp.value()));
@@ -550,12 +608,12 @@ public:
             return;
         }
 
-        if (lit->symbol == core::Symbols::StubModule()) {
+        if (lit->symbol() == core::Symbols::StubModule()) {
             // An error was already reported in resolver when the StubModule was created.
             return;
         }
 
-        this->imports.emplace_back(lit->symbol, send.loc);
+        this->imports.emplace_back(lit->symbol(), send.loc);
     }
 
     void checkImports(core::Context ctx) {

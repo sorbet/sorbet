@@ -27,7 +27,7 @@ This is one of three docs aimed at helping answer common questions about Sorbet:
 1.  [Frequently Asked Questions](faq.md)
 1.  [Sorbet Error Reference](error-reference.md) (this doc)
 
-This page contains tips and tricks for common errors from `srb`.
+This page contains tips and tricks for common errors from Sorbet.
 
 ## 1001
 
@@ -594,6 +594,33 @@ class Info < T::struct
   end
 end
 ```
+
+## 3550
+
+> This error is specific to RBS support when using the
+> `--enable-experimental-rbs-signatures` flag.
+
+This error is raised when a RBS signature comment contains a syntax error. See
+the
+[RBS syntax reference](https://github.com/ruby/rbs/blob/master/docs/syntax.md)
+for more details on the RBS syntax.
+
+## 3551
+
+> This error is specific to RBS support when using the
+> `--enable-experimental-rbs-signatures` flag.
+
+This error is raised when a RBS signature comment contains a feature not
+supported by Sorbet. See
+[RBS support limitations](rbs-support.md#unsupported-features) for more details.
+
+## 3552
+
+> This error is specific to RBS support when using the
+> `--enable-experimental-rbs-signatures` flag.
+
+This error is raised when a RBS signature comment has more parameters than the
+method definition it represents.
 
 ## 3702
 

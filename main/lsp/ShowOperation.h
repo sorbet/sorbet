@@ -27,6 +27,20 @@ public:
         Rename,
         MoveMethod,
     };
+
+    // Copy and move construction and assignment is explicitly deleted here
+    // because the destructor of ShowOperation sends LSP notifications.
+    // Allowing copies or moves will often involve making temporaries, and
+    // those temporaries will have their destructors run, causing notifications
+    // to be sent unexpectedly. There's a reasonable argument for implementing
+    // move assignment and a move constructor, but we would need to modify
+    // ShowOperation to know that it had been moved out of, and for our uses
+    // it's not worth the effort.
+    ShowOperation(const ShowOperation &other) = delete;
+    ShowOperation &operator=(const ShowOperation &other) = delete;
+    ShowOperation(ShowOperation &&other) = delete;
+    ShowOperation &operator=(ShowOperation &&other) = delete;
+
     ShowOperation(const LSPConfiguration &config, Kind kind);
     ~ShowOperation();
 };

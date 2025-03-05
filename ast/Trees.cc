@@ -51,6 +51,7 @@ namespace sorbet::ast {
         CASE_STATEMENT(CASE_BODY, Block)                   \
         CASE_STATEMENT(CASE_BODY, InsSeq)                  \
         CASE_STATEMENT(CASE_BODY, RuntimeMethodDefinition) \
+        CASE_STATEMENT(CASE_BODY, Self)                    \
     }
 
 void ExpressionPtr::deleteTagged(Tag tag, void *ptr) noexcept {
@@ -86,12 +87,26 @@ string ExpressionPtr::showRaw(const core::GlobalState &gs, int tabs) const {
 #undef SHOW_RAW
 }
 
+namespace {
+template <typename T> struct LocGetter {
+    static core::LocOffsets loc(void *ptr) {
+        return reinterpret_cast<T *>(ptr)->loc;
+    }
+};
+
+template <> struct LocGetter<ConstantLit> {
+    static core::LocOffsets loc(void *ptr) {
+        return reinterpret_cast<ConstantLit *>(ptr)->loc();
+    }
+};
+} // namespace
+
 core::LocOffsets ExpressionPtr::loc() const {
     auto *ptr = get();
 
     ENFORCE(ptr != nullptr);
 
-#define CASE(name) return reinterpret_cast<name *>(ptr)->loc;
+#define CASE(name) return LocGetter<name>::loc(ptr);
     GENERATE_TAG_SWITCH(tag(), CASE)
 #undef CASE
 }
@@ -107,10 +122,7 @@ string ExpressionPtr::toStringWithTabs(const core::GlobalState &gs, int tabs) co
 }
 
 bool ExpressionPtr::isSelfReference() const {
-    if (auto local = cast_tree<Local>(*this)) {
-        return local->localVariable == core::LocalVariable::selfVariable();
-    }
-    return false;
+    return isa_tree<Self>(*this);
 }
 
 void ExpressionPtr::resetToEmpty(EmptyTree *expr) noexcept {
@@ -121,7 +133,7 @@ void ExpressionPtr::resetToEmpty(EmptyTree *expr) noexcept {
 bool isa_reference(const ExpressionPtr &what) {
     return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<RestArg>(what) ||
            isa_tree<KeywordArg>(what) || isa_tree<OptionalArg>(what) || isa_tree<BlockArg>(what) ||
-           isa_tree<ShadowArg>(what);
+           isa_tree<ShadowArg>(what) || isa_tree<Self>(what);
 }
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
@@ -219,6 +231,7 @@ Rescue::Rescue(core::LocOffsets loc, ExpressionPtr body, RESCUE_CASE_store rescu
 
 Local::Local(core::LocOffsets loc, core::LocalVariable localVariable1) : loc(loc), localVariable(localVariable1) {
     categoryCounterInc("trees", "local");
+    ENFORCE(localVariable != core::LocalVariable::selfVariable(), "use a Self node");
     _sanityCheck();
 }
 
@@ -295,45 +308,51 @@ UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr
     _sanityCheck();
 }
 
-ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, ExpressionPtr original)
-    : loc(loc), symbol(symbol), original(std::move(original)) {
+ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol) : storage(loc, symbol) {
     categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();
 }
 
-optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolvedPath(core::Context ctx) const {
-    if (this->symbol != core::Symbols::StubModule()) {
+ConstantLit::ConstantLit(core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original)
+    : storage(symbol, std::move(original)) {
+    categoryCounterInc("trees", "resolvedconstantlit");
+    _sanityCheck();
+}
+
+optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolvedPath(const core::Context ctx) const {
+    if (this->symbol() != core::Symbols::StubModule()) {
         return nullopt;
     }
+    ENFORCE(this->resolutionScopes() != nullptr && !this->resolutionScopes()->empty());
 
     vector<core::NameRef> namesFailedToResolve;
     auto *nested = this;
     {
         while (true) {
-            if (nested->resolutionScopes == nullptr || nested->resolutionScopes->empty()) [[unlikely]] {
+            if (nested->resolutionScopes() == nullptr || nested->resolutionScopes()->empty()) [[unlikely]] {
                 ENFORCE(false);
-                fatalLogger->error(R"(msg="Bad fullUnresolvedPath" loc="{}")", ctx.locAt(this->loc).showRaw(ctx));
+                bool hasScopes = nested->resolutionScopes() != nullptr;
+                fatalLogger->error(R"(msg="Bad fullUnresolvedPath" loc="{}" hasScopes={})",
+                                   ctx.locAt(this->loc()).showRaw(ctx), hasScopes);
                 fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
             }
 
-            if (nested->resolutionScopes->front().exists()) {
+            if (nested->resolutionScopes()->front().exists()) {
                 break;
             }
 
-            auto orig = cast_tree<UnresolvedConstantLit>(nested->original);
-            ENFORCE(orig);
-            namesFailedToResolve.emplace_back(orig->cnst);
-            nested = ast::cast_tree<ast::ConstantLit>(orig->scope);
+            auto &orig = *nested->original();
+            namesFailedToResolve.emplace_back(orig.cnst);
+            nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
             ENFORCE(nested);
-            ENFORCE(nested->symbol == core::Symbols::StubModule());
-            ENFORCE(!nested->resolutionScopes->empty());
+            ENFORCE(nested->symbol() == core::Symbols::StubModule());
+            ENFORCE(!nested->resolutionScopes()->empty());
         }
-        auto orig = cast_tree<UnresolvedConstantLit>(nested->original);
-        ENFORCE(orig);
-        namesFailedToResolve.emplace_back(orig->cnst);
+        auto &orig = *nested->original();
+        namesFailedToResolve.emplace_back(orig.cnst);
         absl::c_reverse(namesFailedToResolve);
     }
-    auto prefix = nested->resolutionScopes->front();
+    auto prefix = nested->resolutionScopes()->front();
     return make_pair(prefix, move(namesFailedToResolve));
 }
 
@@ -367,6 +386,11 @@ InsSeq::InsSeq(core::LocOffsets loc, STATS_store stats, ExpressionPtr expr)
 RuntimeMethodDefinition::RuntimeMethodDefinition(core::LocOffsets loc, core::NameRef name, bool isSelfMethod)
     : loc(loc), name(name), isSelfMethod(isSelfMethod) {
     categoryCounterInc("trees", "runtimemethoddefinition");
+    _sanityCheck();
+}
+
+Self::Self(core::LocOffsets loc) : loc(loc) {
+    categoryCounterInc("trees", "self");
     _sanityCheck();
 }
 
@@ -706,10 +730,10 @@ string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) con
 }
 
 string ConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    if (symbol.exists() && symbol != core::Symbols::StubModule()) {
-        return this->symbol.showFullName(gs);
+    if (symbol().exists() && symbol() != core::Symbols::StubModule()) {
+        return this->symbol().showFullName(gs);
     }
-    return "Unresolved: " + this->original.toStringWithTabs(gs, tabs);
+    return "Unresolved: " + this->original()->toStringWithTabs(gs, tabs);
 }
 
 string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) const {
@@ -717,17 +741,17 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) const {
 
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "symbol = ({} {})\n", this->symbol.showKind(gs),
-                   this->symbol.showFullName(gs));
+    fmt::format_to(std::back_inserter(buf), "symbol = ({} {})\n", this->symbol().showKind(gs),
+                   this->symbol().showFullName(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "orig = {}\n",
-                   this->original ? this->original.showRaw(gs, tabs + 1) : "nullptr");
+                   this->original() ? this->original()->showRaw(gs, tabs + 1) : "nullptr");
     // If resolutionScopes isn't null, it should not be empty.
-    ENFORCE(resolutionScopes == nullptr || !resolutionScopes->empty());
-    if (resolutionScopes != nullptr && !resolutionScopes->empty()) {
+    ENFORCE(resolutionScopes() == nullptr || !resolutionScopes()->empty());
+    if (resolutionScopes() != nullptr && !resolutionScopes()->empty()) {
         printTabs(buf, tabs + 1);
         fmt::format_to(std::back_inserter(buf), "resolutionScopes = [{}]\n",
-                       fmt::map_join(*this->resolutionScopes, ", ", [&](auto sym) { return sym.showFullName(gs); }));
+                       fmt::map_join(*this->resolutionScopes(), ", ", [&](auto sym) { return sym.showFullName(gs); }));
     }
     printTabs(buf, tabs);
 
@@ -994,6 +1018,14 @@ std::string RuntimeMethodDefinition::toStringWithTabs(const core::GlobalState &g
 
 std::string RuntimeMethodDefinition::showRaw(const core::GlobalState &gs, int tabs) const {
     return this->toStringWithTabs(gs, tabs);
+}
+
+std::string Self::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
+    return "<self>";
+}
+
+std::string Self::showRaw(const core::GlobalState &gs, int tabs) const {
+    return "Self";
 }
 
 const ast::Block *Send::block() const {
@@ -1459,6 +1491,10 @@ string BlockArg::nodeName() const {
 
 string RuntimeMethodDefinition::nodeName() const {
     return "RuntimeMethodDefinition";
+}
+
+string Self::nodeName() const {
+    return "Self";
 }
 
 ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};

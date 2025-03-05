@@ -3,7 +3,7 @@ id: static
 title: Enabling Static Checks
 ---
 
-This doc will cover how to enable and disable the **static checks** that `srb`
+This doc will cover how to enable and disable the **static checks** that Sorbet
 reports. Specifically, we'll look at how to toggle these checks...
 
 - ...within an entire **file**.
@@ -18,7 +18,7 @@ slap on a quick warning label:
 
 ## File-level granularity: strictness levels
 
-When run at the command line, `srb` roughly works like this:
+When run at the command line, Sorbet roughly works like this:
 
 1.  Read, parse, and analyze every Ruby file in a project.
 2.  Generate a list of errors within the project.
@@ -27,7 +27,7 @@ When run at the command line, `srb` roughly works like this:
 However, in step (3), most kinds of errors are _silenced_ by default, instead of
 being reported. To opt into _more_ checks, we use `# typed:` **sigils**[^sigil].
 A `# typed:` sigil is a comment placed at the top of a Ruby file, indicating to
-`srb` which errors to report and which to silence. These are the available
+Sorbet which errors to report and which to silence. These are the available
 sigils, each defining a **strictness level**:
 
 <!-- prettier-ignore-start -->
@@ -81,8 +81,8 @@ Each strictness level reports all errors at lower levels, plus new errors:
   [`# typed: strong`](strong.md) for more information.
 
 To recap: adding one of these comments to the top of a Ruby file controls which
-errors `srb` reports or silences in that file. The strictness level only affects
-which errors are reported.
+errors Sorbet reports or silences in that file. The strictness level only
+affects which errors are reported.
 
 > **Note**: Method signatures in `# typed: false` files are _still parsed and
 > used_ by Sorbet if that method is called in other files. Specifically, adding
@@ -105,7 +105,7 @@ If you don't regenerate `hidden.rbi`, you are likely to encounter
 ## Method-level granularity: `sig`
 
 After enabling `# typed: true` in some files, we can opt individual methods into
-even more checks by adding signatures (or `sig`s) to them. For example `srb`
+even more checks by adding signatures (or `sig`s) to them. For example, Sorbet
 reports no errors in this file:
 
 ```ruby
@@ -140,7 +140,7 @@ log_env({timeout_len: 2000}, 'timeout_len') # => Expected `Symbol` but found `St
 In this example, we add a line like `sig {...}` above the `def log_env` line.
 This is a Sorbet method signature---it declares the parameter and return types
 of a method. By adding the `sig` to `log_env`, we opted this method into
-additional checks. Now `srb` reports this:
+additional checks. Now Sorbet reports this:
 
 ```plaintext
 Expected `Symbol` but found `String("timeout_len")` for argument `key`

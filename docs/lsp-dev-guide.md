@@ -102,12 +102,22 @@ whatever Sorbet you most recently built will be used.
 **Tips**:
 
 - By default, both of those are configured to drop a Sorbet debug log to the
-  current folder. In the log you will find the complete trace of the JSON RPC
-  methods sent between the client and server, as well as other debug logs.
+  current folder, using the `--debug-log-file` flag. In the log you will find
+  the complete trace of the JSON RPC methods sent between the client and server,
+  as well as other debug logs.
 
 - You can edit the language server launch settings to include `-vvv`, which will
   raise the log level to trace, which will show you literally every log (can be
   noisy, sometimes useful).
+
+- It can also be useful to have the language client log its view of the JSON RPC
+  methods, especially when debugging communication problems between client and
+  server.
+
+  The included VS Code configuration configures the protocol messages to show up
+  in the "Sorbet" window in the Output pane.
+
+  TODO: Client-side log configuration for Neovim client.
 
 - You can attach a debugger to a running LSP server launched this way. Find its
   PID and then use `lldb -p <PID>`.

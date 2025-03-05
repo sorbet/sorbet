@@ -24,6 +24,9 @@ void UndoState::recordEvictedState(ast::ParsedFile evictedIndexTree) {
 
 void UndoState::restore(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> &indexed,
                         UnorderedMap<int, ast::ParsedFile> &indexedFinalGS) {
+    // We should never apply this twice, as that would end up dropping the other GlobalState
+    ENFORCE(this->evictedGs != nullptr);
+
     // Replace evicted index trees.
     for (auto &entry : evictedIndexed) {
         indexed[entry.first] = move(entry.second);
@@ -35,17 +38,6 @@ void UndoState::restore(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFil
 
 const std::unique_ptr<core::GlobalState> &UndoState::getEvictedGs() {
     return evictedGs;
-}
-
-const ast::ParsedFile &UndoState::getIndexed(core::FileRef fref) const {
-    const auto id = fref.id();
-
-    auto treeEvictedIndexed = evictedIndexed.find(id);
-    if (treeEvictedIndexed != evictedIndexed.end()) {
-        return treeEvictedIndexed->second;
-    }
-
-    return dummyParsedFile;
 }
 
 } // namespace sorbet::realmain::lsp

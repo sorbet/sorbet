@@ -154,10 +154,10 @@ public:
     NameRef lookupNameConstant(std::string_view original) const;
 
     FileRef enterFile(std::string_view path, std::string_view source);
-    FileRef enterFile(const std::shared_ptr<File> &file);
-    FileRef enterNewFileAt(const std::shared_ptr<File> &file, FileRef id);
+    FileRef enterFile(std::shared_ptr<File> file);
+    FileRef enterNewFileAt(std::shared_ptr<File> file, FileRef id);
     FileRef reserveFileRef(std::string path);
-    void replaceFile(FileRef whatFile, const std::shared_ptr<File> &withWhat);
+    void replaceFile(FileRef whatFile, std::shared_ptr<File> withWhat);
     static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, FileRef fref);
     FileRef findFileByPath(std::string_view path) const;
 
@@ -324,6 +324,7 @@ public:
 
     std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> semanticExtensions;
 
+    bool rbsSignaturesEnabled = false;
     bool requiresAncestorEnabled = false;
 
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;

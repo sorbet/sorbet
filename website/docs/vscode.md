@@ -6,231 +6,458 @@ sidebar_label: Visual Studio Code
 
 The
 [Sorbet extension for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension)
-integrates with the Sorbet language server to provide IDE-like features for
-typed Ruby files.
+integrates with the [Sorbet language server](lsp.md) to provide IDE-like
+features for typed Ruby files.
 
-## Installing and enabling the Sorbet extension
+This doc covers certain VS Code-specific points, like how to install and
+configure the VS Code extension. Most of Sorbet's editor features are not VS
+Code-specific, and are documented in their own pages (see the "Editor Features"
+section of the page listing).
 
-Install the
-[Sorbet extension from the VS Code extension marketplace](https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension).
-Then, add the following configuration to your workspace's `settings.json`:
+## Installing and enabling the extension
 
-```JSON
-"sorbet.enabled": true
-```
+Install
+[the Sorbet extension](https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension)
+from the VS Code extension marketplace.
 
-The next time you open a Ruby file in the workspace, Sorbet will automatically
-try to run via the following command:
+As long as the current project has a [`sorbet/config`](cli.md#config-file) file,
+Sorbet should start automatically whenever a Ruby file is open. To check that
+Sorbet has started working, look for "**Sorbet: ...**" in the VS Code status
+bar.
 
-```bash
-bundle exec srb typecheck --lsp
-```
+As long as it does not say "Sorbet: Disabled," then Sorbet is working. See
+[Server Status](server-status.md) for more information on what the statuses like
+"Idle" mean.
 
-If needed, you can customize how the extension launches Sorbet via the
-`sorbet.lspConfigs` setting:
+![](/img/sorbet-idle.png)
 
-```json
-"sorbet.lspConfigs": [{
-    "id": "stable",
-    "name": "Sorbet",
-    "description": "Stable Sorbet Ruby IDE features",
-    "cwd": "${workspaceFolder}",
-    "command": [
-      "bundle",
-      "exec",
-      "srb",
-      "typecheck",
-      "--lsp"
-    ]
-}]
-```
+### Troubleshooting startup
 
-Once Sorbet is activated, it will display its status in VS Code's status line.
-For example, this is what you will see when Sorbet is busy typechecking your
-latest edits:
+#### I'm not seeing "Sorbet: ..." in the status bar
 
-![](/img/lsp/typechecking.gif)
+The extension is not active. Here are some steps to try:
 
-For the best experience, Sorbet requires
-[Watchman](https://facebook.github.io/watchman/), which listens for changes to
-the files on disk in addition to edits that happen to files open in the editor.
-For example, without Watchman installed, Sorbet will not detect when files have
-changed on disk due to things like changing the currently checked out branch.
+- Is a Ruby file open? The Sorbet extension does not activate until at least one
+  Ruby file is open.
 
-Sorbet simply requires that the `watchman` binary be somewhere visible on the
-`PATH` environment variable. There are installation instructions for various
-platforms in the
-[Watchman docs](https://facebook.github.io/watchman/docs/install.html).
-
-If you cannot install `watchman` to somewhere on the `PATH`, you can use the
-`--watchman-path=...` command line flag to `srb tc` to specify a path to the
-`watchman` binary.
-
-If you cannot install `watchman` at all, pass the `--disable-watchman` flag to
-`srb tc`. This will mean that Sorbet only reads the files from disk at startup,
-and afterwards only ever sees contents of files that have been opened or changed
-in the editor.
-
-You can use the `sorbet.lspConfigs` setting described above to have the VS Code
-extension always pass these command line flags when starting Sorbet.
-
-Also, watchman requires that watched projects either be version controlled (e.g.
-have a `.git` folder in the project root) or have a `.watchmanconfig` file at
-the root of the project. Without one of these, watchman will not be able to
-start successfully. See [LSP: A note on watchman](lsp.md#a-note-on-watchman) for
-more.
-
-## Features
-
-Live error squiggles for Sorbet typechecking errors
-([demo](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Bparams%28a%3A%20String%29.void%7D%0Adef%20foo%28a%29%3B%20end%0A%0Afoo%2810%29)):
-
-<img src="/img/lsp/errorsquiggle.png" width="75%"/>
-
-Type information and documentation on hover
-([demo](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0A%23%20Documentation%20strings%20can%20use%20_markdown_%0A%23%20*%20That%20includes%20*lists*!%0A%23%0A%23%20Tables%20also%20work%3A%0A%23%0A%23%20%7C%20Column%201%20%7C%20Column%202%20%7C%0A%23%20%7C%20-----%20%7C%20-----%20%7C%0A%23%20%7C%20True%20%20%20%7C%20*False*%20%20%20%7C%0Asig%20%7Breturns%28String%29%7D%0Adef%20my_function%0A%20%20%20%20%22%22%0Aend%0A%0A%0A%0A%0A%0A%0A%0A%0Amy_function%0A%23%20%5E%20hover%20here!)):
-
-<img src="/img/lsp/hover.png" width="50%"/>
-
-Go to definition / type definition
-([demo](https://sorbet.run/#%23%20typed%3A%20true%0A%0A%23%20Both%20lead%20here!%0Aclass%20MyClass%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20def%20foo%3B%20end%0Aend%0A%0Amy_class_instance%20%3D%20MyClass.new%0A%23%20%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%20go%20to%20type%20definition%0A%23%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%5E%5E%5E%5E%5E%5E%5E%20go%20to%20definition%0A)):
-
-<video autoplay muted loop width="35%" style="display:block;margin-left:auto;margin-right:auto;">
-    <source src="/img/lsp/go_to_def.mp4" type="video/mp4">
-
-    Sorry, your browser doesn't support embedded videos.
-
-</video>
-
-Find all references
-([demo](https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Parent%0A%20%20def%20foo%3B%20end%0Aend%0A%0Aclass%20NotParent%0A%20%20def%20foo%3B%20end%0Aend%0A%0Aclass%20Child1%20%3C%20Parent%3B%20end%0Aclass%20Child2%20%3C%20Parent%3B%20end%0A%0AParent.new.foo%0A%23%20%20%20%20%20%20%20%20%20%20%5E%5E%5E%20right%20click%20and%20%22Find%20All%20References%22%20here)):
-
-<img src="/img/lsp/references.png" width="75%"/>
-
-Autocomplete, including sig suggestion
-([demo](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0A%23%20V%20type%20'g'%20here%20and%20accept%20the%20'sig'%20autocomplete%20with%20tab%0Asi%0Adef%20foo%28a%2C%20b%29%0A%20%20%22%23%7Ba%7D%20%23%7Bb%7D%22%0Aend%0A)):
-
-<video autoplay muted loop width="70%" style="display:block;margin-left:auto;margin-right:auto;">
-    <source src="/img/lsp/autocomplete_sig.mp4" type="video/mp4">
-
-    Sorry, your browser doesn't support embedded videos.
-
-</video>
-
-Rename constants and methods
-([demo](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20Parent%0A%20%20%23%20%20%20%5E%20Rename%20me!%0A%20%20def%20foo%3B%20end%0A%20%20%23%20%20%20%5E%20Rename%20me!%0Aend%0A%0Aclass%20Klass%20%3C%20Parent%0A%20%20def%20foo%3B%20end%0Aend%0A%0AKlass.new.foo%0AParent.new.foo%0A)):
-
-<video autoplay muted loop width="30%" style="display:block;margin-left:auto;margin-right:auto;">
-    <source src="/img/lsp/rename.mp4" type="video/mp4">
-
-    Sorry, your browser doesn't support embedded videos.
-
-</video>
-
-Quick fixes (autocorrects) on errors
-([demo](https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Breakfast%3B%20end%0A%0ABreekfast.new%0A%23%20%5E%5E%5E%5E%5E%5E%20put%20cursor%20here%20and%20hit%20cmd%20%2B%20.%20%28Mac%29%20or%20ctrl%20%2B%20.%0A)):
-
-<img src="/img/lsp/quickfix.png" width="40%"/>
-
-Workspace symbol search:
-
-<img src="/img/lsp/symbolsearch.png" width="75%"/>
-
-Custom extension: Copy Symbol to Clipboard
-
-<video autoplay loop muted playsinline width="597">
-  <source src="/img/copy-symbol.mp4" type="video/mp4">
-</video>
-
-(If you are not using the Sorbet VS Code, you can reimplement this feature in
-your preferred LSP client using the [`sorbet/showSymbol` LSP request].)
-
-[`sorbet/showsymbol` lsp request]:
-  https://github.com/sorbet/sorbet/blob/ec02be89e3d1895ea51bc72464538073d27b812c/vscode_extension/src/LanguageClient.ts#L154-L179
-
-## Switching between configurations
-
-The Sorbet extension supports switching between multiple configurations to make
-it easy to try out experimental features. By default, it ships with three
-configurations: stable, beta, and experimental. Workspaces can specify
-alternative configurations via the `sorbet.lspConfigs` setting.
-
-Users can select between these configurations on-the-fly by clicking on "Sorbet"
-in VS Code's status line and selecting "Configure Sorbet". Sorbet will then
-restart in the chosen configuration. Sorbet will also remember this
-configuration choice for the user's future sessions in the workspace.
-
-## Disabling the Sorbet extension
-
-There are multiple ways to disable the Sorbet extension depending on your goals.
-
-- You can click on Sorbet in VS Code's status line and click on _Disable
-  Sorbet_, which will immediately stop Sorbet in that workspace. You will need
-  to click on _Enable Sorbet_ to reenable Sorbet in that workspace. This is a
-  handy way to temporarily disable Sorbet if it is causing problems.
-- Workspaces can set the `sorbet.enabled` setting to `false`, which prevents
-  Sorbet from running in the workspace.
-
-## Troubleshooting and FAQ
-
-### Startup
-
-#### Error: "Sorbet's language server requires a single input directory. However, 0 are configured"
-
-This error can happen if you have not initialized Sorbet in your project. Please
-[follow the instructions](adopting#step-2-initialize-sorbet-in-our-project) to
-initialize Sorbet.
-
-If initializing Sorbet in your project is not desirable or possible, an
-alternative fix is to override the default extension configuration in the
-project's `.vscode/settings.json` file and provide the project directory as
-`"."`:
-
-```json
-"sorbet.lspConfigs": [{
-    "id": "stable",
-    "name": "Sorbet",
-    "description": "Stable Sorbet Ruby IDE features",
-    "cwd": "${workspaceFolder}",
-    "command": [
-      "bundle",
-      "exec",
-      "srb",
-      "typecheck",
-      "--lsp",
-      "."
-    ]
-}]
-```
-
-#### I'm not seeing "Sorbet: Disabled" or "Sorbet: Idle" in the status bar of my VSCode window
-
-That means the extension isn't active. Here are some steps to try:
-
-- Did you open a Ruby file? The Sorbet extension isn't activated until you open
-  at least one Ruby file in your editor.
-- Make sure your VS Code window is wide enough to display the entire contents of
+- Make sure the VS Code window is wide enough to display the entire contents of
   the status bar.
-- Ensure that you are not using VS Code's
-  [Multi-root Workspaces](https://code.visualstudio.com/docs/editor/multi-root-workspaces)
-  feature, which this extension does not support.
 
-#### Sorbet keeps restarting.
+- Do not use VS Code's
+  [multi-root workspaces](https://code.visualstudio.com/docs/editor/multi-root-workspaces).
+  The Sorbet extension does not support this feature.
 
-Click on _Sorbet_ in the status bar, and then click on _View Output_. A log
-should pop up, and will typically contain some error messages that are causing
-the restart.
+#### I see "Sorbet: Disabled" in the status bar
 
-If you see an error that looks like this:
+Sorbet is installed and active, but has chosen not to start the Sorbet process
+automatically. To manually enable Sorbet, either:
 
-```plaintext
+- Use the [`>Sorbet: Enable`] command. The server will start with
+  [the default server command](#sorbet-lspconfigs).
+
+- Use the [`>Sorbet: Configure`] command. A prompt will appear to choose which
+  server configuration to start the Sorbet process with. See
+  [the configuration docs](#sorbet-lspconfigs) to change the configurations.
+
+- Edit the `.vscode/settings.json` for the current workspace to include this:
+
+  ```json
+  {
+    "sorbet.enabled": true
+  }
+  ```
+
+  This may require restarting VS Code.
+
+#### Sorbet keeps restarting
+
+The Sorbet extension restarts the server process when it stops. If the process
+crashes on startup, this can cause Sorbet to restart in a loop. Fixing requires
+fixing the underlying reason for the crash.
+
+Click on "Sorbet: ..." in the status bar and then choose "View Output" (or use
+the [`>Sorbet: Show Output`] command) to see the Sorbet extension logs.
+
+![](/img/view-output.png)
+
+There is usually an error message which gives a hint why Sorbet crashed. For
+example:
+
+```
 [Error - 9:36:32 AM] Connection to server got closed. Server will not be restarted.
 Running Sorbet LSP with:
     bundle exec srb typecheck --lsp
 Could not locate Gemfile or .bundle/ directory
 ```
 
-...then you probably need to run `bundle install` to install Sorbet.
+See below for help with specific error messages.
+
+Note that the "Server will not be restarted" message is logged by a library that
+the Sorbet VS Code extension uses—the actual restart logic lives at a higher
+level, so this error message is misleading. Sorbet **will** be restarted
+whenever the server process crashes.
+
+#### "Could not locate Gemfile or .bundle/ directory"
+
+The Sorbet extension uses this command to start the server process by default:
+
+```
+bundle exec srb typecheck --lsp
+```
+
+This assumes the project uses [Bundler](https://bundler.io/) to manage Ruby
+dependencies. If that's not the case,
+[configure how to launch](#sorbet-lspconfigs) the Sorbet process.
+
+#### "bundler: command not found: srb"
+
+Either:
+
+- The `Gemfile` does not include the `sorbet` gem
+
+  Edit the `Gemfile` as per [the instructions here](adopting.md), and then run
+  `bundle install`.
+
+- The `sorbet` gem is included in the Gemfile, but not yet installed.
+
+  Run `bundle install`, then try again.
+
+#### "Sorbet's language server requires at least one input directory"
+
+Sorbet in LSP mode requires a single input directory.
+
+See
+[Sorbet Language Server > Prerequisites > A single input directory](lsp.md#a-single-input-directory)
+for more.
+
+#### "Sorbet's language server requires a single input directory"
+
+Sorbet in LSP mode requires a single input directory.
+
+See
+[Sorbet Language Server > Prerequisites > A single input directory](lsp.md#a-single-input-directory)
+for more.
+
+#### "Watchman is required for Sorbet to detect changes to files"
+
+For the best experience, Sorbet requires
+[Watchman](https://facebook.github.io/watchman/), which listens for changes to
+the files on disk in addition to edits that happen to files open in the editor.
+
+See [Sorbet Language Server > Prerequisites > Watchman](lsp.md#watchman) for
+more.
+
+#### Something else
+
+If you had to troubleshoot an error message you think is common when installing
+Sorbet, please help by
+[editing this page](https://github.com/sorbet/sorbet/edit/master/website/docs/sorbet-uris.md)!
+
+## Disabling the extension
+
+There are multiple ways to disable the Sorbet extension, which will stop the
+Sorbet server process:
+
+- Use the [`>Sorbet: Disable`] command.
+
+- Click on "Sorbet: ..." in the status bar and then choose "Disable Sorbet."
+
+- Edit the `.vscode/settings.json` for the current workspace to include this:
+
+  ```json
+  {
+    "sorbet.enabled": false
+  }
+  ```
+
+  This is particularly useful to disable Sorbet for all contributors to a given
+  project, if there's some reason why Sorbet should not be used in that project.
+
+## Command Reference
+
+To run these commands, use VS Code's
+[Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette).
+To bring up the command palette, use ⇧⌘P on macOS or Ctrl + Shift + P on Linux.
+
+The `>` character in the command names below does not need to be typed, unless
+it's been deleted from the text box, or if the palette was opened with the
+"Quick Open" menu (⌘P on macOS, Ctrl + P on Linux.)
+
+### `>Sorbet: Enable`
+
+[`>Sorbet: Enable`]: #sorbet-enable
+
+Enables Sorbet, causing the Sorbet server process to start. It will use the most
+recently selected [server launch configuration](#sorbet-lspconfigs), or else the
+default.
+
+### `>Sorbet: Disable`
+
+[`>Sorbet: Disable`]: #sorbet-disable
+
+Disables Sorbet, causing the Sorbet server process to stop.
+
+### `>Sorbet: Restart`
+
+[`>Sorbet: Restart`]: #sorbet-restart
+
+Disables Sorbet, causing the Sorbet server process to stop, then re-enables
+Sorbet, causing it to launch again, using the current server configuration.
+
+### `>Sorbet: Configure`
+
+[`>Sorbet: Configure`]: #sorbet-configure
+
+Chooses which configuration to run Sorbet with, or choose to disable Sorbet.
+After choosing a configuration, any running Sorbet process will stop, and a new
+one will be launched with the chosen configuration.
+
+By default, [there are three configurations](#sorbet-lspconfigs), which allow
+opting into experimental features. A given workspace may choose to define its
+own configurations.
+
+![](/img/configure.png)
+
+### `>Sorbet: Show Output`
+
+[`>Sorbet: Show Output`]: #sorbet-show-output
+
+Opens the Sorbet extension's logs in the output pane. Mostly useful for
+[Troubleshooting startup](#troubleshooting-startup). For debugging the Sorbet
+extension itself, consider also using [`>Sorbet: Set Log Level...`] to make the
+logs more verbose.
+
+Note that the Sorbet output **only** includes logs from the Sorbet extension. It
+does not include debug output from the Sorbet server process. To control log
+output from the Sorbet server process, see the
+[`--debug-log-file`](cli-ref.md#debugging-options) command line option. This
+flag is not passed by default. To pass it, change the
+[server configurations](#sorbet-lspconfigs).
+
+### `>Sorbet: Set Log Level...`
+
+[`>Sorbet: Set Log Level...`]: #sorbet-set-log-level
+
+The Sorbet extension includes various logs designed to help developers
+troubleshoot problems in the Sorbet extension itself. Use this command to
+control how verbose Sorbet's log should be. It may also be helpful to enable
+[logging at VS Code's language client level](https://github.com/sorbet/sorbet/blob/master/docs/lsp-dev-guide.md#by-trying-it-in-a-client).
+
+### `>Sorbet: Copy Symbol to Clipboard`
+
+[`>Sorbet: Copy Symbol to Clipboard`]: #sorbet-copy-symbol-to-clipboard
+
+Copies the fully-qualified name of the symbol under the cursor to the clipboard.
+
+This feature is powered by a custom extension to the LSP specification:
+[`sorbet/showSymbol` request](lsp.md#sorbetshowsymbol-request).
+
+The same feature is also available as a right-click context menu item:
+
+<video autoplay loop muted playsinline style="max-width: 597px;">
+  <source src="/img/copy-symbol.mp4" type="video/mp4">
+</video>
+
+### `>Sorbet: Configure untyped code highligting`
+
+[`>Sorbet: Configure untyped code highligting`]:
+  #sorbet-configure-untyped-code-highlighting
+
+See [Highlighting untyped code](highlight-untyped.md)
+
+### `>Sorbet: Toggle highlighting untyped code`
+
+[`>Sorbet: Toggle highlighting untyped code`]:
+  #sorbet-toggle-highlighting-untyped-code
+
+See [Highlighting untyped code](highlight-untyped.md)
+
+### `` >Sorbet: Toggle the autocomplete nudge in `typed: false` files ``
+
+[``>Sorbet: Toggle the autocomplete nudge in `typed: false` files``]:
+  #-sorbet-toggle-the-autocomplete-nudge-in-typed-false-files-
+
+By default, Sorbet shows a completion item in `# typed: false` files when there
+are no completion results due to the file being `# typed: false`, like this:
+
+<img src="/img/typed-false-nudge.png" style="max-width: 463px; margin-left: 0;" />
+
+The goal of the nudge is to encourage upgrading the current file
+[from `# typed: false` to `# typed: true`](static.md). Use this command to
+disable the nudge.
+
+As a reminder, most features, including autocompletion,
+[have degraded support](lsp-typed-level.md) in `# typed: false` files.
+
+## Configuration Reference
+
+This section documents configuration options which live in the
+[User or Workspace Settings](https://code.visualstudio.com/docs/getstarted/settings)
+of VS Code.
+
+For a complete reference of the Sorbet extension's configuration options, their
+types, and their defaults, see the `"configuration"` section of the
+[package.json](https://github.com/sorbet/sorbet/blob/master/vscode_extension/package.json)
+file.
+
+### Sticky configuration
+
+Sorbet extension settings are _sticky_: even if the `settings.json` file for the
+workspace or the user has a given setting, Sorbet will remember when the user
+previously changed that the setting from the UI. These choices persist across
+reboots of VS Code.
+
+For example, consider the [`sorbet.enabled`](#sorbet-enabled) setting and the
+[`>Sorbet: Enable`] command in this scenario:
+
+1.  Initially, the `.vscode/settings.json` file for a given workspace has
+
+    ```json
+    {
+      "sorbet.enabled": false
+    }
+    ```
+
+    When VS Code starts up, it sees that Sorbet is disabled and does not launch
+    Sorbet.
+
+1.  The user then runs `>Sorbet: Enable` to start Sorbet, does some work, and
+    quits VS Code.
+
+1.  The next time VS Code is opened in this workspace, Sorbet will still be
+    enabled and start automatically.
+
+It's not that the `>Sorbet: Enable` command edited the contents of the
+`.vscode/settings.json` file to flip it to `true`, but rather that the Sorbet
+extension remembers whether a setting has been changed via a command after
+starting up.
+
+The only settings that are not sticky like this are the settings which do not
+have a [command](#command-reference) to change the corresponding
+[configuration setting](#configuration-reference).
+
+### `sorbet.enabled`
+
+Whether Sorbet should be enabled or disabled in this workspace.
+
+### `sorbet.lspConfigs`
+
+This setting controls the command used to launch the Sorbet server process.
+
+The Sorbet extension supports switching between multiple configurations to make
+it easy to try out experimental features or register custom command line
+options. By default, it ships with three configurations: `Sorbet`,
+`Sorbet (Beta)`, and `Sorbet (Experimental)`.
+
+Users can switch between these configurations using the [`>Sorbet: Configure`]
+command, or by clicking on "Sorbet: ..." in the status bar and selecting
+"Configure Sorbet".
+
+As mentioned elsewhere:
+
+- Changing the config will cause Sorbet to restart in the chosen configuration.
+- Using the UI to change this setting is sticky: Sorbet will use the most
+  recently chosen configuration when next launched.
+
+An example configuration would look like this. Consisder a project that uses
+Sorbet but that does not use Bundler:
+
+```json
+{
+  "sorbet.lspConfigs": [
+    {
+      "id": "without-bundler",
+      "name": "srb",
+      "description": "Launch Sorbet using `srb` from the PATH",
+      "cwd": "${workspaceFolder}",
+      "command": ["srb", "tc", "--lsp"]
+    }
+  ]
+}
+```
+
+This project would not use `bundle exec [...]` to launch the Sorbet server
+process.
+
+Some other ideas for how to use this configuration feature:
+
+- Pass custom, [LSP-specific options](cli-ref.md#lsp-options) that don't belong
+  in the [`sorbet/config`](cli.md#config-file).
+
+- Wrap the call to `srb tc` in a custom script for the current project, which
+  might do things like make sure the environment is set up correctly before
+  starting Sorbet.
+
+- Start the server process using a custom, local build of the Sorbet binary.
+
+When setting this setting, it's recommended to refer to the more complete
+documentation in the Sorbet extension's
+[package.json](https://github.com/sorbet/sorbet/blob/master/vscode_extension/package.json)
+file.
+
+### `sorbet.userLspConfigs`
+
+This setting is largely the same as `sorbet.lspConfigs`, but has higher
+precedence. It's designed to allow users to keep their own Sorbet configurations
+in VS Code's User settings.
+
+Normally, Workspace Settings
+[take precedence over](https://code.visualstudio.com/docs/getstarted/settings#_settings-precedence)
+User Settings. Having this option gives users the chance to invert that.
+
+Because of this, it's usually not recommended to commit this setting to
+`.vscode/settings.json` in a workspace, because it prevents users from launching
+Sorbet according to their own preferences.
+
+### `sorbet.selectedLspConfigId`
+
+Which LSP configuration to pick first (see
+[`sorbet.lspConfigs`](#sorbet-lspconfigs)).
+
+If unset, picks the first one, giving precedence to `sorbet.userLspConfigs`.
+
+Remember that [settings are sticky](#sticky-configuration), so if the user has
+used [`>Sorbet: Configure`] to change the configuration, that most recently
+selected configuration will take precedence over this setting.
+
+### `sorbet.highlightUntyped`
+
+Whether to highlight untyped, and where. Defaults to `"nowhere"`.
+
+See [Highlighting untyped code](highlight-untyped.md)
+
+### `sorbet.typedFalseCompletionNudges`
+
+Whether to enable `# typed: false` completion nudges. Defaults to `true`.
+
+See [``>Sorbet: Toggle the autocomplete nudge in `typed: false` files``].
+
+### `sorbet.configFilePatterns`
+
+A list of workspace file patterns that contribute to Sorbet's configuration.
+Changes to any of those files should trigger a restart of any actively running
+Sorbet language server.
+
+For example, changes to the `sorbet/config` file or the `Gemfile.lock` could
+mean that the Sorbet process needs to restart (to pick up new options, or a new
+version, respectively). The default `sorbet.configFilePattern` tracks these two
+files are tracked
+
+Projects that have custom scripts that launch Sorbet likely want to set this
+setting.
+
+Careful: setting this setting completely overwrites the default.
+
+### `sorbet.revealOutputOnError`
+
+Shows the extension output window on errors. Defaults to `false`.
+
+---
+
+## Troubleshooting and FAQ
+
+<!-- TODO(jez) Make separate pages for these features, and document them there.
+Most of these are not VS Code-specific. -->
 
 ### Diagnostics / error squiggles
 
@@ -249,110 +476,13 @@ If the errors are not persistent:
   Sorbet (click on Sorbet in the status bar, and click on Restart Sorbet).
 - If the diagnostics become fixed, then you might have discovered a bug in
   Sorbet.
+- Another thing to check is whether the Problems tab in VS Code has the same
+  errors as what Sorbet would report when run from the command line (assuming
+  all files have been saved). If the list of errors is different, this usually
+  represents a bug in Sorbet (so long as Sorbet is "Idle" in the IDE).
 
 If you arrive at a set of edits that mess up the diagnostics, please file a bug
 on the [issue tracker](https://github.com/sorbet/sorbet/issues).
-
-### Hover
-
-#### When I hover on something, VS Code shows "Loading..."
-
-Is Sorbet still typechecking or initializing? If so, this is expected behavior;
-Sorbet cannot show you type information until it finishes catching up with your
-edits. "Loading..." should get replaced with hover information once the status
-bar displays "Sorbet: Typechecking in background" or "Sorbet: Idle".
-
-#### Hover doesn't work / hover isn't showing information for my file
-
-Is the file untyped (`# typed: false` or `ignore`)? Hover only works in typed
-files. You will need to make your file `# typed: true`.
-
-Does the file have a syntax error? If so, you need to resolve it before hover
-will work again.
-
-If the file is typed, Sorbet is "Idle", and hover isn't working, try to
-reproduce the problem on https://sorbet.run and file a bug on the
-[issue tracker](https://github.com/sorbet/sorbet/issues).
-
-#### Hover is showing incorrect type information for something.
-
-Does your file have a syntax error? If so, resolve it before proceeding.
-
-If the problem persists with your syntax errors fixed, you may have found a bug
-in Sorbet! Check to see if it's in the GitHub issue tracker. If you don't see
-anything relevant there, try to golf the problem down to something small on
-https://sorbet.run and file a bug on the
-[issue tracker](https://github.com/sorbet/sorbet/issues).
-
-#### Hover is not showing documentation that I've written / is showing incorrect documentation.
-
-Internally, Hover uses the "Go to Definition" logic to locate documentation. If
-"Go to Definition" takes you to the wrong location, then Sorbet doesn't have the
-type information it needs to locate your documentation.
-
-Did you include an empty line between your documentation and the thing you are
-defining? We expect documentation to immediately precede the definition (or its
-sig).
-
-```ruby
-# valid documentation location
-def foo; end
-
-# valid documentation location
-sig {void}
-def foo; end
-
-sig {void}
-# valid documentation location
-def foo; end
-
-# invalid documentation location
-
-def foo; end
-```
-
-Is this an instance or class variable? The variable
-[_must_ be defined with `T.let`](/docs/type-annotations#declaring-class-and-instance-variables),
-and the documentation must precede the `T.let`. Otherwise, Sorbet doesn’t see
-that variable as having ever been defined.
-
-Otherwise, try to reproduce the issue on https://sorbet.run/ and file a bug on
-the [issue tracker](https://github.com/sorbet/sorbet/issues).
-
-### Find all References
-
-#### Find all References is not working / Find all References is missing some expected results.
-
-Make sure that Sorbet is running. You should see "Sorbet: Idle" in VS Code's
-status bar. Otherwise, see
-[Feature support by strictness level](lsp-typed-level.md).
-
-If the information in that document doesn't apply (e.g., the current file is
-`# typed: true` or higher), check whether the expression is `T.untyped`. See
-[Troubleshooting](troubleshooting.md) for more information.
-
-#### Find all References is slow.
-
-The speed of Find all References depends on how many files contain an identifier
-with the same name, as we use that information as a first-pass filter over the
-source files before refining to actual references. For example, searching for
-references to a class's `initialize` will involve a scan over most files in a
-project even if the specific `initialize` you are looking for is only used in
-one file.
-
-Find all References also waits for "Typechecking in background..." to complete
-so that it does not contend with typechecking for CPU time.
-
-#### Find all References brought me to a file that I cannot edit.
-
-These features may return results in type definitions for core Ruby libraries,
-which are baked directly into the Sorbet executable and are not present on the
-file system.
-
-In order to display these files in your editor and to support navigating through
-them, we've configured the Sorbet extension to display them in this read-only
-view. Note that certain extension features, like hover and Go to Definition,
-will not function in some of these special files.
 
 ## Reporting metrics
 

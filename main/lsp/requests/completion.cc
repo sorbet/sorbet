@@ -575,13 +575,9 @@ vector<core::NameRef> allSimilarFields(const core::GlobalState &gs, core::ClassO
 }
 
 vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typechecker, const core::ClassOrModuleRef klass,
-                                               const core::Loc queryLoc, ast::UnresolvedIdent::Kind kind,
-                                               string_view prefix) {
+                                               const core::Loc queryLoc, const ast::ParsedFile &resolved,
+                                               ast::UnresolvedIdent::Kind kind, string_view prefix) {
     const auto &gs = typechecker.state();
-    auto files = vector<core::FileRef>{};
-    for (auto loc : klass.data(gs)->locs()) {
-        files.emplace_back(loc.file());
-    }
 
     // We have an interesting problem here: the symbol table already stores
     // information about all the fields in a class, but we only populate the
@@ -589,7 +585,7 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typecheck
     // way.  But we would like to provide completion for all fields, typed
     // or not.
     //
-    // The compromise we take is this: for each file that is < StrictLevel::Strict,
+    // The compromise we take is this: if the file is typed < StrictLevel::Strict,
     // we walk the AST to discover the fields in that class and we add those
     // results to the symbol table results.  We might discover duplicate information
     // (people might have declared instance variables as typed in StrictLevel::True
@@ -597,20 +593,11 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typecheck
     // from which source.
     auto result = allSimilarFields(gs, klass, prefix);
 
-    files.erase(remove_if(files.begin(), files.end(),
-                          [&gs](auto f) { return f.data(gs).strictLevel >= core::StrictLevel::Strict; }),
-                files.end());
-
-    if (!files.empty()) {
-        auto resolved = typechecker.getResolved(files);
-
-        // Instantiate fieldFinder outside loop so that result accumulates over every time we TreeWalk::apply
+    if (resolved.file.data(gs).strictLevel < core::StrictLevel::Strict) {
         std::vector<core::NameRef> fields;
         FieldFinder fieldFinder(klass, kind, fields);
-        for (auto &t : resolved) {
-            auto ctx = core::Context(gs, core::Symbols::root(), t.file);
-            ast::ConstTreeWalk::apply(ctx, fieldFinder, t.tree);
-        }
+        auto ctx = core::Context(gs, core::Symbols::root(), resolved.file);
+        ast::ConstTreeWalk::apply(ctx, fieldFinder, resolved.tree);
 
         // TODO: this does prefix matching for instance/class variables, but our
         // completion for locals matches anywhere in the name
@@ -635,21 +622,13 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typecheck
 }
 
 vector<core::NameRef> localNamesForMethod(LSPTypecheckerDelegate &typechecker, const core::MethodRef method,
-                                          const core::Loc queryLoc) {
+                                          const core::Loc queryLoc, const ast::ParsedFile &resolved) {
     const auto &gs = typechecker.state();
-    auto files = vector<core::FileRef>{};
-    for (auto loc : method.data(gs)->locs()) {
-        files.emplace_back(loc.file());
-    }
-    auto resolved = typechecker.getResolved(files);
 
-    // Instantiate localVarFinder outside loop so that result accumualates over every time we TreeWalk::apply
     std::vector<core::NameRef> result;
     LocalVarFinder localVarFinder(method, queryLoc, result);
-    for (auto &t : resolved) {
-        auto ctx = core::Context(gs, core::Symbols::root(), t.file);
-        ast::ConstTreeWalk::apply(ctx, localVarFinder, t.tree);
-    }
+    auto ctx = core::Context(gs, core::Symbols::root(), resolved.file);
+    ast::ConstTreeWalk::apply(ctx, localVarFinder, resolved.tree);
 
     fast_sort(result, [&gs](const auto &left, const auto &right) {
         // Sort by actual name, not by NameRef id
@@ -666,16 +645,13 @@ vector<core::NameRef> localNamesForMethod(LSPTypecheckerDelegate &typechecker, c
     return result;
 }
 
-core::MethodRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const core::Loc queryLoc) {
+core::MethodRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const core::Loc queryLoc,
+                                      const ast::ParsedFile &resolved) {
     const auto &gs = typechecker.state();
-    auto files = vector<core::FileRef>{queryLoc.file()};
-    auto resolved = typechecker.getResolved(files);
 
     NextMethodFinder nextMethodFinder(queryLoc);
-    for (auto &t : resolved) {
-        auto ctx = core::Context(gs, core::Symbols::root(), t.file);
-        ast::ConstTreeWalk::apply(ctx, nextMethodFinder, t.tree);
-    }
+    auto ctx = core::Context(gs, core::Symbols::root(), resolved.file);
+    ast::ConstTreeWalk::apply(ctx, nextMethodFinder, resolved.tree);
 
     return nextMethodFinder.result();
 }
@@ -709,8 +685,8 @@ constexpr string_view suggestSigDocs =
 
 unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
                                          const LSPClientConfiguration &clientConfig, core::SymbolRef what,
-                                         core::TypePtr receiverType, const core::Loc queryLoc, string_view prefix,
-                                         size_t sortIdx) {
+                                         core::TypePtr receiverType, const core::Loc queryLoc,
+                                         const ast::ParsedFile &resolved, string_view prefix, size_t sortIdx) {
     ENFORCE(receiverType != nullptr);
 
     // Completion with T::Sig::WithoutRuntime.sig / Sorbet::Private::Static.sig won't work because
@@ -723,7 +699,7 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
     const auto markupKind = clientConfig.clientCompletionItemMarkupKind;
     const auto supportSnippets = clientConfig.clientCompletionItemSnippetSupport;
 
-    auto targetMethod = firstMethodAfterQuery(typechecker, queryLoc);
+    auto targetMethod = firstMethodAfterQuery(typechecker, queryLoc, resolved);
     if (!targetMethod.exists()) {
         return nullptr;
     }
@@ -779,10 +755,11 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
 }
 
 unique_ptr<CompletionItem> trySuggestYardSnippet(LSPTypecheckerDelegate &typechecker,
-                                                 const LSPClientConfiguration &clientConfig, core::Loc queryLoc) {
+                                                 const LSPClientConfiguration &clientConfig, core::Loc queryLoc,
+                                                 const ast::ParsedFile &resolved) {
     const auto &gs = typechecker.state();
 
-    auto method = firstMethodAfterQuery(typechecker, queryLoc);
+    auto method = firstMethodAfterQuery(typechecker, queryLoc, resolved);
     if (!method.exists()) {
         return nullptr;
     }
@@ -1025,12 +1002,11 @@ unique_ptr<CompletionItem> CompletionTask::getCompletionItemForUntyped(const cor
     return item;
 }
 
-unique_ptr<CompletionItem> CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker,
-                                                                      core::DispatchResult &dispatchResult,
-                                                                      core::MethodRef maybeAlias,
-                                                                      const core::TypePtr &receiverType,
-                                                                      core::Loc queryLoc, string_view prefix,
-                                                                      size_t sortIdx, uint16_t totalArgs) const {
+unique_ptr<CompletionItem>
+CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, core::DispatchResult &dispatchResult,
+                                           core::MethodRef maybeAlias, const core::TypePtr &receiverType,
+                                           core::Loc queryLoc, const ast::ParsedFile &resolved, string_view prefix,
+                                           size_t sortIdx, uint16_t totalArgs) const {
     const auto &gs = typechecker.state();
     ENFORCE(maybeAlias.exists());
     auto clientConfig = config.getClientConfig();
@@ -1044,7 +1020,8 @@ unique_ptr<CompletionItem> CompletionTask::getCompletionItemForMethod(LSPTypeche
     auto what = maybeAlias.data(gs)->dealiasMethod(gs);
 
     if (what == core::Symbols::sig()) {
-        if (auto item = trySuggestSig(typechecker, clientConfig, what, receiverType, queryLoc, prefix, sortIdx)) {
+        if (auto item =
+                trySuggestSig(typechecker, clientConfig, what, receiverType, queryLoc, resolved, prefix, sortIdx)) {
             return item;
         }
     }
@@ -1120,7 +1097,8 @@ CompletionTask::SearchParams CompletionTask::searchParamsForEmptyAssign(const co
 }
 
 vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypecheckerDelegate &typechecker,
-                                                                      SearchParams &params) {
+                                                                      SearchParams &params,
+                                                                      const ast::ParsedFile &resolved) {
     const auto &gs = typechecker.state();
 
     // ----- locals -----
@@ -1146,12 +1124,14 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
         }
 
         if (kind == ast::UnresolvedIdent::Kind::Local) {
-            vector<core::NameRef> locals = localNamesForMethod(typechecker, params.enclosingMethod, params.queryLoc);
+            vector<core::NameRef> locals =
+                localNamesForMethod(typechecker, params.enclosingMethod, params.queryLoc, resolved);
             similarLocals = allSimilarLocalNames(gs, locals, params.prefix);
         } else {
             auto klass = params.enclosingMethod.data(gs)->owner;
             ENFORCE(klass.exists());
-            similarLocals = allSimilarFieldsForClass(typechecker, klass, params.queryLoc, kind, params.prefix);
+            similarLocals =
+                allSimilarFieldsForClass(typechecker, klass, params.queryLoc, resolved, kind, params.prefix);
         }
     }
 
@@ -1212,7 +1192,7 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
             for (auto &similarMethod : dedupedSimilarMethods) {
                 items.push_back(getCompletionItemForMethod(
                     typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType,
-                    params.queryLoc, params.prefix, items.size(), params.forMethods->totalArgs));
+                    params.queryLoc, resolved, params.prefix, items.size(), params.forMethods->totalArgs));
             }
         }
     }
@@ -1259,7 +1239,14 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
     if (queryResponses.empty()) {
         auto prevTwoChars = queryLoc.adjust(gs, -2, 0);
         if (prevTwoChars.source(gs) == "##") {
-            auto item = trySuggestYardSnippet(typechecker, config.getClientConfig(), queryLoc);
+            // This is the only path that needs the resolved tree when the query response is empty, so to avoid
+            // resolving the tree for the other cases we explicitly request it here.
+            auto resolved = typechecker.getResolved(queryLoc.file());
+            if (resolved.tree == nullptr) {
+                return response;
+            }
+
+            auto item = trySuggestYardSnippet(typechecker, config.getClientConfig(), queryLoc, resolved);
             if (item != nullptr) {
                 items.emplace_back(std::move(item));
                 response->result = make_unique<CompletionList>(false, move(items));
@@ -1284,6 +1271,12 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
     }
 
     auto resp = move(queryResponses[0]);
+
+    // All of the remaining cases require a resolved tree, so we eagerly request it here.
+    auto resolved = typechecker.getResolved(queryLoc.file());
+    if (resolved.tree == nullptr) {
+        return response;
+    }
 
     if (auto sendResp = resp->isSend()) {
         auto callerSideName = sendResp->callerSideName;
@@ -1314,7 +1307,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 core::MethodRef{}, // do not suggest locals
                 scopes,
             };
-            items = this->getCompletionItems(typechecker, params);
+            items = this->getCompletionItems(typechecker, params, resolved);
         } else {
             // isPrivateOk indicates that we are calling (and therefore completing) a method on `self`.  In such a
             // case, it matters whether or not there is a syntactic receiver involved in the call.  In the latter
@@ -1339,7 +1332,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 enclosingMethod,
                 core::lsp::ConstantResponse::Scopes{}, // constants don't make sense here
             };
-            items = this->getCompletionItems(typechecker, params);
+            items = this->getCompletionItems(typechecker, params, resolved);
         }
     } else if (auto constantResp = resp->isConstant()) {
         SearchParams params;
@@ -1370,7 +1363,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 queryLoc, prefix, methodSearchParams, suggestKeywords, enclosingMethod, std::move(constantResp->scopes),
             };
         }
-        items = this->getCompletionItems(typechecker, params);
+        items = this->getCompletionItems(typechecker, params, resolved);
     } else if (auto identResp = resp->isIdent()) {
         auto varName = identResp->variable._name;
         auto prefix = varName.shortName(gs);
@@ -1397,7 +1390,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 identResp->enclosingMethod,
                 core::lsp::ConstantResponse::Scopes{identResp->enclosingMethod.data(gs)->owner},
             };
-            items = this->getCompletionItems(typechecker, params);
+            items = this->getCompletionItems(typechecker, params, resolved);
         } else if (termLocPrefix.source(gs) == prefix && !termLocPrefix.contains(queryLoc)) {
             // This is *probably* (but not definitely necessarily) an IdentResponse for an
             // assignment, with the cursor somewhere on the RHS of the `=` but before having typed
@@ -1407,7 +1400,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             // This technically parses and comes back as an IdentResponse for the whole `x =`
             // assignment. Let's just toss that away and suggest with an empty prefix.
             auto params = searchParamsForEmptyAssign(gs, queryLoc, identResp->enclosingMethod, {});
-            items = this->getCompletionItems(typechecker, params);
+            items = this->getCompletionItems(typechecker, params, resolved);
         }
     }
 

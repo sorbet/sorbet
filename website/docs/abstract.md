@@ -364,8 +364,8 @@ A.bar
 This is hard to statically analyze, as it involves looking into the body of the
 `self.included` method, which might have arbitrary computation. As a compromise,
 Sorbet provides a new construct: `mixes_in_class_methods`. At runtime, it
-behaves as if we'd defined `self.included` like above, but will declare to `srb`
-statically what module is being extended.
+behaves as if we'd defined `self.included` like above, but will declare to
+Sorbet statically what module is being extended.
 
 We can update our previous example to use `mixes_in_class_methods`, which lets
 Sorbet catch the runtime error about `bar` not being defined on `A`:

@@ -43,6 +43,11 @@ are two options:
 If you're having problems making a change to Sorbet, we're happy to help on
 Slack! See the [Community](/community) page for an invite link.
 
+Be sure to also check out our
+[Versioning policy for standard library RBIs](rbi.md#versioning-for-standard-library-rbis),
+which basically says that in general, Sorbet's RBIs for the standard library aim
+to be a superset of everything that gem defines (past and present).
+
 [rbi-folder]: https://github.com/sorbet/sorbet/tree/master/rbi
 
 ## What's the difference between `T.let`, `T.cast`, and `T.unsafe`?
@@ -633,6 +638,11 @@ a smooth transition to Ruby 3:
 For more information, watch [this section](https://youtu.be/2g9R7PUCEXo?t=2022)
 from Matz's RubyConf 2019 keynote, which talks about his plans for typing in
 Ruby 3.
+
+> **February 2025 update**: We're experimenting with limited support for RBS
+> signatures as comments. This feature is protected by the
+> `--enable-experimental-rbs-signatures` flag. See the
+> [RBS support](rbs-support.md) page for more details.
 
 ## Can I use Sorbet for duck typed code?
 

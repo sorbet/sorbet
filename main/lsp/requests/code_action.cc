@@ -156,6 +156,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 action->kind = CodeActionKind::Quickfix;
                 auto workspaceEdit = make_unique<WorkspaceEdit>();
                 workspaceEdit->documentChanges = getQuickfixEdits(config, gs, autocorrect.edits);
+                // TODO(jez) This does package-specific behavior without checking `--stripe-packages`!
                 if (absl::c_any_of(autocorrect.edits, [&](auto edit) { return edit.loc.file().isPackage(gs); })) {
                     action->command = make_unique<Command>("Save package files", "sorbet.savePackageFiles");
                 }

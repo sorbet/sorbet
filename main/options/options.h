@@ -212,7 +212,7 @@ struct Options {
     std::vector<std::string> packageSkipRBIExportEnforcementDirs;
 
     // Contains the allowed extensions Sorbet can parse.
-    UnorderedSet<std::string> allowedExtensions;
+    UnorderedSet<std::string> allowedExtensions = {".rb", ".rbi"};
     // Contains the file names passed in to Sorbet.
     std::vector<std::string> rawInputFileNames;
     // Contains the directory names passed in to Sorbet.
@@ -251,6 +251,9 @@ struct Options {
     // Enables out-of-order reference checking
     bool outOfOrderReferenceChecksEnabled = false;
     core::TrackUntyped trackUntyped = core::TrackUntyped::Nowhere;
+
+    // Enable experimental support for RBS signatures
+    bool rbsSignaturesEnabled = false;
 
     // Experimental feature `requires_ancestor`
     bool requiresAncestorEnabled = false;

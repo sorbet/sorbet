@@ -62,9 +62,8 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
     }
 
     if (definition.symbol.data(gs)->hasSig()) {
-        auto trees = typechecker.getResolved({file});
-        ENFORCE(!trees.empty());
-        auto &rootTree = trees[0].tree;
+        auto resolvedTree = typechecker.getResolved(file);
+        auto &rootTree = resolvedTree.tree;
 
         auto ctx = core::Context(gs, core::Symbols::root(), file);
         auto queryLoc = definition.termLoc.copyWithZeroLength();

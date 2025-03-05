@@ -156,8 +156,7 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
                                superArgs[idx].get().show(ctx), superArgType.show(ctx));
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, superArgType,
-                                                                methodArgType);
+                e.addErrorSections(move(errorDetailsCollector));
             }
         }
         idx++;
@@ -299,8 +298,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                                        req.get().show(ctx), req.get().type.show(ctx));
                         e.addErrorNote(
                             "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, req.get().type,
-                                                                        corresponding->get().type);
+                        e.addErrorSections(move(errorDetailsCollector));
                     }
                 }
             } else {
@@ -332,8 +330,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                                        opt.get().show(ctx), opt.get().type.show(ctx));
                         e.addErrorNote(
                             "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, opt.get().type,
-                                                                        corresponding->get().type);
+                        e.addErrorSections(move(errorDetailsCollector));
                     }
                 }
             } else if (absl::c_any_of(right.kw.required,
@@ -378,8 +375,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                                left.kw.rest->get().show(ctx), left.kw.rest->get().type.show(ctx));
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, left.kw.rest->get().type,
-                                                                right.kw.rest->get().type);
+                e.addErrorSections(move(errorDetailsCollector));
             }
         }
     }
@@ -421,8 +417,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                                superMethodBlkArg.show(ctx), superMethodBlkArg.type.show(ctx));
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, superMethodBlkArg.type,
-                                                                methodBlkArg.type);
+                e.addErrorSections(move(errorDetailsCollector));
             }
         }
     }
@@ -443,8 +438,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Super method defined here with return type `{}`",
                                superReturn.show(ctx));
                 e.addErrorNote("A method's return type must be a subtype of the return type on the super method.");
-                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, superReturn,
-                                                                methodReturn);
+                e.addErrorSections(move(errorDetailsCollector));
             }
         }
     }
@@ -595,13 +589,13 @@ core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef
                                 const core::ClassOrModuleRef ancestor) {
     for (const auto &anc : classDef.ancestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc);
-        if (ancConst != nullptr && ancConst->symbol.dealias(gs) == ancestor) {
+        if (ancConst != nullptr && ancConst->symbol().dealias(gs) == ancestor) {
             return anc.loc();
         }
     }
     for (const auto &anc : classDef.singletonAncestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc);
-        if (ancConst != nullptr && ancConst->symbol.dealias(gs) == ancestor) {
+        if (ancConst != nullptr && ancConst->symbol().dealias(gs) == ancestor) {
             return anc.loc();
         }
     }
@@ -789,7 +783,7 @@ void validateSuperClass(core::Context ctx, const core::ClassOrModuleRef sym, con
     }
 
     if (auto cnst = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front())) {
-        if (cnst->symbol == core::Symbols::todo()) {
+        if (cnst->symbol() == core::Symbols::todo()) {
             return;
         }
     }
@@ -1200,11 +1194,11 @@ public:
         }
 
         auto id = ast::cast_tree<ast::ConstantLit>(send.recv);
-        if (id == nullptr || !id->symbol.exists() || !id->symbol.isClassOrModule()) {
+        if (id == nullptr || !id->symbol().exists() || !id->symbol().isClassOrModule()) {
             return;
         }
 
-        auto symbol = id->symbol.asClassOrModuleRef().data(ctx);
+        auto symbol = id->symbol().asClassOrModuleRef().data(ctx);
         if (!symbol->flags.isAbstract) {
             return;
         }
@@ -1219,9 +1213,9 @@ public:
         // there was no user defined .new method, which warrants an error.
         if (method_new.data(ctx)->owner == core::Symbols::Class()) {
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::AbstractClassInstantiated)) {
-                auto symbolName = id->symbol.show(ctx);
+                auto symbolName = id->symbol().show(ctx);
                 e.setHeader("Attempt to instantiate abstract class `{}`", symbolName);
-                e.addErrorLine(id->symbol.loc(ctx), "`{}` defined here", symbolName);
+                e.addErrorLine(id->symbol().loc(ctx), "`{}` defined here", symbolName);
             }
         }
     }

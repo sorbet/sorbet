@@ -8,7 +8,7 @@ title: Quick Reference
 
 ## Enabling type checking
 
-To [enable static checking](static.md) with `srb`, add this line (called a
+To [enable static checking](static.md) with Sorbet, add this line (called a
 sigil) to the top of your Ruby file:
 
 ```ruby
@@ -46,10 +46,10 @@ class Main
 end
 ```
 
-Now `srb` **and** `sorbet-runtime` will check that our `Main.main` method is
+Now Sorbet **and** `sorbet-runtime` will check that our `Main.main` method is
 given only `String`s and returns only `Integer`s:
 
-- `srb` will do this with [static checks](static.md).
+- Sorbet will do this with [static checks](static.md).
 - `sorbet-runtime` will do this by wrapping `Main.main` with
   [dynamic checks](runtime.md) that run every time the method is called.
 

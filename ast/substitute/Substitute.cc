@@ -12,17 +12,20 @@ private:
     T &subst;
 
     void substClassName(core::MutableContext ctx, ExpressionPtr &node) {
-        auto constLit = cast_tree<UnresolvedConstantLit>(node);
-        if (constLit == nullptr) { // uncommon case. something is strange
-            if (isa_tree<EmptyTree>(node)) {
+        ExpressionPtr *cur = &node;
+        while (true) {
+            auto constLit = cast_tree<UnresolvedConstantLit>(*cur);
+            if (constLit == nullptr) { // uncommon case. something is strange
+                if (isa_tree<EmptyTree>(*cur)) {
+                    return;
+                }
+                TreeWalk::apply(ctx, *this, *cur);
                 return;
             }
-            TreeWalk::apply(ctx, *this, node);
-            return;
-        }
 
-        substClassName(ctx, constLit->scope);
-        constLit->cnst = subst.substituteSymbolName(constLit->cnst);
+            constLit->cnst = subst.substituteSymbolName(constLit->cnst);
+            cur = &constLit->scope;
+        }
     }
 
     void substArg(core::MutableContext ctx, ExpressionPtr &argp) {

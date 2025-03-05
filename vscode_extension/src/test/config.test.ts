@@ -97,7 +97,6 @@ const fooLspConfig = new SorbetLspConfig({
   id: "foo",
   name: "FooFoo",
   description: "The foo config",
-  cwd: "${workspaceFolder}", // eslint-disable-line no-template-curly-in-string
   env: {},
   command: ["foo", "on", "you"],
 });
@@ -106,7 +105,6 @@ const barLspConfig = new SorbetLspConfig({
   id: "bar",
   name: "BarBar",
   description: "The bar config",
-  cwd: "${workspaceFolder}/bar", // eslint-disable-line no-template-curly-in-string
   env: {},
   command: ["I", "heart", "bar", "bee", "que"],
 });
@@ -142,11 +140,6 @@ suite("SorbetLspConfig", () => {
       "three",
       "Modifying ctor description should not affect object",
     );
-    assert.strictEqual(
-      lspConfig.cwd,
-      "four",
-      "Modifying ctor cwd should not affect object",
-    );
     assert.deepStrictEqual(
       lspConfig.command,
       ["five", "six"],
@@ -169,7 +162,6 @@ suite("SorbetLspConfig", () => {
       new SorbetLspConfig({ ...json, id: "different id" }),
       new SorbetLspConfig({ ...json, name: "different name" }),
       new SorbetLspConfig({ ...json, description: "different description" }),
-      new SorbetLspConfig({ ...json, cwd: "different cwd" }),
       new SorbetLspConfig({ ...json, command: ["different", "command"] }),
       new SorbetLspConfig({ ...json, env: { different: "value" } }),
       undefined,

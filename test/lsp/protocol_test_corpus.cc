@@ -968,4 +968,16 @@ TEST_CASE_FIXTURE(ProtocolTest, "OverloadedStdlibSymbolWithMonkeyPatches") {
     assertErrorDiagnostics(send(*openFile(loc->uri, kernelRBIText)), {});
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "IgnoresFilesWithUnexpectedExtensions") {
+    const bool supportsMarkdown = false;
+    const bool supportsCodeActionResolve = true;
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->supportsSorbetURIs = true;
+    assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(initOptions)), {});
+
+    // Send a file with invalid ruby and an extension that we should ignore, and check that we don't see any diagnostics
+    // in response.
+    assertErrorDiagnostics(send(*openFile("not-ruby.txt", "module Kernel\n")), {});
+}
+
 } // namespace sorbet::test::lsp

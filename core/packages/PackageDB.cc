@@ -91,6 +91,16 @@ public:
         return nullopt;
     }
 
+    bool causesLayeringViolation(const core::packages::PackageDB &packageDB, const PackageInfo &otherPkg) const {
+        notImplemented();
+        return false;
+    }
+
+    core::packages::StrictDependenciesLevel minimumStrictDependenciesLevel() const {
+        notImplemented();
+        return core::packages::StrictDependenciesLevel::False;
+    }
+
     std::optional<ImportType> importsPackage(MangledName mangledName) const {
         notImplemented();
         return nullopt;

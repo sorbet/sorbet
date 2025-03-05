@@ -604,7 +604,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::PackageSpecRegistry());
 
     // PackageSpec is a class that can be subclassed.
-    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpec());
+    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), Names::Constants::PackageSpec());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::PackageSpec());
 
@@ -1730,7 +1730,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     return name;
 }
 
-FileRef GlobalState::enterFile(const shared_ptr<File> &file) {
+FileRef GlobalState::enterFile(shared_ptr<File> file) {
     ENFORCE_NO_TIMER(!fileTableFrozen);
 
     SLOW_DEBUG_ONLY(for (auto &f
@@ -1742,9 +1742,10 @@ FileRef GlobalState::enterFile(const shared_ptr<File> &file) {
         }
     })
 
-    files.emplace_back(file);
+    auto path = file->path();
+    files.emplace_back(std::move(file));
     auto ret = FileRef(filesUsed() - 1);
-    fileRefByPath[string(file->path())] = ret;
+    fileRefByPath[path] = ret;
     return ret;
 }
 
@@ -1753,16 +1754,15 @@ FileRef GlobalState::enterFile(string_view path, string_view source) {
         make_shared<File>(string(path.begin(), path.end()), string(source.begin(), source.end()), File::Type::Normal));
 }
 
-FileRef GlobalState::enterNewFileAt(const shared_ptr<File> &file, FileRef id) {
+FileRef GlobalState::enterNewFileAt(shared_ptr<File> file, FileRef id) {
     ENFORCE_NO_TIMER(!fileTableFrozen);
     ENFORCE_NO_TIMER(id.id() < this->files.size());
     ENFORCE_NO_TIMER(this->files[id.id()]->sourceType == File::Type::NotYetRead);
     ENFORCE_NO_TIMER(this->files[id.id()]->path() == file->path());
 
     // was a tombstone before.
-    this->files[id.id()] = file;
-    FileRef result(id);
-    return result;
+    this->files[id.id()] = std::move(file);
+    return id;
 }
 
 FileRef GlobalState::reserveFileRef(string path) {
@@ -2086,6 +2086,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->runningUnderAutogen = this->runningUnderAutogen;
     result->censorForSnapshotTests = this->censorForSnapshotTests;
     result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
+    result->rbsSignaturesEnabled = this->rbsSignaturesEnabled;
     result->requiresAncestorEnabled = this->requiresAncestorEnabled;
     result->ruby3KeywordArgs = this->ruby3KeywordArgs;
     result->typedSuper = this->typedSuper;
@@ -2186,6 +2187,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndex() const {
     result->runningUnderAutogen = this->runningUnderAutogen;
     result->censorForSnapshotTests = this->censorForSnapshotTests;
     result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
+    result->rbsSignaturesEnabled = this->rbsSignaturesEnabled;
     result->requiresAncestorEnabled = this->requiresAncestorEnabled;
     result->ruby3KeywordArgs = this->ruby3KeywordArgs;
     result->typedSuper = this->typedSuper;
@@ -2334,10 +2336,10 @@ void GlobalState::markAsPayload() {
     }
 }
 
-void GlobalState::replaceFile(FileRef whatFile, const shared_ptr<File> &withWhat) {
+void GlobalState::replaceFile(FileRef whatFile, shared_ptr<File> withWhat) {
     ENFORCE_NO_TIMER(whatFile.id() < filesUsed());
     ENFORCE_NO_TIMER(whatFile.dataAllowingUnsafe(*this).path() == withWhat->path());
-    files[whatFile.id()] = withWhat;
+    files[whatFile.id()] = std::move(withWhat);
 }
 
 FileRef GlobalState::findFileByPath(string_view path) const {

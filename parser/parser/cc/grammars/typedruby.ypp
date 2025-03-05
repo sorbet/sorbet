@@ -2623,6 +2623,11 @@ opt_block_args_tail:
                       $$ = args;
                     }
                 | f_arg tCOMMA
+                    {
+                      auto &args = $1;
+                      args->emplace_back(driver.build.implicit_restarg(self, $2));
+                      $$ = args;
+                    }
                 | f_arg tCOMMA                       f_rest_arg tCOMMA f_arg opt_block_args_tail
                     {
                       auto &args = $1;

@@ -168,6 +168,16 @@ string_view sorbet::FileOps::getExtension(string_view path) {
     return path.substr(found + 1);
 }
 
+bool sorbet::FileOps::hasAllowedExtension(std::string_view path, const UnorderedSet<std::string> &extensions) {
+    auto dotLocation = path.rfind('.');
+    if (dotLocation == string_view::npos) {
+        return false;
+    }
+
+    string_view ext = path.substr(dotLocation);
+    return extensions.contains(ext);
+}
+
 int sorbet::FileOps::readFd(int fd, absl::Span<char> output, int timeoutMs) {
     // Prepare to use select()
     fd_set set;
@@ -353,13 +363,7 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                             continue;
                         }
                     } else {
-                        auto dotLocation = nameview.rfind('.');
-                        if (dotLocation == string_view::npos) {
-                            continue;
-                        }
-
-                        string_view ext = nameview.substr(dotLocation);
-                        if (!extensions.contains(ext)) {
+                        if (!sorbet::FileOps::hasAllowedExtension(nameview, extensions)) {
                             continue;
                         }
                     }
@@ -486,17 +490,19 @@ uint32_t sorbet::nextPowerOfTwo(uint32_t v) {
 
 vector<int> sorbet::findLineBreaks(string_view s) {
     vector<int> res;
-    int i = -1;
     res.emplace_back(-1);
-    for (auto c : s) {
-        i++;
-        if (c == '\n') {
-            res.emplace_back(i);
+    size_t next_pos = 0;
+    while (true) {
+        auto pos = s.find_first_of('\n', next_pos);
+        if (pos == string_view::npos) {
+            break;
         }
+
+        res.emplace_back((int)pos);
+        next_pos = pos + 1;
     }
-    // We start at -1 so the last character of the file is actually i+1
-    res.emplace_back(i + 1);
-    ENFORCE(i + 1 == s.size());
+
+    res.emplace_back(s.size());
     return res;
 }
 

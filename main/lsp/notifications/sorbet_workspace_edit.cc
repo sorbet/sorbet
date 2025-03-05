@@ -57,7 +57,7 @@ void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
 
 void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
     if (params->updates.size() <= config.opts.lspMaxFilesOnFastPath) {
-        updates = make_unique<LSPFileUpdates>(indexer.commitEdit(*params));
+        updates = indexer.commitEdit(*params);
     } else {
         // HACK: Too many files to `commitEdit` serially. Index in `runSpecial`.
         this->indexer = &indexer;
@@ -86,7 +86,7 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
     // Checks in debug builds that we have exactly 1 diagnostic latency timer per edit
     ENFORCE(latencyTimer == nullptr || newEditCount == params->diagnosticLatencyTimers.size());
 
-    typechecker.typecheckOnFastPath(move(*updates), move(params->diagnosticLatencyTimers));
+    typechecker.typecheckOnFastPath(std::move(updates), move(params->diagnosticLatencyTimers));
     prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", newEditCount - 1);
 }
 
@@ -100,7 +100,7 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
         // later in this function.
         // This is really gnarly; there's got to be a cleaner way to do threading here. We can't move this out because
         // we need `workers`, which is a resource that is explicitly managed by typechecking.
-        updates = make_unique<LSPFileUpdates>(indexer->commitEdit(*params, workers));
+        updates = indexer->commitEdit(*params, workers);
     } else {
         ENFORCE(updates != nullptr);
     }
@@ -120,7 +120,7 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     ENFORCE(latencyTimer == nullptr || newEditCount == params->diagnosticLatencyTimers.size());
 
     // Only report stats if the edit was committed.
-    if (typechecker.typecheck(move(*updates), workers, move(params->diagnosticLatencyTimers))) {
+    if (typechecker.typecheck(std::move(updates), workers, move(params->diagnosticLatencyTimers))) {
         prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", newEditCount - 1);
     } else if (latencyTimer != nullptr) {
         // Don't report a latency value for canceled slow paths.

@@ -5,7 +5,7 @@ import * as sinon from "sinon";
 
 import { createLogStub } from "../testUtils";
 import { copySymbolToClipboard } from "../../commands/copySymbolToClipboard";
-import { SorbetLanguageClient } from "../../languageClient";
+import { SorbetLanguageClient } from "../../sorbetLanguageClient";
 import { LogLevel } from "../../log";
 import { SorbetExtensionContext } from "../../sorbetExtensionContext";
 import { SorbetStatusProvider } from "../../sorbetStatusProvider";

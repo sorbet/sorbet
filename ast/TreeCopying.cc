@@ -160,11 +160,14 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
 
         case Tag::ConstantLit: {
             auto *exp = reinterpret_cast<const ConstantLit *>(tree);
-            ExpressionPtr originalC;
-            if (exp->original) {
-                originalC = deepCopy(avoid, exp->original);
+            std::unique_ptr<UnresolvedConstantLit> originalC;
+            if (auto *original = exp->original()) {
+                originalC =
+                    make_unique<UnresolvedConstantLit>(original->loc, deepCopy(avoid, original->scope), original->cnst);
+                return make_expression<ConstantLit>(exp->symbol(), move(originalC));
             }
-            return make_expression<ConstantLit>(exp->loc, exp->symbol, move(originalC));
+
+            return make_expression<ConstantLit>(exp->loc(), exp->symbol());
         }
 
         case Tag::ZSuperArgs: {
@@ -185,6 +188,11 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
         case Tag::RuntimeMethodDefinition: {
             auto *exp = reinterpret_cast<const RuntimeMethodDefinition *>(tree);
             return make_expression<RuntimeMethodDefinition>(exp->loc, exp->name, exp->isSelfMethod);
+        }
+
+        case Tag::Self: {
+            auto *exp = reinterpret_cast<const Self *>(tree);
+            return make_expression<Self>(exp->loc);
         }
     }
 }

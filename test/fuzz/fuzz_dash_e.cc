@@ -32,7 +32,7 @@ unique_ptr<core::GlobalState> buildInitialGlobalState() {
 
     logger->trace("Doing on-start initialization");
 
-    payload::createInitialGlobalState(gs, *opts, kvstore);
+    payload::createInitialGlobalState(*gs, *opts, kvstore);
     return gs;
 }
 
@@ -64,7 +64,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     vector<core::FileRef> inputFiles;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
-        auto file = gs->enterFile(string("fuzz.rb"), inputData);
+        auto file = gs->enterFile("fuzz.rb", inputData);
         inputFiles.emplace_back(file);
         file.data(*gs).strictLevel = core::StrictLevel::True;
     }
@@ -72,7 +72,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     indexed = realmain::pipeline::index(*gs, absl::Span<core::FileRef>(inputFiles), *opts, *workers, kvstore);
     // We don't run this fuzzer with any packager options, so we can skip pipeline::package()
     auto foundHashes = nullptr;
-    indexed = move(realmain::pipeline::nameAndResolve(gs, move(indexed), *opts, *workers, foundHashes).result());
+    indexed = move(realmain::pipeline::nameAndResolve(*gs, move(indexed), *opts, *workers, foundHashes).result());
     realmain::pipeline::typecheck(*gs, move(indexed), *opts, *workers);
     return 0;
 }

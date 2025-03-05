@@ -8,6 +8,32 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
+namespace {
+unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::UnresolvedConstantLit *cons) {
+    if (!cons) {
+        return nullptr;
+    }
+
+    auto scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cons->scope);
+    if (!scopeCnst) {
+        if (ast::isa_tree<ast::EmptyTree>(cons->scope)) {
+            return make_unique<ast::UnresolvedConstantLit>(cons->loc, ast::MK::EmptyTree(), cons->cnst);
+        }
+        auto id = ast::cast_tree<ast::ConstantLit>(cons->scope);
+        if (id == nullptr) {
+            return nullptr;
+        }
+        ENFORCE(id->symbol() == core::Symbols::root());
+        return make_unique<ast::UnresolvedConstantLit>(cons->loc, ASTUtil::dupType(cons->scope), cons->cnst);
+    }
+    auto scope = ASTUtil::dupType(cons->scope);
+    if (scope == nullptr) {
+        return nullptr;
+    }
+    return make_unique<ast::UnresolvedConstantLit>(cons->loc, std::move(scope), cons->cnst);
+}
+} // namespace
+
 ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
     auto send = ast::cast_tree<ast::Send>(orig);
     if (send) {
@@ -56,11 +82,15 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
 
     auto ident = ast::cast_tree<ast::ConstantLit>(orig);
     if (ident) {
-        auto orig = dupType(ident->original);
-        if (ident->original && !orig) {
+        auto orig = dupUnresolvedConstantLit(ident->original());
+        if (ident->original() && !orig) {
             return nullptr;
         }
-        return ast::make_expression<ast::ConstantLit>(ident->loc, ident->symbol, std::move(orig));
+        if (orig == nullptr) {
+            return ast::make_expression<ast::ConstantLit>(ident->loc(), ident->symbol());
+        }
+
+        return ast::make_expression<ast::ConstantLit>(ident->symbol(), std::move(orig));
     }
 
     auto arrayLit = ast::cast_tree<ast::Array>(orig);
@@ -104,28 +134,8 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         return ast::MK::Hash(hashLit->loc, std::move(keys), std::move(values));
     }
 
-    auto cons = ast::cast_tree<ast::UnresolvedConstantLit>(orig);
-    if (!cons) {
-        return nullptr;
-    }
-
-    auto scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cons->scope);
-    if (!scopeCnst) {
-        if (ast::isa_tree<ast::EmptyTree>(cons->scope)) {
-            return ast::MK::UnresolvedConstant(cons->loc, ast::MK::EmptyTree(), cons->cnst);
-        }
-        auto id = ast::cast_tree<ast::ConstantLit>(cons->scope);
-        if (id == nullptr) {
-            return nullptr;
-        }
-        ENFORCE(id->symbol == core::Symbols::root());
-        return ast::MK::UnresolvedConstant(cons->loc, dupType(cons->scope), cons->cnst);
-    }
-    auto scope = dupType(cons->scope);
-    if (scope == nullptr) {
-        return nullptr;
-    }
-    return ast::MK::UnresolvedConstant(cons->loc, std::move(scope), cons->cnst);
+    return ast::ExpressionPtr::fromUnique(
+        dupUnresolvedConstantLit(ast::cast_tree<ast::UnresolvedConstantLit>(orig).get()));
 }
 
 bool ASTUtil::hasHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name) {
@@ -387,6 +397,48 @@ pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext 
         }
     }
     return make_pair(res, loc);
+}
+
+bool ASTUtil::isRootScopedSyntacticConstant(const ast::ExpressionPtr &expr,
+                                            absl::Span<const core::NameRef> constantName) {
+    auto *p = &expr;
+
+    for (auto it = constantName.rbegin(), end = constantName.rend(); it != end; ++it) {
+        auto ucl = ast::cast_tree<ast::UnresolvedConstantLit>(*p);
+
+        if (ucl == nullptr || ucl->cnst != *it) {
+            return false;
+        }
+
+        p = &ucl->scope;
+    }
+
+    return ast::MK::isRootScope(*p);
+}
+
+std::optional<ASTUtil::DuplicateArg> ASTUtil::findDuplicateArg(core::MutableContext ctx, const ast::Send *send) {
+    if (!send) {
+        return std::nullopt;
+    }
+
+    UnorderedMap<core::NameRef, core::LocOffsets> seenNames;
+
+    for (auto &arg : send->posArgs()) {
+        auto lit = ast::cast_tree<ast::Literal>(arg);
+        if (!lit || !lit->isName()) {
+            continue;
+        }
+
+        auto name = lit->asName();
+        auto loc = lit->loc;
+
+        auto [it, inserted] = seenNames.emplace(name, loc);
+        if (!inserted) {
+            return DuplicateArg{name, it->second, loc};
+        }
+    }
+
+    return std::nullopt;
 }
 
 } // namespace sorbet::rewriter

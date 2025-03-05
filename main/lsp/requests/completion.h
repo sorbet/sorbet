@@ -42,8 +42,8 @@ class CompletionTask final : public LSPRequestTask {
     static SearchParams searchParamsForEmptyAssign(const core::GlobalState &gs, core::Loc queryLoc,
                                                    core::MethodRef enclosingMethod,
                                                    core::lsp::ConstantResponse::Scopes scopes);
-    std::vector<std::unique_ptr<CompletionItem>> getCompletionItems(LSPTypecheckerDelegate &typechecker,
-                                                                    SearchParams &params);
+    std::vector<std::unique_ptr<CompletionItem>>
+    getCompletionItems(LSPTypecheckerDelegate &typechecker, SearchParams &params, const ast::ParsedFile &resolved);
 
     std::unique_ptr<CompletionItem> getCompletionItemForUntyped(const core::GlobalState &gs, core::Loc queryLoc,
                                                                 size_t sortIdx, std::string_view message);
@@ -51,8 +51,9 @@ class CompletionTask final : public LSPRequestTask {
     std::unique_ptr<CompletionItem> getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker,
                                                                core::DispatchResult &dispatchResult,
                                                                core::MethodRef what, const core::TypePtr &receiverType,
-                                                               core::Loc queryLoc, std::string_view prefix,
-                                                               size_t sortIdx, uint16_t totalArgs) const;
+                                                               core::Loc queryLoc, const ast::ParsedFile &resolved,
+                                                               std::string_view prefix, size_t sortIdx,
+                                                               uint16_t totalArgs) const;
 
 public:
     CompletionTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<CompletionParams> params);

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: true
 
-class ::PackageSpec
+class ::Sorbet::Private::Static::PackageSpec
   extend T::Sig
 
   # Define the things referenced in __package.rb

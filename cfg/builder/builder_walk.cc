@@ -108,7 +108,7 @@ pair<LocalRef, bool> unresolvedIdent2Local(CFGContext cctx, const ast::Unresolve
 
 bool sendRecvIsT(ast::Send &s) {
     if (auto cnst = ast::cast_tree<ast::ConstantLit>(s.recv)) {
-        return cnst->symbol == core::Symbols::T();
+        return cnst->symbol() == core::Symbols::T();
     } else {
         return false;
     }
@@ -125,7 +125,7 @@ bool isKernelLambda(ast::Send &s) {
     // We could revisit this in the future but for now let's be conservative.
 
     auto cnst = ast::cast_tree<ast::ConstantLit>(s.recv);
-    return cnst != nullptr && cnst->symbol == core::Symbols::Kernel();
+    return cnst != nullptr && cnst->symbol() == core::Symbols::Kernel();
 }
 
 InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
@@ -191,7 +191,7 @@ ast::Send *isKernelProcOrLambda(ast::ExpressionPtr &expr) {
     }
 
     auto recv = ast::cast_tree<ast::ConstantLit>(send->recv);
-    if (recv == nullptr || recv->symbol != core::Symbols::Kernel()) {
+    if (recv == nullptr || recv->symbol() != core::Symbols::Kernel()) {
         return nullptr;
     }
 
@@ -449,16 +449,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
             [&](ast::ConstantLit &a) {
                 auto aliasName = cctx.newTemporary(core::Names::cfgAlias());
-                if (a.symbol == core::Symbols::StubModule()) {
-                    current->exprs.emplace_back(aliasName, a.loc, make_insn<Alias>(core::Symbols::untyped()));
+                auto loc = a.loc();
+
+                if (auto sym = a.symbol(); sym == core::Symbols::StubModule()) {
+                    current->exprs.emplace_back(aliasName, loc, make_insn<Alias>(core::Symbols::untyped()));
                 } else {
-                    current->exprs.emplace_back(aliasName, a.loc, make_insn<Alias>(a.symbol));
+                    current->exprs.emplace_back(aliasName, loc, make_insn<Alias>(sym));
                 }
 
-                synthesizeExpr(current, cctx.target, a.loc, make_insn<Ident>(aliasName));
+                synthesizeExpr(current, cctx.target, loc, make_insn<Ident>(aliasName));
 
-                if (a.original) {
-                    auto orig = ast::cast_tree<ast::UnresolvedConstantLit>(a.original);
+                if (auto *orig = a.original()) {
                     // Empirically, these are the only two cases we've needed so far to service the
                     // LSP requests we want (hover and completion), but that doesn't mean these are
                     // the **only** we'll ever want.
@@ -478,10 +479,15 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                             make_insn<Ident>(cctx.inWhat.enterLocal(a.localVariable)));
                 ret = current;
             },
+            [&](const ast::Self &a) {
+                // We still model `self` in the CFG as a local variable, to support `bind`
+                current->exprs.emplace_back(cctx.target, a.loc, make_insn<Ident>(LocalRef::selfVariable()));
+                ret = current;
+            },
             [&](ast::Assign &a) {
                 LocalRef lhs;
                 if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a.lhs)) {
-                    lhs = global2Local(cctx, lhsIdent->symbol);
+                    lhs = global2Local(cctx, lhsIdent->symbol());
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a.lhs)) {
                     lhs = cctx.inWhat.enterLocal(lhsLocal->localVariable);
                 } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a.lhs)) {
@@ -555,7 +561,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     }
 
                     auto &posArg0 = s.getPosArg(0);
-                    if (!ast::isa_tree<ast::Local>(posArg0) && !ast::isa_tree<ast::UnresolvedIdent>(posArg0)) {
+                    if (!ast::isa_tree<ast::Local>(posArg0) && !ast::isa_tree<ast::UnresolvedIdent>(posArg0) &&
+                        !ast::isa_tree<ast::Self>(posArg0)) {
                         if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
                             // Providing a send is the most common way T.absurd is misused, so we provide a
                             // little extra hint in the error message in that case.

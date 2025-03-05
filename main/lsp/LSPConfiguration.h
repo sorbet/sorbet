@@ -122,6 +122,9 @@ public:
     std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc) const;
     bool isFileIgnored(std::string_view filePath) const;
 
+    // Returns true if this path has an extension that sorbet can handle.
+    bool hasAllowedExtension(std::string_view filePath) const;
+
     /**
      * Returns 'true' if the URI corresponds to a path within the active workspace.
      * Note: Does *not* return 'true' for URIs corresponding to sorbet: URIs. While these are valid URIs, they are not

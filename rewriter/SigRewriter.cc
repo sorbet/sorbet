@@ -1,6 +1,7 @@
 #include "rewriter/SigRewriter.h"
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
+#include "rewriter/util/Util.h"
 
 using namespace std;
 namespace sorbet::rewriter {
@@ -9,18 +10,14 @@ namespace {
 
 bool isTSigWithoutRuntime(ast::ExpressionPtr &expr) {
     if (auto cnst = ast::cast_tree<ast::ConstantLit>(expr)) {
-        return cnst->symbol == core::Symbols::T_Sig_WithoutRuntime();
+        return cnst->symbol() == core::Symbols::T_Sig_WithoutRuntime();
     } else {
-        auto withoutRuntime = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-        if (withoutRuntime == nullptr || withoutRuntime->cnst != core::Names::Constants::WithoutRuntime()) {
-            return false;
-        }
-        auto sig = ast::cast_tree<ast::UnresolvedConstantLit>(withoutRuntime->scope);
-        if (sig == nullptr || sig->cnst != core::Names::Constants::Sig()) {
-            return false;
-        }
-        auto t = ast::cast_tree<ast::UnresolvedConstantLit>(sig->scope);
-        return t != nullptr && t->cnst == core::Names::Constants::T() && ast::MK::isRootScope(t->scope);
+        static constexpr core::NameRef tSigWithoutRuntime[] = {
+            core::Names::Constants::T(),
+            core::Names::Constants::Sig(),
+            core::Names::Constants::WithoutRuntime(),
+        };
+        return ASTUtil::isRootScopedSyntacticConstant(expr, tSigWithoutRuntime);
     }
 }
 

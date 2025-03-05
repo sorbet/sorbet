@@ -5,19 +5,8 @@
 
 namespace sorbet::rewriter {
 
-namespace {
-bool isT(const ast::ExpressionPtr &expr) {
-    auto t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    if (t == nullptr || t->cnst != core::Names::Constants::T()) {
-        return false;
-    }
-    return ast::MK::isRootScope(t->scope);
-}
-
-} // namespace
-
 ast::ExpressionPtr TypeAssertion::run(core::MutableContext ctx, ast::Send *send) {
-    if (!isT(send->recv)) {
+    if (!ast::MK::isT(send->recv)) {
         return nullptr;
     }
 

@@ -16,7 +16,7 @@ public:
     // in the scope of a block with a non-zero scope id.
     uint32_t unique;
 
-    LocalVariable(NameRef name, uint32_t unique) : _name(name), unique(unique) {}
+    LocalVariable(NameRef name, uint32_t unique);
 
     LocalVariable() = default;
 

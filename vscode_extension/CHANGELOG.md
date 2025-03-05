@@ -1,5 +1,16 @@
 # Version history
 
+## 0.3.40
+- Upgrade VS Language Client to [protocol 3.17.3](https://github.com/microsoft/vscode-languageserver-node/blob/main/README.md#3173-protocol-810-json-rpc-810-client-and-810-server)
+- Remove `cwd` from Sorbet configuration (it has never been used).
+
+## 0.3.39
+- Fix: `Copy Symbol to Clipboard` fails to be enabled in remote devboxes.
+
+## 0.3.38
+- Sorbet can be disabled while in `Restarting` / `Initializing` loop.
+- `Copy Symbol to Clipboard` is enabled only for supported `file` and `sorbet` URI schemes.
+
 ## 0.3.26
 - Add option to toggle the auto-complete nudge in `typed: false` files
 

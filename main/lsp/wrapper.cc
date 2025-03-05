@@ -28,6 +28,7 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
         gs.suppressErrorClass(sorbet::core::errors::Resolver::OutOfOrderConstantAccess.code);
     }
 
+    gs.rbsSignaturesEnabled = options.rbsSignaturesEnabled;
     gs.requiresAncestorEnabled = options.requiresAncestorEnabled;
     gs.ruby3KeywordArgs = options.ruby3KeywordArgs;
     gs.typedSuper = options.typedSuper;
@@ -53,7 +54,7 @@ createGlobalStateAndOtherObjects(string_view rootPath, options::Options &options
     auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*typeErrorsConsoleOut, *loggerOut));
 
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(loggerOut, options);
-    payload::createInitialGlobalState(gs, options, kvstore);
+    payload::createInitialGlobalState(*gs, options, kvstore);
     setRequiredLSPOptions(*gs, options);
     return make_pair(move(gs), OwnedKeyValueStore::abort(move(kvstore)));
 }

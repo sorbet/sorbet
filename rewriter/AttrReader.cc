@@ -12,21 +12,10 @@ namespace sorbet::rewriter {
 
 namespace {
 
-// these helpers work on a purely syntactic level. for instance, this function determines if an expression is `T`,
-// either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
-// users, but we don't know that information in the Rewriter passes.
-bool isT(const ast::ExpressionPtr &expr) {
-    auto t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    if (t == nullptr || t->cnst != core::Names::Constants::T()) {
-        return false;
-    }
-    return ast::MK::isRootScope(t->scope);
-}
-
 bool isTNilableOrUntyped(const ast::ExpressionPtr &expr) {
     auto send = ast::cast_tree<ast::Send>(expr);
     return send != nullptr && (send->fun == core::Names::nilable() || send->fun == core::Names::untyped()) &&
-           isT(send->recv);
+           ast::MK::isT(send->recv);
 }
 
 ast::Send *findSendReturns(ast::Send *sharedSig) {
@@ -108,7 +97,7 @@ ast::ExpressionPtr toWriterSigForName(ast::Send *sharedSig, const core::NameRef 
     ast::Send *cur = body;
     while (cur != nullptr) {
         auto recv = ast::cast_tree<ast::ConstantLit>(cur->recv);
-        if ((cur->recv.isSelfReference()) || (recv && recv->symbol == core::Symbols::Sorbet())) {
+        if ((cur->recv.isSelfReference()) || (recv && recv->symbol() == core::Symbols::Sorbet())) {
             auto loc = resultType.loc();
             auto params = ast::MK::Send0(loc, move(cur->recv), core::Names::params(), loc.copyWithZeroLength());
             ast::cast_tree_nonnull<ast::Send>(params).addKwArg(ast::MK::Symbol(nameLoc, name), move(resultType));

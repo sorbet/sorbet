@@ -6,6 +6,7 @@
 #include "core/core.h"
 #include "core/errors/rewriter.h"
 #include "rewriter/rewriter.h"
+#include "rewriter/util/Util.h"
 
 using namespace std;
 
@@ -23,21 +24,11 @@ bool isTEnum(core::MutableContext ctx, ast::ClassDef *klass) {
     if (klass->kind != ast::ClassDef::Kind::Class || klass->ancestors.empty()) {
         return false;
     }
-    auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(klass->ancestors.front());
-    if (cnst == nullptr) {
-        return false;
-    }
-    if (cnst->cnst != core::Names::Constants::Enum()) {
-        return false;
-    }
-    auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope);
-    if (scope == nullptr) {
-        return false;
-    }
-    if (scope->cnst != core::Names::Constants::T()) {
-        return false;
-    }
-    return ast::MK::isRootScope(scope->scope);
+    static constexpr core::NameRef tEnum[] = {
+        core::Names::Constants::T(),
+        core::Names::Constants::Enum(),
+    };
+    return ASTUtil::isRootScopedSyntacticConstant(klass->ancestors.front(), tEnum);
 }
 
 ast::Send *asEnumsDo(ast::ExpressionPtr &stat) {

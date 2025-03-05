@@ -215,10 +215,10 @@ sig {void}
 
 Using `void` instead of `returns(...)` does a number of things:
 
-- Statically, `srb` will let us return any value (for example, returning either
+- Statically, Sorbet will let us return any value (for example, returning either
   `5` or `nil` is valid).
 
-- Also statically, `srb` will error when typed code tries to inspect the result
+- Also statically, Sorbet will error when typed code tries to inspect the result
   of a `void` method.
 
 - In the runtime, `sorbet-runtime` will _throw away_ the result of our method,
@@ -340,7 +340,7 @@ calls:
 
   In a [gradual type system](gradual.md) like Sorbet, the static checks can be
   turned off at any time. Having [runtime-validated](runtime.md) type
-  annotations gives greater confidence in the predictions that `srb`
+  annotations gives greater confidence in the predictions that Sorbet
   [makes statically](static.md).
 
 - Type assertions in code would be inevitable.

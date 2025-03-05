@@ -159,10 +159,10 @@ string levelToSigil(core::StrictLevel level) {
     }
 }
 
-core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
-    auto source = file.data(*gs).source();
+core::Loc findTyped(core::GlobalState &gs, core::FileRef file) {
+    auto source = file.data(gs).source();
 
-    if (file.data(*gs).originalSigil == core::StrictLevel::None) {
+    if (file.data(gs).originalSigil == core::StrictLevel::None) {
         if (source.length() >= 2 && source[0] == '#' && source[1] == '!') {
             int newline = source.find("\n", 0);
             return core::Loc(file, newline + 1, newline + 1);
@@ -237,6 +237,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
                     ++n;
                     auto &tree = indexed[idx];
+                    // TODO(jez) This does package-specific behavior without checking `--stripe-packages`!
                     if (tree.file.data(gs).isPackage()) {
                         continue;
                     }
@@ -438,11 +439,12 @@ int realmain(int argc, char *argv[]) {
     gs->semanticExtensions = move(extensions);
     vector<ast::ParsedFile> indexed;
 
+    gs->rbsSignaturesEnabled = opts.rbsSignaturesEnabled;
     gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
 
     logger->trace("building initial global state");
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(logger, opts);
-    payload::createInitialGlobalState(gs, opts, kvstore);
+    payload::createInitialGlobalState(*gs, opts, kvstore);
     if (opts.silenceErrors) {
         gs->silenceErrors = true;
     }
@@ -577,7 +579,7 @@ int realmain(int argc, char *argv[]) {
             hashing::Hashing::computeFileHashes(gs->getFiles(), *logger, *workers, opts);
         }
 
-        inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames);
+        inputFiles = pipeline::reserveFiles(*gs, opts.inputFileNames);
 
         if (opts.packageRBIGeneration) {
 #ifdef SORBET_REALMAIN_MIN
@@ -628,7 +630,7 @@ int realmain(int argc, char *argv[]) {
             // Indexing package files is by far the most expensive part of rbi generation. If we could instead select
             // only the package files that we know we need to load, it would cut down command-line rbi generation by
             // seconds.
-            auto packageFileRefs = pipeline::reserveFiles(gs, packageFiles);
+            auto packageFileRefs = pipeline::reserveFiles(*gs, packageFiles);
             auto packages = pipeline::index(*gs, absl::Span<core::FileRef>(packageFileRefs), opts, *workers, nullptr);
             {
                 core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*gs);
@@ -702,10 +704,13 @@ int realmain(int argc, char *argv[]) {
                     *gs, cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs,
                                                               *workers, indexed));
 
-                // First run: only the __package.rb files. This populates the packageDB
+                // Populate the packageDB by processing only the __package.rb files.
                 pipeline::setPackagerOptions(*gs, opts);
-                pipeline::package(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
-                // TODO(jez) Put the call to pipeline::name back here
+                pipeline::buildPackageDB(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
+                // Only need to compute hashes when running to compute a FileHash
+                auto foundHashes = nullptr;
+                auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
+                ENFORCE(!canceled, "There's no cancellation in batch mode");
             }
 
             auto nonPackageIndexed =
@@ -719,16 +724,8 @@ int realmain(int argc, char *argv[]) {
             cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers,
                                                  nonPackageIndexed);
 
-            // Second run: all the other files (the packageDB shouldn't change)
-            pipeline::package(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers);
-
-            {
-                // TODO(jez) Put this back after the call to `pipeline::package` in the stripePackages section
-                // Only need to compute hashes when running to compute a FileHash
-                auto foundHashes = nullptr;
-                auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
-                ENFORCE(!canceled, "There's no cancellation in batch mode");
-            }
+            // Now validate all the other files (the packageDB shouldn't change)
+            pipeline::validatePackagedFiles(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers);
 
             // Only need to compute hashes when running to compute a FileHash
             auto foundHashes = nullptr;
@@ -763,7 +760,7 @@ int realmain(int argc, char *argv[]) {
             runAutogen(*gs, opts, autogenCfg, *workers, indexed);
 #endif
         } else {
-            indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers).result());
+            indexed = move(pipeline::resolve(*gs, move(indexed), opts, *workers).result());
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
@@ -780,7 +777,7 @@ int realmain(int argc, char *argv[]) {
 
         // getAndClearHistogram ensures that we don't accidentally submit a high-cardinality histogram to statsd
         auto untypedUsages = getAndClearHistogram("untyped.usages");
-        pipeline::printFileTable(gs, opts, untypedUsages);
+        pipeline::printFileTable(*gs, opts, untypedUsages);
 
         if (!opts.minimizeRBI.empty()) {
 #ifdef SORBET_REALMAIN_MIN
@@ -798,7 +795,7 @@ int realmain(int argc, char *argv[]) {
             // project is a single RBI file.
             optsForMinimize.stripePackages = false;
 
-            Minimize::indexAndResolveForMinimize(gs, gsForMinimize, optsForMinimize, *workers, opts.minimizeRBI);
+            Minimize::indexAndResolveForMinimize(*gs, *gsForMinimize, optsForMinimize, *workers, opts.minimizeRBI);
             Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
 #endif
         }
@@ -831,7 +828,7 @@ int realmain(int argc, char *argv[]) {
                     // marked strict.
                     continue;
                 }
-                auto loc = findTyped(gs, file);
+                auto loc = findTyped(*gs, file);
                 if (auto e = gs->beginError(loc, core::errors::Infer::SuggestTyped)) {
                     auto sigil = levelToSigil(minErrorLevel);
                     e.setHeader("You could add `# typed: {}`", sigil);

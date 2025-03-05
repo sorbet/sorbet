@@ -19,6 +19,8 @@ class Context;
 
 namespace sorbet::core::packages {
 
+class PackageDB;
+
 enum class ImportType {
     Normal,
     Test,
@@ -35,6 +37,8 @@ enum class StrictDependenciesLevel {
     LayeredDag,
     Dag,
 };
+
+std::string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level);
 
 struct VisibleTo {
     std::vector<core::NameRef> packageName;
@@ -68,6 +72,12 @@ public:
     core::ClassOrModuleRef getPackageTestScope(const core::GlobalState &gs) const;
 
     virtual std::optional<ImportType> importsPackage(MangledName mangledName) const = 0;
+
+    // Is it a layering violation to import otherPkg from this package?
+    virtual bool causesLayeringViolation(const core::packages::PackageDB &packageDB,
+                                         const PackageInfo &otherPkg) const = 0;
+    // What is the minimum strict dependencies level that this package's imports must have?
+    virtual core::packages::StrictDependenciesLevel minimumStrictDependenciesLevel() const = 0;
 
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,

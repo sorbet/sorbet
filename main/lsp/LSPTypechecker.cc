@@ -73,64 +73,24 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
     LSPFileUpdates updates;
 
     // Initialize the global state for the indexer
-    {
-        initialGS->trackUntyped = currentConfig.getClientConfig().enableHighlightUntyped;
-        // Temporarily replace error queue, as it asserts that the same thread that created it uses it and we're
-        // going to use it on typechecker thread for this one operation.
-        auto savedErrorQueue = initialGS->errorQueue;
-        initialGS->errorQueue = make_shared<core::ErrorQueue>(savedErrorQueue->logger, savedErrorQueue->tracer,
-                                                              make_shared<core::NullFlusher>());
-
-        vector<ast::ParsedFile> indexed;
-        Timer timeit(config->logger, "initial_index");
-        ShowOperation op(*config, ShowOperation::Kind::Indexing);
-        vector<core::FileRef> inputFiles;
-        unique_ptr<const OwnedKeyValueStore> ownedKvstore = cache::ownIfUnchanged(*initialGS, move(kvstore));
-        {
-            Timer timeit(config->logger, "reIndexFromFileSystem");
-            inputFiles = pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
-            indexed.resize(initialGS->filesUsed());
-
-            auto asts = hashing::Hashing::indexAndComputeFileHashes(*initialGS, config->opts, *config->logger,
-                                                                    absl::Span<core::FileRef>(inputFiles), workers,
-                                                                    ownedKvstore);
-            // asts are in fref order, but we (currently) don't index and compute file hashes for payload files, so
-            // vector index != FileRef ID. Fix that by slotting them into `indexed`.
-            for (auto &ast : asts) {
-                int id = ast.file.id();
-                ENFORCE_NO_TIMER(id < indexed.size());
-                indexed[id] = move(ast);
-            }
-        }
-
-        cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(ownedKvstore)), config->opts, *initialGS,
-                                             workers, indexed);
-
-        ENFORCE_NO_TIMER(indexed.size() == initialGS->filesUsed());
-
-        updates.epoch = 0;
-        updates.typecheckingPath = TypecheckingPath::Slow;
-        updates.updatedFileIndexes = move(indexed);
-        updates.updatedGS = initialGS->deepCopy();
-
-        // Restore error queue, as initialGS will be used on the LSPLoop thread from now on.
-        initialGS->errorQueue = move(savedErrorQueue);
-    }
+    initialGS->trackUntyped = currentConfig.getClientConfig().enableHighlightUntyped;
 
     // We should always initialize with epoch 0.
-    this->initialized = true;
-    this->indexed = move(updates.updatedFileIndexes);
+    updates.epoch = 0;
+    updates.typecheckingPath = TypecheckingPath::Slow;
+    updates.updatedGS = std::move(initialGS);
+
     // Initialization typecheck is not cancelable.
     // TODO(jvilk): Make it preemptible.
-    auto committed = false;
     {
         const bool isIncremental = false;
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
-        committed = runSlowPath(move(updates), workers, errorFlusher, /* cancelable */ false);
-        epoch.committed = committed;
+        auto result = runSlowPath(updates, std::move(kvstore), workers, errorFlusher, SlowPathMode::Init);
+        epoch.committed = true;
+        ENFORCE(std::holds_alternative<std::unique_ptr<core::GlobalState>>(result));
+        initialGS = std::move(std::get<std::unique_ptr<core::GlobalState>>(result));
     }
-    ENFORCE(committed);
 
     // Unblock the indexer now that its state is fully initialized.
     {
@@ -144,17 +104,18 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
     config->logger->error("Resuming");
 }
 
-bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
+bool LSPTypechecker::typecheck(std::unique_ptr<LSPFileUpdates> updates, WorkerPool &workers,
                                vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
-    if (updates.canceledSlowPath) {
+    if (updates->canceledSlowPath) {
         // This update canceled the last slow path, so we should have undo state to restore to go to the point _before_
         // that slow path. This should always be the case, but let's not crash release builds.
         ENFORCE(cancellationUndoState != nullptr);
         if (cancellationUndoState != nullptr) {
-            // Restore the previous globalState
-            cancellationUndoState->restore(gs, indexed, indexedFinalGS);
+            // Require that the undo state was restored when the slow path was canceled -- we only need it to be present
+            // for the epoch at this point.
+            ENFORCE(cancellationUndoState->getEvictedGs() == nullptr);
 
             // Prune the new files from list of files to be re-typechecked
             vector<core::FileRef> oldFilesWithErrors;
@@ -166,12 +127,12 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
             }
 
             cancellationUndoState = nullptr;
-            auto fastPathDecision = updates.typecheckingPath;
+            auto fastPathDecision = updates->typecheckingPath;
             // Retypecheck all of the files that previously had errors.
-            updates.mergeOlder(getNoopUpdate(oldFilesWithErrors));
+            updates->mergeOlder(*getNoopUpdate(oldFilesWithErrors));
             // The merge operation resets `fastPathDecision`, but we know that retypechecking unchanged files
             // has no influence on the fast path decision.
-            updates.typecheckingPath = fastPathDecision;
+            updates->typecheckingPath = fastPathDecision;
         } else {
             config->logger->debug("[Typechecker] Error: UndoState is missing for update that canceled slow path!");
         }
@@ -179,25 +140,27 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
 
     vector<core::FileRef> filesTypechecked;
     bool committed = true;
-    const bool isFastPath = updates.typecheckingPath == TypecheckingPath::Fast;
-    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates.typecheckingPath, {});
+    const bool isFastPath = updates->typecheckingPath == TypecheckingPath::Fast;
+    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates->typecheckingPath, {});
     {
-        ErrorEpoch epoch(*errorReporter, updates.epoch, isFastPath, move(diagnosticLatencyTimers));
+        ErrorEpoch epoch(*errorReporter, updates->epoch, isFastPath, move(diagnosticLatencyTimers));
 
-        auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
+        auto errorFlusher = make_shared<ErrorFlusherLSP>(updates->epoch, errorReporter);
         if (isFastPath) {
             bool isNoopUpdateForRetypecheck = false;
-            filesTypechecked = runFastPath(updates, workers, errorFlusher, isNoopUpdateForRetypecheck);
-            commitFileUpdates(updates, /* cancelable */ false);
+            filesTypechecked = runFastPath(*updates, workers, errorFlusher, isNoopUpdateForRetypecheck);
+            commitFileUpdates(*updates, /* cancelable */ false);
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
-            committed = runSlowPath(move(updates), workers, errorFlusher, /* cancelable */ true);
+            auto result = runSlowPath(*updates, nullptr, workers, errorFlusher, SlowPathMode::Cancelable);
+            ENFORCE(std::holds_alternative<bool>(result));
+            committed = std::get<bool>(result);
         }
         epoch.committed = committed;
     }
 
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
-                      updates.typecheckingPath, move(filesTypechecked));
+                      updates->typecheckingPath, move(filesTypechecked));
     return committed;
 }
 
@@ -259,7 +222,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             oldFoundHashesForFiles.emplace(fref, move(fref.data(*gs).getFileHash()->foundHashes));
         }
 
-        gs->replaceFile(fref, file);
+        gs->replaceFile(fref, std::move(file));
         // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
         fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
 
@@ -275,6 +238,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             // NOTE: Using `gs` to access package information here assumes that edits to __package.rb
             // files don't take the fast path. We'll want (or maybe need) to revisit this when we start
             // making edits to `__package.rb` take fast paths.
+            // TODO(jez) This does package-specific behavior without checking `--stripe-packages`!
             if (!(fref.data(*gs).isPackage())) {
                 auto &pkg = gs->packageDB().getPackageForFile(*gs, fref);
                 if (pkg.exists()) {
@@ -298,9 +262,9 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     toTypecheck.erase(std::unique(toTypecheck.begin(), toTypecheck.end()), toTypecheck.end());
 
     config->logger->debug("Running fast path over num_files={}", toTypecheck.size());
-    unique_ptr<ShowOperation> op;
+    std::optional<ShowOperation> op;
     if (toTypecheck.size() > config->opts.lspMaxFilesOnFastPath / 2) {
-        op = make_unique<ShowOperation>(*config, ShowOperation::Kind::FastPath);
+        op.emplace(*config, ShowOperation::Kind::FastPath);
     }
     ENFORCE(gs->errorQueue->isEmpty());
     vector<ast::ParsedFile> updatedIndexed;
@@ -337,21 +301,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     return toTypecheck;
 }
 
-namespace {
-ast::ParsedFile updateFile(core::GlobalState &gs, const shared_ptr<core::File> &file, const options::Options &opts) {
-    core::FileRef fref = gs.findFileByPath(file->path());
-    if (fref.exists()) {
-        gs.replaceFile(fref, file);
-    } else {
-        fref = gs.enterFile(file);
-    }
-    fref.data(gs).strictLevel = pipeline::decideStrictLevel(gs, fref, opts);
-    return pipeline::indexOne(opts, gs, fref);
-}
-} // namespace
-
-bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &ignore,
-                                 vector<ast::ParsedFile> &out) const {
+ast::ParsedFilesOrCancelled LSPTypechecker::copyIndexed(WorkerPool &workers) const {
     auto &logger = *config->logger;
     Timer timeit(logger, "slow_path.copy_indexes");
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
@@ -362,7 +312,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
     const auto &epochManager = *gs->epochManager;
     shared_ptr<BlockingBoundedQueue<vector<ast::ParsedFile>>> resultq =
         make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(indexed.size());
-    workers.multiplexJob("copyParsedFiles", [fileq, resultq, &indexed = this->indexed, &ignore, &epochManager]() {
+    workers.multiplexJob("copyParsedFiles", [fileq, resultq, &indexed = this->indexed, &epochManager]() {
         vector<ast::ParsedFile> threadResult;
         int processedByThread = 0;
         int job;
@@ -375,7 +325,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
                     if (!epochManager.wasTypecheckingCanceled()) {
                         const auto &tree = indexed[job];
                         // Note: indexed entries for payload files don't have any contents.
-                        if (tree.tree && !ignore.contains(tree.file.id())) {
+                        if (tree.tree) {
                             threadResult.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
                         }
                     }
@@ -387,6 +337,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
             resultq->push(move(threadResult), processedByThread);
         }
     });
+    std::vector<ast::ParsedFile> out;
     {
         vector<ast::ParsedFile> threadResult;
         out.reserve(indexed.size());
@@ -399,20 +350,33 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
             }
         }
     }
+
     if (epochManager.wasTypecheckingCanceled()) {
-        return true;
+        return ast::ParsedFilesOrCancelled::cancel(std::move(out), workers);
     }
+
     fast_sort(out, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
-    return epochManager.wasTypecheckingCanceled();
+
+    if (epochManager.wasTypecheckingCanceled()) {
+        return ast::ParsedFilesOrCancelled::cancel(std::move(out), workers);
+    }
+    return out;
 }
 
-bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
-                                 shared_ptr<core::ErrorFlusher> errorFlusher, bool cancelable) {
+LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updates,
+                                                           std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers,
+                                                           shared_ptr<core::ErrorFlusher> errorFlusher,
+                                                           LSPTypechecker::SlowPathMode mode) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runSlowPath can only be called from the typechecker thread.");
 
+    // This is populated when running in `SlowPathMode::Init`.
+    std::unique_ptr<core::GlobalState> indexedState;
+
+    bool cancelable = mode == SlowPathMode::Cancelable;
+
     auto &logger = config->logger;
-    unique_ptr<ShowOperation> slowPathOp = make_unique<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
+    auto slowPathOp = std::make_optional<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
     Timer timeit(logger, "slow_path");
     ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast || config->disableFastPath);
     ENFORCE(updates.updatedGS.has_value());
@@ -423,27 +387,91 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
 
     auto finalGS = move(updates.updatedGS.value());
     const uint32_t epoch = updates.epoch;
-    // Replace error queue with one that is owned by this thread.
-    finalGS->errorQueue =
-        make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer, errorFlusher);
     auto &epochManager = *finalGS->epochManager;
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
-    const bool committed = epochManager.tryCommitEpoch(*finalGS, epoch, cancelable, preemptManager, [&]() -> void {
-        UnorderedSet<int> updatedFiles;
-        vector<ast::ParsedFile> indexedCopies;
+    auto committed = epochManager.tryCommitEpoch(*finalGS, epoch, cancelable, preemptManager, [&]() -> void {
+        // Replace error queue with one that is owned by this thread.
+        auto savedErrorQueue = std::exchange(
+            finalGS->errorQueue,
+            make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer, errorFlusher));
 
-        // Index the updated files using finalGS.
-        {
-            auto &gs = *finalGS;
-            core::UnfreezeFileTable fileTableAccess(gs);
-            for (auto &file : updates.updatedFiles) {
-                auto parsedFile = updateFile(gs, file, config->opts);
-                if (parsedFile.tree) {
-                    indexedCopies.emplace_back(ast::ParsedFile{parsedFile.tree.deepCopy(), parsedFile.file});
-                    updatedFiles.insert(parsedFile.file.id());
+        switch (mode) {
+            case SlowPathMode::Init: {
+                ENFORCE(!this->initialized);
+                Timer timeit(config->logger, "initial_index");
+
+                ShowOperation op(*config, ShowOperation::Kind::Indexing);
+
+                std::unique_ptr<const OwnedKeyValueStore> ownedKvstore =
+                    cache::ownIfUnchanged(*finalGS, std::move(kvstore));
+
+                {
+                    Timer timeit(config->logger, "reIndexFromFileSystem");
+
+                    auto inputFiles = pipeline::reserveFiles(*finalGS, config->opts.inputFileNames);
+                    this->indexed.clear();
+                    this->indexed.resize(finalGS->filesUsed());
+
+                    auto asts = hashing::Hashing::indexAndComputeFileHashes(*finalGS, config->opts, *config->logger,
+                                                                            absl::Span<core::FileRef>(inputFiles),
+                                                                            workers, ownedKvstore);
+                    // asts are in fref order, but we (currently) don't index and compute file hashes for payload files,
+                    // so vector index != FileRef ID. Fix that by slotting them into `indexed`.
+                    for (auto &ast : asts) {
+                        int id = ast.file.id();
+                        ENFORCE_NO_TIMER(id < this->indexed.size());
+                        this->indexed[id] = std::move(ast);
+                    }
                 }
-                updates.updatedFinalGSFileIndexes.push_back(move(parsedFile));
+
+                cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)), config->opts,
+                                                     *finalGS, workers, indexed);
+
+                ENFORCE_NO_TIMER(indexed.size() == finalGS->filesUsed());
+
+                // At this point finalGS has a name table that's initialized enough for the indexer thread, so we make a
+                // copy to pass back over.
+                indexedState = finalGS->deepCopy();
+                indexedState->errorQueue = std::move(savedErrorQueue);
+
+                this->initialized = true;
+
+                break;
+            }
+
+            case SlowPathMode::Cancelable: {
+                // If we're not initializing, there's no need to hold on to the old error queue.
+                savedErrorQueue = nullptr;
+
+                // As finalGS is a copy of the indexer's GlobalState, all of the indexed trees in the update are valid
+                // with it. Additionally, the file table is guaranteed to be up-to-date, as it's also a copy of the
+                // indexer's file table. As a result, if there are updates to perform we can ignore updating our file
+                // table. We can't however skip re-indexing the updated files, as that's what will cause the indexer
+                // errors to show up in the editor.
+                if (!updates.updatedFiles.empty()) {
+                    auto &gs = *finalGS;
+
+                    // Verify that our file table is sane.
+                    if constexpr (debug_mode) {
+                        auto ix = -1;
+                        for (auto &file : updates.updatedFiles) {
+                            ++ix;
+                            auto fref = gs.findFileByPath(file->path());
+                            auto &parsedFile = updates.updatedFileIndexes[ix];
+                            ENFORCE_NO_TIMER(fref == parsedFile.file);
+                        }
+                    }
+
+                    for (auto &parsedFile : updates.updatedFileIndexes) {
+                        auto ast = pipeline::indexOne(this->config->opts, gs, parsedFile.file);
+                        if (ast.tree != nullptr) {
+                            updates.updatedFinalGSFileIndexes.emplace_back(std::move(ast));
+                        }
+                    }
+                }
+
+                break;
             }
         }
 
@@ -454,9 +482,14 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
         // We use `gs` rather than the moved `finalGS` from this point forward.
 
         // Copy the indexes of unchanged files.
-        if (copyIndexed(workers, updatedFiles, indexedCopies)) {
-            // Canceled.
-            return;
+        vector<ast::ParsedFile> indexedCopies;
+        {
+            auto result = copyIndexed(workers);
+            if (!result.hasResult()) {
+                // Canceled.
+                return;
+            }
+            indexedCopies = std::move(result.result());
         }
 
         ENFORCE(gs->lspQuery.isEmpty());
@@ -492,7 +525,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
             return;
         }
 
-        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers);
+        auto maybeResolved = pipeline::resolve(*gs, move(indexedCopies), config->opts, workers);
         if (!maybeResolved.hasResult()) {
             return;
         }
@@ -513,8 +546,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
         if (cancelable) {
             // Inform users that Sorbet should be responsive now.
             // Explicitly end previous operation before beginning next operation.
-            slowPathOp = nullptr;
-            slowPathOp = make_unique<ShowOperation>(*config, ShowOperation::Kind::SlowPathNonBlocking);
+            slowPathOp.emplace(*config, ShowOperation::Kind::SlowPathNonBlocking);
         }
         // Report how long the slow path blocks preemption.
         timeit.clone("slow_path.blocking_time");
@@ -564,12 +596,23 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
     } else {
         prodCategoryCounterInc("lsp.updates", "slowpath_canceled");
         timeit.setTag("canceled", "true");
-        // Update responsible will use state in `cancellationUndoState` to restore typechecker to the point before
-        // this slow path.
+        // Eagerly restore the state to how it was before this slow path, so that we're not holding the old state for an
+        // arbitrarily long time. The next update will be responsible for freeing the underlying UndoState after it
+        // makes use of the epoch field to determine additional files to include in the edit.
+        cancellationUndoState->restore(gs, indexed, indexedFinalGS);
         ENFORCE(cancelable);
         logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", updates.epoch);
     }
-    return committed;
+
+    switch (mode) {
+        case SlowPathMode::Init:
+            ENFORCE(committed);
+            ENFORCE(indexedState != nullptr);
+            return indexedState;
+        case SlowPathMode::Cancelable:
+            ENFORCE(indexedState == nullptr);
+            return committed;
+    }
 }
 
 void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled) {
@@ -588,6 +631,25 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
     ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFiles.size());
     for (auto &ast : updates.updatedFileIndexes) {
         const int id = ast.file.id();
+
+        DEBUG_ONLY({
+            // When typechecking on the fast path, the trees in `updatedFileIndexes` will have been indexed with the
+            // GlobalState that's owned by the indexer and not `this->gs`. As we will be moving those trees into
+            // `this->indexed`, we need to ensure that there is also a version of that tree in the
+            // `this->indexedFinalGS` map that acts as an overlay for `this->indexed`. Ensuring that the overlay is
+            // correctly populated is what allows us to hold on to the indexer's version of the tree for the next
+            // slow path, but also handle fast path requests for modified files.
+            if (updates.typecheckingPath == TypecheckingPath::Fast) {
+                // We don't support package files on the fast path, so package files won't have a tree indexed with
+                // `this->gs` present in `updatedFinalGSFileIndexes`.
+                if (!this->config->opts.stripePackages || !ast.file.data(*this->gs).isPackage()) {
+                    auto indexedForTypechecker = absl::c_any_of(
+                        updates.updatedFinalGSFileIndexes, [id](auto &updated) { return updated.file.id() == id; });
+                    ENFORCE(indexedForTypechecker);
+                }
+            }
+        });
+
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
         }
@@ -672,8 +734,9 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
 }
 
-LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {
-    LSPFileUpdates noop;
+std::unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {
+    auto result = std::make_unique<LSPFileUpdates>();
+    auto &noop = *result;
     noop.typecheckingPath = TypecheckingPath::Fast;
     // Epoch isn't important for this update.
     noop.epoch = 0;
@@ -686,15 +749,15 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
         noop.updatedFileIndexes.push_back({(index.tree ? index.tree.deepCopy() : nullptr), index.file});
         noop.updatedFiles.push_back(gs->getFiles()[fref.id()]);
     }
-    return noop;
+    return result;
 }
 
 std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef> frefs,
                                                                       WorkerPool &workers) const {
-    LSPFileUpdates updates = getNoopUpdate(move(frefs));
+    auto updates = getNoopUpdate(move(frefs));
     auto errorCollector = make_shared<core::ErrorCollector>();
     bool isNoopUpdateForRetypecheck = true;
-    runFastPath(updates, workers, errorCollector, isNoopUpdateForRetypecheck);
+    runFastPath(*updates, workers, errorCollector, isNoopUpdateForRetypecheck);
 
     return errorCollector->drainErrors();
 }
@@ -705,24 +768,24 @@ ast::ExpressionPtr LSPTypechecker::getLocalVarTrees(core::FileRef fref) const {
     return local_vars::LocalVars::run(*gs, {move(afterDesugar), fref}).tree;
 }
 
-const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
-    const auto id = fref.id();
-    auto treeFinalGS = indexedFinalGS.find(id);
-    if (treeFinalGS != indexedFinalGS.end()) {
-        return treeFinalGS->second;
-    }
-    ENFORCE(id < indexed.size());
-    return indexed[id];
-}
-
-vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> &frefs, WorkerPool &workers) const {
+vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     vector<ast::ParsedFile> updatedIndexed;
 
     for (auto fref : frefs) {
-        auto &indexed = getIndexed(fref);
-        if (indexed.tree) {
-            updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
+        const auto id = fref.id();
+        auto treeFinalGS = this->indexedFinalGS.find(id);
+        if (treeFinalGS != this->indexedFinalGS.end()) {
+            auto &indexed = treeFinalGS->second;
+            if (indexed.tree) {
+                updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
+            }
+        } else {
+            ENFORCE(id < this->indexed.size());
+            auto &indexed = this->indexed[id];
+            if (indexed.tree) {
+                updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
+            }
         }
     }
 
@@ -732,6 +795,20 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> 
     auto foundHashesForFiles = nullopt;
 
     return pipeline::incrementalResolve(*gs, move(updatedIndexed), move(foundHashesForFiles), config->opts, workers);
+}
+
+ast::ParsedFile LSPTypechecker::getResolved(core::FileRef fref, WorkerPool &workers) const {
+    std::vector<ast::ParsedFile> trees = this->getResolved(std::initializer_list<core::FileRef>{fref}, workers);
+
+    if (trees.empty()) {
+        // This case can happen if the associated file ref was to a payload file, in which case the tree will be
+        // `nullptr` in `this->indexed` and not added to the vector produced by the multi-file version of
+        // `this-fgetResolved`.
+        return ast::ParsedFile{nullptr, fref};
+    } else {
+        ENFORCE(trees.size() == 1);
+        return std::move(trees.front());
+    }
 }
 
 const core::GlobalState &LSPTypechecker::state() const {
@@ -781,12 +858,12 @@ void LSPTypecheckerDelegate::resumeTaskQueue(InitializedTask &task) {
     this->queue.resume();
 }
 
-void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates,
+void LSPTypecheckerDelegate::typecheckOnFastPath(std::unique_ptr<LSPFileUpdates> updates,
                                                  vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
-    if (updates.typecheckingPath != TypecheckingPath::Fast) {
+    if (updates->typecheckingPath != TypecheckingPath::Fast) {
         Exception::raise("Tried to typecheck a slow path edit on the fast path.");
     }
-    auto committed = typechecker.typecheck(move(updates), workers, move(diagnosticLatencyTimers));
+    auto committed = typechecker.typecheck(std::move(updates), workers, move(diagnosticLatencyTimers));
     // Fast path edits can't be canceled.
     ENFORCE(committed);
 }
@@ -800,12 +877,12 @@ LSPQueryResult LSPTypecheckerDelegate::query(const core::lsp::Query &q,
     return typechecker.query(q, filesForQuery, workers);
 }
 
-const ast::ParsedFile &LSPTypecheckerDelegate::getIndexed(core::FileRef fref) const {
-    return typechecker.getIndexed(fref);
+std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(absl::Span<const core::FileRef> frefs) const {
+    return typechecker.getResolved(frefs, workers);
 }
 
-std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(const std::vector<core::FileRef> &frefs) const {
-    return typechecker.getResolved(frefs, workers);
+ast::ParsedFile LSPTypecheckerDelegate::getResolved(core::FileRef fref) const {
+    return typechecker.getResolved(fref, workers);
 }
 
 ast::ExpressionPtr LSPTypecheckerDelegate::getLocalVarTrees(core::FileRef fref) const {
@@ -819,7 +896,7 @@ void LSPTypecheckerDelegate::updateGsFromOptions(const DidChangeConfigurationPar
     typechecker.updateGsFromOptions(options);
 }
 
-LSPFileUpdates LSPTypecheckerDelegate::getNoopUpdate(std::vector<core::FileRef> frefs) const {
+std::unique_ptr<LSPFileUpdates> LSPTypecheckerDelegate::getNoopUpdate(std::vector<core::FileRef> frefs) const {
     return typechecker.getNoopUpdate(frefs);
 }
 

@@ -38,7 +38,7 @@ These are the server statuses Sorbet will report, and what they mean.
 | &nbsp;                        | &nbsp;                                                      | &nbsp;                      | &nbsp;                  |
 | Indexing files...             | producing ASTs for each file                                | ❌                          | ❌                      |
 | Typechecking...               | resolving project-wide information                          | ❌                          | ❌                      |
-| Typechecking in background... | running inference on each file                              | ✅                          | ❌                      |
+| Typechecking in background... | running inference on each file                              | ✅\*                        | ❌                      |
 | Typechecking in foreground... | running inference on each file, in a blocking way           | ❌                          | ❌                      |
 | &nbsp;                        | &nbsp;                                                      | &nbsp;                      | &nbsp;                  |
 | Finding all references...     | working to respond to a "Find All References" request       | ❌                          | 🤔 maybe?               |
@@ -51,7 +51,7 @@ or delayed response to IDE features like hover, autocompletion, go to
 definition, etc. Most phases of Sorbet cause requests for IDE features to queue
 until the end of the current operation. The exceptions are the **Idle** and
 **Typechecking in background...** phases, which don't cause requests to use IDE
-features to queue.
+features to queue
 
 The "Error list is complete?" column indicates whether the list of errors is
 up-to-date, or whether Sorbet is still working on producing all the errors in a
@@ -62,6 +62,10 @@ depending on whether the request arrived when Sorbet was already in an **Idle**
 state, because those operations pause any ongoing **Typechecking in
 background...** operation in service of responding to the current request
 faster.
+
+The "✅\*" in the table above refers to the fact that Find All References (and
+features powered by finding all references, like Rename Symbol) are only
+available from the Idle state.
 
 For more details, see the sections below.
 
@@ -102,7 +106,8 @@ in each file, in parallel.
 This phase is special: only in this phase (and in the **Idle** phase) is Sorbet
 able to respond to IDE requests concurrently with other work. Requests like
 hover, autocompletion, and go to definition will not be blocked while this
-operation is ongoing.
+operation is ongoing. Requests like finding references or renaming a symbol are
+not included—these requests will block until Sorbet becomes **Idle**.
 
 In this phase Sorbet will still be working to compute the list of errors in this
 phase, but it will prioritize reporting errors in recently-edited files over
