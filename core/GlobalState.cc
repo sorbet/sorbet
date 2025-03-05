@@ -2087,6 +2087,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->censorForSnapshotTests = this->censorForSnapshotTests;
     result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
     result->rbsSignaturesEnabled = this->rbsSignaturesEnabled;
+    result->rbsAssertionsEnabled = this->rbsAssertionsEnabled;
     result->requiresAncestorEnabled = this->requiresAncestorEnabled;
     result->ruby3KeywordArgs = this->ruby3KeywordArgs;
     result->typedSuper = this->typedSuper;
@@ -2188,6 +2189,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndex() const {
     result->censorForSnapshotTests = this->censorForSnapshotTests;
     result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
     result->rbsSignaturesEnabled = this->rbsSignaturesEnabled;
+    result->rbsAssertionsEnabled = this->rbsAssertionsEnabled;
     result->requiresAncestorEnabled = this->requiresAncestorEnabled;
     result->ruby3KeywordArgs = this->ruby3KeywordArgs;
     result->typedSuper = this->typedSuper;

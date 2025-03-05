@@ -29,6 +29,7 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
     }
 
     gs.rbsSignaturesEnabled = options.rbsSignaturesEnabled;
+    gs.rbsAssertionsEnabled = options.rbsAssertionsEnabled;
     gs.requiresAncestorEnabled = options.requiresAncestorEnabled;
     gs.ruby3KeywordArgs = options.ruby3KeywordArgs;
     gs.typedSuper = options.typedSuper;
