@@ -2,7 +2,7 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C SomeConstant> = <emptyTree>::<C PackageSpec>
 
-  class ::<PackageSpecRegistry>::<C MyPackage><<C <todo sym>>> < (::PackageSpec)
+  class ::<PackageSpecRegistry>::<C MyPackage><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
     ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.void()
     end
@@ -48,7 +48,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/invalid_package_control_flow/package_spec_additions.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<root>::<C PackageSpec><<C <todo sym>>> < (::<todo sym>)
+  class ::<root>::<C Sorbet>::<C Private>::<C Static>::<C PackageSpec><<C <todo sym>>> < (::<todo sym>)
     def self.some_method<<todo method>>(x, &<blk>)
       <emptyTree>
     end
