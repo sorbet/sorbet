@@ -2447,6 +2447,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto resultType = resolveConstantType(ctx, asgn->rhs, /* topCall */ true, /* isFrozen */ false);
         if (data->resultType == nullptr) {
             // Do not attempt to suggest types for aliases that fail to resolve in package files.
+            // TODO(jez) This does package-specific behavior without checking `--stripe-packages`!
             if (resultType == nullptr && !ctx.file.data(ctx).isPackage()) {
                 // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
                 auto rhs = move(job.asgn->rhs);
