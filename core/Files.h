@@ -65,6 +65,12 @@ public:
     bool hasIndexErrors() const;
     void setHasIndexErrors(bool value);
 
+    // True when the path for this file could not be read.
+    bool isMissing() const;
+    // Set whether or not the source for this file was missing. Should only be called when the file is being read from
+    // the filesystem, and set with the success of that operation.
+    void setIsMissing(bool value);
+
     // Returns whether or not this file is considered to be packaged.
     bool isPackaged() const;
 
@@ -98,6 +104,9 @@ private:
         bool isPackage : 1;
         // Documented on public accessors
         bool isOpenInClient : 1;
+        // True when the source was missing when the file was created. This should only be cleared by re-creating the
+        // file object.
+        bool isMissing : 1;
 
         Flags(std::string_view path);
     };
