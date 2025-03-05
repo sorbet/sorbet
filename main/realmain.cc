@@ -237,6 +237,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
                     ++n;
                     auto &tree = indexed[idx];
+                    // TODO(jez) This does package-specific behavior without checking `--stripe-packages`!
                     if (tree.file.data(gs).isPackage()) {
                         continue;
                     }

@@ -238,6 +238,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             // NOTE: Using `gs` to access package information here assumes that edits to __package.rb
             // files don't take the fast path. We'll want (or maybe need) to revisit this when we start
             // making edits to `__package.rb` take fast paths.
+            // TODO(jez) This does package-specific behavior without checking `--stripe-packages`!
             if (!(fref.data(*gs).isPackage())) {
                 auto &pkg = gs->packageDB().getPackageForFile(*gs, fref);
                 if (pkg.exists()) {
