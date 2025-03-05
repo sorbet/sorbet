@@ -44,6 +44,9 @@ public:
 
     enum class Tag {
         ClassType = 1,
+        BlamedUntyped,
+        UnresolvedClassType,
+        UnresolvedAppliedType,
         LambdaParam,
         SelfTypeParam,
         AliasType,
@@ -58,9 +61,6 @@ public:
         TupleType,
         AppliedType,
         MetaType,
-        BlamedUntyped,
-        UnresolvedClassType,
-        UnresolvedAppliedType,
     };
 
     // A mapping from type to its corresponding tag.
