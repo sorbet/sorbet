@@ -86,6 +86,12 @@ bool TypePtr::isTop() const {
 }
 
 int TypePtr::kind() const {
+    // This order is load bearing for the purpose of subtyping, because our type constraint
+    // algorithm is greedy.
+    //
+    // For `glb` and `lub`, we sort the arguments based on their `kind`, so the first argument to
+    // these functions effectively always has a lesser `kind`. This matters for the sake of ensuring
+    // that `T.type_parameter` types show up at the right spots during the subtyping checks.
     switch (tag()) {
         case Tag::AppliedType:
             return 1;
