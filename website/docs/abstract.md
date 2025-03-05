@@ -90,12 +90,22 @@ An example where the difference matters: people sometimes use `interface!` as
 the starting point for extracting logic across a network boundary into a new
 service. In this case, having implementation logic in the interface would
 complicate an in-progress migration: the logic should either live in the
-soon-to-be-extracted service, or the current service. In cases, like this, the
-line with the `interface!` declaration serves as a great point to capture
-context around **why** the given module is the way it is in a comment.
+soon-to-be-extracted service, or the current service.
 
-If no such context exists, and the other differences mentioned above are okay
-for the use case, it's usually fine to switch from `interface!` to `abstract!`.
+Similarly, `interface!` is a way to prevent accidental dependencies. Ruby
+applications developed in monorepos can use static analysis to list the files
+which must be included in a service's deploy artifact or be preloaded at deploy
+time. (Tangled code leads a service to include more files than might be strictly
+necessary.) When these analyses use Ruby constant resolution-based algorithms,
+using an `interface!` guarantees that depending on the interface does not
+necessarily incur a dependency on some part of the implementation. This makes it
+easier to detangle and modularize dependencies.
+
+In cases like these, the line with the `interface!` declaration serves as a
+great point to capture context around **why** the given module is the way it is
+in a comment. If no such context exists, and the other differences mentioned
+above are okay for the use case, it's usually fine to switch from `interface!`
+to `abstract!`.
 
 ## `overridable`: Providing default implementations of methods
 
