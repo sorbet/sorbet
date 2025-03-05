@@ -39,7 +39,6 @@
 #include "packager/rbi_gen.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
-#include "rbs/rbs_common.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
