@@ -110,6 +110,15 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         }
     }
 
+    if (auto dup = ASTUtil::findDuplicateArg(ctx, send)) {
+        if (auto e = ctx.beginError(dup->secondLoc, core::errors::Rewriter::InvalidStructMember)) {
+            e.setHeader("Duplicate member `{}` in Struct definition", dup->name.show(ctx));
+            e.addErrorLine(ctx.locAt(dup->firstLoc), "First occurrence of `{}` in Struct definition",
+                           dup->name.show(ctx));
+        }
+        return empty;
+    }
+
     for (auto &arg : send->posArgs()) {
         auto sym = ast::cast_tree<ast::Literal>(arg);
         if (!sym || !sym->isSymbol()) {
