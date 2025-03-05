@@ -187,10 +187,10 @@ class RBSSignaturesWalk {
 
     void transformMethodDef(core::MutableContext ctx, ast::ClassDef::RHS_store &newRHS, ast::MethodDef *methodDef) {
         auto methodComments = findRBSComments(ctx.file.data(ctx).source(), methodDef->loc);
+        auto signatureTranslator = rbs::SignatureTranslator(methodComments.annotations);
 
         for (auto &signature : methodComments.signatures) {
-            auto sig =
-                rbs::SignatureTranslator(signature).translateSignature(ctx, methodDef, methodComments.annotations);
+            auto sig = signatureTranslator.translateSignature(ctx, methodDef, signature);
             if (sig) {
                 newRHS.emplace_back(move(sig));
             }
@@ -199,9 +199,10 @@ class RBSSignaturesWalk {
 
     void transformAccessor(core::MutableContext ctx, ast::ClassDef::RHS_store &newRHS, ast::Send *send) {
         auto attrComments = findRBSComments(ctx.file.data(ctx).source(), send->loc);
+        auto signatureTranslator = rbs::SignatureTranslator(attrComments.annotations);
 
         for (auto &signature : attrComments.signatures) {
-            auto sig = rbs::SignatureTranslator(signature).translateType(ctx, send, attrComments.annotations);
+            auto sig = signatureTranslator.translateType(ctx, send, signature);
             if (sig) {
                 newRHS.emplace_back(move(sig));
             }

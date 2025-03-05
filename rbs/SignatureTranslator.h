@@ -4,21 +4,21 @@
 #include "ast/ast.h"
 #include "rbs/rbs_common.h"
 #include <string_view>
+#include <vector>
 
 namespace sorbet::rbs {
 
 class SignatureTranslator final {
 public:
-    sorbet::rbs::Comment signature;
+    SignatureTranslator(std::vector<Comment> annotations) : annotations(annotations){};
 
-    SignatureTranslator(sorbet::rbs::Comment signature) : signature(signature) {}
-
-    ast::ExpressionPtr translateType(core::MutableContext ctx, const ast::Send *send,
-                                     const std::vector<Comment> &annotations);
+    ast::ExpressionPtr translateType(core::MutableContext ctx, const ast::Send *send, const rbs::Comment &signature);
     ast::ExpressionPtr translateSignature(core::MutableContext ctx, const ast::MethodDef *methodDef,
-                                          const std::vector<rbs::Comment> &annotations);
+                                          const rbs::Comment &signature);
 
 private:
+    std::vector<Comment> annotations;
+
     rbs_string_t makeRBSString(const std::string_view &str);
 };
 
