@@ -65,9 +65,6 @@ public:
     bool hasIndexErrors() const;
     void setHasIndexErrors(bool value);
 
-    bool cached() const;
-    void setCached(bool value);
-
     // Returns whether or not this file is considered to be packaged.
     bool isPackaged() const;
 
@@ -91,8 +88,6 @@ public:
 
 private:
     struct Flags {
-        // if 'true' file is completely cached in kvstore
-        bool cached : 1;
         // some reasonable invariants don't hold for invalid files
         bool hasIndexErrors : 1;
         // only relevant in --stripe-packages mode: is the file a `.test.rb` file?

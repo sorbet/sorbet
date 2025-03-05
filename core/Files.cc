@@ -107,7 +107,7 @@ bool File::isPackagePath(string_view path) {
 }
 
 File::Flags::Flags(string_view path)
-    : cached(false), hasIndexErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)),
+    : hasIndexErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)),
       isPackage(isPackagePath(path)), isOpenInClient(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
@@ -129,7 +129,6 @@ void File::setFileHash(unique_ptr<const FileHash> hash) {
     // If hash_ != nullptr, then the contents of hash_ and hash should be identical.
     // Avoid needlessly invalidating references to *hash_.
     if (hash_ == nullptr) {
-        flags.cached = false;
         hash_ = move(hash);
     }
 }
@@ -282,14 +281,6 @@ bool File::hasIndexErrors() const {
 
 void File::setHasIndexErrors(bool value) {
     flags.hasIndexErrors = value;
-}
-
-bool File::cached() const {
-    return flags.cached;
-}
-
-void File::setCached(bool value) {
-    flags.cached = value;
 }
 
 bool File::isPackaged() const {

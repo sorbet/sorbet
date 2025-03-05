@@ -275,10 +275,30 @@ struct ParsedFile {
     ExpressionPtr tree;
     core::FileRef file;
 
+    struct Flags {
+        // if 'true' file is completely cached in kvstore
+        bool cached : 1;
+
+        Flags() : cached{false} {}
+    };
+
+    Flags flags;
+
+    ParsedFile() = default;
+    ParsedFile(ast::ExpressionPtr tree, core::FileRef file) : tree{std::move(tree)}, file{file}, flags{} {}
+
     void swap(ParsedFile &other) noexcept {
         using std::swap;
         this->tree.swap(other.tree);
         swap(this->file, other.file);
+    }
+
+    bool cached() const {
+        return this->flags.cached;
+    }
+
+    void setCached(bool cached) {
+        this->flags.cached = cached;
     }
 };
 
