@@ -604,7 +604,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::PackageSpecRegistry());
 
     // PackageSpec is a class that can be subclassed.
-    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpec());
+    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), Names::Constants::PackageSpec());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::PackageSpec());
 

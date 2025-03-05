@@ -650,11 +650,6 @@ void populateMangledName(core::GlobalState &gs, PackageName &pName) {
     pName.mangledName = core::packages::MangledName::mangledNameFromParts(gs, pName.fullName.parts);
 }
 
-bool isReferenceToPackageSpec(core::Context ctx, const ast::ExpressionPtr &expr) {
-    auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return constLit != nullptr && constLit->cnst == core::Names::Constants::PackageSpec();
-}
-
 void mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
     // HACKFIX: Tolerate completely empty packages. LSP does not support the notion of a deleted file, and
     // instead replaces deleted files with the empty string. It should really mark files as Tombstones instead.
@@ -1558,11 +1553,27 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
             continue;
         }
 
-        if (!isReferenceToPackageSpec(ctx, packageSpecClass->ancestors[0])) {
-            mustContainPackageDef(ctx, packageSpecClass->ancestors[0].loc());
+        auto &superClass = packageSpecClass->ancestors[0];
+        auto superClassLit = ast::cast_tree<ast::UnresolvedConstantLit>(superClass);
+        if (superClassLit == nullptr || superClassLit->cnst != core::Names::Constants::PackageSpec()) {
+            mustContainPackageDef(ctx, superClass.loc());
             reportedError = true;
             continue;
         }
+
+        // ---- Mutates the tree ----
+        // We can't do these rewrites in rewriter, because this rewrite should only happen if
+        // `opts.stripePackages` is set. That would mean we would have to add another cache flavor,
+        // which would double the size of Sorbet's disk cache.
+        //
+        // Other than being able to say "we don't mutate the trees in packager" there's not much
+        // value in going that far (even namer mutates the trees; the packager fills a similar role).
+
+        // Pre-resolve the super class. This makes it easier to detect that this is a package
+        // spec-related class def in later passes without having to recursively walk up the constant
+        // lit's scope to find if it starts with <PackageSpecRegistry>.
+        superClass = ast::make_expression<ast::ConstantLit>(core::Symbols::PackageSpec(),
+                                                            superClass.toUnique<ast::UnresolvedConstantLit>());
 
         auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(packageSpecClass->name);
         if (!validatePackageName(ctx, nameTree)) {
@@ -1570,23 +1581,9 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
             continue;
         }
 
-        // ---- Mutates the tree ----
         // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
         // This removes the PackageSpec's themselves from the top-level namespace
-        //
-        // We can't do this rewrite in rewriter, because this rewrite should only happen if
-        // `opts.stripePackages` is set. That would mean we would have to add another cache flavor,
-        // which would double the size of Sorbet's disk cache.
-        //
-        // Other than being able to say "we don't mutate the trees in packager" there's not much
-        // value in going that far (even namer mutates the trees; the packager fills a similar role).
         packageSpecClass->name = prependName(move(packageSpecClass->name));
-
-        // Pre-resolve the super class. This makes it easier to detect that this is a package
-        // spec-related class def in later passes without having to recursively walk up the constant
-        // lit's scope to find if it starts with <PackageSpecRegistry>.
-        packageSpecClass->ancestors[0] = ast::make_expression<ast::ConstantLit>(
-            core::Symbols::PackageSpec(), packageSpecClass->ancestors[0].toUnique<ast::UnresolvedConstantLit>());
 
         info = make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),
                                             ctx.locAt(packageSpecClass->declLoc));
