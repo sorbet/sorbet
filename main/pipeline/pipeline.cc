@@ -53,6 +53,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     gs.errorUrlBase = opts.errorUrlBase;
 
     gs.rbsSignaturesEnabled = opts.rbsSignaturesEnabled;
+    gs.rbsAssertionsEnabled = opts.rbsAssertionsEnabled;
     gs.requiresAncestorEnabled = opts.requiresAncestorEnabled;
 
     if (opts.silenceErrors) {
