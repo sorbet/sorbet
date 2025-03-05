@@ -108,7 +108,7 @@ bool File::isPackagePath(string_view path) {
 
 File::Flags::Flags(string_view path)
     : hasIndexErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)),
-      isPackage(isPackagePath(path)), isOpenInClient(false) {}
+      isPackage(isPackagePath(path)), isOpenInClient(false), isMissing(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(path_), packagedLevel{File::filePackagedSigil(source_)},
@@ -281,6 +281,14 @@ bool File::hasIndexErrors() const {
 
 void File::setHasIndexErrors(bool value) {
     flags.hasIndexErrors = value;
+}
+
+bool File::isMissing() const {
+    return flags.isMissing;
+}
+
+void File::setIsMissing(bool value) {
+    flags.isMissing = value;
 }
 
 bool File::isPackaged() const {
