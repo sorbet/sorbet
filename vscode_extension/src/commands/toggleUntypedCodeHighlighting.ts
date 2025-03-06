@@ -27,7 +27,7 @@ function toggle(log: Log, configuration: SorbetExtensionConfig): TrackUntyped {
       return "nowhere";
     default:
       const exhaustiveCheck: never = configuration.highlightUntyped;
-      log.warning(`Got unexpected state: ${exhaustiveCheck}`);
+      log.warn("Got unexpected state", exhaustiveCheck);
       return "nowhere";
   }
 }
@@ -41,7 +41,7 @@ async function cycleStates(
   context.configuration.oldHighlightUntyped = oldHighlightUntyped;
 
   await context.configuration.setHighlightUntyped(targetState);
-  context.log.info(`${forCommand}: Untyped code highlighting: ${targetState}`);
+  context.log.info(forCommand, "Untyped code highlighting", targetState);
 }
 
 /**

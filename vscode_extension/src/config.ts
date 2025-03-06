@@ -63,7 +63,7 @@ export function backwardsCompatibleTrackUntyped(
       return trackWhere;
     default:
       const exhaustiveCheck: never = trackWhere;
-      log.warning(`Got unexpected state: ${exhaustiveCheck}`);
+      log.warn("Got unexpected state", exhaustiveCheck);
       return false;
   }
 }

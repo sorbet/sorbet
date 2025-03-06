@@ -15,11 +15,11 @@ export async function setLogLevel(
   context: SorbetExtensionContext,
   level?: LogLevel,
 ): Promise<void> {
-  const newLevel = level ?? (await getLogLevel(context.log.level));
+  const newLevel = level ?? (await getLogLevel(context.log.logLevel));
   if (newLevel === undefined) {
     return; // User canceled
   }
-  context.log.level = newLevel;
+  context.log.logLevel = newLevel;
 }
 
 async function getLogLevel(

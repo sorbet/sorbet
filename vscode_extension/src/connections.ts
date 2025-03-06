@@ -7,7 +7,7 @@ import { Log } from "./log";
 export async function stopProcess(p: ChildProcess, log: Log): Promise<void> {
   return new Promise<void>((res) => {
     let hasExited = false;
-    log.debug(`Stopping process ${p.pid}`);
+    log.debug("Stopping process", p.pid);
     function onExit() {
       if (!hasExited) {
         hasExited = true;
