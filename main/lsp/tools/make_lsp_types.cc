@@ -415,10 +415,11 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                    },
                    classTypes);
 
-    auto CodeActionKind = makeStrEnum("CodeActionKind",
-                                      {"quickfix", "refactor", "refactor.extract", "refactor.inline",
-                                       "refactor.rewrite", "source", "source.organizeImports", "source.fixAll.sorbet"},
-                                      enumTypes);
+    auto CodeActionKind =
+        makeStrEnum("CodeActionKind",
+                    {"quickfix", "refactor", "refactor.extract", "refactor.inline", "refactor.rewrite", "source",
+                     "source.organizeImports", "source.fixAll", "source.fixAll.sorbet"},
+                    enumTypes);
 
     auto CodeActionKindSupport =
         makeObject("CodeActionKindSupport",
