@@ -32,9 +32,9 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     const context = <SorbetExtensionContext>{
       log: createLogStub(LogLevel.Info),
     };
-    assert.ok(context.log.level !== expectedLogLevel);
+    assert.ok(context.log.logLevel !== expectedLogLevel);
     await assert.doesNotReject(setLogLevel(context));
-    assert.strictEqual(context.log.level, expectedLogLevel);
+    assert.strictEqual(context.log.logLevel, expectedLogLevel);
 
     sinon.assert.calledWithExactly(
       showQuickPickSingleStub,
@@ -84,7 +84,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     const context = <SorbetExtensionContext>{ log };
 
     await assert.doesNotReject(setLogLevel(context, expectedLogLevel));
-    assert.strictEqual(log.level, expectedLogLevel);
+    assert.strictEqual(log.logLevel, expectedLogLevel);
 
     sinon.assert.notCalled(showQuickPickSingleStub);
   });

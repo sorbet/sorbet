@@ -108,7 +108,7 @@ export class SorbetStatusBarEntry implements Disposable {
           tooltip = "The Sorbet server is currently running.";
           break;
         default:
-          this.context.log.error(`Invalid ServerStatus: ${this.serverStatus}`);
+          this.context.log.error("Invalid ServerStatus", this.serverStatus);
           text = "";
           tooltip = "";
           break;
