@@ -21,7 +21,7 @@ import { ServerStatus, RestartReason } from "./types";
  */
 export function activate(context: ExtensionContext) {
   const sorbetExtensionContext = new SorbetExtensionContext(context);
-  sorbetExtensionContext.log.level = getLogLevelFromEnvironment();
+  sorbetExtensionContext.log.logLevel = getLogLevelFromEnvironment();
 
   context.subscriptions.push(
     sorbetExtensionContext,
