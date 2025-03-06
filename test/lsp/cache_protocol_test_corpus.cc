@@ -289,7 +289,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReindexingUsesTheCache") {
     // It should not include data from file updates made during the editor session.
     auto opts = lspWrapper->opts;
 
-    // Release cache lock.
+    // Release cache lock by dropping the entire LSP wrapper which holds onto a kvstore.
     lspWrapper = nullptr;
 
     auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
