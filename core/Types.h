@@ -243,14 +243,13 @@ template <class To> bool isa_type(const TypePtr &what) {
 // Specializations to handle the class hierarchy.
 class ClassType;
 template <> inline bool isa_type<ClassType>(const TypePtr &what) {
-    if (what == nullptr) {
-        return false;
-    }
-    switch (what.tag()) {
-        case TypePtr::Tag::ClassType:
-        case TypePtr::Tag::BlamedUntyped:
-        case TypePtr::Tag::UnresolvedClassType:
-        case TypePtr::Tag::UnresolvedAppliedType:
+    auto tag = what.tagMaybeZero();
+
+    switch (tag) {
+        case int(TypePtr::Tag::ClassType):
+        case int(TypePtr::Tag::BlamedUntyped):
+        case int(TypePtr::Tag::UnresolvedClassType):
+        case int(TypePtr::Tag::UnresolvedAppliedType):
             return true;
         default:
             return false;
