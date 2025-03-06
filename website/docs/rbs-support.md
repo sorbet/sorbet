@@ -198,7 +198,7 @@ of being able to advocate for using this syntax more widely.
 
 ### Runtime checking is a feature
 
-> Note that runtime checking of RBS signatures is not yet implemented, so type
+> Note that runtime checking of RBS signatures is not implemented, so type
 > safety is reduced.
 
 Sorbet's signatures are not just static type annotations: they are also
