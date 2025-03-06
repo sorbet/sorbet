@@ -153,109 +153,53 @@ end
 
 --------------------------------------------------------------------------
 
-foo/foo_class.rb:6: `Foo::Bar::FalsePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because its `strict_dependencies` is too low https://srb.help/3718
+use_false_package/foo.rb:6: `Foo::Bar::FalsePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because its `strict_dependencies` is too low https://srb.help/3718
      6 |      Foo::Bar::FalsePackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_package/__package.rb:5: `Foo::Bar::FalsePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
      5 |  strict_dependencies 'false'
                               ^^^^^^^
 
-foo/foo_class.rb:7: `Foo::Bar::FalsePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because its `strict_dependencies` is too low https://srb.help/3718
+use_false_package/foo.rb:7: `Foo::Bar::FalsePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because its `strict_dependencies` is too low https://srb.help/3718
      7 |      Bar::FalsePackage::OtherClass # resolves via `module Foo`
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_package/__package.rb:5: `Foo::Bar::FalsePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
      5 |  strict_dependencies 'false'
                               ^^^^^^^
 
-foo/foo_class.rb:8: `Foo::Bar::FalseAndAppPackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because importing it would cause a layering violation and its `strict_dependencies` is too low https://srb.help/3718
-     8 |      Foo::Bar::FalseAndAppPackage::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    false_and_app_package/__package.rb:4: Package `Foo::Bar::FalseAndAppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
-     4 |  layer 'app'
-                ^^^^^
-    false_and_app_package/__package.rb:5: `Foo::Bar::FalseAndAppPackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
-     5 |  strict_dependencies 'false'
-                              ^^^^^^^
-
-foo/foo_class.rb:9: `Foo::Bar::FalseAndAppPackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because importing it would cause a layering violation and its `strict_dependencies` is too low https://srb.help/3718
-     9 |      Bar::FalseAndAppPackage::OtherClass # resolves via `module Foo`
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    false_and_app_package/__package.rb:4: Package `Foo::Bar::FalseAndAppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
-     4 |  layer 'app'
-                ^^^^^
-    false_and_app_package/__package.rb:5: `Foo::Bar::FalseAndAppPackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
-     5 |  strict_dependencies 'false'
-                              ^^^^^^^
-
-foo/foo_class.rb:15: `Foo::Bar::FalsePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because its `strict_dependencies` is too low https://srb.help/3718
-    15 |  Foo::Bar::FalsePackage::OtherClass # resolves via root
+use_false_package/foo.rb:13: `Foo::Bar::FalsePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because its `strict_dependencies` is too low https://srb.help/3718
+    13 |  Foo::Bar::FalsePackage::OtherClass # resolves via root
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_package/__package.rb:5: `Foo::Bar::FalsePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
      5 |  strict_dependencies 'false'
                               ^^^^^^^
 
-foo/foo_class.rb:17: `Test::Foo::Bar::FalsePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
-    17 |  Test::Foo::Bar::FalsePackage::TestUtil
+use_false_package/foo.rb:15: `Test::Foo::Bar::FalsePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    15 |  Test::Foo::Bar::FalsePackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-foo/foo_class.rb:19: `Foo::Bar::FalseAndAppPackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because importing it would cause a layering violation and its `strict_dependencies` is too low https://srb.help/3718
-    19 |  Foo::Bar::FalseAndAppPackage::OtherClass # resolves via root
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    false_and_app_package/__package.rb:4: Package `Foo::Bar::FalseAndAppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
-     4 |  layer 'app'
-                ^^^^^
-    false_and_app_package/__package.rb:5: `Foo::Bar::FalseAndAppPackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
-     5 |  strict_dependencies 'false'
-                              ^^^^^^^
-
-foo/foo_class.rb:21: `Test::Foo::Bar::FalseAndAppPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
-    21 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-foo/foo.test.rb:4: `Test::Foo::Bar::FalsePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+use_false_package/foo.test.rb:4: `Test::Foo::Bar::FalsePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::FalsePackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_package/__package.rb:3: Exported from package here
      3 |class Foo::Bar::FalsePackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    foo/__package.rb:7: Inserted `test_import Foo::Bar::FalsePackage`
+    use_false_package/__package.rb:7: Inserted `test_import Foo::Bar::FalsePackage`
      7 |  strict_dependencies 'layered'
                                        ^
 
-foo/foo.test.rb:6: `Foo::Bar::FalsePackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
+use_false_package/foo.test.rb:6: `Foo::Bar::FalsePackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
      6 |  Foo::Bar::FalsePackage::ImportMeTestOnly
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_package/__package.rb:3: Exported from package here
      3 |class Foo::Bar::FalsePackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    foo/__package.rb:7: Inserted `test_import Foo::Bar::FalsePackage`
+    use_false_package/__package.rb:7: Inserted `test_import Foo::Bar::FalsePackage`
      7 |  strict_dependencies 'layered'
                                        ^
-
-foo/foo.test.rb:8: `Test::Foo::Bar::FalseAndAppPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
-     8 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    false_and_app_package/__package.rb:3: Exported from package here
-     3 |class Foo::Bar::FalseAndAppPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    foo/__package.rb:7: Inserted `test_import Foo::Bar::FalseAndAppPackage`
-     7 |  strict_dependencies 'layered'
-                                       ^
-
-foo/foo.test.rb:10: `Foo::Bar::FalseAndAppPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
-    10 |  Foo::Bar::FalseAndAppPackage::ImportMeTestOnly
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    false_and_app_package/__package.rb:3: Exported from package here
-     3 |class Foo::Bar::FalseAndAppPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    foo/__package.rb:7: Inserted `test_import Foo::Bar::FalseAndAppPackage`
-     7 |  strict_dependencies 'layered'
-                                       ^
-Errors: 12
+Errors: 6
 # frozen_string_literal: true
 # typed: strict
 # enable-packager: true
@@ -264,4 +208,72 @@ class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered'
   test_import Foo::Bar::FalsePackage
+end
+
+--------------------------------------------------------------------------
+
+foo/foo_class.rb:6: `Foo::Bar::FalseAndAppPackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because importing it would cause a layering violation and its `strict_dependencies` is too low https://srb.help/3718
+     6 |      Foo::Bar::FalseAndAppPackage::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_and_app_package/__package.rb:4: Package `Foo::Bar::FalseAndAppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     4 |  layer 'app'
+                ^^^^^
+    false_and_app_package/__package.rb:5: `Foo::Bar::FalseAndAppPackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     5 |  strict_dependencies 'false'
+                              ^^^^^^^
+
+foo/foo_class.rb:7: `Foo::Bar::FalseAndAppPackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because importing it would cause a layering violation and its `strict_dependencies` is too low https://srb.help/3718
+     7 |      Bar::FalseAndAppPackage::OtherClass # resolves via `module Foo`
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_and_app_package/__package.rb:4: Package `Foo::Bar::FalseAndAppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     4 |  layer 'app'
+                ^^^^^
+    false_and_app_package/__package.rb:5: `Foo::Bar::FalseAndAppPackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     5 |  strict_dependencies 'false'
+                              ^^^^^^^
+
+foo/foo_class.rb:13: `Foo::Bar::FalseAndAppPackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because importing it would cause a layering violation and its `strict_dependencies` is too low https://srb.help/3718
+    13 |  Foo::Bar::FalseAndAppPackage::OtherClass # resolves via root
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_and_app_package/__package.rb:4: Package `Foo::Bar::FalseAndAppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     4 |  layer 'app'
+                ^^^^^
+    false_and_app_package/__package.rb:5: `Foo::Bar::FalseAndAppPackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     5 |  strict_dependencies 'false'
+                              ^^^^^^^
+
+foo/foo_class.rb:15: `Test::Foo::Bar::FalseAndAppPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    15 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+foo/foo.test.rb:4: `Test::Foo::Bar::FalseAndAppPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+     4 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_and_app_package/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::FalseAndAppPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    foo/__package.rb:7: Inserted `test_import Foo::Bar::FalseAndAppPackage`
+     7 |  strict_dependencies 'layered'
+                                       ^
+
+foo/foo.test.rb:6: `Foo::Bar::FalseAndAppPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
+     6 |  Foo::Bar::FalseAndAppPackage::ImportMeTestOnly
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_and_app_package/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::FalseAndAppPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    foo/__package.rb:7: Inserted `test_import Foo::Bar::FalseAndAppPackage`
+     7 |  strict_dependencies 'layered'
+                                       ^
+Errors: 6
+# frozen_string_literal: true
+# typed: strict
+# enable-packager: true
+
+class Foo::MyPackage < PackageSpec
+  layer 'lib'
+  strict_dependencies 'layered'
+  test_import Foo::Bar::FalseAndAppPackage
 end
