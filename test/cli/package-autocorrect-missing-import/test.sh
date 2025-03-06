@@ -34,9 +34,9 @@ echo
 echo --------------------------------------------------------------------------
 echo
 
-"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --stripe-packages --packager-layers=lib,app --max-threads=0 false_and_app_package foo 2>&1
+"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --stripe-packages --packager-layers=lib,app --max-threads=0 false_and_app_package use_false_and_app_package 2>&1
 
-cat foo/__package.rb
+cat use_false_and_app_package/__package.rb
 
 rm -rf "$tmp"
 
