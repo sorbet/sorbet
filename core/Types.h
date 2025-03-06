@@ -237,7 +237,7 @@ using IntrinsicMethodsDispatchMap = UnorderedMap<NameRef, const std::vector<Name
 const IntrinsicMethodsDispatchMap &intrinsicMethodsDispatchMap();
 
 template <class To> bool isa_type(const TypePtr &what) {
-    return what != nullptr && what.tag() == TypePtr::TypeToTag<To>::value;
+    return bool(what.as_type<To>());
 }
 
 // Specializations to handle the class hierarchy.
@@ -313,20 +313,18 @@ inline bool is_proxy_type(const TypePtr &what) {
     }
 }
 
-template <class To> To const *cast_type(const TypePtr &what) {
+template <class To> core::UntaggedPtr<const To> cast_type(const TypePtr &what) {
     static_assert(TypePtr::TypeToIsInlined<To>::value == false,
                   "Cast inlined type objects with `cast_type_nonnull`, and use `isa_type` to check if the TypePtr "
                   "contains the type you expect.");
-    if (isa_type<To>(what)) {
-        return reinterpret_cast<To const *>(what.get());
-    } else {
-        return nullptr;
-    }
+    return what.as_type<To>();
 }
 
-template <class To> To *cast_type(TypePtr &what) {
-    // const To* -> To* to avoid reimplementing the same logic twice.
-    return const_cast<To *>(cast_type<To>(static_cast<const TypePtr &>(what)));
+template <class To> core::UntaggedPtr<To> cast_type(TypePtr &what) {
+    static_assert(TypePtr::TypeToIsInlined<To>::value == false,
+                  "Cast inlined type objects with `cast_type_nonnull`, and use `isa_type` to check if the TypePtr "
+                  "contains the type you expect.");
+    return what.as_type<To>();
 }
 
 template <class To> To *cast_type(TypePtr &&what) = delete;
