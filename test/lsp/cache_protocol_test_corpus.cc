@@ -291,7 +291,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReindexingUsesTheCache") {
     auto opts = lspWrapper->opts;
 
     // Release cache lock by dropping the entire LSP wrapper which holds onto a kvstore.
-    lspWrapper = nullptr;
+    // lspWrapper = nullptr;
 
     auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
     auto logger = std::make_shared<spdlog::logger>("null", sink);
@@ -323,8 +323,11 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReindexingUsesTheCache") {
     // We should be able to reindex the file multiple times, getting a cache hit for each one.
     for (auto i = 0; i < 2; ++i) {
         auto asts = realmain::pipeline::index(*gs, absl::MakeSpan(frefs), *opts, *workers, kvstore);
-        REQUIRE_EQ(asts.size(), 1);
-        REQUIRE(asts.front().cached());
+
+        // NOTE: we can't use getCounters here, because we're interested in the counters for this thread: we're running
+        // index manually which means the LSP thread's counters wouldn't match our expectations.
+        auto counters = CounterStateDatabase(getAndClearThreadCounters());
+        CHECK_EQ(counters.getCounter("types.input.files.kvstore.hit"), 1);
     }
 }
 
