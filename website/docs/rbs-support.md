@@ -198,6 +198,9 @@ of being able to advocate for using this syntax more widely.
 
 ### Runtime checking is a feature
 
+> Note that runtime checking of RBS signatures is not implemented, so type
+> safety is reduced.
+
 Sorbet's signatures are not just static type annotations: they are also
 [checked at runtime](runtime.md). Runtime-checked signatures are a key reason
 why Sorbet type annotations are so accurate: authors can't "lie" when writing
