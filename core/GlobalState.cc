@@ -2199,6 +2199,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndex() const {
     result->onlyErrorClasses = this->onlyErrorClasses;
     result->suggestUnsafe = this->suggestUnsafe;
     result->pathPrefix = this->pathPrefix;
+    result->packageDB_ = this->packageDB_.emptyCopyWithOptions();
 
     return result;
 }

@@ -748,7 +748,6 @@ void setPackagerOptions(core::GlobalState &gs, const options::Options &opts) {
 }
 
 // packager intentionally runs outside of rewriter so that its output does not get cached.
-// TODO(jez) How much of this still needs to be outside of rewriter?
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
              WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
@@ -945,6 +944,8 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
 ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                                            const options::Options &opts, WorkerPool &workers,
                                            core::FoundDefHashes *foundHashes) {
+    package(gs, absl::Span<ast::ParsedFile>(what), opts, workers);
+
     auto canceled = name(gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
     if (canceled) {
         return ast::ParsedFilesOrCancelled::cancel(move(what), workers);

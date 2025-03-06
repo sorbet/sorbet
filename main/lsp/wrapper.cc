@@ -33,6 +33,8 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
     gs.ruby3KeywordArgs = options.ruby3KeywordArgs;
     gs.typedSuper = options.typedSuper;
     gs.suppressPayloadSuperclassRedefinitionFor = options.suppressPayloadSuperclassRedefinitionFor;
+    // We don't have to deal with packager-specific options here, as those will be handled later by
+    // the pipeline code that decides whether to run the packager at all.
 
     // Ensure LSP is enabled.
     options.runLSP = true;
