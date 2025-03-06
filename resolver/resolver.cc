@@ -2149,7 +2149,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
     static bool isLHSResolved(core::Context ctx, core::SymbolRef sym) {
         if (sym.isTypeMember()) {
-            auto *lambdaParam = core::cast_type<core::LambdaParam>(sym.resultType(ctx));
+            auto lambdaParam = core::cast_type<core::LambdaParam>(sym.resultType(ctx));
             ENFORCE(lambdaParam != nullptr);
 
             // both bounds are set to todo in the namer, so it's sufficient to
@@ -2504,7 +2504,7 @@ class ResolveTypeMembersAndFieldsWalk {
         // Initialize the resultType to a LambdaParam with default bounds
         auto lambdaParam = core::make_type<core::LambdaParam>(lhs, core::Types::bottom(), core::Types::top());
         data->resultType = lambdaParam;
-        auto *memberType = core::cast_type<core::LambdaParam>(lambdaParam);
+        auto memberType = core::cast_type<core::LambdaParam>(lambdaParam);
 
         core::Loc lowerBoundTypeLoc;
         core::Loc upperBoundTypeLoc;
@@ -2638,7 +2638,7 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
         auto attachedClassTypeMember = attachedClass.asTypeMemberRef();
-        auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClassTypeMember.data(ctx)->resultType);
+        auto lambdaParam = core::cast_type<core::LambdaParam>(attachedClassTypeMember.data(ctx)->resultType);
         ENFORCE(lambdaParam != nullptr);
 
         if (isTodo(lambdaParam->lowerBound)) {

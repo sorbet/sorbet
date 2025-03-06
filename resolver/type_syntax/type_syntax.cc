@@ -574,7 +574,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
 // This function recurses through an OrType, and accumulates all the class names,
 // wrapped in T.class_of, and checks if the type is only made up of Classes and OrTypes
 bool recurseOrType(core::Context ctx, core::TypePtr type, std::vector<std::string> &v) {
-    if (auto *o = core::cast_type<core::OrType>(type)) {
+    if (auto o = core::cast_type<core::OrType>(type)) {
         return recurseOrType(ctx, o->left, v) && recurseOrType(ctx, o->right, v);
     } else if (core::isa_type<core::ClassType>(type)) {
         v.push_back(fmt::format("T.class_of({})", type.show(ctx)));
@@ -1457,7 +1457,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             result.type = core::make_type<core::UnresolvedAppliedType>(genericClass, move(targPtrs));
             return result;
         }
-        if (auto *mt = core::cast_type<core::MetaType>(out)) {
+        if (auto mt = core::cast_type<core::MetaType>(out)) {
             result.type = mt->wrapped;
             return result;
         }
