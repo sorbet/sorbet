@@ -266,7 +266,8 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReindexingUsesTheCache") {
     auto filePath = fmt::format("{}/{}", rootPath, relativeFilepath);
     // This file has an error to indirectly assert that LSP is actually typechecking the file during initialization.
     auto fileContents = "# typed: true\n"
-                        "class Foo extend T::Sig\n"
+                        "class Foo\n"
+                        "  extend T::Sig\n"
                         "  sig {returns(Integer)}\n"
                         "  def bar\n"
                         "    'hello'\n"
