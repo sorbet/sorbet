@@ -187,11 +187,10 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                          ast::ExpressionPtr tree) {
     auto &print = opts.print;
     ast::ParsedFile rewritten{nullptr, file};
-    rewritten.setCached(tree != nullptr);
 
     Timer timeit(lgs.tracer(), "indexOne", {{"file", string(file.data(lgs).path())}});
     try {
-        if (!rewritten.cached()) {
+        if (tree == nullptr) {
             // tree isn't cached. Need to start from parser
             if (file.data(lgs).strictLevel == core::StrictLevel::Ignore) {
                 return emptyParsedFile(file);
@@ -477,7 +476,16 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
 
 struct IndexResult {
     unique_ptr<core::GlobalState> gs;
-    vector<ast::ParsedFile> trees;
+    vector<ast::ParsedFile> indexed;
+    vector<ast::ParsedFile> cached;
+
+    bool empty() const {
+        return this->indexed.empty() && this->cached.empty();
+    }
+
+    size_t size() const {
+        return this->indexed.size() + this->cached.size();
+    }
 };
 
 struct IndexThreadResultPack {
@@ -491,14 +499,15 @@ struct IndexSubstitutionJob {
     unique_ptr<core::GlobalState> threadGs;
 
     std::optional<core::NameSubstitution> subst;
-    vector<ast::ParsedFile> trees;
+    vector<ast::ParsedFile> indexed;
+    vector<ast::ParsedFile> cached;
 
     IndexSubstitutionJob() {}
 
     IndexSubstitutionJob(core::GlobalState &to, IndexResult res)
-        : threadGs{std::move(res.gs)}, subst{}, trees{std::move(res.trees)} {
+        : threadGs{std::move(res.gs)}, subst{}, indexed{std::move(res.indexed)}, cached{std::move(res.cached)} {
         to.mergeFileTable(*this->threadGs);
-        if (absl::c_any_of(this->trees, [](auto &parsed) { return !parsed.cached(); })) {
+        if (!this->indexed.empty()) {
             this->subst.emplace(*this->threadGs, to);
         }
     }
@@ -523,7 +532,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
              !result.done(); result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
             if (result.gotItem()) {
                 counterConsume(move(threadResult.counters));
-                auto numTrees = threadResult.res.trees.size();
+                auto numTrees = threadResult.res.size();
                 batchq->push(IndexSubstitutionJob{cgs, std::move(threadResult.res)}, numTrees);
                 totalNumTrees += numTrees;
             }
@@ -539,16 +548,22 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
             IndexSubstitutionJob job;
             for (auto result = batchq->try_pop(job); !result.done(); result = batchq->try_pop(job)) {
                 if (result.gotItem()) {
-                    if (job.subst.has_value()) {
-                        for (auto &tree : job.trees) {
-                            if (!tree.cached()) {
-                                core::MutableContext ctx(cgs, core::Symbols::root(), tree.file);
-                                tree = ast::Substitute::run(ctx, *job.subst, move(tree));
-                            }
+                    if (!job.indexed.empty()) {
+                        ENFORCE(job.subst.has_value());
+
+                        for (auto &tree : job.indexed) {
+                            core::MutableContext ctx(cgs, core::Symbols::root(), tree.file);
+                            tree = ast::Substitute::run(ctx, *job.subst, move(tree));
                         }
+
+                        auto numSubstitutedTrees = job.indexed.size();
+                        resultq->push(std::move(job.indexed), numSubstitutedTrees);
                     }
-                    auto numSubstitutedTrees = job.trees.size();
-                    resultq->push(std::move(job.trees), numSubstitutedTrees);
+
+                    if (!job.cached.empty()) {
+                        auto numCachedTrees = job.cached.size();
+                        resultq->push(std::move(job.cached), numCachedTrees);
+                    }
                 }
             }
         });
@@ -593,16 +608,21 @@ vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, absl::Span
                 if (result.gotItem()) {
                     core::FileRef file = job;
                     auto cachedTree = readFileWithStrictnessOverrides(*localGs, file, opts, kvstore);
+                    bool cached = cachedTree != nullptr;
                     auto parsedFile = indexOne(opts, *localGs, file, move(cachedTree));
-                    threadResult.res.trees.emplace_back(move(parsedFile));
+                    if (cached) {
+                        threadResult.res.cached.emplace_back(move(parsedFile));
+                    } else {
+                        threadResult.res.indexed.emplace_back(move(parsedFile));
+                    }
                 }
             }
         }
 
-        if (!threadResult.res.trees.empty()) {
+        if (!threadResult.res.empty()) {
             threadResult.counters = getAndClearThreadCounters();
             threadResult.res.gs = move(localGs);
-            auto computedTreesCount = threadResult.res.trees.size();
+            auto computedTreesCount = threadResult.res.size();
             resultq->push(move(threadResult), computedTreesCount);
         }
     });
