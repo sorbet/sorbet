@@ -283,7 +283,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReindexingUsesTheCache") {
         lspWrapper->opts->inputFileNames.push_back(filePath);
         assertErrorDiagnostics(
             initializeLSP(),
-            {{relativeFilepath, 4, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
+            {{relativeFilepath, 5, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
     }
 
     // LSP should have written cache to disk with file hashes from initialization.
