@@ -173,6 +173,7 @@ void PackageDB::setPackageNameForFile(FileRef file, MangledName mangledName) {
 
 const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, core::FileRef file) const {
     ENFORCE(frozen);
+    ENFORCE(enabled_);
 
     // If we already have the package name cached, we can skip the slow path below. As this function is const, we cannot
     // update the vector if we fall back on the slow path.
@@ -198,7 +199,7 @@ const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, cor
             return pkg;
         }
 
-        if (fileData.isPackage()) {
+        if (fileData.isPackage(gs)) {
             // When looking up a `__package.rb` file do not search parent directories
             break;
         }

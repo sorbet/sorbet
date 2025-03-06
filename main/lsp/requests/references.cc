@@ -93,8 +93,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
 
         // If file is untyped, only supports find reference requests from constants and class definitions.
         if (auto constResp = resp->isConstant()) {
-            // TODO(jez) This does package-specific behavior without checking `--stripe-packages`!
-            if (fref.data(gs).isPackage()) {
+            if (fref.data(gs).isPackage(gs)) {
                 // Special handling for package files.
                 //
                 // Case 1. get-refs on a package declaration

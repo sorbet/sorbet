@@ -321,7 +321,7 @@ public:
     }
 
     static void run(core::GlobalState &gs, ast::ParsedFile &f) {
-        if (!f.file.data(gs).isPackage()) {
+        if (!f.file.data(gs).isPackage(gs)) {
             return;
         }
 
@@ -552,7 +552,7 @@ public:
             size_t idx;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 ast::ParsedFile &f = files[idx];
-                if (!f.file.data(gs).isPackage()) {
+                if (!f.file.data(gs).isPackage(gs)) {
                     auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                     if (pkgName.exists()) {
                         core::Context ctx{gs, core::Symbols::root(), f.file};
@@ -664,7 +664,7 @@ public:
 
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 ast::ParsedFile &f = files[idx];
-                if (f.file.data(gs).isPackage()) {
+                if (f.file.data(gs).isPackage(gs)) {
                     auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                     if (pkgName.exists()) {
                         core::Context ctx{gs, core::Symbols::root(), f.file};

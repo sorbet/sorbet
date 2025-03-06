@@ -116,9 +116,8 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
         // source text has changed at all. If it does, we take the slow path.
         // Only relevant in `--stripe-packages` mode. This prevents LSP editing features like autocomplete from
         // working in `__package.rb` since every edit causes a slow path.
-        // TODO(jvilk): We could use `PackageInfo` as a `__package.rb` hash -- but we would have to stash it
-        // somewhere. Currently, we discard them after `packager` runs.
-        if (this->config->opts.stripePackages && oldFile.isPackage() && oldFile.source() != f->source()) {
+        // Note: We don't use File::isPackage because we have not necessarily set the packager options on initialGS yet
+        if (this->config->opts.stripePackages && oldFile.hasPackageRbPath() && oldFile.source() != f->source()) {
             logger.debug("Taking slow path because {} is a package file", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "package_file");
             timeit.setTag("path_chosen", "slow");

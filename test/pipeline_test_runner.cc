@@ -456,7 +456,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 tree = ast::ParsedFile{rewriter::Rewriter::run(ctx, move(tree.tree)), tree.file};
                 tree = testSerialize(*rbiGenGs, local_vars::LocalVars::run(ctx, move(tree)));
 
-                if (tree.file.data(*rbiGenGs).isPackage()) {
+                if (tree.file.isPackage(*rbiGenGs)) {
                     packageTrees.emplace_back(move(tree));
                 } else {
                     trees.emplace_back(move(tree));

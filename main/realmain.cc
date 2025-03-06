@@ -237,8 +237,8 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
                     ++n;
                     auto &tree = indexed[idx];
-                    // TODO(jez) This does package-specific behavior without checking `--stripe-packages`!
-                    if (tree.file.data(gs).isPackage()) {
+                    // This does package-specific behavior without checking `--stripe-packages`!
+                    if (tree.file.data(gs).hasPackageRbPath()) {
                         continue;
                     }
                     if (autogenVersion < autogen::AutogenVersion::VERSION_INCLUDE_RBI && tree.file.data(gs).isRBI()) {
@@ -686,6 +686,7 @@ int realmain(int argc, char *argv[]) {
 
             auto inputFilesSpan = absl::Span<core::FileRef>(inputFiles);
             if (opts.stripePackages) {
+                pipeline::setPackagerOptions(*gs, opts);
                 auto numPackageFiles = pipeline::partitionPackageFiles(*gs, inputFilesSpan);
                 auto inputPackageFiles = inputFilesSpan.first(numPackageFiles);
                 inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
@@ -705,7 +706,6 @@ int realmain(int argc, char *argv[]) {
                                                               *workers, indexed));
 
                 // Populate the packageDB by processing only the __package.rb files.
-                pipeline::setPackagerOptions(*gs, opts);
                 pipeline::buildPackageDB(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
                 // Only need to compute hashes when running to compute a FileHash
                 auto foundHashes = nullptr;
