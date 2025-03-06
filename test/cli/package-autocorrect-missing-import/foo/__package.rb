@@ -5,5 +5,4 @@
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered'
-  # import Foo::Bar::OtherPackage ## MISSING!
 end
