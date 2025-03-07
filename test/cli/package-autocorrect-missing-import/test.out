@@ -1,23 +1,23 @@
-use_other_package/foo.rb:15: Unable to resolve constant `MyClass` https://srb.help/5002
-    15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+use_other_package/foo.rb:16: Unable to resolve constant `MyClass` https://srb.help/5002
+    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
           ^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_other_package/foo.rb:15: Replaced with `Class`
-    15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+    use_other_package/foo.rb:16: Replaced with `Class`
+    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
           ^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: `Class` defined here
     NN |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_other_package/foo.rb:15: Replaced with `T::Class`
-    15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+    use_other_package/foo.rb:16: Replaced with `T::Class`
+    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
           ^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#LCENSORED: `T::Class` defined here
       NN |module T::Class
           ^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_other_package/foo.rb:15: Replaced with `Digest::Class`
-    15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+    use_other_package/foo.rb:16: Replaced with `Digest::Class`
+    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
           ^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/digest.rbi#LCENSORED: `Digest::Class` defined here
       NN |class Digest::Class
@@ -45,8 +45,22 @@ use_other_package/foo.rb:8: `Foo::Bar::OtherPackage::OtherClass` resolves but it
      7 |  strict_dependencies 'layered'
                                        ^
 
-use_other_package/foo.rb:14: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
-    14 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
+use_other_package/foo.rb:9: Used `test_import` constant `Foo::Bar::OtherPackageTest::OtherClass` in non-test file https://srb.help/3720
+     9 |      Foo::Bar::OtherPackageTest::OtherClass
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_other_package/__package.rb:7: Inserted `import Foo::Bar::OtherPackageTest`
+     7 |  strict_dependencies 'layered'
+                                       ^
+    use_other_package/__package.rb:8: Deleted
+     8 |  test_import Foo::Bar::OtherPackageTest
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other_test/__package.rb:3: Defined here
+     3 |class Foo::Bar::OtherPackageTest < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+use_other_package/foo.rb:15: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
+    15 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     other/__package.rb:3: Exported from package here
      3 |class Foo::Bar::OtherPackage < PackageSpec
@@ -56,8 +70,8 @@ use_other_package/foo.rb:14: `Foo::Bar::OtherPackage::OtherClass` resolves but i
      7 |  strict_dependencies 'layered'
                                        ^
 
-use_other_package/foo.rb:17: `Test::Foo::Bar::OtherPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
-    17 |  Test::Foo::Bar::OtherPackage::TestUtil
+use_other_package/foo.rb:18: `Test::Foo::Bar::OtherPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    18 |  Test::Foo::Bar::OtherPackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 use_other_package/foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
@@ -81,7 +95,7 @@ use_other_package/foo.test.rb:6: `Foo::Bar::OtherPackage::ImportMeTestOnly` reso
     use_other_package/__package.rb:7: Inserted `test_import Foo::Bar::OtherPackage`
      7 |  strict_dependencies 'layered'
                                        ^
-Errors: 7
+Errors: 8
 # frozen_string_literal: true
 # typed: strict
 # enable-packager: true
@@ -90,6 +104,7 @@ class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered'
   import Foo::Bar::OtherPackage
+
 end
 
 --------------------------------------------------------------------------
