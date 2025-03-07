@@ -973,7 +973,20 @@ public:
     void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
                            std::string_view fieldName) {
         if (allowFallThrough) {
-            // TODO
+            for (std::shared_ptr<JSONType> variant : variants) {
+                fmt::format_to(std::back_inserter(out), "try {{\n");
+                variant->emitFromJSONValue(out, from, assign, fieldName);
+                fmt::format_to(std::back_inserter(out), "}} catch (const DeserializationError &e) {{\n");
+            }
+
+            fmt::format_to(std::back_inserter(out), "auto &unwrappedValue = assertJSONField({}, \"{}\");", from,
+                           fieldName);
+            fmt::format_to(std::back_inserter(out), "throw JSONTypeError(\"{}\", \"{}\", unwrappedValue);\n", fieldName,
+                           sorbet::JSON::escape(getJSONType()));
+
+            for (std::shared_ptr<JSONType> variant : variants) {
+                fmt::format_to(std::back_inserter(out), "}}\n");
+            }
         } else {
             fmt::format_to(std::back_inserter(out), "{{\n");
             fmt::format_to(std::back_inserter(out), "auto &unwrappedValue = assertJSONField({}, \"{}\");", from,
