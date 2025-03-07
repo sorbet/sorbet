@@ -188,6 +188,27 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "cancelable-indexer-test",
+    size = "small",
+    srcs = ["cancelable-indexer-test.cc"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//ast",
+        "//common",
+        "//core",
+        "//main/options",
+        "//main/pipeline",
+        "//payload",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
+    ],
+)
+
 # Passes with --config=dbg but I'm not smart enough to figure out how to make it
 # only run when in that config
 # sh_test(
