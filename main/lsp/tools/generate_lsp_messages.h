@@ -935,8 +935,16 @@ public:
 };
 
 class JSONBasicVariantType final : public JSONVariantType {
+    bool allowFallThrough;
+
 public:
-    JSONBasicVariantType(std::vector<std::shared_ptr<JSONType>> variants) : JSONVariantType(variants) {
+    // By default, we do not allow overlapping JSON base types, because it might indicate that the
+    // user messed something up.
+    //
+    // But if we acknowledge the risks, it's useful for representing types like "either a known
+    // string literal, or any string" (e.g. an open enum)
+    JSONBasicVariantType(std::vector<std::shared_ptr<JSONType>> variants, bool allowFallThrough = false)
+        : JSONVariantType(variants), allowFallThrough(allowFallThrough) {
         // Check that we have at most one of every kind & do not have any complex types.
         UnorderedSet<BaseKind> cppKindSeen;
         UnorderedSet<BaseKind> jsonKindSeen;
@@ -945,14 +953,18 @@ public:
                 variant->getJSONBaseKind() == BaseKind::ComplexKind) {
                 throw std::invalid_argument("Invalid variant type: Complex are not supported.");
             }
+
             if (cppKindSeen.contains(variant->getCPPBaseKind())) {
                 throw std::invalid_argument(
                     "Invalid variant type: Cannot discriminate between multiple types with same base C++ kind.");
             }
             cppKindSeen.insert(variant->getCPPBaseKind());
+
+            if (!allowFallThrough) {
             if (jsonKindSeen.contains(variant->getJSONBaseKind())) {
                 throw std::invalid_argument(
                     "Invalid variant type: Cannot discriminate between multiple types with same base JSON kind.");
+            }
             }
             jsonKindSeen.insert(variant->getJSONBaseKind());
         }
@@ -960,6 +972,9 @@ public:
 
     void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
                            std::string_view fieldName) {
+        if (allowFallThrough) {
+            // TODO
+        } else {
         fmt::format_to(std::back_inserter(out), "{{\n");
         fmt::format_to(std::back_inserter(out), "auto &unwrappedValue = assertJSONField({}, \"{}\");", from, fieldName);
         bool first = true;
@@ -1006,6 +1021,7 @@ public:
                        sorbet::JSON::escape(getJSONType()));
         fmt::format_to(std::back_inserter(out), "}}\n");
         fmt::format_to(std::back_inserter(out), "}}\n");
+        }
     }
 
     void emitToJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
