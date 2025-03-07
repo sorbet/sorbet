@@ -477,7 +477,7 @@ OrType::OrType(const TypePtr &left, const TypePtr &right) : left(move(left)), ri
 void TupleType::_sanityCheck(const GlobalState &gs) const {
     sanityCheckProxyType(gs, underlying(gs));
     auto underlying = this->underlying(gs);
-    auto *applied = cast_type<AppliedType>(underlying);
+    auto applied = cast_type<AppliedType>(underlying);
     ENFORCE(applied);
     ENFORCE(applied->klass == Symbols::Array());
 }
@@ -691,7 +691,7 @@ TypePtr Types::getProcReturnType(const GlobalState &gs, const TypePtr &procType)
     if (!procType.derivesFrom(gs, Symbols::Proc())) {
         return Types::untypedUntracked();
     }
-    auto *applied = cast_type<AppliedType>(procType);
+    auto applied = cast_type<AppliedType>(procType);
     if (applied == nullptr || applied->targs.empty()) {
         return Types::untypedUntracked();
     }
@@ -806,7 +806,7 @@ optional<int> SendAndBlockLink::fixedArity() const {
 
 TypePtr TupleType::elementType(const GlobalState &gs) const {
     auto underlying = this->underlying(gs);
-    auto *ap = cast_type<AppliedType>(underlying);
+    auto ap = cast_type<AppliedType>(underlying);
     ENFORCE(ap);
     ENFORCE(ap->klass == Symbols::Array());
     ENFORCE(ap->targs.size() == 1);
@@ -915,7 +915,7 @@ core::ClassOrModuleRef Types::getRepresentedClass(const GlobalState &gs, const T
         auto s = cast_type_nonnull<ClassType>(ty);
         singleton = s.symbol;
     } else {
-        auto *at = cast_type<AppliedType>(ty);
+        auto at = cast_type<AppliedType>(ty);
         if (at == nullptr) {
             return core::Symbols::noClassOrModule();
         }
@@ -926,7 +926,7 @@ core::ClassOrModuleRef Types::getRepresentedClass(const GlobalState &gs, const T
 }
 
 TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
-    if (auto *metaType = cast_type<MetaType>(tp)) {
+    if (auto metaType = cast_type<MetaType>(tp)) {
         return metaType->wrapped;
     }
 
@@ -962,7 +962,7 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
         return attachedClass.data(gs)->externalType();
     }
 
-    if (auto *appType = cast_type<AppliedType>(tp)) {
+    if (auto appType = cast_type<AppliedType>(tp)) {
         ClassOrModuleRef attachedClass = appType->klass.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
             if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
@@ -974,14 +974,14 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
         return attachedClass.data(gs)->externalType();
     }
 
-    if (auto *shapeType = cast_type<ShapeType>(tp)) {
+    if (auto shapeType = cast_type<ShapeType>(tp)) {
         vector<TypePtr> unwrappedValues;
         unwrappedValues.reserve(shapeType->values.size());
         for (auto &value : shapeType->values) {
             unwrappedValues.emplace_back(unwrapType(gs, loc, value));
         }
         return make_type<ShapeType>(shapeType->keys, move(unwrappedValues));
-    } else if (auto *tupleType = cast_type<TupleType>(tp)) {
+    } else if (auto tupleType = cast_type<TupleType>(tp)) {
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(tupleType->elems.size());
         for (auto &elem : tupleType->elems) {
@@ -1076,7 +1076,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
 
         auto memData = mem.data(gs);
 
-        auto *memType = cast_type<LambdaParam>(memData->resultType);
+        auto memType = cast_type<LambdaParam>(memData->resultType);
         ENFORCE(memType != nullptr);
 
         if (memData->flags.isFixed) {

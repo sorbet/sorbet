@@ -93,7 +93,7 @@ vector<TypePtr> ClassOrModule::selfTypeArgs(const GlobalState &gs) const {
     for (auto tm : typeMembers()) {
         auto tmData = tm.data(gs);
         if (tmData->flags.isFixed) {
-            auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
+            auto lambdaParam = cast_type<LambdaParam>(tmData->resultType);
             ENFORCE(lambdaParam != nullptr);
             targs.emplace_back(lambdaParam->upperBound);
         } else {
@@ -141,7 +141,7 @@ TypePtr ClassOrModule::unsafeComputeExternalType(GlobalState &gs) {
 
         for (auto &tm : typeMembers()) {
             auto tmData = tm.data(gs);
-            auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
+            auto lambdaParam = cast_type<LambdaParam>(tmData->resultType);
             ENFORCE(lambdaParam != nullptr);
 
             if (ref.isLegacyStdlibGeneric()) {
@@ -1868,7 +1868,7 @@ void ClassOrModule::recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subcl
     const OrType *orT = nullptr;
     while ((orT = cast_type<OrType>(*iter))) {
         core::ClassOrModuleRef subclass;
-        if (auto *right = cast_type<AppliedType>(orT->right)) {
+        if (auto right = cast_type<AppliedType>(orT->right)) {
             subclass = right->klass;
         } else if (isa_type<ClassType>(orT->right)) {
             auto right = cast_type_nonnull<ClassType>(orT->right);
@@ -1883,7 +1883,7 @@ void ClassOrModule::recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subcl
     }
 
     core::ClassOrModuleRef lastClass;
-    if (auto *lastType = cast_type<AppliedType>(*iter)) {
+    if (auto lastType = cast_type<AppliedType>(*iter)) {
         lastClass = lastType->klass.data(gs)->attachedClass(gs);
     } else if (isa_type<ClassType>(*iter)) {
         auto lastType = cast_type_nonnull<ClassType>(*iter);
@@ -1929,7 +1929,7 @@ TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
     auto result = Types::bottom();
     while (auto orType = cast_type<OrType>(currentClasses)) {
         core::ClassOrModuleRef subclass;
-        if (auto *right = cast_type<AppliedType>(orType->right)) {
+        if (auto right = cast_type<AppliedType>(orType->right)) {
             subclass = right->klass.data(gs)->attachedClass(gs);
         } else if (isa_type<ClassType>(orType->right)) {
             auto right = cast_type_nonnull<ClassType>(orType->right);
@@ -1944,7 +1944,7 @@ TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
     }
 
     core::ClassOrModuleRef subclass;
-    if (auto *lastType = cast_type<AppliedType>(currentClasses)) {
+    if (auto lastType = cast_type<AppliedType>(currentClasses)) {
         subclass = lastType->klass.data(gs)->attachedClass(gs);
     } else if (isa_type<ClassType>(currentClasses)) {
         auto lastType = cast_type_nonnull<ClassType>(currentClasses);
