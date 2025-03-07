@@ -706,7 +706,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             *gs, "autocorrects",
             [&]() {
                 fmt::memory_buffer buf;
-                for (const auto &file : files) {
+                auto sortedFiles = files; // copy
+                fast_sort(sortedFiles, [&](const auto &lhs, const auto &rhs) -> bool {
+                    return lhs.data(*gs).path() < rhs.data(*gs).path();
+                });
+                for (const auto &file : sortedFiles) {
                     string editedSource;
                     if (toWrite.contains(file)) {
                         editedSource = toWrite[file];

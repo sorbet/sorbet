@@ -7,23 +7,20 @@ if [ "$#" -eq 0 ]; then
   exit 1
 fi
 
-srcs=("${@}")
-
-tmpdir="$(mktemp -d)"
-trap 'rm -rf "$tmpdir"' EXIT
-
-srcs_basenames=()
-for src in "${srcs[@]}"; do
-  src_basename="$(basename "$src")"
-  if [ -f "$tmpdir/$src_basename" ]; then
-    >&2 echo "error: duplicate file basenames: $src_basename"
+if command -v gcp &> /dev/null; then
+  cp="gcp" # GNU cp
+elif [ "$(uname)" = "Linux" ]; then
+  cp="cp"
+else
+  if cp --parents 2>&1 | grep -q 'illegal option'; then
+    echo "This script requires the --parents flag provided by GNU cp"
+    echo "Install GNU coreutils for your platform or re-run this script on Linux"
     exit 1
   fi
+fi
 
-  srcs_basenames+=("$src_basename")
-  cp "$src" "$tmpdir"
-done
-
+args=("${@}")
+srcs=()
 options=(
   --silence-dev-message
   --suppress-non-critical
@@ -31,6 +28,22 @@ options=(
   --autocorrect
   "--max-threads=0"
 )
+
+tmpdir="$(mktemp -d)"
+trap 'rm -rf "$tmpdir"' EXIT
+
+for arg in "${args[@]}"; do
+  case "$arg" in
+    -*)
+      options+=("$arg")
+      ;;
+    *)
+      src="$arg"
+      srcs+=("$src")
+      "$cp" --parents "$src" "$tmpdir"
+      ;;
+  esac
+done
 
 if grep -q '^# enable-suggest-unsafe: true$' "${srcs[@]}"; then
   options+=("--suggest-unsafe")
@@ -41,15 +54,12 @@ pushd "$tmpdir" &> /dev/null
 
 "$cwd"/bazel-bin/main/sorbet \
   "${options[@]}" \
-  "${srcs_basenames[@]}" \
+  "${srcs[@]}" \
   &> /dev/null || true
 
-i=-1
 for src in "${srcs[@]}"; do
-  i=$((i + 1))
-  src_basename="$tmpdir/${srcs_basenames[$i]}"
   echo "# -- $src --"
-  cat "$src_basename"
+  cat "$src"
   echo '# ------------------------------'
 done
 

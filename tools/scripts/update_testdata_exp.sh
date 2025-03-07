@@ -111,6 +111,11 @@ for this_src in "${rb_src[@]}" DUMMY; do
   fi
 
   if [ -n "$basename" ]; then
+    needs_stripe_packages=false
+    if grep -q '^# enable-packager: true' "${srcs[@]}"; then
+      needs_stripe_packages=true
+    fi
+
     needs_requires_ancestor=false
     if grep -q '^# enable-experimental-requires-ancestor: true' "${srcs[@]}"; then
       needs_requires_ancestor=true
@@ -199,8 +204,10 @@ for this_src in "${rb_src[@]}" DUMMY; do
         args=("--stop-after=namer")
       elif [ "$pass" = "minimized-rbi" ]; then
         args=("--minimize-to-rbi=$basename.minimize.rbi")
-      elif [ "$pass" = "package-tree" ]; then
-        args=("--stripe-packages")
+      fi
+
+      if $needs_stripe_packages; then
+        args+=("--stripe-packages")
 
         extra_underscore_prefixes=()
         while IFS='' read -r prefix; do
@@ -232,6 +239,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
           done
         fi
       fi
+
       case "$pass" in
         document-symbols)
           # See above for why this case is weird.
@@ -247,7 +255,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
           ;;
         autocorrects)
           echo tools/scripts/print_autocorrects_exp.sh \
-            "${srcs[@]}" \
+            "${args[@]}" "${srcs[@]}" \
             \> "$candidate" \
             2\> /dev/null \
             >>"$COMMAND_FILE"
