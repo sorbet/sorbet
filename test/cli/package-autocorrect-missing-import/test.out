@@ -123,15 +123,22 @@ use_app_package/foo.rb:7: `Foo::Bar::AppPackage::OtherClass` resolves but its pa
      4 |  layer 'app'
                 ^^^^^
 
-use_app_package/foo.rb:13: `Foo::Bar::AppPackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because importing it would cause a layering violation https://srb.help/3718
-    13 |  Foo::Bar::AppPackage::OtherClass # resolves via root
+use_app_package/foo.rb:8: Used `test_import` constant `Foo::Bar::AppPackageTest::OtherClass` in non-test file. However, it cannot be automatically imported because importing it would cause a layering violation https://srb.help/3718
+     8 |      Foo::Bar::AppPackageTest::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_package_test/__package.rb:4: Package `Foo::Bar::AppPackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     4 |  layer 'app'
+                ^^^^^
+
+use_app_package/foo.rb:14: `Foo::Bar::AppPackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because importing it would cause a layering violation https://srb.help/3718
+    14 |  Foo::Bar::AppPackage::OtherClass # resolves via root
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     app_package/__package.rb:4: Package `Foo::Bar::AppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
      4 |  layer 'app'
                 ^^^^^
 
-use_app_package/foo.rb:15: `Test::Foo::Bar::AppPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
-    15 |  Test::Foo::Bar::AppPackage::TestUtil
+use_app_package/foo.rb:16: `Test::Foo::Bar::AppPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    16 |  Test::Foo::Bar::AppPackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 use_app_package/foo.test.rb:4: `Test::Foo::Bar::AppPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
@@ -155,7 +162,7 @@ use_app_package/foo.test.rb:6: `Foo::Bar::AppPackage::ImportMeTestOnly` resolves
     use_app_package/__package.rb:7: Inserted `test_import Foo::Bar::AppPackage`
      7 |  strict_dependencies 'layered'
                                        ^
-Errors: 6
+Errors: 7
 # frozen_string_literal: true
 # typed: strict
 # enable-packager: true
@@ -164,6 +171,7 @@ class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered'
   test_import Foo::Bar::AppPackage
+  test_import Foo::Bar::AppPackageTest
 end
 
 --------------------------------------------------------------------------
