@@ -8,4 +8,4 @@ Write: {"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{"ur
 Read: {"jsonrpc":"2.0","id":1,"method":"textDocument/codeAction","params":{"textDocument":{"uri":"inmemory://model/default.rb"},"range":{"start":{"line":0,"character":0},"end":{"line":2,"character":0}},"context":{"diagnostics":[],"only":["source.fixAll"]}}}
 Write: {"jsonrpc":"2.0","id":1,"requestMethod":"textDocument/codeAction","result":[]}
 Read: {"jsonrpc":"2.0","id":2,"method":"textDocument/codeAction","params":{"textDocument":{"uri":"inmemory://model/default.rb"},"range":{"start":{"line":0,"character":0},"end":{"line":2,"character":0}},"context":{"diagnostics":[],"only":["no one knows"]}}}
-Write: {"jsonrpc":"2.0","id":2,"requestMethod":"sorbet/error","error":{"code":-32602,"message":"Unable to deserialize LSP request: Error deserializing JSON message: Invalid value for enum type `CodeActionKind`: no one knows"}}
+Write: {"jsonrpc":"2.0","id":2,"requestMethod":"textDocument/codeAction","result":[]}
