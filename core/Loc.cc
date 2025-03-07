@@ -40,16 +40,26 @@ Loc Loc::join(Loc other) const {
     return Loc(this->file(), min(this->beginPos(), other.beginPos()), max(this->endPos(), other.endPos()));
 }
 
-Loc::Detail Loc::offset2Pos(const File &file, uint32_t off) {
-    Loc::Detail pos;
+namespace {
 
+// Returns pointer into lineBreaks argument
+const int *startOfLineOffset(const File &file, absl::Span<const int> lineBreaks, uint32_t off) {
     if (off > file.source().size()) {
         fatalLogger->error(R"(msg="Bad offset2Pos off" path="{}" off="{}"")", absl::CEscape(file.path()), off);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
         ENFORCE_NO_TIMER(false);
     }
+    return absl::c_lower_bound(lineBreaks, off);
+}
+
+} // namespace
+
+Loc::Detail Loc::offset2Pos(const File &file, uint32_t off) {
+    Loc::Detail pos;
+
     auto lineBreaks = file.lineBreaks();
-    auto it = absl::c_lower_bound(lineBreaks, off);
+    auto it = startOfLineOffset(file, lineBreaks, off);
+
     if (it == lineBreaks.begin()) {
         pos.line = 1;
         pos.column = off + 1;
@@ -370,11 +380,11 @@ Loc Loc::adjustLen(const GlobalState &gs, int32_t beginAdjust, int32_t len) cons
 }
 
 pair<Loc, uint32_t> Loc::findStartOfLine(const GlobalState &gs) const {
-    auto startDetail = this->position(gs).first;
-    auto maybeLineStart = Loc::pos2Offset(this->file().data(gs), {startDetail.line, 1});
-    ENFORCE_NO_TIMER(maybeLineStart.has_value());
-    auto lineStart = maybeLineStart.value();
-    std::string_view lineView = this->file().data(gs).source().substr(lineStart);
+    auto &file = this->file().data(gs);
+    auto lineBreaks = file.lineBreaks();
+    auto it = startOfLineOffset(file, lineBreaks, this->beginPos());
+    auto lineStart = *it;
+    std::string_view lineView = file.source().substr(lineStart);
 
     size_t padding = lineView.find_first_not_of(" \t");
     if (padding == string::npos) {
