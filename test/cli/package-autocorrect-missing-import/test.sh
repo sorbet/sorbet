@@ -10,7 +10,7 @@ for file in $(find . -name '*.rb' | sort); do
 done
 cd "$tmp" || exit 1
 
-"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --stripe-packages --packager-layers=lib,app --max-threads=0 other use_other_package 2>&1
+"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --stripe-packages --packager-layers=lib,app --max-threads=0 other other_test use_other_package 2>&1
 
 cat use_other_package/__package.rb
 
