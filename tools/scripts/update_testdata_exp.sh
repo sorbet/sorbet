@@ -116,6 +116,11 @@ for this_src in "${rb_src[@]}" DUMMY; do
       needs_requires_ancestor=true
     fi
 
+    needs_experimental_rbs_signatures=false
+    if grep -q '^# enable-experimental-rbs-signatures: true' "${srcs[@]}"; then
+      needs_experimental_rbs_signatures=true
+    fi
+
     if grep -q '^# typed-super: false' "${srcs[@]}"; then
       needs_typed_super_false=true
     else
@@ -176,6 +181,9 @@ for this_src in "${rb_src[@]}" DUMMY; do
         args=("--enable-experimental-requires-ancestor")
       else
         args=()
+      fi
+      if $needs_experimental_rbs_signatures; then
+        args+=("--enable-experimental-rbs-signatures")
       fi
       if $needs_typed_super_false; then
         args+=("--typed-super=false")
