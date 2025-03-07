@@ -78,9 +78,9 @@ struct KnowledgeFact {
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 };
 
-KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
-    used_vars.resize(cfg->numLocalVariables());
-    for (auto &bb : cfg->basicBlocks) {
+KnowledgeFilter::KnowledgeFilter(core::Context ctx, cfg::CFG &cfg) {
+    used_vars.resize(cfg.numLocalVariables());
+    for (auto &bb : cfg.basicBlocks) {
         ENFORCE(bb->bexit.cond.variable.exists());
         if (bb->bexit.cond.variable != cfg::LocalRef::unconditional() &&
             bb->bexit.cond.variable != cfg::LocalRef::blockCall()) {
@@ -90,7 +90,7 @@ KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
     bool changed = true;
     while (changed) {
         changed = false;
-        for (auto &bb : cfg->forwardsTopoSort) {
+        for (auto &bb : cfg.forwardsTopoSort) {
             for (auto &bind : bb->exprs) {
                 if (auto id = cfg::cast_instruction<cfg::Ident>(bind.value)) {
                     if (isNeeded(bind.bind.variable) && !isNeeded(id->what)) {
