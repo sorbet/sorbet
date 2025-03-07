@@ -107,7 +107,7 @@ bool File::isPackagePath(string_view path) {
 }
 
 File::Flags::Flags(string_view path)
-    : hasIndexErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)),
+    : hasIndexErrors(false), isPackagedTest(isTestPath(path)), hasPackageRBIPath(isPackageRBIPath(path)),
       isPackage(isPackagePath(path)), isOpenInClient(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
@@ -272,7 +272,7 @@ bool File::isPackagedTest() const {
 }
 
 bool File::isPackageRBI() const {
-    return flags.isPackageRBI;
+    return flags.hasPackageRBIPath;
 }
 
 bool File::hasIndexErrors() const {
