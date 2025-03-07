@@ -48,6 +48,7 @@ public:
     absl::Span<const MangledName> packages() const;
 
     PackageDB deepCopy() const;
+    PackageDB emptyCopyWithOptions() const;
 
     UnfreezePackages unfreeze();
 
