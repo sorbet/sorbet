@@ -508,7 +508,9 @@ public:
     }
 
     std::string getJSONType() const {
-        return fmt::format("{}", fmt::join(enumValues, " | "));
+        return fmt::format("{}", fmt::map_join(enumValues, " | ", [](const auto &enumValue) -> std::string {
+                               return fmt::format("\"{}\"", enumValue);
+                           }));
     }
 
     /**
