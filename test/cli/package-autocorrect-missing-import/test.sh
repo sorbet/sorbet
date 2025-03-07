@@ -38,6 +38,38 @@ echo
 
 cat use_false_and_app_package/__package.rb
 
+echo
+echo --------------------------------------------------------------------------
+echo
+
+"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --stripe-packages --packager-layers=lib,app --max-threads=0 cycle_package use_cycle_package 2>&1
+
+cat use_cycle_package/__package.rb
+
+echo
+echo --------------------------------------------------------------------------
+echo
+
+"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --stripe-packages --packager-layers=lib,app --max-threads=0 app_cycle_package use_app_cycle_package 2>&1
+
+cat use_app_cycle_package/__package.rb
+
+echo
+echo --------------------------------------------------------------------------
+echo
+
+"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --stripe-packages --packager-layers=lib,app --max-threads=0 false_cycle_package use_false_cycle_package 2>&1
+
+cat use_false_cycle_package/__package.rb
+
+echo
+echo --------------------------------------------------------------------------
+echo
+
+"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --stripe-packages --packager-layers=lib,app --max-threads=0 app_false_cycle_package use_app_false_cycle_package 2>&1
+
+cat use_app_false_cycle_package/__package.rb
+
 rm -rf "$tmp"
 
 exit 1
