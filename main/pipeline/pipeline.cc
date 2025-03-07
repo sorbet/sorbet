@@ -944,9 +944,9 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
 ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                                            const options::Options &opts, WorkerPool &workers,
                                            core::FoundDefHashes *foundHashes) {
-    package(gs, absl::Span<ast::ParsedFile>(what), opts, workers);
+    package(gs, absl::MakeSpan(what), opts, workers);
 
-    auto canceled = name(gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
+    auto canceled = name(gs, absl::MakeSpan(what), opts, workers, foundHashes);
     if (canceled) {
         return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
     }
