@@ -18,7 +18,7 @@ echo
 echo --------------------------------------------------------------------------
 echo
 
-"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --stripe-packages --packager-layers=lib,app --max-threads=0 app_package use_app_package 2>&1
+"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --stripe-packages --packager-layers=lib,app --max-threads=0 app_package app_package_test use_app_package 2>&1
 
 cat use_app_package/__package.rb
 
