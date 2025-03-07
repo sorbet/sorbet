@@ -400,11 +400,7 @@ public:
                         // So we can craft an edit to delete the `test_import` line, and then use the regular logic for
                         // adding an import to insert the `import`.
                         auto importLoc = core::Loc(fullLoc().file(), import.name.loc);
-                        auto [lineStart, numWhitespace] = importLoc.findStartOfLine(gs);
-                        auto beginPos =
-                            lineStart.adjust(gs, -numWhitespace, 0).beginPos(); // -numWhitespace for the indentation
-                        auto endPos = importLoc.endPos();
-                        core::Loc replaceLoc(importLoc.file(), beginPos, endPos);
+                        auto replaceLoc = importLoc.adjustToStartOfLine(gs).adjustToLeadingWhitespace(gs);
                         deleteTestImportEdit = {replaceLoc, ""};
                     } else {
                         // we already import this, and if so, don't return an autocorrect
@@ -427,8 +423,7 @@ public:
             if (!importToInsertAfter) {
                 // Insert before the first import
                 core::Loc beforePackageName = {loc.file(), importedPackageNames.front().name.loc};
-                auto [beforeImport, numWhitespace] = beforePackageName.findStartOfLine(gs);
-                auto endOfPrevLine = beforeImport.adjust(gs, -numWhitespace - 1, 0);
+                auto endOfPrevLine = beforePackageName.adjustToStartOfLine(gs).adjustToLeadingWhitespace(gs);
                 insertionLoc =
                     core::Loc{loc.file(), endOfPrevLine.copyWithZeroLength().offsets().copyEndWithZeroLength()};
             } else {

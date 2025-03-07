@@ -75,7 +75,7 @@ public:
     inline Loc(FileRef file, uint32_t begin, uint32_t end) : storage{{begin, end}, file} {
         ENFORCE_NO_TIMER(begin <= INVALID_POS_LOC);
         ENFORCE_NO_TIMER(end <= INVALID_POS_LOC);
-        ENFORCE_NO_TIMER(begin <= end);
+        ENFORCE_NO_TIMER(begin <= end, "begin={} end={}", begin, end);
     }
 
     inline Loc(FileRef file, LocOffsets offsets) : Loc(file, offsets.beginPos(), offsets.endPos()){};
@@ -127,6 +127,13 @@ public:
     // Like `Loc::adjust`, but takes a start offset and length, instead of independently adjusting
     // the begin and end positions.
     Loc adjustLen(const GlobalState &gs, int32_t beginAdjust, int32_t len) const;
+
+    // Returns a new loc with a beginPos that has been adjusted to include any leading whitespace,
+    // including newlines.
+    Loc adjustToLeadingWhitespace(const GlobalState &gs) const;
+
+    // Returns a new loc with a beginPos that has been adjusted to the start of the line of the beginPos.
+    Loc adjustToStartOfLine(const GlobalState &gs) const;
 
     // For a given Loc, returns
     //

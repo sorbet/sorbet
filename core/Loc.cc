@@ -379,6 +379,28 @@ Loc Loc::adjustLen(const GlobalState &gs, int32_t beginAdjust, int32_t len) cons
     return Loc{this->file(), newBegin, newEnd};
 }
 
+Loc Loc::adjustToLeadingWhitespace(const GlobalState &gs) const {
+    if (!this->exists()) {
+        return Loc::none(this->file());
+    }
+
+    auto viewToStartOfFile = this->file().data(gs).source().substr(0, this->beginPos());
+    size_t newStart = viewToStartOfFile.find_last_not_of(" \t\n");
+    if (newStart == string::npos) {
+        // If this line didn't have a whitespace prefix, then it doesn't need changing.
+        return *this;
+    }
+
+    return Loc(this->file(), newStart, this->endPos());
+}
+
+Loc Loc::adjustToStartOfLine(const GlobalState &gs) const {
+    auto &file = this->file().data(gs);
+    auto lineBreaks = file.lineBreaks();
+    auto it = startOfLineOffset(file, lineBreaks, this->beginPos());
+    return Loc(this->file(), *it, this->endPos());
+}
+
 pair<Loc, uint32_t> Loc::findStartOfLine(const GlobalState &gs) const {
     auto &file = this->file().data(gs);
     auto lineBreaks = file.lineBreaks();
