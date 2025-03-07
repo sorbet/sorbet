@@ -639,7 +639,7 @@ public:
                 if (auto e = ctx.beginError(it->importLoc, core::errors::Packager::InvalidConfiguration)) {
                     e.setHeader("Duplicate package import `{}`", it->package.show(ctx));
                     e.addErrorLine(ctx.locAt(first->importLoc), "Previous package import found here");
-                    e.replaceWith("Remove import", ctx.locAt(it->importLoc), "");
+                    e.replaceWith("Remove import", ctx.locAt(it->importLoc).adjustToLeadingWhitespace(ctx), "");
                 }
             }
         }
