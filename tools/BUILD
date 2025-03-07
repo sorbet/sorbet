@@ -107,6 +107,7 @@ compilation_database(
         "//sorbet_version:sorbet_version",
         "//test:backtrace-test-error",
         "//test:backtrace-test-raise",
+        "//test:cancelable-indexer-test",
         "//test:error-check-test",
         "//test:hello-test",
         "//test:lsp_test_runner",
