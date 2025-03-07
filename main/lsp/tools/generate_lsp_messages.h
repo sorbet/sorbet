@@ -961,10 +961,10 @@ public:
             cppKindSeen.insert(variant->getCPPBaseKind());
 
             if (!allowFallThrough) {
-            if (jsonKindSeen.contains(variant->getJSONBaseKind())) {
-                throw std::invalid_argument(
-                    "Invalid variant type: Cannot discriminate between multiple types with same base JSON kind.");
-            }
+                if (jsonKindSeen.contains(variant->getJSONBaseKind())) {
+                    throw std::invalid_argument(
+                        "Invalid variant type: Cannot discriminate between multiple types with same base JSON kind.");
+                }
             }
             jsonKindSeen.insert(variant->getJSONBaseKind());
         }
@@ -975,52 +975,53 @@ public:
         if (allowFallThrough) {
             // TODO
         } else {
-        fmt::format_to(std::back_inserter(out), "{{\n");
-        fmt::format_to(std::back_inserter(out), "auto &unwrappedValue = assertJSONField({}, \"{}\");", from, fieldName);
-        bool first = true;
-        for (std::shared_ptr<JSONType> variant : variants) {
-            std::string checkMethod;
-            switch (variant->getJSONBaseKind()) {
-                case BaseKind::NullKind:
-                    checkMethod = "IsNull";
-                    break;
-                case BaseKind::BooleanKind:
-                    checkMethod = "IsBool";
-                    break;
-                case BaseKind::IntKind:
-                    checkMethod = "IsInt";
-                    break;
-                case BaseKind::DoubleKind:
-                    // N.B.: IsDouble() returns false for integers.
-                    // We only care that the value is convertible to double, which is what IsNumber tests.
-                    checkMethod = "IsNumber";
-                    break;
-                case BaseKind::StringKind:
-                    checkMethod = "IsString";
-                    break;
-                case BaseKind::ObjectKind:
-                    checkMethod = "IsObject";
-                    break;
-                case BaseKind::ArrayKind:
-                    checkMethod = "IsArray";
-                    break;
-                default:
-                    throw std::invalid_argument("Invalid kind for variant type.");
+            fmt::format_to(std::back_inserter(out), "{{\n");
+            fmt::format_to(std::back_inserter(out), "auto &unwrappedValue = assertJSONField({}, \"{}\");", from,
+                           fieldName);
+            bool first = true;
+            for (std::shared_ptr<JSONType> variant : variants) {
+                std::string checkMethod;
+                switch (variant->getJSONBaseKind()) {
+                    case BaseKind::NullKind:
+                        checkMethod = "IsNull";
+                        break;
+                    case BaseKind::BooleanKind:
+                        checkMethod = "IsBool";
+                        break;
+                    case BaseKind::IntKind:
+                        checkMethod = "IsInt";
+                        break;
+                    case BaseKind::DoubleKind:
+                        // N.B.: IsDouble() returns false for integers.
+                        // We only care that the value is convertible to double, which is what IsNumber tests.
+                        checkMethod = "IsNumber";
+                        break;
+                    case BaseKind::StringKind:
+                        checkMethod = "IsString";
+                        break;
+                    case BaseKind::ObjectKind:
+                        checkMethod = "IsObject";
+                        break;
+                    case BaseKind::ArrayKind:
+                        checkMethod = "IsArray";
+                        break;
+                    default:
+                        throw std::invalid_argument("Invalid kind for variant type.");
+                }
+                auto condition = fmt::format("unwrappedValue.{}()", checkMethod);
+                if (first) {
+                    first = false;
+                    fmt::format_to(std::back_inserter(out), "if ({}) {{\n", condition);
+                } else {
+                    fmt::format_to(std::back_inserter(out), "}} else if ({}) {{\n", condition);
+                }
+                variant->emitFromJSONValue(out, from, assign, fieldName);
             }
-            auto condition = fmt::format("unwrappedValue.{}()", checkMethod);
-            if (first) {
-                first = false;
-                fmt::format_to(std::back_inserter(out), "if ({}) {{\n", condition);
-            } else {
-                fmt::format_to(std::back_inserter(out), "}} else if ({}) {{\n", condition);
-            }
-            variant->emitFromJSONValue(out, from, assign, fieldName);
-        }
-        fmt::format_to(std::back_inserter(out), "}} else {{\n");
-        fmt::format_to(std::back_inserter(out), "throw JSONTypeError(\"{}\", \"{}\", unwrappedValue);\n", fieldName,
-                       sorbet::JSON::escape(getJSONType()));
-        fmt::format_to(std::back_inserter(out), "}}\n");
-        fmt::format_to(std::back_inserter(out), "}}\n");
+            fmt::format_to(std::back_inserter(out), "}} else {{\n");
+            fmt::format_to(std::back_inserter(out), "throw JSONTypeError(\"{}\", \"{}\", unwrappedValue);\n", fieldName,
+                           sorbet::JSON::escape(getJSONType()));
+            fmt::format_to(std::back_inserter(out), "}}\n");
+            fmt::format_to(std::back_inserter(out), "}}\n");
         }
     }
 
