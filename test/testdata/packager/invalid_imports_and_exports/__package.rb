@@ -27,4 +27,7 @@ class A < PackageSpec
   export A::REFERENCE # Works; it's a constant.
   export A::AClass
   export A::AModule
+
+  test_import C
+  test_import C # error: Duplicate package import
 end
