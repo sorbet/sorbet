@@ -723,6 +723,7 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
 } // namespace
 
 size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileRef> inputFiles) {
+    ENFORCE(gs.packageDB().enabled());
     // c_partition does not maintain relative ordering of the elements, which means that
     // the sort order of the file paths is not preserved.
     //

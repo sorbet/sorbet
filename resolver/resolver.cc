@@ -786,9 +786,7 @@ private:
                     auto suggested =
                         suggestScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, original.cnst);
 
-                    // WARNING: This runs package-specific logic even if the `--stripe-packages` flag was not passed!!
-                    // Do not cargo cult this, this is a pattern that we need to get rid of long term!
-                    if (ctx.file.data(ctx).isPackage() &&
+                    if (ctx.file.data(ctx).isPackage(gs) &&
                         !suggestScope.asClassOrModuleRef().isPackageSpecSymbol(ctx.state)) {
                         // In case the file is a __package.rb file, and the scope is not a PackageSpec-scoped symbol,
                         // the resolution error must be in an export statement. In this case, suggestions must be
@@ -1477,7 +1475,7 @@ public:
             return false;
         }
 
-        if (ctx.file.data(ctx).isPackage()) {
+        if (ctx.file.data(ctx).isPackage(ctx)) {
             // no need to check package files
             return false;
         }
@@ -2451,8 +2449,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto resultType = resolveConstantType(ctx, asgn->rhs, /* topCall */ true, /* isFrozen */ false);
         if (data->resultType == nullptr) {
             // Do not attempt to suggest types for aliases that fail to resolve in package files.
-            // TODO(jez) This does package-specific behavior without checking `--stripe-packages`!
-            if (resultType == nullptr && !ctx.file.data(ctx).isPackage()) {
+            if (resultType == nullptr && !ctx.file.data(ctx).isPackage(ctx)) {
                 // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
                 auto rhs = move(job.asgn->rhs);
                 auto loc = rhs.loc();

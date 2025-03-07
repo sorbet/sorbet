@@ -1536,7 +1536,7 @@ private:
 
 unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::ParsedFile &package) {
     ENFORCE(package.file.exists());
-    ENFORCE(package.file.data(gs).isPackage());
+    ENFORCE(package.file.data(gs).isPackage(gs));
     // Assumption: Root of AST is <root> class. (This won't be true
     // for `typed: ignore` files, so we should make sure to catch that
     // elsewhere.)
@@ -1978,7 +1978,7 @@ void validatePackage(core::Context ctx) {
 
 void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
     auto &file = ctx.file.data(ctx);
-    ENFORCE(!file.isPackage());
+    ENFORCE(!file.isPackage(ctx));
 
     if (file.isPayload()) {
         // Files in Sorbet's payload are parsed and loaded in the --store-state phase, which runs
@@ -2019,7 +2019,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
         core::UnfreezeNameTable unfreeze(gs);
         core::packages::UnfreezePackages packages = gs.unfreezePackages();
         for (auto &file : files) {
-            if (!file.file.data(gs).isPackage()) {
+            if (!file.file.data(gs).isPackage(gs)) {
                 continue;
             }
 
@@ -2154,7 +2154,7 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
                 auto file = job.file;
                 core::Context ctx(gs, core::Symbols::root(), file);
 
-                if (file.data(gs).isPackage()) {
+                if (file.data(gs).isPackage(gs)) {
                     ENFORCE(buildPackageDB);
                     validatePackage(ctx);
                 } else {
@@ -2197,7 +2197,7 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
 
             ast::ParsedFile &file = files[idx];
             core::Context ctx(gs, core::Symbols::root(), file.file);
-            if (file.file.data(gs).isPackage()) {
+            if (file.file.data(gs).isPackage(gs)) {
                 // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
                 // report some syntactic packager errors.
                 auto info = definePackage(gs, file);

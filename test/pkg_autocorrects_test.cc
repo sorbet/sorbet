@@ -75,6 +75,16 @@ string dagPackageAPath = "dagA/__package.rb";
 string dagPackageB = makePackageRB("DagPackageB", "dag", "lib");
 string dagPackageBPath = "dagB/__package.rb";
 
+void makeDefaultPackagerGlobalState(core::GlobalState &gs) {
+    gs.initEmpty();
+
+    {
+        core::UnfreezeNameTable packageNS(gs);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
+        gs.setPackagerOptions({}, {}, {}, {}, {}, {}, "");
+    }
+}
+
 vector<ast::ParsedFile> enterPackages(core::GlobalState &gs, vector<pair<string, string>> packageSources) {
     vector<core::FileRef> files;
     {
@@ -125,7 +135,7 @@ const core::SymbolRef getConstantRef(core::GlobalState &gs, vector<string> rawNa
 
 TEST_CASE("Simple add import") {
     core::GlobalState gs(errorQueue);
-    gs.initEmpty();
+    makeDefaultPackagerGlobalState(gs);
 
     string pkg_source = "class MyPackage < PackageSpec\n"
                         "  import SomethingElse\n"
@@ -151,7 +161,7 @@ TEST_CASE("Simple add import") {
 
 TEST_CASE("Simple test import") {
     core::GlobalState gs(errorQueue);
-    gs.initEmpty();
+    makeDefaultPackagerGlobalState(gs);
 
     string pkg_source = "class MyPackage < PackageSpec\n"
                         "  import SomethingElse\n"
@@ -177,7 +187,7 @@ TEST_CASE("Simple test import") {
 
 TEST_CASE("Add import with only existing exports") {
     core::GlobalState gs(errorQueue);
-    gs.initEmpty();
+    makeDefaultPackagerGlobalState(gs);
 
     string pkg_source = "class MyPackage < PackageSpec\n"
                         "  export SomethingElse\n"
@@ -203,7 +213,7 @@ TEST_CASE("Add import with only existing exports") {
 
 TEST_CASE("Add import and test_import to package with imports and test imports") {
     core::GlobalState gs(errorQueue);
-    gs.initEmpty();
+    makeDefaultPackagerGlobalState(gs);
 
     string pkg_source = "class MyPackage < PackageSpec\n"
                         "  import A\n"
@@ -254,7 +264,7 @@ TEST_CASE("Add import and test_import to package with imports and test imports")
 
 TEST_CASE("Add test import with only existing exports") {
     core::GlobalState gs(errorQueue);
-    gs.initEmpty();
+    makeDefaultPackagerGlobalState(gs);
 
     string pkg_source = "class MyPackage < PackageSpec\n"
                         "  export SomethingElse\n"
@@ -280,7 +290,7 @@ TEST_CASE("Add test import with only existing exports") {
 
 TEST_CASE("Add import to package with neither imports nor exports") {
     core::GlobalState gs(errorQueue);
-    gs.initEmpty();
+    makeDefaultPackagerGlobalState(gs);
 
     string pkg_source = "class MyPackage < PackageSpec\n"
                         "end\n";
@@ -304,7 +314,7 @@ TEST_CASE("Add import to package with neither imports nor exports") {
 
 TEST_CASE("Add test import to package with neither imports nor exports") {
     core::GlobalState gs(errorQueue);
-    gs.initEmpty();
+    makeDefaultPackagerGlobalState(gs);
 
     string pkg_source = "class MyPackage < PackageSpec\n"
                         "end\n";
@@ -328,7 +338,7 @@ TEST_CASE("Add test import to package with neither imports nor exports") {
 
 TEST_CASE("Simple add export") {
     core::GlobalState gs(errorQueue);
-    gs.initEmpty();
+    makeDefaultPackagerGlobalState(gs);
 
     string pkg_source = "class MyPackage < PackageSpec\n"
                         "  export MyPackage::This\n"

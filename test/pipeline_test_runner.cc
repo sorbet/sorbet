@@ -456,7 +456,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 tree = ast::ParsedFile{rewriter::Rewriter::run(ctx, move(tree.tree)), tree.file};
                 tree = testSerialize(*rbiGenGs, local_vars::LocalVars::run(ctx, move(tree)));
 
-                if (tree.file.data(*rbiGenGs).isPackage()) {
+                if (tree.file.data(*rbiGenGs).hasPackageRbPath()) {
                     packageTrees.emplace_back(move(tree));
                 } else {
                     trees.emplace_back(move(tree));
@@ -464,6 +464,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             }
 
             // Initialize the package DB
+            setupPackager(*rbiGenGs, assertions);
             packager::Packager::findPackages(*rbiGenGs, absl::Span<ast::ParsedFile>(packageTrees));
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, packageTrees);
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, trees);

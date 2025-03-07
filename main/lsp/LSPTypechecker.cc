@@ -197,7 +197,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         auto fref = gs->findFileByPath(file->path());
         ENFORCE(fref.exists(), "New files are not supported in the fast path");
 
-        if (config->opts.stripePackages && file->isPackage()) {
+        if (file->isPackage(*gs)) {
             continue;
         }
 
@@ -229,7 +229,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         toTypecheck.emplace_back(fref);
     }
 
-    if (shouldRunIncrementalNamer) {
+    if (shouldRunIncrementalNamer && gs->packageDB().enabled()) {
         std::vector<core::FileRef> packageFiles;
 
         for (auto fref : toTypecheck) {
@@ -238,8 +238,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             // NOTE: Using `gs` to access package information here assumes that edits to __package.rb
             // files don't take the fast path. We'll want (or maybe need) to revisit this when we start
             // making edits to `__package.rb` take fast paths.
-            // TODO(jez) This does package-specific behavior without checking `--stripe-packages`!
-            if (!(fref.data(*gs).isPackage())) {
+            if (!(fref.data(*gs).isPackage(*gs))) {
                 auto &pkg = gs->packageDB().getPackageForFile(*gs, fref);
                 if (pkg.exists()) {
                     // Since even no-op (e.g. whitespace-only) edits will cause constants to be deleted
@@ -642,7 +641,7 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
             if (updates.typecheckingPath == TypecheckingPath::Fast) {
                 // We don't support package files on the fast path, so package files won't have a tree indexed with
                 // `this->gs` present in `updatedFinalGSFileIndexes`.
-                if (!this->config->opts.stripePackages || !ast.file.data(*this->gs).isPackage()) {
+                if (!ast.file.data(*this->gs).isPackage(*gs)) {
                     auto indexedForTypechecker = absl::c_any_of(
                         updates.updatedFinalGSFileIndexes, [id](auto &updated) { return updated.file.id() == id; });
                     ENFORCE(indexedForTypechecker);

@@ -107,8 +107,8 @@ bool File::isPackagePath(string_view path) {
 }
 
 File::Flags::Flags(string_view path)
-    : hasIndexErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)),
-      isPackage(isPackagePath(path)), isOpenInClient(false) {}
+    : hasIndexErrors(false), isPackagedTest(isTestPath(path)), hasPackageRBIPath(isPackageRBIPath(path)),
+      hasPackageRbPath(isPackagePath(path)), isOpenInClient(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(path_), packagedLevel{File::filePackagedSigil(source_)},
@@ -166,7 +166,7 @@ File &FileRef::dataAllowingUnsafe(GlobalState &gs) const {
 bool FileRef::isPackage(const GlobalState &gs) const {
     ENFORCE(gs.files[_id]);
     ENFORCE(gs.files[_id]->sourceType != File::Type::TombStone);
-    return dataAllowingUnsafe(gs).isPackage();
+    return dataAllowingUnsafe(gs).isPackage(gs);
 }
 
 string_view File::path() const {
@@ -205,10 +205,17 @@ bool File::permitOverloadDefinitions() const {
     return this->isRBI() || FileOps::getFileName(this->path()) == OVERLOADS_TEST_RB || this->isStdlib();
 }
 
-bool File::isPackage() const {
+bool File::hasPackageRbPath() const {
+    return flags.hasPackageRbPath && this->strictLevel != StrictLevel::Ignore;
+}
+
+bool File::isPackage(const GlobalState &gs) const {
     // If the `__package.rb` file is at `typed: ignore`, then we haven't even parsed it.
     // Any loop over "all package files" really only wants "all non-ignored package files."
-    return flags.isPackage && this->strictLevel != StrictLevel::Ignore;
+    //
+    // Checks `packageDB()` last because probably we have better locality on the `flags` for the
+    // common case of this not being a `__package.rb` file.
+    return hasPackageRbPath() && gs.packageDB().enabled();
 }
 
 bool File::isOpenInClient() const {
@@ -272,7 +279,7 @@ bool File::isPackagedTest() const {
 }
 
 bool File::isPackageRBI() const {
-    return flags.isPackageRBI;
+    return flags.hasPackageRBIPath;
 }
 
 bool File::hasIndexErrors() const {
