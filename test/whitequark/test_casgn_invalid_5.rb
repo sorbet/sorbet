@@ -1,3 +1,3 @@
 # typed: true
 
-def self.f; ::Bar = 1; end # error: dynamic constant assignment
+def self.f; ::Bar = 1; end # parser-error: dynamic constant assignment

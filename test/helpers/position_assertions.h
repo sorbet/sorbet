@@ -10,6 +10,7 @@ namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
 
 class ErrorAssertion;
+class ParserErrorAssertion;
 class UntypedAssertion;
 
 /**
@@ -42,6 +43,12 @@ public:
      */
     static std::vector<std::shared_ptr<ErrorAssertion>>
     getErrorAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
+
+    /**
+     * Filters a vector of assertions and returns only ParserErrorAssertions.
+     */
+    static std::vector<std::shared_ptr<ParserErrorAssertion>>
+    getParserErrorAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
 
     static std::vector<std::shared_ptr<UntypedAssertion>>
     getUntypedAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
@@ -91,6 +98,36 @@ public:
 
     ErrorAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
                    std::string_view message, bool matchesDuplicateErrors);
+
+    std::string toString() const override;
+
+    bool check(const Diagnostic &diagnostic, std::string_view sourceLine, std::string_view errorPrefix);
+};
+
+// # ^^^ parser-error: message
+class ParserErrorAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<ParserErrorAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                      int assertionLine, std::string_view assertionContents,
+                                                      std::string_view assertionType);
+
+    /**
+     * Given a set of position-based assertions and Sorbet-generated diagnostics, check that the assertions pass.
+     */
+    static bool checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &files,
+                         std::vector<std::shared_ptr<ParserErrorAssertion>> errorAssertions,
+                         std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
+                         std::string errorPrefix = "");
+
+    const std::string message;
+
+    // this exists solely to allow us to reuse ErrorAssertion's checkAll
+    // for UntypedAssertion. It should *always* be false.
+    static constexpr bool matchesDuplicateErrors = false;
+    static constexpr DiagnosticSeverity severity = DiagnosticSeverity::Error;
+
+    ParserErrorAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                         std::string_view message);
 
     std::string toString() const override;
 
