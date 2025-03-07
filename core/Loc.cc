@@ -394,6 +394,13 @@ Loc Loc::adjustToLeadingWhitespace(const GlobalState &gs) const {
     return Loc(this->file(), newStart, this->endPos());
 }
 
+Loc Loc::adjustToStartOfLine(const GlobalState &gs) const {
+    auto &file = this->file().data(gs);
+    auto lineBreaks = file.lineBreaks();
+    auto it = startOfLineOffset(file, lineBreaks, this->beginPos());
+    return Loc(this->file(), *it, this->endPos());
+}
+
 pair<Loc, uint32_t> Loc::findStartOfLine(const GlobalState &gs) const {
     auto &file = this->file().data(gs);
     auto lineBreaks = file.lineBreaks();

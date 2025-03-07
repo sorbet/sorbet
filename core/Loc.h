@@ -132,6 +132,9 @@ public:
     // including newlines.
     Loc adjustToLeadingWhitespace(const GlobalState &gs) const;
 
+    // Returns a new loc with a beginPos that has been adjusted to the start of the line of the beginPos.
+    Loc adjustToStartOfLine(const GlobalState &gs) const;
+
     // For a given Loc, returns
     //
     // - the Loc corresponding to the first non-whitespace character on this line, and
