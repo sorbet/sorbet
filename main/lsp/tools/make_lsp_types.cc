@@ -44,6 +44,11 @@ shared_ptr<JSONType> makeVariant(vector<shared_ptr<JSONType>> variants) {
     return make_shared<JSONBasicVariantType>(variants);
 }
 
+shared_ptr<JSONType> makeOpenVariant(vector<shared_ptr<JSONType>> variants) {
+    auto allowFallThrough = true;
+    return make_shared<JSONBasicVariantType>(variants, allowFallThrough);
+}
+
 shared_ptr<JSONType>
 makeDiscriminatedUnion(shared_ptr<FieldDef> fieldDef,
                        const vector<pair<const string, shared_ptr<JSONType>>> variantsByDiscriminant) {
@@ -1050,12 +1055,13 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                         },
                                         classTypes);
 
-    auto CodeActionContext = makeObject("CodeActionContext",
-                                        {
-                                            makeField("diagnostics", makeArray(Diagnostic)),
-                                            makeField("only", makeOptional(makeArray(CodeActionKind))),
-                                        },
-                                        classTypes);
+    auto CodeActionContext =
+        makeObject("CodeActionContext",
+                   {
+                       makeField("diagnostics", makeArray(Diagnostic)),
+                       makeField("only", makeOptional(makeArray(makeOpenVariant({CodeActionKind, JSONString})))),
+                   },
+                   classTypes);
 
     auto CodeActionParams = makeObject("CodeActionParams",
                                        {
