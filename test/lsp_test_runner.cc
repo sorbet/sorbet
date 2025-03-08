@@ -559,6 +559,8 @@ TEST_CASE("LSPTest") {
         opts->lspExtractToVariableEnabled =
             BooleanPropertyAssertion::getValue("enable-experimental-lsp-extract-to-variable", assertions)
                 .value_or(false);
+        opts->lspExtractToMethodEnabled =
+            BooleanPropertyAssertion::getValue("enable-experimental-lsp-extract-to-method", assertions).value_or(false);
         opts->stripePackages = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
 
         if (opts->stripePackages) {
