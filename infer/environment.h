@@ -46,7 +46,7 @@ class KnowledgeFilter {
     std::vector<bool> used_vars;
 
 public:
-    KnowledgeFilter(core::Context ctx, std::unique_ptr<cfg::CFG> &cfg);
+    KnowledgeFilter(core::Context ctx, cfg::CFG &cfg);
 
     KnowledgeFilter(KnowledgeFilter &) = delete;
     KnowledgeFilter(KnowledgeFilter &&) = delete;
