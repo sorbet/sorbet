@@ -113,8 +113,7 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
     fileErrorStatus.lastReportedEpoch = epoch;
 
     auto it = epochTimers.find(epoch);
-    ENFORCE(it != epochTimers.end());
-    if (!it->second.hasFirstDiagnosticEndTimes) {
+    if (it != epochTimers.end() && !it->second.hasFirstDiagnosticEndTimes) {
         it->second.hasFirstDiagnosticEndTimes = true;
         for (auto &timer : it->second.firstDiagnosticLatencyTimers) {
             timer.setEndTime();
@@ -229,8 +228,10 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
     }
 
     config->logger->debug("[ErrorReporter] Sending diagnostics for file {}, epoch {}", uri, epoch);
-    for (auto &timer : it->second.lastDiagnosticLatencyTimers) {
-        timer->setEndTime();
+    if (it != epochTimers.end()) {
+        for (auto &timer : it->second.lastDiagnosticLatencyTimers) {
+            timer->setEndTime();
+        }
     }
     auto params = make_unique<PublishDiagnosticsParams>(uri, move(diagnostics));
     config->output->write(make_unique<LSPMessage>(
