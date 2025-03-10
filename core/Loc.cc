@@ -117,13 +117,14 @@ constexpr unsigned int WINDOW_SIZE = 10; // how many lines of source to print
 constexpr unsigned int WINDOW_HALF_SIZE = WINDOW_SIZE / 2;
 static_assert((WINDOW_SIZE & 1) == 0, "WINDOW_SIZE should be divisible by 2");
 
-void addLocLine(stringstream &buf, int line, const File &file, int tabs, int posWidth, bool censorForSnapshotTests) {
+void addLocLine(stringstream &buf, int line, const File &file, int tabs, int lineNumPadding,
+                bool censorForSnapshotTests) {
     printTabs(buf, tabs);
     buf << rang::fgB::black;
     if (censorForSnapshotTests) {
-        buf << leftPad("NN", posWidth);
+        buf << leftPad("NN", lineNumPadding);
     } else {
-        buf << leftPad(to_string(line + 1), posWidth);
+        buf << leftPad(to_string(line + 1), lineNumPadding);
     }
     buf << " |" << rang::style::reset;
     if (file.lineBreaks().size() <= line + 1) {
@@ -158,7 +159,7 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
     const File &file = this->file().data(gs);
     auto censorForSnapshotTests = gs.censorForSnapshotTests && file.isPayload();
     auto details = this->toDetails(gs);
-    int posWidth = details.second.line < 100 ? 2 : details.second.line < 10000 ? 4 : 8;
+    int lineNumPadding = details.second.line < 100 ? 2 : details.second.line < 10000 ? 4 : 8;
 
     const auto firstLine = details.first.line - 1;
     auto lineIt = firstLine;
@@ -168,19 +169,19 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
             buf << '\n';
         }
         first = false;
-        addLocLine(buf, lineIt, file, tabs, posWidth, censorForSnapshotTests);
+        addLocLine(buf, lineIt, file, tabs, lineNumPadding, censorForSnapshotTests);
         lineIt++;
     }
     if (lineIt != details.second.line && lineIt < details.second.line - WINDOW_HALF_SIZE) {
         buf << '\n';
         printTabs(buf, tabs);
-        string space(posWidth, ' ');
+        string space(lineNumPadding, ' ');
         buf << space << rang::fgB::black << " |" << rang::style::reset << "...";
         lineIt = details.second.line - WINDOW_HALF_SIZE;
     }
     while (lineIt != details.second.line) {
         buf << '\n';
-        addLocLine(buf, lineIt, file, tabs, posWidth, censorForSnapshotTests);
+        addLocLine(buf, lineIt, file, tabs, lineNumPadding, censorForSnapshotTests);
         lineIt++;
     }
 
@@ -188,7 +189,7 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
         // add squigly
         buf << '\n';
         printTabs(buf, tabs);
-        for (int i = 0; i <= posWidth; i++) {
+        for (int i = 0; i <= lineNumPadding; i++) {
             buf << ' ';
         }
         int p;
