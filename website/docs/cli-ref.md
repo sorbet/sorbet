@@ -151,6 +151,9 @@ Usage:
       --enable-experimental-rbs-signatures
                                 Enable experimental support for RBS signatures as inline
                                 comments
+      --enable-experimental-rbs-assertions
+                                Enable experimental support for RBS assertions as inline
+                                comments
       --enable-experimental-requires-ancestor
                                 Enable experimental `requires_ancestor` annotation
       --uniquely-defined-behavior

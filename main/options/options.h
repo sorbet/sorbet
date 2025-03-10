@@ -255,6 +255,9 @@ struct Options {
     // Enable experimental support for RBS signatures
     bool rbsSignaturesEnabled = false;
 
+    // Enable experimental support for RBS assertions such as `T.let`
+    bool rbsAssertionsEnabled = false;
+
     // Experimental feature `requires_ancestor`
     bool requiresAncestorEnabled = false;
 

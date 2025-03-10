@@ -325,6 +325,7 @@ public:
     std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> semanticExtensions;
 
     bool rbsSignaturesEnabled = false;
+    bool rbsAssertionsEnabled = false;
     bool requiresAncestorEnabled = false;
 
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
