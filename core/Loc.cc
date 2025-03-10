@@ -157,13 +157,13 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
     stringstream buf;
     const File &file = this->file().data(gs);
     auto censorForSnapshotTests = gs.censorForSnapshotTests && file.isPayload();
-    auto pos = this->toDetails(gs);
-    int posWidth = pos.second.line < 100 ? 2 : pos.second.line < 10000 ? 4 : 8;
+    auto details = this->toDetails(gs);
+    int posWidth = details.second.line < 100 ? 2 : details.second.line < 10000 ? 4 : 8;
 
-    const auto firstLine = pos.first.line - 1;
+    const auto firstLine = details.first.line - 1;
     auto lineIt = firstLine;
     bool first = true;
-    while (lineIt != pos.second.line && lineIt - firstLine < WINDOW_HALF_SIZE) {
+    while (lineIt != details.second.line && lineIt - firstLine < WINDOW_HALF_SIZE) {
         if (!first) {
             buf << '\n';
         }
@@ -171,20 +171,20 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
         addLocLine(buf, lineIt, file, tabs, posWidth, censorForSnapshotTests);
         lineIt++;
     }
-    if (lineIt != pos.second.line && lineIt < pos.second.line - WINDOW_HALF_SIZE) {
+    if (lineIt != details.second.line && lineIt < details.second.line - WINDOW_HALF_SIZE) {
         buf << '\n';
         printTabs(buf, tabs);
         string space(posWidth, ' ');
         buf << space << rang::fgB::black << " |" << rang::style::reset << "...";
-        lineIt = pos.second.line - WINDOW_HALF_SIZE;
+        lineIt = details.second.line - WINDOW_HALF_SIZE;
     }
-    while (lineIt != pos.second.line) {
+    while (lineIt != details.second.line) {
         buf << '\n';
         addLocLine(buf, lineIt, file, tabs, posWidth, censorForSnapshotTests);
         lineIt++;
     }
 
-    if (pos.second.line == pos.first.line) {
+    if (details.second.line == details.first.line) {
         // add squigly
         buf << '\n';
         printTabs(buf, tabs);
@@ -193,12 +193,12 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
         }
         int p;
 
-        for (p = 0; p < pos.first.column; p++) {
+        for (p = 0; p < details.first.column; p++) {
             buf << ' ';
         }
         buf << rang::fg::cyan;
-        if (pos.second.column - pos.first.column > 0) {
-            for (; p < pos.second.column; p++) {
+        if (details.second.column - details.first.column > 0) {
+            for (; p < details.second.column; p++) {
                 buf << '^';
             }
         } else {
@@ -269,7 +269,7 @@ string Loc::filePosToString(const GlobalState &gs, bool showFull) const {
         }
 
         if (exists()) {
-            auto pos = toDetails(gs);
+            auto details = toDetails(gs);
             if (path.find("https://") == 0) {
                 // For github permalinks
                 buf << "#L";
@@ -277,14 +277,14 @@ string Loc::filePosToString(const GlobalState &gs, bool showFull) const {
                 buf << ":";
             }
             auto censor = gs.censorForSnapshotTests && file().data(gs).isPayload();
-            buf << (censor ? "CENSORED" : to_string(pos.first.line));
+            buf << (censor ? "CENSORED" : to_string(details.first.line));
             if (showFull) {
                 buf << ":";
-                buf << (censor ? "CENSORED" : to_string(pos.first.column));
+                buf << (censor ? "CENSORED" : to_string(details.first.column));
                 buf << "-";
-                buf << (censor ? "CENSORED" : to_string(pos.second.line));
+                buf << (censor ? "CENSORED" : to_string(details.second.line));
                 buf << ":";
-                buf << (censor ? "CENSORED" : to_string(pos.second.column));
+                buf << (censor ? "CENSORED" : to_string(details.second.column));
             } else {
                 // pos.second.line; is intentionally not printed so that iterm2 can open file name:line_number as links
             }
@@ -386,14 +386,14 @@ pair<Loc, uint32_t> Loc::findStartOfLine(const GlobalState &gs) const {
 }
 
 Loc Loc::truncateToFirstLine(const GlobalState &gs) const {
-    auto [beginPos, endPos] = this->toDetails(gs);
-    if (beginPos.line == endPos.line) {
+    auto [beginDetail, endDetail] = this->toDetails(gs);
+    if (beginDetail.line == endDetail.line) {
         return *this;
     }
 
     const auto &lineBreaks = this->file().data(gs).lineBreaks();
     // Detail::line is 1-indexed. We want one after the 0-indexed line, so line - 1 + 1 = line
-    auto firstNewline = lineBreaks[beginPos.line];
+    auto firstNewline = lineBreaks[beginDetail.line];
     return Loc(this->file(), this->beginPos(), firstNewline);
 }
 
