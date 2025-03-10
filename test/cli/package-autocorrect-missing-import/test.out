@@ -263,8 +263,18 @@ use_false_and_app_package/foo.rb:7: `Foo::Bar::FalseAndAppPackage::OtherClass` r
      5 |  strict_dependencies 'false'
                               ^^^^^^^
 
-use_false_and_app_package/foo.rb:13: `Foo::Bar::FalseAndAppPackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because importing it would cause a layering violation and its `strict_dependencies` is too low https://srb.help/3718
-    13 |  Foo::Bar::FalseAndAppPackage::OtherClass # resolves via root
+use_false_and_app_package/foo.rb:8: Used `test_import` constant `Foo::Bar::FalseAndAppPackageTest::OtherClass` in non-test file. However, it cannot be automatically imported because importing it would cause a layering violation and its `strict_dependencies` is too low https://srb.help/3718
+     8 |      Foo::Bar::FalseAndAppPackageTest::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_and_app_package_test/__package.rb:4: Package `Foo::Bar::FalseAndAppPackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     4 |  layer 'app'
+                ^^^^^
+    false_and_app_package_test/__package.rb:5: `Foo::Bar::FalseAndAppPackageTest` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     5 |  strict_dependencies 'false'
+                              ^^^^^^^
+
+use_false_and_app_package/foo.rb:14: `Foo::Bar::FalseAndAppPackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because importing it would cause a layering violation and its `strict_dependencies` is too low https://srb.help/3718
+    14 |  Foo::Bar::FalseAndAppPackage::OtherClass # resolves via root
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_and_app_package/__package.rb:4: Package `Foo::Bar::FalseAndAppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
      4 |  layer 'app'
@@ -273,8 +283,8 @@ use_false_and_app_package/foo.rb:13: `Foo::Bar::FalseAndAppPackage::OtherClass` 
      5 |  strict_dependencies 'false'
                               ^^^^^^^
 
-use_false_and_app_package/foo.rb:15: `Test::Foo::Bar::FalseAndAppPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
-    15 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
+use_false_and_app_package/foo.rb:16: `Test::Foo::Bar::FalseAndAppPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    16 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 use_false_and_app_package/foo.test.rb:4: `Test::Foo::Bar::FalseAndAppPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
@@ -298,7 +308,7 @@ use_false_and_app_package/foo.test.rb:6: `Foo::Bar::FalseAndAppPackage::ImportMe
     use_false_and_app_package/__package.rb:7: Inserted `test_import Foo::Bar::FalseAndAppPackage`
      7 |  strict_dependencies 'layered'
                                        ^
-Errors: 6
+Errors: 7
 # frozen_string_literal: true
 # typed: strict
 # enable-packager: true
@@ -307,6 +317,7 @@ class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered'
   test_import Foo::Bar::FalseAndAppPackage
+  test_import Foo::Bar::FalseAndAppPackageTest
 end
 
 --------------------------------------------------------------------------
