@@ -124,9 +124,9 @@ optional<unique_ptr<CodeAction>> resolveCodeAction(LSPWrapper &lspWrapper, int &
     return move(receivedResponse);
 }
 
-optional<vector<unique_ptr<CodeAction>>> requestCodeActions(LSPWrapper &lspWrapper, string fileUri,
-                                                            unique_ptr<Range> range, int &nextId,
-                                                            vector<CodeActionKind> &selectedCodeActionKinds) {
+optional<vector<unique_ptr<CodeAction>>>
+requestCodeActions(LSPWrapper &lspWrapper, string fileUri, unique_ptr<Range> range, int &nextId,
+                   vector<variant<CodeActionKind, string>> &selectedCodeActionKinds) {
     vector<unique_ptr<Diagnostic>> diagnostics;
 
     auto codeActionContext = make_unique<CodeActionContext>(move(diagnostics));
@@ -181,7 +181,7 @@ optional<vector<unique_ptr<CodeAction>>> requestCodeActions(LSPWrapper &lspWrapp
 }
 
 void validateCodeActionAbsence(LSPWrapper &lspWrapper, string fileUri, unique_ptr<Range> range, int &nextId,
-                               vector<CodeActionKind> &selectedCodeActionKinds,
+                               vector<variant<CodeActionKind, string>> &selectedCodeActionKinds,
                                vector<CodeActionKind> &ignoredCodeActionKinds) {
     auto maybeReceivedCodeActions =
         requestCodeActions(lspWrapper, fileUri, range->copy(), nextId, selectedCodeActionKinds);
@@ -211,12 +211,13 @@ void validateCodeActionAbsence(LSPWrapper &lspWrapper, string fileUri, unique_pt
 }
 
 void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string fileUri, unique_ptr<Range> range,
-                         int &nextId, vector<CodeActionKind> &selectedCodeActionKinds,
+                         int &nextId, vector<variant<CodeActionKind, string>> &selectedCodeActionKinds,
                          vector<CodeActionKind> &ignoredCodeActionKinds,
                          vector<shared_ptr<ApplyCodeActionAssertion>> &applyCodeActionAssertions,
                          string codeActionDescription, bool assertAllChanges) {
     auto isSelectedKind = [&selectedCodeActionKinds](CodeActionKind kind) {
-        return count(selectedCodeActionKinds.begin(), selectedCodeActionKinds.end(), kind) != 0;
+        return count(selectedCodeActionKinds.begin(), selectedCodeActionKinds.end(),
+                     variant<CodeActionKind, string>(kind)) != 0;
     };
 
     UnorderedMap<string, unique_ptr<CodeAction>> receivedCodeActionsByTitle;
@@ -341,7 +342,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
         CHECK(!selectedCodeActions.empty());
     }
 
-    vector<CodeActionKind> selectedCodeActionKinds;
+    vector<variant<CodeActionKind, string>> selectedCodeActionKinds;
     transform(selectedCodeActions.begin(), selectedCodeActions.end(), back_inserter(selectedCodeActionKinds),
               getCodeActionKind);
 

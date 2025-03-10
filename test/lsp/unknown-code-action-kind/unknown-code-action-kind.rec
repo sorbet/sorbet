@@ -5,5 +5,7 @@ Read: {"jsonrpc":"2.0","method":"textDocument/didOpen","params":{"textDocument":
 Write: {"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{"uri":"inmemory://model/default.rb","diagnostics":[{"range":{"start":{"line":1,"character":0},"end":{"line":1,"character":3}},"severity":1,"code":7003,"codeDescription":{"href":"https://srb.help/7003"},"message":"Method `foo` does not exist on `T.class_of(<root>)`","relatedInformation":[]}]}}
 Read: {"jsonrpc":"2.0","method":"textDocument/didChange","params":{"textDocument":{"uri":"inmemory://model/default.rb","version":2},"contentChanges":[{"text":"# typed: true\nputs\n"}]}}
 Write: {"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{"uri":"inmemory://model/default.rb","diagnostics":[]}}
-Read: {"jsonrpc":"2.0","id":68,"method":"textDocument/codeAction","params":{"textDocument":{"uri":"inmemory://model/default.rb"},"range":{"start":{"line":0,"character":0},"end":{"line":2,"character":0}},"context":{"diagnostics":[],"only":["source.fixAll"]}}}
-Write: {"jsonrpc":"2.0","id":68,"requestMethod":"textDocument/codeAction","result":[]}
+Read: {"jsonrpc":"2.0","id":1,"method":"textDocument/codeAction","params":{"textDocument":{"uri":"inmemory://model/default.rb"},"range":{"start":{"line":0,"character":0},"end":{"line":2,"character":0}},"context":{"diagnostics":[],"only":["source.fixAll"]}}}
+Write: {"jsonrpc":"2.0","id":1,"requestMethod":"textDocument/codeAction","result":[]}
+Read: {"jsonrpc":"2.0","id":2,"method":"textDocument/codeAction","params":{"textDocument":{"uri":"inmemory://model/default.rb"},"range":{"start":{"line":0,"character":0},"end":{"line":2,"character":0}},"context":{"diagnostics":[],"only":["no one knows"]}}}
+Write: {"jsonrpc":"2.0","id":2,"requestMethod":"textDocument/codeAction","result":[]}
