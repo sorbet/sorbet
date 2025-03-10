@@ -40,11 +40,11 @@ Loc Loc::join(Loc other) const {
     return Loc(this->file(), min(this->beginPos(), other.beginPos()), max(this->endPos(), other.endPos()));
 }
 
-Loc::Detail Loc::offset2Pos(const File &file, uint32_t off) {
+Loc::Detail Loc::pos2Detail(const File &file, uint32_t off) {
     Loc::Detail pos;
 
     if (off > file.source().size()) {
-        fatalLogger->error(R"(msg="Bad offset2Pos off" path="{}" off="{}"")", absl::CEscape(file.path()), off);
+        fatalLogger->error(R"(msg="Bad pos2Detail off" path="{}" off="{}"")", absl::CEscape(file.path()), off);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
         ENFORCE_NO_TIMER(false);
     }
@@ -90,8 +90,8 @@ optional<Loc> Loc::fromDetails(const GlobalState &gs, FileRef fileRef, Loc::Deta
 }
 
 pair<Loc::Detail, Loc::Detail> Loc::position(const GlobalState &gs) const {
-    Loc::Detail begin(offset2Pos(this->file().data(gs), beginPos()));
-    Loc::Detail end(offset2Pos(this->file().data(gs), endPos()));
+    Loc::Detail begin(pos2Detail(this->file().data(gs), beginPos()));
+    Loc::Detail end(pos2Detail(this->file().data(gs), endPos()));
     return make_pair(begin, end);
 }
 namespace {
