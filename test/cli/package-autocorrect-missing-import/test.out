@@ -190,15 +190,22 @@ use_false_package/foo.rb:7: `Foo::Bar::FalsePackage::OtherClass` resolves but it
      5 |  strict_dependencies 'false'
                               ^^^^^^^
 
-use_false_package/foo.rb:13: `Foo::Bar::FalsePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because its `strict_dependencies` is too low https://srb.help/3718
-    13 |  Foo::Bar::FalsePackage::OtherClass # resolves via root
+use_false_package/foo.rb:8: Used `test_import` constant `Foo::Bar::FalsePackageTest::OtherClass` in non-test file. However, it cannot be automatically imported because its `strict_dependencies` is too low https://srb.help/3718
+     8 |      Foo::Bar::FalsePackageTest::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_package_test/__package.rb:5: `Foo::Bar::FalsePackageTest` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     5 |  strict_dependencies 'false'
+                              ^^^^^^^
+
+use_false_package/foo.rb:14: `Foo::Bar::FalsePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because its `strict_dependencies` is too low https://srb.help/3718
+    14 |  Foo::Bar::FalsePackage::OtherClass # resolves via root
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_package/__package.rb:5: `Foo::Bar::FalsePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
      5 |  strict_dependencies 'false'
                               ^^^^^^^
 
-use_false_package/foo.rb:15: `Test::Foo::Bar::FalsePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
-    15 |  Test::Foo::Bar::FalsePackage::TestUtil
+use_false_package/foo.rb:16: `Test::Foo::Bar::FalsePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    16 |  Test::Foo::Bar::FalsePackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 use_false_package/foo.test.rb:4: `Test::Foo::Bar::FalsePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
@@ -222,7 +229,7 @@ use_false_package/foo.test.rb:6: `Foo::Bar::FalsePackage::ImportMeTestOnly` reso
     use_false_package/__package.rb:7: Inserted `test_import Foo::Bar::FalsePackage`
      7 |  strict_dependencies 'layered'
                                        ^
-Errors: 6
+Errors: 7
 # frozen_string_literal: true
 # typed: strict
 # enable-packager: true
@@ -231,6 +238,7 @@ class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered'
   test_import Foo::Bar::FalsePackage
+  test_import Foo::Bar::FalsePackageTest
 end
 
 --------------------------------------------------------------------------
