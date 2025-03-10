@@ -19,7 +19,6 @@ cmake(
     cache_entries = {
         "MI_INSTALL_TOPLEVEL": "ON",
     },
-    generate_args = ["-DCMAKE_C_FLAGS=-Wno-unused-function"],
     lib_source = ":srcs",
     out_static_libs = ["libmimalloc.a"],
 )
