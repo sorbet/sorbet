@@ -2346,7 +2346,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = std::move(res);
             },
             [&](parser::LineLiteral *line) {
-                auto pos = dctx.ctx.locAt(loc).position(dctx.ctx);
+                auto pos = dctx.ctx.locAt(loc).toDetails(dctx.ctx);
                 ENFORCE(pos.first.line == pos.second.line, "position corrupted");
                 auto res = MK::Int(loc, pos.first.line);
                 result = std::move(res);

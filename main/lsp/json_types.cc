@@ -106,7 +106,7 @@ unique_ptr<Range> Range::fromLoc(const core::GlobalState &gs, core::Loc loc) {
         // this will happen if e.g. we disable the stdlib (e.g. to speed up testing in fuzzers).
         return nullptr;
     }
-    auto pair = loc.position(gs);
+    auto pair = loc.toDetails(gs);
     // All LSP numbers are zero-based, ours are 1-based.
     return make_unique<Range>(make_unique<Position>(pair.first.line - 1, pair.first.column - 1),
                               make_unique<Position>(pair.second.line - 1, pair.second.column - 1));
