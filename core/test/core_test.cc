@@ -56,7 +56,7 @@ TEST_CASE("TestOffset2Pos2Offset") {
         INFO(name);
         FileRef f = gs.enterFile(name, tc.src);
 
-        auto detail = Loc::offset2Pos(f.data(gs), tc.off.value());
+        auto detail = Loc::pos2Detail(f.data(gs), tc.off.value());
 
         CHECK_EQ(tc.col, detail.column);
         CHECK_EQ(tc.line, detail.line);
