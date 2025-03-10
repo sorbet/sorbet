@@ -9,15 +9,18 @@ class GlobalState;
 class Context;
 class MutableContext;
 
-constexpr uint32_t INVALID_POS_LOC = UINT32_MAX;
 struct LocOffsets {
-    uint32_t beginLoc = INVALID_POS_LOC;
-    uint32_t endLoc = INVALID_POS_LOC;
-    uint32_t beginPos() const {
+    using OFFSET_TYPE = uint32_t;
+
+    constexpr static OFFSET_TYPE INVALID_POS_LOC = std::numeric_limits<OFFSET_TYPE>::max();
+
+    OFFSET_TYPE beginLoc = INVALID_POS_LOC;
+    OFFSET_TYPE endLoc = INVALID_POS_LOC;
+    OFFSET_TYPE beginPos() const {
         return beginLoc;
     };
 
-    uint32_t endPos() const {
+    OFFSET_TYPE endPos() const {
         return endLoc;
     }
     bool exists() const {
