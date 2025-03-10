@@ -200,12 +200,22 @@ unique_ptr<LSPMessage> ProtocolTest::readAsync() {
 void ProtocolTest::updateDiagnostics(const LSPMessage &msg) {
     if (msg.isNotification() && msg.method() == LSPMethod::TextDocumentPublishDiagnostics) {
         if (auto diagnosticParams = getPublishDiagnosticParams(msg.asNotification())) {
+            auto path = uriToFilePath(lspWrapper->config(), (*diagnosticParams)->uri);
+            auto &diagnostics = this->diagnostics[path];
+            auto &parserDiagnostics = this->parserDiagnostics[path];
             // Will explicitly overwrite older diagnostics that are irrelevant.
-            vector<unique_ptr<Diagnostic>> diagnostics;
+            diagnostics.clear();
+            parserDiagnostics.clear();
             for (const auto &d : (*diagnosticParams)->diagnostics) {
-                diagnostics.push_back(d->copy());
+                ENFORCE(d->code.has_value());
+                auto *code = std::get_if<int>(&d->code.value());
+                ENFORCE(code != nullptr);
+                if (*code >= 2000 && *code < 3000) {
+                    parserDiagnostics.push_back(d->copy());
+                } else {
+                    diagnostics.push_back(d->copy());
+                }
             }
-            this->diagnostics[uriToFilePath(lspWrapper->config(), (*diagnosticParams)->uri)] = move(diagnostics);
         }
     }
 }
@@ -244,7 +254,7 @@ vector<unique_ptr<Location>> ProtocolTest::getDefinitions(std::string_view uri, 
 namespace {
 
 template <typename T>
-void assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, vector<ExpectedDiagnostic> expected,
+void assertDiagnostics(absl::Span<const unique_ptr<LSPMessage>> messages, vector<ExpectedDiagnostic> expected,
                        const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                        map<string, vector<unique_ptr<Diagnostic>>> &diagnostics) {
     for (auto &msg : messages) {
@@ -266,12 +276,14 @@ void assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, vector<ExpectedD
 }
 } // namespace
 
-void ProtocolTest::assertErrorDiagnostics(vector<unique_ptr<LSPMessage>> messages,
-                                          vector<ExpectedDiagnostic> expected) {
-    assertDiagnostics<ErrorAssertion>(std::move(messages), expected, sourceFileContents, diagnostics);
+void ProtocolTest::assertErrorDiagnostics(absl::Span<const unique_ptr<LSPMessage>> messages,
+                                          vector<ExpectedDiagnostic> expected,
+                                          vector<ExpectedDiagnostic> expectedParser) {
+    assertDiagnostics<ErrorAssertion>(messages, expected, sourceFileContents, this->diagnostics);
+    assertDiagnostics<ParserErrorAssertion>(messages, expectedParser, sourceFileContents, this->parserDiagnostics);
 }
 
-void ProtocolTest::assertUntypedDiagnostics(vector<unique_ptr<LSPMessage>> messages,
+void ProtocolTest::assertUntypedDiagnostics(absl::Span<const unique_ptr<LSPMessage>> messages,
                                             vector<ExpectedDiagnostic> expected) {
     assertDiagnostics<UntypedAssertion>(std::move(messages), expected, sourceFileContents, diagnostics);
 }

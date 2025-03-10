@@ -1,2 +1,2 @@
 # typed: false
-1j # error: unexpected token tIDENTIFIER
+1j # parser-error: unexpected token tIDENTIFIER
