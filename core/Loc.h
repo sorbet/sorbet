@@ -72,9 +72,7 @@ public:
         }
     }
 
-    inline Loc(FileRef file, uint32_t begin, uint32_t end) : storage{{begin, end}, file} {
-        ENFORCE_NO_TIMER(storage.offsets.exists());
-    }
+    inline Loc(FileRef file, uint32_t begin, uint32_t end) : storage{{begin, end}, file} {}
 
     inline Loc(FileRef file, LocOffsets offsets) : storage{offsets, file} {}
 

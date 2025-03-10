@@ -31,11 +31,12 @@ struct LocOffsets {
     LocOffsets() : beginLoc(INVALID_POS_LOC), endLoc(INVALID_POS_LOC) {}
 
     LocOffsets(uint32_t beginLoc, uint32_t endLoc) : beginLoc(beginLoc), endLoc(endLoc) {
+        ENFORCE_NO_TIMER(this->exists());
         ENFORCE_NO_TIMER(beginLoc <= endLoc);
     }
 
     static LocOffsets none() {
-        return LocOffsets{INVALID_POS_LOC, INVALID_POS_LOC};
+        return LocOffsets();
     }
     LocOffsets join(LocOffsets other) const;
     // For a given LocOffsets, returns a zero-length version that starts at the same location.
