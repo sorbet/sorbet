@@ -167,12 +167,16 @@ void Hashing::computeFileHashes(absl::Span<const shared_ptr<core::File>> files, 
     }
 }
 
-vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(core::GlobalState &gs,
-                                                           const realmain::options::Options &opts,
-                                                           spdlog::logger &logger,
-                                                           absl::Span<const core::FileRef> files, WorkerPool &workers,
-                                                           const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    auto asts = realmain::pipeline::index(gs, files, opts, workers, kvstore);
+ast::ParsedFilesOrCancelled
+Hashing::indexAndComputeFileHashes(core::GlobalState &gs, const realmain::options::Options &opts,
+                                   spdlog::logger &logger, absl::Span<const core::FileRef> files, WorkerPool &workers,
+                                   const unique_ptr<const OwnedKeyValueStore> &kvstore, bool cancelable) {
+    auto indexed = realmain::pipeline::index(gs, files, opts, workers, kvstore, cancelable);
+    if (!indexed.hasResult()) {
+        return indexed;
+    }
+
+    auto asts = std::move(indexed.result());
     ENFORCE_NO_TIMER(asts.size() == files.size());
 
     // Below, we rewrite ASTs to an empty GlobalState and use them for hashing.
