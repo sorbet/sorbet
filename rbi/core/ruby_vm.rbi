@@ -816,8 +816,15 @@ module RubyVM::YJIT
   # * `false`: Disable stats.
   # * `true`: Enable stats. Print stats at exit.
   # * `:quiet`: Enable stats. Do not print stats at exit.
-  sig { params(stats: T.any(T::Boolean, Symbol)).returns(T::Boolean) }
-  def self.enable(stats: false); end
+  # Optional `mem_size` and `call_threshold` can be provided to override default configuration in Ruby 3.5+
+  sig do
+    params(
+      stats: T.any(T::Boolean, Symbol),
+      mem_size: T.nilable(Integer),
+      call_threshold: T.nilable(Integer)
+    ).returns(T::Boolean)
+  end
+  def self.enable(stats: false, mem_size: nil, call_threshold: nil); end
 
   # [`Marshal`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html) dumps exit locations to the given filename.
   #
