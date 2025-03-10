@@ -49,7 +49,11 @@ JEMALLOC_BUILD_COMMAND = """
   export LDFLAGS
 
   # we need to include CFLAGS in CPPFLAGS so that the --sysroot flag makes it in
-  export CPPFLAGS="$${CFLAGS}"
+  #
+  # -fsized-deallocation is not enabled by default in clang; we enable it here
+  # to ensure that jemalloc defines the appropriate overrides for sized operator delete.
+  # Same thing for -faligned-allocation.
+  export CPPFLAGS="$${CFLAGS} -fsized-deallocation -faligned-allocation"
 
   pushd $$(dirname $(location autogen.sh)) > /dev/null
 
