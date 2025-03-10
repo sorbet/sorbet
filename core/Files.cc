@@ -113,7 +113,12 @@ File::Flags::Flags(string_view path)
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(path_), packagedLevel{File::filePackagedSigil(source_)},
       path_(move(path_)), source_(move(source_)), originalSigil(fileStrictSigil(this->source_)),
-      strictLevel(originalSigil) {}
+      strictLevel(originalSigil) {
+    if (this->source_.size() > UINT32_MAX) [[unlikely]] {
+        static_assert(sizeof(LocOffsets::beginLoc) == 4);
+        Exception::raise("File larger than {} bytes. Got: {}", UINT32_MAX, this->source_.size());
+    }
+}
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string sourceCopy = source_;
