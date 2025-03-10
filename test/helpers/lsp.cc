@@ -549,13 +549,13 @@ namespace {
 string applyEdit(string_view source, const core::File &file, const Range &range, string_view newText, bool reindent) {
     auto beginLine = static_cast<uint32_t>(range.start->line + 1);
     auto beginCol = static_cast<uint32_t>(range.start->character + 1);
-    auto beginOffset = core::Loc::pos2Offset(file, {beginLine, beginCol}).value();
+    auto beginOffset = core::Loc::detail2Pos(file, {beginLine, beginCol}).value();
 
     auto endLine = static_cast<uint32_t>(range.end->line + 1);
     auto endCol = static_cast<uint32_t>(range.end->character + 1);
-    auto endOffset = core::Loc::pos2Offset(file, {endLine, endCol}).value();
+    auto endOffset = core::Loc::detail2Pos(file, {endLine, endCol}).value();
 
-    auto lineStartOffset = core::Loc::pos2Offset(file, {beginLine, 1}).value();
+    auto lineStartOffset = core::Loc::detail2Pos(file, {beginLine, 1}).value();
     auto lineStartView = source.substr(lineStartOffset);
     auto firstNonWhitespace = lineStartView.find_first_not_of(" \t\n");
     auto indentAfterNewline = absl::StrCat("\n", source.substr(lineStartOffset, firstNonWhitespace));

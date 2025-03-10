@@ -61,7 +61,7 @@ Loc::Detail Loc::offset2Pos(const File &file, uint32_t off) {
     return pos;
 }
 
-optional<uint32_t> Loc::pos2Offset(const File &file, Loc::Detail pos) {
+optional<uint32_t> Loc::detail2Pos(const File &file, Loc::Detail pos) {
     auto l = pos.line - 1;
     auto lineBreaks = file.lineBreaks();
     if (!(0 <= l && l < lineBreaks.size())) {
@@ -78,11 +78,11 @@ optional<uint32_t> Loc::pos2Offset(const File &file, Loc::Detail pos) {
 
 optional<Loc> Loc::fromDetails(const GlobalState &gs, FileRef fileRef, Loc::Detail begin, Loc::Detail end) {
     const auto &file = fileRef.data(gs);
-    const auto beginOff = pos2Offset(file, begin);
+    const auto beginOff = detail2Pos(file, begin);
     if (!beginOff.has_value()) {
         return nullopt;
     }
-    const auto endOff = pos2Offset(file, end);
+    const auto endOff = detail2Pos(file, end);
     if (!endOff.has_value()) {
         return nullopt;
     }
@@ -371,7 +371,7 @@ Loc Loc::adjustLen(const GlobalState &gs, int32_t beginAdjust, int32_t len) cons
 
 pair<Loc, uint32_t> Loc::findStartOfLine(const GlobalState &gs) const {
     auto startDetail = this->position(gs).first;
-    auto maybeLineStart = Loc::pos2Offset(this->file().data(gs), {startDetail.line, 1});
+    auto maybeLineStart = Loc::detail2Pos(this->file().data(gs), {startDetail.line, 1});
     ENFORCE_NO_TIMER(maybeLineStart.has_value());
     auto lineStart = maybeLineStart.value();
     std::string_view lineView = this->file().data(gs).source().substr(lineStart);
