@@ -26,7 +26,7 @@ echo
 echo --------------------------------------------------------------------------
 echo
 
-"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --stripe-packages --packager-layers=lib,app --max-threads=0 false_package use_false_package 2>&1
+"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --stripe-packages --packager-layers=lib,app --max-threads=0 false_package false_package_test use_false_package 2>&1
 
 cat use_false_package/__package.rb
 
