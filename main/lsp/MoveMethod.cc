@@ -187,7 +187,7 @@ vector<unique_ptr<TextEdit>> moveMethod(LSPTypecheckerDelegate &typechecker, con
 
     // This manipulations with the positions are required to remove leading tabs and whitespaces at the original method
     // position
-    auto [oldMethodStart, oldMethodEnd] = methodSourceLoc.position(gs);
+    auto [oldMethodStart, oldMethodEnd] = methodSourceLoc.toDetails(gs);
     auto oldMethodLoc = core::Loc::fromDetails(gs, fref, {oldMethodStart.line, 0}, oldMethodEnd);
     ENFORCE(oldMethodLoc.has_value());
 

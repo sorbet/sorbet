@@ -89,7 +89,7 @@ optional<Loc> Loc::fromDetails(const GlobalState &gs, FileRef fileRef, Loc::Deta
     return Loc(fileRef, beginOff.value(), endOff.value());
 }
 
-pair<Loc::Detail, Loc::Detail> Loc::position(const GlobalState &gs) const {
+pair<Loc::Detail, Loc::Detail> Loc::toDetails(const GlobalState &gs) const {
     Loc::Detail begin(pos2Detail(this->file().data(gs), beginPos()));
     Loc::Detail end(pos2Detail(this->file().data(gs), endPos()));
     return make_pair(begin, end);
@@ -157,7 +157,7 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
     stringstream buf;
     const File &file = this->file().data(gs);
     auto censorForSnapshotTests = gs.censorForSnapshotTests && file.isPayload();
-    auto pos = this->position(gs);
+    auto pos = this->toDetails(gs);
     int posWidth = pos.second.line < 100 ? 2 : pos.second.line < 10000 ? 4 : 8;
 
     const auto firstLine = pos.first.line - 1;
@@ -252,7 +252,7 @@ string Loc::showRaw(const GlobalState &gs) const {
         return fmt::format("Loc {{file={} start=??? end=???}}", path);
     }
 
-    auto [start, end] = this->position(gs);
+    auto [start, end] = this->toDetails(gs);
     return fmt::format("Loc {{file={} start={}:{} end={}:{}}}", path, start.line, start.column, end.line, end.column);
 }
 
@@ -269,7 +269,7 @@ string Loc::filePosToString(const GlobalState &gs, bool showFull) const {
         }
 
         if (exists()) {
-            auto pos = position(gs);
+            auto pos = toDetails(gs);
             if (path.find("https://") == 0) {
                 // For github permalinks
                 buf << "#L";
@@ -370,7 +370,7 @@ Loc Loc::adjustLen(const GlobalState &gs, int32_t beginAdjust, int32_t len) cons
 }
 
 pair<Loc, uint32_t> Loc::findStartOfLine(const GlobalState &gs) const {
-    auto startDetail = this->position(gs).first;
+    auto startDetail = this->toDetails(gs).first;
     auto maybeLineStart = Loc::detail2Pos(this->file().data(gs), {startDetail.line, 1});
     ENFORCE_NO_TIMER(maybeLineStart.has_value());
     auto lineStart = maybeLineStart.value();
@@ -386,7 +386,7 @@ pair<Loc, uint32_t> Loc::findStartOfLine(const GlobalState &gs) const {
 }
 
 Loc Loc::truncateToFirstLine(const GlobalState &gs) const {
-    auto [beginPos, endPos] = this->position(gs);
+    auto [beginPos, endPos] = this->toDetails(gs);
     if (beginPos.line == endPos.line) {
         return *this;
     }

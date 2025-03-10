@@ -262,7 +262,7 @@ com::stripe::rubytyper::Loc Proto::toProto(const GlobalState &gs, Loc loc) {
         auto path = loc.file().data(gs).path();
         protoLoc.set_path(string(path));
 
-        auto pos = loc.position(gs);
+        auto pos = loc.toDetails(gs);
         start->set_line(pos.first.line);
         start->set_column(pos.first.column);
         end->set_line(pos.second.line);
