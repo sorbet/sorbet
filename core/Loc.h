@@ -103,7 +103,7 @@ public:
     bool operator==(const Loc &rhs) const;
 
     bool operator!=(const Loc &rhs) const;
-    static std::optional<uint32_t> pos2Offset(const File &file, Detail pos);
+    static std::optional<uint32_t> detail2Pos(const File &file, Detail pos);
     static Detail offset2Pos(const File &file, uint32_t off);
     static std::optional<Loc> fromDetails(const GlobalState &gs, FileRef fileRef, Detail begin, Detail end);
 
