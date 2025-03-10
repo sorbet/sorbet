@@ -44,7 +44,7 @@ Loc::Detail Loc::pos2Detail(const File &file, uint32_t off) {
     Loc::Detail pos;
 
     if (off > file.source().size()) {
-        fatalLogger->error(R"(msg="Bad pos2Detail off" path="{}" off="{}"")", absl::CEscape(file.path()), off);
+        fatalLogger->error(R"(msg="Bad offset2Pos off" path="{}" off="{}"")", absl::CEscape(file.path()), off);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
         ENFORCE_NO_TIMER(false);
     }
