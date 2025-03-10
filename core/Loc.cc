@@ -40,16 +40,32 @@ Loc Loc::join(Loc other) const {
     return Loc(this->file(), min(this->beginPos(), other.beginPos()), max(this->endPos(), other.endPos()));
 }
 
-Loc::Detail Loc::pos2Detail(const File &file, uint32_t off) {
-    Loc::Detail detail;
+namespace {
 
+// Returns pointer into lineBreaks argument
+//
+// Note that lineBreaks is assumed to have been computed by findLineBreaks, where the first element
+// of the vector is `-1`, modeling that every file has an implicit line break one character before
+// the file begins.
+//
+// The "maybe" in the name represents that the newline before `off` may not exist.
+const int *maybePrecedingNewline(const File &file, absl::Span<const int> lineBreaks, uint32_t off) {
     if (off > file.source().size()) {
         fatalLogger->error(R"(msg="Bad offset2Pos off" path="{}" off="{}"")", absl::CEscape(file.path()), off);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
         ENFORCE_NO_TIMER(false);
     }
+
+    return absl::c_lower_bound(lineBreaks, off);
+}
+
+} // namespace
+
+Loc::Detail Loc::pos2Detail(const File &file, uint32_t off) {
+    Loc::Detail detail;
+
     auto lineBreaks = file.lineBreaks();
-    auto it = absl::c_lower_bound(lineBreaks, off);
+    auto it = maybePrecedingNewline(file, lineBreaks, off);
     if (it == lineBreaks.begin()) {
         detail.line = 1;
         detail.column = off + 1;
