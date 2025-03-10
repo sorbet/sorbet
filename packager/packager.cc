@@ -599,12 +599,12 @@ public:
         }
     }
 
-    bool importsTransitively(const core::GlobalState &gs, const PackageInfo &otherPkg) const {
+    bool importsTransitively(const core::GlobalState &gs, const core::packages::MangledName &otherPkg) const {
         Timer timeit(gs.tracer(), "importsTransitively");
 
         UnorderedSet<core::packages::MangledName> seen;
         vector<core::packages::MangledName> toVisit;
-        toVisit.push_back(name.mangledName);
+        toVisit.push_back(mangledName());
 
         while (!toVisit.empty()) {
             auto current = toVisit.back();
@@ -614,7 +614,7 @@ public:
             }
             toVisit.push_back(current);
 
-            if (current == otherPkg.mangledName()) {
+            if (current == otherPkg) {
                 return true;
             }
 

@@ -101,7 +101,7 @@ public:
         return core::packages::StrictDependenciesLevel::False;
     }
 
-    bool importsTransitively(const core::GlobalState &gs, const PackageInfo &otherPkg) const {
+    bool importsTransitively(const core::GlobalState &gs, const core::packages::MangledName &otherPkg) const {
         notImplemented();
         return false;
     }

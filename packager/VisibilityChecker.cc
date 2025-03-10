@@ -462,7 +462,7 @@ public:
                     causesCycle =
                         strictDepsLevel.has_value() &&
                         strictDepsLevel.value().first >= core::packages::StrictDependenciesLevel::LayeredDag &&
-                        pkg.importsTransitively(ctx, this->package);
+                        pkg.importsTransitively(ctx, this->package.mangledName());
                 }
                 if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
                     e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
