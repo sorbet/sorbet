@@ -158,7 +158,7 @@ void MsgpackWriterFull::packReference(mpack_writer_t *writer, core::Context ctx,
     mpack_write_u32(writer, ref.nestingId);
 
     // expression_range
-    auto expression_range = ctx.locAt(ref.definitionLoc).position(ctx);
+    auto expression_range = ctx.locAt(ref.definitionLoc).toDetails(ctx);
     packRange(writer, expression_range.first.line, expression_range.second.line);
     // expression_pos_range
     packRange(writer, ref.loc.beginPos(), ref.loc.endPos());

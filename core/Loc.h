@@ -91,7 +91,7 @@ public:
     };
 
     bool contains(const Loc &other) const;
-    std::pair<Detail, Detail> position(const GlobalState &gs) const;
+    std::pair<Detail, Detail> toDetails(const GlobalState &gs) const;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string toString(const GlobalState &gs) const {
         return toStringWithTabs(gs);

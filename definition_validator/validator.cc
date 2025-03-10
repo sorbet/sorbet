@@ -1037,7 +1037,7 @@ private:
         auto classOrModuleDeclaredAt = ctx.locAt(classDef.declLoc);
         auto classOrModuleEndsAt = ctx.locAt(classDef.loc.copyEndWithZeroLength());
         auto hasSingleLineDefinition =
-            classOrModuleDeclaredAt.position(ctx).first.line == classOrModuleEndsAt.position(ctx).second.line;
+            classOrModuleDeclaredAt.toDetails(ctx).first.line == classOrModuleEndsAt.toDetails(ctx).second.line;
 
         auto hasEmptyBody = classDef.rhs.empty();
         if (classDef.rhs.size() == 1) {

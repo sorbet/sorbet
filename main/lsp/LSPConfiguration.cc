@@ -257,7 +257,7 @@ unique_ptr<Location> LSPConfiguration::loc2Location(const core::GlobalState &gs,
         // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18%2318,7
         // but shows you the same thing as
         // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
-        uri = fmt::format("{}#L{}", uri, loc.position(gs).first.line);
+        uri = fmt::format("{}#L{}", uri, loc.toDetails(gs).first.line);
     }
     return make_unique<Location>(uri, std::move(range));
 }
