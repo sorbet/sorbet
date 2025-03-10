@@ -488,8 +488,18 @@ use_false_cycle_package/foo.rb:7: `Foo::Bar::FalseCyclePackage::OtherClass` reso
      7 |  strict_dependencies 'false'
                               ^^^^^^^
 
-use_false_cycle_package/foo.rb:13: `Foo::Bar::FalseCyclePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because importing it would put `Foo::MyPackage` into a cycle and its `strict_dependencies` is too low https://srb.help/3718
-    13 |  Foo::Bar::FalseCyclePackage::OtherClass # resolves via root
+use_false_cycle_package/foo.rb:8: Used `test_import` constant `Foo::Bar::FalseCyclePackageTest::OtherClass` in non-test file. However, it cannot be automatically imported because importing it would put `Foo::MyPackage` into a cycle and its `strict_dependencies` is too low https://srb.help/3718
+     8 |      Foo::Bar::FalseCyclePackageTest::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+    false_cycle_package_test/__package.rb:7: `Foo::Bar::FalseCyclePackageTest` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     7 |  strict_dependencies 'false'
+                              ^^^^^^^
+
+use_false_cycle_package/foo.rb:14: `Foo::Bar::FalseCyclePackage::OtherClass` resolves but its package is not imported. However, it cannot be automatically imported because importing it would put `Foo::MyPackage` into a cycle and its `strict_dependencies` is too low https://srb.help/3718
+    14 |  Foo::Bar::FalseCyclePackage::OtherClass # resolves via root
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     use_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
@@ -498,8 +508,8 @@ use_false_cycle_package/foo.rb:13: `Foo::Bar::FalseCyclePackage::OtherClass` res
      7 |  strict_dependencies 'false'
                               ^^^^^^^
 
-use_false_cycle_package/foo.rb:15: `Test::Foo::Bar::FalseCyclePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
-    15 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
+use_false_cycle_package/foo.rb:16: `Test::Foo::Bar::FalseCyclePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    16 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 use_false_cycle_package/foo.test.rb:4: `Test::Foo::Bar::FalseCyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
@@ -523,7 +533,7 @@ use_false_cycle_package/foo.test.rb:6: `Foo::Bar::FalseCyclePackage::ImportMeTes
     use_false_cycle_package/__package.rb:7: Inserted `test_import Foo::Bar::FalseCyclePackage`
      7 |  strict_dependencies 'layered_dag'
                                            ^
-Errors: 6
+Errors: 7
 # frozen_string_literal: true
 # typed: strict
 # enable-packager: true
@@ -532,6 +542,7 @@ class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered_dag'
   test_import Foo::Bar::FalseCyclePackage
+  test_import Foo::Bar::FalseCyclePackageTest
 end
 
 --------------------------------------------------------------------------
