@@ -824,7 +824,7 @@ module RubyVM::YJIT
       call_threshold: T.nilable(Integer)
     ).returns(T::Boolean)
   end
-  def self.enable(stats: false, mem_size: nil, call_threshold: nil)
+  def self.enable(stats: false, mem_size: nil, call_threshold: nil); end
 
   # [`Marshal`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html) dumps exit locations to the given filename.
   #
