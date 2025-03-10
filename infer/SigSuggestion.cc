@@ -154,19 +154,19 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
 }
 
 UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx, core::MethodRef methodSymbol,
-                                                              unique_ptr<cfg::CFG> &cfg) {
+                                                              cfg::CFG &cfg) {
     // What variables by the end of basic block could plausibly contain what arguments.
     vector<UnorderedMap<cfg::LocalRef, InlinedVector<core::NameRef, 1>>> localsStoringArguments;
-    localsStoringArguments.resize(cfg->maxBasicBlockId);
+    localsStoringArguments.resize(cfg.maxBasicBlockId);
 
     // indicates what type should an argument have for basic block to execute
     vector<UnorderedMap<core::NameRef, core::TypePtr>> argTypesForBBToPass;
-    argTypesForBBToPass.resize(cfg->maxBasicBlockId);
+    argTypesForBBToPass.resize(cfg.maxBasicBlockId);
 
     // This loop computes per-block requirements... Should be a method on its own
-    for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
+    for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
-        if (bb == cfg->deadBlock()) {
+        if (bb == cfg.deadBlock()) {
             continue;
         }
         UnorderedMap<cfg::LocalRef, InlinedVector<core::NameRef, 1>> &blockLocals = localsStoringArguments[bb->id];
@@ -210,7 +210,7 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
                 }
 
                 if (shouldFindArgumentTypes) {
-                    auto currentMethodName = cfg->symbol.data(ctx)->name;
+                    auto currentMethodName = cfg.symbol.data(ctx)->name;
                     extractSendArgumentKnowledge(ctx, bind.loc, snd, blockLocals, blockArgRequirements,
                                                  currentMethodName);
                 }
@@ -229,11 +229,11 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
     bool changed = true;
     while (changed) {
         changed = false;
-        for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
+        for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
             cfg::BasicBlock *bb = *it;
             UnorderedMap<core::NameRef, core::TypePtr> entryRequirements;
             for (auto bbparent : bb->backEdges) {
-                if (bbparent->firstDeadInstructionIdx >= 0 && bb != cfg->deadBlock()) {
+                if (bbparent->firstDeadInstructionIdx >= 0 && bb != cfg.deadBlock()) {
                     continue;
                 }
                 for (auto &kv : argTypesForBBToPass[bbparent->id]) {
@@ -260,7 +260,7 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
         }
     }
 
-    return argTypesForBBToPass[cfg->deadBlock()->id];
+    return argTypesForBBToPass[cfg.deadBlock()->id];
 }
 
 core::MethodRef closestOverriddenMethod(core::Context ctx, core::ClassOrModuleRef enclosingClassSymbol,
@@ -310,10 +310,10 @@ bool childNeedsOverride(core::Context ctx, core::MethodRef childSymbol, core::Me
 
 } // namespace
 
-optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Context ctx, unique_ptr<cfg::CFG> &cfg,
+optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Context ctx, cfg::CFG &cfg,
                                                                      const core::TypePtr &methodReturnType,
                                                                      core::TypeConstraint &constr) {
-    core::MethodRef methodSymbol = cfg->symbol;
+    core::MethodRef methodSymbol = cfg.symbol;
 
     bool guessedSomethingUseful = false;
 
