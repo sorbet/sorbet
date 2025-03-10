@@ -1215,7 +1215,7 @@ private:
                 }
 
                 string replacement = "";
-                int indent = core::Loc::offset2Pos(todo.file.data(gs), send->loc.beginPos()).column - 1;
+                int indent = core::Loc::pos2Detail(todo.file.data(gs), send->loc.beginPos()).column - 1;
                 int index = 1;
                 const auto numPosArgs = send->numPosArgs();
                 for (auto i = 0; i < numPosArgs; ++i) {
