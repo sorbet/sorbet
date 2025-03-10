@@ -41,7 +41,7 @@ Loc Loc::join(Loc other) const {
 }
 
 Loc::Detail Loc::pos2Detail(const File &file, uint32_t off) {
-    Loc::Detail pos;
+    Loc::Detail detail;
 
     if (off > file.source().size()) {
         fatalLogger->error(R"(msg="Bad offset2Pos off" path="{}" off="{}"")", absl::CEscape(file.path()), off);
@@ -51,18 +51,18 @@ Loc::Detail Loc::pos2Detail(const File &file, uint32_t off) {
     auto lineBreaks = file.lineBreaks();
     auto it = absl::c_lower_bound(lineBreaks, off);
     if (it == lineBreaks.begin()) {
-        pos.line = 1;
-        pos.column = off + 1;
-        return pos;
+        detail.line = 1;
+        detail.column = off + 1;
+        return detail;
     }
     --it;
-    pos.line = (it - file.lineBreaks().begin()) + 1;
-    pos.column = off - *it;
-    return pos;
+    detail.line = (it - file.lineBreaks().begin()) + 1;
+    detail.column = off - *it;
+    return detail;
 }
 
-optional<uint32_t> Loc::detail2Pos(const File &file, Loc::Detail pos) {
-    auto l = pos.line - 1;
+optional<uint32_t> Loc::detail2Pos(const File &file, Loc::Detail detail) {
+    auto l = detail.line - 1;
     auto lineBreaks = file.lineBreaks();
     if (!(0 <= l && l < lineBreaks.size())) {
         return nullopt;
@@ -70,10 +70,10 @@ optional<uint32_t> Loc::detail2Pos(const File &file, Loc::Detail pos) {
     auto lineOffset = lineBreaks[l];
     auto nextLineStart = l + 1 < lineBreaks.size() ? lineBreaks[l + 1] : file.source().size();
     auto lineLength = nextLineStart - lineOffset;
-    if (pos.column > lineLength) {
+    if (detail.column > lineLength) {
         return nullopt;
     }
-    return lineOffset + pos.column;
+    return lineOffset + detail.column;
 }
 
 optional<Loc> Loc::fromDetails(const GlobalState &gs, FileRef fileRef, Loc::Detail begin, Loc::Detail end) {
