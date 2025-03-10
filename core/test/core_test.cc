@@ -62,7 +62,7 @@ TEST_CASE("TestOffset2Pos2Offset") {
         CHECK_EQ(tc.line, detail.line);
 
         // Test that it's reversible
-        auto offset = Loc::pos2Offset(f.data(gs), detail);
+        auto offset = Loc::detail2Pos(f.data(gs), detail);
         CHECK_EQ(tc.off, offset);
 
         i++;
@@ -106,7 +106,7 @@ TEST_CASE("TestPos2OffsetNull") {
         auto name = string("case: ") + to_string(i);
         FileRef f = gs.enterFile(name, tc.src);
 
-        auto actualOffset = Loc::pos2Offset(f.data(gs), Loc::Detail{tc.line, tc.col});
+        auto actualOffset = Loc::detail2Pos(f.data(gs), Loc::Detail{tc.line, tc.col});
 
         INFO(fmt::format("i={}, CHECK_EQ({}, {})", i, showOffset(tc.off), showOffset(actualOffset)));
         CHECK_EQ(tc.off, actualOffset);
