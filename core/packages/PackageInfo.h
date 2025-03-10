@@ -78,6 +78,10 @@ public:
                                          const PackageInfo &otherPkg) const = 0;
     // What is the minimum strict dependencies level that this package's imports must have?
     virtual core::packages::StrictDependenciesLevel minimumStrictDependenciesLevel() const = 0;
+    // Does this package transitively import otherPkg? Note: This only looks at non-test imports, since test imports are
+    // allowed to violate strict dependencies.
+    virtual bool importsTransitively(const core::GlobalState &gs,
+                                     const core::packages::MangledName &otherPkg) const = 0;
 
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
