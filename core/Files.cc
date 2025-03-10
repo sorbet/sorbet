@@ -113,7 +113,15 @@ File::Flags::Flags(string_view path)
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(path_), packagedLevel{File::filePackagedSigil(source_)},
       path_(move(path_)), source_(move(source_)), originalSigil(fileStrictSigil(this->source_)),
-      strictLevel(originalSigil) {}
+      strictLevel(originalSigil) {
+    if (this->source_.size() > INT32_MAX) [[unlikely]] {
+        // Specifically looking for INT32_MAX, because File::lineBreaks_ stores `int`, not `uint32_t`
+        static_assert(INT32_MAX < INVALID_POS_LOC);
+        static_assert(is_same_v<decltype(LocOffsets::beginLoc), uint32_t>);
+        static_assert(is_same_v<remove_reference_t<decltype((*this->lineBreaks_)[0])>, int>);
+        Exception::raise("File larger than {} bytes. Got: {}", INT32_MAX, this->source_.size());
+    }
+}
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string sourceCopy = source_;
