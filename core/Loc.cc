@@ -387,11 +387,11 @@ Loc Loc::adjustLen(const GlobalState &gs, int32_t beginAdjust, int32_t len) cons
 }
 
 pair<Loc, uint32_t> Loc::findStartOfLine(const GlobalState &gs) const {
-    auto startDetail = this->toDetails(gs).first;
-    auto maybeLineStart = Loc::detail2Pos(this->file().data(gs), {startDetail.line, 1});
-    ENFORCE_NO_TIMER(maybeLineStart.has_value());
-    auto lineStart = maybeLineStart.value();
-    std::string_view lineView = this->file().data(gs).source().substr(lineStart);
+    auto &file = this->file().data(gs);
+    auto lineBreaks = file.lineBreaks();
+    auto it = maybePrecedingNewline(file, lineBreaks, this->beginPos());
+    auto lineStart = it == lineBreaks.begin() ? 0 : (*it) + 1;
+    std::string_view lineView = file.source().substr(lineStart);
 
     size_t padding = lineView.find_first_not_of(" \t");
     if (padding == string::npos) {
