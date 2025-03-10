@@ -42,7 +42,7 @@ echo
 echo --------------------------------------------------------------------------
 echo
 
-"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --stripe-packages --packager-layers=lib,app --max-threads=0 cycle_package use_cycle_package 2>&1
+"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --stripe-packages --packager-layers=lib,app --max-threads=0 cycle_package cycle_package_test use_cycle_package 2>&1
 
 cat use_cycle_package/__package.rb
 
