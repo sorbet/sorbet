@@ -88,11 +88,11 @@ ExpressionPtr numparamTree(DesugarContext dctx, int num, parser::NodeVec *decls)
 ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what);
 
 pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx, core::LocOffsets loc,
-                                                             unique_ptr<parser::Node> &argnode) {
+                                                             parser::Node *argnode) {
     MethodDef::ARGS_store args;
     InsSeq::STATS_store destructures;
 
-    if (auto *oargs = parser::cast_node<parser::Args>(argnode.get())) {
+    if (auto *oargs = parser::cast_node<parser::Args>(argnode)) {
         args.reserve(oargs->args.size());
         for (auto &arg : oargs->args) {
             if (parser::isa_node<parser::Mlhs>(arg.get())) {
@@ -120,13 +120,13 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
                 args.emplace_back(node2TreeImpl(dctx, std::move(arg)));
             }
         }
-    } else if (auto *numparams = parser::cast_node<parser::NumParams>(argnode.get())) {
+    } else if (auto *numparams = parser::cast_node<parser::NumParams>(argnode)) {
         // The block uses numbered parameters like `_1` or `_9` so we add them as parameters
         // from _1 to the highest number used.
         for (int i = 1; i <= numparamMax(dctx, &numparams->decls); i++) {
             args.emplace_back(numparamTree(dctx, i, &numparams->decls));
         }
-    } else if (argnode.get() == nullptr) {
+    } else if (argnode == nullptr) {
         // do nothing
     } else {
         Exception::raise("not implemented: {}", argnode->nodeName());
@@ -172,7 +172,7 @@ void checkBlockRestArg(DesugarContext dctx, const MethodDef::ARGS_store &args) {
 }
 
 ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets blockLoc,
-                           unique_ptr<parser::Node> &blockSend, unique_ptr<parser::Node> &blockArgs,
+                           unique_ptr<parser::Node> &blockSend, parser::Node *blockArgs,
                            unique_ptr<parser::Node> &blockBody) {
     blockSend->loc = loc;
     auto recv = node2TreeImpl(dctx, std::move(blockSend));
@@ -361,7 +361,7 @@ ExpressionPtr validateRBIBody(DesugarContext dctx, ExpressionPtr body) {
 }
 
 ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
-                          unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &body, bool isSelf) {
+                          parser::Node *argnode, unique_ptr<parser::Node> &body, bool isSelf) {
     // Reset uniqueCounter within this scope (to keep numbers small)
     uint32_t uniqueCounter = 1;
     auto inModule = dctx.inModule && !isSelf;
@@ -500,41 +500,41 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
 }
 
 // Map all MatchVars used in `pattern` to local variables initialized from magic calls
-void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext dctx, unique_ptr<parser::Node> &node) {
-    if (auto var = parser::cast_node<parser::MatchVar>(node.get())) {
+void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext dctx, parser::Node *node) {
+    if (auto var = parser::cast_node<parser::MatchVar>(node)) {
         auto loc = var->loc;
         auto val = MK::RaiseUnimplemented(loc);
         vars.emplace_back(MK::Assign(loc, var->name, std::move(val)));
-    } else if (auto rest = parser::cast_node<parser::MatchRest>(node.get())) {
-        desugarPatternMatchingVars(vars, dctx, rest->var);
-    } else if (auto pair = parser::cast_node<parser::Pair>(node.get())) {
-        desugarPatternMatchingVars(vars, dctx, pair->value);
-    } else if (auto as_pattern = parser::cast_node<parser::MatchAs>(node.get())) {
+    } else if (auto rest = parser::cast_node<parser::MatchRest>(node)) {
+        desugarPatternMatchingVars(vars, dctx, rest->var.get());
+    } else if (auto pair = parser::cast_node<parser::Pair>(node)) {
+        desugarPatternMatchingVars(vars, dctx, pair->value.get());
+    } else if (auto as_pattern = parser::cast_node<parser::MatchAs>(node)) {
         auto loc = as_pattern->as->loc;
         auto name = parser::cast_node<parser::MatchVar>(as_pattern->as.get())->name;
         auto val = MK::RaiseUnimplemented(loc);
         vars.emplace_back(MK::Assign(loc, name, std::move(val)));
-        desugarPatternMatchingVars(vars, dctx, as_pattern->value);
-    } else if (auto array_pattern = parser::cast_node<parser::ArrayPattern>(node.get())) {
+        desugarPatternMatchingVars(vars, dctx, as_pattern->value.get());
+    } else if (auto array_pattern = parser::cast_node<parser::ArrayPattern>(node)) {
         for (auto &elt : array_pattern->elts) {
-            desugarPatternMatchingVars(vars, dctx, elt);
+            desugarPatternMatchingVars(vars, dctx, elt.get());
         }
-    } else if (auto array_pattern = parser::cast_node<parser::ArrayPatternWithTail>(node.get())) {
+    } else if (auto array_pattern = parser::cast_node<parser::ArrayPatternWithTail>(node)) {
         for (auto &elt : array_pattern->elts) {
-            desugarPatternMatchingVars(vars, dctx, elt);
+            desugarPatternMatchingVars(vars, dctx, elt.get());
         }
-    } else if (auto hash_pattern = parser::cast_node<parser::HashPattern>(node.get())) {
+    } else if (auto hash_pattern = parser::cast_node<parser::HashPattern>(node)) {
         for (auto &elt : hash_pattern->pairs) {
-            desugarPatternMatchingVars(vars, dctx, elt);
+            desugarPatternMatchingVars(vars, dctx, elt.get());
         }
-    } else if (auto alt_pattern = parser::cast_node<parser::MatchAlt>(node.get())) {
-        desugarPatternMatchingVars(vars, dctx, alt_pattern->left);
-        desugarPatternMatchingVars(vars, dctx, alt_pattern->right);
+    } else if (auto alt_pattern = parser::cast_node<parser::MatchAlt>(node)) {
+        desugarPatternMatchingVars(vars, dctx, alt_pattern->left.get());
+        desugarPatternMatchingVars(vars, dctx, alt_pattern->right.get());
     }
 }
 
 // Desugar `in` and `=>` oneline pattern matching
-ExpressionPtr desugarOnelinePattern(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser::Node> &match) {
+ExpressionPtr desugarOnelinePattern(DesugarContext dctx, core::LocOffsets loc, parser::Node *match) {
     auto matchExpr = MK::RaiseUnimplemented(loc);
     auto bodyExpr = MK::RaiseUnimplemented(loc);
     auto elseExpr = MK::EmptyTree();
@@ -1162,7 +1162,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 }
             },
             [&](parser::Block *block) {
-                result = desugarBlock(dctx, loc, block->loc, block->send, block->args, block->body);
+                result = desugarBlock(dctx, loc, block->loc, block->send, block->args.get(), block->body);
             },
             [&](parser::Begin *begin) { result = desugarBegin(dctx, loc, begin->stmts); },
             [&](parser::Assign *asgn) {
@@ -1640,8 +1640,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             },
             [&](parser::DefMethod *method) {
                 bool isSelf = false;
-                ExpressionPtr res =
-                    buildMethod(dctx, method->loc, method->declLoc, method->name, method->args, method->body, isSelf);
+                ExpressionPtr res = buildMethod(dctx, method->loc, method->declLoc, method->name, method->args.get(),
+                                                method->body, isSelf);
                 result = std::move(res);
             },
             [&](parser::DefS *method) {
@@ -1657,8 +1657,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     }
                 }
                 bool isSelf = true;
-                ExpressionPtr res =
-                    buildMethod(dctx, method->loc, method->declLoc, method->name, method->args, method->body, isSelf);
+                ExpressionPtr res = buildMethod(dctx, method->loc, method->declLoc, method->name, method->args.get(),
+                                                method->body, isSelf);
                 result = std::move(res);
             },
             [&](parser::SClass *sclass) {
@@ -1689,7 +1689,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             [&](parser::NumBlock *block) {
                 DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
                                      dctx.enclosingMethodName, true, dctx.inModule, dctx.preserveConcreteSyntax);
-                result = desugarBlock(dctx1, loc, block->loc, block->send, block->args, block->body);
+                result = desugarBlock(dctx1, loc, block->loc, block->send, block->args.get(), block->body);
             },
             [&](parser::While *wl) {
                 auto cond = node2TreeImpl(dctx, std::move(wl->cond));
@@ -2405,7 +2405,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                     // Desugar match variables found inside the pattern
                     InsSeq::STATS_store vars;
-                    desugarPatternMatchingVars(vars, dctx, pattern);
+                    desugarPatternMatchingVars(vars, dctx, pattern.get());
                     if (!vars.empty()) {
                         body = MK::InsSeq(pattern->loc, std::move(vars), std::move(body));
                     }
@@ -2444,11 +2444,11 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = MK::Send0(loc, std::move(recv), core::Names::getEncoding(), locZeroLen);
             },
             [&](parser::MatchPattern *pattern) {
-                auto res = desugarOnelinePattern(dctx, pattern->loc, pattern->rhs);
+                auto res = desugarOnelinePattern(dctx, pattern->loc, pattern->rhs.get());
                 result = std::move(res);
             },
             [&](parser::MatchPatternP *pattern) {
-                auto res = desugarOnelinePattern(dctx, pattern->loc, pattern->rhs);
+                auto res = desugarOnelinePattern(dctx, pattern->loc, pattern->rhs.get());
                 result = std::move(res);
             },
             [&](parser::EmptyElse *else_) { result = MK::EmptyTree(); },
