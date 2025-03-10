@@ -5,6 +5,7 @@ module Foo
     class FooClass
       Foo::Bar::CyclePackage::OtherClass # resolves via root
       Bar::CyclePackage::OtherClass # resolves via `module Foo`
+      Foo::Bar::CyclePackageTest::OtherClass # resolves via root
     end
   end
 end
