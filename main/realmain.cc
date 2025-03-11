@@ -201,7 +201,15 @@ void addInlineInput(const string &input, const string &filename, vector<core::Fi
     inputFiles.emplace_back(file);
 }
 
-#ifndef SORBET_REALMAIN_MIN
+#ifdef SORBET_REALMAIN_MIN
+
+void runAutogen(const core::GlobalState &gs, options::Options &opts, const autogen::AutogenConfig &autogenCfg,
+                WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
+    Exception::raise("Autogen is disabled in sorbet-orig for faster builds");
+}
+
+#else
+
 struct AutogenResult {
     struct Serialized {
         // Selectively populated based on print options
@@ -213,8 +221,19 @@ struct AutogenResult {
     vector<pair<int, Serialized>> prints;
 };
 
-void runAutogen(const core::GlobalState &gs, options::Options &opts, const autogen::AutogenConfig &autogenCfg,
-                WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
+void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
+    {
+        core::UnfreezeNameTable nameTableAccess(gs);
+        core::UnfreezeSymbolTable symbolAccess(gs);
+
+        indexed = resolver::Resolver::runConstantResolution(gs, move(indexed), workers);
+    }
+
+    autogen::AutogenConfig autogenCfg = {
+        .behaviorAllowedInRBIsPaths = std::move(opts.autogenBehaviorAllowedInRBIFilesPaths),
+        .msgpackSkipReferenceMetadata = std::move(opts.autogenMsgpackSkipReferenceMetadata),
+    };
+
     Timer timeit(logger, "autogen");
 
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
@@ -742,23 +761,7 @@ int realmain(int argc, char *argv[]) {
         }
 
         if (gs->runningUnderAutogen) {
-#ifdef SORBET_REALMAIN_MIN
-            logger->warn("Autogen is disabled in sorbet-orig for faster builds");
-            return 1;
-#else
-            {
-                core::UnfreezeNameTable nameTableAccess(*gs);
-                core::UnfreezeSymbolTable symbolAccess(*gs);
-
-                indexed = resolver::Resolver::runConstantResolution(*gs, move(indexed), *workers);
-            }
-
-            autogen::AutogenConfig autogenCfg = {
-                .behaviorAllowedInRBIsPaths = std::move(opts.autogenBehaviorAllowedInRBIFilesPaths),
-                .msgpackSkipReferenceMetadata = std::move(opts.autogenMsgpackSkipReferenceMetadata)};
-
-            runAutogen(*gs, opts, autogenCfg, *workers, indexed);
-#endif
+            runAutogen(*gs, opts, *workers, indexed);
         } else {
             indexed = move(pipeline::resolve(*gs, move(indexed), opts, *workers).result());
             if (gs->hadCriticalError()) {
