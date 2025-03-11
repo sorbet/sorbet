@@ -592,6 +592,7 @@ int realmain(int argc, char *argv[]) {
                 logger->error("Cannot serialize package RBIs in legacy stripe packages mode.");
                 return 1;
             }
+            opts.stripePackages = true;
 
             if (opts.packageRBIDir.empty()) {
                 logger->error("Rbi generation requires --package-rbi-dir to be present");
@@ -632,15 +633,7 @@ int realmain(int argc, char *argv[]) {
             // seconds.
             auto packageFileRefs = pipeline::reserveFiles(*gs, packageFiles);
             auto packages = pipeline::index(*gs, absl::Span<core::FileRef>(packageFileRefs), opts, *workers, nullptr);
-            {
-                core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*gs);
-                core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-                gs->setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
-                                       opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                       opts.extraPackageFilesDirectorySlashPrefixes,
-                                       opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor,
-                                       opts.packagerLayers, opts.stripePackagesHint);
-            }
+            pipeline::setPackagerOptions(*gs, opts);
 
             packager::Packager::findPackages(*gs, absl::Span<ast::ParsedFile>(packages));
             packager::Packager::setPackageNameOnFiles(*gs, packages);
