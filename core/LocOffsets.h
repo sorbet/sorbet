@@ -10,22 +10,25 @@ class Context;
 class MutableContext;
 
 struct LocOffsets {
-    using OFFSET_TYPE = uint32_t;
+    using POS = uint32_t;
 
-    constexpr static OFFSET_TYPE INVALID_POS_LOC = std::numeric_limits<OFFSET_TYPE>::max();
+    constexpr static POS INVALID_POS_LOC = std::numeric_limits<POS>::max();
 
-    OFFSET_TYPE beginLoc = INVALID_POS_LOC;
-    OFFSET_TYPE endLoc = INVALID_POS_LOC;
-    OFFSET_TYPE beginPos() const {
+    POS beginLoc = INVALID_POS_LOC;
+    POS endLoc = INVALID_POS_LOC;
+
+    POS beginPos() const {
         return beginLoc;
     };
 
-    OFFSET_TYPE endPos() const {
+    POS endPos() const {
         return endLoc;
     }
+
     bool exists() const {
         return endLoc != INVALID_POS_LOC && beginLoc != INVALID_POS_LOC;
     }
+
     bool empty() const {
         ENFORCE_NO_TIMER(exists());
         return beginLoc == endLoc;
@@ -41,11 +44,14 @@ struct LocOffsets {
     static LocOffsets none() {
         return LocOffsets();
     }
+
     LocOffsets join(LocOffsets other) const;
+
     // For a given LocOffsets, returns a zero-length version that starts at the same location.
     LocOffsets copyWithZeroLength() const {
         return LocOffsets{beginPos(), beginPos()};
     }
+
     // As above, but returns a zero-length version that starts at the end of the location.
     LocOffsets copyEndWithZeroLength() const {
         return LocOffsets{endPos(), endPos()};

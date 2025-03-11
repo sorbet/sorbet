@@ -12,6 +12,7 @@
 namespace sorbet::core {
 
 using namespace std;
+using POS = LocOffsets::POS;
 
 LocOffsets LocOffsets::join(LocOffsets other) const {
     if (!this->exists()) {
@@ -40,7 +41,7 @@ Loc Loc::join(Loc other) const {
     return Loc(this->file(), min(this->beginPos(), other.beginPos()), max(this->endPos(), other.endPos()));
 }
 
-Loc::Detail Loc::pos2Detail(const File &file, uint32_t off) {
+Loc::Detail Loc::pos2Detail(const File &file, LocOffsets::POS off) {
     Loc::Detail detail;
 
     if (off > file.source().size()) {
@@ -61,7 +62,7 @@ Loc::Detail Loc::pos2Detail(const File &file, uint32_t off) {
     return detail;
 }
 
-optional<uint32_t> Loc::detail2Pos(const File &file, Loc::Detail detail) {
+optional<LocOffsets::POS> Loc::detail2Pos(const File &file, Loc::Detail detail) {
     auto l = detail.line - 1;
     auto lineBreaks = file.lineBreaks();
     if (!(0 <= l && l < lineBreaks.size())) {

@@ -48,11 +48,11 @@ public:
         return {this->storage.fileRef, this->storage.offsets.copyEndWithZeroLength()};
     }
 
-    uint32_t beginPos() const {
+    LocOffsets::POS beginPos() const {
         return storage.offsets.beginLoc;
     };
 
-    uint32_t endPos() const {
+    LocOffsets::POS endPos() const {
         return storage.offsets.endLoc;
     }
     const LocOffsets &offsets() const {
@@ -72,7 +72,7 @@ public:
         }
     }
 
-    inline Loc(FileRef file, uint32_t begin, uint32_t end) : storage{{begin, end}, file} {}
+    inline Loc(FileRef file, LocOffsets::POS begin, LocOffsets::POS end) : storage{{begin, end}, file} {}
 
     inline Loc(FileRef file, LocOffsets offsets) : storage{offsets, file} {}
 
@@ -101,8 +101,8 @@ public:
     bool operator==(const Loc &rhs) const;
 
     bool operator!=(const Loc &rhs) const;
-    static std::optional<uint32_t> detail2Pos(const File &file, Detail detail);
-    static Detail pos2Detail(const File &file, uint32_t off);
+    static std::optional<LocOffsets::POS> detail2Pos(const File &file, Detail detail);
+    static Detail pos2Detail(const File &file, LocOffsets::POS off);
     static std::optional<Loc> fromDetails(const GlobalState &gs, FileRef fileRef, Detail begin, Detail end);
 
     // Create a new Loc by adjusting the beginPos and endPos of this Loc, like this:
@@ -129,7 +129,7 @@ public:
     // - the Loc corresponding to the first non-whitespace character on this line, and
     // - how many characters of the start of this line are whitespace.
     //
-    std::pair<Loc, uint32_t> findStartOfLine(const GlobalState &gs) const;
+    std::pair<Loc, LocOffsets::POS> findStartOfLine(const GlobalState &gs) const;
 
     // If the given loc spans multiple lines, return a new location which has been truncated to
     // one line (excluding the newline character which ends the first line).
