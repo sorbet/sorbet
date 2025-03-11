@@ -547,99 +547,6 @@ int realmain(int argc, char *argv[]) {
 
         inputFiles = pipeline::reserveFiles(*gs, opts.inputFileNames);
 
-        if (opts.packageRBIGeneration) {
-#ifdef SORBET_REALMAIN_MIN
-            logger->warn("Package rbi generation is disabled in sorbet-orig for faster builds");
-            return 1;
-#else
-            Timer rbiGenTimer(logger, "rbiGeneration.setup");
-
-            if (opts.cacheSensitiveOptions.stripePackages) {
-                logger->error("Cannot serialize package RBIs in legacy stripe packages mode.");
-                return 1;
-            }
-
-            if (opts.packageRBIDir.empty()) {
-                logger->error("Rbi generation requires --package-rbi-dir to be present");
-                return 1;
-            }
-
-            if (opts.rawInputDirNames.size() != 1) {
-                logger->error("Serializing package RBIs requires one input folder.");
-                return 1;
-            }
-
-            if (!FileOps::dirExists(opts.packageRBIDir)) {
-                logger->error("Directory {} for serialized package RBIs does not exist.", opts.packageRBIDir);
-                return 1;
-            }
-
-            auto relativeIgnorePatterns = opts.relativeIgnorePatterns;
-            auto it = absl::c_find(relativeIgnorePatterns, "/__package.rb");
-            if (it != relativeIgnorePatterns.end()) {
-                relativeIgnorePatterns.erase(it);
-            } else {
-                Exception::raise("Couldn't find ignore pattern.");
-            }
-            auto packageFiles = opts.fs->listFilesInDir(opts.rawInputDirNames[0], opts.allowedExtensions, true,
-                                                        opts.absoluteIgnorePatterns, relativeIgnorePatterns);
-            packageFiles.erase(
-                remove_if(packageFiles.begin(), packageFiles.end(),
-                          [](const auto &packageFile) { return !absl::EndsWith(packageFile, "__package.rb"); }),
-                packageFiles.end());
-
-            if (packageFiles.empty()) {
-                logger->error("No package files found!");
-                return 1;
-            }
-
-            // Indexing package files is by far the most expensive part of rbi generation. If we could instead select
-            // only the package files that we know we need to load, it would cut down command-line rbi generation by
-            // seconds.
-            auto packageFileRefs = pipeline::reserveFiles(*gs, packageFiles);
-            auto packagesResult =
-                pipeline::index(*gs, absl::Span<core::FileRef>(packageFileRefs), opts, *workers, nullptr);
-            ENFORCE(packagesResult.hasResult(), "There's no cancellation in batch mode");
-            auto packages = std::move(packagesResult.result());
-            {
-                core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*gs);
-                core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-                gs->setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
-                                       opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                       opts.extraPackageFilesDirectorySlashPrefixes,
-                                       opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor,
-                                       opts.packagerLayers, opts.stripePackagesHint);
-            }
-
-            packager::Packager::findPackages(*gs, absl::MakeSpan(packages));
-            packager::Packager::setPackageNameOnFiles(*gs, absl::MakeSpan(packages));
-            packager::Packager::setPackageNameOnFiles(*gs, inputFiles);
-
-            if (!opts.singlePackage.empty()) {
-                Timer singlePackageTimer(logger, "singlePackage.setup");
-
-                auto &pkg = gs->packageDB().getPackageInfo(*gs, opts.singlePackage);
-                if (!pkg.exists()) {
-                    logger->error("Unable to find package `{}`", opts.singlePackage);
-                    return 1;
-                }
-
-                auto info = core::packages::ImportInfo::fromPackage(*gs, pkg);
-
-                // Only keep inputs that are part of the package whose interface we're generating
-                auto it =
-                    std::remove_if(inputFiles.begin(), inputFiles.end(), [&db = gs->packageDB(), &info](auto file) {
-                        return info.package != db.getPackageNameForFile(file);
-                    });
-                inputFiles.erase(it, inputFiles.end());
-
-                // Record parent information in GlobalState to guide the resolver when stubbing out constants that come
-                // from other packages.
-                gs->singlePackageImports.emplace(std::move(info));
-            }
-#endif
-        }
-
         {
             core::UnfreezeFileTable fileTableAccess(*gs);
             if (!opts.inlineInput.empty()) {
@@ -722,11 +629,9 @@ int realmain(int argc, char *argv[]) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
 
-            if (!opts.packageRBIGeneration) {
-                // we don't need to typecheck when generating rbis
-                pipeline::typecheck(*gs, move(indexed), opts, *workers, /* cancelable */ false, nullopt,
-                                    /* presorted */ false, /* intentionallyLeakASTs */ !sorbet::emscripten_build);
-            }
+            pipeline::typecheck(*gs, move(indexed), opts, *workers, /* cancelable */ false, nullopt,
+                                /* presorted */ false, /* intentionallyLeakASTs */ !sorbet::emscripten_build);
+
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
@@ -802,36 +707,6 @@ int realmain(int argc, char *argv[]) {
                     e.setHeader("You could add `# typed: {}`", sigil);
                     e.replaceWith(fmt::format("Add `typed: {}` sigil", sigil), loc, "# typed: {}\n", sigil);
                 }
-            }
-#endif
-        }
-
-        if (!opts.dumpPackageInfo.empty()) {
-#ifdef SORBET_REALMAIN_MIN
-            logger->warn("Dumping package info is disabled in sorbet-orig for faster builds");
-            return 1;
-#else
-            if (!opts.cacheSensitiveOptions.stripePackages) {
-                logger->error("stripe packages mode needs to be enabled");
-                return 1;
-            }
-            packager::Packager::dumpPackageInfo(*gs, opts.dumpPackageInfo);
-#endif
-        }
-
-        if (opts.packageRBIGeneration) {
-#ifdef SORBET_REALMAIN_MIN
-            logger->warn("Package rbi generation is disabled in sorbet-orig for faster builds");
-            return 1;
-#else
-            Timer rbiGenTimer(logger, "rbiGeneration.run");
-            auto packageNamespaces = packager::RBIGenerator::buildPackageNamespace(*gs, *workers);
-
-            if (!opts.singlePackage.empty()) {
-                packager::RBIGenerator::runSinglePackage(*gs, packageNamespaces, gs->singlePackageImports->package,
-                                                         opts.packageRBIDir);
-            } else {
-                packager::RBIGenerator::run(*gs, packageNamespaces, opts.packageRBIDir, *workers);
             }
 #endif
         }
