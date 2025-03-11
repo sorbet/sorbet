@@ -588,12 +588,6 @@ int realmain(int argc, char *argv[]) {
 #else
             Timer rbiGenTimer(logger, "rbiGeneration.setup");
 
-            if (opts.stripePackages) {
-                logger->error("Cannot serialize package RBIs in legacy stripe packages mode.");
-                return 1;
-            }
-            opts.stripePackages = true;
-
             if (opts.packageRBIDir.empty()) {
                 logger->error("Rbi generation requires --package-rbi-dir to be present");
                 return 1;

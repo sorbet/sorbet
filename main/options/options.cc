@@ -1223,6 +1223,10 @@ void readOptions(Options &opts,
         }
 
         opts.packageRBIGeneration = raw["package-rbi-generation"].as<bool>();
+        if (opts.packageRBIGeneration && !opts.stripePackages) {
+            logger->error("--stripe-packages-hint-message can only be specified in --stripe-packages mode");
+            throw EarlyReturnWithCode(1);
+        }
 
         opts.packageRBIDir = raw["package-rbi-dir"].as<string>();
         if (!opts.packageRBIDir.empty()) {

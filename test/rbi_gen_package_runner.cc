@@ -271,6 +271,7 @@ int main(int argc, char **argv) {
                       {
                           "--silence-dev-message",
                           "--uniquely-defined-behavior",
+                          "--stripe-packages",
                           "--package-rbi-generation",
                           "--package-rbi-dir",
                           rbiPackageDir,
