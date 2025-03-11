@@ -544,7 +544,7 @@ public:
                     if (reasons.size() == 1) {
                         reason = reasons[0];
                     } else if (reasons.size() == 2) {
-                        reason = fmt::format("{} and {}", reasons[0], reasons[1]);
+                        reason = fmt::format("{}, and {}", reasons[0], reasons[1]);
                     } else if (reasons.size() == 3) {
                         reason = fmt::format("{}, {}, and {}", reasons[0], reasons[1], reasons[2]);
                     } else {
