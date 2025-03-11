@@ -1,7 +1,6 @@
 #ifndef RUBY_TYPER_HASHING_HASHING_H
 #define RUBY_TYPER_HASHING_HASHING_H
 
-#include "ast/Trees.h"
 #include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
 #include "core/Files.h"
@@ -11,7 +10,7 @@ class OwnedKeyValueStore;
 }
 
 namespace sorbet::ast {
-struct ParsedFile;
+class ParsedFilesOrCancelled;
 }
 
 namespace sorbet::realmain::options {
