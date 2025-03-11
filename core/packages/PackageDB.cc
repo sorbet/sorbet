@@ -276,19 +276,11 @@ bool PackageDB::allowRelaxedPackagerChecksFor(MangledName mangledName) const {
 
 PackageDB PackageDB::deepCopy() const {
     ENFORCE(frozen);
-    auto result = this->emptyCopyWithOptions();
-
+    PackageDB result;
     result.packages_.reserve(this->packages_.size());
     for (auto const &[nr, pkgInfo] : this->packages_) {
         result.packages_[nr] = pkgInfo->deepCopy();
     }
-
-    return result;
-}
-
-PackageDB PackageDB::emptyCopyWithOptions() const {
-    ENFORCE(frozen);
-    PackageDB result;
     result.enabled_ = this->enabled_;
     result.extraPackageFilesDirectoryUnderscorePrefixes_ = this->extraPackageFilesDirectoryUnderscorePrefixes_;
     result.extraPackageFilesDirectorySlashDeprecatedPrefixes_ =
