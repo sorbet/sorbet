@@ -672,6 +672,7 @@ ast::ParsedFilesOrCancelled index(core::GlobalState &gs, absl::Span<const core::
             return ast::ParsedFilesOrCancelled::cancel(std::move(parsed), workers);
         }
 
+        // TODO(jez) Do we want this fast_sort here? Is it redundant?
         fast_sort(parsed, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
         ENFORCE(files.size() == parsed.size());
         return parsed;
