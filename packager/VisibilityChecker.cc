@@ -362,10 +362,10 @@ public:
 
 class VisibilityCheckerPass final {
 public:
-    const core::packages::PackageInfo &package;
+    core::packages::PackageInfo &package;
     const bool insideTestFile;
 
-    VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
+    VisibilityCheckerPass(core::Context ctx, core::packages::PackageInfo &package)
         : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
 
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -475,7 +475,12 @@ public:
                 } else {
                     e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                     e.addErrorLine(pkg.declLoc(), "Exported from package here");
+                    // TODO(neil): lookup in trackedImports before re-computing the import
                     if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
+                        this->package.trackImport(pkg.mangledName(), ctx.file,
+                                                  isTestImport ? core::packages::ImportType::Test
+                                                               : core::packages::ImportType::Normal,
+                                                  exp.value().edits);
                         e.addAutocorrect(std::move(exp.value()));
                         if (!db.errorHint().empty()) {
                             e.addErrorNote("{}", db.errorHint());
@@ -538,7 +543,7 @@ public:
         }
     }
 
-    static std::vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
+    static std::vector<ast::ParsedFile> run(core::GlobalState &gs, WorkerPool &workers,
                                             std::vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
@@ -556,7 +561,8 @@ public:
                     auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                     if (pkgName.exists()) {
                         core::Context ctx{gs, core::Symbols::root(), f.file};
-                        VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
+                        // TODO: untrack imports for this file
+                        VisibilityCheckerPass pass{ctx, *gs.packageDB().getPackageInfoNonConst(pkgName)};
                         ast::TreeWalk::apply(ctx, pass, f.tree);
                     }
                 }
@@ -700,7 +706,54 @@ std::vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, Worke
     // the separation of the two is nice for simplifying `runIncremental`.
     files = ImportCheckerPass::run(gs, workers, std::move(files));
 
-    return VisibilityCheckerPass::run(gs, workers, std::move(files));
+    auto result = VisibilityCheckerPass::run(gs, workers, std::move(files));
+
+    for (auto &pkgName : gs.packageDB().packages()) {
+        auto &pkg = gs.packageDB().getPackageInfo(pkgName);
+        ENFORCE(pkg.exists());
+        if (!pkg.trackedImports().empty()) {
+            if (auto e = gs.beginError(pkg.declLoc(), core::errors::Packager::MissingImportPackageRB)) {
+                std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+                auto numImports = 0;
+                for (auto &[key, value] : pkg.trackedImports()) {
+                    auto importName = key.first;
+                    auto importType = key.second;
+                    auto edits = value.second;
+                    if (importType == core::packages::ImportType::Test &&
+                        pkg.trackedImports().contains({importName, core::packages::ImportType::Normal})) {
+                        // If we're already importing the package normally, we don't need to import it again as a
+                        // test_import.
+                        continue;
+                    }
+                    allEdits.insert(allEdits.end(), edits.begin(), edits.end());
+                    numImports++;
+                }
+                if (numImports == 1) {
+                    e.setHeader("Package `{}` is missing an import", pkg.show(gs));
+                } else if (numImports > 1) {
+                    e.setHeader("Package `{}` is missing imports", pkg.show(gs));
+                } else {
+                    ENFORCE(false);
+                }
+                fast_sort(allEdits,
+                          [](const auto &lhs, const auto &rhs) { return lhs.loc.beginPos() < rhs.loc.beginPos(); });
+                auto i = 0;
+                while (i < allEdits.size() - 1) {
+                    if (allEdits[i].loc.beginPos() == allEdits[i + 1].loc.beginPos() && allEdits[i].loc.empty() &&
+                        allEdits[i + 1].loc.empty()) {
+                        // If we're inserting 2 imports at the same location, combine them into a single edit.
+                        allEdits[i].replacement += allEdits[i + 1].replacement;
+                        allEdits.erase(allEdits.begin() + i + 1);
+                    } else {
+                        i++;
+                    }
+                }
+                e.addAutocorrect(core::AutocorrectSuggestion{"Add missing imports", std::move(allEdits)});
+            }
+        }
+    }
+
+    return result;
 }
 
 } // namespace sorbet::packager

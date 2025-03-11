@@ -3,6 +3,7 @@
 
 #include "absl/types/span.h"
 
+#include "core/AutocorrectSuggestion.h"
 #include "core/NameRef.h"
 #include "core/SymbolRef.h"
 #include "core/packages/MangledName.h"
@@ -10,7 +11,6 @@
 #include <vector>
 
 namespace sorbet::core {
-struct AutocorrectSuggestion;
 class NameRef;
 class Loc;
 class GlobalState;
@@ -78,6 +78,14 @@ public:
                                          const PackageInfo &otherPkg) const = 0;
     // What is the minimum strict dependencies level that this package's imports must have?
     virtual core::packages::StrictDependenciesLevel minimumStrictDependenciesLevel() const = 0;
+
+    virtual void trackImport(const core::packages::MangledName toImport, const core::FileRef file,
+                             const core::packages::ImportType importType,
+                             const std::vector<core::AutocorrectSuggestion::Edit> edits) = 0;
+
+    virtual UnorderedMap<std::pair<core::packages::MangledName, core::packages::ImportType>,
+                         std::pair<UnorderedSet<core::FileRef>, std::vector<core::AutocorrectSuggestion::Edit>>>
+    trackedImports() const = 0;
 
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,

@@ -227,6 +227,10 @@ public:
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
 
+    UnorderedMap<pair<core::packages::MangledName, core::packages::ImportType>,
+                 pair<UnorderedSet<core::FileRef>, vector<core::AutocorrectSuggestion::Edit>>>
+        trackedImports_ = {};
+
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_ = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer_ = nullopt;
 
@@ -597,6 +601,19 @@ public:
             case core::packages::StrictDependenciesLevel::Dag:
                 return core::packages::StrictDependenciesLevel::Dag;
         }
+    }
+
+    void trackImport(const core::packages::MangledName toImport, const core::FileRef file,
+                     const core::packages::ImportType importType,
+                     const std::vector<core::AutocorrectSuggestion::Edit> edits) {
+        trackedImports_[{toImport, importType}].first.insert(file);
+        trackedImports_[{toImport, importType}].second = edits;
+    }
+
+    UnorderedMap<std::pair<core::packages::MangledName, core::packages::ImportType>,
+                 pair<UnorderedSet<core::FileRef>, vector<core::AutocorrectSuggestion::Edit>>>
+    trackedImports() const {
+        return trackedImports_;
     }
 };
 

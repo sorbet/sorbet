@@ -106,6 +106,19 @@ public:
         return nullopt;
     }
 
+    void trackImport(const core::packages::MangledName toImport, const core::FileRef file,
+                     const core::packages::ImportType importType,
+                     const std::vector<core::AutocorrectSuggestion::Edit> edits) {
+        notImplemented();
+    }
+
+    UnorderedMap<std::pair<core::packages::MangledName, core::packages::ImportType>,
+                 std::pair<UnorderedSet<core::FileRef>, std::vector<core::AutocorrectSuggestion::Edit>>>
+    trackedImports() const {
+        notImplemented();
+        return {};
+    }
+
     ~NonePackage() {}
 
 private:
