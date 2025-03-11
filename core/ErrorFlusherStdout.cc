@@ -21,10 +21,13 @@ void ErrorFlusherStdout::flushErrors(spdlog::logger &logger, const GlobalState &
             if (out.size() != 0) {
                 fmt::format_to(std::back_inserter(out), "\n\n");
             }
-            ENFORCE(error->text.has_value());
-            fmt::format_to(std::back_inserter(out), "{}", error->text.value_or(""));
+            auto errorText = error->error->toString(gs, error->error->what.code == 3718);
+            fmt::format_to(std::back_inserter(out), "{}", errorText);
 
             for (auto &autocorrect : error->error->autocorrects) {
+                if (error->error->what.code == 3718) {
+                    continue;
+                }
                 autocorrects.emplace_back(move(autocorrect));
             }
         }

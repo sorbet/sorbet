@@ -154,7 +154,7 @@ std::optional<ErrorSection> ErrorSection::Collector::toErrorSection() const {
     return ErrorSection("Detailed explanation:", move(lines));
 }
 
-string Error::toString(const GlobalState &gs) const {
+string Error::toString(const GlobalState &gs, bool skipAutocorrects) const {
     stringstream buf;
     buf << RESET_STYLE << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": " << ERROR_COLOR
         << restoreColors(header, ERROR_COLOR) << RESET_COLOR << LOW_NOISE_COLOR << " " << gs.errorUrlBase << what.code
@@ -172,6 +172,9 @@ string Error::toString(const GlobalState &gs) const {
 
     if (gs.includeErrorSections) {
         for (auto &section : this->sections) {
+            if (section.isAutocorrectDescription && skipAutocorrects) {
+                continue;
+            }
             buf << '\n' << section.toString(gs);
         }
     }

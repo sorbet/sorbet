@@ -123,7 +123,7 @@ public:
     const std::vector<ErrorSection> sections;
 
     bool isCritical() const;
-    std::string toString(const GlobalState &gs) const;
+    std::string toString(const GlobalState &gs, bool skipAutocorrects = false) const;
     Error(Loc loc, ErrorClass what, std::string header, std::vector<ErrorSection> sections,
           std::vector<AutocorrectSuggestion> autocorrects, bool isSilenced)
         : loc(loc), what(what), header(std::move(header)), isSilenced(isSilenced),
