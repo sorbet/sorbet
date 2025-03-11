@@ -203,8 +203,8 @@ void addInlineInput(const string &input, const string &filename, vector<core::Fi
 
 #ifdef SORBET_REALMAIN_MIN
 
-void runAutogen(const core::GlobalState &gs, options::Options &opts, const autogen::AutogenConfig &autogenCfg,
-                WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
+void runAutogen(const core::GlobalState &gs, options::Options &opts, WorkerPool &workers,
+                vector<ast::ParsedFile> &indexed) {
     Exception::raise("Autogen is disabled in sorbet-orig for faster builds");
 }
 
