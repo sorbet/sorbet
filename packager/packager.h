@@ -1,7 +1,6 @@
 #ifndef SORBET_REWRITER_PACKAGE_H
 #define SORBET_REWRITER_PACKAGE_H
 #include "ast/ast.h"
-#include "core/packages/PackageInfo.h"
 #include "packager/VisibilityChecker.h"
 
 namespace sorbet {
@@ -54,8 +53,6 @@ public:
 
     // Validate packaged files. This requires that hte `files` span does not contain any `__package.rb` files.
     static void validatePackagedFiles(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files);
-
-    static void dumpPackageInfo(const core::GlobalState &gs, std::string output);
 
     // For each file, set its package name.
     static void setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files);

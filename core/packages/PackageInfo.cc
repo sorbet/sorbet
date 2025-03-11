@@ -38,33 +38,6 @@ bool PackageInfo::lexCmp(absl::Span<const core::NameRef> lhs, absl::Span<const c
                                         [](NameRef a, NameRef b) -> bool { return a.rawId() < b.rawId(); });
 }
 
-ImportInfo ImportInfo::fromPackage(const core::GlobalState &gs, const PackageInfo &info) {
-    ImportInfo res;
-    res.package = info.mangledName();
-
-    auto thisName = info.fullName();
-
-    auto &db = gs.packageDB();
-
-    for (auto pkg : db.packages()) {
-        if (!info.importsPackage(pkg)) {
-            continue;
-        }
-
-        auto fullName = db.getPackageInfo(pkg).fullName();
-        if (thisName.size() >= fullName.size()) {
-            if (std::equal(fullName.begin(), fullName.end(), thisName.begin())) {
-                res.parentImports.emplace_back(pkg);
-                continue;
-            }
-        }
-
-        res.regularImports.emplace_back(pkg);
-    }
-
-    return res;
-}
-
 string PackageInfo::show(const core::GlobalState &gs) const {
     return absl::StrJoin(fullName(),
                          "::", [&](string *out, core::NameRef name) { absl::StrAppend(out, name.show(gs)); });

@@ -205,10 +205,7 @@ struct Options {
     std::string metricsSha = "none";
     std::map<std::string, std::string> metricsExtraTags; // be super careful with cardinality here
 
-    bool packageRBIGeneration = false;
     std::string dumpPackageInfo = "";
-    std::string singlePackage = "";
-    std::string packageRBIDir = "";
     std::vector<std::string> packageSkipRBIExportEnforcementDirs;
 
     // Contains the allowed extensions Sorbet can parse.

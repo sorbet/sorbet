@@ -21,10 +21,8 @@ cc_library(
     deps = [
         "//ast",
         "//ast/treemap",
-        "//ast/verifier",
         "//common",
         "//common/concurrency",
         "//core",
-        "@rapidjson",
     ],
 )
