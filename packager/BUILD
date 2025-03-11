@@ -22,10 +22,8 @@ cc_library(
         "//ast",
         "//ast/packager",
         "//ast/treemap",
-        "//ast/verifier",
         "//common",
         "//common/concurrency",
         "//core",
-        "@rapidjson",
     ],
 )

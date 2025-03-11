@@ -14,7 +14,6 @@
 #include "core/errors/packager.h"
 #include "core/packages/MangledName.h"
 #include "core/packages/PackageInfo.h"
-#include "rapidjson/writer.h"
 #include <algorithm>
 #include <cctype>
 #include <queue>
