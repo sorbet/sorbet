@@ -86,7 +86,6 @@ ExpressionPtr numparamTree(DesugarContext dctx, int num, parser::NodeVec *decls)
 }
 
 ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> &what);
-ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::Node *what);
 
 pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx, core::LocOffsets loc,
                                                              parser::Node *argnode) {
@@ -705,17 +704,8 @@ public:
     }
 };
 
-// This version of node2TreeImpl exists to incrementally free nodes as it works. (The node is passed as a unique_ptr
-// reference to avoid the overhead of a move, and we explicitly terminate its lifetime by using `reset` instead of
-// relying on its destructor.) To avoid the incremental freeing, use the version of `node2TreeImpl` that operates on
-// `parser::Node *` values instead.
-ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> &what) {
-    auto res = node2TreeImpl(dctx, what.get());
-    what.reset();
-    return res;
-}
-
-ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::Node *what) {
+// Translate a tree to an expression. NOTE: this should only be called from `node2TreeImpl`.
+ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
     try {
         if (what == nullptr) {
             return MK::EmptyTree();
@@ -2472,6 +2462,13 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::Node *what) {
         }
         throw;
     }
+}
+
+// Translate trees by calling `node2TreeBody`, and manually reset the unique_ptr argument when it's done.
+ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> &what) {
+    auto res = node2TreeImplBody(dctx, what.get());
+    what.reset();
+    return res;
 }
 
 ExpressionPtr liftTopLevel(DesugarContext dctx, core::LocOffsets loc, ExpressionPtr what) {
