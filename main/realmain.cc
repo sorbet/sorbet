@@ -631,7 +631,8 @@ int realmain(int argc, char *argv[]) {
             // only the package files that we know we need to load, it would cut down command-line rbi generation by
             // seconds.
             auto packageFileRefs = pipeline::reserveFiles(*gs, packageFiles);
-            auto packagesResult = pipeline::index(*gs, absl::Span<core::FileRef>(packageFileRefs), opts, *workers, nullptr);
+            auto packagesResult =
+                pipeline::index(*gs, absl::Span<core::FileRef>(packageFileRefs), opts, *workers, nullptr);
             ENFORCE(packagesResult.hasResult(), "There's no cancellation in batch mode");
             auto packages = std::move(packagesResult.result());
             {
