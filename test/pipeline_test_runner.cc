@@ -39,6 +39,7 @@
 #include "packager/rbi_gen.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
+#include "payload/payload.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -374,12 +375,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
     auto gs = make_unique<core::GlobalState>(errorQueue);
 
-    if (opts.noStdlib) {
-        gs->initEmpty();
-    } else {
-        core::serialize::Serializer::loadGlobalState(*gs, GLOBAL_STATE_PAYLOAD);
-    }
-
+    unique_ptr<const OwnedKeyValueStore> kvstore = nullptr;
+    payload::createInitialGlobalState(*gs, opts, kvstore);
     realmain::pipeline::setGlobalStateOptions(*gs, opts);
 
     for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
