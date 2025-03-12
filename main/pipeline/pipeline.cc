@@ -265,77 +265,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
     }
 }
 
-vector<ast::ParsedFile>
-incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
-                   optional<UnorderedMap<core::FileRef, core::FoundDefHashes>> &&foundHashesForFiles,
-                   const options::Options &opts, WorkerPool &workers) {
-    try {
-#ifndef SORBET_REALMAIN_MIN
-        if (opts.stripePackages) {
-            Timer timeit(gs.tracer(), "incremental_packager");
-            // For simplicity, we still call Packager::runIncremental here, even though
-            // pipeline::nameAndResolve no longer calls Packager::run.
-            //
-            // TODO(jez) We may want to revisit this. At the moment, the only thing that
-            // runIncremental does is validate that files have the right package prefix. We could
-            // split `pipeline::package` into something like "populate the package DB" and "verify
-            // the package prefixes" with the later living in `pipeline::nameAndResolve` once again
-            // (thus restoring the symmetry).
-            what = packager::Packager::runIncremental(gs, move(what), workers);
-        }
-#endif
-        auto runIncrementalNamer = foundHashesForFiles.has_value() && !foundHashesForFiles->empty();
-        {
-            Timer timeit(gs.tracer(), "incremental_naming");
-            core::UnfreezeSymbolTable symbolTable(gs);
-            core::UnfreezeNameTable nameTable(gs);
-
-            auto canceled = runIncrementalNamer
-                                ? sorbet::namer::Namer::runIncremental(gs, absl::Span<ast::ParsedFile>(what),
-                                                                       std::move(foundHashesForFiles.value()), workers)
-                                : sorbet::namer::Namer::run(gs, absl::Span<ast::ParsedFile>(what), workers, nullptr);
-
-            // Cancellation cannot occur during incremental namer.
-            ENFORCE(!canceled);
-
-            // Required for autogen tests, which need to control which phase to stop after.
-            if (opts.stopAfterPhase == options::Phase::NAMER) {
-                return what;
-            }
-        }
-
-        {
-            Timer timeit(gs.tracer(), "incremental_resolve");
-            gs.tracer().trace("Resolving (incremental pass)...");
-            core::UnfreezeSymbolTable symbolTable(gs);
-            core::UnfreezeNameTable nameTable(gs);
-
-            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what), runIncrementalNamer, workers);
-            // incrementalResolve is not cancelable.
-            ENFORCE(result.hasResult());
-            what = move(result.result());
-
-            // Required for autogen tests, which need to control which phase to stop after.
-            if (opts.stopAfterPhase == options::Phase::RESOLVER) {
-                return what;
-            }
-        }
-
-#ifndef SORBET_REALMAIN_MIN
-        if (opts.stripePackages) {
-            what = packager::VisibilityChecker::run(gs, workers, std::move(what));
-        }
-#endif
-
-    } catch (SorbetException &) {
-        if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
-            e.setHeader("Exception resolving (backtrace is above)");
-        }
-    }
-
-    return what;
-}
-
+namespace {
 
 void incrementStrictLevelCounter(core::StrictLevel level) {
     switch (level) {
@@ -616,6 +546,8 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
     return mergeIndexResults(baseGs, opts, resultq, workers, kvstore, cancelable);
 }
 
+} // namespace
+
 ast::ParsedFilesOrCancelled index(core::GlobalState &gs, absl::Span<const core::FileRef> files,
                                   const options::Options &opts, WorkerPool &workers,
                                   const unique_ptr<const OwnedKeyValueStore> &kvstore, bool cancelable) {
@@ -774,34 +706,7 @@ void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> wh
 #endif
 }
 
-[[nodiscard]] bool name(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
-                        WorkerPool &workers, core::FoundDefHashes *foundHashes) {
-    Timer timeit(gs.tracer(), "name");
-    core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
-    core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-    bool canceled = false;
-    try {
-        canceled = namer::Namer::run(gs, what, workers, foundHashes);
-    } catch (SorbetException &) {
-        Exception::failInFuzzer();
-        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
-            e.setHeader("Exception naming (backtrace is above)");
-        }
-    }
-
-    if (!canceled) {
-        for (auto &named : what) {
-            if (opts.print.NameTree.enabled) {
-                opts.print.NameTree.fmt("{}\n", named.tree.toStringWithTabs(gs, 0));
-            }
-            if (opts.print.NameTreeRaw.enabled) {
-                opts.print.NameTreeRaw.fmt("{}\n", named.tree.showRaw(gs));
-            }
-        }
-    }
-
-    return canceled;
-}
+namespace {
 
 class GatherUnresolvedConstantsWalk {
 public:
@@ -893,15 +798,35 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
     return what;
 }
 
-ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
-                                           const options::Options &opts, WorkerPool &workers,
-                                           core::FoundDefHashes *foundHashes) {
-    auto canceled = name(gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
-    if (canceled) {
-        return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
+} // namespace
+
+[[nodiscard]] bool name(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
+                        WorkerPool &workers, core::FoundDefHashes *foundHashes) {
+    Timer timeit(gs.tracer(), "name");
+    core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+    core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+    bool canceled = false;
+    try {
+        canceled = namer::Namer::run(gs, what, workers, foundHashes);
+    } catch (SorbetException &) {
+        Exception::failInFuzzer();
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception naming (backtrace is above)");
+        }
     }
 
-    return resolve(gs, move(what), opts, workers);
+    if (!canceled) {
+        for (auto &named : what) {
+            if (opts.print.NameTree.enabled) {
+                opts.print.NameTree.fmt("{}\n", named.tree.toStringWithTabs(gs, 0));
+            }
+            if (opts.print.NameTreeRaw.enabled) {
+                opts.print.NameTreeRaw.fmt("{}\n", named.tree.showRaw(gs));
+            }
+        }
+    }
+
+    return canceled;
 }
 
 ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
@@ -1067,6 +992,88 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
     }
 
     return ast::ParsedFilesOrCancelled(move(what));
+}
+
+ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
+                                           const options::Options &opts, WorkerPool &workers,
+                                           core::FoundDefHashes *foundHashes) {
+    auto canceled = name(gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
+    if (canceled) {
+        return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
+    }
+
+    return resolve(gs, move(what), opts, workers);
+}
+
+vector<ast::ParsedFile>
+incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
+                   optional<UnorderedMap<core::FileRef, core::FoundDefHashes>> &&foundHashesForFiles,
+                   const options::Options &opts, WorkerPool &workers) {
+    try {
+#ifndef SORBET_REALMAIN_MIN
+        if (opts.stripePackages) {
+            Timer timeit(gs.tracer(), "incremental_packager");
+            // For simplicity, we still call Packager::runIncremental here, even though
+            // pipeline::nameAndResolve no longer calls Packager::run.
+            //
+            // TODO(jez) We may want to revisit this. At the moment, the only thing that
+            // runIncremental does is validate that files have the right package prefix. We could
+            // split `pipeline::package` into something like "populate the package DB" and "verify
+            // the package prefixes" with the later living in `pipeline::nameAndResolve` once again
+            // (thus restoring the symmetry).
+            what = packager::Packager::runIncremental(gs, move(what), workers);
+        }
+#endif
+        auto runIncrementalNamer = foundHashesForFiles.has_value() && !foundHashesForFiles->empty();
+        {
+            Timer timeit(gs.tracer(), "incremental_naming");
+            core::UnfreezeSymbolTable symbolTable(gs);
+            core::UnfreezeNameTable nameTable(gs);
+
+            auto canceled = runIncrementalNamer
+                                ? sorbet::namer::Namer::runIncremental(gs, absl::Span<ast::ParsedFile>(what),
+                                                                       std::move(foundHashesForFiles.value()), workers)
+                                : sorbet::namer::Namer::run(gs, absl::Span<ast::ParsedFile>(what), workers, nullptr);
+
+            // Cancellation cannot occur during incremental namer.
+            ENFORCE(!canceled);
+
+            // Required for autogen tests, which need to control which phase to stop after.
+            if (opts.stopAfterPhase == options::Phase::NAMER) {
+                return what;
+            }
+        }
+
+        {
+            Timer timeit(gs.tracer(), "incremental_resolve");
+            gs.tracer().trace("Resolving (incremental pass)...");
+            core::UnfreezeSymbolTable symbolTable(gs);
+            core::UnfreezeNameTable nameTable(gs);
+
+            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what), runIncrementalNamer, workers);
+            // incrementalResolve is not cancelable.
+            ENFORCE(result.hasResult());
+            what = move(result.result());
+
+            // Required for autogen tests, which need to control which phase to stop after.
+            if (opts.stopAfterPhase == options::Phase::RESOLVER) {
+                return what;
+            }
+        }
+
+#ifndef SORBET_REALMAIN_MIN
+        if (opts.stripePackages) {
+            what = packager::VisibilityChecker::run(gs, workers, std::move(what));
+        }
+#endif
+
+    } catch (SorbetException &) {
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
+            e.setHeader("Exception resolving (backtrace is above)");
+        }
+    }
+
+    return what;
 }
 
 namespace {

@@ -45,6 +45,12 @@ void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, con
 void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                            WorkerPool &workers);
 
+[[nodiscard]] bool name(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
+                        WorkerPool &workers, core::FoundDefHashes *foundHashes);
+
+ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
+                                    const options::Options &opts, WorkerPool &workers);
+
 ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                            const options::Options &opts, WorkerPool &workers,
                                            core::FoundDefHashes *foundHashes);
@@ -59,12 +65,6 @@ std::vector<ast::ParsedFile>
 incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                    std::optional<UnorderedMap<core::FileRef, core::FoundDefHashes>> &&foundHashesForFiles,
                    const options::Options &opts, WorkerPool &workers);
-
-[[nodiscard]] bool name(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
-                        WorkerPool &workers, core::FoundDefHashes *foundHashes);
-
-ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
-                                    const options::Options &opts, WorkerPool &workers);
 
 std::vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const std::string &cachePath,
                                                    std::vector<ast::ParsedFile> what, WorkerPool &workers);
