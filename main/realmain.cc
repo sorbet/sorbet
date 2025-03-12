@@ -459,6 +459,7 @@ int realmain(int argc, char *argv[]) {
     vector<ast::ParsedFile> indexed;
 
     gs->rbsSignaturesEnabled = opts.rbsSignaturesEnabled;
+    gs->rbsAssertionsEnabled = opts.rbsAssertionsEnabled;
     gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
 
     logger->trace("building initial global state");
