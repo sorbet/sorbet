@@ -1470,8 +1470,8 @@ public:
 
     const bool checkAmbiguousDefinition(core::Context ctx, core::SymbolRef curSym,
                                         const shared_ptr<Nesting> &curNesting) {
-        if (ctx.state.runningUnderAutogen) {
-            // no need to check in autogen
+        if (!ctx.state.shouldReportErrorOn(ctx.file, core::errors::Resolver::AmbiguousDefinitionError)) {
+            // no need to check if suppressed
             return false;
         }
 

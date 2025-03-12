@@ -525,6 +525,7 @@ int realmain(int argc, char *argv[]) {
         gs->suppressErrorClass(core::errors::Namer::ConstantKindRedefinition.code);
         gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
         gs->suppressErrorClass(core::errors::Resolver::RecursiveTypeAlias.code);
+        gs->suppressErrorClass(core::errors::Resolver::AmbiguousDefinitionError.code);
     }
 
     logger->trace("done building initial global state");
