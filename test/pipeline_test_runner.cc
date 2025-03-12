@@ -314,17 +314,6 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
     return trees;
 }
 
-void setupPackager(core::GlobalState &gs, realmain::options::Options &opts) {
-    {
-        core::UnfreezeNameTable packageNS(gs);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-        gs.setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
-                              opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                              opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-                              opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint);
-    }
-}
-
 void package(core::GlobalState &gs, unique_ptr<WorkerPool> &workers, absl::Span<ast::ParsedFile> trees,
              ExpectationHandler &handler, vector<shared_ptr<RangeAssertion>> &assertions) {
     if (!gs.packageDB().enabled()) {
@@ -406,7 +395,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     vector<ast::ParsedFile> trees;
     auto filesSpan = absl::Span<core::FileRef>(files);
     if (opts.stripePackages) {
-        setupPackager(*gs, opts);
+        realmain::pipeline::setPackagerOptions(*gs, opts);
 
         auto numPackageFiles = realmain::pipeline::partitionPackageFiles(*gs, filesSpan);
         auto inputPackageFiles = filesSpan.first(numPackageFiles);
@@ -461,7 +450,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             }
 
             // Initialize the package DB
-            setupPackager(*rbiGenGs, opts);
+            realmain::pipeline::setPackagerOptions(*rbiGenGs, opts);
             packager::Packager::findPackages(*rbiGenGs, absl::Span<ast::ParsedFile>(packageTrees));
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, packageTrees);
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, trees);
