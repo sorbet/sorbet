@@ -2,8 +2,10 @@
 # typed: strict
 # enable-packager: true
 
-class Foo::MyPackage < PackageSpec
+
+class Foo::Bar::CyclePackageTest::SubPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered'
-  test_import Foo::Bar::OtherPackageTest
+
+  import Foo::Bar::CyclePackageTest
 end

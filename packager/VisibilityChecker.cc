@@ -439,47 +439,66 @@ public:
         }
 
         auto importType = this->package.importsPackage(otherPackage);
-        if (!importType.has_value()) {
-            // We failed to import the package that defines the symbol
-            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
-                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
-                auto strictDepsLevel = this->package.strictDependenciesLevel();
-                auto importStrictDepsLevel = pkg.strictDependenciesLevel();
-                bool layeringViolation = false;
-                bool strictDependenciesTooLow = false;
-                bool causesCycle = false;
-                if (!isTestImport && db.enforceLayering()) {
-                    layeringViolation =
-                        strictDepsLevel.has_value() &&
-                        strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&
-                        this->package.causesLayeringViolation(db, pkg);
-                    strictDependenciesTooLow =
-                        importStrictDepsLevel.has_value() &&
-                        importStrictDepsLevel.value().first < this->package.minimumStrictDependenciesLevel();
-                    // If there's a path from the imported packaged to this package, then adding the import will close
-                    // the loop and cause a cycle.
-                    // TODO(neil): This could be slow if importsTransitively is called a lot. This could happen if we
-                    // somehow end up in a situation where there's a bunch of uses of constants that resolve but aren't
-                    // imported. I don't think this will happen in practice, but if does, we should cache the result of
-                    // importsTransitively (by pair of {this->package, otherPackage}) to avoid recomputing it.
-                    causesCycle =
-                        strictDepsLevel.has_value() &&
-                        strictDepsLevel.value().first >= core::packages::StrictDependenciesLevel::LayeredDag &&
-                        pkg.importsTransitively(ctx, this->package.mangledName());
-                }
-                if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
-                    e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
-                    e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                    if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
-                        e.addAutocorrect(std::move(exp.value()));
-                        if (!db.errorHint().empty()) {
-                            e.addErrorNote("{}", db.errorHint());
+        auto wasNotImported = !importType.has_value();
+        auto importedAsTest =
+            importType.has_value() && importType.value() == core::packages::ImportType::Test && !this->insideTestFile;
+        if (wasNotImported || importedAsTest) {
+            auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+            bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
+            auto strictDepsLevel = this->package.strictDependenciesLevel();
+            auto importStrictDepsLevel = pkg.strictDependenciesLevel();
+            bool layeringViolation = false;
+            bool strictDependenciesTooLow = false;
+            bool causesCycle = false;
+            if (!isTestImport && db.enforceLayering()) {
+                layeringViolation = strictDepsLevel.has_value() &&
+                                    strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&
+                                    this->package.causesLayeringViolation(db, pkg);
+                strictDependenciesTooLow =
+                    importStrictDepsLevel.has_value() &&
+                    importStrictDepsLevel.value().first < this->package.minimumStrictDependenciesLevel();
+                // If there's a path from the imported packaged to this package, then adding the import will close
+                // the loop and cause a cycle.
+                causesCycle = strictDepsLevel.has_value() &&
+                              strictDepsLevel.value().first >= core::packages::StrictDependenciesLevel::LayeredDag &&
+                              pkg.importsTransitively(ctx, this->package.mangledName());
+            }
+            if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
+                if (wasNotImported) {
+                    // We failed to import the package that defines the symbol
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
+                        e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
+                        e.addErrorLine(pkg.declLoc(), "Exported from package here");
+                        if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
+                            e.addAutocorrect(std::move(exp.value()));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        }
+                        if (!ctx.file.data(ctx).isPackaged()) {
+                            e.addErrorNote("A `{}` file is allowed to define constants outside of the package's "
+                                           "namespace,\n    "
+                                           "but must still respect its enclosing package's imports.",
+                                           "# packaged: false");
                         }
                     }
+                } else if (importedAsTest) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                        e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
+                        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+                        if (auto exp = this->package.addImport(ctx, pkg, false)) {
+                            e.addAutocorrect(std::move(exp.value()));
+                        }
+                        e.addErrorLine(pkg.declLoc(), "Defined here");
+                    }
                 } else {
-                    // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
-                    // layering/strict_dependencies issues.
+                    ENFORCE(false);
+                }
+            } else {
+                // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
+                // layering/strict_dependencies issues.
+                // TODO(neil): Maybe we should use a new error code for this case?
+                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                     std::vector<std::string> reasons;
                     if (causesCycle) {
                         reasons.emplace_back(core::ErrorColors::format("importing it would put `{}` into a cycle",
@@ -525,35 +544,24 @@ public:
                     if (reasons.size() == 1) {
                         reason = reasons[0];
                     } else if (reasons.size() == 2) {
-                        reason = fmt::format("{} and {}", reasons[0], reasons[1]);
+                        reason = fmt::format("{}, and {}", reasons[0], reasons[1]);
                     } else if (reasons.size() == 3) {
                         reason = fmt::format("{}, {}, and {}", reasons[0], reasons[1], reasons[2]);
                     } else {
                         ENFORCE(false, "At most three reasons should be present");
                     }
-                    e.setHeader("`{}` resolves but its package is not imported. However, it cannot be automatically "
-                                "imported because {}",
-                                lit.symbol().show(ctx), reason);
+                    if (wasNotImported) {
+                        e.setHeader("`{}` resolves but its package is not imported. However, it cannot be "
+                                    "automatically imported because {}",
+                                    lit.symbol().show(ctx), reason);
+                    } else if (importedAsTest) {
+                        e.setHeader("Used `{}` constant `{}` in non-test file. However, it cannot be automatically "
+                                    "imported because {}",
+                                    "test_import", litSymbol.show(ctx), reason);
+                    } else {
+                        ENFORCE(false);
+                    }
                 }
-
-                if (!ctx.file.data(ctx).isPackaged()) {
-                    e.addErrorNote(
-                        "A `{}` file is allowed to define constants outside of the package's namespace,\n    "
-                        "but must still respect its enclosing package's imports.",
-                        "# packaged: false");
-                }
-            }
-        } else if (*importType == core::packages::ImportType::Test && !this->insideTestFile) {
-            // TODO(neil): we need to do the above "can't import if layering violation/strict_deps violation" check here
-            // too
-            // We used a symbol from a `test_import` in a non-test context
-            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
-                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                if (auto exp = this->package.addImport(ctx, pkg, false)) {
-                    e.addAutocorrect(std::move(exp.value()));
-                }
-                e.addErrorLine(pkg.declLoc(), "Defined here");
             }
         }
     }

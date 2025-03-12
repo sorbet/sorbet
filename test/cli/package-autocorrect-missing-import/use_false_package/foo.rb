@@ -5,6 +5,7 @@ module Foo
     class FooClass
       Foo::Bar::FalsePackage::OtherClass # resolves via root
       Bar::FalsePackage::OtherClass # resolves via `module Foo`
+      Foo::Bar::FalsePackageTest::OtherClass # resolves via root
     end
   end
 end
