@@ -45,6 +45,8 @@ using namespace std;
 
 namespace sorbet::realmain::pipeline {
 
+namespace {
+
 ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, core::File &file,
                                       const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     if (kvstore == nullptr) {
@@ -127,6 +129,8 @@ ast::ParsedFile runLocalVars(core::GlobalState &gs, ast::ParsedFile tree) {
 ast::ParsedFile emptyParsedFile(core::FileRef file) {
     return {ast::MK::EmptyTree(), file};
 }
+
+} // namespace
 
 ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &gs, core::FileRef file,
                               bool preserveConcreteSyntax) {
