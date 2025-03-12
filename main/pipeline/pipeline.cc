@@ -48,7 +48,7 @@ using namespace std;
 
 namespace sorbet::realmain::pipeline {
 
-void setGlobalStateOptions(core::GlobalState &gs, options::Options &opts) {
+void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) {
     gs.pathPrefix = opts.pathPrefix;
     gs.errorUrlBase = opts.errorUrlBase;
 
