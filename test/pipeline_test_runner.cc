@@ -348,6 +348,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
 
+    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
+        gs->initEmpty();
+    } else {
+        core::serialize::Serializer::loadGlobalState(*gs, GLOBAL_STATE_PAYLOAD);
+    }
+
     gs->rbsSignaturesEnabled =
         BooleanPropertyAssertion::getValue("enable-experimental-rbs-signatures", assertions).value_or(false);
     gs->requiresAncestorEnabled =
@@ -363,12 +369,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     if (!BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false)) {
         gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
-    }
-
-    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
-        gs->initEmpty();
-    } else {
-        core::serialize::Serializer::loadGlobalState(*gs, GLOBAL_STATE_PAYLOAD);
     }
 
     if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
