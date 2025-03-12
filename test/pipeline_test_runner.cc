@@ -338,42 +338,45 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
     }
 
+    realmain::options::Options opts;
+
     auto logger = spdlog::stderr_color_mt("fixtures: " + inputPath);
     auto workers = WorkerPool::create(0, *logger);
     auto errorCollector = make_shared<core::ErrorCollector>();
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
     auto gs = make_unique<core::GlobalState>(errorQueue);
 
-    gs->censorForSnapshotTests = true;
+    opts.censorForSnapshotTests = true;
 
     auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
 
-    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
+    opts.noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
+    if (opts.noStdlib) {
         gs->initEmpty();
     } else {
         core::serialize::Serializer::loadGlobalState(*gs, GLOBAL_STATE_PAYLOAD);
     }
 
-    gs->rbsSignaturesEnabled =
+    opts.rbsSignaturesEnabled =
         BooleanPropertyAssertion::getValue("enable-experimental-rbs-signatures", assertions).value_or(false);
-    gs->requiresAncestorEnabled =
+    opts.requiresAncestorEnabled =
         BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
-    gs->ruby3KeywordArgs =
+    opts.ruby3KeywordArgs =
         BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
-    gs->typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
+    opts.typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
     // TODO(jez) Allow allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
 
-    if (!BooleanPropertyAssertion::getValue("uniquely-defined-behavior", assertions).value_or(false)) {
-        gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
-    }
+    opts.uniquelyDefinedBehavior =
+        BooleanPropertyAssertion::getValue("uniquely-defined-behavior", assertions).value_or(false);
 
-    if (!BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false)) {
-        gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
-    }
+    opts.outOfOrderReferenceChecksEnabled =
+        BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false);
 
     if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
-        gs->suggestUnsafe = "T.unsafe";
+        opts.suggestUnsafe = "T.unsafe";
     }
+
+    realmain::pipeline::setGlobalStateOptions(*gs, opts);
 
     for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
         gs->semanticExtensions.emplace_back(provider->defaultInstance());
