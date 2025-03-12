@@ -373,6 +373,10 @@ private:
     bool symbolTableFrozen = true;
     bool fileTableFrozen = true;
 
+    // Copy options over from another GlobalState. Private, as it's only meant to be used as a helper to implement other
+    // copying strategies.
+    void copyOptions(const GlobalState &other);
+
     void expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize);
     void moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned int szTo);
 
