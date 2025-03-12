@@ -327,7 +327,7 @@ public:
     bool rbsSignaturesEnabled = false;
     bool requiresAncestorEnabled = false;
 
-    bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
+    bool shouldReportErrorOn(FileRef file, ErrorClass what) const;
 
 private:
     struct DeepCloneHistoryEntry {
