@@ -101,6 +101,11 @@ public:
         return core::packages::StrictDependenciesLevel::False;
     }
 
+    bool importsTransitively(const core::GlobalState &gs, const core::packages::MangledName &otherPkg) const {
+        notImplemented();
+        return false;
+    }
+
     std::optional<ImportType> importsPackage(MangledName mangledName) const {
         notImplemented();
         return nullopt;

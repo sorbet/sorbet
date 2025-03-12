@@ -598,6 +598,37 @@ public:
                 return core::packages::StrictDependenciesLevel::Dag;
         }
     }
+
+    bool importsTransitively(const core::GlobalState &gs, const core::packages::MangledName &otherPkg) const {
+        UnorderedSet<core::packages::MangledName> seen;
+        vector<core::packages::MangledName> toVisit;
+        toVisit.push_back(mangledName());
+
+        while (!toVisit.empty()) {
+            auto current = toVisit.back();
+            toVisit.pop_back();
+            if (seen.contains(current)) {
+                continue;
+            }
+            toVisit.push_back(current);
+
+            if (current == otherPkg) {
+                return true;
+            }
+
+            auto &info = PackageInfoImpl::from(gs.packageDB().getPackageInfo(current));
+
+            for (auto &import : info.importedPackageNames) {
+                if (import.type == core::packages::ImportType::Test ||
+                    !gs.packageDB().getPackageInfo(import.name.mangledName).exists()) {
+                    continue;
+                }
+
+                toVisit.push_back(import.name.mangledName);
+            }
+        }
+        return false;
+    }
 };
 
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.
