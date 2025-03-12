@@ -20,7 +20,7 @@ namespace sorbet::realmain::pipeline {
 // by the realmain/orchestration code, and not be possible to branch on by individual parts of the
 // pipeline (for example: the `runLSP` boolean does not make it into GlobalState, so it's not
 // possible to branch on whether we're in LSP or not when implementing a feature).
-void setGlobalStateOptions(std::unique_ptr<core::GlobalState> &gs, options::Options &opts);
+void setGlobalStateOptions(core::GlobalState &gs, options::Options &opts);
 
 std::vector<core::FileRef> reserveFiles(core::GlobalState &gs, const std::vector<std::string> &files);
 
