@@ -15,6 +15,9 @@ class PreemptionTaskManager;
 namespace sorbet::realmain::pipeline {
 std::vector<core::FileRef> reserveFiles(core::GlobalState &gs, const std::vector<std::string> &files);
 
+core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
+                                    const options::Options &opts);
+
 // Primarily exposed for LSP—outside of LSP, you probably want `indexOne`.
 ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &gs, core::FileRef file,
                               bool preserveConcreteSyntax);
@@ -75,9 +78,6 @@ void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> what, c
                bool presorted = false, bool intentionallyLeakASTs = false);
 
 void printFileTable(core::GlobalState &gs, const options::Options &opts, const UnorderedMap<long, long> &untypedUsages);
-
-core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
-                                    const options::Options &opts);
 
 void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedBlames,
                         const options::Options &opts);
