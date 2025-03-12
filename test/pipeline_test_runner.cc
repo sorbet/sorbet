@@ -344,10 +344,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
     auto gs = make_unique<core::GlobalState>(errorQueue);
 
-    for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
-        gs->semanticExtensions.emplace_back(provider->defaultInstance());
-    }
-
     gs->censorForSnapshotTests = true;
 
     auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
@@ -377,6 +373,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
         gs->suggestUnsafe = "T.unsafe";
+    }
+
+    for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
+        gs->semanticExtensions.emplace_back(provider->defaultInstance());
     }
 
     unique_ptr<core::GlobalState> emptyGs;
