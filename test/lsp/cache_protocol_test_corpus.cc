@@ -322,7 +322,10 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReindexingUsesTheCache") {
 
     // We should be able to reindex the file multiple times, getting a cache hit for each one.
     for (auto i = 0; i < 2; ++i) {
-        auto asts = realmain::pipeline::index(*gs, absl::MakeSpan(frefs), *opts, *workers, kvstore);
+        auto result = realmain::pipeline::index(*gs, absl::MakeSpan(frefs), *opts, *workers, kvstore);
+        REQUIRE(result.hasResult());
+
+        auto &asts = result.result();
         REQUIRE_EQ(asts.size(), 1);
         REQUIRE(asts.front().cached());
     }

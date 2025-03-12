@@ -336,8 +336,9 @@ std::unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams
             initialGS->errorQueue->logger, initialGS->errorQueue->tracer, make_shared<core::NullFlusher>());
         auto trees = hashing::Hashing::indexAndComputeFileHashes(*initialGS, config->opts, *config->logger,
                                                                  absl::Span<core::FileRef>(frefs), workers, kvstore);
-        update.updatedFileIndexes.resize(trees.size());
-        for (auto &ast : trees) {
+        ENFORCE(trees.hasResult(), "The indexer thread doesn't support cancellation");
+        update.updatedFileIndexes.resize(trees.result().size());
+        for (auto &ast : trees.result()) {
             const int i = fileToPos[ast.file];
             update.updatedFileIndexes[i] = move(ast);
         }

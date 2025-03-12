@@ -415,18 +415,20 @@ void Minimize::indexAndResolveForMinimize(core::GlobalState &sourceGS, core::Glo
     // to run on a new _unknown.rbi file every time and I didn't want to think about it.
     // If this phase gets slow, we can consider whether caching would speed things up.
     auto rbiIndexed = pipeline::index(rbiGS, absl::Span<core::FileRef>(rbiInputFiles), opts, workers, nullptr);
+    ENFORCE(rbiIndexed.hasResult(), "Can only cancel in LSP mode");
     if (rbiGS.hadCriticalError()) {
         rbiGS.errorQueue->flushAllErrors(rbiGS);
     }
 
     pipeline::setPackagerOptions(rbiGS, opts);
-    pipeline::package(rbiGS, absl::Span<ast::ParsedFile>(rbiIndexed), opts, workers);
+    pipeline::package(rbiGS, absl::MakeSpan(rbiIndexed.result()), opts, workers);
     // Only need to compute FoundDefHashes when running to compute a FileHash
     auto foundHashes = nullptr;
-    auto canceled = pipeline::name(rbiGS, absl::Span<ast::ParsedFile>(rbiIndexed), opts, workers, foundHashes);
+    auto canceled = pipeline::name(rbiGS, absl::MakeSpan(rbiIndexed.result()), opts, workers, foundHashes);
     ENFORCE(!canceled, "Can only cancel in LSP mode");
 
-    rbiIndexed = move(pipeline::resolve(rbiGS, move(rbiIndexed), opts, workers).result());
+    auto resolved = pipeline::resolve(rbiGS, std::move(rbiIndexed.result()), opts, workers);
+    ENFORCE(resolved.hasResult(), "Can only cancel in LSP mode");
     if (rbiGS.hadCriticalError()) {
         rbiGS.errorQueue->flushAllErrors(rbiGS);
     }
