@@ -15,6 +15,8 @@ class PreemptionTaskManager;
 namespace sorbet::realmain::pipeline {
 std::vector<core::FileRef> reserveFiles(core::GlobalState &gs, const std::vector<std::string> &files);
 
+// ----- indexer --------------------------------------------------------------
+
 core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
                                     const options::Options &opts);
 
@@ -31,6 +33,8 @@ ast::ParsedFilesOrCancelled index(core::GlobalState &gs, absl::Span<const core::
                                   const options::Options &opts, WorkerPool &workers,
                                   const std::unique_ptr<const OwnedKeyValueStore> &kvstore, bool cancelable = false);
 
+// ----- packager -------------------------------------------------------------
+
 size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileRef> files);
 void unpartitionPackageFiles(std::vector<ast::ParsedFile> &packageFiles,
                              std::vector<ast::ParsedFile> &&nonPackageFiles);
@@ -44,6 +48,8 @@ void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, con
 
 void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                            WorkerPool &workers);
+
+// ----- namer + resolver -----------------------------------------------------
 
 [[nodiscard]] bool name(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                         WorkerPool &workers, core::FoundDefHashes *foundHashes);
@@ -66,6 +72,8 @@ incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                    std::optional<UnorderedMap<core::FileRef, core::FoundDefHashes>> &&foundHashesForFiles,
                    const options::Options &opts, WorkerPool &workers);
 
+// ----- typecheck ------------------------------------------------------------
+
 // Note: `cancelable` and `preemption task manager` are only applicable to LSP.
 // If `intentionallyLeakASTs` is `true`, typecheck will leak the ASTs rather than pay the cost of deleting them
 // properly, which is a significant speedup on large codebases.
@@ -73,6 +81,8 @@ void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> what, c
                WorkerPool &workers, bool cancelable = false,
                std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt,
                bool presorted = false, bool intentionallyLeakASTs = false);
+
+// ----- other ----------------------------------------------------------------
 
 void printFileTable(core::GlobalState &gs, const options::Options &opts, const UnorderedMap<long, long> &untypedUsages);
 

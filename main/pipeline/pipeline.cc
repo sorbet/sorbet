@@ -60,6 +60,8 @@ vector<core::FileRef> reserveFiles(core::GlobalState &gs, const vector<string> &
     return ret;
 }
 
+// ----- indexer --------------------------------------------------------------
+
 core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
                                     const options::Options &opts) {
     auto &fileData = file.data(gs);
@@ -588,6 +590,8 @@ ast::ParsedFilesOrCancelled index(core::GlobalState &gs, absl::Span<const core::
     }
 }
 
+// ----- packager -------------------------------------------------------------
+
 size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileRef> inputFiles) {
     ENFORCE(gs.packageDB().enabled());
     // c_partition does not maintain relative ordering of the elements, which means that
@@ -705,6 +709,8 @@ void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> wh
     }
 #endif
 }
+
+// ----- namer & resolver -----------------------------------------------------
 
 namespace {
 
@@ -1076,6 +1082,8 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
     return what;
 }
 
+// ----- typecheck ------------------------------------------------------------
+
 namespace {
 
 class CFGCollectorAndTyper {
@@ -1329,6 +1337,8 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
         return;
     }
 }
+
+// ----- other ----------------------------------------------------------------
 
 void printFileTable(core::GlobalState &gs, const options::Options &opts,
                     const UnorderedMap<long, long> &untypedUsages) {
