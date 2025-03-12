@@ -9,11 +9,7 @@ using namespace std;
 namespace sorbet::rbs {
 
 rbs_string_t SignatureTranslator::makeRBSString(const string_view &str) {
-    return {
-        .start = str.data(),
-        .end = str.data() + str.size(),
-        .type = rbs_string_t::RBS_STRING_SHARED,
-    };
+    return rbs_string_new(str.data(), str.data() + str.size());
 }
 
 ast::ExpressionPtr SignatureTranslator::translateType(core::MutableContext ctx, const ast::Send *send,
