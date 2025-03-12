@@ -456,7 +456,6 @@ int realmain(int argc, char *argv[]) {
     gs->pathPrefix = opts.pathPrefix;
     gs->errorUrlBase = opts.errorUrlBase;
     gs->semanticExtensions = move(extensions);
-    vector<ast::ParsedFile> indexed;
 
     gs->rbsSignaturesEnabled = opts.rbsSignaturesEnabled;
     gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
@@ -572,6 +571,7 @@ int realmain(int argc, char *argv[]) {
         gsForMinimize = gs->deepCopy();
     }
 
+    vector<ast::ParsedFile> indexed;
     if (opts.runLSP) {
 #ifdef SORBET_REALMAIN_MIN
         logger->warn("LSP is disabled in sorbet-orig for faster builds");
