@@ -208,6 +208,8 @@ realmain::options::Options assertionsToOptions(std::vector<std::shared_ptr<Range
         opts.suggestUnsafe = "T.unsafe";
     }
 
+    opts.stripePackages = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
+
     return opts;
 }
 
@@ -331,9 +333,7 @@ void setupPackager(core::GlobalState &gs, vector<shared_ptr<RangeAssertion>> &as
 
 void package(core::GlobalState &gs, unique_ptr<WorkerPool> &workers, absl::Span<ast::ParsedFile> trees,
              ExpectationHandler &handler, vector<shared_ptr<RangeAssertion>> &assertions) {
-    auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
-
-    if (!enablePackager) {
+    if (!gs.packageDB().enabled()) {
         return;
     }
 
@@ -408,11 +408,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     ExpectationHandler handler(test, errorQueue, errorCollector);
-    auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
 
     vector<ast::ParsedFile> trees;
     auto filesSpan = absl::Span<core::FileRef>(files);
-    if (enablePackager) {
+    if (opts.stripePackages) {
         setupPackager(*gs, assertions);
 
         auto numPackageFiles = realmain::pipeline::partitionPackageFiles(*gs, filesSpan);
@@ -431,7 +430,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
 
-    if (enablePackager) {
+    if (opts.stripePackages) {
         if (test.expectations.contains("rbi-gen")) {
             auto rbiGenGs = emptyGs->deepCopy();
             rbiGenGs->errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
@@ -550,7 +549,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
         trees = move(resolver::Resolver::run(*gs, move(trees), *workers).result());
 
-        if (enablePackager) {
+        if (opts.stripePackages) {
             trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
         }
 
@@ -814,7 +813,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     trees = move(newTrees);
     fast_sort(trees, [](auto &lhs, auto &rhs) { return lhs.file < rhs.file; });
 
-    if (enablePackager) {
+    if (opts.stripePackages) {
         absl::c_stable_partition(trees, [&](const auto &pf) { return pf.file.isPackage(*gs); });
         trees = packager::Packager::runIncremental(*gs, move(trees), *workers);
         for (auto &tree : trees) {
@@ -855,7 +854,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncrementalNamer, *workers).result());
     }
 
-    if (enablePackager) {
+    if (opts.stripePackages) {
         trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
     }
 
