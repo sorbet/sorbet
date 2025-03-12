@@ -461,7 +461,6 @@ int realmain(int argc, char *argv[]) {
 
     gs->pathPrefix = opts.pathPrefix;
     gs->errorUrlBase = opts.errorUrlBase;
-    gs->semanticExtensions = move(extensions);
 
     gs->rbsSignaturesEnabled = opts.rbsSignaturesEnabled;
     gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
@@ -530,6 +529,8 @@ int realmain(int argc, char *argv[]) {
         gs->suppressErrorClass(core::errors::Resolver::RecursiveTypeAlias.code);
         gs->suppressErrorClass(core::errors::Resolver::AmbiguousDefinitionError.code);
     }
+
+    gs->semanticExtensions = move(extensions);
 
     logger->trace("done building initial global state");
 
