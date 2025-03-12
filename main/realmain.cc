@@ -453,71 +453,16 @@ int realmain(int argc, char *argv[]) {
     auto errorFlusher = make_shared<core::ErrorFlusherStdout>();
     unique_ptr<core::GlobalState> gs =
         make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, errorFlusher));
-    gs->pathPrefix = opts.pathPrefix;
-    gs->errorUrlBase = opts.errorUrlBase;
-    gs->semanticExtensions = move(extensions);
-    vector<ast::ParsedFile> indexed;
-
-    gs->rbsSignaturesEnabled = opts.rbsSignaturesEnabled;
-    gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
 
     logger->trace("building initial global state");
+
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(logger, opts);
     payload::createInitialGlobalState(*gs, opts, kvstore);
-    if (opts.silenceErrors) {
-        gs->silenceErrors = true;
-    }
-    gs->autocorrect = opts.autocorrect;
-    gs->didYouMean = opts.didYouMean;
+    pipeline::setGlobalStateOptions(*gs, opts);
+
     if (opts.print.isAutogen()) {
         gs->runningUnderAutogen = true;
     }
-    if (opts.censorForSnapshotTests) {
-        gs->censorForSnapshotTests = true;
-    }
-    gs->sleepInSlowPathSeconds = opts.sleepInSlowPathSeconds;
-    gs->preallocateTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
-                          opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
-                          opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
-                          opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
-    for (auto code : opts.isolateErrorCode) {
-        gs->onlyShowErrorClass(code);
-    }
-    for (auto code : opts.suppressErrorCode) {
-        gs->suppressErrorClass(code);
-    }
-    if (opts.noErrorSections) {
-        gs->includeErrorSections = false;
-    }
-    gs->ruby3KeywordArgs = opts.ruby3KeywordArgs;
-    gs->typedSuper = opts.typedSuper;
-    gs->suppressPayloadSuperclassRedefinitionFor = opts.suppressPayloadSuperclassRedefinitionFor;
-    if (!opts.uniquelyDefinedBehavior) {
-        // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
-        if (opts.isolateErrorCode.empty()) {
-            gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
-        }
-    }
-
-    if (!opts.outOfOrderReferenceChecksEnabled) {
-        if (opts.isolateErrorCode.empty()) {
-            gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
-        }
-    }
-
-    gs->trackUntyped = opts.trackUntyped;
-    gs->printingFileTable = opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled ||
-                            opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled ||
-                            opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled;
-
-    if (opts.suggestTyped) {
-        gs->ignoreErrorClassForSuggestTyped(core::errors::Infer::SuggestTyped.code);
-        gs->ignoreErrorClassForSuggestTyped(core::errors::Resolver::SigInFileWithoutSigil.code);
-        if (!opts.uniquelyDefinedBehavior) {
-            gs->ignoreErrorClassForSuggestTyped(core::errors::Namer::MultipleBehaviorDefs.code);
-        }
-    }
-    gs->suggestUnsafe = opts.suggestUnsafe;
 
     if (gs->runningUnderAutogen) {
         gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
@@ -527,6 +472,8 @@ int realmain(int argc, char *argv[]) {
         gs->suppressErrorClass(core::errors::Resolver::RecursiveTypeAlias.code);
         gs->suppressErrorClass(core::errors::Resolver::AmbiguousDefinitionError.code);
     }
+
+    gs->semanticExtensions = move(extensions);
 
     logger->trace("done building initial global state");
 
@@ -572,6 +519,7 @@ int realmain(int argc, char *argv[]) {
         gsForMinimize = gs->deepCopy();
     }
 
+    vector<ast::ParsedFile> indexed;
     if (opts.runLSP) {
 #ifdef SORBET_REALMAIN_MIN
         logger->warn("LSP is disabled in sorbet-orig for faster builds");

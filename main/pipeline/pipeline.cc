@@ -27,7 +27,10 @@
 #include "core/ErrorQueue.h"
 #include "core/NameSubstitution.h"
 #include "core/Unfreeze.h"
+#include "core/errors/infer.h"
+#include "core/errors/namer.h"
 #include "core/errors/parser.h"
+#include "core/errors/resolver.h"
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "core/serialize/serialize.h"
@@ -44,6 +47,66 @@
 using namespace std;
 
 namespace sorbet::realmain::pipeline {
+
+void setGlobalStateOptions(core::GlobalState &gs, options::Options &opts) {
+    gs.pathPrefix = opts.pathPrefix;
+    gs.errorUrlBase = opts.errorUrlBase;
+
+    gs.rbsSignaturesEnabled = opts.rbsSignaturesEnabled;
+    gs.requiresAncestorEnabled = opts.requiresAncestorEnabled;
+
+    if (opts.silenceErrors) {
+        gs.silenceErrors = true;
+    }
+    gs.autocorrect = opts.autocorrect;
+    gs.didYouMean = opts.didYouMean;
+    if (opts.censorForSnapshotTests) {
+        gs.censorForSnapshotTests = true;
+    }
+    gs.sleepInSlowPathSeconds = opts.sleepInSlowPathSeconds;
+    gs.preallocateTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
+                         opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
+                         opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
+                         opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
+    for (auto code : opts.isolateErrorCode) {
+        gs.onlyShowErrorClass(code);
+    }
+    for (auto code : opts.suppressErrorCode) {
+        gs.suppressErrorClass(code);
+    }
+    if (opts.noErrorSections) {
+        gs.includeErrorSections = false;
+    }
+    gs.ruby3KeywordArgs = opts.ruby3KeywordArgs;
+    gs.typedSuper = opts.typedSuper;
+    gs.suppressPayloadSuperclassRedefinitionFor = opts.suppressPayloadSuperclassRedefinitionFor;
+    if (!opts.uniquelyDefinedBehavior) {
+        // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
+        if (opts.isolateErrorCode.empty()) {
+            gs.suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
+        }
+    }
+
+    if (!opts.outOfOrderReferenceChecksEnabled) {
+        if (opts.isolateErrorCode.empty()) {
+            gs.suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
+        }
+    }
+
+    gs.trackUntyped = opts.trackUntyped;
+    gs.printingFileTable = opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled ||
+                           opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled ||
+                           opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled;
+
+    if (opts.suggestTyped) {
+        gs.ignoreErrorClassForSuggestTyped(core::errors::Infer::SuggestTyped.code);
+        gs.ignoreErrorClassForSuggestTyped(core::errors::Resolver::SigInFileWithoutSigil.code);
+        if (!opts.uniquelyDefinedBehavior) {
+            gs.ignoreErrorClassForSuggestTyped(core::errors::Namer::MultipleBehaviorDefs.code);
+        }
+    }
+    gs.suggestUnsafe = opts.suggestUnsafe;
+}
 
 vector<core::FileRef> reserveFiles(core::GlobalState &gs, const vector<string> &files) {
     Timer timeit(gs.tracer(), "reserveFiles");

@@ -13,6 +13,15 @@ class PreemptionTaskManager;
 }
 
 namespace sorbet::realmain::pipeline {
+
+// Copy any relevant options from the options to GlobalState
+//
+// Note that not all options show up in GlobalState, because some options are meant to only be used
+// by the realmain/orchestration code, and not be possible to branch on by individual parts of the
+// pipeline (for example: the `runLSP` boolean does not make it into GlobalState, so it's not
+// possible to branch on whether we're in LSP or not when implementing a feature).
+void setGlobalStateOptions(core::GlobalState &gs, options::Options &opts);
+
 std::vector<core::FileRef> reserveFiles(core::GlobalState &gs, const std::vector<std::string> &files);
 
 // ----- indexer --------------------------------------------------------------
