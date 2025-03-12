@@ -600,8 +600,6 @@ public:
     }
 
     bool importsTransitively(const core::GlobalState &gs, const core::packages::MangledName &otherPkg) const {
-        Timer timeit(gs.tracer(), "importsTransitively");
-
         UnorderedSet<core::packages::MangledName> seen;
         vector<core::packages::MangledName> toVisit;
         toVisit.push_back(mangledName());

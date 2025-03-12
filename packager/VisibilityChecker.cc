@@ -459,6 +459,10 @@ public:
                         importStrictDepsLevel.value().first < this->package.minimumStrictDependenciesLevel();
                     // If there's a path from the imported packaged to this package, then adding the import will close
                     // the loop and cause a cycle.
+                    // TODO(neil): This could be slow if importsTransitively is called a lot. This could happen if we
+                    // somehow end up in a situation where there's a bunch of uses of constants that resolve but aren't
+                    // imported. I don't think this will happen in practice, but if does, we should cache the result of
+                    // importsTransitively (by pair of {this->package, otherPackage}) to avoid recomputing it.
                     causesCycle =
                         strictDepsLevel.has_value() &&
                         strictDepsLevel.value().first >= core::packages::StrictDependenciesLevel::LayeredDag &&
