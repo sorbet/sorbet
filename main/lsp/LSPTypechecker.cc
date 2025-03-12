@@ -183,14 +183,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
 
     std::vector<core::FileRef> toTypecheck;
-    toTypecheck.reserve(updates.fastPathExtraFiles.size() + updates.updatedFiles.size());
-    for (auto &path : updates.fastPathExtraFiles) {
-        auto fref = gs->findFileByPath(path);
-        ENFORCE(fref.exists());
-        toTypecheck.emplace_back(fref);
-    }
-
-    config->logger->debug("Added {} files that were not part of the edit to the update set", toTypecheck.size());
+    toTypecheck.reserve(updates.updatedFiles.size());
     UnorderedMap<core::FileRef, core::FoundDefHashes> oldFoundHashesForFiles;
     auto shouldRunIncrementalNamer = updates.fastPathUseIncrementalNamer;
     for (auto &file : updates.updatedFiles) {
