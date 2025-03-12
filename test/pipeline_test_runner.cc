@@ -343,8 +343,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     vector<ast::ParsedFile> trees;
     auto filesSpan = absl::Span<core::FileRef>(files);
     if (opts.stripePackages) {
-        realmain::pipeline::setPackagerOptions(*gs, opts);
-
         auto numPackageFiles = realmain::pipeline::partitionPackageFiles(*gs, filesSpan);
         auto inputPackageFiles = filesSpan.first(numPackageFiles);
         filesSpan = filesSpan.subspan(numPackageFiles);
@@ -364,6 +362,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     if (opts.stripePackages) {
         if (test.expectations.contains("rbi-gen")) {
             auto rbiGenGs = emptyGs->deepCopy();
+            realmain::pipeline::setGlobalStateOptions(*rbiGenGs, opts);
             rbiGenGs->errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
             // If there is a rbi-gen exp file, we need to retypecheck the files w/o packager mode and run RBI
             // generation for every package.
@@ -398,7 +397,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             }
 
             // Initialize the package DB
-            realmain::pipeline::setPackagerOptions(*rbiGenGs, opts);
             packager::Packager::findPackages(*rbiGenGs, absl::Span<ast::ParsedFile>(packageTrees));
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, packageTrees);
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, trees);

@@ -511,7 +511,6 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             }
         }
 
-        pipeline::setPackagerOptions(*gs, config->opts);
         // TODO(jez) Splitting this like how the pipeline intersperses this with indexing is going
         // to take more work. Punting for now.
         pipeline::package(*gs, absl::Span<ast::ParsedFile>(indexedCopies), config->opts, workers);
