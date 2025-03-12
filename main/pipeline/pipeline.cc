@@ -48,7 +48,7 @@ using namespace std;
 
 namespace sorbet::realmain::pipeline {
 
-void setGlobalStateOptions(core::GlobalState &gs, options::Options &opts) {
+void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) {
     gs.pathPrefix = opts.pathPrefix;
     gs.errorUrlBase = opts.errorUrlBase;
 
@@ -64,10 +64,6 @@ void setGlobalStateOptions(core::GlobalState &gs, options::Options &opts) {
         gs.censorForSnapshotTests = true;
     }
     gs.sleepInSlowPathSeconds = opts.sleepInSlowPathSeconds;
-    gs.preallocateTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
-                         opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
-                         opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
-                         opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
     for (auto code : opts.isolateErrorCode) {
         gs.onlyShowErrorClass(code);
     }
