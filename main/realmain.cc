@@ -520,13 +520,6 @@ int realmain(int argc, char *argv[]) {
         return returnCode;
     }
 
-    unique_ptr<core::GlobalState> gsForMinimize;
-    if (!opts.minimizeRBI.empty()) {
-        // Copy GlobalState after createInitialGlobalState and option handling, but before rest of
-        // pipeline, so that it represents an "empty" GlobalState.
-        gsForMinimize = gs->deepCopy();
-    }
-
     vector<ast::ParsedFile> indexed;
     if (opts.runLSP) {
 #ifdef SORBET_REALMAIN_MIN
@@ -763,8 +756,19 @@ int realmain(int argc, char *argv[]) {
             // project is a single RBI file.
             optsForMinimize.stripePackages = false;
 
+            unique_ptr<core::GlobalState> gsForMinimize = make_unique<core::GlobalState>(gs->errorQueue);
+            auto kvstore = nullptr;
+            payload::createInitialGlobalState(*gsForMinimize, optsForMinimize, kvstore);
+            pipeline::setGlobalStateOptions(*gsForMinimize, optsForMinimize);
+
             Minimize::indexAndResolveForMinimize(*gs, *gsForMinimize, optsForMinimize, *workers, opts.minimizeRBI);
             Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
+
+            if (gsForMinimize->hadCriticalError()) {
+                returnCode = 10;
+            }
+
+            intentionallyLeakMemory(gsForMinimize.release());
 #endif
         }
 
@@ -908,7 +912,7 @@ int realmain(int argc, char *argv[]) {
         }
     }
 #endif
-    if (!gs || gs->hadCriticalError() || (gsForMinimize && gsForMinimize->hadCriticalError())) {
+    if (!gs || gs->hadCriticalError()) {
         returnCode = 10;
     } else if (returnCode == 0 && gs->totalErrors() > 0 && !opts.suppressNonCriticalErrors) {
         returnCode = 100;
@@ -923,7 +927,6 @@ int realmain(int argc, char *argv[]) {
             intentionallyLeakMemory(e.tree.release());
         }
         intentionallyLeakMemory(gs.release());
-        intentionallyLeakMemory(gsForMinimize.release());
     }
 
     // je_malloc_stats_print(nullptr, nullptr, nullptr); // uncomment this to print jemalloc statistics
