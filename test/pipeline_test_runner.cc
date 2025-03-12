@@ -289,45 +289,40 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
     return trees;
 }
 
-void setupPackager(core::GlobalState &gs, vector<shared_ptr<RangeAssertion>> &assertions) {
-    vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
-    vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
-    vector<std::string> extraPackageFilesDirectorySlashPrefixes;
-    vector<std::string> skipRBIExportEnforcementDirs;
-    vector<std::string> allowRelaxedPackagerChecksFor;
-
+void setupPackager(core::GlobalState &gs, vector<shared_ptr<RangeAssertion>> &assertions, realmain::options::Options &opts) {
     auto extraDirUnderscore =
         StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
     if (extraDirUnderscore.has_value()) {
-        extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
+        opts.extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
     }
 
     auto extraDirSlashDeprecated =
         StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash-deprecated", assertions);
     if (extraDirSlashDeprecated.has_value()) {
-        extraPackageFilesDirectorySlashDeprecatedPrefixes.emplace_back(extraDirSlashDeprecated.value());
+        opts.extraPackageFilesDirectorySlashDeprecatedPrefixes.emplace_back(extraDirSlashDeprecated.value());
     }
 
     auto extraDirSlash = StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
     if (extraDirSlash.has_value()) {
-        extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
+        opts.extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
     }
 
     auto allowRelaxedPackager = StringPropertyAssertion::getValue("allow-relaxed-packager-checks-for", assertions);
     if (allowRelaxedPackager.has_value()) {
-        allowRelaxedPackagerChecksFor.emplace_back(allowRelaxedPackager.value());
+        opts.allowRelaxedPackagerChecksFor.emplace_back(allowRelaxedPackager.value());
     }
 
     std::vector<std::string> defaultLayers = {};
-    auto packagerLayers = StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
+    opts.packagerLayers = StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
+    opts.stripePackagesHint = "PACKAGE_ERROR_HINT";
 
     {
         core::UnfreezeNameTable packageNS(gs);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-        gs.setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                              extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                              extraPackageFilesDirectorySlashPrefixes, {}, allowRelaxedPackagerChecksFor,
-                              packagerLayers, "PACKAGE_ERROR_HINT");
+        gs.setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
+                              opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                              opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor,
+                              opts.packagerLayers, opts.stripePackagesHint);
     }
 }
 
@@ -412,7 +407,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     vector<ast::ParsedFile> trees;
     auto filesSpan = absl::Span<core::FileRef>(files);
     if (opts.stripePackages) {
-        setupPackager(*gs, assertions);
+        setupPackager(*gs, assertions, opts);
 
         auto numPackageFiles = realmain::pipeline::partitionPackageFiles(*gs, filesSpan);
         auto inputPackageFiles = filesSpan.first(numPackageFiles);
@@ -467,7 +462,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             }
 
             // Initialize the package DB
-            setupPackager(*rbiGenGs, assertions);
+            setupPackager(*rbiGenGs, assertions, opts);
             packager::Packager::findPackages(*rbiGenGs, absl::Span<ast::ParsedFile>(packageTrees));
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, packageTrees);
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, trees);
