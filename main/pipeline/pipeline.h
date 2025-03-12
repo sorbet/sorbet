@@ -66,9 +66,6 @@ incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                    std::optional<UnorderedMap<core::FileRef, core::FoundDefHashes>> &&foundHashesForFiles,
                    const options::Options &opts, WorkerPool &workers);
 
-std::vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const std::string &cachePath,
-                                                   std::vector<ast::ParsedFile> what, WorkerPool &workers);
-
 // Note: `cancelable` and `preemption task manager` are only applicable to LSP.
 // If `intentionallyLeakASTs` is `true`, typecheck will leak the ASTs rather than pay the cost of deleting them
 // properly, which is a significant speedup on large codebases.
