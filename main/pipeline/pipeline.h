@@ -13,18 +13,27 @@ class PreemptionTaskManager;
 }
 
 namespace sorbet::realmain::pipeline {
-ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         ast::ExpressionPtr cachedTree = nullptr);
+std::vector<core::FileRef> reserveFiles(core::GlobalState &gs, const std::vector<std::string> &files);
+
+// ----- indexer --------------------------------------------------------------
+
+core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
+                                    const options::Options &opts);
 
 // Primarily exposed for LSP—outside of LSP, you probably want `indexOne`.
 ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &gs, core::FileRef file,
                               bool preserveConcreteSyntax);
 
-std::vector<core::FileRef> reserveFiles(core::GlobalState &gs, const std::vector<std::string> &files);
+// Run all of Sorbet's indexer phases (parsing, desugaring, rewriting, etc.) on a single file
+ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
+                         ast::ExpressionPtr cachedTree = nullptr);
 
+// Run all of Sorbet's indexer phases (parsing, desugaring, rewriting, etc.) over multiple files, in parallel
 ast::ParsedFilesOrCancelled index(core::GlobalState &gs, absl::Span<const core::FileRef> files,
                                   const options::Options &opts, WorkerPool &workers,
                                   const std::unique_ptr<const OwnedKeyValueStore> &kvstore, bool cancelable = false);
+
+// ----- packager -------------------------------------------------------------
 
 size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileRef> files);
 void unpartitionPackageFiles(std::vector<ast::ParsedFile> &packageFiles,
@@ -39,6 +48,14 @@ void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, con
 
 void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                            WorkerPool &workers);
+
+// ----- namer + resolver -----------------------------------------------------
+
+[[nodiscard]] bool name(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
+                        WorkerPool &workers, core::FoundDefHashes *foundHashes);
+
+ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
+                                    const options::Options &opts, WorkerPool &workers);
 
 ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                            const options::Options &opts, WorkerPool &workers,
@@ -55,14 +72,7 @@ incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                    std::optional<UnorderedMap<core::FileRef, core::FoundDefHashes>> &&foundHashesForFiles,
                    const options::Options &opts, WorkerPool &workers);
 
-[[nodiscard]] bool name(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
-                        WorkerPool &workers, core::FoundDefHashes *foundHashes);
-
-ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
-                                    const options::Options &opts, WorkerPool &workers);
-
-std::vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const std::string &cachePath,
-                                                   std::vector<ast::ParsedFile> what, WorkerPool &workers);
+// ----- typecheck ------------------------------------------------------------
 
 // Note: `cancelable` and `preemption task manager` are only applicable to LSP.
 // If `intentionallyLeakASTs` is `true`, typecheck will leak the ASTs rather than pay the cost of deleting them
@@ -72,10 +82,9 @@ void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> what, c
                std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt,
                bool presorted = false, bool intentionallyLeakASTs = false);
 
-void printFileTable(core::GlobalState &gs, const options::Options &opts, const UnorderedMap<long, long> &untypedUsages);
+// ----- other ----------------------------------------------------------------
 
-core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
-                                    const options::Options &opts);
+void printFileTable(core::GlobalState &gs, const options::Options &opts, const UnorderedMap<long, long> &untypedUsages);
 
 void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedBlames,
                         const options::Options &opts);
