@@ -2250,7 +2250,7 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     if (what == errors::Internal::InternalError) {
         Exception::failInFuzzer();
     }
-    return ErrorBuilder(*this, shouldReportErrorOn(loc, what), loc, what);
+    return ErrorBuilder(*this, shouldReportErrorOn(loc.file(), what), loc, what);
 }
 
 ErrorBuilder GlobalState::beginIndexerError(Loc loc, ErrorClass what) {
@@ -2274,7 +2274,7 @@ void GlobalState::onlyShowErrorClass(int code) {
     onlyErrorClasses.insert(code);
 }
 
-bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
+bool GlobalState::shouldReportErrorOn(FileRef file, ErrorClass what) const {
     if (what.minLevel == StrictLevel::Internal) {
         return true;
     }
@@ -2294,8 +2294,8 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
     }
 
     StrictLevel level = StrictLevel::Strong;
-    if (loc.file().exists()) {
-        level = loc.file().data(*this).strictLevel;
+    if (file.exists()) {
+        level = file.data(*this).strictLevel;
     }
     if (level >= StrictLevel::Max) {
         // Custom rules
