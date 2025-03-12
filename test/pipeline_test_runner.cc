@@ -320,8 +320,8 @@ void setupPackager(core::GlobalState &gs, realmain::options::Options &opts) {
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
         gs.setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
                               opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                              opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor,
-                              opts.packagerLayers, opts.stripePackagesHint);
+                              opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
+                              opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint);
     }
 }
 
