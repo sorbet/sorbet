@@ -65,9 +65,9 @@ void setGlobalStateOptions(core::GlobalState &gs, options::Options &opts) {
     }
     gs.sleepInSlowPathSeconds = opts.sleepInSlowPathSeconds;
     gs.preallocateTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
-                          opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
-                          opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
-                          opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
+                         opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
+                         opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
+                         opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
     for (auto code : opts.isolateErrorCode) {
         gs.onlyShowErrorClass(code);
     }
@@ -95,8 +95,8 @@ void setGlobalStateOptions(core::GlobalState &gs, options::Options &opts) {
 
     gs.trackUntyped = opts.trackUntyped;
     gs.printingFileTable = opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled ||
-                            opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled ||
-                            opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled;
+                           opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled ||
+                           opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled;
 
     if (opts.suggestTyped) {
         gs.ignoreErrorClassForSuggestTyped(core::errors::Infer::SuggestTyped.code);

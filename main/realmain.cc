@@ -458,7 +458,6 @@ int realmain(int argc, char *argv[]) {
 
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(logger, opts);
     payload::createInitialGlobalState(*gs, opts, kvstore);
-
     pipeline::setGlobalStateOptions(*gs, opts);
 
     if (opts.print.isAutogen()) {
