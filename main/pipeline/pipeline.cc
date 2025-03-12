@@ -45,41 +45,6 @@ using namespace std;
 
 namespace sorbet::realmain::pipeline {
 
-class CFGCollectorAndTyper {
-    const options::Options &opts;
-
-public:
-    CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
-
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        if (!infer::Inference::willRun(ctx, m.declLoc, m.symbol)) {
-            return;
-        }
-
-        auto &print = opts.print;
-        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m);
-
-        if (opts.stopAfterPhase != options::Phase::CFG) {
-            cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
-            if (cfg) {
-                for (auto &extension : ctx.state.semanticExtensions) {
-                    extension->typecheck(ctx, ctx.file, *cfg, m);
-                }
-            }
-        }
-        if (print.CFG.enabled) {
-            print.CFG.fmt("{}\n\n", cfg->toString(ctx));
-        }
-        if (print.CFGText.enabled) {
-            print.CFG.fmt("{}\n\n", cfg->toTextualString(ctx));
-        }
-        if (print.CFGRaw.enabled) {
-            print.CFGRaw.fmt("{}\n\n", cfg->showRaw(ctx));
-        }
-    }
-};
-
 ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, core::File &file,
                                       const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     if (kvstore == nullptr) {
@@ -686,88 +651,6 @@ ast::ParsedFilesOrCancelled index(core::GlobalState &gs, absl::Span<const core::
     }
 }
 
-namespace {
-void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts,
-                  bool intentionallyLeakASTs) {
-    core::FileRef f = resolved.file;
-
-    if (opts.stopAfterPhase == options::Phase::NAMER) {
-        if (intentionallyLeakASTs) {
-            intentionallyLeakMemory(resolved.tree.release());
-        }
-        return;
-    }
-
-    resolved = class_flatten::runOne(ctx, move(resolved));
-
-    resolved = definition_validator::runOne(ctx, std::move(resolved));
-
-    if (opts.print.FlattenTree.enabled || opts.print.AST.enabled) {
-        opts.print.FlattenTree.fmt("{}\n", resolved.tree.toString(ctx));
-    }
-    if (opts.print.FlattenTreeRaw.enabled || opts.print.ASTRaw.enabled) {
-        opts.print.FlattenTreeRaw.fmt("{}\n", resolved.tree.showRaw(ctx));
-    }
-
-    if (opts.stopAfterPhase == options::Phase::RESOLVER) {
-        if (intentionallyLeakASTs) {
-            intentionallyLeakMemory(resolved.tree.release());
-        }
-        return;
-    }
-    if (f.data(ctx).isRBI() && ctx.state.lspQuery.isEmpty()) {
-        // If this is an RBI file but isEmpty is not set, we want to run inference just so that we
-        // can get hover, completion, and definition requests.
-        //
-        // There may be type errors in the file (e.g., you don't need `extend T::Sig` to write `sig`
-        // in an RBI file), but we already ignore errors produced in service of an LSPQuery.
-        if (intentionallyLeakASTs) {
-            intentionallyLeakMemory(resolved.tree.release());
-        }
-        return;
-    }
-
-    Timer timeit(ctx.state.tracer(), "typecheckOne", {{"file", string(f.data(ctx).path())}});
-    try {
-        if (opts.print.CFG.enabled) {
-            opts.print.CFG.fmt("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
-        }
-        if (opts.print.CFGRaw.enabled) {
-            opts.print.CFGRaw.fmt("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
-            opts.print.CFGRaw.fmt("  graph [fontname = \"Courier\"];\n");
-            opts.print.CFGRaw.fmt("  node [fontname = \"Courier\"];\n");
-            opts.print.CFGRaw.fmt("  edge [fontname = \"Courier\"];\n");
-        }
-        CFGCollectorAndTyper collector(opts);
-        {
-            ast::ShallowWalk::apply(ctx, collector, resolved.tree);
-            if (f.data(ctx).isRBI()) {
-                return;
-            }
-            for (auto &extension : ctx.state.semanticExtensions) {
-                extension->finishTypecheckFile(ctx, f);
-            }
-        }
-        if (opts.print.CFG.enabled) {
-            opts.print.CFG.fmt("}}\n\n");
-        }
-        if (opts.print.CFGRaw.enabled) {
-            opts.print.CFGRaw.fmt("}}\n\n");
-        }
-    } catch (SorbetException &) {
-        Exception::failInFuzzer();
-        if (auto e = ctx.state.beginError(sorbet::core::Loc::none(f), core::errors::Internal::InternalError)) {
-            e.setHeader("Exception in cfg+infer: {} (backtrace is above)", f.data(ctx).path());
-        }
-    }
-
-    if (intentionallyLeakASTs) {
-        intentionallyLeakMemory(resolved.tree.release());
-    }
-    return;
-}
-} // namespace
-
 size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileRef> inputFiles) {
     ENFORCE(gs.packageDB().enabled());
     // c_partition does not maintain relative ordering of the elements, which means that
@@ -1180,6 +1063,125 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
 
     return ast::ParsedFilesOrCancelled(move(what));
 }
+
+namespace {
+
+class CFGCollectorAndTyper {
+    const options::Options &opts;
+
+public:
+    CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
+
+    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+        if (!infer::Inference::willRun(ctx, m.declLoc, m.symbol)) {
+            return;
+        }
+
+        auto &print = opts.print;
+        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m);
+
+        if (opts.stopAfterPhase != options::Phase::CFG) {
+            cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
+            if (cfg) {
+                for (auto &extension : ctx.state.semanticExtensions) {
+                    extension->typecheck(ctx, ctx.file, *cfg, m);
+                }
+            }
+        }
+        if (print.CFG.enabled) {
+            print.CFG.fmt("{}\n\n", cfg->toString(ctx));
+        }
+        if (print.CFGText.enabled) {
+            print.CFG.fmt("{}\n\n", cfg->toTextualString(ctx));
+        }
+        if (print.CFGRaw.enabled) {
+            print.CFGRaw.fmt("{}\n\n", cfg->showRaw(ctx));
+        }
+    }
+};
+
+void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts,
+                  bool intentionallyLeakASTs) {
+    core::FileRef f = resolved.file;
+
+    if (opts.stopAfterPhase == options::Phase::NAMER) {
+        if (intentionallyLeakASTs) {
+            intentionallyLeakMemory(resolved.tree.release());
+        }
+        return;
+    }
+
+    resolved = class_flatten::runOne(ctx, move(resolved));
+
+    resolved = definition_validator::runOne(ctx, std::move(resolved));
+
+    if (opts.print.FlattenTree.enabled || opts.print.AST.enabled) {
+        opts.print.FlattenTree.fmt("{}\n", resolved.tree.toString(ctx));
+    }
+    if (opts.print.FlattenTreeRaw.enabled || opts.print.ASTRaw.enabled) {
+        opts.print.FlattenTreeRaw.fmt("{}\n", resolved.tree.showRaw(ctx));
+    }
+
+    if (opts.stopAfterPhase == options::Phase::RESOLVER) {
+        if (intentionallyLeakASTs) {
+            intentionallyLeakMemory(resolved.tree.release());
+        }
+        return;
+    }
+    if (f.data(ctx).isRBI() && ctx.state.lspQuery.isEmpty()) {
+        // If this is an RBI file but isEmpty is not set, we want to run inference just so that we
+        // can get hover, completion, and definition requests.
+        //
+        // There may be type errors in the file (e.g., you don't need `extend T::Sig` to write `sig`
+        // in an RBI file), but we already ignore errors produced in service of an LSPQuery.
+        if (intentionallyLeakASTs) {
+            intentionallyLeakMemory(resolved.tree.release());
+        }
+        return;
+    }
+
+    Timer timeit(ctx.state.tracer(), "typecheckOne", {{"file", string(f.data(ctx).path())}});
+    try {
+        if (opts.print.CFG.enabled) {
+            opts.print.CFG.fmt("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
+        }
+        if (opts.print.CFGRaw.enabled) {
+            opts.print.CFGRaw.fmt("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
+            opts.print.CFGRaw.fmt("  graph [fontname = \"Courier\"];\n");
+            opts.print.CFGRaw.fmt("  node [fontname = \"Courier\"];\n");
+            opts.print.CFGRaw.fmt("  edge [fontname = \"Courier\"];\n");
+        }
+        CFGCollectorAndTyper collector(opts);
+        {
+            ast::ShallowWalk::apply(ctx, collector, resolved.tree);
+            if (f.data(ctx).isRBI()) {
+                return;
+            }
+            for (auto &extension : ctx.state.semanticExtensions) {
+                extension->finishTypecheckFile(ctx, f);
+            }
+        }
+        if (opts.print.CFG.enabled) {
+            opts.print.CFG.fmt("}}\n\n");
+        }
+        if (opts.print.CFGRaw.enabled) {
+            opts.print.CFGRaw.fmt("}}\n\n");
+        }
+    } catch (SorbetException &) {
+        Exception::failInFuzzer();
+        if (auto e = ctx.state.beginError(sorbet::core::Loc::none(f), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception in cfg+infer: {} (backtrace is above)", f.data(ctx).path());
+        }
+    }
+
+    if (intentionallyLeakASTs) {
+        intentionallyLeakMemory(resolved.tree.release());
+    }
+    return;
+}
+
+} // namespace
 
 void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
                WorkerPool &workers, bool cancelable,
