@@ -453,6 +453,12 @@ int realmain(int argc, char *argv[]) {
     auto errorFlusher = make_shared<core::ErrorFlusherStdout>();
     unique_ptr<core::GlobalState> gs =
         make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, errorFlusher));
+
+    logger->trace("building initial global state");
+
+    unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(logger, opts);
+    payload::createInitialGlobalState(*gs, opts, kvstore);
+
     gs->pathPrefix = opts.pathPrefix;
     gs->errorUrlBase = opts.errorUrlBase;
     gs->semanticExtensions = move(extensions);
@@ -460,9 +466,6 @@ int realmain(int argc, char *argv[]) {
     gs->rbsSignaturesEnabled = opts.rbsSignaturesEnabled;
     gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
 
-    logger->trace("building initial global state");
-    unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(logger, opts);
-    payload::createInitialGlobalState(*gs, opts, kvstore);
     if (opts.silenceErrors) {
         gs->silenceErrors = true;
     }
