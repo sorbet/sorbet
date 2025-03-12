@@ -366,7 +366,9 @@ public:
     const bool insideTestFile;
 
     VisibilityCheckerPass(core::Context ctx, core::packages::PackageInfo &package)
-        : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
+        : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {
+        package.untrackImportsFor(ctx.file);
+    }
 
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);

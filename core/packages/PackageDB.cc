@@ -112,6 +112,10 @@ public:
         notImplemented();
     }
 
+    void untrackImportsFor(const core::FileRef file) {
+        notImplemented();
+    }
+
     UnorderedMap<std::pair<core::packages::MangledName, core::packages::ImportType>,
                  std::pair<UnorderedSet<core::FileRef>, std::vector<core::AutocorrectSuggestion::Edit>>>
     trackedImports() const {

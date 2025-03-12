@@ -83,6 +83,8 @@ public:
                              const core::packages::ImportType importType,
                              const std::vector<core::AutocorrectSuggestion::Edit> edits) = 0;
 
+    virtual void untrackImportsFor(const core::FileRef file) = 0;
+
     virtual UnorderedMap<std::pair<core::packages::MangledName, core::packages::ImportType>,
                          std::pair<UnorderedSet<core::FileRef>, std::vector<core::AutocorrectSuggestion::Edit>>>
     trackedImports() const = 0;

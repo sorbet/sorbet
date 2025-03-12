@@ -610,6 +610,21 @@ public:
         trackedImports_[{toImport, importType}].second = edits;
     }
 
+    void untrackImportsFor(const core::FileRef file) {
+        std::vector<std::pair<core::packages::MangledName, core::packages::ImportType>> toDelete;
+        for (auto &[key, value] : trackedImports_) {
+            if (value.first.contains(file)) {
+                value.first.erase(file);
+                if (value.first.empty()) {
+                    toDelete.emplace_back(key);
+                }
+            }
+        }
+        for (auto &key : toDelete) {
+            trackedImports_.erase(key);
+        }
+    }
+
     UnorderedMap<std::pair<core::packages::MangledName, core::packages::ImportType>,
                  pair<UnorderedSet<core::FileRef>, vector<core::AutocorrectSuggestion::Edit>>>
     trackedImports() const {
