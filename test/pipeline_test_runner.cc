@@ -339,6 +339,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     auto logger = spdlog::stderr_color_mt("fixtures: " + inputPath);
+    auto workers = WorkerPool::create(0, *logger);
     auto errorCollector = make_shared<core::ErrorCollector>();
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
     auto gs = make_unique<core::GlobalState>(errorQueue);
@@ -348,7 +349,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     gs->censorForSnapshotTests = true;
-    auto workers = WorkerPool::create(0, gs->tracer());
 
     auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
 
