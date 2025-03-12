@@ -183,6 +183,33 @@ public:
     }
 };
 
+realmain::options::Options assertionsToOptions(std::vector<std::shared_ptr<RangeAssertion>> &assertions) {
+    realmain::options::Options opts;
+
+    opts.censorForSnapshotTests = true;
+    opts.noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
+    opts.rbsSignaturesEnabled =
+        BooleanPropertyAssertion::getValue("enable-experimental-rbs-signatures", assertions).value_or(false);
+    opts.requiresAncestorEnabled =
+        BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
+    opts.ruby3KeywordArgs =
+        BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
+    opts.typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
+    // TODO(jez) Allow allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
+
+    opts.uniquelyDefinedBehavior =
+        BooleanPropertyAssertion::getValue("uniquely-defined-behavior", assertions).value_or(false);
+
+    opts.outOfOrderReferenceChecksEnabled =
+        BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false);
+
+    if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
+        opts.suggestUnsafe = "T.unsafe";
+    }
+
+    return opts;
+}
+
 vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> files, ExpectationHandler &handler,
                               Expectations &test) {
     vector<ast::ParsedFile> trees;
@@ -338,7 +365,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
     }
 
-    realmain::options::Options opts;
+    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    auto opts = assertionsToOptions(assertions);
 
     auto logger = spdlog::stderr_color_mt("fixtures: " + inputPath);
     auto workers = WorkerPool::create(0, *logger);
@@ -346,34 +374,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
     auto gs = make_unique<core::GlobalState>(errorQueue);
 
-    opts.censorForSnapshotTests = true;
-
-    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
-
-    opts.noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
     if (opts.noStdlib) {
         gs->initEmpty();
     } else {
         core::serialize::Serializer::loadGlobalState(*gs, GLOBAL_STATE_PAYLOAD);
-    }
-
-    opts.rbsSignaturesEnabled =
-        BooleanPropertyAssertion::getValue("enable-experimental-rbs-signatures", assertions).value_or(false);
-    opts.requiresAncestorEnabled =
-        BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
-    opts.ruby3KeywordArgs =
-        BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
-    opts.typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
-    // TODO(jez) Allow allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
-
-    opts.uniquelyDefinedBehavior =
-        BooleanPropertyAssertion::getValue("uniquely-defined-behavior", assertions).value_or(false);
-
-    opts.outOfOrderReferenceChecksEnabled =
-        BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false);
-
-    if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
-        opts.suggestUnsafe = "T.unsafe";
     }
 
     realmain::pipeline::setGlobalStateOptions(*gs, opts);
