@@ -658,7 +658,6 @@ int realmain(int argc, char *argv[]) {
 
             auto inputFilesSpan = absl::Span<core::FileRef>(inputFiles);
             if (opts.stripePackages) {
-                pipeline::setPackagerOptions(*gs, opts);
                 auto numPackageFiles = pipeline::partitionPackageFiles(*gs, inputFilesSpan);
                 auto inputPackageFiles = inputFilesSpan.first(numPackageFiles);
                 inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);

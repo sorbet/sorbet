@@ -102,6 +102,9 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
         }
     }
     gs.suggestUnsafe = opts.suggestUnsafe;
+
+    // TODO(jez) Goal is to be able to get rid of setPackagerOptions, and just have it be a part of this function.
+    setPackagerOptions(gs, opts);
 }
 
 vector<core::FileRef> reserveFiles(core::GlobalState &gs, const vector<string> &files) {
