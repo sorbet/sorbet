@@ -471,9 +471,6 @@ int realmain(int argc, char *argv[]) {
     }
     gs->autocorrect = opts.autocorrect;
     gs->didYouMean = opts.didYouMean;
-    if (opts.print.isAutogen()) {
-        gs->runningUnderAutogen = true;
-    }
     if (opts.censorForSnapshotTests) {
         gs->censorForSnapshotTests = true;
     }
@@ -520,6 +517,10 @@ int realmain(int argc, char *argv[]) {
         }
     }
     gs->suggestUnsafe = opts.suggestUnsafe;
+
+    if (opts.print.isAutogen()) {
+        gs->runningUnderAutogen = true;
+    }
 
     if (gs->runningUnderAutogen) {
         gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
