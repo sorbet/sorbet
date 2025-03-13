@@ -91,6 +91,11 @@ public:
         return nullopt;
     }
 
+    optional<int> sccID() const {
+        notImplemented();
+        return nullopt;
+    }
+
     bool causesLayeringViolation(const core::packages::PackageDB &packageDB, const PackageInfo &otherPkg) const {
         notImplemented();
         return false;
