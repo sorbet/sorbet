@@ -18,6 +18,7 @@
 #include "rapidjson/writer.h"
 #include <algorithm>
 #include <cctype>
+#include <queue>
 #include <sstream>
 #include <sys/stat.h>
 
@@ -1869,6 +1870,57 @@ void computeSCCs(core::GlobalState &gs) {
     }
 }
 
+// Finds a path from src to dest in the same SCC.
+// Note: This function assumes that there's a path from dest -> src. As a performance optimization, this function only
+// searches within the same SCC.
+// Note: only looks at non-test imports.
+vector<core::packages::MangledName> findPathSameSCC(const core::GlobalState &gs, const core::packages::MangledName src,
+                                                    const core::packages::MangledName dest) {
+    queue<core::packages::MangledName> q;
+    UnorderedMap<core::packages::MangledName, core::packages::MangledName> prev;
+    UnorderedSet<core::packages::MangledName> visited;
+    q.push(src);
+
+    while (!q.empty()) {
+        auto curr = q.front();
+        q.pop();
+        if (visited.contains(curr)) {
+            continue;
+        }
+        visited.insert(src);
+
+        if (curr == dest) {
+            vector<core::packages::MangledName> path;
+            path.push_back(curr);
+            while (curr != src) {
+                curr = prev[curr];
+                path.push_back(curr);
+            }
+            reverse(path.begin(), path.end());
+            return path;
+        }
+
+        auto &currInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfo(curr));
+        for (auto &import : currInfo.importedPackageNames) {
+            auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
+            if (!importInfo.exists()) {
+                continue;
+            }
+            if (import.type == core::packages::ImportType::Test || visited.contains(import.name.mangledName) ||
+                importInfo.sccID() != currInfo.sccID()) {
+                continue;
+            }
+            if (!prev.contains(import.name.mangledName)) {
+                prev[import.name.mangledName] = curr;
+            }
+            q.push(import.name.mangledName);
+        }
+    }
+
+    // No path found.
+    return {};
+}
+
 void validateLayering(const core::Context &ctx, const Import &i) {
     if (i.type == core::packages::ImportType::Test) {
         return;
@@ -1931,6 +1983,20 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                 e.setHeader("Strict dependencies violation: importing `{}` will put `{}` into a cycle, which is not "
                             "valid at `{}`",
                             otherPkg.show(ctx), thisPkg.show(ctx), level);
+                auto path = findPathSameSCC(ctx, otherPkg.mangledName(), thisPkg.mangledName());
+                ENFORCE(!path.empty(), "Path from import to thisPkg should always exist");
+                string pathMessage;
+                for (int i = 0; i < path.size(); i++) {
+                    auto name = packageDB.getPackageInfo(path[i]).show(ctx);
+                    if (i == 0) {
+                        pathMessage += core::ErrorColors::format("    `{}` →\n", name);
+                    } else if (i < path.size() - 1) {
+                        pathMessage += core::ErrorColors::format("    `{}` →\n", name);
+                    } else {
+                        pathMessage += core::ErrorColors::format("    `{}`\n", name);
+                    }
+                }
+                e.addErrorNote("Path from `{}` to `{}`:\n{}", otherPkg.show(ctx), thisPkg.show(ctx), pathMessage);
             }
             // TODO(neil): if the import is unused (ie. there are no references in this package to the imported
             // package), autocorrect to delete import
