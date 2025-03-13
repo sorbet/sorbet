@@ -28,9 +28,9 @@ struct LocOffsets {
         return beginLoc == endLoc;
     }
 
-    LocOffsets() : beginLoc(INVALID_POS_LOC), endLoc(INVALID_POS_LOC) {}
+    LocOffsets() : beginLoc{INVALID_POS_LOC}, endLoc{INVALID_POS_LOC} {}
 
-    LocOffsets(uint32_t beginLoc, uint32_t endLoc) : beginLoc(beginLoc), endLoc(endLoc) {
+    LocOffsets(uint32_t beginLoc, uint32_t endLoc) : beginLoc{beginLoc}, endLoc{endLoc} {
         ENFORCE_NO_TIMER(beginLoc <= endLoc);
     }
 
