@@ -105,6 +105,8 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
 
 #ifndef SORBET_REALMAIN_MIN
     if (opts.stripePackages) {
+        ENFORCE(!gs.packageDB().enabled());
+
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
         gs.setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
