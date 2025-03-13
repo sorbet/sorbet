@@ -103,8 +103,16 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     }
     gs.suggestUnsafe = opts.suggestUnsafe;
 
-    // TODO(jez) Goal is to be able to get rid of setPackagerOptions, and just have it be a part of this function.
-    setPackagerOptions(gs, opts);
+#ifndef SORBET_REALMAIN_MIN
+    if (opts.stripePackages) {
+        core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
+        gs.setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
+                              opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                              opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
+                              opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint);
+    }
+#endif
 }
 
 vector<core::FileRef> reserveFiles(core::GlobalState &gs, const vector<string> &files) {
@@ -677,23 +685,6 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
         packageFiles.reserve(packageFiles.size() + nonPackageFiles.size());
         absl::c_move(nonPackageFiles, back_inserter(packageFiles));
     }
-}
-
-void setPackagerOptions(core::GlobalState &gs, const options::Options &opts) {
-#ifndef SORBET_REALMAIN_MIN
-    if (!opts.stripePackages) {
-        return;
-    }
-
-    {
-        core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-        gs.setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
-                              opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                              opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-                              opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint);
-    }
-#endif
 }
 
 // packager intentionally runs outside of rewriter so that its output does not get cached.
