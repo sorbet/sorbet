@@ -1901,8 +1901,8 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                            thisPkg.show(ctx), "layer");
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.layer().value().second), "`{}`'s `{}` declared here",
                            otherPkg.show(ctx), "layer");
-            // TODO: if the import is unused (ie. there are no references in this package to the imported package),
-            // autocorrect to delete import
+            // TODO(neil): if the import is unused (ie. there are no references in this package to the imported
+            // package), autocorrect to delete import
         }
     }
 
@@ -1914,10 +1914,10 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                         "import", core::packages::strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel().value().second),
                            "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
-            // TODO: if the import is unused (ie. there are no references in this package to the imported package),
-            // autocorrect to delete import
-            // TODO: if the imported package can be trivially upgraded to the required level (ex. it's at 'false' but
-            // has no layering violations), autocorrect to do so
+            // TODO(neil): if the import is unused (ie. there are no references in this package to the imported
+            // package), autocorrect to delete import
+            // TODO(neil): if the imported package can be trivially upgraded to the required level (ex. it's at 'false'
+            // but has no layering violations), autocorrect to do so
         }
     }
 
@@ -1931,8 +1931,8 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                             "valid at `{}`",
                             otherPkg.show(ctx), thisPkg.show(ctx), level);
             }
-            // TODO: if the import is unused (ie. there are no references in this package to the imported package),
-            // autocorrect to delete import
+            // TODO(neil): if the import is unused (ie. there are no references in this package to the imported
+            // package), autocorrect to delete import
         }
     }
 }
