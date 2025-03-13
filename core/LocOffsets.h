@@ -9,7 +9,7 @@ class GlobalState;
 class Context;
 class MutableContext;
 
-constexpr int INVALID_POS_LOC = 0xfffffff;
+constexpr uint32_t INVALID_POS_LOC = UINT32_MAX;
 struct LocOffsets {
     uint32_t beginLoc = INVALID_POS_LOC;
     uint32_t endLoc = INVALID_POS_LOC;
