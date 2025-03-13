@@ -420,7 +420,7 @@ void Minimize::indexAndResolveForMinimize(core::GlobalState &sourceGS, core::Glo
         rbiGS.errorQueue->flushAllErrors(rbiGS);
     }
 
-    pipeline::setPackagerOptions(rbiGS, opts);
+    // We explicitly disable `stripePackages` in realmain for this call, which makes the packager call a no-op here.
     pipeline::package(rbiGS, absl::MakeSpan(rbiIndexed.result()), opts, workers);
     // Only need to compute FoundDefHashes when running to compute a FileHash
     auto foundHashes = nullptr;
