@@ -10,6 +10,8 @@
 #include "core/NameSubstitution.h"
 #include "core/Unfreeze.h"
 #include "local_vars/local_vars.h"
+#include "main/options/options.h"
+#include "main/pipeline/pipeline.h"
 #include "packager/packager.h"
 #include "parser/parser.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -75,14 +77,16 @@ string dagPackageAPath = "dagA/__package.rb";
 string dagPackageB = makePackageRB("DagPackageB", "dag", "lib");
 string dagPackageBPath = "dagB/__package.rb";
 
-void makeDefaultPackagerGlobalState(core::GlobalState &gs) {
-    gs.initEmpty();
+const vector<string> NO_LAYERS;
+const vector<string> LAYERS_LIB_APP = {"lib", "app"};
+const vector<string> LAYERS_UTIL_LIB_APP = {"util", "lib", "app"};
 
-    {
-        core::UnfreezeNameTable packageNS(gs);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-        gs.setPackagerOptions({}, {}, {}, {}, {}, {}, "");
-    }
+void makeDefaultPackagerGlobalState(core::GlobalState &gs, const vector<string> &packagerLayers = NO_LAYERS) {
+    gs.initEmpty();
+    realmain::options::Options opts;
+    opts.stripePackages = true;
+    opts.packagerLayers = packagerLayers;
+    realmain::pipeline::setGlobalStateOptions(gs, opts);
 }
 
 vector<ast::ParsedFile> enterPackages(core::GlobalState &gs, vector<pair<string, string>> packageSources) {
@@ -362,12 +366,7 @@ TEST_CASE("Simple add export") {
 // Tests with layering and strict dependencies checks on
 TEST_CASE("Add imports to strict_dependencies 'false' package") {
     core::GlobalState gs(errorQueue);
-    gs.initEmpty();
-    {
-        core::UnfreezeNameTable packageNS(gs);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-        gs.setPackagerOptions({}, {}, {}, {}, {}, {"lib", "app"}, "");
-    }
+    makeDefaultPackagerGlobalState(gs, LAYERS_LIB_APP);
 
     string pkg_source = makePackageRB("MyPackage", "false", "app",
                                       {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
@@ -435,12 +434,7 @@ TEST_CASE("Add imports to strict_dependencies 'false' package") {
 
 TEST_CASE("Add imports to strict_dependencies 'layered' package") {
     core::GlobalState gs(errorQueue);
-    gs.initEmpty();
-    {
-        core::UnfreezeNameTable packageNS(gs);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-        gs.setPackagerOptions({}, {}, {}, {}, {}, {"lib", "app"}, "");
-    }
+    makeDefaultPackagerGlobalState(gs, LAYERS_LIB_APP);
 
     string pkg_source = makePackageRB("MyPackage", "layered", "app",
                                       {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
@@ -508,12 +502,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered' package") {
 
 TEST_CASE("Add imports to strict_dependencies 'layered_dag' package") {
     core::GlobalState gs(errorQueue);
-    gs.initEmpty();
-    {
-        core::UnfreezeNameTable packageNS(gs);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-        gs.setPackagerOptions({}, {}, {}, {}, {}, {"lib", "app"}, "");
-    }
+    makeDefaultPackagerGlobalState(gs, LAYERS_LIB_APP);
 
     string pkg_source = makePackageRB("MyPackage", "layered_dag", "app",
                                       {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
@@ -581,12 +570,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered_dag' package") {
 
 TEST_CASE("Add imports to strict_dependencies 'dag' package") {
     core::GlobalState gs(errorQueue);
-    gs.initEmpty();
-    {
-        core::UnfreezeNameTable packageNS(gs);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-        gs.setPackagerOptions({}, {}, {}, {}, {}, {"lib", "app"}, "");
-    }
+    makeDefaultPackagerGlobalState(gs, LAYERS_LIB_APP);
 
     string pkg_source = makePackageRB("MyPackage", "dag", "app",
                                       {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
@@ -654,12 +638,7 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
 
 TEST_CASE("Edge cases") {
     core::GlobalState gs(errorQueue);
-    gs.initEmpty();
-    {
-        core::UnfreezeNameTable packageNS(gs);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-        gs.setPackagerOptions({}, {}, {}, {}, {}, {"lib", "app"}, "");
-    }
+    makeDefaultPackagerGlobalState(gs, LAYERS_LIB_APP);
 
     string packageWithFakeImport = makePackageRB("HasFakeImport", "false", "app", {"FakeImport"});
     string packageWithFakeImportPath = "has_fake_import/__package.rb";
@@ -771,12 +750,7 @@ TEST_CASE("Edge cases") {
 
 TEST_CASE("Convert test_import to import") {
     core::GlobalState gs(errorQueue);
-    gs.initEmpty();
-    {
-        core::UnfreezeNameTable packageNS(gs);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-        gs.setPackagerOptions({}, {}, {}, {}, {}, {"lib", "app"}, "");
-    }
+    makeDefaultPackagerGlobalState(gs, LAYERS_LIB_APP);
 
     string myPackage =
         makePackageRB("MyPackage", "layered", "app", {"FalsePackageA", "DagPackageA"}, {"LayeredPackageA"});
@@ -815,12 +789,7 @@ TEST_CASE("Convert test_import to import") {
 
 TEST_CASE("Ordering by alphabetical") {
     core::GlobalState gs(errorQueue);
-    gs.initEmpty();
-    {
-        core::UnfreezeNameTable packageNS(gs);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-        gs.setPackagerOptions({}, {}, {}, {}, {}, {"util", "lib", "app"}, "");
-    }
+    makeDefaultPackagerGlobalState(gs, LAYERS_UTIL_LIB_APP);
 
     string myPackage = makePackageRB("MyPackage", "layered", "lib", {"Lib::Foo::B::A"});
 
