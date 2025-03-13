@@ -239,7 +239,11 @@ public:
     }
 
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
-    optional<int> sccID = nullopt;
+    optional<int> sccID_ = nullopt;
+
+    optional<int> sccID() const {
+        return sccID_;
+    }
 
     // PackageInfoImpl is the only implementation of PackageInfo
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
@@ -1842,7 +1846,7 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
             metadata.nodeMap[poppedPkgName].onStack = false;
             PackageInfoImpl &poppedPkgInfo =
                 PackageInfoImpl::from(*(gs.packageDB().getPackageInfoNonConst(poppedPkgName)));
-            poppedPkgInfo.sccID = metadata.nextSCCId;
+            poppedPkgInfo.sccID_ = metadata.nextSCCId;
         } while (poppedPkgName != pkgName);
         metadata.nextSCCId++;
     }
@@ -1875,8 +1879,8 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     ENFORCE(packageDB.getPackageForFile(ctx, ctx.file).exists())
     auto &thisPkg = PackageInfoImpl::from(packageDB.getPackageForFile(ctx, ctx.file));
     auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name.mangledName));
-    ENFORCE(thisPkg.sccID.has_value(), "computeSCCs should already have been called and set sccID");
-    ENFORCE(otherPkg.sccID.has_value(), "computeSCCs should already have been called and set sccID");
+    ENFORCE(thisPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
+    ENFORCE(otherPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
 
     if (!thisPkg.strictDependenciesLevel().has_value() || !otherPkg.strictDependenciesLevel().has_value() ||
         !thisPkg.layer().has_value() || !otherPkg.layer().has_value()) {
@@ -1919,7 +1923,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     }
 
     if (thisPkg.strictDependenciesLevel().value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
-        if (thisPkg.sccID == otherPkg.sccID) {
+        if (thisPkg.sccID() == otherPkg.sccID()) {
             if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
                 auto level = fmt::format(
                     "strict_dependencies '{}'",

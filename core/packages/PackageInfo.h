@@ -61,6 +61,7 @@ public:
     virtual std::optional<std::pair<core::packages::StrictDependenciesLevel, core::LocOffsets>>
     strictDependenciesLevel() const = 0;
     virtual std::optional<std::pair<core::NameRef, core::LocOffsets>> layer() const = 0;
+    virtual std::optional<int> sccID() const = 0;
     virtual core::Loc fullLoc() const = 0;
     virtual core::Loc declLoc() const = 0;
     virtual bool exists() const final;
