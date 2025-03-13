@@ -260,7 +260,7 @@ attr_accessor :baz
 
 ### Annotations
 
-While RBS does not support the same modifiers than Sorbet, it is possible to
+While RBS does not support the same modifiers as Sorbet, it is possible to
 specify them using `@` annotation comments.
 
 The following signatures are equivalent:
