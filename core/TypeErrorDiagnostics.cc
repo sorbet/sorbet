@@ -142,14 +142,10 @@ TypeErrorDiagnostics::editForDSLMethod(const GlobalState &gs, FileRef fileToEdit
             // If they're writing methods at the top level, it's probably a small script.
             // Just put the `extend` immediately above the sig.
 
-            auto [sigStart, _sigEnd] = defaultInsertLoc.toDetails(gs);
-            auto thisLineStart = core::Loc::Detail{sigStart.line, 1};
-            auto thisLineLoc = core::Loc::fromDetails(gs, defaultInsertLoc.file(), thisLineStart, thisLineStart);
-            ENFORCE(thisLineLoc.has_value());
-            auto [_, thisLinePadding] = thisLineLoc.value().findStartOfIndentation(gs);
-
+            auto [thisLineIndented, thisLinePadding] = defaultInsertLoc.findStartOfIndentation(gs);
+            auto thisLineStart = thisLineIndented.adjustLen(gs, -thisLinePadding, 0);
             string prefix(thisLinePadding, ' ');
-            return autocorrectEditForDSLMethod(gs, thisLineLoc.value(), prefix, dslOwner, dsl, needsDslOwner);
+            return autocorrectEditForDSLMethod(gs, thisLineStart, prefix, dslOwner, dsl, needsDslOwner);
         } else {
             return nullopt;
         }
@@ -157,10 +153,7 @@ TypeErrorDiagnostics::editForDSLMethod(const GlobalState &gs, FileRef fileToEdit
 
     auto [classStart, classEnd] = classLoc->toDetails(gs);
 
-    core::Loc::Detail thisLineStart = {classStart.line, 1};
-    auto thisLineLoc = core::Loc::fromDetails(gs, classLoc->file(), thisLineStart, thisLineStart);
-    ENFORCE(thisLineLoc.has_value());
-    auto [_, thisLinePadding] = thisLineLoc.value().findStartOfIndentation(gs);
+    auto [_, thisLinePadding] = classLoc->findStartOfIndentation(gs);
 
     core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
     auto nextLineLoc = core::Loc::fromDetails(gs, classLoc->file(), nextLineStart, nextLineStart);
