@@ -3,7 +3,7 @@
 def foo(*args, **kwargs); end
 
 def various_bad_commas_in_send(a, b, x, y)
-  foo(, x: x) # error: unexpected token ","
+  foo(, x: x) # parser-error: unexpected token ","
   #   ^ completion: a, b, x, y, ...
 
   # This one is a little clowny unfortunately: completes even immediately
@@ -16,28 +16,28 @@ def various_bad_commas_in_send(a, b, x, y)
   #         ^ completion: alias, and, a, ...
   #          ^ completion: alias, and, a, ...
   #         ^ error: Method `a` does not exist
-  #         ^ error: positional arg "a" after keyword arg
+  #         ^ parser-error: positional arg "a" after keyword arg
 
-  foo(a, , y: y) # error: unexpected token ","
+  foo(a, , y: y) # parser-error: unexpected token ","
   #      ^ completion: a, b, x, y, ...
 
   # This one was kind of an accident of the implementation for the next one. I
   # don't think it's too bad if the behavior here needs to change in the future.
   foo(a, x: y:)
-  #      ^^ error: unexpected token tLABEL
+  #      ^^ parser-error: unexpected token tLABEL
 
   # Either another positional arg, or the start of a keyword
   foo(a, x y: y)
   #       ^ completion: x, ...
   #      ^ error: Method `x` does not exist
-  #       ^ error: missing token ","
+  #       ^ parser-error: missing token ","
 
   # Inserting new keyword arg into list
-  foo(a, x: y: y) # error: unexpected token tLABEL
+  foo(a, x: y: y) # parser-error: unexpected token tLABEL
   #        ^ completion: a, b, x, y, ...
   #         ^ completion: a, b, x, y, ...
 
-  foo(a, x: x, , y: y) # error: unexpected token ","
+  foo(a, x: x, , y: y) # parser-error: unexpected token ","
   #            ^ completion: a, b, x, y, ...
 
   foo(a, x: , y: y)
@@ -47,9 +47,9 @@ def various_bad_commas_in_send(a, b, x, y)
   foo(x: x y: y)
   #       ^ completion: x, ...
   #      ^ error: Method `x` does not exist
-  #       ^ error: missing token ","
+  #       ^ parser-error: missing token ","
   foo(a: a, x: x y: y)
   #             ^ completion: x, ...
   #            ^ error: Method `x` does not exist
-  #             ^ error: missing token ","
+  #             ^ parser-error: missing token ","
 end

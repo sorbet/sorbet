@@ -1,3 +1,3 @@
 # typed: true
 
-%k[foo] # error: %k: unknown type of percent-literal
+%k[foo] # parser-error: %k: unknown type of percent-literal
