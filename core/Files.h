@@ -74,6 +74,15 @@ public:
     File(const File &other) = delete;
     File() = delete;
     std::unique_ptr<File> deepCopy(GlobalState &) const;
+
+    // Maps a 0-indexed line number to the offset of the end of the line
+    //
+    // If the line ends with the end of the file, then the offset points to the end of the file
+    // If the line ends with a newline character, then the offset points to the newline character.
+    //
+    // This means that for a file contents like "foo\n", this is considered two lines:
+    // - line 0: "foo"
+    // - line 1: ""
     absl::Span<const uint32_t> lineBreaks() const;
     int lineCount() const;
     StrictLevel minErrorLevel() const;
@@ -114,6 +123,10 @@ private:
 public:
     const std::string path_;
     const std::string source_;
+
+    // This is always a pure function of the `source_` string, so it is computed lazily, thus the
+    // `mutable`. We generally don't need `lineBreaks_` for every file, unless we're showing errors
+    // for that file, and computing lazily allows saving space.
     mutable std::shared_ptr<std::vector<uint32_t>> lineBreaks_;
 
     mutable StrictLevel minErrorLevel_ = StrictLevel::Max;
