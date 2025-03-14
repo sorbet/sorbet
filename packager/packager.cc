@@ -429,8 +429,7 @@ public:
                 core::Loc beforePackageName = {loc.file(), importedPackageNames.front().name.loc};
                 auto [beforeImport, numWhitespace] = beforePackageName.findStartOfLine(gs);
                 auto endOfPrevLine = beforeImport.adjust(gs, -numWhitespace - 1, 0);
-                insertionLoc =
-                    core::Loc{loc.file(), endOfPrevLine.copyWithZeroLength().offsets().copyEndWithZeroLength()};
+                insertionLoc = endOfPrevLine.copyWithZeroLength();
             } else {
                 insertionLoc = core::Loc{loc.file(), importToInsertAfter->loc.copyEndWithZeroLength()};
             }
