@@ -24,7 +24,7 @@ bool isCommand(const ast::ClassDef *klass) {
 }
 
 void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
-    if (ctx.state.runningUnderAutogen) {
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return;
     }
 

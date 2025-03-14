@@ -59,7 +59,7 @@ bool doesExtendConcern(core::MutableContext ctx, ast::ClassDef *klass) {
 // Knowledge of `class_methods` and its source code will help you understand the steps taken here.
 // See https://api.rubyonrails.org/classes/ActiveSupport/Concern.html#method-i-class_methods.
 void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
-    if (ctx.state.runningUnderAutogen) {
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return;
     }
     if (!doesExtendConcern(ctx, klass)) {

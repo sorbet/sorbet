@@ -46,7 +46,7 @@ bool isMissingInitialize(const core::GlobalState &gs, const ast::Send *send) {
 vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn) {
     vector<ast::ExpressionPtr> empty;
 
-    if (ctx.state.runningUnderAutogen) {
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return empty;
     }
 

@@ -493,7 +493,7 @@ ast::ExpressionPtr recurse(core::MutableContext ctx, bool isClass, ast::Expressi
 
 vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass, ast::Send *send) {
     vector<ast::ExpressionPtr> stats;
-    if (ctx.state.runningUnderAutogen) {
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return stats;
     }
 

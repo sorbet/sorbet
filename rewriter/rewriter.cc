@@ -46,7 +46,7 @@ public:
 
         auto isClass = classDef->kind == ast::ClassDef::Kind::Class;
 
-        if (ctx.state.rbsAssertionsEnabled) {
+        if (ctx.state.cacheSensitiveOptions.rbsAssertionsEnabled) {
             RBSAssertions::run(ctx, classDef);
         }
 
@@ -210,7 +210,7 @@ ast::ExpressionPtr Rewriter::run(core::MutableContext ctx, ast::ExpressionPtr tr
 
     Rewriterer rewriter;
 
-    if (ctx.state.rbsSignaturesEnabled) {
+    if (ctx.state.cacheSensitiveOptions.rbsSignaturesEnabled) {
         // This rewriter must run before the others, because it creates signatures that other rewriters depend on.
         ast = RBSSignatures::run(ctx, std::move(ast));
     }

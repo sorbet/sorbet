@@ -53,7 +53,7 @@ void selfScopeToEmptyTree(ast::UnresolvedConstantLit &cnst) {
 vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
     vector<ast::ExpressionPtr> empty;
 
-    if (ctx.state.runningUnderAutogen) {
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return empty;
     }
 

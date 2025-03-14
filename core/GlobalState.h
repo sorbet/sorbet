@@ -300,6 +300,13 @@ public:
     // If 'true', enforce use of Ruby 3.0-style keyword args.
     bool ruby3KeywordArgs = false;
 
+    // Some options change the behavior of things that might be cached, including ASTs, the file
+    // table, the name table, the symbol table, etc.
+    //
+    // If these options change, it's no longer safe to read things out of the cache, because the
+    // cache. For example, `typedSuper` controls how Ruby's `super` keyword is desugared, and the
+    // result of desugar is cached.
+    struct CacheSensitiveOptions {
     // If 'true', attempt to typecheck calls to `super` as often as possible.
     // Some calls to `super` are not type checked due to incomplete/imperfect information.
     bool typedSuper = true;
@@ -320,6 +327,8 @@ public:
     // Think very hard before looking at this value in namer / resolver!
     // (hint: probably you want to find an alternate solution)
     bool runningUnderAutogen = false;
+    };
+    CacheSensitiveOptions cacheSensitiveOptions;
 
     std::vector<std::string> suppressPayloadSuperclassRedefinitionFor;
 

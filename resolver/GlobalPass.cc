@@ -396,7 +396,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
             auto sym = core::ClassOrModuleRef(gs, i);
             resolveTypeMembers(gs, sym, typeAliases, resolved);
 
-            if (gs.requiresAncestorEnabled) {
+            if (gs.cacheSensitiveOptions.requiresAncestorEnabled) {
                 // Precompute the list of all required ancestors for this symbol
                 sym.data(gs)->computeRequiredAncestorLinearization(gs);
             }
