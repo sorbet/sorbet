@@ -488,9 +488,8 @@ uint32_t sorbet::nextPowerOfTwo(uint32_t v) {
     return v;
 }
 
-vector<int> sorbet::findLineBreaks(string_view s) {
-    vector<int> res;
-    res.emplace_back(-1);
+vector<uint32_t> sorbet::findLineBreaks(string_view s) {
+    vector<uint32_t> res;
     size_t next_pos = 0;
     while (true) {
         auto pos = s.find_first_of('\n', next_pos);
