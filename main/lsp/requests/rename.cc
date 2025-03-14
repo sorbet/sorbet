@@ -146,7 +146,7 @@ private:
             if (methodNameLoc->file().exists()) {
                 auto path = methodNameLoc->file().data(gs).path();
                 error = fmt::format("Failed to rename `{}` method call at {}:{}", oldName, path,
-                                    methodNameLoc->position(gs).first.line);
+                                    methodNameLoc->toDetails(gs).first.line);
             }
             return "";
         }

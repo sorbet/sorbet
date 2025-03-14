@@ -142,7 +142,7 @@ TypeErrorDiagnostics::editForDSLMethod(const GlobalState &gs, FileRef fileToEdit
             // If they're writing methods at the top level, it's probably a small script.
             // Just put the `extend` immediately above the sig.
 
-            auto [sigStart, _sigEnd] = defaultInsertLoc.position(gs);
+            auto [sigStart, _sigEnd] = defaultInsertLoc.toDetails(gs);
             auto thisLineStart = core::Loc::Detail{sigStart.line, 1};
             auto thisLineLoc = core::Loc::fromDetails(gs, defaultInsertLoc.file(), thisLineStart, thisLineStart);
             ENFORCE(thisLineLoc.has_value());
@@ -155,7 +155,7 @@ TypeErrorDiagnostics::editForDSLMethod(const GlobalState &gs, FileRef fileToEdit
         }
     }
 
-    auto [classStart, classEnd] = classLoc->position(gs);
+    auto [classStart, classEnd] = classLoc->toDetails(gs);
 
     core::Loc::Detail thisLineStart = {classStart.line, 1};
     auto thisLineLoc = core::Loc::fromDetails(gs, classLoc->file(), thisLineStart, thisLineStart);

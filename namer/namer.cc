@@ -1849,7 +1849,7 @@ public:
         auto multiline = false;
         auto indent = ""s;
         auto sendLoc = ctx.locAt(send->loc);
-        auto [beginDetail, endDetail] = sendLoc.position(ctx);
+        auto [beginDetail, endDetail] = sendLoc.toDetails(ctx);
         if (endDetail.line > beginDetail.line && send->funLoc.exists() && !send->funLoc.empty() &&
             send->numPosArgs() == 0) {
             deleteLoc = core::Loc(ctx.file, send->funLoc.endPos(), send->loc.endPos());
@@ -1863,7 +1863,7 @@ public:
         auto insertLoc = ctx.locAt(send->loc).copyEndWithZeroLength();
         auto kwArgsSource = kwArgsLoc.source(ctx).value();
         if (multiline) {
-            auto [kwBeginDetail, kwEndDetail] = kwArgsLoc.position(ctx);
+            auto [kwBeginDetail, kwEndDetail] = kwArgsLoc.toDetails(ctx);
             if (kwEndDetail.line > kwBeginDetail.line) {
                 auto reindentedSource = absl::StrReplaceAll(kwArgsSource, {{"\n", "\n  "}});
                 if (kwBeginDetail.line == beginDetail.line) {
