@@ -49,7 +49,20 @@ Loc::Detail Loc::pos2Detail(const File &file, uint32_t off) {
         ENFORCE_NO_TIMER(false);
     }
     auto lineBreaks = file.lineBreaks();
+    // lower_bound is what the C++ STL calls the "least upper bound," i.e., a pointer to the first
+    // element which is greater than or equal to you in a sorted list
     auto it = absl::c_lower_bound(lineBreaks, off);
+    // haha, gotcha! You'd THINK our list is sorted, but since we're doing the comparison by way of
+    // mixing `uint32_t off` and `vector<int> lineBreaks_`, the `-1` at the start of the vector gets
+    // coerced to UINT32_MAX, which then the algorithm thinks is the least upper bound, because it's
+    // greater than anything we could possibly be looking for. It's as if the list is not actually
+    // sorted, because the first element is bigger than all the rest.
+    //
+    // When this happens, the libc++ (and libstdc++, I think) binary search algorithms happen to
+    // return the first element, so we handle that separately here.
+    //
+    // If the comparison were being done entirely on signed values, or we changed lineBreaks_ to no
+    // longer store signed values, we could get rid of this `... == begin()` hack here.
     if (it == lineBreaks.begin()) {
         detail.line = 1;
         detail.column = off + 1;
