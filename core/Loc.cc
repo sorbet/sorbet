@@ -370,7 +370,7 @@ Loc Loc::adjustLen(const GlobalState &gs, int32_t beginAdjust, int32_t len) cons
     return Loc{this->file(), newBegin, newEnd};
 }
 
-pair<Loc, uint32_t> Loc::findStartOfLine(const GlobalState &gs) const {
+pair<Loc, uint32_t> Loc::findStartOfIndentation(const GlobalState &gs) const {
     auto startDetail = this->toDetails(gs).first;
     auto maybeLineStart = Loc::detail2Pos(this->file().data(gs), {startDetail.line, 1});
     ENFORCE_NO_TIMER(maybeLineStart.has_value());

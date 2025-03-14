@@ -146,7 +146,7 @@ TypeErrorDiagnostics::editForDSLMethod(const GlobalState &gs, FileRef fileToEdit
             auto thisLineStart = core::Loc::Detail{sigStart.line, 1};
             auto thisLineLoc = core::Loc::fromDetails(gs, defaultInsertLoc.file(), thisLineStart, thisLineStart);
             ENFORCE(thisLineLoc.has_value());
-            auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(gs);
+            auto [_, thisLinePadding] = thisLineLoc.value().findStartOfIndentation(gs);
 
             string prefix(thisLinePadding, ' ');
             return autocorrectEditForDSLMethod(gs, thisLineLoc.value(), prefix, dslOwner, dsl, needsDslOwner);
@@ -160,14 +160,14 @@ TypeErrorDiagnostics::editForDSLMethod(const GlobalState &gs, FileRef fileToEdit
     core::Loc::Detail thisLineStart = {classStart.line, 1};
     auto thisLineLoc = core::Loc::fromDetails(gs, classLoc->file(), thisLineStart, thisLineStart);
     ENFORCE(thisLineLoc.has_value());
-    auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(gs);
+    auto [_, thisLinePadding] = thisLineLoc.value().findStartOfIndentation(gs);
 
     core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
     auto nextLineLoc = core::Loc::fromDetails(gs, classLoc->file(), nextLineStart, nextLineStart);
     if (!nextLineLoc.has_value()) {
         return nullopt;
     }
-    auto [replacementLoc, nextLinePadding] = nextLineLoc.value().findStartOfLine(gs);
+    auto [replacementLoc, nextLinePadding] = nextLineLoc.value().findStartOfIndentation(gs);
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');

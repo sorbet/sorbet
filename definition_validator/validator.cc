@@ -1046,7 +1046,7 @@ private:
             }
         }
 
-        auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfLine(ctx);
+        auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfIndentation(ctx);
         string classOrModuleIndent(indentLength, ' ');
         auto insertAt = endLoc.adjust(ctx, -indentLength, 0);
 
