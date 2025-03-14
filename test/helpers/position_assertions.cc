@@ -683,7 +683,8 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
         BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
     opts.ruby3KeywordArgs =
         BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
-    opts.cacheSensitiveOptions.typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
+    opts.cacheSensitiveOptions.typedSuper =
+        BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
     // TODO(jez) Allow allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
 
     opts.uniquelyDefinedBehavior =

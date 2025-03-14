@@ -230,8 +230,9 @@ ExpressionPtr desugarBegin(DesugarContext dctx, core::LocOffsets loc, parser::No
 }
 
 core::NameRef maybeTypedSuper(DesugarContext dctx) {
-    return (dctx.ctx.state.cacheSensitiveOptions.typedSuper && !dctx.inAnyBlock && !dctx.inModule) ? core::Names::super()
-                                                                             : core::Names::untypedSuper();
+    return (dctx.ctx.state.cacheSensitiveOptions.typedSuper && !dctx.inAnyBlock && !dctx.inModule)
+               ? core::Names::super()
+               : core::Names::untypedSuper();
 }
 
 bool isStringLit(DesugarContext dctx, ExpressionPtr &expr) {

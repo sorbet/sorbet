@@ -307,26 +307,26 @@ public:
     // cache. For example, `typedSuper` controls how Ruby's `super` keyword is desugared, and the
     // result of desugar is cached.
     struct CacheSensitiveOptions {
-    // If 'true', attempt to typecheck calls to `super` as often as possible.
-    // Some calls to `super` are not type checked due to incomplete/imperfect information.
-    bool typedSuper = true;
+        // If 'true', attempt to typecheck calls to `super` as often as possible.
+        // Some calls to `super` are not type checked due to incomplete/imperfect information.
+        bool typedSuper = true;
 
-    // Whether to parse RBS-style type annotations out of comments
-    bool rbsSignaturesEnabled = false;
+        // Whether to parse RBS-style type annotations out of comments
+        bool rbsSignaturesEnabled = false;
 
-    // Whether to parse RBS-style type assertions out of end-of-line comments
-    bool rbsAssertionsEnabled = false;
+        // Whether to parse RBS-style type assertions out of end-of-line comments
+        bool rbsAssertionsEnabled = false;
 
-    // Whether to allow `requires_ancestor`, which allows modeling certain kinds of indirect
-    // inheritance hierarchies, at the expense of implementation complexity and soundness
-    // problems.
-    bool requiresAncestorEnabled = false;
+        // Whether to allow `requires_ancestor`, which allows modeling certain kinds of indirect
+        // inheritance hierarchies, at the expense of implementation complexity and soundness
+        // problems.
+        bool requiresAncestorEnabled = false;
 
-    // So we can know whether we're running in autogen mode.
-    // Right now this is only used to turn certain Rewriter passes on or off.
-    // Think very hard before looking at this value in namer / resolver!
-    // (hint: probably you want to find an alternate solution)
-    bool runningUnderAutogen = false;
+        // So we can know whether we're running in autogen mode.
+        // Right now this is only used to turn certain Rewriter passes on or off.
+        // Think very hard before looking at this value in namer / resolver!
+        // (hint: probably you want to find an alternate solution)
+        bool runningUnderAutogen = false;
     };
     CacheSensitiveOptions cacheSensitiveOptions;
 
