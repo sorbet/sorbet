@@ -337,7 +337,7 @@ VariableExtractor::getExtractSingleOccurrenceEdits(const LSPTypecheckerDelegate 
     skippedLocsExact = walk.skippedLocsExact;
 
     auto whereToInsertLoc = core::Loc(file, whereToInsert.copyWithZeroLength());
-    auto [startOfLine, numSpaces] = whereToInsertLoc.findStartOfLine(gs);
+    auto [startOfLine, numSpaces] = whereToInsertLoc.findStartOfIndentation(gs);
 
     auto trailing = whereToInsertLoc.beginPos() == startOfLine.beginPos()
                         // If we're inserting at the start of the line (ignoring whitespace),
@@ -569,7 +569,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
         return {};
     }
     auto whereToInsertLoc = core::Loc(file, whereToInsert.copyWithZeroLength());
-    auto [startOfLine, numSpaces] = whereToInsertLoc.findStartOfLine(gs);
+    auto [startOfLine, numSpaces] = whereToInsertLoc.findStartOfIndentation(gs);
 
     auto trailing = whereToInsertLoc.beginPos() == startOfLine.beginPos()
                         // If we're inserting at the start of the line (ignoring whitespace),

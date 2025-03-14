@@ -1854,7 +1854,7 @@ public:
             send->numPosArgs() == 0) {
             deleteLoc = core::Loc(ctx.file, send->funLoc.endPos(), send->loc.endPos());
             multiline = true;
-            auto [_, indentLen] = sendLoc.copyEndWithZeroLength().findStartOfLine(ctx);
+            auto [_, indentLen] = sendLoc.copyEndWithZeroLength().findStartOfIndentation(ctx);
             indent = string(indentLen, ' ');
         }
 

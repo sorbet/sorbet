@@ -8,7 +8,7 @@ using namespace std;
 
 namespace sorbet::resolver {
 std::string getIndent(core::Context ctx, const core::Loc loc) {
-    auto [_, indentLen] = loc.findStartOfLine(ctx);
+    auto [_, indentLen] = loc.findStartOfIndentation(ctx);
     return string(indentLen, ' ');
 }
 
