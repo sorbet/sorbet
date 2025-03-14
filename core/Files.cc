@@ -250,7 +250,7 @@ int File::lineCount() const {
 // 1-indexed line number
 string_view File::getLine(int i) const {
     auto lineBreaks = this->lineBreaks();
-    ENFORCE(i < lineBreaks.size());
+    ENFORCE(i <= lineBreaks.size());
     ENFORCE(i > 0);
     auto start = i == 1 ? 0 : lineBreaks[i - 2] + 1;
     auto end = lineBreaks[i - 1];
