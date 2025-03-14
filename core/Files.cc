@@ -114,12 +114,8 @@ File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(path_), packagedLevel{File::filePackagedSigil(source_)},
       path_(move(path_)), source_(move(source_)), originalSigil(fileStrictSigil(this->source_)),
       strictLevel(originalSigil) {
-    if (this->source_.size() > INT32_MAX) [[unlikely]] {
-        // Specifically looking for INT32_MAX, because File::lineBreaks_ stores `int`, not `uint32_t`
-        static_assert(INT32_MAX < INVALID_POS_LOC);
-        static_assert(is_same_v<decltype(LocOffsets::beginLoc), uint32_t>);
-        static_assert(is_same_v<remove_reference_t<decltype((*this->lineBreaks_)[0])>, int>);
-        Exception::raise("File larger than {} bytes. Got: {}", INT32_MAX, this->source_.size());
+    if (this->source_.size() >= INVALID_POS_LOC) [[unlikely]] {
+        Exception::raise("File not less than {} bytes. Got: {}", UINT32_MAX, this->source_.size());
     }
 }
 
@@ -234,29 +230,30 @@ void File::setIsOpenInClient(bool isOpenInClient) {
     this->flags.isOpenInClient = isOpenInClient;
 }
 
-absl::Span<const int> File::lineBreaks() const {
+absl::Span<const uint32_t> File::lineBreaks() const {
     ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);
     auto ptr = atomic_load(&lineBreaks_);
     if (ptr != nullptr) {
         return absl::MakeSpan(*ptr);
     } else {
-        auto my = make_shared<vector<int>>(findLineBreaks(this->source_));
+        auto my = make_shared<vector<uint32_t>>(findLineBreaks(this->source_));
         atomic_compare_exchange_weak(&lineBreaks_, &ptr, my);
         return lineBreaks();
     }
 }
 
 int File::lineCount() const {
-    return lineBreaks().size() - 1;
+    return lineBreaks().size();
 }
 
+// 1-indexed line number
 string_view File::getLine(int i) const {
     auto lineBreaks = this->lineBreaks();
     ENFORCE(i < lineBreaks.size());
     ENFORCE(i > 0);
-    auto start = lineBreaks[i - 1] + 1;
-    auto end = lineBreaks[i];
+    auto start = i == 1 ? 0 : lineBreaks[i - 2] + 1;
+    auto end = lineBreaks[i - 1];
     return source().substr(start, end - start);
 }
 

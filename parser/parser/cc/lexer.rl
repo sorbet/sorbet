@@ -234,24 +234,21 @@ size_t lexer::line_start(token_type type, size_t beginPos) {
     }
 
     // If this assertion ever fires, we'll have to change File::lineBreaks to operate on size_t
-    assert(beginPos < INT_MAX);
-    int beginPosInt = static_cast<int>(beginPos);
+    assert(beginPos < UINT32_MAX);
+    auto beginPosInt = static_cast<uint32_t>(beginPos);
 
-    // Gets the first element which compares greater than or equal to `beginPos`.
+    // Easier to think of this as "least upper bound," i.e. first element which is great than or equal to beginPos
     // Since we already handled newline characters, it should be just the first elem greater.
     auto it = absl::c_lower_bound(this->lineBreaks, beginPosInt);
-    if (it != this->lineBreaks.begin()) {
-        // First element of lineBreaks is always -1 (as if there was an
-        // imaginary `\n`) one character before the start of a file. But we're
-        // actually looking for the start of the line (i.e., the offset right
-        // after the newline).
-        //
-        // If we're not at begin, that means we found something the first newline after beginPos,
-        // and we want last newline before beginPos.
-        --it;
+    if (it == this->lineBreaks.begin()) {
+        // If the least upper bound newline is the first linebreak in the list,
+        // then the start of the line is the start of the file.
+        return 0;
     }
+
+    auto prevLineBreak = it - 1;
     // return offset immediately after offset of newline char
-    return (*it) + 1;
+    return (*prevLineBreak) + 1;
 }
 
 void lexer::check_stack_capacity() {
