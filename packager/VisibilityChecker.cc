@@ -675,7 +675,13 @@ public:
                 if (auto e = ctx.beginError(it->importLoc, core::errors::Packager::InvalidConfiguration)) {
                     e.setHeader("Duplicate package import `{}`", it->package.show(ctx));
                     e.addErrorLine(ctx.locAt(first->importLoc), "Previous package import found here");
-                    e.replaceWith("Remove import", ctx.locAt(it->importLoc), "");
+                    auto importLoc = ctx.locAt(it->importLoc);
+                    auto [startOfIndent, indentation] = importLoc.findStartOfLine(ctx);
+                    auto replacementLoc = startOfIndent.adjust(ctx, -indentation, 0).join(importLoc);
+                    if (replacementLoc.beginPos() != 0) {
+                        replacementLoc = replacementLoc.adjust(ctx, -1, 0); // Also the preceding newline
+                    }
+                    e.replaceWith("Remove import", replacementLoc, "");
                 }
             }
         }
