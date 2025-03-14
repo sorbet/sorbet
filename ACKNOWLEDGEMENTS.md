@@ -7,19 +7,21 @@ contribute up until the process of open sourcing it:
 The current Sorbet team:
 
 - Trevor Elliott
-- James Iry
-- Dmitry Petrashko
+- Nathan Froyd
+- Neil Parikh
 - Getty Ritter
-- John Vilk
 - Jake Zimmerman
 
 Former Sorbet team members:
 
+- Ariel Davis
 - Russell Davis
 - Nelson Elhage
-- Neil Parikh
-- Ariel Davis
+- James Iry
+- Dmitry Petrashko
 - Paul Tarjan
+- John Vilk
+- Ilya Zheleznikov
 
 Stripes who helped open source Sorbet:
 
