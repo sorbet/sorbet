@@ -3,6 +3,7 @@
 
 #include "main/lsp/json_types.h"
 #include "main/lsp/wrapper.h"
+#include "main/options/options.h"
 #include "test/helpers/expectations.h"
 #include <regex>
 
@@ -27,6 +28,8 @@ public:
      */
     static std::vector<std::shared_ptr<RangeAssertion>>
     parseAssertions(const UnorderedMap<std::string, std::shared_ptr<core::File>> filesAndContents);
+
+    static realmain::options::Options parseOptions(std::vector<std::shared_ptr<RangeAssertion>> &assertions);
 
     // Creates a Range object for a source line and character range. Matches arbitrary subset of line if only sourceLine
     // is provided.
