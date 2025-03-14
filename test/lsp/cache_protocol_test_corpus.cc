@@ -331,4 +331,105 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReindexingUsesTheCache") {
     }
 }
 
+TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
+    // Write a file to disk.
+    auto relativeFilepath = "test.rb";
+    auto filePath = fmt::format("{}/{}", rootPath, relativeFilepath);
+    // This file has an error to indirectly assert that LSP is actually typechecking the file during initialization.
+    auto fileContents = "# typed: true\n"
+                        "class Foo\n"
+                        "  extend T::Sig\n"
+                        "  sig {returns(Integer)}\n"
+                        "  def bar\n"
+                        "    'hello'\n"
+                        "  end\n"
+                        "end\n";
+    auto key = core::serialize::Serializer::fileKey(
+        core::File(string(filePath), string(fileContents), core::File::Type::Normal, 0));
+
+    // LSP should write a cache to disk corresponding to initialization state.
+    {
+        writeFilesToFS({{relativeFilepath, fileContents}});
+
+        lspWrapper->opts->inputFileNames.push_back(filePath);
+        assertErrorDiagnostics(
+            initializeLSP(),
+            {{relativeFilepath, 5, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
+    }
+
+    // LSP should have written cache to disk with file hashes from initialization.
+    // It should not include data from file updates made during the editor session.
+    auto opts = lspWrapper->opts;
+
+    // Release cache lock by dropping the entire LSP wrapper which holds onto a kvstore.
+    lspWrapper = nullptr;
+
+    auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = std::make_shared<spdlog::logger>("null", sink);
+    unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+
+    // The key should exist in the kvstore
+    std::vector<uint8_t> origContent;
+    {
+        auto contents = kvstore->read(key);
+        REQUIRE_NE(contents.data, nullptr);
+        origContent.insert(origContent.begin(), contents.data, contents.data + contents.len);
+    }
+
+    // Create a session copy of the cache, consuming the original
+    auto sessionCache = realmain::cache::SessionCache::make(std::move(kvstore), *logger, *opts);
+    auto copy = std::make_unique<OwnedKeyValueStore>(sessionCache->open(logger));
+
+    // Make sure that the same key exists
+    std::vector<uint8_t> copyContent;
+
+    {
+        auto contents = copy->read(key);
+        REQUIRE_NE(contents.data, nullptr);
+        copyContent.insert(copyContent.begin(), contents.data, contents.data + contents.len);
+    }
+
+    REQUIRE_EQ(origContent, copyContent);
+
+    // Add a new key, and close out the copy.
+    std::vector<uint8_t> value{0, 1, 2, 3, 4, 5, 6, 7};
+    copy->write("new key", value);
+
+    {
+        auto contents = copy->read("new key");
+        REQUIRE_NE(contents.data, nullptr);
+        std::vector<uint8_t> readValue(contents.data, contents.data + contents.len);
+        REQUIRE_EQ(value, readValue);
+    }
+
+    OwnedKeyValueStore::bestEffortCommit(*logger, std::move(copy));
+
+    // Make sure the copy doesn't exist in the original
+    kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+    {
+        auto contents = kvstore->read("new key");
+        REQUIRE_EQ(contents.data, nullptr);
+    }
+
+    OwnedKeyValueStore::abort(std::move(kvstore));
+
+    // Reopen the copy, and make sure it still has our new value
+    copy = std::make_unique<OwnedKeyValueStore>(sessionCache->open(logger));
+
+    {
+        auto contents = copy->read("new key");
+        REQUIRE_NE(contents.data, nullptr);
+        std::vector<uint8_t> readValue(contents.data, contents.data + contents.len);
+        REQUIRE_EQ(value, readValue);
+    }
+
+    OwnedKeyValueStore::abort(std::move(copy));
+
+    // Close the session cache, and make sure that it removes the directory.
+    std::string sessionPath(sessionCache->kvstorePath());
+    REQUIRE(FileOps::exists(sessionPath));
+    sessionCache.reset();
+    REQUIRE(!FileOps::exists(sessionPath));
+}
+
 } // namespace sorbet::test::lsp
