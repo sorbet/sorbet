@@ -9,7 +9,7 @@ class GlobalState;
 class Context;
 class MutableContext;
 
-constexpr int INVALID_POS_LOC = 0xfffffff;
+constexpr uint32_t INVALID_POS_LOC = UINT32_MAX;
 struct LocOffsets {
     uint32_t beginLoc = INVALID_POS_LOC;
     uint32_t endLoc = INVALID_POS_LOC;
@@ -27,6 +27,13 @@ struct LocOffsets {
         ENFORCE_NO_TIMER(exists());
         return beginLoc == endLoc;
     }
+
+    LocOffsets() : beginLoc{INVALID_POS_LOC}, endLoc{INVALID_POS_LOC} {}
+
+    LocOffsets(uint32_t beginLoc, uint32_t endLoc) : beginLoc{beginLoc}, endLoc{endLoc} {
+        ENFORCE_NO_TIMER(beginLoc <= endLoc);
+    }
+
     static LocOffsets none() {
         return LocOffsets{INVALID_POS_LOC, INVALID_POS_LOC};
     }
