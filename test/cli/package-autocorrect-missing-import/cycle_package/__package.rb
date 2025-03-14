@@ -6,8 +6,8 @@ class Foo::Bar::CyclePackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered'
 
-  import Foo::Bar::CyclePackage::SubPackage
   import Foo::MyPackage
+  import Foo::Bar::CyclePackage::SubPackage
 
   export Foo::Bar::CyclePackage::OtherClass
   export Foo::Bar::CyclePackage::ImportMeTestOnly

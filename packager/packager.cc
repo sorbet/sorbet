@@ -610,7 +610,7 @@ public:
             if (seen.contains(current)) {
                 continue;
             }
-            toVisit.push_back(current);
+            seen.insert(current);
 
             if (current == otherPkg) {
                 return true;
