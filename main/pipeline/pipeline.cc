@@ -55,6 +55,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     gs.rbsSignaturesEnabled = opts.rbsSignaturesEnabled;
     gs.rbsAssertionsEnabled = opts.rbsAssertionsEnabled;
     gs.requiresAncestorEnabled = opts.requiresAncestorEnabled;
+    gs.typedSuper = opts.typedSuper;
 
     if (opts.silenceErrors) {
         gs.silenceErrors = true;
@@ -75,7 +76,6 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
         gs.includeErrorSections = false;
     }
     gs.ruby3KeywordArgs = opts.ruby3KeywordArgs;
-    gs.typedSuper = opts.typedSuper;
     gs.suppressPayloadSuperclassRedefinitionFor = opts.suppressPayloadSuperclassRedefinitionFor;
     if (!opts.uniquelyDefinedBehavior) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.

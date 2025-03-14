@@ -249,12 +249,6 @@ public:
     //
     // If this attribute is set to `true`, all strings will be checked for `<` and `>` characters in them.
     bool ensureCleanStrings = false;
-
-    // So we can know whether we're running in autogen mode.
-    // Right now this is only used to turn certain Rewriter passes on or off.
-    // Think very hard before looking at this value in namer / resolver!
-    // (hint: probably you want to find an alternate solution)
-    bool runningUnderAutogen = false;
     bool censorForSnapshotTests = false;
 
     std::optional<int> sleepInSlowPathSeconds = std::nullopt;
@@ -310,6 +304,23 @@ public:
     // Some calls to `super` are not type checked due to incomplete/imperfect information.
     bool typedSuper = true;
 
+    // Whether to parse RBS-style type annotations out of comments
+    bool rbsSignaturesEnabled = false;
+
+    // Whether to parse RBS-style type assertions out of end-of-line comments
+    bool rbsAssertionsEnabled = false;
+
+    // Whether to allow `requires_ancestor`, which allows modeling certain kinds of indirect
+    // inheritance hierarchies, at the expense of implementation complexity and soundness
+    // problems.
+    bool requiresAncestorEnabled = false;
+
+    // So we can know whether we're running in autogen mode.
+    // Right now this is only used to turn certain Rewriter passes on or off.
+    // Think very hard before looking at this value in namer / resolver!
+    // (hint: probably you want to find an alternate solution)
+    bool runningUnderAutogen = false;
+
     std::vector<std::string> suppressPayloadSuperclassRedefinitionFor;
 
     // When present, this indicates that single-package rbi generation is being performed, and contains metadata about
@@ -323,10 +334,6 @@ public:
     std::optional<std::string> suggestUnsafe;
 
     std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> semanticExtensions;
-
-    bool rbsSignaturesEnabled = false;
-    bool rbsAssertionsEnabled = false;
-    bool requiresAncestorEnabled = false;
 
     bool shouldReportErrorOn(FileRef file, ErrorClass what) const;
 
