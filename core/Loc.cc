@@ -52,41 +52,35 @@ Loc::Detail Loc::pos2Detail(const File &file, uint32_t off) {
     // lower_bound is what the C++ STL calls the "least upper bound," i.e., a pointer to the first
     // element which is greater than or equal to you in a sorted list
     auto it = absl::c_lower_bound(lineBreaks, off);
-    // haha, gotcha! You'd THINK our list is sorted, but since we're doing the comparison by way of
-    // mixing `uint32_t off` and `vector<int> lineBreaks_`, the `-1` at the start of the vector gets
-    // coerced to UINT32_MAX, which then the algorithm thinks is the least upper bound, because it's
-    // greater than anything we could possibly be looking for. It's as if the list is not actually
-    // sorted, because the first element is bigger than all the rest.
-    //
-    // When this happens, the libc++ (and libstdc++, I think) binary search algorithms happen to
-    // return the first element, so we handle that separately here.
-    //
-    // If the comparison were being done entirely on signed values, or we changed lineBreaks_ to no
-    // longer store signed values, we could get rid of this `... == begin()` hack here.
     if (it == lineBreaks.begin()) {
         detail.line = 1;
         detail.column = off + 1;
         return detail;
     }
+    detail.line = (it - lineBreaks.begin()) + 1;
     --it;
-    detail.line = (it - file.lineBreaks().begin()) + 1;
     detail.column = off - *it;
     return detail;
 }
 
 optional<uint32_t> Loc::detail2Pos(const File &file, Loc::Detail detail) {
-    auto l = detail.line - 1;
+    auto line1idx = detail.line;
     auto lineBreaks = file.lineBreaks();
-    if (!(0 <= l && l < lineBreaks.size())) {
+    if (!(1 <= line1idx && line1idx <= lineBreaks.size() + 1)) {
         return nullopt;
     }
-    auto lineOffset = lineBreaks[l];
-    auto nextLineStart = l + 1 < lineBreaks.size() ? lineBreaks[l + 1] : file.source().size();
-    auto lineLength = nextLineStart - lineOffset;
-    if (detail.column > lineLength) {
+    auto line0idx = line1idx - 1;
+
+    auto lineStart = line0idx == 0 ? 0 : lineBreaks[line0idx - 1] + 1;
+    auto lineEnd = line0idx < lineBreaks.size() ? lineBreaks[line0idx] : file.source().size();
+    auto lineLength = lineEnd - lineStart;
+    auto column1idx = detail.column;
+    if (column1idx > lineLength + 1) {
         return nullopt;
     }
-    return lineOffset + detail.column;
+
+    auto column0idx = column1idx - 1;
+    return lineStart + column0idx;
 }
 
 optional<Loc> Loc::fromDetails(const GlobalState &gs, FileRef fileRef, Loc::Detail begin, Loc::Detail end) {
@@ -140,18 +134,18 @@ void addLocLine(stringstream &buf, int line, const File &file, int tabs, int lin
         buf << leftPad(to_string(line + 1), lineNumPadding);
     }
     buf << " |" << rang::style::reset;
-    if (file.lineBreaks().size() <= line + 1) {
+    if (!(0 <= line || line < file.lineBreaks().size())) {
         fatalLogger->error(R"(msg="Bad addLocLine line" path="{}" line="{}"")", absl::CEscape(file.path()), line);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
         ENFORCE_NO_TIMER(false);
     }
-    auto endPos = file.lineBreaks()[line + 1];
-    auto numToWrite = endPos - file.lineBreaks()[line] - 1;
-    if (numToWrite <= 0) {
+    auto endPos = file.lineBreaks()[line];
+    auto offset = line == 0 ? 0 : file.lineBreaks()[line - 1] + 1;
+    if (endPos <= offset) {
         return;
     }
-    auto offset = file.lineBreaks()[line] + 1;
-    if (offset < 0 || offset >= file.source().size()) {
+    auto numToWrite = endPos - offset;
+    if (offset >= file.source().size()) {
         fatalLogger->error(R"(msg="Bad addLocLine offset" path="{}" line="{}" offset="{}")", absl::CEscape(file.path()),
                            line, offset);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
@@ -406,8 +400,8 @@ Loc Loc::truncateToFirstLine(const GlobalState &gs) const {
     }
 
     const auto &lineBreaks = this->file().data(gs).lineBreaks();
-    // Detail::line is 1-indexed. We want one after the 0-indexed line, so line - 1 + 1 = line
-    auto firstNewline = lineBreaks[beginDetail.line];
+    // Detail::line is 1-indexed. lineBreaks stores the ending newline of the 0-indexed line
+    auto firstNewline = lineBreaks[beginDetail.line - 1];
     return Loc(this->file(), this->beginPos(), firstNewline);
 }
 

@@ -74,7 +74,7 @@ public:
     File(const File &other) = delete;
     File() = delete;
     std::unique_ptr<File> deepCopy(GlobalState &) const;
-    absl::Span<const int> lineBreaks() const;
+    absl::Span<const uint32_t> lineBreaks() const;
     int lineCount() const;
     StrictLevel minErrorLevel() const;
 
@@ -114,7 +114,7 @@ private:
 public:
     const std::string path_;
     const std::string source_;
-    mutable std::shared_ptr<std::vector<int>> lineBreaks_;
+    mutable std::shared_ptr<std::vector<uint32_t>> lineBreaks_;
 
     mutable StrictLevel minErrorLevel_ = StrictLevel::Max;
 

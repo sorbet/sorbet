@@ -59,7 +59,7 @@ private:
     ruby_version version;
     std::string_view source_buffer;
     sorbet::StableStringStorage<> &scratch;
-    const std::vector<int> lineBreaks;
+    const std::vector<uint32_t> lineBreaks;
 
     std::stack<environment> static_env;
     std::stack<literal> literal_stack;
