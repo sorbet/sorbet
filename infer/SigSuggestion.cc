@@ -461,7 +461,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         fmt::format_to(std::back_inserter(ss), "returns({}) }}", guessedReturnType.show(ctx, options));
     }
 
-    auto [replacementLoc, padding] = loc.findStartOfLine(ctx);
+    auto [replacementLoc, padding] = loc.findStartOfIndentation(ctx);
     string spaces(padding, ' ');
     bool hasExistingSig = methodSymbol.data(ctx)->resultType != nullptr;
 
