@@ -482,4 +482,27 @@ unique_ptr<KeyValueStore> OwnedKeyValueStore::bestEffortCommit(spdlog::logger &l
     return move(ownedKvstore->kvstore);
 }
 
+void OwnedKeyValueStore::copyTo(const std::string &path) const {
+    this->abort();
+
+    auto rc = mdb_env_copy(this->kvstore->dbState->env, path.c_str());
+    if (rc != 0) {
+        if (rc == ENOENT) {
+        }
+        try {
+            filesystem::create_directories(std::string_view(path));
+        } catch (filesystem::filesystem_error &e) {
+            fmt::print(stderr,
+                       "'{}' does not exist and could not be created. "
+                       "When using --cache-dir, create the directory before hand.\n",
+                       path);
+            throw EarlyReturnWithCode(1);
+        }
+        rc = mdb_env_copy(this->kvstore->dbState->env, path.c_str());
+        if (rc != 0) {
+            throw_mdb_error("failed to copy kvstore"sv, rc, kvstorePath());
+        }
+    }
+}
+
 } // namespace sorbet

@@ -79,6 +79,10 @@ public:
     OwnedKeyValueStore(std::unique_ptr<KeyValueStore> kvstore);
     ~OwnedKeyValueStore();
 
+    /** Copies the env to the path given. After a call to `copyTo`, a new kvstore may be opened using the path that was
+     * given. */
+    void copyTo(const std::string &path) const;
+
     /** returns nullptr if not found*/
     KeyValueStoreValue read(std::string_view key) const;
     /** Reads a string from the key value store. Lifetime of string is tied to the lifetime of the database. Returns an

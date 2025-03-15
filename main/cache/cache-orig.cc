@@ -19,4 +19,19 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
     return kvstore;
 }
 
+SessionCache::~SessionCache() noexcept(false) {}
+
+std::string_view SessionCache::kvstorePath() const {
+    return std::string_view(this->path);
+}
+
+std::unique_ptr<SessionCache> SessionCache::make(std::unique_ptr<const OwnedKeyValueStore> kvstore,
+                                                 ::spdlog::logger &logger, const options::Options &opts) {
+    return nullptr;
+}
+
+std::unique_ptr<KeyValueStore> SessionCache::open(std::shared_ptr<::spdlog::logger> logger) const {
+    return nullptr;
+}
+
 } // namespace sorbet::realmain::cache
