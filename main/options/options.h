@@ -247,6 +247,7 @@ struct Options {
     bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
     bool lspExtractToVariableEnabled = false;
+    bool lspExtractToMethodEnabled = false;
     bool forciblySilenceLspMultipleDirError = false;
     // Enables out-of-order reference checking
     bool outOfOrderReferenceChecksEnabled = false;
