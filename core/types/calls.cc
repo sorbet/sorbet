@@ -4242,7 +4242,7 @@ public:
 
         std::optional<int> numberOfPositionalBlockParams = args.block->fixedArity();
         if (!numberOfPositionalBlockParams || *numberOfPositionalBlockParams > core::Symbols::MAX_PROC_ARITY) {
-            res.returnType = core::Types::procClass();
+            res.returnType = Types::procOf(Types::untyped(Symbols::Magic_UntypedSource_proc()));
             return;
         }
         auto untypedWithBlame = core::Types::untyped(Symbols::Magic_UntypedSource_proc());
@@ -4268,7 +4268,7 @@ public:
         }
 
         auto procType = Types::unwrapType(gs, args.argLoc(0), args.args[0]->type);
-        if (!Types::isSubType(gs, procType, Types::nilableProcClass())) {
+        if (!Types::isSubType(gs, procType, Types::nilableProc())) {
             if (auto e = gs.beginError(args.argLoc(0), core::errors::Infer::CastTypeMismatch)) {
                 e.setHeader("Lambda type annotation must be either `{}` or a `{}` type (and possibly nilable)", "Proc",
                             "T.proc");
@@ -4543,6 +4543,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::T_Range(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Set(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Class(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Proc(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
 
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::class_(), &Object_class},
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},
@@ -4617,6 +4618,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::T_Range(), Intrinsic::Kind::Singleton, Names::tripleEq(), &GenericForwarder_tripleEq},
     {Symbols::T_Set(), Intrinsic::Kind::Singleton, Names::tripleEq(), &GenericForwarder_tripleEq},
     {Symbols::T_Class(), Intrinsic::Kind::Singleton, Names::tripleEq(), &GenericForwarder_tripleEq},
+    {Symbols::T_Proc(), Intrinsic::Kind::Singleton, Names::tripleEq(), &GenericForwarder_tripleEq},
 };
 
 UnorderedMap<NameRef, const vector<NameRef>> computeIntrinsicsDispatchMap() {
