@@ -152,9 +152,7 @@ bool LSPTypechecker::typecheck(std::unique_ptr<LSPFileUpdates> updates, WorkerPo
             commitFileUpdates(*updates, /* cancelable */ false);
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
-            auto kvstore = this->config->getKvStore();
-            auto result = runSlowPath(*updates, OwnedKeyValueStore::abort(std::move(kvstore)), workers, errorFlusher,
-                                      SlowPathMode::Cancelable);
+            auto result = runSlowPath(*updates, this->getKvStore(), workers, errorFlusher, SlowPathMode::Cancelable);
             ENFORCE(std::holds_alternative<bool>(result));
             committed = std::get<bool>(result);
         }
@@ -480,25 +478,34 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                 if (mode == SlowPathMode::Init) {
                     // Cache these before any pipeline::package rewrites, so that the cache is still usable
                     // regardless of whether `--stripe-packages` was passed.
-                    cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
-                                                         this->config->opts, *this->gs, workers, nonPackagedIndexed);
+                    ownedKvstore = cache::ownIfUnchanged(
+                        *this->gs, cache::maybeCacheGlobalStateAndFiles(
+                                       OwnedKeyValueStore::abort(std::move(ownedKvstore)), this->config->opts,
+                                       *this->gs, workers, nonPackagedIndexed));
                 }
 
                 // Second run: all the other files (the packageDB shouldn't change)
                 pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts,
                                                 workers);
-            }
 
-            if (mode == SlowPathMode::Init) {
-                // At this point this->gs has a name table that's initialized enough for the indexer thread, so we
-                // make a copy to pass back over.
-                indexedState = this->gs->deepCopy();
-                indexedState->errorQueue = std::move(savedErrorQueue);
+                if (mode == SlowPathMode::Init) {
+                    Timer timeit(config->logger, "copy_state");
 
-                this->initialized = true;
-            } else {
-                // We don't need to hold on to the saved error queue.
-                savedErrorQueue.reset();
+                    // At this point this->gs has a name table that's initialized enough for the indexer thread, so we
+                    // make a copy to pass back over.
+                    indexedState = this->gs->deepCopy();
+                    indexedState->errorQueue = std::move(savedErrorQueue);
+
+                    this->sessionCache =
+                        cache::SessionCache::make(std::move(ownedKvstore), *this->config->logger, this->config->opts);
+
+                    this->initialized = true;
+                } else {
+                    // We don't need to hold on to the saved error queue.
+                    savedErrorQueue.reset();
+
+                    OwnedKeyValueStore::abort(std::move(ownedKvstore));
+                }
             }
         }
 
@@ -758,6 +765,14 @@ ast::ParsedFile LSPTypechecker::getIndexed(core::FileRef fref) const {
     return pipeline::indexOne(this->config->opts, *this->gs, fref);
 }
 
+std::unique_ptr<KeyValueStore> LSPTypechecker::getKvStore() const {
+    if (this->sessionCache == nullptr) {
+        return nullptr;
+    }
+
+    return this->sessionCache->open(this->config->logger, this->config->opts);
+}
+
 vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     vector<ast::ParsedFile> updatedIndexed;
@@ -780,7 +795,7 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileR
 
     if (!toIndex.empty()) {
         auto cancelable = false;
-        auto kvstore = this->config->getKvStore();
+        auto kvstore = std::make_unique<OwnedKeyValueStore>(this->getKvStore());
         auto result = pipeline::index(*this->gs, toIndex, this->config->opts, workers, std::move(kvstore), cancelable);
         ENFORCE(result.hasResult());
         auto indexed = std::move(result.result());

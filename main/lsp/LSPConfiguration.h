@@ -5,10 +5,6 @@
 #include "main/lsp/json_enums.h"
 #include "main/options/options.h"
 
-namespace sorbet {
-class OwnedKeyValueStore;
-}
-
 namespace sorbet::realmain::lsp {
 
 class LSPOutput;
@@ -135,11 +131,6 @@ public:
      * actually within the workspace.
      */
     bool isUriInWorkspace(std::string_view uri) const;
-
-    /**
-     * Opens the kvstore if one was specified in `this->opts`. Returns `nullptr` if none was specified.
-     */
-    std::unique_ptr<const OwnedKeyValueStore> getKvStore() const;
 };
 } // namespace sorbet::realmain::lsp
 #endif // RUBY_TYPER_LSPCONFIGURATION_H
