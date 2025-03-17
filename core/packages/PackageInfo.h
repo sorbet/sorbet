@@ -83,6 +83,10 @@ public:
     // allowed to violate strict dependencies.
     virtual bool importsTransitively(const core::GlobalState &gs,
                                      const core::packages::MangledName &otherPkg) const = 0;
+    // Returns a string representing the path to the given package from this package, if it exists. Note: this only
+    // looks at non-test imports.
+    virtual std::optional<std::string> pathTo(const core::GlobalState &gs,
+                                              const core::packages::MangledName dest) const = 0;
 
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,

@@ -111,6 +111,11 @@ public:
         return false;
     }
 
+    std::optional<std::string> pathTo(const core::GlobalState &gs, const MangledName dest) const {
+        notImplemented();
+        return nullopt;
+    }
+
     std::optional<ImportType> importsPackage(MangledName mangledName) const {
         notImplemented();
         return nullopt;

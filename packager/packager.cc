@@ -18,6 +18,7 @@
 #include "rapidjson/writer.h"
 #include <algorithm>
 #include <cctype>
+#include <queue>
 #include <sstream>
 #include <sys/stat.h>
 
@@ -631,6 +632,66 @@ public:
             }
         }
         return false;
+    }
+
+    string renderPath(const core::GlobalState &gs, vector<core::packages::MangledName> path) const {
+        // TODO(neil): if the cycle has a large number of nodes (10?), show partial path (first 5, ... (n omitted), last
+        // 5) to prevent error being too long
+        std::string pathMessage;
+        for (int i = 0; i < path.size(); i++) {
+            auto name = gs.packageDB().getPackageInfo(path[i]).show(gs);
+            bool showArrow = i < path.size() - 1;
+            pathMessage += core::ErrorColors::format("    `{}`{}\n", name, showArrow ? " →" : "");
+        }
+        return pathMessage;
+    }
+
+    optional<string> pathTo(const core::GlobalState &gs, const core::packages::MangledName dest) const {
+        auto src = mangledName();
+        queue<core::packages::MangledName> q;
+        // Maps from package to what package we came from to get to that package, used to construct the path
+        // Ex. A -> B -> C means that prev[C] = B and prev[B] = A
+        UnorderedMap<core::packages::MangledName, core::packages::MangledName> prev;
+        UnorderedSet<core::packages::MangledName> visited;
+
+        q.push(src);
+        while (!q.empty()) {
+            auto curr = q.front();
+            q.pop();
+            if (visited.contains(curr)) {
+                continue;
+            }
+            visited.insert(curr);
+
+            if (curr == dest) {
+                // Found the target node, walk backward through the prev map to construct the path
+                vector<core::packages::MangledName> path;
+                path.push_back(curr);
+                while (curr != src) {
+                    curr = prev[curr];
+                    path.push_back(curr);
+                }
+                reverse(path.begin(), path.end());
+                return renderPath(gs, path);
+            }
+
+            ENFORCE(gs.packageDB().getPackageInfo(curr).exists());
+            auto &currInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfo(curr));
+            for (auto &import : currInfo.importedPackageNames) {
+                auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
+                if (!importInfo.exists() || import.type == core::packages::ImportType::Test ||
+                    visited.contains(import.name.mangledName)) {
+                    continue;
+                }
+                if (!prev.contains(import.name.mangledName)) {
+                    prev[import.name.mangledName] = curr;
+                }
+                q.push(import.name.mangledName);
+            }
+        }
+
+        // No path found
+        return nullopt;
     }
 };
 
@@ -1930,6 +1991,10 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                 e.setHeader("Strict dependencies violation: importing `{}` will put `{}` into a cycle, which is not "
                             "valid at `{}`",
                             otherPkg.show(ctx), thisPkg.show(ctx), level);
+                auto path = otherPkg.pathTo(ctx, thisPkg.mangledName());
+                ENFORCE(path.has_value(),
+                        "Path from otherPkg to thisPkg should always exist if they are in the same SCC");
+                e.addErrorNote("Path from `{}` to `{}`:\n{}", otherPkg.show(ctx), thisPkg.show(ctx), path.value());
             }
             // TODO(neil): if the import is unused (ie. there are no references in this package to the imported
             // package), autocorrect to delete import

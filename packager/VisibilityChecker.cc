@@ -509,6 +509,11 @@ public:
                         e.addErrorLine(core::Loc(this->package.declLoc().file(), strictDepsLevel.value().second),
                                        "`{}` is `{}`, which disallows cycles", this->package.show(ctx),
                                        currentStrictDepsLevel);
+                        auto path = pkg.pathTo(ctx, this->package.mangledName());
+                        ENFORCE(path.has_value(),
+                                "Path from pkg to this->package should always exist if causesCycle is true");
+                        e.addErrorNote("Path from `{}` to `{}`:\n{}", pkg.show(ctx), this->package.show(ctx),
+                                       path.value());
                     }
 
                     if (layeringViolation) {
