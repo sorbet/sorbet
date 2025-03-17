@@ -91,7 +91,7 @@ public:
     };
 
     bool contains(const Loc &other) const;
-    std::pair<Detail, Detail> position(const GlobalState &gs) const;
+    std::pair<Detail, Detail> toDetails(const GlobalState &gs) const;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string toString(const GlobalState &gs) const {
         return toStringWithTabs(gs);
@@ -103,8 +103,8 @@ public:
     bool operator==(const Loc &rhs) const;
 
     bool operator!=(const Loc &rhs) const;
-    static std::optional<uint32_t> pos2Offset(const File &file, Detail pos);
-    static Detail offset2Pos(const File &file, uint32_t off);
+    static std::optional<uint32_t> detail2Pos(const File &file, Detail detail);
+    static Detail pos2Detail(const File &file, uint32_t off);
     static std::optional<Loc> fromDetails(const GlobalState &gs, FileRef fileRef, Detail begin, Detail end);
 
     // Create a new Loc by adjusting the beginPos and endPos of this Loc, like this:
