@@ -106,11 +106,6 @@ public:
         return core::packages::StrictDependenciesLevel::False;
     }
 
-    bool importsTransitively(const core::GlobalState &gs, const core::packages::MangledName &otherPkg) const {
-        notImplemented();
-        return false;
-    }
-
     std::optional<std::string> pathTo(const core::GlobalState &gs, const MangledName dest) const {
         notImplemented();
         return nullopt;

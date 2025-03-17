@@ -603,37 +603,6 @@ public:
         }
     }
 
-    bool importsTransitively(const core::GlobalState &gs, const core::packages::MangledName &otherPkg) const {
-        UnorderedSet<core::packages::MangledName> seen;
-        vector<core::packages::MangledName> toVisit;
-        toVisit.push_back(mangledName());
-
-        while (!toVisit.empty()) {
-            auto current = toVisit.back();
-            toVisit.pop_back();
-            if (seen.contains(current)) {
-                continue;
-            }
-            seen.insert(current);
-
-            if (current == otherPkg) {
-                return true;
-            }
-
-            auto &info = PackageInfoImpl::from(gs.packageDB().getPackageInfo(current));
-
-            for (auto &import : info.importedPackageNames) {
-                if (import.type == core::packages::ImportType::Test ||
-                    !gs.packageDB().getPackageInfo(import.name.mangledName).exists()) {
-                    continue;
-                }
-
-                toVisit.push_back(import.name.mangledName);
-            }
-        }
-        return false;
-    }
-
     string renderPath(const core::GlobalState &gs, vector<core::packages::MangledName> path) const {
         // TODO(neil): if the cycle has a large number of nodes (10?), show partial path (first 5, ... (n omitted), last
         // 5) to prevent error being too long

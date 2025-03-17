@@ -79,10 +79,6 @@ public:
                                          const PackageInfo &otherPkg) const = 0;
     // What is the minimum strict dependencies level that this package's imports must have?
     virtual core::packages::StrictDependenciesLevel minimumStrictDependenciesLevel() const = 0;
-    // Does this package transitively import otherPkg? Note: This only looks at non-test imports, since test imports are
-    // allowed to violate strict dependencies.
-    virtual bool importsTransitively(const core::GlobalState &gs,
-                                     const core::packages::MangledName &otherPkg) const = 0;
     // Returns a string representing the path to the given package from this package, if it exists. Note: this only
     // looks at non-test imports.
     virtual std::optional<std::string> pathTo(const core::GlobalState &gs,

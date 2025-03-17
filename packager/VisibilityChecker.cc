@@ -450,6 +450,7 @@ public:
             bool layeringViolation = false;
             bool strictDependenciesTooLow = false;
             bool causesCycle = false;
+            std::optional<std::string> path;
             if (!isTestImport && db.enforceLayering()) {
                 layeringViolation = strictDepsLevel.has_value() &&
                                     strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&
@@ -459,9 +460,10 @@ public:
                     importStrictDepsLevel.value().first < this->package.minimumStrictDependenciesLevel();
                 // If there's a path from the imported packaged to this package, then adding the import will close
                 // the loop and cause a cycle.
+                path = pkg.pathTo(ctx, this->package.mangledName());
                 causesCycle = strictDepsLevel.has_value() &&
                               strictDepsLevel.value().first >= core::packages::StrictDependenciesLevel::LayeredDag &&
-                              pkg.importsTransitively(ctx, this->package.mangledName());
+                              path.has_value();
             }
             if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
                 if (wasNotImported) {
@@ -509,7 +511,6 @@ public:
                         e.addErrorLine(core::Loc(this->package.declLoc().file(), strictDepsLevel.value().second),
                                        "`{}` is `{}`, which disallows cycles", this->package.show(ctx),
                                        currentStrictDepsLevel);
-                        auto path = pkg.pathTo(ctx, this->package.mangledName());
                         ENFORCE(path.has_value(),
                                 "Path from pkg to this->package should always exist if causesCycle is true");
                         e.addErrorNote("Path from `{}` to `{}`:\n{}", pkg.show(ctx), this->package.show(ctx),
