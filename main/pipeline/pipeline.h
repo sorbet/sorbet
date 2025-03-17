@@ -48,7 +48,6 @@ size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileR
 void unpartitionPackageFiles(std::vector<ast::ParsedFile> &packageFiles,
                              std::vector<ast::ParsedFile> &&nonPackageFiles);
 
-void setPackagerOptions(core::GlobalState &gs, const options::Options &opts);
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
              WorkerPool &workers);
 

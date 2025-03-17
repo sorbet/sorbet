@@ -282,18 +282,30 @@ bool PackageDB::allowRelaxedPackagerChecksFor(MangledName mangledName) const {
 PackageDB PackageDB::deepCopy() const {
     ENFORCE(frozen);
     PackageDB result;
+
+    // --- data ---
     result.packages_.reserve(this->packages_.size());
     for (auto const &[nr, pkgInfo] : this->packages_) {
         result.packages_[nr] = pkgInfo->deepCopy();
     }
+    result.packagesByPathPrefix = this->packagesByPathPrefix;
+    // This assumes that the GlobalState this PackageDB is getting copied into also has these
+    // interned mangledName NameRefs at the same IDs as the current PackageDB.
+    result.mangledNames = this->mangledNames;
+
+    // --- options ---
     result.enabled_ = this->enabled_;
     result.extraPackageFilesDirectoryUnderscorePrefixes_ = this->extraPackageFilesDirectoryUnderscorePrefixes_;
     result.extraPackageFilesDirectorySlashDeprecatedPrefixes_ =
         this->extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     result.extraPackageFilesDirectorySlashPrefixes_ = this->extraPackageFilesDirectorySlashPrefixes_;
-    result.packagesByPathPrefix = this->packagesByPathPrefix;
-    result.mangledNames = this->mangledNames;
+    result.skipRBIExportEnforcementDirs_ = this->skipRBIExportEnforcementDirs_;
+    // This assumes that the GlobalState this PackageDB is getting copied into also has these
+    // interned layer NameRefs at the same IDs as the current PackageDB.
+    result.layers_ = this->layers_;
+    result.allowRelaxedPackagerChecksFor_ = this->allowRelaxedPackagerChecksFor_;
     result.errorHint_ = this->errorHint_;
+
     return result;
 }
 
