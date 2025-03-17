@@ -39,6 +39,7 @@
 #include "packager/rbi_gen.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
+#include "payload/payload.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -259,53 +260,9 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
     return trees;
 }
 
-void setupPackager(core::GlobalState &gs, vector<shared_ptr<RangeAssertion>> &assertions) {
-    vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
-    vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
-    vector<std::string> extraPackageFilesDirectorySlashPrefixes;
-    vector<std::string> skipRBIExportEnforcementDirs;
-    vector<std::string> allowRelaxedPackagerChecksFor;
-
-    auto extraDirUnderscore =
-        StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
-    if (extraDirUnderscore.has_value()) {
-        extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
-    }
-
-    auto extraDirSlashDeprecated =
-        StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash-deprecated", assertions);
-    if (extraDirSlashDeprecated.has_value()) {
-        extraPackageFilesDirectorySlashDeprecatedPrefixes.emplace_back(extraDirSlashDeprecated.value());
-    }
-
-    auto extraDirSlash = StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
-    if (extraDirSlash.has_value()) {
-        extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
-    }
-
-    auto allowRelaxedPackager = StringPropertyAssertion::getValue("allow-relaxed-packager-checks-for", assertions);
-    if (allowRelaxedPackager.has_value()) {
-        allowRelaxedPackagerChecksFor.emplace_back(allowRelaxedPackager.value());
-    }
-
-    std::vector<std::string> defaultLayers = {};
-    auto packagerLayers = StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
-
-    {
-        core::UnfreezeNameTable packageNS(gs);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-        gs.setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                              extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                              extraPackageFilesDirectorySlashPrefixes, {}, allowRelaxedPackagerChecksFor,
-                              packagerLayers, "PACKAGE_ERROR_HINT");
-    }
-}
-
 void package(core::GlobalState &gs, unique_ptr<WorkerPool> &workers, absl::Span<ast::ParsedFile> trees,
              ExpectationHandler &handler, vector<shared_ptr<RangeAssertion>> &assertions) {
-    auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
-
-    if (!enablePackager) {
+    if (!gs.packageDB().enabled()) {
         return;
     }
 
@@ -338,45 +295,23 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
     }
 
+    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    auto opts = RangeAssertion::parseOptions(assertions);
+    opts.censorForSnapshotTests = true;
+    opts.stripePackagesHint = "PACKAGE_ERROR_HINT";
+
     auto logger = spdlog::stderr_color_mt("fixtures: " + inputPath);
+    auto workers = WorkerPool::create(0, *logger);
     auto errorCollector = make_shared<core::ErrorCollector>();
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
     auto gs = make_unique<core::GlobalState>(errorQueue);
 
+    unique_ptr<const OwnedKeyValueStore> kvstore = nullptr;
+    payload::createInitialGlobalState(*gs, opts, kvstore);
+    realmain::pipeline::setGlobalStateOptions(*gs, opts);
+
     for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
         gs->semanticExtensions.emplace_back(provider->defaultInstance());
-    }
-
-    gs->censorForSnapshotTests = true;
-    auto workers = WorkerPool::create(0, gs->tracer());
-
-    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
-
-    gs->rbsSignaturesEnabled =
-        BooleanPropertyAssertion::getValue("enable-experimental-rbs-signatures", assertions).value_or(false);
-    gs->requiresAncestorEnabled =
-        BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
-    gs->ruby3KeywordArgs =
-        BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
-    gs->typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
-    // TODO(jez) Allow allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
-
-    if (!BooleanPropertyAssertion::getValue("uniquely-defined-behavior", assertions).value_or(false)) {
-        gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
-    }
-
-    if (!BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false)) {
-        gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
-    }
-
-    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
-        gs->initEmpty();
-    } else {
-        core::serialize::Serializer::loadGlobalState(*gs, GLOBAL_STATE_PAYLOAD);
-    }
-
-    if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
-        gs->suggestUnsafe = "T.unsafe";
     }
 
     unique_ptr<core::GlobalState> emptyGs;
@@ -404,12 +339,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     ExpectationHandler handler(test, errorQueue, errorCollector);
-    auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
 
     vector<ast::ParsedFile> trees;
     auto filesSpan = absl::Span<core::FileRef>(files);
-    if (enablePackager) {
-        setupPackager(*gs, assertions);
+    if (opts.stripePackages) {
+        realmain::pipeline::setPackagerOptions(*gs, opts);
 
         auto numPackageFiles = realmain::pipeline::partitionPackageFiles(*gs, filesSpan);
         auto inputPackageFiles = filesSpan.first(numPackageFiles);
@@ -427,7 +361,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
 
-    if (enablePackager) {
+    if (opts.stripePackages) {
         if (test.expectations.contains("rbi-gen")) {
             auto rbiGenGs = emptyGs->deepCopy();
             rbiGenGs->errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
@@ -464,7 +398,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             }
 
             // Initialize the package DB
-            setupPackager(*rbiGenGs, assertions);
+            realmain::pipeline::setPackagerOptions(*rbiGenGs, opts);
             packager::Packager::findPackages(*rbiGenGs, absl::Span<ast::ParsedFile>(packageTrees));
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, packageTrees);
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, trees);
@@ -546,7 +480,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
         trees = move(resolver::Resolver::run(*gs, move(trees), *workers).result());
 
-        if (enablePackager) {
+        if (opts.stripePackages) {
             trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
         }
 
@@ -810,7 +744,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     trees = move(newTrees);
     fast_sort(trees, [](auto &lhs, auto &rhs) { return lhs.file < rhs.file; });
 
-    if (enablePackager) {
+    if (opts.stripePackages) {
         absl::c_stable_partition(trees, [&](const auto &pf) { return pf.file.isPackage(*gs); });
         trees = packager::Packager::runIncremental(*gs, move(trees), *workers);
         for (auto &tree : trees) {
@@ -851,7 +785,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncrementalNamer, *workers).result());
     }
 
-    if (enablePackager) {
+    if (opts.stripePackages) {
         trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
     }
 

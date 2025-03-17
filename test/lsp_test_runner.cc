@@ -543,58 +543,19 @@ TEST_CASE("LSPTest") {
 
     // Initialize lspWrapper.
     {
-        shared_ptr<realmain::options::Options> opts = make_shared<realmain::options::Options>();
-        opts->noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
-        opts->ruby3KeywordArgs =
-            BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
-        opts->typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
-        // TODO(jez) Allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
-        opts->uniquelyDefinedBehavior =
-            BooleanPropertyAssertion::getValue("uniquely-defined-behavior", assertions).value_or(false);
-        opts->outOfOrderReferenceChecksEnabled =
-            BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false);
-        opts->rbsSignaturesEnabled =
-            BooleanPropertyAssertion::getValue("enable-experimental-rbs-signatures", assertions).value_or(false);
-        opts->requiresAncestorEnabled =
-            BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
-        opts->lspExtractToVariableEnabled =
+        auto opts = RangeAssertion::parseOptions(assertions);
+
+        opts.lspExtractToVariableEnabled =
             BooleanPropertyAssertion::getValue("enable-experimental-lsp-extract-to-variable", assertions)
                 .value_or(false);
-        opts->stripePackages = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
-
-        if (opts->stripePackages) {
-            auto extraDirUnderscore =
-                StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
-            if (extraDirUnderscore.has_value()) {
-                opts->extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
-            }
-            auto extraDirSlashDeprecated =
-                StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash-deprecated", assertions);
-            if (extraDirSlashDeprecated.has_value()) {
-                opts->extraPackageFilesDirectorySlashDeprecatedPrefixes.emplace_back(extraDirSlashDeprecated.value());
-            }
-            auto extraDirSlash =
-                StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
-            if (extraDirSlash.has_value()) {
-                opts->extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
-            }
-            auto skipImportVisibility =
-                StringPropertyAssertion::getValue("allow-relaxed-packager-checks-for", assertions);
-            if (skipImportVisibility.has_value()) {
-                opts->allowRelaxedPackagerChecksFor.emplace_back(skipImportVisibility.value());
-            }
-            std::vector<std::string> defaultLayers = {};
-            opts->packagerLayers =
-                StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
-        }
-        opts->disableWatchman = true;
-        opts->rubyfmtPath = "test/testdata/lsp/rubyfmt-stub/rubyfmt";
+        opts.disableWatchman = true;
+        opts.rubyfmtPath = "test/testdata/lsp/rubyfmt-stub/rubyfmt";
 
         // Set to a number that is reasonable large for tests, but small enough that we can have a test to handle
         // this edge case. If you change this number, `fast_path/{too_many_files,not_enough_files,initialize}` will
         // need to be changed as well.
-        opts->lspMaxFilesOnFastPath = 10;
-        lspWrapper = SingleThreadedLSPWrapper::create("", move(opts));
+        opts.lspMaxFilesOnFastPath = 10;
+        lspWrapper = SingleThreadedLSPWrapper::create("", make_shared<realmain::options::Options>(move(opts)));
         lspWrapper->enableAllExperimentalFeatures();
     }
 
