@@ -250,6 +250,55 @@ public:
 
         classDef.rhs = move(newRHS);
     }
+
+    void postTransformBlock(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        auto &block = ast::cast_tree_nonnull<ast::Block>(tree);
+
+        if (auto methodDef = ast::cast_tree<ast::MethodDef>(block.body)) {
+            auto signatures = makeMethodDefSignatures(ctx, methodDef);
+
+            if (signatures.empty()) {
+                return;
+            }
+
+            auto newBody = ast::InsSeq::STATS_store();
+            newBody.reserve(signatures.size());
+
+            for (auto &signature : signatures) {
+                newBody.emplace_back(move(signature));
+            }
+
+            block.body = ast::MK::InsSeq(block.loc, move(newBody), move(block.body));
+
+            return;
+        }
+
+        if (auto body = ast::cast_tree<ast::InsSeq>(block.body)) {
+            auto newBody = ast::InsSeq::STATS_store();
+
+            for (auto &stat : body->stats) {
+                if (auto methodDef = ast::cast_tree<ast::MethodDef>(stat)) {
+                    auto signatures = makeMethodDefSignatures(ctx, methodDef);
+                    for (auto &signature : signatures) {
+                        newBody.emplace_back(move(signature));
+                    }
+                }
+
+                newBody.emplace_back(move(stat));
+            }
+
+            if (auto methodDef = ast::cast_tree<ast::MethodDef>(body->expr)) {
+                auto signatures = makeMethodDefSignatures(ctx, methodDef);
+                for (auto &signature : signatures) {
+                    newBody.emplace_back(move(signature));
+                }
+            }
+
+            body->stats = move(newBody);
+
+            return;
+        }
+    }
 };
 
 } // namespace
