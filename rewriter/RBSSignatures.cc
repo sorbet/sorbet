@@ -188,7 +188,9 @@ class RBSSignaturesWalk {
         return nullptr;
     }
 
-    void transformMethodDef(core::MutableContext ctx, ast::ClassDef::RHS_store &newRHS, ast::MethodDef *methodDef) {
+    vector<ast::ExpressionPtr> makeMethodDefSignatures(core::MutableContext ctx, ast::MethodDef *methodDef) {
+        auto signatures = vector<ast::ExpressionPtr>();
+
         auto methodComments = findRBSComments(ctx.file.data(ctx).source(), methodDef->loc);
 
         for (auto &signature : methodComments.signatures) {
@@ -196,7 +198,7 @@ class RBSSignaturesWalk {
             if (rbsMethodType.first) {
                 auto sig = rbs::MethodTypeTranslator::methodSignature(ctx, methodDef, move(rbsMethodType.first.value()),
                                                                       methodComments.annotations);
-                newRHS.emplace_back(move(sig));
+                signatures.emplace_back(move(sig));
             } else {
                 ENFORCE(rbsMethodType.second);
                 if (auto e = ctx.beginError(rbsMethodType.second->loc, core::errors::Rewriter::RBSSyntaxError)) {
@@ -204,9 +206,12 @@ class RBSSignaturesWalk {
                 }
             }
         }
+
+        return signatures;
     }
 
-    void transformAccessor(core::MutableContext ctx, ast::ClassDef::RHS_store &newRHS, ast::Send *send) {
+    vector<ast::ExpressionPtr> makeAccessorSignatures(core::MutableContext ctx, ast::Send *send) {
+        auto signatures = vector<ast::ExpressionPtr>();
         auto attrComments = findRBSComments(ctx.file.data(ctx).source(), send->loc);
 
         for (auto &signature : attrComments.signatures) {
@@ -214,7 +219,7 @@ class RBSSignaturesWalk {
             if (rbsType.first) {
                 auto sig = rbs::MethodTypeTranslator::attrSignature(ctx, send, move(rbsType.first.value()),
                                                                     attrComments.annotations);
-                newRHS.emplace_back(move(sig));
+                signatures.emplace_back(move(sig));
             } else {
                 ENFORCE(rbsType.second);
 
@@ -231,6 +236,8 @@ class RBSSignaturesWalk {
                 }
             }
         }
+
+        return signatures;
     }
 
 public:
@@ -244,12 +251,21 @@ public:
 
         for (auto &stat : classDef.rhs) {
             if (auto methodDef = ast::cast_tree<ast::MethodDef>(stat)) {
-                transformMethodDef(ctx, newRHS, methodDef);
+                auto signatures = makeMethodDefSignatures(ctx, methodDef);
+                for (auto &signature : signatures) {
+                    newRHS.emplace_back(move(signature));
+                }
             } else if (auto send = ast::cast_tree<ast::Send>(stat)) {
                 if (isAccessor(send)) {
-                    transformAccessor(ctx, newRHS, send);
+                    auto signatures = makeAccessorSignatures(ctx, send);
+                    for (auto &signature : signatures) {
+                        newRHS.emplace_back(move(signature));
+                    }
                 } else if (auto methodDef = asVisibilityWrappedMethod(send)) {
-                    transformMethodDef(ctx, newRHS, methodDef);
+                    auto signatures = makeMethodDefSignatures(ctx, methodDef);
+                    for (auto &signature : signatures) {
+                        newRHS.emplace_back(move(signature));
+                    }
                 }
             }
 
