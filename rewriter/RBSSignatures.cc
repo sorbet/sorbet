@@ -212,7 +212,7 @@ class RBSSignaturesWalk {
 public:
     RBSSignaturesWalk(core::MutableContext ctx) {}
 
-    void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+    void postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         auto newRHS = ast::ClassDef::RHS_store();
