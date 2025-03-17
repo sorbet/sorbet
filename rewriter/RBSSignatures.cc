@@ -185,28 +185,35 @@ class RBSSignaturesWalk {
         return nullptr;
     }
 
-    void transformMethodDef(core::MutableContext ctx, ast::ClassDef::RHS_store &newRHS, ast::MethodDef *methodDef) {
+    vector<ast::ExpressionPtr> makeMethodDefSignatures(core::MutableContext ctx, ast::MethodDef *methodDef) {
+        auto signatures = vector<ast::ExpressionPtr>();
+
         auto methodComments = findRBSComments(ctx.file.data(ctx).source(), methodDef->loc);
         auto signatureTranslator = rbs::SignatureTranslator(ctx);
 
         for (auto &signature : methodComments.signatures) {
             auto sig = signatureTranslator.translateSignature(methodDef, signature, methodComments.annotations);
             if (sig) {
-                newRHS.emplace_back(move(sig));
+                signatures.emplace_back(move(sig));
             }
         }
+
+        return signatures;
     }
 
-    void transformAccessor(core::MutableContext ctx, ast::ClassDef::RHS_store &newRHS, ast::Send *send) {
+    vector<ast::ExpressionPtr> makeAccessorSignatures(core::MutableContext ctx, ast::Send *send) {
+        auto signatures = vector<ast::ExpressionPtr>();
         auto attrComments = findRBSComments(ctx.file.data(ctx).source(), send->loc);
         auto signatureTranslator = rbs::SignatureTranslator(ctx);
 
         for (auto &signature : attrComments.signatures) {
             auto sig = signatureTranslator.translateType(send, signature, attrComments.annotations);
             if (sig) {
-                newRHS.emplace_back(move(sig));
+                signatures.emplace_back(move(sig));
             }
         }
+
+        return signatures;
     }
 
 public:
@@ -220,12 +227,21 @@ public:
 
         for (auto &stat : classDef.rhs) {
             if (auto methodDef = ast::cast_tree<ast::MethodDef>(stat)) {
-                transformMethodDef(ctx, newRHS, methodDef);
+                auto signatures = makeMethodDefSignatures(ctx, methodDef);
+                for (auto &signature : signatures) {
+                    newRHS.emplace_back(move(signature));
+                }
             } else if (auto send = ast::cast_tree<ast::Send>(stat)) {
                 if (isAccessor(send)) {
-                    transformAccessor(ctx, newRHS, send);
+                    auto signatures = makeAccessorSignatures(ctx, send);
+                    for (auto &signature : signatures) {
+                        newRHS.emplace_back(move(signature));
+                    }
                 } else if (auto methodDef = asVisibilityWrappedMethod(send)) {
-                    transformMethodDef(ctx, newRHS, methodDef);
+                    auto signatures = makeMethodDefSignatures(ctx, methodDef);
+                    for (auto &signature : signatures) {
+                        newRHS.emplace_back(move(signature));
+                    }
                 }
             }
 
