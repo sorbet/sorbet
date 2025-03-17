@@ -237,7 +237,7 @@ size_t lexer::line_start(token_type type, size_t beginPos) {
     assert(beginPos < UINT32_MAX);
     auto beginPosInt = static_cast<uint32_t>(beginPos);
 
-    // Easier to think of this as "least upper bound," i.e. first element which is great than or equal to beginPos
+    // Easier to think of this as "least upper bound," i.e. first element which is greater than or equal to beginPos
     // Since we already handled newline characters, it should be just the first elem greater.
     auto it = absl::c_lower_bound(this->lineBreaks, beginPosInt);
     if (it == this->lineBreaks.begin()) {

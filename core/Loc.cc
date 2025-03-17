@@ -57,7 +57,7 @@ Loc::Detail Loc::pos2Detail(const File &file, uint32_t off) {
         detail.column = off + 1;
         return detail;
     }
-    detail.line = (it - lineBreaks.begin()) + 1;
+    detail.line = std::distance(lineBreaks.begin(), it) + 1;
     --it;
     detail.column = off - *it;
     return detail;
