@@ -260,11 +260,27 @@ std::string_view SessionCache::kvstorePath() const {
 }
 
 std::unique_ptr<KeyValueStore> SessionCache::open(std::shared_ptr<::spdlog::logger> logger) const {
+    // If the session copy has disappeared, we return a nullptr to force downstream consumers to explicitly handle the
+    // empty cache.
+    if (!FileOps::dirExists(this->path)) {
+        return nullptr;
+    }
+
     // Despite being called "experimental," this feature is actually stable. We just didn't want to
     // bust all existing caches when we promoted the experimental-at-the-time incremental fast path
     // to the stable version.
     auto flavor = "experimentalfastpath";
-    return openCache(std::move(logger), std::move(flavor), this->path, this->maxCacheBytes);
+    auto kvstore = std::make_unique<const OwnedKeyValueStore>(
+        openCache(std::move(logger), std::move(flavor), this->path, this->maxCacheBytes));
+
+    // If the name table entry is missing, this indicates that the cache is completely fresh and doesn't originate in a
+    // copy from the result of indexing.
+    const auto nameTableEntry = kvstore->read(core::serialize::Serializer::NAME_TABLE_KEY);
+    if (nameTableEntry.len == 0) {
+        return nullptr;
+    }
+
+    return OwnedKeyValueStore::abort(std::move(kvstore));
 }
 
 } // namespace sorbet::realmain::cache
