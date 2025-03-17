@@ -18,6 +18,10 @@ class PreemptionTaskManager;
 class QueryResponse;
 } // namespace sorbet::core::lsp
 
+namespace sorbet::realmain::cache {
+class SessionCache;
+}
+
 namespace sorbet::realmain::lsp {
 class ResponseError;
 class InitializedTask;
@@ -45,6 +49,11 @@ class LSPTypechecker final {
      * GlobalState back over to the typechecker to use as the starting point for the next slow path.
      */
     std::unique_ptr<core::GlobalState> gs;
+
+    /**
+     * A copy of the kvstore produced during initialization, that's private to this LSP session.
+     */
+    std::unique_ptr<cache::SessionCache> sessionCache;
 
     /**
      * A vector of file refs that we clear and reuse on slow paths. It's held here instead of as a temporary in the slow
@@ -113,6 +122,11 @@ class LSPTypechecker final {
      * re-indexing the file on disk.
      */
     ast::ParsedFile getIndexed(core::FileRef fref) const;
+
+    /**
+     * Open the session-local kvstore.
+     */
+    std::unique_ptr<KeyValueStore> getKvStore() const;
 
 public:
     LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
