@@ -73,12 +73,10 @@ public:
     }
 
     inline Loc(FileRef file, uint32_t begin, uint32_t end) : storage{{begin, end}, file} {
-        ENFORCE_NO_TIMER(begin <= INVALID_POS_LOC);
-        ENFORCE_NO_TIMER(end <= INVALID_POS_LOC);
-        ENFORCE_NO_TIMER(begin <= end);
+        ENFORCE_NO_TIMER(storage.offsets.exists());
     }
 
-    inline Loc(FileRef file, LocOffsets offsets) : Loc(file, offsets.beginPos(), offsets.endPos()){};
+    inline Loc(FileRef file, LocOffsets offsets) : storage{offsets, file} {}
 
     Loc() : Loc(0, LocOffsets::none()){};
 
