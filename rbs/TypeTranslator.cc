@@ -47,7 +47,8 @@ ast::ExpressionPtr typeNameType(core::MutableContext ctx,
 
     rbs_constant_t *name = rbs_constant_pool_id_to_constant(fake_constant_pool, typeName->name->constant_id);
     string_view nameStr(name->start, name->length);
-    auto nameConstant = ctx.state.enterNameConstant(nameStr);
+    auto nameUTF8 = ctx.state.enterNameUTF8(nameStr);
+    auto nameConstant = ctx.state.enterNameConstant(nameUTF8);
     pathNames.emplace_back(nameConstant);
 
     if (pathNames.size() == 1) {
@@ -69,7 +70,6 @@ ast::ExpressionPtr typeNameType(core::MutableContext ctx,
             }
         } else {
             // The type may refer to a type parameter, so we need to check if it exists as a NameKind::UTF8
-            auto nameUTF8 = ctx.state.enterNameUTF8(nameStr);
             if (hasTypeParam(ctx, typeParams, nameUTF8)) {
                 return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::typeParameter(), loc,
                                       ast::MK::Symbol(loc, nameUTF8));
