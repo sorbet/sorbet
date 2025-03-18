@@ -15,6 +15,8 @@
 using namespace std;
 using namespace sorbet;
 
+namespace sorbet::rewriter {
+
 namespace {
 
 /**
@@ -476,7 +478,6 @@ vector<pair<core::LocOffsets, core::NameRef>> parseTypeParams(core::MutableConte
 
 } // namespace
 
-namespace sorbet::rewriter {
 void RBSAssertions::run(core::MutableContext ctx, ast::ClassDef *classDef) {
     ast::ExpressionPtr *prevStat = nullptr;
 
