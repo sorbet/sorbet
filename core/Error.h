@@ -193,7 +193,7 @@ public:
 
     void addAutocorrect(AutocorrectSuggestion &&autocorrect);
     template <typename... Args>
-    void replaceWith(const std::string &title, Loc loc, fmt::format_string<Args...> replacement, Args &&...args) {
+    void replaceWith(std::string_view title, Loc loc, fmt::format_string<Args...> replacement, Args &&...args) {
         std::string formatted = fmt::format(replacement, std::forward<Args>(args)...);
         addAutocorrect(AutocorrectSuggestion{title, {AutocorrectSuggestion::Edit{loc, std::move(formatted)}}});
     }
