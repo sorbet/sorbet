@@ -2082,6 +2082,7 @@ void GlobalState::copyOptions(const core::GlobalState &other) {
     this->censorForSnapshotTests = other.censorForSnapshotTests;
     this->sleepInSlowPathSeconds = other.sleepInSlowPathSeconds;
     this->rbsSignaturesEnabled = other.rbsSignaturesEnabled;
+    this->rbsAssertionsEnabled = other.rbsAssertionsEnabled;
     this->requiresAncestorEnabled = other.requiresAncestorEnabled;
     this->ruby3KeywordArgs = other.ruby3KeywordArgs;
     this->typedSuper = other.typedSuper;

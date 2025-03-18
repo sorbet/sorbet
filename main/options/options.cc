@@ -452,6 +452,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  cxxopts::value<bool>());
     options.add_options(section)("enable-experimental-rbs-signatures",
                                  "Enable experimental support for RBS signatures as inline comments");
+    options.add_options(section)("enable-experimental-rbs-assertions",
+                                 "Enable experimental support for RBS assertions as inline comments");
     options.add_options(section)("enable-experimental-requires-ancestor",
                                  "Enable experimental `requires_ancestor` annotation");
     options.add_options(section)("uniquely-defined-behavior",
@@ -920,6 +922,12 @@ void readOptions(Options &opts,
         opts.rbsSignaturesEnabled = raw["enable-experimental-rbs-signatures"].as<bool>();
         if (opts.rbsSignaturesEnabled && !opts.cacheDir.empty()) {
             logger->error("--enable-experimental-rbs-signatures is incompatible with --cache-dir. Ignoring cache");
+            opts.cacheDir = "";
+        }
+
+        opts.rbsAssertionsEnabled = raw["enable-experimental-rbs-assertions"].as<bool>();
+        if (opts.rbsAssertionsEnabled && !opts.cacheDir.empty()) {
+            logger->error("--enable-experimental-rbs-assertions is incompatible with --cache-dir. Ignoring cache");
             opts.cacheDir = "";
         }
 

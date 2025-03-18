@@ -23,6 +23,7 @@
 #include "rewriter/ModuleFunction.h"
 #include "rewriter/Private.h"
 #include "rewriter/Prop.h"
+#include "rewriter/RBSAssertions.h"
 #include "rewriter/RBSSignatures.h"
 #include "rewriter/Rails.h"
 #include "rewriter/SigRewriter.h"
@@ -44,6 +45,10 @@ public:
         auto classDef = ast::cast_tree<ast::ClassDef>(tree);
 
         auto isClass = classDef->kind == ast::ClassDef::Kind::Class;
+
+        if (ctx.state.rbsAssertionsEnabled) {
+            RBSAssertions::run(ctx, classDef);
+        }
 
         Command::run(ctx, classDef);
         Rails::run(ctx, classDef);

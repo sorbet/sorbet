@@ -255,6 +255,7 @@ const UnorderedMap<
         {"check-out-of-order-constant-references", BooleanPropertyAssertion::make},
         {"enable-packager", BooleanPropertyAssertion::make},
         {"enable-experimental-rbs-signatures", BooleanPropertyAssertion::make},
+        {"enable-experimental-rbs-assertions", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
         {"experimental-ruby3-keyword-args", BooleanPropertyAssertion::make},
         {"typed-super", BooleanPropertyAssertion::make},
@@ -676,6 +677,8 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
     opts.noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
     opts.rbsSignaturesEnabled =
         BooleanPropertyAssertion::getValue("enable-experimental-rbs-signatures", assertions).value_or(false);
+    opts.rbsAssertionsEnabled =
+        BooleanPropertyAssertion::getValue("enable-experimental-rbs-assertions", assertions).value_or(false);
     opts.requiresAncestorEnabled =
         BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
     opts.ruby3KeywordArgs =
