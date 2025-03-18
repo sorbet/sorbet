@@ -717,6 +717,12 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
+        if (opts.stopAfterPhase == options::Phase::INDEXING) {
+            for (auto &f : indexed) {
+                f.tree = nullptr;
+            }
+        }
+
         if (gs->runningUnderAutogen) {
             runAutogen(*gs, opts, *workers, indexed);
         } else {
