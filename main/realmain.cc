@@ -468,7 +468,7 @@ int realmain(int argc, char *argv[]) {
                           opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
                           opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
 
-    if (opts.runningUnderAutogen) {
+    if (opts.cacheSensitiveOptions.runningUnderAutogen) {
         gs->cacheSensitiveOptions.runningUnderAutogen = true;
     }
 

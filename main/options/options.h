@@ -150,7 +150,6 @@ struct Options {
     bool forceHashing = false;
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
-    bool runningUnderAutogen = false;
     int autogenVersion = 0;
     bool uniquelyDefinedBehavior = false;
     bool stripePackages = false;
@@ -170,13 +169,28 @@ struct Options {
     bool enableCounters = false;
     std::string errorUrlBase = "https://srb.help/";
     bool ruby3KeywordArgs = false;
-    bool typedSuper = true;
     std::vector<std::string> suppressPayloadSuperclassRedefinitionFor;
     std::set<int> isolateErrorCode;
     std::set<int> suppressErrorCode;
     bool noErrorSections = false;
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
+
+    struct CacheSensitiveOptions {
+        bool typedSuper = true;
+
+        // Enable experimental support for RBS signatures
+        bool rbsSignaturesEnabled = false;
+
+        // Enable experimental support for RBS assertions such as `T.let`
+        bool rbsAssertionsEnabled = false;
+
+        // Experimental feature `requires_ancestor`
+        bool requiresAncestorEnabled = false;
+
+        bool runningUnderAutogen = false;
+    };
+    CacheSensitiveOptions cacheSensitiveOptions;
 
     uint32_t reserveClassTableCapacity = 0;
     uint32_t reserveMethodTableCapacity = 0;
@@ -251,15 +265,6 @@ struct Options {
     // Enables out-of-order reference checking
     bool outOfOrderReferenceChecksEnabled = false;
     core::TrackUntyped trackUntyped = core::TrackUntyped::Nowhere;
-
-    // Enable experimental support for RBS signatures
-    bool rbsSignaturesEnabled = false;
-
-    // Enable experimental support for RBS assertions such as `T.let`
-    bool rbsAssertionsEnabled = false;
-
-    // Experimental feature `requires_ancestor`
-    bool requiresAncestorEnabled = false;
 
     std::string inlineInput; // passed via -e
     std::string debugLogFile;
