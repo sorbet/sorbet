@@ -430,7 +430,8 @@ public:
  *
  * We need to be aware of the type parameter `X` so we can use it to resolve the type of `y`.
  */
-vector<pair<core::LocOffsets, core::NameRef>> parseTypeParams(core::MutableContext ctx, ast::ExpressionPtr *prevStat) {
+vector<pair<core::LocOffsets, core::NameRef>> parseTypeParams(core::MutableContext ctx,
+                                                              const ast::ExpressionPtr *prevStat) {
     vector<pair<core::LocOffsets, core::NameRef>> typeParams;
 
     // Do we have a previous statement?
