@@ -112,8 +112,8 @@ private:
                     //
                     // has the `<<-` or `<<~` markers **inside** its location.
 
-                    auto lineStart = core::Loc::offset2Pos(ctx.file.data(ctx), lit.loc.beginLoc).line;
-                    auto lineEnd = core::Loc::offset2Pos(ctx.file.data(ctx), lit.loc.endLoc).line;
+                    auto lineStart = core::Loc::pos2Detail(ctx.file.data(ctx), lit.loc.beginLoc).line;
+                    auto lineEnd = core::Loc::pos2Detail(ctx.file.data(ctx), lit.loc.endLoc).line;
 
                     if (lineEnd - lineStart <= 1) {
                         // Single line heredoc, we look for the heredoc marker outside, ie. between the assign `=` sign
