@@ -194,6 +194,17 @@ struct Options {
         CacheSensitiveOptions()
             : typedSuper(true), rbsSignaturesEnabled(false), rbsAssertionsEnabled(false),
               requiresAncestorEnabled(false), runningUnderAutogen(false) {}
+
+        constexpr static uint8_t NUMBER_OF_FLAGS = 4;
+        constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
+
+        uint8_t serialize() const {
+            static_assert(sizeof(CacheSensitiveOptions) == sizeof(uint8_t));
+            // Can replace this with std::bit_cast in C++20
+            auto rawBits = *reinterpret_cast<const uint8_t *>(this);
+            // Mask the valid bits since uninitialized bits can be any value.
+            return rawBits & VALID_BITS_MASK;
+        }
     };
     CacheSensitiveOptions cacheSensitiveOptions;
 

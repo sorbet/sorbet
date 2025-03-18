@@ -84,7 +84,7 @@ public:
               isIncompatibleOverride(false), isPackagePrivate(false) {}
 
         uint16_t serialize() const {
-            ENFORCE(sizeof(Flags) == sizeof(uint16_t));
+            static_assert(sizeof(Flags) == sizeof(uint16_t));
             // Can replace this with std::bit_cast in C++20
             auto rawBits = *reinterpret_cast<const uint16_t *>(this);
 
@@ -233,7 +233,7 @@ public:
               isExported(false) {}
 
         uint8_t serialize() const {
-            ENFORCE(sizeof(Flags) == sizeof(uint8_t));
+            static_assert(sizeof(Flags) == sizeof(uint8_t));
             // Can replace this with std::bit_cast in C++20
             auto rawBits = *reinterpret_cast<const uint8_t *>(this);
             // We need to mask the valid bits since uninitialized memory isn't zeroed in C++.
@@ -306,6 +306,7 @@ public:
               isContravariant(false), isFixed(false) {}
 
         uint8_t serialize() const {
+            static_assert(sizeof(Flags) == sizeof(uint8_t));
             // Can replace this with std::bit_cast in C++20
             auto rawBits = *reinterpret_cast<const uint8_t *>(this);
             // Mask the valid bits since uninitialized bits can be any value.
@@ -389,6 +390,7 @@ public:
               isBehaviorDefining(false) {}
 
         uint16_t serialize() const {
+            static_assert(sizeof(Flags) == sizeof(uint16_t));
             // Can replace this with std::bit_cast in C++20
             auto rawBits = *reinterpret_cast<const uint16_t *>(this);
             // Mask the valid bits since uninitialized bits can be any value.
