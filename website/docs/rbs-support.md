@@ -37,7 +37,7 @@ def foo(x)
 end
 ```
 
-### Caveats
+## Caveats
 
 > Support for this feature is experimental, and we actively discourage depending
 > on it for anything other than to offer feedback to the Sorbet developers.
@@ -45,7 +45,7 @@ end
 There are numerous shortcomings of the comment-based syntax versus `sig` syntax.
 By contrast, the near-sole upside is that the syntax is terser.
 
-#### The comment-based syntax is second class
+### The comment-based syntax is second class
 
 The comment-based syntax uses [RBS syntax](https://github.com/ruby/rbs). RBS is
 an alternative annotation syntax for Ruby. The headline features of RBS:
@@ -60,7 +60,7 @@ an alternative annotation syntax for Ruby. The headline features of RBS:
 However, there are a number of problems which mean that RBS syntax has a
 second-class position in Sorbet:
 
-##### RBS syntax does not match the semantics of Sorbet
+### RBS syntax does not match the semantics of Sorbet
 
 Sorbet's type annotation syntax evolved differently from the evolution of RBS
 syntax. Unfortunately, this difference is not syntax-deep: it affects the
@@ -95,7 +95,7 @@ possible to embed Sorbet-only syntax within the context of an RBS signature.
 While it is possible for RBS comment signatures to coexist with Sorbet `sig`
 signatures, needing to flip between them adds development friction.
 
-##### Sorbet has minimal influence over the evolution of RBS syntax
+### Sorbet has minimal influence over the evolution of RBS syntax
 
 Sorbet continues to evolve its type syntax. For example, `T.anything`,
 `T::Class`, and `has_attached_class!` are additions to Sorbet which arrived 6
@@ -137,7 +137,7 @@ There are a lot of features that come for free by reusing Ruby syntax:
 In fairness, these are technical, implementation considerations, and thus could
 hope to improve one day. But they remain problems today.
 
-#### Performance is worse
+### Performance is worse
 
 The chosen implementation for RBS annotations in comments is:
 
@@ -211,7 +211,7 @@ alongside the existing Sorbet syntax. In the mean time, users will need to
 mentally translate from Sorbet syntax to RBS syntax on their own, including
 understanding the cases where there is no suitable RBS replacement.
 
-### Quick reference
+## Quick reference
 
 Most RBS features can be used and will be translated to equivalent Sorbet syntax
 during type checking:
@@ -234,7 +234,7 @@ during type checking:
 | [Shape type]           | `{ a: Foo, b: Bar }`                     | [`{ a: Foo, b: Bar }`](shapes.md)                       |
 | [Proc type]            | `^(Foo) -> Bar`                          | [`T.proc.params(arg: Foo).returns(Bar)`](procs.md)      |
 
-### Attribute accessor types
+## Attribute accessor types
 
 Attribute accessors can be annotated with RBS types:
 
@@ -249,7 +249,7 @@ attr_writer :bar
 attr_accessor :baz
 ```
 
-### Annotations
+## Annotations
 
 While RBS does not support the same modifiers as Sorbet, it is possible to
 specify them using `@` annotation comments.
@@ -290,7 +290,7 @@ Note: these annotations like `@abstract` use normal comments, like `# @abstract`
 (not the special `#:` comment). This makes it possible to reuse any existing
 YARD or RDoc annotations.
 
-### Special behaviors
+## Special behaviors
 
 The `#:` comment must come **immediately** before the following method
 definition. If there is a blank line between the comment and method definition,
@@ -312,9 +312,9 @@ equivalent:
 Note that non-generic types are not translated, so `Array` without a type
 argument stays `Array`.
 
-### Unsupported features
+## Unsupported features
 
-#### Class types
+### Class types
 
 The `class` type in RBS is context sensitive (depends on the class where it is
 used) and Sorbet does not support this feature yet. Instead, use the equivalent
@@ -327,7 +327,7 @@ class Foo
 end
 ```
 
-#### Interface types
+### Interface types
 
 Interface types are not supported, use the equivalent Sorbet syntax instead:
 
@@ -342,7 +342,7 @@ end
 def takes_foo(x); end
 ```
 
-#### Alias types
+### Alias types
 
 Alias types are not supported, use the equivalent Sorbet syntax instead:
 
@@ -353,7 +353,7 @@ sig { params(x: Bool).void }
 def foo(x); end
 ```
 
-#### Literal types
+### Literal types
 
 Sorbet does not support RBS's concept of "literal types". The next best thing is
 to use the literal's underlying type instead:
