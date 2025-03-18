@@ -129,9 +129,9 @@ public:
     // For a given Loc, returns
     //
     // - the Loc corresponding to the first non-whitespace character on this line, and
-    // - how many characters of the start of this line are whitespace.
+    // - how many characters of the start of this line are whitespace (the indentation level).
     //
-    std::pair<Loc, uint32_t> findStartOfLine(const GlobalState &gs) const;
+    std::pair<Loc, uint32_t> findStartOfIndentation(const GlobalState &gs) const;
 
     // If the given loc spans multiple lines, return a new location which has been truncated to
     // one line (excluding the newline character which ends the first line).
