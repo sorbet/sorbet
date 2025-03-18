@@ -511,8 +511,8 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
         REQUIRE_EQ(copy, nullptr);
     }
 
-    // Verify that we can't open when the database files have been removed (the previous open attempt will create an
-    // empty db, so we have to remove it again)
+    // Verify that we can't open when the database directory has been removed (the previous open attempt will create an
+    // empty db, so we have to remove the files again again)
     for (auto &file : toRemove) {
         FileOps::removeFile(file);
     }
