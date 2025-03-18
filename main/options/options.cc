@@ -26,6 +26,8 @@ using namespace std;
 
 namespace sorbet::realmain::options {
 
+namespace {
+
 enum class Group {
     INPUT,
     OUTPUT,
@@ -147,6 +149,8 @@ const vector<PrintOptions> print_options({
     {"untyped-blame", &Printers::UntypedBlame, true, true, true},
 });
 
+} // namespace
+
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
 
 void PrinterConfig::print(const string_view &contents) const {
@@ -222,6 +226,8 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
 bool Printers::isAutogen() const {
     return Autogen.enabled || AutogenMsgPack.enabled || AutogenSubclasses.enabled;
 }
+
+namespace {
 
 struct StopAfterOptions {
     string option;
@@ -805,11 +811,15 @@ string_view stripTrailingSlashes(string_view path) {
     return path;
 }
 
+} // namespace
+
 void Options::flushPrinters() {
     for (PrinterConfig &cfg : print.printers()) {
         cfg.flush();
     }
 }
+
+namespace {
 
 void parseIgnorePatterns(const vector<string> &rawIgnorePatterns, vector<string> &absoluteIgnorePatterns,
                          vector<string> &relativeIgnorePatterns) {
@@ -846,6 +856,8 @@ void addFilesFromDir(Options &opts, string_view dir, WorkerPool &workerPool, sha
                                    std::make_move_iterator(containedFiles.end()));
     }
 }
+
+} // namespace
 
 void readOptions(Options &opts,
                  vector<unique_ptr<pipeline::semantic_extension::SemanticExtension>> &configuredExtensions, int argc,
