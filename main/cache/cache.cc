@@ -236,6 +236,8 @@ std::unique_ptr<SessionCache> SessionCache::make(std::unique_ptr<const OwnedKeyV
     std::string path;
 
     for (int i = 0; i < 10; i++) {
+        // Store the session cache as a sub folder of the cacheDir, so we don't write additional cache data to
+        // an unexpected location.
         path = fmt::format("{}/session-{:x}", opts.cacheDir, Random::uniformU4());
         if (!FileOps::dirExists(path)) {
             break;
