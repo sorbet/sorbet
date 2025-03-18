@@ -176,6 +176,8 @@ struct Options {
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
 
+    // Options which affect the contents of the `--cache-dir`.
+    // If these options change, the cache needs to be invalidated.
     struct CacheSensitiveOptions {
         bool typedSuper : 1;
 
