@@ -205,8 +205,8 @@ private:
             return nullptr;
         }
 
-        return rbs::SignatureTranslator(vector<rbs::Comment>{*assertion}).translateAssertionType(ctx, typeParams,
-                                                                                                   *assertion);
+        auto signatureTranslator = rbs::SignatureTranslator(ctx);
+        return signatureTranslator.translateAssertionType(typeParams, *assertion);
     }
 
     /**

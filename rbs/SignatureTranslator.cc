@@ -13,9 +13,7 @@ rbs_string_t SignatureTranslator::makeRBSString(const string_view &str) {
     return rbs_string_new(str.data(), str.data() + str.size());
 }
 
-ast::ExpressionPtr SignatureTranslator::translateAssertionType(core::MutableContext ctx,
-                                                               vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
-                                                               const rbs::Comment &assertion) {
+ast::ExpressionPtr SignatureTranslator::translateAssertionType(vector<std::pair<core::LocOffsets, core::NameRef>> typeParams, const rbs::Comment &assertion) {
     rbs_string_t rbsString = makeRBSString(assertion.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
@@ -33,8 +31,8 @@ ast::ExpressionPtr SignatureTranslator::translateAssertionType(core::MutableCont
     return rbs::TypeTranslator(ctx, typeParams, parser).toExpressionPtr(rbsType, assertion.loc);
 }
 
-ast::ExpressionPtr SignatureTranslator::translateType(core::MutableContext ctx, const ast::Send *send,
-                                                      const rbs::Comment &signature) {
+ast::ExpressionPtr SignatureTranslator::translateType(const ast::Send *send, const rbs::Comment &signature,
+                                                      const std::vector<Comment> &annotations) {
     rbs_string_t rbsString = makeRBSString(signature.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
@@ -64,8 +62,9 @@ ast::ExpressionPtr SignatureTranslator::translateType(core::MutableContext ctx, 
     return methodTypeTranslator.attrSignature(send, rbsType, signature.loc, annotations);
 }
 
-ast::ExpressionPtr SignatureTranslator::translateSignature(core::MutableContext ctx, const ast::MethodDef *methodDef,
-                                                           const rbs::Comment &signature) {
+ast::ExpressionPtr SignatureTranslator::translateSignature(const ast::MethodDef *methodDef,
+                                                           const rbs::Comment &signature,
+                                                           const std::vector<Comment> &annotations) {
     rbs_string_t rbsString = makeRBSString(signature.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 

@@ -10,18 +10,18 @@ namespace sorbet::rbs {
 
 class SignatureTranslator final {
 public:
-    SignatureTranslator(std::vector<Comment> annotations) : annotations(annotations){};
+    SignatureTranslator(core::MutableContext ctx) : ctx(ctx){};
 
-    ast::ExpressionPtr translateAssertionType(core::MutableContext ctx,
-                                              std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+    ast::ExpressionPtr translateAssertionType(std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
                                               const rbs::Comment &assertion);
 
-    ast::ExpressionPtr translateType(core::MutableContext ctx, const ast::Send *send, const rbs::Comment &signature);
-    ast::ExpressionPtr translateSignature(core::MutableContext ctx, const ast::MethodDef *methodDef,
-                                          const rbs::Comment &signature);
+    ast::ExpressionPtr translateType(const ast::Send *send, const rbs::Comment &signature,
+                                     const std::vector<Comment> &annotations);
+    ast::ExpressionPtr translateSignature(const ast::MethodDef *methodDef, const rbs::Comment &signature,
+                                          const std::vector<Comment> &annotations);
 
 private:
-    std::vector<Comment> annotations;
+    core::MutableContext ctx;
 
     rbs_string_t makeRBSString(const std::string_view &str);
 };
