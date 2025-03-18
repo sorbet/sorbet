@@ -22,14 +22,14 @@ module T::Private::Sealed
   module NoIncludeExtend
     def included(child)
       super
-      caller_loc = T::Private::CallerUtils.find_caller {|loc| !loc.to_s.match(/in `included'$/)}
+      caller_loc = T::Private::CallerUtils.find_caller {|loc| loc.base_label != 'included'}
       T::Private::Sealed.validate_inheritance(caller_loc, self, child, 'included')
       @sorbet_sealed_module_all_subclasses << child
     end
 
     def extended(child)
       super
-      caller_loc = T::Private::CallerUtils.find_caller {|loc| !loc.to_s.match(/in `extended'$/)}
+      caller_loc = T::Private::CallerUtils.find_caller {|loc| loc.base_label != 'extended'}
       T::Private::Sealed.validate_inheritance(caller_loc, self, child, 'extended')
       @sorbet_sealed_module_all_subclasses << child
     end

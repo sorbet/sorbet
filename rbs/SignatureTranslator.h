@@ -12,6 +12,10 @@ class SignatureTranslator final {
 public:
     SignatureTranslator(std::vector<Comment> annotations) : annotations(annotations){};
 
+    ast::ExpressionPtr translateAssertionType(core::MutableContext ctx,
+                                              std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                                              const rbs::Comment &assertion);
+
     ast::ExpressionPtr translateType(core::MutableContext ctx, const ast::Send *send, const rbs::Comment &signature);
     ast::ExpressionPtr translateSignature(core::MutableContext ctx, const ast::MethodDef *methodDef,
                                           const rbs::Comment &signature);

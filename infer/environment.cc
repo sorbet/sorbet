@@ -14,7 +14,7 @@ namespace sorbet::infer {
 
 namespace {
 core::TypePtr dropConstructor(core::Context ctx, core::Loc loc, core::TypePtr tp) {
-    if (auto *mt = core::cast_type<core::MetaType>(tp)) {
+    if (auto mt = core::cast_type<core::MetaType>(tp)) {
         if (!mt->wrapped.isUntyped()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");
@@ -78,9 +78,9 @@ struct KnowledgeFact {
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 };
 
-KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
-    used_vars.resize(cfg->numLocalVariables());
-    for (auto &bb : cfg->basicBlocks) {
+KnowledgeFilter::KnowledgeFilter(core::Context ctx, cfg::CFG &cfg) {
+    used_vars.resize(cfg.numLocalVariables());
+    for (auto &bb : cfg.basicBlocks) {
         ENFORCE(bb->bexit.cond.variable.exists());
         if (bb->bexit.cond.variable != cfg::LocalRef::unconditional() &&
             bb->bexit.cond.variable != cfg::LocalRef::blockCall()) {
@@ -90,7 +90,7 @@ KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
     bool changed = true;
     while (changed) {
         changed = false;
-        for (auto &bb : cfg->forwardsTopoSort) {
+        for (auto &bb : cfg.forwardsTopoSort) {
             for (auto &bind : bb->exprs) {
                 if (auto id = cfg::cast_instruction<cfg::Ident>(bind.value)) {
                     if (isNeeded(bind.bind.variable) && !isNeeded(id->what)) {
@@ -531,7 +531,7 @@ void Environment::updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, 
             whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, ty);
             whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, ty);
         }
-    } else if (auto *klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
+    } else if (auto klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
         if (klassTypeApp->klass == core::Symbols::Class()) {
             auto currentAlignment =
                 core::Types::alignBaseTypeArgs(ctx, klassTypeApp->klass, klassTypeApp->targs, core::Symbols::Class());
@@ -1374,7 +1374,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // rule doesn't apply. We don't model the distinction accurately
                 // yet.
                 auto &blkArgs = insn.link->argFlags;
-                auto *tuple = core::cast_type<core::TupleType>(params);
+                auto tuple = core::cast_type<core::TupleType>(params);
                 if (blkArgs.size() > 1 && !blkArgs.front().isRepeated && tuple && tuple->elems.size() == 1 &&
                     tuple->elems.front().derivesFrom(ctx, core::Symbols::Array())) {
                     tp.type = std::move(tuple->elems.front());

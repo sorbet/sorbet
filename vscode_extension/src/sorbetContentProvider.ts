@@ -27,7 +27,7 @@ export class SorbetContentProvider implements TextDocumentContentProvider {
     let content: string;
     const { activeLanguageClient: client } = this.context.statusProvider;
     if (client) {
-      this.context.log.info(`Retrieving file contents. URI:${uri}`);
+      this.context.log.info("Retrieving file contents", uri);
       const response = await client.sendRequest<TextDocumentItem>(
         "sorbet/readFile",
         {
@@ -37,7 +37,8 @@ export class SorbetContentProvider implements TextDocumentContentProvider {
       content = response.text;
     } else {
       this.context.log.info(
-        `Cannot retrieve file contents, no active Sorbet client. URI:${uri}`,
+        "Cannot retrieve file contents, no active Sorbet client",
+        uri,
       );
       content = "";
     }

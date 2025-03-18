@@ -786,9 +786,7 @@ private:
                     auto suggested =
                         suggestScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, original.cnst);
 
-                    // WARNING: This runs package-specific logic even if the `--stripe-packages` flag was not passed!!
-                    // Do not cargo cult this, this is a pattern that we need to get rid of long term!
-                    if (ctx.file.data(ctx).isPackage() &&
+                    if (ctx.file.data(ctx).isPackage(gs) &&
                         !suggestScope.asClassOrModuleRef().isPackageSpecSymbol(ctx.state)) {
                         // In case the file is a __package.rb file, and the scope is not a PackageSpec-scoped symbol,
                         // the resolution error must be in an export statement. In this case, suggestions must be
@@ -1217,7 +1215,7 @@ private:
                 }
 
                 string replacement = "";
-                int indent = core::Loc::offset2Pos(todo.file.data(gs), send->loc.beginPos()).column - 1;
+                int indent = core::Loc::pos2Detail(todo.file.data(gs), send->loc.beginPos()).column - 1;
                 int index = 1;
                 const auto numPosArgs = send->numPosArgs();
                 for (auto i = 0; i < numPosArgs; ++i) {
@@ -1472,12 +1470,12 @@ public:
 
     const bool checkAmbiguousDefinition(core::Context ctx, core::SymbolRef curSym,
                                         const shared_ptr<Nesting> &curNesting) {
-        if (ctx.state.runningUnderAutogen) {
-            // no need to check in autogen
+        if (!ctx.state.shouldReportErrorOn(ctx.file, core::errors::Resolver::AmbiguousDefinitionError)) {
+            // no need to check if suppressed
             return false;
         }
 
-        if (ctx.file.data(ctx).isPackage()) {
+        if (ctx.file.data(ctx).isPackage(ctx)) {
             // no need to check package files
             return false;
         }
@@ -2149,7 +2147,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
     static bool isLHSResolved(core::Context ctx, core::SymbolRef sym) {
         if (sym.isTypeMember()) {
-            auto *lambdaParam = core::cast_type<core::LambdaParam>(sym.resultType(ctx));
+            auto lambdaParam = core::cast_type<core::LambdaParam>(sym.resultType(ctx));
             ENFORCE(lambdaParam != nullptr);
 
             // both bounds are set to todo in the namer, so it's sufficient to
@@ -2451,8 +2449,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto resultType = resolveConstantType(ctx, asgn->rhs, /* topCall */ true, /* isFrozen */ false);
         if (data->resultType == nullptr) {
             // Do not attempt to suggest types for aliases that fail to resolve in package files.
-            // TODO(jez) This does package-specific behavior without checking `--stripe-packages`!
-            if (resultType == nullptr && !ctx.file.data(ctx).isPackage()) {
+            if (resultType == nullptr && !ctx.file.data(ctx).isPackage(ctx)) {
                 // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
                 auto rhs = move(job.asgn->rhs);
                 auto loc = rhs.loc();
@@ -2504,7 +2501,7 @@ class ResolveTypeMembersAndFieldsWalk {
         // Initialize the resultType to a LambdaParam with default bounds
         auto lambdaParam = core::make_type<core::LambdaParam>(lhs, core::Types::bottom(), core::Types::top());
         data->resultType = lambdaParam;
-        auto *memberType = core::cast_type<core::LambdaParam>(lambdaParam);
+        auto memberType = core::cast_type<core::LambdaParam>(lambdaParam);
 
         core::Loc lowerBoundTypeLoc;
         core::Loc upperBoundTypeLoc;
@@ -2638,7 +2635,7 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
         auto attachedClassTypeMember = attachedClass.asTypeMemberRef();
-        auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClassTypeMember.data(ctx)->resultType);
+        auto lambdaParam = core::cast_type<core::LambdaParam>(attachedClassTypeMember.data(ctx)->resultType);
         ENFORCE(lambdaParam != nullptr);
 
         if (isTodo(lambdaParam->lowerBound)) {

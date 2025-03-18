@@ -40,7 +40,9 @@ ast::ExpressionPtr TypeTranslator::typeNameType(rbs_typename_t *typeName, bool i
     }
 
     auto nameStr = parser.resolveConstant(typeName->name);
-    auto nameConstant = ctx.state.enterNameConstant(nameStr);
+    auto nameUTF8 = ctx.state.enterNameUTF8(nameStr);
+    auto nameConstant = ctx.state.enterNameConstant(nameUTF8);
+
     pathNames.emplace_back(nameConstant);
 
     if (pathNames.size() == 1) {
@@ -60,9 +62,12 @@ ast::ExpressionPtr TypeTranslator::typeNameType(rbs_typename_t *typeName, bool i
             } else if (nameConstant == core::Names::Constants::Range()) {
                 return ast::MK::T_Range(loc);
             }
-        } else if (hasTypeParam(typeParams, nameConstant)) {
-            return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::typeParameter(), loc,
-                                  ast::MK::Symbol(loc, nameConstant));
+        } else {
+            // The type may refer to a type parameter, so we need to check if it exists as a NameKind::UTF8
+            if (hasTypeParam(typeParams, nameUTF8)) {
+                return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::typeParameter(), loc,
+                                      ast::MK::Symbol(loc, nameUTF8));
+            }
         }
     } else if (pathNames.size() == 2 && isGeneric) {
         if (pathNames[0] == core::Names::Constants::Enumerator()) {

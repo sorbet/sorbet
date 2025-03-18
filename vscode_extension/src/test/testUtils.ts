@@ -6,11 +6,11 @@ import { Log, LogLevel } from "../log";
  */
 export function createLogStub(level = LogLevel.Critical): Log {
   return {
-    debug: (_message: string) => {},
-    error: (_messageOrError: string | Error) => {},
-    info: (_message: string) => {},
-    trace: (_message: string) => {},
-    warning: (_message: string) => {},
-    level,
+    debug: () => {},
+    error: () => {},
+    info: () => {},
+    trace: () => {},
+    warn: () => {},
+    logLevel: level,
   };
 }

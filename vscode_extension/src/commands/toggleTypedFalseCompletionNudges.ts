@@ -12,7 +12,8 @@ export async function toggleTypedFalseCompletionNudges(
   const targetState = !context.configuration.typedFalseCompletionNudges;
   await context.configuration.setTypedFalseCompletionNudges(targetState);
   context.log.info(
-    `Untyped file auto-complete nudge: ${targetState ? "enabled" : "disabled"}`,
+    "Untyped file auto-complete nudge",
+    targetState ? "enabled" : "disabled",
   );
 
   await context.statusProvider.restartSorbet(RestartReason.CONFIG_CHANGE);

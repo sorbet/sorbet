@@ -90,11 +90,8 @@ core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<cor
                                           unique_ptr<core::GlobalState> &lgs,
                                           const realmain::options::Options &hashingOpts) {
     lgs = core::GlobalState::makeEmptyGlobalStateForHashing(logger);
-    lgs->rbsSignaturesEnabled = hashingOpts.rbsSignaturesEnabled;
-    lgs->requiresAncestorEnabled = hashingOpts.requiresAncestorEnabled;
-    lgs->ruby3KeywordArgs = hashingOpts.ruby3KeywordArgs;
-    lgs->typedSuper = hashingOpts.typedSuper;
-    lgs->suppressPayloadSuperclassRedefinitionFor = hashingOpts.suppressPayloadSuperclassRedefinitionFor;
+    realmain::pipeline::setGlobalStateOptions(*lgs, hashingOpts);
+    lgs->silenceErrors = true;
     {
         core::UnfreezeFileTable fileTableAccess(*lgs);
         auto fref = lgs->enterFile(std::move(forWhat));
@@ -167,12 +164,16 @@ void Hashing::computeFileHashes(absl::Span<const shared_ptr<core::File>> files, 
     }
 }
 
-vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(core::GlobalState &gs,
-                                                           const realmain::options::Options &opts,
-                                                           spdlog::logger &logger,
-                                                           absl::Span<const core::FileRef> files, WorkerPool &workers,
-                                                           const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    auto asts = realmain::pipeline::index(gs, files, opts, workers, kvstore);
+ast::ParsedFilesOrCancelled
+Hashing::indexAndComputeFileHashes(core::GlobalState &gs, const realmain::options::Options &opts,
+                                   spdlog::logger &logger, absl::Span<const core::FileRef> files, WorkerPool &workers,
+                                   const unique_ptr<const OwnedKeyValueStore> &kvstore, bool cancelable) {
+    auto indexed = realmain::pipeline::index(gs, files, opts, workers, kvstore, cancelable);
+    if (!indexed.hasResult()) {
+        return indexed;
+    }
+
+    auto asts = std::move(indexed.result());
     ENFORCE_NO_TIMER(asts.size() == files.size());
 
     // Below, we rewrite ASTs to an empty GlobalState and use them for hashing.

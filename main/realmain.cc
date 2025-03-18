@@ -201,7 +201,15 @@ void addInlineInput(const string &input, const string &filename, vector<core::Fi
     inputFiles.emplace_back(file);
 }
 
-#ifndef SORBET_REALMAIN_MIN
+#ifdef SORBET_REALMAIN_MIN
+
+void runAutogen(const core::GlobalState &gs, options::Options &opts, WorkerPool &workers,
+                vector<ast::ParsedFile> &indexed) {
+    Exception::raise("Autogen is disabled in sorbet-orig for faster builds");
+}
+
+#else
+
 struct AutogenResult {
     struct Serialized {
         // Selectively populated based on print options
@@ -213,8 +221,19 @@ struct AutogenResult {
     vector<pair<int, Serialized>> prints;
 };
 
-void runAutogen(const core::GlobalState &gs, options::Options &opts, const autogen::AutogenConfig &autogenCfg,
-                WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
+void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
+    {
+        core::UnfreezeNameTable nameTableAccess(gs);
+        core::UnfreezeSymbolTable symbolAccess(gs);
+
+        indexed = resolver::Resolver::runConstantResolution(gs, move(indexed), workers);
+    }
+
+    autogen::AutogenConfig autogenCfg = {
+        .behaviorAllowedInRBIsPaths = std::move(opts.autogenBehaviorAllowedInRBIFilesPaths),
+        .msgpackSkipReferenceMetadata = std::move(opts.autogenMsgpackSkipReferenceMetadata),
+    };
+
     Timer timeit(logger, "autogen");
 
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
@@ -237,8 +256,8 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
                     ++n;
                     auto &tree = indexed[idx];
-                    // TODO(jez) This does package-specific behavior without checking `--stripe-packages`!
-                    if (tree.file.data(gs).isPackage()) {
+                    // This does package-specific behavior without checking `--stripe-packages`!
+                    if (tree.file.data(gs).hasPackageRbPath()) {
                         continue;
                     }
                     if (autogenVersion < autogen::AutogenVersion::VERSION_INCLUDE_RBI && tree.file.data(gs).isRBI()) {
@@ -434,71 +453,24 @@ int realmain(int argc, char *argv[]) {
     auto errorFlusher = make_shared<core::ErrorFlusherStdout>();
     unique_ptr<core::GlobalState> gs =
         make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, errorFlusher));
-    gs->pathPrefix = opts.pathPrefix;
-    gs->errorUrlBase = opts.errorUrlBase;
-    gs->semanticExtensions = move(extensions);
-    vector<ast::ParsedFile> indexed;
-
-    gs->rbsSignaturesEnabled = opts.rbsSignaturesEnabled;
-    gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
 
     logger->trace("building initial global state");
+
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(logger, opts);
     payload::createInitialGlobalState(*gs, opts, kvstore);
-    if (opts.silenceErrors) {
-        gs->silenceErrors = true;
-    }
-    gs->autocorrect = opts.autocorrect;
-    gs->didYouMean = opts.didYouMean;
-    if (opts.print.isAutogen()) {
-        gs->runningUnderAutogen = true;
-    }
-    if (opts.censorForSnapshotTests) {
-        gs->censorForSnapshotTests = true;
-    }
-    gs->sleepInSlowPathSeconds = opts.sleepInSlowPathSeconds;
+    pipeline::setGlobalStateOptions(*gs, opts);
+
+    // This is here, not in setGlobalStateOptions, because this makes us allocate memory, potentially lots of it.
+    // We want to be able to use setGlobalStateOptions in places like makeEmptyGlobalStateForFile,
+    // which will only ever need enough memory for one file's worth of definition (not one codebase's worth).
     gs->preallocateTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
                           opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
                           opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
                           opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
-    for (auto code : opts.isolateErrorCode) {
-        gs->onlyShowErrorClass(code);
-    }
-    for (auto code : opts.suppressErrorCode) {
-        gs->suppressErrorClass(code);
-    }
-    if (opts.noErrorSections) {
-        gs->includeErrorSections = false;
-    }
-    gs->ruby3KeywordArgs = opts.ruby3KeywordArgs;
-    gs->typedSuper = opts.typedSuper;
-    gs->suppressPayloadSuperclassRedefinitionFor = opts.suppressPayloadSuperclassRedefinitionFor;
-    if (!opts.uniquelyDefinedBehavior) {
-        // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
-        if (opts.isolateErrorCode.empty()) {
-            gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
-        }
-    }
 
-    if (!opts.outOfOrderReferenceChecksEnabled) {
-        if (opts.isolateErrorCode.empty()) {
-            gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
-        }
+    if (opts.print.isAutogen()) {
+        gs->runningUnderAutogen = true;
     }
-
-    gs->trackUntyped = opts.trackUntyped;
-    gs->printingFileTable = opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled ||
-                            opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled ||
-                            opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled;
-
-    if (opts.suggestTyped) {
-        gs->ignoreErrorClassForSuggestTyped(core::errors::Infer::SuggestTyped.code);
-        gs->ignoreErrorClassForSuggestTyped(core::errors::Resolver::SigInFileWithoutSigil.code);
-        if (!opts.uniquelyDefinedBehavior) {
-            gs->ignoreErrorClassForSuggestTyped(core::errors::Namer::MultipleBehaviorDefs.code);
-        }
-    }
-    gs->suggestUnsafe = opts.suggestUnsafe;
 
     if (gs->runningUnderAutogen) {
         gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
@@ -506,7 +478,10 @@ int realmain(int argc, char *argv[]) {
         gs->suppressErrorClass(core::errors::Namer::ConstantKindRedefinition.code);
         gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
         gs->suppressErrorClass(core::errors::Resolver::RecursiveTypeAlias.code);
+        gs->suppressErrorClass(core::errors::Resolver::AmbiguousDefinitionError.code);
     }
+
+    gs->semanticExtensions = move(extensions);
 
     logger->trace("done building initial global state");
 
@@ -545,13 +520,7 @@ int realmain(int argc, char *argv[]) {
         return returnCode;
     }
 
-    unique_ptr<core::GlobalState> gsForMinimize;
-    if (!opts.minimizeRBI.empty()) {
-        // Copy GlobalState after createInitialGlobalState and option handling, but before rest of
-        // pipeline, so that it represents an "empty" GlobalState.
-        gsForMinimize = gs->deepCopy();
-    }
-
+    vector<ast::ParsedFile> indexed;
     if (opts.runLSP) {
 #ifdef SORBET_REALMAIN_MIN
         logger->warn("LSP is disabled in sorbet-orig for faster builds");
@@ -631,7 +600,10 @@ int realmain(int argc, char *argv[]) {
             // only the package files that we know we need to load, it would cut down command-line rbi generation by
             // seconds.
             auto packageFileRefs = pipeline::reserveFiles(*gs, packageFiles);
-            auto packages = pipeline::index(*gs, absl::Span<core::FileRef>(packageFileRefs), opts, *workers, nullptr);
+            auto packagesResult =
+                pipeline::index(*gs, absl::Span<core::FileRef>(packageFileRefs), opts, *workers, nullptr);
+            ENFORCE(packagesResult.hasResult(), "There's no cancellation in batch mode");
+            auto packages = std::move(packagesResult.result());
             {
                 core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*gs);
                 core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
@@ -642,8 +614,8 @@ int realmain(int argc, char *argv[]) {
                                        opts.packagerLayers, opts.stripePackagesHint);
             }
 
-            packager::Packager::findPackages(*gs, absl::Span<ast::ParsedFile>(packages));
-            packager::Packager::setPackageNameOnFiles(*gs, packages);
+            packager::Packager::findPackages(*gs, absl::MakeSpan(packages));
+            packager::Packager::setPackageNameOnFiles(*gs, absl::MakeSpan(packages));
             packager::Packager::setPackageNameOnFiles(*gs, inputFiles);
 
             if (!opts.singlePackage.empty()) {
@@ -691,10 +663,14 @@ int realmain(int argc, char *argv[]) {
                 inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
 
                 if (!opts.storeState.empty() || opts.forceHashing) {
-                    indexed = hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, inputPackageFiles,
-                                                                          *workers, kvstore);
+                    auto result = hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, inputPackageFiles,
+                                                                              *workers, kvstore);
+                    ENFORCE(result.hasResult(), "There's no cancellation in batch mode");
+                    indexed = std::move(result.result());
                 } else {
-                    indexed = pipeline::index(*gs, inputPackageFiles, opts, *workers, kvstore);
+                    auto result = pipeline::index(*gs, inputPackageFiles, opts, *workers, kvstore);
+                    ENFORCE(result.hasResult(), "There's no cancellation in batch mode");
+                    indexed = std::move(result.result());
                 }
 
                 // Cache these before any pipeline::package rewrites, so that the cache is still
@@ -705,7 +681,6 @@ int realmain(int argc, char *argv[]) {
                                                               *workers, indexed));
 
                 // Populate the packageDB by processing only the __package.rb files.
-                pipeline::setPackagerOptions(*gs, opts);
                 pipeline::buildPackageDB(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
                 // Only need to compute hashes when running to compute a FileHash
                 auto foundHashes = nullptr;
@@ -713,11 +688,13 @@ int realmain(int argc, char *argv[]) {
                 ENFORCE(!canceled, "There's no cancellation in batch mode");
             }
 
-            auto nonPackageIndexed =
+            auto nonPackageIndexedResult =
                 (!opts.storeState.empty() || opts.forceHashing)
                     // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
                     ? hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, inputFilesSpan, *workers, kvstore)
                     : pipeline::index(*gs, inputFilesSpan, opts, *workers, kvstore);
+            ENFORCE(nonPackageIndexedResult.hasResult(), "There's no cancellation in batch mode");
+            auto nonPackageIndexed = std::move(nonPackageIndexedResult.result());
 
             // Cache these before any pipeline::package rewrites, so that the cache is still usable
             // regardless of whether `--stripe-packages` was passed.
@@ -725,12 +702,11 @@ int realmain(int argc, char *argv[]) {
                                                  nonPackageIndexed);
 
             // Now validate all the other files (the packageDB shouldn't change)
-            pipeline::validatePackagedFiles(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers);
+            pipeline::validatePackagedFiles(*gs, absl::MakeSpan(nonPackageIndexed), opts, *workers);
 
             // Only need to compute hashes when running to compute a FileHash
             auto foundHashes = nullptr;
-            auto canceled =
-                pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers, foundHashes);
+            auto canceled = pipeline::name(*gs, absl::MakeSpan(nonPackageIndexed), opts, *workers, foundHashes);
             ENFORCE(!canceled, "There's no cancellation in batch mode");
 
             pipeline::unpartitionPackageFiles(indexed, move(nonPackageIndexed));
@@ -742,23 +718,7 @@ int realmain(int argc, char *argv[]) {
         }
 
         if (gs->runningUnderAutogen) {
-#ifdef SORBET_REALMAIN_MIN
-            logger->warn("Autogen is disabled in sorbet-orig for faster builds");
-            return 1;
-#else
-            {
-                core::UnfreezeNameTable nameTableAccess(*gs);
-                core::UnfreezeSymbolTable symbolAccess(*gs);
-
-                indexed = resolver::Resolver::runConstantResolution(*gs, move(indexed), *workers);
-            }
-
-            autogen::AutogenConfig autogenCfg = {
-                .behaviorAllowedInRBIsPaths = std::move(opts.autogenBehaviorAllowedInRBIFilesPaths),
-                .msgpackSkipReferenceMetadata = std::move(opts.autogenMsgpackSkipReferenceMetadata)};
-
-            runAutogen(*gs, opts, autogenCfg, *workers, indexed);
-#endif
+            runAutogen(*gs, opts, *workers, indexed);
         } else {
             indexed = move(pipeline::resolve(*gs, move(indexed), opts, *workers).result());
             if (gs->hadCriticalError()) {
@@ -795,8 +755,19 @@ int realmain(int argc, char *argv[]) {
             // project is a single RBI file.
             optsForMinimize.stripePackages = false;
 
+            unique_ptr<core::GlobalState> gsForMinimize = make_unique<core::GlobalState>(gs->errorQueue);
+            auto kvstore = nullptr;
+            payload::createInitialGlobalState(*gsForMinimize, optsForMinimize, kvstore);
+            pipeline::setGlobalStateOptions(*gsForMinimize, optsForMinimize);
+
             Minimize::indexAndResolveForMinimize(*gs, *gsForMinimize, optsForMinimize, *workers, opts.minimizeRBI);
             Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
+
+            if (gsForMinimize->hadCriticalError()) {
+                returnCode = 10;
+            }
+
+            intentionallyLeakMemory(gsForMinimize.release());
 #endif
         }
 
@@ -940,7 +911,7 @@ int realmain(int argc, char *argv[]) {
         }
     }
 #endif
-    if (!gs || gs->hadCriticalError() || (gsForMinimize && gsForMinimize->hadCriticalError())) {
+    if (!gs || gs->hadCriticalError()) {
         returnCode = 10;
     } else if (returnCode == 0 && gs->totalErrors() > 0 && !opts.suppressNonCriticalErrors) {
         returnCode = 100;
@@ -955,7 +926,6 @@ int realmain(int argc, char *argv[]) {
             intentionallyLeakMemory(e.tree.release());
         }
         intentionallyLeakMemory(gs.release());
-        intentionallyLeakMemory(gsForMinimize.release());
     }
 
     // je_malloc_stats_print(nullptr, nullptr, nullptr); // uncomment this to print jemalloc statistics

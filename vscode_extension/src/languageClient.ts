@@ -25,9 +25,8 @@ export function createClient(
   };
 
   context.log.debug(
-    `Initializing with initializationOptions=${JSON.stringify(
-      initializationOptions,
-    )}`,
+    "Initializing with initializationOptions",
+    ...Object.entries(initializationOptions).map(([k, v]) => `${k}:${v}`),
   );
 
   const client = new CustomLanguageClient("ruby", "Sorbet", serverOptions, {

@@ -23,6 +23,7 @@ void populateRBIsInto(core::GlobalState &gs) {
     unique_ptr<const OwnedKeyValueStore> kvstore;
     auto workers = WorkerPool::create(emptyOpts.threads, gs.tracer());
     auto indexed = realmain::pipeline::index(gs, absl::Span<core::FileRef>(payloadFiles), emptyOpts, *workers, kvstore);
+    ENFORCE(indexed.hasResult(), "Cancelation is not supported during payload generation");
 
     // We don't run the payload with any packager options, so we can skip pipeline::package()
 
@@ -32,7 +33,7 @@ void populateRBIsInto(core::GlobalState &gs) {
     // '[0].to_set' will typecheck (using text-based payload) but never calculate hashes for the
     // payload files (because neither `--lsp` nor `--store-state` was passed).
     auto foundMethodHashes = nullptr;
-    realmain::pipeline::nameAndResolve(gs, move(indexed), emptyOpts, *workers, foundMethodHashes);
+    realmain::pipeline::nameAndResolve(gs, move(indexed.result()), emptyOpts, *workers, foundMethodHashes);
     // ^ result is thrown away
     gs.ensureCleanStrings = false;
 }

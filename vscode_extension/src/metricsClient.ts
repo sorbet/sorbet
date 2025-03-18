@@ -116,7 +116,8 @@ export class MetricsClient {
           : (<any>reason).message;
 
       this.context.log.error(
-        `Metrics-gathering disabled (error): ${adjustedReason}`,
+        "Metrics-gathering disabled (error)",
+        adjustedReason,
       );
     }
     return sorbetMetricsApi;

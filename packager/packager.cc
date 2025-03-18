@@ -400,7 +400,7 @@ public:
                         // So we can craft an edit to delete the `test_import` line, and then use the regular logic for
                         // adding an import to insert the `import`.
                         auto importLoc = core::Loc(fullLoc().file(), import.name.loc);
-                        auto [lineStart, numWhitespace] = importLoc.findStartOfLine(gs);
+                        auto [lineStart, numWhitespace] = importLoc.findStartOfIndentation(gs);
                         auto beginPos =
                             lineStart.adjust(gs, -numWhitespace, 0).beginPos(); // -numWhitespace for the indentation
                         auto endPos = importLoc.endPos();
@@ -427,10 +427,9 @@ public:
             if (!importToInsertAfter) {
                 // Insert before the first import
                 core::Loc beforePackageName = {loc.file(), importedPackageNames.front().name.loc};
-                auto [beforeImport, numWhitespace] = beforePackageName.findStartOfLine(gs);
+                auto [beforeImport, numWhitespace] = beforePackageName.findStartOfIndentation(gs);
                 auto endOfPrevLine = beforeImport.adjust(gs, -numWhitespace - 1, 0);
-                insertionLoc =
-                    core::Loc{loc.file(), endOfPrevLine.copyWithZeroLength().offsets().copyEndWithZeroLength()};
+                insertionLoc = endOfPrevLine.copyWithZeroLength();
             } else {
                 insertionLoc = core::Loc{loc.file(), importToInsertAfter->loc.copyEndWithZeroLength()};
             }
@@ -597,6 +596,37 @@ public:
             case core::packages::StrictDependenciesLevel::Dag:
                 return core::packages::StrictDependenciesLevel::Dag;
         }
+    }
+
+    bool importsTransitively(const core::GlobalState &gs, const core::packages::MangledName &otherPkg) const {
+        UnorderedSet<core::packages::MangledName> seen;
+        vector<core::packages::MangledName> toVisit;
+        toVisit.push_back(mangledName());
+
+        while (!toVisit.empty()) {
+            auto current = toVisit.back();
+            toVisit.pop_back();
+            if (seen.contains(current)) {
+                continue;
+            }
+            seen.insert(current);
+
+            if (current == otherPkg) {
+                return true;
+            }
+
+            auto &info = PackageInfoImpl::from(gs.packageDB().getPackageInfo(current));
+
+            for (auto &import : info.importedPackageNames) {
+                if (import.type == core::packages::ImportType::Test ||
+                    !gs.packageDB().getPackageInfo(import.name.mangledName).exists()) {
+                    continue;
+                }
+
+                toVisit.push_back(import.name.mangledName);
+            }
+        }
+        return false;
     }
 };
 
@@ -1536,7 +1566,7 @@ private:
 
 unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::ParsedFile &package) {
     ENFORCE(package.file.exists());
-    ENFORCE(package.file.data(gs).isPackage());
+    ENFORCE(package.file.data(gs).isPackage(gs));
     // Assumption: Root of AST is <root> class. (This won't be true
     // for `typed: ignore` files, so we should make sure to catch that
     // elsewhere.)
@@ -1978,7 +2008,7 @@ void validatePackage(core::Context ctx) {
 
 void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
     auto &file = ctx.file.data(ctx);
-    ENFORCE(!file.isPackage());
+    ENFORCE(!file.isPackage(ctx));
 
     if (file.isPayload()) {
         // Files in Sorbet's payload are parsed and loaded in the --store-state phase, which runs
@@ -2019,7 +2049,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
         core::UnfreezeNameTable unfreeze(gs);
         core::packages::UnfreezePackages packages = gs.unfreezePackages();
         for (auto &file : files) {
-            if (!file.file.data(gs).isPackage()) {
+            if (!file.file.data(gs).isPackage(gs)) {
                 continue;
             }
 
@@ -2154,7 +2184,7 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
                 auto file = job.file;
                 core::Context ctx(gs, core::Symbols::root(), file);
 
-                if (file.data(gs).isPackage()) {
+                if (file.data(gs).isPackage(gs)) {
                     ENFORCE(buildPackageDB);
                     validatePackage(ctx);
                 } else {
@@ -2197,7 +2227,7 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
 
             ast::ParsedFile &file = files[idx];
             core::Context ctx(gs, core::Symbols::root(), file.file);
-            if (file.file.data(gs).isPackage()) {
+            if (file.file.data(gs).isPackage(gs)) {
                 // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
                 // report some syntactic packager errors.
                 auto info = definePackage(gs, file);

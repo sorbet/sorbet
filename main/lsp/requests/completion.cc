@@ -371,7 +371,7 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
     auto hasBlockType = blkArg.type != nullptr && !blkArg.type.isUntyped();
     if (hasBlockType && !core::Types::isSubType(gs, core::Types::nilClass(), blkArg.type)) {
         string blkArgs;
-        if (auto *appliedType = core::cast_type<core::AppliedType>(blkArg.type)) {
+        if (auto appliedType = core::cast_type<core::AppliedType>(blkArg.type)) {
             if (appliedType->targs.size() >= 2) {
                 // The first element in targs is the return type.
                 auto targs_it = appliedType->targs.begin();

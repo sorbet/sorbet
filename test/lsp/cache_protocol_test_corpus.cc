@@ -6,6 +6,7 @@
 #include "common/common.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/ErrorQueue.h"
+#include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
 #include "main/cache/cache.h"
 #include "main/pipeline/pipeline.h"
@@ -258,4 +259,76 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
         }
     }
 }
+
+TEST_CASE_FIXTURE(CacheProtocolTest, "ReindexingUsesTheCache") {
+    // Write a file to disk.
+    auto relativeFilepath = "test.rb";
+    auto filePath = fmt::format("{}/{}", rootPath, relativeFilepath);
+    // This file has an error to indirectly assert that LSP is actually typechecking the file during initialization.
+    auto fileContents = "# typed: true\n"
+                        "class Foo\n"
+                        "  extend T::Sig\n"
+                        "  sig {returns(Integer)}\n"
+                        "  def bar\n"
+                        "    'hello'\n"
+                        "  end\n"
+                        "end\n";
+    auto key = core::serialize::Serializer::fileKey(
+        core::File(string(filePath), string(fileContents), core::File::Type::Normal, 0));
+
+    // LSP should write a cache to disk corresponding to initialization state.
+    {
+        writeFilesToFS({{relativeFilepath, fileContents}});
+
+        lspWrapper->opts->inputFileNames.push_back(filePath);
+        assertErrorDiagnostics(
+            initializeLSP(),
+            {{relativeFilepath, 5, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
+    }
+
+    // LSP should have written cache to disk with file hashes from initialization.
+    // It should not include data from file updates made during the editor session.
+    auto opts = lspWrapper->opts;
+
+    // Release cache lock by dropping the entire LSP wrapper which holds onto a kvstore.
+    lspWrapper = nullptr;
+
+    auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = std::make_shared<spdlog::logger>("null", sink);
+    unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+
+    // The key should exist in the kvstore
+    auto contents = kvstore->read(key);
+    REQUIRE_NE(contents.data, nullptr);
+
+    auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*logger, *logger));
+    payload::createInitialGlobalState(*gs, *opts, kvstore);
+
+    // If caching fails, gs gets modified during payload creation.
+    CHECK_FALSE(gs->wasModified());
+
+    core::FileRef fref;
+    {
+        core::UnfreezeFileTable fileTableAccess(*gs);
+        fref = gs->enterFile(filePath, fileContents);
+    }
+
+    // The file should now be present in the file table with its contents loaded, meaning that its type is `Normal`
+    REQUIRE(fref.exists());
+    REQUIRE_EQ(fref.data(*gs).sourceType, core::File::Type::Normal);
+
+    auto workers = WorkerPool::create(0, *logger);
+    std::vector<core::FileRef> frefs{fref};
+
+    // We should be able to reindex the file multiple times, getting a cache hit for each one.
+    for (auto i = 0; i < 2; ++i) {
+        auto result = realmain::pipeline::index(*gs, absl::MakeSpan(frefs), *opts, *workers, kvstore);
+        REQUIRE(result.hasResult());
+
+        auto &asts = result.result();
+        REQUIRE_EQ(asts.size(), 1);
+        REQUIRE(asts.front().cached());
+    }
+}
+
 } // namespace sorbet::test::lsp

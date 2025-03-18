@@ -40,8 +40,8 @@ Loc Loc::join(Loc other) const {
     return Loc(this->file(), min(this->beginPos(), other.beginPos()), max(this->endPos(), other.endPos()));
 }
 
-Loc::Detail Loc::offset2Pos(const File &file, uint32_t off) {
-    Loc::Detail pos;
+Loc::Detail Loc::pos2Detail(const File &file, uint32_t off) {
+    Loc::Detail detail;
 
     if (off > file.source().size()) {
         fatalLogger->error(R"(msg="Bad offset2Pos off" path="{}" off="{}"")", absl::CEscape(file.path()), off);
@@ -49,49 +49,56 @@ Loc::Detail Loc::offset2Pos(const File &file, uint32_t off) {
         ENFORCE_NO_TIMER(false);
     }
     auto lineBreaks = file.lineBreaks();
+    // lower_bound is what the C++ STL calls the "least upper bound," i.e., a pointer to the first
+    // element which is greater than or equal to you in a sorted list
     auto it = absl::c_lower_bound(lineBreaks, off);
     if (it == lineBreaks.begin()) {
-        pos.line = 1;
-        pos.column = off + 1;
-        return pos;
+        detail.line = 1;
+        detail.column = off + 1;
+        return detail;
     }
+    detail.line = std::distance(lineBreaks.begin(), it) + 1;
     --it;
-    pos.line = (it - file.lineBreaks().begin()) + 1;
-    pos.column = off - *it;
-    return pos;
+    detail.column = off - *it;
+    return detail;
 }
 
-optional<uint32_t> Loc::pos2Offset(const File &file, Loc::Detail pos) {
-    auto l = pos.line - 1;
+optional<uint32_t> Loc::detail2Pos(const File &file, Loc::Detail detail) {
+    auto line1idx = detail.line;
     auto lineBreaks = file.lineBreaks();
-    if (!(0 <= l && l < lineBreaks.size())) {
+    if (!(1 <= line1idx && line1idx <= lineBreaks.size() + 1)) {
         return nullopt;
     }
-    auto lineOffset = lineBreaks[l];
-    auto nextLineStart = l + 1 < lineBreaks.size() ? lineBreaks[l + 1] : file.source().size();
-    auto lineLength = nextLineStart - lineOffset;
-    if (pos.column > lineLength) {
+    auto line0idx = line1idx - 1;
+
+    auto lineStart = line0idx == 0 ? 0 : lineBreaks[line0idx - 1] + 1;
+    auto lineEnd = line0idx < lineBreaks.size() ? lineBreaks[line0idx] : file.source().size();
+    auto lineLength = lineEnd - lineStart;
+    auto column1idx = detail.column;
+    if (column1idx > lineLength + 1) {
         return nullopt;
     }
-    return lineOffset + pos.column;
+
+    auto column0idx = column1idx - 1;
+    return lineStart + column0idx;
 }
 
 optional<Loc> Loc::fromDetails(const GlobalState &gs, FileRef fileRef, Loc::Detail begin, Loc::Detail end) {
     const auto &file = fileRef.data(gs);
-    const auto beginOff = pos2Offset(file, begin);
+    const auto beginOff = detail2Pos(file, begin);
     if (!beginOff.has_value()) {
         return nullopt;
     }
-    const auto endOff = pos2Offset(file, end);
+    const auto endOff = detail2Pos(file, end);
     if (!endOff.has_value()) {
         return nullopt;
     }
     return Loc(fileRef, beginOff.value(), endOff.value());
 }
 
-pair<Loc::Detail, Loc::Detail> Loc::position(const GlobalState &gs) const {
-    Loc::Detail begin(offset2Pos(this->file().data(gs), beginPos()));
-    Loc::Detail end(offset2Pos(this->file().data(gs), endPos()));
+pair<Loc::Detail, Loc::Detail> Loc::toDetails(const GlobalState &gs) const {
+    Loc::Detail begin(pos2Detail(this->file().data(gs), beginPos()));
+    Loc::Detail end(pos2Detail(this->file().data(gs), endPos()));
     return make_pair(begin, end);
 }
 namespace {
@@ -117,27 +124,28 @@ constexpr unsigned int WINDOW_SIZE = 10; // how many lines of source to print
 constexpr unsigned int WINDOW_HALF_SIZE = WINDOW_SIZE / 2;
 static_assert((WINDOW_SIZE & 1) == 0, "WINDOW_SIZE should be divisible by 2");
 
-void addLocLine(stringstream &buf, int line, const File &file, int tabs, int posWidth, bool censorForSnapshotTests) {
+void addLocLine(stringstream &buf, int line, const File &file, int tabs, int lineNumPadding,
+                bool censorForSnapshotTests) {
     printTabs(buf, tabs);
     buf << rang::fgB::black;
     if (censorForSnapshotTests) {
-        buf << leftPad("NN", posWidth);
+        buf << leftPad("NN", lineNumPadding);
     } else {
-        buf << leftPad(to_string(line + 1), posWidth);
+        buf << leftPad(to_string(line + 1), lineNumPadding);
     }
     buf << " |" << rang::style::reset;
-    if (file.lineBreaks().size() <= line + 1) {
+    if (!(0 <= line || line < file.lineBreaks().size())) {
         fatalLogger->error(R"(msg="Bad addLocLine line" path="{}" line="{}"")", absl::CEscape(file.path()), line);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
         ENFORCE_NO_TIMER(false);
     }
-    auto endPos = file.lineBreaks()[line + 1];
-    auto numToWrite = endPos - file.lineBreaks()[line] - 1;
-    if (numToWrite <= 0) {
+    auto endPos = file.lineBreaks()[line];
+    auto offset = line == 0 ? 0 : file.lineBreaks()[line - 1] + 1;
+    if (endPos <= offset) {
         return;
     }
-    auto offset = file.lineBreaks()[line] + 1;
-    if (offset < 0 || offset >= file.source().size()) {
+    auto numToWrite = endPos - offset;
+    if (offset >= file.source().size()) {
         fatalLogger->error(R"(msg="Bad addLocLine offset" path="{}" line="{}" offset="{}")", absl::CEscape(file.path()),
                            line, offset);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
@@ -157,48 +165,48 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
     stringstream buf;
     const File &file = this->file().data(gs);
     auto censorForSnapshotTests = gs.censorForSnapshotTests && file.isPayload();
-    auto pos = this->position(gs);
-    int posWidth = pos.second.line < 100 ? 2 : pos.second.line < 10000 ? 4 : 8;
+    auto details = this->toDetails(gs);
+    int lineNumPadding = details.second.line < 100 ? 2 : details.second.line < 10000 ? 4 : 8;
 
-    const auto firstLine = pos.first.line - 1;
+    const auto firstLine = details.first.line - 1;
     auto lineIt = firstLine;
     bool first = true;
-    while (lineIt != pos.second.line && lineIt - firstLine < WINDOW_HALF_SIZE) {
+    while (lineIt != details.second.line && lineIt - firstLine < WINDOW_HALF_SIZE) {
         if (!first) {
             buf << '\n';
         }
         first = false;
-        addLocLine(buf, lineIt, file, tabs, posWidth, censorForSnapshotTests);
+        addLocLine(buf, lineIt, file, tabs, lineNumPadding, censorForSnapshotTests);
         lineIt++;
     }
-    if (lineIt != pos.second.line && lineIt < pos.second.line - WINDOW_HALF_SIZE) {
+    if (lineIt != details.second.line && lineIt < details.second.line - WINDOW_HALF_SIZE) {
         buf << '\n';
         printTabs(buf, tabs);
-        string space(posWidth, ' ');
+        string space(lineNumPadding, ' ');
         buf << space << rang::fgB::black << " |" << rang::style::reset << "...";
-        lineIt = pos.second.line - WINDOW_HALF_SIZE;
+        lineIt = details.second.line - WINDOW_HALF_SIZE;
     }
-    while (lineIt != pos.second.line) {
+    while (lineIt != details.second.line) {
         buf << '\n';
-        addLocLine(buf, lineIt, file, tabs, posWidth, censorForSnapshotTests);
+        addLocLine(buf, lineIt, file, tabs, lineNumPadding, censorForSnapshotTests);
         lineIt++;
     }
 
-    if (pos.second.line == pos.first.line) {
+    if (details.second.line == details.first.line) {
         // add squigly
         buf << '\n';
         printTabs(buf, tabs);
-        for (int i = 0; i <= posWidth; i++) {
+        for (int i = 0; i <= lineNumPadding; i++) {
             buf << ' ';
         }
         int p;
 
-        for (p = 0; p < pos.first.column; p++) {
+        for (p = 0; p < details.first.column; p++) {
             buf << ' ';
         }
         buf << rang::fg::cyan;
-        if (pos.second.column - pos.first.column > 0) {
-            for (; p < pos.second.column; p++) {
+        if (details.second.column - details.first.column > 0) {
+            for (; p < details.second.column; p++) {
                 buf << '^';
             }
         } else {
@@ -252,7 +260,7 @@ string Loc::showRaw(const GlobalState &gs) const {
         return fmt::format("Loc {{file={} start=??? end=???}}", path);
     }
 
-    auto [start, end] = this->position(gs);
+    auto [start, end] = this->toDetails(gs);
     return fmt::format("Loc {{file={} start={}:{} end={}:{}}}", path, start.line, start.column, end.line, end.column);
 }
 
@@ -269,7 +277,7 @@ string Loc::filePosToString(const GlobalState &gs, bool showFull) const {
         }
 
         if (exists()) {
-            auto pos = position(gs);
+            auto details = toDetails(gs);
             if (path.find("https://") == 0) {
                 // For github permalinks
                 buf << "#L";
@@ -277,14 +285,14 @@ string Loc::filePosToString(const GlobalState &gs, bool showFull) const {
                 buf << ":";
             }
             auto censor = gs.censorForSnapshotTests && file().data(gs).isPayload();
-            buf << (censor ? "CENSORED" : to_string(pos.first.line));
+            buf << (censor ? "CENSORED" : to_string(details.first.line));
             if (showFull) {
                 buf << ":";
-                buf << (censor ? "CENSORED" : to_string(pos.first.column));
+                buf << (censor ? "CENSORED" : to_string(details.first.column));
                 buf << "-";
-                buf << (censor ? "CENSORED" : to_string(pos.second.line));
+                buf << (censor ? "CENSORED" : to_string(details.second.line));
                 buf << ":";
-                buf << (censor ? "CENSORED" : to_string(pos.second.column));
+                buf << (censor ? "CENSORED" : to_string(details.second.column));
             } else {
                 // pos.second.line; is intentionally not printed so that iterm2 can open file name:line_number as links
             }
@@ -369,9 +377,9 @@ Loc Loc::adjustLen(const GlobalState &gs, int32_t beginAdjust, int32_t len) cons
     return Loc{this->file(), newBegin, newEnd};
 }
 
-pair<Loc, uint32_t> Loc::findStartOfLine(const GlobalState &gs) const {
-    auto startDetail = this->position(gs).first;
-    auto maybeLineStart = Loc::pos2Offset(this->file().data(gs), {startDetail.line, 1});
+pair<Loc, uint32_t> Loc::findStartOfIndentation(const GlobalState &gs) const {
+    auto startDetail = this->toDetails(gs).first;
+    auto maybeLineStart = Loc::detail2Pos(this->file().data(gs), {startDetail.line, 1});
     ENFORCE_NO_TIMER(maybeLineStart.has_value());
     auto lineStart = maybeLineStart.value();
     std::string_view lineView = this->file().data(gs).source().substr(lineStart);
@@ -386,14 +394,14 @@ pair<Loc, uint32_t> Loc::findStartOfLine(const GlobalState &gs) const {
 }
 
 Loc Loc::truncateToFirstLine(const GlobalState &gs) const {
-    auto [beginPos, endPos] = this->position(gs);
-    if (beginPos.line == endPos.line) {
+    auto [beginDetail, endDetail] = this->toDetails(gs);
+    if (beginDetail.line == endDetail.line) {
         return *this;
     }
 
     const auto &lineBreaks = this->file().data(gs).lineBreaks();
-    // Detail::line is 1-indexed. We want one after the 0-indexed line, so line - 1 + 1 = line
-    auto firstNewline = lineBreaks[beginPos.line];
+    // Detail::line is 1-indexed. lineBreaks stores the ending newline of the 0-indexed line
+    auto firstNewline = lineBreaks[beginDetail.line - 1];
     return Loc(this->file(), this->beginPos(), firstNewline);
 }
 

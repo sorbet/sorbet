@@ -107,10 +107,10 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     testRestorables.push(createOutputChannelStub);
 
     const log = new OutputChannelLog("Test", LogLevel.Info);
-    assert.strictEqual(log.level, LogLevel.Info, "Expected default state");
+    assert.strictEqual(log.logLevel, LogLevel.Info, "Expected default state");
 
-    log.level = expectedLogLevel;
-    assert.strictEqual(log.level, expectedLogLevel, "Expected new state");
+    log.logLevel = expectedLogLevel;
+    assert.strictEqual(log.logLevel, expectedLogLevel, "Expected new state");
 
     sinon.assert.calledOnce(createOutputChannelStub);
   });
@@ -133,7 +133,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     assert.strictEqual(1, callCount);
     log.info(logMessage);
     assert.strictEqual(2, callCount);
-    log.warning(logMessage);
+    log.warn(logMessage);
     assert.strictEqual(3, callCount);
     log.debug(logMessage);
     assert.strictEqual(4, callCount);

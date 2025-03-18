@@ -127,7 +127,7 @@ template <class From, class To> To *fast_cast(From *what) {
 // Rounds the provided number up to the nearest power of two. If v is already a power of two, it returns v.
 uint32_t nextPowerOfTwo(uint32_t v);
 
-std::vector<int> findLineBreaks(std::string_view s);
+std::vector<uint32_t> findLineBreaks(std::string_view s);
 
 // To get exhaustiveness checking with std::visit.
 // From: https://en.cppreference.com/w/cpp/utility/variant/visit#Example

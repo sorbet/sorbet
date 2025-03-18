@@ -306,7 +306,6 @@ unique_ptr<GlobalState> GlobalState::makeEmptyGlobalStateForHashing(spdlog::logg
         new GlobalState(make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>()),
                         make_shared<lsp::TypecheckEpochManager>(), -1));
     rv->initEmpty();
-    rv->silenceErrors = true;
     return rv;
 }
 
@@ -2074,25 +2073,37 @@ bool GlobalState::unfreezeSymbolTable() {
     return old;
 }
 
+void GlobalState::copyOptions(const core::GlobalState &other) {
+    this->silenceErrors = other.silenceErrors;
+    this->autocorrect = other.autocorrect;
+    this->didYouMean = other.didYouMean;
+    this->ensureCleanStrings = other.ensureCleanStrings;
+    this->runningUnderAutogen = other.runningUnderAutogen;
+    this->censorForSnapshotTests = other.censorForSnapshotTests;
+    this->sleepInSlowPathSeconds = other.sleepInSlowPathSeconds;
+    this->rbsSignaturesEnabled = other.rbsSignaturesEnabled;
+    this->rbsAssertionsEnabled = other.rbsAssertionsEnabled;
+    this->requiresAncestorEnabled = other.requiresAncestorEnabled;
+    this->ruby3KeywordArgs = other.ruby3KeywordArgs;
+    this->typedSuper = other.typedSuper;
+    this->suppressPayloadSuperclassRedefinitionFor = other.suppressPayloadSuperclassRedefinitionFor;
+    this->trackUntyped = other.trackUntyped;
+    this->printingFileTable = other.printingFileTable;
+    this->errorUrlBase = other.errorUrlBase;
+    this->includeErrorSections = other.includeErrorSections;
+    this->ignoredForSuggestTypedErrorClasses = other.ignoredForSuggestTypedErrorClasses;
+    this->suppressedErrorClasses = other.suppressedErrorClasses;
+    this->onlyErrorClasses = other.onlyErrorClasses;
+    this->suggestUnsafe = other.suggestUnsafe;
+    this->pathPrefix = other.pathPrefix;
+}
+
 unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     Timer timeit(tracer(), "GlobalState::deepCopy", this->creation);
     this->sanityCheck();
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
-    result->silenceErrors = this->silenceErrors;
-    result->autocorrect = this->autocorrect;
-    result->didYouMean = this->didYouMean;
-    result->ensureCleanStrings = this->ensureCleanStrings;
-    result->runningUnderAutogen = this->runningUnderAutogen;
-    result->censorForSnapshotTests = this->censorForSnapshotTests;
-    result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
-    result->rbsSignaturesEnabled = this->rbsSignaturesEnabled;
-    result->requiresAncestorEnabled = this->requiresAncestorEnabled;
-    result->ruby3KeywordArgs = this->ruby3KeywordArgs;
-    result->typedSuper = this->typedSuper;
-    result->suppressPayloadSuperclassRedefinitionFor = this->suppressPayloadSuperclassRedefinitionFor;
-    result->trackUntyped = this->trackUntyped;
-    result->printingFileTable = this->printingFileTable;
+    result->copyOptions(*this);
 
     if (keepId) {
         result->globalStateId = this->globalStateId;
@@ -2107,12 +2118,6 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->lspQuery = this->lspQuery;
     result->kvstoreUuid = this->kvstoreUuid;
     result->lspTypecheckCount = this->lspTypecheckCount;
-    result->errorUrlBase = this->errorUrlBase;
-    result->includeErrorSections = this->includeErrorSections;
-    result->ignoredForSuggestTypedErrorClasses = this->ignoredForSuggestTypedErrorClasses;
-    result->suppressedErrorClasses = this->suppressedErrorClasses;
-    result->onlyErrorClasses = this->onlyErrorClasses;
-    result->suggestUnsafe = this->suggestUnsafe;
     result->utf8Names.reserve(this->utf8Names.capacity());
     result->constantNames.reserve(this->constantNames.capacity());
     result->uniqueNames.reserve(this->uniqueNames.capacity());
@@ -2159,7 +2164,6 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     for (auto &sym : this->typeMembers) {
         result->typeMembers.emplace_back(sym.deepCopy(*result));
     }
-    result->pathPrefix = this->pathPrefix;
     for (auto &semanticExtension : this->semanticExtensions) {
         result->semanticExtensions.emplace_back(semanticExtension->deepCopy(*this, *result));
     }
@@ -2176,29 +2180,12 @@ unique_ptr<GlobalState> GlobalState::copyForIndex() const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     result->initEmpty();
+    result->copyOptions(*this);
 
-    // Options that might be used during indexing are manually copied over here
+    // Additional options that might be used during indexing are manually copied over here
     result->files = this->files;
     result->fileRefByPath = this->fileRefByPath;
-    result->silenceErrors = this->silenceErrors;
-    result->autocorrect = this->autocorrect;
-    result->didYouMean = this->didYouMean;
-    result->ensureCleanStrings = this->ensureCleanStrings;
-    result->runningUnderAutogen = this->runningUnderAutogen;
-    result->censorForSnapshotTests = this->censorForSnapshotTests;
-    result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
-    result->rbsSignaturesEnabled = this->rbsSignaturesEnabled;
-    result->requiresAncestorEnabled = this->requiresAncestorEnabled;
-    result->ruby3KeywordArgs = this->ruby3KeywordArgs;
-    result->typedSuper = this->typedSuper;
-    result->suppressPayloadSuperclassRedefinitionFor = this->suppressPayloadSuperclassRedefinitionFor;
-    result->trackUntyped = this->trackUntyped;
     result->kvstoreUuid = this->kvstoreUuid;
-    result->errorUrlBase = this->errorUrlBase;
-    result->suppressedErrorClasses = this->suppressedErrorClasses;
-    result->onlyErrorClasses = this->onlyErrorClasses;
-    result->suggestUnsafe = this->suggestUnsafe;
-    result->pathPrefix = this->pathPrefix;
 
     return result;
 }
@@ -2250,7 +2237,7 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     if (what == errors::Internal::InternalError) {
         Exception::failInFuzzer();
     }
-    return ErrorBuilder(*this, shouldReportErrorOn(loc, what), loc, what);
+    return ErrorBuilder(*this, shouldReportErrorOn(loc.file(), what), loc, what);
 }
 
 ErrorBuilder GlobalState::beginIndexerError(Loc loc, ErrorClass what) {
@@ -2274,7 +2261,7 @@ void GlobalState::onlyShowErrorClass(int code) {
     onlyErrorClasses.insert(code);
 }
 
-bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
+bool GlobalState::shouldReportErrorOn(FileRef file, ErrorClass what) const {
     if (what.minLevel == StrictLevel::Internal) {
         return true;
     }
@@ -2294,8 +2281,8 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
     }
 
     StrictLevel level = StrictLevel::Strong;
-    if (loc.file().exists()) {
-        level = loc.file().data(*this).strictLevel;
+    if (file.exists()) {
+        level = file.data(*this).strictLevel;
     }
     if (level >= StrictLevel::Max) {
         // Custom rules

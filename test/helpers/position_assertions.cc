@@ -255,6 +255,7 @@ const UnorderedMap<
         {"check-out-of-order-constant-references", BooleanPropertyAssertion::make},
         {"enable-packager", BooleanPropertyAssertion::make},
         {"enable-experimental-rbs-signatures", BooleanPropertyAssertion::make},
+        {"enable-experimental-rbs-assertions", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
         {"experimental-ruby3-keyword-args", BooleanPropertyAssertion::make},
         {"typed-super", BooleanPropertyAssertion::make},
@@ -572,10 +573,6 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
     auto lineBreaks = file->lineBreaks();
 
     for (auto lineBreak : lineBreaks) {
-        // Ignore first line break entry.
-        if (lineBreak == -1) {
-            continue;
-        }
         string_view lineView = source.substr(nextChar, lineBreak - nextChar);
         auto line = string(lineView);
         nextChar = lineBreak + 1;
@@ -672,6 +669,60 @@ RangeAssertion::parseAssertions(const UnorderedMap<string, shared_ptr<core::File
     fast_sort(assertions, RangeAssertion::compareByRange);
 
     return assertions;
+}
+
+realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeAssertion>> &assertions) {
+    realmain::options::Options opts;
+
+    opts.noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
+    opts.rbsSignaturesEnabled =
+        BooleanPropertyAssertion::getValue("enable-experimental-rbs-signatures", assertions).value_or(false);
+    opts.rbsAssertionsEnabled =
+        BooleanPropertyAssertion::getValue("enable-experimental-rbs-assertions", assertions).value_or(false);
+    opts.requiresAncestorEnabled =
+        BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
+    opts.ruby3KeywordArgs =
+        BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
+    opts.typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
+    // TODO(jez) Allow allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
+
+    opts.uniquelyDefinedBehavior =
+        BooleanPropertyAssertion::getValue("uniquely-defined-behavior", assertions).value_or(false);
+
+    opts.outOfOrderReferenceChecksEnabled =
+        BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false);
+
+    if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
+        opts.suggestUnsafe = "T.unsafe";
+    }
+
+    opts.stripePackages = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
+    auto extraDirUnderscore =
+        StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
+    if (extraDirUnderscore.has_value()) {
+        opts.extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
+    }
+
+    auto extraDirSlashDeprecated =
+        StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash-deprecated", assertions);
+    if (extraDirSlashDeprecated.has_value()) {
+        opts.extraPackageFilesDirectorySlashDeprecatedPrefixes.emplace_back(extraDirSlashDeprecated.value());
+    }
+
+    auto extraDirSlash = StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
+    if (extraDirSlash.has_value()) {
+        opts.extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
+    }
+
+    auto allowRelaxedPackager = StringPropertyAssertion::getValue("allow-relaxed-packager-checks-for", assertions);
+    if (allowRelaxedPackager.has_value()) {
+        opts.allowRelaxedPackagerChecksFor.emplace_back(allowRelaxedPackager.value());
+    }
+
+    std::vector<std::string> defaultLayers = {};
+    opts.packagerLayers = StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
+
+    return opts;
 }
 
 unique_ptr<Location> RangeAssertion::getLocation(const LSPConfiguration &config) const {

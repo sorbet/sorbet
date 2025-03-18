@@ -589,7 +589,7 @@ void maybeSuggestUnsafeKwsplat(const core::GlobalState &gs, core::ErrorBuilder &
 
 // Ensure that a ShapeType used as a keyword args splat in a send has only symbol keys present.
 const ShapeType *fromKwargsHash(const GlobalState &gs, const TypePtr &ty) {
-    auto *hash = cast_type<ShapeType>(ty);
+    auto hash = cast_type<ShapeType>(ty);
     if (hash == nullptr) {
         return nullptr;
     }
@@ -1287,7 +1287,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // Mark the keyword args as consumed
         ait += numKwargs;
 
-        if (auto *hash = cast_type<ShapeType>(kwargs)) {
+        if (auto hash = cast_type<ShapeType>(kwargs)) {
             // find keyword arguments and advance `pend` before them; We'll walk
             // `kwit` ahead below
             auto kwit = pit;
@@ -1670,7 +1670,7 @@ bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
         }
     }
 
-    if (auto *appliedType = cast_type<AppliedType>(wrapped)) {
+    if (auto appliedType = cast_type<AppliedType>(wrapped)) {
         if (appliedType->klass == core::Symbols::Class()) {
             // T::Class[...].new is not implemented--users should just use Class.new(super_class)
             return false;
@@ -1710,7 +1710,7 @@ DispatchResult badMetaTypeCall(const GlobalState &gs, const DispatchArgs &args, 
                                "which doesn't work at runtime");
                 e.replaceWith("Replace with class name", args.callLoc(), "{}", appliedType->klass.show(gs));
             }
-        } else if (auto *appliedType = cast_type<AppliedType>(wrapped)) {
+        } else if (auto appliedType = cast_type<AppliedType>(wrapped)) {
             // For T.class_of(Foo), we'll suggest replacing it with the attached class (Foo).
             if (appliedType->klass.data(gs)->isSingletonClass(gs)) {
                 auto receiverLoc = core::Loc(args.locs.file, args.locs.receiver);
@@ -1763,7 +1763,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
             return original;
         }
         case Names::squareBrackets().rawId(): {
-            auto *applied = cast_type<AppliedType>(this->wrapped);
+            auto applied = cast_type<AppliedType>(this->wrapped);
             if (applied == nullptr) {
                 return badMetaTypeCall(gs, args, errLoc, this->wrapped);
             }
@@ -1776,7 +1776,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
         case Names::bind().rawId():
         case Names::returns().rawId():
         case Names::void_().rawId(): {
-            auto *applied = cast_type<AppliedType>(this->wrapped);
+            auto applied = cast_type<AppliedType>(this->wrapped);
             if (applied == nullptr) {
                 return badMetaTypeCall(gs, args, errLoc, this->wrapped);
             }
@@ -2173,7 +2173,7 @@ public:
     }
 
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *selfApp = cast_type<AppliedType>(args.thisType);
+        auto selfApp = cast_type<AppliedType>(args.thisType);
         if (selfApp == nullptr) {
             return;
         }
@@ -2372,11 +2372,11 @@ public:
 
 class Magic_expandSplat : public IntrinsicMethod {
     static TypePtr expandArray(const GlobalState &gs, const TypePtr &type, int expandTo) {
-        if (auto *ot = cast_type<OrType>(type)) {
+        if (auto ot = cast_type<OrType>(type)) {
             return Types::any(gs, expandArray(gs, ot->left, expandTo), expandArray(gs, ot->right, expandTo));
         }
 
-        auto *tuple = cast_type<TupleType>(type);
+        auto tuple = cast_type<TupleType>(type);
         if (tuple == nullptr && core::Types::approximate(gs, type, core::TypeConstraint::EmptyFrozenConstraint)
                                     .derivesFrom(gs, Symbols::Array())) {
             // If this is an array and not a tuple, just pass it through. We
@@ -2496,7 +2496,7 @@ public:
             res.returnType = args.args[2]->type;
             return;
         }
-        auto *posTuple = cast_type<TupleType>(args.args[2]->type);
+        auto posTuple = cast_type<TupleType>(args.args[2]->type);
         if (posTuple == nullptr) {
             if (auto e = gs.beginError(args.argLoc(2), core::errors::Infer::UntypedSplat)) {
                 e.setHeader("Splats are only supported where the size of the array is known statically");
@@ -2505,7 +2505,7 @@ public:
         }
 
         auto kwArgsType = args.args[3]->type;
-        auto *kwTuple = cast_type<TupleType>(kwArgsType);
+        auto kwTuple = cast_type<TupleType>(kwArgsType);
         if (kwTuple == nullptr && !kwArgsType.isNilClass()) {
             if (auto e = gs.beginError(args.argLoc(2), core::errors::Infer::UntypedSplat)) {
                 e.setHeader(
@@ -2591,7 +2591,7 @@ private:
     }
 
     static std::optional<int> getArityForBlock(const TypePtr &blockType) {
-        if (auto *appliedType = cast_type<AppliedType>(blockType)) {
+        if (auto appliedType = cast_type<AppliedType>(blockType)) {
             return Types::getProcArity(*appliedType);
         }
 
@@ -2849,7 +2849,7 @@ public:
             res.returnType = args.args[2]->type;
             return;
         }
-        auto *posTuple = cast_type<TupleType>(args.args[2]->type);
+        auto posTuple = cast_type<TupleType>(args.args[2]->type);
         if (posTuple == nullptr) {
             if (auto e = gs.beginError(args.argLoc(2), core::errors::Infer::UntypedSplat)) {
                 e.setHeader("Splats are only supported where the size of the array is known statically");
@@ -2860,7 +2860,7 @@ public:
         uint16_t numPosArgs = posTuple->elems.size();
 
         auto kwType = args.args[3]->type;
-        auto *kwTuple = cast_type<TupleType>(kwType);
+        auto kwTuple = cast_type<TupleType>(kwType);
         if (kwTuple == nullptr && !kwType.isNilClass()) {
             if (auto e = gs.beginError(args.argLoc(2), core::errors::Infer::UntypedSplat)) {
                 e.setHeader(
@@ -3221,7 +3221,7 @@ public:
             return;
         }
 
-        auto *tuple = cast_type<TupleType>(args.thisType);
+        auto tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
         auto tupleSize = tuple->elems.size();
 
@@ -3283,7 +3283,7 @@ public:
 class Tuple_last : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.thisType);
+        auto tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
@@ -3300,7 +3300,7 @@ public:
 class Tuple_first : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.thisType);
+        auto tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
@@ -3317,7 +3317,7 @@ public:
 class Tuple_minMax : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.thisType);
+        auto tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
@@ -3334,7 +3334,7 @@ public:
 class Tuple_sum : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.thisType);
+        auto tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
@@ -3354,7 +3354,7 @@ public:
 class Tuple_sample : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.thisType);
+        auto tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (args.args.size() > 1) {
@@ -3390,11 +3390,11 @@ class Tuple_concat : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         vector<TypePtr> elems;
-        auto *tuple = cast_type<TupleType>(args.thisType);
+        auto tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
         elems = tuple->elems;
         for (auto elem : args.args) {
-            if (auto *tuple = cast_type<TupleType>(elem->type)) {
+            if (auto tuple = cast_type<TupleType>(elem->type)) {
                 elems.insert(elems.end(), tuple->elems.begin(), tuple->elems.end());
             } else {
                 return;
@@ -3520,7 +3520,7 @@ public:
 class Shape_merge : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *shape = cast_type<ShapeType>(args.thisType);
+        auto shape = cast_type<ShapeType>(args.thisType);
         ENFORCE(shape);
 
         if (args.args.empty() || args.block != nullptr) {
@@ -3541,7 +3541,7 @@ public:
 
         // Deliberately copy the keys and values, since we may be adding entries.
         auto copyTypePtr = make_type<ShapeType>(shape->keys, shape->values);
-        auto *copy = cast_type<ShapeType>(copyTypePtr);
+        auto copy = cast_type<ShapeType>(copyTypePtr);
         ENFORCE(copy != nullptr);
         auto addShapeEntry = [&copy](const TypePtr &keyType, const TypePtr &value) {
             if (auto optind = copy->indexForKey(keyType)) {
@@ -3776,7 +3776,7 @@ class Magic_checkMatchArray : public IntrinsicMethod {
         auto testedSym = Symbols::noClassOrModule();
         if (isa_type<ClassType>(testedType)) {
             testedSym = cast_type_nonnull<ClassType>(testedType).symbol;
-        } else if (auto *app = cast_type<AppliedType>(testedType)) {
+        } else if (auto app = cast_type<AppliedType>(testedType)) {
             testedSym = app->klass;
         }
         if (testedSym.exists() && testedSym.data(gs)->flags.isSealed) {
@@ -4023,7 +4023,7 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // Unwrap the array one time to get the element type (we'll rewrap it down at the bottom)
         TypePtr element;
-        auto *ap = cast_type<AppliedType>(args.thisType);
+        auto ap = cast_type<AppliedType>(args.thisType);
         ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
         ENFORCE(!ap->targs.empty());
         element = ap->targs.front();
@@ -4068,18 +4068,18 @@ public:
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(args.args.size() + 1);
 
-        auto *ap = cast_type<AppliedType>(args.thisType);
+        auto ap = cast_type<AppliedType>(args.thisType);
         ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
         ENFORCE(!ap->targs.empty());
         unwrappedElems.emplace_back(ap->targs.front());
 
         for (auto arg : args.args) {
             auto argTyp = arg->type;
-            if (auto *ap = cast_type<AppliedType>(argTyp)) {
+            if (auto ap = cast_type<AppliedType>(argTyp)) {
                 ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
                 ENFORCE(!ap->targs.empty());
                 unwrappedElems.emplace_back(ap->targs.front());
-            } else if (auto *tuple = cast_type<TupleType>(argTyp)) {
+            } else if (auto tuple = cast_type<TupleType>(argTyp)) {
                 unwrappedElems.emplace_back(tuple->elementType(gs));
             } else {
                 // Arg type didn't match; we already reported an error for the arg type; just return untyped to recover.
@@ -4097,7 +4097,7 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         TypePtr element;
 
-        auto *ap = cast_type<AppliedType>(args.thisType);
+        auto ap = cast_type<AppliedType>(args.thisType);
         ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
         ENFORCE(!ap->targs.empty());
         element = ap->targs.front();
@@ -4113,19 +4113,19 @@ public:
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(args.args.size() + 1);
 
-        auto *ap = cast_type<AppliedType>(args.thisType);
+        auto ap = cast_type<AppliedType>(args.thisType);
         ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
         ENFORCE(!ap->targs.empty());
         unwrappedElems.emplace_back(ap->targs.front());
 
         for (auto arg : args.args) {
             auto argTyp = arg->type;
-            if (auto *ap = cast_type<AppliedType>(argTyp)) {
+            if (auto ap = cast_type<AppliedType>(argTyp)) {
                 ENFORCE(ap->klass == Symbols::Enumerable() ||
                         ap->klass.data(gs)->derivesFrom(gs, Symbols::Enumerable()));
                 ENFORCE(!ap->targs.empty());
                 unwrappedElems.emplace_back(Types::any(gs, ap->targs.front(), Types::nilClass()));
-            } else if (auto *tuple = cast_type<TupleType>(argTyp)) {
+            } else if (auto tuple = cast_type<TupleType>(argTyp)) {
                 unwrappedElems.emplace_back(Types::any(gs, tuple->elementType(gs), Types::nilClass()));
             } else {
                 // Arg type didn't match; we already reported an error for the arg type; just return untyped to
@@ -4138,7 +4138,7 @@ public:
         if (args.block != nullptr) {
             res.returnType = Types::nilClass();
 
-            if (auto *blockAppliedType = cast_type<AppliedType>(res.main.blockPreType)) {
+            if (auto blockAppliedType = cast_type<AppliedType>(res.main.blockPreType)) {
                 ENFORCE(blockAppliedType->targs.size() == 2, "calls.cc out of date w.r.t. array.rbi");
                 blockAppliedType->targs[1] = make_type<TupleType>(move(unwrappedElems));
             }
@@ -4151,12 +4151,12 @@ public:
 class Array_transpose : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *ap = cast_type<AppliedType>(args.thisType);
+        auto ap = cast_type<AppliedType>(args.thisType);
         ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
         ENFORCE(!ap->targs.empty());
         auto &elementType = ap->targs.front();
 
-        auto *tuple = cast_type<TupleType>(elementType);
+        auto tuple = cast_type<TupleType>(elementType);
         if (tuple == nullptr) {
             return;
         }
@@ -4412,7 +4412,7 @@ public:
         auto rhsSym = Symbols::noClassOrModule();
         if (isa_type<ClassType>(rhs)) {
             rhsSym = cast_type_nonnull<ClassType>(rhs).symbol;
-        } else if (auto *app = cast_type<AppliedType>(rhs)) {
+        } else if (auto app = cast_type<AppliedType>(rhs)) {
             rhsSym = app->klass;
         }
 
@@ -4458,7 +4458,7 @@ public:
         auto rhsSym = Symbols::noClassOrModule();
         if (isa_type<ClassType>(rhs)) {
             rhsSym = cast_type_nonnull<ClassType>(rhs).symbol;
-        } else if (auto *app = cast_type<AppliedType>(rhs)) {
+        } else if (auto app = cast_type<AppliedType>(rhs)) {
             rhsSym = app->klass;
         }
 
@@ -4491,7 +4491,7 @@ class GenericForwarder_tripleEq : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto forwarderSingleton = Symbols::noClassOrModule();
-        if (auto *app = cast_type<AppliedType>(args.thisType)) {
+        if (auto app = cast_type<AppliedType>(args.thisType)) {
             forwarderSingleton = app->klass;
         } else {
             forwarderSingleton = cast_type_nonnull<ClassType>(args.thisType).symbol;

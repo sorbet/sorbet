@@ -7,19 +7,21 @@ contribute up until the process of open sourcing it:
 The current Sorbet team:
 
 - Trevor Elliott
-- James Iry
-- Dmitry Petrashko
+- Nathan Froyd
+- Neil Parikh
 - Getty Ritter
-- John Vilk
 - Jake Zimmerman
 
 Former Sorbet team members:
 
+- Ariel Davis
 - Russell Davis
 - Nelson Elhage
-- Neil Parikh
-- Ariel Davis
+- James Iry
+- Dmitry Petrashko
 - Paul Tarjan
+- John Vilk
+- Ilya Zheleznikov
 
 Stripes who helped open source Sorbet:
 
@@ -35,9 +37,15 @@ Our collaborators at Coinbase & Shopify:
 - Michael de Hoog (Coinbase)
 - Mark Hudnall (Coinbase)
 - Ufuk Kayserilioglu (Shopify)
+- Stan Lo (Shopify)
 - Guillaume Malette (Shopify)
+- Alexander Momchilov (Shopify)
+- Kaan Ozkan (Shopify)
+- Emily Samp (Shopify)
 - Jordan Sitkin (Coinbase)
+- Vinicius Stock (Shopify)
 - Alexandre Terrasa (Shopify)
+- Andy Waite (Shopify)
 - Alan Wu (Shopify)
 
 Our collaborators on the Ruby Types working group:
