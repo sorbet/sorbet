@@ -90,7 +90,6 @@ struct Printers {
     // Ensure everything here is in PrinterConfig::printers().
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();
-    bool isAutogen() const;
 };
 
 enum class Phase {
@@ -151,6 +150,7 @@ struct Options {
     bool forceHashing = false;
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
+    bool runningUnderAutogen = false;
     int autogenVersion = 0;
     bool uniquelyDefinedBehavior = false;
     bool stripePackages = false;

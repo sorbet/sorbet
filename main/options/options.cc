@@ -223,10 +223,6 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
     });
 }
 
-bool Printers::isAutogen() const {
-    return Autogen.enabled || AutogenMsgPack.enabled || AutogenSubclasses.enabled;
-}
-
 namespace {
 
 struct StopAfterOptions {
@@ -1010,9 +1006,15 @@ void readOptions(Options &opts,
         }
 
         // Certain features only need certain passes
-        if (opts.print.isAutogen() && (opts.stopAfterPhase != Phase::NAMER)) {
-            logger->error("-p autogen{-msgpack,-classlist,-subclasses} must also include --stop-after=namer");
-            throw EarlyReturnWithCode(1);
+        auto isAutogen =
+            opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenSubclasses.enabled;
+        if (isAutogen) {
+            if (opts.stopAfterPhase != Phase::NAMER) {
+                logger->error("-p autogen{-msgpack,-classlist,-subclasses} must also include --stop-after=namer");
+                throw EarlyReturnWithCode(1);
+            }
+
+            opts.runningUnderAutogen = isAutogen;
         }
 
         if (raw.count("autogen-version") > 0) {
@@ -1046,7 +1048,7 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("autogen-behavior-allowed-in-rbi-files-paths") > 0) {
-            if (!opts.print.isAutogen()) {
+            if (!opts.runningUnderAutogen) {
                 logger->error("autogen-behavior-allowed-in-rbi-files-paths can only be used with -p autogen or -p "
                               "autogen-msgpack");
                 throw EarlyReturnWithCode(1);
