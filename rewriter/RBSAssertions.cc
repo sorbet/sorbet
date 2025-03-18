@@ -231,7 +231,7 @@ private:
     ast::ExpressionPtr transformAssign(core::MutableContext ctx, ast::Assign *assign) {
         if (auto type = getRBSAssertionType(ctx, assign)) {
             auto rhs = ast::MK::Let(type.loc(), move(assign->rhs), move(type));
-            return ast::make_expression<ast::Assign>(assign->loc, move(assign->lhs), move(rhs));
+            return ast::MK::Assign(assign->loc, move(assign->lhs), move(rhs));
         }
 
         return nullptr;
@@ -337,18 +337,18 @@ public:
         stats.reserve(3);
 
         auto let = ast::MK::Let(elseAssignCast->loc, ast::MK::cpRef(elseAssign->lhs), move(elseAssignCast->typeExpr));
-        auto newLet = ast::make_expression<ast::Assign>(elseAssign->loc, ast::MK::cpRef(elseAssign->lhs), move(let));
+        auto newLet = ast::MK::Assign(elseAssign->loc, ast::MK::cpRef(elseAssign->lhs), move(let));
         stats.push_back(move(newLet));
 
         auto tempLocal = ast::MK::Local(elseAssignCast->loc, core::Names::statTemp());
         auto newTemp = ast::MK::Assign(elseAssignCast->loc, ast::MK::cpRef(tempLocal), move(elseAssignCast->arg));
         stats.push_back(move(newTemp));
 
-        auto expr = ast::make_expression<ast::Assign>(elseAssign->loc, move(elseAssign->lhs), move(tempLocal));
+        auto expr = ast::MK::Assign(elseAssign->loc, move(elseAssign->lhs), move(tempLocal));
 
-        iff->elsep = ast::make_expression<ast::InsSeq>(iff->elsep.loc(), move(stats), move(expr));
+        iff->elsep = ast::MK::InsSeq(iff->elsep.loc(), move(stats), move(expr));
 
-        tree = ast::make_expression<ast::If>(iff->loc, move(iff->cond), move(iff->thenp), move(iff->elsep));
+        tree = ast::MK::If(iff->loc, move(iff->cond), move(iff->thenp), move(iff->elsep));
     }
 
     /*
