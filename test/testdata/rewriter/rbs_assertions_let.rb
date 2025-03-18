@@ -52,6 +52,10 @@ T.reveal_type(h) # error: Revealed type: `T::Array[String]`
 i = "#: Integer" #: String
 T.reveal_type(i) # error: Revealed type: `String`
 
+j = 42 #: Integer
+j += 42 #: String # error: Argument does not have asserted type `String`
+T.reveal_type(j) # error: Revealed type: `String`
+
 # constants
 
 A = ARGV.first #: String
