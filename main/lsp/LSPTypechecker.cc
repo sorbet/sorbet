@@ -343,9 +343,8 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             ShowOperation op(*config, ShowOperation::Kind::Indexing);
 
             switch (mode) {
-                // Initialize the tracked files to everything found at startup.
+                // Initialization fetches the list of files to index from the options
                 case SlowPathMode::Init: {
-                    // We're initializing an empty global state from the kvstore, if it's valid.
                     ENFORCE(!this->initialized);
                     timeit.emplace(this->config->logger, "initial_index");
 
@@ -353,6 +352,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                     break;
                 }
 
+                // Reindexing on the slow path derives the list of inputs files from the file table
                 case SlowPathMode::Cancelable: {
                     timeit.emplace(this->config->logger, "slow_path_reindex");
 
