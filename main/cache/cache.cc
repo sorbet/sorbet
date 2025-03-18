@@ -278,12 +278,14 @@ std::unique_ptr<KeyValueStore> SessionCache::open(std::shared_ptr<::spdlog::logg
         openCache(std::move(logger), std::move(flavor), this->path, this->maxCacheBytes));
 
     // If the name table entry is missing, this indicates that the cache is completely fresh and doesn't originate in a
-    // copy from the result of indexing.
+    // copy from the result of indexing. This can happen if only the `data.mdb` file was removed from `this->path`, and
+    // the KeyValueStore created a fresh database when created.
     const auto nameTableEntry = kvstore->read(core::serialize::Serializer::NAME_TABLE_KEY);
     if (nameTableEntry.len == 0) {
         return nullptr;
     }
 
+    // We abort here because there will be no outstanding transactions present.
     return OwnedKeyValueStore::abort(std::move(kvstore));
 }
 
