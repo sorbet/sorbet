@@ -24,15 +24,8 @@ namespace {
  */
 bool isDesugarIdent(core::MutableContext ctx, const ast::ExpressionPtr &expr) {
     auto ident = ast::cast_tree<ast::UnresolvedIdent>(expr);
-    return ident && ident->kind == ast::UnresolvedIdent::Kind::Local &&
-           (ident->name.isUniqueNameOf(ctx, core::Names::andAnd()) ||
-            ident->name.isUniqueNameOf(ctx, core::Names::assignTemp()) ||
-            ident->name.isUniqueNameOf(ctx, core::Names::destructureArg()) ||
-            ident->name.isUniqueNameOf(ctx, core::Names::forTemp()) ||
-            ident->name.isUniqueNameOf(ctx, core::Names::hashTemp()) ||
-            ident->name.isUniqueNameOf(ctx, core::Names::orOr()) ||
-            ident->name.isUniqueNameOf(ctx, core::Names::rescueTemp()) ||
-            ident->name.isUniqueNameOf(ctx, core::Names::statTemp()));
+    return ident && ident->name.kind() == core::NameKind::UNIQUE &&
+           ident->name.dataUnique(ctx.state)->uniqueNameKind == core::UniqueNameKind::Desugar;
 }
 
 /**
