@@ -102,7 +102,7 @@ with ENV.begin() as txn:
 
 # Print a list of key<TAB>len(val) pairs to out.txt:
 with open('/tmp/out.txt', 'wb') as f:
-  with ENV.begin(db=ENV.open_db(b'experimentalfastpath')) as txn:
+  with ENV.begin(db=ENV.open_db(b'default')) as txn:
       cursor = txn.cursor()
       for key, val in cursor:
           f.write(key)
@@ -111,7 +111,7 @@ with open('/tmp/out.txt', 'wb') as f:
           f.write(b'\n')
 
 # Get the value for a single key (in the shell):
-with ENV.begin(db=ENV.open_db(b'experimentalfastpath')) as txn:
+with ENV.begin(db=ENV.open_db(b'default')) as txn:
   txn.get(b'DB_FORMAT_VERSION')
 
 # open another database in the shell, for comparison purposes
@@ -129,7 +129,7 @@ env = '/home/jez/sorbet-cache.bak'
 ENV = lmdb.open(env, map_size=10_485_760, max_dbs=128, create=False)
 
 with open('/tmp/out.txt', 'wb') as f:
-  with ENV.begin(db=ENV.open_db(b'experimentalfastpath')) as txn:
+  with ENV.begin(db=ENV.open_db(b'default')) as txn:
       cursor = txn.cursor()
       for key, val in cursor:
           f.write(key)
