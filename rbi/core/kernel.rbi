@@ -2895,11 +2895,13 @@ module Kernel
   # :   Used for experimental features that may change in future releases.
   sig do
     params(
-        msg: String,
+        msgs: String,
+        uplevel: T.nilable(Integer),
+        category: T.nilable(Symbol)
     )
     .returns(NilClass)
   end
-  def warn(*msg); end
+  def warn(*msgs, uplevel: nil, category: nil); end
 
   # With no arguments, raises the exception in `$!` or raises a
   # [`RuntimeError`](https://docs.ruby-lang.org/en/2.7.0/RuntimeError.html) if
