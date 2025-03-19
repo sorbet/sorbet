@@ -2366,7 +2366,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             },
             [&](parser::Undef *undef) {
                 if (auto e = dctx.ctx.beginIndexerError(what->loc, core::errors::Desugar::UndefUsage)) {
-                    e.setHeader("Unsuppored method: undef");
+                    e.setHeader("Unsupported method: undef");
                 }
                 Send::ARGS_store args;
                 for (auto &expr : undef->exprs) {
