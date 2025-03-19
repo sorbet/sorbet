@@ -4,15 +4,21 @@
 
 ```mermaid
 sequenceDiagram
+  box rgba(255,255,255,0.2) Preprocessor Thread
   participant LSPPreprocessor
+  end
+  box rgba(255,255,255,0.2) Main Thread
   participant LSPLoop
   participant LSPIndexer
+  end
+  box rgba(255,255,255,0.2) Typechecker Thread
   participant LSPTypechecker
+  end
 
   LSPPreprocessor --) LSPLoop: InitializedTask
   LSPLoop ->> LSPIndexer: InitializedTask::index
   Note left of LSPIndexer: Transfer GlobalState and<br/>kvstore to InitializedTask
-  LSPIndexer ->> LSPLoop: pause
+  LSPIndexer ->> LSPLoop: TaskQueue::pause
   LSPLoop ->> LSPTypechecker: InitializedTask::run
   LSPTypechecker ->> LSPTypechecker: LSPTypechecker::runSlowPath
   Note right of LSPTypechecker: Copy the GlobalState<br/>after indexing
@@ -27,10 +33,16 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
+  box rgba(255,255,255,0.2) Preprocessor Thread
   participant LSPPreprocessor
+  end
+  box rgba(255,255,255,0.2) Main Thread
   participant LSPLoop
   participant LSPIndexer
+  end
+  box rgba(255,255,255,0.2) Typechecker Thread
   participant LSPTypechecker
+  end
 
   LSPPreprocessor --) LSPLoop: SorbetWorkspaceEditTask
   LSPLoop ->> LSPIndexer: SorbetWorkspaceEditTask::index
