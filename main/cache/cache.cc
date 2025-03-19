@@ -1,4 +1,5 @@
 #include "main/cache/cache.h"
+#include "common/FileOps.h"
 #include "common/Random.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/kvstore/KeyValueStore.h"
@@ -9,6 +10,15 @@
 using namespace std;
 
 namespace sorbet::realmain::cache {
+
+namespace {
+unique_ptr<KeyValueStore> openCache(std::shared_ptr<::spdlog::logger> logger, std::string flavor, std::string cacheDir,
+                                    size_t maxCacheSizeBytes) {
+    return make_unique<KeyValueStore>(std::move(logger), sorbet_full_version_string, std::move(cacheDir),
+                                      std::move(flavor), maxCacheSizeBytes);
+}
+} // namespace
+
 unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(shared_ptr<::spdlog::logger> logger,
                                                         const options::Options &opts) {
     if (opts.cacheDir.empty()) {
@@ -18,8 +28,8 @@ unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(shared_ptr<::spdlog::log
     // bust all existing caches when we promoted the experimental-at-the-time incremental fast path
     // to the stable version.
     auto flavor = "experimentalfastpath";
-    return make_unique<OwnedKeyValueStore>(make_unique<KeyValueStore>(logger, sorbet_full_version_string, opts.cacheDir,
-                                                                      move(flavor), opts.maxCacheSizeBytes));
+    return make_unique<OwnedKeyValueStore>(
+        openCache(std::move(logger), std::move(flavor), opts.cacheDir, opts.maxCacheSizeBytes));
 }
 
 namespace {
@@ -192,6 +202,91 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
     }
 
     return kvstore;
+}
+
+SessionCache::SessionCache(std::string path, size_t maxCacheBytes)
+    : path{std::move(path)}, maxCacheBytes{maxCacheBytes} {}
+
+SessionCache::~SessionCache() noexcept(false) {
+    if (!FileOps::dirExists(this->path)) {
+        return;
+    }
+
+    auto dataMdb = fmt::format("{}/data.mdb", this->path);
+    if (FileOps::exists(dataMdb)) {
+        FileOps::removeFile(dataMdb);
+    }
+
+    auto lockMdb = fmt::format("{}/lock.mdb", this->path);
+    if (FileOps::exists(lockMdb)) {
+        FileOps::removeFile(lockMdb);
+    }
+
+    // Fail silently if the directory has files other than those created by LMDB. This should be fine though, as we will
+    // have removed the largest files.
+    FileOps::removeEmptyDir(this->path);
+}
+
+std::unique_ptr<SessionCache> SessionCache::make(std::unique_ptr<const OwnedKeyValueStore> kvstore,
+                                                 ::spdlog::logger &logger, const options::Options &opts) {
+    if (kvstore == nullptr || opts.cacheDir.empty()) {
+        return nullptr;
+    }
+
+    std::string path;
+
+    // Pretty unlikely that we'll see a collision, as we're removing the directory on exit and also generating random
+    // names, but make two attempts to find a new one anyway.
+    for (int i = 0; i < 2; i++) {
+        // Store the session cache as a sub folder of the cacheDir, so we don't write additional cache data to
+        // an unexpected location.
+        path = fmt::format("{}/session-{:x}", opts.cacheDir, Random::uniformU4());
+        if (!FileOps::dirExists(path)) {
+            break;
+        }
+        path.clear();
+    }
+
+    if (path.empty()) {
+        Exception::raise("Cache copying failed: failed to make a unique temp directory");
+    }
+
+    kvstore->copyTo(path);
+
+    OwnedKeyValueStore::abort(std::move(kvstore));
+
+    // Explicit construction because the constructor is private.
+    return std::unique_ptr<SessionCache>(new SessionCache{std::move(path), opts.maxCacheSizeBytes});
+}
+
+std::string_view SessionCache::kvstorePath() const {
+    return std::string_view(this->path);
+}
+
+std::unique_ptr<KeyValueStore> SessionCache::open(std::shared_ptr<::spdlog::logger> logger) const {
+    // If the session copy has disappeared, we return a nullptr to force downstream consumers to explicitly handle the
+    // empty cache.
+    if (!FileOps::dirExists(this->path)) {
+        return nullptr;
+    }
+
+    // Despite being called "experimental," this feature is actually stable. We just didn't want to
+    // bust all existing caches when we promoted the experimental-at-the-time incremental fast path
+    // to the stable version.
+    auto flavor = "experimentalfastpath";
+    auto kvstore = std::make_unique<const OwnedKeyValueStore>(
+        openCache(std::move(logger), std::move(flavor), this->path, this->maxCacheBytes));
+
+    // If the name table entry is missing, this indicates that the cache is completely fresh and doesn't originate in a
+    // copy from the result of indexing. This can happen if only the `data.mdb` file was removed from `this->path`, and
+    // the KeyValueStore created a fresh database when created.
+    const auto nameTableEntry = kvstore->read(core::serialize::Serializer::NAME_TABLE_KEY);
+    if (nameTableEntry.len == 0) {
+        return nullptr;
+    }
+
+    // We abort here because there will be no outstanding transactions present.
+    return OwnedKeyValueStore::abort(std::move(kvstore));
 }
 
 } // namespace sorbet::realmain::cache
