@@ -8,11 +8,11 @@ namespace sorbet::rbs {
 
 class TypeTranslator {
     core::MutableContext ctx;
-    const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams;
+    absl::Span<const std::pair<core::LocOffsets, core::NameRef>> typeParams;
     Parser parser;
 
 public:
-    TypeTranslator(core::MutableContext ctx, const std::vector<std::pair<core::LocOffsets, core::NameRef>> &typeParams,
+    TypeTranslator(core::MutableContext ctx, absl::Span<const std::pair<core::LocOffsets, core::NameRef>> typeParams,
                    Parser parser)
         : ctx(ctx), typeParams(typeParams), parser(parser) {}
 

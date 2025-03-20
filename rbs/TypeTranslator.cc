@@ -10,7 +10,7 @@ namespace sorbet::rbs {
 
 namespace {
 
-bool hasTypeParam(const vector<pair<core::LocOffsets, core::NameRef>> &typeParams, core::NameRef name) {
+bool hasTypeParam(absl::Span<const std::pair<core::LocOffsets, core::NameRef>> typeParams, core::NameRef name) {
     return absl::c_any_of(typeParams, [&](const auto &param) { return param.second == name; });
 }
 
