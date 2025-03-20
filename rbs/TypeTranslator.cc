@@ -8,9 +8,13 @@ using namespace std;
 
 namespace sorbet::rbs {
 
+namespace {
+
 bool hasTypeParam(const vector<pair<core::LocOffsets, core::NameRef>> &typeParams, core::NameRef name) {
     return absl::c_any_of(typeParams, [&](const auto &param) { return param.second == name; });
 }
+
+} // namespace
 
 ast::ExpressionPtr TypeTranslator::typeNameType(rbs_typename_t *typeName, bool isGeneric, core::LocOffsets loc) {
     rbs_node_list *typePath = typeName->rbs_namespace->path;

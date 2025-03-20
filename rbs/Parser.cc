@@ -2,6 +2,14 @@
 
 namespace sorbet::rbs {
 
+namespace {
+
+// RBS's parser needs to initialize a global constant pool to host around 26 unique strings
+// that are shared across all parsers.
+// When the process exits, we need to free the constant pool too.
+// This class and the static rbsLibraryInitializer variable leverage C++'s static initialization
+// and destruction semantics to automatically initialize the constant pool at program startup
+// and clean it up at program termination.
 class RBSLibraryInitializer {
 public:
     RBSLibraryInitializer() {
@@ -14,8 +22,8 @@ public:
     }
 };
 
-// Runs before main and at process exit
-static RBSLibraryInitializer rbsLibraryInitializer;
+RBSLibraryInitializer rbsLibraryInitializer;
+} // namespace
 
 Parser::Parser(rbs_string_t rbsString, const rbs_encoding_t *encoding)
     : parser(alloc_parser(rbsString, encoding, 0, rbsString.end - rbsString.start), free_parser) {}

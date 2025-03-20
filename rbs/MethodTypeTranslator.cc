@@ -13,6 +13,14 @@ using namespace std;
 
 namespace sorbet::rbs {
 
+namespace {
+
+struct RBSArg {
+    core::LocOffsets loc;
+    rbs_ast_symbol_t *name;
+    rbs_node_t *type;
+};
+
 ast::ExpressionPtr handleAnnotations(ast::ExpressionPtr sigBuilder, const vector<Comment> &annotations) {
     for (auto &annotation : annotations) {
         if (annotation.string == "final") {
@@ -54,7 +62,7 @@ core::NameRef expressionName(const ast::ExpressionPtr *expr) {
     return name;
 }
 
-void MethodTypeTranslator::collectArgs(core::LocOffsets docLoc, rbs_node_list_t *field, vector<RBSArg> &args) {
+void collectArgs(core::LocOffsets docLoc, rbs_node_list_t *field, vector<RBSArg> &args) {
     if (field == nullptr || field->length == 0) {
         return;
     }
@@ -71,7 +79,7 @@ void MethodTypeTranslator::collectArgs(core::LocOffsets docLoc, rbs_node_list_t 
     }
 }
 
-void MethodTypeTranslator::collectKeywords(core::LocOffsets docLoc, rbs_hash_t *field, vector<RBSArg> &args) {
+void collectKeywords(core::LocOffsets docLoc, rbs_hash_t *field, vector<RBSArg> &args) {
     if (field == nullptr) {
         return;
     }
@@ -92,6 +100,8 @@ void MethodTypeTranslator::collectKeywords(core::LocOffsets docLoc, rbs_hash_t *
         args.emplace_back(arg);
     }
 }
+
+} // namespace
 
 ast::ExpressionPtr MethodTypeTranslator::methodSignature(const ast::MethodDef *methodDef,
                                                          const rbs_methodtype_t *methodType,

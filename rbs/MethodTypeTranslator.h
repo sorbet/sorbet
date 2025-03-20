@@ -6,12 +6,6 @@
 
 namespace sorbet::rbs {
 
-struct RBSArg {
-    core::LocOffsets loc;
-    rbs_ast_symbol_t *name;
-    rbs_node_t *type;
-};
-
 class MethodTypeTranslator {
     core::MutableContext ctx;
     Parser parser;
@@ -34,10 +28,6 @@ public:
      */
     ast::ExpressionPtr attrSignature(const ast::Send *send, rbs_node_t *type, const core::LocOffsets &typeLoc,
                                      const std::vector<Comment> &annotations);
-
-private:
-    void collectArgs(core::LocOffsets docLoc, rbs_node_list_t *field, std::vector<RBSArg> &args);
-    void collectKeywords(core::LocOffsets docLoc, rbs_hash_t *field, std::vector<RBSArg> &args);
 };
 
 } // namespace sorbet::rbs
