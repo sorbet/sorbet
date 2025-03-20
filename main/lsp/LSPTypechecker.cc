@@ -504,10 +504,11 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                     // We don't need to hold on to the saved error queue.
                     savedErrorQueue.reset();
 
+                    // We don't write in the cancelable slow path, and all our read operations have completed.
                     OwnedKeyValueStore::abort(std::move(ownedKvstore));
                 }
             }
-        }
+        } // Indexing is done at this point
 
         if (epochManager.wasTypecheckingCanceled()) {
             return;
