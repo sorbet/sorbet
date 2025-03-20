@@ -379,64 +379,48 @@ void incrementStrictLevelCounter(core::StrictLevel level) {
 ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::FileRef file,
                                                    const options::Options &opts,
                                                    const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    switch (file.dataAllowingUnsafe(gs).sourceType) {
-        case core::File::Type::NotYetRead: {
-            string fileName{file.dataAllowingUnsafe(gs).path()};
-            Timer timeit(gs.tracer(), "readFileWithStrictnessOverrides", {{"file", fileName}});
-            string src;
-            bool fileFound = true;
-            try {
-                src = opts.fs->readFile(fileName);
-            } catch (FileNotFoundException e) {
-                // continue with an empty source, because the
-                // assertion below requires every input file to map
-                // to one output tree
-                fileFound = false;
-            }
-            prodCounterAdd("types.input.bytes", src.size());
-            prodCounterInc("types.input.files");
-            if (core::File::isRBIPath(fileName)) {
-                counterAdd("types.input.rbi.bytes", src.size());
-                counterInc("types.input.rbi.files");
-            }
+    ast::ExpressionPtr ast;
+    if (file.dataAllowingUnsafe(gs).sourceType != core::File::Type::NotYetRead) {
+        return ast;
+    }
+    string fileName{file.dataAllowingUnsafe(gs).path()};
+    Timer timeit(gs.tracer(), "readFileWithStrictnessOverrides", {{"file", fileName}});
+    string src;
+    bool fileFound = true;
+    try {
+        src = opts.fs->readFile(fileName);
+    } catch (FileNotFoundException e) {
+        // continue with an empty source, because the
+        // assertion below requires every input file to map
+        // to one output tree
+        fileFound = false;
+    }
+    prodCounterAdd("types.input.bytes", src.size());
+    prodCounterInc("types.input.files");
+    if (core::File::isRBIPath(fileName)) {
+        counterAdd("types.input.rbi.bytes", src.size());
+        counterInc("types.input.rbi.files");
+    }
 
-            {
-                core::UnfreezeFileTable unfreezeFiles(gs);
-                auto fileObj = make_shared<core::File>(move(fileName), move(src), core::File::Type::Normal);
+    {
+        core::UnfreezeFileTable unfreezeFiles(gs);
+        auto fileObj = make_shared<core::File>(move(fileName), move(src), core::File::Type::Normal);
+        // Returns nullptr if tree is not in cache.
+        ast = fetchTreeFromCache(gs, file, *fileObj, kvstore);
 
-                auto entered = gs.enterNewFileAt(move(fileObj), file);
-                ENFORCE(entered == file);
-            }
-
-            if constexpr (enable_counters) {
-                counterAdd("types.input.lines", file.data(gs).lineCount());
-            }
-
-            if (!fileFound) {
-                if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::FileNotFound)) {
-                    e.setHeader("File Not Found");
-                }
-            }
-
-            break;
-        }
-        case core::File::Type::Normal: {
-            // If we load successfully from the cache then there weren't any indexing errors, and otherwise we'll set
-            // this flag during indexing if necessary.
-            file.data(gs).setHasIndexErrors(false);
-
-            break;
-        }
-        case core::File::Type::PayloadGeneration:
-        case core::File::Type::Payload:
-        case core::File::Type::TombStone:
-            return nullptr;
+        auto entered = gs.enterNewFileAt(move(fileObj), file);
+        ENFORCE(entered == file);
+    }
+    if (enable_counters) {
+        counterAdd("types.input.lines", file.data(gs).lineCount());
     }
 
     auto &fileData = file.data(gs);
-
-    // Returns nullptr if tree is not in cache.
-    auto ast = fetchTreeFromCache(gs, file, fileData, kvstore);
+    if (!fileFound) {
+        if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::FileNotFound)) {
+            e.setHeader("File Not Found");
+        }
+    }
 
     if (!opts.storeState.empty()) {
         fileData.sourceType = core::File::Type::PayloadGeneration;
