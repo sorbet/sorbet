@@ -318,14 +318,16 @@ tracked and unmodified files will still be in the cache.</p>
 <p>This compact binary representation has no stability guarantees, meaning it is
 not forward nor backward compatible with new versions of Sorbet. Instead, Sorbet
 completely flushes the cache whenever the Sorbet version string
-(<code>srb tc --version</code>) changes.</p>
-<p>(This version string is only populated correctly for release builds of
-Sorbet—when using a custom source build of Sorbet which doesn’t build Sorbet in
-release mode, avoid using <code>--cache-dir</code>.)</p>
-<p>Apart from evictions when the Sorbet version changes (e.g. upgrading Sorbet in
-the Gemfile, or checking out an old commit with an older Sorbet version), Sorbet
-never evicts data from this cache. It can grow without bound. If disk space is
-limited, consider
+(<code>srb tc --version</code>) changes, or certain
+<a href="https://github.com/search?q=repo%3Asorbet%2Fsorbet%20%2Fstruct%20CacheSensitiveOptions%20%5C%7B%24%2F&amp;type=code">cache-sensitive options</a>
+change.</p>
+<p>The version string is only populated correctly for release builds of Sorbet—when
+using a custom source build of Sorbet which doesn’t build Sorbet in release
+mode, avoid using <code>--cache-dir</code>.</p>
+<p>Apart from evictions when the Sorbet version or those cache-sensitive options
+changes (e.g. upgrading Sorbet in the Gemfile, or checking out an old commit
+with an older Sorbet version), Sorbet never evicts data from this cache. It can
+grow without bound. If disk space is limited, consider
 <a href="/docs/metrics#collecting-metrics-from-sorbet">Collecting metrics from Sorbet</a>,
 paying attention to these metrics:</p>
 <ul>
@@ -342,6 +344,13 @@ can use the <code>--max-cache-size-bytes</code> to set a larger cache size. If y
 yourself needing to pass this option, please reach out to the Sorbet development
 team, as your codebase is likely huge (possibly the largest known Sorbet
 codebase) and we’d like to talk to you.</p>
+<p>Whether an option is “cache-sensitive” is implementation-defined. Implementing
+some of Sorbet’s options requires that Sorbet alter the parsed representation of
+a Ruby file. If this altered representation were cached with one set of options
+and read back out in a different run of Sorbet with incompatible options, Sorbet
+would produce incorrect results. If you frequently alternate between runs of
+Sorbet with and without cache-sensitive options, you may wish to specify
+multiple different cache folders, so that the cache isn’t thrashed.</p>
 <h2><a class="anchor" aria-hidden="true" id="is-there-a-way-to-get-errors-in-json-format"></a><a href="#is-there-a-way-to-get-errors-in-json-format" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Is there a way to get errors in JSON format?</h2>
 <p>There is not, intentionally. If you’re trying to consume Sorbet’s output from a
 script, we recommend you either consume Sorbet via the LSP protocol, or using
