@@ -518,7 +518,7 @@ ast::ParsedFilesOrCancelled mergeIndexResults(core::GlobalState &cgs, const opti
         Timer timeit(cgs.tracer(), "substituteTrees");
         auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(batchq->bound);
 
-        workers.multiplexJob("substituteTrees", [&cgs, &logger = cgs.tracer(), batchq, resultq, cancelable]() {
+        workers.multiplexJob("substituteTrees", [&cgs, &logger = cgs.tracer(), batchq, resultq]() {
             Timer timeit(logger, "substituteTreesWorker");
             IndexSubstitutionJob job;
             int numTreesProcessed = 0;
@@ -527,11 +527,6 @@ ast::ParsedFilesOrCancelled mergeIndexResults(core::GlobalState &cgs, const opti
                 if (result.gotItem()) {
                     // Unconditionally update the total to avoid starving the consumer thread
                     numTreesProcessed += job.numTreesProcessed;
-
-                    // If the slow path has been cancelled, skip substitution to handle the tree dropping in once place.
-                    if (cancelable && cgs.epochManager->wasTypecheckingCanceled()) {
-                        continue;
-                    }
 
                     if (job.subst.has_value()) {
                         for (auto &tree : job.trees) {
@@ -563,10 +558,6 @@ ast::ParsedFilesOrCancelled mergeIndexResults(core::GlobalState &cgs, const opti
         }
     }
 
-    if (cancelable && cgs.epochManager->wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled::cancel(std::move(ret), workers);
-    }
-
     return ret;
 }
 
@@ -581,13 +572,12 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
 
     std::shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex();
 
-    workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore, cancelable]() {
+    workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
 
         // clone the empty global state to avoid manually re-entering everything, and copy the base filetable so that
         // file sources are available.
         unique_ptr<core::GlobalState> localGs = emptyGs->deepCopy();
-        auto &epochManager = *localGs->epochManager;
 
         IndexThreadResultPack threadResult;
 
@@ -599,10 +589,6 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
                     // have been processed.
                     threadResult.res.numTreesProcessed++;
 
-                    // Drain the queue if the slow path gets canceled.
-                    if (cancelable && epochManager.wasTypecheckingCanceled()) {
-                        continue;
-                    }
                     core::FileRef file = job;
                     auto cachedTree = readFileWithStrictnessOverrides(*localGs, file, opts, kvstore);
                     auto parsedFile = indexOne(opts, *localGs, file, move(cachedTree));
@@ -643,10 +629,6 @@ ast::ParsedFilesOrCancelled index(core::GlobalState &gs, absl::Span<const core::
             auto tree = readFileWithStrictnessOverrides(gs, file, opts, kvstore);
             auto parsedFile = indexOne(opts, gs, file, move(tree));
             parsed.emplace_back(move(parsedFile));
-        }
-
-        if (cancelable && gs.epochManager->wasTypecheckingCanceled()) {
-            return ast::ParsedFilesOrCancelled::cancel(std::move(parsed), workers);
         }
 
         // TODO(jez) Do we want this fast_sort here? Is it redundant?
