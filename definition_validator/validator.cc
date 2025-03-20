@@ -1144,7 +1144,7 @@ public:
             // is a `class << self` ClassDef)
             validateAbstract(ctx, sym, classDef);
 
-            if (ctx.state.requiresAncestorEnabled) {
+            if (ctx.state.cacheSensitiveOptions.requiresAncestorEnabled) {
                 validateRequiredAncestors(ctx, sym);
             }
         }
@@ -1153,7 +1153,7 @@ public:
         validateSealed(ctx, sym, classDef);
         validateSuperClass(ctx, sym, classDef);
 
-        if (ctx.state.requiresAncestorEnabled) {
+        if (ctx.state.cacheSensitiveOptions.requiresAncestorEnabled) {
             validateRequiredAncestors(ctx, singleton);
         }
     }

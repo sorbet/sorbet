@@ -52,9 +52,10 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     gs.pathPrefix = opts.pathPrefix;
     gs.errorUrlBase = opts.errorUrlBase;
 
-    gs.rbsSignaturesEnabled = opts.rbsSignaturesEnabled;
-    gs.rbsAssertionsEnabled = opts.rbsAssertionsEnabled;
-    gs.requiresAncestorEnabled = opts.requiresAncestorEnabled;
+    gs.cacheSensitiveOptions.rbsSignaturesEnabled = opts.cacheSensitiveOptions.rbsSignaturesEnabled;
+    gs.cacheSensitiveOptions.rbsAssertionsEnabled = opts.cacheSensitiveOptions.rbsAssertionsEnabled;
+    gs.cacheSensitiveOptions.requiresAncestorEnabled = opts.cacheSensitiveOptions.requiresAncestorEnabled;
+    gs.cacheSensitiveOptions.typedSuper = opts.cacheSensitiveOptions.typedSuper;
 
     if (opts.silenceErrors) {
         gs.silenceErrors = true;
@@ -75,7 +76,6 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
         gs.includeErrorSections = false;
     }
     gs.ruby3KeywordArgs = opts.ruby3KeywordArgs;
-    gs.typedSuper = opts.typedSuper;
     gs.suppressPayloadSuperclassRedefinitionFor = opts.suppressPayloadSuperclassRedefinitionFor;
     if (!opts.uniquelyDefinedBehavior) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
@@ -169,7 +169,7 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
         }
     }
 
-    if (gs.runningUnderAutogen) {
+    if (gs.cacheSensitiveOptions.runningUnderAutogen) {
         // Autogen stops before infer but needs to see all definitions
         level = core::StrictLevel::False;
     }

@@ -2078,14 +2078,10 @@ void GlobalState::copyOptions(const core::GlobalState &other) {
     this->autocorrect = other.autocorrect;
     this->didYouMean = other.didYouMean;
     this->ensureCleanStrings = other.ensureCleanStrings;
-    this->runningUnderAutogen = other.runningUnderAutogen;
     this->censorForSnapshotTests = other.censorForSnapshotTests;
     this->sleepInSlowPathSeconds = other.sleepInSlowPathSeconds;
-    this->rbsSignaturesEnabled = other.rbsSignaturesEnabled;
-    this->rbsAssertionsEnabled = other.rbsAssertionsEnabled;
-    this->requiresAncestorEnabled = other.requiresAncestorEnabled;
+    this->cacheSensitiveOptions = other.cacheSensitiveOptions;
     this->ruby3KeywordArgs = other.ruby3KeywordArgs;
-    this->typedSuper = other.typedSuper;
     this->suppressPayloadSuperclassRedefinitionFor = other.suppressPayloadSuperclassRedefinitionFor;
     this->trackUntyped = other.trackUntyped;
     this->printingFileTable = other.printingFileTable;

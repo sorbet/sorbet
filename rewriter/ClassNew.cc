@@ -24,7 +24,7 @@ bool isRewrittenBind(ast::ExpressionPtr &expr) {
 vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *asgn) {
     vector<ast::ExpressionPtr> empty;
 
-    if (ctx.state.runningUnderAutogen) {
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         // This is not safe to run under autogen, because we'd be outputting
         // autoloader files that predeclare the class and cause "warning:
         // already initialized constant" errors

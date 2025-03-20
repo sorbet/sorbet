@@ -468,11 +468,11 @@ int realmain(int argc, char *argv[]) {
                           opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
                           opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
 
-    if (opts.print.isAutogen()) {
-        gs->runningUnderAutogen = true;
+    if (opts.cacheSensitiveOptions.runningUnderAutogen) {
+        gs->cacheSensitiveOptions.runningUnderAutogen = true;
     }
 
-    if (gs->runningUnderAutogen) {
+    if (gs->cacheSensitiveOptions.runningUnderAutogen) {
         gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
         gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
         gs->suppressErrorClass(core::errors::Namer::ConstantKindRedefinition.code);
@@ -717,7 +717,7 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        if (gs->runningUnderAutogen) {
+        if (gs->cacheSensitiveOptions.runningUnderAutogen) {
             runAutogen(*gs, opts, *workers, indexed);
         } else {
             indexed = move(pipeline::resolve(*gs, move(indexed), opts, *workers).result());

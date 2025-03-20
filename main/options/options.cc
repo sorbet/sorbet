@@ -26,6 +26,8 @@ using namespace std;
 
 namespace sorbet::realmain::options {
 
+namespace {
+
 enum class Group {
     INPUT,
     OUTPUT,
@@ -147,6 +149,8 @@ const vector<PrintOptions> print_options({
     {"untyped-blame", &Printers::UntypedBlame, true, true, true},
 });
 
+} // namespace
+
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
 
 void PrinterConfig::print(const string_view &contents) const {
@@ -219,9 +223,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
     });
 }
 
-bool Printers::isAutogen() const {
-    return Autogen.enabled || AutogenMsgPack.enabled || AutogenSubclasses.enabled;
-}
+namespace {
 
 struct StopAfterOptions {
     string option;
@@ -805,11 +807,15 @@ string_view stripTrailingSlashes(string_view path) {
     return path;
 }
 
+} // namespace
+
 void Options::flushPrinters() {
     for (PrinterConfig &cfg : print.printers()) {
         cfg.flush();
     }
 }
+
+namespace {
 
 void parseIgnorePatterns(const vector<string> &rawIgnorePatterns, vector<string> &absoluteIgnorePatterns,
                          vector<string> &relativeIgnorePatterns) {
@@ -846,6 +852,8 @@ void addFilesFromDir(Options &opts, string_view dir, WorkerPool &workerPool, sha
                                    std::make_move_iterator(containedFiles.end()));
     }
 }
+
+} // namespace
 
 void readOptions(Options &opts,
                  vector<unique_ptr<pipeline::semantic_extension::SemanticExtension>> &configuredExtensions, int argc,
@@ -919,19 +927,11 @@ void readOptions(Options &opts,
 
         opts.cacheDir = raw["cache-dir"].as<string>();
 
-        opts.rbsSignaturesEnabled = raw["enable-experimental-rbs-signatures"].as<bool>();
-        if (opts.rbsSignaturesEnabled && !opts.cacheDir.empty()) {
-            logger->error("--enable-experimental-rbs-signatures is incompatible with --cache-dir. Ignoring cache");
-            opts.cacheDir = "";
-        }
+        opts.cacheSensitiveOptions.rbsSignaturesEnabled = raw["enable-experimental-rbs-signatures"].as<bool>();
 
-        opts.rbsAssertionsEnabled = raw["enable-experimental-rbs-assertions"].as<bool>();
-        if (opts.rbsAssertionsEnabled && !opts.cacheDir.empty()) {
-            logger->error("--enable-experimental-rbs-assertions is incompatible with --cache-dir. Ignoring cache");
-            opts.cacheDir = "";
-        }
+        opts.cacheSensitiveOptions.rbsAssertionsEnabled = raw["enable-experimental-rbs-assertions"].as<bool>();
 
-        opts.requiresAncestorEnabled = raw["enable-experimental-requires-ancestor"].as<bool>();
+        opts.cacheSensitiveOptions.requiresAncestorEnabled = raw["enable-experimental-requires-ancestor"].as<bool>();
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
@@ -998,9 +998,15 @@ void readOptions(Options &opts,
         }
 
         // Certain features only need certain passes
-        if (opts.print.isAutogen() && (opts.stopAfterPhase != Phase::NAMER)) {
-            logger->error("-p autogen{-msgpack,-classlist,-subclasses} must also include --stop-after=namer");
-            throw EarlyReturnWithCode(1);
+        auto isAutogen =
+            opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenSubclasses.enabled;
+        if (isAutogen) {
+            if (opts.stopAfterPhase != Phase::NAMER) {
+                logger->error("-p autogen{-msgpack,-classlist,-subclasses} must also include --stop-after=namer");
+                throw EarlyReturnWithCode(1);
+            }
+
+            opts.cacheSensitiveOptions.runningUnderAutogen = isAutogen;
         }
 
         if (raw.count("autogen-version") > 0) {
@@ -1034,7 +1040,7 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("autogen-behavior-allowed-in-rbi-files-paths") > 0) {
-            if (!opts.print.isAutogen()) {
+            if (!opts.cacheSensitiveOptions.runningUnderAutogen) {
                 logger->error("autogen-behavior-allowed-in-rbi-files-paths can only be used with -p autogen or -p "
                               "autogen-msgpack");
                 throw EarlyReturnWithCode(1);
@@ -1279,7 +1285,7 @@ void readOptions(Options &opts,
         opts.errorUrlBase = raw["error-url-base"].as<string>();
         opts.noErrorSections = raw["no-error-sections"].as<bool>();
         opts.ruby3KeywordArgs = raw["experimental-ruby3-keyword-args"].as<bool>();
-        opts.typedSuper = raw["typed-super"].as<bool>();
+        opts.cacheSensitiveOptions.typedSuper = raw["typed-super"].as<bool>();
 
         if (raw.count("suppress-payload-superclass-redefinition-for") > 0) {
             for (const auto &childClassName :

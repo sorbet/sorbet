@@ -695,7 +695,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         mayBeOverloaded = symbol.data(gs)->findMethodTransitive(gs, targetName);
     }
 
-    if (!mayBeOverloaded.exists() && gs.requiresAncestorEnabled) {
+    if (!mayBeOverloaded.exists() && gs.cacheSensitiveOptions.requiresAncestorEnabled) {
         // Before raising any error, we look if the method exists in all required ancestors by this symbol
         auto ancestors = symbol.data(gs)->requiredAncestorsTransitive(gs);
         for (auto ancst : ancestors) {
@@ -743,7 +743,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
                 args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed() ||
                 args.name == core::Names::mixesInClassMethods() ||
-                (args.name == core::Names::requiresAncestor() && gs.requiresAncestorEnabled)) {
+                (args.name == core::Names::requiresAncestor() && gs.cacheSensitiveOptions.requiresAncestorEnabled)) {
                 auto attachedClass = symbol.data(gs)->attachedClass(gs);
                 TypeErrorDiagnostics::maybeInsertDSLMethod(gs, e, args.locs.file, args.callLoc(), attachedClass,
                                                            Symbols::T_Helpers(), "");
@@ -2133,7 +2133,8 @@ public:
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
         auto tClassSelfType = Types::tClass(Types::widen(gs, args.selfType));
         if (self.data(gs)->isModule()) {
-            ENFORCE(gs.requiresAncestorEnabled, "Congrats, you've found a test case. Please add it, then delete this.");
+            ENFORCE(gs.cacheSensitiveOptions.requiresAncestorEnabled,
+                    "Congrats, you've found a test case. Please add it, then delete this.");
             // This normally can't happen, because `Object` is not an ancestor of any module
             // instance by default. But Sorbet supports requires ancestor in a really weird way (by
             // simply dispatching to a completely unrelated method) which means that sometimes we

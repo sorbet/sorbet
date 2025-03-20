@@ -358,16 +358,18 @@ tracked and unmodified files will still be in the cache.
 This compact binary representation has no stability guarantees, meaning it is
 not forward nor backward compatible with new versions of Sorbet. Instead, Sorbet
 completely flushes the cache whenever the Sorbet version string
-(`srb tc --version`) changes.
+(`srb tc --version`) changes, or certain
+[cache-sensitive options](https://github.com/search?q=repo%3Asorbet%2Fsorbet%20%2Fstruct%20CacheSensitiveOptions%20%5C%7B%24%2F&type=code)
+change.
 
-(This version string is only populated correctly for release builds of
-Sorbet—when using a custom source build of Sorbet which doesn't build Sorbet in
-release mode, avoid using `--cache-dir`.)
+The version string is only populated correctly for release builds of Sorbet—when
+using a custom source build of Sorbet which doesn't build Sorbet in release
+mode, avoid using `--cache-dir`.
 
-Apart from evictions when the Sorbet version changes (e.g. upgrading Sorbet in
-the Gemfile, or checking out an old commit with an older Sorbet version), Sorbet
-never evicts data from this cache. It can grow without bound. If disk space is
-limited, consider
+Apart from evictions when the Sorbet version or those cache-sensitive options
+changes (e.g. upgrading Sorbet in the Gemfile, or checking out an old commit
+with an older Sorbet version), Sorbet never evicts data from this cache. It can
+grow without bound. If disk space is limited, consider
 [Collecting metrics from Sorbet](metrics.md#collecting-metrics-from-sorbet),
 paying attention to these metrics:
 
@@ -385,6 +387,14 @@ can use the `--max-cache-size-bytes` to set a larger cache size. If you find
 yourself needing to pass this option, please reach out to the Sorbet development
 team, as your codebase is likely huge (possibly the largest known Sorbet
 codebase) and we'd like to talk to you.
+
+Whether an option is "cache-sensitive" is implementation-defined. Implementing
+some of Sorbet's options requires that Sorbet alter the parsed representation of
+a Ruby file. If this altered representation were cached with one set of options
+and read back out in a different run of Sorbet with incompatible options, Sorbet
+would produce incorrect results. If you frequently alternate between runs of
+Sorbet with and without cache-sensitive options, you may wish to specify
+multiple different cache folders, so that the cache isn't thrashed.
 
 ## Is there a way to get errors in JSON format?
 

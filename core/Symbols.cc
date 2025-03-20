@@ -2105,12 +2105,12 @@ ClassOrModule::requiredAncestorsTransitiveInternal(GlobalState &gs, std::vector<
 
 // All required ancestors by this class or module
 vector<ClassOrModule::RequiredAncestor> ClassOrModule::requiredAncestorsTransitive(const GlobalState &gs) const {
-    ENFORCE(gs.requiresAncestorEnabled);
+    ENFORCE(gs.cacheSensitiveOptions.requiresAncestorEnabled);
     return readRequiredAncestorsInternal(gs, Names::requiredAncestorsLin());
 }
 
 void ClassOrModule::computeRequiredAncestorLinearization(GlobalState &gs) {
-    ENFORCE(gs.requiresAncestorEnabled);
+    ENFORCE(gs.cacheSensitiveOptions.requiresAncestorEnabled);
     std::vector<ClassOrModuleRef> seen;
     requiredAncestorsTransitiveInternal(gs, seen);
 }

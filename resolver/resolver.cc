@@ -1639,7 +1639,7 @@ public:
             if (send.fun == core::Names::mixesInClassMethods()) {
                 this->todoClassMethods_.emplace_back(ctx.file, ctx.owner, &send);
             } else if (send.fun == core::Names::requiresAncestor()) {
-                if (ctx.state.requiresAncestorEnabled) {
+                if (ctx.state.cacheSensitiveOptions.requiresAncestorEnabled) {
                     this->todoRequiredAncestors_.emplace_back(ctx.file, ctx.owner.asClassOrModuleRef(), &send);
                 }
             }
@@ -1839,7 +1839,7 @@ public:
         fast_sort(todoClassMethods, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
         fast_sort(todoRequiredAncestors, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
 
-        ENFORCE(todoRequiredAncestors.empty() || gs.requiresAncestorEnabled);
+        ENFORCE(todoRequiredAncestors.empty() || gs.cacheSensitiveOptions.requiresAncestorEnabled);
         fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
 
         Timer timeit1(gs.tracer(), "resolver.resolve_constants.fixed_point");

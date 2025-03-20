@@ -90,7 +90,6 @@ struct Printers {
     // Ensure everything here is in PrinterConfig::printers().
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();
-    bool isAutogen() const;
 };
 
 enum class Phase {
@@ -170,13 +169,46 @@ struct Options {
     bool enableCounters = false;
     std::string errorUrlBase = "https://srb.help/";
     bool ruby3KeywordArgs = false;
-    bool typedSuper = true;
     std::vector<std::string> suppressPayloadSuperclassRedefinitionFor;
     std::set<int> isolateErrorCode;
     std::set<int> suppressErrorCode;
     bool noErrorSections = false;
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
+
+    // Options which affect the contents of the `--cache-dir`.
+    // If these options change, the cache needs to be invalidated.
+    struct CacheSensitiveOptions {
+        bool typedSuper : 1;
+
+        // Enable experimental support for RBS signatures
+        bool rbsSignaturesEnabled : 1;
+
+        // Enable experimental support for RBS assertions such as `T.let`
+        bool rbsAssertionsEnabled : 1;
+
+        // Experimental feature `requires_ancestor`
+        bool requiresAncestorEnabled : 1;
+
+        bool runningUnderAutogen : 1;
+
+        // In C++20 we can replace this with bit field initializers
+        CacheSensitiveOptions()
+            : typedSuper(true), rbsSignaturesEnabled(false), rbsAssertionsEnabled(false),
+              requiresAncestorEnabled(false), runningUnderAutogen(false) {}
+
+        constexpr static uint8_t NUMBER_OF_FLAGS = 4;
+        constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
+
+        uint8_t serialize() const {
+            static_assert(sizeof(CacheSensitiveOptions) == sizeof(uint8_t));
+            // Can replace this with std::bit_cast in C++20
+            auto rawBits = *reinterpret_cast<const uint8_t *>(this);
+            // Mask the valid bits since uninitialized bits can be any value.
+            return rawBits & VALID_BITS_MASK;
+        }
+    };
+    CacheSensitiveOptions cacheSensitiveOptions;
 
     uint32_t reserveClassTableCapacity = 0;
     uint32_t reserveMethodTableCapacity = 0;
@@ -251,15 +283,6 @@ struct Options {
     // Enables out-of-order reference checking
     bool outOfOrderReferenceChecksEnabled = false;
     core::TrackUntyped trackUntyped = core::TrackUntyped::Nowhere;
-
-    // Enable experimental support for RBS signatures
-    bool rbsSignaturesEnabled = false;
-
-    // Enable experimental support for RBS assertions such as `T.let`
-    bool rbsAssertionsEnabled = false;
-
-    // Experimental feature `requires_ancestor`
-    bool requiresAncestorEnabled = false;
 
     std::string inlineInput; // passed via -e
     std::string debugLogFile;

@@ -9,7 +9,7 @@ using namespace std;
 namespace sorbet::rewriter {
 
 void ConstantAssumeType::run(core::MutableContext ctx, ast::Assign *asgn) {
-    if (ctx.state.runningUnderAutogen) {
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return;
     }
 

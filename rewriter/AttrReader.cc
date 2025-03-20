@@ -143,7 +143,7 @@ ast::ExpressionPtr toWriterSigForName(ast::Send *sharedSig, const core::NameRef 
 vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, ast::ExpressionPtr *prevStat) {
     vector<ast::ExpressionPtr> empty;
 
-    if (ctx.state.runningUnderAutogen) {
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return empty;
     }
 

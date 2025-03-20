@@ -187,7 +187,7 @@ core::TypePtr collectNewStats(core::MutableContext ctx, ast::ClassDef *klass, as
 } // namespace
 
 void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
-    if (ctx.state.runningUnderAutogen) {
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return;
     }
 

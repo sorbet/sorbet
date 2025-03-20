@@ -675,15 +675,16 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
     realmain::options::Options opts;
 
     opts.noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
-    opts.rbsSignaturesEnabled =
+    opts.cacheSensitiveOptions.rbsSignaturesEnabled =
         BooleanPropertyAssertion::getValue("enable-experimental-rbs-signatures", assertions).value_or(false);
-    opts.rbsAssertionsEnabled =
+    opts.cacheSensitiveOptions.rbsAssertionsEnabled =
         BooleanPropertyAssertion::getValue("enable-experimental-rbs-assertions", assertions).value_or(false);
-    opts.requiresAncestorEnabled =
+    opts.cacheSensitiveOptions.requiresAncestorEnabled =
         BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
     opts.ruby3KeywordArgs =
         BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
-    opts.typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
+    opts.cacheSensitiveOptions.typedSuper =
+        BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
     // TODO(jez) Allow allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
 
     opts.uniquelyDefinedBehavior =
