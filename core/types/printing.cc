@@ -45,7 +45,7 @@ string UnresolvedAppliedType::toStringWithTabs(const GlobalState &gs, int tabs) 
 
 namespace {
 string argTypeForUnresolvedAppliedType(const GlobalState &gs, const TypePtr &t, ShowOptions options) {
-    if (auto m = cast_type<MetaType>(t)) {
+    if (auto *m = cast_type<MetaType>(t)) {
         return m->wrapped.show(gs, options);
     }
     return t.show(gs, options);

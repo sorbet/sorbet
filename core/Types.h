@@ -237,19 +237,20 @@ using IntrinsicMethodsDispatchMap = UnorderedMap<NameRef, const std::vector<Name
 const IntrinsicMethodsDispatchMap &intrinsicMethodsDispatchMap();
 
 template <class To> bool isa_type(const TypePtr &what) {
-    return bool(what.as_type<To>());
+    return what != nullptr && what.tag() == TypePtr::TypeToTag<To>::value;
 }
 
 // Specializations to handle the class hierarchy.
 class ClassType;
 template <> inline bool isa_type<ClassType>(const TypePtr &what) {
-    auto tag = what.tagMaybeZero();
-
-    switch (tag) {
-        case int(TypePtr::Tag::ClassType):
-        case int(TypePtr::Tag::BlamedUntyped):
-        case int(TypePtr::Tag::UnresolvedClassType):
-        case int(TypePtr::Tag::UnresolvedAppliedType):
+    if (what == nullptr) {
+        return false;
+    }
+    switch (what.tag()) {
+        case TypePtr::Tag::ClassType:
+        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::UnresolvedClassType:
+        case TypePtr::Tag::UnresolvedAppliedType:
             return true;
         default:
             return false;
@@ -312,18 +313,20 @@ inline bool is_proxy_type(const TypePtr &what) {
     }
 }
 
-template <class To> core::UntaggedPtr<const To> cast_type(const TypePtr &what) {
+template <class To> To const *cast_type(const TypePtr &what) {
     static_assert(TypePtr::TypeToIsInlined<To>::value == false,
                   "Cast inlined type objects with `cast_type_nonnull`, and use `isa_type` to check if the TypePtr "
                   "contains the type you expect.");
-    return what.as_type<To>();
+    if (isa_type<To>(what)) {
+        return reinterpret_cast<To const *>(what.get());
+    } else {
+        return nullptr;
+    }
 }
 
-template <class To> core::UntaggedPtr<To> cast_type(TypePtr &what) {
-    static_assert(TypePtr::TypeToIsInlined<To>::value == false,
-                  "Cast inlined type objects with `cast_type_nonnull`, and use `isa_type` to check if the TypePtr "
-                  "contains the type you expect.");
-    return what.as_type<To>();
+template <class To> To *cast_type(TypePtr &what) {
+    // const To* -> To* to avoid reimplementing the same logic twice.
+    return const_cast<To *>(cast_type<To>(static_cast<const TypePtr &>(what)));
 }
 
 template <class To> To *cast_type(TypePtr &&what) = delete;

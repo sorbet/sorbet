@@ -76,7 +76,7 @@ const TypePtr underlying(const GlobalState &gs, const TypePtr &t1) {
 }
 
 void fillInOrComponents(InlinedVector<TypePtr, 4> &orComponents, const TypePtr &type) {
-    auto o = cast_type<OrType>(type);
+    auto *o = cast_type<OrType>(type);
     if (o == nullptr) {
         orComponents.emplace_back(type);
     } else {
@@ -86,7 +86,7 @@ void fillInOrComponents(InlinedVector<TypePtr, 4> &orComponents, const TypePtr &
 }
 
 TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<TypePtr, 4> &typeFilter) {
-    auto o = cast_type<OrType>(originalType);
+    auto *o = cast_type<OrType>(originalType);
     if (o == nullptr) {
         if (absl::c_linear_search(typeFilter, originalType)) {
             return nullptr;
@@ -111,7 +111,7 @@ TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<Type
 TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     InlinedVector<TypePtr, 4> originalOrComponents;
     InlinedVector<TypePtr, 4> typesConsumed;
-    auto o1 = cast_type<OrType>(t1);
+    auto *o1 = cast_type<OrType>(t1);
     ENFORCE(o1 != nullptr);
     fillInOrComponents(originalOrComponents, o1->left);
     fillInOrComponents(originalOrComponents, o1->right);
@@ -145,7 +145,7 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
 }
 
 TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
-    auto a1 = cast_type<AndType>(t1);
+    auto *a1 = cast_type<AndType>(t1);
     ENFORCE(t1 != nullptr);
     TypePtr n1 = Types::all(gs, a1->left, t2);
     if (n1 == a1->left) {
@@ -185,7 +185,7 @@ TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr
 
 // only keep knowledge in t1 that is not already present in t2. Return the same reference if unchanged
 TypePtr dropLubComponents(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
-    if (auto a1 = cast_type<AndType>(t1)) {
+    if (auto *a1 = cast_type<AndType>(t1)) {
         auto a1a = dropLubComponents(gs, a1->left, t2);
         auto a1b = dropLubComponents(gs, a1->right, t2);
         auto subl = Types::isSubType(gs, a1a, t2);
@@ -196,7 +196,7 @@ TypePtr dropLubComponents(const GlobalState &gs, const TypePtr &t1, const TypePt
         if (a1a != a1->left || a1b != a1->right) {
             return Types::all(gs, a1a, a1b);
         }
-    } else if (auto o1 = cast_type<OrType>(t1)) {
+    } else if (auto *o1 = cast_type<OrType>(t1)) {
         auto subl = Types::isSubType(gs, o1->left, t2);
         auto subr = Types::isSubType(gs, o1->right, t2);
         if (subl && subr) {
@@ -255,8 +255,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     if (isa_type<OrType>(t2)) { // 3, 5, 6
         categoryCounterInc("lub", "or>");
         return lubDistributeOr(gs, t2, t1);
-    } else if (auto a2 = cast_type<AndType>(t2)) { // 2, 4
-        if (auto a1 = cast_type<AndType>(t1)) {
+    } else if (auto *a2 = cast_type<AndType>(t2)) { // 2, 4
+        if (auto *a1 = cast_type<AndType>(t1)) {
             // Check if the members of a1 and a2 are referentially equivalent. This helps simplify T.all types created
             // during type inference.
             if (compositeTypeDeepRefEqual(*a1, *a2)) {
@@ -280,8 +280,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         return lubDistributeOr(gs, t1, t2);
     }
 
-    if (auto a1 = cast_type<AppliedType>(t1)) {
-        auto a2 = cast_type<AppliedType>(t2);
+    if (auto *a1 = cast_type<AppliedType>(t1)) {
+        auto *a2 = cast_type<AppliedType>(t2);
         if (a2 == nullptr) {
             if (isSubType(gs, t2, t1)) {
                 return t1;
@@ -359,7 +359,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             typecase(
                 t1,
                 [&](const TupleType &a1) { // Warning: this implements COVARIANT arrays
-                    if (auto a2 = cast_type<TupleType>(t2)) {
+                    if (auto *a2 = cast_type<TupleType>(t2)) {
                         if (a1.elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
                             vector<TypePtr> elemLubs;
                             int i = -1;
@@ -386,7 +386,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     }
                 },
                 [&](const ShapeType &h1) { // Warning: this implements COVARIANT hashes
-                    if (auto h2 = cast_type<ShapeType>(t2)) {
+                    if (auto *h2 = cast_type<ShapeType>(t2)) {
                         if (h2->keys.size() == h1.keys.size()) {
                             // have enough keys.
                             int i = -1;
@@ -499,8 +499,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
     {
         if (isa_type<MetaType>(t1) || isa_type<MetaType>(t2)) {
-            auto m1 = cast_type<MetaType>(t1);
-            auto m2 = cast_type<MetaType>(t2);
+            auto *m1 = cast_type<MetaType>(t1);
+            auto *m2 = cast_type<MetaType>(t2);
             if (m1 != nullptr && m2 != nullptr && Types::equiv(gs, m1->wrapped, m2->wrapped)) {
                 return t1;
             }
@@ -861,8 +861,8 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
     {
         if (isa_type<MetaType>(t1) || isa_type<MetaType>(t2)) {
-            auto m1 = cast_type<MetaType>(t1);
-            auto m2 = cast_type<MetaType>(t2);
+            auto *m1 = cast_type<MetaType>(t1);
+            auto *m2 = cast_type<MetaType>(t2);
             if (m1 != nullptr && m2 != nullptr && Types::equiv(gs, m1->wrapped, m2->wrapped)) {
                 return t1;
             }
@@ -871,7 +871,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
 
-    if (auto o2 = cast_type<OrType>(t2)) { // 3, 6
+    if (auto *o2 = cast_type<OrType>(t2)) { // 3, 6
         bool collapseInLeft = Types::isAsSpecificAs(gs, t1, t2);
         if (collapseInLeft) {
             categoryCounterInc("glb", "Zor");
@@ -903,7 +903,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             }
         }
 
-        if (auto o1 = cast_type<OrType>(t1)) { // 6
+        if (auto *o1 = cast_type<OrType>(t1)) { // 6
             auto t11 = Types::all(gs, o1->left, o2->left);
             auto t12 = Types::all(gs, o1->left, o2->right);
             auto t21 = Types::all(gs, o1->right, o2->left);
@@ -937,8 +937,8 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         return AndType::make_shared(t1, t2);
     }
 
-    if (auto a1 = cast_type<AppliedType>(t1)) {
-        auto a2 = cast_type<AppliedType>(t2);
+    if (auto *a1 = cast_type<AppliedType>(t1)) {
+        auto *a2 = cast_type<AppliedType>(t2);
         if (a2 == nullptr) {
             if (a1->klass.data(gs)->isModule() || !isa_type<ClassType>(t2)) {
                 return AndType::make_shared(t1, t2);
@@ -1110,22 +1110,22 @@ void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypeP
         compareToUntyped(gs, constr, ty.underlying(gs), blame);
     }
 
-    if (auto t = cast_type<AppliedType>(ty)) {
+    if (auto *t = cast_type<AppliedType>(ty)) {
         for (auto &targ : t->targs) {
             compareToUntyped(gs, constr, targ, blame);
         }
-    } else if (auto t = cast_type<ShapeType>(ty)) {
+    } else if (auto *t = cast_type<ShapeType>(ty)) {
         for (auto &val : t->values) {
             compareToUntyped(gs, constr, val, blame);
         }
-    } else if (auto t = cast_type<TupleType>(ty)) {
+    } else if (auto *t = cast_type<TupleType>(ty)) {
         for (auto &val : t->elems) {
             compareToUntyped(gs, constr, val, blame);
         }
-    } else if (auto t = cast_type<OrType>(ty)) {
+    } else if (auto *t = cast_type<OrType>(ty)) {
         compareToUntyped(gs, constr, t->left, blame);
         compareToUntyped(gs, constr, t->right, blame);
-    } else if (auto t = cast_type<AndType>(ty)) {
+    } else if (auto *t = cast_type<AndType>(ty)) {
         compareToUntyped(gs, constr, t->left, blame);
         compareToUntyped(gs, constr, t->right, blame);
     } else if (isa_type<TypeVar>(ty)) {
@@ -1197,8 +1197,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
     //    original signatures using lub ENFORCE(cast_type<LambdaParam>(t2) == nullptr);
 
     {
-        auto lambda1 = cast_type<LambdaParam>(t1);
-        auto lambda2 = cast_type<LambdaParam>(t2);
+        auto *lambda1 = cast_type<LambdaParam>(t1);
+        auto *lambda2 = cast_type<LambdaParam>(t2);
         if (lambda1 != nullptr || lambda2 != nullptr) {
             // This should only be reachable in resolver.
             if (lambda1 == nullptr || lambda2 == nullptr) {
@@ -1216,7 +1216,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             // we can only check bounds when a LambdaParam is present.
             if (!isSelfTypeT1) {
                 auto self2 = cast_type_nonnull<SelfTypeParam>(t2);
-                if (auto lambdaParam = cast_type<LambdaParam>(self2.definition.resultType(gs))) {
+                if (auto *lambdaParam = cast_type<LambdaParam>(self2.definition.resultType(gs))) {
                     auto result = Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode,
                                                                   errorDetailsCollector);
                     if constexpr (shouldAddErrorDetails) {
@@ -1231,7 +1231,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                 }
             } else if (!isSelfTypeT2) {
                 auto self1 = cast_type_nonnull<SelfTypeParam>(t1);
-                if (auto lambdaParam = cast_type<LambdaParam>(self1.definition.resultType(gs))) {
+                if (auto *lambdaParam = cast_type<LambdaParam>(self1.definition.resultType(gs))) {
                     return Types::isSubTypeUnderConstraint(gs, constr, lambdaParam->upperBound, t2, mode,
                                                            errorDetailsCollector);
                 } else {
@@ -1244,8 +1244,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     return true;
                 }
 
-                auto lambda1 = cast_type<LambdaParam>(self1.definition.resultType(gs));
-                auto lambda2 = cast_type<LambdaParam>(self2.definition.resultType(gs));
+                auto *lambda1 = cast_type<LambdaParam>(self1.definition.resultType(gs));
+                auto *lambda2 = cast_type<LambdaParam>(self2.definition.resultType(gs));
                 return lambda1 && lambda2 &&
                        Types::isSubTypeUnderConstraint(gs, constr, lambda1->upperBound, lambda2->lowerBound, mode,
                                                        errorDetailsCollector);
@@ -1265,8 +1265,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
 
     {
         if (isa_type<MetaType>(t1) || isa_type<MetaType>(t2)) {
-            auto m1 = cast_type<MetaType>(t1);
-            auto m2 = cast_type<MetaType>(t2);
+            auto *m1 = cast_type<MetaType>(t1);
+            auto *m2 = cast_type<MetaType>(t2);
             if (m1 != nullptr && m2 != nullptr) {
                 // TODO(jez) Should this actually run under EmptyFrozenConstraint? Leaving for backwards
                 // compatibility, but maybe we should do this under the `constr` that's in scope.
@@ -1301,8 +1301,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         }
     }
 
-    if (auto a1 = cast_type<AppliedType>(t1)) {
-        auto a2 = cast_type<AppliedType>(t2);
+    if (auto *a1 = cast_type<AppliedType>(t1)) {
+        auto *a2 = cast_type<AppliedType>(t2);
         bool result;
         if (a2 == nullptr) {
             if (isa_type<ClassType>(t2)) {
@@ -1397,7 +1397,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         // alight type params.
         return result;
     }
-    if (auto a2 = cast_type<AppliedType>(t2)) {
+    if (auto *a2 = cast_type<AppliedType>(t2)) {
         if (is_proxy_type(t1)) {
             return Types::isSubTypeUnderConstraint(gs, constr, t1.underlying(gs), t2, mode, errorDetailsCollector);
         }
@@ -1427,7 +1427,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             typecase(
                 t1,
                 [&](const TupleType &a1) { // Warning: this implements COVARIANT arrays
-                    auto a2 = cast_type<TupleType>(t2);
+                    auto *a2 = cast_type<TupleType>(t2);
                     result = a2 != nullptr && a1.elems.size() >= a2->elems.size();
                     if (result) {
                         int i = -1;
@@ -1452,7 +1452,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     }
                 },
                 [&](const ShapeType &h1) { // Warning: this implements COVARIANT hashes
-                    auto h2 = cast_type<ShapeType>(t2);
+                    auto *h2 = cast_type<ShapeType>(t2);
                     result = h2 != nullptr && h2->keys.size() <= h1.keys.size();
                     if constexpr (shouldAddErrorDetails) {
                         if (h2 == nullptr) {
@@ -1577,12 +1577,12 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
 
     // Note: order of cases here matters! We can't lose "and" information in t1 early and we can't
     // lose "or" information in t2 early.
-    if (auto o1 = cast_type<OrType>(t1)) { // 7, 8, 9
+    if (auto *o1 = cast_type<OrType>(t1)) { // 7, 8, 9
         return Types::isSubTypeUnderConstraint(gs, constr, o1->left, t2, mode, errorDetailsCollector) &&
                Types::isSubTypeUnderConstraint(gs, constr, o1->right, t2, mode, errorDetailsCollector);
     }
 
-    if (auto a2 = cast_type<AndType>(t2)) { // 2, 5
+    if (auto *a2 = cast_type<AndType>(t2)) { // 2, 5
         auto subCollectorLeft = errorDetailsCollector.newCollector();
         auto isSubTypeOfLeft = Types::isSubTypeUnderConstraint(gs, constr, t1, a2->left, mode, subCollectorLeft);
         if (!isSubTypeOfLeft) {
@@ -1608,8 +1608,8 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         return isSubTypeOfRight;
     }
 
-    auto a1 = cast_type<AndType>(t1);
-    auto o2 = cast_type<OrType>(t2);
+    auto *a1 = cast_type<AndType>(t1);
+    auto *o2 = cast_type<OrType>(t2);
 
     if (a1 != nullptr) {
         // If the left is an And of an Or, then we can reorder it to be an Or of
@@ -1619,7 +1619,7 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         if (isa_type<OrType>(*r)) {
             swap(r, l);
         }
-        auto a1o = cast_type<OrType>(*l);
+        auto *a1o = cast_type<OrType>(*l);
         if (a1o != nullptr) {
             // This handles `(A | B) & C` -> `(A & C) | (B & C)`
 
@@ -1639,7 +1639,7 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         if (isa_type<AndType>(*r)) {
             swap(r, l);
         }
-        auto o2a = cast_type<AndType>(*l);
+        auto *o2a = cast_type<AndType>(*l);
         if (o2a != nullptr) {
             // This handles `(A & B) | C` -> `(A | C) & (B | C)`
 

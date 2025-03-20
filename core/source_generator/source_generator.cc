@@ -16,7 +16,7 @@ core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &ty
     if (core::is_proxy_type(receiver)) {
         receiver = receiver.underlying(gs);
     }
-    if (auto applied = core::cast_type<core::AppliedType>(receiver)) {
+    if (auto *applied = core::cast_type<core::AppliedType>(receiver)) {
         /* instantiate generic classes */
         resultType = core::Types::resultTypeAsSeenFrom(gs, resultType, inWhat.enclosingClass(gs), applied->klass,
                                                        applied->targs);

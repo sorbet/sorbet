@@ -6,7 +6,6 @@
 #include "core/Polarity.h"
 #include "core/ShowOptions.h"
 #include "core/SymbolRef.h"
-#include "core/UntaggedPtr.h"
 #include <memory>
 
 namespace sorbet::core {
@@ -134,10 +133,6 @@ private:
         return maskedPtr | val | NOT_INLINED_MASK;
     }
 
-    uint16_t tagMaybeZero() const noexcept {
-        return store & TAG_MASK;
-    }
-
     // Inlined TypePtr constructor
     TypePtr(Tag tag, uint64_t inlinedValue) noexcept : store(tagValue(tag, inlinedValue)) {}
 
@@ -247,18 +242,6 @@ public:
         return store == 0;
     }
 
-    template <class To> core::UntaggedPtr<To> as_type() {
-        bool isValid = tagMaybeZero() == uint16_t(TypeToTag<To>::value);
-        auto *ptr = isValid ? reinterpret_cast<To *>(get()) : nullptr;
-        return core::UntaggedPtr<To>(ptr, isValid);
-    }
-
-    template <class To> core::UntaggedPtr<const To> as_type() const {
-        bool isValid = tagMaybeZero() == uint16_t(TypeToTag<To>::value);
-        auto *ptr = isValid ? reinterpret_cast<const To *>(get()) : nullptr;
-        return core::UntaggedPtr<const To>(ptr, isValid);
-    }
-
     bool isUntyped() const;
 
     bool isNilClass() const;
@@ -337,8 +320,7 @@ public:
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
 
     template <class T, class... Args> friend TypePtr make_type(Args &&...args);
-    template <class To> friend bool isa_type(const TypePtr &what);
-    template <class To> friend core::UntaggedPtr<const To> cast_type(const TypePtr &what);
+    template <class To> friend To const *cast_type(const TypePtr &what);
     template <class To>
     friend typename TypeToCastType<To, TypeToIsInlined<To>::value>::type cast_type_nonnull(const TypePtr &what);
     friend class TypePtrTestHelper;
