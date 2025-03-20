@@ -378,7 +378,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
 
     // Create a session copy of the cache, consuming the original
     auto sessionCache = realmain::cache::SessionCache::make(std::move(kvstore), *logger, *opts);
-    auto copy = std::make_unique<OwnedKeyValueStore>(sessionCache->open(logger));
+    auto copy = std::make_unique<OwnedKeyValueStore>(sessionCache->open(logger, *opts));
 
     // Make sure that the same key exists
     std::vector<uint8_t> copyContent;
@@ -414,7 +414,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
     OwnedKeyValueStore::abort(std::move(kvstore));
 
     // Reopen the copy, and make sure it still has our new value
-    copy = std::make_unique<OwnedKeyValueStore>(sessionCache->open(logger));
+    copy = std::make_unique<OwnedKeyValueStore>(sessionCache->open(logger, *opts));
 
     {
         auto contents = copy->read("new key");
@@ -482,7 +482,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
 
     // Verify that we can get a handle to the kvstore
     {
-        auto copy = sessionCache->open(logger);
+        auto copy = sessionCache->open(logger, *opts);
         REQUIRE_NE(copy, nullptr);
     }
 
@@ -507,7 +507,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
     }
 
     {
-        auto copy = sessionCache->open(logger);
+        auto copy = sessionCache->open(logger, *opts);
         REQUIRE_EQ(copy, nullptr);
     }
 
@@ -519,7 +519,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
     REQUIRE(FileOps::removeEmptyDir(sessionCacheDir));
 
     {
-        auto copy = sessionCache->open(logger);
+        auto copy = sessionCache->open(logger, *opts);
         REQUIRE_EQ(copy, nullptr);
     }
 }
