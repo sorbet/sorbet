@@ -374,14 +374,13 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                     this->workspaceFiles.clear();
                     this->workspaceFiles.reserve(finalGS->filesUsed());
 
-                    // Rebuild the set of filerefs we're going to index.
-                    auto ix = -1;
-                    for (const auto &file : finalGS->getFiles()) {
+                    // Rebuild the set of filerefs we're going to index. We're explicitly skipping the `0` file, as
+                    // that's always a nullptr.
+                    auto ix = 0;
+                    for (const auto &file : finalGS->getFiles().subspan(1)) {
                         ++ix;
 
-                        if (file == nullptr) {
-                            continue;
-                        }
+                        ENFORCE(file != nullptr);
 
                         switch (file->sourceType) {
                             case core::File::Type::NotYetRead:
