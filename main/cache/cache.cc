@@ -13,14 +13,15 @@ namespace sorbet::realmain::cache {
 
 namespace {
 unique_ptr<KeyValueStore> openCache(std::shared_ptr<::spdlog::logger> logger, std::string cacheDir,
-                                    size_t maxCacheSizeBytes) {
+                                    const options::Options &opts) {
     // We currently only support one flavor of cache: "default". Each flavor is a separate database in the LMDB
     // environment, and we'll write all cached trees to that database during indexing. This means that supporting
     // multiple populated flavors in a single environment will increase the size of the environment proportionally to
     // the number of files stored * the number of flavors used. For this reason, we need to be very careful when
     // considering adding a new cache flavor.
-    return make_unique<KeyValueStore>(std::move(logger), sorbet_full_version_string, std::move(cacheDir), "default",
-                                      maxCacheSizeBytes);
+    auto flavor = "default";
+    return make_unique<KeyValueStore>(std::move(logger), sorbet_full_version_string, std::move(cacheDir), flavor,
+                                      opts.maxCacheSizeBytes);
 }
 } // namespace
 
@@ -29,7 +30,7 @@ unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(shared_ptr<::spdlog::log
     if (opts.cacheDir.empty()) {
         return nullptr;
     }
-    return make_unique<OwnedKeyValueStore>(openCache(std::move(logger), opts.cacheDir, opts.maxCacheSizeBytes));
+    return make_unique<OwnedKeyValueStore>(openCache(std::move(logger), opts.cacheDir, opts));
 }
 
 namespace {
@@ -204,8 +205,7 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
     return kvstore;
 }
 
-SessionCache::SessionCache(std::string path, size_t maxCacheBytes)
-    : path{std::move(path)}, maxCacheBytes{maxCacheBytes} {}
+SessionCache::SessionCache(std::string path) : path{std::move(path)} {}
 
 SessionCache::~SessionCache() noexcept(false) {
     if (!FileOps::dirExists(this->path)) {
@@ -256,22 +256,22 @@ std::unique_ptr<SessionCache> SessionCache::make(std::unique_ptr<const OwnedKeyV
     OwnedKeyValueStore::abort(std::move(kvstore));
 
     // Explicit construction because the constructor is private.
-    return std::unique_ptr<SessionCache>(new SessionCache{std::move(path), opts.maxCacheSizeBytes});
+    return std::unique_ptr<SessionCache>(new SessionCache{std::move(path)});
 }
 
 std::string_view SessionCache::kvstorePath() const {
     return std::string_view(this->path);
 }
 
-std::unique_ptr<KeyValueStore> SessionCache::open(std::shared_ptr<::spdlog::logger> logger) const {
+std::unique_ptr<KeyValueStore> SessionCache::open(std::shared_ptr<::spdlog::logger> logger,
+                                                  const options::Options &opts) const {
     // If the session copy has disappeared, we return a nullptr to force downstream consumers to explicitly handle the
     // empty cache.
     if (!FileOps::dirExists(this->path)) {
         return nullptr;
     }
 
-    auto kvstore =
-        std::make_unique<const OwnedKeyValueStore>(openCache(std::move(logger), this->path, this->maxCacheBytes));
+    auto kvstore = std::make_unique<const OwnedKeyValueStore>(openCache(std::move(logger), this->path, opts));
 
     // If the name table entry is missing, this indicates that the cache is completely fresh and doesn't originate in a
     // copy from the result of indexing. This can happen if only the `data.mdb` file was removed from `this->path`, and

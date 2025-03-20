@@ -46,10 +46,9 @@ std::unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(std::unique_ptr<Key
 class SessionCache {
     // The path to the session-unique copy of the cache that was created during initialization.
     std::string path;
-    size_t maxCacheBytes;
 
     SessionCache() = delete;
-    SessionCache(std::string path, size_t maxCacheBytes);
+    SessionCache(std::string path);
 
 public:
     // Removes the session cache.
@@ -64,7 +63,7 @@ public:
                                               ::spdlog::logger &logger, const options::Options &opts);
 
     // Open the session cache for use.
-    std::unique_ptr<KeyValueStore> open(std::shared_ptr<::spdlog::logger> logger) const;
+    std::unique_ptr<KeyValueStore> open(std::shared_ptr<::spdlog::logger> logger, const options::Options &opts) const;
 };
 
 } // namespace sorbet::realmain::cache
