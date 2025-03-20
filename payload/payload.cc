@@ -10,8 +10,7 @@ namespace sorbet::payload {
 
 void createInitialGlobalState(core::GlobalState &gs, const realmain::options::Options &options,
                               const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    if (options.noStdlib) {
-        ENFORCE(kvstore == nullptr, "--no-stdlib and --cache-dir are incompatible");
+    if (options.cacheSensitiveOptions.noStdlib) {
         gs.initEmpty();
         return;
     }

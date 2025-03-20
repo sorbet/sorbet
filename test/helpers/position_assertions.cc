@@ -674,7 +674,7 @@ RangeAssertion::parseAssertions(const UnorderedMap<string, shared_ptr<core::File
 realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeAssertion>> &assertions) {
     realmain::options::Options opts;
 
-    opts.noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
+    opts.cacheSensitiveOptions.noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
     opts.cacheSensitiveOptions.rbsSignaturesEnabled =
         BooleanPropertyAssertion::getValue("enable-experimental-rbs-signatures", assertions).value_or(false);
     opts.cacheSensitiveOptions.rbsAssertionsEnabled =

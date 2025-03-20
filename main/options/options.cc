@@ -1070,11 +1070,7 @@ void readOptions(Options &opts,
 
         opts.noErrorCount = raw["no-error-count"].as<bool>();
 
-        opts.noStdlib = raw["no-stdlib"].as<bool>();
-        if (opts.noStdlib && !opts.cacheDir.empty()) {
-            logger->error("--no-stdlib is incompatible with --cache-dir. Ignoring cache");
-            opts.cacheDir = "";
-        }
+        opts.cacheSensitiveOptions.noStdlib = raw["no-stdlib"].as<bool>();
 
         opts.minimizeRBI = raw["minimize-to-rbi"].as<string>();
         if (!opts.minimizeRBI.empty() && !opts.print.MinimizeRBI.enabled) {
