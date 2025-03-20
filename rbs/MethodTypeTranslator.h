@@ -19,14 +19,14 @@ public:
      * For example the signature comment `#: () -> void` will be translated as `sig { void }`.
      */
     ast::ExpressionPtr methodSignature(const ast::MethodDef *methodDef, const rbs_methodtype_t *methodType,
-                                       const core::LocOffsets &methodTypeLoc, const std::vector<Comment> &annotations);
+                                       const core::LocOffsets methodTypeLoc, const std::vector<Comment> &annotations);
 
     /**
      * Convert an RBS attribute type comment to a Sorbet signature.
      *
      * For example the attribute type comment `#: Integer` will be translated as `sig { returns(Integer) }`.
      */
-    ast::ExpressionPtr attrSignature(const ast::Send *send, rbs_node_t *type, const core::LocOffsets &typeLoc,
+    ast::ExpressionPtr attrSignature(const ast::Send *send, rbs_node_t *type, const core::LocOffsets typeLoc,
                                      const std::vector<Comment> &annotations);
 };
 

@@ -105,7 +105,7 @@ void collectKeywords(core::LocOffsets docLoc, rbs_hash_t *field, vector<RBSArg> 
 
 ast::ExpressionPtr MethodTypeTranslator::methodSignature(const ast::MethodDef *methodDef,
                                                          const rbs_methodtype_t *methodType,
-                                                         const core::LocOffsets &methodTypeLoc,
+                                                         const core::LocOffsets methodTypeLoc,
                                                          const vector<Comment> &annotations) {
     const auto &node = *methodType;
 
@@ -267,7 +267,7 @@ ast::ExpressionPtr MethodTypeTranslator::methodSignature(const ast::MethodDef *m
 }
 
 ast::ExpressionPtr MethodTypeTranslator::attrSignature(const ast::Send *send, rbs_node_t *type,
-                                                       const core::LocOffsets &typeLoc,
+                                                       const core::LocOffsets typeLoc,
                                                        const vector<Comment> &annotations) {
     auto typeParams = vector<pair<core::LocOffsets, core::NameRef>>();
     auto sigBuilder = ast::MK::Self(typeLoc.copyWithZeroLength());

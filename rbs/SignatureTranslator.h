@@ -22,8 +22,6 @@ public:
 
 private:
     core::MutableContext ctx;
-
-    rbs_string_t makeRBSString(const std::string_view &str);
 };
 
 } // namespace sorbet::rbs
