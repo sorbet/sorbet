@@ -1607,6 +1607,12 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
             continue;
         }
 
+        auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(packageSpecClass->name);
+        if (!validatePackageName(ctx, nameTree)) {
+            reportedError = true;
+            continue;
+        }
+
         // ---- Mutates the tree ----
         // We can't do these rewrites in rewriter, because this rewrite should only happen if
         // `opts.stripePackages` is set. That would mean we would have to add another cache flavor,
@@ -1620,12 +1626,6 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
         // lit's scope to find if it starts with <PackageSpecRegistry>.
         superClass = ast::make_expression<ast::ConstantLit>(core::Symbols::PackageSpec(),
                                                             superClass.toUnique<ast::UnresolvedConstantLit>());
-
-        auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(packageSpecClass->name);
-        if (!validatePackageName(ctx, nameTree)) {
-            reportedError = true;
-            continue;
-        }
 
         // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
         // This removes the PackageSpec's themselves from the top-level namespace
