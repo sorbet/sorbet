@@ -506,8 +506,8 @@ public:
                 if (auto e = ctx.beginError(lit.loc(), error)) {
                     std::vector<std::string> reasons;
                     if (causesCycle) {
-                        reasons.emplace_back(core::ErrorColors::format("importing it would put `{}` into a cycle",
-                                                                       this->package.show(ctx)));
+                        reasons.emplace_back(core::ErrorColors::format(
+                            "importing its package would put `{}` into a cycle", this->package.show(ctx)));
                         auto currentStrictDepsLevel =
                             fmt::format("strict_dependencies '{}'",
                                         core::packages::strictDependenciesLevelToString(strictDepsLevel.value().first));
@@ -521,7 +521,7 @@ public:
                     }
 
                     if (layeringViolation) {
-                        reasons.emplace_back("importing it would cause a layering violation");
+                        reasons.emplace_back("importing its package would cause a layering violation");
                         ENFORCE(pkg.layer().has_value(),
                                 "causesLayeringViolation should return false if layer is not set");
                         ENFORCE(this->package.layer().has_value(),
