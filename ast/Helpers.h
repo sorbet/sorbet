@@ -526,6 +526,17 @@ public:
         return ret;
     }
 
+    static ExpressionPtr prependPackageSpecRegistry(ast::ExpressionPtr scope) {
+        auto lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
+        ENFORCE(lastConstLit != nullptr);
+        while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
+            lastConstLit = constLit;
+        }
+        lastConstLit->scope =
+            ast::MK::Constant(lastConstLit->scope.loc().copyWithZeroLength(), core::Symbols::PackageSpecRegistry());
+        return scope;
+    }
+
     static bool isRootScope(const ast::ExpressionPtr &scope) {
         if (ast::isa_tree<ast::EmptyTree>(scope)) {
             return true;

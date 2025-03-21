@@ -709,17 +709,6 @@ void mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
     }
 }
 
-ast::ExpressionPtr prependName(ast::ExpressionPtr scope) {
-    auto lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
-    ENFORCE(lastConstLit != nullptr);
-    while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
-        lastConstLit = constLit;
-    }
-    lastConstLit->scope =
-        ast::MK::Constant(lastConstLit->scope.loc().copyWithZeroLength(), core::Symbols::PackageSpecRegistry());
-    return scope;
-}
-
 bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit &cnst) {
     if (auto scope = ast::cast_tree<ast::ConstantLit>(cnst.scope)) {
         return scope->symbol() == core::Symbols::PackageSpecRegistry();
@@ -1270,7 +1259,7 @@ struct PackageSpecBodyWalk {
                 // Transform: `import Foo` -> `import <PackageSpecRegistry>::Foo`
                 auto &posArg = send.getPosArg(0);
                 auto importArg = move(posArg);
-                posArg = prependName(move(importArg));
+                posArg = ast::MK::prependPackageSpecRegistry(move(importArg));
 
                 info.importedPackageNames.emplace_back(getPackageName(ctx, target), method2ImportType(send));
             }
@@ -1280,7 +1269,7 @@ struct PackageSpecBodyWalk {
             // Transform: `restrict_to_service Foo` -> `restrict_to_service <PackageSpecRegistry>::Foo`
             auto &posArg = send.getPosArg(0);
             auto importArg = move(posArg);
-            posArg = prependName(move(importArg));
+            posArg = ast::MK::prependPackageSpecRegistry(move(importArg));
         }
 
         if (send.fun == core::Names::exportAll() && send.numPosArgs() == 0) {
@@ -1313,7 +1302,7 @@ struct PackageSpecBodyWalk {
                 if (auto *recv = verifyConstant(ctx, send.fun, target->recv)) {
                     auto &posArg = send.getPosArg(0);
                     auto importArg = move(target->recv);
-                    posArg = prependName(move(importArg));
+                    posArg = ast::MK::prependPackageSpecRegistry(move(importArg));
                     info.visibleTo_.emplace_back(getPackageName(ctx, recv), core::packages::VisibleToType::Wildcard);
                 } else {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
@@ -1325,7 +1314,7 @@ struct PackageSpecBodyWalk {
             } else if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto &posArg = send.getPosArg(0);
                 auto importArg = move(posArg);
-                posArg = prependName(move(importArg));
+                posArg = ast::MK::prependPackageSpecRegistry(move(importArg));
 
                 info.visibleTo_.emplace_back(getPackageName(ctx, target), core::packages::VisibleToType::Normal);
             }
@@ -1644,7 +1633,7 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
 
         // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
         // This removes the PackageSpec's themselves from the top-level namespace
-        packageSpecClass->name = prependName(move(packageSpecClass->name));
+        packageSpecClass->name = ast::MK::prependPackageSpecRegistry(move(packageSpecClass->name));
 
         info = make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),
                                             ctx.locAt(packageSpecClass->declLoc));
