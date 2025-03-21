@@ -499,8 +499,11 @@ public:
             } else {
                 // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
                 // layering/strict_dependencies issues.
-                // TODO(neil): Maybe we should use a new error code for this case?
-                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
+                core::ErrorClass error =
+                    causesCycle ? core::errors::Packager::StrictDependenciesViolation
+                                : (layeringViolation ? core::errors::Packager::LayeringViolation
+                                                     : core::errors::Packager::StrictDependenciesViolation);
+                if (auto e = ctx.beginError(lit.loc(), error)) {
                     std::vector<std::string> reasons;
                     if (causesCycle) {
                         reasons.emplace_back(core::ErrorColors::format("importing it would put `{}` into a cycle",
