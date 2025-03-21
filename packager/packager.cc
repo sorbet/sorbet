@@ -1627,14 +1627,8 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
 
     auto &rootClass = ast::cast_tree_nonnull<ast::ClassDef>(package.tree);
 
-    unique_ptr<PackageInfoImpl> info;
     bool reportedError = false;
     for (auto &rootStmt : rootClass.rhs) {
-        if (info != nullptr) {
-            // No error here; let the error be reported in the tree walk later as a bad node type.
-            continue;
-        }
-
         auto packageSpecClass = ast::cast_tree<ast::ClassDef>(rootStmt);
         if (packageSpecClass == nullptr) {
             // No error here; let this be reported in the tree walk later as a bad node type,
@@ -1696,18 +1690,20 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
         // This removes the PackageSpec's themselves from the top-level namespace
         packageSpecClass->name = prependName(move(packageSpecClass->name));
 
-        info = make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),
+        // Return eagerly so we don't report duplicate errors on subsequent statements:
+        // we'll let those errors be reported in the tree walk later as a bad node type.
+        return make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),
                                             ctx.locAt(packageSpecClass->declLoc));
     }
 
     // Only report an error if we didn't already
     // (the one we reported will have been more descriptive than this one)
-    if (info == nullptr && !reportedError) {
+    if (!reportedError) {
         auto errLoc = rootClass.rhs.empty() ? core::LocOffsets{0, 0} : rootClass.rhs[0].loc();
         mustContainPackageDef(ctx, errLoc);
     }
 
-    return info;
+    return nullptr;
 }
 
 void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
