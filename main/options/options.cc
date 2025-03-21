@@ -1153,7 +1153,7 @@ void readOptions(Options &opts,
         opts.reserveTypeArgumentTableCapacity = raw["reserve-type-argument-table-capacity"].as<uint32_t>();
         opts.reserveTypeMemberTableCapacity = raw["reserve-type-member-table-capacity"].as<uint32_t>();
         opts.uniquelyDefinedBehavior = raw["uniquely-defined-behavior"].as<bool>();
-        opts.stripePackages = raw["stripe-packages"].as<bool>();
+        opts.cacheSensitiveOptions.stripePackages = raw["stripe-packages"].as<bool>();
 
         if (raw.count("extra-package-files-directory-prefix-underscore")) {
             for (const string &dirName : raw["extra-package-files-directory-prefix-underscore"].as<vector<string>>()) {
@@ -1191,7 +1191,7 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("allow-relaxed-packager-checks-for")) {
-            if (!opts.stripePackages) {
+            if (!opts.cacheSensitiveOptions.stripePackages) {
                 logger->error("--allow-relaxed-packager-checks-for can only be specified in --stripe-packages mode");
                 throw EarlyReturnWithCode(1);
             }
@@ -1207,7 +1207,7 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("packager-layers")) {
-            if (opts.stripePackages) {
+            if (opts.cacheSensitiveOptions.stripePackages) {
                 // TODO(neil): This regex was picked on a whim, so open to changing to be more or less restrictive based
                 // on feedback/usecases.
                 std::regex layerValid("[a-zA-Z0-9]+");
@@ -1225,8 +1225,8 @@ void readOptions(Options &opts,
         }
 
         opts.stripePackagesHint = raw["stripe-packages-hint-message"].as<string>();
-        if (!opts.stripePackagesHint.empty() && !opts.stripePackages) {
-            if (!opts.stripePackages) {
+        if (!opts.stripePackagesHint.empty() && !opts.cacheSensitiveOptions.stripePackages) {
+            if (!opts.cacheSensitiveOptions.stripePackages) {
                 logger->error("--stripe-packages-hint-message can only be specified in --stripe-packages mode");
                 throw EarlyReturnWithCode(1);
             }
@@ -1236,14 +1236,14 @@ void readOptions(Options &opts,
 
         opts.packageRBIDir = raw["package-rbi-dir"].as<string>();
         if (!opts.packageRBIDir.empty()) {
-            if (opts.stripePackages) {
+            if (opts.cacheSensitiveOptions.stripePackages) {
                 logger->error("--package-rbi-dir must not be specified in --stripe-packages mode");
                 throw EarlyReturnWithCode(1);
             }
         }
 
         if (raw.count("package-skip-rbi-export-enforcement")) {
-            if (!opts.stripePackages) {
+            if (!opts.cacheSensitiveOptions.stripePackages) {
                 logger->error("--package-skip-rbi-export-enforcement can only be specified in --stripe-packages mode");
                 throw EarlyReturnWithCode(1);
             }
@@ -1254,7 +1254,7 @@ void readOptions(Options &opts,
 
         opts.singlePackage = raw["single-package"].as<string>();
         if (!opts.singlePackage.empty()) {
-            if (opts.stripePackages) {
+            if (opts.cacheSensitiveOptions.stripePackages) {
                 logger->error("--single-package must not be specified in --stripe-packages mode");
                 throw EarlyReturnWithCode(1);
             }
@@ -1272,7 +1272,7 @@ void readOptions(Options &opts,
 
         opts.dumpPackageInfo = raw["dump-package-info"].as<string>();
         if (!opts.dumpPackageInfo.empty()) {
-            if (!opts.stripePackages) {
+            if (!opts.cacheSensitiveOptions.stripePackages) {
                 logger->error("--dump-package-info can only be specified in --stripe-packages mode");
                 throw EarlyReturnWithCode(1);
             }
