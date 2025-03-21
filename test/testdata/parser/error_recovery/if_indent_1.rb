@@ -3,23 +3,23 @@
 class A
   def test0
     x = nil
-    if # error: unexpected token "if"
+    if # parser-error: unexpected token "if"
   end
 
   def test1
     x = nil
-    if x # error: Hint: this "if" token might not be properly closed
+    if x # parser-error: Hint: this "if" token might not be properly closed
   end
 
   def test2
     x = nil
-    if x. # error: Hint: this "if" token might not be properly closed
+    if x. # parser-error: Hint: this "if" token might not be properly closed
   end
-# ^^^ error: unexpected token "end"
+# ^^^ parser-error: unexpected token "end"
 
   def test3
     x = nil
-    if x.f # error: Hint: this "if" token might not be properly closed
+    if x.f # parser-error: Hint: this "if" token might not be properly closed
   end
 
   # -- These should still have no errors even in indentationAware mode --
@@ -40,4 +40,4 @@ class A
     end
     puts 'after'
   end
-end # error: unexpected token "end of file"
+end # parser-error: unexpected token "end of file"

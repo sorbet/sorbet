@@ -6,4 +6,4 @@ def foo(x)
   x.
   # ^ completion: (call site is T.untyped)
   # ^ apply-completion: [A] item: 0
-end # error: unexpected token
+end # parser-error: unexpected token
