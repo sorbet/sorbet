@@ -7,8 +7,7 @@
 #include "core/Names.h"
 #include "core/core.h"
 #include "core/errors/rewriter.h"
-#include "rbs/RBSParser.h"
-#include "rbs/TypeTranslator.h"
+#include "rbs/SignatureTranslator.h"
 #include "rewriter/util/Util.h"
 #include <regex>
 
@@ -206,16 +205,8 @@ private:
             return nullptr;
         }
 
-        auto result = rbs::RBSParser::parseType(ctx, *assertion);
-        if (result.second) {
-            if (auto e = ctx.beginError(result.second->loc, core::errors::Rewriter::RBSSyntaxError)) {
-                e.setHeader("Failed to parse RBS type ({})", result.second->message);
-            }
-            return nullptr;
-        }
-
-        auto rbsType = move(result.first.value());
-        return rbs::TypeTranslator::toExpressionPtr(ctx, typeParams, rbsType.node.get(), assertion->loc);
+        auto signatureTranslator = rbs::SignatureTranslator(ctx);
+        return signatureTranslator.translateAssertionType(typeParams, *assertion);
     }
 
     /**
