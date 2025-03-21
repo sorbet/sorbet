@@ -1313,7 +1313,7 @@ void readOptions(Options &opts,
         }
 
         if (opts.print.PayloadSources.enabled) {
-            if (opts.noStdlib) {
+            if (opts.cacheSensitiveOptions.noStdlib) {
                 logger->error("You can't pass both `{}` and `{}`.", "--print=payload-sources", "--no-stdlib");
                 throw EarlyReturnWithCode(1);
             } else if (raw.count("e") > 0) {
