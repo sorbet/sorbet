@@ -119,7 +119,6 @@ constexpr size_t MAX_CACHE_SIZE_BYTES = 1L * 1024 * 1024 * 1024; // 1 GiB
 struct Options {
     Printers print;
     Phase stopAfterPhase = Phase::INFERENCER;
-    bool noStdlib = false;
 
     // Should we monitor STDOUT for HUP and exit if it hangs up. This is a
     // workaround for https://bugzilla.mindrot.org/show_bug.cgi?id=2863
@@ -179,6 +178,11 @@ struct Options {
     // Options which affect the contents of the `--cache-dir`.
     // If these options change, the cache needs to be invalidated.
     struct CacheSensitiveOptions {
+        // Ideally, we would have named this option something like `--stdlib=false`, because by
+        // nature of this option being a boolean option with cxxopts, you can do `--no-stdlib=false`
+        // which is a no-op, and also confusing.
+        bool noStdlib : 1;
+
         bool typedSuper : 1;
 
         // Enable experimental support for RBS signatures
@@ -194,10 +198,10 @@ struct Options {
 
         // In C++20 we can replace this with bit field initializers
         CacheSensitiveOptions()
-            : typedSuper(true), rbsSignaturesEnabled(false), rbsAssertionsEnabled(false),
+            : noStdlib(false), typedSuper(true), rbsSignaturesEnabled(false), rbsAssertionsEnabled(false),
               requiresAncestorEnabled(false), runningUnderAutogen(false) {}
 
-        constexpr static uint8_t NUMBER_OF_FLAGS = 4;
+        constexpr static uint8_t NUMBER_OF_FLAGS = 6;
         constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         uint8_t serialize() const {

@@ -1070,11 +1070,7 @@ void readOptions(Options &opts,
 
         opts.noErrorCount = raw["no-error-count"].as<bool>();
 
-        opts.noStdlib = raw["no-stdlib"].as<bool>();
-        if (opts.noStdlib && !opts.cacheDir.empty()) {
-            logger->error("--no-stdlib is incompatible with --cache-dir. Ignoring cache");
-            opts.cacheDir = "";
-        }
+        opts.cacheSensitiveOptions.noStdlib = raw["no-stdlib"].as<bool>();
 
         opts.minimizeRBI = raw["minimize-to-rbi"].as<string>();
         if (!opts.minimizeRBI.empty() && !opts.print.MinimizeRBI.enabled) {
@@ -1317,7 +1313,7 @@ void readOptions(Options &opts,
         }
 
         if (opts.print.PayloadSources.enabled) {
-            if (opts.noStdlib) {
+            if (opts.cacheSensitiveOptions.noStdlib) {
                 logger->error("You can't pass both `{}` and `{}`.", "--print=payload-sources", "--no-stdlib");
                 throw EarlyReturnWithCode(1);
             } else if (raw.count("e") > 0) {
