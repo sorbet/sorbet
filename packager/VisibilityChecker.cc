@@ -676,7 +676,7 @@ public:
                     e.setHeader("Duplicate package import `{}`", it->package.show(ctx));
                     e.addErrorLine(ctx.locAt(first->importLoc), "Previous package import found here");
                     auto importLoc = ctx.locAt(it->importLoc);
-                    auto [startOfIndent, indentation] = importLoc.findStartOfLine(ctx);
+                    auto [startOfIndent, indentation] = importLoc.findStartOfIndentation(ctx);
                     auto replacementLoc = startOfIndent.adjust(ctx, -indentation, 0).join(importLoc);
                     if (replacementLoc.beginPos() != 0) {
                         replacementLoc = replacementLoc.adjust(ctx, -1, 0); // Also the preceding newline
