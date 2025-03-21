@@ -440,7 +440,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                     cache::ownIfUnchanged(*this->gs, std::move(kvstore));
 
                 auto workspaceFilesSpan = absl::MakeSpan(this->workspaceFiles);
-                if (this->config->opts.stripePackages) {
+                if (this->config->opts.cacheSensitiveOptions.stripePackages) {
                     auto numPackageFiles = pipeline::partitionPackageFiles(*this->gs, workspaceFilesSpan);
                     auto inputPackageFiles = workspaceFilesSpan.first(numPackageFiles);
                     workspaceFilesSpan = workspaceFilesSpan.subspan(numPackageFiles);
@@ -523,7 +523,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             return;
         }
 
-        if (this->config->opts.stripePackages) {
+        if (this->config->opts.cacheSensitiveOptions.stripePackages) {
             // Only need to compute FoundDefHashes when running to compute a FileHash
             auto foundHashes = nullptr;
             auto cancelled =
