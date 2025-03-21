@@ -107,7 +107,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     gs.suggestUnsafe = opts.suggestUnsafe;
 
 #ifndef SORBET_REALMAIN_MIN
-    if (opts.stripePackages) {
+    if (opts.cacheSensitiveOptions.stripePackages) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
         gs.setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
@@ -728,7 +728,7 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
              WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
-    if (!opts.stripePackages) {
+    if (!opts.cacheSensitiveOptions.stripePackages) {
         return;
     }
 
@@ -753,7 +753,7 @@ void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const opti
 void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                     WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
-    if (!opts.stripePackages) {
+    if (!opts.cacheSensitiveOptions.stripePackages) {
         return;
     }
 
@@ -778,7 +778,7 @@ void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, con
 void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                            WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
-    if (!opts.stripePackages) {
+    if (!opts.cacheSensitiveOptions.stripePackages) {
         return;
     }
 
@@ -941,7 +941,7 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
             }
 
 #ifndef SORBET_REALMAIN_MIN
-            if (opts.stripePackages) {
+            if (opts.cacheSensitiveOptions.stripePackages) {
                 Timer timeit(gs.tracer(), "visibility_checker");
                 what = packager::VisibilityChecker::run(gs, workers, std::move(what));
             }
@@ -1106,7 +1106,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                    const options::Options &opts, WorkerPool &workers) {
     try {
 #ifndef SORBET_REALMAIN_MIN
-        if (opts.stripePackages) {
+        if (opts.cacheSensitiveOptions.stripePackages) {
             Timer timeit(gs.tracer(), "incremental_packager");
             // For simplicity, we still call Packager::runIncremental here, even though
             // pipeline::nameAndResolve no longer calls Packager::run.
@@ -1157,7 +1157,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
         }
 
 #ifndef SORBET_REALMAIN_MIN
-        if (opts.stripePackages) {
+        if (opts.cacheSensitiveOptions.stripePackages) {
             what = packager::VisibilityChecker::run(gs, workers, std::move(what));
         }
 #endif

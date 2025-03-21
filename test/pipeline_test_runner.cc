@@ -380,7 +380,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     vector<ast::ParsedFile> trees;
     auto filesSpan = absl::Span<core::FileRef>(files);
-    if (opts.stripePackages) {
+    if (opts.cacheSensitiveOptions.stripePackages) {
         auto numPackageFiles = realmain::pipeline::partitionPackageFiles(*gs, filesSpan);
         auto inputPackageFiles = filesSpan.first(numPackageFiles);
         filesSpan = filesSpan.subspan(numPackageFiles);
@@ -397,7 +397,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
 
-    if (opts.stripePackages) {
+    if (opts.cacheSensitiveOptions.stripePackages) {
         if (test.expectations.contains("rbi-gen")) {
             auto rbiGenGs = emptyGs->deepCopyGlobalState();
             realmain::pipeline::setGlobalStateOptions(*rbiGenGs, opts);
@@ -526,7 +526,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
         trees = move(resolver::Resolver::run(*gs, move(trees), *workers).result());
 
-        if (opts.stripePackages) {
+        if (opts.cacheSensitiveOptions.stripePackages) {
             trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
         }
 
@@ -801,7 +801,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     trees = move(newTrees);
     fast_sort(trees, [](auto &lhs, auto &rhs) { return lhs.file < rhs.file; });
 
-    if (opts.stripePackages) {
+    if (opts.cacheSensitiveOptions.stripePackages) {
         absl::c_stable_partition(trees, [&](const auto &pf) { return pf.file.isPackage(*gs); });
         trees = packager::Packager::runIncremental(*gs, move(trees), *workers);
         for (auto &tree : trees) {
@@ -842,7 +842,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncrementalNamer, *workers).result());
     }
 
-    if (opts.stripePackages) {
+    if (opts.cacheSensitiveOptions.stripePackages) {
         trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
     }
 
