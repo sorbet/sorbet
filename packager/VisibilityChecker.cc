@@ -559,14 +559,11 @@ public:
                     } else {
                         ENFORCE(false, "At most three reasons should be present");
                     }
+                    e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
                     if (wasNotImported) {
-                        e.setHeader("`{}` resolves but its package is not imported. However, it cannot be "
-                                    "automatically imported because {}",
-                                    lit.symbol().show(ctx), reason);
+                        e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
                     } else if (importedAsTest) {
-                        e.setHeader("Used `{}` constant `{}` in non-test file. However, it cannot be automatically "
-                                    "imported because {}",
-                                    "test_import", litSymbol.show(ctx), reason);
+                        e.addErrorNote("`{}`'s package is imported as `{}`", lit.symbol().show(ctx), "test_import");
                     } else {
                         ENFORCE(false);
                     }
