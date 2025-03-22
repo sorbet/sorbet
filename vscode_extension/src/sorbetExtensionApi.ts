@@ -1,24 +1,27 @@
 import { Disposable, Event, EventEmitter } from "vscode";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { ServerStatus } from "./types";
-import { Log } from "./log";
 
 /**
  * Status changes reported by extension.
  */
 const enum Status {
   /**
-   * Extension starts in disabled state. It then can enter this state after
-   * user explicitly disables Sorbet.
+   * Sorbet Language Server has been disabled.
    */
   Disabled = "disabled",
   /**
-   * Sorbet Language Server has started up and it is ready to process.
+   * Sorbet Language Server encountered an error. This state does not correlate
+   * to code typing errors.
    */
-  Ready = "ready",
+  Error = "error",
   /**
-   * Sorbet server is being started, event might repeat in case of error or if
-   * the server was shutdown.
+   * Sorbet Language Server us running.
+   */
+  Running = "running",
+  /**
+   * Sorbet server is being started. The event might repeat in case of error or
+   * if the server was previously stopped.
    */
   Start = "start",
 }
@@ -26,9 +29,9 @@ const enum Status {
 /**
  * Sorbet Extension API.
  *
- * IMPORTANT!
- * Maintain backward and forward compatibility in all changes to prevent breaking
- * consumer extensions:
+ * !!! IMPORTANT !!!
+ * Maintain backward and forward compatibility in all changes to this interface
+ * to prevent breaking consumer extensions:
  *  1. Use optional properties.
  *  2. NEVER expose internal types directly.
  */
@@ -40,19 +43,16 @@ export interface SorbetExtensionApi {
 export class SorbetExtensionApiImpl implements Disposable {
   private readonly disposables: Disposable[];
   private readonly onStatusChangedEmitter: EventEmitter<Status>;
-  private readonly log: Log;
   public status?: Status;
 
-  constructor({ statusProvider, log }: SorbetExtensionContext) {
-    this.log = log;
+  constructor({ statusProvider }: SorbetExtensionContext) {
     this.onStatusChangedEmitter = new EventEmitter();
     this.status = this.mapStatus(statusProvider.serverStatus);
     this.disposables = [
       this.onStatusChangedEmitter,
       statusProvider.onStatusChanged((e) => {
         const mappedStatus = this.mapStatus(e.status);
-        this.log.trace("EVENT", this.status, mappedStatus);
-        if (mappedStatus) {
+        if (mappedStatus && this.status !== mappedStatus) {
           this.status = mappedStatus;
           this.onStatusChangedEmitter.fire(mappedStatus);
         }
@@ -68,24 +68,27 @@ export class SorbetExtensionApiImpl implements Disposable {
     switch (status) {
       case ServerStatus.DISABLED:
         return Status.Disabled;
+      case ServerStatus.ERROR:
+        return Status.Error;
       case ServerStatus.INITIALIZING:
       case ServerStatus.RESTARTING:
         return Status.Start;
       case ServerStatus.RUNNING:
-        return Status.Ready;
+        return Status.Running;
       default:
         return undefined;
     }
   }
 
-  public get onStatusChanged(): Event<Status> | undefined {
-    return this.onStatusChangedEmitter.event;
-  }
-
+  /**
+   * Public API.
+   */
   public toApi(): SorbetExtensionApi {
+    // This should be used instead of returning `this` because that would expose
+    // the internal implementations, e.g. `onStatusChangedEmitter`.
     return {
       status: () => this.status,
-      onStatusChanged: this.onStatusChanged
+      onStatusChanged: this.onStatusChangedEmitter.event,
     };
   }
 }
