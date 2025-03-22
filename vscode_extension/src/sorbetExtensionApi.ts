@@ -16,7 +16,7 @@ const enum Status {
    */
   Error = "error",
   /**
-   * Sorbet Language Server us running.
+   * Sorbet Language Server is running.
    */
   Running = "running",
   /**
