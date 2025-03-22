@@ -67,7 +67,7 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
 
     this.onStatusChangeEmitter = new EventEmitter<ServerStatus>();
     this.restart = restart;
-    this.wrappedStatus = ServerStatus.DISABLED;
+    this.wrappedStatus = ServerStatus.INITIALIZING;
   }
 
   /**

@@ -1,5 +1,8 @@
 # Version history
 
+## 0.3.41
+- New extension API to track status changes on the Language Service.
+
 ## 0.3.40
 - Upgrade VS Language Client to [protocol 3.17.3](https://github.com/microsoft/vscode-languageserver-node/blob/main/README.md#3173-protocol-810-json-rpc-810-client-and-810-server)
 - Remove `cwd` from Sorbet configuration (it has never been used).
