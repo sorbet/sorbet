@@ -1453,26 +1453,25 @@ struct PackageSpecBodyWalk {
     void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
-            // Ignore top-level <root>
+            // Skip over top-level <root>
             return;
         }
 
         auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
         if (nameTree == nullptr) {
-            // Already reported an error
+            // Already reported an error in definePackage
             return;
         }
 
-        if (startsWithPackageSpecRegistry(*nameTree)) {
-            this->foundFirstPackageSpec = true;
-        } else if (this->foundFirstPackageSpec) {
-            if (auto e = ctx.beginError(classDef.declLoc, core::errors::Packager::MultiplePackagesInOneFile)) {
-                e.setHeader("Package files can only declare one package");
-                e.addErrorLine(info.loc, "Previous package declaration found here");
-            }
-        } else {
-            mustContainPackageDef(ctx, tree.loc());
+        if (!this->foundFirstPackageSpec) {
+            this->foundFirstPackageSpec |= startsWithPackageSpecRegistry(*nameTree);
+
+            // Already reported an error (in definePackage) or no need to report an error (because
+            // this is the package spec class)
+            return;
         }
+
+        illegalNode(ctx, tree);
     }
 
     // Generate a list of FQNs exported by this package. No export may be a prefix of another.

@@ -3,5 +3,5 @@
 # enable-packager: true
 
 class Inside < PackageSpec
-  class A; end # error: Package files can only declare one package
+  class A; end # error: Invalid expression in package: `ClassDef` not allowed
 end
