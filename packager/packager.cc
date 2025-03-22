@@ -1421,6 +1421,7 @@ struct PackageSpecBodyWalk {
                 e.addErrorLine(info.loc, "Previous package declaration found here");
             }
         } else {
+            ENFORCE(false);
             mustContainPackageDef(ctx, tree.loc());
         }
     }
