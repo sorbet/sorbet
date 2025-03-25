@@ -365,7 +365,7 @@ to use the literal's underlying type instead:
 - `false` is `FalseClass`
 - `nil` is `NilClass`
 
-You can also consider using [`T.::Enum`](tenum.md).
+You can also consider using [`T::Enum`](tenum.md).
 
 ## Type assertions comments
 
