@@ -41,6 +41,7 @@
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "pipeline.h"
+#include "rbs/AssertionsRewriter.h"
 #include "rbs/SigsRewriter.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
@@ -229,13 +230,19 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
 
 unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> node,
                                        const options::Printers &print) {
-    if (gs.cacheSensitiveOptions.rbsSignaturesEnabled) {
+    if (gs.cacheSensitiveOptions.rbsSignaturesEnabled || gs.cacheSensitiveOptions.rbsAssertionsEnabled) {
         Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
         core::MutableContext ctx(gs, core::Symbols::root(), file);
         core::UnfreezeNameTable nameTableAccess(gs);
 
-        auto rewriter = rbs::SigsRewriter(ctx);
-        node = rewriter.run(move(node));
+        if (gs.cacheSensitiveOptions.rbsSignaturesEnabled) {
+            auto rewriter = rbs::SigsRewriter(ctx);
+            node = rewriter.run(move(node));
+        }
+        if (gs.cacheSensitiveOptions.rbsAssertionsEnabled) {
+            auto rewriter = rbs::AssertionsRewriter(ctx);
+            node = rewriter.run(move(node));
+        }
     }
     if (print.RBSRewriteTree.enabled) {
         print.ParseTree.fmt("{}\n", node->toStringWithTabs(gs, 0));

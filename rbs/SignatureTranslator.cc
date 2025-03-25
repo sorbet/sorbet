@@ -1,8 +1,7 @@
 #include "rbs/SignatureTranslator.h"
-#include "ast/ast.h"
 #include "core/errors/rewriter.h"
 #include "rbs/MethodTypeToParserNode.h"
-#include "rbs/TypeTranslator.h"
+#include "rbs/TypeToParserNode.h"
 #include "rbs/rbs_common.h"
 
 using namespace std;
@@ -17,7 +16,7 @@ rbs_string_t makeRBSString(const string_view &str) {
 
 } // namespace
 
-ast::ExpressionPtr
+unique_ptr<parser::Node>
 SignatureTranslator::translateAssertionType(vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
                                             const rbs::Comment &assertion) {
     rbs_string_t rbsString = makeRBSString(assertion.string);
@@ -34,7 +33,8 @@ SignatureTranslator::translateAssertionType(vector<std::pair<core::LocOffsets, c
         return nullptr;
     }
 
-    return rbs::TypeTranslator(ctx, typeParams, std::move(parser)).toExpressionPtr(rbsType, assertion.loc);
+    auto typeToParserNode = TypeToParserNode(ctx, typeParams, std::move(parser));
+    return typeToParserNode.toParserNode(rbsType, assertion.loc);
 }
 
 unique_ptr<parser::Node> SignatureTranslator::translateType(const parser::Send *send, const rbs::Comment &signature,

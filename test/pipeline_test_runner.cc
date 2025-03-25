@@ -40,6 +40,7 @@
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "payload/payload.h"
+#include "rbs/AssertionsRewriter.h"
 #include "rbs/SigsRewriter.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
@@ -217,12 +218,17 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
         handler.addObserved(gs, "parse-tree-json", [&]() { return nodes->toJSON(gs); });
 
         {
-            if (gs.cacheSensitiveOptions.rbsSignaturesEnabled) {
+            if (gs.cacheSensitiveOptions.rbsSignaturesEnabled || gs.cacheSensitiveOptions.rbsAssertionsEnabled) {
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
                 core::MutableContext ctx(gs, core::Symbols::root(), file);
-
-                auto rbsSignatures = rbs::SigsRewriter(ctx);
-                nodes = rbsSignatures.run(std::move(nodes));
+                if (gs.cacheSensitiveOptions.rbsSignaturesEnabled) {
+                    auto rbsSignatures = rbs::SigsRewriter(ctx);
+                    nodes = rbsSignatures.run(std::move(nodes));
+                }
+                if (gs.cacheSensitiveOptions.rbsAssertionsEnabled) {
+                    auto rbsAssertions = rbs::AssertionsRewriter(ctx);
+                    nodes = rbsAssertions.run(std::move(nodes));
+                }
             }
         }
 
@@ -400,6 +406,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 if (rbiGenGs->cacheSensitiveOptions.rbsSignaturesEnabled) {
                     auto rbsSignatures = rbs::SigsRewriter(ctx);
                     nodes = rbsSignatures.run(std::move(nodes));
+                }
+                if (rbiGenGs->cacheSensitiveOptions.rbsAssertionsEnabled) {
+                    auto rbsAssertions = rbs::AssertionsRewriter(ctx);
+                    nodes = rbsAssertions.run(std::move(nodes));
                 }
 
                 auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file};
@@ -744,6 +754,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         if (gs->cacheSensitiveOptions.rbsSignaturesEnabled) {
             auto rbsSignatures = rbs::SigsRewriter(ctx);
             nodes = rbsSignatures.run(std::move(nodes));
+        }
+        if (gs->cacheSensitiveOptions.rbsAssertionsEnabled) {
+            auto rbsAssertions = rbs::AssertionsRewriter(ctx);
+            nodes = rbsAssertions.run(std::move(nodes));
         }
 
         ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
