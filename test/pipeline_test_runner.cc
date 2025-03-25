@@ -87,15 +87,34 @@ public:
     }
 };
 
-UnorderedSet<string> knownExpectations = {"parse-tree",       "parse-tree-json",  "parse-tree-whitequark",
-                                          "desugar-tree",     "desugar-tree-raw", "rewrite-tree",
-                                          "rewrite-tree-raw", "index-tree",       "index-tree-raw",
-                                          "symbol-table",     "symbol-table-raw", "name-tree",
-                                          "name-tree-raw",    "resolve-tree",     "resolve-tree-raw",
-                                          "flatten-tree",     "flatten-tree-raw", "cfg",
-                                          "cfg-raw",          "cfg-text",         "autogen",
-                                          "document-symbols", "package-tree",     "document-formatting-rubyfmt",
-                                          "autocorrects",     "minimized-rbi",    "rbi-gen"};
+UnorderedSet<string> knownExpectations = {"parse-tree",
+                                          "parse-tree-json",
+                                          "parse-tree-whitequark",
+                                          "rbs-rewrite-tree",
+                                          "desugar-tree",
+                                          "desugar-tree-raw",
+                                          "rewrite-tree",
+                                          "rewrite-tree-raw",
+                                          "index-tree",
+                                          "index-tree-raw",
+                                          "symbol-table",
+                                          "symbol-table-raw",
+                                          "name-tree",
+                                          "name-tree-raw",
+                                          "resolve-tree",
+                                          "resolve-tree-raw",
+                                          "flatten-tree",
+                                          "flatten-tree-raw",
+                                          "cfg",
+                                          "cfg-raw",
+                                          "cfg-text",
+                                          "autogen",
+                                          "document-symbols",
+                                          "package-tree",
+                                          "document-formatting-rubyfmt",
+                                          "autocorrects",
+                                          "minimized-rbi",
+                                          "rbi-gen"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
@@ -230,6 +249,8 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                     nodes = rbsAssertions.run(std::move(nodes));
                 }
             }
+
+            handler.addObserved(gs, "rbs-rewrite-tree", [&]() { return nodes->toString(gs); });
         }
 
         // Desugarer
@@ -759,6 +780,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             auto rbsAssertions = rbs::AssertionsRewriter(ctx);
             nodes = rbsAssertions.run(std::move(nodes));
         }
+        handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return nodes->toString(*gs); });
 
         ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
         handler.addObserved(*gs, "desguar-tree", [&]() { return file.tree.toString(*gs); });
