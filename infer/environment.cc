@@ -1141,7 +1141,7 @@ core::TypePtr Environment::processBinding(
                     if (reportCustomerCallsite && bind.loc.exists()) {
                         auto wrappingMethodClass = inWhat.symbol.data(ctx)->owner;
                         auto wrappingMethodName = inWhat.symbol.data(ctx)->name.show(ctx);
-                        auto [wrappingMethodStart, _ew] = std::move(inWhat.symbol.data(ctx)->loc()).position(ctx.state);
+                        auto [wrappingMethodStart, _ew] = std::move(inWhat.symbol.data(ctx)->loc()).toDetails(ctx.state);
 
                         auto methodClass = it->main.method.data(ctx)->owner;
                         auto methodName = it->main.method.data(ctx)->name.show(ctx);
@@ -1149,7 +1149,7 @@ core::TypePtr Environment::processBinding(
 
                         auto callSiteLoc = ctx.locAt(bind.loc);
                         auto callSiteFile = callSiteLoc.file().data(ctx.state).path();
-                        auto [start, _e] = std::move(callSiteLoc).position(ctx.state);
+                        auto [start, _e] = std::move(callSiteLoc).toDetails(ctx.state);
                         auto receiverName = send.recv.variable.data(inWhat)._name.toString(ctx);
 
                         std::string wrappingMethodClassName;
@@ -1193,7 +1193,7 @@ core::TypePtr Environment::processBinding(
                                 }
 
                                 auto originFile = originLoc.file().data(ctx.state).path();
-                                auto [originStart, _e] = std::move(originLoc).position(ctx.state);
+                                auto [originStart, _e] = std::move(originLoc).toDetails(ctx.state);
                                 if (locIndex == recvType.origins.size() - 1) {
                                     oss << "\"" << std::move(originFile) << ":" << originStart.line << "\"";
                                 } else {
@@ -1302,7 +1302,7 @@ core::TypePtr Environment::processBinding(
                                 }
 
                                 auto originFile = originLoc.file().data(ctx.state).path();
-                                auto [originStart, _e] = std::move(originLoc).position(ctx.state);
+                                auto [originStart, _e] = std::move(originLoc).toDetails(ctx.state);
                                 if (locIndex == arg->origins.size() - 1) {
                                     oss << "\"" << std::move(originFile) << ":" << originStart.line << "\"";
                                 } else {
@@ -1674,7 +1674,7 @@ core::TypePtr Environment::processBinding(
                     if (klass.exists()) {
                         auto wrappingMethodClass = inWhat.symbol.data(ctx)->owner;
                         auto wrappingMethodName = inWhat.symbol.data(ctx)->name.show(ctx);
-                        auto [wrappingMethodStart, _ew] = std::move(inWhat.symbol.data(ctx)->loc()).position(ctx.state);
+                        auto [wrappingMethodStart, _ew] = std::move(inWhat.symbol.data(ctx)->loc()).toDetails(ctx.state);
 
                         std::string wrappingMethodClassName;
                         if (wrappingMethodClass.data(ctx)->isSingletonClass(ctx)) {
@@ -1686,7 +1686,7 @@ core::TypePtr Environment::processBinding(
 
                         auto callSiteLoc = ctx.locAt(bind.loc);
                         auto callSiteFile = callSiteLoc.file().data(ctx.state).path();
-                        auto [start, _e] = std::move(callSiteLoc).position(ctx.state);
+                        auto [start, _e] = std::move(callSiteLoc).toDetails(ctx.state);
 
                         auto methodRetTypeStr = methodReturnType.show(ctx);
 
@@ -1711,7 +1711,7 @@ core::TypePtr Environment::processBinding(
                             }
 
                             auto originFile = originLoc.file().data(ctx.state).path();
-                            auto [originStart, _e] = std::move(originLoc).position(ctx.state);
+                            auto [originStart, _e] = std::move(originLoc).toDetails(ctx.state);
                             if (locIndex == typeAndOrigin.origins.size() - 1) {
                                 oss << "\"" << std::move(originFile) << ":" << originStart.line << "\"";
                             } else {

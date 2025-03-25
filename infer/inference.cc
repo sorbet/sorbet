@@ -194,7 +194,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         auto wrappingMethodClass = cfg->symbol.data(ctx)->owner;
                         auto wrappingMethodName = cfg->symbol.data(ctx)->name.show(ctx);
                         auto defFile = defLoc.file().data(ctx.state).path();
-                        auto [wrappingMethodStart, _ew] = std::move(defLoc).position(ctx.state);
+                        auto [wrappingMethodStart, _ew] = std::move(defLoc).toDetails(ctx.state);
 
                         std::string wrappingMethodClassName;
                         if (wrappingMethodClass.data(ctx)->isSingletonClass(ctx)) {
@@ -230,7 +230,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     auto wrappingMethodClass = cfg->symbol.data(ctx)->owner;
                     auto wrappingMethodName = cfg->symbol.data(ctx)->name.show(ctx);
                     auto defFile = defLoc.file().data(ctx.state).path();
-                    auto [wrappingMethodStart, _ew] = std::move(defLoc).position(ctx.state);
+                    auto [wrappingMethodStart, _ew] = std::move(defLoc).toDetails(ctx.state);
 
                     std::string wrappingMethodClassName;
                     if (wrappingMethodClass.data(ctx)->isSingletonClass(ctx)) {
