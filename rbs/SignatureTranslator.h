@@ -2,6 +2,7 @@
 #define RBS_SIGNATURE_TRANSLATOR_H
 
 #include "ast/ast.h"
+#include "parser/parser.h"
 #include "rbs/rbs_common.h"
 #include <string_view>
 #include <vector>
@@ -15,10 +16,10 @@ public:
     ast::ExpressionPtr translateAssertionType(std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
                                               const rbs::Comment &assertion);
 
-    ast::ExpressionPtr translateType(const ast::Send *send, const rbs::Comment &signature,
-                                     const std::vector<Comment> &annotations);
-    ast::ExpressionPtr translateSignature(const ast::MethodDef *methodDef, const rbs::Comment &signature,
-                                          const std::vector<Comment> &annotations);
+    std::unique_ptr<parser::Node> translateType(const parser::Send *send, const rbs::Comment &signature,
+                                                const std::vector<Comment> &annotations);
+    std::unique_ptr<parser::Node> translateSignature(const parser::Node *methodDef, const rbs::Comment &signature,
+                                                     const std::vector<Comment> &annotations);
 
 private:
     core::MutableContext ctx;

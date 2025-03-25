@@ -41,6 +41,7 @@
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "pipeline.h"
+#include "rbs/SigsRewriter.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
 
@@ -226,6 +227,22 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
     return nodes;
 }
 
+unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> node,
+                                       const options::Printers &print) {
+    if (gs.cacheSensitiveOptions.rbsSignaturesEnabled) {
+        Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
+        core::MutableContext ctx(gs, core::Symbols::root(), file);
+        core::UnfreezeNameTable nameTableAccess(gs);
+
+        auto rewriter = rbs::SigsRewriter(ctx);
+        node = rewriter.run(move(node));
+    }
+    if (print.RBSRewriteTree.enabled) {
+        print.ParseTree.fmt("{}\n", node->toStringWithTabs(gs, 0));
+    }
+    return node;
+}
+
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
                               const options::Printers &print, bool preserveConcreteSyntax = false) {
     Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
@@ -274,6 +291,9 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
             return ast::MK::EmptyTree();
         }
         auto parseTree = runParser(gs, file, print, opts.traceLexer, opts.traceParser);
+
+        parseTree = runRBSRewrite(gs, file, move(parseTree), print);
+
         return runDesugar(gs, file, move(parseTree), print, preserveConcreteSyntax);
     } catch (SorbetException &) {
         Exception::failInFuzzer();
@@ -301,6 +321,11 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (opts.stopAfterPhase == options::Phase::PARSER) {
                 return emptyParsedFile(file);
             }
+            parseTree = runRBSRewrite(lgs, file, move(parseTree), print);
+            if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
+                return emptyParsedFile(file);
+            }
+
             tree = runDesugar(lgs, file, move(parseTree), print);
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyParsedFile(file);

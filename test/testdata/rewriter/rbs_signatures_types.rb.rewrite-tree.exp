@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
     <self>.returns(<emptyTree>::<C Foo>)
   end
 
@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
     <self>.returns(::<root>::<C Foo>)
   end
 
@@ -15,7 +15,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
     <self>.returns(<emptyTree>::<C Foo>::<C Bar>)
   end
 
@@ -23,7 +23,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
     <self>.returns(<emptyTree>::<C Foo>::<C Bar>::<C Baz>)
   end
 
@@ -31,7 +31,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
     <self>.returns(::<root>::<C Foo>::<C Bar>)
   end
 
@@ -39,119 +39,119 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.class_of(<emptyTree>::<C Foo>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.class_of(<emptyTree>::<C Foo>))
   end
 
   def class_singleton_type1<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.class_of(::<root>::<C Foo>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.class_of(::<root>::<C Foo>))
   end
 
   def class_singleton_type2<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.class_of(<emptyTree>::<C Foo>::<C Bar>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.class_of(<emptyTree>::<C Foo>::<C Bar>))
   end
 
   def class_singleton_type3<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.class_of(<emptyTree>::<C Foo>::<C Bar>::<C Baz>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.class_of(<emptyTree>::<C Foo>::<C Bar>::<C Baz>))
   end
 
   def class_singleton_type4<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.class_of(::<root>::<C Foo>::<C Bar>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.class_of(::<root>::<C Foo>::<C Bar>))
   end
 
   def class_singleton_type5<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.any(<emptyTree>::<C Foo>, <emptyTree>::<C Foo>::<C Bar>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.any(<emptyTree>::<C Foo>, <emptyTree>::<C Foo>::<C Bar>))
   end
 
   def union_type1<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.any(<emptyTree>::<C Foo>, <emptyTree>::<C Foo>::<C Bar>, ::<root>::<C Foo>::<C Bar>::<C Baz>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.any(<emptyTree>::<C Foo>, <emptyTree>::<C Foo>::<C Bar>, ::<root>::<C Foo>::<C Bar>::<C Baz>))
   end
 
   def union_type2<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.all(<emptyTree>::<C A>, <emptyTree>::<C B>, <emptyTree>::<C C>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.all(<emptyTree>::<C A>, <emptyTree>::<C B>, <emptyTree>::<C C>))
   end
 
   def intersection_type1<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.nilable(<emptyTree>::<C Foo>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.nilable(<emptyTree>::<C Foo>))
   end
 
   def optional_type1<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.self_type())
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.self_type())
   end
 
   def base_type1<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.untyped())
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.untyped())
   end
 
   def base_type3<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Boolean>)
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Boolean>)
   end
 
   def base_type4<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C NilClass>)
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C NilClass>)
   end
 
   def base_type5<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.anything())
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.anything())
   end
 
   def base_type6<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
     <self>.void()
   end
 
@@ -159,151 +159,151 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Array>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_array<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Array>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_array_root<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Class>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Class>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_class<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Class>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Class>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_class_root<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Enumerable>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Enumerable>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerable<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Enumerable>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Enumerable>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerable_root<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Enumerator>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Enumerator>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerator<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Enumerator>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Enumerator>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerator_root<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Enumerator>::<C Lazy>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Lazy>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerator_lazy<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Enumerator>::<C Lazy>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Lazy>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerator_lazy_root<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Enumerator>::<C Chain>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Chain>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerator_chain<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Enumerator>::<C Chain>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Chain>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerator_chain_root<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C String>, <emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Hash>.[](<emptyTree>::<C String>, <emptyTree>::<C Integer>))
   end
 
   def generic_type_hash<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C String>, <emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Hash>.[](<emptyTree>::<C String>, <emptyTree>::<C Integer>))
   end
 
   def generic_type_hash_root<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Set>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Set>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_set<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Set>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Set>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_set_root<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Range>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Range>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_range<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Range>.[](<emptyTree>::<C Integer>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Range>.[](<emptyTree>::<C Integer>))
   end
 
   def generic_type_range_root<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
     <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C Integer>))
   end
 
@@ -311,7 +311,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
     <self>.returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C String>, <emptyTree>::<C Integer>))
   end
 
@@ -319,7 +319,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
     <self>.returns(<emptyTree>::<C GenericType1>.[](<emptyTree>::<C Integer>))
   end
 
@@ -327,15 +327,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C GenericType2>.[](<emptyTree>::<C GenericType1>.[](::T.untyped()), <emptyTree>::<C GenericType3>.[](<emptyTree>::<C Integer>, <emptyTree>::<C String>, ::T.untyped())))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(<emptyTree>::<C GenericType2>.[](<emptyTree>::<C GenericType1>.[](::<root>::<C T>.untyped()), <emptyTree>::<C GenericType3>.[](<emptyTree>::<C Integer>, <emptyTree>::<C String>, ::<root>::<C T>.untyped())))
   end
 
   def generic_type6<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
     <self>.returns([<emptyTree>::<C Integer>])
   end
 
@@ -343,15 +343,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns([<emptyTree>::<C Integer>, <emptyTree>::<C String>, ::T.untyped()])
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns([<emptyTree>::<C Integer>, <emptyTree>::<C String>, ::<root>::<C T>.untyped()])
   end
 
   def tuple_type2<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
     <self>.returns({:id => <emptyTree>::<C String>, :name => <emptyTree>::<C String>})
   end
 
@@ -359,7 +359,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
     <self>.returns({"a" => <emptyTree>::<C String>, "b" => <emptyTree>::<C Integer>})
   end
 
@@ -367,7 +367,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
     <self>.returns({:a => <emptyTree>::<C String>, :b => <emptyTree>::<C Integer>})
   end
 
@@ -375,7 +375,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
     <self>.returns({"a" => <emptyTree>::<C String>, :b => <emptyTree>::<C Integer>})
   end
 
@@ -383,64 +383,64 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.proc().params(:arg0, <emptyTree>::<C Integer>, :arg1, <emptyTree>::<C String>).returns(<emptyTree>::<C String>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.proc().params(:arg0, <emptyTree>::<C Integer>, :arg1, <emptyTree>::<C String>).returns(<emptyTree>::<C String>))
   end
 
   def proc_type1<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.proc().void().bind(<emptyTree>::<C Foo>))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.proc().void().bind(<emptyTree>::<C Foo>))
   end
 
   def proc_type2<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.untyped())
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.untyped())
   end
 
   def proc_type3<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.untyped())
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.untyped())
   end
 
   def proc_type4<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.noreturn())
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.noreturn())
   end
 
   def base_type_last<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.untyped())
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.untyped())
   end
 
   def alias_type1<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.untyped())
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.untyped())
   end
 
   def interface_type1<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::T.untyped())
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>.untyped())
   end
 
   def literal_type1<<todo method>>(&<blk>)
@@ -530,8 +530,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(<self>.base_type1())
 
   class <emptyTree>::<C BaseType2><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.returns(::T.attached_class())
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+      <self>.returns(::<root>::<C T>.attached_class())
     end
 
     def self.base_type2<<todo method>>(&<blk>)

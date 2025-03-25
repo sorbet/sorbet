@@ -24,7 +24,6 @@
 #include "rewriter/Private.h"
 #include "rewriter/Prop.h"
 #include "rewriter/RBSAssertions.h"
-#include "rewriter/RBSSignatures.h"
 #include "rewriter/Rails.h"
 #include "rewriter/SigRewriter.h"
 #include "rewriter/Struct.h"
@@ -209,11 +208,6 @@ ast::ExpressionPtr Rewriter::run(core::MutableContext ctx, ast::ExpressionPtr tr
     auto ast = std::move(tree);
 
     Rewriterer rewriter;
-
-    if (ctx.state.cacheSensitiveOptions.rbsSignaturesEnabled) {
-        // This rewriter must run before the others, because it creates signatures that other rewriters depend on.
-        ast = RBSSignatures::run(ctx, std::move(ast));
-    }
 
     ast::TreeWalk::apply(ctx, rewriter, ast);
     // This AST flattening pass requires that we mutate the AST in a way that our previous DSL passes were not designed

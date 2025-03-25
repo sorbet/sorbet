@@ -1,7 +1,7 @@
 #include "rbs/SignatureTranslator.h"
 #include "ast/ast.h"
 #include "core/errors/rewriter.h"
-#include "rbs/MethodTypeTranslator.h"
+#include "rbs/MethodTypeToParserNode.h"
 #include "rbs/TypeTranslator.h"
 #include "rbs/rbs_common.h"
 
@@ -37,8 +37,8 @@ SignatureTranslator::translateAssertionType(vector<std::pair<core::LocOffsets, c
     return rbs::TypeTranslator(ctx, typeParams, std::move(parser)).toExpressionPtr(rbsType, assertion.loc);
 }
 
-ast::ExpressionPtr SignatureTranslator::translateType(const ast::Send *send, const rbs::Comment &signature,
-                                                      const std::vector<Comment> &annotations) {
+unique_ptr<parser::Node> SignatureTranslator::translateType(const parser::Send *send, const rbs::Comment &signature,
+                                                            const vector<Comment> &annotations) {
     rbs_string_t rbsString = makeRBSString(signature.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
@@ -64,13 +64,13 @@ ast::ExpressionPtr SignatureTranslator::translateType(const ast::Send *send, con
         return nullptr;
     }
 
-    auto methodTypeTranslator = MethodTypeTranslator(ctx, std::move(parser));
-    return methodTypeTranslator.attrSignature(send, rbsType, signature.loc, annotations);
+    auto methodTypeToParserNode = MethodTypeToParserNode(ctx, std::move(parser));
+    return methodTypeToParserNode.attrSignature(send, rbsType, signature.loc, annotations);
 }
 
-ast::ExpressionPtr SignatureTranslator::translateSignature(const ast::MethodDef *methodDef,
-                                                           const rbs::Comment &signature,
-                                                           const std::vector<Comment> &annotations) {
+unique_ptr<parser::Node> SignatureTranslator::translateSignature(const parser::Node *methodDef,
+                                                                 const rbs::Comment &signature,
+                                                                 const vector<Comment> &annotations) {
     rbs_string_t rbsString = makeRBSString(signature.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
@@ -87,8 +87,8 @@ ast::ExpressionPtr SignatureTranslator::translateSignature(const ast::MethodDef 
         return nullptr;
     }
 
-    auto methodTypeTranslator = MethodTypeTranslator(ctx, std::move(parser));
-    return methodTypeTranslator.methodSignature(methodDef, rbsMethodType, signature.loc, annotations);
+    auto methodTypeToParserNode = MethodTypeToParserNode(ctx, std::move(parser));
+    return methodTypeToParserNode.methodSignature(methodDef, rbsMethodType, signature.loc, annotations);
 }
 
 } // namespace sorbet::rbs

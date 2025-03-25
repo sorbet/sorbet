@@ -40,6 +40,7 @@
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "payload/payload.h"
+#include "rbs/SigsRewriter.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -215,6 +216,16 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
         handler.addObserved(gs, "parse-tree-whitequark", [&]() { return nodes->toWhitequark(gs); });
         handler.addObserved(gs, "parse-tree-json", [&]() { return nodes->toJSON(gs); });
 
+        {
+            if (gs.cacheSensitiveOptions.rbsSignaturesEnabled) {
+                core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+                core::MutableContext ctx(gs, core::Symbols::root(), file);
+
+                auto rbsSignatures = rbs::SigsRewriter(ctx);
+                nodes = rbsSignatures.run(std::move(nodes));
+            }
+        }
+
         // Desugarer
         ast::ParsedFile desugared;
         {
@@ -385,6 +396,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 auto settings = parser::Parser::Settings{};
                 auto nodes = parser::Parser::run(*rbiGenGs, file, settings);
                 core::MutableContext ctx(*rbiGenGs, core::Symbols::root(), file);
+
+                if (rbiGenGs->cacheSensitiveOptions.rbsSignaturesEnabled) {
+                    auto rbsSignatures = rbs::SigsRewriter(ctx);
+                    nodes = rbsSignatures.run(std::move(nodes));
+                }
+
                 auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file};
                 tree = ast::ParsedFile{rewriter::Rewriter::run(ctx, move(tree.tree)), tree.file};
                 tree = testSerialize(*rbiGenGs, local_vars::LocalVars::run(ctx, move(tree)));
@@ -723,6 +740,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         handler.addObserved(*gs, "parse-tree-json", [&]() { return nodes->toJSON(*gs); });
 
         core::MutableContext ctx(*gs, core::Symbols::root(), f.file);
+
+        if (gs->cacheSensitiveOptions.rbsSignaturesEnabled) {
+            auto rbsSignatures = rbs::SigsRewriter(ctx);
+            nodes = rbsSignatures.run(std::move(nodes));
+        }
+
         ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
         handler.addObserved(*gs, "desguar-tree", [&]() { return file.tree.toString(*gs); });
         handler.addObserved(*gs, "desugar-tree-raw", [&]() { return file.tree.showRaw(*gs); });

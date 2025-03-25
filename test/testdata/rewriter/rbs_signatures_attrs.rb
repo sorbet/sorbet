@@ -45,7 +45,7 @@ x = Foo.new
 T.reveal_type(x.foo) # error: Revealed type: `Integer`
 T.reveal_type(x.bar) # error: Revealed type: `T.nilable(Integer)`
 T.reveal_type(x.baz) # error: Revealed type: `T.nilable(Integer)`
-x.qux = "" # error: Assigning a value to `qux` that does not match expected type `T.nilable(Integer)`
+x.qux = "" # error: Assigning a value to `:qux` that does not match expected type `T.nilable(Integer)`
 
 class AttrRewriter
   extend T::Sig

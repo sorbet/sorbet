@@ -45,6 +45,7 @@ struct Printers {
     PrinterConfig ParseTreeJson;
     PrinterConfig ParseTreeJsonWithLocs;
     PrinterConfig ParseTreeWhitequark;
+    PrinterConfig RBSRewriteTree;
     PrinterConfig DesugarTree;
     PrinterConfig DesugarTreeRaw;
     PrinterConfig RewriterTree;
@@ -95,6 +96,7 @@ struct Printers {
 enum class Phase {
     INIT,
     PARSER,
+    RBS_REWRITER,
     DESUGARER,
     REWRITER,
     LOCAL_VARS,
