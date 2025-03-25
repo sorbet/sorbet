@@ -628,10 +628,10 @@ public:
         while (!toVisit.empty()) {
             auto curr = toVisit.front();
             toVisit.pop();
-            if (visited.contains(curr)) {
+            auto [_it, inserted] = visited.emplace(curr);
+            if (!inserted) {
                 continue;
             }
-            visited.insert(curr);
 
             if (curr == dest) {
                 // Found the target node, walk backward through the prev map to construct the path
