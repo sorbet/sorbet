@@ -27,24 +27,26 @@ unique_ptr<parser::Node> handleAnnotations(unique_ptr<parser::Node> sigBuilder, 
         if (annotation.string == "final") {
             // no-op, `final` is handled in the `sig()` call later
         } else if (annotation.string == "abstract") {
-            sigBuilder = parser::MK::Send0(annotation.loc, move(sigBuilder), core::Names::abstract(), annotation.loc);
+            sigBuilder =
+                parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::abstract(), annotation.typeLoc);
         } else if (annotation.string == "overridable") {
             sigBuilder =
-                parser::MK::Send0(annotation.loc, move(sigBuilder), core::Names::overridable(), annotation.loc);
+                parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::overridable(), annotation.typeLoc);
         } else if (annotation.string == "override") {
-            sigBuilder = parser::MK::Send0(annotation.loc, move(sigBuilder), core::Names::override_(), annotation.loc);
+            sigBuilder =
+                parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::override_(), annotation.typeLoc);
         } else if (annotation.string == "override(allow_incompatible: true)") {
             auto pairs = parser::NodeVec();
-            auto key = parser::MK::Symbol(annotation.loc, core::Names::allowIncompatible());
-            auto value = parser::MK::True(annotation.loc);
-            pairs.emplace_back(make_unique<parser::Pair>(annotation.loc, move(key), move(value)));
-            auto hash = parser::MK::Hash(annotation.loc, true, move(pairs));
+            auto key = parser::MK::Symbol(annotation.typeLoc, core::Names::allowIncompatible());
+            auto value = parser::MK::True(annotation.typeLoc);
+            pairs.emplace_back(make_unique<parser::Pair>(annotation.typeLoc, move(key), move(value)));
+            auto hash = parser::MK::Hash(annotation.typeLoc, true, move(pairs));
 
             auto args = parser::NodeVec();
             args.emplace_back(move(hash));
 
-            sigBuilder = parser::MK::Send(annotation.loc, move(sigBuilder), core::Names::override_(), annotation.loc,
-                                          move(args));
+            sigBuilder = parser::MK::Send(annotation.typeLoc, move(sigBuilder), core::Names::override_(),
+                                          annotation.typeLoc, move(args));
         }
     }
 
@@ -123,12 +125,13 @@ void collectKeywords(core::LocOffsets docLoc, rbs_hash_t *field, vector<RBSArg> 
 
 unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::Node *methodDef,
                                                                  const rbs_methodtype_t *methodType,
-                                                                 const core::LocOffsets methodTypeLoc,
+                                                                 const core::LocOffsets typeLoc,
+                                                                 const core::LocOffsets commentLoc,
                                                                  const vector<Comment> &annotations) {
     const auto &node = *methodType;
 
     if (node.type->type != RBS_TYPES_FUNCTION) {
-        auto errLoc = locFromRange(methodTypeLoc, node.type->location->rg);
+        auto errLoc = locFromRange(typeLoc, node.type->location->rg);
         if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSUnsupported)) {
             e.setHeader("Unexpected node type `{}` in method signature, expected `{}`", rbs_node_type_name(node.type),
                         "Function");
@@ -142,7 +145,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
     vector<pair<core::LocOffsets, core::NameRef>> typeParams;
     for (rbs_node_list_node_t *list_node = node.type_params->head; list_node != nullptr; list_node = list_node->next) {
-        auto loc = locFromRange(methodTypeLoc, list_node->node->location->rg);
+        auto loc = locFromRange(typeLoc, list_node->node->location->rg);
 
         ENFORCE(list_node->node->type == RBS_AST_TYPEPARAM,
                 "Unexpected node type `{}` in type parameter list, expected `{}`", rbs_node_type_name(list_node->node),
@@ -157,8 +160,8 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
     vector<RBSArg> args;
 
-    collectArgs(methodTypeLoc, functionType->required_positionals, args);
-    collectArgs(methodTypeLoc, functionType->optional_positionals, args);
+    collectArgs(typeLoc, functionType->required_positionals, args);
+    collectArgs(typeLoc, functionType->optional_positionals, args);
 
     rbs_node_t *restPositionals = functionType->rest_positionals;
     if (restPositionals) {
@@ -166,18 +169,18 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
                 "Unexpected node type `{}` in rest positional argument, expected `{}`",
                 rbs_node_type_name(restPositionals), "FunctionParam");
 
-        auto loc = locFromRange(methodTypeLoc, restPositionals->location->rg);
+        auto loc = locFromRange(typeLoc, restPositionals->location->rg);
         auto node = (rbs_types_function_param_t *)restPositionals;
         auto arg = RBSArg{loc, node->name, node->type};
         args.emplace_back(arg);
     }
 
-    collectArgs(methodTypeLoc, functionType->trailing_positionals, args);
+    collectArgs(typeLoc, functionType->trailing_positionals, args);
 
     // Collect keywords
 
-    collectKeywords(methodTypeLoc, functionType->required_keywords, args);
-    collectKeywords(methodTypeLoc, functionType->optional_keywords, args);
+    collectKeywords(typeLoc, functionType->required_keywords, args);
+    collectKeywords(typeLoc, functionType->optional_keywords, args);
 
     rbs_node_t *restKeywords = functionType->rest_keywords;
     if (restKeywords) {
@@ -185,7 +188,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
                 "Unexpected node type `{}` in rest keyword argument, expected `{}`", rbs_node_type_name(restKeywords),
                 "FunctionParam");
 
-        auto loc = locFromRange(methodTypeLoc, restKeywords->location->rg);
+        auto loc = locFromRange(typeLoc, restKeywords->location->rg);
         auto node = (rbs_types_function_param_t *)restKeywords;
         auto arg = RBSArg{loc, node->name, node->type};
         args.emplace_back(arg);
@@ -196,7 +199,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
     auto *block = node.block;
     if (block) {
         // TODO: RBS doesn't have location on blocks yet
-        auto arg = RBSArg{methodTypeLoc, nullptr, (rbs_node_t *)block};
+        auto arg = RBSArg{typeLoc, nullptr, (rbs_node_t *)block};
         args.emplace_back(arg);
     }
 
@@ -235,7 +238,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
     // Build the sig
 
-    auto sigBuilder = parser::MK::Self(methodTypeLoc);
+    auto sigBuilder = parser::MK::Self(typeLoc);
     sigBuilder = handleAnnotations(std::move(sigBuilder), annotations);
 
     if (typeParams.size() > 0) {
@@ -245,16 +248,15 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
         for (auto &param : typeParams) {
             typeParamsVector.emplace_back(parser::MK::Symbol(param.first, param.second));
         }
-        sigBuilder = parser::MK::Send(methodTypeLoc, move(sigBuilder), core::Names::typeParameters(), methodTypeLoc,
-                                      move(typeParamsVector));
+        sigBuilder =
+            parser::MK::Send(typeLoc, move(sigBuilder), core::Names::typeParameters(), typeLoc, move(typeParamsVector));
     }
 
     if (sigParams.size() > 0) {
-        auto hash = parser::MK::Hash(methodTypeLoc, true, move(sigParams));
+        auto hash = parser::MK::Hash(typeLoc, true, move(sigParams));
         auto args = parser::NodeVec();
         args.emplace_back(move(hash));
-        sigBuilder =
-            parser::MK::Send(methodTypeLoc, move(sigBuilder), core::Names::params(), methodTypeLoc, move(args));
+        sigBuilder = parser::MK::Send(typeLoc, move(sigBuilder), core::Names::params(), typeLoc, move(args));
     }
 
     rbs_node_t *returnValue = functionType->return_type;
@@ -268,9 +270,9 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
     }
 
     auto sigArgs = parser::NodeVec();
-    auto t = parser::MK::T(methodTypeLoc);
-    auto t_sig = parser::MK::Const(methodTypeLoc, move(t), core::Names::Constants::Sig());
-    auto t_sig_withoutRuntime = parser::MK::Const(methodTypeLoc, move(t_sig), core::Names::Constants::WithoutRuntime());
+    auto t = parser::MK::T(typeLoc);
+    auto t_sig = parser::MK::Const(typeLoc, move(t), core::Names::Constants::Sig());
+    auto t_sig_withoutRuntime = parser::MK::Const(typeLoc, move(t_sig), core::Names::Constants::WithoutRuntime());
     sigArgs.emplace_back(move(t_sig_withoutRuntime));
 
     bool isFinal = absl::c_any_of(annotations, [](const Comment &annotation) { return annotation.string == "final"; });
@@ -279,14 +281,15 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
         sigArgs.emplace_back(parser::MK::Symbol(methodTypeLoc, core::Names::final_()));
     }
 
-    auto sig = parser::MK::Send(methodTypeLoc, parser::MK::SorbetPrivateStatic(methodTypeLoc), core::Names::sig(),
-                                methodTypeLoc, move(sigArgs));
+    auto sig =
+        parser::MK::Send(typeLoc, parser::MK::SorbetPrivateStatic(typeLoc), core::Names::sig(), typeLoc, move(sigArgs));
 
-    return make_unique<parser::Block>(methodTypeLoc, move(sig), nullptr, move(sigBuilder));
+    return make_unique<parser::Block>(commentLoc, move(sig), nullptr, move(sigBuilder));
 }
 
 unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Send *send, const rbs_node_t *type,
                                                                const core::LocOffsets typeLoc,
+                                                               const core::LocOffsets commentLoc,
                                                                const vector<Comment> &annotations) {
     auto typeParams = vector<pair<core::LocOffsets, core::NameRef>>();
     auto sigBuilder = parser::MK::Self(typeLoc.copyWithZeroLength());
@@ -330,7 +333,8 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
         sigBuilder = parser::MK::Send(send->loc, move(sigBuilder), core::Names::params(), send->loc, move(sigArgs));
     }
 
-    sigBuilder = parser::MK::Send1(typeLoc, move(sigBuilder), core::Names::returns(), typeLoc, move(returnType));
+    sigBuilder =
+        parser::MK::Send1(typeLoc, move(sigBuilder), core::Names::returns(), returnType->loc, move(returnType));
 
     auto sigArgs = parser::NodeVec();
     auto t = parser::MK::T(typeLoc);
@@ -341,7 +345,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
     auto sig =
         parser::MK::Send(typeLoc, parser::MK::SorbetPrivateStatic(typeLoc), core::Names::sig(), typeLoc, move(sigArgs));
 
-    return make_unique<parser::Block>(typeLoc, move(sig), nullptr, move(sigBuilder));
+    return make_unique<parser::Block>(commentLoc, move(sig), nullptr, move(sigBuilder));
 }
 
 } // namespace sorbet::rbs

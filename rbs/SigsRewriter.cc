@@ -130,7 +130,7 @@ Comments signaturesForLoc(core::MutableContext ctx, core::LocOffsets loc) {
             int lineSize = line.size();
             auto rbsSignature = Comment{
                 core::LocOffsets{index, index + lineSize},
-                // core::LocOffsets{index + 2, index + lineSize},
+                core::LocOffsets{index + 2, index + lineSize},
                 line.substr(2),
             };
             signatures.emplace_back(rbsSignature);
@@ -141,7 +141,7 @@ Comments signaturesForLoc(core::MutableContext ctx, core::LocOffsets loc) {
             int lineSize = line.size();
             auto annotation = Comment{
                 core::LocOffsets{index, index + lineSize},
-                // core::LocOffsets{index + 3, index + lineSize},
+                core::LocOffsets{index + 3, index + lineSize},
                 line.substr(3),
             };
             annotations.emplace_back(annotation);

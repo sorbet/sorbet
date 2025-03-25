@@ -19,7 +19,7 @@ public:
      * For example the signature comment `#: () -> void` will be translated as `sig { void }`.
      */
     std::unique_ptr<parser::Node> methodSignature(const parser::Node *methodDef, const rbs_methodtype_t *methodType,
-                                                  const core::LocOffsets methodTypeLoc,
+                                                  const core::LocOffsets typeLoc, const core::LocOffsets commentLoc,
                                                   const std::vector<Comment> &annotations);
 
     /**
@@ -28,7 +28,7 @@ public:
      * For example the attribute type comment `#: Integer` will be translated as `sig { returns(Integer) }`.
      */
     std::unique_ptr<parser::Node> attrSignature(const parser::Send *send, const rbs_node_t *type,
-                                                const core::LocOffsets typeLoc,
+                                                const core::LocOffsets typeLoc, const core::LocOffsets commentLoc,
                                                 const std::vector<Comment> &annotations);
 };
 
