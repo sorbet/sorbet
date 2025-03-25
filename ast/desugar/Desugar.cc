@@ -576,8 +576,7 @@ Send *asTLet(ExpressionPtr &arg) {
         return nullptr;
     }
 
-    auto recv = cast_tree<UnresolvedConstantLit>(send->recv);
-    if (recv == nullptr || recv->cnst != core::Names::Constants::T() || !isa_tree<EmptyTree>(recv->scope)) {
+    if (!ast::MK::isT(send->recv)) {
         return nullptr;
     }
 

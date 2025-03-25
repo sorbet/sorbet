@@ -55,6 +55,26 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def self.initialized_with_qualified_let<<todo method>>(&<blk>)
+      begin
+        if @initialized_with_qualified_let
+          @initialized_with_qualified_let
+        else
+          begin
+            @initialized_with_qualified_let = ::<root>::<C T>.let(@initialized_with_qualified_let, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+            <statTemp>$2 = 42
+            @initialized_with_qualified_let = <statTemp>$2
+          end
+        end
+        <emptyTree>::<C T>.reveal_type(@initialized_with_qualified_let)
+        <emptyTree>::<C T>.must(@initialized_with_qualified_let)
+      end
+    end
+
+    <self>.sig() do ||
       <self>.returns(<emptyTree>::<C T>::<C Boolean>)
     end
 

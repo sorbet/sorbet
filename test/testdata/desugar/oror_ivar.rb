@@ -21,6 +21,13 @@ module Config
     @initialized_to_nilable ||= T.let(nil, T.nilable(String))
   end # error: Expected `String` but found `T.nilable(String)` for method result type
 
+  sig {returns(Integer)}
+  def self.initialized_with_qualified_let
+    @initialized_with_qualified_let ||= ::T.let(42, T.nilable(Integer))
+    T.reveal_type(@initialized_with_qualified_let) # error: Revealed type: `Integer`
+    T.must(@initialized_with_qualified_let) # error: `T.must` called on `Integer`, which is never `nil`
+  end
+
   sig {returns(T::Boolean)}
   def self.lazy_boolean
     # This is dangerous, but it's dangerous in normal Ruby, too. (The `||`
