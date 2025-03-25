@@ -192,6 +192,16 @@ unique_ptr<parser::NodeVec> signaturesForNode(core::MutableContext ctx, parser::
 
 } // namespace
 
+parser::NodeVec SigsRewriter::rewriteNodes(parser::NodeVec nodes) {
+    parser::NodeVec result;
+
+    for (auto &node : nodes) {
+        result.emplace_back(rewriteBody(move(node)));
+    }
+
+    return result;
+}
+
 unique_ptr<parser::Node> SigsRewriter::rewriteBegin(unique_ptr<parser::Node> node) {
     auto begin = parser::cast_node<parser::Begin>(node.get());
     ENFORCE(begin != nullptr);
@@ -246,6 +256,35 @@ unique_ptr<parser::Node> SigsRewriter::rewriteNode(unique_ptr<parser::Node> node
 
     typecase(
         node.get(),
+        // Using the same order as Desugar.cc
+        [&](parser::Block *block) {
+            block->body = rewriteBody(move(block->body));
+            result = move(node);
+        },
+        [&](parser::Begin *begin) {
+            node = rewriteBegin(move(node));
+            result = move(node);
+        },
+        [&](parser::Assign *assign) {
+            assign->rhs = rewriteNode(move(assign->rhs));
+            result = move(node);
+        },
+        [&](parser::AndAsgn *andAsgn) {
+            andAsgn->right = rewriteNode(move(andAsgn->right));
+            result = move(node);
+        },
+        [&](parser::OrAsgn *orAsgn) {
+            orAsgn->right = rewriteNode(move(orAsgn->right));
+            result = move(node);
+        },
+        [&](parser::OpAsgn *opAsgn) {
+            opAsgn->right = rewriteNode(move(opAsgn->right));
+            result = move(node);
+        },
+        [&](parser::Kwbegin *kwbegin) {
+            kwbegin->stmts = rewriteNodes(move(kwbegin->stmts));
+            result = move(node);
+        },
         [&](parser::Module *module) {
             module->body = rewriteBody(move(module->body));
             result = move(node);
@@ -254,16 +293,57 @@ unique_ptr<parser::Node> SigsRewriter::rewriteNode(unique_ptr<parser::Node> node
             klass->body = rewriteBody(move(klass->body));
             result = move(node);
         },
+        [&](parser::DefMethod *def) {
+            def->body = rewriteBody(move(def->body));
+            result = move(node);
+        },
+        [&](parser::DefS *def) {
+            def->body = rewriteBody(move(def->body));
+            result = move(node);
+        },
         [&](parser::SClass *sclass) {
             sclass->body = rewriteBody(move(sclass->body));
             result = move(node);
         },
-        [&](parser::Block *block) {
-            block->body = rewriteBody(move(block->body));
+        [&](parser::For *for_) {
+            for_->body = rewriteBody(move(for_->body));
             result = move(node);
         },
-        [&](parser::Begin *begin) {
-            node = rewriteBegin(move(node));
+        [&](parser::Array *array) {
+            array->elts = rewriteNodes(move(array->elts));
+            result = move(node);
+        },
+        [&](parser::Rescue *rescue) {
+            rescue->body = rewriteBody(move(rescue->body));
+            rescue->rescue = rewriteNodes(move(rescue->rescue));
+            rescue->else_ = rewriteBody(move(rescue->else_));
+            result = move(node);
+        },
+        [&](parser::Resbody *resbody) {
+            resbody->body = rewriteBody(move(resbody->body));
+            result = move(node);
+        },
+        [&](parser::Ensure *ensure) {
+            ensure->body = rewriteBody(move(ensure->body));
+            ensure->ensure = rewriteBody(move(ensure->ensure));
+            result = move(node);
+        },
+        [&](parser::If *if_) {
+            if_->then_ = rewriteBody(move(if_->then_));
+            if_->else_ = rewriteBody(move(if_->else_));
+            result = move(node);
+        },
+        [&](parser::Masgn *masgn) {
+            masgn->rhs = rewriteNode(move(masgn->rhs));
+            result = move(node);
+        },
+        [&](parser::Case *case_) {
+            case_->whens = rewriteNodes(move(case_->whens));
+            case_->else_ = rewriteBody(move(case_->else_));
+            result = move(node);
+        },
+        [&](parser::When *when) {
+            when->body = rewriteBody(move(when->body));
             result = move(node);
         },
         [&](parser::Node *other) { result = move(node); });
