@@ -603,10 +603,10 @@ public:
         }
     }
 
-    string renderPath(const core::GlobalState &gs, vector<core::packages::MangledName> path) const {
+    string renderPath(const core::GlobalState &gs, const vector<core::packages::MangledName> &path) const {
         // TODO(neil): if the cycle has a large number of nodes (10?), show partial path (first 5, ... (n omitted), last
         // 5) to prevent error being too long
-        std::string pathMessage;
+        string pathMessage;
         for (int i = 0; i < path.size(); i++) {
             auto name = gs.packageDB().getPackageInfo(path[i]).show(gs);
             bool showArrow = i < path.size() - 1;
@@ -616,17 +616,18 @@ public:
     }
 
     optional<string> pathTo(const core::GlobalState &gs, const core::packages::MangledName dest) const {
+        // Note: This implements BFS.
         auto src = mangledName();
-        queue<core::packages::MangledName> q;
+        queue<core::packages::MangledName> toVisit;
         // Maps from package to what package we came from to get to that package, used to construct the path
         // Ex. A -> B -> C means that prev[C] = B and prev[B] = A
         UnorderedMap<core::packages::MangledName, core::packages::MangledName> prev;
         UnorderedSet<core::packages::MangledName> visited;
 
-        q.push(src);
-        while (!q.empty()) {
-            auto curr = q.front();
-            q.pop();
+        toVisit.push(src);
+        while (!toVisit.empty()) {
+            auto curr = toVisit.front();
+            toVisit.pop();
             if (visited.contains(curr)) {
                 continue;
             }
@@ -644,7 +645,6 @@ public:
                 return renderPath(gs, path);
             }
 
-            ENFORCE(gs.packageDB().getPackageInfo(curr).exists());
             auto &currInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfo(curr));
             for (auto &import : currInfo.importedPackageNames) {
                 auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
@@ -655,7 +655,7 @@ public:
                 if (!prev.contains(import.name.mangledName)) {
                     prev[import.name.mangledName] = curr;
                 }
-                q.push(import.name.mangledName);
+                toVisit.push(import.name.mangledName);
             }
         }
 
