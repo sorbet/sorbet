@@ -323,6 +323,13 @@ public:
     }
 
     /*
+     * Create a `T.unsafe(value)` send node.
+     */
+    static std::unique_ptr<parser::Node> TUnsafe(core::LocOffsets loc, std::unique_ptr<parser::Node> value) {
+        return Send1(loc, T(loc), core::Names::unsafe(), loc, move(value));
+    }
+
+    /*
      * Create a `T.untyped()` send node.
      */
     static std::unique_ptr<parser::Node> TUntyped(core::LocOffsets loc) {
