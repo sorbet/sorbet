@@ -261,12 +261,12 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
     rbs_node_t *returnValue = functionType->return_type;
     if (returnValue->type == RBS_TYPES_BASES_VOID) {
-        auto loc = locFromRange(methodTypeLoc, returnValue->location->rg);
-        sigBuilder = parser::MK::Send0(loc, move(sigBuilder), core::Names::void_(), loc);
+        auto loc = locFromRange(typeLoc, returnValue->location->rg);
+        sigBuilder = parser::MK::Send0(typeLoc, move(sigBuilder), core::Names::void_(), loc);
     } else {
-        auto returnType = typeToParserNode.toParserNode(returnValue, methodTypeLoc);
+        auto returnType = typeToParserNode.toParserNode(returnValue, typeLoc);
         sigBuilder =
-            parser::MK::Send1(methodTypeLoc, move(sigBuilder), core::Names::returns(), methodTypeLoc, move(returnType));
+            parser::MK::Send1(typeLoc, move(sigBuilder), core::Names::returns(), returnType->loc, move(returnType));
     }
 
     auto sigArgs = parser::NodeVec();

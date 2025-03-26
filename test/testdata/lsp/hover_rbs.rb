@@ -4,16 +4,16 @@
 # Sig parts hover
 
 #: -> String
-#^ hover: # T::Sig::WithoutRuntime.sig:
-# ^ hover: # T::Sig::WithoutRuntime.sig:
-#  ^ hover: # T::Sig::WithoutRuntime.sig:
-#   ^ hover: # T::Sig::WithoutRuntime.sig:
-#    ^ hover: # T::Sig::WithoutRuntime.sig:
-def hover_sig1; T.unsafe(nil); end
+#^ hover: null
+# ^ hover: (nothing)
+#  ^ hover: (nothing)
+#   ^ hover: (nothing)
+#    ^ hover: (nothing)
+def hover_def_sig1; T.unsafe(nil); end
 
 #: () -> String
-#  ^ hover: # T::Sig::WithoutRuntime.sig:
-#   ^ hover: # T::Sig::WithoutRuntime.sig:
+#  ^ hover: (nothing)
+#   ^ hover: (nothing)
 def hover_sig2; T.unsafe(nil); end
 
 #: (Integer, String) -> String
@@ -77,8 +77,16 @@ def hover_keyword_params_1(x, y, z); T.unsafe(nil); end
 # Block params hover
 
 #: () { -> String } -> void
-#     ^ hover: # T::Sig::WithoutRuntime.sig:
-#              ^ TODO: RBS blocks do not have location yet
+#     ^ hover: # T.proc:
 #          ^ hover: T.class_of(String)
 #               ^ hover: T.class_of(String)
 def hover_block_params_1(&block); T.unsafe(nil); end
+
+# Attr sig hover
+
+#: String
+#^ hover: null
+# ^ hover: (nothing)
+#  ^ hover: T.class_of(String)
+#       ^ hover: T.class_of(String)
+attr_reader :hover_attr_sig1
