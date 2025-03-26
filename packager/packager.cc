@@ -606,10 +606,12 @@ public:
     string renderPath(const core::GlobalState &gs, const vector<core::packages::MangledName> &path) const {
         // TODO(neil): if the cycle has a large number of nodes (10?), show partial path (first 5, ... (n omitted), last
         // 5) to prevent error being too long
+        // Note: This function iterates through path in reverse order because pathTo generates it in that order, so
+        // iterating reverse gives the regular order.
         string pathMessage;
-        for (int i = 0; i < path.size(); i++) {
+        for (int i = path.size() - 1; i >= 0; i--) {
             auto name = gs.packageDB().getPackageInfo(path[i]).show(gs);
-            bool showArrow = i < path.size() - 1;
+            bool showArrow = i > 0;
             pathMessage += core::ErrorColors::format("    `{}`{}\n", name, showArrow ? " →" : "");
         }
         return pathMessage;
@@ -641,7 +643,9 @@ public:
                     curr = prev[curr];
                     path.push_back(curr);
                 }
-                reverse(path.begin(), path.end());
+                // Note: here, path will be in reverse order (ie. from dest -> src), and then renderPath iterates it in
+                // reverse, to get the correct order. If you plan to use path directly, make sure to reverse it (and
+                // then upate renderPath to iterate normally).
                 return renderPath(gs, path);
             }
 
