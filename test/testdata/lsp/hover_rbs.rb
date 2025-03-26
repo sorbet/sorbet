@@ -90,3 +90,33 @@ def hover_block_params_1(&block); T.unsafe(nil); end
 #  ^ hover: T.class_of(String)
 #       ^ hover: T.class_of(String)
 attr_reader :hover_attr_sig1
+
+# Annotations hover
+
+# @final
+# ^ hover: null
+#  ^ hover: Symbol(:final)
+#      ^ hover: Symbol(:final)
+#: -> void
+def hover_annot_1; end
+
+# @final
+# ^ hover: null
+#  ^ hover: Symbol(:final)
+#      ^ hover: Symbol(:final)
+#: -> void
+def hover_annot_1; end
+
+# @overridable
+# ^ hover: null
+#  ^ hover: # T::Private::Methods::DeclBuilder#overridable:
+#            ^ hover: # T::Private::Methods::DeclBuilder#overridable:
+#: -> void
+def hover_annot_2; end
+
+# @final
+# ^ hover: null
+#  ^ hover: Symbol(:final)
+#      ^ hover: Symbol(:final)
+#: Integer
+attr_reader :hover_attr_annot_1

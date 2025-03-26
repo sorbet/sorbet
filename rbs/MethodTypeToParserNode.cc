@@ -275,10 +275,9 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
     auto t_sig_withoutRuntime = parser::MK::Const(typeLoc, move(t_sig), core::Names::Constants::WithoutRuntime());
     sigArgs.emplace_back(move(t_sig_withoutRuntime));
 
-    bool isFinal = absl::c_any_of(annotations, [](const Comment &annotation) { return annotation.string == "final"; });
-
-    if (isFinal) {
-        sigArgs.emplace_back(parser::MK::Symbol(methodTypeLoc, core::Names::final_()));
+    auto final = absl::c_find_if(annotations, [](const Comment &annotation) { return annotation.string == "final"; });
+    if (final != annotations.end()) {
+        sigArgs.emplace_back(parser::MK::Symbol(final->typeLoc, core::Names::final_()));
     }
 
     auto sig =
@@ -341,6 +340,11 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
     auto t_sig = parser::MK::Const(typeLoc, move(t), core::Names::Constants::Sig());
     auto t_sig_withoutRuntime = parser::MK::Const(typeLoc, move(t_sig), core::Names::Constants::WithoutRuntime());
     sigArgs.emplace_back(move(t_sig_withoutRuntime));
+
+    auto final = absl::c_find_if(annotations, [](const Comment &annotation) { return annotation.string == "final"; });
+    if (final != annotations.end()) {
+        sigArgs.emplace_back(parser::MK::Symbol(final->typeLoc, core::Names::final_()));
+    }
 
     auto sig =
         parser::MK::Send(typeLoc, parser::MK::SorbetPrivateStatic(typeLoc), core::Names::sig(), typeLoc, move(sigArgs));
