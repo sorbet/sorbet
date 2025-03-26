@@ -154,6 +154,13 @@ A short list of useful LSP-related command line flags:
   diagnostics it sends to clients at 1,000 diagnostics, but this can be changed
   (set it to `0` to remove the cap).
 
+- `--cache=dir=...`
+
+  When an edit causes Sorbet to retypecheck the whole workspace, supplying a
+  cache directory will allow it to avoid reindexing files that haven't
+  changed. This will improve performance, shortening the duration of that slow
+  path operation.
+
 For all Sorbet flags, be sure to check `srb tc --help`.
 
 ## Instructions for specific language clients
