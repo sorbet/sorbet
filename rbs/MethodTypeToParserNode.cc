@@ -92,7 +92,16 @@ void collectArgs(core::LocOffsets docLoc, rbs_node_list_t *field, vector<RBSArg>
                 "Unexpected node type `{}` in function parameter list, expected `{}`",
                 rbs_node_type_name(list_node->node), "FunctionParam");
 
-        auto loc = locFromRange(docLoc, list_node->node->location->rg);
+        auto range = list_node->node->location->rg;
+
+        // If the arg is named, we need to adjust the location to point to the name
+        auto nameRange = list_node->node->location->children->entries[0].rg;
+        if (nameRange.start != -1 && nameRange.end != -1) {
+            range.start.char_pos = nameRange.start;
+            range.end.char_pos = nameRange.end;
+        }
+
+        auto loc = locFromRange(docLoc, range);
         auto node = (rbs_types_function_param_t *)list_node->node;
         auto arg = RBSArg{loc, node->name, node->type};
         args.emplace_back(arg);
@@ -211,16 +220,16 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
     auto methodArgs = getMethodArgs(methodDef);
     for (int i = 0; i < args.size(); i++) {
         auto &arg = args[i];
-        core::NameRef name;
-        auto nameSymbol = arg.name;
+        auto type = typeToParserNode.toParserNode(arg.type, typeLoc);
 
-        if (nameSymbol) {
+        if (auto nameSymbol = arg.name) {
             // The RBS arg is named in the signature, so we use the explicit name used
             auto nameStr = parser.resolveConstant(nameSymbol);
-            name = ctx.state.enterNameUTF8(nameStr);
+            auto name = ctx.state.enterNameUTF8(nameStr);
+            sigParams.emplace_back(make_unique<parser::Pair>(arg.loc, parser::MK::Symbol(arg.loc, name), move(type)));
         } else {
             if (!methodArgs || i >= methodArgs->args.size()) {
-                if (auto e = ctx.beginError(methodTypeLoc, core::errors::Rewriter::RBSParameterMismatch)) {
+                if (auto e = ctx.beginError(typeLoc, core::errors::Rewriter::RBSParameterMismatch)) {
                     e.setHeader("RBS signature has more parameters than in the method definition");
                 }
 
@@ -228,12 +237,11 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
             }
 
             // The RBS arg is not named in the signature, so we get it from the method definition
-            name = nodeName(methodArgs->args[i].get());
+            auto methodArg = methodArgs->args[i].get();
+            auto name = nodeName(methodArg);
+            sigParams.emplace_back(
+                make_unique<parser::Pair>(arg.loc, parser::MK::Symbol(methodArg->loc, name), move(type)));
         }
-
-        auto type = typeToParserNode.toParserNode(arg.type, methodTypeLoc);
-        auto pair = make_unique<parser::Pair>(arg.loc, parser::MK::Symbol(arg.loc, name), move(type));
-        sigParams.emplace_back(move(pair));
     }
 
     // Build the sig
