@@ -1372,6 +1372,13 @@ void readOptions(Options &opts,
             }
         }
 
+        if (opts.print.RBSRewriteTree.enabled &&
+            (!opts.cacheSensitiveOptions.rbsSignaturesEnabled && !opts.cacheSensitiveOptions.rbsAssertionsEnabled)) {
+            logger->error("--print=rbs-rewrite-tree must also include `{}` or `{}`", "--rbs-signatures-enabled",
+                          "--rbs-assertions-enabled");
+            throw EarlyReturnWithCode(1);
+        }
+
         // Allow semanticExtensionProviders to print something when --version is given before we throw.
         if (raw["version"].as<bool>()) {
             fmt::print("Sorbet typechecker {}\n", sorbet_full_version_string);

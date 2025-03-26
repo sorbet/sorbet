@@ -1,0 +1,93 @@
+No errors! Great job.
+Begin {
+  stmts = [
+    Send {
+      receiver = NULL
+      method = <U extend>
+      args = [
+        Const {
+          scope = Const {
+            scope = NULL
+            name = <C <U T>>
+          }
+          name = <C <U Sig>>
+        }
+      ]
+    }
+    Block {
+      send = Send {
+        receiver = Const {
+          scope = Const {
+            scope = Const {
+              scope = Cbase {
+              }
+              name = <C <U Sorbet>>
+            }
+            name = <C <U Private>>
+          }
+          name = <C <U Static>>
+        }
+        method = <U sig>
+        args = [
+          Const {
+            scope = Const {
+              scope = Const {
+                scope = Cbase {
+                }
+                name = <C <U T>>
+              }
+              name = <C <U Sig>>
+            }
+            name = <C <U WithoutRuntime>>
+          }
+        ]
+      }
+      args = NULL
+      body = Send {
+        receiver = Self {
+        }
+        method = <U returns>
+        args = [
+          Const {
+            scope = NULL
+            name = <C <U String>>
+          }
+        ]
+      }
+    }
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = Assign {
+        lhs = LVarLhs {
+          name = <U x>
+        }
+        rhs = Send {
+          receiver = Const {
+            scope = Cbase {
+            }
+            name = <C <U T>>
+          }
+          method = <U let>
+          args = [
+            Send {
+              receiver = Const {
+                scope = NULL
+                name = <C <U ARGV>>
+              }
+              method = <U first>
+              args = [
+              ]
+            }
+            Const {
+              scope = NULL
+              name = <C <U String>>
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+--------------------------------------------------------------------------
+--print=rbs-rewrite-tree must also include `--rbs-signatures-enabled` or `--rbs-assertions-enabled`

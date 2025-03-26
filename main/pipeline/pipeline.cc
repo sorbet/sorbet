@@ -243,9 +243,10 @@ unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file
             auto rewriter = rbs::AssertionsRewriter(ctx);
             node = rewriter.run(move(node));
         }
-    }
-    if (print.RBSRewriteTree.enabled) {
-        print.ParseTree.fmt("{}\n", node->toStringWithTabs(gs, 0));
+
+        if (print.RBSRewriteTree.enabled) {
+            print.RBSRewriteTree.fmt("{}\n", node->toStringWithTabs(gs, 0));
+        }
     }
     return node;
 }
