@@ -179,6 +179,15 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     ENFORCE(updates.typecheckingPath == TypecheckingPath::Fast);
 
     Timer timeit(config->logger, "fast_path");
+
+    auto shouldRunIncrementalNamer = updates.fastPathUseIncrementalNamer;
+    if (shouldRunIncrementalNamer) {
+        timeit.setTag("path_chosen", "fast+incremental");
+    } else {
+        ENFORCE(updates.fastPathExtraFiles.empty());
+        timeit.setTag("path_chosen", "fast");
+    }
+
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
 
@@ -192,7 +201,6 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 
     config->logger->debug("Added {} files that were not part of the edit to the update set", toTypecheck.size());
     UnorderedMap<core::FileRef, core::FoundDefHashes> oldFoundHashesForFiles;
-    auto shouldRunIncrementalNamer = updates.fastPathUseIncrementalNamer;
     for (auto &file : updates.updatedFiles) {
         auto fref = gs->findFileByPath(file->path());
         ENFORCE(fref.exists(), "New files are not supported in the fast path");
