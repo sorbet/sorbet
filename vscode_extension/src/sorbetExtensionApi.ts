@@ -36,24 +36,24 @@ const enum Status {
  *  2. NEVER expose internal types directly.
  */
 export interface SorbetExtensionApi {
-  status?(): Status | undefined;
+  status?: Status;
   readonly onStatusChanged?: Event<Status>;
 }
 
 export class SorbetExtensionApiImpl implements Disposable {
   private readonly disposables: Disposable[];
   private readonly onStatusChangedEmitter: EventEmitter<Status>;
-  public status?: Status;
+  private status?: Status;
 
   constructor({ statusProvider }: SorbetExtensionContext) {
     this.onStatusChangedEmitter = new EventEmitter();
     this.status = this.mapStatus(statusProvider.serverStatus);
+
     this.disposables = [
       this.onStatusChangedEmitter,
       statusProvider.onStatusChanged((e) => {
         const mappedStatus = this.mapStatus(e.status);
-        if (mappedStatus && this.status !== mappedStatus) {
-          this.status = mappedStatus;
+        if (mappedStatus  && this.status !== mappedStatus) {
           this.onStatusChangedEmitter.fire(mappedStatus);
         }
       }),
@@ -84,10 +84,10 @@ export class SorbetExtensionApiImpl implements Disposable {
    * Public API.
    */
   public toApi(): SorbetExtensionApi {
-    // This should be used instead of returning `this` because that would expose
-    // the internal implementations, e.g. `onStatusChangedEmitter`.
+    // API returned to other extensions should be specific not use `this` as
+    // that would expose internal implementation, e.g. `onStatusChangedEmitter`.
     return {
-      status: () => this.status,
+      status: this.status,
       onStatusChanged: this.onStatusChangedEmitter.event,
     };
   }

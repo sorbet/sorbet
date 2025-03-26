@@ -42,15 +42,15 @@ VS Code extension development.
 
 ## Sorbet Extension API
 
-From 0.3.41, Sorbet exports a public API. Check VS Code's `getExtension` API. To ensure backward and forward compatibility,
-all properties should be treated as are nullable.
+Starting from version 0.3.41, Sorbet exports a public API. You can access it using VS Code's `getExtension` API. To ensure backward and forward compatibility, all properties are nullable.
 
- - `status()`: Sorbet status, or `undefined`.
- - `onStatusChanged`: event raised whenever status changes.
+- `status`: Represents the Sorbet status, or `undefined` if the state is unknown.
+- `onStatusChanged`: An event triggered whenever the status changes.
 
 ### Available Status Values
-These are string values:
-  - `disabled`: Sorbet Language Server has been disabled.
-  - `error`:  Sorbet Language Server encountered an error. This state does not correlate to code typing errors.
-  - `running`: Sorbet Language Server is running.
-  - `start`: Sorbet Language Server is being started. The event might repeat in case of error.
+The following are string values:
+
+- `disabled`: Indicates that the Sorbet Language Server has been disabled.
+- `error`: Indicates that the Sorbet Language Server encountered an error. This status does not correlate to code typing errors.
+- `running`: Indicates that the Sorbet Language Server is running.
+- `start`: Indicates that the Sorbet Language Server is starting. This status may repeat in case of an error.
