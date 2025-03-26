@@ -229,7 +229,7 @@ unique_ptr<parser::Node> SigsRewriter::rewriteBody(unique_ptr<parser::Node> node
         return node;
     }
 
-    if (auto begin = parser::cast_node<parser::Begin>(node.get())) {
+    if (parser::isa_node<parser::Begin>(node.get())) {
         return rewriteBegin(move(node));
     }
 
