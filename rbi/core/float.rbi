@@ -1045,11 +1045,12 @@ class Float < Numeric
   sig {returns(Integer)}
   sig do
     params(
-        arg0: Numeric,
+      ndigits: Numeric,
+      half: T.nilable(Symbol)
     )
     .returns(T.any(Integer, Float))
   end
-  def round(arg0=T.unsafe(nil)); end
+  def round(ndigits = 0, half: :up); end
 
   sig {returns(Complex)}
   def to_c(); end
