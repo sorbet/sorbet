@@ -91,7 +91,7 @@ public:
     std::string_view getLine(int i) const;
 
     void setFileHash(std::unique_ptr<const FileHash> hash);
-    const std::shared_ptr<const FileHash> &getFileHash() const;
+    const FileHash *getFileHash() const;
 
     static constexpr std::string_view URL_PREFIX = "https://github.com/sorbet/sorbet/tree/master/";
     static std::string censorFilePathForSnapshotTests(std::string_view orig);

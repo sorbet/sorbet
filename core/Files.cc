@@ -137,8 +137,8 @@ void File::setFileHash(unique_ptr<const FileHash> hash) {
     }
 }
 
-const shared_ptr<const FileHash> &File::getFileHash() const {
-    return hash_;
+const FileHash *File::getFileHash() const {
+    return hash_.get();
 }
 
 FileRef::FileRef(unsigned int id) : _id(id) {}
