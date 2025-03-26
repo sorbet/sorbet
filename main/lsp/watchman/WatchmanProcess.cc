@@ -1,5 +1,6 @@
 #include "WatchmanProcess.h"
 #include "common/FileOps.h"
+#include "common/Subprocess.h"
 #include "common/common.h"
 #include "common/strings/formatting.h"
 #include "main/lsp/LSPConfiguration.h"
@@ -38,73 +39,139 @@ template <typename F> void catchDeserializationError(spdlog::logger &logger, con
         logger.error("Unable to deserialize Watchman request: {}\nOriginal request:\n{}", e.what(), line);
     }
 }
+
 } // namespace
+
+optional<WatchmanProcess::ReadResponse> WatchmanProcess::readResponse(FILE *file, int fd, string &buffer) {
+    errno = 0;
+    auto maybeLine = FileOps::readLineFromFd(fd, buffer);
+    if (maybeLine.result == FileOps::ReadResult::Timeout) {
+        // Timeout occurred. See if we should abort before reading further.
+        return nullopt;
+    }
+
+    if (maybeLine.result == FileOps::ReadResult::ErrorOrEof) {
+        if (errno == EINTR) {
+            return nullopt;
+        }
+
+        // Exit loop; unable to read from Watchman process.
+        exitWithCode(1, nullopt);
+        return nullopt;
+    }
+
+    ENFORCE(maybeLine.result == FileOps::ReadResult::Success);
+
+    if (!maybeLine.output.has_value()) {
+        return nullopt;
+    }
+
+    auto line = move(maybeLine.output.value());
+    rapidjson::MemoryPoolAllocator<> alloc;
+    rapidjson::Document d(&alloc);
+    logger->debug(line);
+    if (d.Parse(line.c_str(), line.size()).HasParseError()) {
+        logger->error("Error parsing Watchman response: `{}` is not a valid json object", line);
+        return nullopt;
+    }
+
+    return make_optional<ReadResponse>(move(line), move(d));
+}
 
 void WatchmanProcess::start() {
     auto mainPid = getpid();
     try {
-        string subscriptionName = fmt::format("ruby-typer-{}", getpid());
+        string subscriptionName = fmt::format("sorbet-{}", getpid());
 
         logger->debug("Starting monitoring path {} with watchman for files with extensions {}. Subscription id: {}",
                       workSpace, fmt::join(extensions, ","), subscriptionName);
 
+        auto watchProjectResult = Subprocess::spawn(watchmanPath, {"--no-pretty", "watch-project", workSpace}, nullopt);
+        if (watchProjectResult.has_value()) {
+            logger->debug(watchProjectResult->output);
+        }
+
+        if (!watchProjectResult.has_value() || watchProjectResult->status != 0) {
+            auto msg = fmt::format(
+                "Error running Watchman (with `{} --no-pretty watch-project {}`).\n"
+                "Watchman is required for Sorbet to detect changes to files made outside of your code editor.\n"
+                "Don't need Watchman? Run Sorbet with `--disable-watchman`.",
+                watchmanPath, workSpace);
+            logger->error(msg);
+            exitWithCode(1, msg);
+            return;
+        }
+
+        rapidjson::MemoryPoolAllocator<> alloc;
+        rapidjson::Document d(&alloc);
+        if (d.Parse(watchProjectResult->output.c_str(), watchProjectResult->output.size()).HasParseError()) {
+            auto msg = fmt::format("Error parsing Watchman response: `{}` is not a valid json object",
+                                   watchProjectResult->output);
+            logger->error(msg);
+            exitWithCode(1, msg);
+            return;
+        }
+
+        string watchRoot;
+        catchDeserializationError(*logger, watchProjectResult->output, [&d, &watchRoot /*, this*/]() {
+            auto queryResponse = sorbet::realmain::lsp::WatchmanWatchProjectResponse::fromJSONValue(d);
+            watchRoot = std::move(queryResponse->watch);
+        });
+
         auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "-p", "--no-pretty"},
                                    subprocess::output{subprocess::PIPE}, subprocess::input{subprocess::PIPE});
-
-        // Note: Newer versions of Watchman (post 4.9.0) support ["suffix", ["suffix1", "suffix2", ...]], but Stripe
-        // laptops have 4.9.0. Thus, we use [ "anyof", [ "suffix", "suffix1" ], [ "suffix", "suffix2" ], ... ].
-        // Note 2: `empty_on_fresh_instance` prevents Watchman from sending entire contents of folder if this
-        // subscription starts the daemon / causes the daemon to watch this folder for the first time.
-        string subscribeCommand = fmt::format(
-            "[\"subscribe\", \"{}\", \"{}\", {{"
-            "\"expression\": [\"allof\", "
-            "[\"type\", \"f\"], "
-            "[\"anyof\", {}], "
-            // Exclude rsync tmpfiles
-            "[\"not\", [\"match\", \"**/.~tmp~/**\", \"wholename\", {{\"includedotfiles\": true}}]]"
-            "], "
-            "\"fields\": [\"name\"], "
-            "\"empty_on_fresh_instance\": true"
-            "}}]",
-            workSpace, subscriptionName, fmt::map_join(extensions, ", ", [](const std::string &ext) -> string {
-                return fmt::format("[\"suffix\", \"{}\"]", ext);
-            }));
-        p.send(subscribeCommand.c_str(), subscribeCommand.size());
-        logger->debug(subscribeCommand);
 
         auto file = p.output();
         auto fd = fileno(file);
 
         string buffer;
 
+        // Note: Newer versions of Watchman (post 4.9.0) support ["suffix", ["suffix1", "suffix2", ...]], but Stripe
+        // laptops have 4.9.0. Thus, we use [ "anyof", [ "suffix", "suffix1" ], [ "suffix", "suffix2" ], ... ].
+        // Note 2: `empty_on_fresh_instance` prevents Watchman from sending entire contents of folder if this
+        // subscription starts the daemon / causes the daemon to watch this folder for the first time.
+        string subscribeCommand = fmt::format(
+            "["
+            /**/ "\"subscribe\", "
+            /**/ "\"{}\", "
+            /**/ "\"{}\", "
+            /**/ "{{"
+            /*    */ "\"expression\": ["
+            /*        */ "\"allof\", "
+            /*        */ "[\"type\", \"f\"], "
+            /*        */ "[\"anyof\", {}], "
+            /*        */ // Exclude rsync tmpfiles
+            /*        */ "[\"not\", [\"match\", \"**/.~tmp~/**\", \"wholename\", {{\"includedotfiles\": true}}]]"
+            /*    */ "], "
+            /*    */ "\"fields\": [\"name\"], "
+            /*    */ "\"empty_on_fresh_instance\": true"
+            /**/ "}}"
+            "]",
+            workSpace, subscriptionName, fmt::map_join(extensions, ", ", [](const std::string &ext) -> string {
+                return fmt::format("[\"suffix\", \"{}\"]", ext);
+            }));
+        p.send(subscribeCommand.c_str(), subscribeCommand.size());
+        logger->debug(subscribeCommand);
+
+        if (auto res = readResponse(file, fd, buffer)) {
+            if (!res->d.HasMember("subscribe")) {
+                // Something we don't understand yet.
+                logger->debug("Unknown Watchman response:\n{}", res->line);
+            }
+        }
+
         while (!isStopped()) {
-            errno = 0;
-            auto maybeLine = FileOps::readLineFromFd(fd, buffer);
-            if (maybeLine.result == FileOps::ReadResult::Timeout) {
-                // Timeout occurred. See if we should abort before reading further.
+            ReadResponse res;
+            if (auto maybeRes = readResponse(file, fd, buffer)) {
+                res = move(maybeRes.value());
+            } else {
                 continue;
             }
 
-            if (maybeLine.result == FileOps::ReadResult::ErrorOrEof) {
-                if (errno == EINTR) {
-                    continue;
-                }
+            auto line = move(res.line);
+            auto d = move(res.d);
 
-                // Exit loop; unable to read from Watchman process.
-                exitWithCode(1, nullopt);
-                break;
-            }
-
-            ENFORCE(maybeLine.result == FileOps::ReadResult::Success);
-
-            const string &line = *maybeLine.output;
-            // Line found!
-            rapidjson::MemoryPoolAllocator<> alloc;
-            rapidjson::Document d(&alloc);
-            logger->debug(line);
-            if (d.Parse(line.c_str(), line.size()).HasParseError()) {
-                logger->error("Error parsing Watchman response: `{}` is not a valid json object", line);
-            } else if (d.HasMember("is_fresh_instance")) {
+            if (d.HasMember("is_fresh_instance")) {
                 catchDeserializationError(*logger, line, [&d, this]() {
                     auto queryResponse = sorbet::realmain::lsp::WatchmanQueryResponse::fromJSONValue(d);
                     processQueryResponse(move(queryResponse));
@@ -125,7 +192,7 @@ void WatchmanProcess::start() {
                     auto stateLeave = sorbet::realmain::lsp::WatchmanStateLeave::fromJSONValue(d);
                     processStateLeave(move(stateLeave));
                 });
-            } else if (!d.HasMember("subscribe")) {
+            } else {
                 // Something we don't understand yet.
                 logger->debug("Unknown Watchman response:\n{}", line);
             }
