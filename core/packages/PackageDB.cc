@@ -91,6 +91,11 @@ public:
         return nullopt;
     }
 
+    optional<int> sccID() const {
+        notImplemented();
+        return nullopt;
+    }
+
     bool causesLayeringViolation(const core::packages::PackageDB &packageDB, const PackageInfo &otherPkg) const {
         notImplemented();
         return false;
@@ -101,9 +106,9 @@ public:
         return core::packages::StrictDependenciesLevel::False;
     }
 
-    bool importsTransitively(const core::GlobalState &gs, const core::packages::MangledName &otherPkg) const {
+    std::optional<std::string> pathTo(const core::GlobalState &gs, const MangledName dest) const {
         notImplemented();
-        return false;
+        return nullopt;
     }
 
     std::optional<ImportType> importsPackage(MangledName mangledName) const {

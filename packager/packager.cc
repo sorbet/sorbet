@@ -18,6 +18,7 @@
 #include "rapidjson/writer.h"
 #include <algorithm>
 #include <cctype>
+#include <queue>
 #include <sstream>
 #include <sys/stat.h>
 
@@ -239,7 +240,11 @@ public:
     }
 
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
-    optional<int> sccID = nullopt;
+    optional<int> sccID_ = nullopt;
+
+    optional<int> sccID() const {
+        return sccID_;
+    }
 
     // PackageInfoImpl is the only implementation of PackageInfo
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
@@ -598,35 +603,68 @@ public:
         }
     }
 
-    bool importsTransitively(const core::GlobalState &gs, const core::packages::MangledName &otherPkg) const {
-        UnorderedSet<core::packages::MangledName> seen;
-        vector<core::packages::MangledName> toVisit;
-        toVisit.push_back(mangledName());
+    string renderPath(const core::GlobalState &gs, const vector<core::packages::MangledName> &path) const {
+        // TODO(neil): if the cycle has a large number of nodes (10?), show partial path (first 5, ... (n omitted), last
+        // 5) to prevent error being too long
+        // Note: This function iterates through path in reverse order because pathTo generates it in that order, so
+        // iterating reverse gives the regular order.
+        string pathMessage;
+        for (int i = path.size() - 1; i >= 0; i--) {
+            auto name = gs.packageDB().getPackageInfo(path[i]).show(gs);
+            bool showArrow = i > 0;
+            pathMessage += core::ErrorColors::format("    `{}`{}\n", name, showArrow ? " →" : "");
+        }
+        return pathMessage;
+    }
 
+    optional<string> pathTo(const core::GlobalState &gs, const core::packages::MangledName dest) const {
+        // Note: This implements BFS.
+        auto src = mangledName();
+        queue<core::packages::MangledName> toVisit;
+        // Maps from package to what package we came from to get to that package, used to construct the path
+        // Ex. A -> B -> C means that prev[C] = B and prev[B] = A
+        UnorderedMap<core::packages::MangledName, core::packages::MangledName> prev;
+        UnorderedSet<core::packages::MangledName> visited;
+
+        toVisit.push(src);
         while (!toVisit.empty()) {
-            auto current = toVisit.back();
-            toVisit.pop_back();
-            if (seen.contains(current)) {
+            auto curr = toVisit.front();
+            toVisit.pop();
+            auto [_it, inserted] = visited.emplace(curr);
+            if (!inserted) {
                 continue;
             }
-            seen.insert(current);
 
-            if (current == otherPkg) {
-                return true;
+            if (curr == dest) {
+                // Found the target node, walk backward through the prev map to construct the path
+                vector<core::packages::MangledName> path;
+                path.push_back(curr);
+                while (curr != src) {
+                    curr = prev[curr];
+                    path.push_back(curr);
+                }
+                // Note: here, path will be in reverse order (ie. from dest -> src), and then renderPath iterates it in
+                // reverse, to get the correct order. If you plan to use path directly, make sure to reverse it (and
+                // then upate renderPath to iterate normally).
+                return renderPath(gs, path);
             }
 
-            auto &info = PackageInfoImpl::from(gs.packageDB().getPackageInfo(current));
-
-            for (auto &import : info.importedPackageNames) {
-                if (import.type == core::packages::ImportType::Test ||
-                    !gs.packageDB().getPackageInfo(import.name.mangledName).exists()) {
+            auto &currInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfo(curr));
+            for (auto &import : currInfo.importedPackageNames) {
+                auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
+                if (!importInfo.exists() || import.type == core::packages::ImportType::Test ||
+                    visited.contains(import.name.mangledName)) {
                     continue;
                 }
-
-                toVisit.push_back(import.name.mangledName);
+                if (!prev.contains(import.name.mangledName)) {
+                    prev[import.name.mangledName] = curr;
+                }
+                toVisit.push(import.name.mangledName);
             }
         }
-        return false;
+
+        // No path found
+        return nullopt;
     }
 };
 
@@ -1841,7 +1879,7 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
             metadata.nodeMap[poppedPkgName].onStack = false;
             PackageInfoImpl &poppedPkgInfo =
                 PackageInfoImpl::from(*(gs.packageDB().getPackageInfoNonConst(poppedPkgName)));
-            poppedPkgInfo.sccID = metadata.nextSCCId;
+            poppedPkgInfo.sccID_ = metadata.nextSCCId;
         } while (poppedPkgName != pkgName);
         metadata.nextSCCId++;
     }
@@ -1874,8 +1912,8 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     ENFORCE(packageDB.getPackageForFile(ctx, ctx.file).exists())
     auto &thisPkg = PackageInfoImpl::from(packageDB.getPackageForFile(ctx, ctx.file));
     auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name.mangledName));
-    ENFORCE(thisPkg.sccID.has_value(), "computeSCCs should already have been called and set sccID");
-    ENFORCE(otherPkg.sccID.has_value(), "computeSCCs should already have been called and set sccID");
+    ENFORCE(thisPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
+    ENFORCE(otherPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
 
     if (!thisPkg.strictDependenciesLevel().has_value() || !otherPkg.strictDependenciesLevel().has_value() ||
         !thisPkg.layer().has_value() || !otherPkg.layer().has_value()) {
@@ -1897,8 +1935,8 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                            thisPkg.show(ctx), "layer");
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.layer().value().second), "`{}`'s `{}` declared here",
                            otherPkg.show(ctx), "layer");
-            // TODO: if the import is unused (ie. there are no references in this package to the imported package),
-            // autocorrect to delete import
+            // TODO(neil): if the import is unused (ie. there are no references in this package to the imported
+            // package), autocorrect to delete import
         }
     }
 
@@ -1910,15 +1948,15 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                         "import", core::packages::strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel().value().second),
                            "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
-            // TODO: if the import is unused (ie. there are no references in this package to the imported package),
-            // autocorrect to delete import
-            // TODO: if the imported package can be trivially upgraded to the required level (ex. it's at 'false' but
-            // has no layering violations), autocorrect to do so
+            // TODO(neil): if the import is unused (ie. there are no references in this package to the imported
+            // package), autocorrect to delete import
+            // TODO(neil): if the imported package can be trivially upgraded to the required level (ex. it's at 'false'
+            // but has no layering violations), autocorrect to do so
         }
     }
 
     if (thisPkg.strictDependenciesLevel().value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
-        if (thisPkg.sccID == otherPkg.sccID) {
+        if (thisPkg.sccID() == otherPkg.sccID()) {
             if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
                 auto level = fmt::format(
                     "strict_dependencies '{}'",
@@ -1926,9 +1964,13 @@ void validateLayering(const core::Context &ctx, const Import &i) {
                 e.setHeader("Strict dependencies violation: importing `{}` will put `{}` into a cycle, which is not "
                             "valid at `{}`",
                             otherPkg.show(ctx), thisPkg.show(ctx), level);
+                auto path = otherPkg.pathTo(ctx, thisPkg.mangledName());
+                ENFORCE(path.has_value(),
+                        "Path from otherPkg to thisPkg should always exist if they are in the same SCC");
+                e.addErrorNote("Path from `{}` to `{}`:\n{}", otherPkg.show(ctx), thisPkg.show(ctx), path.value());
             }
-            // TODO: if the import is unused (ie. there are no references in this package to the imported package),
-            // autocorrect to delete import
+            // TODO(neil): if the import is unused (ie. there are no references in this package to the imported
+            // package), autocorrect to delete import
         }
     }
 }

@@ -247,6 +247,11 @@ use_cycle_package/foo.rb:6: `Foo::Bar::CyclePackage::OtherClass` resolves but it
     use_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::CyclePackage` to `Foo::MyPackage`:
+    `Foo::Bar::CyclePackage` →
+    `Foo::MyPackage`
+
 
 use_cycle_package/foo.rb:7: Used `test_import` constant `Foo::Bar::CyclePackageTest::OtherClass` in non-test file. However, it cannot be automatically imported because importing it would put `Foo::MyPackage` into a cycle https://srb.help/3718
      7 |      Foo::Bar::CyclePackageTest::OtherClass # resolves via root
@@ -254,6 +259,11 @@ use_cycle_package/foo.rb:7: Used `test_import` constant `Foo::Bar::CyclePackageT
     use_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::CyclePackageTest` to `Foo::MyPackage`:
+    `Foo::Bar::CyclePackageTest` →
+    `Foo::MyPackage`
+
 
 use_cycle_package/foo.rb:13: `Test::Foo::Bar::CyclePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
     13 |  Test::Foo::Bar::CyclePackage::TestUtil
@@ -289,6 +299,11 @@ use_app_cycle_package/foo.rb:6: `Foo::Bar::AppCyclePackage::OtherClass` resolves
     use_app_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::AppCyclePackage` to `Foo::MyPackage`:
+    `Foo::Bar::AppCyclePackage` →
+    `Foo::MyPackage`
+
     app_cycle_package/__package.rb:6: Package `Foo::Bar::AppCyclePackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
      6 |  layer 'app'
                 ^^^^^
@@ -299,6 +314,11 @@ use_app_cycle_package/foo.rb:7: Used `test_import` constant `Foo::Bar::AppCycleP
     use_app_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::AppCyclePackageTest` to `Foo::MyPackage`:
+    `Foo::Bar::AppCyclePackageTest` →
+    `Foo::MyPackage`
+
     app_cycle_package_test/__package.rb:6: Package `Foo::Bar::AppCyclePackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
      6 |  layer 'app'
                 ^^^^^
@@ -337,6 +357,11 @@ use_false_cycle_package/foo.rb:6: `Foo::Bar::FalseCyclePackage::OtherClass` reso
     use_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::FalseCyclePackage` to `Foo::MyPackage`:
+    `Foo::Bar::FalseCyclePackage` →
+    `Foo::MyPackage`
+
     false_cycle_package/__package.rb:7: `Foo::Bar::FalseCyclePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
      7 |  strict_dependencies 'false'
                               ^^^^^^^
@@ -347,6 +372,11 @@ use_false_cycle_package/foo.rb:7: Used `test_import` constant `Foo::Bar::FalseCy
     use_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::FalseCyclePackageTest` to `Foo::MyPackage`:
+    `Foo::Bar::FalseCyclePackageTest` →
+    `Foo::MyPackage`
+
     false_cycle_package_test/__package.rb:7: `Foo::Bar::FalseCyclePackageTest` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
      7 |  strict_dependencies 'false'
                               ^^^^^^^
@@ -385,6 +415,11 @@ use_app_false_cycle_package/foo.rb:6: `Foo::Bar::AppFalseCyclePackage::OtherClas
     use_app_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::AppFalseCyclePackage` to `Foo::MyPackage`:
+    `Foo::Bar::AppFalseCyclePackage` →
+    `Foo::MyPackage`
+
     app_false_cycle_package/__package.rb:6: Package `Foo::Bar::AppFalseCyclePackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
      6 |  layer 'app'
                 ^^^^^
@@ -398,6 +433,11 @@ use_app_false_cycle_package/foo.rb:7: Used `test_import` constant `Foo::Bar::App
     use_app_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::AppFalseCyclePackageTest` to `Foo::MyPackage`:
+    `Foo::Bar::AppFalseCyclePackageTest` →
+    `Foo::MyPackage`
+
     app_false_cycle_package_test/__package.rb:6: Package `Foo::Bar::AppFalseCyclePackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
      6 |  layer 'app'
                 ^^^^^
