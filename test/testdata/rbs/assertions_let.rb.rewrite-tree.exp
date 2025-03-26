@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, ::T.untyped()))
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.returns(::<root>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, ::<root>::<C T>.untyped()))
   end
 
   def foo_params<<todo method>>(&<blk>)
@@ -23,11 +23,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <emptyTree>::<C T>.reveal_type(a)
 
-  b = <cast:let>(nil, <todo sym>, ::T.nilable(<emptyTree>::<C Integer>))
+  b = <cast:let>(nil, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
 
   <emptyTree>::<C T>.reveal_type(b)
 
-  c = <cast:let>(nil, <todo sym>, ::T.nilable(<emptyTree>::<C Integer>))
+  c = <cast:let>(nil, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
 
   <emptyTree>::<C T>.reveal_type(c)
 
@@ -38,12 +38,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   if e
     e
   else
-    e = <cast:let>("foo", <todo sym>, ::T.nilable(<emptyTree>::<C String>))
+    e = <cast:let>("foo", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
   end
 
   <emptyTree>::<C T>.reveal_type(e)
 
-  f = <cast:let>("", <todo sym>, ::T.nilable(<emptyTree>::<C String>))
+  f = <cast:let>("", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
 
   if f
     f = <cast:let>("foo", <todo sym>, <emptyTree>::<C Integer>)
@@ -54,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(f)
 
   begin
-    <assignTemp>$2 = <cast:let>(<emptyTree>::<C ARGV>, <todo sym>, <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
+    <assignTemp>$2 = <cast:let>(<emptyTree>::<C ARGV>, <todo sym>, ::<root>::<C T>::<C Array>.[](<emptyTree>::<C String>))
     <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 1, 0)
     g = <assignTemp>$3.[](0)
     h = <assignTemp>$3.to_ary()
@@ -71,7 +71,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   j = <cast:let>(42, <todo sym>, <emptyTree>::<C Integer>)
 
-  j = <cast:let>(j.+(42), <todo sym>, <emptyTree>::<C String>)
+  j = j.+(<cast:let>("", <todo sym>, <emptyTree>::<C String>))
 
   <emptyTree>::<C T>.reveal_type(j)
 
@@ -94,7 +94,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     else
       []
     end
-  end, <todo sym>, <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
+  end, <todo sym>, ::<root>::<C T>::<C Array>.[](<emptyTree>::<C String>))
 
   <emptyTree>::<C T>.reveal_type(@b)
 
@@ -105,7 +105,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     else
       <assignTemp>$5.strip()
     end
-  end, <todo sym>, ::T.nilable(<emptyTree>::<C String>))
+  end, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
 
   <emptyTree>::<C T>.reveal_type(@c)
 
@@ -118,7 +118,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type($a)
 
   class <emptyTree>::<C LetAccessor><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
@@ -126,7 +126,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @x
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
       <self>.params(:x, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 
@@ -134,8 +134,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @x = x
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:something, ::T.untyped()).void()
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+      <self>.params(:something, ::<root>::<C T>.untyped()).void()
     end
 
     def initialize<<todo method>>(something, &<blk>)
@@ -154,7 +154,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C DesugaredLetNilable><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
@@ -164,16 +164,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           @x
         else
           begin
-            @x = <cast:let>(@x, <todo sym>, ::T.nilable(<emptyTree>::<C Integer>))
-            <statTemp> = 42
-            @x = <statTemp>
+            @x = <cast:let>(@x, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+            <statTemp>$2 = 42
+            @x = <statTemp>$2
           end
         end
         <emptyTree>::<C T>.reveal_type(@x)
       end
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
       <self>.void()
     end
 
@@ -183,9 +183,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           @y
         else
           begin
-            @y = <cast:let>(@y, <todo sym>, ::T.nilable(<emptyTree>::<C Integer>))
-            <statTemp> = nil
-            @y = <statTemp>
+            @y = <cast:let>(@y, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+            <statTemp>$2 = nil
+            @y = <statTemp>$2
           end
         end
         if @y
@@ -197,7 +197,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
       <self>.void()
     end
 
@@ -216,17 +216,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C TypeParams><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.type_parameters(:A, :B, :C).params(:a, ::T.type_parameter(:A), :b, ::T.nilable(::T.type_parameter(:B)), :c, ::T.type_parameter(:C)).void()
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+      <self>.type_parameters(:A, :B, :C).params(:a, ::<root>::<C T>.type_parameter(:A), :b, ::<root>::<C T>.nilable(::<root>::<C T>.type_parameter(:B)), :c, ::<root>::<C T>.type_parameter(:C)).void()
     end
 
     def foo<<todo method>>(a, b, c, &<blk>)
       begin
-        x = <cast:let>(a, <todo sym>, ::T.type_parameter(:A))
+        x = <cast:let>(a, <todo sym>, ::<root>::<C T>.type_parameter(:A))
         <emptyTree>::<C T>.reveal_type(x)
-        y = <cast:let>([], <todo sym>, <emptyTree>::<C T>::<C Array>.[](::T.type_parameter(:B)))
+        y = <cast:let>([], <todo sym>, ::<root>::<C T>::<C Array>.[](::<root>::<C T>.type_parameter(:B)))
         <emptyTree>::<C T>.reveal_type(y)
-        z = <cast:let>(nil, <todo sym>, ::T.nilable(::T.type_parameter(:C)))
+        z = <cast:let>(nil, <todo sym>, ::<root>::<C T>.nilable(::<root>::<C T>.type_parameter(:C)))
         <emptyTree>::<C T>.reveal_type(z)
       end
     end
@@ -238,29 +238,29 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <emptyTree>::<C HEREDOC_STRING> = "<<~ #: Integer".strip()
 
-  <emptyTree>::<C HEREDOC1> = <cast:let>("foo\n", <todo sym>, ::T.nilable(<emptyTree>::<C String>))
+  <emptyTree>::<C HEREDOC1> = <cast:let>("foo\n", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC1>)
 
-  <emptyTree>::<C HEREDOC2> = <cast:let>(::<Magic>.<string-interpolate>(42, "\n").strip().strip(), <todo sym>, ::T.nilable(<emptyTree>::<C String>))
+  <emptyTree>::<C HEREDOC2> = <cast:let>(::<Magic>.<string-interpolate>(42, "\n").strip().strip(), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC2>)
 
-  <emptyTree>::<C HEREDOC3> = <cast:let>(<self>.String("foo\n".strip()), <todo sym>, ::T.nilable(<emptyTree>::<C String>))
+  <emptyTree>::<C HEREDOC3> = <cast:let>(<self>.String("foo\n".strip()), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC3>)
 
-  <emptyTree>::<C HEREDOC4> = <cast:let>("foo\nbar\nbaz\n", <todo sym>, ::T.nilable(<emptyTree>::<C String>))
+  <emptyTree>::<C HEREDOC4> = <cast:let>("foo\nbar\nbaz\n", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC4>)
 
   class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:x, ::T.untyped()).void()
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+      <self>.params(:x, ::<root>::<C T>.untyped()).void()
     end
 
     def initialize<<todo method>>(x, &<blk>)
-      @x = <cast:let>(x, <todo sym>, ::T.untyped())
+      @x = <cast:let>(x, <todo sym>, ::<root>::<C T>.untyped())
     end
 
     <runtime method definition of initialize>
@@ -271,5 +271,5 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   foo = <cast:let>(<emptyTree>::<C Foo>.new(begin
       <hashTemp>$6 = ::<Magic>.<to-hash-dup>(<self>.foo_params())
       <hashTemp>$6
-    end), <todo sym>, ::T.nilable(<emptyTree>::<C Foo>))
+    end), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Foo>))
 end

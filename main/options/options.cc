@@ -106,6 +106,7 @@ const vector<PrintOptions> print_options({
     {"parse-tree-json", &Printers::ParseTreeJson, false},
     {"parse-tree-json-with-locs", &Printers::ParseTreeJsonWithLocs, false},
     {"parse-tree-whitequark", &Printers::ParseTreeWhitequark, false},
+    {"rbs-rewrite-tree", &Printers::RBSRewriteTree, false},
     {"desugar-tree", &Printers::DesugarTree, false},
     {"desugar-tree-raw", &Printers::DesugarTreeRaw, false},
     {"rewrite-tree", &Printers::RewriterTree, false},
@@ -182,6 +183,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         ParseTreeJson,
         ParseTreeJsonWithLocs,
         ParseTreeWhitequark,
+        RBSRewriteTree,
         DesugarTree,
         DesugarTreeRaw,
         RewriterTree,
@@ -1368,6 +1370,13 @@ void readOptions(Options &opts,
             if (maybeExtension) {
                 configuredExtensions.emplace_back(move(maybeExtension));
             }
+        }
+
+        if (opts.print.RBSRewriteTree.enabled &&
+            (!opts.cacheSensitiveOptions.rbsSignaturesEnabled && !opts.cacheSensitiveOptions.rbsAssertionsEnabled)) {
+            logger->error("--print=rbs-rewrite-tree must also include `{}` or `{}`", "--rbs-signatures-enabled",
+                          "--rbs-assertions-enabled");
+            throw EarlyReturnWithCode(1);
         }
 
         // Allow semanticExtensionProviders to print something when --version is given before we throw.

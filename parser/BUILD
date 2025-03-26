@@ -10,6 +10,7 @@ cc_library(
         "Node_gen.h",
         "Parser.cc",
         "diagnostics.cc",
+        "helper.h",
         "parser.h",
     ],
     hdrs = [
