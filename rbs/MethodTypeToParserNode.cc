@@ -313,9 +313,16 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
         }
 
         // For attr writer, we need to add the param to the sig
-        auto name = nodeName(send->args[0].get());
+        auto argName = nodeName(send->args[0].get());
+
+        // The origin location points to the `:name` symbol, so we need to adjust it to point to the actual name
+        auto argLoc = core::LocOffsets{
+            send->args[0]->loc.beginPos() + 1,
+            send->args[0]->loc.endPos(),
+        };
+
         auto pairs = parser::NodeVec();
-        pairs.emplace_back(make_unique<parser::Pair>(send->args[0]->loc, parser::MK::Symbol(send->args[0]->loc, name),
+        pairs.emplace_back(make_unique<parser::Pair>(argLoc, parser::MK::Symbol(argLoc, argName),
                                                      typeTranslator.toParserNode(type, typeLoc)));
         auto hash = parser::MK::Hash(send->loc, true, move(pairs));
         auto sigArgs = parser::NodeVec();
