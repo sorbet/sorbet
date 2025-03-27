@@ -53,7 +53,7 @@ export class SorbetExtensionApiImpl implements Disposable {
       this.onStatusChangedEmitter,
       statusProvider.onStatusChanged((e) => {
         const mappedStatus = this.mapStatus(e.status);
-        if (mappedStatus  && this.status !== mappedStatus) {
+        if (mappedStatus && this.status !== mappedStatus) {
           this.onStatusChangedEmitter.fire(mappedStatus);
         }
       }),
