@@ -456,25 +456,31 @@ Shows the extension output window on errors. Defaults to `false`.
 
 ## Extension API
 
-Starting from version 0.3.41, the Sorbet extension exports a public API.
-To ensure backward and forward compatibility, all properties are nullable.
-- `status`: Represents the Sorbet status, or `undefined` if the state is unknown.
+Starting from version 0.3.41, the Sorbet extension exports a public API. To
+ensure backward and forward compatibility, all properties are nullable.
+
+- `status`: Represents Sorbet status, or `undefined` if the state is
+  unknown.
 - `onStatusChanged`: An event triggered whenever the status changes.
 
 You can access this API using VS Code's `getExtension` API, e.g.
 
 ```javascript
 // Example: get current status
-vscode.extensions.getExtension('sorbet.sorbet-vscode-extension')?.exports?.status
+vscode.extensions.getExtension('sorbet.sorbet-vscode-extension')?.exports
+  ?.status;
 ```
 
 ### Available Status Values
+
 The following are string values:
 
 - `disabled`: Indicates that the Sorbet Language Server has been disabled.
-- `error`: Indicates that the Sorbet Language Server encountered an error. This status does not correlate to code typing errors.
+- `error`: Indicates that the Sorbet Language Server encountered an error. This
+  status does not correlate to code typing errors.
 - `running`: Indicates that the Sorbet Language Server is running.
-- `start`: Indicates that the Sorbet Language Server is starting. This status may repeat in case of an error.
+- `start`: Indicates that the Sorbet Language Server is starting. This status
+  may repeat in case of an error.
 
 ## Troubleshooting and FAQ
 
