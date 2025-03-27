@@ -62,7 +62,7 @@ module Coverage
         stop: T::Boolean,
         clear: T::Boolean
     )
-    .returns(T::Hash[String, T::Array[T.nilable(Integer)]])
+    .returns(T::Hash[String, T.untyped])
   end
   def self.result(stop: T.unsafe(nil), clear: T.unsafe(nil)); end
 
