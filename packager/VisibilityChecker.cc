@@ -399,6 +399,14 @@ public:
             return;
         }
 
+        if (otherFile.data(ctx).isPackagedTest() && this->insideTestFile &&
+            absl::EndsWith(otherFile.data(ctx).path(), ".test.rb")) {
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTests)) {
+                e.setHeader("`{}` is defined in a test file and cannot be referenced", litSymbol.show(ctx));
+            }
+            return;
+        }
+
         bool isExported = false;
         if (litSymbol.isClassOrModule()) {
             isExported = litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
