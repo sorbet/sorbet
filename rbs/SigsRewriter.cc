@@ -13,6 +13,17 @@ namespace sorbet::rbs {
 
 namespace {
 
+const string_view RBS_PREFIX = "#:";
+const string_view ANNOTATION_PREFIX = "# @";
+
+pair<string_view, uint32_t> stripAsciiWhitespaceWithCount(string_view str) {
+    uint32_t prefixWhitespaceCount = 0;
+    while (prefixWhitespaceCount < str.size() && absl::ascii_isspace(str[prefixWhitespaceCount])) {
+        prefixWhitespaceCount++;
+    }
+    return {str.substr(prefixWhitespaceCount), prefixWhitespaceCount};
+}
+
 bool isVisibilitySend(const parser::Send *send) {
     return send->receiver == nullptr && send->args.size() == 1 &&
            (parser::isa_node<parser::DefMethod>(send->args[0].get()) ||
@@ -45,152 +56,105 @@ parser::Node *signaturesTarget(parser::Node *node) {
     return nullptr;
 }
 
-Comments signaturesForLoc(core::MutableContext ctx, core::LocOffsets loc) {
-    auto source = ctx.file.data(ctx).source();
+unique_ptr<parser::NodeVec> signaturesForNode(core::MutableContext ctx, parser::Node *node,
+                                              UnorderedMap<uint32_t, SigsRewriter::Comments> &methodSignatures) {
+    auto lineStart = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
 
-    vector<Comment> annotations;
-    vector<Comment> signatures;
-
-    uint32_t beginIndex = loc.beginPos();
-
-    // Everything in the file before the method definition
-    string_view preDefinition = source.substr(0, source.rfind('\n', beginIndex));
-
-    // Get all the lines before it
-    vector<string_view> all_lines = absl::StrSplit(preDefinition, '\n');
-
-    // We compute the current position in the source so we know the location of each comment
-    uint32_t index = beginIndex;
-
-    // NOTE: This is accidentally quadratic.
-    // Instead of looping over all the lines between here and the start of the file, we should
-    // instead track something like the locs of all the expressions in the ClassDef::rhs, and
-    // only scan over the space between the ClassDef::rhs top level items
-
-    // Iterate from the last line, to the first line
-    for (auto it = all_lines.rbegin(); it != all_lines.rend(); it++) {
-        index -= it->size();
-        index -= 1;
-
-        string_view line = absl::StripAsciiWhitespace(*it);
-
-        // Short circuit when line is empty
-        if (line.empty()) {
-            break;
+    if (auto it = methodSignatures.find(lineStart); it != methodSignatures.end()) {
+        auto &[lineNumber, comments] = *it;
+        if (comments.signatures.empty()) {
+            return nullptr;
         }
 
-        // Handle single-line sig block
-        else if (absl::StartsWith(line, "sig")) {
-            // Do nothing for a one-line sig block
-            // TODO: Handle single-line sig blocks
-        }
+        auto signatures = make_unique<parser::NodeVec>();
+        auto signatureTranslator = rbs::SignatureTranslator(ctx);
 
-        // Handle multi-line sig block
-        else if (absl::StartsWith(line, "end")) {
-            // ASSUMPTION: We either hit the start of file, a `sig do`/`sig(:final) do` or an `end`
-            // TODO: Handle multi-line sig blocks
-            it++;
-            while (
-                // SOF
-                it != all_lines.rend()
-                // Start of sig block
-                && !(absl::StartsWith(absl::StripAsciiWhitespace(*it), "sig do") ||
-                     absl::StartsWith(absl::StripAsciiWhitespace(*it), "sig(:final) do"))
-                // Invalid end keyword
-                && !absl::StartsWith(absl::StripAsciiWhitespace(*it), "end")) {
-                it++;
-            };
-
-            // We have either
-            // 1) Reached the start of the file
-            // 2) Found a `sig do`
-            // 3) Found an invalid end keyword
-            if (it == all_lines.rend() || absl::StartsWith(absl::StripAsciiWhitespace(*it), "end")) {
-                break;
+        for (auto &signature : comments.signatures) {
+            if (parser::isa_node<parser::DefMethod>(node) || parser::isa_node<parser::DefS>(node)) {
+                auto sig = signatureTranslator.translateSignature(node, signature, comments.annotations);
+                signatures->emplace_back(move(sig));
+            } else if (auto send = parser::cast_node<parser::Send>(node)) {
+                auto sig = signatureTranslator.translateType(send, signature, comments.annotations);
+                signatures->emplace_back(move(sig));
+            } else {
+                Exception::raise("Unimplemented node type: {}", node->nodeName());
             }
-
-            // Reached a sig block.
-            line = absl::StripAsciiWhitespace(*it);
-            ENFORCE(absl::StartsWith(line, "sig do") || absl::StartsWith(line, "sig(:final) do"));
-
-            // Stop looking if this is a single-line block e.g `sig do; <block>; end`
-            if ((absl::StartsWith(line, "sig do;") || absl::StartsWith(line, "sig(:final) do;")) &&
-                absl::EndsWith(line, "end")) {
-                break;
-            }
-
-            // Else, this is a valid sig block. Move on to any possible documentation.
         }
 
-        // Handle a RBS sig annotation `#: SomeRBS`
-        else if (absl::StartsWith(line, "#:")) {
-            // Account for whitespace before the annotation e.g
-            // #: abc -> "abc"
-            // #:abc -> "abc"
-            int lineSize = line.size();
-            auto rbsSignature = Comment{
-                core::LocOffsets{index, index + lineSize},
-                core::LocOffsets{index + 2, index + lineSize},
-                line.substr(2),
-            };
-            signatures.emplace_back(rbsSignature);
-        }
-
-        // Handle RDoc annotations `# @abstract`
-        else if (absl::StartsWith(line, "# @")) {
-            int lineSize = line.size();
-            auto annotation = Comment{
-                core::LocOffsets{index, index + lineSize},
-                core::LocOffsets{index + 3, index + lineSize},
-                line.substr(3),
-            };
-            annotations.emplace_back(annotation);
-        }
-
-        // Ignore other comments
-        else if (absl::StartsWith(line, "#")) {
-            continue;
-        }
-
-        // No other cases applied to this line, so stop looking.
-        else {
-            break;
-        }
+        methodSignatures.erase(it);
+        return signatures;
     }
-
-    reverse(annotations.begin(), annotations.end());
-    reverse(signatures.begin(), signatures.end());
-
-    return Comments{annotations, signatures};
-}
-
-unique_ptr<parser::NodeVec> signaturesForNode(core::MutableContext ctx, parser::Node *node) {
-    auto comments = signaturesForLoc(ctx, node->loc);
-
-    if (comments.signatures.empty()) {
-        return nullptr;
-    }
-
-    auto signatures = make_unique<parser::NodeVec>();
-    auto signatureTranslator = rbs::SignatureTranslator(ctx);
-
-    for (auto &signature : comments.signatures) {
-        if (parser::isa_node<parser::DefMethod>(node) || parser::isa_node<parser::DefS>(node)) {
-            auto sig = signatureTranslator.translateSignature(node, signature, comments.annotations);
-
-            signatures->emplace_back(move(sig));
-        } else if (auto send = parser::cast_node<parser::Send>(node)) {
-            auto sig = signatureTranslator.translateType(send, signature, comments.annotations);
-            signatures->emplace_back(move(sig));
-        } else {
-            Exception::raise("Unimplemented node type: {}", node->nodeName());
-        }
-    }
-
-    return signatures;
+    return nullptr;
 }
 
 } // namespace
+
+void SigsRewriter::checkForUnusedComments() {
+    for (const auto &[lineNumber, comments] : methodSignatures) {
+        for (const auto &sig : comments.signatures) {
+            if (auto e = ctx.beginError(sig.typeLoc, core::errors::Rewriter::RBSUnusedComment)) {
+                e.setHeader("Unused RBS signature comment. No method definition found after it");
+            }
+        }
+    }
+}
+
+// Triggered once per file. We iterate over the source code and look for RBS comments
+// Each RBS comment is stored in a hash map, methodSignatures. Key is the method name, value is a vector of Comments
+void SigsRewriter::extractCommentsFromFile() {
+    auto lines = absl::StrSplit(ctx.file.data(ctx).source(), '\n');
+    Comments currentComments;
+    uint32_t offset = 0;
+    uint32_t lineNumber = 0;
+
+    for (const auto &line : lines) {
+        lineNumber++;
+        auto [trimmedLine, leadingWhitespaceCount] = stripAsciiWhitespaceWithCount(line);
+
+        // Empty lines between the RBS Comment and the method definition are allowed
+        if (trimmedLine.empty()) {
+            offset += line.length() + 1;
+            continue;
+        } else if (absl::StartsWith(trimmedLine, RBS_PREFIX)) {
+            auto signature = trimmedLine.substr(RBS_PREFIX.size());
+            uint32_t startOffset = offset + leadingWhitespaceCount;
+            uint32_t endOffset = startOffset + trimmedLine.length();
+
+            rbs::Comment comment{
+                core::LocOffsets{startOffset, endOffset},
+                core::LocOffsets{startOffset + 2, endOffset},
+                signature,
+            };
+            currentComments.signatures.emplace_back(move(comment));
+            offset += line.length() + 1;
+            continue;
+        } else if (absl::StartsWith(trimmedLine, ANNOTATION_PREFIX)) {
+            auto annotation = trimmedLine.substr(ANNOTATION_PREFIX.size());
+            uint32_t startOffset = offset + leadingWhitespaceCount;
+            uint32_t endOffset = startOffset + trimmedLine.length();
+
+            rbs::Comment comment{
+                core::LocOffsets{startOffset, endOffset},
+                core::LocOffsets{startOffset + 2, endOffset},
+                annotation,
+            };
+            currentComments.annotations.emplace_back(move(comment));
+            offset += line.length() + 1;
+            continue;
+        } else if (absl::StartsWith(trimmedLine, "#")) {
+            offset += line.length() + 1;
+            continue;
+        }
+
+        if (!currentComments.signatures.empty() || !currentComments.annotations.empty()) {
+            methodSignatures[lineNumber] = move(currentComments);
+        }
+
+        // Clean up currentComments for next iteration
+        currentComments = Comments{};
+        offset += line.length() + 1;
+    }
+}
 
 parser::NodeVec SigsRewriter::rewriteNodes(parser::NodeVec nodes) {
     parser::NodeVec result;
@@ -211,7 +175,7 @@ unique_ptr<parser::Node> SigsRewriter::rewriteBegin(unique_ptr<parser::Node> nod
 
     for (auto &stmt : oldStmts) {
         if (auto target = signaturesTarget(stmt.get())) {
-            if (auto signatures = signaturesForNode(ctx, target)) {
+            if (auto signatures = signaturesForNode(ctx, target, methodSignatures)) {
                 for (auto &signature : *signatures) {
                     begin->stmts.emplace_back(move(signature));
                 }
@@ -234,7 +198,7 @@ unique_ptr<parser::Node> SigsRewriter::rewriteBody(unique_ptr<parser::Node> node
     }
 
     if (auto target = signaturesTarget(node.get())) {
-        if (auto signatures = signaturesForNode(ctx, target)) {
+        if (auto signatures = signaturesForNode(ctx, target, methodSignatures)) {
             auto begin = make_unique<parser::Begin>(node->loc, parser::NodeVec());
             for (auto &signature : *signatures) {
                 begin->stmts.emplace_back(move(signature));
@@ -352,7 +316,11 @@ unique_ptr<parser::Node> SigsRewriter::rewriteNode(unique_ptr<parser::Node> node
 }
 
 unique_ptr<parser::Node> SigsRewriter::run(unique_ptr<parser::Node> node) {
-    return rewriteBody(move(node));
+    extractCommentsFromFile();
+    auto body = rewriteBody(move(node));
+    checkForUnusedComments();
+
+    return body;
 }
 
 } // namespace sorbet::rbs
