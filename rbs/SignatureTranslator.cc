@@ -26,7 +26,7 @@ SignatureTranslator::translateAssertionType(vector<std::pair<core::LocOffsets, c
     rbs_node_t *rbsType = parser.parseType();
 
     if (parser.hasError()) {
-        core::LocOffsets offset = locFromRange(assertion.loc, parser.getError()->token.range);
+        core::LocOffsets offset = locFromRange(assertion.typeLoc, parser.getError()->token.range);
         if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSSyntaxError)) {
             e.setHeader("Failed to parse RBS type ({})", parser.getError()->message);
         }
@@ -34,7 +34,7 @@ SignatureTranslator::translateAssertionType(vector<std::pair<core::LocOffsets, c
     }
 
     auto typeToParserNode = TypeToParserNode(ctx, typeParams, std::move(parser));
-    return typeToParserNode.toParserNode(rbsType, assertion.loc);
+    return typeToParserNode.toParserNode(rbsType, assertion.typeLoc);
 }
 
 unique_ptr<parser::Node> SignatureTranslator::translateType(const parser::Send *send, const rbs::Comment &signature,
@@ -46,7 +46,7 @@ unique_ptr<parser::Node> SignatureTranslator::translateType(const parser::Send *
     rbs_node_t *rbsType = parser.parseType();
 
     if (parser.hasError()) {
-        core::LocOffsets offset = locFromRange(signature.loc, parser.getError()->token.range);
+        core::LocOffsets offset = locFromRange(signature.typeLoc, parser.getError()->token.range);
         // First parse failed, let's check if the user mistakenly used a method signature on an accessor
         auto methodParser = Parser(rbsString, encoding);
         methodParser.parseMethodType();
@@ -65,7 +65,7 @@ unique_ptr<parser::Node> SignatureTranslator::translateType(const parser::Send *
     }
 
     auto methodTypeToParserNode = MethodTypeToParserNode(ctx, std::move(parser));
-    return methodTypeToParserNode.attrSignature(send, rbsType, signature.loc, annotations);
+    return methodTypeToParserNode.attrSignature(send, rbsType, signature.typeLoc, signature.commentLoc, annotations);
 }
 
 unique_ptr<parser::Node> SignatureTranslator::translateSignature(const parser::Node *methodDef,
@@ -78,7 +78,7 @@ unique_ptr<parser::Node> SignatureTranslator::translateSignature(const parser::N
     rbs_methodtype_t *rbsMethodType = parser.parseMethodType();
 
     if (parser.hasError()) {
-        core::LocOffsets offset = locFromRange(signature.loc, parser.getError()->token.range);
+        core::LocOffsets offset = locFromRange(signature.typeLoc, parser.getError()->token.range);
 
         if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSSyntaxError)) {
             e.setHeader("Failed to parse RBS signature ({})", parser.getError()->message);
@@ -88,7 +88,8 @@ unique_ptr<parser::Node> SignatureTranslator::translateSignature(const parser::N
     }
 
     auto methodTypeToParserNode = MethodTypeToParserNode(ctx, std::move(parser));
-    return methodTypeToParserNode.methodSignature(methodDef, rbsMethodType, signature.loc, annotations);
+    return methodTypeToParserNode.methodSignature(methodDef, rbsMethodType, signature.typeLoc, signature.commentLoc,
+                                                  annotations);
 }
 
 } // namespace sorbet::rbs

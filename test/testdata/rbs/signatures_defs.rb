@@ -81,14 +81,14 @@ def method7(p1)
   T.reveal_type(p1) # error: Revealed type: `P1`
 end
 method7(P1.new)
-method7(42) # error: Expected `P1` but found `Integer(42)` for argument `P1`
+method7(42) # error: Expected `P1` but found `Integer(42)` for argument `p1`
 
 #: (P1, P2) -> void
 def method8(p1, p2)
   T.reveal_type(p1) # error: Revealed type: `P1`
   T.reveal_type(p2) # error: Revealed type: `P2`
 end
-method8(P1.new, 42) # error: Expected `P2` but found `Integer(42)` for argument `P2`
+method8(P1.new, 42) # error: Expected `P2` but found `Integer(42)` for argument `p2`
 
 
 #: (?Integer) -> void
@@ -114,17 +114,17 @@ def method11(x)
   T.reveal_type(x) # error: Revealed type: `String`
 end
 method11("foo")
-method11(42) # error: Expected `String` but found `Integer(42)` for argument `String x`
+method11(42) # error: Expected `String` but found `Integer(42)` for argument `x`
 
 #: (String x) -> String
-#   ^^^^^^^^ error: Unknown argument name `x`
+#          ^ error: Unknown argument name `x`
 def named_args2(y)
   #             ^ error: Malformed `sig`. Type not specified for argument `y`
   T.reveal_type(y) # error: Revealed type: `T.untyped`
 end
 
 #: (String foo) -> String
-#   ^^^^^^^^^^ error: Unknown argument name `foo`
+#          ^^^ error: Unknown argument name `foo`
 def method12(y)
   #          ^ error: Malformed `sig`. Type not specified for argument `y`
   T.reveal_type(y) # error: Revealed type: `T.untyped`
@@ -162,7 +162,7 @@ def method17(p1, p2 = nil, *p3, p4:, p5: nil, **p6, &block)
 end
 method17(P1.new, P2.new, P3.new, p4: 42, p5: P5.new, p6: P6.new) {} # error: Expected `P4` but found `Integer(42)` for argument `p4`
 method17(P1.new, P2.new, P3.new, p4: P4.new, p5: 42, p6: P6.new) {} # error: Expected `T.nilable(P5)` but found `Integer(42)` for argument `p5`
-method17(P1.new, P2.new, P3.new, p4: P4.new, p5: P5.new, p6: 42) {} # error: Expected `P6` but found `Integer(42)` for argument `P6`
+method17(P1.new, P2.new, P3.new, p4: P4.new, p5: P5.new, p6: 42) {} # error: Expected `P6` but found `Integer(42)` for argument `p6`
 
 #: ?{ -> void } -> void
 def method18(&block)
@@ -216,7 +216,7 @@ module Annotations
   class OverrideIncompatible < Parent
     # @override
     #: (String) -> void
-    def method(x) # error: Parameter `String` of type `String` not compatible with type of overridden method `Annotations::Parent#method`
+    def method(x) # error: Parameter `x` of type `String` not compatible with type of overridden method `Annotations::Parent#method`
       T.reveal_type(x) # error: Revealed type: `String`
     end
   end
