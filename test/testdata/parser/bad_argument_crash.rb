@@ -2,7 +2,7 @@
 extend T::Sig
 
 sig {type_parameters(:).void}
-#                    ^ error: unexpected token ":"
+#                    ^ parser-error: unexpected token ":"
 #                    ^ error: Unexpected `ConstantLit`
 def ex1; end
 

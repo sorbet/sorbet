@@ -1,3 +1,3 @@
 # typed: true
 
-$+ |= m foo # error: cannot assign to a back-reference variable
+$+ |= m foo # parser-error: cannot assign to a back-reference variable
