@@ -486,14 +486,12 @@ public:
     optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                     const core::SymbolRef newExport) const {
         auto insertionLoc = core::Loc::none(loc.file());
-        // first let's try adding it to the end of the imports.
+        // first let's try adding it to the end of the exports.
         if (!exports_.empty()) {
             auto lastOffset = exports_.back().fqn.loc.offsets();
             insertionLoc = core::Loc{loc.file(), lastOffset.copyEndWithZeroLength()};
         } else {
-            // if we don't have any imports, then we can try adding it
-            // either before the first export, or if we have no
-            // exports, then right before the final `end`
+            // if we don't have any exports, then we can try adding it right before the final `end`
             uint32_t exportLoc = loc.endPos() - "end"sv.size() - 1;
             // we want to find the end of the last non-empty line, so
             // let's do something gross: walk backward until we find non-whitespace
@@ -510,8 +508,6 @@ public:
         }
         ENFORCE(insertionLoc.exists());
 
-        // now find the appropriate place for it, specifically by
-        // finding the import that directly precedes it, if any
         auto strName = newExport.show(gs);
         core::AutocorrectSuggestion suggestion(fmt::format("Export `{}` in package `{}`", strName, name.toString(gs)),
                                                {{insertionLoc, fmt::format("\n  export {}", strName)}});
