@@ -87,6 +87,10 @@ struct FullyQualifiedName {
 
         return std::equal(prefix.parts.begin(), prefix.parts.end(), parts.begin());
     }
+
+    string show(const core::GlobalState &gs) const {
+        return absl::StrJoin(parts, "::", core::packages::NameFormatter(gs));
+    }
 };
 
 struct PackageName {
@@ -486,10 +490,22 @@ public:
     optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                     const core::SymbolRef newExport) const {
         auto insertionLoc = core::Loc::none(loc.file());
-        // first let's try adding it to the end of the exports.
         if (!exports_.empty()) {
-            auto lastOffset = exports_.back().fqn.loc.offsets();
-            insertionLoc = core::Loc{loc.file(), lastOffset.copyEndWithZeroLength()};
+            FullyQualifiedName const *exportToInsertAfter = nullptr;
+            for (auto &e : exports_) {
+                if (newExport.show(gs) > e.fqn.show(gs)) {
+                    exportToInsertAfter = &e.fqn;
+                }
+            }
+            if (!exportToInsertAfter) {
+                // Insert before the first export
+                auto beforeConstantName = exports_.front().fqn.loc;
+                auto [beforeExport, numWhitespace] = beforeConstantName.findStartOfIndentation(gs);
+                auto endOfPrevLine = beforeExport.adjust(gs, -numWhitespace - 1, 0);
+                insertionLoc = endOfPrevLine.copyWithZeroLength();
+            } else {
+                insertionLoc = exportToInsertAfter->loc.copyEndWithZeroLength();
+            }
         } else {
             // if we don't have any exports, then we can try adding it right before the final `end`
             uint32_t exportLoc = loc.endPos() - "end"sv.size() - 1;

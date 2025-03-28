@@ -340,7 +340,7 @@ TEST_CASE("Add test import to package with neither imports nor exports") {
     CHECK_EQ(expected, replaced);
 }
 
-TEST_CASE("Simple add export") {
+TEST_CASE("Add export that goes before existing exports") {
     core::GlobalState gs(errorQueue);
     makeDefaultPackagerGlobalState(gs);
 
@@ -349,8 +349,8 @@ TEST_CASE("Simple add export") {
                         "end\n";
 
     string expected = "class MyPackage < PackageSpec\n"
-                      "  export MyPackage::This\n"
                       "  export MyPackage::NewExport\n"
+                      "  export MyPackage::This\n"
                       "end\n";
 
     auto parsedFiles = enterPackages(gs, {{"my_package/__package.rb", pkg_source}});
