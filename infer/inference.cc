@@ -12,6 +12,18 @@
 using namespace std;
 namespace sorbet::infer {
 
+bool reportCustomerCallsite() {
+    static bool reportCallsite = []() { return std::getenv("CUSTOMER_CALLSITE_INDEX") != nullptr; }();
+
+    return reportCallsite;
+}
+
+bool customerCallsiteArgMatchOnly() {
+    static bool argMatchOnly = []() { return std::getenv("CUSTOMER_CALLSITE_ARGMATCH") != nullptr; }();
+
+    return argMatchOnly;
+}
+
 bool Inference::willRun(core::Context ctx, core::LocOffsets loc, core::MethodRef method) {
     if (ctx.file.data(ctx).strictLevel < core::StrictLevel::True) {
         return false;
@@ -41,6 +53,60 @@ bool Inference::willRun(core::Context ctx, core::LocOffsets loc, core::MethodRef
 
 bool silenceDeadCodeError(const cfg::InstructionPtr &value) {
     return value.isSynthetic() || cfg::isa_instruction<cfg::TAbsurd>(value);
+}
+
+// Looks for class ending in Customer::Model::Customer
+bool isCustomer(core::Context ctx, core::ClassOrModuleRef klass) {
+    if (klass.exists() && klass.data(ctx)->name == core::Names::Constants::Customer()) {
+        auto ownerKlass = klass.data(ctx)->owner;
+        if (ownerKlass.exists() && ownerKlass.data(ctx)->name == core::Names::Constants::Model()) {
+            auto grandOwnerKlass = ownerKlass.data(ctx)->owner;
+            if (grandOwnerKlass.exists() && grandOwnerKlass.data(ctx)->name == core::Names::Constants::Customer()) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+core::ClassOrModuleRef getCustomerClass(core::Context ctx, const core::TypePtr &type) {
+    if (core::isa_type<core::ClassType>(type)) {
+        auto klass = core::cast_type_nonnull<core::ClassType>(type).symbol;
+        if (isCustomer(ctx, klass)) {
+            return klass;
+        }
+    }
+
+    if (core::isa_type<core::OrType>(type)) {
+        auto left = core::cast_type_nonnull<core::OrType>(type).left;
+        auto right = core::cast_type_nonnull<core::OrType>(type).right;
+        if (core::isa_type<core::ClassType>(left)) {
+            auto klass = core::cast_type_nonnull<core::ClassType>(left).symbol;
+            if (isCustomer(ctx, klass)) {
+                return klass;
+            }
+        } else if (core::isa_type<core::OrType>(left)) {
+            auto klass = getCustomerClass(ctx, left);
+            if (klass.exists()) {
+                return klass;
+            }
+        }
+
+        if (core::isa_type<core::ClassType>(right)) {
+            auto klass = core::cast_type_nonnull<core::ClassType>(right).symbol;
+            if (isCustomer(ctx, klass)) {
+                return klass;
+            }
+        } else if (core::isa_type<core::OrType>(right)) {
+            auto klass = getCustomerClass(ctx, right);
+            if (klass.exists()) {
+                return klass;
+            }
+        }
+    }
+
+    return core::Symbols::noClassOrModule();
 }
 
 unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
@@ -114,6 +180,81 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     vector<bool> visited;
     visited.resize(cfg->maxBasicBlockId);
     KnowledgeFilter knowledgeFilter(ctx, *cfg);
+
+    std::string_view customerArgName = "";
+
+    if (reportCustomerCallsite() && !ctx.file.data(ctx).isPackagedTest()) {
+        for (auto &arg : cfg->symbol.data(ctx)->arguments) {
+            if (getCustomerClass(ctx, arg.type).exists()) {
+                customerArgName = arg.argumentName(ctx);
+
+                if (cfg->loc.exists()) {
+                    auto defLoc = ctx.locAt(cfg->loc);
+                    if (defLoc.exists()) {
+                        auto wrappingMethodClass = cfg->symbol.data(ctx)->owner;
+                        auto wrappingMethodName = cfg->symbol.data(ctx)->name.show(ctx);
+                        auto defFile = defLoc.file().data(ctx.state).path();
+                        auto [wrappingMethodStart, _ew] = std::move(defLoc).toDetails(ctx.state);
+
+                        std::string wrappingMethodClassName;
+                        if (wrappingMethodClass.data(ctx)->isSingletonClass(ctx)) {
+                            wrappingMethodClassName =
+                                wrappingMethodClass.data(ctx)->attachedClass(ctx).showFullName(ctx);
+                        } else {
+                            wrappingMethodClassName = wrappingMethodClass.showFullName(ctx);
+                        }
+
+                        // JSONL machine-readable format
+                        // clang-format off
+                        std::ostringstream oss;
+                        oss << "{\"context\": \""
+                                  << std::move(wrappingMethodClassName) << "#"
+                                  << std::move(wrappingMethodName)
+                                  << "\", \"context_loc\": \""
+                                  << std::move(defFile) << ":" << wrappingMethodStart.line
+                                  << "\", \"method_type\": \"arg\"}";
+                        ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
+                        // clang-format on
+                    }
+                }
+
+                break;
+            }
+        }
+
+        auto &resultType = cfg->symbol.data(ctx)->resultType;
+        if (getCustomerClass(ctx, resultType).exists()) {
+            if (cfg->loc.exists()) {
+                auto defLoc = ctx.locAt(cfg->loc);
+                if (defLoc.exists()) {
+                    auto wrappingMethodClass = cfg->symbol.data(ctx)->owner;
+                    auto wrappingMethodName = cfg->symbol.data(ctx)->name.show(ctx);
+                    auto defFile = defLoc.file().data(ctx.state).path();
+                    auto [wrappingMethodStart, _ew] = std::move(defLoc).toDetails(ctx.state);
+
+                    std::string wrappingMethodClassName;
+                    if (wrappingMethodClass.data(ctx)->isSingletonClass(ctx)) {
+                        wrappingMethodClassName = wrappingMethodClass.data(ctx)->attachedClass(ctx).showFullName(ctx);
+                    } else {
+                        wrappingMethodClassName = wrappingMethodClass.showFullName(ctx);
+                    }
+
+                    // JSONL machine-readable format
+                    // clang-format off
+                    std::ostringstream oss;
+                    oss << "{\"context\": \""
+                              << std::move(wrappingMethodClassName) << "#"
+                              << std::move(wrappingMethodName)
+                              << "\", \"context_loc\": \""
+                              << std::move(defFile) << ":" << wrappingMethodStart.line
+                              << "\", \"method_type\": \"ret\"}";
+                    ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
+                    // clang-format on
+                }
+            }
+        }
+    }
+
     for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         if (bb == cfg->deadBlock()) {
@@ -332,12 +473,15 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
         core::Loc madeBlockDead;
         int i = 0;
+
         for (cfg::Binding &bind : bb->exprs) {
             i++;
             if (!current.isDead || !ctx.state.lspQuery.isEmpty()) {
                 bind.bind.type =
                     current.processBinding(ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg),
-                                           knowledgeFilter, *constr, methodReturnType, parentUpdateKnowledgeReceiver);
+                                           knowledgeFilter, *constr, methodReturnType, parentUpdateKnowledgeReceiver,
+                                           reportCustomerCallsite() && !ctx.file.data(ctx).isPackagedTest(),
+                                           customerArgName, customerCallsiteArgMatchOnly());
                 if (cfg::isa_instruction<cfg::Send>(bind.value)) {
                     totalSendCount++;
                     if (bind.bind.type && !bind.bind.type.isUntyped()) {
