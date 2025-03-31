@@ -124,6 +124,15 @@ A short list of useful LSP-related command line flags:
   [Including and excluding files](cli.md#including-and-excluding-files) or
   `srb tc --help` for more information.
 
+- `--cache-dir=...`
+
+  When an edit causes Sorbet to
+  [retypecheck the whole workspace](server-status#why-do-some-of-my-edits-make-sorbet-go-back-to-typechecking),
+  supplying a cache directory with the
+  [`--cache-dir`](cli#--cache-dir-caching-parse-results) flag allows it to avoid
+  reindexing files that haven't changed. This improves performance, shortening
+  the duration of that slow path operation.
+
 - `--disable-watchman` / `--watchman-path=...`
 
   Configure whether or how the `watchman` binary is invoked.
@@ -153,13 +162,6 @@ A short list of useful LSP-related command line flags:
   (errors, warnings, information hints, etc.). Sorbet caps the number of
   diagnostics it sends to clients at 1,000 diagnostics, but this can be changed
   (set it to `0` to remove the cap).
-
-- `--cache=dir=...`
-
-  When an edit causes Sorbet to retypecheck the whole workspace, supplying a
-  cache directory will allow it to avoid reindexing files that haven't changed.
-  This will improve performance, shortening the duration of that slow path
-  operation.
 
 For all Sorbet flags, be sure to check `srb tc --help`.
 
