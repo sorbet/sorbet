@@ -534,7 +534,8 @@ public:
                     }
 
                     if (strictDependenciesTooLow) {
-                        reasons.emplace_back(core::ErrorColors::format("its `{}` is too low", "strict_dependencies"));
+                        reasons.emplace_back(
+                            core::ErrorColors::format("its `{}` is not strict enough", "strict_dependencies"));
                         ENFORCE(importStrictDepsLevel.has_value(),
                                 "strictDependenciesTooLow should be false if strict_dependencies level is not set");
                         auto requiredStrictDepsLevel = fmt::format("strict_dependencies '{}'",
