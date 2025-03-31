@@ -459,8 +459,7 @@ Shows the extension output window on errors. Defaults to `false`.
 Starting from version 0.3.41, the Sorbet extension exports a public API. To
 ensure backward and forward compatibility, all properties are nullable.
 
-- `status`: Represents Sorbet status, or `undefined` if the state is
-  unknown.
+- `status`: Represents Sorbet status, or `undefined` if the state is unknown.
 - `onStatusChanged`: An event triggered whenever the status changes.
 
 You can access this API using VS Code's `getExtension` API, e.g.
