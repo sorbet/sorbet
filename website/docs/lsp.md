@@ -157,9 +157,9 @@ A short list of useful LSP-related command line flags:
 - `--cache=dir=...`
 
   When an edit causes Sorbet to retypecheck the whole workspace, supplying a
-  cache directory will allow it to avoid reindexing files that haven't
-  changed. This will improve performance, shortening the duration of that slow
-  path operation.
+  cache directory will allow it to avoid reindexing files that haven't changed.
+  This will improve performance, shortening the duration of that slow path
+  operation.
 
 For all Sorbet flags, be sure to check `srb tc --help`.
 
