@@ -16,9 +16,10 @@ namespace sorbet::rbs {
  * RBS type comments are formatted as `#: () -> void` for methods or `#: Integer` for attributes.
  */
 struct Comment {
-    core::LocOffsets loc;    // The location of the comment in the file
-    std::string_view string; // The type string (excluding the `#: ` prefix)
-                             // this is only a view on the string owned by the File.source() data.
+    core::LocOffsets commentLoc; // The location of the comment in the file
+    core::LocOffsets typeLoc;    // The location of the actual RBS content in the file
+    std::string_view string;     // The type string (excluding the `#: ` prefix)
+                                 // this is only a view on the string owned by the File.source() data.
 };
 
 core::LocOffsets locFromRange(core::LocOffsets loc, const range &range);

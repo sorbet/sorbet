@@ -149,8 +149,7 @@ optional<rbs::InlineComment> commentForPos(core::Context ctx, uint32_t fromPos) 
 
     return InlineComment{
         rbs::Comment{core::LocOffsets{(uint32_t)commentStart, static_cast<uint32_t>(endPos)},
-                     // core::LocOffsets{(uint32_t)contentStart, static_cast<uint32_t>(endPos)},
-                     content},
+                     core::LocOffsets{(uint32_t)contentStart, static_cast<uint32_t>(endPos)}, content},
         kind,
     };
 }
@@ -184,7 +183,7 @@ parseComment(core::MutableContext ctx, InlineComment comment,
              vector<pair<core::LocOffsets, core::NameRef>> typeParams) {
     if (comment.kind == InlineComment::Kind::MUST) {
         return pair<unique_ptr<parser::Node>, InlineComment::Kind>{
-            make_unique<parser::Nil>(comment.comment.loc),
+            make_unique<parser::Nil>(comment.comment.typeLoc),
             comment.kind,
         };
     }
