@@ -87,6 +87,10 @@ struct FullyQualifiedName {
 
         return std::equal(prefix.parts.begin(), prefix.parts.end(), parts.begin());
     }
+
+    string show(const core::GlobalState &gs) const {
+        return absl::StrJoin(parts, "::", core::packages::NameFormatter(gs));
+    }
 };
 
 struct PackageName {
@@ -486,14 +490,24 @@ public:
     optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                     const core::SymbolRef newExport) const {
         auto insertionLoc = core::Loc::none(loc.file());
-        // first let's try adding it to the end of the imports.
         if (!exports_.empty()) {
-            auto lastOffset = exports_.back().fqn.loc.offsets();
-            insertionLoc = core::Loc{loc.file(), lastOffset.copyEndWithZeroLength()};
+            FullyQualifiedName const *exportToInsertAfter = nullptr;
+            for (auto &e : exports_) {
+                if (newExport.show(gs) > e.fqn.show(gs)) {
+                    exportToInsertAfter = &e.fqn;
+                }
+            }
+            if (!exportToInsertAfter) {
+                // Insert before the first export
+                auto beforeConstantName = exports_.front().fqn.loc;
+                auto [beforeExport, numWhitespace] = beforeConstantName.findStartOfIndentation(gs);
+                auto endOfPrevLine = beforeExport.adjust(gs, -numWhitespace - 1, 0);
+                insertionLoc = endOfPrevLine.copyWithZeroLength();
+            } else {
+                insertionLoc = exportToInsertAfter->loc.copyEndWithZeroLength();
+            }
         } else {
-            // if we don't have any imports, then we can try adding it
-            // either before the first export, or if we have no
-            // exports, then right before the final `end`
+            // if we don't have any exports, then we can try adding it right before the final `end`
             uint32_t exportLoc = loc.endPos() - "end"sv.size() - 1;
             // we want to find the end of the last non-empty line, so
             // let's do something gross: walk backward until we find non-whitespace
@@ -510,8 +524,6 @@ public:
         }
         ENFORCE(insertionLoc.exists());
 
-        // now find the appropriate place for it, specifically by
-        // finding the import that directly precedes it, if any
         auto strName = newExport.show(gs);
         core::AutocorrectSuggestion suggestion(fmt::format("Export `{}` in package `{}`", strName, name.toString(gs)),
                                                {{insertionLoc, fmt::format("\n  export {}", strName)}});
