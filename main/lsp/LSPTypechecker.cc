@@ -501,6 +501,8 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                     this->initialized = true;
                 } else {
                     // We don't need to hold on to the saved error queue.
+                    // We were only holding onto it for the Init case, so that we could give a GlobalState
+                    // back to the indexer thread (with an ErrorQueue owned by that thread).
                     savedErrorQueue.reset();
 
                     // We don't write in the cancelable slow path, and all our read operations have completed.
