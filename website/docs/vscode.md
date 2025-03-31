@@ -456,8 +456,43 @@ Shows the extension output window on errors. Defaults to `false`.
 
 ## Extension API
 
-Starting from version 0.3.41, the Sorbet extension exports a public API. To
-ensure backward and forward compatibility, all properties are nullable.
+### Reporting metrics
+
+> Sorbet does not require metrics gathering for full functionality. If you are
+> seeing a log line like "Sorbet metrics gathering disabled," Sorbet is working
+> as intended.
+
+It is possible to ask the Sorbet VS Code extension to collect and report usage
+metrics. This is predominantly useful if you maintain a large Ruby codebase that
+uses Sorbet, and want to gather metrics on things like daily users and editor
+responsiveness.
+
+To start gathering metrics, implement a
+[custom VS Code command](https://code.visualstudio.com/api/extension-guides/command#creating-new-commands)
+using the name `sorbet.metrics.getExportedApi`.
+
+The implementation of this command should simply return an object like this:
+
+```js
+{
+  metricsEmitter: ...
+}
+```
+
+The `metricsEmitter` value should conform to the [`MetricsEmitter` interface]
+declared in the Sorbet VS Code extension source code. Most likely, you will want
+to implement this interface by importing a StatsD client, connecting to an
+internal metrics reporting host, and forwarding requests from the
+`MetricEmitter` interface function calls to the StatsD client of your choice.
+
+[`metricsemitter` interface]:
+  https://github.com/sorbet/sorbet/blob/2b850340e9bccd689d6a976cddbbfecf533933ae/vscode_extension/src/veneur.ts#L11
+
+### Tracking server status changes
+
+Starting from version 0.3.41, the Sorbet extension exports an API to track
+server status changes. To ensure backward and forward compatibility, all
+properties are nullable.
 
 - `status`: Represents Sorbet status, or `undefined` if the state is unknown.
 - `onStatusChanged`: An event triggered whenever the status changes.
@@ -465,20 +500,20 @@ ensure backward and forward compatibility, all properties are nullable.
 You can access this API using VS Code's `getExtension` API, e.g.
 
 ```javascript
+const ext = vscode.extensions.getExtension('sorbet.sorbet-vscode-extension');
+
 // Example: get current status
-vscode.extensions.getExtension('sorbet.sorbet-vscode-extension')?.exports
-  ?.status;
+ext?.exports?.status;
 ```
 
-### Available Status Values
+The `status` field may take on the following string values:
 
-The following are string values:
-
-- `disabled`: Indicates that the Sorbet Language Server has been disabled.
-- `error`: Indicates that the Sorbet Language Server encountered an error. This
-  status does not correlate to code typing errors.
-- `running`: Indicates that the Sorbet Language Server is running.
-- `start`: Indicates that the Sorbet Language Server is starting. This status
+- `"disabled"`: Indicates that the Sorbet Language Server has been disabled.
+- `"error"`: Indicates that the Sorbet Language Server encountered an error.
+  This status does **not** mean that there are type checking errors: it means
+  there was an error with the language client itself.
+- `"running"`: Indicates that the Sorbet Language Server is running.
+- `"start"`: Indicates that the Sorbet Language Server is starting. This status
   may repeat in case of an error.
 
 ## Troubleshooting and FAQ
@@ -510,35 +545,3 @@ If the errors are not persistent:
 
 If you arrive at a set of edits that mess up the diagnostics, please file a bug
 on the [issue tracker](https://github.com/sorbet/sorbet/issues).
-
-## Reporting metrics
-
-> Sorbet does not require metrics gathering for full functionality. If you are
-> seeing a log line like "Sorbet metrics gathering disabled," Sorbet is working
-> as intended.
-
-It is possible to ask the Sorbet VS Code extension to collect and report usage
-metrics. This is predominantly useful if you maintain a large Ruby codebase that
-uses Sorbet, and want to gather metrics on things like daily users and editor
-responsiveness.
-
-To start gathering metrics, implement a
-[custom VS Code command](https://code.visualstudio.com/api/extension-guides/command#creating-new-commands)
-using the name `sorbet.metrics.getExportedApi`.
-
-The implementation of this command should simply return an object like this:
-
-```js
-{
-  metricsEmitter: ...
-}
-```
-
-The `metricsEmitter` value should conform to the [`MetricsEmitter` interface]
-declared in the Sorbet VS Code extension source code. Most likely, you will want
-to implement this interface by importing a StatsD client, connecting to an
-internal metrics reporting host, and forwarding requests from the
-`MetricEmitter` interface function calls to the StatsD client of your choice.
-
-[`metricsemitter` interface]:
-  https://github.com/sorbet/sorbet/blob/2b850340e9bccd689d6a976cddbbfecf533933ae/vscode_extension/src/veneur.ts#L11
