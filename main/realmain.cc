@@ -557,7 +557,7 @@ int realmain(int argc, char *argv[]) {
 #else
             Timer rbiGenTimer(logger, "rbiGeneration.setup");
 
-            if (opts.stripePackages) {
+            if (opts.cacheSensitiveOptions.stripePackages) {
                 logger->error("Cannot serialize package RBIs in legacy stripe packages mode.");
                 return 1;
             }
@@ -657,7 +657,7 @@ int realmain(int argc, char *argv[]) {
             // ----- index -----
 
             auto inputFilesSpan = absl::Span<core::FileRef>(inputFiles);
-            if (opts.stripePackages) {
+            if (opts.cacheSensitiveOptions.stripePackages) {
                 auto numPackageFiles = pipeline::partitionPackageFiles(*gs, inputFilesSpan);
                 auto inputPackageFiles = inputFilesSpan.first(numPackageFiles);
                 inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
@@ -753,7 +753,7 @@ int realmain(int argc, char *argv[]) {
             auto optsForMinimize = opts.clone();
             // Explicitly turn off the packager, because it doesn't make sense when the whole
             // project is a single RBI file.
-            optsForMinimize.stripePackages = false;
+            optsForMinimize.cacheSensitiveOptions.stripePackages = false;
 
             unique_ptr<core::GlobalState> gsForMinimize = make_unique<core::GlobalState>(gs->errorQueue);
             auto kvstore = nullptr;
@@ -814,7 +814,7 @@ int realmain(int argc, char *argv[]) {
             logger->warn("Dumping package info is disabled in sorbet-orig for faster builds");
             return 1;
 #else
-            if (!opts.stripePackages) {
+            if (!opts.cacheSensitiveOptions.stripePackages) {
                 logger->error("stripe packages mode needs to be enabled");
                 return 1;
             }
