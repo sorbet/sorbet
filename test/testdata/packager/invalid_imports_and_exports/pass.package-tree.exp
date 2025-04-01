@@ -25,6 +25,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.export(::<root>::<C A>::<C AModule>)
 
+    <self>.test_import(::<PackageSpecRegistry>::<C B>)
+
     <self>.test_import(::<PackageSpecRegistry>::<C C>)
 
     <self>.test_import(::<PackageSpecRegistry>::<C C>)

@@ -18,8 +18,7 @@ class A < PackageSpec
        # ^^^^^^^^^ error: Unable to resolve constant `REFERENCE`
   # Despite the above, this import should work.
   import B
-  # But this one will fail; no duplicate imports allowed.
-# ^^^^^^^^ error: Duplicate package import
+  import B
 
   export 123 # error: Argument to `export` must be a constant
   export "hello" # error: Argument to `export` must be a constant
@@ -29,8 +28,9 @@ class A < PackageSpec
   export A::AClass
   export A::AModule
 
+  test_import B
   test_import C
-# ^^^^^^^^^^^^^ error: Duplicate package import
+  test_import C
 end
 # ------------------------------
 # -- test/testdata/packager/invalid_imports_and_exports/a.rb --
