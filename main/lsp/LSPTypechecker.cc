@@ -150,7 +150,14 @@ bool LSPTypechecker::typecheck(std::unique_ptr<LSPFileUpdates> updates, WorkerPo
         if (isFastPath) {
             bool isNoopUpdateForRetypecheck = false;
             filesTypechecked = runFastPath(*updates, workers, errorFlusher, isNoopUpdateForRetypecheck);
-            commitFileUpdates(*updates, /* cancelable */ false);
+
+            ENFORCE(updates->updatedFileIndexes.empty());
+            ENFORCE(updates->updatedFiles.empty());
+
+            for (auto &ast : updates->updatedFinalGSFileIndexes) {
+                this->indexedFinalGS[ast.file.id()] = move(ast);
+            }
+
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
             auto result = runSlowPath(*updates, this->getKvStore(), workers, errorFlusher, SlowPathMode::Cancelable);
