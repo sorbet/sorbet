@@ -15,6 +15,7 @@ compilation_database(
         "//ast:ast",
         "//ast/desugar:desugar",
         "//ast/desugar:desugar_test",
+        "//ast/packager:packager",
         "//ast/substitute:substitute",
         "//ast/treemap:treemap",
         "//ast/verifier:verifier",

@@ -5,13 +5,15 @@ cc_library(
             "*.cc",
             "*.h",
         ],
-        # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
-        exclude = ["flycheck_*"],
+        exclude = [
+            "*_test.cc",
+
+            # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
+            "flycheck_*",
+        ],
     ),
     hdrs = [
-        "VisibilityChecker.h",
         "packager.h",
-        "rbi_gen.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,
@@ -20,12 +22,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast",
-        "//ast/packager",
-        "//ast/treemap",
-        "//ast/verifier",
         "//common",
-        "//common/concurrency",
         "//core",
-        "@rapidjson",
     ],
 )
