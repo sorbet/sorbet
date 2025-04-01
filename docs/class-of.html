@@ -262,7 +262,7 @@ smart enough to know that objects created by calling <code>new</code> have type
 <p><code>T::Class</code> was designed to model some mismatches between how people think they
 can use <code>T.class_of</code> and how <code>T.class_of</code> actually works. <code>T::Class</code> is powered
 by Sorbet’s support for <a href="/docs/generics">generic classes</a>, and is therefore a good
-choice for writing code that abstracts over over class objects.</p>
+choice for writing code that abstracts over class objects.</p>
 <p>What are these mismatches? <code>T.class_of(...)</code> is, simply, a type representing the
 singleton class of <code>A</code>, matching how singleton classes work in Ruby as closely
 as possible. However:</p>
