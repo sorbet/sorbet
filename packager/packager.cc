@@ -712,16 +712,6 @@ PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *
     return pName;
 }
 
-bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit &cnst) {
-    if (auto scope = ast::cast_tree<ast::ConstantLit>(cnst.scope)) {
-        return scope->symbol() == core::Symbols::PackageSpecRegistry();
-    } else if (auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst.scope)) {
-        return startsWithPackageSpecRegistry(*scope);
-    } else {
-        return false;
-    }
-}
-
 ast::ExpressionPtr prependRoot(ast::ExpressionPtr scope) {
     auto *lastConstLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(scope);
     while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
@@ -730,6 +720,20 @@ ast::ExpressionPtr prependRoot(ast::ExpressionPtr scope) {
     auto loc = lastConstLit->scope.loc();
     lastConstLit->scope = ast::MK::Constant(loc, core::Symbols::root());
     return scope;
+}
+
+const ast::ClassDef *asPackageSpecClass(const ast::ExpressionPtr &expr) {
+    auto packageSpecClass = ast::cast_tree<ast::ClassDef>(expr);
+    if (packageSpecClass == nullptr || packageSpecClass->ancestors.size() != 1) {
+        return nullptr;
+    }
+
+    auto superClassLit = ast::cast_tree<ast::ConstantLit>(packageSpecClass->ancestors[0]);
+    if (superClassLit == nullptr || superClassLit->symbol() != core::Symbols::PackageSpec()) {
+        return nullptr;
+    }
+
+    return packageSpecClass;
 }
 
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
@@ -1399,14 +1403,9 @@ struct PackageSpecBodyWalk {
             return;
         }
 
-        auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
-        if (nameTree == nullptr) {
-            // Already reported an error in definePackage
-            return;
-        }
-
         if (!this->foundFirstPackageSpec) {
-            this->foundFirstPackageSpec |= startsWithPackageSpecRegistry(*nameTree);
+            auto packageSpecClass = asPackageSpecClass(tree);
+            this->foundFirstPackageSpec |= (packageSpecClass != nullptr);
 
             // Already reported an error (in definePackage) or no need to report an error (because
             // this is the package spec class)
@@ -1567,6 +1566,20 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
     core::Context ctx(gs, core::Symbols::root(), package.file);
 
     auto &rootClass = ast::cast_tree_nonnull<ast::ClassDef>(package.tree);
+
+    for (auto &rootStmt : rootClass.rhs) {
+        auto packageSpecClass = asPackageSpecClass(rootStmt);
+        if (packageSpecClass == nullptr) {
+            // rewriter already reported an error
+            continue;
+        }
+
+        auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(packageSpecClass->name);
+        ENFORCE(nameTree != nullptr, "Invariant from rewriter");
+
+        return make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),
+                                            ctx.locAt(packageSpecClass->declLoc));
+    }
 
     return nullptr;
 }
