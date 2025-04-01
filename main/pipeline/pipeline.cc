@@ -159,7 +159,7 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
     core::StrictLevel level;
 
     if (fileData.originalSigil == core::StrictLevel::None) {
-        level = core::StrictLevel::False;
+        level = opts.cacheSensitiveOptions.defaultStrictnessLevel;
     } else {
         level = fileData.originalSigil;
     }
