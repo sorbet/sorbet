@@ -253,7 +253,7 @@ We discuss `T::Class` more in the next section. To break down that large type:
 `T::Class` was designed to model some mismatches between how people think they
 can use `T.class_of` and how `T.class_of` actually works. `T::Class` is powered
 by Sorbet's support for [generic classes](generics.md), and is therefore a good
-choice for writing code that abstracts over over class objects.
+choice for writing code that abstracts over class objects.
 
 What are these mismatches? `T.class_of(...)` is, simply, a type representing the
 singleton class of `A`, matching how singleton classes work in Ruby as closely
