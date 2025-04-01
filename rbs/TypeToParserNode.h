@@ -26,9 +26,9 @@ public:
     std::unique_ptr<parser::Node> toParserNode(const rbs_node_t *node, core::LocOffsets loc);
 
 private:
-    std::unique_ptr<parser::Node> typeNameType(const rbs_typename_t *typeName, bool isGeneric, core::LocOffsets loc);
-    std::unique_ptr<parser::Node> classInstanceType(const rbs_types_classinstance_t *node, core::LocOffsets loc);
-    std::unique_ptr<parser::Node> classSingletonType(const rbs_types_classsingleton_t *node, core::LocOffsets loc);
+    std::unique_ptr<parser::Node> typeNameType(const rbs_type_name_t *typeName, bool isGeneric, core::LocOffsets loc);
+    std::unique_ptr<parser::Node> classInstanceType(const rbs_types_class_instance_t *node, core::LocOffsets loc);
+    std::unique_ptr<parser::Node> classSingletonType(const rbs_types_class_singleton_t *node, core::LocOffsets loc);
     std::unique_ptr<parser::Node> intersectionType(const rbs_types_intersection_t *node, core::LocOffsets loc);
     std::unique_ptr<parser::Node> unionType(const rbs_types_union_t *node, core::LocOffsets loc);
     std::unique_ptr<parser::Node> optionalType(const rbs_types_optional_t *node, core::LocOffsets loc);

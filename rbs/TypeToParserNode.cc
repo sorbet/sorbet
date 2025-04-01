@@ -16,7 +16,7 @@ bool hasTypeParam(absl::Span<const std::pair<core::LocOffsets, core::NameRef>> t
 
 } // namespace
 
-unique_ptr<parser::Node> TypeToParserNode::typeNameType(const rbs_typename_t *typeName, bool isGeneric,
+unique_ptr<parser::Node> TypeToParserNode::typeNameType(const rbs_type_name_t *typeName, bool isGeneric,
                                                         core::LocOffsets loc) {
     rbs_node_list *typePath = typeName->rbs_namespace->path;
 
@@ -86,7 +86,7 @@ unique_ptr<parser::Node> TypeToParserNode::typeNameType(const rbs_typename_t *ty
     return parser::MK::Const(loc, move(parent), nameConstant);
 }
 
-unique_ptr<parser::Node> TypeToParserNode::classInstanceType(const rbs_types_classinstance_t *node,
+unique_ptr<parser::Node> TypeToParserNode::classInstanceType(const rbs_types_class_instance_t *node,
                                                              core::LocOffsets loc) {
     auto offsets = locFromRange(loc, ((rbs_node_t *)node)->location->rg);
     auto argsValue = node->args;
@@ -107,7 +107,7 @@ unique_ptr<parser::Node> TypeToParserNode::classInstanceType(const rbs_types_cla
     return typeConstant;
 }
 
-unique_ptr<parser::Node> TypeToParserNode::classSingletonType(const rbs_types_classsingleton_t *node,
+unique_ptr<parser::Node> TypeToParserNode::classSingletonType(const rbs_types_class_singleton_t *node,
                                                               core::LocOffsets loc) {
     auto offsets = locFromRange(loc, ((rbs_node_t *)node)->location->rg);
     auto innerType = typeNameType(node->name, false, offsets);
@@ -197,7 +197,7 @@ unique_ptr<parser::Node> TypeToParserNode::procType(const rbs_types_proc_t *node
             function = functionType((rbs_types_function_t *)functionTypeNode, loc);
             break;
         }
-        case RBS_TYPES_UNTYPEDFUNCTION: {
+        case RBS_TYPES_UNTYPED_FUNCTION: {
             return function;
         }
         default: {
@@ -229,7 +229,7 @@ unique_ptr<parser::Node> TypeToParserNode::blockType(const rbs_types_block_t *no
             function = functionType((rbs_types_function_t *)functionTypeNode, docLoc);
             break;
         }
-        case RBS_TYPES_UNTYPEDFUNCTION: {
+        case RBS_TYPES_UNTYPED_FUNCTION: {
             return function;
         }
         default: {
@@ -298,7 +298,7 @@ unique_ptr<parser::Node> TypeToParserNode::recordType(const rbs_types_record_t *
             }
         }
 
-        if (hash_node->value->type != RBS_TYPES_RECORD_FIELDTYPE) {
+        if (hash_node->value->type != RBS_TYPES_RECORD_FIELD_TYPE) {
             if (auto e = ctx.beginError(loc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in record value type, expected `{}`",
                             rbs_node_type_name(hash_node->value), "RecordFieldtype");
@@ -307,7 +307,7 @@ unique_ptr<parser::Node> TypeToParserNode::recordType(const rbs_types_record_t *
             continue;
         }
 
-        rbs_types_record_fieldtype_t *valueNode = (rbs_types_record_fieldtype_t *)hash_node->value;
+        rbs_types_record_field_type_t *valueNode = (rbs_types_record_field_type_t *)hash_node->value;
         auto innerType = toParserNode(valueNode->type, loc);
         pairs.emplace_back(make_unique<parser::Pair>(loc, move(key), move(innerType)));
     }
@@ -356,10 +356,10 @@ unique_ptr<parser::Node> TypeToParserNode::toParserNode(const rbs_node_t *node, 
             return voidType((rbs_types_bases_void_t *)node, docLoc);
         case RBS_TYPES_BLOCK:
             return blockType((rbs_types_block_t *)node, docLoc);
-        case RBS_TYPES_CLASSINSTANCE:
-            return classInstanceType((rbs_types_classinstance_t *)node, docLoc);
-        case RBS_TYPES_CLASSSINGLETON:
-            return classSingletonType((rbs_types_classsingleton_t *)node, docLoc);
+        case RBS_TYPES_CLASS_INSTANCE:
+            return classInstanceType((rbs_types_class_instance_t *)node, docLoc);
+        case RBS_TYPES_CLASS_SINGLETON:
+            return classSingletonType((rbs_types_class_singleton_t *)node, docLoc);
         case RBS_TYPES_FUNCTION:
             return functionType((rbs_types_function_t *)node, docLoc);
         case RBS_TYPES_INTERFACE: {

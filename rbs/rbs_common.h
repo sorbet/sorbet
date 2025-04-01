@@ -22,7 +22,7 @@ struct Comment {
                                  // this is only a view on the string owned by the File.source() data.
 };
 
-core::LocOffsets locFromRange(core::LocOffsets loc, const range &range);
+core::LocOffsets locFromRange(core::LocOffsets loc, const rbs_range_t &range);
 
 } // namespace sorbet::rbs
 
