@@ -80,12 +80,6 @@ void findAndRewritePackageSpecClass(core::Context ctx, ast::ClassDef &rootClass)
         }
 
         // ---- Mutates the tree ----
-        // We can't do these rewrites in rewriter, because this rewrite should only happen if
-        // `opts.stripePackages` is set. That would mean we would have to add another cache flavor,
-        // which would double the size of Sorbet's disk cache.
-        //
-        // Other than being able to say "we don't mutate the trees in packager" there's not much
-        // value in going that far (even namer mutates the trees; the packager fills a similar role).
 
         auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(packageSpecClass->name);
         if (!validatePackageName(ctx, nameTree)) {
