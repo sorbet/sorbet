@@ -612,125 +612,6 @@ public:
         return files;
     }
 };
-
-class ImportCheckerPass final {
-    struct Import {
-        core::SymbolRef package;
-        core::LocOffsets importLoc;
-
-        Import(core::SymbolRef package, core::LocOffsets importLoc) : package{package}, importLoc{importLoc} {}
-
-        // Lexicographic ordering, grouping like packages together and ordering them by position in the file.
-        bool operator<(const Import &other) const {
-            if (this->package == other.package) {
-                return this->importLoc.beginPos() < other.importLoc.beginPos();
-            }
-
-            return this->package.rawId() < other.package.rawId();
-        }
-    };
-
-    std::vector<Import> imports;
-
-public:
-    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (send.fun != core::Names::import() && send.fun != core::Names::testImport()) {
-            return;
-        }
-
-        if (send.numPosArgs() != 1) {
-            // an error will have been raised in the packager pass
-            return;
-        }
-
-        auto lit = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
-        if (lit == nullptr) {
-            // We don't raise an explicit error here, for the same reasons as in PropagateVisibility::postTransformSend.
-            return;
-        }
-
-        if (lit->symbol() == core::Symbols::StubModule()) {
-            // An error was already reported in resolver when the StubModule was created.
-            return;
-        }
-
-        this->imports.emplace_back(lit->symbol(), send.loc);
-    }
-
-    void checkImports(core::Context ctx) {
-        fast_sort(this->imports);
-
-        auto it = this->imports.begin();
-        while (true) {
-            it = std::adjacent_find(it, this->imports.end(), [](auto &l, auto &r) { return l.package == r.package; });
-            if (it == this->imports.end()) {
-                break;
-            }
-
-            // find the end of the region of duplicated imports
-            auto end =
-                std::find_if_not(it, this->imports.end(), [sym = it->package](auto &e) { return sym == e.package; });
-
-            auto first = it;
-
-            // Treat the first import as the authoritative one, and report errors for the rest.
-            std::advance(it, 1);
-
-            for (; it != end; ++it) {
-                if (auto e = ctx.beginError(it->importLoc, core::errors::Packager::InvalidConfiguration)) {
-                    e.setHeader("Duplicate package import `{}`", it->package.show(ctx));
-                    e.addErrorLine(ctx.locAt(first->importLoc), "Previous package import found here");
-                    auto importLoc = ctx.locAt(it->importLoc);
-                    auto [startOfIndent, indentation] = importLoc.findStartOfIndentation(ctx);
-                    auto replacementLoc = startOfIndent.adjust(ctx, -indentation, 0).join(importLoc);
-                    if (replacementLoc.beginPos() != 0) {
-                        replacementLoc = replacementLoc.adjust(ctx, -1, 0); // Also the preceding newline
-                    }
-                    e.replaceWith("Remove import", replacementLoc, "");
-                }
-            }
-        }
-
-        this->imports.clear();
-    }
-
-    static std::vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
-                                            std::vector<ast::ParsedFile> files) {
-        Timer timeit(gs.tracer(), "visibility_checker.check_imports");
-        auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
-        absl::BlockingCounter barrier(std::max(workers.size(), 1));
-
-        for (size_t i = 0; i < files.size(); ++i) {
-            taskq->push(i, 1);
-        }
-
-        workers.multiplexJob("ImportChecker", [&gs, &files, &barrier, taskq]() {
-            Timer timeit(gs.tracer(), "ImportCheckerWorker");
-            size_t idx;
-            ImportCheckerPass pass;
-
-            for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
-                ast::ParsedFile &f = files[idx];
-                if (f.file.data(gs).isPackage(gs)) {
-                    auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
-                    if (pkgName.exists()) {
-                        core::Context ctx{gs, core::Symbols::root(), f.file};
-                        ast::TreeWalk::apply(ctx, pass, f.tree);
-                        pass.checkImports(ctx);
-                    }
-                }
-            }
-
-            barrier.DecrementCount();
-        });
-
-        barrier.Wait();
-
-        return files;
-    }
-};
-
 } // namespace
 
 std::vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
@@ -743,10 +624,6 @@ std::vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, Worke
             PropagateVisibility::run(gs, f);
         }
     }
-
-    // We could dispatch to this pass while running the `VisibilityCheckerPass` when we encounter a package file, but
-    // the separation of the two is nice for simplifying `runIncremental`.
-    files = ImportCheckerPass::run(gs, workers, std::move(files));
 
     return VisibilityCheckerPass::run(gs, workers, std::move(files));
 }
