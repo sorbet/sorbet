@@ -12,11 +12,11 @@ namespace sorbet::rewriter {
 
 namespace {
 
-void mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
+void mustContainPackageDef(core::MutableContext ctx, core::LocOffsets loc) {
     // HACKFIX: Tolerate completely empty packages. LSP does not support the notion of a deleted file, and
     // instead replaces deleted files with the empty string. It should really mark files as Tombstones instead.
     if (!ctx.file.data(ctx).source().empty()) {
-        if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidPackageDefinition)) {
+        if (auto e = ctx.beginIndexerError(loc, core::errors::Packager::InvalidPackageDefinition)) {
             e.setHeader("`{}` file must contain a package definition", "__package.rb");
             e.addErrorNote("Package definitions are class definitions like `{}`.\n"
                            "    For more information, see http://go/package-layout",
@@ -25,7 +25,7 @@ void mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
     }
 }
 
-[[nodiscard]] bool validatePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constLit) {
+[[nodiscard]] bool validatePackageName(core::MutableContext ctx, const ast::UnresolvedConstantLit *constLit) {
     bool valid = true;
     while (constLit != nullptr) {
         if (absl::StrContains(constLit->cnst.shortName(ctx), "_")) {
@@ -35,7 +35,7 @@ void mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
             // Even with packages into the symbol table this restriction is useful, because we have
             // a lot of tooling that will create directory structures like Foo_Bar to store
             // generated files associated with package Foo::Bar
-            if (auto e = ctx.beginError(constLit->loc, core::errors::Packager::InvalidPackageName)) {
+            if (auto e = ctx.beginIndexerError(constLit->loc, core::errors::Packager::InvalidPackageName)) {
                 e.setHeader("Package names cannot contain an underscore");
                 auto replacement = absl::StrReplaceAll(constLit->cnst.shortName(ctx), {{"_", ""}});
                 auto nameLoc = constLit->loc;
@@ -54,7 +54,7 @@ void mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
     return valid;
 }
 
-void findAndRewritePackageSpecClass(core::Context ctx, ast::ClassDef &rootClass) {
+void findAndRewritePackageSpecClass(core::MutableContext ctx, ast::ClassDef &rootClass) {
     bool reportedError = false;
     for (auto &rootStmt : rootClass.rhs) {
         auto packageSpecClass = ast::cast_tree<ast::ClassDef>(rootStmt);
