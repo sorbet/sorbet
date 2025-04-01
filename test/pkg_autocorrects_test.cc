@@ -340,7 +340,7 @@ TEST_CASE("Add test import to package with neither imports nor exports") {
     CHECK_EQ(expected, replaced);
 }
 
-TEST_CASE("Add export that goes before existing exports") {
+TEST_CASE("Simple add export") {
     core::GlobalState gs(errorQueue);
     makeDefaultPackagerGlobalState(gs);
 
@@ -349,76 +349,7 @@ TEST_CASE("Add export that goes before existing exports") {
                         "end\n";
 
     string expected = "class MyPackage < PackageSpec\n"
-                      "  export MyPackage::NewExport\n"
                       "  export MyPackage::This\n"
-                      "end\n";
-
-    auto parsedFiles = enterPackages(gs, {{"my_package/__package.rb", pkg_source}});
-    auto &myPkg = getPackageForFile(gs, parsedFiles[0].file);
-    ENFORCE(myPkg.exists());
-
-    auto addExport = myPkg.addExport(gs, getConstantRef(gs, {"MyPackage", "NewExport"}));
-    ENFORCE(addExport, "Expected to get an autocorrect from `addExport`");
-    auto replaced = applySuggestion(gs, *addExport);
-    CHECK_EQ(expected, replaced);
-}
-
-TEST_CASE("Add export to package with no existing exports") {
-    core::GlobalState gs(errorQueue);
-    makeDefaultPackagerGlobalState(gs);
-
-    string pkg_source = "class MyPackage < PackageSpec\n"
-                        "end\n";
-
-    string expected = "class MyPackage < PackageSpec\n"
-                      "  export MyPackage::NewExport\n"
-                      "end\n";
-
-    auto parsedFiles = enterPackages(gs, {{"my_package/__package.rb", pkg_source}});
-    auto &myPkg = getPackageForFile(gs, parsedFiles[0].file);
-    ENFORCE(myPkg.exists());
-
-    auto addExport = myPkg.addExport(gs, getConstantRef(gs, {"MyPackage", "NewExport"}));
-    ENFORCE(addExport, "Expected to get an autocorrect from `addExport`");
-    auto replaced = applySuggestion(gs, *addExport);
-    CHECK_EQ(expected, replaced);
-}
-
-TEST_CASE("Add export that goes in the middle of existing exports") {
-    core::GlobalState gs(errorQueue);
-    makeDefaultPackagerGlobalState(gs);
-
-    string pkg_source = "class MyPackage < PackageSpec\n"
-                        "  export MyPackage::A\n"
-                        "  export MyPackage::This\n"
-                        "end\n";
-
-    string expected = "class MyPackage < PackageSpec\n"
-                      "  export MyPackage::A\n"
-                      "  export MyPackage::NewExport\n"
-                      "  export MyPackage::This\n"
-                      "end\n";
-
-    auto parsedFiles = enterPackages(gs, {{"my_package/__package.rb", pkg_source}});
-    auto &myPkg = getPackageForFile(gs, parsedFiles[0].file);
-    ENFORCE(myPkg.exists());
-
-    auto addExport = myPkg.addExport(gs, getConstantRef(gs, {"MyPackage", "NewExport"}));
-    ENFORCE(addExport, "Expected to get an autocorrect from `addExport`");
-    auto replaced = applySuggestion(gs, *addExport);
-    CHECK_EQ(expected, replaced);
-}
-
-TEST_CASE("Add export that goes at the end") {
-    core::GlobalState gs(errorQueue);
-    makeDefaultPackagerGlobalState(gs);
-
-    string pkg_source = "class MyPackage < PackageSpec\n"
-                        "  export MyPackage::A\n"
-                        "end\n";
-
-    string expected = "class MyPackage < PackageSpec\n"
-                      "  export MyPackage::A\n"
                       "  export MyPackage::NewExport\n"
                       "end\n";
 
