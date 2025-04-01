@@ -363,10 +363,13 @@ public:
 class VisibilityCheckerPass final {
 public:
     const core::packages::PackageInfo &package;
+    core::packages::PackageInfo &packageNonConst;
     const bool insideTestFile;
 
-    VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
-        : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
+    VisibilityCheckerPass(core::Context ctx, core::packages::PackageInfo &package)
+        : package{package}, packageNonConst{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {
+        packageNonConst.untrackMissingImportsFor(ctx.file);
+    }
 
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
@@ -438,13 +441,13 @@ public:
             return;
         }
 
-        auto importType = this->package.importsPackage(otherPackage);
-        auto wasNotImported = !importType.has_value();
+        auto currentImportType = this->package.importsPackage(otherPackage);
+        auto wasImported = currentImportType.has_value();
         auto importedAsTest =
-            importType.has_value() && importType.value() == core::packages::ImportType::Test && !this->insideTestFile;
-        if (wasNotImported || importedAsTest) {
+            wasImported && currentImportType.value() == core::packages::ImportType::Test && !this->insideTestFile;
+        if (!wasImported || importedAsTest) {
             auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-            bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
+            bool isTestImport = otherFile.data(ctx).isPackagedTest() || this->insideTestFile;
             auto strictDepsLevel = this->package.strictDependenciesLevel();
             auto importStrictDepsLevel = pkg.strictDependenciesLevel();
             bool layeringViolation = false;
@@ -466,13 +469,29 @@ public:
                               path.has_value();
             }
             if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
-                if (wasNotImported) {
-                    // We failed to import the package that defines the symbol
+                std::optional<core::AutocorrectSuggestion> autocorrect;
+                auto newImportType =
+                    isTestImport ? core::packages::ImportType::Test : core::packages::ImportType::Normal;
+                std::pair<core::packages::MangledName, core::packages::ImportType> key = {pkg.mangledName(),
+                                                                                          newImportType};
+                if (this->package.trackedMissingImports().contains(key)) {
+                    autocorrect = this->package.trackedMissingImports()[key].second;
+                } else {
+                    autocorrect = this->package.addImport(ctx, pkg, isTestImport);
+                    // TODO(neil): find out why this is sometimes not true and enable this ENFORCE
+                    /* ENFORCE(autocorrect.has_value()); */
+                    if (autocorrect.has_value()) {
+                        this->packageNonConst.trackMissingImport(pkg.mangledName(), ctx.file, newImportType,
+                                                                 autocorrect.value());
+                    }
+                }
+                if (!wasImported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                         e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                        if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
-                            e.addAutocorrect(std::move(exp.value()));
+                        if (autocorrect.has_value()) {
+                            core::AutocorrectSuggestion autocorrectCopy(autocorrect.value());
+                            e.addAutocorrect(std::move(autocorrectCopy));
                             if (!db.errorHint().empty()) {
                                 e.addErrorNote("{}", db.errorHint());
                             }
@@ -485,11 +504,16 @@ public:
                         }
                     }
                 } else if (importedAsTest) {
+                    ENFORCE(!isTestImport);
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                         e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
                         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                        if (auto exp = this->package.addImport(ctx, pkg, false)) {
-                            e.addAutocorrect(std::move(exp.value()));
+                        if (autocorrect.has_value()) {
+                            core::AutocorrectSuggestion autocorrectCopy(autocorrect.value());
+                            e.addAutocorrect(std::move(autocorrectCopy));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
                         }
                         e.addErrorLine(pkg.declLoc(), "Defined here");
                     }
@@ -556,7 +580,7 @@ public:
                     } else {
                         ENFORCE(false, "At most three reasons should be present");
                     }
-                    if (wasNotImported) {
+                    if (!wasImported) {
                         e.setHeader("`{}` resolves but its package is not imported. However, it cannot be "
                                     "automatically imported because {}",
                                     lit.symbol().show(ctx), reason);
@@ -580,8 +604,9 @@ public:
         }
     }
 
-    static std::vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
+    static std::vector<ast::ParsedFile> run(core::GlobalState &nonConstGs, WorkerPool &workers,
                                             std::vector<ast::ParsedFile> files) {
+        const core::GlobalState &gs = nonConstGs;
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
         absl::BlockingCounter barrier(std::max(workers.size(), 1));
@@ -590,7 +615,7 @@ public:
             taskq->push(i, 1);
         }
 
-        workers.multiplexJob("VisibilityChecker", [&gs, &files, &barrier, taskq]() {
+        workers.multiplexJob("VisibilityChecker", [&gs, &nonConstGs, &files, &barrier, taskq]() {
             size_t idx;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 ast::ParsedFile &f = files[idx];
@@ -598,7 +623,7 @@ public:
                     auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                     if (pkgName.exists()) {
                         core::Context ctx{gs, core::Symbols::root(), f.file};
-                        VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
+                        VisibilityCheckerPass pass{ctx, *nonConstGs.packageDB().getPackageInfoNonConst(pkgName)};
                         ast::TreeWalk::apply(ctx, pass, f.tree);
                     }
                 }

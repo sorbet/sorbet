@@ -116,6 +116,23 @@ public:
         return nullopt;
     }
 
+    void trackMissingImport(const core::packages::MangledName toImport, const core::FileRef file,
+                            const core::packages::ImportType importType,
+                            const core::AutocorrectSuggestion autocorrect) {
+        notImplemented();
+    }
+
+    void untrackMissingImportsFor(const core::FileRef file) {
+        notImplemented();
+    }
+
+    UnorderedMap<std::pair<core::packages::MangledName, core::packages::ImportType>,
+                 std::pair<UnorderedSet<core::FileRef>, core::AutocorrectSuggestion>>
+    trackedMissingImports() const {
+        notImplemented();
+        return {};
+    }
+
     ~NonePackage() {}
 
 private:

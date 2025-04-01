@@ -236,6 +236,10 @@ public:
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_ = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer_ = nullopt;
 
+    UnorderedMap<pair<core::packages::MangledName, core::packages::ImportType>,
+                 pair<UnorderedSet<core::FileRef>, core::AutocorrectSuggestion>>
+        trackedMissingImports_ = {};
+
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
         return strictDependenciesLevel_;
     }
@@ -678,6 +682,38 @@ public:
 
         // No path found
         return nullopt;
+    }
+
+    void trackMissingImport(const core::packages::MangledName toImport, const core::FileRef file,
+                            const core::packages::ImportType importType,
+                            const core::AutocorrectSuggestion autocorrect) {
+        pair<core::packages::MangledName, core::packages::ImportType> key = {toImport, importType};
+        if (!trackedMissingImports_.contains(key)) {
+            trackedMissingImports_[key] = {{file}, autocorrect};
+        } else {
+            trackedMissingImports_[key].first.insert(file);
+        }
+    }
+
+    void untrackMissingImportsFor(const core::FileRef file) {
+        std::vector<std::pair<core::packages::MangledName, core::packages::ImportType>> toDelete;
+        for (auto &[key, value] : trackedMissingImports_) {
+            if (value.first.contains(file)) {
+                value.first.erase(file);
+                if (value.first.empty()) {
+                    toDelete.emplace_back(key);
+                }
+            }
+        }
+        for (auto &key : toDelete) {
+            trackedMissingImports_.erase(key);
+        }
+    }
+
+    UnorderedMap<std::pair<core::packages::MangledName, core::packages::ImportType>,
+                 pair<UnorderedSet<core::FileRef>, core::AutocorrectSuggestion>>
+    trackedMissingImports() const {
+        return trackedMissingImports_;
     }
 };
 

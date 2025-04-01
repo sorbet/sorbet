@@ -84,6 +84,16 @@ public:
     virtual std::optional<std::string> pathTo(const core::GlobalState &gs,
                                               const core::packages::MangledName dest) const = 0;
 
+    virtual void trackMissingImport(const core::packages::MangledName toImport, const core::FileRef file,
+                                    const core::packages::ImportType importType,
+                                    const core::AutocorrectSuggestion autocorrect) = 0;
+
+    virtual void untrackMissingImportsFor(const core::FileRef file) = 0;
+
+    virtual UnorderedMap<std::pair<core::packages::MangledName, core::packages::ImportType>,
+                         std::pair<UnorderedSet<core::FileRef>, core::AutocorrectSuggestion>>
+    trackedMissingImports() const = 0;
+
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                                  bool isTestImport) const = 0;
