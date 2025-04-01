@@ -54,9 +54,20 @@ void mustContainPackageDef(core::MutableContext ctx, core::LocOffsets loc) {
     return valid;
 }
 
-void findAndRewritePackageSpecClass(core::MutableContext ctx, ast::ClassDef &rootClass) {
+} // namespace
+
+void PackageSpec::run(core::MutableContext ctx, ast::ClassDef *klass) {
+    ENFORCE(ctx.state.packageDB().enabled(), "Should only run on __package.rb files");
+    ENFORCE(ctx.file.data(ctx).isPackage(ctx), "Should only run on __package.rb files");
+
+    if (ctx.owner != core::Symbols::root()) {
+        // Only process ClassDef that are at the top level
+        ENFORCE(ctx.owner == core::Symbols::todo());
+        return;
+    }
+
     bool reportedError = false;
-    for (auto &rootStmt : rootClass.rhs) {
+    for (auto &rootStmt : klass->rhs) {
         auto packageSpecClass = ast::cast_tree<ast::ClassDef>(rootStmt);
         if (packageSpecClass == nullptr) {
             // No error here; let this be reported in the tree walk later as a bad node type,
@@ -120,24 +131,9 @@ void findAndRewritePackageSpecClass(core::MutableContext ctx, ast::ClassDef &roo
     // Only report an error if we didn't already
     // (the one we reported will have been more descriptive than this one)
     if (!reportedError) {
-        auto errLoc = rootClass.rhs.empty() ? core::LocOffsets{0, 0} : rootClass.rhs[0].loc();
+        auto errLoc = klass->rhs.empty() ? core::LocOffsets{0, 0} : klass->rhs[0].loc();
         mustContainPackageDef(ctx, errLoc);
     }
-}
-
-} // namespace
-
-void PackageSpec::run(core::MutableContext ctx, ast::ClassDef *klass) {
-    ENFORCE(ctx.state.packageDB().enabled(), "Should only run on __package.rb files");
-    ENFORCE(ctx.file.data(ctx).isPackage(ctx), "Should only run on __package.rb files");
-
-    if (ctx.owner != core::Symbols::root()) {
-        // Only process ClassDef that are at the top level
-        ENFORCE(ctx.owner == core::Symbols::todo());
-        return;
-    }
-
-    findAndRewritePackageSpecClass(ctx, *klass);
 }
 
 } // namespace sorbet::rewriter
