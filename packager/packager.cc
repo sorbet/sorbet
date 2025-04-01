@@ -712,11 +712,6 @@ PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *
     return pName;
 }
 
-// TODO(jez) Rename this to lookupMangledName, and make it take a const GlobalState
-void populateMangledName(core::GlobalState &gs, PackageName &pName) {
-    pName.mangledName = core::packages::MangledName::mangledNameFromParts(gs, pName.fullName.parts);
-}
-
 bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit &cnst) {
     if (auto scope = ast::cast_tree<ast::ConstantLit>(cnst.scope)) {
         return scope->symbol() == core::Symbols::PackageSpecRegistry();
@@ -1593,6 +1588,11 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
         }
     }
     bodyWalk.finalize(ctx);
+}
+
+// TODO(jez) Rename this to lookupMangledName, and make it take a const GlobalState
+void populateMangledName(core::GlobalState &gs, PackageName &pName) {
+    pName.mangledName = core::packages::MangledName::mangledNameFromParts(gs, pName.fullName.parts);
 }
 
 unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, ast::ParsedFile &package) {
