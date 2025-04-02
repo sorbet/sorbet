@@ -16,7 +16,7 @@ other_package/reference.rb:10: `MyPackage::BehaviorDefiningParentNamespace` reso
     10 |  module BehaviorDefiningParentNamespace
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    my_package/__package.rb:6: Insert `export MyPackage::BehaviorDefiningParentNamespace`
-     6 |  export MyPackage::BehaviorDefiningParentNamespace::Const1
-                                                                   ^
+    my_package/__package.rb:3: Insert `export MyPackage::BehaviorDefiningParentNamespace`
+     3 |class MyPackage < PackageSpec
+                                     ^
 Errors: 2
