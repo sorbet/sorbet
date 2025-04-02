@@ -151,7 +151,6 @@ bool LSPTypechecker::typecheck(std::unique_ptr<LSPFileUpdates> updates, WorkerPo
             bool isNoopUpdateForRetypecheck = false;
             filesTypechecked = runFastPath(*updates, workers, errorFlusher, isNoopUpdateForRetypecheck);
 
-            ENFORCE(updates->updatedFileIndexes.empty());
             ENFORCE(updates->updatedFiles.empty());
 
             for (auto &ast : updates->updatedFinalGSFileIndexes) {
@@ -246,7 +245,6 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     }
 
     updates.updatedFiles.clear();
-    updates.updatedFileIndexes.clear();
 
     if (shouldRunIncrementalNamer && gs->packageDB().enabled()) {
         std::vector<core::FileRef> packageFiles;
@@ -353,6 +351,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
     auto committed = epochManager.tryCommitEpoch(*this->gs, epoch, cancelable, preemptManager, [&]() -> void {
+        vector<core::FileRef> openFiles;
         vector<ast::ParsedFile> indexed, nonPackagedIndexed;
 
         {
@@ -378,19 +377,18 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                 case SlowPathMode::Cancelable: {
                     timeit.emplace(this->config->logger, "slow_path_reindex");
 
-                    ENFORCE(updates.updatedFiles.size() == updates.updatedFileIndexes.size());
-
                     // Move the indexed trees into our local cache for open files. We will still reindex them again to
                     // force any errors, but this is a convenient way to pre-populate our cache.
                     if (!updates.updatedFiles.empty()) {
-                        for (auto &ast : updates.updatedFileIndexes) {
-                            if (ast.tree) {
-                                this->indexedFinalGS[ast.file.id()] = std::move(ast);
-                            }
+                        openFiles.resize(updates.updatedFiles.size());
+
+                        for (auto &file : updates.updatedFiles) {
+                            auto fref = this->gs->findFileByPath(file->path());
+                            ENFORCE(fref.exists());
+                            openFiles.emplace_back(fref);
                         }
 
                         updates.updatedFiles.clear();
-                        updates.updatedFileIndexes.clear();
                     }
 
                     this->workspaceFiles.clear();
@@ -421,7 +419,6 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                 }
             }
 
-            ENFORCE(updates.updatedFileIndexes.empty());
             ENFORCE(updates.updatedFiles.empty());
             ENFORCE(gs->lspQuery.isEmpty());
 
@@ -559,6 +556,8 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
         pipeline::unpartitionPackageFiles(indexed, std::move(nonPackagedIndexed));
         // TODO(jez) At this point, it's not correct to call it `indexed` anymore: we've run namer too
 
+        this->cacheOpenFiles(indexed, std::move(openFiles), workers);
+
         auto maybeResolved = pipeline::resolve(*gs, move(indexed), config->opts, workers);
         if (!maybeResolved.hasResult()) {
             return;
@@ -649,6 +648,55 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     }
 }
 
+void LSPTypechecker::cacheOpenFiles(absl::Span<const ast::ParsedFile> indexed, std::vector<core::FileRef> openFiles,
+                                    WorkerPool &workers) {
+    if (openFiles.empty()) {
+        return;
+    }
+
+    fast_sort(openFiles);
+
+    auto &logger = *config->logger;
+    Timer timeit(logger, "slow_path.cache_open_files");
+
+    shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(openFiles.size());
+    for (int i = 0; i < openFiles.size(); i++) {
+        fileq->push(i, 1);
+    }
+
+    shared_ptr<BlockingBoundedQueue<ast::ParsedFile>> resultq =
+        make_shared<BlockingBoundedQueue<ast::ParsedFile>>(openFiles.size());
+    workers.multiplexJob("cacheOpenFiles", [fileq, resultq, indexed]() {
+        vector<ast::ParsedFile> threadResult;
+        int job;
+        {
+            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                if (result.gotItem()) {
+                    // TODO(trevor): We traverse the whole indexed set for each open file. We could speed this up by
+                    // pre-sorting `indexed` and restarting from the previous result, given that `openFiles` is also
+                    // sorted. That way each worker would traverse `indexed` at most once.
+                    auto it = absl::c_find_if(indexed, [job](auto &ast) { return ast.file.id() == job; });
+                    if (it == indexed.end()) {
+                        continue;
+                    }
+
+                    resultq->push(ast::ParsedFile{it->tree.deepCopy(), it->file}, 1);
+                }
+            }
+        }
+    });
+
+    {
+        ast::ParsedFile threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
+            if (result.gotItem()) {
+                this->indexedFinalGS[threadResult.file.id()] = std::move(threadResult);
+            }
+        }
+    }
+}
+
 unique_ptr<core::GlobalState> LSPTypechecker::destroy() {
     return move(gs);
 }
@@ -719,8 +767,6 @@ std::unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(std::vector<core::
     noop.epoch = 0;
     for (auto fref : frefs) {
         ENFORCE(fref.exists());
-        // Note: `index.tree` can be null if the file is a stdlib file.
-        noop.updatedFileIndexes.emplace_back(this->getIndexed(fref));
         noop.updatedFiles.push_back(gs->getFiles()[fref.id()]);
     }
     return result;
