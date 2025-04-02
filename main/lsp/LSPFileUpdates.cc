@@ -11,25 +11,18 @@ void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
     cancellationExpected = cancellationExpected || older.cancellationExpected;
     preemptionsExpected += older.preemptionsExpected;
 
-    ENFORCE(updatedFiles.size() == updatedFileIndexes.size());
-    ENFORCE(older.updatedFiles.size() == older.updatedFileIndexes.size());
-
     // For updates, we prioritize _newer_ updates.
     UnorderedSet<string> encountered;
     for (auto &f : updatedFiles) {
         encountered.emplace(f->path());
     }
 
-    int i = -1;
     for (auto &f : older.updatedFiles) {
-        i++;
         if (encountered.contains(f->path())) {
             continue;
         }
         encountered.emplace(f->path());
         updatedFiles.push_back(f);
-        auto &ast = older.updatedFileIndexes[i];
-        updatedFileIndexes.push_back(ast::ParsedFile{ast.tree.deepCopy(), ast.file});
     }
     typecheckingPath = TypecheckingPath::Slow;
 }
@@ -44,9 +37,6 @@ LSPFileUpdates LSPFileUpdates::copy() const {
     copy.updatedFiles = updatedFiles;
     copy.cancellationExpected = cancellationExpected;
     copy.preemptionsExpected = preemptionsExpected;
-    for (auto &ast : updatedFileIndexes) {
-        copy.updatedFileIndexes.push_back(ast::ParsedFile{ast.tree.deepCopy(), ast.file});
-    }
     return copy;
 }
 

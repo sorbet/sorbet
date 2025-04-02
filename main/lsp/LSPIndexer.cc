@@ -338,11 +338,6 @@ std::unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams
         auto trees = hashing::Hashing::indexAndComputeFileHashes(*initialGS, config->opts, *config->logger,
                                                                  absl::Span<core::FileRef>(frefs), workers, kvstore);
         ENFORCE(trees.hasResult(), "The indexer thread doesn't support cancellation");
-        update.updatedFileIndexes.resize(trees.result().size());
-        for (auto &ast : trees.result()) {
-            const int i = fileToPos[ast.file];
-            update.updatedFileIndexes[i] = move(ast);
-        }
     }
 
     // _Now_ that we've computed file hashes, we can make a fast path determination.
@@ -368,8 +363,6 @@ std::unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams
             update.canceledSlowPath = true;
         }
     }
-
-    ENFORCE(update.updatedFiles.size() == update.updatedFileIndexes.size());
 
     if (update.canceledSlowPath) {
         // Merge diagnostic latency timers; this edit contains the previous slow path.
