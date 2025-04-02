@@ -2,7 +2,7 @@
 
 namespace sorbet::rbs {
 
-core::LocOffsets locFromRange(core::LocOffsets loc, const range &range) {
+core::LocOffsets locFromRange(core::LocOffsets loc, const rbs_range_t &range) {
     return {
         loc.beginPos() + range.start.char_pos,
         loc.beginPos() + range.end.char_pos,

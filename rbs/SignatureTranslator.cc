@@ -75,7 +75,7 @@ unique_ptr<parser::Node> SignatureTranslator::translateSignature(const parser::N
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
     Parser parser(rbsString, encoding);
-    rbs_methodtype_t *rbsMethodType = parser.parseMethodType();
+    rbs_method_type_t *rbsMethodType = parser.parseMethodType();
 
     if (parser.hasError()) {
         core::LocOffsets offset = locFromRange(signature.typeLoc, parser.getError()->token.range);

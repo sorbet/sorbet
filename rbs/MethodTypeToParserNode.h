@@ -18,7 +18,7 @@ public:
      *
      * For example the signature comment `#: () -> void` will be translated as `sig { void }`.
      */
-    std::unique_ptr<parser::Node> methodSignature(const parser::Node *methodDef, const rbs_methodtype_t *methodType,
+    std::unique_ptr<parser::Node> methodSignature(const parser::Node *methodDef, const rbs_method_type_t *methodType,
                                                   const core::LocOffsets typeLoc, const core::LocOffsets commentLoc,
                                                   const std::vector<Comment> &annotations);
 

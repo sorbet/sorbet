@@ -133,7 +133,7 @@ void collectKeywords(core::LocOffsets docLoc, rbs_hash_t *field, vector<RBSArg> 
 } // namespace
 
 unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::Node *methodDef,
-                                                                 const rbs_methodtype_t *methodType,
+                                                                 const rbs_method_type_t *methodType,
                                                                  const core::LocOffsets typeLoc,
                                                                  const core::LocOffsets commentLoc,
                                                                  const vector<Comment> &annotations) {
@@ -156,11 +156,11 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
     for (rbs_node_list_node_t *list_node = node.type_params->head; list_node != nullptr; list_node = list_node->next) {
         auto loc = locFromRange(typeLoc, list_node->node->location->rg);
 
-        ENFORCE(list_node->node->type == RBS_AST_TYPEPARAM,
+        ENFORCE(list_node->node->type == RBS_AST_TYPE_PARAM,
                 "Unexpected node type `{}` in type parameter list, expected `{}`", rbs_node_type_name(list_node->node),
                 "TypeParam");
 
-        auto node = (rbs_ast_typeparam_t *)list_node->node;
+        auto node = (rbs_ast_type_param_t *)list_node->node;
         auto str = parser.resolveConstant(node->name);
         typeParams.emplace_back(loc, ctx.state.enterNameUTF8(str));
     }
