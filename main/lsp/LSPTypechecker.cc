@@ -86,7 +86,8 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
         const bool isIncremental = false;
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
-        auto result = runSlowPath(updates, std::move(kvstore), workers, errorFlusher, SlowPathMode::Init);
+        auto result = runSlowPath(updates, cache::ownIfUnchanged(*updates.updatedGS.value(), std::move(kvstore)),
+                                  workers, errorFlusher, SlowPathMode::Init);
         epoch.committed = true;
         ENFORCE(std::holds_alternative<std::unique_ptr<core::GlobalState>>(result));
         initialGS = std::move(std::get<std::unique_ptr<core::GlobalState>>(result));
@@ -312,7 +313,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 }
 
 LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updates,
-                                                           std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers,
+                                                           std::unique_ptr<const OwnedKeyValueStore> ownedKvstore,
+                                                           WorkerPool &workers,
                                                            shared_ptr<core::ErrorFlusher> errorFlusher,
                                                            LSPTypechecker::SlowPathMode mode) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
@@ -435,9 +437,6 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
 
             {
                 Timer timeit(config->logger, "reIndexFromFileSystem");
-
-                std::unique_ptr<const OwnedKeyValueStore> ownedKvstore =
-                    cache::ownIfUnchanged(*this->gs, std::move(kvstore));
 
                 auto workspaceFilesSpan = absl::MakeSpan(this->workspaceFiles);
                 if (this->config->opts.stripePackages) {
@@ -775,12 +774,17 @@ ast::ParsedFile LSPTypechecker::getIndexed(core::FileRef fref) const {
     return pipeline::indexOne(this->config->opts, *this->gs, fref);
 }
 
-std::unique_ptr<KeyValueStore> LSPTypechecker::getKvStore() const {
+std::unique_ptr<OwnedKeyValueStore> LSPTypechecker::getKvStore() const {
     if (this->sessionCache == nullptr) {
         return nullptr;
     }
 
-    return this->sessionCache->open(this->config->logger, this->config->opts);
+    auto kvstore = this->sessionCache->open(this->config->logger, this->config->opts);
+    if (kvstore == nullptr) {
+        return nullptr;
+    }
+
+    return std::make_unique<OwnedKeyValueStore>(std::move(kvstore));
 }
 
 vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers) const {
@@ -805,7 +809,7 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileR
 
     if (!toIndex.empty()) {
         auto cancelable = false;
-        auto kvstore = std::make_unique<OwnedKeyValueStore>(this->getKvStore());
+        auto kvstore = this->getKvStore();
         auto result = pipeline::index(*this->gs, toIndex, this->config->opts, workers, std::move(kvstore), cancelable);
         ENFORCE(result.hasResult());
         auto indexed = std::move(result.result());

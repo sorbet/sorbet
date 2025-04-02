@@ -11,6 +11,7 @@
 namespace sorbet {
 class WorkerPool;
 class KeyValueStore;
+class OwnedKeyValueStore;
 } // namespace sorbet
 
 namespace sorbet::core::lsp {
@@ -105,8 +106,9 @@ class LSPTypechecker final {
 
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
-    SlowPathResult runSlowPath(LSPFileUpdates &updates, std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers,
-                               std::shared_ptr<core::ErrorFlusher> errorFlusher, SlowPathMode mode);
+    SlowPathResult runSlowPath(LSPFileUpdates &updates, std::unique_ptr<const OwnedKeyValueStore> ownedKvstore,
+                               WorkerPool &workers, std::shared_ptr<core::ErrorFlusher> errorFlusher,
+                               SlowPathMode mode);
 
     /** Runs incremental typechecking on the provided updates. Returns the final list of files typechecked. */
     std::vector<core::FileRef> runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
@@ -126,7 +128,7 @@ class LSPTypechecker final {
     /**
      * Open the session-local kvstore.
      */
-    std::unique_ptr<KeyValueStore> getKvStore() const;
+    std::unique_ptr<OwnedKeyValueStore> getKvStore() const;
 
 public:
     LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
