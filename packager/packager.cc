@@ -477,7 +477,8 @@ public:
         ENFORCE(insertionLoc.exists());
 
         auto packageToImport = info.name.toString(gs);
-        auto suggestionTitle = fmt::format("Import `{}` in package `{}`", packageToImport, name.toString(gs));
+        auto suggestionTitle = fmt::format("{} `{}` in package `{}`", isTestImport ? "Test Import" : "Import",
+                                           packageToImport, name.toString(gs));
         vector<core::AutocorrectSuggestion::Edit> edits = {
             {insertionLoc, fmt::format("\n  {} {}", isTestImport ? "test_import" : "import", packageToImport)}};
         if (deleteTestImportEdit.has_value()) {
