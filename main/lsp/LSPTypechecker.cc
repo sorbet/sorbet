@@ -342,19 +342,26 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     }
     logger->debug("Taking slow path");
 
-    auto finalGS = move(updates.updatedGS.value());
+    ENFORCE(this->cancellationUndoState == nullptr);
+    if (cancelable) {
+        this->cancellationUndoState =
+            std::make_unique<UndoState>(std::move(gs), std::move(this->indexedFinalGS), updates.epoch);
+    }
+
+    this->gs = std::move(updates.updatedGS.value());
+
     const uint32_t epoch = updates.epoch;
-    auto &epochManager = *finalGS->epochManager;
+    auto &epochManager = *this->gs->epochManager;
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
-    auto committed = epochManager.tryCommitEpoch(*finalGS, epoch, cancelable, preemptManager, [&]() -> void {
+    auto committed = epochManager.tryCommitEpoch(*this->gs, epoch, cancelable, preemptManager, [&]() -> void {
         vector<ast::ParsedFile> indexed, nonPackagedIndexed;
 
         {
             // Replace error queue with one that is owned by this thread.
             auto savedErrorQueue = std::exchange(
-                finalGS->errorQueue,
-                make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer, errorFlusher));
+                this->gs->errorQueue, make_shared<core::ErrorQueue>(this->gs->errorQueue->logger,
+                                                                    this->gs->errorQueue->tracer, errorFlusher));
 
             std::optional<Timer> timeit;
             ShowOperation op(*config, ShowOperation::Kind::Indexing);
@@ -365,7 +372,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                     ENFORCE(!this->initialized);
                     timeit.emplace(this->config->logger, "initial_index");
 
-                    this->workspaceFiles = pipeline::reserveFiles(*finalGS, config->opts.inputFileNames);
+                    this->workspaceFiles = pipeline::reserveFiles(*this->gs, config->opts.inputFileNames);
                     break;
                 }
 
@@ -380,7 +387,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                     if (!updates.updatedFiles.empty()) {
                         for (auto &ast : updates.updatedFileIndexes) {
                             if (ast.tree) {
-                                updates.updatedFinalGSFileIndexes.emplace_back(std::move(ast));
+                                this->indexedFinalGS[ast.file.id()] = std::move(ast);
                             }
                         }
 
@@ -389,12 +396,12 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                     }
 
                     this->workspaceFiles.clear();
-                    this->workspaceFiles.reserve(finalGS->filesUsed());
+                    this->workspaceFiles.reserve(this->gs->filesUsed());
 
                     // Rebuild the set of filerefs we're going to index. We're explicitly skipping the `0` file, as
                     // that's always a nullptr.
                     auto ix = 0;
-                    for (const auto &file : finalGS->getFiles().subspan(1)) {
+                    for (const auto &file : this->gs->getFiles().subspan(1)) {
                         ++ix;
 
                         ENFORCE(file != nullptr);
@@ -416,13 +423,8 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                 }
             }
 
-            // Before making preemption or cancelation possible, pre-commit the changes from this slow path so that
-            // preempted queries can use them and the code after this lambda can assume that this step happened.
-            updates.updatedGS = move(finalGS);
-            commitFileUpdates(updates, cancelable);
-
-            // IMPORTANT: We use `this->gs` rather than the moved `finalGS` from this point forward.
-
+            ENFORCE(updates.updatedFileIndexes.empty());
+            ENFORCE(updates.updatedFiles.empty());
             ENFORCE(gs->lspQuery.isEmpty());
 
             // Test-only hook: Stall for as long as `slowPathBlocked` is set.
@@ -618,7 +620,6 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
         pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
     });
 
-    // Note: `gs` now holds the value of `finalGS`.
     gs->lspQuery = core::lsp::Query::noQuery();
 
     if (committed) {
@@ -630,11 +631,11 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     } else {
         prodCategoryCounterInc("lsp.updates", "slowpath_canceled");
         timeit.setTag("canceled", "true");
+        ENFORCE(cancelable);
         // Eagerly restore the state to how it was before this slow path, so that we're not holding the old state for an
         // arbitrarily long time. The next update will be responsible for freeing the underlying UndoState after it
         // makes use of the epoch field to determine additional files to include in the edit.
         cancellationUndoState->restore(this->gs, this->indexedFinalGS);
-        ENFORCE(cancelable);
         logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", updates.epoch);
     }
 
