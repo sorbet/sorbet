@@ -424,6 +424,10 @@ public:
     void local_push();
     void local_pop();
 
+    const std::vector<std::pair<size_t, size_t>> &get_comment_locations() const {
+        return lex.comment_locations;
+    }
+
 private:
     void rewind_to_tok_start(token_t endToken);
     void rewind_to_tok_end(token_t endToken);

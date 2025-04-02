@@ -64,11 +64,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(<emptyTree>::<C String>)
+    <self>.void()
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.void()
+    <self>.returns(<emptyTree>::<C String>)
   end
 
   def method6<<todo method>>(&<blk>)
