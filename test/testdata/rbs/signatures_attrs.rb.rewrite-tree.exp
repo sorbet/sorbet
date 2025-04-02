@@ -184,4 +184,32 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of foo>
     end
   end
+
+  class <emptyTree>::<C UnusedComments><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      @foo
+    end
+
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+      <self>.void()
+    end
+
+    def initialize<<todo method>>(&<blk>)
+      @foo = <cast:let>("foo", <todo sym>, <emptyTree>::<C String>)
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of foo>
+
+    <runtime method definition of initialize>
+  end
+
+  x = <emptyTree>::<C UnusedComments>.new()
+
+  <emptyTree>::<C T>.reveal_type(x.foo())
 end
