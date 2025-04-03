@@ -1,0 +1,53 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  let1 = <cast:let>("", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  if let1
+    let1 = <cast:let>("foo", <todo sym>, <emptyTree>::<C Integer>)
+  else
+    let1
+  end
+
+  <emptyTree>::<C T>.reveal_type(let1)
+
+  let2 = <cast:let>("", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  let3 = <cast:let>(if let2
+    let2 = "foo"
+  else
+    let2
+  end, <todo sym>, <emptyTree>::<C Integer>)
+
+  <emptyTree>::<C T>.reveal_type(let2)
+
+  <emptyTree>::<C T>.reveal_type(let3)
+
+  let4 = <cast:let>("", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  <cast:let>(if let4
+    let4 = "foo"
+  else
+    let4
+  end, <todo sym>, <emptyTree>::<C Integer>)
+
+  <emptyTree>::<C T>.reveal_type(let4)
+
+  cast1 = <cast:cast>("", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  if cast1
+    cast1 = <cast:cast>("foo", <todo sym>, <emptyTree>::<C Integer>)
+  else
+    cast1
+  end
+
+  <emptyTree>::<C T>.reveal_type(cast1)
+
+  must1 = ::<root>::<C T>.must("")
+
+  if must1
+    must1 = ::<root>::<C T>.must("foo")
+  else
+    must1
+  end
+
+  <emptyTree>::<C T>.reveal_type(must1)
+end

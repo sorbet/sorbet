@@ -1,0 +1,91 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  this = ::<root>::<C T>.unsafe(<self>)
+
+  <cast:cast>(begin
+    <assignTemp>$2 = this
+    if ::NilClass.===(<assignTemp>$2)
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$2)
+    else
+      <assignTemp>$2.puts()
+    end
+  end, <todo sym>, <emptyTree>::<C String>)
+
+  <cast:cast>(begin
+    <assignTemp>$3 = this
+    if ::NilClass.===(<assignTemp>$3)
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$3)
+    else
+      <assignTemp>$3.ARGV()
+    end
+  end.first(), <todo sym>, <emptyTree>::<C String>)
+
+  begin
+    <assignTemp>$4 = <cast:cast>(<emptyTree>::<C ARGV>, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+    if ::NilClass.===(<assignTemp>$4)
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$4)
+    else
+      <assignTemp>$4.first()
+    end
+  end
+
+  <cast:cast>(begin
+    <assignTemp>$5 = this
+    if ::NilClass.===(<assignTemp>$5)
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$5)
+    else
+      <assignTemp>$5.puts(<cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>))
+    end
+  end, <todo sym>, <emptyTree>::<C String>)
+
+  begin
+    <assignTemp>$6 = this
+    if ::NilClass.===(<assignTemp>$6)
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$6)
+    else
+      <assignTemp>$6.puts(<cast:cast>(42, <todo sym>, <emptyTree>::<C String>))
+    end
+  end
+
+  begin
+    <assignTemp>$7 = this
+    if ::NilClass.===(<assignTemp>$7)
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$7)
+    else
+      <assignTemp>$7.puts(<cast:cast>(42, <todo sym>, <emptyTree>::<C String>), <cast:cast>(42, <todo sym>, <emptyTree>::<C String>))
+    end
+  end
+
+  <cast:cast>(begin
+    <assignTemp>$8 = this
+    if ::NilClass.===(<assignTemp>$8)
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$8)
+    else
+      <assignTemp>$8.puts()
+    end
+  end, <todo sym>, <emptyTree>::<C Integer>)
+
+  <cast:cast>(begin
+    <assignTemp>$9 = <cast:cast>(this, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+    if ::NilClass.===(<assignTemp>$9)
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$9)
+    else
+      <assignTemp>$9.first()
+    end
+  end, <todo sym>, <emptyTree>::<C Integer>)
+
+  begin
+    <assignTemp>$10 = <cast:cast>(begin
+      <assignTemp>$11 = <cast:cast>(<emptyTree>::<C ARGV>, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+      if ::NilClass.===(<assignTemp>$11)
+        ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$11)
+      else
+        <assignTemp>$11.first()
+      end
+    end, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+    if ::NilClass.===(<assignTemp>$10)
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$10)
+    else
+      <assignTemp>$10.last()
+    end
+  end
+end

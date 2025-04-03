@@ -1,0 +1,38 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.type_parameters(:A, :B, :C).params(:a, ::<root>::<C T>.type_parameter(:A), :b, ::<root>::<C T>.nilable(::<root>::<C T>.type_parameter(:B)), :c, ::<root>::<C T>.type_parameter(:C)).void()
+  end
+
+  def type_params1<<todo method>>(a, b, c, &<blk>)
+    begin
+      x = <cast:let>(a, <todo sym>, ::<root>::<C T>.type_parameter(:A))
+      <emptyTree>::<C T>.reveal_type(x)
+      y = <cast:let>([], <todo sym>, ::<root>::<C T>::<C Array>.[](::<root>::<C T>.type_parameter(:B)))
+      <emptyTree>::<C T>.reveal_type(y)
+      z = <cast:let>(nil, <todo sym>, ::<root>::<C T>.nilable(::<root>::<C T>.type_parameter(:C)))
+      <emptyTree>::<C T>.reveal_type(z)
+    end
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.type_parameters(:A).params(:a, ::<root>::<C T>.nilable(::<root>::<C T>.type_parameter(:A))).returns(::<root>::<C T>.type_parameter(:A))
+  end
+
+  def type_params2<<todo method>>(a, &<blk>)
+    <cast:cast>(a, <todo sym>, ::<root>::<C T>.type_parameter(:A))
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.type_parameters(:A).params(:a, ::<root>::<C T>.nilable(::<root>::<C T>.type_parameter(:A))).returns(::<root>::<C T>.type_parameter(:A))
+  end
+
+  def type_params3<<todo method>>(a, &<blk>)
+    ::<root>::<C T>.must(a)
+  end
+
+  <runtime method definition of type_params1>
+
+  <runtime method definition of type_params2>
+
+  <runtime method definition of type_params3>
+end

@@ -1,0 +1,53 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <emptyTree>::<C ARGV>.first()
+rescue => <rescueTemp>$2
+  <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+rescue => e
+  <cast:cast>(e, <todo sym>, <emptyTree>::<C String>)
+
+  begin
+    x = <emptyTree>::<C ARGV>.first()
+    <cast:cast>(x, <todo sym>, <emptyTree>::<C String>)
+  end
+rescue => e
+  begin
+    <self>.puts(e)
+    <cast:cast>(e, <todo sym>, <emptyTree>::<C String>)
+  end
+rescue => e
+  begin
+    <self>.puts(e)
+    <cast:cast>(e, <todo sym>, <emptyTree>::<C String>)
+  end
+
+  r1 = begin
+    x = <emptyTree>::<C ARGV>.first()
+    <cast:cast>(x, <todo sym>, <emptyTree>::<C Integer>)
+  end
+rescue => e
+  begin
+    <self>.puts(e)
+    <cast:cast>(e, <todo sym>, <emptyTree>::<C String>)
+  end
+rescue => e
+  begin
+    <self>.puts(e)
+    <cast:cast>(e, <todo sym>, <emptyTree>::<C Float>)
+  end
+
+  <emptyTree>::<C T>.reveal_type(r1)
+
+  <emptyTree>
+rescue => e
+  <emptyTree>
+
+  <emptyTree>
+rescue <emptyTree>::<C StandardError> => <rescueTemp>$3
+  <emptyTree>
+
+  <emptyTree>
+rescue => <rescueTemp>$4
+  <emptyTree>
+end

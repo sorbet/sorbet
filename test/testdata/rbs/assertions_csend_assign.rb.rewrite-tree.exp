@@ -1,0 +1,70 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Let><<C <todo sym>>> < (::<todo sym>)
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+      <self>.params(:args, ::<root>::<C T>.untyped()).void()
+    end
+
+    def foo=<<todo method>>(*args, &<blk>)
+      <emptyTree>
+    end
+
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+      <self>.returns(::<root>::<C T>.untyped())
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of foo=>
+
+    <runtime method definition of foo>
+  end
+
+  let1 = <cast:let>(<emptyTree>::<C Let>.new(), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Let>))
+
+  begin
+    <assignTemp>$2 = let1
+    if ::NilClass.===(<assignTemp>$2)
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$2)
+    else
+      <assignTemp>$2.foo=(<cast:let>("foo", <todo sym>, <emptyTree>::<C String>))
+    end
+  end
+
+  let2 = <cast:let>(<emptyTree>::<C Let>.new(), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Let>))
+
+  begin
+    <assignTemp>$3 = begin
+      <assignTemp>$4 = let2
+      if ::NilClass.===(<assignTemp>$4)
+        ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$4)
+      else
+        <assignTemp>$4.foo()
+      end
+    end
+    if ::NilClass.===(<assignTemp>$3)
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$3)
+    else
+      <assignTemp>$3.foo=(<cast:let>("foo", <todo sym>, <emptyTree>::<C String>))
+    end
+  end
+
+  let3 = <cast:let>(<emptyTree>::<C Let>.new(), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Let>))
+
+  begin
+    <assignTemp>$5 = begin
+      <assignTemp>$6 = let3
+      if ::NilClass.===(<assignTemp>$6)
+        ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$6)
+      else
+        <assignTemp>$6.foo()
+      end
+    end
+    if ::NilClass.===(<assignTemp>$5)
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$5)
+    else
+      <assignTemp>$5.foo=(<cast:let>(["foo", "bar"], <todo sym>, ::<root>::<C T>::<C Array>.[](<emptyTree>::<C String>)))
+    end
+  end
+end

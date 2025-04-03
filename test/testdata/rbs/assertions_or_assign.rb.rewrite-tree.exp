@@ -1,0 +1,89 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  if let1
+    let1
+  else
+    let1 = <cast:let>("foo", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+  end
+
+  <emptyTree>::<C T>.reveal_type(let1)
+
+  if let2
+    let2
+  else
+    let2 = <cast:let>("foo", <todo sym>, <emptyTree>::<C Integer>)
+  end
+
+  <emptyTree>::<C T>.reveal_type(let2)
+
+  let3 = <cast:let>("", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  <cast:let>(if let3
+    let3
+  else
+    let3 = "foo"
+  end, <todo sym>, <emptyTree>::<C Integer>)
+
+  <emptyTree>::<C T>.reveal_type(let3)
+
+  class <emptyTree>::<C DesugaredLetNilable><<C <todo sym>>> < (::<todo sym>)
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      begin
+        if @x
+          @x
+        else
+          begin
+            @x = <cast:let>(@x, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+            <statTemp>$2 = 42
+            @x = <statTemp>$2
+          end
+        end
+        <emptyTree>::<C T>.reveal_type(@x)
+      end
+    end
+
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+      <self>.void()
+    end
+
+    def bar<<todo method>>(&<blk>)
+      begin
+        if @y
+          @y
+        else
+          begin
+            @y = <cast:let>(@y, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+            <statTemp>$2 = nil
+            @y = <statTemp>$2
+          end
+        end
+        if @y
+          @y
+        else
+          @y = 42
+        end
+        <emptyTree>::<C T>.reveal_type(@y)
+      end
+    end
+
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+      <self>.void()
+    end
+
+    def baz<<todo method>>(&<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(@x)
+        <emptyTree>::<C T>.reveal_type(@y)
+      end
+    end
+
+    <runtime method definition of foo>
+
+    <runtime method definition of bar>
+
+    <runtime method definition of baz>
+  end
+end

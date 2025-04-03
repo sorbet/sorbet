@@ -1,0 +1,12 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  x = <cast:cast>(nil, <todo sym>, <emptyTree>::<C String>)
+
+  <cast:cast>(<self>.puts(nil), <todo sym>, <emptyTree>::<C String>)
+
+  <cast:let>(42, <todo sym>, <emptyTree>::<C String>)
+
+  <cast:cast>(begin
+    <cast:let>(42, <todo sym>, <emptyTree>::<C String>)
+    <cast:let>(42, <todo sym>, <emptyTree>::<C String>)
+  end, <todo sym>, <emptyTree>::<C Integer>)
+end
