@@ -1,0 +1,30 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C SClassErr1><<C <todo sym>>> < (::<todo sym>)
+    class <singleton class><<C <todo sym>>> < ()
+    end
+  end
+
+  class <emptyTree>::<C SClassErr2><<C <todo sym>>> < (::<todo sym>)
+    class <singleton class><<C <todo sym>>> < ()
+    end
+  end
+
+  class <emptyTree>::<C SClassErr3><<C <todo sym>>> < (::<todo sym>)
+    class <singleton class><<C <todo sym>>> < ()
+    end
+  end
+
+  class <emptyTree>::<C SClassStmt><<C <todo sym>>> < (::<todo sym>)
+    class <singleton class><<C <todo sym>>> < ()
+      <cast:let>(42, <todo sym>, <emptyTree>::<C String>)
+    end
+  end
+
+  class <emptyTree>::<C SClassStmts><<C <todo sym>>> < (::<todo sym>)
+    class <singleton class><<C <todo sym>>> < ()
+      <cast:let>(42, <todo sym>, <emptyTree>::<C String>)
+
+      <cast:let>(42, <todo sym>, <emptyTree>::<C String>)
+    end
+  end
+end

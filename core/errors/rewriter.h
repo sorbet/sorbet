@@ -24,6 +24,7 @@ constexpr ErrorClass DuplicateProp{3515, StrictLevel::True};
 constexpr ErrorClass RBSSyntaxError{3550, StrictLevel::False};
 constexpr ErrorClass RBSUnsupported{3551, StrictLevel::False};
 constexpr ErrorClass RBSParameterMismatch{3552, StrictLevel::False};
+constexpr ErrorClass RBSAssertionError{3553, StrictLevel::False};
 
 } // namespace sorbet::core::errors::Rewriter
 #endif

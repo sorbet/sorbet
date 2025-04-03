@@ -374,7 +374,9 @@ You can also consider using [`T::Enum`](tenum.md).
 > To enable it pass the `--enable-experimental-rbs-assertions` option to Sorbet
 > or add it to your `sorbet/config`.
 
-`T.let` assertions can be expressed using RBS comments:
+### `T.let` assertions
+
+[`T.let`](type-assertions#tlet) assertions can be expressed using RBS comments:
 
 ```ruby
 x = 42 #: Integer
@@ -409,14 +411,110 @@ X = <<~MSG #: String
 MSG
 ```
 
-### Caveats
+### `T.cast` assertions
 
-Because Ruby does not have something akin to C-style `/* ... */` comments, the
-comment-based syntax only support trailing comments, meaning only for variable
-assignments.
+[`T.cast`](type-assertions#tcast) assertions can be expressed using RBS comments
+with the `as` keyword:
 
-At time of writing, there is no support for other inline type assertions (e.g.,
-no `T.cast` nor `T.must` alternative).
+```ruby
+x = 42 #: as Integer
+```
+
+This is equivalent to:
+
+```ruby
+x = T.cast(42, Integer)
+```
+
+The comment is always applied to the outermost expression. For example, in this
+method call, the cast is applied to the value returned by `foo` and not the
+argument `x`:
+
+```ruby
+foo x #: as Integer
+```
+
+This is equivalent to:
+
+```ruby
+T.cast(foo x, Integer)
+```
+
+It is possible to cast the argument `x` by using parentheses:
+
+```ruby
+foo(
+  x #: as Integer
+)
+```
+
+This is equivalent to:
+
+```ruby
+foo(T.cast(x, Integer))
+```
+
+Casts comments can be used in any context where a type assertion is valid:
+
+```ruby
+foo
+  .bar #: as Integer
+  .baz
+
+[
+  foo, #: as Integer
+  {
+    bar: baz, #: as String
+  }
+]
+
+x = if foo
+  bar
+else
+  baz
+end #: as Integer
+```
+
+### `T.must` assertions
+
+[`T.must`](type-assertions#tmust) are denoted with the special `as !nil`
+comment:
+
+```ruby
+foo #: as !nil
+```
+
+This is equivalent to:
+
+```ruby
+T.must(foo)
+```
+
+The `as !nil` comment can be used in any context where a cast is valid and
+follows the same rules as `as Type` comments:
+
+```ruby
+foo(
+  x #: as !nil
+)
+```
+
+### `T.unsafe` escape hatch
+
+[`T.unsafe`](static#call-site-granularity-tunsafe) can be replaced with the
+special `as untyped` annotation:
+
+```ruby
+x = 42 #: as untyped
+x.undefined_method # no error statically, but will fail at runtime
+```
+
+This is equivalent to:
+
+```ruby
+x = T.unsafe(42)
+x.undefined_method
+```
 
 [Class instance type]:
   https://github.com/ruby/rbs/blob/master/docs/syntax.md#class-instance-type

@@ -1710,7 +1710,7 @@ lbrace_cmd_block_start:
                   arg
                     {
                       driver.lex.context.inDefined = false;
-                      $$ = driver.build.keywordDefined(self, $1, $4);
+                      $$ = driver.build.keywordDefined(self, $1, nullptr, $4, nullptr);
                     }
                 | arg tEH arg opt_nl tCOLON arg
                     {
@@ -2116,7 +2116,7 @@ array_premature_end: eof
                   expr rparen
                     {
                       driver.lex.context.inDefined = false;
-                      $$ = driver.build.keywordDefined(self, $1, $5);
+                      $$ = driver.build.keywordDefined(self, $1, $3, $5, $6);
                     }
 
                 | kNOT tLPAREN2 expr rparen

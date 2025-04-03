@@ -1,0 +1,130 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.void()
+  end
+
+  def defErr1<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.void()
+  end
+
+  def defErr2<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.void()
+  end
+
+  def defErr3<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.void()
+  end
+
+  def defStmt<<todo method>>(&<blk>)
+    <cast:let>(42, <todo sym>, <emptyTree>::<C String>)
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.void()
+  end
+
+  def defStmts<<todo method>>(&<blk>)
+    begin
+      <cast:let>(42, <todo sym>, <emptyTree>::<C String>)
+      <cast:let>(42, <todo sym>, <emptyTree>::<C String>)
+    end
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:x, ::<root>::<C T>.nilable(<emptyTree>::<C String>)).returns(<emptyTree>::<C String>)
+  end
+
+  def defImplicitReturn1<<todo method>>(x, &<blk>)
+    <cast:cast>(x, <todo sym>, <emptyTree>::<C String>)
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:x, ::<root>::<C T>.nilable(<emptyTree>::<C String>)).returns(<emptyTree>::<C String>)
+  end
+
+  def defImplicitReturn2<<todo method>>(x, &<blk>)
+    begin
+      <self>.puts(x)
+      <cast:cast>(x, <todo sym>, <emptyTree>::<C String>)
+    end
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:x, ::<root>::<C T>.nilable(<emptyTree>::<C String>)).returns(<emptyTree>::<C String>)
+  end
+
+  def defReturn1<<todo method>>(x, &<blk>)
+    return <cast:cast>(x, <todo sym>, <emptyTree>::<C String>)
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:x, ::<root>::<C T>.nilable(<emptyTree>::<C String>)).void()
+  end
+
+  def defReturn2<<todo method>>(x, &<blk>)
+    return <emptyTree>
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:x, ::<root>::<C T>.nilable(<emptyTree>::<C String>)).void()
+  end
+
+  def defReturn3<<todo method>>(x, &<blk>)
+    return <cast:cast>(x, <todo sym>, <emptyTree>::<C String>)
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:x, ::<root>::<C T>.nilable(<emptyTree>::<C String>), :y, ::<root>::<C T>.nilable(<emptyTree>::<C String>)).void()
+  end
+
+  def defReturn4<<todo method>>(x, y, &<blk>)
+    return begin
+        <cast:cast>(x, <todo sym>, <emptyTree>::<C String>)
+        <cast:cast>(y, <todo sym>, <emptyTree>::<C String>)
+      end
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:x, ::<root>::<C T>.nilable(<emptyTree>::<C String>)).void()
+  end
+
+  def defReturn5<<todo method>>(x, &<blk>)
+    return <cast:cast>([x, 42], <todo sym>, [<emptyTree>::<C String>, <emptyTree>::<C Integer>])
+  end
+
+  <runtime method definition of defErr1>
+
+  <runtime method definition of defErr2>
+
+  <runtime method definition of defErr3>
+
+  <runtime method definition of defStmt>
+
+  <runtime method definition of defStmts>
+
+  <runtime method definition of defImplicitReturn1>
+
+  <runtime method definition of defImplicitReturn2>
+
+  <runtime method definition of defReturn1>
+
+  <runtime method definition of defReturn2>
+
+  <runtime method definition of defReturn3>
+
+  <runtime method definition of defReturn4>
+
+  <runtime method definition of defReturn5>
+end

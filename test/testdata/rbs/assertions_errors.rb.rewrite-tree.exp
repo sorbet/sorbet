@@ -1,0 +1,25 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  letErr1 = <cast:let>(<emptyTree>::<C ARGV>, <todo sym>, <emptyTree>::<C Int>)
+
+  letErr2 = <emptyTree>::<C ARGV>
+
+  letErr3 = <emptyTree>::<C ARGV>
+
+  letErr4 = <cast:let>(<emptyTree>::<C ARGV>, <todo sym>, <emptyTree>::<C Integer>)
+
+  letErr5 = <cast:let>(<emptyTree>::<C ARGV>, <todo sym>, <emptyTree>::<C Integer>)
+
+  letErr6 = <cast:let>(<emptyTree>::<C ARGV>, <todo sym>, <emptyTree>::<C Integer>)
+
+  castErr1 = <emptyTree>::<C ARGV>.first()
+
+  castErr2 = <emptyTree>::<C ARGV>.first()
+
+  castErr3 = <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C Int>)
+
+  <emptyTree>::<C ARGV>
+
+  <emptyTree>::<C ARGV>
+
+  <emptyTree>::<C ARGV>
+end

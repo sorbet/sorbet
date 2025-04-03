@@ -1,0 +1,41 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Let><<C <todo sym>>> < (::<todo sym>)
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+      <self>.params(:args, ::<root>::<C T>.untyped()).void()
+    end
+
+    def foo=<<todo method>>(*args, &<blk>)
+      <emptyTree>
+    end
+
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+      <self>.returns(::<root>::<C T>.untyped())
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of foo=>
+
+    <runtime method definition of foo>
+  end
+
+  let1 = <emptyTree>::<C Let>.new()
+
+  let1.foo=(<cast:let>("foo", <todo sym>, <emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(let1.foo())
+
+  let2 = <emptyTree>::<C Let>.new()
+
+  let2.foo().foo=(<cast:let>("foo", <todo sym>, <emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(let2.foo())
+
+  let3 = <emptyTree>::<C Let>.new()
+
+  let3.foo().foo=(<cast:let>(["foo", "bar"], <todo sym>, ::<root>::<C T>::<C Array>.[](<emptyTree>::<C String>)))
+
+  <emptyTree>::<C T>.reveal_type(let3.foo())
+end

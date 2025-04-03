@@ -622,6 +622,21 @@ supported by Sorbet. See
 This error is raised when a RBS signature comment has more parameters than the
 method definition it represents.
 
+## 3553
+
+> This error is specific to RBS support when using the
+> `--enable-experimental-rbs-signatures` flag.
+
+This error is raised when a RBS assertion comment is found in a place where it
+is not allowed.
+
+For example this snippet will raise this error:
+
+```ruby
+class A #: as String
+end
+```
+
 ## 3702
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are

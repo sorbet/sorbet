@@ -1,0 +1,20 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C ClassErr1><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  class <emptyTree>::<C ClassErr2><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  class <emptyTree>::<C ClassErr3><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  class <emptyTree>::<C ClassStmt><<C <todo sym>>> < (::<todo sym>)
+    <cast:let>(42, <todo sym>, <emptyTree>::<C String>)
+  end
+
+  class <emptyTree>::<C ClassStmts><<C <todo sym>>> < (::<todo sym>)
+    <cast:let>(42, <todo sym>, <emptyTree>::<C String>)
+
+    <cast:let>(42, <todo sym>, <emptyTree>::<C String>)
+  end
+end
