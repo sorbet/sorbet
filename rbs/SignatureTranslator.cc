@@ -37,8 +37,9 @@ SignatureTranslator::translateAssertionType(vector<std::pair<core::LocOffsets, c
     return typeToParserNode.toParserNode(rbsType, assertion.typeLoc);
 }
 
-unique_ptr<parser::Node> SignatureTranslator::translateType(const parser::Send *send, const rbs::Comment &signature,
-                                                            const vector<Comment> &annotations) {
+unique_ptr<parser::Node> SignatureTranslator::translateAttrSignature(const parser::Send *send,
+                                                                     const rbs::Comment &signature,
+                                                                     const vector<Comment> &annotations) {
     rbs_string_t rbsString = makeRBSString(signature.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
@@ -68,9 +69,9 @@ unique_ptr<parser::Node> SignatureTranslator::translateType(const parser::Send *
     return methodTypeToParserNode.attrSignature(send, rbsType, signature.typeLoc, signature.commentLoc, annotations);
 }
 
-unique_ptr<parser::Node> SignatureTranslator::translateSignature(const parser::Node *methodDef,
-                                                                 const rbs::Comment &signature,
-                                                                 const vector<Comment> &annotations) {
+unique_ptr<parser::Node> SignatureTranslator::translateMethodSignature(const parser::Node *methodDef,
+                                                                       const rbs::Comment &signature,
+                                                                       const vector<Comment> &annotations) {
     rbs_string_t rbsString = makeRBSString(signature.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 

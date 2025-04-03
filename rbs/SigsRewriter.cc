@@ -176,11 +176,11 @@ unique_ptr<parser::NodeVec> signaturesForNode(core::MutableContext ctx, parser::
 
     for (auto &signature : comments.signatures) {
         if (parser::isa_node<parser::DefMethod>(node) || parser::isa_node<parser::DefS>(node)) {
-            auto sig = signatureTranslator.translateSignature(node, signature, comments.annotations);
+            auto sig = signatureTranslator.translateMethodSignature(node, signature, comments.annotations);
 
             signatures->emplace_back(move(sig));
         } else if (auto send = parser::cast_node<parser::Send>(node)) {
-            auto sig = signatureTranslator.translateType(send, signature, comments.annotations);
+            auto sig = signatureTranslator.translateAttrSignature(send, signature, comments.annotations);
             signatures->emplace_back(move(sig));
         } else {
             Exception::raise("Unimplemented node type: {}", node->nodeName());
