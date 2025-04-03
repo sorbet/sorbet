@@ -1062,8 +1062,15 @@ public:
         return make_unique<Break>(loc, std::move(args));
     }
 
-    unique_ptr<Node> keywordDefined(const token *keyword, unique_ptr<Node> arg) {
-        return make_unique<Defined>(tokLoc(keyword).join(arg->loc), std::move(arg));
+    unique_ptr<Node> keywordDefined(const token *keyword, const token *lparen, unique_ptr<Node> arg,
+                                    const token *rparen) {
+        auto loc = tokLoc(keyword);
+        if (rparen != nullptr) {
+            loc = loc.join(tokLoc(rparen));
+        } else {
+            loc = loc.join(arg->loc);
+        }
+        return make_unique<Defined>(loc, std::move(arg));
     }
 
     unique_ptr<Node> keywordNext(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
@@ -2296,9 +2303,10 @@ ForeignPtr keywordBreak(SelfPtr builder, const token *keyword, const token *lpar
     return build->toForeign(build->keywordBreak(keyword, lparen, build->convertNodeList(args), rparen));
 }
 
-ForeignPtr keywordDefined(SelfPtr builder, const token *keyword, ForeignPtr arg) {
+ForeignPtr keywordDefined(SelfPtr builder, const token *keyword, const token *lparen, ForeignPtr arg,
+                          const token *rparen) {
     auto build = cast_builder(builder);
-    return build->toForeign(build->keywordDefined(keyword, build->cast_node(arg)));
+    return build->toForeign(build->keywordDefined(keyword, lparen, build->cast_node(arg), rparen));
 }
 
 ForeignPtr keywordNext(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
