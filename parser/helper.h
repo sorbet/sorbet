@@ -189,6 +189,13 @@ public:
     }
 
     /*
+     * Create a `T::Helpers` constant node.
+     */
+    static std::unique_ptr<parser::Node> T_Helpers(core::LocOffsets loc) {
+        return Const(loc, T(loc), core::Names::Constants::Helpers());
+    }
+
+    /*
      * Create a `T::Set` constant node.
      */
     static std::unique_ptr<parser::Node> T_Set(core::LocOffsets loc) {
