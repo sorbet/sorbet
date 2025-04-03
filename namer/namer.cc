@@ -1218,7 +1218,7 @@ private:
             symbolData->flags.isInterface = true;
             if (!symbolData->isModule()) {
                 if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InterfaceClass)) {
-                    e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
+                    e.setHeader("Classes can't be interfaces. Use `{}` instead of `{}`", "abstract!", "interface!");
                     e.replaceWith("Change `interface!` to `abstract!`", ctx.locAt(mod.loc), "abstract!");
                 }
             }
