@@ -120,4 +120,82 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergesMultipleWatchmanUpdates") {
     CHECK_EQ(lspWrapper->getTypecheckCount(), 1);
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
+    auto opts = std::make_shared<realmain::options::Options>();
+    opts->stripePackages = true;
+    this->resetState(std::move(opts));
+
+    writeFilesToFS({
+        {"__package.rb", "# typed: strict\n"
+                         "# frozen_string_literal: true\n"
+                         "class Project < PackageSpec\n"
+                         "  export Project::Bar\n"
+                         "end\n"},
+
+        {"impl.rb", "# typed: strict\n"
+                    "# frozen_string_literal: true\n"
+                    "module Project\n"
+                    "  class Bar\n"
+                    "  end\n"
+                    "end\n"},
+
+        {"b/__package.rb", "# typed: strict\n"
+                           "# frozen_string_literal: frue\n"
+                           "class Project::B < PackageSpec\n"
+                           "  export Project::B::Foo\n"
+                           "  import Project::C\n"
+                           "end\n"},
+
+        {"b/impl.rb", "# typed: strict\n"
+                      "# frozen_string_literal: true\n"
+                      "module Project\n"
+                      "  class B::Foo\n"
+                      "    extend T::Sig\n"
+                      "    sig { returns(Project::C::Bar) }\n"
+                      "    def test\n"
+                      "      Project::C::Bar.new\n"
+                      "    end\n"
+                      "  end\n"
+                      "end\n"},
+
+        {"c/__package.rb", "# typed: strict\n"
+                           "# frozen_string_literal: true\n"
+                           "class Project::C < PackageSpec\n"
+                           "  export Project::C::Bar\n"
+                           "end\n"},
+
+        {"c/impl.rb", "# typed: strict\n"
+                      "# frozen_string_literal: true\n"
+                      "module Project\n"
+                      "  class C::Bar\n"
+                      "  end\n"
+                      "end\n"},
+    });
+
+    // It's important that these files are present during initialization, to force any potential persistence issues
+    // when the typechecker thread copies its GlobalState over to the indexer.
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/__package.rb", this->rootPath));
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/b/__package.rb", this->rootPath));
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/b/impl.rb", this->rootPath));
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/c/__package.rb", this->rootPath));
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/c/impl.rb", this->rootPath));
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/impl.rb", this->rootPath));
+
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    // Overwrite the contents of c/__package.rb, and trigger a slow path. This should only result in errors about the
+    // new structure of the project, but if the packageDB is accidentally persisted through the GlobalState copy that's
+    // given to the indexer, we'll see ENFORCE failures here when we try to use stale information from the original
+    // packageDB to generate autocorrects.
+    writeFilesToFS({{"c/__package.rb", "\n"}});
+    vector<unique_ptr<LSPMessage>> requests;
+    requests.push_back(watchmanFileUpdate({"c/__package.rb", "c/impl.rb"}));
+    assertErrorDiagnostics(send(move(requests)), {
+                                                     {"b/__package.rb", 4, "Unable to resolve constant"},
+                                                     {"b/impl.rb", 5, "resolves but is not exported"},
+                                                     {"b/impl.rb", 7, "resolves but is not exported"},
+                                                     {"c/__package.rb", 0, "must contain a package definition"},
+                                                 });
+}
+
 } // namespace sorbet::test::lsp
