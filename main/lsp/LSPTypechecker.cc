@@ -502,6 +502,11 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                     indexedState = this->gs->deepCopy();
                     indexedState->errorQueue = std::move(savedErrorQueue);
 
+                    // We need to ensure that the package DB we build up during indexing isn't accidentaly persisted in
+                    // the indexer, as that would feed it back into all subsequent slow path runs and prevent any
+                    // deletions to the package db structure.
+                    indexedState->packageDB() = indexedState->packageDB().copyOptionsOnly();
+
                     this->sessionCache =
                         cache::SessionCache::make(std::move(ownedKvstore), *this->config->logger, this->config->opts);
 
