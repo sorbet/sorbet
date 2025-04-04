@@ -31,7 +31,7 @@ uint32_t hasHeredocMarker(core::Context ctx, const uint32_t fromPos, const uint3
     if (regex_search(source, match, heredoc_pattern)) {
         return fromPos + match.length();
     }
-    return -1;
+    return UINT32_MAX;
 }
 
 /**
@@ -39,10 +39,10 @@ uint32_t hasHeredocMarker(core::Context ctx, const uint32_t fromPos, const uint3
  */
 uint32_t heredocPos(core::Context ctx, core::LocOffsets assignLoc, const unique_ptr<parser::Node> &node) {
     if (node == nullptr) {
-        return -1;
+        return UINT32_MAX;
     }
 
-    uint32_t result = -1;
+    uint32_t result = UINT32_MAX;
     typecase(
         node.get(),
         [&](parser::String *lit) {
@@ -82,7 +82,7 @@ uint32_t heredocPos(core::Context ctx, core::LocOffsets assignLoc, const unique_
         [&](parser::Array *arr) {
             for (auto &elem : arr->elts) {
                 result = heredocPos(ctx, assignLoc, elem);
-                if (result != -1) {
+                if (result != UINT32_MAX) {
                     break;
                 }
             }
