@@ -23,7 +23,7 @@ struct Comments {
      *
      * Signatures are formatted as `#: () -> void`.
      */
-    std::vector<Comment> signatures;
+    std::vector<RBSDeclaration> signatures;
 };
 
 class SigsRewriter {

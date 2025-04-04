@@ -119,7 +119,10 @@ parseComment(core::MutableContext ctx, InlineComment comment,
     }
 
     auto signatureTranslator = rbs::SignatureTranslator(ctx);
-    auto type = signatureTranslator.translateAssertionType(typeParams, comment.comment);
+    vector<Comment> comments;
+    comments.push_back(comment.comment);
+    auto declaration = RBSDeclaration(comments);
+    auto type = signatureTranslator.translateAssertionType(typeParams, declaration);
 
     if (type == nullptr) {
         // We couldn't parse the type, we produced an error, we don't return anything

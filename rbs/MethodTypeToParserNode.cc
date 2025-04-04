@@ -82,7 +82,7 @@ parser::Args *getMethodArgs(const parser::Node *node) {
     return parser::cast_node<parser::Args>(args);
 }
 
-void collectArgs(core::LocOffsets docLoc, rbs_node_list_t *field, vector<RBSArg> &args) {
+void collectArgs(const RBSDeclaration &declaration, rbs_node_list_t *field, vector<RBSArg> &args) {
     if (field == nullptr || field->length == 0) {
         return;
     }
@@ -101,14 +101,14 @@ void collectArgs(core::LocOffsets docLoc, rbs_node_list_t *field, vector<RBSArg>
             range.end.char_pos = nameRange.end;
         }
 
-        auto loc = locFromRange(docLoc, range);
+        auto loc = declaration.typeLocFromRange(range);
         auto node = (rbs_types_function_param_t *)list_node->node;
         auto arg = RBSArg{loc, node->name, node->type};
         args.emplace_back(arg);
     }
 }
 
-void collectKeywords(core::LocOffsets docLoc, rbs_hash_t *field, vector<RBSArg> &args) {
+void collectKeywords(const RBSDeclaration &declaration, rbs_hash_t *field, vector<RBSArg> &args) {
     if (field == nullptr) {
         return;
     }
@@ -122,7 +122,7 @@ void collectKeywords(core::LocOffsets docLoc, rbs_hash_t *field, vector<RBSArg> 
                 "Unexpected node type `{}` in keyword argument value, expected `{}`",
                 rbs_node_type_name(hash_node->value), "FunctionParam");
 
-        auto loc = locFromRange(docLoc, hash_node->key->location->rg);
+        auto loc = declaration.typeLocFromRange(hash_node->key->location->rg);
         rbs_ast_symbol_t *keyNode = (rbs_ast_symbol_t *)hash_node->key;
         rbs_types_function_param_t *valueNode = (rbs_types_function_param_t *)hash_node->value;
         auto arg = RBSArg{loc, keyNode, valueNode->type};
@@ -130,17 +130,36 @@ void collectKeywords(core::LocOffsets docLoc, rbs_hash_t *field, vector<RBSArg> 
     }
 }
 
+unique_ptr<parser::Node> assembleTSigWithoutRuntime(const core::LocOffsets &loc) {
+    auto t = parser::MK::T(loc);
+    auto t_sig = parser::MK::Const(loc, move(t), core::Names::Constants::Sig());
+    auto t_sig_withoutRuntime = parser::MK::Const(loc, move(t_sig), core::Names::Constants::WithoutRuntime());
+    return t_sig_withoutRuntime;
+}
+
 } // namespace
 
 unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::Node *methodDef,
                                                                  const rbs_method_type_t *methodType,
-                                                                 const core::LocOffsets typeLoc,
-                                                                 const core::LocOffsets commentLoc,
+                                                                 const RBSDeclaration &declaration,
                                                                  const vector<Comment> &annotations) {
     const auto &node = *methodType;
+    // Method signatures can have multiple lines, so we need
+    // - full type location
+    // - first line type location
+    // - token specific location
+    // for different parts of the signature
+    //
+    // For example,
+    // - The whole signature block needs to be mapped to the full type location
+    // - The `sig` call is always mapped to just the first line of the signature
+    // - The return value needs to has a calculated location based on the token range
+    auto fullTypeLoc = declaration.fullTypeLoc();
+    auto firstLineTypeLoc = declaration.firstLineTypeLoc();
+    auto commentLoc = declaration.commentLoc();
 
     if (node.type->type != RBS_TYPES_FUNCTION) {
-        auto errLoc = locFromRange(typeLoc, node.type->location->rg);
+        auto errLoc = declaration.typeLocFromRange(node.type->location->rg);
         if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSUnsupported)) {
             e.setHeader("Unexpected node type `{}` in method signature, expected `{}`", rbs_node_type_name(node.type),
                         "Function");
@@ -154,7 +173,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
     vector<pair<core::LocOffsets, core::NameRef>> typeParams;
     for (rbs_node_list_node_t *list_node = node.type_params->head; list_node != nullptr; list_node = list_node->next) {
-        auto loc = locFromRange(typeLoc, list_node->node->location->rg);
+        auto loc = declaration.typeLocFromRange(list_node->node->location->rg);
 
         ENFORCE(list_node->node->type == RBS_AST_TYPE_PARAM,
                 "Unexpected node type `{}` in type parameter list, expected `{}`", rbs_node_type_name(list_node->node),
@@ -169,8 +188,8 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
     vector<RBSArg> args;
 
-    collectArgs(typeLoc, functionType->required_positionals, args);
-    collectArgs(typeLoc, functionType->optional_positionals, args);
+    collectArgs(declaration, functionType->required_positionals, args);
+    collectArgs(declaration, functionType->optional_positionals, args);
 
     rbs_node_t *restPositionals = functionType->rest_positionals;
     if (restPositionals) {
@@ -178,18 +197,18 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
                 "Unexpected node type `{}` in rest positional argument, expected `{}`",
                 rbs_node_type_name(restPositionals), "FunctionParam");
 
-        auto loc = locFromRange(typeLoc, restPositionals->location->rg);
+        auto loc = declaration.typeLocFromRange(restPositionals->location->rg);
         auto node = (rbs_types_function_param_t *)restPositionals;
         auto arg = RBSArg{loc, node->name, node->type};
         args.emplace_back(arg);
     }
 
-    collectArgs(typeLoc, functionType->trailing_positionals, args);
+    collectArgs(declaration, functionType->trailing_positionals, args);
 
     // Collect keywords
 
-    collectKeywords(typeLoc, functionType->required_keywords, args);
-    collectKeywords(typeLoc, functionType->optional_keywords, args);
+    collectKeywords(declaration, functionType->required_keywords, args);
+    collectKeywords(declaration, functionType->optional_keywords, args);
 
     rbs_node_t *restKeywords = functionType->rest_keywords;
     if (restKeywords) {
@@ -197,7 +216,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
                 "Unexpected node type `{}` in rest keyword argument, expected `{}`", rbs_node_type_name(restKeywords),
                 "FunctionParam");
 
-        auto loc = locFromRange(typeLoc, restKeywords->location->rg);
+        auto loc = declaration.typeLocFromRange(restKeywords->location->rg);
         auto node = (rbs_types_function_param_t *)restKeywords;
         auto arg = RBSArg{loc, node->name, node->type};
         args.emplace_back(arg);
@@ -208,7 +227,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
     auto *block = node.block;
     if (block) {
         // TODO: RBS doesn't have location on blocks yet
-        auto arg = RBSArg{typeLoc, nullptr, (rbs_node_t *)block};
+        auto arg = RBSArg{fullTypeLoc, nullptr, (rbs_node_t *)block};
         args.emplace_back(arg);
     }
 
@@ -220,7 +239,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
     auto methodArgs = getMethodArgs(methodDef);
     for (int i = 0; i < args.size(); i++) {
         auto &arg = args[i];
-        auto type = typeToParserNode.toParserNode(arg.type, typeLoc);
+        auto type = typeToParserNode.toParserNode(arg.type, declaration);
 
         if (auto nameSymbol = arg.name) {
             // The RBS arg is named in the signature, so we use the explicit name used
@@ -229,7 +248,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
             sigParams.emplace_back(make_unique<parser::Pair>(arg.loc, parser::MK::Symbol(arg.loc, name), move(type)));
         } else {
             if (!methodArgs || i >= methodArgs->args.size()) {
-                if (auto e = ctx.beginError(typeLoc, core::errors::Rewriter::RBSParameterMismatch)) {
+                if (auto e = ctx.beginError(fullTypeLoc, core::errors::Rewriter::RBSParameterMismatch)) {
                     e.setHeader("RBS signature has more parameters than in the method definition");
                 }
 
@@ -246,7 +265,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
     // Build the sig
 
-    auto sigBuilder = parser::MK::Self(typeLoc);
+    auto sigBuilder = parser::MK::Self(fullTypeLoc);
     sigBuilder = handleAnnotations(std::move(sigBuilder), annotations);
 
     if (typeParams.size() > 0) {
@@ -256,49 +275,51 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
         for (auto &param : typeParams) {
             typeParamsVector.emplace_back(parser::MK::Symbol(param.first, param.second));
         }
-        sigBuilder =
-            parser::MK::Send(typeLoc, move(sigBuilder), core::Names::typeParameters(), typeLoc, move(typeParamsVector));
+        sigBuilder = parser::MK::Send(fullTypeLoc, move(sigBuilder), core::Names::typeParameters(), fullTypeLoc,
+                                      move(typeParamsVector));
     }
 
     if (sigParams.size() > 0) {
-        auto hash = parser::MK::Hash(typeLoc, true, move(sigParams));
+        auto hash = parser::MK::Hash(fullTypeLoc, true, move(sigParams));
         auto args = parser::NodeVec();
         args.emplace_back(move(hash));
-        sigBuilder = parser::MK::Send(typeLoc, move(sigBuilder), core::Names::params(), typeLoc, move(args));
+        sigBuilder = parser::MK::Send(fullTypeLoc, move(sigBuilder), core::Names::params(), fullTypeLoc, move(args));
     }
 
     rbs_node_t *returnValue = functionType->return_type;
     if (returnValue->type == RBS_TYPES_BASES_VOID) {
-        auto loc = locFromRange(typeLoc, returnValue->location->rg);
-        sigBuilder = parser::MK::Send0(typeLoc, move(sigBuilder), core::Names::void_(), loc);
+        auto loc = declaration.typeLocFromRange(returnValue->location->rg);
+        sigBuilder = parser::MK::Send0(fullTypeLoc, move(sigBuilder), core::Names::void_(), loc);
     } else {
-        auto returnType = typeToParserNode.toParserNode(returnValue, typeLoc);
+        auto nameLoc = declaration.typeLocFromRange(returnValue->location->rg);
+        auto returnType = typeToParserNode.toParserNode(returnValue, declaration);
         sigBuilder =
-            parser::MK::Send1(typeLoc, move(sigBuilder), core::Names::returns(), returnType->loc, move(returnType));
+            parser::MK::Send1(fullTypeLoc, move(sigBuilder), core::Names::returns(), nameLoc, move(returnType));
     }
 
     auto sigArgs = parser::NodeVec();
-    auto t = parser::MK::T(typeLoc);
-    auto t_sig = parser::MK::Const(typeLoc, move(t), core::Names::Constants::Sig());
-    auto t_sig_withoutRuntime = parser::MK::Const(typeLoc, move(t_sig), core::Names::Constants::WithoutRuntime());
-    sigArgs.emplace_back(move(t_sig_withoutRuntime));
+    sigArgs.emplace_back(assembleTSigWithoutRuntime(firstLineTypeLoc));
 
     auto final = absl::c_find_if(annotations, [](const Comment &annotation) { return annotation.string == "final"; });
     if (final != annotations.end()) {
         sigArgs.emplace_back(parser::MK::Symbol(final->typeLoc, core::Names::final_()));
     }
 
-    auto sig =
-        parser::MK::Send(typeLoc, parser::MK::SorbetPrivateStatic(typeLoc), core::Names::sig(), typeLoc, move(sigArgs));
+    auto sig = parser::MK::Send(fullTypeLoc, parser::MK::SorbetPrivateStatic(fullTypeLoc), core::Names::sig(),
+                                firstLineTypeLoc, move(sigArgs));
 
     return make_unique<parser::Block>(commentLoc, move(sig), nullptr, move(sigBuilder));
 }
 
 unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Send *send, const rbs_node_t *type,
-                                                               const core::LocOffsets typeLoc,
-                                                               const core::LocOffsets commentLoc,
+                                                               const RBSDeclaration &declaration,
                                                                const vector<Comment> &annotations) {
     auto typeParams = vector<pair<core::LocOffsets, core::NameRef>>();
+    // Attribute signatures doesn't support multiple lines
+    // so first line type loc is the same as the full type loc
+    auto typeLoc = declaration.firstLineTypeLoc();
+    auto commentLoc = declaration.commentLoc();
+
     auto sigBuilder = parser::MK::Self(typeLoc.copyWithZeroLength());
     sigBuilder = handleAnnotations(std::move(sigBuilder), annotations);
 
@@ -311,7 +332,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
     }
 
     auto typeTranslator = TypeToParserNode(ctx, typeParams, parser);
-    auto returnType = typeTranslator.toParserNode(type, typeLoc);
+    auto returnType = typeTranslator.toParserNode(type, declaration);
 
     if (send->method == core::Names::attrWriter()) {
         if (send->args.size() > 1) {
@@ -333,7 +354,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
 
         auto pairs = parser::NodeVec();
         pairs.emplace_back(make_unique<parser::Pair>(argLoc, parser::MK::Symbol(argLoc, argName),
-                                                     typeTranslator.toParserNode(type, typeLoc)));
+                                                     typeTranslator.toParserNode(type, declaration)));
         auto hash = parser::MK::Hash(send->loc, true, move(pairs));
         auto sigArgs = parser::NodeVec();
         sigArgs.emplace_back(move(hash));
@@ -344,10 +365,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
         parser::MK::Send1(typeLoc, move(sigBuilder), core::Names::returns(), returnType->loc, move(returnType));
 
     auto sigArgs = parser::NodeVec();
-    auto t = parser::MK::T(typeLoc);
-    auto t_sig = parser::MK::Const(typeLoc, move(t), core::Names::Constants::Sig());
-    auto t_sig_withoutRuntime = parser::MK::Const(typeLoc, move(t_sig), core::Names::Constants::WithoutRuntime());
-    sigArgs.emplace_back(move(t_sig_withoutRuntime));
+    sigArgs.emplace_back(assembleTSigWithoutRuntime(typeLoc));
 
     auto final = absl::c_find_if(annotations, [](const Comment &annotation) { return annotation.string == "final"; });
     if (final != annotations.end()) {
