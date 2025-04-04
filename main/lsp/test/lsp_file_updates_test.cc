@@ -20,11 +20,6 @@ unique_ptr<core::FileHash> getFileHash() {
     return hash;
 }
 
-ast::ParsedFile getParsedFile(core::FileRef fref) {
-    auto lit = ast::make_expression<ast::Literal>(core::LocOffsets{0, 1}, core::Types::Integer());
-    return ast::ParsedFile{move(lit), fref};
-}
-
 shared_ptr<core::File> makeFile(std::string path, std::string contents) {
     auto file = make_shared<core::File>(move(path), move(contents), core::File::Type::Normal);
     file->setFileHash(getFileHash());
@@ -33,7 +28,6 @@ shared_ptr<core::File> makeFile(std::string path, std::string contents) {
 
 void addFile(LSPFileUpdates &updates, core::FileRef fref, std::string path, std::string contents) {
     updates.updatedFiles.push_back(makeFile(move(path), move(contents)));
-    updates.updatedFileIndexes.push_back(getParsedFile(fref));
 }
 
 } // namespace
@@ -106,7 +100,6 @@ TEST_CASE("MergeUpdatedFiles") {
 
     newUpdates.mergeOlder(oldUpdates);
     REQUIRE_EQ(3, newUpdates.updatedFiles.size());
-    REQUIRE_EQ(3, newUpdates.updatedFileIndexes.size());
 
     UnorderedMap<string, int> fileIndexes;
     int i = -1;
@@ -120,7 +113,6 @@ TEST_CASE("MergeUpdatedFiles") {
         REQUIRE(fileIndexes.contains("bar.rb"));
         int i = fileIndexes["bar.rb"];
         CHECK_EQ("newcontents", newUpdates.updatedFiles[i]->source());
-        CHECK_EQ(2, newUpdates.updatedFileIndexes[i].file.id());
         CHECK_NE(oldUpdates.updatedFiles[1]->getFileHash()->localSymbolTableHashes.hierarchyHash,
                  newUpdates.updatedFiles[i]->getFileHash()->localSymbolTableHashes.hierarchyHash);
     }
@@ -129,7 +121,6 @@ TEST_CASE("MergeUpdatedFiles") {
         REQUIRE(fileIndexes.contains("foo.rb"));
         int i = fileIndexes["foo.rb"];
         CHECK_EQ("foo", newUpdates.updatedFiles[i]->source());
-        CHECK_EQ(1, newUpdates.updatedFileIndexes[i].file.id());
         CHECK_EQ(oldUpdates.updatedFiles[0]->getFileHash()->localSymbolTableHashes.hierarchyHash,
                  newUpdates.updatedFiles[i]->getFileHash()->localSymbolTableHashes.hierarchyHash);
     }
@@ -160,15 +151,11 @@ TEST_CASE("Copy") {
     CHECK_FALSE(copy.updatedGS.has_value());
 
     REQUIRE_EQ(2, copy.updatedFiles.size());
-    REQUIRE_EQ(2, copy.updatedFileIndexes.size());
 
     CHECK_EQ("foo.rb", copy.updatedFiles[0]->path());
     CHECK_EQ("foo", copy.updatedFiles[0]->source());
     CHECK_EQ("bar.rb", copy.updatedFiles[1]->path());
     CHECK_EQ("bar", copy.updatedFiles[1]->source());
-
-    CHECK_EQ(1, copy.updatedFileIndexes[0].file.id());
-    CHECK_EQ(2, copy.updatedFileIndexes[1].file.id());
 
     CHECK_EQ(updates.updatedFiles[0]->getFileHash()->localSymbolTableHashes.hierarchyHash,
              copy.updatedFiles[0]->getFileHash()->localSymbolTableHashes.hierarchyHash);

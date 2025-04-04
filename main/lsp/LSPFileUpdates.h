@@ -22,9 +22,6 @@ public:
 
     std::vector<std::shared_ptr<core::File>> updatedFiles;
 
-    // Indexed versions of `updatedFiles`, tied to the `initialGS` global state in the indexer.
-    std::vector<ast::ParsedFile> updatedFileIndexes;
-
     TypecheckingPath typecheckingPath = TypecheckingPath::Slow;
 
     // Indicates whether or not the incremental namer should be used on the fast path.
@@ -43,8 +40,6 @@ public:
     bool canceledSlowPath = false;
     // Updated on typechecking thread. Contains indexes processed with typechecking global state.
     std::vector<ast::ParsedFile> updatedFinalGSFileIndexes;
-    // (Optional) Updated global state object to use to typecheck this update.
-    std::optional<std::unique_ptr<core::GlobalState>> updatedGS;
     // (Used in tests) Ensures that a slow path typecheck on these updates waits until it gets cancelled.
     bool cancellationExpected = false;
     // (Used in tests) Ensures that a slow path typecheck waits until this number of preemption occurs before finishing.
@@ -58,7 +53,7 @@ public:
     void mergeOlder(const LSPFileUpdates &older);
 
     /**
-     * Returns a copy of this LSPFileUpdates object. Does not handle deepCopying `updatedGS`.
+     * Returns a copy of this LSPFileUpdates object.
      */
     LSPFileUpdates copy() const;
 
