@@ -37,8 +37,9 @@ SignatureTranslator::translateAssertionType(vector<std::pair<core::LocOffsets, c
     return typeToParserNode.toParserNode(rbsType, assertion.typeLoc);
 }
 
-unique_ptr<parser::Node> SignatureTranslator::translateType(const parser::Send *send, const rbs::Comment &signature,
-                                                            const vector<Comment> &annotations) {
+unique_ptr<parser::Node> SignatureTranslator::translateAttrSignature(const parser::Send *send,
+                                                                     const rbs::Comment &signature,
+                                                                     const vector<Comment> &annotations) {
     rbs_string_t rbsString = makeRBSString(signature.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
@@ -68,9 +69,9 @@ unique_ptr<parser::Node> SignatureTranslator::translateType(const parser::Send *
     return methodTypeToParserNode.attrSignature(send, rbsType, signature.typeLoc, signature.commentLoc, annotations);
 }
 
-unique_ptr<parser::Node> SignatureTranslator::translateSignature(const parser::Node *methodDef,
-                                                                 const rbs::Comment &signature,
-                                                                 const vector<Comment> &annotations) {
+unique_ptr<parser::Node> SignatureTranslator::translateMethodSignature(const parser::Node *methodDef,
+                                                                       const rbs::Comment &signature,
+                                                                       const vector<Comment> &annotations) {
     rbs_string_t rbsString = makeRBSString(signature.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
@@ -90,6 +91,26 @@ unique_ptr<parser::Node> SignatureTranslator::translateSignature(const parser::N
     auto methodTypeToParserNode = MethodTypeToParserNode(ctx, std::move(parser));
     return methodTypeToParserNode.methodSignature(methodDef, rbsMethodType, signature.typeLoc, signature.commentLoc,
                                                   annotations);
+}
+
+unique_ptr<parser::Node> SignatureTranslator::translateType(core::LocOffsets loc, const std::string_view typeString) {
+    rbs_string_t rbsString = makeRBSString(typeString);
+    const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
+
+    Parser parser(rbsString, encoding);
+    rbs_node_t *rbsType = parser.parseType();
+
+    if (parser.hasError()) {
+        core::LocOffsets offset = locFromRange(loc, parser.getError()->token.range);
+        if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSSyntaxError)) {
+            e.setHeader("Failed to parse RBS type ({})", parser.getError()->message);
+        }
+
+        return nullptr;
+    }
+
+    auto typeTranslator = TypeToParserNode(ctx, vector<pair<core::LocOffsets, core::NameRef>>(), parser);
+    return typeTranslator.toParserNode(rbsType, loc);
 }
 
 } // namespace sorbet::rbs

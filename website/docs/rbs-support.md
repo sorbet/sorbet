@@ -250,7 +250,7 @@ attr_writer :bar
 attr_accessor :baz
 ```
 
-## Annotations
+## Method annotations
 
 While RBS does not support the same modifiers as Sorbet, it is possible to
 specify them using `@` annotation comments.
@@ -290,6 +290,48 @@ def qux2(x); end
 Note: these annotations like `@abstract` use normal comments, like `# @abstract`
 (not the special `#:` comment). This makes it possible to reuse any existing
 YARD or RDoc annotations.
+
+## Class and module annotations
+
+RBS annotations can be used to add Sorbet helpers to classes like
+[`abstract!`](abstract.md):
+
+```ruby
+# @abstract
+class Foo; end
+end
+```
+
+This is equivalent to:
+
+```ruby
+class Foo
+  extend T::Helpers
+
+  abstract!
+end
+```
+
+The [`@interface!`](abstract.md), [`@final!`](final.md), and
+[`@sealed!`](sealed.md) annotations are supported in the same way.
+
+The [`@requires_ancestor`](requires-ancestor.md) annotation expects an argument
+to represent the ancestor to require:
+
+```ruby
+# @requires_ancestor: ::Some::Ancestor
+class Foo; end
+```
+
+This is equivalent to:
+
+```ruby
+class Foo
+  extend T::Helpers
+
+  requires_ancestor { Some::Ancestor }
+end
+```
 
 ## Special behaviors
 
@@ -376,7 +418,8 @@ You can also consider using [`T::Enum`](tenum.md).
 
 ### `T.let` assertions
 
-[`T.let`](type-assertions#tlet) assertions can be expressed using RBS comments:
+[`T.let`](type-assertions.md#tlet) assertions can be expressed using RBS
+comments:
 
 ```ruby
 x = 42 #: Integer
@@ -413,8 +456,8 @@ MSG
 
 ### `T.cast` assertions
 
-[`T.cast`](type-assertions#tcast) assertions can be expressed using RBS comments
-with the `as` keyword:
+[`T.cast`](type-assertions.md#tcast) assertions can be expressed using RBS
+comments with the `as` keyword:
 
 ```ruby
 x = 42 #: as Integer
@@ -477,7 +520,7 @@ end #: as Integer
 
 ### `T.must` assertions
 
-[`T.must`](type-assertions#tmust) are denoted with the special `as !nil`
+[`T.must`](type-assertions.md#tmust) are denoted with the special `as !nil`
 comment:
 
 ```ruby
@@ -501,7 +544,7 @@ foo(
 
 ### `T.unsafe` escape hatch
 
-[`T.unsafe`](static#call-site-granularity-tunsafe) can be replaced with the
+[`T.unsafe`](static.md#call-site-granularity-tunsafe) can be replaced with the
 special `as untyped` annotation:
 
 ```ruby
