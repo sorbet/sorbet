@@ -86,9 +86,10 @@ below.)
 Sorbet is currently reading files from disk and parsing them into abstract
 syntax trees.
 
-This operation only happens when Sorbet initially starts up in LSP mode for the
-first time. If this operation is taking a long time, it can be sped up by
-passing the [`--cache-dir`](cli.md#--cache-dir-caching-parse-results) flag.
+This operation happens when Sorbet determines it needs to
+[retypecheck the whole codebase](server-status#why-do-some-of-my-edits-make-sorbet-go-back-to-typechecking).
+If this operation is taking a long time, it can be sped up by passing the
+[`--cache-dir`](cli.md#--cache-dir-caching-parse-results) flag.
 
 ### Typechecking...
 

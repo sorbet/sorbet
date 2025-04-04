@@ -49,6 +49,9 @@ public:
 
     PackageDB deepCopy() const;
 
+    // Copy the options of the PackageDB, but leave all the data out.
+    PackageDB copyOptionsOnly() const;
+
     UnfreezePackages unfreeze();
 
     PackageDB() = default;
