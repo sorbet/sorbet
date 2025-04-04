@@ -6,6 +6,26 @@
 #include "common/common.h"
 #include "test/helpers/lsp.h"
 
+#define INITIALIZE_AND_OPEN(init, files)                                                                            \
+    {                                                                                                               \
+        fmt::println(stderr, "initialize");                                                                         \
+        std::vector<std::pair<std::string, std::string>> sources = (files);                                         \
+        SUBCASE("Empty workspace") {                                                                                \
+            /* the empty subcase is important, we need it to conditinally run the populate step */                  \
+        }                                                                                                           \
+        SUBCASE("Populated workspace") {                                                                            \
+            this->writeFilesToFS(sources);                                                                          \
+            for (auto &p : sources) {                                                                               \
+                this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, p.first)); \
+            }                                                                                                       \
+        }                                                                                                           \
+        assertErrorDiagnostics((init), {});                                                                         \
+        std::vector<std::unique_ptr<LSPMessage>> requests;                                                          \
+        for (auto &p : sources) {                                                                                   \
+            assertErrorDiagnostics(send(*openFile(p.first, p.second)), {});                                         \
+        }                                                                                                           \
+    }
+
 namespace sorbet::test::lsp {
 using namespace std;
 using namespace sorbet::realmain::lsp;
@@ -900,15 +920,14 @@ TEST_CASE_FIXTURE(ProtocolTest, "ReportsSyntaxErrors") {
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "DidChangeConfigurationNotificationUpdatesHighlightUntypedSetting") {
-    assertErrorDiagnostics(initializeLSP(), {});
+    std::vector<std::pair<std::string, std::string>> files{{"foo.rb", "# typed: true\n"
+                                                                      "class A\n"
+                                                                      "def foo; end\n"
+                                                                      "end\n"
+                                                                      "\n"}};
+    this->resetState();
+    INITIALIZE_AND_OPEN(initializeLSP(), files);
 
-    // Create a new file.
-    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
-                                                    "class A\n"
-                                                    "def foo; end\n"
-                                                    "end\n"
-                                                    "\n")),
-                           {});
     auto settings = make_unique<SorbetInitializationOptions>();
     settings->highlightUntyped = true;
     auto config = make_unique<DidChangeConfigurationParams>(move(settings));
@@ -969,15 +988,14 @@ TEST_CASE_FIXTURE(ProtocolTest, "OverloadedStdlibSymbolWithMonkeyPatches") {
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "IgnoresFilesWithUnexpectedExtensions") {
-    const bool supportsMarkdown = false;
-    const bool supportsCodeActionResolve = true;
-    auto initOptions = make_unique<SorbetInitializationOptions>();
-    initOptions->supportsSorbetURIs = true;
-    assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(initOptions)), {});
-
-    // Send a file with invalid ruby and an extension that we should ignore, and check that we don't see any diagnostics
-    // in response.
-    assertErrorDiagnostics(send(*openFile("not-ruby.txt", "module Kernel\n")), {});
+    std::vector<std::pair<std::string, std::string>> files = {{"not-ruby.txt", "module Kernel\n"}};
+    INITIALIZE_AND_OPEN(initializeLSP(), files);
+    // assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(initOptions)), {});
+    //
+    // // Send a file with invalid ruby and an extension that we should ignore, and check that we don't see any
+    // diagnostics
+    // // in response.
+    // assertErrorDiagnostics(send(*openFile("not-ruby.txt", "module Kernel\n")), {});
 }
 
 } // namespace sorbet::test::lsp
