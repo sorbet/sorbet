@@ -250,7 +250,7 @@ attr_writer :bar
 attr_accessor :baz
 ```
 
-## Annotations
+## Method annotations
 
 While RBS does not support the same modifiers as Sorbet, it is possible to
 specify them using `@` annotation comments.
@@ -290,6 +290,52 @@ def qux2(x); end
 Note: these annotations like `@abstract` use normal comments, like `# @abstract`
 (not the special `#:` comment). This makes it possible to reuse any existing
 YARD or RDoc annotations.
+
+## Class and module annotations
+
+RBS annotations can be used to add Sorbet helpers to classes like
+[`abstract!`](abstract):
+
+```ruby
+# @abstract
+class Foo; end
+end
+```
+
+This is equivalent to:
+
+```ruby
+class Foo
+  extend T::Helpers
+
+  abstract!
+end
+```
+
+The [`@interface!`](abstract), [`@final!`](final), and [`@sealed!`](sealed)
+annotations are supported in the same way.
+
+The annotations
+[`@mixes_in_class_methods`](abstract#interfaces-and-the-included-hook) and
+[`@requires_ancestor`](requires-ancestor) expect an argument to represent the
+constant to be mixed in or required:
+
+```ruby
+# @mixes_in_class_methods: Some::Constant
+# @requires_ancestor: ::Some::Ancestor
+class Foo; end
+```
+
+This is equivalent to:
+
+```ruby
+class Foo
+  extend T::Helpers
+
+  mixes_in_class_methods Some::Constant
+  requires_ancestor { Some::Ancestor }
+end
+```
 
 ## Special behaviors
 
