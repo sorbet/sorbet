@@ -25,7 +25,6 @@ void InitializedTask::index(LSPIndexer &indexer) {
 void InitializedTask::run(LSPTypecheckerDelegate &typechecker) {
     ENFORCE(this->gs != nullptr);
     typechecker.initialize(*this, std::move(this->gs), std::move(this->kvstore), config);
-    typechecker.resumeTaskQueue(*this);
 }
 
 bool InitializedTask::needsMultithreading(const LSPIndexer &indexer) const {

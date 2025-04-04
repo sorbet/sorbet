@@ -84,24 +84,12 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
     // TODO(jvilk): Make it preemptible.
     {
         const bool isIncremental = false;
-        ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
+        ErrorEpoch epoch(*errorReporter, 0, isIncremental, {});
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
-        auto result = runSlowPath(updates, std::move(kvstore), workers, errorFlusher, SlowPathMode::Init);
+        auto committed = runSlowPath(updates, std::move(kvstore), workers, errorFlusher, SlowPathMode::Init, &queue);
+        ENFORCE(committed);
         epoch.committed = true;
-        ENFORCE(std::holds_alternative<std::unique_ptr<core::GlobalState>>(result));
-        initialGS = std::move(std::get<std::unique_ptr<core::GlobalState>>(result));
     }
-
-    // Unblock the indexer now that its state is fully initialized.
-    {
-        absl::MutexLock lck{queue.getMutex()};
-
-        // ensure that the next task we process initializes the indexer
-        auto initTask = std::make_unique<IndexerInitializationTask>(*config, std::move(initialGS));
-        queue.tasks().push_front(std::move(initTask));
-    }
-
-    config->logger->error("Resuming");
 }
 
 bool LSPTypechecker::typecheck(std::unique_ptr<LSPFileUpdates> updates, WorkerPool &workers,
@@ -152,9 +140,8 @@ bool LSPTypechecker::typecheck(std::unique_ptr<LSPFileUpdates> updates, WorkerPo
             commitFileUpdates(*updates, /* cancelable */ false);
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
-            auto result = runSlowPath(*updates, nullptr, workers, errorFlusher, SlowPathMode::Cancelable);
-            ENFORCE(std::holds_alternative<bool>(result));
-            committed = std::get<bool>(result);
+            auto queue = nullptr;
+            committed = runSlowPath(*updates, nullptr, workers, errorFlusher, SlowPathMode::Cancelable, queue);
         }
         epoch.committed = committed;
     }
@@ -370,15 +357,11 @@ ast::ParsedFilesOrCancelled LSPTypechecker::copyIndexed(WorkerPool &workers) con
     return out;
 }
 
-LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updates,
-                                                           std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers,
-                                                           shared_ptr<core::ErrorFlusher> errorFlusher,
-                                                           LSPTypechecker::SlowPathMode mode) {
+bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers,
+                                 shared_ptr<core::ErrorFlusher> errorFlusher, LSPTypechecker::SlowPathMode mode,
+                                 TaskQueue *queue) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runSlowPath can only be called from the typechecker thread.");
-
-    // This is populated when running in `SlowPathMode::Init`.
-    std::unique_ptr<core::GlobalState> indexedState;
 
     bool cancelable = mode == SlowPathMode::Cancelable;
 
@@ -406,6 +389,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
         switch (mode) {
             case SlowPathMode::Init: {
                 ENFORCE(!this->initialized);
+                ENFORCE(queue != nullptr);
                 Timer timeit(config->logger, "initial_index");
 
                 ShowOperation op(*config, ShowOperation::Kind::Indexing);
@@ -439,11 +423,22 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                 ENFORCE_NO_TIMER(indexed.size() == finalGS->filesUsed());
 
                 // At this point finalGS has a name table that's initialized enough for the indexer thread, so we make a
-                // copy to pass back over.
-                indexedState = finalGS->deepCopy();
+                // copy and pass it back over. This unblocks the indexer, and will allow it to preempt typechecking
+                // later on in the initialization phase.
+                auto indexedState = finalGS->deepCopy();
                 indexedState->errorQueue = std::move(savedErrorQueue);
 
                 this->initialized = true;
+
+                {
+                    absl::MutexLock lck{queue->getMutex()};
+                    queue->tasks().push_front(
+                        std::make_unique<IndexerInitializationTask>(*this->config, std::move(indexedState)));
+                    ENFORCE(queue->isPaused());
+                    queue->resume();
+                }
+
+                this->config->logger->error("Resuming");
 
                 break;
             }
@@ -549,12 +544,11 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
 
         // Inform the fast path that this global state is OK for typechecking as resolution has completed.
         gs->lspTypecheckCount++;
-        // TODO(jvilk): Remove conditional once initial typecheck is preemptible.
-        if (cancelable) {
-            // Inform users that Sorbet should be responsive now.
-            // Explicitly end previous operation before beginning next operation.
-            slowPathOp.emplace(*config, ShowOperation::Kind::SlowPathNonBlocking);
-        }
+
+        // Inform users that Sorbet should be responsive now.
+        // Explicitly end previous operation before beginning next operation.
+        slowPathOp.emplace(*config, ShowOperation::Kind::SlowPathNonBlocking);
+
         // Report how long the slow path blocks preemption.
         timeit.clone("slow_path.blocking_time");
 
@@ -611,15 +605,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
         logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", updates.epoch);
     }
 
-    switch (mode) {
-        case SlowPathMode::Init:
-            ENFORCE(committed);
-            ENFORCE(indexedState != nullptr);
-            return indexedState;
-        case SlowPathMode::Cancelable:
-            ENFORCE(indexedState == nullptr);
-            return committed;
-    }
+    return committed;
 }
 
 void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled) {
@@ -857,12 +843,6 @@ LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &wor
 void LSPTypecheckerDelegate::initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
                                         std::unique_ptr<KeyValueStore> kvstore, const LSPConfiguration &currentConfig) {
     return typechecker.initialize(this->queue, std::move(gs), std::move(kvstore), this->workers, currentConfig);
-}
-
-void LSPTypecheckerDelegate::resumeTaskQueue(InitializedTask &task) {
-    absl::MutexLock lck{this->queue.getMutex()};
-    ENFORCE(this->queue.isPaused());
-    this->queue.resume();
 }
 
 void LSPTypecheckerDelegate::typecheckOnFastPath(std::unique_ptr<LSPFileUpdates> updates,
