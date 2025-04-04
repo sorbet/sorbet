@@ -123,6 +123,10 @@ unique_ptr<LSPMessage> ProtocolTest::getDefinition(string_view path, int line, i
     return makeDefinitionRequest(nextId++, getUri(path), line, character);
 }
 
+unique_ptr<LSPMessage> ProtocolTest::getReference(string_view path, int line, int character) {
+    return makeReferenceRequest(nextId++, getUri(path), line, character);
+}
+
 unique_ptr<LSPMessage> ProtocolTest::watchmanFileUpdate(vector<string> updatedFilePaths) {
     auto req = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange,
                                                 make_unique<WatchmanQueryResponse>("", "", false, updatedFilePaths));
@@ -236,6 +240,18 @@ vector<unique_ptr<Location>> ProtocolTest::getDefinitions(std::string_view uri, 
         auto &defResponse = defResponses.at(0);
         CHECK(defResponse->isResponse());
         auto &defResult = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(*defResponse->asResponse().result);
+        return move(get<vector<unique_ptr<Location>>>(defResult));
+    }
+    return {};
+}
+
+vector<unique_ptr<Location>> ProtocolTest::getReferences(std::string_view uri, int line, int character) {
+    auto refResponses = send(*getReference(uri, line, character));
+    CHECK_EQ(refResponses.size(), 1);
+    if (refResponses.size() == 1) {
+        auto &refResponse = refResponses.at(0);
+        CHECK(refResponse->isResponse());
+        auto &defResult = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(*refResponse->asResponse().result);
         return move(get<vector<unique_ptr<Location>>>(defResult));
     }
     return {};

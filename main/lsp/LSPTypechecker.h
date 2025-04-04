@@ -11,12 +11,17 @@
 namespace sorbet {
 class WorkerPool;
 class KeyValueStore;
+class OwnedKeyValueStore;
 } // namespace sorbet
 
 namespace sorbet::core::lsp {
 class PreemptionTaskManager;
 class QueryResponse;
 } // namespace sorbet::core::lsp
+
+namespace sorbet::realmain::cache {
+class SessionCache;
+}
 
 namespace sorbet::realmain::lsp {
 class ResponseError;
@@ -45,23 +50,18 @@ class LSPTypechecker final {
      * GlobalState back over to the typechecker to use as the starting point for the next slow path.
      */
     std::unique_ptr<core::GlobalState> gs;
+
     /**
-     * Trees that have been indexed with the GlobalState that was originally supplied during initialization
-     * (initialGS). As all values of this->gs will derive from that initial GlobalState, none of these trees will be
-     * re-indexed for subsequent slow path runs. An additional consequence of this->gs deriving from the initialization
-     * value of GlobalState is that they will continue to be valid when used with this->gs (see the comment on this->gs
-     * for an explanation of how this derivation is ensured).
-     *
-     * WARNING:
-     * Updates to this vector can happen through this->commitFileUpdates and LSPFileUpdates::updatedFileIndexes, however
-     * those updates will only be valid when used with the indexer's GlobalState. As a result it is absolutely necessary
-     * to ensure that any updates to this vector are either already valid with this->gs, or have a corresponding tree in
-     * this->indexedFinalGS, as otherwise there is a possibility that the tree used will reference names that aren't
-     * consistent with this->gs. Once a slow path is kicked off this problem will resolve itself, as this->gs will be
-     * re-initialized with a copy of the indexer's GlobalState, making all of the names stored in the trees of
-     * this->indexed valid again.
+     * A copy of the kvstore produced during initialization, that's private to this LSP session.
      */
-    std::vector<ast::ParsedFile> indexed;
+    std::unique_ptr<cache::SessionCache> sessionCache;
+
+    /**
+     * A vector of file refs that we clear and reuse on slow paths. It's held here instead of as a temporary in the slow
+     * path to ensure we're not aggressively reallocating memory.
+     */
+    std::vector<core::FileRef> workspaceFiles;
+
     /**
      * Trees that have been indexed with this->gs between slow path runs, which means that they may have names that are
      * not present in the name table of the indexer. This is a sparse diff of trees indexed by position in
@@ -106,8 +106,9 @@ class LSPTypechecker final {
 
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
-    SlowPathResult runSlowPath(LSPFileUpdates &updates, std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers,
-                               std::shared_ptr<core::ErrorFlusher> errorFlusher, SlowPathMode mode);
+    SlowPathResult runSlowPath(LSPFileUpdates &updates, std::unique_ptr<const OwnedKeyValueStore> ownedKvstore,
+                               WorkerPool &workers, std::shared_ptr<core::ErrorFlusher> errorFlusher,
+                               SlowPathMode mode);
 
     /** Runs incremental typechecking on the provided updates. Returns the final list of files typechecked. */
     std::vector<core::FileRef> runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
@@ -117,9 +118,17 @@ class LSPTypechecker final {
     /** Commits the given file updates to LSPTypechecker. Does not send diagnostics. */
     void commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled);
 
-    /** Deep copy all entries in `indexed` that contain ASTs. Returns true on success, false if the operation was
-     * canceled. */
-    ast::ParsedFilesOrCancelled copyIndexed(WorkerPool &workers) const;
+    /**
+     * Returns a the indexed tree for the given file ref. The associated tree may be `nullptr` if the file ref given
+     * points to a payload RBI. This function will first consult the `this->indexedFinalGS` cache before falling back on
+     * re-indexing the file on disk.
+     */
+    ast::ParsedFile getIndexed(core::FileRef fref) const;
+
+    /**
+     * Open the session-local kvstore.
+     */
+    std::unique_ptr<OwnedKeyValueStore> getKvStore() const;
 
 public:
     LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
@@ -162,7 +171,8 @@ public:
     ast::ExpressionPtr getLocalVarTrees(core::FileRef fref) const;
 
     /**
-     * Returns copies of the indexed trees that have been run through the incremental resolver.
+     * Returns copies of the indexed trees that have been run through the incremental resolver. There is no guarantee
+     * that the resolved trees are returned in the same order that the FileRefs appear in the input span.
      */
     std::vector<ast::ParsedFile> getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers) const;
 
