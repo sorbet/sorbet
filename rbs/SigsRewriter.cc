@@ -190,6 +190,166 @@ unique_ptr<parser::NodeVec> signaturesForNode(core::MutableContext ctx, parser::
     return signatures;
 }
 
+/**
+ * Extracts and parses the argument from the annotation string.
+ *
+ * Considering an annotation like `@mixes_in_class_methods: ClassMethods`,
+ * this function will extract and parse `ClassMethods` as a type then return the corresponding parser::Node.
+ *
+ * We do not error if the node is not a constant, we just insert it as is and let the pipeline error down the line.
+ */
+unique_ptr<parser::Node> extractHelperArgument(core::MutableContext ctx, Comment annotation, int offset) {
+    while (annotation.string[offset] == ' ') {
+        offset++;
+    }
+
+    return rbs::SignatureTranslator(ctx).translateType(
+        core::LocOffsets{annotation.typeLoc.beginPos() + offset, annotation.typeLoc.endPos()},
+        annotation.string.substr(offset));
+}
+
+/**
+ * Extracts and parses the helpers from the annotations.
+ *
+ * Returns a `parser::NodeVec`, containing the `parser::Node` corresponding to each annotation.
+ *
+ * For example, given the annotations the following annotations:
+ *
+ *     # @abstract,
+ *     # @interface
+ *
+ * This function will return two `parser::Send` nodes:
+ *
+ *
+ * 1. `self.abstract!()`
+ * 2. `self.interface!()`
+ *
+ * It doesn't insert them into the body of the class/module/etc.
+ */
+parser::NodeVec extractHelpers(core::MutableContext ctx, vector<Comment> annotations) {
+    parser::NodeVec helpers;
+
+    for (auto &annotation : annotations) {
+        if (annotation.string == "abstract") {
+            auto send = parser::MK::Send0(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
+                                          core::Names::declareAbstract(), annotation.typeLoc);
+            helpers.emplace_back(move(send));
+        } else if (annotation.string == "interface") {
+            auto send = parser::MK::Send0(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
+                                          core::Names::declareInterface(), annotation.typeLoc);
+            helpers.emplace_back(move(send));
+        } else if (annotation.string == "final") {
+            auto send = parser::MK::Send0(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
+                                          core::Names::declareFinal(), annotation.typeLoc);
+            helpers.emplace_back(move(send));
+        } else if (annotation.string == "sealed") {
+            auto send = parser::MK::Send0(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
+                                          core::Names::declareSealed(), annotation.typeLoc);
+            helpers.emplace_back(move(send));
+        } else if (absl::StartsWith(annotation.string, "mixes_in_class_methods:")) {
+            if (auto type = extractHelperArgument(ctx, annotation, 23)) {
+                auto send = parser::MK::Send1(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
+                                              core::Names::mixesInClassMethods(), annotation.typeLoc, move(type));
+                helpers.emplace_back(move(send));
+            }
+        } else if (absl::StartsWith(annotation.string, "requires_ancestor:")) {
+            if (auto type = extractHelperArgument(ctx, annotation, 18)) {
+                auto body = make_unique<parser::Begin>(annotation.typeLoc, parser::NodeVec());
+                body->stmts.emplace_back(move(type));
+                auto send = parser::MK::Send0(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
+                                              core::Names::requiresAncestor(), annotation.typeLoc);
+                auto block = make_unique<parser::Block>(annotation.typeLoc, move(send), nullptr, move(body));
+                helpers.emplace_back(move(block));
+            }
+        }
+    }
+
+    return helpers;
+}
+
+/**
+ * Wraps the body in a `parser::Begin` if it isn't already.
+ *
+ * This is useful for cases where we want to insert helpers into the body of a class/module/etc.
+ */
+unique_ptr<parser::Node> maybeWrapBody(unique_ptr<parser::Node> &owner, unique_ptr<parser::Node> body) {
+    if (body == nullptr) {
+        return make_unique<parser::Begin>(owner->loc, parser::NodeVec());
+    } else if (parser::isa_node<parser::Begin>(body.get())) {
+        return body;
+    } else {
+        auto newBody = make_unique<parser::Begin>(body->loc, parser::NodeVec());
+        newBody->stmts.emplace_back(move(body));
+        return newBody;
+    }
+}
+
+/**
+ * Returns true if the body contains an `extend T::Helpers` call already.
+ */
+bool containsExtendTHelper(parser::Begin *body) {
+    for (auto &stmt : body->stmts) {
+        auto send = parser::cast_node<parser::Send>(stmt.get());
+        if (send == nullptr) {
+            continue;
+        }
+
+        if (send->method != core::Names::extend()) {
+            continue;
+        }
+
+        if (send->receiver != nullptr && !parser::isa_node<parser::Self>(send->receiver.get())) {
+            continue;
+        }
+
+        if (send->args.size() != 1) {
+            continue;
+        }
+
+        auto arg = parser::cast_node<parser::Const>(send->args[0].get());
+        if (arg == nullptr) {
+            continue;
+        }
+
+        if (arg->name != core::Names::Constants::Helpers() || !parser::MK::isT(arg->scope)) {
+            continue;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Inserts an `extend T::Helpers` call into the body if it doesn't already exist.
+ */
+void maybeInsertExtendTHelpers(unique_ptr<parser::Node> *body) {
+    auto begin = parser::cast_node<parser::Begin>(body->get());
+    ENFORCE(begin != nullptr);
+
+    if (containsExtendTHelper(begin)) {
+        return;
+    }
+
+    auto send = parser::MK::Send1(begin->loc, parser::MK::Self(begin->loc), core::Names::extend(), begin->loc,
+                                  parser::MK::T_Helpers(begin->loc));
+
+    begin->stmts.emplace_back(move(send));
+}
+
+/**
+ * Inserts the helpers into the body.
+ */
+void insertHelpers(unique_ptr<parser::Node> *body, parser::NodeVec helpers) {
+    auto begin = parser::cast_node<parser::Begin>(body->get());
+    ENFORCE(begin != nullptr);
+
+    for (auto &helper : helpers) {
+        begin->stmts.emplace_back(move(helper));
+    }
+}
+
 } // namespace
 
 parser::NodeVec SigsRewriter::rewriteNodes(parser::NodeVec nodes) {
@@ -247,6 +407,43 @@ unique_ptr<parser::Node> SigsRewriter::rewriteBody(unique_ptr<parser::Node> node
     return rewriteNode(move(node));
 }
 
+unique_ptr<parser::Node> SigsRewriter::rewriteClass(unique_ptr<parser::Node> node) {
+    if (node == nullptr) {
+        return node;
+    }
+
+    auto comments = signaturesForLoc(ctx, node->loc);
+    if (comments.annotations.empty()) {
+        return node;
+    }
+
+    auto helpers = extractHelpers(ctx, comments.annotations);
+    if (helpers.empty()) {
+        return node;
+    }
+
+    typecase(
+        node.get(),
+        [&](parser::Class *klass) {
+            klass->body = maybeWrapBody(node, move(klass->body));
+            maybeInsertExtendTHelpers(&klass->body);
+            insertHelpers(&klass->body, move(helpers));
+        },
+        [&](parser::Module *module) {
+            module->body = maybeWrapBody(node, move(module->body));
+            maybeInsertExtendTHelpers(&module->body);
+            insertHelpers(&module->body, move(helpers));
+        },
+        [&](parser::SClass *sclass) {
+            sclass->body = maybeWrapBody(node, move(sclass->body));
+            maybeInsertExtendTHelpers(&sclass->body);
+            insertHelpers(&sclass->body, move(helpers));
+        },
+        [&](parser::Node *other) { Exception::raise("Unimplemented node type: {}", other->nodeName()); });
+
+    return node;
+}
+
 unique_ptr<parser::Node> SigsRewriter::rewriteNode(unique_ptr<parser::Node> node) {
     if (node == nullptr) {
         return node;
@@ -287,11 +484,11 @@ unique_ptr<parser::Node> SigsRewriter::rewriteNode(unique_ptr<parser::Node> node
         },
         [&](parser::Module *module) {
             module->body = rewriteBody(move(module->body));
-            result = move(node);
+            result = rewriteClass(move(node));
         },
         [&](parser::Class *klass) {
             klass->body = rewriteBody(move(klass->body));
-            result = move(node);
+            result = rewriteClass(move(node));
         },
         [&](parser::DefMethod *def) {
             def->body = rewriteBody(move(def->body));
@@ -303,7 +500,7 @@ unique_ptr<parser::Node> SigsRewriter::rewriteNode(unique_ptr<parser::Node> node
         },
         [&](parser::SClass *sclass) {
             sclass->body = rewriteBody(move(sclass->body));
-            result = move(node);
+            result = rewriteClass(move(node));
         },
         [&](parser::For *for_) {
             for_->body = rewriteBody(move(for_->body));
