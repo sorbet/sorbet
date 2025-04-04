@@ -93,4 +93,24 @@ unique_ptr<parser::Node> SignatureTranslator::translateMethodSignature(const par
                                                   annotations);
 }
 
+unique_ptr<parser::Node> SignatureTranslator::translateType(core::LocOffsets loc, const std::string_view typeString) {
+    rbs_string_t rbsString = makeRBSString(typeString);
+    const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
+
+    Parser parser(rbsString, encoding);
+    rbs_node_t *rbsType = parser.parseType();
+
+    if (parser.hasError()) {
+        core::LocOffsets offset = locFromRange(loc, parser.getError()->token.range);
+        if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSSyntaxError)) {
+            e.setHeader("Failed to parse RBS type ({})", parser.getError()->message);
+        }
+
+        return nullptr;
+    }
+
+    auto typeTranslator = TypeToParserNode(ctx, vector<pair<core::LocOffsets, core::NameRef>>(), parser);
+    return typeTranslator.toParserNode(rbsType, loc);
+}
+
 } // namespace sorbet::rbs
