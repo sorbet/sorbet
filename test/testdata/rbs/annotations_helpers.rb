@@ -75,30 +75,11 @@ class Multiple1
   end
 end
 
-# @mixes_in_class_methods:
-#                         ^ error: Failed to parse RBS type (unexpected token for simple type)
-module MixesInClassMethods1; end
-
-# @mixes_in_class_methods: _
-#                          ^ error: Failed to parse RBS type (unexpected token for simple type)
-module MixesInClassMethods2; end
-
-# @mixes_in_class_methods: untyped
-#                          ^^^^^^^ error: Expected `Module` but found `Runtime object representing type: T.untyped` for argument `mod`
-#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Argument to `mixes_in_class_methods` must be statically resolvable to a module
-module MixesInClassMethods3; end
-
-# @mixes_in_class_methods: ClassMethods
-module ClassMethods1
-  module ClassMethods
-  end
-end
-
-# @mixes_in_class_methods: ClassMethods1::ClassMethods
-module ClassMethods2; end
-
-# @mixes_in_class_methods: ::ClassMethods1::ClassMethods
-module ClassMethods2; end
-
 # @requires_ancestor: BasicObject
 module RequiresAncestor1; end
+
+# @requires_ancestor: ::BasicObject
+module RequiresAncestor2; end
+
+# @requires_ancestor: Multiple1::Multiple2
+module RequiresAncestor3; end

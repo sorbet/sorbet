@@ -123,44 +123,27 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.final!()
   end
 
-  module <emptyTree>::<C MixesInClassMethods1><<C <todo sym>>> < ()
-  end
-
-  module <emptyTree>::<C MixesInClassMethods2><<C <todo sym>>> < ()
-  end
-
-  module <emptyTree>::<C MixesInClassMethods3><<C <todo sym>>> < ()
-    <self>.extend(::<root>::<C T>::<C Helpers>)
-
-    <self>.mixes_in_class_methods(::<root>::<C T>.untyped())
-  end
-
-  module <emptyTree>::<C ClassMethods1><<C <todo sym>>> < ()
-    module <emptyTree>::<C ClassMethods><<C <todo sym>>> < ()
-    end
-
-    <self>.extend(::<root>::<C T>::<C Helpers>)
-
-    <self>.mixes_in_class_methods(<emptyTree>::<C ClassMethods>)
-  end
-
-  module <emptyTree>::<C ClassMethods2><<C <todo sym>>> < ()
-    <self>.extend(::<root>::<C T>::<C Helpers>)
-
-    <self>.mixes_in_class_methods(<emptyTree>::<C ClassMethods1>::<C ClassMethods>)
-  end
-
-  module <emptyTree>::<C ClassMethods2><<C <todo sym>>> < ()
-    <self>.extend(::<root>::<C T>::<C Helpers>)
-
-    <self>.mixes_in_class_methods(::<root>::<C ClassMethods1>::<C ClassMethods>)
-  end
-
   module <emptyTree>::<C RequiresAncestor1><<C <todo sym>>> < ()
     <self>.extend(::<root>::<C T>::<C Helpers>)
 
     <self>.requires_ancestor() do ||
       <emptyTree>::<C BasicObject>
+    end
+  end
+
+  module <emptyTree>::<C RequiresAncestor2><<C <todo sym>>> < ()
+    <self>.extend(::<root>::<C T>::<C Helpers>)
+
+    <self>.requires_ancestor() do ||
+      ::<root>::<C BasicObject>
+    end
+  end
+
+  module <emptyTree>::<C RequiresAncestor3><<C <todo sym>>> < ()
+    <self>.extend(::<root>::<C T>::<C Helpers>)
+
+    <self>.requires_ancestor() do ||
+      <emptyTree>::<C Multiple1>::<C Multiple2>
     end
   end
 end

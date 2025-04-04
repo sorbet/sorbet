@@ -246,12 +246,6 @@ parser::NodeVec extractHelpers(core::MutableContext ctx, vector<Comment> annotat
             auto send = parser::MK::Send0(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
                                           core::Names::declareSealed(), annotation.typeLoc);
             helpers.emplace_back(move(send));
-        } else if (absl::StartsWith(annotation.string, "mixes_in_class_methods:")) {
-            if (auto type = extractHelperArgument(ctx, annotation, 23)) {
-                auto send = parser::MK::Send1(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
-                                              core::Names::mixesInClassMethods(), annotation.typeLoc, move(type));
-                helpers.emplace_back(move(send));
-            }
         } else if (absl::StartsWith(annotation.string, "requires_ancestor:")) {
             if (auto type = extractHelperArgument(ctx, annotation, 18)) {
                 auto body = make_unique<parser::Begin>(annotation.typeLoc, parser::NodeVec());

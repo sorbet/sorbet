@@ -315,13 +315,10 @@ end
 The [`@interface!`](abstract), [`@final!`](final), and [`@sealed!`](sealed)
 annotations are supported in the same way.
 
-The annotations
-[`@mixes_in_class_methods`](abstract#interfaces-and-the-included-hook) and
-[`@requires_ancestor`](requires-ancestor) expect an argument to represent the
-constant to be mixed in or required:
+The [`@requires_ancestor`](requires-ancestor) annotation expects an argument to
+represent the ancestor to require:
 
 ```ruby
-# @mixes_in_class_methods: Some::Constant
 # @requires_ancestor: ::Some::Ancestor
 class Foo; end
 ```
@@ -332,7 +329,6 @@ This is equivalent to:
 class Foo
   extend T::Helpers
 
-  mixes_in_class_methods Some::Constant
   requires_ancestor { Some::Ancestor }
 end
 ```
