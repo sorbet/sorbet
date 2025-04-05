@@ -6,6 +6,8 @@
 #include <string>
 
 namespace sorbet::infer {
+core::ClassOrModuleRef getCustomerClass(core::Context ctx, const core::TypePtr &type);
+
 class Inference final {
 public:
     static bool willRun(core::Context ctx, core::LocOffsets loc, core::MethodRef method);
