@@ -12,8 +12,10 @@
         std::vector<std::pair<std::string, std::string>> sources = (files);                                         \
         SUBCASE("Empty workspace") {                                                                                \
             /* the empty subcase is important, we need it to conditinally run the populate step */                  \
+            fmt::println(stderr, "empty");                                                                          \
         }                                                                                                           \
         SUBCASE("Populated workspace") {                                                                            \
+            fmt::println(stderr, "populated");                                                                      \
             this->writeFilesToFS(sources);                                                                          \
             for (auto &p : sources) {                                                                               \
                 this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, p.first)); \
@@ -920,6 +922,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ReportsSyntaxErrors") {
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "DidChangeConfigurationNotificationUpdatesHighlightUntypedSetting") {
+    fmt::println(stderr, "--- begin %< ---");
     std::vector<std::pair<std::string, std::string>> files{{"foo.rb", "# typed: true\n"
                                                                       "class A\n"
                                                                       "def foo; end\n"
@@ -927,6 +930,10 @@ TEST_CASE_FIXTURE(ProtocolTest, "DidChangeConfigurationNotificationUpdatesHighli
                                                                       "\n"}};
     this->resetState();
     INITIALIZE_AND_OPEN(initializeLSP(), files);
+
+    SUBCASE("test") {
+        fmt::println(stderr, "testing!");
+    }
 
     auto settings = make_unique<SorbetInitializationOptions>();
     settings->highlightUntyped = true;
@@ -946,6 +953,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "DidChangeConfigurationNotificationUpdatesHighli
                              {
                                  {"foo.rb", 3, "Call to method `foo` on `T.untyped`"},
                              });
+    fmt::println(stderr, "--- end %< ---");
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "OverloadedStdlibSymbolWithMonkeyPatches") {
