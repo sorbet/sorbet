@@ -111,7 +111,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
     }
 
     if (auto dup = ASTUtil::findDuplicateArg(ctx, send)) {
-        if (auto e = ctx.beginError(dup->secondLoc, core::errors::Rewriter::InvalidStructMember)) {
+        if (auto e = ctx.beginIndexerError(dup->secondLoc, core::errors::Rewriter::InvalidStructMember)) {
             e.setHeader("Duplicate member `{}` in Struct definition", dup->name.show(ctx));
             e.addErrorLine(ctx.locAt(dup->firstLoc), "First occurrence of `{}` in Struct definition",
                            dup->name.show(ctx));
