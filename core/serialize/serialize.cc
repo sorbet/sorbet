@@ -25,7 +25,7 @@ const uint32_t Serializer::VERSION;
 // class.
 class SerializerImpl {
 public:
-    static Pickler pickle(const GlobalState &gs, bool payloadOnly = false);
+    static Pickler pickle(const GlobalState &gs);
     static void pickleNameTable(Pickler &p, const GlobalState &gs);
     static void pickle(Pickler &p, const File &what);
     static void pickle(Pickler &p, const UTF8Name &what);
@@ -831,26 +831,15 @@ TypeParameter SerializerImpl::unpickleTypeParameter(UnPickler &p, const GlobalSt
     return result;
 }
 
-Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
+Pickler SerializerImpl::pickle(const GlobalState &gs) {
     Timer timeit(gs.tracer(), "pickleGlobalState");
     Pickler result;
     result.putU4(Serializer::VERSION);
     result.putU4(gs.kvstoreUuid);
 
-    absl::Span<const shared_ptr<File>> wantFiles;
-    if (payloadOnly) {
-        auto lastPayload =
-            absl::c_find_if(gs.files, [](auto &file) { return file && file->sourceType != File::Type::Payload; });
-        ENFORCE(
-            none_of(lastPayload, gs.files.end(), [](auto &file) { return file->sourceType == File::Type::Payload; }));
-        wantFiles = absl::Span<const shared_ptr<File>>(gs.files.data(), lastPayload - gs.files.begin());
-    } else {
-        wantFiles = absl::Span<const shared_ptr<File>>(gs.files.data(), gs.files.size());
-    }
-
-    result.putU4(wantFiles.size());
+    result.putU4(gs.files.size());
     int i = -1;
-    for (auto &f : wantFiles) {
+    for (const auto &f : gs.files) {
         ++i;
         if (i != 0) {
             pickle(result, *f);
@@ -1072,11 +1061,6 @@ vector<uint8_t> Serializer::storeNameTable(const GlobalState &gs) {
 
 vector<uint8_t> Serializer::store(const GlobalState &gs) {
     Pickler p = SerializerImpl::pickle(gs);
-    return p.result();
-}
-
-std::vector<uint8_t> Serializer::storePayloadAndNameTable(const GlobalState &gs) {
-    Pickler p = SerializerImpl::pickle(gs, true);
     return p.result();
 }
 
