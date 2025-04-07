@@ -143,6 +143,13 @@ protocol has support for multiple workspace root directories
 format. See
 <a href="/docs/cli#including-and-excluding-files">Including and excluding files</a> or
 <code>srb tc --help</code> for more information.</p></li>
+<li><p><code>--cache-dir=...</code></p>
+<p>When an edit causes Sorbet to
+<a href="server-status#why-do-some-of-my-edits-make-sorbet-go-back-to-typechecking">retypecheck the whole workspace</a>,
+supplying a cache directory with the
+<a href="cli#--cache-dir-caching-parse-results"><code>--cache-dir</code></a> flag allows it to avoid
+reindexing files that haven’t changed. This improves performance, shortening
+the duration of that slow path operation.</p></li>
 <li><p><code>--disable-watchman</code> / <code>--watchman-path=...</code></p>
 <p>Configure whether or how the <code>watchman</code> binary is invoked.</p></li>
 <li><p><code>--enable-all-beta-lsp-features</code></p>
