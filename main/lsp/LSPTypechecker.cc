@@ -499,7 +499,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
 
                     // At this point this->gs has a name table that's initialized enough for the indexer thread, so we
                     // make a copy to pass back over.
-                    indexedState = this->gs->deepCopy();
+                    indexedState = this->gs->deepCopyGlobalState();
                     indexedState->errorQueue = std::move(savedErrorQueue);
 
                     // We need to ensure that the package DB we build up during indexing isn't accidentaly persisted in
