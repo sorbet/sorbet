@@ -980,4 +980,42 @@ TEST_CASE_FIXTURE(ProtocolTest, "IgnoresFilesWithUnexpectedExtensions") {
     assertErrorDiagnostics(send(*openFile("not-ruby.txt", "module Kernel\n")), {});
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "FindAllReferencesWithoutCacheWorks") {
+    REQUIRE(!this->useCache);
+
+    // We need to ensure that these aren't loaded, so that we consult the filesystem rather than the cache of open trees
+    // in LSPTypechecker.
+    this->writeFilesToFS({
+        {"a.rb", "# typed: true\n"
+                 "class A\n"
+                 "end\n"},
+
+        {"b.rb", "# typed: true\n"
+                 "class B\n"
+                 "  def foo\n"
+                 "    A.new\n"
+                 "  end\n"
+                 "end\n"},
+    });
+
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/a.rb", this->rootPath));
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/b.rb", this->rootPath));
+
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    // We should be able to use `A` in a new file at this point
+    assertErrorDiagnostics(send(*openFile("test.rb", "# typed: true\n"
+                                                     "\n"
+                                                     "class Test\n"
+                                                     "  def test()\n"
+                                                     "    A.new\n"
+                                                     "  end\n"
+                                                     "end\n"
+                                                     "")),
+                           {});
+
+    auto references = this->getReferences("test.rb", 4, 4);
+    REQUIRE_EQ(3, references.size());
+}
+
 } // namespace sorbet::test::lsp

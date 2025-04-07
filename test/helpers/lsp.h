@@ -47,6 +47,10 @@ std::unique_ptr<LSPMessage> makeClose(std::string_view uri);
 /** Create an LSPMessage containing a workspace/didChangeConfiguration notification */
 std::unique_ptr<LSPMessage> makeConfigurationChange(std::unique_ptr<DidChangeConfigurationParams> params);
 
+/** Create an LSPMessage containing a textDocument/references notification */
+std::unique_ptr<LSPMessage> makeReferenceRequest(int id, std::string_view uri, int line, int character,
+                                                 bool includeDecl = true);
+
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const ServerCapabilities &capabilities);
 
