@@ -704,8 +704,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Exit 0 unless there was a critical error (i.e., an uncaught exception)");
     options.add_options(section)("no-stdlib",
                                  "Do not load Sorbet's payload which defines RBI files for the Ruby standard library");
-    options.add_options(section)("store-state", "Store state into file",
-                                 cxxopts::value<string>()->default_value(empty.storeState), "file");
+    options.add_options(section)(
+        "store-state", "Store state into three files, separated by commas: <symbol-table>,<name-table>,<file-table>",
+        cxxopts::value<string>()->default_value(""), "file");
     options.add_options(section)("silence-dev-message", "Silence \"You are running a development build\" message");
     options.add_options(section)("censor-for-snapshot-tests",
                                  "When printing raw location information, don't show line numbers");
@@ -1084,7 +1085,15 @@ void readOptions(Options &opts,
             throw EarlyReturnWithCode(1);
         }
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();
-        opts.storeState = raw["store-state"].as<string>();
+        auto storeStateRaw = raw["store-state"].as<string>();
+        if (!storeStateRaw.empty()) {
+            opts.storeState = absl::StrSplit(storeStateRaw, ',');
+            if (!opts.storeState.empty() && opts.storeState.size() != 3) {
+                logger->error("--store-state must be given three paths, separated by commas");
+                throw EarlyReturnWithCode(1);
+            }
+        }
+
         opts.forceHashing = raw["force-hashing"].as<bool>();
 
         opts.threads = (opts.runLSP || !opts.storeState.empty())
@@ -1101,7 +1110,8 @@ void readOptions(Options &opts,
         }
         if (raw["license"].as<bool>()) {
             fmt::print(
-                "Sorbet typechecker is licensed under Apache License Version 2.0.\n\nSorbet is built on top of:\n{}",
+                "Sorbet typechecker is licensed under Apache License Version 2.0.\n\nSorbet is built on top "
+                "of:\n{}",
                 fmt::map_join(third_party::licenses::all(), "\n\n", [](const auto &pair) { return pair.second; }));
             throw EarlyReturnWithCode(0);
         }
@@ -1210,8 +1220,8 @@ void readOptions(Options &opts,
 
         if (raw.count("packager-layers")) {
             if (opts.stripePackages) {
-                // TODO(neil): This regex was picked on a whim, so open to changing to be more or less restrictive based
-                // on feedback/usecases.
+                // TODO(neil): This regex was picked on a whim, so open to changing to be more or less restrictive
+                // based on feedback/usecases.
                 std::regex layerValid("[a-zA-Z0-9]+");
                 for (const string &layer : raw["packager-layers"].as<vector<string>>()) {
                     if (!std::regex_match(layer, layerValid)) {

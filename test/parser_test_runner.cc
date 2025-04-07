@@ -95,7 +95,7 @@ TEST_CASE("WhitequarkParserTest") {
     if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
         gs.initEmpty();
     } else {
-        core::serialize::Serializer::loadGlobalState(gs, GLOBAL_STATE_PAYLOAD);
+        core::serialize::Serializer::loadGlobalState(gs, PAYLOAD_SYMBOL_TABLE, PAYLOAD_NAME_TABLE, PAYLOAD_FILE_TABLE);
     }
     // Parser
     vector<core::FileRef> files;

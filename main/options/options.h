@@ -166,7 +166,7 @@ struct Options {
     // Needs to be a multiple of getpagesize(2) which is 4096 by default on macOS and Linux
     size_t maxCacheSizeBytes = MAX_CACHE_SIZE_BYTES;
     UnorderedMap<std::string, core::StrictLevel> strictnessOverrides;
-    std::string storeState = "";
+    std::vector<std::string> storeState;
     bool enableCounters = false;
     std::string errorUrlBase = "https://srb.help/";
     bool ruby3KeywordArgs = false;

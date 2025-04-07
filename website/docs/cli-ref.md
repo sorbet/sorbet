@@ -405,7 +405,8 @@ Usage:
                                 uncaught exception)
       --no-stdlib               Do not load Sorbet's payload which defines RBI files for
                                 the Ruby standard library
-      --store-state file        Store state into file (default: "")
+      --store-state file        Store state into three files, separated by commas:
+                                <symbol-table>,<name-table>,<file-table> (default: "")
       --silence-dev-message     Silence "You are running a development build" message
       --censor-for-snapshot-tests
                                 When printing raw location information, don't show line
