@@ -1098,7 +1098,7 @@ ExpressionPtr *Send::kwSplat() {
 
 void Send::clearArgs() {
     this->args.clear();
-    this->flags.hasBlock = false;
+    this->flags.hasBlock = BlockType::None;
     this->numPosArgs_ = 0;
 }
 
@@ -1113,15 +1113,34 @@ void Send::insertPosArg(uint16_t index, ExpressionPtr arg) {
     this->numPosArgs_++;
 }
 
-void Send::setBlock(ExpressionPtr block) {
+Send::BlockType Send::getBlockType(const core::GlobalState &gs, core::Loc blockLoc) {
+    if (!blockLoc.exists()) {
+        return BlockType::None;
+    }
+
+    auto blockEndPos = blockLoc.copyEndWithZeroLength();
+    auto endBraceLoc = blockEndPos.adjustLen(gs, -1, 1);
+    if (endBraceLoc.source(gs) == "}") {
+        return BlockType::Braces;
+    }
+
+    auto endKwLoc = blockEndPos.adjustLen(gs, -3, 3);
+    if (endKwLoc.source(gs) == "end") {
+        return BlockType::DoEnd;
+    }
+
+    return BlockType::Present;
+}
+
+void Send::setBlock(ExpressionPtr block, BlockType type) {
     if (hasBlock()) {
         this->args.pop_back();
-        flags.hasBlock = false;
+        flags.hasBlock = BlockType::None;
     }
 
     if (block != nullptr) {
         this->args.emplace_back(move(block));
-        flags.hasBlock = true;
+        flags.hasBlock = type;
         ENFORCE(this->block() != nullptr);
     }
 }
@@ -1140,7 +1159,7 @@ ExpressionPtr Send::withNewBody(core::LocOffsets loc, ExpressionPtr recv, core::
 
     // Reset important metadata on this function.
     this->numPosArgs_ = 0;
-    this->flags.hasBlock = false;
+    this->flags.hasBlock = BlockType::None;
 
     return rv;
 }
