@@ -191,6 +191,30 @@ void checkBlockRestParam(DesugarContext dctx, const MethodDef::PARAMS_store &arg
     }
 }
 
+namespace {
+
+// Determine what kind of block argument is defined by the given location.
+ast::Send::BlockType getBlockType(const core::GlobalState &gs, core::Loc blockLoc) {
+    if (!blockLoc.exists()) {
+        return ast::Send::BlockType::None;
+    }
+
+    auto blockEndPos = blockLoc.copyEndWithZeroLength();
+    auto endBraceLoc = blockEndPos.adjustLen(gs, -1, 1);
+    if (endBraceLoc.source(gs) == "}") {
+        return ast::Send::BlockType::Braces;
+    }
+
+    auto endKwLoc = blockEndPos.adjustLen(gs, -3, 3);
+    if (endKwLoc.source(gs) == "end") {
+        return ast::Send::BlockType::DoEnd;
+    }
+
+    return ast::Send::BlockType::Present;
+}
+
+} // namespace
+
 ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
     block->send->loc = block->send->loc.join(block->loc);
     auto recv = node2TreeImpl(dctx, block->send);
@@ -226,7 +250,8 @@ ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
                          dctx.enclosingMethodName, inBlock, dctx.inModule, dctx.preserveConcreteSyntax);
     auto desugaredBody = desugarBody(dctx1, block->loc, block->body, move(destructures));
 
-    send->setBlock(MK::Block(block->loc, move(desugaredBody), move(Params)));
+    send->setBlock(MK::Block(block->loc, move(desugaredBody), move(Params)),
+                   getBlockType(dctx.ctx, dctx.ctx.locAt(block->loc)));
     return res;
 }
 
@@ -973,8 +998,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             // E.g. `foo(*splat, &:to_s)`
 
                             auto desugaredBlockLiteral = symbol2Proc(dctx, move(blockPassArg));
+                            flags.hasBlock =
+                                getBlockType(dctx.ctx, dctx.ctx.locAt(desugaredBlockLiteral.loc()));
                             sendargs.emplace_back(move(desugaredBlockLiteral));
-                            flags.hasBlock = true;
 
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                            move(sendargs), flags);
@@ -1018,8 +1044,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             // E.g. `a.map(:to_s)`
 
                             auto desugaredBlockLiteral = symbol2Proc(dctx, move(blockPassArg));
+                            flags.hasBlock =
+                                getBlockType(dctx.ctx, dctx.ctx.locAt(desugaredBlockLiteral.loc()));
                             args.emplace_back(move(desugaredBlockLiteral));
-                            flags.hasBlock = true;
 
                             res =
                                 MK::Send(loc, move(rec), send->method, send->methodLoc, numPosArgs, move(args), flags);
