@@ -62,10 +62,10 @@ string buildValidLayersStr(const core::GlobalState &gs) {
 
 struct FullyQualifiedName {
     vector<core::NameRef> parts;
-    core::Loc loc;
+    core::LocOffsets loc;
 
     FullyQualifiedName() = default;
-    FullyQualifiedName(vector<core::NameRef> parts, core::Loc loc) : parts(parts), loc(loc) {}
+    FullyQualifiedName(vector<core::NameRef> parts, core::LocOffsets loc) : parts(parts), loc(loc) {}
     explicit FullyQualifiedName(const FullyQualifiedName &) = default;
     FullyQualifiedName(FullyQualifiedName &&) = default;
     FullyQualifiedName &operator=(const FullyQualifiedName &) = delete;
@@ -487,7 +487,8 @@ public:
 
     optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                     const core::SymbolRef newExport) const {
-        auto insertionLoc = core::Loc::none(loc.file());
+        auto pkgFile = loc.file();
+        auto insertionLoc = core::Loc::none(pkgFile);
         if (!exports_.empty()) {
             FullyQualifiedName const *exportToInsertAfter = nullptr;
             for (auto &e : exports_) {
@@ -498,11 +499,11 @@ public:
             if (!exportToInsertAfter) {
                 // Insert before the first export
                 auto beforeConstantName = exports_.front().fqn.loc;
-                auto [beforeExport, numWhitespace] = beforeConstantName.findStartOfIndentation(gs);
+                auto [beforeExport, numWhitespace] = core::Loc(pkgFile, beforeConstantName).findStartOfIndentation(gs);
                 auto endOfPrevLine = beforeExport.adjust(gs, -numWhitespace - 1, 0);
                 insertionLoc = endOfPrevLine.copyWithZeroLength();
             } else {
-                insertionLoc = exportToInsertAfter->loc.copyEndWithZeroLength();
+                insertionLoc = core::Loc(pkgFile, exportToInsertAfter->loc.copyEndWithZeroLength());
             }
         } else {
             // if we don't have any exports, then we can try adding it right before the final `end`
@@ -686,7 +687,7 @@ bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) 
 
 FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     FullyQualifiedName fqn;
-    fqn.loc = ctx.locAt(constantLit->loc);
+    fqn.loc = constantLit->loc;
     while (constantLit != nullptr) {
         fqn.parts.emplace_back(constantLit->cnst);
         constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(constantLit->scope);
@@ -1422,7 +1423,7 @@ struct PackageSpecBodyWalk {
             // `exportAll` is set then we've got conflicting
             // information about export; flag the exports as wrong
             for (auto it = exported.begin(); it != exported.end(); ++it) {
-                if (auto e = ctx.beginError(it->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
+                if (auto e = ctx.beginError(it->fqn.loc, core::errors::Packager::ExportConflict)) {
                     e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
                                 info.name.toString(ctx), "export_all!");
                 }
@@ -1435,7 +1436,7 @@ struct PackageSpecBodyWalk {
             LexNext upperBound(it->parts());
             auto longer = it + 1;
             for (; longer != exported.end() && !(upperBound < *longer); ++longer) {
-                if (auto e = ctx.beginError(longer->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
+                if (auto e = ctx.beginError(longer->fqn.loc, core::errors::Packager::ExportConflict)) {
                     if (it->parts() == longer->parts()) {
                         e.setHeader("Duplicate export of `{}`",
                                     fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
@@ -1444,7 +1445,7 @@ struct PackageSpecBodyWalk {
                                     fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }),
                                     fmt::map_join(it->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
                     }
-                    e.addErrorLine(it->fqn.loc, "Prefix exported here");
+                    e.addErrorLine(ctx.locAt(it->fqn.loc), "Prefix exported here");
                 }
 
                 dupInds.emplace_back(distance(exported.begin(), longer));
