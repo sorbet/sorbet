@@ -125,6 +125,13 @@ struct Export {
     }
 };
 
+struct VisibleTo {
+    PackageName name;
+    core::packages::VisibleToType type;
+
+    VisibleTo(PackageName &&name, core::packages::VisibleToType type) : name(move(name)), type(type) {}
+};
+
 // For a given vector of NameRefs, this represents the "next" vector that does not begin with its
 // prefix (without actually constructing it). Consider the following sorted names:
 //
@@ -217,7 +224,7 @@ public:
     // but also any package name underneath it. `Normal` means the package can be imported
     // by the referenced package name but not any child packages (unless they have a separate
     // `visible_to` line of their own.)
-    vector<pair<PackageName, core::packages::VisibleToType>> visibleTo_ = {};
+    vector<VisibleTo> visibleTo_ = {};
 
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
@@ -549,7 +556,7 @@ public:
     vector<core::packages::VisibleTo> visibleTo() const {
         vector<core::packages::VisibleTo> rv;
         for (auto &v : visibleTo_) {
-            rv.emplace_back(v.first.fullName.parts, v.second);
+            rv.emplace_back(v.name.fullName.parts, v.type);
         }
         return rv;
     }
@@ -1593,7 +1600,7 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
 }
 
 // TODO(jez) Rename this to lookupMangledName, and make it take a const GlobalState
-void populateMangledName(core::GlobalState &gs, PackageName &pName) {
+template <typename PackageName> void populateMangledName(core::GlobalState &gs, PackageName &pName) {
     pName.mangledName = core::packages::MangledName::mangledNameFromParts(gs, pName.fullName.parts);
 }
 
@@ -1626,7 +1633,7 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     }
 
     for (auto &visibleTo : info->visibleTo_) {
-        populateMangledName(gs, visibleTo.first);
+        populateMangledName(gs, visibleTo.name);
     }
 
     auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
