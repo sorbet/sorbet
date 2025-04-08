@@ -520,9 +520,6 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
         // First run: only the __package.rb files. This populates the packageDB
         pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers);
 
-        // Second run: all the other files (the packageDB shouldn't change)
-        pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts, workers);
-
         // Only need to compute FoundDefHashes when running to compute a FileHash
         auto foundHashes = nullptr;
         auto cancelled = pipeline::name(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers, foundHashes);
@@ -531,6 +528,9 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
             return;
         }
+
+        // Second run: all the other files (the packageDB shouldn't change)
+        pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts, workers);
 
         // Only need to compute FoundDefHashes when running to compute a FileHash
         auto canceled =
