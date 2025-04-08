@@ -813,12 +813,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                         if (blockLast->exprs.empty() || isa_instruction<LoadSelf>(blockLast->exprs.back().value) ||
                             isa_instruction<YieldLoadArg>(blockLast->exprs.back().value)) {
                             auto blockEndPos = blockReturnLoc.copyEndWithZeroLength();
-                            auto endKwLoc = cctx.ctx.locAt(blockEndPos).adjustLen(cctx.ctx, -3, 3);
-                            auto endBraceLoc = cctx.ctx.locAt(blockEndPos).adjustLen(cctx.ctx, -1, 1);
-                            if (endKwLoc.source(cctx.ctx) == "end") {
-                                blockReturnLoc = endKwLoc.offsets();
-                            } else if (endBraceLoc.source(cctx.ctx) == "}") {
-                                blockReturnLoc = endBraceLoc.offsets();
+                            if (s.flags.hasBlock == ast::Send::BlockType::DoEnd) {
+                                blockReturnLoc = cctx.ctx.locAt(blockEndPos).adjustLen(cctx.ctx, -3, 3).offsets();
+                            } else if (s.flags.hasBlock == ast::Send::BlockType::Braces) {
+                                blockReturnLoc = cctx.ctx.locAt(blockEndPos).adjustLen(cctx.ctx, -1, 1).offsets();
                             }
                         } else {
                             blockReturnLoc = blockLast->exprs.back().loc;
