@@ -356,7 +356,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     if (!test.minimizeRBI.empty() || test.expectations.contains("rbi-gen")) {
         // Copy GlobalState after initializing it, but before rest of pipeline, so that it
         // represents an "empty" GlobalState.
-        emptyGs = gs->deepCopy();
+        emptyGs = gs->deepCopyGlobalState();
     }
 
     // Read files
@@ -399,7 +399,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     if (opts.stripePackages) {
         if (test.expectations.contains("rbi-gen")) {
-            auto rbiGenGs = emptyGs->deepCopy();
+            auto rbiGenGs = emptyGs->deepCopyGlobalState();
             realmain::pipeline::setGlobalStateOptions(*rbiGenGs, opts);
             rbiGenGs->errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
             // If there is a rbi-gen exp file, we need to retypecheck the files w/o packager mode and run RBI
@@ -542,7 +542,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     if (!test.minimizeRBI.empty()) {
-        auto gsForMinimize = emptyGs->deepCopy();
+        auto gsForMinimize = emptyGs->deepCopyGlobalState();
         auto opts = realmain::options::Options{};
         auto minimizeRBI = test.folder + test.minimizeRBI;
         realmain::Minimize::indexAndResolveForMinimize(*gs, *gsForMinimize, opts, *workers, minimizeRBI);
