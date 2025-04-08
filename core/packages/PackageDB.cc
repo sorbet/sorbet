@@ -286,7 +286,7 @@ bool PackageDB::allowRelaxedPackagerChecksFor(MangledName mangledName) const {
 
 PackageDB PackageDB::deepCopy() const {
     ENFORCE(frozen);
-    PackageDB result = this->copyOptionsOnly();
+    PackageDB result;
 
     // --- data ---
     result.packages_.reserve(this->packages_.size());
@@ -297,13 +297,6 @@ PackageDB PackageDB::deepCopy() const {
     // This assumes that the GlobalState this PackageDB is getting copied into also has these
     // interned mangledName NameRefs at the same IDs as the current PackageDB.
     result.mangledNames = this->mangledNames;
-
-    return result;
-}
-
-PackageDB PackageDB::copyOptionsOnly() const {
-    ENFORCE(frozen);
-    PackageDB result;
 
     // --- options ---
     result.enabled_ = this->enabled_;

@@ -464,9 +464,6 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                             cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
                                                                  this->config->opts, *this->gs, workers, indexed));
                     }
-
-                    // First run: only the __package.rb files. This populates the packageDB
-                    pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers);
                 }
 
                 {
@@ -490,22 +487,15 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                                        *this->gs, workers, nonPackagedIndexed));
                 }
 
-                // Second run: all the other files (the packageDB shouldn't change)
-                pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts,
-                                                workers);
-
                 if (mode == SlowPathMode::Init) {
                     Timer timeit(config->logger, "copy_state");
 
                     // At this point this->gs has a name table that's initialized enough for the indexer thread, so we
                     // make a copy to pass back over.
+                    ENFORCE(this->gs->packageDB().packages().empty(),
+                            "Don't want symbols or packages in indexer GlobalState");
                     indexedState = this->gs->deepCopyGlobalState();
                     indexedState->errorQueue = std::move(savedErrorQueue);
-
-                    // We need to ensure that the package DB we build up during indexing isn't accidentaly persisted in
-                    // the indexer, as that would feed it back into all subsequent slow path runs and prevent any
-                    // deletions to the package db structure.
-                    indexedState->packageDB() = indexedState->packageDB().copyOptionsOnly();
 
                     this->sessionCache =
                         cache::SessionCache::make(std::move(ownedKvstore), *this->config->logger, this->config->opts);
@@ -527,20 +517,22 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             return;
         }
 
-        if (this->config->opts.stripePackages) {
-            // Only need to compute FoundDefHashes when running to compute a FileHash
-            auto foundHashes = nullptr;
-            auto cancelled =
-                pipeline::name(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers, foundHashes);
-            if (cancelled) {
-                ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
-                ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
-                return;
-            }
-        }
+        // First run: only the __package.rb files. This populates the packageDB
+        pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers);
 
         // Only need to compute FoundDefHashes when running to compute a FileHash
         auto foundHashes = nullptr;
+        auto cancelled = pipeline::name(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers, foundHashes);
+        if (cancelled) {
+            ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
+            ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
+            return;
+        }
+
+        // Second run: all the other files (the packageDB shouldn't change)
+        pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts, workers);
+
+        // Only need to compute FoundDefHashes when running to compute a FileHash
         auto canceled =
             pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackagedIndexed), config->opts, workers, foundHashes);
         if (canceled) {
