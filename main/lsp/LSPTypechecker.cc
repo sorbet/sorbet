@@ -650,36 +650,6 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     }
 }
 
-void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled) {
-    // The fast path cannot be canceled.
-    ENFORCE(!(updates.typecheckingPath == TypecheckingPath::Fast && couldBeCanceled));
-    if (couldBeCanceled) {
-        ENFORCE(updates.updatedGS.has_value());
-        cancellationUndoState =
-            make_unique<UndoState>(std::move(this->gs), std::move(this->indexedFinalGS), updates.epoch);
-    }
-
-    // Both the fast and slow path clear these vectors out before we see a call to this method.
-    ENFORCE(updates.updatedFileIndexes.empty());
-    ENFORCE(updates.updatedFiles.empty());
-
-    // Clear out state associated with old finalGS.
-    if (updates.typecheckingPath != TypecheckingPath::Fast) {
-        this->indexedFinalGS.clear();
-    }
-
-    for (auto &ast : updates.updatedFinalGSFileIndexes) {
-        this->indexedFinalGS[ast.file.id()] = move(ast);
-    }
-
-    if (updates.updatedGS.has_value()) {
-        ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast);
-        this->gs = move(updates.updatedGS.value());
-    } else {
-        ENFORCE(updates.typecheckingPath == TypecheckingPath::Fast);
-    }
-}
-
 unique_ptr<core::GlobalState> LSPTypechecker::destroy() {
     return move(gs);
 }

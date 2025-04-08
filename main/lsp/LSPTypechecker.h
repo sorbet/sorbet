@@ -115,9 +115,6 @@ class LSPTypechecker final {
                                            std::shared_ptr<core::ErrorFlusher> errorFlusher,
                                            bool isNoopUpdateForRetypecheck) const;
 
-    /** Commits the given file updates to LSPTypechecker. Does not send diagnostics. */
-    void commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled);
-
     /**
      * Returns a the indexed tree for the given file ref. The associated tree may be `nullptr` if the file ref given
      * points to a payload RBI. This function will first consult the `this->indexedFinalGS` cache before falling back on
