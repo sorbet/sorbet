@@ -396,7 +396,7 @@ std::unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams
         }
         case TypecheckingPath::Slow: {
             // Completely replace `pendingTypecheckUpdates` if this was a slow path update.
-            update.updatedGS = initialGS->deepCopy();
+            update.updatedGS = initialGS->deepCopyGlobalState();
             pendingTypecheckUpdates = update.copy();
             break;
         }

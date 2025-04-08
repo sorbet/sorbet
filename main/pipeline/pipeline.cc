@@ -619,7 +619,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
 
         // clone the empty global state to avoid manually re-entering everything, and copy the base filetable so that
         // file sources are available.
-        unique_ptr<core::GlobalState> localGs = emptyGs->deepCopy();
+        unique_ptr<core::GlobalState> localGs = emptyGs->deepCopyGlobalState();
         auto &epochManager = *localGs->epochManager;
 
         IndexThreadResultPack threadResult;

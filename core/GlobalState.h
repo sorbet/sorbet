@@ -253,7 +253,7 @@ public:
 
     std::optional<int> sleepInSlowPathSeconds = std::nullopt;
 
-    std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
+    std::unique_ptr<GlobalState> deepCopyGlobalState(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;
 
     // Copy the file table and other parts of GlobalState that are required for the indexing pass.

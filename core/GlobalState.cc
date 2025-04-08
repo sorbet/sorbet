@@ -2094,7 +2094,7 @@ void GlobalState::copyOptions(const core::GlobalState &other) {
     this->pathPrefix = other.pathPrefix;
 }
 
-unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
+unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     Timer timeit(tracer(), "GlobalState::deepCopy", this->creation);
     this->sanityCheck();
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
