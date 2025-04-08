@@ -96,7 +96,6 @@ struct PackageName {
     core::LocOffsets loc;
     core::packages::MangledName mangledName;
     FullyQualifiedName fullName;
-    FullyQualifiedName fullTestPkgName;
 
     // Pretty print the package's (user-observable) name (e.g. Foo::Bar)
     string toString(const core::GlobalState &gs) const {
@@ -705,7 +704,6 @@ PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *
     PackageName pName;
     pName.loc = constantLit->loc;
     pName.fullName = getFullyQualifiedName(ctx, constantLit);
-    pName.fullTestPkgName = pName.fullName.withPrefix(core::packages::PackageDB::TEST_NAMESPACE);
 
     // pname.mangledName will be populated later, when we have a mutable GlobalState
 
@@ -1121,19 +1119,16 @@ public:
         if (rootConsts > 0 || namespaces.depth() == 0) {
             return;
         }
-        auto &pkgName = requiredNamespace(ctx);
         auto packageForNamespace = namespaces.packageForNamespace();
         if (packageForNamespace != pkg.mangledName()) {
             ENFORCE(errorDepth == 0);
             errorDepth++;
             if (auto e = ctx.beginError(loc, core::errors::Packager::DefinitionPackageMismatch)) {
-                e.setHeader("This file must only define behavior in enclosing package `{}`",
-                            fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                e.setHeader("This file must only define behavior in enclosing package `{}`", requiredNamespace(ctx));
                 const auto &constantName = namespaces.currentConstantName();
                 e.addErrorLine(ctx.locAt(constantName.back().second), "Defining behavior in `{}` instead:",
                                fmt::map_join(constantName, "::", [&](const auto &nr) { return nr.first.show(ctx); }));
-                e.addErrorLine(pkg.declLoc(), "Enclosing package `{}` declared here",
-                               fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                e.addErrorLine(pkg.declLoc(), "Enclosing package `{}` declared here", pkg.name.toString(ctx));
                 if (packageForNamespace.exists()) {
                     auto &packageInfo = ctx.state.packageDB().getPackageInfo(packageForNamespace);
                     e.addErrorLine(packageInfo.declLoc(), "Package `{}` declared here",
@@ -1185,8 +1180,12 @@ private:
         }
     }
 
-    const vector<core::NameRef> &requiredNamespace(const core::GlobalState &gs) const {
-        return useTestNamespace ? pkg.name.fullTestPkgName.parts : pkg.name.fullName.parts;
+    const string requiredNamespace(const core::GlobalState &gs) const {
+        auto result = pkg.name.toString(gs);
+        if (useTestNamespace) {
+            result = fmt::format("{}::{}", core::packages::PackageDB::TEST_NAMESPACE.show(gs), result);
+        }
+        return result;
     }
 
     bool hasParentClass(const ast::ClassDef &def) const {
@@ -1195,9 +1194,7 @@ private:
     }
 
     void definitionPackageMismatch(const core::GlobalState &gs, core::ErrorBuilder &e) const {
-        auto requiredName =
-            fmt::format("{}", fmt::map_join(requiredNamespace(gs), "::", [&](const auto nr) { return nr.show(gs); }));
-
+        auto requiredName = requiredNamespace(gs);
         if (useTestNamespace) {
             e.setHeader("Tests in the `{}` package must define tests in the `{}` namespace", pkg.show(gs),
                         requiredName);
