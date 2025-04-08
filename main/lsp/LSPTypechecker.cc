@@ -464,9 +464,6 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                             cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
                                                                  this->config->opts, *this->gs, workers, indexed));
                     }
-
-                    // First run: only the __package.rb files. This populates the packageDB
-                    pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers);
                 }
 
                 {
@@ -489,10 +486,6 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                                        OwnedKeyValueStore::abort(std::move(ownedKvstore)), this->config->opts,
                                        *this->gs, workers, nonPackagedIndexed));
                 }
-
-                // Second run: all the other files (the packageDB shouldn't change)
-                pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts,
-                                                workers);
 
                 if (mode == SlowPathMode::Init) {
                     Timer timeit(config->logger, "copy_state");
@@ -526,6 +519,13 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
         if (epochManager.wasTypecheckingCanceled()) {
             return;
         }
+
+                    // First run: only the __package.rb files. This populates the packageDB
+                    pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers);
+
+                // Second run: all the other files (the packageDB shouldn't change)
+                pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts,
+                                                workers);
 
         // Only need to compute FoundDefHashes when running to compute a FileHash
         auto foundHashes = nullptr;
