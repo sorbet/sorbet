@@ -101,14 +101,6 @@ struct PackageName {
     string toString(const core::GlobalState &gs) const {
         return absl::StrJoin(fullName.parts, "::", core::packages::NameFormatter(gs));
     }
-
-    bool operator==(const PackageName &rhs) const {
-        return mangledName == rhs.mangledName;
-    }
-
-    bool operator!=(const PackageName &rhs) const {
-        return mangledName != rhs.mangledName;
-    }
 };
 
 struct Import {
@@ -400,7 +392,7 @@ public:
         if (!importedPackageNames.empty()) {
             packager::PackageName const *importToInsertAfter = nullptr;
             for (auto &import : importedPackageNames) {
-                if (import.name == info.name) {
+                if (import.name.mangledName == info.name.mangledName) {
                     if (!isTestImport && import.type == core::packages::ImportType::Test) {
                         // There's already a test import for this package, so we'll convert it to a regular import.
                         // importToInsertAfter already tracks where we need to insert the import.
