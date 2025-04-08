@@ -57,7 +57,6 @@ public:
     static Method unpickleMethod(UnPickler &p, const GlobalState *gs);
     static Field unpickleField(UnPickler &p, const GlobalState *gs);
     static TypeParameter unpickleTypeParameter(UnPickler &p, const GlobalState *gs);
-    static void unpickleGS(UnPickler &p, GlobalState &result);
     static void unpickleSymbolTable(UnPickler &g, GlobalState &result);
     static void unpickleNameTable(UnPickler &g, GlobalState &result);
     static void unpickleFileTable(UnPickler &g, GlobalState &result);
@@ -842,22 +841,6 @@ uint32_t SerializerImpl::unpickleGSUUID(UnPickler &p) {
         Exception::raise("Payload version mismatch");
     }
     return p.getU4();
-}
-
-void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
-    Timer timeit(result.tracer(), "unpickleGS");
-    result.creation = timeit.getFlowEdge();
-    if (p.getU4() != Serializer::VERSION) {
-        Exception::raise("Payload version mismatch");
-    }
-
-    result.kvstoreUuid = p.getU4();
-
-    unpickleFileTable(p, result);
-    unpickleNameTable(p, result);
-    unpickleSymbolTable(p, result);
-
-    result.sanityCheck();
 }
 
 Pickler SerializerImpl::pickleFileTable(const GlobalState &gs, bool payloadOnly) {
