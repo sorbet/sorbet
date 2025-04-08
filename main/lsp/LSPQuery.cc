@@ -104,12 +104,10 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
     const core::GlobalState &gs = typechecker.state();
     const core::WithoutUniqueNameHash symShortNameHash(gs, symbol.name(gs));
     // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
-    int i = -1;
-    for (auto &file : typechecker.state().getFiles()) {
+    size_t i = 0;
+    // skip idx 0 (corresponds to File that does not exist, so it contains nullptr)
+    for (auto &file : typechecker.state().getFiles().subspan(1)) {
         i++;
-        if (file == nullptr) {
-            continue;
-        }
 
         auto ref = core::FileRef(i);
         if (pkgName.exists() && gs.packageDB().getPackageNameForFile(ref) != pkgName) {
