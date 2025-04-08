@@ -153,7 +153,6 @@ struct Options {
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
     bool uniquelyDefinedBehavior = false;
-    bool stripePackages = false;
     std::string stripePackagesHint = "";
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
@@ -198,12 +197,14 @@ struct Options {
 
         bool runningUnderAutogen : 1;
 
+        bool stripePackages : 1;
+
         // In C++20 we can replace this with bit field initializers
         CacheSensitiveOptions()
             : noStdlib(false), typedSuper(true), rbsSignaturesEnabled(false), rbsAssertionsEnabled(false),
-              requiresAncestorEnabled(false), runningUnderAutogen(false) {}
+              requiresAncestorEnabled(false), runningUnderAutogen(false), stripePackages(false) {}
 
-        constexpr static uint8_t NUMBER_OF_FLAGS = 6;
+        constexpr static uint8_t NUMBER_OF_FLAGS = 7;
         constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         uint8_t serialize() const {

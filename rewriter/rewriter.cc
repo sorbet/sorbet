@@ -21,6 +21,7 @@
 #include "rewriter/Minitest.h"
 #include "rewriter/MixinEncryptedProp.h"
 #include "rewriter/ModuleFunction.h"
+#include "rewriter/PackageSpec.h"
 #include "rewriter/Private.h"
 #include "rewriter/Prop.h"
 #include "rewriter/Rails.h"
@@ -52,6 +53,8 @@ public:
         TypeMembers::run(ctx, classDef);
         Concern::run(ctx, classDef);
         TestCase::run(ctx, classDef);
+
+        PackageSpec::run(ctx, classDef);
 
         for (auto &extension : ctx.state.semanticExtensions) {
             extension->run(ctx, classDef);

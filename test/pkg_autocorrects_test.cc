@@ -14,6 +14,7 @@
 #include "main/pipeline/pipeline.h"
 #include "packager/packager.h"
 #include "parser/parser.h"
+#include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include "test/helpers/MockFileSystem.h"
@@ -84,7 +85,7 @@ const vector<string> LAYERS_UTIL_LIB_APP = {"util", "lib", "app"};
 void makeDefaultPackagerGlobalState(core::GlobalState &gs, const vector<string> &packagerLayers = NO_LAYERS) {
     gs.initEmpty();
     realmain::options::Options opts;
-    opts.stripePackages = true;
+    opts.cacheSensitiveOptions.stripePackages = true;
     opts.packagerLayers = packagerLayers;
     realmain::pipeline::setGlobalStateOptions(gs, opts);
 }
@@ -110,6 +111,7 @@ vector<ast::ParsedFile> enterPackages(core::GlobalState &gs, vector<pair<string,
 
             core::MutableContext ctx(gs, core::Symbols::root(), file);
             auto parsedFile = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file};
+            parsedFile.tree = rewriter::Rewriter::run(ctx, move(parsedFile.tree));
             parsedFiles.emplace_back(local_vars::LocalVars::run(ctx, move(parsedFile)));
         }
     }

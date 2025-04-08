@@ -117,7 +117,8 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
         // Only relevant in `--stripe-packages` mode. This prevents LSP editing features like autocomplete from
         // working in `__package.rb` since every edit causes a slow path.
         // Note: We don't use File::isPackage because we have not necessarily set the packager options on initialGS yet
-        if (this->config->opts.stripePackages && oldFile.hasPackageRbPath() && oldFile.source() != f->source()) {
+        if (this->config->opts.cacheSensitiveOptions.stripePackages && oldFile.hasPackageRbPath() &&
+            oldFile.source() != f->source()) {
             logger.debug("Taking slow path because {} is a package file", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "package_file");
             timeit.setTag("path_chosen", "slow");

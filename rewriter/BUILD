@@ -16,6 +16,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast",
+        "//ast/packager",
         "//ast/treemap",
         "//ast/verifier",
         "//common",

@@ -697,7 +697,8 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
         opts.suggestUnsafe = "T.unsafe";
     }
 
-    opts.stripePackages = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
+    opts.cacheSensitiveOptions.stripePackages =
+        BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
     auto extraDirUnderscore =
         StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
     if (extraDirUnderscore.has_value()) {
