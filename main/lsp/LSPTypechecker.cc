@@ -527,15 +527,14 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             return;
         }
 
-            // Only need to compute FoundDefHashes when running to compute a FileHash
-            auto foundHashes = nullptr;
-            auto cancelled =
-                pipeline::name(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers, foundHashes);
-            if (cancelled) {
-                ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
-                ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
-                return;
-            }
+        // Only need to compute FoundDefHashes when running to compute a FileHash
+        auto foundHashes = nullptr;
+        auto cancelled = pipeline::name(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers, foundHashes);
+        if (cancelled) {
+            ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
+            ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
+            return;
+        }
 
         // Only need to compute FoundDefHashes when running to compute a FileHash
         auto canceled =
