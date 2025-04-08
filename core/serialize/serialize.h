@@ -17,12 +17,6 @@ public:
     // Serialize a global state.
     static std::vector<uint8_t> store(const GlobalState &gs);
 
-    // Stores a GlobalState, but only includes `File`s with Type == Payload.
-    // This can be used in conjunction with `storeFile` to store
-    // a global state containing a name table along side a large number of
-    // individual cached files, which can be loaded independently.
-    static std::vector<uint8_t> storePayloadAndNameTable(const GlobalState &gs);
-
     static std::string fileKey(const core::File &file);
 
     // Serializes an AST and file hash.
