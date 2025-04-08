@@ -1110,8 +1110,7 @@ void readOptions(Options &opts,
         }
         if (raw["license"].as<bool>()) {
             fmt::print(
-                "Sorbet typechecker is licensed under Apache License Version 2.0.\n\nSorbet is built on top "
-                "of:\n{}",
+                "Sorbet typechecker is licensed under Apache License Version 2.0.\n\nSorbet is built on top of:\n{}",
                 fmt::map_join(third_party::licenses::all(), "\n\n", [](const auto &pair) { return pair.second; }));
             throw EarlyReturnWithCode(0);
         }
@@ -1220,8 +1219,8 @@ void readOptions(Options &opts,
 
         if (raw.count("packager-layers")) {
             if (opts.stripePackages) {
-                // TODO(neil): This regex was picked on a whim, so open to changing to be more or less restrictive
-                // based on feedback/usecases.
+                // TODO(neil): This regex was picked on a whim, so open to changing to be more or less restrictive based
+                // on feedback/usecases.
                 std::regex layerValid("[a-zA-Z0-9]+");
                 for (const string &layer : raw["packager-layers"].as<vector<string>>()) {
                     if (!std::regex_match(layer, layerValid)) {
