@@ -15,4 +15,18 @@ ExpressionPtr prependRegistry(ExpressionPtr scope) {
     return scope;
 }
 
+const ast::ClassDef *asPackageSpecClass(const ast::ExpressionPtr &expr) {
+    auto packageSpecClass = ast::cast_tree<ast::ClassDef>(expr);
+    if (packageSpecClass == nullptr || packageSpecClass->ancestors.size() != 1) {
+        return nullptr;
+    }
+
+    auto superClassLit = ast::cast_tree<ast::ConstantLit>(packageSpecClass->ancestors[0]);
+    if (superClassLit == nullptr || superClassLit->symbol() != core::Symbols::PackageSpec()) {
+        return nullptr;
+    }
+
+    return packageSpecClass;
+}
+
 } // namespace sorbet::ast::packager

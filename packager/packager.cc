@@ -718,20 +718,6 @@ ast::ExpressionPtr prependRoot(ast::ExpressionPtr scope) {
     return scope;
 }
 
-const ast::ClassDef *asPackageSpecClass(const ast::ExpressionPtr &expr) {
-    auto packageSpecClass = ast::cast_tree<ast::ClassDef>(expr);
-    if (packageSpecClass == nullptr || packageSpecClass->ancestors.size() != 1) {
-        return nullptr;
-    }
-
-    auto superClassLit = ast::cast_tree<ast::ConstantLit>(packageSpecClass->ancestors[0]);
-    if (superClassLit == nullptr || superClassLit->symbol() != core::Symbols::PackageSpec()) {
-        return nullptr;
-    }
-
-    return packageSpecClass;
-}
-
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
                              const ast::ExpressionPtr &expr) {
     if (ast::isa_tree<ast::EmptyTree>(expr)) {
@@ -1399,7 +1385,7 @@ struct PackageSpecBodyWalk {
         }
 
         if (!this->foundFirstPackageSpec) {
-            auto packageSpecClass = asPackageSpecClass(tree);
+            auto packageSpecClass = ast::packager::asPackageSpecClass(tree);
             this->foundFirstPackageSpec |= (packageSpecClass != nullptr);
 
             // Already reported an error (in definePackage) or no need to report an error (because
@@ -1563,7 +1549,7 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
     auto &rootClass = ast::cast_tree_nonnull<ast::ClassDef>(package.tree);
 
     for (auto &rootStmt : rootClass.rhs) {
-        auto packageSpecClass = asPackageSpecClass(rootStmt);
+        auto packageSpecClass = ast::packager::asPackageSpecClass(rootStmt);
         if (packageSpecClass == nullptr) {
             // rewriter already reported an error
             continue;
