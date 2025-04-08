@@ -2172,7 +2172,13 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     return result;
 }
 
-unique_ptr<GlobalState> GlobalState::copyForIndex() const {
+unique_ptr<GlobalState>
+GlobalState::copyForIndex(const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                          const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                          const vector<string> &extraPackageFilesDirectorySlashPrefixes,
+                          const vector<string> &packageSkipRBIExportEnforcementDirs,
+                          const vector<string> &allowRelaxedPackagerChecksFor, const vector<string> &packagerLayers,
+                          string errorHint) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     result->initEmpty();
@@ -2182,6 +2188,15 @@ unique_ptr<GlobalState> GlobalState::copyForIndex() const {
     result->files = this->files;
     result->fileRefByPath = this->fileRefByPath;
     result->kvstoreUuid = this->kvstoreUuid;
+
+    {
+        core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
+        result->setPackagerOptions(extraPackageFilesDirectorySlashPrefixes,
+                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
+                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint);
+    }
 
     return result;
 }

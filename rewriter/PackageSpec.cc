@@ -57,12 +57,13 @@ void mustContainPackageDef(core::MutableContext ctx, core::LocOffsets loc) {
 } // namespace
 
 void PackageSpec::run(core::MutableContext ctx, ast::ClassDef *klass) {
-    ENFORCE(ctx.state.packageDB().enabled(), "Should only run on __package.rb files");
-    ENFORCE(ctx.file.data(ctx).isPackage(ctx), "Should only run on __package.rb files");
+    // Aware of whether the --stripe-packages option was passed
+    if (!ctx.file.data(ctx).isPackage(ctx)) {
+        return;
+    }
 
-    if (ctx.owner != core::Symbols::root()) {
+    if (klass->symbol != core::Symbols::root()) {
         // Only process ClassDef that are at the top level
-        ENFORCE(ctx.owner == core::Symbols::todo());
         return;
     }
 

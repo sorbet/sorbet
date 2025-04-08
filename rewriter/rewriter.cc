@@ -54,10 +54,7 @@ public:
         Concern::run(ctx, classDef);
         TestCase::run(ctx, classDef);
 
-        // Aware of whether the --stripe-packages option was passed
-        if (ctx.file.data(ctx).isPackage(ctx)) {
-            PackageSpec::run(ctx, classDef);
-        }
+        PackageSpec::run(ctx, classDef);
 
         for (auto &extension : ctx.state.semanticExtensions) {
             extension->run(ctx, classDef);
