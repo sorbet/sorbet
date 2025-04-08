@@ -156,8 +156,8 @@ TEST_CASE("CloneSubstitutePayload") {
     sorbet::core::GlobalState gs(errorQueue);
     sorbet::core::serialize::Serializer::loadGlobalState(gs, GLOBAL_STATE_PAYLOAD);
 
-    auto c1 = gs.deepCopy();
-    auto c2 = gs.deepCopy();
+    auto c1 = gs.deepCopyGlobalState();
+    auto c2 = gs.deepCopyGlobalState();
 
     sorbet::core::NameRef n1;
     {
