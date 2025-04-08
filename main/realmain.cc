@@ -850,8 +850,12 @@ int realmain(int argc, char *argv[]) {
         logger->trace("sorbet done");
 
         if (!opts.storeState.empty()) {
+            ENFORCE(opts.storeState.size() == 3);
             gs->markAsPayload();
-            FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
+            auto result = core::serialize::Serializer::store(*gs);
+            FileOps::write(opts.storeState[0].c_str(), result.symbolTableData);
+            FileOps::write(opts.storeState[1].c_str(), result.nameTableData);
+            FileOps::write(opts.storeState[2].c_str(), result.fileTableData);
         }
 
         auto untypedBlames = getAndClearHistogram("untyped.blames");
