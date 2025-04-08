@@ -489,11 +489,8 @@ int realmain(int argc, char *argv[]) {
         auto dumpDir = opts.print.PayloadSources.outputPath;
         FileOps::ensureDir(dumpDir);
 
-        for (auto &payloadFile : gs->getFiles()) {
-            if (payloadFile == nullptr) {
-                continue;
-            }
-
+        // skip idx 0 (corresponds to File that does not exist, so it contains nullptr)
+        for (auto &payloadFile : gs->getFiles().subspan(1)) {
             auto payloadVersion = sorbet_is_release_build ? sorbet_build_scm_revision : "master";
             auto payloadPath = payloadFile->path();
             auto payloadPrefix = absl::StrCat("https://github.com/sorbet/sorbet/tree/", payloadVersion, "/rbi/");

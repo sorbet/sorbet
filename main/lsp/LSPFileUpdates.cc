@@ -193,12 +193,10 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
 
     core::WithoutUniqueNameHash::sortAndDedupe(changedSymbolNameHashes);
 
-    int i = -1;
-    for (auto &oldFile : gs.getFiles()) {
+    size_t i = 0;
+    // skip idx 0 (corresponds to File that does not exist, so it contains nullptr)
+    for (auto &oldFile : gs.getFiles().subspan(1)) {
         i++;
-        if (oldFile == nullptr) {
-            continue;
-        }
 
         auto ref = core::FileRef(i);
         if (changedFiles.contains(ref)) {
