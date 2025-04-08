@@ -239,6 +239,7 @@ class LocalNameInserter {
         ENFORCE(original.fun == core::Names::super() || original.fun == core::Names::untypedSuper());
 
         ast::ExpressionPtr originalBlock;
+        ast::Send::BlockType originalBlockType = original.flags.hasBlock;
         if (auto *rawBlock = original.rawBlock()) {
             originalBlock = move(*rawBlock);
         }
@@ -419,7 +420,7 @@ class LocalNameInserter {
                 // <call-with-splat> and "do"
                 original.fun = core::Names::callWithSplat();
                 // Re-add block argument
-                original.setBlock(std::move(originalBlock));
+                original.setBlock(std::move(originalBlock), originalBlockType);
             } else if (shouldForwardBlockArg) {
                 // <call-with-splat-and-block>(..., &blk)
                 original.fun = core::Names::callWithSplatAndBlock();
@@ -474,7 +475,7 @@ class LocalNameInserter {
             }
             // Re-add original block
             if (originalBlock) {
-                original.setBlock(std::move(originalBlock));
+                original.setBlock(std::move(originalBlock), originalBlockType);
             }
             kwArgKeyEntries.clear();
             kwArgValueEntries.clear();

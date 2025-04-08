@@ -171,6 +171,30 @@ void checkBlockRestArg(DesugarContext dctx, const MethodDef::ARGS_store &args) {
     }
 }
 
+namespace {
+
+// Determine what kind of block argument is defined by the given location.
+ast::Send::BlockType getBlockType(const core::GlobalState &gs, core::Loc blockLoc) {
+    if (!blockLoc.exists()) {
+        return ast::Send::BlockType::None;
+    }
+
+    auto blockEndPos = blockLoc.copyEndWithZeroLength();
+    auto endBraceLoc = blockEndPos.adjustLen(gs, -1, 1);
+    if (endBraceLoc.source(gs) == "}") {
+        return ast::Send::BlockType::Braces;
+    }
+
+    auto endKwLoc = blockEndPos.adjustLen(gs, -3, 3);
+    if (endKwLoc.source(gs) == "end") {
+        return ast::Send::BlockType::DoEnd;
+    }
+
+    return ast::Send::BlockType::Present;
+}
+
+} // namespace
+
 ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets blockLoc,
                            unique_ptr<parser::Node> &blockSend, parser::Node *blockArgs,
                            unique_ptr<parser::Node> &blockBody) {
@@ -206,7 +230,8 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
     auto desugaredBody = desugarBody(dctx1, loc, blockBody, std::move(destructures));
 
     // TODO the send->block's loc is too big and includes the whole send
-    send->setBlock(MK::Block(loc, std::move(desugaredBody), std::move(args)));
+    send->setBlock(MK::Block(loc, std::move(desugaredBody), std::move(args)),
+                   getBlockType(dctx.ctx, dctx.ctx.locAt(loc)));
     return res;
 }
 
@@ -906,8 +931,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         if (auto lit = cast_tree<Literal>(convertedBlock); lit && lit->isSymbol()) {
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                            std::move(sendargs), flags);
-                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(
-                                symbol2Proc(dctx, std::move(convertedBlock)));
+                            auto block = symbol2Proc(dctx, std::move(convertedBlock));
+                            auto type = getBlockType(dctx.ctx, dctx.ctx.locAt(block.loc()));
+                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(std::move(block), type);
                         } else {
                             sendargs.emplace_back(std::move(convertedBlock));
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlock(), send->methodLoc,
@@ -999,8 +1025,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         if (auto lit = cast_tree<Literal>(convertedBlock); lit && lit->isSymbol()) {
                             res = MK::Send(loc, std::move(rec), send->method, send->methodLoc, numPosArgs,
                                            std::move(args), flags);
-                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(
-                                symbol2Proc(dctx, std::move(convertedBlock)));
+                            auto block = symbol2Proc(dctx, std::move(convertedBlock));
+                            auto type = getBlockType(dctx.ctx, dctx.ctx.locAt(block.loc()));
+                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(std::move(block), type);
                         } else {
                             Send::ARGS_store sendargs;
                             sendargs.emplace_back(std::move(rec));
