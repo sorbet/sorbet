@@ -29,6 +29,7 @@
 #include "main/lsp/notifications/indexer_initialization.h"
 #include "main/lsp/notifications/sorbet_resume.h"
 #include "main/pipeline/pipeline.h"
+#include "payload/payload.h"
 
 namespace sorbet::realmain::lsp {
 using namespace std;
@@ -78,7 +79,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
     // We should always initialize with epoch 0.
     updates.epoch = 0;
     updates.typecheckingPath = TypecheckingPath::Slow;
-    updates.updatedGS = std::move(initialGS);
+    this->gs = std::move(initialGS);
 
     // Initialization typecheck is not cancelable.
     // TODO(jvilk): Make it preemptible.
@@ -86,8 +87,8 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
         const bool isIncremental = false;
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
-        auto result = runSlowPath(updates, cache::ownIfUnchanged(*updates.updatedGS.value(), std::move(kvstore)),
-                                  workers, errorFlusher, SlowPathMode::Init);
+        auto result = runSlowPath(updates, cache::ownIfUnchanged(*this->gs, std::move(kvstore)), workers, errorFlusher,
+                                  SlowPathMode::Init);
         epoch.committed = true;
         ENFORCE(std::holds_alternative<std::unique_ptr<core::GlobalState>>(result));
         initialGS = std::move(std::get<std::unique_ptr<core::GlobalState>>(result));
@@ -334,19 +335,22 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     auto slowPathOp = std::make_optional<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
     Timer timeit(logger, "slow_path");
     ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast || config->disableFastPath);
-    ENFORCE(updates.updatedGS.has_value());
-    if (!updates.updatedGS.has_value()) {
-        Exception::raise("runSlowPath called with an update that lacks an updated global state.");
-    }
     logger->debug("Taking slow path");
 
     ENFORCE(this->cancellationUndoState == nullptr);
     if (cancelable) {
-        this->cancellationUndoState =
-            std::make_unique<UndoState>(std::move(gs), std::move(this->indexedFinalGS), updates.epoch);
-    }
+        auto trackUntyped = this->gs->trackUntyped;
+        auto savedGS = std::exchange(this->gs, payload::copyForSlowPath(*this->gs, this->config->opts));
 
-    this->gs = std::move(updates.updatedGS.value());
+        this->cancellationUndoState =
+            std::make_unique<UndoState>(std::move(savedGS), std::move(this->indexedFinalGS), updates.epoch);
+
+        pipeline::setGlobalStateOptions(*this->gs, this->config->opts);
+
+        // This option is managed entirely by LSPTypechecker and will be cleared by `setGlobalStateOptions` if it wasn't
+        // explicitly enabled at startup, so we must carry it over here.
+        this->gs->trackUntyped = trackUntyped;
+    }
 
     const uint32_t epoch = updates.epoch;
     auto &epochManager = *this->gs->epochManager;
@@ -379,11 +383,19 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                 case SlowPathMode::Cancelable: {
                     timeit.emplace(this->config->logger, "slow_path_reindex");
 
-                    // Determine which files we need to copy into the open files cache (indexedFinalGS).
+                    // Determine which files we need to copy into the open files cache (indexedFinalGS), and update the
+                    // file table to point to the updated files.
                     if (!updates.updatedFiles.empty()) {
+                        core::UnfreezeFileTable updateFileTable{*this->gs};
+
                         for (auto &file : updates.updatedFiles) {
                             auto fref = this->gs->findFileByPath(file->path());
-                            ENFORCE(fref.exists());
+                            if (!fref.exists()) {
+                                fref = this->gs->enterFile(std::move(file));
+                            } else {
+                                this->gs->replaceFile(fref, std::move(file));
+                            }
+
                             openFiles.insert(fref);
                         }
 

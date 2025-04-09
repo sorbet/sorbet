@@ -1125,6 +1125,31 @@ void Serializer::loadGlobalState(GlobalState &gs, const uint8_t *const symbolTab
     }
 }
 
+void Serializer::initForSlowPath(GlobalState &result, const GlobalState &gs, const uint8_t *const symbolTableData) {
+    ENFORCE_NO_TIMER(result.files.empty() && result.namesUsedTotal() == 0 && result.symbolsUsedTotal() == 0,
+                     "Can't load into a non-empty state");
+
+    {
+        Timer timeit(result.tracer(), "copyGlobalState");
+
+        // We copy minimally here, as the expectation is that this is used in a similar path as `loadGlobalState`:
+        result.strings = gs.strings;
+        result.files = gs.files;
+        result.fileRefByPath = gs.fileRefByPath;
+        result.kvstoreUuid = gs.kvstoreUuid;
+        result.utf8Names = gs.utf8Names;
+        result.constantNames = gs.constantNames;
+        result.uniqueNames = gs.uniqueNames;
+        result.namesByHash = gs.namesByHash;
+    }
+
+    {
+        UnPickler p(symbolTableData, result.tracer());
+        SerializerImpl::unpickleSymbolTable(p, result);
+    }
+
+} // namespace sorbet::core::serialize
+
 uint32_t Serializer::loadGlobalStateUUID(const GlobalState &gs, const uint8_t *const data) {
     UnPickler p(data, gs.tracer());
     return SerializerImpl::unpickleGSUUID(p);
