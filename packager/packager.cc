@@ -1,4 +1,5 @@
 #include "packager/packager.h"
+#include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
 #include "absl/synchronization/blocking_counter.h"
 #include "ast/Helpers.h"
@@ -32,10 +33,16 @@ bool isTestNamespace(const core::NameRef ns) {
     return ns == core::packages::PackageDB::TEST_NAMESPACE;
 }
 
-bool visibilityApplies(const core::packages::VisibleTo &vt, absl::Span<const core::NameRef> name) {
+bool visibilityApplies(const core::GlobalState &gs, const core::packages::VisibleTo &vt,
+                       core::packages::MangledName name) {
     if (vt.visibleToType == core::packages::VisibleToType::Wildcard) {
         // a wildcard will match if it's a proper prefix of the package name
-        return vt.packageName == name.subspan(0, vt.packageName.size());
+        // TODO(jez) Replace this with looking up in ownership nesting hierarchy
+        auto curPkgName = name.mangledName.shortName(gs);
+        auto prefix = vt.packageName.mangledName.shortName(gs);
+        return absl::StartsWith(curPkgName, prefix) &&
+               // Have to check '_' to make sure we're on a package boundary.
+               (curPkgName.size() == prefix.size() || curPkgName[prefix.size()] == '_');
     } else {
         // otherwise it needs to be the same
         return vt.packageName == name;
@@ -1877,8 +1884,8 @@ void validateVisibility(const core::Context &ctx, const Import i) {
         return;
     }
 
-    bool allowed =
-        absl::c_any_of(visibleTo, [&absPkg](const auto &other) { return visibilityApplies(other, absPkg.fullName()); });
+    bool allowed = absl::c_any_of(
+        visibleTo, [&ctx, &absPkg](const auto &other) { return visibilityApplies(ctx, other, absPkg.mangledName()); });
 
     if (!allowed) {
         if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::ImportNotVisible)) {
