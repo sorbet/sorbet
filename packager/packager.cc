@@ -1599,7 +1599,7 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
 }
 
 // TODO(jez) Rename this to lookupMangledName, and make it take a const GlobalState
-template <typename PackageName> void populateMangledName(core::GlobalState &gs, PackageName &pName) {
+void populateMangledName(core::GlobalState &gs, PackageName &pName) {
     pName.mangledName = core::packages::MangledName::mangledNameFromParts(gs, pName.fullName.parts);
 }
 
