@@ -429,7 +429,7 @@ public:
                     importToInsertAfter = import.name.fullName.loc;
                 }
             }
-            if (importToInsertAfter.exists()) {
+            if (!importToInsertAfter.exists()) {
                 // Insert before the first import
                 core::Loc beforePackageName = {loc.file(), importedPackageNames.front().name.fullName.loc};
                 auto [beforeImport, numWhitespace] = beforePackageName.findStartOfIndentation(gs);
