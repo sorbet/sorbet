@@ -2230,14 +2230,14 @@ void Packager::dumpPackageInfo(const core::GlobalState &gs, std::string outputFi
         writer.String("imports");
         writer.StartArray();
         for (auto &import : pkg.imports()) {
-            writer.String(absl::StrJoin(import, "::", core::packages::NameFormatter(gs)));
+            writer.String(import.mangledName.show(gs));
         }
         writer.EndArray();
 
         writer.String("testImports");
         writer.StartArray();
         for (auto &import : pkg.testImports()) {
-            writer.String(absl::StrJoin(import, "::", core::packages::NameFormatter(gs)));
+            writer.String(import.mangledName.show(gs));
         }
         writer.EndArray();
 
