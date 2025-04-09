@@ -1211,7 +1211,7 @@ public:
 
     RBIGenerator::RBIOutput emit() {
         RBIGenerator::RBIOutput output;
-        output.baseFilePath = pkg.mangledName().mangledName.show(gs);
+        output.baseFilePath = fmt::format("{}_Package", pkg.mangledName().mangledName.show(gs));
 
         vector<core::SymbolRef> exports;
         vector<core::SymbolRef> testExports;

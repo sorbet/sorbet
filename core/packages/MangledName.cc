@@ -8,8 +8,8 @@ using namespace std;
 
 namespace sorbet::core::packages {
 MangledName MangledName::mangledNameFromParts(core::GlobalState &gs, const std::vector<std::string_view> &parts) {
-    // Foo::Bar => Foo_Bar_Package
-    auto mangledName = absl::StrCat(absl::StrJoin(parts, "_"), core::PACKAGE_SUFFIX);
+    // Foo::Bar => Foo_Bar
+    auto mangledName = absl::StrCat(absl::StrJoin(parts, "_"));
 
     auto utf8Name = gs.enterNameUTF8(mangledName);
     auto packagerName = gs.freshNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
@@ -17,8 +17,8 @@ MangledName MangledName::mangledNameFromParts(core::GlobalState &gs, const std::
 }
 
 MangledName MangledName::mangledNameFromParts(core::GlobalState &gs, const std::vector<core::NameRef> &parts) {
-    // Foo::Bar => Foo_Bar_Package
-    auto mangledName = absl::StrCat(absl::StrJoin(parts, "_", NameFormatter(gs)), core::PACKAGE_SUFFIX);
+    // Foo::Bar => Foo_Bar
+    auto mangledName = absl::StrCat(absl::StrJoin(parts, "_", NameFormatter(gs)));
 
     auto utf8Name = gs.enterNameUTF8(mangledName);
     auto packagerName = gs.freshNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
@@ -26,7 +26,7 @@ MangledName MangledName::mangledNameFromParts(core::GlobalState &gs, const std::
 }
 
 MangledName MangledName::mangledNameFromHuman(const core::GlobalState &gs, string_view nameStr) {
-    auto mangled = absl::StrCat(absl::StrReplaceAll(nameStr, {{"::", "_"}}), core::PACKAGE_SUFFIX);
+    auto mangled = absl::StrCat(absl::StrReplaceAll(nameStr, {{"::", "_"}}));
     auto utf8Name = gs.lookupNameUTF8(mangled);
     if (!utf8Name.exists()) {
         return MangledName();

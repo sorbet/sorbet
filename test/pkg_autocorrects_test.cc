@@ -442,7 +442,7 @@ TEST_CASE("Add imports to strict_dependencies 'false' package") {
     string pkg_source = makePackageRB("MyPackage", "false", "app",
                                       {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
 
-    auto parsedFiles = enterPackages(gs, {{"my_Package/__package.rb", pkg_source},
+    auto parsedFiles = enterPackages(gs, {{"my_package/__package.rb", pkg_source},
                                           {falsePackageAPath, falsePackageA},
                                           {layeredPackageAPath, layeredPackageA},
                                           {layeredDagPackageAPath, layeredDagPackageA},
@@ -510,7 +510,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered' package") {
     string pkg_source = makePackageRB("MyPackage", "layered", "app",
                                       {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
 
-    auto parsedFiles = enterPackages(gs, {{"my_Package/__package.rb", pkg_source},
+    auto parsedFiles = enterPackages(gs, {{"my_package/__package.rb", pkg_source},
                                           {falsePackageAPath, falsePackageA},
                                           {layeredPackageAPath, layeredPackageA},
                                           {layeredDagPackageAPath, layeredDagPackageA},
@@ -578,7 +578,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered_dag' package") {
     string pkg_source = makePackageRB("MyPackage", "layered_dag", "app",
                                       {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
 
-    auto parsedFiles = enterPackages(gs, {{"my_Package/__package.rb", pkg_source},
+    auto parsedFiles = enterPackages(gs, {{"my_package/__package.rb", pkg_source},
                                           {falsePackageAPath, falsePackageA},
                                           {layeredPackageAPath, layeredPackageA},
                                           {layeredDagPackageAPath, layeredDagPackageA},
@@ -646,7 +646,7 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
     string pkg_source = makePackageRB("MyPackage", "dag", "app",
                                       {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
 
-    auto parsedFiles = enterPackages(gs, {{"my_Package/__package.rb", pkg_source},
+    auto parsedFiles = enterPackages(gs, {{"my_package/__package.rb", pkg_source},
                                           {falsePackageAPath, falsePackageA},
                                           {layeredPackageAPath, layeredPackageA},
                                           {layeredDagPackageAPath, layeredDagPackageA},
