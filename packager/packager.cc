@@ -535,20 +535,20 @@ public:
         }
         return rv;
     }
-    vector<vector<core::NameRef>> imports() const {
-        vector<vector<core::NameRef>> rv;
+    vector<core::packages::MangledName> imports() const {
+        vector<core::packages::MangledName> rv;
         for (auto &i : importedPackageNames) {
             if (i.type == core::packages::ImportType::Normal) {
-                rv.emplace_back(i.name.fullName.parts);
+                rv.emplace_back(i.name.mangledName);
             }
         }
         return rv;
     }
-    vector<vector<core::NameRef>> testImports() const {
-        vector<vector<core::NameRef>> rv;
+    vector<core::packages::MangledName> testImports() const {
+        vector<core::packages::MangledName> rv;
         for (auto &i : importedPackageNames) {
             if (i.type == core::packages::ImportType::Test) {
-                rv.emplace_back(i.name.fullName.parts);
+                rv.emplace_back(i.name.mangledName);
             }
         }
         return rv;
@@ -556,7 +556,7 @@ public:
     vector<core::packages::VisibleTo> visibleTo() const {
         vector<core::packages::VisibleTo> rv;
         for (auto &v : visibleTo_) {
-            rv.emplace_back(v.name.fullName.parts, v.type);
+            rv.emplace_back(v.name.mangledName, v.type);
         }
         return rv;
     }
