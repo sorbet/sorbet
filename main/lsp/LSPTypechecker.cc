@@ -353,7 +353,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
     auto committed = epochManager.tryCommitEpoch(*this->gs, epoch, cancelable, preemptManager, [&]() -> void {
-        vector<core::FileRef> openFiles;
+        UnorderedSet<core::FileRef> openFiles;
         vector<ast::ParsedFile> indexed, nonPackagedIndexed;
 
         {
@@ -379,15 +379,12 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                 case SlowPathMode::Cancelable: {
                     timeit.emplace(this->config->logger, "slow_path_reindex");
 
-                    // Move the indexed trees into our local cache for open files. We will still reindex them again to
-                    // force any errors, but this is a convenient way to pre-populate our cache.
+                    // Determine which files we need to copy into the open files cache (indexedFinalGS).
                     if (!updates.updatedFiles.empty()) {
-                        openFiles.resize(updates.updatedFiles.size());
-
                         for (auto &file : updates.updatedFiles) {
                             auto fref = this->gs->findFileByPath(file->path());
                             ENFORCE(fref.exists());
-                            openFiles.emplace_back(fref);
+                            openFiles.insert(fref);
                         }
 
                         updates.updatedFiles.clear();
@@ -523,6 +520,9 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             return;
         }
 
+        this->cacheOpenFiles(indexed, openFiles);
+        this->cacheOpenFiles(nonPackagedIndexed, openFiles);
+
         // First run: only the __package.rb files. This populates the packageDB
         pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers);
 
@@ -549,8 +549,6 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
 
         pipeline::unpartitionPackageFiles(indexed, std::move(nonPackagedIndexed));
         // TODO(jez) At this point, it's not correct to call it `indexed` anymore: we've run namer too
-
-        this->cacheOpenFiles(indexed, std::move(openFiles), workers);
 
         auto maybeResolved = pipeline::resolve(*gs, move(indexed), config->opts, workers);
         if (!maybeResolved.hasResult()) {
@@ -641,51 +639,14 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     }
 }
 
-void LSPTypechecker::cacheOpenFiles(absl::Span<const ast::ParsedFile> indexed, std::vector<core::FileRef> openFiles,
-                                    WorkerPool &workers) {
-    if (openFiles.empty()) {
-        return;
-    }
-
+void LSPTypechecker::cacheOpenFiles(absl::Span<const ast::ParsedFile> indexed,
+                                    const UnorderedSet<core::FileRef> &openFiles) {
     auto &logger = *config->logger;
     Timer timeit(logger, "slow_path.cache_open_files");
 
-    auto fileq = make_shared<ConcurrentBoundedQueue<int>>(openFiles.size());
-    for (int i = 0; i < openFiles.size(); i++) {
-        fileq->push(i, 1);
-    }
-
-    auto resultq = make_shared<BlockingBoundedQueue<std::vector<ast::ParsedFile>>>(std::max(workers.size(), 1));
-    workers.multiplexJob("cacheOpenFiles", [fileq, resultq, indexed]() {
-        vector<ast::ParsedFile> threadResult;
-        int job;
-
-        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-            if (result.gotItem()) {
-                // TODO(trevor): We traverse the whole indexed set for each open file. We could speed this up by
-                // pre-sorting `indexed` and restarting from the previous result, given that `openFiles` is also
-                // sorted. That way each worker would traverse `indexed` at most once.
-                auto it = absl::c_find_if(indexed, [job](auto &ast) { return ast.file.id() == job; });
-                if (it == indexed.end()) {
-                    continue;
-                }
-
-                threadResult.emplace_back(ast::ParsedFile{it->tree.deepCopy(), it->file});
-            }
-        }
-
-        resultq->push(std::move(threadResult), 1);
-    });
-
-    {
-        std::vector<ast::ParsedFile> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
-            if (result.gotItem()) {
-                for (auto &ast : threadResult) {
-                    this->indexedFinalGS[ast.file.id()] = std::move(ast);
-                }
-            }
+    for (auto &ast : indexed) {
+        if (openFiles.contains(ast.file)) {
+            this->indexedFinalGS[ast.file.id()] = ast::ParsedFile{ast.tree.deepCopy(), ast.file};
         }
     }
 }
