@@ -89,7 +89,7 @@ class UnusedComments
 
   #: -> void
   def initialize
-    @foo = T.let("foo", String)
+    @foo = T.let("", String)
   end
 end
 

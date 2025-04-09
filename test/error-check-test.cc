@@ -37,7 +37,7 @@ TEST_CASE("ParserCheck") {
 
     core::FileRef fileId = gs.enterFile("<test input>", "a");
     auto settings = parser::Parser::Settings{};
-    auto ast = sorbet::parser::Parser::run(gs, fileId, settings);
+    auto ast = sorbet::parser::Parser::run(gs, fileId, settings).tree;
 
     try {
         sorbet::core::MutableContext ctx(gs, core::Symbols::root(), fileId);

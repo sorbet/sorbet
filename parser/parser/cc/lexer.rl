@@ -271,7 +271,15 @@ int lexer::arg_or_cmdarg(int cmd_state) {
 
 void lexer::emit_comment(const char* s, const char* e) {
   if (collect_comments) {
-    const char* line_start = newline_s ? newline_s + 1 : source_buffer.data();
+    // Find the start of the line manually. `newline_s` was incorrect for HEREDOCs
+    const char* line_start = source_buffer.data();
+    for (const char* p = s - 1; p >= source_buffer.data(); --p) {
+      if (*p == '\n') {
+        line_start = p + 1;
+        break;
+      }
+    }
+
     bool is_first_in_line = true;
     for (const char* p = line_start; p < s; ++p) {
       if (!isspace(*p)) {

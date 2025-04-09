@@ -212,7 +212,7 @@ Comments SigsRewriter::commentsForNode(core::MutableContext ctx, parser::Node *n
                 auto comment = Comment{
                     .commentLoc = commentNode.loc,
                     .typeLoc = core::LocOffsets{commentNode.loc.beginPos() + 3, commentNode.loc.endPos()},
-                    .string = commentNode.string.substr(2),
+                    .string = commentNode.string.substr(3),
                 };
 
                 comments.annotations.push_back(comment);
@@ -220,7 +220,7 @@ Comments SigsRewriter::commentsForNode(core::MutableContext ctx, parser::Node *n
             }
 
             // If the comment starts with `# :`, it's a signature
-            if (absl::StartsWith(commentNode.string, "# :")) {
+            if (absl::StartsWith(commentNode.string, "#:")) {
                 auto comment = Comment{
                     .commentLoc = commentNode.loc,
                     .typeLoc = core::LocOffsets{commentNode.loc.beginPos() + 2, commentNode.loc.endPos()},
@@ -235,6 +235,7 @@ Comments SigsRewriter::commentsForNode(core::MutableContext ctx, parser::Node *n
 
     return comments;
 }
+
 unique_ptr<parser::NodeVec> SigsRewriter::signaturesForNode(core::MutableContext ctx, parser::Node *node) {
     auto comments = commentsForNode(ctx, node);
 
@@ -252,6 +253,7 @@ unique_ptr<parser::NodeVec> SigsRewriter::signaturesForNode(core::MutableContext
             signatures->emplace_back(move(sig));
         } else if (auto send = parser::cast_node<parser::Send>(node)) {
             auto sig = signatureTranslator.translateAttrSignature(send, signature, comments.annotations);
+
             signatures->emplace_back(move(sig));
         } else {
             Exception::raise("Unimplemented node type: {}", node->nodeName());

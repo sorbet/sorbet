@@ -1,8 +1,10 @@
 #ifndef SORBET_RBS_COMMENTS_ASSOCIATOR_H
 #define SORBET_RBS_COMMENTS_ASSOCIATOR_H
 
+#include "common/common.h"
 #include "parser/parser.h"
 #include <memory>
+#include <string_view>
 
 namespace sorbet::rbs {
 
@@ -26,18 +28,20 @@ private:
     core::MutableContext ctx;
     std::vector<std::pair<size_t, size_t>> commentLocations;
 
-    // @kaan: use a ordered map on the line number
     std::map<int, CommentNode> commentByLine;
-
     std::map<parser::Node *, std::vector<CommentNode>> commentsByNode;
+
+    static const std::string_view RBS_PREFIX;
+    static const std::string_view ANNOTATION_PREFIX;
 
     void associateCommentsToLines();
     void walkNodes(parser::Node *node);
-    void associateCommentsToNode(parser::Node *node);
+    void associateCommentsToNode(parser::Node *node,
+                                 const InlinedVector<std::string_view, 2> &prefixes = {RBS_PREFIX, ANNOTATION_PREFIX});
     void consumeDanglingComments(parser::Node *node);
     void associateInlineCommentToNode(parser::Node *node);
+    void consumePrecedingComments(parser::Node *node, const std::string_view &prefix);
 };
 
 } // namespace sorbet::rbs
-
 #endif // SORBET_RBS_COMMENTS_ASSOCIATOR_H

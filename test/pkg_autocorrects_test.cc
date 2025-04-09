@@ -107,7 +107,7 @@ vector<ast::ParsedFile> enterPackages(core::GlobalState &gs, vector<pair<string,
         // run parser
         for (auto file : files) {
             auto settings = parser::Parser::Settings{};
-            auto nodes = parser::Parser::run(gs, file, settings);
+            auto nodes = parser::Parser::run(gs, file, settings).tree;
 
             core::MutableContext ctx(gs, core::Symbols::root(), file);
             auto parsedFile = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file};

@@ -626,14 +626,6 @@ method definition it represents.
 
 > This error is specific to RBS support when using the
 > `--enable-experimental-rbs-signatures` flag.
-This error is raised when Sorbet couldn't match a RBS signature comment with a
-method definition. Ensure your comment is followed by a method definition.
-
-
-## 3554
-
-> This error is specific to RBS support when using the
-> `--enable-experimental-rbs-signatures` flag.
 
 This error is raised when a RBS assertion comment is found in a place where it
 is not allowed.
@@ -644,6 +636,13 @@ For example this snippet will raise this error:
 class A #: as String
 end
 ```
+
+## 3554
+
+> This error is specific to RBS support when using the
+> `--enable-experimental-rbs-signatures` flag. This error is raised when Sorbet
+> couldn't match a RBS signature comment with a method definition. Ensure your
+> comment is followed by a method definition.
 
 ## 3702
 
