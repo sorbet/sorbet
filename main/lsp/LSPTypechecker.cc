@@ -509,7 +509,13 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                     // make a copy to pass back over.
                     ENFORCE(this->gs->packageDB().packages().empty(),
                             "Don't want symbols or packages in indexer GlobalState");
-                    indexedState = this->gs->deepCopyGlobalState();
+                    indexedState = this->gs->copyForIndex(
+                        this->config->opts.extraPackageFilesDirectoryUnderscorePrefixes,
+                        this->config->opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                        this->config->opts.extraPackageFilesDirectorySlashPrefixes,
+                        this->config->opts.packageSkipRBIExportEnforcementDirs,
+                        this->config->opts.allowRelaxedPackagerChecksFor, this->config->opts.packagerLayers,
+                        this->config->opts.stripePackagesHint);
                     indexedState->errorQueue = std::move(savedErrorQueue);
 
                     this->sessionCache =
