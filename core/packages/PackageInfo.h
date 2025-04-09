@@ -53,6 +53,8 @@ public:
     virtual MangledName mangledName() const = 0;
     virtual absl::Span<const core::NameRef> fullName() const = 0;
     virtual absl::Span<const std::string> pathPrefixes() const = 0;
+    // TODO(jez) Why do these methods not return the `Import`/`Export`/`VisibleTo` data structures
+    // that PackageInfoImpl operates on?
     virtual std::vector<std::vector<core::NameRef>> exports() const = 0;
     virtual std::vector<std::vector<core::NameRef>> imports() const = 0;
     virtual std::vector<std::vector<core::NameRef>> testImports() const = 0;

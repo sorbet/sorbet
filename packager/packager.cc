@@ -62,10 +62,10 @@ string buildValidLayersStr(const core::GlobalState &gs) {
 
 struct FullyQualifiedName {
     vector<core::NameRef> parts;
-    core::Loc loc;
+    core::LocOffsets loc;
 
     FullyQualifiedName() = default;
-    FullyQualifiedName(vector<core::NameRef> parts, core::Loc loc) : parts(parts), loc(loc) {}
+    FullyQualifiedName(vector<core::NameRef> parts, core::LocOffsets loc) : parts(parts), loc(loc) {}
     explicit FullyQualifiedName(const FullyQualifiedName &) = default;
     FullyQualifiedName(FullyQualifiedName &&) = default;
     FullyQualifiedName &operator=(const FullyQualifiedName &) = delete;
@@ -93,22 +93,12 @@ struct FullyQualifiedName {
 };
 
 struct PackageName {
-    core::LocOffsets loc;
     core::packages::MangledName mangledName;
     FullyQualifiedName fullName;
-    FullyQualifiedName fullTestPkgName;
 
     // Pretty print the package's (user-observable) name (e.g. Foo::Bar)
     string toString(const core::GlobalState &gs) const {
         return absl::StrJoin(fullName.parts, "::", core::packages::NameFormatter(gs));
-    }
-
-    bool operator==(const PackageName &rhs) const {
-        return mangledName == rhs.mangledName;
-    }
-
-    bool operator!=(const PackageName &rhs) const {
-        return mangledName != rhs.mangledName;
     }
 };
 
@@ -132,6 +122,13 @@ struct Export {
         // Lex sort by name.
         return core::packages::PackageInfo::lexCmp(a.parts(), b.parts());
     }
+};
+
+struct VisibleTo {
+    PackageName name;
+    core::packages::VisibleToType type;
+
+    VisibleTo(PackageName &&name, core::packages::VisibleToType type) : name(move(name)), type(type) {}
 };
 
 // For a given vector of NameRefs, this represents the "next" vector that does not begin with its
@@ -226,7 +223,7 @@ public:
     // but also any package name underneath it. `Normal` means the package can be imported
     // by the referenced package name but not any child packages (unless they have a separate
     // `visible_to` line of their own.)
-    vector<pair<PackageName, core::packages::VisibleToType>> visibleTo_ = {};
+    vector<VisibleTo> visibleTo_ = {};
 
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
@@ -399,15 +396,15 @@ public:
         auto insertionLoc = core::Loc::none(loc.file());
         optional<core::AutocorrectSuggestion::Edit> deleteTestImportEdit = nullopt;
         if (!importedPackageNames.empty()) {
-            packager::PackageName const *importToInsertAfter = nullptr;
+            core::LocOffsets importToInsertAfter;
             for (auto &import : importedPackageNames) {
-                if (import.name == info.name) {
+                if (import.name.mangledName == info.name.mangledName) {
                     if (!isTestImport && import.type == core::packages::ImportType::Test) {
                         // There's already a test import for this package, so we'll convert it to a regular import.
                         // importToInsertAfter already tracks where we need to insert the import.
                         // So we can craft an edit to delete the `test_import` line, and then use the regular logic for
                         // adding an import to insert the `import`.
-                        auto importLoc = core::Loc(fullLoc().file(), import.name.loc);
+                        auto importLoc = core::Loc(fullLoc().file(), import.name.fullName.loc);
                         auto [lineStart, numWhitespace] = importLoc.findStartOfIndentation(gs);
                         auto beginPos =
                             lineStart.adjust(gs, -numWhitespace, 0).beginPos(); // -numWhitespace for the indentation
@@ -422,24 +419,24 @@ public:
 
                 auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
                 if (!importInfo.exists()) {
-                    importToInsertAfter = &import.name;
+                    importToInsertAfter = import.name.fullName.loc;
                     continue;
                 }
 
                 auto compareResult =
                     orderImports(gs, info, isTestImport, importInfo, import.type == core::packages::ImportType::Test);
                 if (compareResult == 1 || compareResult == 0) {
-                    importToInsertAfter = &import.name;
+                    importToInsertAfter = import.name.fullName.loc;
                 }
             }
-            if (!importToInsertAfter) {
+            if (!importToInsertAfter.exists()) {
                 // Insert before the first import
-                core::Loc beforePackageName = {loc.file(), importedPackageNames.front().name.loc};
+                core::Loc beforePackageName = {loc.file(), importedPackageNames.front().name.fullName.loc};
                 auto [beforeImport, numWhitespace] = beforePackageName.findStartOfIndentation(gs);
                 auto endOfPrevLine = beforeImport.adjust(gs, -numWhitespace - 1, 0);
                 insertionLoc = endOfPrevLine.copyWithZeroLength();
             } else {
-                insertionLoc = core::Loc{loc.file(), importToInsertAfter->loc.copyEndWithZeroLength()};
+                insertionLoc = core::Loc(loc.file(), importToInsertAfter.copyEndWithZeroLength());
             }
         } else {
             // if we don't have any imports, then we can try adding it
@@ -489,7 +486,8 @@ public:
 
     optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                     const core::SymbolRef newExport) const {
-        auto insertionLoc = core::Loc::none(loc.file());
+        auto pkgFile = loc.file();
+        auto insertionLoc = core::Loc::none(pkgFile);
         if (!exports_.empty()) {
             FullyQualifiedName const *exportToInsertAfter = nullptr;
             for (auto &e : exports_) {
@@ -500,11 +498,11 @@ public:
             if (!exportToInsertAfter) {
                 // Insert before the first export
                 auto beforeConstantName = exports_.front().fqn.loc;
-                auto [beforeExport, numWhitespace] = beforeConstantName.findStartOfIndentation(gs);
+                auto [beforeExport, numWhitespace] = core::Loc(pkgFile, beforeConstantName).findStartOfIndentation(gs);
                 auto endOfPrevLine = beforeExport.adjust(gs, -numWhitespace - 1, 0);
                 insertionLoc = endOfPrevLine.copyWithZeroLength();
             } else {
-                insertionLoc = exportToInsertAfter->loc.copyEndWithZeroLength();
+                insertionLoc = core::Loc(pkgFile, exportToInsertAfter->loc.copyEndWithZeroLength());
             }
         } else {
             // if we don't have any exports, then we can try adding it right before the final `end`
@@ -558,7 +556,7 @@ public:
     vector<core::packages::VisibleTo> visibleTo() const {
         vector<core::packages::VisibleTo> rv;
         for (auto &v : visibleTo_) {
-            rv.emplace_back(v.first.fullName.parts, v.second);
+            rv.emplace_back(v.name.fullName.parts, v.type);
         }
         return rv;
     }
@@ -688,7 +686,7 @@ bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) 
 
 FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     FullyQualifiedName fqn;
-    fqn.loc = ctx.locAt(constantLit->loc);
+    fqn.loc = constantLit->loc;
     while (constantLit != nullptr) {
         fqn.parts.emplace_back(constantLit->cnst);
         constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(constantLit->scope);
@@ -703,9 +701,7 @@ PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *
     ENFORCE(constantLit != nullptr);
 
     PackageName pName;
-    pName.loc = constantLit->loc;
     pName.fullName = getFullyQualifiedName(ctx, constantLit);
-    pName.fullTestPkgName = pName.fullName.withPrefix(core::packages::PackageDB::TEST_NAMESPACE);
 
     // pname.mangledName will be populated later, when we have a mutable GlobalState
 
@@ -1121,19 +1117,16 @@ public:
         if (rootConsts > 0 || namespaces.depth() == 0) {
             return;
         }
-        auto &pkgName = requiredNamespace(ctx);
         auto packageForNamespace = namespaces.packageForNamespace();
         if (packageForNamespace != pkg.mangledName()) {
             ENFORCE(errorDepth == 0);
             errorDepth++;
             if (auto e = ctx.beginError(loc, core::errors::Packager::DefinitionPackageMismatch)) {
-                e.setHeader("This file must only define behavior in enclosing package `{}`",
-                            fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                e.setHeader("This file must only define behavior in enclosing package `{}`", requiredNamespace(ctx));
                 const auto &constantName = namespaces.currentConstantName();
                 e.addErrorLine(ctx.locAt(constantName.back().second), "Defining behavior in `{}` instead:",
                                fmt::map_join(constantName, "::", [&](const auto &nr) { return nr.first.show(ctx); }));
-                e.addErrorLine(pkg.declLoc(), "Enclosing package `{}` declared here",
-                               fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                e.addErrorLine(pkg.declLoc(), "Enclosing package `{}` declared here", pkg.name.toString(ctx));
                 if (packageForNamespace.exists()) {
                     auto &packageInfo = ctx.state.packageDB().getPackageInfo(packageForNamespace);
                     e.addErrorLine(packageInfo.declLoc(), "Package `{}` declared here",
@@ -1185,8 +1178,12 @@ private:
         }
     }
 
-    const vector<core::NameRef> &requiredNamespace(const core::GlobalState &gs) const {
-        return useTestNamespace ? pkg.name.fullTestPkgName.parts : pkg.name.fullName.parts;
+    const string requiredNamespace(const core::GlobalState &gs) const {
+        auto result = pkg.name.toString(gs);
+        if (useTestNamespace) {
+            result = fmt::format("{}::{}", core::packages::PackageDB::TEST_NAMESPACE.show(gs), result);
+        }
+        return result;
     }
 
     bool hasParentClass(const ast::ClassDef &def) const {
@@ -1195,9 +1192,7 @@ private:
     }
 
     void definitionPackageMismatch(const core::GlobalState &gs, core::ErrorBuilder &e) const {
-        auto requiredName =
-            fmt::format("{}", fmt::map_join(requiredNamespace(gs), "::", [&](const auto nr) { return nr.show(gs); }));
-
+        auto requiredName = requiredNamespace(gs);
         if (useTestNamespace) {
             e.setHeader("Tests in the `{}` package must define tests in the `{}` namespace", pkg.show(gs),
                         requiredName);
@@ -1426,7 +1421,7 @@ struct PackageSpecBodyWalk {
             // `exportAll` is set then we've got conflicting
             // information about export; flag the exports as wrong
             for (auto it = exported.begin(); it != exported.end(); ++it) {
-                if (auto e = ctx.beginError(it->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
+                if (auto e = ctx.beginError(it->fqn.loc, core::errors::Packager::ExportConflict)) {
                     e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
                                 info.name.toString(ctx), "export_all!");
                 }
@@ -1439,7 +1434,7 @@ struct PackageSpecBodyWalk {
             LexNext upperBound(it->parts());
             auto longer = it + 1;
             for (; longer != exported.end() && !(upperBound < *longer); ++longer) {
-                if (auto e = ctx.beginError(longer->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
+                if (auto e = ctx.beginError(longer->fqn.loc, core::errors::Packager::ExportConflict)) {
                     if (it->parts() == longer->parts()) {
                         e.setHeader("Duplicate export of `{}`",
                                     fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
@@ -1448,7 +1443,7 @@ struct PackageSpecBodyWalk {
                                     fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }),
                                     fmt::map_join(it->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
                     }
-                    e.addErrorLine(it->fqn.loc, "Prefix exported here");
+                    e.addErrorLine(ctx.locAt(it->fqn.loc), "Prefix exported here");
                 }
 
                 dupInds.emplace_back(distance(exported.begin(), longer));
@@ -1590,12 +1585,12 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
     if (gs.packageDB().enforceLayering()) {
         if (!bodyWalk.foundLayerDeclaration) {
-            if (auto e = ctx.beginError(info.name.loc, core::errors::Packager::InvalidLayer)) {
+            if (auto e = ctx.beginError(info.name.fullName.loc, core::errors::Packager::InvalidLayer)) {
                 e.setHeader("This package does not declare a `{}`", "layer");
             }
         }
         if (!bodyWalk.foundStrictDependenciesDeclaration) {
-            if (auto e = ctx.beginError(info.name.loc, core::errors::Packager::InvalidStrictDependencies)) {
+            if (auto e = ctx.beginError(info.name.fullName.loc, core::errors::Packager::InvalidStrictDependencies)) {
                 e.setHeader("This package does not declare a `{}` level", "strict_dependencies");
             }
         }
@@ -1620,7 +1615,7 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
         populateMangledName(gs, importedPackageName.name);
 
         if (importedPackageName.name.mangledName == info->name.mangledName) {
-            if (auto e = gs.beginError(core::Loc(package.file, importedPackageName.name.loc),
+            if (auto e = gs.beginError(core::Loc(package.file, importedPackageName.name.fullName.loc),
                                        core::errors::Packager::NoSelfImport)) {
                 string import_;
                 switch (importedPackageName.type) {
@@ -1637,7 +1632,7 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     }
 
     for (auto &visibleTo : info->visibleTo_) {
-        populateMangledName(gs, visibleTo.first);
+        populateMangledName(gs, visibleTo.name);
     }
 
     auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
@@ -1834,7 +1829,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     auto otherPkgLayer = otherPkg.layer().value().first;
 
     if (thisPkg.causesLayeringViolation(packageDB, otherPkgLayer)) {
-        if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
+        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::LayeringViolation)) {
             e.setHeader("Layering violation: cannot import `{}` (in layer `{}`) from `{}` (in layer `{}`)",
                         otherPkg.show(ctx), otherPkgLayer.show(ctx), thisPkg.show(ctx), pkgLayer.show(ctx));
             e.addErrorLine(core::Loc(thisPkg.loc.file(), thisPkg.layer().value().second), "`{}`'s `{}` declared here",
@@ -1849,7 +1844,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     core::packages::StrictDependenciesLevel otherPkgExpectedLevel = thisPkg.minimumStrictDependenciesLevel();
 
     if (otherPkg.strictDependenciesLevel().value().first < otherPkgExpectedLevel) {
-        if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
+        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::StrictDependenciesViolation)) {
             e.setHeader("Strict dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
                         "import", core::packages::strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel().value().second),
@@ -1863,7 +1858,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
 
     if (thisPkg.strictDependenciesLevel().value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
         if (thisPkg.sccID() == otherPkg.sccID()) {
-            if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::StrictDependenciesViolation)) {
+            if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::StrictDependenciesViolation)) {
                 auto level = fmt::format(
                     "strict_dependencies '{}'",
                     core::packages::strictDependenciesLevelToString(thisPkg.strictDependenciesLevel().value().first));
@@ -1900,7 +1895,7 @@ void validateVisibility(const core::Context &ctx, const Import i) {
         absl::c_any_of(visibleTo, [&absPkg](const auto &other) { return visibilityApplies(other, absPkg.fullName()); });
 
     if (!allowed) {
-        if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
+        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::ImportNotVisible)) {
             e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
                         otherPkg.show(ctx), absPkg.show(ctx));
             e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
