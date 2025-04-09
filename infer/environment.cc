@@ -1122,12 +1122,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             const auto &curPkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
                             if (curPkg.exists() && !curPkg.ownsSymbol(ctx, klass)) {
                                 if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PackagePrivateMethod)) {
-                                    auto curPkgName = curPkg.fullName();
-                                    // TODO (aadi-stripe, add name of owning package to message).
                                     e.setHeader(
                                         "Method `{}` on `{}` is package-private and cannot be called from package `{}`",
-                                        it->main.method.data(ctx)->name.show(ctx), klass.show(ctx),
-                                        fmt::map_join(curPkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                                        it->main.method.data(ctx)->name.show(ctx), klass.show(ctx), curPkg.show(ctx));
                                     e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined in `{}` here",
                                                    it->main.method.data(ctx)->owner.show(ctx));
                                 }
