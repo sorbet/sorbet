@@ -2,11 +2,50 @@
 
 namespace sorbet::rbs {
 
-core::LocOffsets locFromRange(core::LocOffsets loc, const rbs_range_t &range) {
+core::LocOffsets RBSDeclaration::commentLoc() const {
     return {
-        loc.beginPos() + range.start.char_pos,
-        loc.beginPos() + range.end.char_pos,
+        comments.front().commentLoc.beginLoc,
+        comments.back().commentLoc.endLoc,
     };
 }
 
+std::string RBSDeclaration::string() const {
+    std::string result;
+    for (const auto &comment : comments) {
+        result += comment.string;
+    }
+    return result;
+}
+
+core::LocOffsets RBSDeclaration::firstLineTypeLoc() const {
+    return comments.front().typeLoc;
+}
+
+core::LocOffsets RBSDeclaration::fullTypeLoc() const {
+    return {
+        comments.front().typeLoc.beginLoc,
+        comments.back().typeLoc.endLoc,
+    };
+}
+
+core::LocOffsets RBSDeclaration::typeLocFromRange(const rbs_range_t &range) const {
+    int rangeOffset = range.start.char_pos;
+    int rangeLength = range.end.char_pos - range.start.char_pos;
+
+    for (const auto &comment : comments) {
+        int commentTypeLength = comment.typeLoc.endLoc - comment.typeLoc.beginLoc;
+        if (rangeOffset < commentTypeLength) {
+            auto beginLoc = comment.typeLoc.beginLoc + rangeOffset;
+            auto endLoc = beginLoc + rangeLength;
+
+            if (rangeLength > commentTypeLength) {
+                endLoc = comment.typeLoc.endLoc;
+            }
+
+            return core::LocOffsets{beginLoc, endLoc};
+        }
+        rangeOffset -= commentTypeLength;
+    }
+    return comments.front().typeLoc;
+}
 } // namespace sorbet::rbs

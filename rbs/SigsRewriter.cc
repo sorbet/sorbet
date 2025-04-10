@@ -49,7 +49,7 @@ Comments signaturesForLoc(core::MutableContext ctx, core::LocOffsets loc) {
     auto source = ctx.file.data(ctx).source();
 
     vector<Comment> annotations;
-    vector<Comment> signatures;
+    vector<RBSDeclaration> signatures;
 
     uint32_t beginIndex = loc.beginPos();
 
@@ -128,12 +128,38 @@ Comments signaturesForLoc(core::MutableContext ctx, core::LocOffsets loc) {
             // #: abc -> "abc"
             // #:abc -> "abc"
             int lineSize = line.size();
-            auto rbsSignature = Comment{
+            auto comments = vector<rbs::Comment>();
+            auto firstComment = Comment{
                 core::LocOffsets{index, index + lineSize},
                 core::LocOffsets{index + 2, index + lineSize},
                 line.substr(2),
             };
-            signatures.emplace_back(rbsSignature);
+
+            comments.emplace_back(firstComment);
+
+            uint32_t continueIndex = index + line.size();
+
+            // Look downwards (later lines) for continuation lines starting with "#|"
+            auto forwardIt = all_lines.begin() + 1 + distance(it, all_lines.rend()) -
+                             1; // convert reverse iterator to forward iterator
+            for (; forwardIt != all_lines.end(); forwardIt++) {
+                auto continuationLine = *forwardIt;
+                if (absl::StartsWith(absl::StripAsciiWhitespace(continuationLine), "#|")) {
+                    auto trimmedLine = absl::StripAsciiWhitespace(continuationLine);
+                    auto whitespaceSize = continuationLine.size() - trimmedLine.size();
+                    continueIndex += 1 + whitespaceSize;
+                    comments.emplace_back(rbs::Comment{
+                        core::LocOffsets{continueIndex, (uint32_t)(continueIndex + trimmedLine.size())},
+                        core::LocOffsets{continueIndex + 2, (uint32_t)(continueIndex + trimmedLine.size())},
+                        trimmedLine.substr(2),
+                    });
+                    continueIndex += trimmedLine.size();
+                } else {
+                    break;
+                }
+            }
+
+            signatures.emplace_back(RBSDeclaration{comments});
         }
 
         // Handle RDoc annotations `# @abstract`
@@ -174,13 +200,13 @@ unique_ptr<parser::NodeVec> signaturesForNode(core::MutableContext ctx, parser::
     auto signatures = make_unique<parser::NodeVec>();
     auto signatureTranslator = rbs::SignatureTranslator(ctx);
 
-    for (auto &signature : comments.signatures) {
+    for (auto &declaration : comments.signatures) {
         if (parser::isa_node<parser::DefMethod>(node) || parser::isa_node<parser::DefS>(node)) {
-            auto sig = signatureTranslator.translateMethodSignature(node, signature, comments.annotations);
+            auto sig = signatureTranslator.translateMethodSignature(node, declaration, comments.annotations);
 
             signatures->emplace_back(move(sig));
         } else if (auto send = parser::cast_node<parser::Send>(node)) {
-            auto sig = signatureTranslator.translateAttrSignature(send, signature, comments.annotations);
+            auto sig = signatureTranslator.translateAttrSignature(send, declaration, comments.annotations);
             signatures->emplace_back(move(sig));
         } else {
             Exception::raise("Unimplemented node type: {}", node->nodeName());
@@ -203,9 +229,13 @@ unique_ptr<parser::Node> extractHelperArgument(core::MutableContext ctx, Comment
         offset++;
     }
 
-    return rbs::SignatureTranslator(ctx).translateType(
+    Comment comment = {
         core::LocOffsets{annotation.typeLoc.beginPos() + offset, annotation.typeLoc.endPos()},
-        annotation.string.substr(offset));
+        core::LocOffsets{annotation.typeLoc.beginPos() + offset, annotation.typeLoc.endPos()},
+        annotation.string.substr(offset),
+    };
+
+    return rbs::SignatureTranslator(ctx).translateType(RBSDeclaration{vector<Comment>{comment}});
 }
 
 /**
@@ -366,8 +396,8 @@ unique_ptr<parser::Node> SigsRewriter::rewriteBegin(unique_ptr<parser::Node> nod
     for (auto &stmt : oldStmts) {
         if (auto target = signaturesTarget(stmt.get())) {
             if (auto signatures = signaturesForNode(ctx, target)) {
-                for (auto &signature : *signatures) {
-                    begin->stmts.emplace_back(move(signature));
+                for (auto &declaration : *signatures) {
+                    begin->stmts.emplace_back(move(declaration));
                 }
             }
         }
@@ -390,8 +420,8 @@ unique_ptr<parser::Node> SigsRewriter::rewriteBody(unique_ptr<parser::Node> node
     if (auto target = signaturesTarget(node.get())) {
         if (auto signatures = signaturesForNode(ctx, target)) {
             auto begin = make_unique<parser::Begin>(node->loc, parser::NodeVec());
-            for (auto &signature : *signatures) {
-                begin->stmts.emplace_back(move(signature));
+            for (auto &declaration : *signatures) {
+                begin->stmts.emplace_back(move(declaration));
             }
             begin->stmts.emplace_back(move(node));
             return move(begin);

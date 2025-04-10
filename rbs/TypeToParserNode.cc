@@ -17,7 +17,8 @@ bool hasTypeParam(absl::Span<const std::pair<core::LocOffsets, core::NameRef>> t
 } // namespace
 
 unique_ptr<parser::Node> TypeToParserNode::typeNameType(const rbs_type_name_t *typeName, bool isGeneric,
-                                                        core::LocOffsets loc) {
+                                                        const RBSDeclaration &declaration) {
+    auto loc = declaration.typeLocFromRange(((rbs_node_t *)typeName)->location->rg);
     rbs_node_list *typePath = typeName->rbs_namespace->path;
 
     unique_ptr<parser::Node> parent;
@@ -87,58 +88,58 @@ unique_ptr<parser::Node> TypeToParserNode::typeNameType(const rbs_type_name_t *t
 }
 
 unique_ptr<parser::Node> TypeToParserNode::classInstanceType(const rbs_types_class_instance_t *node,
-                                                             core::LocOffsets loc) {
-    auto offsets = locFromRange(loc, ((rbs_node_t *)node)->location->rg);
+                                                             core::LocOffsets loc, const RBSDeclaration &declaration) {
     auto argsValue = node->args;
     auto isGeneric = argsValue != nullptr && argsValue->length > 0;
-    auto typeConstant = typeNameType(node->name, isGeneric, offsets);
+    auto typeConstant = typeNameType(node->name, isGeneric, declaration);
 
     if (isGeneric) {
         auto args = parser::NodeVec();
         args.reserve(argsValue->length);
         for (rbs_node_list_node *list_node = argsValue->head; list_node != nullptr; list_node = list_node->next) {
-            auto argType = toParserNode(list_node->node, loc);
+            auto argType = toParserNode(list_node->node, declaration);
             args.emplace_back(move(argType));
         }
 
-        return parser::MK::Send(offsets, move(typeConstant), core::Names::squareBrackets(), offsets, move(args));
+        return parser::MK::Send(loc, move(typeConstant), core::Names::squareBrackets(), loc, move(args));
     }
 
     return typeConstant;
 }
 
 unique_ptr<parser::Node> TypeToParserNode::classSingletonType(const rbs_types_class_singleton_t *node,
-                                                              core::LocOffsets loc) {
-    auto offsets = locFromRange(loc, ((rbs_node_t *)node)->location->rg);
-    auto innerType = typeNameType(node->name, false, offsets);
+                                                              core::LocOffsets loc, const RBSDeclaration &declaration) {
+    auto innerType = typeNameType(node->name, false, declaration);
     return parser::MK::TClassOf(loc, move(innerType));
 }
 
-unique_ptr<parser::Node> TypeToParserNode::unionType(const rbs_types_union_t *node, core::LocOffsets loc) {
+unique_ptr<parser::Node> TypeToParserNode::unionType(const rbs_types_union_t *node, core::LocOffsets loc,
+                                                     const RBSDeclaration &declaration) {
     auto args = parser::NodeVec();
 
     for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
-        auto innerType = toParserNode(list_node->node, loc);
+        auto innerType = toParserNode(list_node->node, declaration);
         args.emplace_back(move(innerType));
     }
 
     return parser::MK::TAny(loc, move(args));
 }
 
-unique_ptr<parser::Node> TypeToParserNode::intersectionType(const rbs_types_intersection_t *node,
-                                                            core::LocOffsets loc) {
+unique_ptr<parser::Node> TypeToParserNode::intersectionType(const rbs_types_intersection_t *node, core::LocOffsets loc,
+                                                            const RBSDeclaration &declaration) {
     auto args = parser::NodeVec();
 
     for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
-        auto innerType = toParserNode(list_node->node, loc);
+        auto innerType = toParserNode(list_node->node, declaration);
         args.emplace_back(move(innerType));
     }
 
     return parser::MK::TAll(loc, move(args));
 }
 
-unique_ptr<parser::Node> TypeToParserNode::optionalType(const rbs_types_optional_t *node, core::LocOffsets loc) {
-    auto innerType = toParserNode(node->type, loc);
+unique_ptr<parser::Node> TypeToParserNode::optionalType(const rbs_types_optional_t *node, core::LocOffsets loc,
+                                                        const RBSDeclaration &declaration) {
+    auto innerType = toParserNode(node->type, declaration);
 
     if (parser::MK::isTUntyped(innerType)) {
         return innerType;
@@ -151,7 +152,8 @@ unique_ptr<parser::Node> TypeToParserNode::voidType(const rbs_types_bases_void_t
     return parser::MK::Const(loc, parser::MK::SorbetPrivateStatic(loc), core::Names::Constants::Void());
 }
 
-unique_ptr<parser::Node> TypeToParserNode::functionType(const rbs_types_function_t *node, core::LocOffsets loc) {
+unique_ptr<parser::Node> TypeToParserNode::functionType(const rbs_types_function_t *node, core::LocOffsets loc,
+                                                        const RBSDeclaration &declaration) {
     auto pairs = parser::NodeVec();
     int i = 0;
     for (rbs_node_list_node *list_node = node->required_positionals->head; list_node != nullptr;
@@ -169,7 +171,7 @@ unique_ptr<parser::Node> TypeToParserNode::functionType(const rbs_types_function
             }
             innerType = parser::MK::TUntyped(loc);
         } else {
-            innerType = toParserNode(((rbs_types_function_param_t *)paramNode)->type, loc);
+            innerType = toParserNode(((rbs_types_function_param_t *)paramNode)->type, declaration);
         }
 
         pairs.emplace_back(make_unique<parser::Pair>(loc, move(key), move(innerType)));
@@ -182,26 +184,26 @@ unique_ptr<parser::Node> TypeToParserNode::functionType(const rbs_types_function
         return parser::MK::TProcVoid(loc, make_unique<parser::Hash>(loc, true, move(pairs)));
     }
 
-    auto returnType = toParserNode(returnValue, loc);
+    auto returnType = toParserNode(returnValue, declaration);
 
     return parser::MK::TProc(loc, make_unique<parser::Hash>(loc, true, move(pairs)), move(returnType));
 }
 
-unique_ptr<parser::Node> TypeToParserNode::procType(const rbs_types_proc_t *node, core::LocOffsets docLoc) {
-    auto loc = locFromRange(docLoc, ((rbs_node_t *)node)->location->rg);
+unique_ptr<parser::Node> TypeToParserNode::procType(const rbs_types_proc_t *node, core::LocOffsets loc,
+                                                    const RBSDeclaration &declaration) {
     auto function = parser::MK::TUntyped(loc);
 
     rbs_node_t *functionTypeNode = node->type;
     switch (functionTypeNode->type) {
         case RBS_TYPES_FUNCTION: {
-            function = functionType((rbs_types_function_t *)functionTypeNode, loc);
+            function = functionType((rbs_types_function_t *)functionTypeNode, loc, declaration);
             break;
         }
         case RBS_TYPES_UNTYPED_FUNCTION: {
             return function;
         }
         default: {
-            auto errLoc = locFromRange(docLoc, functionTypeNode->location->rg);
+            auto errLoc = declaration.typeLocFromRange(functionTypeNode->location->rg);
             if (auto e = ctx.beginError(errLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in proc type, expected `{}`",
                             rbs_node_type_name(functionTypeNode), "Function");
@@ -211,29 +213,28 @@ unique_ptr<parser::Node> TypeToParserNode::procType(const rbs_types_proc_t *node
 
     rbs_node_t *selfNode = node->self_type;
     if (selfNode != nullptr) {
-        auto selfLoc = locFromRange(loc, selfNode->location->rg);
-        auto selfType = toParserNode(selfNode, selfLoc);
+        auto selfType = toParserNode(selfNode, declaration);
         function = parser::MK::Send1(loc, move(function), core::Names::bind(), loc, move(selfType));
     }
 
     return function;
 }
 
-unique_ptr<parser::Node> TypeToParserNode::blockType(const rbs_types_block_t *node, core::LocOffsets docLoc) {
-    auto loc = locFromRange(docLoc, ((rbs_node_t *)node)->location->rg);
+unique_ptr<parser::Node> TypeToParserNode::blockType(const rbs_types_block_t *node, core::LocOffsets loc,
+                                                     const RBSDeclaration &declaration) {
     auto function = parser::MK::TUntyped(loc);
 
     rbs_node_t *functionTypeNode = node->type;
     switch (functionTypeNode->type) {
         case RBS_TYPES_FUNCTION: {
-            function = functionType((rbs_types_function_t *)functionTypeNode, docLoc);
+            function = functionType((rbs_types_function_t *)functionTypeNode, loc, declaration);
             break;
         }
         case RBS_TYPES_UNTYPED_FUNCTION: {
             return function;
         }
         default: {
-            auto errLoc = locFromRange(docLoc, functionTypeNode->location->rg);
+            auto errLoc = declaration.typeLocFromRange(functionTypeNode->location->rg);
             if (auto e = ctx.beginError(errLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in block type, expected `{}`",
                             rbs_node_type_name(functionTypeNode), "Function");
@@ -245,8 +246,8 @@ unique_ptr<parser::Node> TypeToParserNode::blockType(const rbs_types_block_t *no
 
     rbs_node_t *selfNode = node->self_type;
     if (selfNode != nullptr) {
-        auto selfLoc = locFromRange(docLoc, selfNode->location->rg);
-        auto selfType = toParserNode(selfNode, selfLoc);
+        auto selfLoc = declaration.typeLocFromRange(selfNode->location->rg);
+        auto selfType = toParserNode(selfNode, declaration);
         function = parser::MK::Send1(selfLoc, move(function), core::Names::bind(), selfLoc, move(selfType));
     }
 
@@ -257,18 +258,20 @@ unique_ptr<parser::Node> TypeToParserNode::blockType(const rbs_types_block_t *no
     return function;
 }
 
-unique_ptr<parser::Node> TypeToParserNode::tupleType(const rbs_types_tuple_t *node, core::LocOffsets loc) {
+unique_ptr<parser::Node> TypeToParserNode::tupleType(const rbs_types_tuple_t *node, core::LocOffsets loc,
+                                                     const RBSDeclaration &declaration) {
     auto typesStore = parser::NodeVec();
 
     for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
-        auto innerType = toParserNode(list_node->node, loc);
+        auto innerType = toParserNode(list_node->node, declaration);
         typesStore.emplace_back(move(innerType));
     }
 
     return parser::MK::Array(loc, move(typesStore));
 }
 
-unique_ptr<parser::Node> TypeToParserNode::recordType(const rbs_types_record_t *node, core::LocOffsets loc) {
+unique_ptr<parser::Node> TypeToParserNode::recordType(const rbs_types_record_t *node, core::LocOffsets loc,
+                                                      const RBSDeclaration &declaration) {
     auto pairs = parser::NodeVec();
 
     for (rbs_hash_node_t *hash_node = node->all_fields->head; hash_node != nullptr; hash_node = hash_node->next) {
@@ -308,7 +311,7 @@ unique_ptr<parser::Node> TypeToParserNode::recordType(const rbs_types_record_t *
         }
 
         rbs_types_record_field_type_t *valueNode = (rbs_types_record_field_type_t *)hash_node->value;
-        auto innerType = toParserNode(valueNode->type, loc);
+        auto innerType = toParserNode(valueNode->type, declaration);
         pairs.emplace_back(make_unique<parser::Pair>(loc, move(key), move(innerType)));
     }
 
@@ -322,81 +325,77 @@ unique_ptr<parser::Node> TypeToParserNode::variableType(const rbs_types_variable
     return parser::MK::TTypeParameter(loc, parser::MK::Symbol(loc, name));
 }
 
-unique_ptr<parser::Node> TypeToParserNode::toParserNode(const rbs_node_t *node, core::LocOffsets docLoc) {
+unique_ptr<parser::Node> TypeToParserNode::toParserNode(const rbs_node_t *node, const RBSDeclaration &declaration) {
+    auto nodeLoc = declaration.typeLocFromRange(((rbs_node_t *)node)->location->rg);
     switch (node->type) {
         case RBS_TYPES_ALIAS: {
-            auto loc = locFromRange(docLoc, node->location->rg);
-            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
+            if (auto e = ctx.beginError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS aliases are not supported");
             }
-            return parser::MK::TUntyped(docLoc);
+            return parser::MK::TUntyped(nodeLoc);
         }
         case RBS_TYPES_BASES_ANY:
-            return parser::MK::TUntyped(docLoc);
+            return parser::MK::TUntyped(nodeLoc);
         case RBS_TYPES_BASES_BOOL:
-            return parser::MK::T_Boolean(docLoc);
+            return parser::MK::T_Boolean(nodeLoc);
         case RBS_TYPES_BASES_BOTTOM:
-            return parser::MK::TNoReturn(docLoc);
+            return parser::MK::TNoReturn(nodeLoc);
         case RBS_TYPES_BASES_CLASS: {
-            auto loc = locFromRange(docLoc, node->location->rg);
-            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
+            if (auto e = ctx.beginError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS type `{}` is not supported", "class");
             }
-            return parser::MK::TUntyped(docLoc);
+            return parser::MK::TUntyped(nodeLoc);
         }
         case RBS_TYPES_BASES_INSTANCE:
-            return parser::MK::TAttachedClass(docLoc);
+            return parser::MK::TAttachedClass(nodeLoc);
         case RBS_TYPES_BASES_NIL:
-            return parser::MK::Const(docLoc, parser::MK::Cbase(docLoc), core::Names::Constants::NilClass());
+            return parser::MK::Const(nodeLoc, parser::MK::Cbase(nodeLoc), core::Names::Constants::NilClass());
         case RBS_TYPES_BASES_SELF:
-            return parser::MK::TSelfType(docLoc);
+            return parser::MK::TSelfType(nodeLoc);
         case RBS_TYPES_BASES_TOP:
-            return parser::MK::TAnything(docLoc);
+            return parser::MK::TAnything(nodeLoc);
         case RBS_TYPES_BASES_VOID:
-            return voidType((rbs_types_bases_void_t *)node, docLoc);
+            return voidType((rbs_types_bases_void_t *)node, nodeLoc);
         case RBS_TYPES_BLOCK:
-            return blockType((rbs_types_block_t *)node, docLoc);
+            return blockType((rbs_types_block_t *)node, nodeLoc, declaration);
         case RBS_TYPES_CLASS_INSTANCE:
-            return classInstanceType((rbs_types_class_instance_t *)node, docLoc);
+            return classInstanceType((rbs_types_class_instance_t *)node, nodeLoc, declaration);
         case RBS_TYPES_CLASS_SINGLETON:
-            return classSingletonType((rbs_types_class_singleton_t *)node, docLoc);
+            return classSingletonType((rbs_types_class_singleton_t *)node, nodeLoc, declaration);
         case RBS_TYPES_FUNCTION:
-            return functionType((rbs_types_function_t *)node, docLoc);
+            return functionType((rbs_types_function_t *)node, nodeLoc, declaration);
         case RBS_TYPES_INTERFACE: {
-            auto loc = locFromRange(docLoc, node->location->rg);
-            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
+            if (auto e = ctx.beginError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS interfaces are not supported");
             }
-            return parser::MK::TUntyped(docLoc);
+            return parser::MK::TUntyped(nodeLoc);
         }
         case RBS_TYPES_INTERSECTION:
-            return intersectionType((rbs_types_intersection_t *)node, docLoc);
+            return intersectionType((rbs_types_intersection_t *)node, nodeLoc, declaration);
         case RBS_TYPES_LITERAL: {
-            auto loc = locFromRange(docLoc, node->location->rg);
-            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
+            if (auto e = ctx.beginError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS literal types are not supported");
             }
-            return parser::MK::TUntyped(docLoc);
+            return parser::MK::TUntyped(nodeLoc);
         }
         case RBS_TYPES_OPTIONAL:
-            return optionalType((rbs_types_optional_t *)node, docLoc);
+            return optionalType((rbs_types_optional_t *)node, nodeLoc, declaration);
         case RBS_TYPES_PROC:
-            return procType((rbs_types_proc_t *)node, docLoc);
+            return procType((rbs_types_proc_t *)node, nodeLoc, declaration);
         case RBS_TYPES_RECORD:
-            return recordType((rbs_types_record_t *)node, docLoc);
+            return recordType((rbs_types_record_t *)node, nodeLoc, declaration);
         case RBS_TYPES_TUPLE:
-            return tupleType((rbs_types_tuple_t *)node, docLoc);
+            return tupleType((rbs_types_tuple_t *)node, nodeLoc, declaration);
         case RBS_TYPES_UNION:
-            return unionType((rbs_types_union_t *)node, docLoc);
+            return unionType((rbs_types_union_t *)node, nodeLoc, declaration);
         case RBS_TYPES_VARIABLE:
-            return variableType((rbs_types_variable_t *)node, docLoc);
+            return variableType((rbs_types_variable_t *)node, nodeLoc);
         default: {
-            auto errLoc = locFromRange(docLoc, node->location->rg);
-            if (auto e = ctx.beginError(errLoc, core::errors::Internal::InternalError)) {
+            if (auto e = ctx.beginError(nodeLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}`", rbs_node_type_name((rbs_node_t *)node));
             }
 
-            return parser::MK::TUntyped(docLoc);
+            return parser::MK::TUntyped(nodeLoc);
         }
     }
 }

@@ -14,14 +14,15 @@ public:
 
     std::unique_ptr<parser::Node>
     translateAssertionType(std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
-                           const rbs::Comment &assertion);
+                           const RBSDeclaration &declaration);
 
-    std::unique_ptr<parser::Node> translateAttrSignature(const parser::Send *send, const rbs::Comment &signature,
+    std::unique_ptr<parser::Node> translateAttrSignature(const parser::Send *send, const RBSDeclaration &declaration,
                                                          const std::vector<Comment> &annotations);
-    std::unique_ptr<parser::Node> translateMethodSignature(const parser::Node *methodDef, const rbs::Comment &signature,
+    std::unique_ptr<parser::Node> translateMethodSignature(const parser::Node *methodDef,
+                                                           const RBSDeclaration &declaration,
                                                            const std::vector<Comment> &annotations);
 
-    std::unique_ptr<parser::Node> translateType(core::LocOffsets loc, const std::string_view typeString);
+    std::unique_ptr<parser::Node> translateType(const RBSDeclaration &declaration);
 
 private:
     core::MutableContext ctx;

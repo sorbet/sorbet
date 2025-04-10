@@ -22,7 +22,73 @@ struct Comment {
                                  // this is only a view on the string owned by the File.source() data.
 };
 
-core::LocOffsets locFromRange(core::LocOffsets loc, const rbs_range_t &range);
+/**
+ * A collection of RBS type comments that collectively describe a method signature, attribute type, or type assertion.
+ */
+class RBSDeclaration {
+public:
+    std::vector<Comment> comments;
+
+    RBSDeclaration(std::vector<Comment> comments) : comments(comments) {}
+
+    /**
+     * Combines all the comments into a single string.
+     */
+    std::string string() const;
+
+    /**
+     * Returns the location that all the comments cover.
+     *
+     * For multiline comments, this starts at the first comment's location and ends at the last comment's location.
+     *
+     * ```
+     * v starts from here
+     * #: (Integer) ->
+     * #| void
+     *       ^ ends here
+     * ```
+     */
+    core::LocOffsets commentLoc() const;
+
+    /**
+     * Returns entire type location
+     *
+     * ```
+     *   v starts from here
+     * #: (Integer) ->
+     * #| void
+     *       ^ ends here
+     * ```
+     */
+    core::LocOffsets fullTypeLoc() const;
+
+    /**
+     * Returns the type location of the first comment.
+     *
+     * ```
+     *   v starts from here
+     * #: (Integer) ->
+     *               ^ ends here
+     * #| void
+     * ```
+     *
+     * Usually used for generating `sig` nodes only.
+     */
+    core::LocOffsets firstLineTypeLoc() const;
+
+    /**
+     * Returns the type location of the RBS declaration that covers the given range.
+     * For example, if given the range of the `void` token:
+     *
+     * ```
+     * #: (Integer) ->
+     *    v starts from here
+     * #| void
+     *       ^ ends here
+     * ```
+     */
+    core::LocOffsets typeLocFromRange(const rbs_range_t &range) const;
+};
 
 } // namespace sorbet::rbs
 
