@@ -116,6 +116,22 @@ public:
         return nullopt;
     }
 
+    void trackMissingImport(const core::packages::MangledName toImport, const core::packages::ImportType importType,
+                            const core::AutocorrectSuggestion autocorrect) {
+        notImplemented();
+    }
+
+    std::optional<core::AutocorrectSuggestion> fetchMissingImport(const core::packages::MangledName toImport,
+                                                                  const core::packages::ImportType importType) const {
+        notImplemented();
+        return nullopt;
+    }
+
+    core::AutocorrectSuggestion aggregateMissingImports() const {
+        notImplemented();
+        return core::AutocorrectSuggestion{"notImplemented", {}};
+    }
+
     ~NonePackage() {}
 
 private:
