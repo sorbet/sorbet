@@ -7,6 +7,8 @@ namespace sorbet::ast::packager {
 
 ExpressionPtr prependRegistry(ExpressionPtr scope);
 
+const ast::ClassDef *asPackageSpecClass(const ast::ExpressionPtr &expr);
+
 } // namespace sorbet::ast::packager
   //
 #endif
