@@ -520,8 +520,8 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
             return;
         }
 
-        this->cacheOpenFiles(indexed, openFiles);
-        this->cacheOpenFiles(nonPackagedIndexed, openFiles);
+        this->cacheUpdatedFiles(indexed, openFiles);
+        this->cacheUpdatedFiles(nonPackagedIndexed, openFiles);
 
         // First run: only the __package.rb files. This populates the packageDB
         pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers);
@@ -639,8 +639,8 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     }
 }
 
-void LSPTypechecker::cacheOpenFiles(absl::Span<const ast::ParsedFile> indexed,
-                                    const UnorderedSet<core::FileRef> &openFiles) {
+void LSPTypechecker::cacheUpdatedFiles(absl::Span<const ast::ParsedFile> indexed,
+                                       const UnorderedSet<core::FileRef> &openFiles) {
     auto &logger = *config->logger;
     Timer timeit(logger, "slow_path.cache_open_files");
 

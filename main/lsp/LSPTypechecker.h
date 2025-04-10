@@ -131,7 +131,7 @@ class LSPTypechecker final {
      * Populate `this->indexedFinalGS` with copies of indexed trees from the `indexed` span, whose files are mentioned
      * in the `openFiles` vector.
      */
-    void cacheOpenFiles(absl::Span<const ast::ParsedFile> indexed, const UnorderedSet<core::FileRef> &openFiles);
+    void cacheUpdatedFiles(absl::Span<const ast::ParsedFile> indexed, const UnorderedSet<core::FileRef> &openFiles);
 
 public:
     LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
