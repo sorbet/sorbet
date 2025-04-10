@@ -46,13 +46,13 @@ struct PackageInfo {
     vector<string> testImports;
     vector<string> files;
     vector<string> testFiles;
-    string mangledName;
+    string baseFilePath;
 
     PackageInfo() = default;
     PackageInfo(string name, vector<string> imports, vector<string> testImports, vector<string> files,
                 vector<string> testFiles)
         : name(name), imports(imports), testImports(testImports), files(files), testFiles(testFiles),
-          mangledName(absl::StrReplaceAll(name, {{"::", "_"}}) + "_Package"s) {}
+          baseFilePath(absl::StrReplaceAll(name, {{"::", "_"}}) + "_Package"s) {}
 
     static PackageInfo fromJson(const rapidjson::Value &d) {
         return PackageInfo(d["name"].GetString(), fromJsonStringArray(d["imports"]),
@@ -108,11 +108,11 @@ struct PackageDB {
     }
 
     string lookupRbiFor(PackageInfo info) {
-        return rbis.at(info.mangledName);
+        return rbis.at(info.baseFilePath);
     }
 
     DependencyInfo lookupDepsFor(PackageInfo info) {
-        return deps.at(info.mangledName);
+        return deps.at(info.baseFilePath);
     }
 
     PackageInfo lookupPackageFor(string name) {

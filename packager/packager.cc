@@ -1635,7 +1635,7 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
     const string_view shortName = info->name.mangledName.mangledName.shortName(gs);
     const string slashDirName = absl::StrJoin(info->name.fullName.parts, "/", core::packages::NameFormatter(gs)) + "/";
-    const string_view dirNameFromShortName = shortName.substr(0, shortName.rfind(core::PACKAGE_SUFFIX));
+    const string_view dirNameFromShortName = shortName;
 
     for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
         // Project_FooBar -- munge with underscore
