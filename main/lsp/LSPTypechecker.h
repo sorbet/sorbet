@@ -127,6 +127,12 @@ class LSPTypechecker final {
      */
     std::unique_ptr<OwnedKeyValueStore> getKvStore() const;
 
+    /**
+     * Populate `this->indexedFinalGS` with copies of indexed trees from the `indexed` span, whose files are mentioned
+     * in the `openFiles` vector.
+     */
+    void cacheUpdatedFiles(absl::Span<const ast::ParsedFile> indexed, const UnorderedSet<core::FileRef> &openFiles);
+
 public:
     LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
                    std::shared_ptr<core::lsp::PreemptionTaskManager> preemptionTaskManager);

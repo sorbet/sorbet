@@ -22,9 +22,6 @@ public:
 
     std::vector<std::shared_ptr<core::File>> updatedFiles;
 
-    // Indexed versions of `updatedFiles`, tied to the `initialGS` global state in the indexer.
-    std::vector<ast::ParsedFile> updatedFileIndexes;
-
     TypecheckingPath typecheckingPath = TypecheckingPath::Slow;
 
     // Indicates whether or not the incremental namer should be used on the fast path.

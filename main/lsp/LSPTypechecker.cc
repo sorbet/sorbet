@@ -151,7 +151,6 @@ bool LSPTypechecker::typecheck(std::unique_ptr<LSPFileUpdates> updates, WorkerPo
             bool isNoopUpdateForRetypecheck = false;
             filesTypechecked = runFastPath(*updates, workers, errorFlusher, isNoopUpdateForRetypecheck);
 
-            ENFORCE(updates->updatedFileIndexes.empty());
             ENFORCE(updates->updatedFiles.empty());
 
             for (auto &ast : updates->updatedFinalGSFileIndexes) {
@@ -246,7 +245,6 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     }
 
     updates.updatedFiles.clear();
-    updates.updatedFileIndexes.clear();
 
     if (shouldRunIncrementalNamer && gs->packageDB().enabled()) {
         std::vector<core::FileRef> packageFiles;
@@ -355,6 +353,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
     auto committed = epochManager.tryCommitEpoch(*this->gs, epoch, cancelable, preemptManager, [&]() -> void {
+        UnorderedSet<core::FileRef> openFiles;
         vector<ast::ParsedFile> indexed, nonPackagedIndexed;
 
         {
@@ -380,19 +379,15 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                 case SlowPathMode::Cancelable: {
                     timeit.emplace(this->config->logger, "slow_path_reindex");
 
-                    ENFORCE(updates.updatedFiles.size() == updates.updatedFileIndexes.size());
-
-                    // Move the indexed trees into our local cache for open files. We will still reindex them again to
-                    // force any errors, but this is a convenient way to pre-populate our cache.
+                    // Determine which files we need to copy into the open files cache (indexedFinalGS).
                     if (!updates.updatedFiles.empty()) {
-                        for (auto &ast : updates.updatedFileIndexes) {
-                            if (ast.tree) {
-                                this->indexedFinalGS[ast.file.id()] = std::move(ast);
-                            }
+                        for (auto &file : updates.updatedFiles) {
+                            auto fref = this->gs->findFileByPath(file->path());
+                            ENFORCE(fref.exists());
+                            openFiles.insert(fref);
                         }
 
                         updates.updatedFiles.clear();
-                        updates.updatedFileIndexes.clear();
                     }
 
                     this->workspaceFiles.clear();
@@ -423,7 +418,6 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                 }
             }
 
-            ENFORCE(updates.updatedFileIndexes.empty());
             ENFORCE(updates.updatedFiles.empty());
             ENFORCE(gs->lspQuery.isEmpty());
 
@@ -525,6 +519,9 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
         if (epochManager.wasTypecheckingCanceled()) {
             return;
         }
+
+        this->cacheUpdatedFiles(indexed, openFiles);
+        this->cacheUpdatedFiles(nonPackagedIndexed, openFiles);
 
         // First run: only the __package.rb files. This populates the packageDB
         pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers);
@@ -642,6 +639,18 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     }
 }
 
+void LSPTypechecker::cacheUpdatedFiles(absl::Span<const ast::ParsedFile> indexed,
+                                       const UnorderedSet<core::FileRef> &openFiles) {
+    auto &logger = *config->logger;
+    Timer timeit(logger, "slow_path.cache_open_files");
+
+    for (auto &ast : indexed) {
+        if (openFiles.contains(ast.file)) {
+            this->indexedFinalGS[ast.file.id()] = ast::ParsedFile{ast.tree.deepCopy(), ast.file};
+        }
+    }
+}
+
 unique_ptr<core::GlobalState> LSPTypechecker::destroy() {
     return move(gs);
 }
@@ -712,8 +721,6 @@ std::unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(std::vector<core::
     noop.epoch = 0;
     for (auto fref : frefs) {
         ENFORCE(fref.exists());
-        // Note: `index.tree` can be null if the file is a stdlib file.
-        noop.updatedFileIndexes.emplace_back(this->getIndexed(fref));
         noop.updatedFiles.push_back(gs->getFiles()[fref.id()]);
     }
     return result;
