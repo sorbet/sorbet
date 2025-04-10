@@ -440,13 +440,13 @@ public:
             return;
         }
 
-        auto importType = this->package.importsPackage(otherPackage);
-        auto wasNotImported = !importType.has_value();
+        auto currentImportType = this->package.importsPackage(otherPackage);
+        auto wasImported = currentImportType.has_value();
         auto importedAsTest =
-            importType.has_value() && importType.value() == core::packages::ImportType::Test && !this->insideTestFile;
-        if (wasNotImported || importedAsTest) {
+            wasImported && currentImportType.value() == core::packages::ImportType::Test && !this->insideTestFile;
+        if (!wasImported || importedAsTest) {
             auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-            bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
+            bool isTestImport = otherFile.data(ctx).isPackagedTest() || this->insideTestFile;
             auto strictDepsLevel = this->package.strictDependenciesLevel();
             auto importStrictDepsLevel = pkg.strictDependenciesLevel();
             bool layeringViolation = false;
@@ -468,8 +468,7 @@ public:
                               path.has_value();
             }
             if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
-                if (wasNotImported) {
-                    // We failed to import the package that defines the symbol
+                if (!wasImported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                         e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Exported from package here");
@@ -487,11 +486,15 @@ public:
                         }
                     }
                 } else if (importedAsTest) {
+                    ENFORCE(!isTestImport);
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                         e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
                         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                         if (auto exp = this->package.addImport(ctx, pkg, false)) {
                             e.addAutocorrect(std::move(exp.value()));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
                         }
                         e.addErrorLine(pkg.declLoc(), "Defined here");
                     }
@@ -563,7 +566,7 @@ public:
                         ENFORCE(false, "At most three reasons should be present");
                     }
                     e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
-                    if (wasNotImported) {
+                    if (!wasImported) {
                         e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
                     } else if (importedAsTest) {
                         e.addErrorNote("`{}`'s package is imported as `{}`", lit.symbol().show(ctx), "test_import");
