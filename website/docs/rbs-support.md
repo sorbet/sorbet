@@ -37,6 +37,17 @@ def foo(x)
 end
 ```
 
+Long signatures can be broken into multiple lines using the `#|` continuation
+comment:
+
+```ruby
+#: (
+#|  Integer,
+#|  String
+#| ) -> Float
+def foo(x, y); end
+```
+
 ## Caveats
 
 > Support for this feature is experimental, and we actively discourage depending
