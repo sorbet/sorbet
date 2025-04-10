@@ -13,10 +13,12 @@ struct AutocorrectSuggestion {
         std::string replacement;
     };
 
-    const std::string title;
+    std::string title;
     std::vector<Edit> edits;
 
     bool isDidYouMean;
+
+    AutocorrectSuggestion() : title(""), edits({}), isDidYouMean(false) {}
 
     AutocorrectSuggestion(std::string title, std::vector<Edit> edits, bool isDidYouMean = false)
         : title(title), edits(edits), isDidYouMean(isDidYouMean) {}

@@ -231,6 +231,9 @@ public:
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_ = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer_ = nullopt;
 
+    UnorderedMap<pair<core::packages::MangledName, core::packages::ImportType>, core::AutocorrectSuggestion>
+        trackedMissingImports_ = {};
+
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
         return strictDependenciesLevel_;
     }
@@ -675,6 +678,55 @@ public:
 
         // No path found
         return nullopt;
+    }
+
+    void trackMissingImport(const core::packages::MangledName toImport, const core::packages::ImportType importType,
+                            const core::AutocorrectSuggestion autocorrect) {
+        trackedMissingImports_[{toImport, importType}] = autocorrect;
+    }
+
+    std::optional<core::AutocorrectSuggestion> fetchMissingImport(const core::packages::MangledName toImport,
+                                                                  const core::packages::ImportType importType) const {
+        auto r = trackedMissingImports_.find({toImport, importType});
+        if (r != trackedMissingImports_.end()) {
+            return r->second;
+        }
+        return nullopt;
+    }
+
+    core::AutocorrectSuggestion aggregateMissingImports() const {
+        std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+        for (auto &[key, autocorrect] : trackedMissingImports_) {
+            auto importName = key.first;
+            auto importType = key.second;
+            if (importType == core::packages::ImportType::Test &&
+                trackedMissingImports_.contains({importName, core::packages::ImportType::Normal})) {
+                // If we're already importing the package normally, we don't need to import it again as a
+                // test_import.
+                continue;
+            }
+            allEdits.insert(allEdits.end(), autocorrect.edits.begin(), autocorrect.edits.end());
+        }
+        fast_sort(allEdits, [](const auto &lhs, const auto &rhs) {
+            if (lhs.loc == rhs.loc) {
+                return lhs.replacement < rhs.replacement;
+            }
+            return lhs.loc.beginPos() < rhs.loc.beginPos();
+        });
+        auto i = 0;
+        while (allEdits.size() > 0 && i < allEdits.size() - 1) {
+            if (allEdits[i].loc.beginPos() == allEdits[i + 1].loc.beginPos() && allEdits[i].loc.empty() &&
+                allEdits[i + 1].loc.empty()) {
+                // If we're inserting 2 imports at the same location, combine them into a single edit.
+                // TODO(neil): maybe this logic should be moved/added to AutocorrectSuggestion::apply, to handle other
+                // cases where 2 autocorrects add at the same loc?
+                allEdits[i].replacement += allEdits[i + 1].replacement;
+                allEdits.erase(allEdits.begin() + i + 1);
+            } else {
+                i++;
+            }
+        }
+        return core::AutocorrectSuggestion{"Add missing imports", std::move(allEdits)};
     }
 };
 
