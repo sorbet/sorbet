@@ -32,9 +32,9 @@ public:
      */
     std::string string;
 
-    RBSDeclaration(std::vector<Comment> comments) : comments(comments) {
+    RBSDeclaration(std::vector<Comment> comments) : comments(std::move(comments)) {
         std::string result;
-        for (const auto &comment : comments) {
+        for (const auto &comment : this->comments) {
             result += comment.string;
         }
         this->string = result;
