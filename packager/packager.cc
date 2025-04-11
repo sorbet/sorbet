@@ -1547,10 +1547,10 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
             continue;
         }
 
-        auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(packageSpecClass->name);
+        auto nameTree = ast::cast_tree<ast::ConstantLit>(packageSpecClass->name);
         ENFORCE(nameTree != nullptr, "Invariant from rewriter");
 
-        return make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),
+        return make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree->original()), ctx.locAt(packageSpecClass->loc),
                                             ctx.locAt(packageSpecClass->declLoc));
     }
 
