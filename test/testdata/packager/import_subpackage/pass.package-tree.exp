@@ -7,7 +7,7 @@ end
 # -- test/testdata/packager/import_subpackage/a/b/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::<C Root>::<C B><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.export(::<root>::<C Root>::<C B>::<C Foo>)
+    <self>.export(<emptyTree>::<C Root>::<C B>::<C Foo>)
   end
 end
 # -- test/testdata/packager/import_subpackage/a/b/foo.rb --
