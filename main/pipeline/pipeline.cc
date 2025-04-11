@@ -40,6 +40,8 @@
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
+#include "payload/binary/binary.h"
+#include "payload/text/text.h"
 #include "pipeline.h"
 #include "rbs/AssertionsRewriter.h"
 #include "rbs/SigsRewriter.h"
@@ -1541,6 +1543,29 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
     writer.EndArray();
 
     opts.print.UntypedBlame.print(result.GetString());
+#endif
+}
+
+std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts) {
+#ifdef SORBET_REALMAIN_MIN
+    // It is impossible to enter this function if SORBET_REALMAIN_MIN is defined, as the only entry should be from a
+    // running LSP session.
+    Exception::raise("LSP is disabled in sorbet-orig for faster builds");
+#else
+    if (opts.cacheSensitiveOptions.noStdlib) {
+        auto result = std::make_unique<core::GlobalState>(from.errorQueue, from.epochManager);
+        result->initEmpty();
+        return result;
+    }
+
+    auto result = from.copyForSlowPath(
+        opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
+        opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
+        opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint);
+
+    core::serialize::Serializer::loadSymbolTable(*result, PAYLOAD_SYMBOL_TABLE);
+
+    return result;
 #endif
 }
 

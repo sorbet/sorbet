@@ -40,8 +40,6 @@ public:
     bool canceledSlowPath = false;
     // Updated on typechecking thread. Contains indexes processed with typechecking global state.
     std::vector<ast::ParsedFile> updatedFinalGSFileIndexes;
-    // (Optional) Updated global state object to use to typecheck this update.
-    std::optional<std::unique_ptr<core::GlobalState>> updatedGS;
     // (Used in tests) Ensures that a slow path typecheck on these updates waits until it gets cancelled.
     bool cancellationExpected = false;
     // (Used in tests) Ensures that a slow path typecheck waits until this number of preemption occurs before finishing.
