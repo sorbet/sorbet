@@ -36,9 +36,8 @@ public:
     static void loadGlobalState(GlobalState &gs, const uint8_t *const symbolTableData,
                                 const uint8_t *const nameTableData, const uint8_t *const fileTableData);
 
-    // Initialize `result` with the symbol table of the payload, and the UUID, strings, name table, and file table of
-    // `gs`.
-    static void initForSlowPath(GlobalState &result, const GlobalState &gs, const uint8_t *const symbolTableData);
+    // Initialize only the symbol table of `gs` by deserializing the payload.
+    static void loadSymbolTable(GlobalState &gs, const uint8_t *const symbolTableData);
 
     static uint32_t loadGlobalStateUUID(const GlobalState &gs, const uint8_t *const data);
 

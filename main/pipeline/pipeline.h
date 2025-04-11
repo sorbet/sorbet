@@ -97,5 +97,8 @@ void printFileTable(core::GlobalState &gs, const options::Options &opts, const U
 void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedBlames,
                         const options::Options &opts);
 
+// Create a copy of `from` that has its symbol table reset to the payload.
+std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts);
+
 } // namespace sorbet::realmain::pipeline
 #endif // RUBY_TYPER_PIPELINE_H

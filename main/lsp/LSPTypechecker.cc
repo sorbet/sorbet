@@ -339,17 +339,9 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
 
     ENFORCE(this->cancellationUndoState == nullptr);
     if (cancelable) {
-        auto trackUntyped = this->gs->trackUntyped;
-        auto savedGS = std::exchange(this->gs, payload::copyForSlowPath(*this->gs, this->config->opts));
-
+        auto savedGS = std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts));
         this->cancellationUndoState =
             std::make_unique<UndoState>(std::move(savedGS), std::move(this->indexedFinalGS), updates.epoch);
-
-        pipeline::setGlobalStateOptions(*this->gs, this->config->opts);
-
-        // This option is managed entirely by LSPTypechecker and will be cleared by `setGlobalStateOptions` if it wasn't
-        // explicitly enabled at startup, so we must carry it over here.
-        this->gs->trackUntyped = trackUntyped;
     }
 
     const uint32_t epoch = updates.epoch;

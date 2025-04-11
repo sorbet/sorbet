@@ -267,6 +267,17 @@ public:
                  const std::vector<std::string> &allowRelaxedPackagerChecksFor,
                  const std::vector<std::string> &packagerLayers, std::string errorHint) const;
 
+    // Copy the name table, file table and other parts of GlobalState that are required to start the slow path.
+    // NOTE: this very intentionally will not copy the symbol table, and the expectation is that the symbol table will
+    // be overwritten by immediately deserializaing the payload over it.
+    std::unique_ptr<GlobalState>
+    copyForSlowPath(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                    const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                    const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
+                    const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
+                    const std::vector<std::string> &allowRelaxedPackagerChecksFor,
+                    const std::vector<std::string> &packagerLayers, std::string errorHint) const;
+
     // Merge the contents of one file table into this GlobalState. This is used during the index pass to make sure that
     // changes made to the file table in worker threads are propagated back to the main GlobalState.
     void mergeFileTable(const core::GlobalState &gs);

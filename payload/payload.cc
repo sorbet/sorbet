@@ -76,17 +76,4 @@ void createInitialGlobalState(core::GlobalState &gs, const realmain::options::Op
     }
 }
 
-std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &gs,
-                                                   const realmain::options::Options &options) {
-    auto result = std::make_unique<core::GlobalState>(gs.errorQueue, gs.epochManager);
-
-    if (options.cacheSensitiveOptions.noStdlib) {
-        result->initEmpty();
-    } else {
-        core::serialize::Serializer::initForSlowPath(*result, gs, PAYLOAD_SYMBOL_TABLE);
-    }
-
-    return result;
-}
-
 } // namespace sorbet::payload
