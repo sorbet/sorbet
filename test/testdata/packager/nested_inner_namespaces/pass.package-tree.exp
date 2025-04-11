@@ -7,11 +7,11 @@ end
 # -- test/testdata/packager/nested_inner_namespaces/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::<C RootPackage>::<C Foo><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.export(::<root>::<C RootPackage>::<C Foo>::<C Constant>)
+    <self>.export(<emptyTree>::<C RootPackage>::<C Foo>::<C Constant>)
 
-    <self>.export(::<root>::<C RootPackage>::<C Foo>::<C Bar>::<C Constant>)
+    <self>.export(<emptyTree>::<C RootPackage>::<C Foo>::<C Bar>::<C Constant>)
 
-    <self>.export(::<root>::<C RootPackage>::<C Foo>::<C Bar>::<C Baz>)
+    <self>.export(<emptyTree>::<C RootPackage>::<C Foo>::<C Bar>::<C Baz>)
   end
 end
 # -- test/testdata/packager/nested_inner_namespaces/bar.rb --

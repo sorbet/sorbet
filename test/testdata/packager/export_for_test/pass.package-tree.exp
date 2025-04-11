@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.test_import(::<PackageSpecRegistry>::<C Opus>::<C TestImported>)
 
-    <self>.export(::<root>::<C Opus>::<C Foo>::<C FooClass>)
+    <self>.export(<emptyTree>::<C Opus>::<C Foo>::<C FooClass>)
 
     <self>.export_for_test(<emptyTree>::<C Opus>::<C Foo>::<C Private>::<C ImplDetail>)
 
@@ -22,27 +22,27 @@ end
 # -- test/testdata/packager/export_for_test/foo/bar/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.export(::<root>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>)
+    <self>.export(<emptyTree>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>)
 
-    <self>.export(::<root>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest>)
+    <self>.export(<emptyTree>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest>)
   end
 end
 # -- test/testdata/packager/export_for_test/test_imported/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::<C Opus>::<C TestImported><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.export(::<root>::<C Opus>::<C TestImported>::<C TIClass>)
+    <self>.export(<emptyTree>::<C Opus>::<C TestImported>::<C TIClass>)
 
-    <self>.export(::<root>::<C Test>::<C Opus>::<C TestImported>::<C TITestClass>)
+    <self>.export(<emptyTree>::<C Test>::<C Opus>::<C TestImported>::<C TITestClass>)
   end
 end
 # -- test/testdata/packager/export_for_test/util/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::<C Opus>::<C Util><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.export(::<root>::<C Opus>::<C Util>::<C UtilClass>)
+    <self>.export(<emptyTree>::<C Opus>::<C Util>::<C UtilClass>)
 
-    <self>.export(::<root>::<C Test>::<C Opus>::<C Util>::<C TestUtil>)
+    <self>.export(<emptyTree>::<C Test>::<C Opus>::<C Util>::<C TestUtil>)
 
-    <self>.export(::<root>::<C Opus>::<C Util>::<C Nesting>::<C Public>)
+    <self>.export(<emptyTree>::<C Opus>::<C Util>::<C Nesting>::<C Public>)
 
     <self>.export_for_test(<emptyTree>::<C Opus>::<C Util>::<C Nesting>)
   end

@@ -1,7 +1,7 @@
 # -- test/testdata/packager/unimported_namespace/aaa/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::<C AAA><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.export(::<root>::<C AAA>::<C AClass>)
+    <self>.export(<emptyTree>::<C AAA>::<C AClass>)
   end
 end
 # -- test/testdata/packager/unimported_namespace/bbb/__package.rb --

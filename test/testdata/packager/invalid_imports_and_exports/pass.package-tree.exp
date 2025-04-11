@@ -19,11 +19,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.export(<self>.method())
 
-    <self>.export(::<root>::<C A>::<C REFERENCE>)
+    <self>.export(<emptyTree>::<C A>::<C REFERENCE>)
 
-    <self>.export(::<root>::<C A>::<C AClass>)
+    <self>.export(<emptyTree>::<C A>::<C AClass>)
 
-    <self>.export(::<root>::<C A>::<C AModule>)
+    <self>.export(<emptyTree>::<C A>::<C AModule>)
 
     <self>.test_import(::<PackageSpecRegistry>::<C B>)
 
@@ -37,9 +37,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::<C B><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C A>)
 
-    <self>.export(::<root>::<C B>::<C BClass>)
+    <self>.export(<emptyTree>::<C B>::<C BClass>)
 
-    <self>.export(::<root>::<C B>::<C BModule>)
+    <self>.export(<emptyTree>::<C B>::<C BModule>)
   end
 end
 # -- test/testdata/packager/invalid_imports_and_exports/c/__package.rb --

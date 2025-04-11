@@ -708,16 +708,6 @@ PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *
     return pName;
 }
 
-ast::ExpressionPtr prependRoot(ast::ExpressionPtr scope) {
-    auto *lastConstLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(scope);
-    while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
-        lastConstLit = constLit;
-    }
-    auto loc = lastConstLit->scope.loc();
-    lastConstLit->scope = ast::MK::Constant(loc, core::Symbols::root());
-    return scope;
-}
-
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
                              const ast::ExpressionPtr &expr) {
     if (ast::isa_tree<ast::EmptyTree>(expr)) {
@@ -1236,8 +1226,6 @@ struct PackageSpecBodyWalk {
             // null indicates an invalid export.
             if (auto target = verifyConstant(ctx, core::Names::export_(), send.getPosArg(0))) {
                 exported.emplace_back(getFullyQualifiedName(ctx, target));
-                auto &arg = send.getPosArg(0);
-                arg = prependRoot(std::move(arg));
             }
         }
 
