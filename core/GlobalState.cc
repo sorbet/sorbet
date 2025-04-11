@@ -2215,7 +2215,8 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
 
     result->copyOptions(*this);
 
-    // Additional options that might be used during indexing are manually copied over here
+    // We share the file table entries with the original GlobalState, and then copy the content of the name table,
+    // string storage, and uuid to ensure that we remain compatible with the session cache.
     result->files = this->files;
     result->fileRefByPath = this->fileRefByPath;
     result->kvstoreUuid = this->kvstoreUuid;
