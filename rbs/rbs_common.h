@@ -37,7 +37,7 @@ public:
         for (const auto &comment : this->comments) {
             result += comment.string;
         }
-        this->string = result;
+        this->string = std::move(result);
     }
 
     /**
