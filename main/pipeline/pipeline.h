@@ -75,10 +75,10 @@ ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, std::vector<as
 //
 // It's not required when running incrementalResolve just to turn an AST into a resolved AST, if
 // that AST has already been resolved once before on the fast path
-std::vector<ast::ParsedFile>
-incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
-                   std::optional<UnorderedMap<core::FileRef, core::FoundDefHashes>> &&foundHashesForFiles,
-                   const options::Options &opts, WorkerPool &workers);
+std::vector<ast::ParsedFile> incrementalResolve(
+    core::GlobalState &gs, std::vector<ast::ParsedFile> what,
+    std::optional<UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>>> &&foundHashesForFiles,
+    const options::Options &opts, WorkerPool &workers);
 
 // ----- typecheck ------------------------------------------------------------
 

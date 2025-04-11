@@ -207,7 +207,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     }
 
     config->logger->debug("Added {} files that were not part of the edit to the update set", toTypecheck.size());
-    UnorderedMap<core::FileRef, core::FoundDefHashes> oldFoundHashesForFiles;
+    UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>> oldFoundHashesForFiles;
     for (auto &file : updates.updatedFiles) {
         auto fref = gs->findFileByPath(file->path());
         ENFORCE(fref.exists(), "New files are not supported in the fast path");
@@ -231,10 +231,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             // This does mean that runFastPath for retypecheck will fail to report those type member
             // errors (because no-op edits will not run incremental namer), but that's fine because
             // GlobalState doesn't change for no-op edits, and retypecheck already drops all errors.
-
-            // Okay to `move` here (steals component of getFileHash) because we're about to use
-            // replaceFile to clobber fref.data(gs) anyways.
-            oldFoundHashesForFiles.emplace(fref, move(fref.data(*gs).getFileHash()->foundHashes));
+            oldFoundHashesForFiles.emplace(fref, fref.data(*gs).getFileHash());
         }
 
         gs->replaceFile(fref, std::move(file));
@@ -299,7 +296,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             // edited files, so whatever it happens to have in foundMethodHashes is still "old"
             // (but we can't use `move` to steal it like before, because we're not replacing the
             // whole file).
-            oldFoundHashesForFiles.emplace(fref, fref.data(*gs).getFileHash()->foundHashes);
+            oldFoundHashesForFiles.emplace(fref, fref.data(*gs).getFileHash());
         }
     }
 
