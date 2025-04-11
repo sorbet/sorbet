@@ -315,12 +315,12 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
                                                                const RBSDeclaration &declaration,
                                                                const vector<Comment> &annotations) {
     auto typeParams = vector<pair<core::LocOffsets, core::NameRef>>();
-    // Attribute signatures doesn't support multiple lines
-    // so first line type loc is the same as the full type loc
-    auto typeLoc = declaration.firstLineTypeLoc();
+
+    auto fullTypeLoc = declaration.fullTypeLoc();
+    auto firstLineTypeLoc = declaration.firstLineTypeLoc();
     auto commentLoc = declaration.commentLoc();
 
-    auto sigBuilder = parser::MK::Self(typeLoc.copyWithZeroLength());
+    auto sigBuilder = parser::MK::Self(fullTypeLoc.copyWithZeroLength());
     sigBuilder = handleAnnotations(std::move(sigBuilder), annotations);
 
     if (send->args.size() == 0) {
@@ -362,18 +362,18 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
     }
 
     sigBuilder =
-        parser::MK::Send1(typeLoc, move(sigBuilder), core::Names::returns(), returnType->loc, move(returnType));
+        parser::MK::Send1(fullTypeLoc, move(sigBuilder), core::Names::returns(), returnType->loc, move(returnType));
 
     auto sigArgs = parser::NodeVec();
-    sigArgs.emplace_back(assembleTSigWithoutRuntime(typeLoc));
+    sigArgs.emplace_back(assembleTSigWithoutRuntime(firstLineTypeLoc));
 
     auto final = absl::c_find_if(annotations, [](const Comment &annotation) { return annotation.string == "final"; });
     if (final != annotations.end()) {
         sigArgs.emplace_back(parser::MK::Symbol(final->typeLoc, core::Names::final_()));
     }
 
-    auto sig =
-        parser::MK::Send(typeLoc, parser::MK::SorbetPrivateStatic(typeLoc), core::Names::sig(), typeLoc, move(sigArgs));
+    auto sig = parser::MK::Send(fullTypeLoc, parser::MK::SorbetPrivateStatic(fullTypeLoc), core::Names::sig(),
+                                firstLineTypeLoc, move(sigArgs));
 
     return make_unique<parser::Block>(commentLoc, move(sig), nullptr, move(sigBuilder));
 }

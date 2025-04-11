@@ -19,8 +19,7 @@ rbs_string_t makeRBSString(const string &str) {
 unique_ptr<parser::Node>
 SignatureTranslator::translateAssertionType(vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
                                             const rbs::RBSDeclaration &assertion) {
-    string signatureString = assertion.string();
-    rbs_string_t rbsString = makeRBSString(signatureString);
+    rbs_string_t rbsString = makeRBSString(assertion.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
     Parser parser(rbsString, encoding);
@@ -41,8 +40,7 @@ SignatureTranslator::translateAssertionType(vector<std::pair<core::LocOffsets, c
 unique_ptr<parser::Node> SignatureTranslator::translateAttrSignature(const parser::Send *send,
                                                                      const RBSDeclaration &declaration,
                                                                      const vector<Comment> &annotations) {
-    string signatureString = declaration.string();
-    rbs_string_t rbsString = makeRBSString(signatureString);
+    rbs_string_t rbsString = makeRBSString(declaration.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
     Parser parser(rbsString, encoding);
@@ -74,8 +72,7 @@ unique_ptr<parser::Node> SignatureTranslator::translateAttrSignature(const parse
 unique_ptr<parser::Node> SignatureTranslator::translateMethodSignature(const parser::Node *methodDef,
                                                                        const RBSDeclaration &declaration,
                                                                        const vector<Comment> &annotations) {
-    string signatureString = declaration.string();
-    rbs_string_t rbsString = makeRBSString(signatureString);
+    rbs_string_t rbsString = makeRBSString(declaration.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
     Parser parser(rbsString, encoding);
@@ -97,8 +94,7 @@ unique_ptr<parser::Node> SignatureTranslator::translateMethodSignature(const par
 }
 
 unique_ptr<parser::Node> SignatureTranslator::translateType(const RBSDeclaration &declaration) {
-    string signatureString = declaration.string();
-    rbs_string_t rbsString = makeRBSString(signatureString);
+    rbs_string_t rbsString = makeRBSString(declaration.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
     Parser parser(rbsString, encoding);

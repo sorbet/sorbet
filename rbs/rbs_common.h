@@ -27,14 +27,18 @@ struct Comment {
  */
 class RBSDeclaration {
 public:
-    std::vector<Comment> comments;
-
-    RBSDeclaration(std::vector<Comment> comments) : comments(comments) {}
-
     /**
-     * Combines all the comments into a single string.
+     * All the comments into a single string.
      */
-    std::string string() const;
+    std::string string;
+
+    RBSDeclaration(std::vector<Comment> comments) : comments(std::move(comments)) {
+        std::string result;
+        for (const auto &comment : this->comments) {
+            result += comment.string;
+        }
+        this->string = std::move(result);
+    }
 
     /**
      * Returns the location that all the comments cover.
@@ -88,6 +92,9 @@ public:
      * ```
      */
     core::LocOffsets typeLocFromRange(const rbs_range_t &range) const;
+
+private:
+    std::vector<Comment> comments;
 };
 
 } // namespace sorbet::rbs

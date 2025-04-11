@@ -261,6 +261,16 @@ attr_writer :bar
 attr_accessor :baz
 ```
 
+Long attribute types can span over multiple lines:
+
+```ruby
+#: [
+#|   Integer,
+#|   String
+#| ]
+attr_reader :foo
+```
+
 ## Method annotations
 
 While RBS does not support the same modifiers as Sorbet, it is possible to

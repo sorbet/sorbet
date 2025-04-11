@@ -196,3 +196,18 @@ FooProc.new do |foo|
   T.reveal_type(foo) # error: Revealed type: `Integer`
   "foo"
 end
+
+# comment
+#: (
+# comment
+#| P1,
+# comment
+#| P2
+# comment
+#| )
+# comment
+#| ->
+# comment
+#| P10
+#  ^^^ error: Unable to resolve constant `P10`
+def method21(x, y); end
