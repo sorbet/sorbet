@@ -71,14 +71,14 @@ public:
     std::vector<std::vector<core::NameRef>> exports() const {
         return vector<vector<core::NameRef>>();
     }
-    std::vector<std::vector<core::NameRef>> imports() const {
-        return vector<vector<core::NameRef>>();
+    std::vector<MangledName> imports() const {
+        return {};
     }
-    std::vector<std::vector<core::NameRef>> testImports() const {
-        return vector<vector<core::NameRef>>();
+    std::vector<MangledName> testImports() const {
+        return {};
     }
     std::vector<VisibleTo> visibleTo() const {
-        return vector<VisibleTo>();
+        return {};
     }
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {

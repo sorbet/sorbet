@@ -41,10 +41,10 @@ enum class StrictDependenciesLevel {
 std::string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level);
 
 struct VisibleTo {
-    std::vector<core::NameRef> packageName;
+    MangledName packageName;
     VisibleToType visibleToType;
 
-    VisibleTo(std::vector<core::NameRef> packageName, VisibleToType visibleToType)
+    VisibleTo(MangledName packageName, VisibleToType visibleToType)
         : packageName(std::move(packageName)), visibleToType(visibleToType){};
 };
 
@@ -56,8 +56,8 @@ public:
     // TODO(jez) Why do these methods not return the `Import`/`Export`/`VisibleTo` data structures
     // that PackageInfoImpl operates on?
     virtual std::vector<std::vector<core::NameRef>> exports() const = 0;
-    virtual std::vector<std::vector<core::NameRef>> imports() const = 0;
-    virtual std::vector<std::vector<core::NameRef>> testImports() const = 0;
+    virtual std::vector<MangledName> imports() const = 0;
+    virtual std::vector<MangledName> testImports() const = 0;
     virtual std::vector<VisibleTo> visibleTo() const = 0;
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
     virtual std::optional<std::pair<core::packages::StrictDependenciesLevel, core::LocOffsets>>
