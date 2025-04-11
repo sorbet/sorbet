@@ -44,7 +44,7 @@ public:
     static void pickle(Pickler &p, const ast::ExpressionPtr &what);
     static void pickle(Pickler &p, core::LocOffsets loc);
     static void pickle(Pickler &p, core::Loc loc);
-    static void pickle(Pickler &p, const FileHash *fh);
+    static void pickle(Pickler &p, shared_ptr<const FileHash> fh);
     static void pickle(Pickler &p, const ast::UnresolvedConstantLit &lit);
 
     static shared_ptr<File> unpickleFile(UnPickler &p);
@@ -250,7 +250,7 @@ int64_t UnPickler::getS8() {
     return absl::bit_cast<int64_t>(res);
 }
 
-void SerializerImpl::pickle(Pickler &p, const FileHash *fh) {
+void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
     if (fh == nullptr) {
         p.putU1(0);
         return;
