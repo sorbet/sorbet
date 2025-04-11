@@ -466,8 +466,7 @@ constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &
     };
 }
 
-void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree, core::MethodRef method) {
-    auto klass = method.data(ctx)->owner;
+void validateOverridingForMethodInClass(const core::Context ctx, const ast::ExpressionPtr &tree, core::MethodRef method, core::ClassOrModuleRef klass) {
     auto name = method.data(ctx)->name;
     auto klassData = klass.data(ctx);
     InlinedVector<core::MethodRef, 4> overriddenMethods;
@@ -580,6 +579,11 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
             validateCompatibleOverride(ctx, overriddenMethod, method);
         }
     }
+}
+
+void validateOverridingForMethod(const core::Context ctx, const ast::ExpressionPtr &tree, core::MethodRef method) {
+    auto klass = method.data(ctx)->owner;
+    validateOverridingForMethodInClass(ctx, tree, method, klass);
 }
 
 core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef &classDef,
@@ -1227,7 +1231,7 @@ public:
         // See the comment in `VarianceValidator::validateMethod` for an explanation of why we don't
         // need to check types on instance variables.
 
-        validateOverriding(ctx, this->tree, methodDef.symbol);
+        validateOverridingForMethod(ctx, this->tree, methodDef.symbol);
     }
 
     void postTransformSend(core::Context ctx, const ast::ExpressionPtr &tree) {
