@@ -693,7 +693,11 @@ FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::Unresolve
     fqn.loc = constantLit->loc;
     while (constantLit != nullptr) {
         fqn.parts.emplace_back(constantLit->cnst);
-        constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(constantLit->scope);
+        if (auto resolvedLit = ast::cast_tree<ast::ConstantLit>(constantLit->scope)) {
+            constantLit = resolvedLit->original();
+        } else {
+            constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(constantLit->scope);
+        }
     }
     reverse(fqn.parts.begin(), fqn.parts.end());
     ENFORCE(!fqn.parts.empty());
