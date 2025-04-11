@@ -52,7 +52,7 @@ public:
                                     core::LocOffsets funLoc, ExpressionPtr blk, Send::Flags flags = {}) {
         Send::ARGS_store nargs;
         if (blk != nullptr) {
-            flags.hasBlock = Send::BlockType::Present;
+            flags.blockType = Send::BlockType::Present;
             nargs.emplace_back(std::move(blk));
         }
         return Send(loc, std::move(recv), fun, funLoc, 0, std::move(nargs), flags);

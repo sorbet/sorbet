@@ -2642,7 +2642,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
                 ast::Send::Flags flags;
                 flags.isPrivateOk = true;
-                flags.hasBlock = ast::Send::BlockType::Present;
+                flags.blockType = ast::Send::BlockType::Present;
 
                 return MK::Send(location, move(receiver), methodName, location, posArgs, move(args), flags);
             }
@@ -4507,7 +4507,7 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
             if (block.hasLiteralBlock()) {
                 // Both block pass AND literal block: `foo(...) { "literal" }`
                 magicSendArgs.emplace_back(move(block.literalBlockExpr));
-                flags.hasBlock = ast::Send::BlockType::Present;
+                flags.blockType = ast::Send::BlockType::Present;
             }
 
             return MK::Send(sendWithBlockLoc, MK::Magic(blockPassLoc), core::Names::callWithSplatAndBlockPass(),
@@ -4517,7 +4517,7 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
         if (block.hasLiteralBlock()) {
             // Just a literal block, no block pass
             magicSendArgs.emplace_back(move(block.literalBlockExpr));
-            flags.hasBlock = ast::Send::BlockType::Present;
+            flags.blockType = ast::Send::BlockType::Present;
         }
 
         // Desugar any call with a splat and without a block pass argument.
@@ -4549,7 +4549,7 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
         if (block.hasLiteralBlock()) {
             // This supports the invalid case of having both a block pass AND a literal block
             magicSendArgs.emplace_back(move(block.literalBlockExpr));
-            flags.hasBlock = ast::Send::BlockType::Present;
+            flags.blockType = ast::Send::BlockType::Present;
         }
 
         for (auto *arg : prismArgs) {
@@ -4586,7 +4586,7 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
 
     if (block.hasLiteralBlock()) {
         sendArgs.emplace_back(move(block.literalBlockExpr));
-        flags.hasBlock = ast::Send::BlockType::Present;
+        flags.blockType = ast::Send::BlockType::Present;
     }
 
     return MK::Send(sendWithBlockLoc, move(receiver), methodName, messageLoc, numPosArgs, move(sendArgs), flags);

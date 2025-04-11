@@ -845,7 +845,7 @@ public:
         //   - As of Ruby 2.7, it became legal to call private methods on self, e.g. `self.foo()`.
         bool isPrivateOk : 1 = false;
         bool isRewriterSynthesized : 1 = false;
-        BlockType hasBlock : 2 = BlockType::None;
+        BlockType blockType : 2 = BlockType::None;
 
         Flags() {}
 
@@ -1014,7 +1014,7 @@ public:
 
     // True when this send contains a block argument.
     bool hasBlock() const {
-        return flags.hasBlock != BlockType::None;
+        return flags.blockType != BlockType::None;
     }
 
     // True when this send contains at least 1 position argument.

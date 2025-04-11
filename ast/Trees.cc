@@ -1127,7 +1127,7 @@ ExpressionPtr *Send::kwSplat() {
 
 void Send::clearArgs() {
     this->args.clear();
-    this->flags.hasBlock = BlockType::None;
+    this->flags.blockType = BlockType::None;
     this->numPosArgs_ = 0;
 }
 
@@ -1145,12 +1145,12 @@ void Send::insertPosArg(uint16_t index, ExpressionPtr arg) {
 void Send::setBlock(ExpressionPtr block, BlockType type) {
     if (hasBlock()) {
         this->args.pop_back();
-        flags.hasBlock = BlockType::None;
+        flags.blockType = BlockType::None;
     }
 
     if (block != nullptr) {
         this->args.emplace_back(move(block));
-        flags.hasBlock = type;
+        flags.blockType = type;
         ENFORCE(this->block() != nullptr);
     }
 }
@@ -1160,7 +1160,7 @@ ExpressionPtr Send::withNewBody(core::LocOffsets loc, ExpressionPtr recv, core::
 
     // Reset important metadata on this function.
     this->numPosArgs_ = 0;
-    this->flags.hasBlock = BlockType::None;
+    this->flags.blockType = BlockType::None;
 
     return rv;
 }

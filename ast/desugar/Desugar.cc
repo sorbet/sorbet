@@ -998,7 +998,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             // E.g. `foo(*splat, &:to_s)`
 
                             auto desugaredBlockLiteral = symbol2Proc(dctx, move(blockPassArg));
-                            flags.hasBlock =
+                            flags.blockType =
                                 getBlockType(dctx.ctx, dctx.ctx.locAt(desugaredBlockLiteral.loc()));
                             sendargs.emplace_back(move(desugaredBlockLiteral));
 
@@ -1044,7 +1044,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             // E.g. `a.map(:to_s)`
 
                             auto desugaredBlockLiteral = symbol2Proc(dctx, move(blockPassArg));
-                            flags.hasBlock =
+                            flags.blockType =
                                 getBlockType(dctx.ctx, dctx.ctx.locAt(desugaredBlockLiteral.loc()));
                             args.emplace_back(move(desugaredBlockLiteral));
 
