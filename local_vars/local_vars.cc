@@ -239,7 +239,7 @@ class LocalNameInserter {
         ENFORCE(original.fun == core::Names::super() || original.fun == core::Names::untypedSuper());
 
         ast::ExpressionPtr originalBlock;
-        ast::Send::BlockType originalBlockType = original.flags.hasBlock;
+        ast::Send::BlockType originalBlockType = original.flags.blockType;
         if (auto *rawBlock = original.rawBlock()) {
             originalBlock = move(*rawBlock);
         }

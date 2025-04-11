@@ -804,13 +804,13 @@ public:
     struct Flags {
         bool isPrivateOk : 1;
         bool isRewriterSynthesized : 1;
-        BlockType hasBlock : 2;
+        BlockType blockType : 2;
 
         // In C++20 we can replace this with bit field initialzers
-        Flags() : isPrivateOk(false), isRewriterSynthesized(false), hasBlock(BlockType::None) {}
+        Flags() : isPrivateOk(false), isRewriterSynthesized(false), blockType(BlockType::None) {}
         bool operator==(const Flags &other) const noexcept {
             return isPrivateOk == other.isPrivateOk && isRewriterSynthesized == other.isRewriterSynthesized &&
-                   hasBlock == other.hasBlock;
+                   blockType == other.blockType;
         }
 
         bool operator!=(const Flags &other) const noexcept {
@@ -986,7 +986,7 @@ public:
 
     // True when this send contains a block argument.
     bool hasBlock() const {
-        return flags.hasBlock != BlockType::None;
+        return flags.blockType != BlockType::None;
     }
 
     // True when this send contains at least 1 position argument.

@@ -50,7 +50,7 @@ public:
         Send::ARGS_store nargs;
         Send::Flags flags;
         if (blk != nullptr) {
-            flags.hasBlock = Send::BlockType::Present;
+            flags.blockType = Send::BlockType::Present;
             nargs.emplace_back(std::move(blk));
         }
         return Send(loc, std::move(recv), fun, funLoc, 0, std::move(nargs), flags);

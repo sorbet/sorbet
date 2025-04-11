@@ -724,9 +724,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         if (blockLast->exprs.empty() || isa_instruction<LoadSelf>(blockLast->exprs.back().value) ||
                             isa_instruction<YieldLoadArg>(blockLast->exprs.back().value)) {
                             auto blockEndPos = blockReturnLoc.copyEndWithZeroLength();
-                            if (s.flags.hasBlock == ast::Send::BlockType::DoEnd) {
+                            if (s.flags.blockType == ast::Send::BlockType::DoEnd) {
                                 blockReturnLoc = cctx.ctx.locAt(blockEndPos).adjustLen(cctx.ctx, -3, 3).offsets();
-                            } else if (s.flags.hasBlock == ast::Send::BlockType::Braces) {
+                            } else if (s.flags.blockType == ast::Send::BlockType::Braces) {
                                 blockReturnLoc = cctx.ctx.locAt(blockEndPos).adjustLen(cctx.ctx, -1, 1).offsets();
                             }
                         } else {
