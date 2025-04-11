@@ -6,14 +6,6 @@ core::LocOffsets RBSDeclaration::commentLoc() const {
     return comments.front().commentLoc.join(comments.back().commentLoc);
 }
 
-std::string RBSDeclaration::string() const {
-    std::string result;
-    for (const auto &comment : comments) {
-        result += comment.string;
-    }
-    return result;
-}
-
 core::LocOffsets RBSDeclaration::firstLineTypeLoc() const {
     return comments.front().typeLoc;
 }
