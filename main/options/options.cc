@@ -1383,8 +1383,8 @@ void readOptions(Options &opts,
 
         if (opts.print.RBSRewriteTree.enabled &&
             (!opts.cacheSensitiveOptions.rbsSignaturesEnabled && !opts.cacheSensitiveOptions.rbsAssertionsEnabled)) {
-            logger->error("--print=rbs-rewrite-tree must also include `{}` or `{}`", "--rbs-signatures-enabled",
-                          "--rbs-assertions-enabled");
+            logger->error("--print=rbs-rewrite-tree must also include `{}` or `{}`",
+                          "--enable-experimental-rbs-signatures", "--enable-experimental-rbs-assertions");
             throw EarlyReturnWithCode(1);
         }
 
