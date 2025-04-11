@@ -2225,7 +2225,7 @@ void Packager::dumpPackageInfo(const core::GlobalState &gs, std::string outputFi
         writer.StartObject();
 
         writer.String("name");
-        writer.String(absl::StrJoin(pkg.fullName(), "::", core::packages::NameFormatter(gs)));
+        writer.String(pkg.mangledName().mangledName.show(gs));
 
         writer.String("imports");
         writer.StartArray();
