@@ -2192,7 +2192,7 @@ GlobalState::copyForIndex(const vector<string> &extraPackageFilesDirectoryUnders
     {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-        result->setPackagerOptions(extraPackageFilesDirectorySlashPrefixes,
+        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
                                    extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                    extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
                                    allowRelaxedPackagerChecksFor, packagerLayers, errorHint);
