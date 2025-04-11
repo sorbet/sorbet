@@ -90,4 +90,4 @@ Begin {
   ]
 }
 --------------------------------------------------------------------------
---print=rbs-rewrite-tree must also include `--rbs-signatures-enabled` or `--rbs-assertions-enabled`
+--print=rbs-rewrite-tree must also include `--enable-experimental-rbs-signatures` or `--enable-experimental-rbs-assertions`
