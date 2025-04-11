@@ -1014,6 +1014,13 @@ private:
             return;
         }
 
+        auto unownedConcreteAbstractMethodTransitives =
+            findUnownedConcreteAbstractMethodTransitives(ctx, sym);
+
+        // Here just to allow for compilation to succeed
+        printf("unownedConcreteAbstractMethodTransitives: %s\n",
+               unownedConcreteAbstractMethodTransitives.size() > 0 ? "true" : "false");
+
         auto missingAbstractMethods = findMissingAbstractMethods(ctx, sym);
         if (missingAbstractMethods.empty()) {
             return;
@@ -1116,6 +1123,45 @@ private:
             }
 
             result.emplace_back(proto);
+        }
+
+        // Sort missing methods to ensure consistent ordering in both the error message and the autocorrect output.
+        fast_sort(result, [ctx](const auto &l, const auto &r) -> bool {
+            return l.data(ctx)->name.show(ctx) < r.data(ctx)->name.show(ctx);
+        });
+
+        // Deduplicate methods to prevent suggesting duplicate corrections for methods that are missing from several
+        // ancestors in the same inheritance chain.
+        result.resize(std::distance(result.begin(), std::unique(result.begin(), result.end())));
+
+        return result;
+    }
+
+    vector<core::MethodRef> findUnownedConcreteAbstractMethodTransitives(const core::Context ctx,
+                                                                         core::ClassOrModuleRef sym) {
+        vector<core::MethodRef> result;
+
+        auto &abstractMethods = getAbstractMethods(ctx, sym);
+        if (abstractMethods.empty()) {
+            return result;
+        }
+
+        for (auto proto : abstractMethods) {
+            if (proto.data(ctx)->owner == sym) {
+                continue;
+            }
+
+            // Overload signatures all have unique names, so to find the name of the concrete implementation we need to
+            // use the original name, not the unique one.
+            auto protoName = proto.data(ctx)->name;
+            if (protoName.isOverloadName(ctx)) {
+                protoName = protoName.dataUnique(ctx)->original;
+            }
+
+            auto concreteMethodRef = sym.data(ctx)->findConcreteMethodTransitive(ctx, protoName);
+            if (concreteMethodRef.exists() && sym != concreteMethodRef.data(ctx)->owner) {
+                result.emplace_back(concreteMethodRef);
+            }
         }
 
         // Sort missing methods to ensure consistent ordering in both the error message and the autocorrect output.
