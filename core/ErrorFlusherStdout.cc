@@ -1,5 +1,6 @@
 #include "core/ErrorFlusherStdout.h"
 #include "common/FileSystem.h"
+#include "core/GlobalState.h"
 #include "core/lsp/QueryResponse.h"
 
 using namespace std;
@@ -25,6 +26,9 @@ void ErrorFlusherStdout::flushErrors(spdlog::logger &logger, const GlobalState &
             fmt::format_to(std::back_inserter(out), "{}", error->text.value_or(""));
 
             for (auto &autocorrect : error->error->autocorrects) {
+                if (autocorrect.skipWhenAggregated) {
+                    continue;
+                }
                 autocorrects.emplace_back(move(autocorrect));
             }
         }
@@ -57,7 +61,15 @@ void ErrorFlusherStdout::flushErrorCount(spdlog::logger &logger, int count) {
 }
 
 void ErrorFlusherStdout::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
-    auto toWrite = AutocorrectSuggestion::apply(gs, fs, this->autocorrects);
+    if (gs.packageDB().enabled()) {
+        for (auto &pkgName : gs.packageDB().packages()) {
+            auto &pkg = gs.packageDB().getPackageInfo(pkgName);
+            ENFORCE(pkg.exists());
+            auto autocorrect = pkg.aggregateMissingImports();
+            autocorrects.emplace_back(move(autocorrect));
+        }
+    }
+    auto toWrite = AutocorrectSuggestion::apply(gs, fs, autocorrects);
     for (auto &[file, contents] : toWrite) {
         fs.writeFile(string(file.data(gs).path()), contents);
     }

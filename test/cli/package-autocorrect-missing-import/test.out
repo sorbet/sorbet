@@ -90,6 +90,7 @@ class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered'
   import Foo::Bar::OtherPackage
+  import Foo::Bar::OtherPackageTest
 
 end
 
