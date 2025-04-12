@@ -308,7 +308,8 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
     auto sig = parser::MK::Send(fullTypeLoc, parser::MK::SorbetPrivateStatic(fullTypeLoc), core::Names::sig(),
                                 firstLineTypeLoc, move(sigArgs));
 
-    return make_unique<parser::Block>(commentLoc, move(sig), nullptr, move(sigBuilder));
+    auto style = static_cast<uint32_t>(parser::BlockStyle::Present);
+    return make_unique<parser::Block>(commentLoc, move(sig), nullptr, move(sigBuilder), style);
 }
 
 unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Send *send, const rbs_node_t *type,
@@ -375,7 +376,8 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
     auto sig =
         parser::MK::Send(typeLoc, parser::MK::SorbetPrivateStatic(typeLoc), core::Names::sig(), typeLoc, move(sigArgs));
 
-    return make_unique<parser::Block>(commentLoc, move(sig), nullptr, move(sigBuilder));
+    auto style = static_cast<uint32_t>(parser::BlockStyle::Present);
+    return make_unique<parser::Block>(commentLoc, move(sig), nullptr, move(sigBuilder), style);
 }
 
 } // namespace sorbet::rbs
