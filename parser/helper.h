@@ -341,7 +341,7 @@ public:
     static std::unique_ptr<parser::Node> TTypeAlias(core::LocOffsets loc, std::unique_ptr<parser::Node> type) {
         auto send = Send0(loc, T(loc), core::Names::typeAlias(), loc);
         auto body = std::make_unique<parser::Begin>(loc, parser::NodeVec1(move(type)));
-        return std::make_unique<parser::Block>(loc, move(send), nullptr, move(body));
+        return std::make_unique<parser::Block>(loc, move(send), nullptr, move(body), parser::BlockStyle::Present);
     }
 
     /*
