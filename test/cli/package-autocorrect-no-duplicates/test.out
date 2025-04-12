@@ -1,0 +1,51 @@
+a/foo.rb:4: `B::Foo` resolves but its package is not imported https://srb.help/3718
+     4 |  B::Foo.new
+          ^^^^^^
+    b/__package.rb:3: Exported from package here
+     3 |class B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    a/__package.rb:5: Inserted `import B`
+     5 |  strict_dependencies 'layered'
+                                       ^
+
+a/foo.rb:5: `B::Foo` resolves but its package is not imported https://srb.help/3718
+     5 |  B::Foo.new
+          ^^^^^^
+    b/__package.rb:3: Exported from package here
+     3 |class B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    a/__package.rb:5: Inserted `import B`
+     5 |  strict_dependencies 'layered'
+                                       ^
+
+a/foo.rb:6: `C::Foo` resolves but its package is not imported https://srb.help/3718
+     6 |  C::Foo.new
+          ^^^^^^
+    c/__package.rb:3: Exported from package here
+     3 |class C < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    a/__package.rb:5: Inserted `import C`
+     5 |  strict_dependencies 'layered'
+                                       ^
+
+a/foo.test.rb:4: `C::Foo` resolves but its package is not imported https://srb.help/3718
+     4 |  C::Foo.new
+          ^^^^^^
+    c/__package.rb:3: Exported from package here
+     3 |class C < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    a/__package.rb:5: Inserted `test_import C`
+     5 |  strict_dependencies 'layered'
+                                       ^
+Errors: 4
+# typed: strict
+
+class A < PackageSpec
+  layer 'lib'
+  strict_dependencies 'layered'
+  import B
+end
