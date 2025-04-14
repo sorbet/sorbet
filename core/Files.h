@@ -117,10 +117,8 @@ private:
 
     Flags flags;
 
-private:
     const PackagedLevel packagedLevel;
 
-public:
     const std::string path_;
     const std::string source_;
 
