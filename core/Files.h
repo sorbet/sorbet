@@ -17,6 +17,25 @@ namespace serialize {
 class SerializerImpl;
 }
 
+class FileSource {
+public:
+    FileSource();
+
+    explicit FileSource(std::string_view content);
+
+    bool isCompressed() const;
+    void compress();
+
+    std::string_view source();
+
+    size_t size() const;
+
+private:
+    bool compressed;
+    size_t decompressedSize;
+    std::vector<uint8_t> content;
+};
+
 class File final {
 public:
     enum class Type : uint8_t {
@@ -40,6 +59,10 @@ public:
     std::string_view path() const;
     std::string_view source() const;
     Type sourceType;
+
+    // Replace the uncompressed source with a compressed version. The first call to `source` will cause a decompression
+    // that will be cached.
+    void compress();
 
     bool isPayload() const;
     bool isRBI() const;
@@ -97,6 +120,8 @@ public:
     static std::string censorFilePathForSnapshotTests(std::string_view orig);
 
 private:
+    File(std::string path_, FileSource source_, Type sourceType, uint32_t epoch = 0);
+
     struct Flags {
         // some reasonable invariants don't hold for invalid files
         bool hasIndexErrors : 1;
@@ -117,12 +142,9 @@ private:
 
     Flags flags;
 
-private:
     const PackagedLevel packagedLevel;
-
-public:
     const std::string path_;
-    const std::string source_;
+    mutable FileSource source_;
 
     // This is always a pure function of the `source_` string, so it is computed lazily, thus the
     // `mutable`. We generally don't need `lineBreaks_` for every file, unless we're showing errors
@@ -139,7 +161,7 @@ private:
     std::shared_ptr<const FileHash> hash_;
 };
 
-CheckSize(File, 96, 8);
+CheckSize(File, 112, 8);
 
 template <typename H> H AbslHashValue(H h, const FileRef &m) {
     return H::combine(std::move(h), m.id());

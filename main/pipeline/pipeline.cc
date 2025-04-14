@@ -356,6 +356,9 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
         if (print.IndexTreeRaw.enabled) {
             print.IndexTreeRaw.fmt("{}\n", tree.showRaw(lgs));
         }
+
+        file.data(lgs).compress();
+
         if (opts.stopAfterPhase == options::Phase::REWRITER) {
             return emptyParsedFile(file);
         }

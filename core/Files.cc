@@ -4,6 +4,7 @@
 #include "core/FileHash.h"
 #include "core/GlobalState.h"
 #include "core/SigilTraits.h"
+#include "lib/lz4.h"
 #include <vector>
 
 #include "absl/strings/match.h"
@@ -112,7 +113,16 @@ File::Flags::Flags(string_view path)
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(path_), packagedLevel{File::filePackagedSigil(source_)},
-      path_(move(path_)), source_(move(source_)), originalSigil(fileStrictSigil(this->source_)),
+      path_(move(path_)), source_(move(source_)), originalSigil(fileStrictSigil(this->source())),
+      strictLevel(originalSigil) {
+    if (this->source_.size() >= INVALID_POS_LOC) [[unlikely]] {
+        Exception::raise("File not less than {} bytes. Got: {}", UINT32_MAX, this->source_.size());
+    }
+}
+
+File::File(string path_, FileSource source_, Type sourceType, uint32_t epoch)
+    : epoch(epoch), sourceType(sourceType), flags(path_), packagedLevel{File::filePackagedSigil(source_.source())},
+      path_(move(path_)), source_(move(source_)), originalSigil(fileStrictSigil(this->source())),
       strictLevel(originalSigil) {
     if (this->source_.size() >= INVALID_POS_LOC) [[unlikely]] {
         Exception::raise("File not less than {} bytes. Got: {}", UINT32_MAX, this->source_.size());
@@ -120,9 +130,10 @@ File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
 }
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
-    string sourceCopy = source_;
+    FileSource sourceCopy = source_;
     string pathCopy = path_;
-    auto ret = make_unique<File>(move(pathCopy), move(sourceCopy), sourceType, epoch);
+    // Explicit new here because we're using a private constructor.
+    std::unique_ptr<File> ret(new File(move(pathCopy), move(sourceCopy), sourceType, epoch));
     ret->lineBreaks_ = lineBreaks_;
     ret->minErrorLevel_ = minErrorLevel_;
     ret->strictLevel = strictLevel;
@@ -180,7 +191,19 @@ string_view File::path() const {
 string_view File::source() const {
     ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);
-    return this->source_;
+    return this->source_.source();
+}
+
+void File::compress() {
+    ENFORCE(this->sourceType != File::Type::TombStone);
+    ENFORCE(this->sourceType != File::Type::NotYetRead);
+
+    // Skip compression for payload files, and files that are open in the LSP client.
+    if (this->flags.isOpenInClient || this->sourceType != File::Type::Normal) {
+        return;
+    }
+
+    this->source_.compress();
 }
 
 StrictLevel File::minErrorLevel() const {
@@ -233,11 +256,12 @@ void File::setIsOpenInClient(bool isOpenInClient) {
 absl::Span<const uint32_t> File::lineBreaks() const {
     ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);
+    ENFORCE(!this->source_.isCompressed());
     auto ptr = atomic_load(&lineBreaks_);
     if (ptr != nullptr) {
         return absl::MakeSpan(*ptr);
     } else {
-        auto my = make_shared<vector<uint32_t>>(findLineBreaks(this->source_));
+        auto my = make_shared<vector<uint32_t>>(findLineBreaks(this->source()));
         atomic_compare_exchange_weak(&lineBreaks_, &ptr, my);
         return lineBreaks();
     }
@@ -304,6 +328,61 @@ bool File::isPackaged() const {
         case PackagedLevel::None:
             return true;
     }
+}
+
+FileSource::FileSource() : compressed{false} {}
+
+FileSource::FileSource(std::string_view content) : compressed{false}, content{content.begin(), content.end()} {}
+
+bool FileSource::isCompressed() const {
+    return this->compressed;
+}
+
+void FileSource::compress() {
+    if (this->compressed) {
+        return;
+    }
+
+    std::vector<uint8_t> scratch(this->content.size(), 0);
+    constexpr int LZ4_ACCELERATION = 1;
+    auto result = LZ4_compress_fast(reinterpret_cast<const char *>(this->content.data()),
+                                    reinterpret_cast<char *>(scratch.data()), this->content.size(), scratch.size(),
+                                    LZ4_ACCELERATION);
+    if (result == 0) {
+        // compression failed
+        return;
+    }
+
+    this->decompressedSize = this->content.size();
+    this->content = std::vector<uint8_t>{scratch.begin(), scratch.begin() + result};
+    this->compressed = true;
+
+    prodCounterInc("types.input.files.compression");
+}
+
+std::string_view FileSource::source() {
+    if (this->compressed) {
+        std::vector<uint8_t> decompressed;
+        decompressed.resize(this->decompressedSize);
+
+        auto result = LZ4_decompress_safe(reinterpret_cast<const char *>(this->content.data()),
+                                          reinterpret_cast<char *>(decompressed.data()), this->content.size(),
+                                          decompressed.size());
+        if (result != this->decompressedSize) {
+            Exception::raise("incomplete decompression");
+        }
+
+        this->content = decompressed;
+        this->compressed = false;
+
+        prodCounterInc("types.input.files.decompression");
+    }
+
+    return std::string_view{reinterpret_cast<char *>(this->content.data()), this->content.size()};
+}
+
+size_t FileSource::size() const {
+    return this->content.size();
 }
 
 } // namespace sorbet::core
