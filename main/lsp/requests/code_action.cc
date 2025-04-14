@@ -2,6 +2,7 @@
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "common/sort/sort.h"
+#include "core/errors/packager.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/ConvertToSingletonClassMethod.h"
 #include "main/lsp/ExtractVariable.h"
@@ -138,8 +139,14 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
         if (!error->isSilenced && !error->autocorrects.empty()) {
             // Collect all autocorrects regardless of range to compile into a "source" autocorrect whose scope is
             // the whole file.
-            for (auto &autocorrect : error->autocorrects) {
-                allEdits.insert(allEdits.end(), autocorrect.edits.begin(), autocorrect.edits.end());
+            if (error->what != core::errors::Packager::MissingImport &&
+                error->what != core::errors::Packager::UsedTestOnlyName) {
+                // If there's multiple missing import errors in a given file, we'll have multiple edits that add the
+                // same import, which will lead to a duplicate import added to the package file. So instead of adding
+                // the edits here, we aggregate the missing imports and then add one edit per missing import.
+                for (auto &autocorrect : error->autocorrects) {
+                    allEdits.insert(allEdits.end(), autocorrect.edits.begin(), autocorrect.edits.end());
+                }
             }
 
             // We return code actions corresponding to any error that encloses the request's range. Matching request
@@ -163,6 +170,12 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 result.emplace_back(move(action));
             }
         }
+    }
+
+    if (gs.packageDB().enabled()) {
+        auto &package = gs.packageDB().getPackageForFile(gs, file);
+        auto autocorrect = package.aggregateMissingImports(file);
+        allEdits.insert(allEdits.end(), autocorrect.edits.begin(), autocorrect.edits.end());
     }
 
     // TODO(sushain): investigate where duplicates might happen and whether there is a better fix

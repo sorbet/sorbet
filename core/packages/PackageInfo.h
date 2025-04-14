@@ -105,6 +105,10 @@ public:
     // Create on autocorrect that contains edits to insert all the missing imports for this package.
     virtual core::AutocorrectSuggestion aggregateMissingImports() const = 0;
 
+    // Create on autocorrect that contains edits to insert all the missing imports for this package that are referenced
+    // in `file`.
+    virtual core::AutocorrectSuggestion aggregateMissingImports(const core::FileRef file) const = 0;
+
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                                  bool isTestImport) const = 0;

@@ -137,6 +137,11 @@ public:
         return core::AutocorrectSuggestion{"notImplemented", {}};
     }
 
+    core::AutocorrectSuggestion aggregateMissingImports(const core::FileRef file) const {
+        notImplemented();
+        return core::AutocorrectSuggestion{"notImplemented", {}};
+    }
+
     ~NonePackage() {}
 
 private:
