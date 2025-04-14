@@ -3117,7 +3117,7 @@ public:
                 case core::Names::assumeType().rawId():
                 case core::Names::assertType().rawId():
                 case core::Names::cast().rawId(): {
-                    if (send.numPosArgs() < 2) {
+                    if (send.numPosArgs() < 2 || send.hasBlock()) {
                         return;
                     }
 

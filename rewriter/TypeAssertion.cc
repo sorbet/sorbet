@@ -21,7 +21,7 @@ ast::ExpressionPtr TypeAssertion::run(core::MutableContext ctx, ast::Send *send)
             return nullptr;
     }
 
-    if (send->numPosArgs() < 2) {
+    if (send->numPosArgs() < 2 || send->hasBlock()) {
         return nullptr;
     }
 
