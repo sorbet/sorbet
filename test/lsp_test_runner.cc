@@ -249,9 +249,9 @@ void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string file
         }
         // We send two identical "Apply all Sorbet autocorrects" code actions with different kinds: One is a
         // Source, the other is a Quickfix. This logic strips out the quickfix.
-        if (sourceLevelCodeAction != nullptr && codeAction->title == sourceLevelCodeAction->title) {
-            continue;
-        }
+        /* if (sourceLevelCodeAction != nullptr && codeAction->title == sourceLevelCodeAction->title) { */
+        /*     continue; */
+        /* } */
 
         bool codeActionTitleUnique =
             receivedCodeActionsByTitle.find(codeAction->title) == receivedCodeActionsByTitle.end();
