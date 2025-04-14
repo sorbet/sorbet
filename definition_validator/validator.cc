@@ -1020,10 +1020,10 @@ private:
 
         auto unownedConcreteAbstractMethodTransitives =
             findUnownedConcreteAbstractMethodTransitives(ctx, sym);
-
-        // Here just to allow for compilation to succeed
-        printf("unownedConcreteAbstractMethodTransitives: %s\n",
-               unownedConcreteAbstractMethodTransitives.size() > 0 ? "true" : "false");
+        
+        for (auto concreteMethodRef : unownedConcreteAbstractMethodTransitives) {
+            validateOverridingForMethodInClass(ctx, this->tree, concreteMethodRef, sym);
+        }
 
         auto missingAbstractMethods = findMissingAbstractMethods(ctx, sym);
         if (missingAbstractMethods.empty()) {
