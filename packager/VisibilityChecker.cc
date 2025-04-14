@@ -367,7 +367,9 @@ public:
     const bool insideTestFile;
 
     VisibilityCheckerPass(core::Context ctx, core::packages::PackageInfo &package)
-        : package{package}, packageNonConst{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
+        : package{package}, packageNonConst{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {
+        packageNonConst.untrackMissingImportsFor(ctx.file);
+    }
 
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
@@ -475,8 +477,12 @@ public:
                     // TODO(neil): find out why this is sometimes not true and enable this ENFORCE
                     /* ENFORCE(autocorrect.has_value()); */
                     if (autocorrect.has_value()) {
-                        this->packageNonConst.trackMissingImport(pkg.mangledName(), newImportType, autocorrect.value());
+                        this->packageNonConst.trackMissingImport(ctx.file, pkg.mangledName(), newImportType,
+                                                                 autocorrect.value());
                     }
+                } else {
+                    this->packageNonConst.trackMissingImport(ctx.file, pkg.mangledName(), newImportType,
+                                                             autocorrect.value());
                 }
                 if (!wasImported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {

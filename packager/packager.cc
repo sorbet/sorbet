@@ -231,7 +231,8 @@ public:
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_ = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer_ = nullopt;
 
-    UnorderedMap<pair<core::packages::MangledName, core::packages::ImportType>, core::AutocorrectSuggestion>
+    UnorderedMap<pair<core::packages::MangledName, core::packages::ImportType>,
+                 pair<UnorderedSet<core::FileRef>, core::AutocorrectSuggestion>>
         trackedMissingImports_ = {};
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
@@ -680,25 +681,41 @@ public:
         return nullopt;
     }
 
-    void trackMissingImport(const core::packages::MangledName toImport, const core::packages::ImportType importType,
+    void trackMissingImport(const core::FileRef file, const core::packages::MangledName toImport,
+                            const core::packages::ImportType importType,
                             const core::AutocorrectSuggestion autocorrect) {
-        trackedMissingImports_[{toImport, importType}] = autocorrect;
+        auto r = trackedMissingImports_.find({toImport, importType});
+        if (r != trackedMissingImports_.end()) {
+            r->second.first.insert(file);
+        } else {
+            trackedMissingImports_[{toImport, importType}] = {{file}, autocorrect};
+        }
+    }
+
+    void untrackMissingImportsFor(const core::FileRef file) {
+        for (auto &[key, value] : trackedMissingImports_) {
+            if (value.first.contains(file)) {
+                value.first.erase(file);
+            }
+        }
+        erase_if(trackedMissingImports_, [](const auto &x) { return x.second.first.empty(); });
     }
 
     std::optional<core::AutocorrectSuggestion> fetchMissingImport(const core::packages::MangledName toImport,
                                                                   const core::packages::ImportType importType) const {
         auto r = trackedMissingImports_.find({toImport, importType});
         if (r != trackedMissingImports_.end()) {
-            return r->second;
+            return r->second.second;
         }
         return nullopt;
     }
 
     core::AutocorrectSuggestion aggregateMissingImports() const {
         std::vector<core::AutocorrectSuggestion::Edit> allEdits;
-        for (auto &[key, autocorrect] : trackedMissingImports_) {
+        for (auto &[key, value] : trackedMissingImports_) {
             auto importName = key.first;
             auto importType = key.second;
+            auto autocorrect = value.second;
             if (importType == core::packages::ImportType::Test &&
                 trackedMissingImports_.contains({importName, core::packages::ImportType::Normal})) {
                 // If we're already importing the package normally, we don't need to import it again as a
