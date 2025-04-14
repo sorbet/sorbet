@@ -3218,19 +3218,6 @@ public:
         if (send && (sym.isTypeAlias(ctx) || sym.isTypeMember())) {
             ENFORCE(!sym.isTypeMember() || send->recv.isSelfReference());
 
-            // This is for a special case that happens with the generation of
-            // reflection.rbi: it re-creates the type aliases of the payload,
-            // without the knowledge that they are type aliases. The manifestation
-            // of this, is that there are entries like:
-            //
-            // > module T
-            // >   Boolean = T.let(nil, T.untyped)
-            // > end
-            if (sym.isTypeAlias(ctx) && send->fun == core::Names::let()) {
-                todoUntypedResultTypes_.emplace_back(sym);
-                return;
-            }
-
             if ((sym.isTypeAlias(ctx) && send->fun != core::Names::typeAlias()) ||
                 (sym.isTypeMember() && send->fun != core::Names::typeMember() &&
                  send->fun != core::Names::typeTemplate())) {
