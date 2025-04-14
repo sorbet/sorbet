@@ -1,5 +1,4 @@
 #include "absl/strings/match.h"
-#include "absl/strings/str_join.h"
 #include "absl/strings/str_replace.h"
 #include "common/Subprocess.h"
 #include "common/common.h"
@@ -146,7 +145,6 @@ void chDirAndSpawn(string executable, vector<string> arguments, optional<string_
         filesystem::path chdirPath = chdir.value();
         filesystem::current_path(chdirPath);
     }
-    fmt::print(stderr, "{} {}\n", executable, absl::StrJoin(arguments, " "));
     auto result = sorbet::Subprocess::spawn(move(executable), move(arguments), nullopt);
 
     if (!result.has_value() || result->status != 0) {
