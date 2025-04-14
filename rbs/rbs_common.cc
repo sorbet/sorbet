@@ -3,18 +3,7 @@
 namespace sorbet::rbs {
 
 core::LocOffsets RBSDeclaration::commentLoc() const {
-    return {
-        comments.front().commentLoc.beginLoc,
-        comments.back().commentLoc.endLoc,
-    };
-}
-
-std::string RBSDeclaration::string() const {
-    std::string result;
-    for (const auto &comment : comments) {
-        result += comment.string;
-    }
-    return result;
+    return comments.front().commentLoc.join(comments.back().commentLoc);
 }
 
 core::LocOffsets RBSDeclaration::firstLineTypeLoc() const {
@@ -22,10 +11,7 @@ core::LocOffsets RBSDeclaration::firstLineTypeLoc() const {
 }
 
 core::LocOffsets RBSDeclaration::fullTypeLoc() const {
-    return {
-        comments.front().typeLoc.beginLoc,
-        comments.back().typeLoc.endLoc,
-    };
+    return comments.front().typeLoc.join(comments.back().typeLoc);
 }
 
 core::LocOffsets RBSDeclaration::typeLocFromRange(const rbs_range_t &range) const {

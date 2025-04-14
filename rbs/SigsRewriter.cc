@@ -154,6 +154,13 @@ Comments signaturesForLoc(core::MutableContext ctx, core::LocOffsets loc) {
                         trimmedLine.substr(2),
                     });
                     continueIndex += trimmedLine.size();
+                } else if (absl::StartsWith(absl::StripAsciiWhitespace(continuationLine), "#:")) {
+                    // This is a new RBS sig annotation, we need to break out of the loop and start a new one.
+                    break;
+                } else if (absl::StartsWith(absl::StripAsciiWhitespace(continuationLine), "#")) {
+                    // Ignore other comments in the middle of a continuation
+                    continueIndex += continuationLine.size() + 1;
+                    continue;
                 } else {
                     break;
                 }
@@ -203,7 +210,6 @@ unique_ptr<parser::NodeVec> signaturesForNode(core::MutableContext ctx, parser::
     for (auto &declaration : comments.signatures) {
         if (parser::isa_node<parser::DefMethod>(node) || parser::isa_node<parser::DefS>(node)) {
             auto sig = signatureTranslator.translateMethodSignature(node, declaration, comments.annotations);
-
             signatures->emplace_back(move(sig));
         } else if (auto send = parser::cast_node<parser::Send>(node)) {
             auto sig = signatureTranslator.translateAttrSignature(send, declaration, comments.annotations);
