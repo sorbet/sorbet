@@ -63,8 +63,7 @@ an alternative annotation syntax for Ruby. The headline features of RBS:
 
 - It's the type annotation syntax blessed by the Ruby core team, and Matz in
   particular (the lead of the Ruby project).
-- RBS supports certain enticing features, like method overloading and duck
-  types.
+- RBS supports certain enticing features, like duck typing.
 - The syntax is terse.
 - The Ruby distribution bundles a gem for parsing RBS annotations.
 
@@ -86,9 +85,7 @@ analogue in Sorbet and vice versa. Some examples:
   [interfaces](abstract.md)), but
   [Sorbet does not support duck typing](faq.md#can-i-use-sorbet-for-duck-typed-code),
   by design.
-- Sorbet treats Ruby's `::Class` as a generic class, allowing sophisticated
-  class-level metaprogramming (abstracting over a class's attached class). In
-  turn, all class singleton classes are generic
+- With Sorbet all class singleton classes are generic
   ([`T.class_of(...)[...]`](class-of.md#tclass_of-applying-type-arguments-to-a-singleton-class-type)).
   RBS does not have syntax to represent this.
 - By extension, Sorbet allows singleton classes to declare their own generic
@@ -120,7 +117,7 @@ Our belief is that syntax matters less than semantics; that "what's possible to
 express in the type system" matters more than "how to express it." Time spent
 bikeshedding syntax detracts from meaningful improvements to the type system.
 
-##### IDE integration is more difficult
+### IDE integration is more difficult
 
 Sorbet's type syntax doubles as Ruby syntax. Setting aside other benefits of
 reusing Ruby syntax for type annotations (e.g., [runtime checking](runtime.md),
@@ -131,9 +128,9 @@ There are a lot of features that come for free by reusing Ruby syntax:
 
 - Syntax highlighting
 
-  There are no plans to offer highlighting for RBS comment-based type
-  annotations. They will be monochromatic, highlighted like comments
-  (third-party extensions may offer such functionality).
+  Highlighting for RBS comment-based type annotations is provided through the
+  [Ruby LSP](https://github.com/Shopify/ruby-lsp). Without it, they will be
+  monochromatic, highlighted like comments.
 
 - Syntax error tolerance and recovery
 
