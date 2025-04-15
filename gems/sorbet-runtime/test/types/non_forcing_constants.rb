@@ -118,7 +118,7 @@ class Opus::Types::Test::NonForcingConstantsTest < Critic::Unit::UnitTest
 
     it 'returns an InheritanceChecked object' do
       r = T::NonForcingConstants.static_inheritance_check('::Foo', Base)
-      assert_match('::Foo', r.get)
+      assert_equal('Foo', r.get)
     end
   end
 end

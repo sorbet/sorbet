@@ -56,7 +56,7 @@ module T::NonForcingConstants
   class InheritanceChecked
     T::Sig::WithoutRuntime.sig {params(classname: String).void}
     def initialize(classname)
-      @classname = T.let(classname, String)
+      @classname = T.let(classname.delete_prefix("::"), String)
     end
 
     T::Sig::WithoutRuntime.sig {returns(String)}
