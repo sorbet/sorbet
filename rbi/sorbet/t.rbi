@@ -490,6 +490,9 @@ module T::NonForcingConstants
   sig {params(val: BasicObject, klass: String).returns(T::Boolean)}
   def self.non_forcing_is_a?(val, klass); end
 
-  sig {params(classname: String, base: T::Class[T.anything]).returns(String)}
+  class InheritanceChecked
+  end
+
+  sig {params(classname: String, base: T::Class[T.anything]).returns(InheritanceChecked)}
   def self.static_inheritance_check(classname, base); end
 end

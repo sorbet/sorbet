@@ -53,10 +53,30 @@ module T::NonForcingConstants
     current_klass.===(val)
   end
 
-  # Note that this method is only used for static enforcement. At runtime, it is a noop;
-  # calling T::NonForcingConstants.static_inheritance_check("Foo") always returns "Foo".
-  T::Sig::WithoutRuntime.sig {params(classname: String, base: T::Class[T.anything]).returns(String)}
+  class InheritanceChecked
+    T::Sig::WithoutRuntime.sig {params(classname: String).void}
+    def initialize(classname)
+      @classname = T.let(classname, String)
+    end
+
+    T::Sig::WithoutRuntime.sig {returns(String)}
+    def get
+      @classname
+    end
+  end
+
+  # Note that this method is mostly used for static enforcement. At runtime, it does no inheritance checking.
+  T::Sig::WithoutRuntime.sig {params(classname: String, base: T::Class[T.anything]).returns(InheritanceChecked)}
   def self.static_inheritance_check(classname, base)
-    classname
+    method_name = "T::NonForcingConstants.static_inheritance_check"
+    if classname.empty?
+      raise ArgumentError.new("The string given to `#{method_name}` must not be empty")
+    end
+
+    if base.nil?
+      raise ArgumentError.new("Must pass a base class constant to #{method_name}")
+    end
+
+    InheritanceChecked.new(classname)
   end
 end

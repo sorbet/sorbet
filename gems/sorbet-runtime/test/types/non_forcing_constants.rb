@@ -96,4 +96,29 @@ class Opus::Types::Test::NonForcingConstantsTest < Critic::Unit::UnitTest
       assert_match(/is not a class or module/, exn.message)
     end
   end
+
+  describe "T::NonForcingConstants.static_inheritance_check" do
+    class Base
+    end
+
+    class Foo
+    end
+
+    it "empty string" do
+      assert_raises(ArgumentError) do
+        T::NonForcingConstants.static_inheritance_check('', Base)
+      end
+    end
+
+    it "empty base class" do
+      assert_raises(ArgumentError) do
+        T::NonForcingConstants.static_inheritance_check('::Foo', nil)
+      end
+    end
+
+    it 'returns an InheritanceChecked object' do
+      r = T::NonForcingConstants.static_inheritance_check('::Foo', Base)
+      assert_match('::Foo', r.get)
+    end
+  end
 end
