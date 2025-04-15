@@ -489,4 +489,7 @@ module T::NonForcingConstants
   # See <https://sorbet.org/docs/non-forcing-constants> for full docs.
   sig {params(val: BasicObject, klass: String).returns(T::Boolean)}
   def self.non_forcing_is_a?(val, klass); end
+
+  sig {params(classname: String, base: T::Class[T.anything]).returns(String)}
+  def self.static_inheritance_check(classname, base); end
 end

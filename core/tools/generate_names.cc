@@ -165,6 +165,7 @@ NameDef names[] = {
     {"revealType", "reveal_type"},
     {"absurd"},
     {"nonForcingIsA_p", "non_forcing_is_a?"},
+    {"staticInheritanceCheck", "static_inheritance_check"},
     {"valid_p", "valid?"},
     {"recursivelyValid_p", "recursively_valid?"},
     {"subtypeOf_p", "subtype_of?"},

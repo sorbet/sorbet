@@ -52,4 +52,11 @@ module T::NonForcingConstants
 
     current_klass.===(val)
   end
+
+  # Note that this method is only used for static enforcement. At runtime, it is a noop;
+  # calling T::NonForcingConstants.static_inheritance_check("Foo") always returns "Foo".
+  T::Sig::WithoutRuntime.sig {params(classname: String, base: T::Class[T.anything]).returns(String)}
+  def self.static_inheritance_check(classname, base)
+    classname
+  end
 end
