@@ -8,6 +8,7 @@ module Opus::Types::Test
     class Base; end
     class Sub < Base; end
     class WithMixin; include Mixin1; end
+    module Mixin1Child; include Mixin1; end
     class ReloadedClass; end
 
     private def counting_allocations
@@ -1398,10 +1399,14 @@ module Opus::Types::Test
         assert_match(/Expected type T.class_of\(Opus::Types::Test::TypesTest::Base\), got/, msg)
       end
 
-      it 'works for a mixin' do
+      it 'treats module singleton classes as final' do
         type = T.class_of(Mixin1)
+
         msg = check_error_message_for_obj(type, WithMixin)
-        assert_nil(msg)
+        assert_equal("Expected type T.class_of(Opus::Types::Test::TypesTest::Mixin1), got Opus::Types::Test::TypesTest::WithMixin", msg)
+
+        msg = check_error_message_for_obj(type, Mixin1Child)
+        assert_equal("Expected type T.class_of(Opus::Types::Test::TypesTest::Mixin1), got Opus::Types::Test::TypesTest::Mixin1Child", msg)
       end
 
       it 'can not just be .singleton_class' do
@@ -1634,6 +1639,14 @@ module Opus::Types::Test
 
         it "returns false for a singleton of a module against T::Class[...]" do
           assert_equal(false, subtype?(T.class_of(Mixin1), T::Class[T.anything]))
+        end
+
+        it "handles when RHS is a T.class_of type (equal)" do
+          assert(subtype?(T.class_of(Mixin1Child), T.class_of(Mixin1Child)))
+        end
+
+        it "handles when RHS is a T.class_of type (parent)" do
+          refute(subtype?(T.class_of(Mixin1Child), T.class_of(Mixin1)))
         end
       end
 
