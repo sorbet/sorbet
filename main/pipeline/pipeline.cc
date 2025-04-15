@@ -1105,7 +1105,7 @@ ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, vector<ast::Pa
 
 vector<ast::ParsedFile>
 incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
-                   optional<UnorderedMap<core::FileRef, core::FoundDefHashes>> &&foundHashesForFiles,
+                   optional<UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>>> &&foundHashesForFiles,
                    const options::Options &opts, WorkerPool &workers) {
     try {
 #ifndef SORBET_REALMAIN_MIN
