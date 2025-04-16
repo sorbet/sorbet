@@ -453,9 +453,9 @@ x = T.let(42, Integer)
 X = T.let(42, Integer)
 ```
 
-The comment must be placed at the end of the assignement. Either on the same
-line if the assignment is on a single line, or on the last line if the
-assignment spans multiple lines:
+The comment must be placed at the end of the assignment. Either on the same line
+if the assignment is on a single line, or on the last line if the assignment
+spans multiple lines:
 
 ```ruby
 x = [

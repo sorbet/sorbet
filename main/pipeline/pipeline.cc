@@ -42,6 +42,7 @@
 #include "parser/parser.h"
 #include "pipeline.h"
 #include "rbs/AssertionsRewriter.h"
+#include "rbs/CommentsAssociator.h"
 #include "rbs/SigsRewriter.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
@@ -241,7 +242,10 @@ unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file
         core::UnfreezeNameTable nameTableAccess(gs);
 
         if (gs.cacheSensitiveOptions.rbsSignaturesEnabled) {
-            auto rewriter = rbs::SigsRewriter(ctx);
+            auto associator = rbs::CommentsAssociator(ctx, commentLocations);
+            auto commentsByNode = associator.run(node);
+
+            auto rewriter = rbs::SigsRewriter(ctx, commentsByNode);
             node = rewriter.run(move(node));
         }
         if (gs.cacheSensitiveOptions.rbsAssertionsEnabled) {
