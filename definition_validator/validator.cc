@@ -56,18 +56,15 @@ Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method
 // It makes certain assumptions that it is running for the sake of computing overrides that are not
 // going to be true in other situations.
 bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const core::TypePtr &sub,
-                  core::MethodRef subMethod, const core::TypePtr &super, core::MethodRef superMethod,
+                  core::ClassOrModuleRef subReceiver, const core::TypePtr &super, core::ClassOrModuleRef superOwner,
                   core::Polarity polarity, core::ErrorSection::Collector &errorDetailsCollector) {
     if (sub == nullptr || super == nullptr) {
         // nullptr is just "unannotated" which is T.untyped
         return true;
     }
 
-    auto subOwner = subMethod.data(ctx)->owner;
-    auto superOwner = superMethod.data(ctx)->owner;
-
     // Need this to be true for the sake of resultTypeAsSeenFrom.
-    ENFORCE(subOwner.data(ctx)->derivesFrom(ctx, superOwner));
+    ENFORCE(subReceiver.data(ctx)->derivesFrom(ctx, superOwner));
 
     // We're only using the TypeConstraint as a way to have an easy way to replace a `TypeVar` with
     // a "skolem" type variable (type variable representing an unknown but specific type). In
@@ -88,12 +85,12 @@ bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const c
 
     // For the sake of comparison, we always compare the two types as if they were being "observed"
     // in the child class, so we always instantiate with the sub class types
-    const auto &subSelfTypeArgs = subOwner.data(ctx)->selfTypeArgs(ctx);
+    const auto &subSelfTypeArgs = subReceiver.data(ctx)->selfTypeArgs(ctx);
 
     auto subType = core::Types::approximate(ctx, sub, constr);
-    subType = core::Types::resultTypeAsSeenFrom(ctx, subType, subOwner, subOwner, subSelfTypeArgs);
+    subType = core::Types::resultTypeAsSeenFrom(ctx, subType, subReceiver, subReceiver, subSelfTypeArgs);
     auto superType = core::Types::approximate(ctx, super, constr);
-    superType = core::Types::resultTypeAsSeenFrom(ctx, superType, superOwner, subOwner, subSelfTypeArgs);
+    superType = core::Types::resultTypeAsSeenFrom(ctx, superType, superOwner, subReceiver, subSelfTypeArgs);
 
     switch (polarity) {
         case core::Polarity::Negative:
@@ -145,7 +142,7 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
         auto &methodArgType = methodArgs[idx].get().type;
 
         core::ErrorSection::Collector errorDetailsCollector;
-        if (!checkSubtype(ctx, constr, methodArgType, method, superArgType, superMethod, core::Polarity::Negative,
+        if (!checkSubtype(ctx, constr, methodArgType, method.data(ctx)->owner, superArgType, superMethod.data(ctx)->owner, core::Polarity::Negative,
                           errorDetailsCollector)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter `{}` of type `{}` not compatible with type of {} method `{}`",
@@ -286,7 +283,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
             // if there is a corresponding parameter, make sure it has the right type
             if (hasCorrespondingRequired || hasCorrespondingOptional) {
                 core::ErrorSection::Collector errorDetailsCollector;
-                if (!checkSubtype(ctx, *constr, corresponding->get().type, method, req.get().type, superMethod,
+                if (!checkSubtype(ctx, *constr, corresponding->get().type, method.data(ctx)->owner, req.get().type, superMethod.data(ctx)->owner,
                                   core::Polarity::Negative, errorDetailsCollector)) {
                     if (auto e =
                             ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
@@ -318,7 +315,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
             // if there is a corresponding parameter, make sure it has the right type
             if (corresponding != right.kw.optional.end()) {
                 core::ErrorSection::Collector errorDetailsCollector;
-                if (!checkSubtype(ctx, *constr, corresponding->get().type, method, opt.get().type, superMethod,
+                if (!checkSubtype(ctx, *constr, corresponding->get().type, method.data(ctx)->owner, opt.get().type, superMethod.data(ctx)->owner,
                                   core::Polarity::Negative, errorDetailsCollector)) {
                     if (auto e =
                             ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
@@ -364,7 +361,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                             superMethod.show(ctx), leftRest->get().show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
-        } else if (!checkSubtype(ctx, *constr, right.kw.rest->get().type, method, leftRest->get().type, superMethod,
+        } else if (!checkSubtype(ctx, *constr, right.kw.rest->get().type, method.data(ctx)->owner, leftRest->get().type, superMethod.data(ctx)->owner,
                                  core::Polarity::Negative, errorDetailsCollector)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter **`{}` of type `{}` not compatible with type of {} method `{}`",
@@ -406,7 +403,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         const auto &superMethodBlkArg = superMethod.data(ctx)->arguments.back();
 
         core::ErrorSection::Collector errorDetailsCollector;
-        if (!checkSubtype(ctx, *constr, methodBlkArg.type, method, superMethodBlkArg.type, superMethod,
+        if (!checkSubtype(ctx, *constr, methodBlkArg.type, method.data(ctx)->owner, superMethodBlkArg.type, superMethod.data(ctx)->owner,
                           core::Polarity::Negative, errorDetailsCollector)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Block parameter `{}` of type `{}` not compatible with type of {} method `{}`",
@@ -429,7 +426,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         auto &methodReturn = method.data(ctx)->resultType;
 
         core::ErrorSection::Collector errorDetailsCollector;
-        if (!checkSubtype(ctx, *constr, methodReturn, method, superReturn, superMethod, core::Polarity::Positive,
+        if (!checkSubtype(ctx, *constr, methodReturn, method.data(ctx)->owner, superReturn, superMethod.data(ctx)->owner, core::Polarity::Positive,
                           errorDetailsCollector)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 auto methodReturnShow = methodReturn == core::Types::void_() ? "void" : methodReturn.show(ctx);
