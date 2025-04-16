@@ -903,6 +903,7 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
     }
 
     bool onlySuggestPackageSpecs = ref(gs).isPackageSpecSymbol(gs);
+    Levenstein levenstein;
 
     // Find the closest by following outer scopes
     {
@@ -943,7 +944,7 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                             }
                         }
 
-                        auto thisDistance = Levenstein::distance(
+                        auto thisDistance = levenstein.distance(
                             currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
                         if (thisDistance <= best.distance) {
                             if (thisDistance < best.distance) {
@@ -999,7 +1000,7 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                         }
                     }
 
-                    auto thisDistance = Levenstein::distance(
+                    auto thisDistance = levenstein.distance(
                         currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
                     if (thisDistance <= globalBestDistance) {
                         if (thisDistance < globalBestDistance) {
@@ -1047,13 +1048,14 @@ ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const G
         result.distance = 1 + (currentName.size() / 2);
     }
 
+    Levenstein levenstein;
     for (auto pair : members()) {
         auto thisName = pair.first;
         if (thisName.kind() != NameKind::UTF8) {
             continue;
         }
         auto utf8 = thisName.dataUtf8(gs)->utf8;
-        int thisDistance = Levenstein::distance(currentName, utf8, result.distance);
+        int thisDistance = levenstein.distance(currentName, utf8, result.distance);
         if (thisDistance < result.distance ||
             (thisDistance == result.distance && result.symbol._id > pair.second._id)) {
             result.distance = thisDistance;
