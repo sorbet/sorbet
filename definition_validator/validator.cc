@@ -495,11 +495,21 @@ void validateOverridingForMethodInClass(const core::Context ctx, const ast::Expr
         auto superMethod = klassData->superClass().data(ctx)->findMethodTransitive(ctx, name);
         if (superMethod.exists()) {
             if (superMethod.data(ctx)->flags.isOverloaded) {
-                ENFORCE(!superMethod.data(ctx)->name.isOverloadName(ctx));
-                auto overload = ctx.state.lookupNameUnique(core::UniqueNameKind::Overload, name, 1);
-                superMethod = superMethod.data(ctx)->owner.data(ctx)->findMethod(ctx, overload);
-                ENFORCE(superMethod.exists());
+                if (superMethod.data(ctx)->name.isOverloadName(ctx)) {
+                    // If we found an overload name, try to find the original method
+                    auto originalName = superMethod.data(ctx)->name.dataUnique(ctx)->original;
+                    auto overload = ctx.state.lookupNameUnique(core::UniqueNameKind::Overload, originalName, 1);
+                    auto overloadMethod = superMethod.data(ctx)->owner.data(ctx)->findMethod(ctx, overload);
+                    superMethod = overloadMethod;
+                } else {
+                    // If we found the original method, try to find the overload
+                    auto overload = ctx.state.lookupNameUnique(core::UniqueNameKind::Overload, name, 1);
+                    auto overloadMethod = superMethod.data(ctx)->owner.data(ctx)->findMethod(ctx, overload);
+                    superMethod = overloadMethod;
+                }
             }
+
+            ENFORCE(superMethod.exists());
 
             overriddenMethods.emplace_back(superMethod);
         }
