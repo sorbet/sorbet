@@ -127,7 +127,7 @@ TEST_CASE("WhitequarkParserTest") {
             // simplify testing cases around local variables
             vector<string> initialLocals = {"foo", "bar", "baz"};
             auto settings = parser::Parser::Settings{};
-            nodes = parser::Parser::run(gs, file, settings, initialLocals);
+            nodes = parser::Parser::run(gs, file, settings, initialLocals).tree;
         }
         {
             errorQueue->flushAllErrors(gs);

@@ -192,6 +192,9 @@ public:
 
     Context context;
 
+    bool collect_comments = false;
+    std::vector<std::pair<size_t, size_t>> comment_locations;
+
     lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer,
           sorbet::StableStringStorage<> &scratch, bool traceLexer);
 

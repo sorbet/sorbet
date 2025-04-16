@@ -9,6 +9,7 @@
 
 #include "builder.hh"
 #include "common/common.h"
+#include "core/LocOffsets.h"
 #include "diagnostic.hh"
 #include "lexer.hh"
 
@@ -423,6 +424,17 @@ public:
 
     void local_push();
     void local_pop();
+
+    std::vector<sorbet::core::LocOffsets> get_comment_locations() const {
+        std::vector<sorbet::core::LocOffsets> result;
+        result.reserve(lex.comment_locations.size());
+
+        for (const auto &loc : lex.comment_locations) {
+            result.emplace_back(loc.first, loc.second);
+        }
+
+        return result;
+    }
 
 private:
     void rewind_to_tok_start(token_t endToken);
