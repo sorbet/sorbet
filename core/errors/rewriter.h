@@ -26,6 +26,7 @@ constexpr ErrorClass RBSUnsupported{3551, StrictLevel::False};
 constexpr ErrorClass RBSParameterMismatch{3552, StrictLevel::False};
 constexpr ErrorClass RBSAssertionError{3553, StrictLevel::False};
 constexpr ErrorClass RBSUnusedComment{3554, StrictLevel::False};
+constexpr ErrorClass RBSMultilineMisformatted{3555, StrictLevel::False};
 
 } // namespace sorbet::core::errors::Rewriter
 #endif
