@@ -827,7 +827,8 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
     }
 
     if (name.kind() == NameKind::UTF8) {
-        auto sym = findMemberFuzzyMatchUTF8(gs, name, betterThan);
+        Levenstein levenstein;
+        auto sym = findMemberFuzzyMatchUTF8(gs, name, levenstein, betterThan);
         if (sym.symbol.exists()) {
             res.emplace_back(sym);
         } else {
@@ -835,7 +836,7 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
             // singleton one
             auto singleton = lookupSingletonClass(gs);
             if (singleton.exists()) {
-                sym = singleton.data(gs)->findMemberFuzzyMatchUTF8(gs, name, betterThan);
+                sym = singleton.data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, betterThan);
                 if (sym.symbol.exists()) {
                     res.emplace_back(sym);
                 }
@@ -843,7 +844,7 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
                 // For the error when you use a singleton method but wanted the
                 // instance one
                 auto attached = attachedClass(gs);
-                sym = attached.data(gs)->findMemberFuzzyMatchUTF8(gs, name, betterThan);
+                sym = attached.data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, betterThan);
                 if (sym.symbol.exists()) {
                     res.emplace_back(sym);
                 }
@@ -1037,7 +1038,7 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
 }
 
 ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name,
-                                                                         int betterThan) const {
+                                                                         Levenstein &levenstein, int betterThan) const {
     FuzzySearchResult result;
     result.symbol = Symbols::noSymbol();
     result.name = NameRef::noName();
@@ -1048,7 +1049,6 @@ ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const G
         result.distance = 1 + (currentName.size() / 2);
     }
 
-    Levenstein levenstein;
     for (auto pair : members()) {
         auto thisName = pair.first;
         if (thisName.kind() != NameKind::UTF8) {
@@ -1067,7 +1067,7 @@ ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const G
     for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
         ENFORCE(it->exists());
 
-        auto subResult = it->data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
+        auto subResult = it->data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
             ENFORCE(subResult.name.kind() == NameKind::UTF8);
@@ -1075,7 +1075,7 @@ ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const G
         }
     }
     if (this->superClass().exists()) {
-        auto subResult = this->superClass().data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
+        auto subResult = this->superClass().data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
             ENFORCE(subResult.name.kind() == NameKind::UTF8);
