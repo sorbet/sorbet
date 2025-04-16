@@ -187,6 +187,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
+  def method22<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
+  def method23<<todo method>>(p1, p2, &<blk>)
+    <emptyTree>
+  end
+
   <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
   class <emptyTree>::<C P1><<C <todo sym>>> < (::<todo sym>)
@@ -314,4 +322,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   <runtime method definition of method21>
+
+  <runtime method definition of method22>
+
+  <runtime method definition of method23>
 end
