@@ -637,6 +637,14 @@ class A #: as String
 end
 ```
 
+## 3554
+
+> This error is specific to RBS support when using the
+> `--enable-experimental-rbs-signatures` flag.
+
+This error is raised when Sorbet couldn't match a RBS signature comment with a
+method definition. Ensure your comment is followed by a method definition.
+
 ## 3702
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
