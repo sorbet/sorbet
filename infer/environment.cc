@@ -587,6 +587,23 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         return;
     }
 
+    if (send->fun == core::Names::custom_p()) {
+        whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
+        whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
+        whoKnows.sanityCheck();
+        return;
+
+        auto methodLoc = send->funLoc();
+        auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, methodLoc.copyWithZeroLength());
+
+        // このklassTypeをsigでどこかに保存して取り出す必要がある
+        const auto &klassType = send->args[0].type;
+        auto ref = send->recv.variable;
+        updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter);
+        whoKnows.sanityCheck();
+        return;
+    }
+
     if (send->fun == core::Names::blank_p()) {
         // Note that this assumes that .blank? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
