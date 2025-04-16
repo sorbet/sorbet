@@ -827,7 +827,8 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
     }
 
     if (name.kind() == NameKind::UTF8) {
-        auto sym = findMemberFuzzyMatchUTF8(gs, name, betterThan);
+        Levenstein levenstein;
+        auto sym = findMemberFuzzyMatchUTF8(gs, name, levenstein, betterThan);
         if (sym.symbol.exists()) {
             res.emplace_back(sym);
         } else {
@@ -835,7 +836,7 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
             // singleton one
             auto singleton = lookupSingletonClass(gs);
             if (singleton.exists()) {
-                sym = singleton.data(gs)->findMemberFuzzyMatchUTF8(gs, name, betterThan);
+                sym = singleton.data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, betterThan);
                 if (sym.symbol.exists()) {
                     res.emplace_back(sym);
                 }
@@ -843,7 +844,7 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
                 // For the error when you use a singleton method but wanted the
                 // instance one
                 auto attached = attachedClass(gs);
-                sym = attached.data(gs)->findMemberFuzzyMatchUTF8(gs, name, betterThan);
+                sym = attached.data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, betterThan);
                 if (sym.symbol.exists()) {
                     res.emplace_back(sym);
                 }
@@ -903,6 +904,7 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
     }
 
     bool onlySuggestPackageSpecs = ref(gs).isPackageSpecSymbol(gs);
+    Levenstein levenstein;
 
     // Find the closest by following outer scopes
     {
@@ -943,7 +945,7 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                             }
                         }
 
-                        auto thisDistance = Levenstein::distance(
+                        auto thisDistance = levenstein.distance(
                             currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
                         if (thisDistance <= best.distance) {
                             if (thisDistance < best.distance) {
@@ -999,7 +1001,7 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                         }
                     }
 
-                    auto thisDistance = Levenstein::distance(
+                    auto thisDistance = levenstein.distance(
                         currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
                     if (thisDistance <= globalBestDistance) {
                         if (thisDistance < globalBestDistance) {
@@ -1036,7 +1038,7 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
 }
 
 ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name,
-                                                                         int betterThan) const {
+                                                                         Levenstein &levenstein, int betterThan) const {
     FuzzySearchResult result;
     result.symbol = Symbols::noSymbol();
     result.name = NameRef::noName();
@@ -1053,7 +1055,7 @@ ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const G
             continue;
         }
         auto utf8 = thisName.dataUtf8(gs)->utf8;
-        int thisDistance = Levenstein::distance(currentName, utf8, result.distance);
+        int thisDistance = levenstein.distance(currentName, utf8, result.distance);
         if (thisDistance < result.distance ||
             (thisDistance == result.distance && result.symbol._id > pair.second._id)) {
             result.distance = thisDistance;
@@ -1065,7 +1067,7 @@ ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const G
     for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
         ENFORCE(it->exists());
 
-        auto subResult = it->data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
+        auto subResult = it->data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
             ENFORCE(subResult.name.kind() == NameKind::UTF8);
@@ -1073,7 +1075,7 @@ ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const G
         }
     }
     if (this->superClass().exists()) {
-        auto subResult = this->superClass().data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
+        auto subResult = this->superClass().data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
             ENFORCE(subResult.name.kind() == NameKind::UTF8);

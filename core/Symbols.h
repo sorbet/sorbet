@@ -12,6 +12,10 @@
 #include <tuple>
 #include <vector>
 
+namespace sorbet {
+class Levenstein;
+}
+
 namespace sorbet::core {
 class ClassOrModule;
 class GlobalState;
@@ -622,7 +626,8 @@ private:
     friend class serialize::SerializerImpl;
     friend class GlobalState;
 
-    FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, int betterThan = -1) const;
+    FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, Levenstein &levenstein,
+                                               int betterThan = -1) const;
     std::vector<FuzzySearchResult> findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                                                                 int betterThan = -1) const;
 
