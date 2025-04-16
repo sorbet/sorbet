@@ -224,11 +224,14 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
         }
 
         unique_ptr<parser::Node> nodes;
+        parser::Parser::ParseResult parseResult;
         {
             core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            auto settings = parser::Parser::Settings{};
-            nodes = parser::Parser::run(gs, file, settings);
+            auto settings =
+                parser::Parser::Settings{false, false, false, gs.cacheSensitiveOptions.rbsSignaturesEnabled};
+            parseResult = parser::Parser::run(gs, file, settings);
+            nodes = move(parseResult.tree);
         }
 
         handler.drainErrors(gs);
@@ -241,7 +244,9 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
                 core::MutableContext ctx(gs, core::Symbols::root(), file);
                 if (gs.cacheSensitiveOptions.rbsSignaturesEnabled) {
-                    auto rbsSignatures = rbs::SigsRewriter(ctx);
+                    auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
+                    auto commentsByNode = associator.run(nodes);
+                    auto rbsSignatures = rbs::SigsRewriter(ctx, commentsByNode);
                     nodes = rbsSignatures.run(std::move(nodes));
                 }
                 if (gs.cacheSensitiveOptions.rbsAssertionsEnabled) {
@@ -420,20 +425,23 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             for (auto file : files) {
                 core::UnfreezeNameTable nameTableAccess(*rbiGenGs); // enters original strings
 
-                auto settings = parser::Parser::Settings{};
-                auto nodes = parser::Parser::run(*rbiGenGs, file, settings);
+                auto settings =
+                    parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsSignaturesEnabled};
+                auto parseResult = parser::Parser::run(*rbiGenGs, file, settings);
                 core::MutableContext ctx(*rbiGenGs, core::Symbols::root(), file);
 
                 if (rbiGenGs->cacheSensitiveOptions.rbsSignaturesEnabled) {
-                    auto rbsSignatures = rbs::SigsRewriter(ctx);
-                    nodes = rbsSignatures.run(std::move(nodes));
+                    auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
+                    auto commentsByNode = associator.run(parseResult.tree);
+                    auto rbsSignatures = rbs::SigsRewriter(ctx, commentsByNode);
+                    parseResult.tree = rbsSignatures.run(std::move(parseResult.tree));
                 }
                 if (rbiGenGs->cacheSensitiveOptions.rbsAssertionsEnabled) {
                     auto rbsAssertions = rbs::AssertionsRewriter(ctx);
-                    nodes = rbsAssertions.run(std::move(nodes));
+                    parseResult.tree = rbsAssertions.run(std::move(parseResult.tree));
                 }
 
-                auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file};
+                auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(parseResult.tree)), file};
                 tree = ast::ParsedFile{rewriter::Rewriter::run(ctx, move(tree.tree)), tree.file};
                 tree = testSerialize(*rbiGenGs, local_vars::LocalVars::run(ctx, move(tree)));
 
@@ -765,21 +773,24 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         gs->replaceFile(f.file, move(newFile));
 
         // this replicates the logic of pipeline::indexOne
-        auto settings = parser::Parser::Settings{};
-        auto nodes = parser::Parser::run(*gs, f.file, settings);
-        handler.addObserved(*gs, "parse-tree", [&]() { return nodes->toString(*gs); });
-        handler.addObserved(*gs, "parse-tree-json", [&]() { return nodes->toJSON(*gs); });
+        auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsSignaturesEnabled};
+        auto parseResult = parser::Parser::run(*gs, f.file, settings);
+        handler.addObserved(*gs, "parse-tree", [&]() { return parseResult.tree->toString(*gs); });
+        handler.addObserved(*gs, "parse-tree-json", [&]() { return parseResult.tree->toJSON(*gs); });
 
         core::MutableContext ctx(*gs, core::Symbols::root(), f.file);
 
         if (gs->cacheSensitiveOptions.rbsSignaturesEnabled) {
-            auto rbsSignatures = rbs::SigsRewriter(ctx);
-            nodes = rbsSignatures.run(std::move(nodes));
+            auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
+            auto commentsByNode = associator.run(parseResult.tree);
+            auto rbsSignatures = rbs::SigsRewriter(ctx, commentsByNode);
+            parseResult.tree = rbsSignatures.run(std::move(parseResult.tree));
         }
         if (gs->cacheSensitiveOptions.rbsAssertionsEnabled) {
             auto rbsAssertions = rbs::AssertionsRewriter(ctx);
-            nodes = rbsAssertions.run(std::move(nodes));
+            parseResult.tree = rbsAssertions.run(std::move(parseResult.tree));
         }
+        auto nodes = move(parseResult.tree);
         handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return nodes->toString(*gs); });
 
         ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
