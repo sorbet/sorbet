@@ -133,7 +133,8 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
                      absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &superArgs,
                      core::MethodRef superMethod,
                      absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &methodArgs,
-                     core::MethodRef method) {
+                     core::MethodRef method,
+                     core::ClassOrModuleRef receiverKlass) {
     auto idx = 0;
     auto maxLen = min(superArgs.size(), methodArgs.size());
 
@@ -142,7 +143,7 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
         auto &methodArgType = methodArgs[idx].get().type;
 
         core::ErrorSection::Collector errorDetailsCollector;
-        if (!checkSubtype(ctx, constr, methodArgType, method.data(ctx)->owner, superArgType, superMethod.data(ctx)->owner, core::Polarity::Negative,
+        if (!checkSubtype(ctx, constr, methodArgType, receiverKlass, superArgType, superMethod.data(ctx)->owner, core::Polarity::Negative,
                           errorDetailsCollector)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter `{}` of type `{}` not compatible with type of {} method `{}`",
@@ -161,7 +162,7 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
 }
 
 // Ensure that two argument lists are compatible in shape and type
-void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMethod, core::MethodRef method, core::Loc loc_for_error) {
+void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMethod, core::MethodRef method, core::ClassOrModuleRef receiverKlass, core::Loc loc_for_error) {
     if (method.data(ctx)->flags.isOverloaded) {
         // Don't try to check overloaded methods; It's not immediately clear how
         // to match overloads against their superclass definitions. Since we
@@ -263,9 +264,9 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
     }
 
     // match types of required positional arguments
-    matchPositional(ctx, *constr, left.pos.required, superMethod, right.pos.required, method);
+    matchPositional(ctx, *constr, left.pos.required, superMethod, right.pos.required, method, receiverKlass);
     // match types of optional positional arguments
-    matchPositional(ctx, *constr, left.pos.optional, superMethod, right.pos.optional, method);
+    matchPositional(ctx, *constr, left.pos.optional, superMethod, right.pos.optional, method, receiverKlass);
 
     if (!right.kw.rest) {
         for (auto req : left.kw.required) {
@@ -283,7 +284,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
             // if there is a corresponding parameter, make sure it has the right type
             if (hasCorrespondingRequired || hasCorrespondingOptional) {
                 core::ErrorSection::Collector errorDetailsCollector;
-                if (!checkSubtype(ctx, *constr, corresponding->get().type, method.data(ctx)->owner, req.get().type, superMethod.data(ctx)->owner,
+                if (!checkSubtype(ctx, *constr, corresponding->get().type, receiverKlass, req.get().type, superMethod.data(ctx)->owner,
                                   core::Polarity::Negative, errorDetailsCollector)) {
                     if (auto e =
                             ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
@@ -315,7 +316,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
             // if there is a corresponding parameter, make sure it has the right type
             if (corresponding != right.kw.optional.end()) {
                 core::ErrorSection::Collector errorDetailsCollector;
-                if (!checkSubtype(ctx, *constr, corresponding->get().type, method.data(ctx)->owner, opt.get().type, superMethod.data(ctx)->owner,
+                if (!checkSubtype(ctx, *constr, corresponding->get().type, receiverKlass, opt.get().type, superMethod.data(ctx)->owner,
                                   core::Polarity::Negative, errorDetailsCollector)) {
                     if (auto e =
                             ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
@@ -361,7 +362,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                             superMethod.show(ctx), leftRest->get().show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
-        } else if (!checkSubtype(ctx, *constr, right.kw.rest->get().type, method.data(ctx)->owner, leftRest->get().type, superMethod.data(ctx)->owner,
+        } else if (!checkSubtype(ctx, *constr, right.kw.rest->get().type, receiverKlass, leftRest->get().type, superMethod.data(ctx)->owner,
                                  core::Polarity::Negative, errorDetailsCollector)) {
             if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter **`{}` of type `{}` not compatible with type of {} method `{}`",
@@ -403,7 +404,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         const auto &superMethodBlkArg = superMethod.data(ctx)->arguments.back();
 
         core::ErrorSection::Collector errorDetailsCollector;
-        if (!checkSubtype(ctx, *constr, methodBlkArg.type, method.data(ctx)->owner, superMethodBlkArg.type, superMethod.data(ctx)->owner,
+        if (!checkSubtype(ctx, *constr, methodBlkArg.type, receiverKlass, superMethodBlkArg.type, superMethod.data(ctx)->owner,
                           core::Polarity::Negative, errorDetailsCollector)) {
             if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Block parameter `{}` of type `{}` not compatible with type of {} method `{}`",
@@ -426,7 +427,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         auto &methodReturn = method.data(ctx)->resultType;
 
         core::ErrorSection::Collector errorDetailsCollector;
-        if (!checkSubtype(ctx, *constr, methodReturn, method.data(ctx)->owner, superReturn, superMethod.data(ctx)->owner, core::Polarity::Positive,
+        if (!checkSubtype(ctx, *constr, methodReturn, receiverKlass, superReturn, superMethod.data(ctx)->owner, core::Polarity::Positive,
                           errorDetailsCollector)) {
             if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
                 auto methodReturnShow = methodReturn == core::Types::void_() ? "void" : methodReturn.show(ctx);
@@ -579,7 +580,7 @@ void validateOverridingForMethodInClass(const core::Context ctx, const ast::Expr
             auto method_owner_is_subclass_of_overridden_method_owner = method.data(ctx)->owner.data(ctx)->derivesFrom(ctx, overriddenMethod.data(ctx)->owner);
             auto klass_loc = klass.data(ctx)->loc();
             auto loc_for_error = (method_owner_is_subclass_of_overridden_method_owner || !klass_loc.exists()) ? method.data(ctx)->loc() : klass_loc;
-            validateCompatibleOverride(ctx, overriddenMethod, method, loc_for_error);
+            validateCompatibleOverride(ctx, overriddenMethod, method, klass, loc_for_error);
         }
     }
 }
