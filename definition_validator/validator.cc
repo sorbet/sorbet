@@ -556,7 +556,8 @@ void validateOverridingForMethodInClass(const core::Context ctx, const ast::Expr
         }
         if (!method.data(ctx)->flags.isOverride && !method.data(ctx)->flags.isAbstract && method.data(ctx)->hasSig() &&
             overriddenMethod.data(ctx)->flags.isAbstract && overriddenMethod.data(ctx)->hasSig() &&
-            !method.data(ctx)->flags.isRewriterSynthesized && !isRBI) {
+            !method.data(ctx)->flags.isRewriterSynthesized && !isRBI &&
+            method.data(ctx)->owner.data(ctx)->derivesFrom(ctx, overriddenMethod.data(ctx)->owner)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` implements an abstract method `{}` but is not declared with `{}`",
                             method.show(ctx), overriddenMethod.show(ctx), "override.");
