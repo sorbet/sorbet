@@ -29,7 +29,6 @@
 #include "main/lsp/notifications/indexer_initialization.h"
 #include "main/lsp/notifications/sorbet_resume.h"
 #include "main/pipeline/pipeline.h"
-#include "payload/payload.h"
 
 namespace sorbet::realmain::lsp {
 using namespace std;
