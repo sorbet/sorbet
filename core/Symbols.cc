@@ -886,8 +886,8 @@ bool SymbolRef::isUnderNamespace(const GlobalState &gs, ClassOrModuleRef otherCl
 
 vector<ClassOrModule::FuzzySearchResult>
 ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name, int betterThan) const {
-    // This function is somewhat expensive, as it will crawl all owning scopes to determine if there's a reasonable
-    // match for `name`.
+    // This function is somewhat expensive, as it will crawl all owners to determine if there's a reasonable match for
+    // `name`.
     vector<ClassOrModule::FuzzySearchResult> result;
 
     FuzzySearchResult best;
@@ -906,7 +906,10 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
 
     // Ensure that we start the search from the attached class -- we're interested in constants, which aren't present on
     // the singleton.
-    ClassOrModuleRef base = this->isSingletonClass(gs) ? this->attachedClass(gs) : this->ref(gs);
+    ClassOrModuleRef base = ref(gs);
+    if (auto attachedClass = this->attachedClass(gs); attachedClass.exists()) {
+        base = attachedClass;
+    }
 
     // Find the closest by following outer scopes
     do {
