@@ -499,12 +499,15 @@ public:
             } else {
                 // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
                 // layering/strict_dependencies issues.
-                // TODO(neil): Maybe we should use a new error code for this case?
-                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
+                core::ErrorClass error =
+                    causesCycle ? core::errors::Packager::StrictDependenciesViolation
+                                : (layeringViolation ? core::errors::Packager::LayeringViolation
+                                                     : core::errors::Packager::StrictDependenciesViolation);
+                if (auto e = ctx.beginError(lit.loc(), error)) {
                     std::vector<std::string> reasons;
                     if (causesCycle) {
-                        reasons.emplace_back(core::ErrorColors::format("importing it would put `{}` into a cycle",
-                                                                       this->package.show(ctx)));
+                        reasons.emplace_back(core::ErrorColors::format(
+                            "importing its package would put `{}` into a cycle", this->package.show(ctx)));
                         auto currentStrictDepsLevel =
                             fmt::format("strict_dependencies '{}'",
                                         core::packages::strictDependenciesLevelToString(strictDepsLevel.value().first));
@@ -518,7 +521,7 @@ public:
                     }
 
                     if (layeringViolation) {
-                        reasons.emplace_back("importing it would cause a layering violation");
+                        reasons.emplace_back("importing its package would cause a layering violation");
                         ENFORCE(pkg.layer().has_value(),
                                 "causesLayeringViolation should return false if layer is not set");
                         ENFORCE(this->package.layer().has_value(),
@@ -531,7 +534,8 @@ public:
                     }
 
                     if (strictDependenciesTooLow) {
-                        reasons.emplace_back(core::ErrorColors::format("its `{}` is too low", "strict_dependencies"));
+                        reasons.emplace_back(
+                            core::ErrorColors::format("its `{}` is not strict enough", "strict_dependencies"));
                         ENFORCE(importStrictDepsLevel.has_value(),
                                 "strictDependenciesTooLow should be false if strict_dependencies level is not set");
                         auto requiredStrictDepsLevel = fmt::format("strict_dependencies '{}'",
@@ -556,14 +560,11 @@ public:
                     } else {
                         ENFORCE(false, "At most three reasons should be present");
                     }
+                    e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
                     if (wasNotImported) {
-                        e.setHeader("`{}` resolves but its package is not imported. However, it cannot be "
-                                    "automatically imported because {}",
-                                    lit.symbol().show(ctx), reason);
+                        e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
                     } else if (importedAsTest) {
-                        e.setHeader("Used `{}` constant `{}` in non-test file. However, it cannot be automatically "
-                                    "imported because {}",
-                                    "test_import", litSymbol.show(ctx), reason);
+                        e.addErrorNote("`{}`'s package is imported as `{}`", lit.symbol().show(ctx), "test_import");
                     } else {
                         ENFORCE(false);
                     }
