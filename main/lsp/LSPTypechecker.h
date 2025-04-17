@@ -215,7 +215,7 @@ public:
      * Get an LSPFileUpdates containing the latest versions of the given files. It's a "no-op" file update because it
      * doesn't actually change anything.
      */
-    std::unique_ptr<LSPFileUpdates> getNoopUpdate(std::vector<core::FileRef> frefs) const;
+    std::unique_ptr<LSPFileUpdates> getNoopUpdate(absl::Span<const core::FileRef> frefs) const;
 };
 
 /**
@@ -260,7 +260,7 @@ public:
     const core::GlobalState &state() const;
 
     void updateGsFromOptions(const DidChangeConfigurationParams &options) const;
-    std::unique_ptr<LSPFileUpdates> getNoopUpdate(std::vector<core::FileRef> frefs) const;
+    std::unique_ptr<LSPFileUpdates> getNoopUpdate(absl::Span<const core::FileRef> frefs) const;
 };
 } // namespace sorbet::realmain::lsp
 #endif

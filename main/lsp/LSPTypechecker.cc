@@ -719,7 +719,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
 }
 
-std::unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {
+std::unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(absl::Span<const core::FileRef> frefs) const {
     auto result = std::make_unique<LSPFileUpdates>();
     auto &noop = *result;
     noop.typecheckingPath = TypecheckingPath::Fast;
@@ -734,7 +734,7 @@ std::unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(std::vector<core::
 
 std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef> frefs,
                                                                       WorkerPool &workers) const {
-    auto updates = getNoopUpdate(move(frefs));
+    auto updates = getNoopUpdate(frefs);
     auto errorCollector = make_shared<core::ErrorCollector>();
     bool isNoopUpdateForRetypecheck = true;
     runFastPath(*updates, workers, errorCollector, isNoopUpdateForRetypecheck);
@@ -914,7 +914,7 @@ void LSPTypecheckerDelegate::updateGsFromOptions(const DidChangeConfigurationPar
     typechecker.updateGsFromOptions(options);
 }
 
-std::unique_ptr<LSPFileUpdates> LSPTypecheckerDelegate::getNoopUpdate(std::vector<core::FileRef> frefs) const {
+std::unique_ptr<LSPFileUpdates> LSPTypecheckerDelegate::getNoopUpdate(absl::Span<const core::FileRef> frefs) const {
     return typechecker.getNoopUpdate(frefs);
 }
 
