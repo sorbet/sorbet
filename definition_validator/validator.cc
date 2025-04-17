@@ -161,7 +161,7 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
 }
 
 // Ensure that two argument lists are compatible in shape and type
-void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMethod, core::MethodRef method) {
+void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMethod, core::MethodRef method, core::Loc loc_for_error) {
     if (method.data(ctx)->flags.isOverloaded) {
         // Don't try to check overloaded methods; It's not immediately clear how
         // to match overloads against their superclass definitions. Since we
@@ -171,7 +171,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
     if (superMethod.data(ctx)->flags.isGenericMethod != method.data(ctx)->flags.isGenericMethod &&
         method.data(ctx)->hasSig()) {
-        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+        if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
             if (superMethod.data(ctx)->flags.isGenericMethod) {
                 e.setHeader("{} method `{}` must declare the same number of type parameters as the base method",
                             implementationOf(ctx, superMethod), superMethod.show(ctx));
@@ -191,7 +191,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         const auto &methodTypeArguments = method.data(ctx)->typeArguments();
         const auto &superMethodTypeArguments = superMethod.data(ctx)->typeArguments();
         if (methodTypeArguments.size() != superMethodTypeArguments.size()) {
-            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("{} method `{}` must declare the same number of type parameters as the base method",
                             implementationOf(ctx, superMethod), superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
@@ -236,7 +236,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         auto leftPos = left.pos.required.size() + left.pos.optional.size();
         auto rightPos = right.pos.required.size() + right.pos.optional.size();
         if (leftPos > rightPos) {
-            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("{} method `{}` must accept at least `{}` positional arguments",
                             implementationOf(ctx, superMethod), superMethod.show(ctx), leftPos);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
@@ -246,7 +246,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
     if (auto leftRest = left.pos.rest) {
         if (!right.pos.rest) {
-            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("{} method `{}` must accept *`{}`", implementationOf(ctx, superMethod),
                             superMethod.show(ctx), leftRest->get().show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
@@ -255,7 +255,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
     }
 
     if (right.pos.required.size() > left.pos.required.size()) {
-        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+        if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("{} method `{}` must accept no more than `{}` required argument(s)",
                         implementationOf(ctx, superMethod), superMethod.show(ctx), left.pos.required.size());
             e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
@@ -286,7 +286,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 if (!checkSubtype(ctx, *constr, corresponding->get().type, method.data(ctx)->owner, req.get().type, superMethod.data(ctx)->owner,
                                   core::Polarity::Negative, errorDetailsCollector)) {
                     if (auto e =
-                            ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                            ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
                         e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
                                     corresponding->get().show(ctx), corresponding->get().type.show(ctx),
                                     superMethodKind(ctx, superMethod), superMethod.show(ctx));
@@ -299,7 +299,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                     }
                 }
             } else {
-                if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
                     e.setHeader("{} method `{}` is missing required keyword argument `{}`",
                                 implementationOf(ctx, superMethod), superMethod.show(ctx), req.get().name.show(ctx));
                     e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
@@ -318,7 +318,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 if (!checkSubtype(ctx, *constr, corresponding->get().type, method.data(ctx)->owner, opt.get().type, superMethod.data(ctx)->owner,
                                   core::Polarity::Negative, errorDetailsCollector)) {
                     if (auto e =
-                            ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                            ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
                         e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
                                     corresponding->get().show(ctx), corresponding->get().type.show(ctx),
                                     superMethodKind(ctx, superMethod), superMethod.show(ctx));
@@ -332,7 +332,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 }
             } else if (absl::c_any_of(right.kw.required,
                                       [&](const auto &r) { return r.get().name == opt.get().name; })) {
-                if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
                     e.setHeader("{} method `{}` must redeclare keyword parameter `{}` as optional",
                                 implementationOf(ctx, superMethod), superMethod.show(ctx), opt.get().name.show(ctx));
                     // Show the superMethod loc (declLoc) so the error message includes the default value
@@ -341,7 +341,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                                    opt.get().name.show(ctx));
                 }
             } else {
-                if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
                     e.setHeader("{} method `{}` must accept optional keyword parameter `{}`",
                                 implementationOf(ctx, superMethod), superMethod.show(ctx), opt.get().name.show(ctx));
                     // Show the superMethod loc (declLoc) so the error message includes the default value
@@ -356,14 +356,14 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
     if (auto leftRest = left.kw.rest) {
         core::ErrorSection::Collector errorDetailsCollector;
         if (!right.kw.rest) {
-            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("{} method `{}` must accept **`{}`", implementationOf(ctx, superMethod),
                             superMethod.show(ctx), leftRest->get().show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
         } else if (!checkSubtype(ctx, *constr, right.kw.rest->get().type, method.data(ctx)->owner, leftRest->get().type, superMethod.data(ctx)->owner,
                                  core::Polarity::Negative, errorDetailsCollector)) {
-            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter **`{}` of type `{}` not compatible with type of {} method `{}`",
                             right.kw.rest->get().show(ctx), right.kw.rest->get().type.show(ctx),
                             superMethodKind(ctx, superMethod), superMethod.show(ctx));
@@ -385,7 +385,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
             // We would have already reported a more informative error above.
             continue;
         }
-        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+        if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("{} method `{}` contains extra required keyword argument `{}`",
                         implementationOf(ctx, superMethod), superMethod.show(ctx), extra.get().name.toString(ctx));
             e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
@@ -393,7 +393,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
     }
 
     if (!left.syntheticBlk && right.syntheticBlk) {
-        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+        if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("{} method `{}` must explicitly name a block argument", implementationOf(ctx, superMethod),
                         superMethod.show(ctx));
             e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
@@ -405,7 +405,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         core::ErrorSection::Collector errorDetailsCollector;
         if (!checkSubtype(ctx, *constr, methodBlkArg.type, method.data(ctx)->owner, superMethodBlkArg.type, superMethod.data(ctx)->owner,
                           core::Polarity::Negative, errorDetailsCollector)) {
-            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Block parameter `{}` of type `{}` not compatible with type of {} method `{}`",
                             methodBlkArg.argumentName(ctx), methodBlkArg.type.show(ctx),
                             superMethodKind(ctx, superMethod), superMethod.show(ctx));
@@ -428,7 +428,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         core::ErrorSection::Collector errorDetailsCollector;
         if (!checkSubtype(ctx, *constr, methodReturn, method.data(ctx)->owner, superReturn, superMethod.data(ctx)->owner, core::Polarity::Positive,
                           errorDetailsCollector)) {
-            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            if (auto e = ctx.state.beginError(loc_for_error, core::errors::Resolver::BadMethodOverride)) {
                 auto methodReturnShow = methodReturn == core::Types::void_() ? "void" : methodReturn.show(ctx);
                 e.setHeader("Return type `{}` does not match return type of {} method `{}`", methodReturnShow,
                             superMethodKind(ctx, superMethod), superMethod.show(ctx));
@@ -576,7 +576,10 @@ void validateOverridingForMethodInClass(const core::Context ctx, const ast::Expr
             // One day, we may want to build something like overridable(allow_incompatible: true)
             // and mark certain methods in the standard library as possible to be overridden incompatibly,
             // without needing to write `override(allow_incompatible: true)`.
-            validateCompatibleOverride(ctx, overriddenMethod, method);
+            auto method_owner_is_subclass_of_overridden_method_owner = method.data(ctx)->owner.data(ctx)->derivesFrom(ctx, overriddenMethod.data(ctx)->owner);
+            auto klass_loc = klass.data(ctx)->loc();
+            auto loc_for_error = (method_owner_is_subclass_of_overridden_method_owner || !klass_loc.exists()) ? method.data(ctx)->loc() : klass_loc;
+            validateCompatibleOverride(ctx, overriddenMethod, method, loc_for_error);
         }
     }
 }
