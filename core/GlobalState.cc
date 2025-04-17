@@ -2201,6 +2201,51 @@ GlobalState::copyForIndex(const vector<string> &extraPackageFilesDirectoryUnders
     return result;
 }
 
+unique_ptr<GlobalState>
+GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                             const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                             const vector<string> &extraPackageFilesDirectorySlashPrefixes,
+                             const vector<string> &packageSkipRBIExportEnforcementDirs,
+                             const vector<string> &allowRelaxedPackagerChecksFor, const vector<string> &packagerLayers,
+                             string errorHint) const {
+    auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
+
+    // We omit a call to `initEmpty` here, as the only intended use of this function is to have its symbol table
+    // immediately overwritten by deserializing the payload's symbol table.
+
+    result->copyOptions(*this);
+
+    // We share the file table entries with the original GlobalState, and then copy the content of the name table,
+    // string storage, and uuid to ensure that we remain compatible with the session cache.
+    result->files = this->files;
+    result->fileRefByPath = this->fileRefByPath;
+    result->kvstoreUuid = this->kvstoreUuid;
+    result->strings = this->strings;
+    result->utf8Names = this->utf8Names;
+    result->constantNames = this->constantNames;
+    result->uniqueNames = this->uniqueNames;
+    result->namesByHash = this->namesByHash;
+
+    // Reserve space for the symbol tables, under the assumption that we'll probably grow to a similar size on the slow
+    // path.
+    result->classAndModules.reserve(this->classAndModules.capacity());
+    result->methods.reserve(this->methods.capacity());
+    result->fields.reserve(this->fields.capacity());
+    result->typeArguments.reserve(this->typeArguments.capacity());
+    result->typeMembers.reserve(this->typeMembers.capacity());
+
+    {
+        core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
+        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
+                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
+                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint);
+    }
+
+    return result;
+}
+
 void GlobalState::mergeFileTable(const core::GlobalState &from) {
     UnfreezeFileTable unfreezeFiles(*this);
     // id 0 is for non-existing FileRef

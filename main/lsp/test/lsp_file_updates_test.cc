@@ -138,7 +138,6 @@ TEST_CASE("Copy") {
     updates.cancellationExpected = true;
     updates.typecheckingPath = TypecheckingPath::Fast;
     updates.hasNewFiles = true;
-    updates.updatedGS = unique_ptr<core::GlobalState>(nullptr);
     addFile(updates, core::FileRef(1), "foo.rb", "foo");
     addFile(updates, core::FileRef(2), "bar.rb", "bar");
 
@@ -148,7 +147,6 @@ TEST_CASE("Copy") {
     CHECK(copy.cancellationExpected);
     CHECK(copy.typecheckingPath == TypecheckingPath::Fast);
     CHECK(copy.hasNewFiles);
-    CHECK_FALSE(copy.updatedGS.has_value());
 
     REQUIRE_EQ(2, copy.updatedFiles.size());
 

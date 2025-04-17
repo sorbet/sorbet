@@ -1125,6 +1125,12 @@ void Serializer::loadGlobalState(GlobalState &gs, const uint8_t *const symbolTab
     }
 }
 
+void Serializer::loadSymbolTable(GlobalState &gs, const uint8_t *const symbolTableData) {
+    ENFORCE_NO_TIMER(gs.symbolsUsedTotal() == 0, "Can't load into a non-empty symbol table");
+    UnPickler p(symbolTableData, gs.tracer());
+    SerializerImpl::unpickleSymbolTable(p, gs);
+}
+
 uint32_t Serializer::loadGlobalStateUUID(const GlobalState &gs, const uint8_t *const data) {
     UnPickler p(data, gs.tracer());
     return SerializerImpl::unpickleGSUUID(p);

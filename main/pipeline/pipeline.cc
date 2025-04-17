@@ -40,6 +40,7 @@
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
+#include "payload/binary/binary.h"
 #include "pipeline.h"
 #include "rbs/AssertionsRewriter.h"
 #include "rbs/SigsRewriter.h"
@@ -116,6 +117,23 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
                               opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint);
     }
 #endif
+}
+
+std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts) {
+    if (opts.cacheSensitiveOptions.noStdlib) {
+        auto result = std::make_unique<core::GlobalState>(from.errorQueue, from.epochManager);
+        result->initEmpty();
+        return result;
+    }
+
+    auto result = from.copyForSlowPath(
+        opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
+        opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
+        opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint);
+
+    core::serialize::Serializer::loadSymbolTable(*result, PAYLOAD_SYMBOL_TABLE);
+
+    return result;
 }
 
 vector<core::FileRef> reserveFiles(core::GlobalState &gs, const vector<string> &files) {

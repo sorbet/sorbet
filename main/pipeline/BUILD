@@ -32,6 +32,7 @@ cc_library(
         "//namer",
         "//packager",
         "//parser",
+        "//payload",
         "//payload/binary",
         "//payload/text",
         "//rbs",

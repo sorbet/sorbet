@@ -36,6 +36,9 @@ public:
     static void loadGlobalState(GlobalState &gs, const uint8_t *const symbolTableData,
                                 const uint8_t *const nameTableData, const uint8_t *const fileTableData);
 
+    // Initialize only the symbol table of `gs` by deserializing the payload.
+    static void loadSymbolTable(GlobalState &gs, const uint8_t *const symbolTableData);
+
     static uint32_t loadGlobalStateUUID(const GlobalState &gs, const uint8_t *const data);
 
     // Loads the AST and file hash for the given file. Mutates file to indicate that it is cached and to store the
