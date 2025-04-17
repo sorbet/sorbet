@@ -886,12 +886,8 @@ bool SymbolRef::isUnderNamespace(const GlobalState &gs, ClassOrModuleRef otherCl
 
 vector<ClassOrModule::FuzzySearchResult>
 ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name, int betterThan) const {
-    // Performance of this method is bad, to say the least.
-    // It's written under assumption that it's called rarely
-    // and that it's worth spending a lot of time finding a good candidate in ALL scopes.
-    // It may return multiple candidates:
-    //   - best candidate per every outer scope if it's better than all the candidates in inner scope
-    //   - globally best candidate in ALL scopes.
+    // This function is somewhat expensive, as it will crawl all owners to determine if there's a reasonable match for
+    // `name`.
     vector<ClassOrModule::FuzzySearchResult> result;
 
     FuzzySearchResult best;
@@ -905,95 +901,43 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
 
     bool onlySuggestPackageSpecs = ref(gs).isPackageSpecSymbol(gs);
     Levenstein levenstein;
+    vector<ClassOrModuleRef> candidateScopes;
+    vector<ClassOrModule::FuzzySearchResult> scopeBest;
 
-    // Find the closest by following outer scopes
-    {
-        ClassOrModuleRef base = ref(gs);
-
-        do {
-            // follow outer scopes
-
-            // find scopes that would be considered for search
-            vector<ClassOrModuleRef> candidateScopes;
-            vector<ClassOrModule::FuzzySearchResult> scopeBest;
-            candidateScopes.emplace_back(base);
-            int i = 0;
-            // this is quadratic in number of scopes that we traverse, but YOLO, this should rarely run
-            while (i < candidateScopes.size()) {
-                const auto &sym = candidateScopes[i].data(gs);
-                if (sym->superClass().exists()) {
-                    if (!absl::c_linear_search(candidateScopes, sym->superClass())) {
-                        candidateScopes.emplace_back(sym->superClass());
-                    }
-                }
-                for (auto ancestor : sym->mixins()) {
-                    if (!absl::c_linear_search(candidateScopes, ancestor)) {
-                        candidateScopes.emplace_back(ancestor);
-                    }
-                }
-                i++;
-            }
-            for (const auto scope : candidateScopes) {
-                scopeBest.clear();
-                for (auto member : scope.data(gs)->members()) {
-                    if (member.first.kind() == NameKind::CONSTANT &&
-                        member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
-                        if (onlySuggestPackageSpecs) {
-                            if (!member.second.isClassOrModule() ||
-                                !member.second.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
-                                continue;
-                            }
-                        }
-
-                        auto thisDistance = levenstein.distance(
-                            currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
-                        if (thisDistance <= best.distance) {
-                            if (thisDistance < best.distance) {
-                                scopeBest.clear();
-                            }
-                            best.distance = thisDistance;
-                            best.symbol = member.second;
-                            best.name = member.first;
-                            scopeBest.emplace_back(best);
-                        }
-                    }
-                }
-                if (!scopeBest.empty()) {
-                    // NOTE: Iteration order over members is nondeterministic, so we use SymbolId to deterministically
-                    // order the recommendations from this scope.
-                    // We order in decreasing symbol ID order because `result` is later reversed and we want earlier
-                    // ID'd symbols to be recommended first.
-                    fast_sort(scopeBest, [&](const auto &lhs, const auto &rhs) -> bool {
-                        return lhs.symbol._id > rhs.symbol._id;
-                    });
-                    for (auto &item : scopeBest) {
-                        result.emplace_back(item);
-                    }
-                }
-            }
-
-            base = base.data(gs)->owner;
-        } while (best.distance > 0 && base.data(gs)->owner.exists() && base != Symbols::root());
+    // Ensure that we start the search from the attached class -- we're interested in constants, which aren't present on
+    // the singleton.
+    ClassOrModuleRef base = ref(gs);
+    if (auto attachedClass = this->attachedClass(gs); attachedClass.exists()) {
+        base = attachedClass;
     }
 
-    // At this point, `result` is in a deterministic order, and is ordered with _decreasing_ edit distance
+    // Find the closest by following outer scopes
+    do {
+        // find scopes that would be considered for search
+        candidateScopes.clear();
+        candidateScopes.emplace_back(base);
+        int i = 0;
 
-    if (best.distance > 0) {
-        // find the closest by global dfs.
-        auto globalBestDistance = best.distance - 1;
-        vector<ClassOrModule::FuzzySearchResult> globalBest;
-        vector<ClassOrModuleRef> yetToGoDeeper;
-        yetToGoDeeper.emplace_back(Symbols::root());
-        while (!yetToGoDeeper.empty()) {
-            const ClassOrModuleRef thisIter = yetToGoDeeper.back();
-            yetToGoDeeper.pop_back();
-            for (auto member : thisIter.data(gs)->members()) {
-                if (member.second.exists() && member.first.exists() && member.first.kind() == NameKind::CONSTANT &&
-                    member.first.dataCnst(gs)->original.kind() == NameKind::UTF8) {
-                    if (member.second.isClassOrModule() &&
-                        member.second.asClassOrModuleRef().data(gs)->derivesFrom(gs, core::Symbols::StubModule())) {
-                        continue;
-                    }
+        // this is quadratic in number of scopes that we traverse, but YOLO, this should rarely run
+        while (i < candidateScopes.size()) {
+            const auto &sym = candidateScopes[i].data(gs);
+            if (sym->superClass().exists()) {
+                if (!absl::c_linear_search(candidateScopes, sym->superClass())) {
+                    candidateScopes.emplace_back(sym->superClass());
+                }
+            }
+            for (auto ancestor : sym->mixins()) {
+                if (!absl::c_linear_search(candidateScopes, ancestor)) {
+                    candidateScopes.emplace_back(ancestor);
+                }
+            }
+            i++;
+        }
+        for (const auto scope : candidateScopes) {
+            scopeBest.clear();
+            for (auto member : scope.data(gs)->members()) {
+                if (member.first.kind() == NameKind::CONSTANT &&
+                    member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
                     if (onlySuggestPackageSpecs) {
                         if (!member.second.isClassOrModule() ||
                             !member.second.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
@@ -1003,33 +947,38 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
 
                     auto thisDistance = levenstein.distance(
                         currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
-                    if (thisDistance <= globalBestDistance) {
-                        if (thisDistance < globalBestDistance) {
-                            globalBest.clear();
+                    if (thisDistance <= best.distance) {
+                        if (thisDistance < best.distance) {
+                            scopeBest.clear();
                         }
-                        globalBestDistance = thisDistance;
                         best.distance = thisDistance;
                         best.symbol = member.second;
                         best.name = member.first;
-                        globalBest.emplace_back(best);
-                    }
-                    if (member.second.isClassOrModule()) {
-                        yetToGoDeeper.emplace_back(member.second.asClassOrModuleRef());
+                        scopeBest.emplace_back(best);
                     }
                 }
             }
+            if (!scopeBest.empty()) {
+                // NOTE: Iteration order over members is nondeterministic, so we use SymbolId to deterministically
+                // order the recommendations from this scope.
+                // We order in decreasing symbol ID order because `result` is later reversed and we want earlier
+                // ID'd symbols to be recommended first.
+                fast_sort(scopeBest,
+                          [&](const auto &lhs, const auto &rhs) -> bool { return lhs.symbol._id > rhs.symbol._id; });
+                for (auto &item : scopeBest) {
+                    result.emplace_back(item);
+                }
+            }
         }
-        // globalBest is nondeterministically ordered since iteration over `members()` is non deterministic.
-        // Everything in globalBest has the same edit distance, so we just have to sort by symbol ID to get a
-        // deterministic order.
-        // We order in decreasing symbol ID order because `result` is later reversed and we want earlier
-        // ID'd symbols to be recommended first.
-        fast_sort(globalBest,
-                  [&](const auto &lhs, const auto &rhs) -> bool { return lhs.symbol._id > rhs.symbol._id; });
-        for (auto &e : globalBest) {
-            result.emplace_back(e);
+
+        // <root>'s owner is <root>, so we explicitly break that cycle here.
+        auto owner = base.data(gs)->owner;
+        if (!owner.exists() || base == owner) {
+            break;
         }
-    }
+
+        base = owner;
+    } while (best.distance > 0);
 
     // result is ordered in decreasing edit distance order. We want to flip the order so the items w/ the smallest edit
     // distance are first.

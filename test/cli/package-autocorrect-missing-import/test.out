@@ -8,20 +8,6 @@ use_other_package/foo.rb:16: Unable to resolve constant `MyClass` https://srb.he
     https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: `Class` defined here
     NN |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    use_other_package/foo.rb:16: Replaced with `T::Class`
-    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
-          ^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#LCENSORED: `T::Class` defined here
-      NN |module T::Class
-          ^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    use_other_package/foo.rb:16: Replaced with `Digest::Class`
-    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
-          ^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/digest.rbi#LCENSORED: `Digest::Class` defined here
-      NN |class Digest::Class
-          ^^^^^^^^^^^^^^^^^^^
 
 use_other_package/foo.rb:7: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
      7 |      Foo::Bar::OtherPackage::OtherClass # resolves via root
