@@ -3256,7 +3256,7 @@ public:
     }
 
     static ResolveTypeMembersAndFieldsResult run(core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                                 WorkerPool &workers) {
+                                                 WorkerPool &workers, bool hierarchyMayHaveChanged) {
         Timer timeit(gs.tracer(), "resolver.type_params");
 
         auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
@@ -3400,7 +3400,9 @@ public:
         }
 
         // Compute the resultType of all classes.
-        computeExternalTypes(gs);
+        if (hierarchyMayHaveChanged) {
+            computeExternalTypes(gs);
+        }
 
         // Resolve the remaining casts and fields.
         vector<ResolveCastItem> stillPendingTodoResolveCastItems;
@@ -4227,7 +4229,8 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
         return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
 
-    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers);
+    auto hierarchyMayHaveChanged = true;
+    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers, hierarchyMayHaveChanged);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled::cancel(move(rtmafResult.trees), workers);
     }
@@ -4254,7 +4257,8 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     if (ranIncrementalNamer) {
         Resolver::finalizeSymbols(gs);
     }
-    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers);
+    auto hierarchyMayHaveChanged = ranIncrementalNamer;
+    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers, hierarchyMayHaveChanged);
     auto result = resolveSigs(gs, std::move(rtmafResult.trees), workers);
     ResolveTypeMembersAndFieldsWalk::resolvePendingCastItems(gs, rtmafResult.todoResolveCastItems);
     sanityCheck(gs, result);
