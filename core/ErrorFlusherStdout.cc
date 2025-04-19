@@ -1,5 +1,7 @@
 #include "core/ErrorFlusherStdout.h"
 #include "common/FileSystem.h"
+#include "core/GlobalState.h"
+#include "core/errors/packager.h"
 #include "core/lsp/QueryResponse.h"
 
 using namespace std;
@@ -24,8 +26,14 @@ void ErrorFlusherStdout::flushErrors(spdlog::logger &logger, const GlobalState &
             ENFORCE(error->text.has_value());
             fmt::format_to(std::back_inserter(out), "{}", error->text.value_or(""));
 
-            for (auto &autocorrect : error->error->autocorrects) {
-                autocorrects.emplace_back(move(autocorrect));
+            if (error->error->what != core::errors::Packager::MissingImport &&
+                error->error->what != core::errors::Packager::UsedTestOnlyName) {
+                // If there's multiple missing import errors in a given file, we'll have multiple edits that add the
+                // same import, which will lead to a duplicate import added to the package file. So instead of adding
+                // the edits here, we aggregate the missing imports and then add one edit per missing import.
+                for (auto &autocorrect : error->error->autocorrects) {
+                    autocorrects.emplace_back(move(autocorrect));
+                }
             }
         }
     }
@@ -57,7 +65,15 @@ void ErrorFlusherStdout::flushErrorCount(spdlog::logger &logger, int count) {
 }
 
 void ErrorFlusherStdout::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
-    auto toWrite = AutocorrectSuggestion::apply(gs, fs, this->autocorrects);
+    if (gs.packageDB().enabled()) {
+        for (auto &pkgName : gs.packageDB().packages()) {
+            auto &pkg = gs.packageDB().getPackageInfo(pkgName);
+            ENFORCE(pkg.exists());
+            auto autocorrect = pkg.aggregateMissingImports();
+            autocorrects.emplace_back(move(autocorrect));
+        }
+    }
+    auto toWrite = AutocorrectSuggestion::apply(gs, fs, autocorrects);
     for (auto &[file, contents] : toWrite) {
         fs.writeFile(string(file.data(gs).path()), contents);
     }
