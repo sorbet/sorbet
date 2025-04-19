@@ -544,15 +544,24 @@ public:
             isNumblock = true;
         }
 
+        BlockStyle type = BlockStyle::Present;
+        if (end != nullptr) {
+            if (end->type() == ruby_parser::token_type::tRCURLY) {
+                type = BlockStyle::Braces;
+            } else {
+                type = BlockStyle::DoEnd;
+            }
+        }
+
         Node &n = *methodCall;
         const type_info &ty = typeid(n);
         if (ty == typeid(Send) || ty == typeid(CSend) || ty == typeid(Super) || ty == typeid(ZSuper)) {
             if (isNumblock) {
                 return make_unique<NumBlock>(methodCall->loc.join(tokLoc(end)), std::move(methodCall), std::move(args),
-                                             std::move(body));
+                                             std::move(body), static_cast<uint32_t>(type));
             }
             return make_unique<Block>(methodCall->loc.join(tokLoc(end)), std::move(methodCall), std::move(args),
-                                      std::move(body));
+                                      std::move(body), static_cast<uint32_t>(type));
         }
 
         sorbet::parser::NodeVec *exprs;
@@ -569,9 +578,11 @@ public:
         core::LocOffsets blockLoc = send->loc.join(tokLoc(end));
         unique_ptr<Node> block;
         if (isNumblock) {
-            block = make_unique<NumBlock>(blockLoc, std::move(send), std::move(args), std::move(body));
+            block = make_unique<NumBlock>(blockLoc, std::move(send), std::move(args), std::move(body),
+                                          static_cast<uint32_t>(type));
         } else {
-            block = make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body));
+            block = make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body),
+                                       static_cast<uint32_t>(type));
         }
         exprs->front().swap(block);
         return methodCall;
