@@ -1,3 +1,3 @@
 # typed: true
 
-"\u{120 120000}" # error: invalid Unicode codepoint (too large)
+"\u{120 120000}" # parser-error: invalid Unicode codepoint (too large)

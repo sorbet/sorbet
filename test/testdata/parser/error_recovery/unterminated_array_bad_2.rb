@@ -8,8 +8,8 @@ class A
   def bar
     puts 'before'
     x = [1,
-      # ^ error: unterminated "["
-        # ^ error: unexpected token ","
+      # ^ parser-error: unterminated "["
+        # ^ parser-error: unexpected token ","
     puts 'after'
   end
 end
