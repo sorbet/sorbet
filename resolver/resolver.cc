@@ -2813,48 +2813,32 @@ class ResolveTypeMembersAndFieldsWalk {
         }
     }
 
-    void validateNonForcingIsA(core::Context ctx, const ast::Send &send) {
-        constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
+    core::ClassOrModuleRef validateAndExtractNonForcingLiteralArgument(core::Context ctx,
+                                                                       const ast::ExpressionPtr &maybeLiteralArg,
+                                                                       const core::LocOffsets &loc,
+                                                                       std::string_view method) {
+        auto literalNode = ast::cast_tree<ast::Literal>(maybeLiteralArg);
 
-        if (send.numPosArgs() != 2) {
-            return;
-        }
-
-        auto numKwArgs = send.numKwArgs();
-        if (numKwArgs > 1) {
-            return;
-        }
-
-        auto stringLoc = send.getPosArg(1).loc();
-
-        auto literalNode = ast::cast_tree<ast::Literal>(send.getPosArg(1));
-        if (literalNode == nullptr) {
-            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+        if (literalNode == nullptr || !core::isa_type<core::NamedLiteralType>(literalNode->value)) {
+            if (auto e = ctx.beginError(loc, core::errors::Resolver::LazyResolve)) {
                 e.setHeader("`{}` only accepts string literals", method);
             }
-            return;
-        }
-
-        if (!core::isa_type<core::NamedLiteralType>(literalNode->value)) {
-            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                e.setHeader("`{}` only accepts string literals", method);
-            }
-            return;
+            return core::Symbols::noClassOrModule();
         }
 
         auto literal = core::cast_type_nonnull<core::NamedLiteralType>(literalNode->value);
         if (literal.literalKind != core::NamedLiteralType::LiteralTypeKind::String) {
             // Infer will report a type error
-            return;
+            return core::Symbols::noClassOrModule();
         }
 
         auto name = literal.asName();
         auto shortName = name.shortName(ctx);
         if (shortName.empty()) {
-            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+            if (auto e = ctx.beginError(loc, core::errors::Resolver::LazyResolve)) {
                 e.setHeader("The string given to `{}` must not be empty", method);
             }
-            return;
+            return core::Symbols::noClassOrModule();
         }
 
         // If this string _begins_ with `::`, then the first fragment will be an empty string; in multiple places
@@ -2869,24 +2853,24 @@ class ResolveTypeMembersAndFieldsWalk {
 
                 // First iteration
                 if (part != "") {
-                    if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                    if (auto e = ctx.beginError(loc, core::errors::Resolver::LazyResolve)) {
                         e.setHeader("The string given to `{}` must be an absolute constant reference that "
                                     "starts with `{}`",
                                     method, "::");
                     }
-                    return;
+                    return core::Symbols::noClassOrModule();
                 }
                 continue;
             }
 
             auto member = ctx.state.lookupNameConstant(part);
             if (!member.exists()) {
-                if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                if (auto e = ctx.beginError(loc, core::errors::Resolver::LazyResolve)) {
                     auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.show(ctx);
                     auto pretty = fmt::format("{}::{}", prettyCurrent, part);
                     e.setHeader("Unable to resolve constant `{}`", pretty);
                 }
-                return;
+                return core::Symbols::noClassOrModule();
             }
 
             core::SymbolRef newCurrent;
@@ -2894,12 +2878,12 @@ class ResolveTypeMembersAndFieldsWalk {
                 newCurrent = current.asClassOrModuleRef().data(ctx)->findMember(ctx, member);
             }
             if (!newCurrent.exists()) {
-                if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                if (auto e = ctx.beginError(loc, core::errors::Resolver::LazyResolve)) {
                     auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.show(ctx);
                     auto pretty = fmt::format("{}::{}", prettyCurrent, part);
                     e.setHeader("Unable to resolve constant `{}`", pretty);
                 }
-                return;
+                return core::Symbols::noClassOrModule();
             }
             current = newCurrent;
         }
@@ -2907,11 +2891,77 @@ class ResolveTypeMembersAndFieldsWalk {
         ENFORCE(current.exists(), "Loop invariant violated");
 
         if (!current.isClassOrModule()) {
-            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+            if (auto e = ctx.beginError(loc, core::errors::Resolver::LazyResolve)) {
                 e.setHeader("The string given to `{}` must resolve to a class or module", method);
                 e.addErrorLine(current.loc(ctx), "Resolved to this constant");
             }
+            return core::Symbols::noClassOrModule();
+        }
+
+        return current.asClassOrModuleRef();
+    }
+
+    void validateNonForcingIsA(core::Context ctx, const ast::Send &send) {
+        constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
+
+        if (send.numPosArgs() != 2) {
             return;
+        }
+
+        auto numKwArgs = send.numKwArgs();
+        if (numKwArgs > 1) {
+            return;
+        }
+
+        validateAndExtractNonForcingLiteralArgument(ctx, send.getPosArg(1), send.getPosArg(1).loc(), method);
+
+        return;
+    }
+
+    void validateStaticInheritanceCheck(core::Context ctx, const ast::Send &send) {
+        constexpr string_view method = "T::NonForcingConstants.static_inheritance_check";
+
+        if (send.numPosArgs() != 2) {
+            return;
+        }
+
+        auto numKwArgs = send.numKwArgs();
+        if (numKwArgs > 0) {
+            return;
+        }
+
+        auto classUnderCheck =
+            validateAndExtractNonForcingLiteralArgument(ctx, send.getPosArg(0), send.getPosArg(0).loc(), method);
+        if (!classUnderCheck.exists()) {
+            return;
+        }
+
+        auto &constArg = send.getPosArg(1);
+        if (!ast::isa_tree<ast::ConstantLit>(constArg)) {
+            return;
+        }
+
+        auto constLitNode = ast::cast_tree<ast::ConstantLit>(constArg);
+        auto superclassSym = constLitNode->symbol();
+        if (superclassSym.exists() && superclassSym.isClassOrModule()) {
+            auto superclass = superclassSym.asClassOrModuleRef();
+            bool isAncestor = false;
+
+            auto cur = classUnderCheck;
+            while (cur.exists()) {
+                if (cur.data(ctx)->superClass() == superclass) {
+                    isAncestor = true;
+                    break;
+                }
+
+                cur = cur.data(ctx)->superClass();
+            }
+
+            if (!isAncestor) {
+                if (auto e = ctx.beginError(send.getPosArg(0).loc(), core::errors::Resolver::LazyResolve)) {
+                    e.setHeader("{} does not inherit from {}", classUnderCheck.show(ctx), superclass.show(ctx));
+                }
+            }
         }
     }
 
@@ -3148,6 +3198,9 @@ public:
                 }
                 case core::Names::nonForcingIsA_p().rawId():
                     validateNonForcingIsA(ctx, send);
+                    return;
+                case core::Names::staticInheritanceCheck().rawId():
+                    validateStaticInheritanceCheck(ctx, send);
                     return;
                 default:
                     return;
