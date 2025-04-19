@@ -2,6 +2,7 @@
 #define SORBET_RBS_SIGS_REWRITER_H
 
 #include "parser/parser.h"
+#include "rbs/CommentsAssociator.h"
 #include "rbs/rbs_common.h"
 #include <memory>
 
@@ -28,17 +29,21 @@ struct Comments {
 
 class SigsRewriter {
 public:
-    SigsRewriter(core::MutableContext ctx) : ctx(ctx){};
+    SigsRewriter(core::MutableContext ctx, std::map<parser::Node *, std::vector<rbs::CommentNode>> commentsByNode)
+        : ctx(ctx), commentsByNode(commentsByNode){};
     std::unique_ptr<parser::Node> run(std::unique_ptr<parser::Node> tree);
 
 private:
     core::MutableContext ctx;
+    std::map<parser::Node *, std::vector<rbs::CommentNode>> commentsByNode;
 
     std::unique_ptr<parser::Node> rewriteBegin(std::unique_ptr<parser::Node> tree);
     std::unique_ptr<parser::Node> rewriteBody(std::unique_ptr<parser::Node> tree);
     std::unique_ptr<parser::Node> rewriteNode(std::unique_ptr<parser::Node> tree);
     std::unique_ptr<parser::Node> rewriteClass(std::unique_ptr<parser::Node> tree);
     parser::NodeVec rewriteNodes(parser::NodeVec nodes);
+    std::unique_ptr<parser::NodeVec> signaturesForNode(core::MutableContext ctx, parser::Node *node);
+    Comments commentsForNode(core::MutableContext ctx, parser::Node *node);
 };
 
 } // namespace sorbet::rbs
