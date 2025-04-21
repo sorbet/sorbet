@@ -397,22 +397,35 @@ class T::Props::Decorator
     T::Configuration.without_ruby_warnings do
       if !rules[:immutable]
         if method(:prop_set).owner != T::Props::Decorator
-          @class.send(:define_method, "#{name}=") do |val|
-            T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
-          end
+          @class.class_eval <<~SETTER
+            def #{name}=(val)
+              rules = self.class.decorator.prop_rules(:#{name})
+              self.class.decorator.prop_set(self, :#{name}, val, rules)
+            end
+          SETTER
         else
           # Fast path (~4x faster as of Ruby 2.6)
-          @class.send(:define_method, "#{name}=", &rules.fetch(:setter_proc))
+          @class.class_eval <<~SETTER
+            def #{name}=(val)
+              rules = self.class.decorator.prop_rules(:#{name})
+              instance_exec(val, &rules.fetch(:setter_proc))
+            end
+          SETTER
         end
       end
 
       if method(:prop_get).owner != T::Props::Decorator || rules.key?(:ifunset)
-        @class.send(:define_method, name) do
-          T.unsafe(self.class).decorator.prop_get(self, name, rules)
-        end
+        @class.class_eval <<~GETTER
+          def #{name}
+            rules = self.class.decorator.prop_rules(:#{name})
+            self.class.decorator.prop_get(self, :#{name}, rules)
+          end
+        GETTER
       else
         # Fast path (~30x faster as of Ruby 2.6)
-        @class.send(:attr_reader, name) # send is used because `attr_reader` is private in 2.4
+        @class.class_eval <<~GETTER
+          send(:attr_reader, :#{name})
+        GETTER
       end
     end
   end
@@ -640,15 +653,21 @@ class T::Props::Decorator
       #
       unless rules[:without_accessors]
         if clobber_getter?(child, name)
-          child.send(:define_method, name) do
-            T.unsafe(self.class).decorator.prop_get(self, name, rules)
-          end
+          child.class_eval <<~GETTER
+            def #{name}
+              rules = T.unsafe(self.class).decorator.prop_rules(:#{name})
+              T.unsafe(self.class).decorator.prop_get(self, :#{name}, rules)
+            end
+          GETTER
         end
 
         if !rules[:immutable] && clobber_setter?(child, name)
-          child.send(:define_method, "#{name}=") do |val|
-            T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
-          end
+          child.class_eval <<~SETTER
+            def #{name}=(val)
+              rules = T.unsafe(self.class).decorator.prop_rules(:#{name})
+              T.unsafe(self.class).decorator.prop_set(self, :#{name}, val, rules)
+            end
+          SETTER
         end
       end
     end
