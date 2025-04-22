@@ -1341,13 +1341,8 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
             (*preemptionManager)->tryRunScheduledPreemptionTask(gs);
         }
 
-        shared_ptr<ConcurrentBoundedQueue<ast::ParsedFile>> fileq;
-        shared_ptr<BlockingBoundedQueue<vector<core::FileRef>>> outputq;
-
-        {
-            fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(what.size());
-            outputq = make_shared<BlockingBoundedQueue<vector<core::FileRef>>>(what.size());
-        }
+        auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(what.size());
+        auto outputq = make_shared<BlockingBoundedQueue<core::FileRef>>(what.size());
 
         if (!presorted) {
             // If files are not already sorted, we want to start typeckecking big files first because it helps with
@@ -1365,7 +1360,6 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
             workers.multiplexJob("typecheck", [&gs, &opts, epoch, &epochManager, &preemptionManager, fileq, outputq,
                                                cancelable, intentionallyLeakASTs]() {
-                vector<core::FileRef> processedFiles;
                 ast::ParsedFile job;
                 int processedByThread = 0;
 
@@ -1398,25 +1392,24 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                                                       file.data(gs).path());
                                 }
                                 // Stream out errors
-                                processedFiles.emplace_back(file);
-                                outputq->push(move(processedFiles), processedByThread);
+                                outputq->push(file, processedByThread);
                                 processedByThread = 0;
                             }
                         }
                     }
                 }
                 if (processedByThread > 0) {
-                    outputq->push(move(processedFiles), processedByThread);
+                    outputq->push(core::FileRef(), processedByThread);
                 }
             });
 
-            vector<core::FileRef> files;
             {
-                for (auto result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+                core::FileRef file;
+                for (auto result = outputq->wait_pop_timed(file, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                      !result.done();
-                     result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+                     result = outputq->wait_pop_timed(file, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                     if (result.gotItem()) {
-                        for (auto &file : files) {
+                        if (file.exists()) {
                             gs.errorQueue->flushErrorsForFile(gs, file);
                         }
                     }
