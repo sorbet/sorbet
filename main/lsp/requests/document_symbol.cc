@@ -15,7 +15,7 @@ namespace {
 
 struct Node {
     // The parent node, or nullptr if this is `<root>`.
-    std::shared_ptr<Node> parent;
+    shared_ptr<Node> parent;
 
     // The symbol defined.
     core::SymbolRef symbol;
@@ -30,12 +30,12 @@ struct Node {
     bool isAttrBestEffortUIOnly = false;
 
     // Any child symbols.
-    std::vector<std::shared_ptr<Node>> children;
+    vector<shared_ptr<Node>> children;
 
-    Node(std::shared_ptr<Node> parent, core::SymbolRef symbol, core::Loc loc)
-        : parent{std::move(parent)}, symbol{symbol}, loc{loc}, declLoc{loc} {}
+    Node(shared_ptr<Node> parent, core::SymbolRef symbol, core::Loc loc)
+        : parent{move(parent)}, symbol{symbol}, loc{loc}, declLoc{loc} {}
 
-    std::unique_ptr<DocumentSymbol> genNode(const core::GlobalState &gs) const {
+    unique_ptr<DocumentSymbol> genNode(const core::GlobalState &gs) const {
         if (!this->symbol.exists()) {
             return nullptr;
         }
@@ -67,7 +67,7 @@ struct Node {
         name += view;
 
         auto result =
-            std::make_unique<DocumentSymbol>(std::move(name), kind, std::move(range), std::move(selectionRange));
+            make_unique<DocumentSymbol>(move(name), kind, move(range), move(selectionRange));
 
         // Previous versions of VSCode have a bug that requires this non-optional field to be present.
         // This previously tried to include the method signature but due to issues where large signatures were not
@@ -81,13 +81,13 @@ struct Node {
         return result;
     }
 
-    std::vector<std::unique_ptr<DocumentSymbol>> genChildren(const core::GlobalState &gs) const {
-        std::vector<std::unique_ptr<DocumentSymbol>> result;
+    vector<unique_ptr<DocumentSymbol>> genChildren(const core::GlobalState &gs) const {
+        vector<unique_ptr<DocumentSymbol>> result;
 
         result.reserve(this->children.size());
         for (auto &child : this->children) {
             if (auto res = child->genNode(gs)) {
-                result.emplace_back(std::move(res));
+                result.emplace_back(move(res));
             }
         }
 
@@ -97,16 +97,16 @@ struct Node {
 
 // Reify the outline of the tree, so that we can post-process it into a documentSymbol response.
 class Outliner {
-    std::shared_ptr<Node> scope;
+    shared_ptr<Node> scope;
 
-    Outliner(core::Loc fullFile) : scope{std::make_shared<Node>(nullptr, core::Symbols::root(), fullFile)} {}
+    Outliner(core::Loc fullFile) : scope{make_shared<Node>(nullptr, core::Symbols::root(), fullFile)} {}
 
     // When processing all the members of a class/module, only add the ones that occur syntactically within the current
     // node.
     void addChild(const core::Context ctx, core::SymbolRef child) {
         for (auto childLoc : child.locs(ctx)) {
             if (childLoc.file() == ctx.file && this->scope->loc.contains(childLoc)) {
-                this->scope->children.emplace_back(std::make_shared<Node>(this->scope, child, childLoc));
+                this->scope->children.emplace_back(make_shared<Node>(this->scope, child, childLoc));
                 return;
             }
         }
@@ -121,10 +121,10 @@ public:
             return;
         }
 
-        auto next = std::make_shared<Node>(this->scope, klass.symbol, ctx.locAt(klass.loc));
+        auto next = make_shared<Node>(this->scope, klass.symbol, ctx.locAt(klass.loc));
         next->declLoc = ctx.locAt(klass.declLoc);
         this->scope->children.emplace_back(next);
-        this->scope = std::move(next);
+        this->scope = move(next);
 
         for (auto member : klass.symbol.data(ctx)->members()) {
             if (member.second.isClassOrModule() || member.second.isMethod()) {
@@ -166,13 +166,13 @@ public:
 
         // We avoid using `this->addChild` here because we know the method occurs within `this->scope`, and we also want
         // to give it a different `declLoc` and propagate `isAttrBestEffortUIOnly`.
-        auto node = std::make_shared<Node>(this->scope, method.symbol, ctx.locAt(method.loc));
+        auto node = make_shared<Node>(this->scope, method.symbol, ctx.locAt(method.loc));
         node->declLoc = ctx.locAt(method.declLoc);
         node->isAttrBestEffortUIOnly = method.flags.isAttrBestEffortUIOnly;
         this->scope->children.emplace_back(node);
     }
 
-    static std::vector<std::unique_ptr<DocumentSymbol>> documentSymbol(core::Context ctx, ast::ExpressionPtr &tree) {
+    static vector<unique_ptr<DocumentSymbol>> documentSymbol(core::Context ctx, ast::ExpressionPtr &tree) {
         core::Loc fullFile{ctx.file, core::LocOffsets{0, static_cast<uint32_t>(ctx.file.data(ctx).source().size())}};
 
         Outliner outliner{fullFile};
@@ -188,7 +188,7 @@ public:
 } // namespace
 
 DocumentSymbolTask::DocumentSymbolTask(const LSPConfiguration &config, MessageId id,
-                                       std::unique_ptr<DocumentSymbolParams> params)
+                                       unique_ptr<DocumentSymbolParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentDocumentSymbol), params(move(params)) {}
 
 bool DocumentSymbolTask::isDelayable() const {
@@ -203,13 +203,13 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
     string_view uri = params->textDocument->uri;
     auto fref = config.uri2FileRef(gs, uri);
     if (!fref.exists()) {
-        response->result = std::move(result);
+        response->result = move(result);
         return response;
     }
 
     auto resolved = typechecker.getResolved(fref);
     if (resolved.tree == nullptr) {
-        response->result = std::move(result);
+        response->result = move(result);
         return response;
     }
 
