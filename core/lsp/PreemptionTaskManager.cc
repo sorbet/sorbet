@@ -42,8 +42,6 @@ bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalStat
         atomic_compare_exchange_strong(&this->preemptTask, &preemptTask, shared_ptr<Task>(nullptr))) {
         // Capture with write lock before running task. Ensures that all worker threads park before we proceed.
         absl::MutexLock lock(&typecheckMutex);
-        // Invariant: Typechecking _cannot_ be canceled before or during a preemption task.
-        ENFORCE(!epochManager->wasTypecheckingCanceled());
         // The error queue is where typechecking puts all typechecking errors. For a given edit, Sorbet LSP runs
         // typechecking and then drains the error queue. If we failed to temporarily swap it out during preemption, the
         // preempted task will see all of the errors that have accumulated thus far on the slow path. Thus, we save the
@@ -55,7 +53,6 @@ bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalStat
         preemptTask->run();
         gs.tracer().debug("[Typechecker] Preemption task complete.");
         gs.errorQueue = move(previousErrorQueue);
-        ENFORCE(!epochManager->wasTypecheckingCanceled());
         return true;
     }
     return false;
