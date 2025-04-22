@@ -30,8 +30,7 @@ private:
     static const std::string_view MULTILINE_RBS_PREFIX;
 
     void walkNodes(parser::Node *node);
-    void associateCommentsToNode(parser::Node *node, const InlinedVector<std::string_view, 3> &prefixes = {
-                                                         RBS_PREFIX, ANNOTATION_PREFIX, MULTILINE_RBS_PREFIX});
+    void associateCommentsToNode(parser::Node *node, absl::Span<const std::string_view> prefixes);
     void associateInlineCommentToNode(parser::Node *node);
     void consumeCommentsUntilLine(int line);
 };
