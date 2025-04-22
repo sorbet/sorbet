@@ -99,7 +99,7 @@ struct Node {
 class Outliner {
     std::shared_ptr<Node> scope;
 
-    Outliner() = default;
+    Outliner(core::Loc fullFile) : scope{std::make_shared<Node>(nullptr, core::Symbols::root(), fullFile)} {}
 
     // When processing all the members of a class/module, only add the ones that occur syntactically within the current
     // node.
@@ -115,6 +115,8 @@ class Outliner {
 public:
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &expr) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(expr);
+
+        // <root> is eagerly added in the constructor, so we exit early here to avoid accidentally adding it twice.
         if (klass.symbol == core::Symbols::root()) {
             return;
         }
@@ -146,6 +148,9 @@ public:
 
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &expr) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(expr);
+
+        // <root> is eagerly added in the constructor, so we exit early here to avoid accidentally assigning
+        // `scope` to its parent, which will be `nullptr`.
         if (klass.symbol == core::Symbols::root()) {
             return;
         }
@@ -170,11 +175,11 @@ public:
     static std::vector<std::unique_ptr<DocumentSymbol>> documentSymbol(core::Context ctx, ast::ExpressionPtr &tree) {
         core::Loc fullFile{ctx.file, core::LocOffsets{0, static_cast<uint32_t>(ctx.file.data(ctx).source().size())}};
 
-        Outliner outliner;
-        outliner.scope = std::make_shared<Node>(nullptr, core::Symbols::root(), fullFile);
+        Outliner outliner{fullFile};
 
         ast::ShallowWalk::apply(ctx, outliner, tree);
 
+        ENFORCE(outliner.scope != nullptr);
         ENFORCE(outliner.scope->symbol == core::Symbols::root());
         return outliner.scope->genChildren(ctx);
     }
