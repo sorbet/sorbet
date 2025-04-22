@@ -113,9 +113,7 @@ class Outliner {
     }
 
 public:
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &expr) {
-        auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(expr);
-
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &klass) {
         // <root> is eagerly added in the constructor, so we exit early here to avoid accidentally adding it twice.
         if (klass.symbol == core::Symbols::root()) {
             return;
@@ -146,9 +144,7 @@ public:
         }
     }
 
-    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &expr) {
-        auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(expr);
-
+    void postTransformClassDef(core::Context ctx, const ast::ClassDef &klass) {
         // <root> is eagerly added in the constructor, so we exit early here to avoid accidentally assigning
         // `scope` to its parent, which will be `nullptr`.
         if (klass.symbol == core::Symbols::root()) {
@@ -161,9 +157,7 @@ public:
         this->scope = this->scope->parent;
     }
 
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &expr) {
-        auto &method = ast::cast_tree_nonnull<ast::MethodDef>(expr);
-
+    void preTransformMethodDef(core::Context ctx, const ast::MethodDef &method) {
         // We avoid using `this->addChild` here because we know the method occurs within `this->scope`, and we also want
         // to give it a different `declLoc` and propagate `isAttrBestEffortUIOnly`.
         auto node = make_shared<Node>(this->scope, method.symbol, ctx.locAt(method.loc));
@@ -172,12 +166,12 @@ public:
         this->scope->children.emplace_back(node);
     }
 
-    static vector<unique_ptr<DocumentSymbol>> documentSymbol(core::Context ctx, ast::ExpressionPtr &tree) {
+    static vector<unique_ptr<DocumentSymbol>> documentSymbol(core::Context ctx, const ast::ExpressionPtr &tree) {
         core::Loc fullFile{ctx.file, core::LocOffsets{0, static_cast<uint32_t>(ctx.file.data(ctx).source().size())}};
 
         Outliner outliner{fullFile};
 
-        ast::ShallowWalk::apply(ctx, outliner, tree);
+        ast::ConstShallowWalk::apply(ctx, outliner, tree);
 
         ENFORCE(outliner.scope != nullptr);
         ENFORCE(outliner.scope->symbol == core::Symbols::root());
