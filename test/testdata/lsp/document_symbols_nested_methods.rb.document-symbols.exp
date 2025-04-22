@@ -29,32 +29,6 @@
             },
             "children": [
                 {
-                    "name": "b_func",
-                    "detail": "",
-                    "kind": 6,
-                    "range": {
-                        "start": {
-                            "line": 4,
-                            "character": 4
-                        },
-                        "end": {
-                            "line": 6,
-                            "character": 7
-                        }
-                    },
-                    "selectionRange": {
-                        "start": {
-                            "line": 4,
-                            "character": 4
-                        },
-                        "end": {
-                            "line": 4,
-                            "character": 14
-                        }
-                    },
-                    "children": []
-                },
-                {
                     "name": "self.a_func",
                     "detail": "",
                     "kind": 6,
@@ -76,6 +50,32 @@
                         "end": {
                             "line": 3,
                             "character": 17
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "name": "b_func",
+                    "detail": "",
+                    "kind": 6,
+                    "range": {
+                        "start": {
+                            "line": 4,
+                            "character": 4
+                        },
+                        "end": {
+                            "line": 6,
+                            "character": 7
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 4,
+                            "character": 4
+                        },
+                        "end": {
+                            "line": 4,
+                            "character": 14
                         }
                     },
                     "children": []

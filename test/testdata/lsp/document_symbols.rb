@@ -87,3 +87,19 @@ class OuterModule
   class InnerClass; end
   module InnerModule; end
 end
+
+module Container; end
+module Container::Services; end
+
+module Container
+  class Services::TestService
+    extend T::Sig
+
+    def method1
+    end
+
+    sig { void }
+    def method2
+    end
+  end
+end
