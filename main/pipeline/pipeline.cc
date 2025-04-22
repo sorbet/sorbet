@@ -1137,6 +1137,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                    optional<UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>>> &&foundHashesForFiles,
                    const options::Options &opts, WorkerPool &workers) {
     try {
+        std::vector<core::ClassOrModuleRef> symbolsToRecompute;
         auto runIncrementalNamer = foundHashesForFiles.has_value() && !foundHashesForFiles->empty();
         {
             Timer timeit(gs.tracer(), "incremental_naming");
@@ -1145,7 +1146,8 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
 
             auto canceled = runIncrementalNamer
                                 ? sorbet::namer::Namer::runIncremental(gs, absl::Span<ast::ParsedFile>(what),
-                                                                       std::move(foundHashesForFiles.value()), workers)
+                                                                       std::move(foundHashesForFiles.value()), workers,
+                                                                       symbolsToRecompute)
                                 : sorbet::namer::Namer::run(gs, absl::Span<ast::ParsedFile>(what), workers, nullptr);
 
             // Cancellation cannot occur during incremental namer.
@@ -1178,7 +1180,8 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
-            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what), runIncrementalNamer, workers);
+            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what), runIncrementalNamer, workers,
+                                                                     std::move(symbolsToRecompute));
             // incrementalResolve is not cancelable.
             ENFORCE(result.hasResult());
             what = move(result.result());

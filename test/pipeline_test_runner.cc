@@ -758,7 +758,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     {
         core::UnfreezeNameTable nameTableAccess(*gs);
         core::UnfreezeSymbolTable symbolTableAccess(*gs);
-        trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncrementalNamer, *workers).result());
+        trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncrementalNamer, *workers, {}).result());
     }
 
     if (opts.cacheSensitiveOptions.stripePackages) {

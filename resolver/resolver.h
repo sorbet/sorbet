@@ -22,13 +22,15 @@ public:
      * These two versions are explicitly instantiated in resolver.cc
      */
     static ast::ParsedFilesOrCancelled runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
-                                                      bool ranIncrementalNamer, WorkerPool &workers);
+                                                      bool ranIncrementalNamer, WorkerPool &workers,
+                                                      std::vector<core::ClassOrModuleRef> symbolsToRecompute);
 
     // used by autogen only
     static std::vector<ast::ParsedFile> runConstantResolution(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
                                                               WorkerPool &workers);
 
-    static void finalizeSymbols(core::GlobalState &gs);
+    static void finalizeSymbols(core::GlobalState &gs,
+                                std::vector<core::ClassOrModuleRef> *symbolsToRecompute = nullptr);
 
 private:
     static void finalizeAncestors(core::GlobalState &gs);

@@ -14,7 +14,7 @@ class Namer final {
     [[nodiscard]] static bool
     runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
                 UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>> &&oldFoundDefHashesForFiles,
-                core::FoundDefHashes *foundHashesOut);
+                core::FoundDefHashes *foundHashesOut, std::vector<core::ClassOrModuleRef> *updatedSymbols);
 
 public:
     // Note: foundHashes is an optional out parameter.
@@ -36,7 +36,7 @@ public:
     [[nodiscard]] static bool
     runIncremental(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees,
                    UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>> &&oldFoundDefHashesForFiles,
-                   WorkerPool &workers);
+                   WorkerPool &workers, std::vector<core::ClassOrModuleRef> &updatedSymbols);
 
     Namer() = delete;
 };
