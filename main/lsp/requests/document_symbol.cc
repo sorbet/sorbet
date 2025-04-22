@@ -66,8 +66,7 @@ struct Node {
         }
         name += view;
 
-        auto result =
-            make_unique<DocumentSymbol>(move(name), kind, move(range), move(selectionRange));
+        auto result = make_unique<DocumentSymbol>(move(name), kind, move(range), move(selectionRange));
 
         // Previous versions of VSCode have a bug that requires this non-optional field to be present.
         // This previously tried to include the method signature but due to issues where large signatures were not
