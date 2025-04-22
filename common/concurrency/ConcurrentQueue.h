@@ -40,8 +40,7 @@ public:
 
     // When `Elem` is a fundamental type (int, bool, etc) push takes a value, but if it's anything else it expects an
     // rvalue reference so that we don't forget to move the argument.
-    // TODO: is it valuable to make this check use `std::is_trivially_copyable` instead?
-    inline void push(typename std::conditional<std::is_fundamental<Elem>::value, Elem, Elem &&>::type elem,
+    inline void push(typename std::conditional<std::is_trivially_copyable_v<Elem>, Elem, Elem &&>::type elem,
                      int count) noexcept {
         _queue.enqueue(std::move(elem));
         elementsLeftToPush.fetch_add(-count, std::memory_order_release);
