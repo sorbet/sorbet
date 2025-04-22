@@ -211,3 +211,12 @@ end
 #| P10
 #  ^^^ error: Unable to resolve constant `P10`
 def method21(x, y); end
+
+#| -> void # error: Multiline signature ("#|") must be preceded by a signature start ("#:")
+def method22; end # error: The method `method22` does not have a `sig`
+
+#: (
+#|   P1,
+#|   P2
+#: ) -> void # error: Signature start ("#:") cannot appear after a multiline signature ("#|")
+def method23(p1, p2); end # error: The method `method23` does not have a `sig`

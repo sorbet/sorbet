@@ -181,6 +181,48 @@ def method20(&block)
   T.reveal_type(block) # error: Revealed type: `T.untyped`
 end
 
+# Some comment
+#: (String) -> void
+
+def method21(x)
+  T.reveal_type(x) # error: Revealed type: `String`
+end
+
+#: (Integer) -> void # error: Unused RBS signature comment. No method definition found after it
+sig { params(x: String).void }
+def method22(x)
+  T.reveal_type(x) # error: Revealed type: `String`
+end
+
+#: (Integer) -> void # error: Unused RBS signature comment. No method definition found after it
+sig do
+  params(x: String).void
+end
+def method23(x)
+  T.reveal_type(x) # error: Revealed type: `String`
+end
+
+#: (String) -> void
+def method24(x)
+  T.reveal_type(x) # error: Revealed type: `String`
+  #: (Integer) -> void
+  def method25(x)
+    T.reveal_type(x) # error: Revealed type: `Integer`
+  end
+end
+
+class UnusedTypeAnnotation
+  #: -> void # error: Unused RBS signature comment. No method definition found after it
+  class Inner
+    def foo; end # error: The method `foo` does not have a `sig`
+  end
+
+  def foo # error: The method `foo` does not have a `sig`
+    #: -> void # error: Unused RBS signature comment. No method definition found after it
+  end
+  def bar; end # error: The method `bar` does not have a `sig`
+end
+
 class FooProc
   #: (p: ^() -> Integer ) ?{ (Integer) [self: FooProc] -> String } -> void
   def initialize(p: -> { 42 }, &block)

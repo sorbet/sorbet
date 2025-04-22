@@ -79,3 +79,19 @@ class AttrAnnotations
     attr_reader :foo
   end
 end
+
+class UnusedComments
+  extend T::Sig
+
+  #: Integer # error: Unused RBS signature comment. No method definition found after it
+  sig { returns(String) }
+  attr_reader :foo
+
+  #: -> void
+  def initialize
+    @foo = T.let("", String)
+  end
+end
+
+x = UnusedComments.new
+T.reveal_type(x.foo) # error: Revealed type: `String`

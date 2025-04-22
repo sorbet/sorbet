@@ -212,6 +212,49 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(block)
   end
 
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:x, <emptyTree>::<C String>).void()
+  end
+
+  def method21<<todo method>>(x, &<blk>)
+    <emptyTree>::<C T>.reveal_type(x)
+  end
+
+  ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.params(:x, <emptyTree>::<C String>).void()
+  end
+
+  def method22<<todo method>>(x, &<blk>)
+    <emptyTree>::<C T>.reveal_type(x)
+  end
+
+  ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.params(:x, <emptyTree>::<C String>).void()
+  end
+
+  def method23<<todo method>>(x, &<blk>)
+    <emptyTree>::<C T>.reveal_type(x)
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:x, <emptyTree>::<C String>).void()
+  end
+
+  def method24<<todo method>>(x, &<blk>)
+    begin
+      <emptyTree>::<C T>.reveal_type(x)
+      <runtime method definition of method25>
+    end
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:x, <emptyTree>::<C Integer>).void()
+  end
+
+  def method25<<todo method>>(x, &<blk>)
+    <emptyTree>::<C T>.reveal_type(x)
+  end
+
   <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
   class <emptyTree>::<C P1><<C <todo sym>>> < (::<todo sym>)
@@ -343,6 +386,36 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(<self>.method19(42))
 
   <runtime method definition of method20>
+
+  <runtime method definition of method21>
+
+  <runtime method definition of method22>
+
+  <runtime method definition of method23>
+
+  <runtime method definition of method24>
+
+  class <emptyTree>::<C UnusedTypeAnnotation><<C <todo sym>>> < (::<todo sym>)
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def bar<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    class <emptyTree>::<C Inner><<C <todo sym>>> < (::<todo sym>)
+      def foo<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      <runtime method definition of foo>
+    end
+
+    <runtime method definition of foo>
+
+    <runtime method definition of bar>
+  end
 
   class <emptyTree>::<C FooProc><<C <todo sym>>> < (::<todo sym>)
     ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||

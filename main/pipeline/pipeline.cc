@@ -43,6 +43,7 @@
 #include "payload/binary/binary.h"
 #include "pipeline.h"
 #include "rbs/AssertionsRewriter.h"
+#include "rbs/CommentsAssociator.h"
 #include "rbs/SigsRewriter.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
@@ -221,40 +222,48 @@ ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref,
     return core::serialize::Serializer::loadTree(gs, file, maybeCached.data);
 }
 
-unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
-                                   bool traceLexer, bool traceParser) {
+parser::Parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
+                                      bool traceLexer, bool traceParser) {
     Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
-    unique_ptr<parser::Node> nodes;
+    parser::Parser::ParseResult result;
     {
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
         auto indentationAware = false;               // Don't start in indentation-aware error recovery mode
-        auto settings = parser::Parser::Settings{traceLexer, traceParser, indentationAware};
-        nodes = parser::Parser::run(gs, file, settings);
+        auto collectComments =
+            gs.cacheSensitiveOptions.rbsSignaturesEnabled; // Collect comments for RBS signature translation
+        auto settings = parser::Parser::Settings{traceLexer, traceParser, indentationAware, collectComments};
+        result = parser::Parser::run(gs, file, settings);
     }
     if (print.ParseTree.enabled) {
-        print.ParseTree.fmt("{}\n", nodes->toStringWithTabs(gs, 0));
+        print.ParseTree.fmt("{}\n", result.tree->toStringWithTabs(gs, 0));
     }
     if (print.ParseTreeJson.enabled) {
-        print.ParseTreeJson.fmt("{}\n", nodes->toJSON(gs, 0));
+        print.ParseTreeJson.fmt("{}\n", result.tree->toJSON(gs, 0));
     }
     if (print.ParseTreeJsonWithLocs.enabled) {
-        print.ParseTreeJson.fmt("{}\n", nodes->toJSONWithLocs(gs, file, 0));
+        print.ParseTreeJson.fmt("{}\n", result.tree->toJSONWithLocs(gs, file, 0));
     }
     if (print.ParseTreeWhitequark.enabled) {
-        print.ParseTreeWhitequark.fmt("{}\n", nodes->toWhitequark(gs, 0));
+        print.ParseTreeWhitequark.fmt("{}\n", result.tree->toWhitequark(gs, 0));
     }
-    return nodes;
+    return result;
 }
 
-unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> node,
-                                       const options::Printers &print) {
+unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file,
+                                       parser::Parser::ParseResult &&parseResult, const options::Printers &print) {
+    auto node = move(parseResult.tree);
+    auto commentLocations = move(parseResult.commentLocations);
+
     if (gs.cacheSensitiveOptions.rbsSignaturesEnabled || gs.cacheSensitiveOptions.rbsAssertionsEnabled) {
         Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
         core::MutableContext ctx(gs, core::Symbols::root(), file);
         core::UnfreezeNameTable nameTableAccess(gs);
 
         if (gs.cacheSensitiveOptions.rbsSignaturesEnabled) {
-            auto rewriter = rbs::SigsRewriter(ctx);
+            auto associator = rbs::CommentsAssociator(ctx, commentLocations);
+            auto commentsByNode = associator.run(node);
+
+            auto rewriter = rbs::SigsRewriter(ctx, commentsByNode);
             node = rewriter.run(move(node));
         }
         if (gs.cacheSensitiveOptions.rbsAssertionsEnabled) {
@@ -316,9 +325,9 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
         if (file.data(gs).strictLevel == core::StrictLevel::Ignore) {
             return ast::MK::EmptyTree();
         }
-        auto parseTree = runParser(gs, file, print, opts.traceLexer, opts.traceParser);
+        auto parseResult = runParser(gs, file, print, opts.traceLexer, opts.traceParser);
 
-        parseTree = runRBSRewrite(gs, file, move(parseTree), print);
+        auto parseTree = runRBSRewrite(gs, file, move(parseResult), print);
 
         return runDesugar(gs, file, move(parseTree), print, preserveConcreteSyntax);
     } catch (SorbetException &) {
@@ -343,11 +352,11 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (file.data(lgs).strictLevel == core::StrictLevel::Ignore) {
                 return emptyParsedFile(file);
             }
-            auto parseTree = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
+            auto parseResult = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
             if (opts.stopAfterPhase == options::Phase::PARSER) {
                 return emptyParsedFile(file);
             }
-            parseTree = runRBSRewrite(lgs, file, move(parseTree), print);
+            auto parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
             if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
                 return emptyParsedFile(file);
             }

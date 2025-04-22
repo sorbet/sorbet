@@ -199,3 +199,12 @@ else
     nil # error: Expected `String` but found `NilClass` for method result type
   end
 end
+
+class Foo
+  class << self
+    #: -> String
+    def def33
+      nil # error: Expected `String` but found `NilClass` for method result type
+    end
+  end
+end

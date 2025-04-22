@@ -112,6 +112,8 @@ unique_ptr<ruby_parser::base_driver> makeDriver(Parser::Settings settings, strin
                                                              !!settings.indentationAware);
     }
 
+    driver->lex.collect_comments = settings.collectComments;
+
     for (string local : initialLocals) {
         driver->lex.declare(local);
     }
@@ -121,8 +123,8 @@ unique_ptr<ruby_parser::base_driver> makeDriver(Parser::Settings settings, strin
 
 } // namespace
 
-unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::Settings settings,
-                             vector<string> initialLocals) {
+Parser::ParseResult Parser::run(core::GlobalState &gs, core::FileRef file, Parser::Settings settings,
+                                vector<string> initialLocals) {
     // Marked `const` so that we can re-use across multiple `build()` invocations
     const Builder builder(gs, file);
 
@@ -155,7 +157,7 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
 
     if (ast != nullptr) {
         // Successful parse on first try
-        return ast;
+        return ParseResult{std::move(ast), driver->get_comment_locations()};
     }
 
     Timer timeit(gs.tracer(), "withIndentationAware");
@@ -165,7 +167,7 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
 
     if (astRetry == nullptr) {
         // Retry did not produce a parse result
-        return make_unique<Begin>(core::LocOffsets{0, 0}, NodeVec{});
+        return ParseResult{std::make_unique<Begin>(core::LocOffsets{0, 0}, NodeVec{}), std::vector<core::LocOffsets>{}};
     }
 
     ENFORCE(absl::c_any_of(driverRetry->diagnostics,
@@ -175,6 +177,6 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
             "Error-recovery mode of the parser should always emit an error hint if it produced a parse result.");
     auto onlyHints = true;
     reportDiagnostics(gs, file, driverRetry->diagnostics, onlyHints);
-    return astRetry;
+    return ParseResult{std::move(astRetry), driverRetry->get_comment_locations()};
 }
 }; // namespace sorbet::parser
