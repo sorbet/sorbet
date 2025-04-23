@@ -441,7 +441,7 @@ module T::Private::Methods
         # We already ran the sig block, perhaps in another thread.
         return sig
       else
-        raise "No `sig` wrapper for #{key_to_method(key)}"
+        raise "No `sig` wrapper for #{key}"
       end
     end
 
@@ -452,7 +452,7 @@ module T::Private::Methods
       raise
     end
     if @sigs_that_raised[key]
-      raise "A previous invocation of #{key_to_method(key)} raised, and the current one succeeded. Please don't do that."
+      raise "A previous invocation of #{key} raised, and the current one succeeded. Please don't do that."
     end
 
     @sig_wrappers.delete(key)
@@ -589,19 +589,17 @@ module T::Private::Methods
     mod.extend(SingletonMethodHooks)
   end
 
+  CONST_WEAK_MAP = ObjectSpace::WeakMap.new
+  private_constant :CONST_WEAK_MAP
+
   # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.
   private_class_method def self.method_owner_and_name_to_key(owner, name)
-    "#{owner.object_id}##{name}"
+    CONST_WEAK_MAP[owner.object_id] ||= owner # rubocop:disable Lint/HashCompareByIdentity
+    [owner.object_id, name]
   end
 
   private_class_method def self.method_to_key(method)
     method_owner_and_name_to_key(method.owner, method.name)
-  end
-
-  private_class_method def self.key_to_method(key)
-    id, name = key.split("#")
-    obj = ObjectSpace._id2ref(id.to_i)
-    obj.instance_method(name)
   end
 end
 
