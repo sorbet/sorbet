@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <iterator>
 
+using namespace std;
+
 using namespace std::literals::string_view_literals;
 
 namespace sorbet::packager {

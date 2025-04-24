@@ -2094,7 +2094,7 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
             }
         }
 
-        workers.multiplexJob("rewritePackagesAndFiles", [&gs, &files, &barrier, taskq]() {
+        workers.multiplexJob("rewritePackagesAndFiles", [&gs = as_const(gs), &files, &barrier, taskq]() {
             Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
             size_t idx;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
