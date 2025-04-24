@@ -81,7 +81,17 @@ else
         break;
     esac
   done
-  paths=("$@")
+  for path in "${@}"; do
+    if [[ "$path" = *.exp ]]; then
+      # delete shortest match of pattern from back of path
+      path=${path%.*.exp}
+      if [[ "$path" = */pass ]]; then
+        path=${path%/pass}
+      fi
+    fi
+
+    paths=("$path")
+  done
 fi
 
 if [ "$BUILD" != "" ]; then
