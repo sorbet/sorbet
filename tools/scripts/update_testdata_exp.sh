@@ -90,7 +90,7 @@ else
       fi
     fi
 
-    paths=("$path")
+    paths+=("$path")
   done
 fi
 
