@@ -1,12 +1,12 @@
 # -- test/testdata/packager/nested_inner_namespaces/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C RootPackage><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::RootPackage<<C RootPackage>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C RootPackage>::<C Foo>)
   end
 end
 # -- test/testdata/packager/nested_inner_namespaces/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C RootPackage>::<C Foo><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::RootPackage::Foo<<C Foo>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C RootPackage>::<C Foo>::<C Constant>)
 
     <self>.export(<emptyTree>::<C RootPackage>::<C Foo>::<C Bar>::<C Constant>)
@@ -16,12 +16,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/nested_inner_namespaces/bar.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C RootPackage>::<C Bar><<C <todo sym>>> < ()
+  module ::RootPackage::Bar<<C Bar>> < ()
     ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params(:a, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
     end
 
-    def main<<todo method>>(a, &<blk>)
+    def main(a, <blk>)
       if a.>(10)
         <emptyTree>::<C RootPackage>::<C Foo>::<C Constant>
       else
@@ -40,14 +40,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/nested_inner_namespaces/foo/foo.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C RootPackage>::<C Foo><<C <todo sym>>> < ()
-    <emptyTree>::<C Constant> = "Foo"
+  module ::RootPackage::Foo<<C Foo>> < ()
+    ::RootPackage::Foo::Constant = "Foo"
 
-    module <emptyTree>::<C Bar><<C <todo sym>>> < ()
-      <emptyTree>::<C Constant> = "Bar"
+    module ::RootPackage::Foo::Bar<<C Bar>> < ()
+      ::RootPackage::Foo::Bar::Constant = "Bar"
 
-      module <emptyTree>::<C Baz><<C <todo sym>>> < ()
-        <emptyTree>::<C Constant> = "Baz"
+      module ::RootPackage::Foo::Bar::Baz<<C Baz>> < ()
+        ::RootPackage::Foo::Bar::Baz::Constant = "Baz"
       end
     end
   end

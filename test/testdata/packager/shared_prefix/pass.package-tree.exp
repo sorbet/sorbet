@@ -1,35 +1,35 @@
 # -- test/testdata/packager/shared_prefix/bar/that/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Project>::<C Bar>::<C That><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::Project::Bar::That<<C That>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C Project>::<C Bar>::<C That>::<C Thing>)
   end
 end
 # -- test/testdata/packager/shared_prefix/bar/this/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Project>::<C Bar>::<C This><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::Project::Bar::This<<C This>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C Project>::<C Bar>::<C This>::<C Thing>)
   end
 end
 # -- test/testdata/packager/shared_prefix/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Project>::<C Foo><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::Project::Foo<<C Foo>> < (::Sorbet::Private::Static::PackageSpec)
   end
 end
 # -- test/testdata/packager/shared_prefix/bar/that/that.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C Project>::<C Bar>::<C That><<C <todo sym>>> < ()
-    <emptyTree>::<C Thing> = <cast:let>(:yeah, <todo sym>, <emptyTree>::<C Symbol>)
+  module ::Project::Bar::That<<C That>> < ()
+    ::Project::Bar::That::Thing = <cast:let>(:yeah, <todo sym>, <emptyTree>::<C Symbol>)
   end
 end
 # -- test/testdata/packager/shared_prefix/bar/this/this.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C Project>::<C Bar>::<C This><<C <todo sym>>> < ()
-    <emptyTree>::<C Thing> = <cast:let>(:hey, <todo sym>, <emptyTree>::<C Symbol>)
+  module ::Project::Bar::This<<C This>> < ()
+    ::Project::Bar::This::Thing = <cast:let>(:hey, <todo sym>, <emptyTree>::<C Symbol>)
   end
 end
 # -- test/testdata/packager/shared_prefix/foo/foo.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C Foo>::<C Foo><<C <todo sym>>> < (::<todo sym>)
+  class ::Project::Foo::Foo<<C Foo>> < (::<todo sym>)
     <self>.puts(<emptyTree>::<C Project>::<C Bar>::<C This>)
   end
 end

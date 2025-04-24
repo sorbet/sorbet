@@ -1,6 +1,6 @@
 # -- test/testdata/packager/invalid_imports_and_exports/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C A><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::A<<C A>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(123)
 
     <self>.import("hello")
@@ -34,7 +34,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/invalid_imports_and_exports/b/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C B><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::B<<C B>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C A>)
 
     <self>.export(<emptyTree>::<C B>::<C BClass>)
@@ -44,23 +44,23 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/invalid_imports_and_exports/c/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C C><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::C<<C C>> < (::Sorbet::Private::Static::PackageSpec)
   end
 end
 # -- test/testdata/packager/invalid_imports_and_exports/a.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C A><<C <todo sym>>> < ()
-    <emptyTree>::<C REFERENCE> = <emptyTree>::<C ASecondClass>
+  module ::A<<C A>> < ()
+    ::A::REFERENCE = <emptyTree>::<C ASecondClass>
 
-    class <emptyTree>::<C ASecondClass><<C <todo sym>>> < (::<todo sym>)
+    class ::A::ASecondClass<<C ASecondClass>> < (::<todo sym>)
     end
 
-    class <emptyTree>::<C AClass><<C <todo sym>>> < (::<todo sym>)
+    class ::A::AClass<<C AClass>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.returns(<emptyTree>::<C AClass>)
       end
 
-      def get_a<<todo method>>(&<blk>)
+      def get_a(<blk>)
         <emptyTree>::<C B>::<C BModule>.get_a()
       end
 
@@ -69,12 +69,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of get_a>
     end
 
-    module <emptyTree>::<C AModule><<C <todo sym>>> < ()
+    module ::A::AModule<<C AModule>> < ()
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.returns(<emptyTree>::<C Integer>)
       end
 
-      def self.one<<todo method>>(&<blk>)
+      def self.one(<blk>)
         1
       end
 
@@ -86,13 +86,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/invalid_imports_and_exports/b/b.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C B><<C <todo sym>>> < ()
-    class <emptyTree>::<C BClass><<C <todo sym>>> < (::<todo sym>)
+  module ::B<<C B>> < ()
+    class ::B::BClass<<C BClass>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.returns(<emptyTree>::<C Integer>)
       end
 
-      def get_one<<todo method>>(&<blk>)
+      def get_one(<blk>)
         <emptyTree>::<C A>::<C AModule>.one()
       end
 
@@ -101,12 +101,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of get_one>
     end
 
-    module <emptyTree>::<C BModule><<C <todo sym>>> < ()
+    module ::B::BModule<<C BModule>> < ()
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.returns(<emptyTree>::<C A>::<C AClass>)
       end
 
-      def self.get_a<<todo method>>(&<blk>)
+      def self.get_a(<blk>)
         <emptyTree>::<C A>::<C AClass>.new()
       end
 

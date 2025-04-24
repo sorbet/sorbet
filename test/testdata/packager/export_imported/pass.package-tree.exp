@@ -1,6 +1,6 @@
 # -- test/testdata/packager/export_imported/a/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C A><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::A<<C A>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C B>)
 
     <self>.export(<emptyTree>::<C B>::<C BClass>)
@@ -8,12 +8,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_imported/b/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C B><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::B<<C B>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C B>::<C BClass>)
   end
 end
 # -- test/testdata/packager/export_imported/b/b.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C B>::<C BClass><<C <todo sym>>> < (::<todo sym>)
+  class ::B::BClass<<C BClass>> < (::<todo sym>)
   end
 end

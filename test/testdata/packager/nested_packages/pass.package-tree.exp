@@ -1,6 +1,6 @@
 # -- test/testdata/packager/nested_packages/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Package><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::Package<<C Package>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C Package>::<C Subpackage>)
 
     <self>.export(<emptyTree>::<C Package>::<C PackageClass>)
@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/nested_packages/subpackage/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Package>::<C Subpackage><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::Package::Subpackage<<C Subpackage>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C Package>)
 
     <self>.export(<emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass>)
@@ -16,12 +16,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/nested_packages/mainpackage.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Package>::<C PackageClass><<C <todo sym>>> < (::<todo sym>)
+  class ::Package::PackageClass<<C PackageClass>> < (::<todo sym>)
     ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass>)
     end
 
-    def self.subpkg_class<<todo method>>(&<blk>)
+    def self.subpkg_class(<blk>)
       <emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass>.new()
     end
 
@@ -32,12 +32,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/nested_packages/subpackage/subpackage.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass><<C <todo sym>>> < (::<todo sym>)
+  class ::Package::Subpackage::SubpackageClass<<C SubpackageClass>> < (::<todo sym>)
     ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C Package>::<C PackageClass>)
     end
 
-    def self.package_class<<todo method>>(&<blk>)
+    def self.package_class(<blk>)
       return <emptyTree>::<C Package>::<C PackageClass>.new()
     end
 
