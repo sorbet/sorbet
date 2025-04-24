@@ -236,6 +236,10 @@ public:
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_ = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer_ = nullopt;
 
+    UnorderedMap<pair<core::packages::MangledName, core::packages::ImportType>,
+                 pair<UnorderedSet<core::FileRef>, core::AutocorrectSuggestion>>
+        trackedMissingImports_ = {};
+
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
         return strictDependenciesLevel_;
     }
@@ -485,7 +489,10 @@ public:
             edits.push_back(deleteTestImportEdit.value());
             suggestionTitle = fmt::format("Convert `{}` to `{}`", "test_import", "import");
         }
-        core::AutocorrectSuggestion suggestion(suggestionTitle, edits);
+
+        bool isDidYouMean = false;
+        bool skipWhenAggregated = true;
+        core::AutocorrectSuggestion suggestion(suggestionTitle, edits, isDidYouMean, skipWhenAggregated);
         return {suggestion};
     }
 
@@ -680,6 +687,27 @@ public:
 
         // No path found
         return nullopt;
+    }
+
+    void trackMissingImport(const core::FileRef file, const core::packages::MangledName toImport,
+                            const core::packages::ImportType importType,
+                            const core::AutocorrectSuggestion autocorrect) {
+        auto r = trackedMissingImports_.find({toImport, importType});
+        if (r != trackedMissingImports_.end()) {
+            r->second.first.insert(file);
+        } else {
+            trackedMissingImports_[{toImport, importType}] = {{file}, autocorrect};
+        }
+    }
+
+    void untrackMissingImportsFor(const core::FileRef file) {
+        for (auto &[_, value] : trackedMissingImports_) {
+            auto &files = value.first;
+            if (files.contains(file)) {
+                files.erase(file);
+            }
+        }
+        erase_if(trackedMissingImports_, [](const auto &x) { return x.second.first.empty(); });
     }
 };
 

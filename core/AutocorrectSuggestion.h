@@ -13,13 +13,18 @@ struct AutocorrectSuggestion {
         std::string replacement;
     };
 
-    const std::string title;
+    std::string title;
     std::vector<Edit> edits;
 
     bool isDidYouMean;
 
-    AutocorrectSuggestion(std::string title, std::vector<Edit> edits, bool isDidYouMean = false)
-        : title(title), edits(edits), isDidYouMean(isDidYouMean) {}
+    bool skipWhenAggregated;
+
+    AutocorrectSuggestion() : title(""), edits({}), isDidYouMean(false), skipWhenAggregated(false) {}
+
+    AutocorrectSuggestion(std::string title, std::vector<Edit> edits, bool isDidYouMean = false,
+                          bool skipWhenAggregated = false)
+        : title(title), edits(edits), isDidYouMean(isDidYouMean), skipWhenAggregated(skipWhenAggregated) {}
 
     // Reads all the files to be edited, and then accumulates all the edits that need to be applied
     // to those files into a resulting string with all edits applied. Does not write those back out

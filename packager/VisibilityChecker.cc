@@ -364,6 +364,8 @@ class VisibilityCheckerPass final {
 public:
     const core::packages::PackageInfo &package;
     const bool insideTestFile;
+    UnorderedMap<std::pair<core::packages::MangledName, core::packages::ImportType>, core::AutocorrectSuggestion>
+        missingImports;
 
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
         : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
@@ -466,12 +468,22 @@ public:
                               path.has_value();
             }
             if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
+                auto newImportType =
+                    isTestImport ? core::packages::ImportType::Test : core::packages::ImportType::Normal;
+                std::optional<core::AutocorrectSuggestion> autocorrect =
+                    this->package.addImport(ctx, pkg, isTestImport);
+                // TODO(neil): find out why this is sometimes not true and enable this ENFORCE
+                /* ENFORCE(autocorrect.has_value()); */
+                if (autocorrect.has_value()) {
+                    missingImports.insert({{pkg.mangledName(), newImportType}, autocorrect.value()});
+                }
                 if (!wasImported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                         e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                        if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
-                            e.addAutocorrect(std::move(exp.value()));
+                        if (autocorrect.has_value()) {
+                            core::AutocorrectSuggestion autocorrectCopy(autocorrect.value());
+                            e.addAutocorrect(std::move(autocorrectCopy));
                             if (!db.errorHint().empty()) {
                                 e.addErrorNote("{}", db.errorHint());
                             }
@@ -488,8 +500,9 @@ public:
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                         e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
                         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                        if (auto exp = this->package.addImport(ctx, pkg, false)) {
-                            e.addAutocorrect(std::move(exp.value()));
+                        if (autocorrect.has_value()) {
+                            core::AutocorrectSuggestion autocorrectCopy(autocorrect.value());
+                            e.addAutocorrect(std::move(autocorrectCopy));
                             if (!db.errorHint().empty()) {
                                 e.addErrorNote("{}", db.errorHint());
                             }
@@ -584,38 +597,67 @@ public:
         }
     }
 
-    static std::vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
+    static std::vector<ast::ParsedFile> run(core::GlobalState &nonConstGs, WorkerPool &workers,
                                             std::vector<ast::ParsedFile> files) {
+        const core::GlobalState &gs = nonConstGs;
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
+        auto resultq = std::make_shared<BlockingBoundedQueue<
+            std::pair<core::FileRef, UnorderedMap<std::pair<core::packages::MangledName, core::packages::ImportType>,
+                                                  core::AutocorrectSuggestion>>>>(files.size());
         absl::BlockingCounter barrier(std::max(workers.size(), 1));
 
         for (size_t i = 0; i < files.size(); ++i) {
             taskq->push(i, 1);
         }
 
-        workers.multiplexJob("VisibilityChecker", [&gs, &files, &barrier, taskq]() {
+        workers.multiplexJob("VisibilityChecker", [&gs, &files, &barrier, taskq, resultq]() {
             size_t idx;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 ast::ParsedFile &f = files[idx];
                 if (f.file.data(gs).isPackage(gs)) {
+                    resultq->push({f.file, {}}, 1);
                     continue;
                 }
 
                 auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                 if (!pkgName.exists()) {
+                    resultq->push({f.file, {}}, 1);
                     continue;
                 }
 
                 core::Context ctx{gs, core::Symbols::root(), f.file};
                 VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
                 ast::TreeWalk::apply(ctx, pass, f.tree);
+                resultq->push({f.file, std::move(pass.missingImports)}, 1);
             }
 
             barrier.DecrementCount();
         });
 
         barrier.Wait();
+
+        std::pair<core::FileRef, UnorderedMap<std::pair<core::packages::MangledName, core::packages::ImportType>,
+                                              core::AutocorrectSuggestion>>
+            threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (result.gotItem()) {
+                auto file = threadResult.first;
+                auto pkgName = gs.packageDB().getPackageNameForFile(file);
+                if (!pkgName.exists()) {
+                    continue;
+                }
+                auto nonConstPackageInfo = nonConstGs.packageDB().getPackageInfoNonConst(pkgName);
+                nonConstPackageInfo->untrackMissingImportsFor(file);
+                for (auto [key, autocorrect] : threadResult.second) {
+                    auto toImport = key.first;
+                    auto importType = key.second;
+                    nonConstPackageInfo->trackMissingImport(file, toImport, importType, autocorrect);
+                }
+            }
+        }
 
         return files;
     }
