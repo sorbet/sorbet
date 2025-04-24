@@ -395,7 +395,7 @@ like this:
 ```lua
 vim.lsp.commands['sorbet.savePackageFiles'] = function(command)
   -- ...
-endfunction
+end
 ```
 
 Sorbet includes this `sorbet.savePackageFiles` command in the `command` field of
