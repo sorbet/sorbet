@@ -139,6 +139,9 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             // Collect all autocorrects regardless of range to compile into a "source" autocorrect whose scope is
             // the whole file.
             for (auto &autocorrect : error->autocorrects) {
+                if (autocorrect.skipWhenAggregated) {
+                    continue;
+                }
                 allEdits.insert(allEdits.end(), autocorrect.edits.begin(), autocorrect.edits.end());
             }
 
@@ -162,6 +165,14 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 action->edit = move(workspaceEdit);
                 result.emplace_back(move(action));
             }
+        }
+    }
+
+    if (gs.packageDB().enabled()) {
+        auto &package = gs.packageDB().getPackageForFile(gs, file);
+        if (package.exists()) {
+            auto autocorrect = package.aggregateMissingImports(file);
+            allEdits.insert(allEdits.end(), autocorrect.edits.begin(), autocorrect.edits.end());
         }
     }
 
