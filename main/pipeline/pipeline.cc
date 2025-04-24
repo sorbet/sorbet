@@ -578,39 +578,41 @@ ast::ParsedFilesOrCancelled mergeIndexResults(core::GlobalState &cgs, const opti
         Timer timeit(cgs.tracer(), "substituteTrees");
         auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(batchq->bound);
 
-        workers.multiplexJob("substituteTrees", [&cgs = as_const(cgs), &logger = cgs.tracer(), batchq, resultq, cancelable]() {
-            Timer timeit(logger, "substituteTreesWorker");
-            IndexSubstitutionJob job;
-            int numTreesProcessed = 0;
-            std::vector<ast::ParsedFile> trees;
-            for (auto result = batchq->try_pop(job); !result.done(); result = batchq->try_pop(job)) {
-                if (result.gotItem()) {
-                    // Unconditionally update the total to avoid starving the consumer thread
-                    numTreesProcessed += job.numTreesProcessed;
+        workers.multiplexJob(
+            "substituteTrees", [&cgs = as_const(cgs), &logger = cgs.tracer(), batchq, resultq, cancelable]() {
+                Timer timeit(logger, "substituteTreesWorker");
+                IndexSubstitutionJob job;
+                int numTreesProcessed = 0;
+                std::vector<ast::ParsedFile> trees;
+                for (auto result = batchq->try_pop(job); !result.done(); result = batchq->try_pop(job)) {
+                    if (result.gotItem()) {
+                        // Unconditionally update the total to avoid starving the consumer thread
+                        numTreesProcessed += job.numTreesProcessed;
 
-                    // If the slow path has been cancelled, skip substitution to handle the tree dropping in once place.
-                    if (cancelable && cgs.epochManager->wasTypecheckingCanceled()) {
-                        continue;
-                    }
+                        // If the slow path has been cancelled, skip substitution to handle the tree dropping in once
+                        // place.
+                        if (cancelable && cgs.epochManager->wasTypecheckingCanceled()) {
+                            continue;
+                        }
 
-                    if (job.subst.has_value()) {
-                        for (auto &tree : job.trees) {
-                            if (!tree.cached()) {
-                                core::MutableContext ctx(cgs, core::Symbols::root(), tree.file);
-                                tree = ast::Substitute::run(ctx, *job.subst, move(tree));
+                        if (job.subst.has_value()) {
+                            for (auto &tree : job.trees) {
+                                if (!tree.cached()) {
+                                    core::MutableContext ctx(cgs, core::Symbols::root(), tree.file);
+                                    tree = ast::Substitute::run(ctx, *job.subst, move(tree));
+                                }
                             }
                         }
+
+                        trees.insert(trees.end(), std::make_move_iterator(job.trees.begin()),
+                                     std::make_move_iterator(job.trees.end()));
                     }
-
-                    trees.insert(trees.end(), std::make_move_iterator(job.trees.begin()),
-                                 std::make_move_iterator(job.trees.end()));
                 }
-            }
 
-            if (numTreesProcessed > 0) {
-                resultq->push(std::move(trees), numTreesProcessed);
-            }
-        });
+                if (numTreesProcessed > 0) {
+                    resultq->push(std::move(trees), numTreesProcessed);
+                }
+            });
 
         ret.reserve(totalNumTrees);
         vector<ast::ParsedFile> trees;
