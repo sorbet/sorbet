@@ -598,7 +598,7 @@ ast::ParsedFilesOrCancelled mergeIndexResults(core::GlobalState &cgs, const opti
                         if (job.subst.has_value()) {
                             for (auto &tree : job.trees) {
                                 if (!tree.cached()) {
-                                    core::MutableContext ctx(cgs, core::Symbols::root(), tree.file);
+                                    core::Context ctx(cgs, core::Symbols::root(), tree.file);
                                     tree = ast::Substitute::run(ctx, *job.subst, move(tree));
                                 }
                             }
