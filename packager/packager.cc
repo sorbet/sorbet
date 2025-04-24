@@ -709,6 +709,59 @@ public:
         }
         erase_if(trackedMissingImports_, [](const auto &x) { return x.second.first.empty(); });
     }
+
+    void mergeAdjacentEdits(std::vector<core::AutocorrectSuggestion::Edit> &edits) const {
+        fast_sort(edits, [](const auto &lhs, const auto &rhs) {
+            if (lhs.loc == rhs.loc) {
+                return lhs.replacement < rhs.replacement;
+            }
+            return lhs.loc.beginPos() < rhs.loc.beginPos();
+        });
+        auto i = 0;
+        while (edits.size() > 0 && i < edits.size() - 1) {
+            if (edits[i].loc.beginPos() == edits[i + 1].loc.beginPos() && edits[i].loc.empty() &&
+                edits[i + 1].loc.empty()) {
+                // If we're inserting 2 imports at the same location, combine them into a single edit.
+                // TODO(neil): maybe this logic should be moved/added to AutocorrectSuggestion::apply, to handle other
+                // cases where 2 autocorrects add at the same loc?
+                edits[i].replacement += edits[i + 1].replacement;
+                edits.erase(edits.begin() + i + 1);
+            } else {
+                i++;
+            }
+        }
+    }
+
+    core::AutocorrectSuggestion aggregateMissingImports() const {
+        std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+        for (auto &[key, value] : trackedMissingImports_) {
+            auto importName = key.first;
+            auto importType = key.second;
+            auto autocorrect = value.second;
+            if (importType == core::packages::ImportType::Test &&
+                trackedMissingImports_.contains({importName, core::packages::ImportType::Normal})) {
+                // If we're already importing the package normally, we don't need to import it again as a
+                // test_import.
+                continue;
+            }
+            allEdits.insert(allEdits.end(), autocorrect.edits.begin(), autocorrect.edits.end());
+        }
+        mergeAdjacentEdits(allEdits);
+        return core::AutocorrectSuggestion{"Add missing imports", std::move(allEdits)};
+    }
+
+    core::AutocorrectSuggestion aggregateMissingImports(const core::FileRef file) const {
+        std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+        for (auto &[_, value] : trackedMissingImports_) {
+            auto files = value.first;
+            auto autocorrect = value.second;
+            if (files.contains(file)) {
+                allEdits.insert(allEdits.end(), autocorrect.edits.begin(), autocorrect.edits.end());
+            }
+        }
+        mergeAdjacentEdits(allEdits);
+        return core::AutocorrectSuggestion{"Add missing imports", std::move(allEdits)};
+    }
 };
 
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.
