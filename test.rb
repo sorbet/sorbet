@@ -2,54 +2,32 @@
 
 require 'sorbet-runtime'
 
-class A
-  def custom?
-    true
-  end
-end
-
-class NilClass
-  def custom?
-    false
-  end
-end
-
-a = T.let(A.new, T.nilable(A))
-if a.custom?
-  T.reveal_type(a)
-end
-
-class Super
+class User
   extend T::Sig
   extend T::Helpers
 
   abstract!
 
-  # SubAがサブクラスであること
-  # trueならclass変える
-  sig { abstract.returns(T::Boolean).narrows_to(SubA) }
-  def a?; end
+  sig { abstract.returns(T::Boolean).narrows_to(Admin) }
+  def admin?; end
 end
 
-class SubA < Super
-  sig { override.returns(TrueClass).narrows_to(SubA) }
-  def a?
+class Admin < User
+  sig { override.returns(TrueClass).narrows_to(Admin) }
+  def admin?
     pp(true)
   end
 end
 
-class SubB < Super
-  sig { override.returns(FalseClass).narrows_to(SubA) }
-  def a?
+class Staff < User
+  sig { override.returns(FalseClass).narrows_to(Admin) }
+  def admin?
     pp(false)
   end
 end
 
-foo = T.let(SubA.new, Super)
-if foo.a?
+foo = T.let(Admin.new, User)
+if foo.admin?
   T.reveal_type(foo)
 end
 
-unless foo.nil?
-  T.reveal_type(foo)
-end

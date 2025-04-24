@@ -587,20 +587,62 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         return;
     }
 
-    if (send->fun == core::Names::custom_p()) {
-        whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
-        whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
-        whoKnows.sanityCheck();
-        return;
+    // elseでも変わるようにしたい
+    // でもSuperからSubを引いた時にどうなるかわからない
+    // Sealedならいいが
+    // まあだから継承めんどいんだな
+    auto recv = send->recv.variable;
+    auto &recvType = send->recv.type;
 
-        auto methodLoc = send->funLoc();
-        auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, methodLoc.copyWithZeroLength());
+    core::TypePtr narrowsToType = recvType;
 
-        // このklassTypeをsigでどこかに保存して取り出す必要がある
-        const auto &klassType = send->args[0].type;
-        auto ref = send->recv.variable;
-        updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter);
+    auto suppressErrors = false;
+    InlinedVector<core::LocOffsets, 2> argLocs{loc.offsets()};
+    core::CallLocs locs{
+        ctx.file, loc.offsets(), loc.offsets(), loc.offsets(), argLocs,
+    };
+
+    InlinedVector<const core::TypeAndOrigins *, 2> args;
+
+    //args.reserve(send->args.size());
+    // for (cfg::VariableUseSite &arg : send->args) {
+    //     args.emplace_back(&getAndFillTypeAndOrigin(arg));
+    // }
+
+    const core::TypeAndOrigins &recvType2 = getTypeAndOrigin(send->recv.variable);
+    core::DispatchArgs dispatchArgs{send->fun,        locs,
+                                    send->numPosArgs, args,
+                                    recvType,   recvType2,
+                                    recvType,   send->link.get(),
+                                    ownerLoc,        send->isPrivateOk,
+                                    suppressErrors,  send->fun};
+
+    auto dispatched = recvType.dispatchCall(ctx, dispatchArgs);
+
+    auto it = &dispatched;
+
+    if (it->main.method.exists() && it->main.method.data(ctx)->narrowsTo != nullptr) {
+        narrowsToType = it->main.method.data(ctx)->narrowsTo;
+
+        core::ClassOrModuleRef klass = core::Types::getRepresentedClass(ctx, recvType);
+
+        if (klass.exists()) {
+            auto methodSymbol = klass.data(ctx)->findMethod(ctx, send->fun);
+            if (methodSymbol.exists() && methodSymbol.data(ctx)->narrowsTo != nullptr) {
+                narrowsToType = methodSymbol.data(ctx)->narrowsTo;
+            }
+        }
+
+        if (!narrowsToType.isUntyped()) {
+            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, recv, narrowsToType);
+            whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, recv, narrowsToType);
+        } else {
+          if (auto e = ctx.beginError(loc.offsets(), core::errors::Infer::GenericMethodConstraintUnsolved)) {
+              e.setHeader("must be specified");
+          }
+        }
         whoKnows.sanityCheck();
+
         return;
     }
 
@@ -1133,6 +1175,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         }
                     }
 
+                    // ここだ！！！！！！
                     if (it->main.method.exists() && it->main.method.data(ctx)->flags.isPackagePrivate) {
                         core::ClassOrModuleRef klass = it->main.method.data(ctx)->owner;
                         if (klass.exists()) {
