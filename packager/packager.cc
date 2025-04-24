@@ -2,7 +2,6 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
 #include "absl/synchronization/blocking_counter.h"
-#include "ast/Helpers.h"
 #include "ast/packager/packager.h"
 #include "ast/treemap/treemap.h"
 #include "common/FileOps.h"
@@ -19,7 +18,6 @@
 #include <algorithm>
 #include <cctype>
 #include <queue>
-#include <sstream>
 #include <sys/stat.h>
 
 using namespace std;
