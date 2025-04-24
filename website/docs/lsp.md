@@ -382,6 +382,36 @@ _Response_:
 
 - result: [`TextDocumentItem`]
 
+### `sorbet.savePackageFiles` command
+
+The Sorbet language server will sometimes request that the
+`sorbet.savePackageFiles` command is run. This command is meant to be
+implemented by language clients.
+
+Each language client has a way to register commands that are not part of the
+core language server protocol. For example, in Neovim, a command is registered
+like this:
+
+```lua
+vim.lsp.commands['sorbet.savePackageFiles'] = function(command)
+  -- ...
+endfunction
+```
+
+Sorbet includes this `sorbet.savePackageFiles` command in the `command` field of
+certain `CodeAction` responses, and the Sorbet VS Code extension includes
+[an implementation](https://github.com/sorbet/sorbet/blob/546293d16abbb6ea41704c147544569c7508a572/vscode_extension/src/commands/savePackageFiles.ts#L11).
+The idea is that certain code actions make edits in files that the user did not
+open on their own, and so by not saving the edits from Sorbet's code, they don't
+realize that they need to switch over to those files and save them for the code
+action's edits to have been reflected on disk.
+
+See
+[CodeAction](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeAction)
+and
+[Command](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#command)
+in the LSP specification.
+
 ## Appendix
 
 ### A note on watchman
