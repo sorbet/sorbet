@@ -578,7 +578,7 @@ ast::ParsedFilesOrCancelled mergeIndexResults(core::GlobalState &cgs, const opti
         Timer timeit(cgs.tracer(), "substituteTrees");
         auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(batchq->bound);
 
-        workers.multiplexJob("substituteTrees", [&cgs, &logger = cgs.tracer(), batchq, resultq, cancelable]() {
+        workers.multiplexJob("substituteTrees", [&cgs = as_const(cgs), &logger = cgs.tracer(), batchq, resultq, cancelable]() {
             Timer timeit(logger, "substituteTreesWorker");
             IndexSubstitutionJob job;
             int numTreesProcessed = 0;

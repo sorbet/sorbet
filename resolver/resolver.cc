@@ -3266,7 +3266,7 @@ public:
         }
         trees.clear();
 
-        workers.multiplexJob("resolveTypeParamsWalk", [&gs, inputq, outputq]() -> void {
+        workers.multiplexJob("resolveTypeParamsWalk", [&gs = as_const(gs), inputq, outputq]() -> void {
             Timer timeit(gs.tracer(), "resolveTypeParamsWalkWorker");
             ResolveTypeMembersAndFieldsWalk walk;
             ResolveTypeMembersAndFieldsWorkerResult output;
@@ -4133,7 +4133,7 @@ vector<ast::ParsedFile> resolveSigs(core::GlobalState &gs, vector<ast::ParsedFil
 
     trees.clear();
 
-    workers.multiplexJob("resolveSignaturesWalk", [&gs, inputq, outputq]() -> void {
+    workers.multiplexJob("resolveSignaturesWalk", [&gs = as_const(gs), inputq, outputq]() -> void {
         ResolveSignaturesWalk walk;
         ResolveSignaturesWalk::ResolveSignaturesWalkResult output;
         ast::ParsedFile job;
