@@ -994,7 +994,7 @@ public:
             return;
         }
 
-        auto constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
+        auto constantLit = ast::cast_tree<ast::ConstantLit>(classDef.name);
         if (constantLit == nullptr) {
             return;
         }
@@ -1009,7 +1009,7 @@ public:
             } else if (!namespaces.onPackagePath(ctx)) {
                 ENFORCE(errorDepth == 0);
                 errorDepth++;
-                if (auto e = ctx.beginError(constantLit->loc, core::errors::Packager::DefinitionPackageMismatch)) {
+                if (auto e = ctx.beginError(constantLit->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
                     definitionPackageMismatch(ctx, e);
                 }
             }
@@ -1032,7 +1032,7 @@ public:
             }
         }
 
-        auto constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
+        auto constantLit = ast::cast_tree<ast::ConstantLit>(classDef.name);
         if (constantLit == nullptr) {
             return;
         }
@@ -1045,7 +1045,7 @@ public:
             errorDepth++;
             return;
         }
-        auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
+        auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
 
         if (lhs != nullptr && rootConsts == 0) {
             pushConstantLit(ctx, lhs);
@@ -1053,7 +1053,7 @@ public:
             if (rootConsts == 0 && namespaces.packageForNamespace() != pkg.mangledName()) {
                 ENFORCE(errorDepth == 0);
                 errorDepth++;
-                if (auto e = ctx.beginError(lhs->loc, core::errors::Packager::DefinitionPackageMismatch)) {
+                if (auto e = ctx.beginError(lhs->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
                     definitionPackageMismatch(ctx, e);
                 }
             }
@@ -1121,16 +1121,13 @@ public:
     }
 
 private:
-    void pushConstantLit(core::Context ctx, const ast::UnresolvedConstantLit *lit) {
+    void pushConstantLit(core::Context ctx, const ast::ConstantLit *lit) {
         ENFORCE(tmpNameParts.empty());
         auto prevDepth = namespaces.depth();
-        while (lit != nullptr) {
-            tmpNameParts.emplace_back(lit->cnst, lit->loc);
-            auto scope = ast::cast_tree<ast::ConstantLit>(lit->scope);
-            lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
-            if (scope != nullptr) {
-                ENFORCE(lit == nullptr);
-                ENFORCE(scope->symbol() == core::Symbols::root());
+        while (lit != nullptr && lit->original() != nullptr) {
+            tmpNameParts.emplace_back(lit->original()->cnst, lit->loc());
+            lit = ast::cast_tree<ast::ConstantLit>(lit->original()->scope);
+            if (lit != nullptr && lit->symbol() == core::Symbols::root()) {
                 rootConsts++;
             }
         }
@@ -1147,16 +1144,13 @@ private:
         tmpNameParts.clear();
     }
 
-    void popConstantLit(const ast::UnresolvedConstantLit *lit) {
-        while (lit != nullptr) {
+    void popConstantLit(const ast::ConstantLit *lit) {
+        while (lit != nullptr && lit->original() != nullptr) {
             if (rootConsts == 0) {
                 namespaces.popName();
             }
-            auto scope = ast::cast_tree<ast::ConstantLit>(lit->scope);
-            lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
-            if (scope != nullptr) {
-                ENFORCE(lit == nullptr);
-                ENFORCE(scope->symbol() == core::Symbols::root());
+            lit = ast::cast_tree<ast::ConstantLit>(lit->original()->scope);
+            if (lit != nullptr && lit->symbol() == core::Symbols::root()) {
                 rootConsts--;
             }
         }
