@@ -21,7 +21,7 @@ module T::Types
 
     # overrides Base
     def valid?(obj)
-      obj.is_a?(Module) && (obj.is_a?(@type.singleton_class) || false)
+      obj.is_a?(@type.singleton_class)
     end
 
     # overrides Base
