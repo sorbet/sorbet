@@ -347,7 +347,7 @@ core language server protocol. For example, in Neovim, a command is registered
 like this:</p>
 <pre><code class="hljs css language-lua">vim.lsp.commands[<span class="hljs-string">'sorbet.savePackageFiles'</span>] = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(command)</span></span>
   <span class="hljs-comment">-- ...</span>
-endfunction
+<span class="hljs-keyword">end</span>
 </code></pre>
 <p>Sorbet includes this <code>sorbet.savePackageFiles</code> command in the <code>command</code> field of
 certain <code>CodeAction</code> responses, and the Sorbet VS Code extension includes
