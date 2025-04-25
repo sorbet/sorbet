@@ -10,6 +10,45 @@ namespace sorbet::test::lsp {
 using namespace std;
 using namespace sorbet::realmain::lsp;
 
+// Test that initialization with non-object initializationOptions doesn't fail
+TEST_CASE_FIXTURE(ProtocolTest, "InitializeWithNonObjectOptions") {
+    // Create a raw initialize message with an array as initializationOptions instead of an object
+    string rawInitMessage = R"(
+        {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "processId": null,
+                "rootPath": "",
+                "rootUri": "file:///test",
+                "initializationOptions": [],
+                "capabilities": {
+                    "workspace": {
+                        "applyEdit": true
+                    },
+                    "textDocument": {
+                        "completion": {
+                            "completionItem": {
+                                "snippetSupport": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    )";
+
+    // This should not throw an exception
+    auto responses = sendRaw(rawInitMessage);
+
+    // Verify that we get a successful initialize response
+    REQUIRE_GE(responses.size(), 1);
+    auto &response = responses[0];
+    REQUIRE(response->isResponse());
+    REQUIRE_FALSE(response->asResponse().error.has_value());
+}
+
 // Adds two new files that have errors, and asserts that Sorbet returns errors for both of them.
 TEST_CASE_FIXTURE(ProtocolTest, "AddFile") {
     assertErrorDiagnostics(initializeLSP(), {});
