@@ -1540,6 +1540,10 @@ class MyCachable < Cachable
 end
 ```
 
+See
+[Unsupported features: Dynamic constant references](unsupported.md#dynamic-constant-references)
+for a more thorough explanation.
+
 ## 5002
 
 This means that the typechecker has been unable to resolve a reference to a
