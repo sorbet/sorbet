@@ -16,6 +16,110 @@ document the most commonly Ruby features which are not supported in Sorbet
 > When in doubt, please
 > [open an issue](https://github.com/sorbet/sorbet/issues/new/choose).
 
+## Dynamic constant references
+
+```ruby
+class A
+  X = 42
+end
+
+class B
+  X = 'hello'
+end
+
+def takes_class(cls)
+  p(cls::X)
+end
+takes_class(A)
+takes_class(B)
+
+def takes_inst(val)
+  p(val.class::X)
+end
+takes_inst(A.new)
+takes_inst(B.new)
+```
+
+### Alternative
+
+This pattern amounts to dynamic dispatch, so it's better to use methods.
+
+```ruby
+class A
+  def self.x = 42
+end
+
+class B
+  def self.x = 'hello'
+end
+
+def takes_class(cls)
+  p(cls.x)
+end
+takes_class(A)
+takes_class(B)
+
+def takes_inst(val)
+  p(val.class.x)
+end
+takes_inst(A.new)
+takes_inst(B.new)
+```
+
+You can even get clever with this approach: methods can start with a capital
+letter (like constants) as long as it's clear from context that it's a method
+call, not a constant reference. So it's possible to keep the constant's original
+`X` name as long as you use one of these forms to call it: `X()`, `self.X`,
+`cls::X()`, etc. This can help minimize the size of the edit when refactoring
+code to not use constants.
+
+As a last resort, if you absolutely cannot refactor the code to use methods
+(which can then be typed), you can use `const_get` instead:
+
+```ruby
+cls.const_get(:X)
+```
+
+Sorbet treats all calls to `const_get` as untyped.
+
+### Why?
+
+There are three main reasons.
+
+1.  It breaks a cyclic dependency in the implementation of the type checker.
+
+    Sorbet resolves all constant definitions and their ancestors to be able to
+    understand the type of an expression. Sorbet cannot know the type of an
+    expression like `x.y::Z` until it has first resolved the type of `x.y`,
+    which requires knowing the type of `x`, its full class hierarchy, the
+    methods defined in that hierarchy, and their types. All of that information
+    requires knowing which constants are defined, which thus cannot require
+    knowing the types of arbitrary expressions.
+
+    Sorbet could technically allow dynamic constant references in positions
+    where they have no impact on the ancestor hierarchy or type resolution
+    (basically, inside method bodies excluding in type assertions like `T.let`).
+    This would still exclude their use in superclasses, `include`, `extend`,
+    `T.type_alias`, `sig` types, and types of constants.
+
+1.  It would require treating constants like methods anyways.
+
+    This mode of use of constants acts like dynamic dispatch. Specifically,
+    Sorbet would need to validate the same
+    [override checking](override-checking.md) constraints that it validates for
+    methods, meaning that Sorbet would need `overridable`/`override` syntax for
+    constants (and likely also `abstract`).
+
+    Stylistically, constants should be for static information, and methods
+    should be the solution for dynamic dispatch.
+
+1.  It simplifies all other constant handling inside Sorbet.
+
+    Sorbet can assume that the scope of constant literal is always another
+    constant literal (or nothing). This invariant substantially simplifies all
+    other code that reads and manipulates constant references in the codebase—no
+    need to defensively handle arbitrary code.
+
 ## Constant resolution through constant scopes via inheritance
 
 ```ruby
