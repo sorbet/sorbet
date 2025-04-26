@@ -224,7 +224,7 @@ class Index extends React.Component {
               Sorbet is built <a href="https://stripe.com">at Stripe</a>, where
               the vast majority of code is written in Ruby. We've developed
               Sorbet to run fast, model Ruby accurately, and power
-              language-aware editor features for hundreds of developers across
+              language-aware editor features for thousands of developers across
               millions of lines of actual Ruby code.
             </div>
           </div>
