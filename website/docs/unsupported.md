@@ -4,8 +4,7 @@ title: Unsupported Ruby Features
 ---
 
 Some features of Ruby Sorbet intentionally does not support. This doc aims to
-document the most commonly Ruby features which are not supported in Sorbet
-**and** for which Sorbet will not produce an error.
+document the most common such features with explanations and alternatives.
 
 > **Note**: This page is not exhaustive.
 >
