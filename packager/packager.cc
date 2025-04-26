@@ -973,6 +973,12 @@ class EnforcePackagePrefix final {
     // - Upon emitting an error increment
     // - Once greater than 0, all preTransform* increment, postTransform* decrement
     int errorDepth = 0;
+
+    // Meant to track when we're inside something like `class ::A; class B; end; end` instead of
+    // `class A; class B; end; end`. Classes that start from an absolutely qualified "cbase" with a
+    // leading `::` are opted out of the EnforcePackagePrefix checks.
+    // TODO(jez) Document this in the public docs for the packager (at least in the error reference,
+    // but also in any eventual docs on the package system).
     int rootConsts = 0;
     bool useTestNamespace = false;
     vector<std::pair<core::NameRef, core::LocOffsets>> tmpNameParts;
