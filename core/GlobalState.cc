@@ -2172,13 +2172,12 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     return result;
 }
 
-unique_ptr<GlobalState>
-GlobalState::copyForIndex(const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                          const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                          const vector<string> &extraPackageFilesDirectorySlashPrefixes,
-                          const vector<string> &packageSkipRBIExportEnforcementDirs,
-                          const vector<string> &allowRelaxedPackagerChecksFor, const vector<string> &packagerLayers,
-                          string errorHint) const {
+unique_ptr<GlobalState> GlobalState::copyForIndex(
+    const bool packagerEnabled, const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
+    const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+    const vector<string> &extraPackageFilesDirectorySlashPrefixes,
+    const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
+    const vector<string> &packagerLayers, string errorHint) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     result->initEmpty();
@@ -2189,7 +2188,7 @@ GlobalState::copyForIndex(const vector<string> &extraPackageFilesDirectoryUnders
     result->fileRefByPath = this->fileRefByPath;
     result->kvstoreUuid = this->kvstoreUuid;
 
-    {
+    if (packagerEnabled) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
         result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
@@ -2234,7 +2233,7 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
     result->typeArguments.reserve(this->typeArguments.capacity());
     result->typeMembers.reserve(this->typeMembers.capacity());
 
-    {
+    if (packageDB().enabled()) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
         result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,

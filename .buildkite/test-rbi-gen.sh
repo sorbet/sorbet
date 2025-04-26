@@ -52,7 +52,7 @@ if [ "$err" -ne 0 ]; then
     sed -e 's/^/  /' >> "$failing_tests"
 
   # Put this last as an easy way to not have a `\` on the last line.
-  echo '  -c opt --config=forcedebug' >> "$failing_tests"
+  echo '  -c opt --config=forcedebug --test_output=errors' >> "$failing_tests"
   echo '```' >> "$failing_tests"
 
   buildkite-agent annotate --context "test-rbi-gen.sh" --style error --append < "$failing_tests"

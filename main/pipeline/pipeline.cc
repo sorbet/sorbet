@@ -642,6 +642,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
     }
 
     std::shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex(
+        opts.cacheSensitiveOptions.stripePackages || opts.packageRBIGeneration,
         opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
         opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
         opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint);

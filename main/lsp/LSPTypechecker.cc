@@ -498,6 +498,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                     ENFORCE(this->gs->packageDB().packages().empty(),
                             "Don't want symbols or packages in indexer GlobalState");
                     indexedState = this->gs->copyForIndex(
+                        this->config->opts.cacheSensitiveOptions.stripePackages,
                         this->config->opts.extraPackageFilesDirectoryUnderscorePrefixes,
                         this->config->opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
                         this->config->opts.extraPackageFilesDirectorySlashPrefixes,
