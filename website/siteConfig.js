@@ -17,6 +17,11 @@ const users = [
   },
   // End Sorbet early adopters. Please alphabetize below this comment.
   {
+    caption: 'Census',
+    image: 'img/census-logo.png',
+    infoLink: 'https://getcensus.com/',
+  },
+  {
     caption: 'Chan Zuckerberg Initiative',
     image: 'img/czi-logo.svg',
     infoLink: 'https://chanzuckerberg.com/',
