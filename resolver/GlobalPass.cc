@@ -334,7 +334,8 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     prodCounterAdd("types.input.methods.total", methodCount);
 }
 
-void Resolver::finalizeSymbols(core::GlobalState &gs, std::vector<core::ClassOrModuleRef> *symbolsToRecompute) {
+void Resolver::finalizeSymbols(core::GlobalState &gs,
+                               std::optional<absl::Span<const core::ClassOrModuleRef>> symbolsToRecompute) {
     Timer timer(gs.tracer(), "resolver.finalize_resolution");
     // TODO(nelhage): Properly this first loop should go in finalizeAncestors,
     // but we currently compute mixes_in_class_methods during the same AST walk
@@ -393,7 +394,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs, std::vector<core::ClassOrM
         vector<bool> resolved;
         resolved.resize(gs.classAndModulesUsed());
 
-        if (symbolsToRecompute) {
+        if (symbolsToRecompute.has_value()) {
             for (auto sym : *symbolsToRecompute) {
                 resolveTypeMembers(gs, sym, typeAliases, resolved);
 

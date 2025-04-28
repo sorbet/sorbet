@@ -2211,7 +2211,7 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
     uint32_t foundMethods = 0;
     ClassBehaviorLocsMap classBehaviorLocs;
     UnorderedMap<core::FileRef, SymbolDefiner::State> incrementalDefinitions;
-    auto willDeleteOldDefs = updatedSymbols != nullptr;
+    auto willDeleteOldDefs = !oldFoundHashesForFiles.empty();
     for (auto &[fref, fileFoundDefinitions] : allFoundDefinitions) {
         foundMethods += fileFoundDefinitions->methods().size();
         count++;

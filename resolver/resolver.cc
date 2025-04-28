@@ -3036,8 +3036,9 @@ public:
         classOfDepth_.clear();
     }
 
-    static ResolveTypeMembersAndFieldsResult run(core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                                 WorkerPool &workers, bool hierarchyMayHaveChanged) {
+    static ResolveTypeMembersAndFieldsResult
+    run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
+        std::optional<absl::Span<const core::ClassOrModuleRef>> symbolsToRecompute) {
         Timer timeit(gs.tracer(), "resolver.type_params");
 
         auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
@@ -3180,8 +3181,14 @@ public:
             }
         }
 
-        // Compute the resultType of all classes.
-        if (hierarchyMayHaveChanged) {
+        // Recompute selectively when possible, otherwise compute everything.
+        if (symbolsToRecompute.has_value()) {
+            Timer timeit(gs.tracer(), "resolver.computeExternalType");
+            // Ensure all symbols have `externalType` computed.
+            for (auto symbol : *symbolsToRecompute) {
+                symbol.data(gs)->unsafeComputeExternalType(gs);
+            }
+        } else {
             computeExternalTypes(gs);
         }
 
@@ -4008,13 +4015,13 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
-    finalizeSymbols(gs);
+    auto computeAllSymbols = std::nullopt;
+    finalizeSymbols(gs, computeAllSymbols);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
 
-    auto hierarchyMayHaveChanged = true;
-    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers, hierarchyMayHaveChanged);
+    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers, computeAllSymbols);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled::cancel(move(rtmafResult.trees), workers);
     }
@@ -4028,7 +4035,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
 
 ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                      bool ranIncrementalNamer, WorkerPool &workers,
-                                                     std::vector<core::ClassOrModuleRef> symbolsToRecompute) {
+                                                     absl::Span<const core::ClassOrModuleRef> symbolsToRecompute) {
     {
         auto result = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
         if (!result.hasResult()) {
@@ -4046,10 +4053,9 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     // If we had a faster/incremental way to do finalizeSymbols, we could maybe start
     // unconditionally finalizing symbols again, and then the above note about lineraization would apply.
     if (ranIncrementalNamer) {
-        Resolver::finalizeSymbols(gs, &symbolsToRecompute);
+        Resolver::finalizeSymbols(gs, symbolsToRecompute);
     }
-    auto hierarchyMayHaveChanged = ranIncrementalNamer;
-    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers, hierarchyMayHaveChanged);
+    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers, symbolsToRecompute);
     auto result = resolveSigs(gs, std::move(rtmafResult.trees), workers);
     ResolveTypeMembersAndFieldsWalk::resolvePendingCastItems(gs, rtmafResult.todoResolveCastItems);
     sanityCheck(gs, result);
