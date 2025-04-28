@@ -696,7 +696,7 @@ private:
     const core::FoundDefinitions &foundDefs;
     const core::FoundDefHashes *oldFoundHashes;
 
-    std::vector<core::ClassOrModuleRef> *symbolsToRecompute;
+    std::vector<core::ClassOrModuleRef> &symbolsToRecompute;
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
     core::ClassOrModuleRef getOwnerSymbol(const SymbolDefiner::State &state, core::FoundDefinitionRef ref) {
@@ -1164,11 +1164,8 @@ private:
                     symbol.data(ctx)->resultType = nullptr;
                     singletonClass.data(ctx)->resultType = nullptr;
 
-                    // TODO: This conditional should be redundant with `willDeleteOldDefs`
-                    if (this->symbolsToRecompute) {
-                        this->symbolsToRecompute->emplace_back(symbol);
-                        this->symbolsToRecompute->emplace_back(singletonClass);
-                    }
+                    this->symbolsToRecompute.emplace_back(symbol);
+                    this->symbolsToRecompute.emplace_back(singletonClass);
                     // TODO(jez) This is a gross hack. We are basically re-implementing the logic in
                     // singletonClass to reset the <AttachedClass> type template to what it used to be.
                     // Is there a better way to accomplish this? (This is largely the same as the bad locs problem
@@ -1586,7 +1583,7 @@ public:
     }
 
     SymbolDefiner(const core::FoundDefinitions &foundDefs, const core::FoundDefHashes *oldFoundHashes,
-                  std::vector<core::ClassOrModuleRef> *symbolsToRecompute)
+                  std::vector<core::ClassOrModuleRef> &symbolsToRecompute)
         : foundDefs(foundDefs), oldFoundHashes(oldFoundHashes), symbolsToRecompute{symbolsToRecompute} {}
 
     SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs,
@@ -2204,7 +2201,7 @@ void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap 
 
 void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinitions, WorkerPool &workers,
                    UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
-                   core::FoundDefHashes *foundHashesOut, std::vector<core::ClassOrModuleRef> *updatedSymbols) {
+                   core::FoundDefHashes *foundHashesOut, std::vector<core::ClassOrModuleRef> &updatedSymbols) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     const auto &epochManager = *gs.epochManager;
     uint32_t count = 0;
@@ -2292,7 +2289,7 @@ void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> tre
 [[nodiscard]] bool
 Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
                    UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
-                   core::FoundDefHashes *foundHashesOut, std::vector<core::ClassOrModuleRef> *updatedSymbols) {
+                   core::FoundDefHashes *foundHashesOut, std::vector<core::ClassOrModuleRef> &updatedSymbols) {
     auto foundDefs = findSymbols(gs, trees, workers);
     if (gs.epochManager->wasTypecheckingCanceled()) {
         return true;
@@ -2313,8 +2310,9 @@ Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, Wor
 [[nodiscard]] bool Namer::run(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
                               core::FoundDefHashes *foundHashesOut) {
     // In non-incremental namer, there are no old FoundDefHashes; just defineSymbols like normal.
-    auto updatedSymbols = nullptr;
+    std::vector<core::ClassOrModuleRef> updatedSymbols;
     return runInternal(gs, trees, workers, {}, foundHashesOut, updatedSymbols);
+    ENFORCE(updatedSymbols.empty());
 }
 
 [[nodiscard]] bool
@@ -2324,7 +2322,7 @@ Namer::runIncremental(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees,
     // foundHashesOut is only used when namer is run via hashing.cc to compute a FileHash for each file
     // The incremental namer mode should never be used for hashing.
     auto foundHashesOut = nullptr;
-    return runInternal(gs, trees, workers, std::move(oldFoundHashesForFiles), foundHashesOut, &updatedSymbols);
+    return runInternal(gs, trees, workers, std::move(oldFoundHashesForFiles), foundHashesOut, updatedSymbols);
 }
 
 }; // namespace sorbet::namer

@@ -14,7 +14,7 @@ class Namer final {
     [[nodiscard]] static bool
     runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
                 UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>> &&oldFoundDefHashesForFiles,
-                core::FoundDefHashes *foundHashesOut, std::vector<core::ClassOrModuleRef> *updatedSymbols);
+                core::FoundDefHashes *foundHashesOut, std::vector<core::ClassOrModuleRef> &updatedSymbols);
 
 public:
     // Note: foundHashes is an optional out parameter.
