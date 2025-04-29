@@ -276,6 +276,22 @@ class Sorbet::Private::Static::ENVClass
   end
   def keys; end
 
+  sig do
+    returns(Sorbet::Private::Static::ENVClass)
+  end
+  sig do
+    params(
+      hashes: T::Hash[String, T.nilable(String)]
+    ).returns(Sorbet::Private::Static::ENVClass)
+  end
+  sig do
+    params(
+      hashes: T::Hash[String, T.nilable(String)],
+      blk: T.proc.params(name: String, env_value: T.nilable(String), hash_value: T.nilable(String)).returns(T.nilable(String))
+    ).returns(Sorbet::Private::Static::ENVClass)
+  end
+  def merge!(*hashes, &blk); end
+
   sig {returns(Integer)}
   def length(); end
 
