@@ -53,58 +53,6 @@ exp_test = rule(
     },
 )
 
-_GEN_PACKAGE_RUNNER_SCRIPT = """
-set -x
-
-{runner} {test_directory}
-"""
-
-def _end_to_end_rbi_test_impl(ctx):
-    packager_folder = "/packager/"
-
-    rb_file_path = ctx.files.rb_files[0].path
-    pos = rb_file_path.find(packager_folder)
-    final_dirsep = rb_file_path.find("/", pos + len(packager_folder))
-    test_directory = rb_file_path[0:final_dirsep]
-
-    ctx.actions.write(
-        output = ctx.outputs.executable,
-        content = _GEN_PACKAGE_RUNNER_SCRIPT.format(
-            runner = ctx.executable._runner.short_path,
-            test_directory = test_directory,
-        ),
-    )
-    runfiles = ctx.runfiles(ctx.files.rb_files)
-    runfiles = runfiles.merge(ctx.attr._runner[DefaultInfo].default_runfiles)
-
-    return [DefaultInfo(runfiles = runfiles)]
-
-end_to_end_rbi_test = rule(
-    implementation = _end_to_end_rbi_test_impl,
-    test = True,
-    attrs = {
-        "rb_files": attr.label_list(
-            allow_files = True,
-            mandatory = True,
-        ),
-        "_runner": attr.label(
-            cfg = "target",
-            default = "//test:single_package_runner",
-            executable = True,
-        ),
-    },
-)
-
-def single_package_rbi_test(name, rb_files):
-    end_to_end_rbi_test(
-        name = name,
-        rb_files = rb_files,
-        # This is to get the test to run on the rbi-gen build job, because I
-        # can't figure out how to disable the leak sanitizer when running this.
-        tags = ["manual"],
-        size = "medium",
-    )
-
 _TEST_RUNNERS = {
     "PosTests": ":pipeline_test_runner",
     "LSPTests": ":lsp_test_runner",
@@ -191,7 +139,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
         elif tests[name]["isMultiFile"]:
             data += native.glob(["{}*".format(prefix)])
         else:
-            data += [sentinel]
+            data.append(sentinel)
             data += native.glob(["{}.*.exp".format(prefix)])
             data += native.glob(["{}.*.rbupdate".format(prefix)])
             data += native.glob(["{}.*.rbiupdate".format(prefix)])

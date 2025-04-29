@@ -150,7 +150,6 @@ private:
         shared_ptr<Nesting> scope;
         ast::ConstantLit *out;
         bool resolutionFailed = false;
-        bool possibleGenericType = false;
 
         ConstantResolutionItem() = default;
         ConstantResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
@@ -476,236 +475,26 @@ private:
         }
     };
 
-    struct ImportStubs {
-        std::vector<ParentPackageStub> parents;
-        std::vector<PackageStub> imports;
-
-        static ImportStubs make(core::GlobalState &gs) {
-            ImportStubs stubs;
-
-            auto &db = gs.packageDB();
-
-            for (auto parent : gs.singlePackageImports->parentImports) {
-                auto &info = db.getPackageInfo(parent);
-                stubs.parents.emplace_back(ParentPackageStub{info});
-            }
-
-            for (auto parent : gs.singlePackageImports->regularImports) {
-                auto &info = db.getPackageInfo(parent);
-                stubs.imports.emplace_back(PackageStub{info});
-            }
-
-            return stubs;
-        }
-
-        // Determine if a package with the same name as `scope` is known to export the name `cnst`.
-        bool packageExportsConstant(const std::vector<core::NameRef> &scope, core::NameRef cnst) const {
-            ENFORCE(!scope.empty());
-
-            auto start = scope.begin();
-            if (*start == core::Names::Constants::Test()) {
-                ++start;
-            }
-
-            auto scopeSize = std::distance(start, scope.end());
-            ENFORCE(scopeSize > 0);
-
-            const auto parent = absl::c_find_if(this->parents, [start, scopeSize, &scope](auto &p) {
-                return scopeSize == p.stub.fullName.size() && std::equal(start, scope.end(), p.stub.fullName.begin());
-            });
-
-            bool inTestNamespace = start != scope.begin();
-            return parent != this->parents.end() && parent->exportsSymbol(inTestNamespace, cnst);
-        }
-
-        // Determine if a package is known to have a prefix that is a combination of the name defined by `scope`, and
-        // some prefix of the suffix vector provided.
-        bool fromChildNamespace(const core::GlobalState &gs, const std::vector<core::NameRef> &prefix,
-                                const std::vector<ast::ConstantLit *> &suffix) const {
-            return absl::c_any_of(this->imports, [&gs, &prefix, &suffix](auto &stub) {
-                return stub.couldDefineChildNamespace(gs, prefix, suffix);
-            });
-        }
-    };
-
-    static void ensureTGenericMixin(core::GlobalState &gs, core::ClassOrModuleRef klass) {
-        auto &mixins = klass.data(gs)->mixins();
-        if (!absl::c_contains(mixins, core::Symbols::T_Generic())) {
-            mixins.emplace_back(core::Symbols::T_Generic());
-        }
-    }
-
-    static core::ClassOrModuleRef stubConstant(core::MutableContext ctx, core::ClassOrModuleRef owner,
-                                               ast::ConstantLit *out, bool possibleGenericType) {
-        auto symbol = ctx.state.enterClassSymbol(ctx.locAt(out->loc()), owner, out->original()->cnst);
-
-        auto data = symbol.data(ctx);
-        data->setIsModule(true); // This is what would happen in finalizeAncestors
-        // force a singleton into existence
-        auto singletonClass = data->singletonClass(ctx);
-        if (possibleGenericType) {
-            ensureTGenericMixin(ctx, singletonClass);
-        }
-
-        out->setSymbol(symbol);
-        return symbol;
-    }
-
-    static void stubConstantSuffix(core::MutableContext ctx, core::ClassOrModuleRef owner,
-                                   std::vector<ast::ConstantLit *> suffix, bool possibleGenericType) {
-        if (suffix.empty()) {
-            return;
-        }
-
-        auto last = suffix.end() - 1;
-        for (auto it = suffix.begin(); it != last; ++it) {
-            owner = stubConstant(ctx, owner, *it, false);
-        }
-        stubConstant(ctx, owner, *last, possibleGenericType);
-    }
-
-    // Turn a symbol into a vector of `NameRefs`. Returns true if a non-empty result vector was populated, and false if
-    // the scope was root, or one of the owning symbols in the hierarchy doesn't exist.
-    static bool scopeToNames(core::GlobalState &gs, core::SymbolRef sym, std::vector<core::NameRef> &res) {
-        res.clear();
-        while (sym.exists() && sym != core::Symbols::root()) {
-            if (!sym.isClassOrModule()) {
-                res.clear();
-                return false;
-            }
-
-            auto cls = sym.asClassOrModuleRef();
-            res.emplace_back(cls.data(gs)->name);
-            sym = cls.data(gs)->owner;
-        }
-
-        // Explicitly consider an empty top-level scope as one to skip. This arises when the symbol passed in is
-        // `core::Symbols::root()`, which will always be the top-most parent for the `Nesting` linked list present for
-        // the `ResolutionItem` being stubbed. As this doesn't correspond to a prefix of the current package's
-        // namespace, we return false to signal that this scope doesn't need to be considered as either of the
-        // parent/child package special cases.
-        if (res.empty()) {
-            return false;
-        }
-
-        absl::c_reverse(res);
-
-        return true;
-    }
-
     // Determine if a parent package exports a constant named `base`. If it does, return the symbol that already exists
     // for that nesting scope.
-    static core::ClassOrModuleRef parentPackageOwner(core::MutableContext ctx, const ImportStubs &importStubs,
-                                                     const Nesting *scope, ast::ConstantLit *base) {
-        std::vector<core::NameRef> prefix;
-        prefix.reserve(5);
-
-        for (auto *cursor = scope; cursor != nullptr; cursor = cursor->parent.get()) {
-            // If this is expensive, we could cache it in stubForRbiGeneration below
-            if (!scopeToNames(ctx, cursor->scope, prefix)) {
-                continue;
-            }
-
-            auto &original = *base->original();
-            if (importStubs.packageExportsConstant(prefix, original.cnst)) {
-                ENFORCE(cursor->scope.isClassOrModule());
-                return cursor->scope.asClassOrModuleRef();
-            }
-        }
-
-        return core::ClassOrModuleRef{};
-    }
-
-    // Determine if a child class shares a name in suffix, potentially rooted in any of the nesting scopes.
-    static core::ClassOrModuleRef childPackageOwner(core::MutableContext ctx, const ImportStubs &importStubs,
-                                                    const Nesting *scope, std::vector<ast::ConstantLit *> suffix) {
-        std::vector<core::NameRef> prefix;
-        prefix.reserve(5);
-
-        for (auto *cursor = scope; cursor != nullptr; cursor = cursor->parent.get()) {
-            // If this is expensive, we could cache it in stubForRbiGeneration below
-            if (!scopeToNames(ctx, cursor->scope, prefix)) {
-                continue;
-            }
-
-            if (importStubs.fromChildNamespace(ctx, prefix, suffix)) {
-                ENFORCE(cursor->scope.isClassOrModule());
-                return cursor->scope.asClassOrModuleRef();
-            }
-        }
-
-        return core::ClassOrModuleRef{};
-    }
-
-    static void stubForRbiGeneration(core::MutableContext ctx, const ImportStubs &importStubs, const Nesting *scope,
-                                     ast::ConstantLit *out, bool possibleGenericType) {
-        std::vector<ast::ConstantLit *> suffix;
-        {
-            auto *cursor = out;
-            bool isRootReference = false;
-            while (cursor != nullptr) {
-                auto original = cursor->original();
-                if (original == nullptr) {
-                    isRootReference = cursor->symbol() == core::Symbols::root();
-                    break;
-                }
-
-                suffix.emplace_back(cursor);
-                cursor = ast::cast_tree<ast::ConstantLit>(original->scope);
-            }
-            absl::c_reverse(suffix);
-
-            // If the constant looks like `::Foo::Bar`, we don't need to apply the heuristics below as it's known to be
-            // defined at the root.
-            if (isRootReference) {
-                stubConstantSuffix(ctx, core::Symbols::root(), suffix, possibleGenericType);
-                return;
-            }
-        }
-
-        // If the constant doesn't resolve to something that overlaps with this package's namespace, it will be defined
-        // at the root scope.
-        auto owner = core::Symbols::root();
-
-        // First, determine if we're already in the context of a parent package by crawling up the nesting scopes.
-        auto parentPackage = parentPackageOwner(ctx, importStubs, scope, suffix.front());
-        if (parentPackage.exists()) {
-            owner = parentPackage;
-        } else {
-            // If we're not in a parent package, check the name suffix to determine if we're inside of a child package.
-            auto childPackage = childPackageOwner(ctx, importStubs, scope, suffix);
-            if (childPackage.exists()) {
-                owner = childPackage;
-            }
-        }
-
-        stubConstantSuffix(ctx, owner, suffix, possibleGenericType);
-    }
-
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
     static void constantResolutionFailed(core::GlobalState &gs, core::FileRef file, ConstantResolutionItem &job,
-                                         const ImportStubs &importStubs, int &suggestionCount) {
+                                         int &suggestionCount) {
         core::Context ctx(gs, core::Symbols::root(), file);
-
-        bool singlePackageRbiGeneration = ctx.state.singlePackageImports.has_value();
 
         auto resolved = resolveConstant(ctx, job);
         if (resolved.exists() && resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType == nullptr) {
-                if (singlePackageRbiGeneration) {
-                    job.out->symbol().setResultType(gs, core::make_type<core::ClassType>(core::Symbols::todo()));
-                } else {
-                    // This is actually a use-site error, but we limit ourselves to emitting it once by checking
-                    // resultType
-                    auto loc = resolvedField.data(ctx)->loc();
-                    if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
-                        e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
-                        e.addErrorLine(ctx.locAt(job.out->original()->loc), "Type alias used here");
-                    }
-
-                    resolvedField.data(gs)->resultType = core::Types::untyped(resolved);
+                // This is actually a use-site error, but we limit ourselves to emitting it once by checking
+                // resultType
+                auto loc = resolvedField.data(ctx)->loc();
+                if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
+                    e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
+                    e.addErrorLine(ctx.locAt(job.out->original()->loc), "Type alias used here");
                 }
+
+                resolvedField.data(gs)->resultType = core::Types::untyped(resolved);
             }
             job.out->setSymbol(resolved);
             return;
@@ -714,13 +503,6 @@ private:
             // we only set this when a job has failed for other reasons and we've already reported an error, and
             // continuing on will only redundantly report that we can't resolve the constant, so bail early here
             job.out->setSymbol(core::Symbols::untyped());
-            return;
-        }
-
-        // When generating rbis in single-package mode, we may need to invent a symbol at this point
-        if (singlePackageRbiGeneration) {
-            core::MutableContext ctx(gs, job.scope->scope, file);
-            stubForRbiGeneration(ctx, importStubs, job.scope.get(), job.out, job.possibleGenericType);
             return;
         }
 
@@ -833,9 +615,6 @@ private:
 
     static bool resolveConstantJob(core::Context ctx, ConstantResolutionItem &job) {
         if (isAlreadyResolved(ctx, *job.out)) {
-            if (job.possibleGenericType) {
-                return false;
-            }
             return true;
         }
         auto resolved = resolveConstant(ctx, job);
@@ -1645,15 +1424,6 @@ public:
             if (recvAsConstantLit != nullptr && recvAsConstantLit->symbol() == core::Symbols::Magic() &&
                 send.fun == core::Names::mixesInClassMethods()) {
                 this->todoClassMethods_.emplace_back(ctx.file, ctx.owner, &send);
-            } else if (recvAsConstantLit != nullptr && send.fun == core::Names::squareBrackets() &&
-                       ctx.state.singlePackageImports.has_value()) {
-                // In single-package RBI generation mode, we treat Constant[...] as
-                // possible generic types.
-                ConstantResolutionItem job{nesting_, recvAsConstantLit};
-                job.possibleGenericType = true;
-                if (!resolveConstantJob(ctx, job)) {
-                    todo_.emplace_back(std::move(job));
-                }
             }
         }
     }
@@ -1987,18 +1757,11 @@ public:
         {
             Timer timeit(gs.tracer(), "resolver.resolve_constants.errors");
 
-            // Initialize the stubbed parent namespaces if we're generating an interface for a single package
-            ImportStubs importStubs;
-            bool singlePackageRbiGeneration = gs.singlePackageImports.has_value();
-            if (singlePackageRbiGeneration) {
-                importStubs = ImportStubs::make(gs);
-            }
-
             // Only give suggestions for the first several constants, because fuzzy suggestions are expensive.
             int suggestionCount = 0;
             for (auto &job : todo) {
                 for (auto &item : job.items) {
-                    constantResolutionFailed(gs, job.file, item, importStubs, suggestionCount);
+                    constantResolutionFailed(gs, job.file, item, suggestionCount);
                 }
             }
 

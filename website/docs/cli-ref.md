@@ -369,8 +369,6 @@ Usage:
                                 Useful for profiling.
       --trace-lexer             Emit the lexer's token stream in a debug format
       --trace-parser            Enable bison's parser trace functionality
-      --dump-package-info arg   Dump package info in JSON form to the given file.
-                                (default: "")
   -p, --print <format>          Print various internal data structures.
                                 By default, the output is to stdout. To send the data to
                                 a file, use
@@ -425,9 +423,6 @@ Usage:
                                 [experimental] Output a minimal RBI containing the diff
                                 between Sorbet's view of a codebase and the definitions
                                 present in this file (default: "")
-      --single-package arg      Run in single-package mode (default: "")
-      --package-rbi-generation  Enable rbi generation for stripe packages
-      --package-rbi-dir arg     The location of generated package rbis (default: "")
   -h, --help [=SECTION(=all)]   Show help. Can pass an optional SECTION to show help for
                                 only one section instead of the default of all sections
 

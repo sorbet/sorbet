@@ -1,4 +1,5 @@
 load("//tools:clang.bzl", "clang_tool")  # todo: this should be decoupled and use the library toolchain, not the compiler one
+load(":pipeline_test.bzl", "pipeline_tests")
 
 clang_tool("llvm-symbolizer")
 
@@ -239,18 +240,6 @@ cc_binary(
     deps = ["//common"],
 )
 
-load(":pipeline_test.bzl", "pipeline_tests", "single_package_rbi_test")
-
-filegroup(
-    name = "rbi_gen_files",
-    srcs = glob(["testdata/packager/rbi_gen_files/**/*.rb"]),
-)
-
-single_package_rbi_test(
-    name = "end_to_end_rbi_test",
-    rb_files = ["//test:rbi_gen_files"],
-)
-
 pipeline_tests(
     "test_corpus",
     glob(
@@ -292,33 +281,4 @@ test_suite(
 test_suite(
     name = "whitequark_parser_tests",
     tests = ["whitequark_parser_corpus"],
-)
-
-sh_binary(
-    name = "single_package_runner",
-    srcs = ["test_single_package_runner.sh"],
-    data = [
-        "single_package_runner_cc",
-        "//main:sorbet",
-    ],
-    tags = ["manual"],
-    deps = [
-        "@bazel_tools//tools/bash/runfiles",
-    ],
-)
-
-cc_binary(
-    name = "single_package_runner_cc",
-    srcs = ["rbi_gen_package_runner.cc"],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
-    tags = ["manual"],
-    visibility = ["//tools:__pkg__"],
-    deps = [
-        "//common",
-        "@com_google_absl//absl/strings",
-        "@rapidjson",
-    ],
 )

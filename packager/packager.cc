@@ -14,7 +14,6 @@
 #include "core/errors/packager.h"
 #include "core/packages/MangledName.h"
 #include "core/packages/PackageInfo.h"
-#include "rapidjson/writer.h"
 #include <algorithm>
 #include <cctype>
 #include <queue>
@@ -2173,88 +2172,6 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
 
 void Packager::validatePackagedFiles(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
     packageRunCore<PackagerMode::PackagedFilesOnly>(gs, workers, files);
-}
-
-namespace {
-
-struct PackageFiles {
-    vector<core::FileRef> files;
-    vector<core::FileRef> testFiles;
-};
-
-} // namespace
-
-void Packager::dumpPackageInfo(const core::GlobalState &gs, std::string outputFile) {
-    const auto &pkgDB = gs.packageDB();
-    // package => files
-    UnorderedMap<core::packages::MangledName, PackageFiles> packageFiles;
-    for (uint32_t i = 1; i < gs.filesUsed(); ++i) {
-        core::FileRef file(i);
-        const auto &pkg = pkgDB.getPackageForFile(gs, file);
-        if (pkg.exists()) {
-            if (file.data(gs).isPackagedTest()) {
-                packageFiles[pkg.mangledName()].testFiles.emplace_back(file);
-            } else {
-                packageFiles[pkg.mangledName()].files.emplace_back(file);
-            }
-        }
-    }
-
-    rapidjson::StringBuffer result;
-    rapidjson::Writer writer(result);
-
-    writer.StartArray();
-
-    for (auto mangledName : pkgDB.packages()) {
-        const auto &pkg = gs.packageDB().getPackageInfo(mangledName);
-
-        writer.StartObject();
-
-        writer.String("name");
-        writer.String(pkg.mangledName().mangledName.show(gs));
-
-        writer.String("imports");
-        writer.StartArray();
-        for (auto &import : pkg.imports()) {
-            writer.String(import.mangledName.show(gs));
-        }
-        writer.EndArray();
-
-        writer.String("testImports");
-        writer.StartArray();
-        for (auto &import : pkg.testImports()) {
-            writer.String(import.mangledName.show(gs));
-        }
-        writer.EndArray();
-
-        const auto it = packageFiles.find(mangledName);
-
-        writer.String("files");
-        writer.StartArray();
-        if (it != packageFiles.end()) {
-            for (auto file : it->second.files) {
-                auto path = file.data(gs).path();
-                writer.String(path.data(), path.size());
-            }
-        }
-        writer.EndArray();
-
-        writer.String("testFiles");
-        writer.StartArray();
-        if (it != packageFiles.end()) {
-            for (auto file : it->second.testFiles) {
-                auto path = file.data(gs).path();
-                writer.String(path.data(), path.size());
-            }
-        }
-        writer.EndArray();
-
-        writer.EndObject();
-    }
-
-    writer.EndArray();
-
-    FileOps::write(outputFile, result.GetString());
 }
 
 } // namespace sorbet::packager

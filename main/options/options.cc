@@ -675,8 +675,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Force Sorbet to calculate file hashes, even from the CLI. Useful for profiling.");
     options.add_options(section)("trace-lexer", "Emit the lexer's token stream in a debug format");
     options.add_options(section)("trace-parser", "Enable bison's parser trace functionality");
-    options.add_options(section)("dump-package-info", "Dump package info in JSON form to the given file.",
-                                 cxxopts::value<string>()->default_value(""));
     auto partitioned_print_options = print_options;
     auto stableEnd = absl::c_stable_partition(partitioned_print_options, [](const auto &po) { return po.stable; });
     fmt::memory_buffer print_help;
@@ -722,12 +720,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "[experimental] Output a minimal RBI containing the diff between Sorbet's view of a "
                                  "codebase and the definitions present in this file",
                                  cxxopts::value<std::string>()->default_value(""), "<file.rbi>");
-    options.add_options(section)("single-package", "Run in single-package mode",
-                                 cxxopts::value<string>()->default_value(""));
-    options.add_options(section)("package-rbi-generation", "Enable rbi generation for stripe packages",
-                                 cxxopts::value<bool>());
-    options.add_options(section)("package-rbi-dir", "The location of generated package rbis",
-                                 cxxopts::value<string>()->default_value(""));
     options.add_options(section)("h,help",
                                  "Show help. Can pass an optional SECTION to show help for only one section instead of "
                                  "the default of all sections",
@@ -1243,16 +1235,6 @@ void readOptions(Options &opts,
             }
         }
 
-        opts.packageRBIGeneration = raw["package-rbi-generation"].as<bool>();
-
-        opts.packageRBIDir = raw["package-rbi-dir"].as<string>();
-        if (!opts.packageRBIDir.empty()) {
-            if (opts.cacheSensitiveOptions.stripePackages) {
-                logger->error("--package-rbi-dir must not be specified in --stripe-packages mode");
-                throw EarlyReturnWithCode(1);
-            }
-        }
-
         if (raw.count("package-skip-rbi-export-enforcement")) {
             if (!opts.cacheSensitiveOptions.stripePackages) {
                 logger->error("--package-skip-rbi-export-enforcement can only be specified in --stripe-packages mode");
@@ -1260,32 +1242,6 @@ void readOptions(Options &opts,
             }
             for (const string &ns : raw["package-skip-rbi-export-enforcement"].as<vector<string>>()) {
                 opts.packageSkipRBIExportEnforcementDirs.emplace_back(ns);
-            }
-        }
-
-        opts.singlePackage = raw["single-package"].as<string>();
-        if (!opts.singlePackage.empty()) {
-            if (opts.cacheSensitiveOptions.stripePackages) {
-                logger->error("--single-package must not be specified in --stripe-packages mode");
-                throw EarlyReturnWithCode(1);
-            }
-
-            if (opts.packageRBIDir.empty()) {
-                logger->error("--single-package requires --package-rbi-dir also be provided");
-                throw EarlyReturnWithCode(1);
-            }
-
-            if (!opts.packageRBIGeneration) {
-                logger->error("--single-package can only be specified in --package-rbi-generation mode");
-                throw EarlyReturnWithCode(1);
-            }
-        }
-
-        opts.dumpPackageInfo = raw["dump-package-info"].as<string>();
-        if (!opts.dumpPackageInfo.empty()) {
-            if (!opts.cacheSensitiveOptions.stripePackages) {
-                logger->error("--dump-package-info can only be specified in --stripe-packages mode");
-                throw EarlyReturnWithCode(1);
             }
         }
 
