@@ -317,8 +317,9 @@ def register_sorbet_dependencies():
     # while we're upstreaming their changes.
     http_archive(
         name = "rbs_parser",
-        url = "https://github.com/shopify/rbs/archive/91dfbbda3cc43cdc4f47048abb9de597a15c1ada.zip",
-        sha256 = "1166b6d7dc1268213fb8a936125b7a28da89c881802946e11f87a4560263c107",
-        strip_prefix = "rbs-91dfbbda3cc43cdc4f47048abb9de597a15c1ada",
+        url = "https://github.com/shopify/rbs/archive/f8d9d5186c39eebffcd350b5452c6041f7ca6e6c.zip",
+        sha256 = "7fc542180adbeb653f0ce95b1cda9630286b6d1e4edb6ede2b61cf1cf7a3758c",
+        strip_prefix = "rbs-f8d9d5186c39eebffcd350b5452c6041f7ca6e6c",
         build_file = "@com_stripe_ruby_typer//third_party:rbs_parser.BUILD",
     )
+
