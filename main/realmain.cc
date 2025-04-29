@@ -15,7 +15,6 @@
 #include "main/lsp/LSPOutput.h"
 #include "main/minimize/minimize.h"
 #include "packager/packager.h"
-#include "packager/rbi_gen.h"
 #endif
 
 #include "absl/algorithm/container.h"
