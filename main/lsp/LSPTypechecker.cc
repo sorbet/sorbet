@@ -86,11 +86,10 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
         const bool isIncremental = false;
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
-        auto result = runSlowPath(updates, cache::ownIfUnchanged(*this->gs, std::move(kvstore)), workers, errorFlusher,
-                                  SlowPathMode::Init);
+        auto committed = runSlowPath(updates, cache::ownIfUnchanged(*this->gs, std::move(kvstore)), workers,
+                                     errorFlusher, SlowPathMode::Init);
+        ENFORCE(committed);
         epoch.committed = true;
-        ENFORCE(std::holds_alternative<std::unique_ptr<core::GlobalState>>(result));
-        initialGS = std::move(std::get<std::unique_ptr<core::GlobalState>>(result));
     }
 
     // Unblock the indexer now that its state is fully initialized.
@@ -98,7 +97,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
         absl::MutexLock lck{queue.getMutex()};
 
         // ensure that the next task we process initializes the indexer
-        auto initTask = std::make_unique<IndexerInitializationTask>(*config, std::move(initialGS));
+        auto initTask = std::make_unique<IndexerInitializationTask>(*config);
         queue.tasks().push_front(std::move(initTask));
     }
 
@@ -159,9 +158,7 @@ bool LSPTypechecker::typecheck(std::unique_ptr<LSPFileUpdates> updates, WorkerPo
 
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
-            auto result = runSlowPath(*updates, this->getKvStore(), workers, errorFlusher, SlowPathMode::Cancelable);
-            ENFORCE(std::holds_alternative<bool>(result));
-            committed = std::get<bool>(result);
+            committed = runSlowPath(*updates, this->getKvStore(), workers, errorFlusher, SlowPathMode::Cancelable);
         }
         epoch.committed = committed;
     }
@@ -314,16 +311,11 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     return toTypecheck;
 }
 
-LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updates,
-                                                           std::unique_ptr<const OwnedKeyValueStore> ownedKvstore,
-                                                           WorkerPool &workers,
-                                                           shared_ptr<core::ErrorFlusher> errorFlusher,
-                                                           LSPTypechecker::SlowPathMode mode) {
+bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, std::unique_ptr<const OwnedKeyValueStore> ownedKvstore,
+                                 WorkerPool &workers, shared_ptr<core::ErrorFlusher> errorFlusher,
+                                 LSPTypechecker::SlowPathMode mode) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runSlowPath can only be called from the typechecker thread.");
-
-    // This is populated when running in `SlowPathMode::Init`.
-    std::unique_ptr<core::GlobalState> indexedState;
 
     const bool cancelable = mode == SlowPathMode::Cancelable;
 
@@ -350,9 +342,8 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
 
         {
             // Replace error queue with one that is owned by this thread.
-            auto savedErrorQueue = std::exchange(
-                this->gs->errorQueue, make_shared<core::ErrorQueue>(this->gs->errorQueue->logger,
-                                                                    this->gs->errorQueue->tracer, errorFlusher));
+            this->gs->errorQueue =
+                make_shared<core::ErrorQueue>(this->gs->errorQueue->logger, this->gs->errorQueue->tracer, errorFlusher);
 
             std::optional<Timer> timeit;
             ShowOperation op(*config, ShowOperation::Kind::Indexing);
@@ -488,34 +479,13 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                         *this->gs, cache::maybeCacheGlobalStateAndFiles(
                                        OwnedKeyValueStore::abort(std::move(ownedKvstore)), this->config->opts,
                                        *this->gs, workers, nonPackagedIndexed));
-                }
 
-                if (mode == SlowPathMode::Init) {
-                    Timer timeit(config->logger, "copy_state");
-
-                    // At this point this->gs has a name table that's initialized enough for the indexer thread, so we
-                    // make a copy to pass back over.
-                    ENFORCE(this->gs->packageDB().packages().empty(),
-                            "Don't want symbols or packages in indexer GlobalState");
-                    indexedState = this->gs->copyForIndex(
-                        this->config->opts.extraPackageFilesDirectoryUnderscorePrefixes,
-                        this->config->opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                        this->config->opts.extraPackageFilesDirectorySlashPrefixes,
-                        this->config->opts.packageSkipRBIExportEnforcementDirs,
-                        this->config->opts.allowRelaxedPackagerChecksFor, this->config->opts.packagerLayers,
-                        this->config->opts.stripePackagesHint);
-                    indexedState->errorQueue = std::move(savedErrorQueue);
-
+                    // Close and copy the global kvstore, so that we have unique access for the rest of the session.
                     this->sessionCache =
                         cache::SessionCache::make(std::move(ownedKvstore), *this->config->logger, this->config->opts);
 
                     this->initialized = true;
                 } else {
-                    // We don't need to hold on to the saved error queue.
-                    // We were only holding onto it for the Init case, so that we could give a GlobalState
-                    // back to the indexer thread (with an ErrorQueue owned by that thread).
-                    savedErrorQueue.reset();
-
                     // We don't write in the cancelable slow path, and all our read operations have completed.
                     OwnedKeyValueStore::abort(std::move(ownedKvstore));
                 }
@@ -634,15 +604,7 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
         logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", updates.epoch);
     }
 
-    switch (mode) {
-        case SlowPathMode::Init:
-            ENFORCE(committed);
-            ENFORCE(indexedState != nullptr);
-            return indexedState;
-        case SlowPathMode::Cancelable:
-            ENFORCE(indexedState == nullptr);
-            return committed;
-    }
+    return committed;
 }
 
 void LSPTypechecker::cacheUpdatedFiles(absl::Span<const ast::ParsedFile> indexed,
