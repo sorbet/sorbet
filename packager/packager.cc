@@ -532,13 +532,6 @@ public:
         return {suggestion};
     }
 
-    vector<vector<core::NameRef>> exports() const {
-        vector<vector<core::NameRef>> rv;
-        for (auto &e : exports_) {
-            rv.emplace_back(e.fqn.parts);
-        }
-        return rv;
-    }
     vector<core::packages::MangledName> imports() const {
         vector<core::packages::MangledName> rv;
         for (auto &i : importedPackageNames) {
