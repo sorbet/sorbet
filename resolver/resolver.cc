@@ -1727,8 +1727,8 @@ public:
         vector<ast::ParsedFile> trees;
     };
 
-    static vector<ast::ParsedFile> resolveConstants(core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                                    WorkerPool &workers) {
+    static ast::ParsedFilesOrCancelled resolveConstants(core::GlobalState &gs, vector<ast::ParsedFile> trees,
+                                                        WorkerPool &workers) {
         UnorderedSet<core::ClassOrModuleRef> suppressPayloadSuperclassRedefinitionFor;
         for (string_view className : gs.suppressPayloadSuperclassRedefinitionFor) {
             auto klass = resolvePayloadSuperclassClassName(gs, className);
@@ -1747,22 +1747,33 @@ public:
         }
 
         Timer timeit(gs.tracer(), "resolver.resolve_constants");
-        const core::GlobalState &igs = gs;
         auto resultq = make_shared<BlockingBoundedQueue<ResolveWalkResult>>(trees.size());
         auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
         for (auto &tree : trees) {
             fileq->push(move(tree), 1);
         }
 
-        workers.multiplexJob("resolveConstantsWalk", [&igs, fileq, resultq]() {
-            Timer timeit(igs.tracer(), "ResolveConstantsWorker");
+        workers.multiplexJob("resolveConstantsWalk", [&gs = as_const(gs), fileq, resultq]() {
+            Timer timeit(gs.tracer(), "ResolveConstantsWorker");
             ResolveConstantsWalk constants;
             ResolveWalkResult walkResult;
             vector<ast::ParsedFile> partiallyResolvedTrees;
             ast::ParsedFile job;
+            auto computedTreesCount = 0ul;
+            bool cancelled = false;
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
-                    core::Context ictx(igs, core::Symbols::root(), job.file);
+                    computedTreesCount++;
+
+                    if (!cancelled) {
+                        if (computedTreesCount % 250 == 0 && gs.epochManager->wasTypecheckingCanceled()) {
+                            cancelled = true;
+                        }
+                    } else {
+                        continue;
+                    }
+
+                    core::Context ictx(gs, core::Symbols::root(), job.file);
                     ast::TreeWalk::apply(ictx, constants, job.tree);
                     partiallyResolvedTrees.emplace_back(move(job));
                     if (!constants.todo_.empty()) {
@@ -1788,7 +1799,6 @@ public:
             }
             if (!partiallyResolvedTrees.empty()) {
                 walkResult.trees = move(partiallyResolvedTrees);
-                auto computedTreesCount = walkResult.trees.size();
                 resultq->push(move(walkResult), computedTreesCount);
             }
         });
@@ -1826,6 +1836,10 @@ public:
                                  make_move_iterator(threadResult.trees.end()));
                 }
             }
+        }
+
+        if (gs.epochManager->wasTypecheckingCanceled()) {
+            return ast::ParsedFilesOrCancelled::cancel(std::move(trees), workers);
         }
 
         // Note: `todo` does not need to be sorted. There are no ordering effects on error production.
@@ -2022,6 +2036,10 @@ public:
                     }
                 }
             }
+        }
+
+        if (gs.epochManager->wasTypecheckingCanceled()) {
+            return ast::ParsedFilesOrCancelled::cancel(std::move(trees), workers);
         }
 
         return trees;
@@ -4216,9 +4234,12 @@ void verifyLinearizationComputed(const core::GlobalState &gs) {
 
 ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     const auto &epochManager = *gs.epochManager;
-    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
-    if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
+    {
+        auto result = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
+        if (!result.hasResult()) {
+            return result;
+        }
+        trees = std::move(result.result());
     }
     finalizeAncestors(gs);
     if (epochManager.wasTypecheckingCanceled()) {
@@ -4244,7 +4265,13 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
 
 ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                      bool ranIncrementalNamer, WorkerPool &workers) {
-    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
+    {
+        auto result = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
+        if (!result.hasResult()) {
+            return result;
+        }
+        trees = std::move(result.result());
+    }
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
     verifyLinearizationComputed(gs);
     // (verifyLinearizationComputed vs finalizeAncestors is currently the only difference between
@@ -4271,7 +4298,9 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
 
 vector<ast::ParsedFile> Resolver::runConstantResolution(core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                         WorkerPool &workers) {
-    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
+    auto result = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
+    ENFORCE(result.hasResult());
+    trees = std::move(result.result());
     sanityCheck(gs, trees);
 
     return trees;
