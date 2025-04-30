@@ -15,10 +15,16 @@ TEST_CASE("U4") { // NOLINT
     Pickler p;
     p.putU4(0);
     p.putU4(1);
+    p.putU4(247);
+    p.putU4(42877);
+    p.putU4(16777215);
     p.putU4(4294967295);
     UnPickler u(p.result().data(), *logger);
     CHECK_EQ(u.getU4(), 0);
     CHECK_EQ(u.getU4(), 1);
+    CHECK_EQ(u.getU4(), 247);
+    CHECK_EQ(u.getU4(), 42877);
+    CHECK_EQ(u.getU4(), 16777215);
     CHECK_EQ(u.getU4(), 4294967295);
 }
 

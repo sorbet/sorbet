@@ -6,7 +6,6 @@
 namespace sorbet::core::serialize {
 class Pickler {
     std::vector<uint8_t> data;
-    uint8_t zeroCounter = 0;
 
 public:
     void putU4(uint32_t u);
@@ -19,7 +18,6 @@ public:
 
 class UnPickler {
     int pos;
-    uint8_t zeroCounter = 0;
     std::vector<uint8_t> data;
 
 public:
