@@ -179,6 +179,7 @@ vector<unique_ptr<TextDocumentEdit>> MethodExtractor::getExtractEdits(const LSPT
         methodReturns.push_back(name.show(gs));
         /* } */
     }
+    // TODO: sort methodParams and methodReturns for deterministic behaviour
 
     string firstLine = fmt::format("def newMethod({})", absl::StrJoin(methodParams, ", "));
     string lastLine = fmt::format("return {}", absl::StrJoin(methodReturns, ", "));
