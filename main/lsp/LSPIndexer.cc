@@ -339,7 +339,6 @@ std::unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams
     }
 
     {
-        Timer timeit{config->logger, "LSPIndexer::commitEdit.index"};
         // Explicitly null. It does not make sense to use kvstore for short-lived editor edits.
         unique_ptr<const OwnedKeyValueStore> kvstore;
         // Create a throwaway error queue. commitEdit may be called on two different threads, and we can't anticipate
