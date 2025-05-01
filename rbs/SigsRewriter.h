@@ -42,8 +42,8 @@ private:
     std::unique_ptr<parser::Node> rewriteNode(std::unique_ptr<parser::Node> tree);
     std::unique_ptr<parser::Node> rewriteClass(std::unique_ptr<parser::Node> tree);
     parser::NodeVec rewriteNodes(parser::NodeVec nodes);
-    std::unique_ptr<parser::NodeVec> signaturesForNode(core::MutableContext ctx, parser::Node *node);
-    Comments commentsForNode(core::MutableContext ctx, parser::Node *node);
+    std::unique_ptr<parser::NodeVec> signaturesForNode(parser::Node *node);
+    Comments commentsForNode(parser::Node *node);
 };
 
 } // namespace sorbet::rbs

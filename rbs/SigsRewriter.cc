@@ -205,7 +205,7 @@ void insertHelpers(unique_ptr<parser::Node> *body, parser::NodeVec helpers) {
 
 } // namespace
 
-Comments SigsRewriter::commentsForNode(core::MutableContext ctx, parser::Node *node) {
+Comments SigsRewriter::commentsForNode(parser::Node *node) {
     auto comments = Comments{};
     enum class SignatureState { None, Started, Multiline };
     auto state = SignatureState::None;
@@ -283,8 +283,8 @@ Comments SigsRewriter::commentsForNode(core::MutableContext ctx, parser::Node *n
     return comments;
 }
 
-unique_ptr<parser::NodeVec> SigsRewriter::signaturesForNode(core::MutableContext ctx, parser::Node *node) {
-    auto comments = commentsForNode(ctx, node);
+unique_ptr<parser::NodeVec> SigsRewriter::signaturesForNode(parser::Node *node) {
+    auto comments = commentsForNode(node);
 
     if (comments.signatures.empty()) {
         return nullptr;
@@ -329,7 +329,7 @@ unique_ptr<parser::Node> SigsRewriter::rewriteBegin(unique_ptr<parser::Node> nod
 
     for (auto &stmt : oldStmts) {
         if (auto target = signaturesTarget(stmt.get())) {
-            if (auto signatures = signaturesForNode(ctx, target)) {
+            if (auto signatures = signaturesForNode(target)) {
                 for (auto &declaration : *signatures) {
                     begin->stmts.emplace_back(move(declaration));
                 }
@@ -352,7 +352,7 @@ unique_ptr<parser::Node> SigsRewriter::rewriteBody(unique_ptr<parser::Node> node
     }
 
     if (auto target = signaturesTarget(node.get())) {
-        if (auto signatures = signaturesForNode(ctx, target)) {
+        if (auto signatures = signaturesForNode(target)) {
             auto begin = make_unique<parser::Begin>(node->loc, parser::NodeVec());
             for (auto &declaration : *signatures) {
                 begin->stmts.emplace_back(move(declaration));
@@ -370,7 +370,7 @@ unique_ptr<parser::Node> SigsRewriter::rewriteClass(unique_ptr<parser::Node> nod
         return node;
     }
 
-    auto comments = commentsForNode(ctx, node.get());
+    auto comments = commentsForNode(node.get());
     if (comments.annotations.empty()) {
         return node;
     }
