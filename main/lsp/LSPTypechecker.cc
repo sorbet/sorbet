@@ -271,7 +271,6 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     fast_sort(toTypecheck);
     toTypecheck.erase(std::unique(toTypecheck.begin(), toTypecheck.end()), toTypecheck.end());
 
-    config->logger->debug("Running fast path over num_files={}", toTypecheck.size());
     std::optional<ShowOperation> op;
     if (toTypecheck.size() > config->opts.lspMaxFilesOnFastPath / 2) {
         op.emplace(*config, ShowOperation::Kind::FastPath);
@@ -309,6 +308,9 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     const auto cancelable = false;
     pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, std::nullopt, presorted);
     gs->lspTypecheckCount++;
+
+    auto duration = timeit.setEndTime();
+    config->logger->debug("Running fast path over num_files={} duration={}", toTypecheck.size(), duration.usec);
 
     return toTypecheck;
 }
