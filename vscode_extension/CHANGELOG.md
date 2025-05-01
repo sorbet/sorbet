@@ -1,5 +1,8 @@
 # Version history
 
+## 0.3.42
+- Use VS Code's standard `$(sync)` icon on status bar.
+
 ## 0.3.41
 - New extension API to track status changes on the Language Service.
 

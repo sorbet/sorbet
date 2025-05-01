@@ -4,7 +4,7 @@
   "description": "Ruby IDE features, powered by Sorbet.",
   "author": "Stripe Inc.",
   "license": "Apache-2.0",
-  "version": "0.3.41",
+  "version": "0.3.42",
   "publisher": "sorbet",
   "icon": "icon.png",
   "repository": {
@@ -325,7 +325,6 @@
     "launch": "VSCODE_SORBETEXT_LOG_LEVEL=trace code --extensionDevelopmentPath=$PWD"
   },
   "dependencies": {
-    "elegant-spinner": "^2.0.0",
     "vscode-languageclient": "8.1.0"
   },
   "devDependencies": {
