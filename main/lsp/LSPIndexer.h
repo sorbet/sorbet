@@ -82,9 +82,9 @@ public:
     void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files) const;
 
     /**
-     * Initializes the indexer with the state produced on the typechecking thread.
+     * Finalizes indexer initialization.
      */
-    void initialize(IndexerInitializationTask &task, std::unique_ptr<core::GlobalState> initialGS);
+    void initialize(IndexerInitializationTask &task);
 
     /**
      * Commits the given edit to `initialGS`, and returns a canonical LSPFileUpdates object containing indexed trees

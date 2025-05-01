@@ -6,10 +6,8 @@
 namespace sorbet::realmain::lsp {
 
 class IndexerInitializationTask final : public LSPTask {
-    std::unique_ptr<core::GlobalState> initialGS;
-
 public:
-    IndexerInitializationTask(const LSPConfiguration &config, std::unique_ptr<core::GlobalState> initialGS);
+    IndexerInitializationTask(const LSPConfiguration &config);
 
     Phase finalPhase() const override;
 
