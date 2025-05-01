@@ -282,13 +282,15 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     ENFORCE(gs->errorQueue->isEmpty());
     vector<ast::ParsedFile> updatedIndexed;
     for (core::FileRef fref : toTypecheck) {
-        // TODO(jvilk): We don't need to re-index files that didn't change.
-        // (`updates` has already-indexed trees, but they've been indexed with initialGS, not the
-        // `*gs` that we'll be typechecking with. We could do an ast::Substitute here if we had
-        // access to `initialGS`, but that's owned by the indexer thread, not this thread.)
         auto t = pipeline::indexOne(config->opts, *gs, fref);
-        updatedIndexed.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
-        updates.updatedFinalGSFileIndexes.push_back(move(t));
+
+        // As the fast-path might pull in unrelated files in the incremental case, we make sure to only cache files that
+        // are explicitly open in the editor.
+        if (fref.data(*gs).isOpenInClient()) {
+            updates.updatedFinalGSFileIndexes.push_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
+        }
+
+        updatedIndexed.emplace_back(std::move(t));
 
         // See earlier in the method for an explanation of the isNoopUpdateForRetypecheck check here.
         if (shouldRunIncrementalNamer && !oldFoundHashesForFiles.contains(fref)) {
@@ -333,9 +335,16 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast || config->disableFastPath);
     logger->debug("Taking slow path");
 
+    UnorderedSet<core::FileRef> openFiles;
     ENFORCE(this->cancellationUndoState == nullptr);
     if (cancelable) {
         auto savedGS = std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts));
+
+        // Seed open files with the previous set from `indexedFinalGS`
+        for (auto &entry : this->indexedFinalGS) {
+            openFiles.insert(entry.first);
+        }
+
         this->cancellationUndoState =
             std::make_unique<UndoState>(std::move(savedGS), std::move(this->indexedFinalGS), updates.epoch);
     }
@@ -345,7 +354,6 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
     auto committed = epochManager.tryCommitEpoch(*this->gs, epoch, cancelable, preemptManager, [&]() -> void {
-        UnorderedSet<core::FileRef> openFiles;
         vector<ast::ParsedFile> indexed, nonPackagedIndexed;
 
         {
@@ -384,7 +392,15 @@ LSPTypechecker::SlowPathResult LSPTypechecker::runSlowPath(LSPFileUpdates &updat
                                 this->gs->replaceFile(fref, std::move(file));
                             }
 
-                            openFiles.insert(fref);
+                            // Not all files present in the update set will be from open files--some could be watchman
+                            // update events, and others will be the result of a `textDocument/didClose` notification.
+                            // As a result, we may need to remove entries from the set that was eagerly cloned from
+                            // `indexedFinalGS`
+                            if (fref.data(*this->gs).isOpenInClient()) {
+                                openFiles.insert(fref);
+                            } else {
+                                openFiles.erase(fref);
+                            }
                         }
 
                         updates.updatedFiles.clear();
