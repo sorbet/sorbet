@@ -1,6 +1,6 @@
 # -- test/testdata/packager/simple_test_import/main_lib/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Project>::<C MainLib><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::Project::MainLib<<C MainLib>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C Project>::<C Util>)
 
     <self>.test_import(::<PackageSpecRegistry>::<C Project>::<C TestOnly>)
@@ -10,13 +10,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/simple_test_import/test_only/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Project>::<C TestOnly><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::Project::TestOnly<<C TestOnly>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C Project>::<C TestOnly>::<C SomeHelper>)
   end
 end
 # -- test/testdata/packager/simple_test_import/util/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Project>::<C Util><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::Project::Util<<C Util>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C Project>::<C Util>::<C MyUtil>)
 
     <self>.export(<emptyTree>::<C Test>::<C Project>::<C Util>::<C UtilHelper>)
@@ -24,7 +24,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/simple_test_import/main_lib/lib.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C MainLib>::<C Lib><<C <todo sym>>> < (::<todo sym>)
+  class ::Project::MainLib::Lib<<C Lib>> < (::<todo sym>)
     <emptyTree>::<C Project>::<C Util>::<C MyUtil>.new()
 
     <emptyTree>::<C Project>::<C TestOnly>::<C SomeHelper>.new()
@@ -36,7 +36,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/simple_test_import/main_lib/lib.test.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Test>::<C Project>::<C MainLib>::<C LibTest><<C <todo sym>>> < (::<todo sym>)
+  class ::Test::Project::MainLib::LibTest<<C LibTest>> < (::<todo sym>)
     <emptyTree>::<C Project>::<C MainLib>::<C Lib>.new()
 
     <emptyTree>::<C Project>::<C Util>::<C MyUtil>.new()
@@ -50,21 +50,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/simple_test_import/test_only/some_helper.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C TestOnly>::<C SomeHelper><<C <todo sym>>> < (::<todo sym>)
+  class ::Project::TestOnly::SomeHelper<<C SomeHelper>> < (::<todo sym>)
   end
 end
 # -- test/testdata/packager/simple_test_import/util/my_util.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C Util>::<C MyUtil><<C <todo sym>>> < (::<todo sym>)
+  class ::Project::Util::MyUtil<<C MyUtil>> < (::<todo sym>)
   end
 end
 # -- test/testdata/packager/simple_test_import/util/unexported.test.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Test>::<C Project>::<C Util>::<C Unexported><<C <todo sym>>> < (::<todo sym>)
+  class ::Test::Project::Util::Unexported<<C Unexported>> < (::<todo sym>)
   end
 end
 # -- test/testdata/packager/simple_test_import/util/util_helper.test.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Test>::<C Project>::<C Util>::<C UtilHelper><<C <todo sym>>> < (::<todo sym>)
+  class ::Test::Project::Util::UtilHelper<<C UtilHelper>> < (::<todo sym>)
   end
 end

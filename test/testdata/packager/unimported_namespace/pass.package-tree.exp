@@ -1,23 +1,23 @@
 # -- test/testdata/packager/unimported_namespace/aaa/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C AAA><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::AAA<<C AAA>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C AAA>::<C AClass>)
   end
 end
 # -- test/testdata/packager/unimported_namespace/bbb/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C BBB><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::BBB<<C BBB>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C AAA>)
   end
 end
 # -- test/testdata/packager/unimported_namespace/ccc/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C CCC><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::CCC<<C CCC>> < (::Sorbet::Private::Static::PackageSpec)
   end
 end
 # -- test/testdata/packager/unimported_namespace/aaa/a_class.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C AAA>::<C AClass><<C <todo sym>>> < (::<todo sym>)
+  class ::AAA::AClass<<C AClass>> < (::<todo sym>)
     <emptyTree>::<C BBB>
 
     <emptyTree>::<C CCC>
@@ -27,6 +27,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/unimported_namespace/bbb/b_class.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C BBB>::<C BClass><<C <todo sym>>> < (::<todo sym>)
+  class ::BBB::BClass<<C BClass>> < (::<todo sym>)
   end
 end

@@ -1,11 +1,11 @@
 # -- test/testdata/packager/export_for_test/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C RootPkg><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::RootPkg<<C RootPkg>> < (::Sorbet::Private::Static::PackageSpec)
   end
 end
 # -- test/testdata/packager/export_for_test/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Opus>::<C Foo><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::Opus::Foo<<C Foo>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C Opus>::<C Foo>::<C Bar>)
 
     <self>.import(::<PackageSpecRegistry>::<C Opus>::<C Util>)
@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_for_test/foo/bar/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::Opus::Foo::Bar<<C Bar>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>)
 
     <self>.export(<emptyTree>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest>)
@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_for_test/test_imported/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Opus>::<C TestImported><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::Opus::TestImported<<C TestImported>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C Opus>::<C TestImported>::<C TIClass>)
 
     <self>.export(<emptyTree>::<C Test>::<C Opus>::<C TestImported>::<C TITestClass>)
@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_for_test/util/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Opus>::<C Util><<C <todo sym>>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::<PackageSpecRegistry>::Opus::Util<<C Util>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C Opus>::<C Util>::<C UtilClass>)
 
     <self>.export(<emptyTree>::<C Test>::<C Opus>::<C Util>::<C TestUtil>)
@@ -49,32 +49,32 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_for_test/foo/bar/bar.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Opus>::<C Foo>::<C Bar>::<C BarClass><<C <todo sym>>> < (::<todo sym>)
+  class ::Opus::Foo::Bar::BarClass<<C BarClass>> < (::<todo sym>)
   end
 end
 # -- test/testdata/packager/export_for_test/foo/bar/bar.test.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C Test>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < ()
-    class <emptyTree>::<C BarClassTest><<C <todo sym>>> < (::<todo sym>)
+  module ::Test::Opus::Foo::Bar<<C Bar>> < ()
+    class ::Test::Opus::Foo::Bar::BarClassTest<<C BarClassTest>> < (::<todo sym>)
     end
   end
 end
 # -- test/testdata/packager/export_for_test/foo/foo.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C Opus>::<C Foo><<C <todo sym>>> < ()
-    class <emptyTree>::<C FooClass><<C <todo sym>>> < (::<todo sym>)
-      <emptyTree>::<C Inner> = 1
+  module ::Opus::Foo<<C Foo>> < ()
+    class ::Opus::Foo::FooClass<<C FooClass>> < (::<todo sym>)
+      ::Opus::Foo::FooClass::Inner = 1
     end
 
-    class <emptyTree>::<C FooUnexported><<C <todo sym>>> < (::<todo sym>)
+    class ::Opus::Foo::FooUnexported<<C FooUnexported>> < (::<todo sym>)
     end
 
-    class <emptyTree>::<C Private>::<C ImplDetail><<C <todo sym>>> < (::<todo sym>)
+    class ::Opus::Foo::Private::ImplDetail<<C ImplDetail>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.void()
       end
 
-      def self.stub_stuff!<<todo method>>(&<blk>)
+      def self.stub_stuff!(<blk>)
         <emptyTree>
       end
 
@@ -106,7 +106,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_for_test/foo/foo.test.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Test>::<C Opus>::<C Foo>::<C FooTest><<C <todo sym>>> < (::<todo sym>)
+  class ::Test::Opus::Foo::FooTest<<C FooTest>> < (::<todo sym>)
     <emptyTree>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
 
     <emptyTree>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest>
@@ -134,30 +134,30 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_for_test/test_imported/test_imported.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C Opus>::<C TestImported><<C <todo sym>>> < ()
-    class <emptyTree>::<C TIClass><<C <todo sym>>> < (::<todo sym>)
+  module ::Opus::TestImported<<C TestImported>> < ()
+    class ::Opus::TestImported::TIClass<<C TIClass>> < (::<todo sym>)
     end
   end
 end
 # -- test/testdata/packager/export_for_test/test_imported/test_imported.test.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C Test>::<C Opus>::<C TestImported><<C <todo sym>>> < ()
-    class <emptyTree>::<C TITestClass><<C <todo sym>>> < (::<todo sym>)
+  module ::Test::Opus::TestImported<<C TestImported>> < ()
+    class ::Test::Opus::TestImported::TITestClass<<C TITestClass>> < (::<todo sym>)
     end
   end
 end
 # -- test/testdata/packager/export_for_test/util/util.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C Opus>::<C Util><<C <todo sym>>> < ()
-    class <emptyTree>::<C UtilClass><<C <todo sym>>> < (::<todo sym>)
+  module ::Opus::Util<<C Util>> < ()
+    class ::Opus::Util::UtilClass<<C UtilClass>> < (::<todo sym>)
     end
 
-    module <emptyTree>::<C Nesting><<C <todo sym>>> < ()
+    module ::Opus::Util::Nesting<<C Nesting>> < ()
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.void()
       end
 
-      def self.nesting_method<<todo method>>(&<blk>)
+      def self.nesting_method(<blk>)
         <emptyTree>
       end
 
@@ -165,15 +165,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <runtime method definition of self.nesting_method>
 
-      class <emptyTree>::<C OnlyForSelf><<C <todo sym>>> < (::<todo sym>)
+      class ::Opus::Util::Nesting::OnlyForSelf<<C OnlyForSelf>> < (::<todo sym>)
       end
 
-      class <emptyTree>::<C Public><<C <todo sym>>> < (::<todo sym>)
+      class ::Opus::Util::Nesting::Public<<C Public>> < (::<todo sym>)
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.void()
         end
 
-        def self.public_method<<todo method>>(&<blk>)
+        def self.public_method(<blk>)
           <emptyTree>
         end
 
@@ -186,8 +186,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_for_test/util/util.test.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C Test>::<C Opus>::<C Util><<C <todo sym>>> < ()
-    class <emptyTree>::<C TestUtil><<C <todo sym>>> < (::<todo sym>)
+  module ::Test::Opus::Util<<C Util>> < ()
+    class ::Test::Opus::Util::TestUtil<<C TestUtil>> < (::<todo sym>)
     end
 
     <emptyTree>::<C Opus>::<C Util>::<C Nesting>.nesting_method()

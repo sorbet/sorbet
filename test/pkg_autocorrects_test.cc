@@ -12,6 +12,7 @@
 #include "local_vars/local_vars.h"
 #include "main/options/options.h"
 #include "main/pipeline/pipeline.h"
+#include "namer/namer.h"
 #include "packager/packager.h"
 #include "parser/parser.h"
 #include "rewriter/rewriter.h"
@@ -116,11 +117,17 @@ vector<ast::ParsedFile> enterPackages(core::GlobalState &gs, vector<pair<string,
         }
     }
 
+    auto workers = WorkerPool::create(0, gs.tracer());
+
     {
-        // and then finally the packager!
-        auto workers = WorkerPool::create(0, gs.tracer());
-        packager::Packager::run(gs, *workers, absl::Span<ast::ParsedFile>(parsedFiles));
+        core::UnfreezeNameTable nameTableAccess(gs);
+        core::UnfreezeSymbolTable symbolTableAccess(gs);
+        auto foundHashes = nullptr;
+        auto canceled = namer::Namer::run(gs, absl::MakeSpan(parsedFiles), *workers, foundHashes);
+        ENFORCE(!canceled);
     }
+
+    packager::Packager::run(gs, *workers, absl::Span<ast::ParsedFile>(parsedFiles));
     return parsedFiles;
 }
 

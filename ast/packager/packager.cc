@@ -17,7 +17,7 @@ ExpressionPtr prependRegistry(ExpressionPtr scope) {
 
 const ast::ClassDef *asPackageSpecClass(const ast::ExpressionPtr &expr) {
     auto packageSpecClass = ast::cast_tree<ast::ClassDef>(expr);
-    if (packageSpecClass == nullptr || packageSpecClass->ancestors.size() != 1) {
+    if (packageSpecClass == nullptr || packageSpecClass->ancestors.empty()) {
         return nullptr;
     }
 

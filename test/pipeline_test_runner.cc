@@ -391,15 +391,13 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         filesSpan = filesSpan.subspan(numPackageFiles);
 
         trees = index(*gs, inputPackageFiles, handler, test);
-
-        // First run: only the __package.rb files. This populates the packageDB
-        package(*gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
-        name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
     }
 
     auto nonPackageTrees = index(*gs, filesSpan, handler, test);
-    package(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
+    name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
+    package(*gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
     name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
+    package(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
 
     for (auto &tree : trees) {
@@ -722,16 +720,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     trees = move(newTrees);
     fast_sort(trees, [](auto &lhs, auto &rhs) { return lhs.file < rhs.file; });
 
-    if (opts.cacheSensitiveOptions.stripePackages) {
-        absl::c_stable_partition(trees, [&](const auto &pf) { return pf.file.isPackage(*gs); });
-        trees = packager::Packager::runIncremental(*gs, move(trees), *workers);
-        for (auto &tree : trees) {
-            handler.addObserved(*gs, "package-tree", [&]() {
-                return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
-            });
-        }
-    }
-
     bool ranIncrementalNamer = false;
     {
         // namer
@@ -753,6 +741,16 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
             handler.addObserved(*gs, "name-tree", [&]() { return tree.tree.toString(*gs); });
             handler.addObserved(*gs, "name-tree-raw", [&]() { return tree.tree.showRaw(*gs); });
+        }
+    }
+
+    if (opts.cacheSensitiveOptions.stripePackages) {
+        absl::c_stable_partition(trees, [&](const auto &pf) { return pf.file.isPackage(*gs); });
+        trees = packager::Packager::runIncremental(*gs, move(trees), *workers);
+        for (auto &tree : trees) {
+            handler.addObserved(*gs, "package-tree", [&]() {
+                return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
+            });
         }
     }
 

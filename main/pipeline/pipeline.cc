@@ -1137,20 +1137,6 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                    optional<UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>>> &&foundHashesForFiles,
                    const options::Options &opts, WorkerPool &workers) {
     try {
-#ifndef SORBET_REALMAIN_MIN
-        if (opts.cacheSensitiveOptions.stripePackages) {
-            Timer timeit(gs.tracer(), "incremental_packager");
-            // For simplicity, we still call Packager::runIncremental here, even though
-            // pipeline::nameAndResolve no longer calls Packager::run.
-            //
-            // TODO(jez) We may want to revisit this. At the moment, the only thing that
-            // runIncremental does is validate that files have the right package prefix. We could
-            // split `pipeline::package` into something like "populate the package DB" and "verify
-            // the package prefixes" with the later living in `pipeline::nameAndResolve` once again
-            // (thus restoring the symmetry).
-            what = packager::Packager::runIncremental(gs, move(what), workers);
-        }
-#endif
         auto runIncrementalNamer = foundHashesForFiles.has_value() && !foundHashesForFiles->empty();
         {
             Timer timeit(gs.tracer(), "incremental_naming");
@@ -1170,6 +1156,21 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                 return what;
             }
         }
+
+#ifndef SORBET_REALMAIN_MIN
+        if (opts.cacheSensitiveOptions.stripePackages) {
+            Timer timeit(gs.tracer(), "incremental_packager");
+            // For simplicity, we still call Packager::runIncremental here, even though
+            // pipeline::nameAndResolve no longer calls Packager::run.
+            //
+            // TODO(jez) We may want to revisit this. At the moment, the only thing that
+            // runIncremental does is validate that files have the right package prefix. We could
+            // split `pipeline::package` into something like "populate the package DB" and "verify
+            // the package prefixes" with the later living in `pipeline::nameAndResolve` once again
+            // (thus restoring the symmetry).
+            what = packager::Packager::runIncremental(gs, move(what), workers);
+        }
+#endif
 
         {
             Timer timeit(gs.tracer(), "incremental_resolve");
