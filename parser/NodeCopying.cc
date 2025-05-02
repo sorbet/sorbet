@@ -337,9 +337,7 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
         },
         [&](const parser::Yield *yield) { result = std::make_unique<Yield>(yield->loc, deepCopyVec(yield->exprs)); },
         [&](const parser::ZSuper *zSuper) { result = std::make_unique<ZSuper>(zSuper->loc); },
-        [&](const parser::Node *other) {
-            ENFORCE(false, "Unimplemented node type: {}", ((parser::Node *)other)->nodeName());
-        });
+        [&](const parser::Node *other) { ENFORCE(false, "Unimplemented node type: {}", other->nodeName()); });
 
     return result;
 }

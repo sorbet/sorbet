@@ -859,14 +859,14 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
     out << "  virtual std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0);"
         << '\n';
     out << "  virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0);" << '\n';
-    out << "  virtual std::string nodeName();" << '\n';
+    out << "  virtual std::string nodeName() const;" << '\n';
 
     out << "};" << '\n';
     out << '\n';
 }
 
 void emitNodeClassfile(ostream &out, NodeDef &node) {
-    out << "  std::string " << node.name << "::nodeName() {" << '\n';
+    out << "  std::string " << node.name << "::nodeName() const {" << '\n';
     out << "    return \"" << node.name << "\";" << '\n';
     out << "  };" << '\n' << '\n';
 
