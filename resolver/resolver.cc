@@ -578,7 +578,7 @@ private:
 
                         // Can't use pkg.ownsSymbol since it uses symbol definition locs, which have an edge case that
                         // isn't handled until the VisibilityChecker pass.
-                        auto enclosingPackage = ctx.state.packageDB().getPackageForFile(ctx.state, ctx.file);
+                        auto enclosingPackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
                         if (enclosingPackage.exists()) {
                             const auto pkgRootSymbol = ctx.state.packageDB()
                                                            .getPackageInfo(enclosingPackage)
