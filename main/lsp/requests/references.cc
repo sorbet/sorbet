@@ -44,7 +44,7 @@ vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::
         auto symFound = findSym(gs, fullName, namespaceToCheck);
         // Do nothing if the symbol is not found or is from the same package -- i.e. for class ... < PackageSpec
         // declarations
-        if (symFound.exists() && gs.packageDB().getPackageNameForFile(symFound.loc(gs).file()) != packageName) {
+        if (symFound.exists() && gs.packageDB().getPackageNameForFileFast(symFound.loc(gs).file()) != packageName) {
             result.emplace_back(std::move(symFound));
         }
     }
@@ -119,7 +119,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 //                ^
                 //  Returns all global usages of Foo::A
 
-                auto packageName = gs.packageDB().getPackageNameForFile(fref);
+                auto packageName = gs.packageDB().getPackageNameForFileFast(fref);
                 auto symsToCheck = getSymsToCheckWithinPackage(gs, constResp->symbolBeforeDealias, packageName);
 
                 if (!symsToCheck.empty()) {

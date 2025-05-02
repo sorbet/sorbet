@@ -37,7 +37,7 @@ class PropagateVisibility final {
     const core::packages::PackageInfo &package;
 
     bool definedByThisPackage(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
-        auto pkg = gs.packageDB().getPackageNameForFile(sym.data(gs)->loc().file());
+        auto pkg = gs.packageDB().getPackageNameForFileFast(sym.data(gs)->loc().file());
         return this->package.mangledName() == pkg;
     }
 
@@ -153,7 +153,7 @@ class PropagateVisibility final {
 
             if (packageSym.exists()) {
                 auto file = packageSym.data(ctx)->loc().file();
-                if (db.getPackageNameForFile(file) != this->package.mangledName()) {
+                if (db.getPackageNameForFileFast(file) != this->package.mangledName()) {
                     packageSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
                 }
             }
@@ -179,7 +179,7 @@ class PropagateVisibility final {
 
             if (testSym.exists()) {
                 auto file = testSym.data(ctx)->loc().file();
-                if (db.getPackageNameForFile(file) != this->package.mangledName()) {
+                if (db.getPackageNameForFileFast(file) != this->package.mangledName()) {
                     testSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
                 }
             }
@@ -209,7 +209,7 @@ class PropagateVisibility final {
         }
 
         auto definingFile = sym.loc(ctx).file();
-        auto symPackage = ctx.state.packageDB().getPackageNameForFile(definingFile);
+        auto symPackage = ctx.state.packageDB().getPackageNameForFileFast(definingFile);
         if (symPackage != this->package.mangledName()) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Cannot export `{}` because it is owned by another package", sym.show(ctx));
@@ -327,7 +327,7 @@ public:
             return;
         }
 
-        auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
+        auto pkgName = gs.packageDB().getPackageNameForFileFast(f.file);
         if (!pkgName.exists()) {
             return;
         }
@@ -396,7 +396,7 @@ public:
         auto &db = ctx.state.packageDB();
 
         // no need to check visibility for these cases
-        auto otherPackage = db.getPackageNameForFile(otherFile);
+        auto otherPackage = db.getPackageNameForFileFast(otherFile);
         if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
             return;
         }
@@ -598,7 +598,7 @@ public:
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 ast::ParsedFile &f = files[idx];
                 if (!f.file.data(gs).isPackage(gs)) {
-                    auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
+                    auto pkgName = gs.packageDB().getPackageNameForFileFast(f.file);
                     if (pkgName.exists()) {
                         core::Context ctx{gs, core::Symbols::root(), f.file};
                         VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};

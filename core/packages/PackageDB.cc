@@ -165,7 +165,7 @@ MangledName PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
     return nr;
 }
 
-const MangledName PackageDB::getPackageNameForFile(FileRef file) const {
+const MangledName PackageDB::getPackageNameForFileFast(FileRef file) const {
     if (this->packageForFile_.size() <= file.id()) {
         return MangledName();
     }
@@ -187,7 +187,7 @@ MangledName PackageDB::getPackageForFile(const core::GlobalState &gs, core::File
 
     // If we already have the package name cached, we can skip the slow path below. As this function is const, we cannot
     // update the vector if we fall back on the slow path.
-    auto name = this->getPackageNameForFile(file);
+    auto name = this->getPackageNameForFileFast(file);
     if (name.exists()) {
         return name;
     }

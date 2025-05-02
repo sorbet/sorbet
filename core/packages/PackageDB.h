@@ -30,7 +30,7 @@ public:
 
     // Fetch the mangled package name for a file, returning a MangledName that doesn't exist if there is no
     // associated package for the file.
-    const MangledName getPackageNameForFile(FileRef file) const;
+    const MangledName getPackageNameForFileFast(FileRef file) const;
 
     // Set the associated package for the file.
     void setPackageNameForFile(FileRef file, MangledName mangledName);
