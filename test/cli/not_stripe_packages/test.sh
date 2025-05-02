@@ -7,7 +7,7 @@ set -euo pipefail
 #
 # This makes it easy to have behavior that leaks `--stripe-packages`-specific
 # behavior into the pipeline. Long term, we should figure out how to fix this.
-if main/sorbet --silence-dev-message test/cli/not_stripe_packages/__package.rb 2>&1; then
+if main/sorbet --silence-dev-message --censor-for-snapshot-tests test/cli/not_stripe_packages/__package.rb 2>&1; then
   echo "Expected to fail!"
   exit 1
 fi

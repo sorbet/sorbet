@@ -342,6 +342,9 @@ end
 class NoMatchingPatternError < StandardError
 end
 
+class NoMatchingPatternKeyError < NoMatchingPatternError
+end
+
 # Raised when a given numerical value is out of range.
 #
 # ```ruby
