@@ -35,7 +35,7 @@ public:
     // Set the associated package for the file.
     void setPackageNameForFile(FileRef file, MangledName mangledName);
 
-    MangledName getPackageForFile(const core::GlobalState &gs, core::FileRef file) const;
+    MangledName findPackageByPath(const core::GlobalState &gs, core::FileRef file) const;
     const PackageInfo &getPackageInfo(MangledName mangledName) const;
     PackageInfo *getPackageInfoNonConst(MangledName mangledName);
 

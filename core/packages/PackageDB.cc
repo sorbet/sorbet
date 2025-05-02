@@ -181,16 +181,8 @@ void PackageDB::setPackageNameForFile(FileRef file, MangledName mangledName) {
     this->packageForFile_[file.id()] = mangledName;
 }
 
-MangledName PackageDB::getPackageForFile(const core::GlobalState &gs, core::FileRef file) const {
-    ENFORCE(frozen);
+MangledName PackageDB::findPackageByPath(const core::GlobalState &gs, core::FileRef file) const {
     ENFORCE(enabled_);
-
-    // If we already have the package name cached, we can skip the slow path below. As this function is const, we cannot
-    // update the vector if we fall back on the slow path.
-    auto name = this->getPackageNameForFile(file);
-    if (name.exists()) {
-        return name;
-    }
 
     // Note about safety: we're only using the file data for two pieces of information: the file path and the
     // sourceType. The path is present even on unloaded files, and the sourceType we're interested in is `Package`,

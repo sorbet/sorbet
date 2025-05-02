@@ -2016,7 +2016,12 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast
     {
         auto &db = gs.packageDB();
         for (auto &f : files) {
-            auto pkg = db.getPackageForFile(gs, f.file);
+            auto pkg = db.getPackageNameForFile(f.file);
+            if (pkg.exists()) {
+                continue;
+            }
+
+            pkg = db.findPackageByPath(gs, f.file);
             if (!pkg.exists()) {
                 continue;
             }
@@ -2040,7 +2045,12 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const cor
     {
         auto &db = gs.packageDB();
         for (auto &f : files) {
-            auto pkg = db.getPackageForFile(gs, f);
+            auto pkg = db.getPackageNameForFile(f);
+            if (pkg.exists()) {
+                continue;
+            }
+
+            pkg = db.findPackageByPath(gs, f);
             if (!pkg.exists()) {
                 continue;
             }
