@@ -131,7 +131,7 @@ vector<ast::ParsedFile> enterPackages(core::GlobalState &gs, vector<pair<string,
     return parsedFiles;
 }
 
-const core::packages::PackageInfo &getPackageForFile(const core::GlobalState &gs, core::FileRef file) {
+const core::packages::PackageInfo &packageInfoFor(const core::GlobalState &gs, core::FileRef file) {
     return gs.packageDB().getPackageInfo(gs.packageDB().getPackageForFile(gs, file));
 }
 
@@ -161,8 +161,8 @@ TEST_CASE("Simple add import") {
 
     auto parsedFiles =
         enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
-    auto &examplePkg = getPackageForFile(gs, parsedFiles[0].file);
-    auto &myPkg = getPackageForFile(gs, parsedFiles[1].file);
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
     ENFORCE(examplePkg.exists());
     ENFORCE(myPkg.exists());
 
@@ -187,8 +187,8 @@ TEST_CASE("Simple test import") {
 
     auto parsedFiles =
         enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
-    auto &examplePkg = getPackageForFile(gs, parsedFiles[0].file);
-    auto &myPkg = getPackageForFile(gs, parsedFiles[1].file);
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
     ENFORCE(examplePkg.exists());
     ENFORCE(myPkg.exists());
 
@@ -213,8 +213,8 @@ TEST_CASE("Add import with only existing exports") {
 
     auto parsedFiles =
         enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
-    auto &examplePkg = getPackageForFile(gs, parsedFiles[0].file);
-    auto &myPkg = getPackageForFile(gs, parsedFiles[1].file);
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
     ENFORCE(examplePkg.exists());
     ENFORCE(myPkg.exists());
 
@@ -241,8 +241,8 @@ TEST_CASE("Add import and test_import to package with imports and test imports")
                                           {"b/__package.rb", "class B < PackageSpec\nend\n"},
                                           {"c/__package.rb", "class C < PackageSpec\nend\n"},
                                           {"d/__package.rb", "class D < PackageSpec\nend\n"}});
-    auto &examplePkg = getPackageForFile(gs, parsedFiles[0].file);
-    auto &myPkg = getPackageForFile(gs, parsedFiles[1].file);
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
     ENFORCE(examplePkg.exists());
     ENFORCE(myPkg.exists());
 
@@ -290,8 +290,8 @@ TEST_CASE("Add test import with only existing exports") {
 
     auto parsedFiles =
         enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
-    auto &examplePkg = getPackageForFile(gs, parsedFiles[0].file);
-    auto &myPkg = getPackageForFile(gs, parsedFiles[1].file);
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
     ENFORCE(examplePkg.exists());
     ENFORCE(myPkg.exists());
 
@@ -314,8 +314,8 @@ TEST_CASE("Add import to package with neither imports nor exports") {
 
     auto parsedFiles =
         enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
-    auto &examplePkg = getPackageForFile(gs, parsedFiles[0].file);
-    auto &myPkg = getPackageForFile(gs, parsedFiles[1].file);
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
     ENFORCE(examplePkg.exists());
     ENFORCE(myPkg.exists());
 
@@ -338,8 +338,8 @@ TEST_CASE("Add test import to package with neither imports nor exports") {
 
     auto parsedFiles =
         enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
-    auto &examplePkg = getPackageForFile(gs, parsedFiles[0].file);
-    auto &myPkg = getPackageForFile(gs, parsedFiles[1].file);
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
     ENFORCE(examplePkg.exists());
     ENFORCE(myPkg.exists());
 
@@ -363,7 +363,7 @@ TEST_CASE("Add export that goes before existing exports") {
                       "end\n";
 
     auto parsedFiles = enterPackages(gs, {{"my_package/__package.rb", pkg_source}});
-    auto &myPkg = getPackageForFile(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[0].file);
     ENFORCE(myPkg.exists());
 
     auto addExport = myPkg.addExport(gs, getConstantRef(gs, {"MyPackage", "NewExport"}));
@@ -384,7 +384,7 @@ TEST_CASE("Add export to package with no existing exports") {
                       "end\n";
 
     auto parsedFiles = enterPackages(gs, {{"my_package/__package.rb", pkg_source}});
-    auto &myPkg = getPackageForFile(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[0].file);
     ENFORCE(myPkg.exists());
 
     auto addExport = myPkg.addExport(gs, getConstantRef(gs, {"MyPackage", "NewExport"}));
@@ -409,7 +409,7 @@ TEST_CASE("Add export that goes in the middle of existing exports") {
                       "end\n";
 
     auto parsedFiles = enterPackages(gs, {{"my_package/__package.rb", pkg_source}});
-    auto &myPkg = getPackageForFile(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[0].file);
     ENFORCE(myPkg.exists());
 
     auto addExport = myPkg.addExport(gs, getConstantRef(gs, {"MyPackage", "NewExport"}));
@@ -432,7 +432,7 @@ TEST_CASE("Add export that goes at the end") {
                       "end\n";
 
     auto parsedFiles = enterPackages(gs, {{"my_package/__package.rb", pkg_source}});
-    auto &myPkg = getPackageForFile(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[0].file);
     ENFORCE(myPkg.exists());
 
     auto addExport = myPkg.addExport(gs, getConstantRef(gs, {"MyPackage", "NewExport"}));
@@ -458,11 +458,11 @@ TEST_CASE("Add imports to strict_dependencies 'false' package") {
                                           {layeredPackageBPath, layeredPackageB},
                                           {layeredDagPackageBPath, layeredDagPackageB},
                                           {dagPackageBPath, dagPackageB}});
-    auto &myPkg = getPackageForFile(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[0].file);
     ENFORCE(myPkg.exists());
 
     {
-        auto &falsePkgB = getPackageForFile(gs, parsedFiles[5].file);
+        auto &falsePkgB = packageInfoFor(gs, parsedFiles[5].file);
         ENFORCE(falsePkgB.exists());
         auto addImport = myPkg.addImport(gs, falsePkgB, false);
         string expected =
@@ -474,7 +474,7 @@ TEST_CASE("Add imports to strict_dependencies 'false' package") {
     }
 
     {
-        auto &layeredPkgB = getPackageForFile(gs, parsedFiles[6].file);
+        auto &layeredPkgB = packageInfoFor(gs, parsedFiles[6].file);
         ENFORCE(layeredPkgB.exists());
         auto addImport = myPkg.addImport(gs, layeredPkgB, false);
         string expected =
@@ -486,7 +486,7 @@ TEST_CASE("Add imports to strict_dependencies 'false' package") {
     }
 
     {
-        auto &layeredDagPkgB = getPackageForFile(gs, parsedFiles[7].file);
+        auto &layeredDagPkgB = packageInfoFor(gs, parsedFiles[7].file);
         ENFORCE(layeredDagPkgB.exists());
         auto addImport = myPkg.addImport(gs, layeredDagPkgB, false);
         string expected = makePackageRB(
@@ -498,7 +498,7 @@ TEST_CASE("Add imports to strict_dependencies 'false' package") {
     }
 
     {
-        auto &dagPkgB = getPackageForFile(gs, parsedFiles[8].file);
+        auto &dagPkgB = packageInfoFor(gs, parsedFiles[8].file);
         ENFORCE(dagPkgB.exists());
         auto addImport = myPkg.addImport(gs, dagPkgB, false);
         string expected =
@@ -526,11 +526,11 @@ TEST_CASE("Add imports to strict_dependencies 'layered' package") {
                                           {layeredPackageBPath, layeredPackageB},
                                           {layeredDagPackageBPath, layeredDagPackageB},
                                           {dagPackageBPath, dagPackageB}});
-    auto &myPkg = getPackageForFile(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[0].file);
     ENFORCE(myPkg.exists());
 
     {
-        auto &falsePkgB = getPackageForFile(gs, parsedFiles[5].file);
+        auto &falsePkgB = packageInfoFor(gs, parsedFiles[5].file);
         ENFORCE(falsePkgB.exists());
         auto addImport = myPkg.addImport(gs, falsePkgB, false);
         string expected =
@@ -542,7 +542,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered' package") {
     }
 
     {
-        auto &layeredPkgB = getPackageForFile(gs, parsedFiles[6].file);
+        auto &layeredPkgB = packageInfoFor(gs, parsedFiles[6].file);
         ENFORCE(layeredPkgB.exists());
         auto addImport = myPkg.addImport(gs, layeredPkgB, false);
         string expected =
@@ -554,7 +554,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered' package") {
     }
 
     {
-        auto &layeredDagPkgB = getPackageForFile(gs, parsedFiles[7].file);
+        auto &layeredDagPkgB = packageInfoFor(gs, parsedFiles[7].file);
         ENFORCE(layeredDagPkgB.exists());
         auto addImport = myPkg.addImport(gs, layeredDagPkgB, false);
         string expected = makePackageRB(
@@ -566,7 +566,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered' package") {
     }
 
     {
-        auto &dagPkgB = getPackageForFile(gs, parsedFiles[8].file);
+        auto &dagPkgB = packageInfoFor(gs, parsedFiles[8].file);
         ENFORCE(dagPkgB.exists());
         auto addImport = myPkg.addImport(gs, dagPkgB, false);
         string expected =
@@ -594,11 +594,11 @@ TEST_CASE("Add imports to strict_dependencies 'layered_dag' package") {
                                           {layeredPackageBPath, layeredPackageB},
                                           {layeredDagPackageBPath, layeredDagPackageB},
                                           {dagPackageBPath, dagPackageB}});
-    auto &myPkg = getPackageForFile(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[0].file);
     ENFORCE(myPkg.exists());
 
     {
-        auto &falsePkgB = getPackageForFile(gs, parsedFiles[5].file);
+        auto &falsePkgB = packageInfoFor(gs, parsedFiles[5].file);
         ENFORCE(falsePkgB.exists());
         auto addImport = myPkg.addImport(gs, falsePkgB, false);
         string expected =
@@ -610,7 +610,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered_dag' package") {
     }
 
     {
-        auto &layeredPkgB = getPackageForFile(gs, parsedFiles[6].file);
+        auto &layeredPkgB = packageInfoFor(gs, parsedFiles[6].file);
         ENFORCE(layeredPkgB.exists());
         auto addImport = myPkg.addImport(gs, layeredPkgB, false);
         string expected =
@@ -622,7 +622,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered_dag' package") {
     }
 
     {
-        auto &layeredDagPkgB = getPackageForFile(gs, parsedFiles[7].file);
+        auto &layeredDagPkgB = packageInfoFor(gs, parsedFiles[7].file);
         ENFORCE(layeredDagPkgB.exists());
         auto addImport = myPkg.addImport(gs, layeredDagPkgB, false);
         string expected = makePackageRB(
@@ -634,7 +634,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered_dag' package") {
     }
 
     {
-        auto &dagPkgB = getPackageForFile(gs, parsedFiles[8].file);
+        auto &dagPkgB = packageInfoFor(gs, parsedFiles[8].file);
         ENFORCE(dagPkgB.exists());
         auto addImport = myPkg.addImport(gs, dagPkgB, false);
         string expected =
@@ -662,11 +662,11 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
                                           {layeredPackageBPath, layeredPackageB},
                                           {layeredDagPackageBPath, layeredDagPackageB},
                                           {dagPackageBPath, dagPackageB}});
-    auto &myPkg = getPackageForFile(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[0].file);
     ENFORCE(myPkg.exists());
 
     {
-        auto &falsePkgB = getPackageForFile(gs, parsedFiles[5].file);
+        auto &falsePkgB = packageInfoFor(gs, parsedFiles[5].file);
         ENFORCE(falsePkgB.exists());
         auto addImport = myPkg.addImport(gs, falsePkgB, false);
         string expected =
@@ -678,7 +678,7 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
     }
 
     {
-        auto &layeredPkgB = getPackageForFile(gs, parsedFiles[6].file);
+        auto &layeredPkgB = packageInfoFor(gs, parsedFiles[6].file);
         ENFORCE(layeredPkgB.exists());
         auto addImport = myPkg.addImport(gs, layeredPkgB, false);
         string expected =
@@ -690,7 +690,7 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
     }
 
     {
-        auto &layeredDagPkgB = getPackageForFile(gs, parsedFiles[7].file);
+        auto &layeredDagPkgB = packageInfoFor(gs, parsedFiles[7].file);
         ENFORCE(layeredDagPkgB.exists());
         auto addImport = myPkg.addImport(gs, layeredDagPkgB, false);
         string expected = makePackageRB(
@@ -702,7 +702,7 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
     }
 
     {
-        auto &dagPkgB = getPackageForFile(gs, parsedFiles[8].file);
+        auto &dagPkgB = packageInfoFor(gs, parsedFiles[8].file);
         ENFORCE(dagPkgB.exists());
         auto addImport = myPkg.addImport(gs, dagPkgB, false);
         string expected =
@@ -753,9 +753,9 @@ TEST_CASE("Edge cases") {
 
     {
         // Import list contains non-existent package
-        auto &fakeImportPkg = getPackageForFile(gs, parsedFiles[0].file);
+        auto &fakeImportPkg = packageInfoFor(gs, parsedFiles[0].file);
         ENFORCE(fakeImportPkg.exists());
-        auto &layeredPkgA = getPackageForFile(gs, parsedFiles[2].file);
+        auto &layeredPkgA = packageInfoFor(gs, parsedFiles[2].file);
         ENFORCE(layeredPkgA.exists());
 
         auto addImport = fakeImportPkg.addImport(gs, layeredPkgA, false);
@@ -767,9 +767,9 @@ TEST_CASE("Edge cases") {
 
     {
         // Import added to start of import list
-        auto &libPkg = getPackageForFile(gs, parsedFiles[3].file);
+        auto &libPkg = packageInfoFor(gs, parsedFiles[3].file);
         ENFORCE(libPkg.exists());
-        auto &appPkg = getPackageForFile(gs, parsedFiles[4].file);
+        auto &appPkg = packageInfoFor(gs, parsedFiles[4].file);
         ENFORCE(appPkg.exists());
 
         auto addImport = libPkg.addImport(gs, appPkg, false);
@@ -781,9 +781,9 @@ TEST_CASE("Edge cases") {
 
     {
         // Import list with comments in it
-        auto &hasCommentsPkg = getPackageForFile(gs, parsedFiles[5].file);
+        auto &hasCommentsPkg = packageInfoFor(gs, parsedFiles[5].file);
         ENFORCE(hasCommentsPkg.exists());
-        auto &layeredPkgA = getPackageForFile(gs, parsedFiles[2].file);
+        auto &layeredPkgA = packageInfoFor(gs, parsedFiles[2].file);
         ENFORCE(layeredPkgA.exists());
 
         auto addImport = hasCommentsPkg.addImport(gs, layeredPkgA, false);
@@ -800,9 +800,9 @@ TEST_CASE("Edge cases") {
 
     {
         // Add import to a package with a bunch of test imports
-        auto &hasTestImportsPkg = getPackageForFile(gs, parsedFiles[6].file);
+        auto &hasTestImportsPkg = packageInfoFor(gs, parsedFiles[6].file);
         ENFORCE(hasTestImportsPkg.exists());
-        auto &dagPkgA = getPackageForFile(gs, parsedFiles[7].file);
+        auto &dagPkgA = packageInfoFor(gs, parsedFiles[7].file);
         ENFORCE(dagPkgA.exists());
 
         auto addImport = hasTestImportsPkg.addImport(gs, dagPkgA, false);
@@ -814,9 +814,9 @@ TEST_CASE("Edge cases") {
 
     {
         // Add import to a package with layering violations
-        auto &hasLayeringViolationsPkg = getPackageForFile(gs, parsedFiles[8].file);
+        auto &hasLayeringViolationsPkg = packageInfoFor(gs, parsedFiles[8].file);
         ENFORCE(hasLayeringViolationsPkg.exists());
-        auto &falsePkgA = getPackageForFile(gs, parsedFiles[1].file);
+        auto &falsePkgA = packageInfoFor(gs, parsedFiles[1].file);
         ENFORCE(falsePkgA.exists());
 
         auto addImport = hasLayeringViolationsPkg.addImport(gs, falsePkgA, false);
@@ -840,9 +840,9 @@ TEST_CASE("Convert test_import to import") {
                                           {dagPackageAPath, dagPackageA}});
 
     {
-        auto &myPkg = getPackageForFile(gs, parsedFiles[0].file);
+        auto &myPkg = packageInfoFor(gs, parsedFiles[0].file);
         ENFORCE(myPkg.exists());
-        auto &layeredPkgA = getPackageForFile(gs, parsedFiles[2].file);
+        auto &layeredPkgA = packageInfoFor(gs, parsedFiles[2].file);
         ENFORCE(layeredPkgA.exists());
 
         auto addImport = myPkg.addImport(gs, layeredPkgA, false);
@@ -880,9 +880,9 @@ TEST_CASE("Ordering by alphabetical") {
                            {"my_package/__package.rb", myPackage}});
 
     {
-        auto &myPkg = getPackageForFile(gs, parsedFiles[5].file);
+        auto &myPkg = packageInfoFor(gs, parsedFiles[5].file);
         ENFORCE(myPkg.exists());
-        auto &libFooB = getPackageForFile(gs, parsedFiles[1].file);
+        auto &libFooB = packageInfoFor(gs, parsedFiles[1].file);
         ENFORCE(libFooB.exists());
 
         string expected = makePackageRB("MyPackage", "layered", "lib", {"Lib::Foo::B", "Lib::Foo::B::A"});
@@ -893,9 +893,9 @@ TEST_CASE("Ordering by alphabetical") {
     }
 
     {
-        auto &myPkg = getPackageForFile(gs, parsedFiles[5].file);
+        auto &myPkg = packageInfoFor(gs, parsedFiles[5].file);
         ENFORCE(myPkg.exists());
-        auto &libFooC = getPackageForFile(gs, parsedFiles[3].file);
+        auto &libFooC = packageInfoFor(gs, parsedFiles[3].file);
         ENFORCE(libFooC.exists());
 
         string expected = makePackageRB("MyPackage", "layered", "lib", {"Lib::Foo::B::A", "Lib::Foo::C"});
@@ -906,9 +906,9 @@ TEST_CASE("Ordering by alphabetical") {
     }
 
     {
-        auto &myPkg = getPackageForFile(gs, parsedFiles[5].file);
+        auto &myPkg = packageInfoFor(gs, parsedFiles[5].file);
         ENFORCE(myPkg.exists());
-        auto &libFooD = getPackageForFile(gs, parsedFiles[4].file);
+        auto &libFooD = packageInfoFor(gs, parsedFiles[4].file);
         ENFORCE(libFooD.exists());
 
         string expected = makePackageRB("MyPackage", "layered", "lib", {"Lib::Foo::D", "Lib::Foo::B::A"});
