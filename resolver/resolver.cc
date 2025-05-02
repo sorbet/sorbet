@@ -578,10 +578,11 @@ private:
 
                         // Can't use pkg.ownsSymbol since it uses symbol definition locs, which have an edge case that
                         // isn't handled until the VisibilityChecker pass.
-                        auto &enclosingPackage = ctx.state.packageDB().getPackageForFile(ctx.state, ctx.file);
+                        auto enclosingPackage = ctx.state.packageDB().getPackageForFile(ctx.state, ctx.file);
                         if (enclosingPackage.exists()) {
-                            const auto pkgRootSymbol =
-                                enclosingPackage.getRootSymbolForAutocorrectSearch(ctx.state, suggestScope);
+                            const auto pkgRootSymbol = ctx.state.packageDB()
+                                                           .getPackageInfo(enclosingPackage)
+                                                           .getRootSymbolForAutocorrectSearch(ctx.state, suggestScope);
 
                             auto it = std::remove_if(suggested.begin(), suggested.end(),
                                                      [&pkgRootSymbol, &gs](auto &suggestion) -> bool {

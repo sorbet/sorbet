@@ -251,6 +251,17 @@ public:
     }
 
     // PackageInfoImpl is the only implementation of PackageInfo
+    static PackageInfoImpl &from(core::GlobalState &gs, core::packages::MangledName pkg) {
+        ENFORCE(pkg.exists());
+        return from(*gs.packageDB().getPackageInfoNonConst(pkg));
+    }
+
+    const static PackageInfoImpl &from(const core::GlobalState &gs, core::packages::MangledName pkg) {
+        ENFORCE(pkg.exists());
+        return from(gs.packageDB().getPackageInfo(pkg));
+    }
+
+    // PackageInfoImpl is the only implementation of PackageInfo
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
         ENFORCE(pkg.exists());
         return reinterpret_cast<const PackageInfoImpl &>(pkg); // TODO is there a more idiomatic way to do this?
@@ -267,8 +278,8 @@ public:
 
     bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const {
         auto file = symbol.loc(gs).file();
-        auto &pkg = gs.packageDB().getPackageForFile(gs, file);
-        return this->mangledName() == pkg.mangledName();
+        auto pkg = gs.packageDB().getPackageForFile(gs, file);
+        return this->mangledName() == pkg;
     }
 
     PackageInfoImpl(PackageName name, core::Loc loc, core::Loc declLoc_) : name(name), loc(loc), declLoc_(declLoc_) {}
@@ -1793,7 +1804,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     const auto &packageDB = ctx.state.packageDB();
     ENFORCE(packageDB.getPackageInfo(i.name.mangledName).exists())
     ENFORCE(packageDB.getPackageForFile(ctx, ctx.file).exists())
-    auto &thisPkg = PackageInfoImpl::from(packageDB.getPackageForFile(ctx, ctx.file));
+    auto &thisPkg = PackageInfoImpl::from(ctx, packageDB.getPackageForFile(ctx, ctx.file));
     auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name.mangledName));
     ENFORCE(thisPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
     ENFORCE(otherPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
@@ -1858,10 +1869,9 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     }
 }
 
-void validateVisibility(const core::Context &ctx, const Import i) {
+void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg, const Import i) {
     ENFORCE(ctx.state.packageDB().getPackageInfo(i.name.mangledName).exists())
     ENFORCE(ctx.state.packageDB().getPackageForFile(ctx, ctx.file).exists())
-    auto &absPkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
     auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.name.mangledName);
 
     const auto &visibleTo = otherPkg.visibleTo();
@@ -1890,7 +1900,7 @@ void validateVisibility(const core::Context &ctx, const Import i) {
 
 void validatePackage(core::Context ctx) {
     const auto &packageDB = ctx.state.packageDB();
-    auto &absPkg = packageDB.getPackageForFile(ctx, ctx.file);
+    auto absPkg = packageDB.getPackageForFile(ctx, ctx.file);
     if (!absPkg.exists()) {
         // We already produced an error on this package when producing its package info.
         // The correct course of action is to abort the transform.
@@ -1905,7 +1915,7 @@ void validatePackage(core::Context ctx) {
         }
     }
 
-    auto &pkgInfo = PackageInfoImpl::from(absPkg);
+    auto &pkgInfo = PackageInfoImpl::from(ctx, absPkg);
     bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
     auto enforceLayering = ctx.state.packageDB().enforceLayering();
 
@@ -1926,7 +1936,7 @@ void validatePackage(core::Context ctx) {
         }
 
         if (!skipImportVisibilityCheck) {
-            validateVisibility(ctx, i);
+            validateVisibility(ctx, pkgInfo, i);
         }
     }
 }
@@ -1946,7 +1956,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
         return;
     }
 
-    auto &pkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
+    auto pkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
     if (!pkg.exists()) {
         // Don't transform, but raise an error on the first line.
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
@@ -1957,7 +1967,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
         return;
     }
 
-    auto &pkgImpl = PackageInfoImpl::from(pkg);
+    auto &pkgImpl = PackageInfoImpl::from(ctx, pkg);
 
     EnforcePackagePrefix enforcePrefix(ctx, pkgImpl);
     ast::ConstShallowWalk::apply(ctx, enforcePrefix, tree);
@@ -2006,12 +2016,12 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast
     {
         auto &db = gs.packageDB();
         for (auto &f : files) {
-            auto &pkg = db.getPackageForFile(gs, f.file);
+            auto pkg = db.getPackageForFile(gs, f.file);
             if (!pkg.exists()) {
                 continue;
             }
 
-            mapping.emplace_back(f.file, pkg.mangledName());
+            mapping.emplace_back(f.file, pkg);
         }
     }
 
@@ -2030,12 +2040,12 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const cor
     {
         auto &db = gs.packageDB();
         for (auto &f : files) {
-            auto &pkg = db.getPackageForFile(gs, f);
+            auto pkg = db.getPackageForFile(gs, f);
             if (!pkg.exists()) {
                 continue;
             }
 
-            mapping.emplace_back(f, pkg.mangledName());
+            mapping.emplace_back(f, pkg);
         }
     }
 
