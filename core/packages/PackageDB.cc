@@ -213,6 +213,14 @@ const PackageInfo &PackageDB::getPackageInfo(const core::GlobalState &gs, std::s
     return getPackageInfo(cnst);
 }
 
+const PackageInfo *PackageDB::maybeGetPackageInfo(MangledName mangledName) const {
+    auto it = packages_.find(mangledName);
+    if (it == packages_.end()) {
+        return nullptr;
+    }
+    return it->second.get();
+}
+
 const PackageInfo &PackageDB::getPackageInfo(MangledName mangledName) const {
     return *packages_.at(mangledName);
 }

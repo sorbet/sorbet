@@ -1995,12 +1995,12 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
                 // surfaced that error to the user. Nothing to do here.
                 continue;
             }
-            auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
-            if (prevPkg.exists() && prevPkg.declLoc() != pkg->declLoc()) {
+            auto *prevPkg = gs.packageDB().maybeGetPackageInfo(pkg->mangledName());
+            if (prevPkg != nullptr && prevPkg->exists() && prevPkg->declLoc() != pkg->declLoc()) {
                 if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
                     auto pkgName = pkg->name.toString(ctx);
                     e.setHeader("Redefinition of package `{}`", pkgName);
-                    e.addErrorLine(prevPkg.declLoc(), "Package `{}` originally defined here", pkgName);
+                    e.addErrorLine(prevPkg->declLoc(), "Package `{}` originally defined here", pkgName);
                 }
             } else {
                 packages.db.enterPackage(move(pkg));
