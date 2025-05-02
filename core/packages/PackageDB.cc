@@ -206,6 +206,7 @@ const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, cor
         if (it != packagesByPathPrefix.end()) {
             const auto &pkg = getPackageInfo(it->second);
             ENFORCE(pkg.exists());
+            Exception::raise("Slow path of getPackageForFile");
             return pkg;
         }
 
