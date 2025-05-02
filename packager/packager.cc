@@ -253,7 +253,7 @@ public:
     // PackageInfoImpl is the only implementation of PackageInfo
     static PackageInfoImpl &from(core::GlobalState &gs, core::packages::MangledName pkg) {
         ENFORCE(pkg.exists());
-        return from(*gs.packageDB().getPackageInfoNonConst(pkg));
+        return from(gs.packageDB().getPackageInfoNonConst(pkg));
     }
 
     const static PackageInfoImpl &from(const core::GlobalState &gs, core::packages::MangledName pkg) {
@@ -1712,12 +1712,11 @@ struct ComputeSCCsMetadata {
 // detecting SCCs.
 void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::packages::MangledName pkgName,
                    NodeInfo &infoAtEntry) {
-    auto *pkgInfoPtr = gs.packageDB().getPackageInfoNonConst(pkgName);
-    if (!pkgInfoPtr) {
+    if (!pkgName.exists()) {
         // This is to handle the case where the user imports a package that doesn't exist.
         return;
     }
-    auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
+    auto &pkgInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfoNonConst(pkgName));
 
     infoAtEntry.index = metadata.nextIndex;
     infoAtEntry.lowLink = metadata.nextIndex;
@@ -1773,8 +1772,7 @@ void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::p
             poppedPkgName = metadata.stack.back();
             metadata.stack.pop_back();
             metadata.nodeMap[poppedPkgName].onStack = false;
-            PackageInfoImpl &poppedPkgInfo =
-                PackageInfoImpl::from(*(gs.packageDB().getPackageInfoNonConst(poppedPkgName)));
+            auto &poppedPkgInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfoNonConst(poppedPkgName));
             poppedPkgInfo.sccID_ = metadata.nextSCCId;
         } while (poppedPkgName != pkgName);
         metadata.nextSCCId++;

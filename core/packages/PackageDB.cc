@@ -214,19 +214,11 @@ const PackageInfo &PackageDB::getPackageInfo(const core::GlobalState &gs, std::s
 }
 
 const PackageInfo &PackageDB::getPackageInfo(MangledName mangledName) const {
-    auto it = packages_.find(mangledName);
-    if (it == packages_.end()) {
-        return NONE_PKG;
-    }
-    return *it->second;
+    return *packages_.at(mangledName);
 }
 
-PackageInfo *PackageDB::getPackageInfoNonConst(MangledName mangledName) {
-    auto it = packages_.find(mangledName);
-    if (it == packages_.end()) {
-        return nullptr;
-    }
-    return it->second.get();
+PackageInfo &PackageDB::getPackageInfoNonConst(MangledName mangledName) {
+    return *packages_.at(mangledName);
 }
 
 absl::Span<const MangledName> PackageDB::packages() const {
