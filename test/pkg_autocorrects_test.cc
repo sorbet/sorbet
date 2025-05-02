@@ -132,7 +132,7 @@ vector<ast::ParsedFile> enterPackages(core::GlobalState &gs, vector<pair<string,
 }
 
 const core::packages::PackageInfo &getPackageForFile(const core::GlobalState &gs, core::FileRef file) {
-    return gs.packageDB().getPackageForFile(gs, file);
+    return gs.packageDB().getPackageInfo(gs.packageDB().getPackageForFile(gs, file));
 }
 
 const core::SymbolRef getConstantRef(core::GlobalState &gs, vector<string> rawName) {
