@@ -353,8 +353,8 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
         };
 
         auto pairs = parser::NodeVec();
-        pairs.emplace_back(make_unique<parser::Pair>(argLoc, parser::MK::Symbol(argLoc, argName),
-                                                     typeTranslator.toParserNode(type, declaration)));
+        pairs.emplace_back(
+            make_unique<parser::Pair>(argLoc, parser::MK::Symbol(argLoc, argName), returnType->deepCopy()));
         auto hash = parser::MK::Hash(send->loc, true, move(pairs));
         auto sigArgs = parser::NodeVec();
         sigArgs.emplace_back(move(hash));
