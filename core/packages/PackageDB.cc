@@ -204,6 +204,7 @@ MangledName PackageDB::getPackageForFile(const core::GlobalState &gs, core::File
     while (curPrefixPos > 0) {
         const auto &it = packagesByPathPrefix.find(path.substr(0, curPrefixPos + 1));
         if (it != packagesByPathPrefix.end()) {
+            Exception::raise("Slow path of getPackageForFile");
             return it->second;
         }
 
