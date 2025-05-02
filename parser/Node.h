@@ -23,6 +23,7 @@ public:
     virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
     core::LocOffsets loc;
+    std::unique_ptr<Node> deepCopy() const;
 
 protected:
     void printTabs(fmt::memory_buffer &to, int count) const;

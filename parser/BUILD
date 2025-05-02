@@ -6,6 +6,7 @@ cc_library(
         "Dedenter.h",
         "Node.cc",
         "Node.h",
+        "NodeCopying.cc",
         "Node_gen.cc",
         "Node_gen.h",
         "Parser.cc",
