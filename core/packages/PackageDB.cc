@@ -181,7 +181,7 @@ void PackageDB::setPackageNameForFile(FileRef file, MangledName mangledName) {
     this->packageForFile_[file.id()] = mangledName;
 }
 
-const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, core::FileRef file) const {
+MangledName PackageDB::getPackageForFile(const core::GlobalState &gs, core::FileRef file) const {
     ENFORCE(frozen);
     ENFORCE(enabled_);
 
@@ -189,7 +189,7 @@ const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, cor
     // update the vector if we fall back on the slow path.
     auto name = this->getPackageNameForFile(file);
     if (name.exists()) {
-        return this->getPackageInfo(name);
+        return name;
     }
 
     // Note about safety: we're only using the file data for two pieces of information: the file path and the
@@ -204,9 +204,7 @@ const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, cor
     while (curPrefixPos > 0) {
         const auto &it = packagesByPathPrefix.find(path.substr(0, curPrefixPos + 1));
         if (it != packagesByPathPrefix.end()) {
-            const auto &pkg = getPackageInfo(it->second);
-            ENFORCE(pkg.exists());
-            return pkg;
+            return it->second;
         }
 
         if (fileData.isPackage(gs)) {
@@ -215,7 +213,7 @@ const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, cor
         }
         curPrefixPos = path.find_last_of('/', curPrefixPos - 1);
     }
-    return NONE_PKG;
+    return MangledName();
 }
 
 const PackageInfo &PackageDB::getPackageInfo(const core::GlobalState &gs, std::string_view nameStr) const {
