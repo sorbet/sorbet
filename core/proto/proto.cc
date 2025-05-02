@@ -409,9 +409,9 @@ com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs,
         }
 
         if (stripePackages) {
-            const auto &packageInfo = packageDB.getPackageForFile(gs, file);
-            if (packageInfo.exists()) {
-                entry->set_pkg(packageInfo.show(gs));
+            const auto &pkg = packageDB.getPackageForFile(gs, file);
+            if (pkg.exists()) {
+                entry->set_pkg(packageDB.getPackageInfo(pkg).show(gs));
             }
         }
     }
