@@ -5,7 +5,7 @@ test/cli/not_stripe_packages/__package.rb:2: Unable to resolve constant `DoesNot
     test/cli/not_stripe_packages/__package.rb:2: Replace with `SystemExit`
      2 |DoesNotExist
         ^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/errors.rbi#L560: `SystemExit` defined here
-     560 |class SystemExit < Exception
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/errors.rbi#L563: `SystemExit` defined here
+     563 |class SystemExit < Exception
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1
