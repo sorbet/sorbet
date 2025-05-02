@@ -2016,7 +2016,7 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast
     {
         auto &db = gs.packageDB();
         for (auto &f : files) {
-            auto pkg = db.getPackageForFile(gs, f.file);
+            auto pkg = db.getPackageNameForFileFast(f.file);
             if (!pkg.exists()) {
                 continue;
             }
