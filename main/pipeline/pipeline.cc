@@ -1137,16 +1137,18 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                    optional<UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>>> &&foundHashesForFiles,
                    const options::Options &opts, WorkerPool &workers) {
     try {
+        std::vector<core::ClassOrModuleRef> symbolsToRecompute;
         auto runIncrementalNamer = foundHashesForFiles.has_value() && !foundHashesForFiles->empty();
         {
             Timer timeit(gs.tracer(), "incremental_naming");
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
-            auto canceled = runIncrementalNamer
-                                ? sorbet::namer::Namer::runIncremental(gs, absl::Span<ast::ParsedFile>(what),
-                                                                       std::move(foundHashesForFiles.value()), workers)
-                                : sorbet::namer::Namer::run(gs, absl::Span<ast::ParsedFile>(what), workers, nullptr);
+            auto canceled =
+                runIncrementalNamer
+                    ? namer::Namer::runIncremental(gs, absl::Span<ast::ParsedFile>(what),
+                                                   std::move(foundHashesForFiles.value()), workers, symbolsToRecompute)
+                    : namer::Namer::run(gs, absl::Span<ast::ParsedFile>(what), workers, nullptr);
 
             // Cancellation cannot occur during incremental namer.
             ENFORCE(!canceled);
@@ -1178,7 +1180,8 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
-            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what), runIncrementalNamer, workers);
+            auto result = resolver::Resolver::runIncremental(gs, move(what), runIncrementalNamer, workers,
+                                                             absl::MakeSpan(symbolsToRecompute));
             // incrementalResolve is not cancelable.
             ENFORCE(result.hasResult());
             what = move(result.result());

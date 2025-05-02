@@ -756,9 +756,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     // resolver
     {
+        std::vector<core::ClassOrModuleRef> recomputeNoSymbols;
         core::UnfreezeNameTable nameTableAccess(*gs);
         core::UnfreezeSymbolTable symbolTableAccess(*gs);
-        trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncrementalNamer, *workers).result());
+        trees =
+            move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncrementalNamer, *workers, recomputeNoSymbols)
+                     .result());
     }
 
     if (opts.cacheSensitiveOptions.stripePackages) {
