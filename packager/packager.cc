@@ -432,6 +432,11 @@ public:
                     }
                 }
 
+                if (!import.name.mangledName.exists()) {
+                    importToInsertAfter = import.name.fullName.loc;
+                    continue;
+                }
+
                 auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
                 if (!importInfo.exists()) {
                     importToInsertAfter = import.name.fullName.loc;
@@ -669,7 +674,11 @@ public:
 
             auto &currInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfo(curr));
             for (auto &import : currInfo.importedPackageNames) {
-                auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
+                if (!import.name.mangledName.exists()) {
+                    continue;
+                }
+
+                auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName); //
                 if (!importInfo.exists() || import.type == core::packages::ImportType::Test ||
                     visited.contains(import.name.mangledName)) {
                     continue;
