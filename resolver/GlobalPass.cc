@@ -384,7 +384,11 @@ void Resolver::finalizeSymbols(core::GlobalState &gs,
         }
     }
 
-    gs.computeLinearization();
+    // As we don't mutate mixins during incremental resolution, seeing a partial list of symbols to update indicates
+    // that we're in the incremental path, allowing us to skip linearization.
+    if (!symbolsToRecompute.has_value()) {
+        gs.computeLinearization();
+    }
 
     {
         Timer timer(gs.tracer(), "resolver.resolve_type_members");
