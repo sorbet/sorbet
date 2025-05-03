@@ -21,7 +21,7 @@ public:
     virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0) = 0;
     virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0) = 0;
-    virtual std::string nodeName() = 0;
+    virtual std::string nodeName() const = 0;
     core::LocOffsets loc;
     std::unique_ptr<Node> deepCopy() const;
 
