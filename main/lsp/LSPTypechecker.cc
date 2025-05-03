@@ -250,7 +250,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             // files don't take the fast path. We'll want (or maybe need) to revisit this when we start
             // making edits to `__package.rb` take fast paths.
             if (!(fref.data(*gs).isPackage(*gs))) {
-                auto pkg = gs->packageDB().getPackageForFile(*gs, fref);
+                auto pkg = gs->packageDB().getPackageNameForFile(fref);
                 if (pkg.exists()) {
                     // Since even no-op (e.g. whitespace-only) edits will cause constants to be deleted
                     // and re-added, we have to add the __package.rb files to set of files to retypecheck

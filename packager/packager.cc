@@ -278,7 +278,7 @@ public:
 
     bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const {
         auto file = symbol.loc(gs).file();
-        auto pkg = gs.packageDB().getPackageForFile(gs, file);
+        auto pkg = gs.packageDB().getPackageNameForFile(file);
         return this->mangledName() == pkg;
     }
 
@@ -1803,8 +1803,8 @@ void validateLayering(const core::Context &ctx, const Import &i) {
 
     const auto &packageDB = ctx.state.packageDB();
     ENFORCE(packageDB.getPackageInfo(i.name.mangledName).exists())
-    ENFORCE(packageDB.getPackageForFile(ctx, ctx.file).exists())
-    auto &thisPkg = PackageInfoImpl::from(ctx, packageDB.getPackageForFile(ctx, ctx.file));
+    ENFORCE(packageDB.getPackageNameForFile(ctx.file).exists())
+    auto &thisPkg = PackageInfoImpl::from(ctx, packageDB.getPackageNameForFile(ctx.file));
     auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name.mangledName));
     ENFORCE(thisPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
     ENFORCE(otherPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
@@ -1871,7 +1871,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
 
 void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg, const Import i) {
     ENFORCE(ctx.state.packageDB().getPackageInfo(i.name.mangledName).exists())
-    ENFORCE(ctx.state.packageDB().getPackageForFile(ctx, ctx.file).exists())
+    ENFORCE(ctx.state.packageDB().getPackageNameForFile(ctx.file).exists())
     auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.name.mangledName);
 
     const auto &visibleTo = otherPkg.visibleTo();
@@ -1900,7 +1900,7 @@ void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg,
 
 void validatePackage(core::Context ctx) {
     const auto &packageDB = ctx.state.packageDB();
-    auto absPkg = packageDB.getPackageForFile(ctx, ctx.file);
+    auto absPkg = packageDB.getPackageNameForFile(ctx.file);
     if (!absPkg.exists()) {
         // We already produced an error on this package when producing its package info.
         // The correct course of action is to abort the transform.
@@ -1956,7 +1956,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
         return;
     }
 
-    auto pkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
+    auto pkg = ctx.state.packageDB().getPackageNameForFile(ctx.file);
     if (!pkg.exists()) {
         // Don't transform, but raise an error on the first line.
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
@@ -2016,7 +2016,12 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast
     {
         auto &db = gs.packageDB();
         for (auto &f : files) {
-            auto pkg = db.getPackageForFile(gs, f.file);
+            auto pkg = db.getPackageNameForFile(f.file);
+            if (pkg.exists()) {
+                continue;
+            }
+
+            pkg = db.findPackageByPath(gs, f.file);
             if (!pkg.exists()) {
                 continue;
             }
@@ -2040,7 +2045,12 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const cor
     {
         auto &db = gs.packageDB();
         for (auto &f : files) {
-            auto pkg = db.getPackageForFile(gs, f);
+            auto pkg = db.getPackageNameForFile(f);
+            if (pkg.exists()) {
+                continue;
+            }
+
+            pkg = db.findPackageByPath(gs, f);
             if (!pkg.exists()) {
                 continue;
             }

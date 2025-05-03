@@ -409,7 +409,7 @@ com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs,
         }
 
         if (stripePackages) {
-            const auto &pkg = packageDB.getPackageForFile(gs, file);
+            const auto &pkg = packageDB.getPackageNameForFile(file);
             if (pkg.exists()) {
                 entry->set_pkg(packageDB.getPackageInfo(pkg).show(gs));
             }

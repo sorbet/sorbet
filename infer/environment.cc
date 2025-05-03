@@ -1119,7 +1119,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     if (it->main.method.exists() && it->main.method.data(ctx)->flags.isPackagePrivate) {
                         core::ClassOrModuleRef klass = it->main.method.data(ctx)->owner;
                         if (klass.exists()) {
-                            auto curPkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
+                            auto curPkg = ctx.state.packageDB().getPackageNameForFile(ctx.file);
                             if (curPkg.exists()) {
                                 auto &curPkgInfo = ctx.state.packageDB().getPackageInfo(curPkg);
                                 if (!curPkgInfo.ownsSymbol(ctx, klass)) {
