@@ -2038,35 +2038,6 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast
     }
 }
 
-void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const core::FileRef> files) {
-    std::vector<std::pair<core::FileRef, core::packages::MangledName>> mapping;
-    mapping.reserve(files.size());
-
-    {
-        auto &db = gs.packageDB();
-        for (auto &f : files) {
-            auto pkg = db.getPackageNameForFile(f);
-            if (pkg.exists()) {
-                continue;
-            }
-
-            pkg = db.findPackageByPath(gs, f);
-            if (!pkg.exists()) {
-                continue;
-            }
-
-            mapping.emplace_back(f, pkg);
-        }
-    }
-
-    {
-        auto packages = gs.unfreezePackages();
-        for (auto [file, package] : mapping) {
-            packages.db.setPackageNameForFile(file, package);
-        }
-    }
-}
-
 namespace {
 
 enum class PackagerMode {
