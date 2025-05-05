@@ -49,6 +49,38 @@ def sig_mismatch2(p1); end
 #: (P1, P2, P3) -> void # error: RBS signature has more parameters than in the method definition
 def sig_mismatch3; end # error: The method `sig_mismatch3` does not have a `sig`
 
+#: (?Integer) -> void
+#    ^^^^^^^ error: Argument kind mismatch for `p`, expected `positional`, got `optional positional`
+def sig_mismatch4(p); end
+
+#: (Integer) -> void
+#   ^^^^^^^ error: Argument kind mismatch for `p`, expected `optional positional`, got `positional`
+def sig_mismatch5(p = 42); end
+
+#: (Integer) -> void
+#   ^^^^^^^ error: Argument kind mismatch for `p`, expected `keyword`, got `positional`
+def sig_mismatch6(p:); end
+
+#: (Integer) -> void
+#   ^^^^^^^ error: Argument kind mismatch for `p`, expected `rest positional`, got `positional`
+def sig_mismatch7(*p); end
+
+#: (?p: Integer) -> void
+#    ^ error: Argument kind mismatch for `p`, expected `keyword`, got `optional keyword`
+def sig_mismatch8(p:); end
+
+#: (p: Integer) -> void
+#   ^ error: Argument kind mismatch for `p`, expected `optional keyword`, got `keyword`
+def sig_mismatch9(p: 42); end
+
+#: (*Integer) -> void
+#    ^^^^^^^ error: Argument kind mismatch for `p`, expected `rest keyword`, got `rest positional`
+def sig_mismatch10(**p); end
+
+#: (^() -> void) -> void
+#   ^^^^^^^^^^^ error: Argument kind mismatch for `blk`, expected `block`, got `positional`
+def sig_mismatch11(&blk); end
+
 # Sigs
 
 # We do not create any sig if there is no RBS comment

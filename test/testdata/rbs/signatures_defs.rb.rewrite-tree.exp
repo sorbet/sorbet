@@ -27,6 +27,70 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:p, <emptyTree>::<C Integer>).void()
+  end
+
+  def sig_mismatch4<<todo method>>(p, &<blk>)
+    <emptyTree>
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:p, <emptyTree>::<C Integer>).void()
+  end
+
+  def sig_mismatch5<<todo method>>(p = 42, &<blk>)
+    <emptyTree>
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:p, <emptyTree>::<C Integer>).void()
+  end
+
+  def sig_mismatch6<<todo method>>(p:, &<blk>)
+    <emptyTree>
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:p, <emptyTree>::<C Integer>).void()
+  end
+
+  def sig_mismatch7<<todo method>>(*p, &<blk>)
+    <emptyTree>
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:p, <emptyTree>::<C Integer>).void()
+  end
+
+  def sig_mismatch8<<todo method>>(p:, &<blk>)
+    <emptyTree>
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:p, <emptyTree>::<C Integer>).void()
+  end
+
+  def sig_mismatch9<<todo method>>(p: = 42, &<blk>)
+    <emptyTree>
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:p, <emptyTree>::<C Integer>).void()
+  end
+
+  def sig_mismatch10<<todo method>>(*p:, &<blk>)
+    <emptyTree>
+  end
+
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:blk, ::<root>::<C T>.proc().void()).void()
+  end
+
+  def sig_mismatch11<<todo method>>(&blk)
+    <emptyTree>
+  end
+
   def method1<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
@@ -300,6 +364,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <runtime method definition of sig_mismatch2>
 
   <runtime method definition of sig_mismatch3>
+
+  <runtime method definition of sig_mismatch4>
+
+  <runtime method definition of sig_mismatch5>
+
+  <runtime method definition of sig_mismatch6>
+
+  <runtime method definition of sig_mismatch7>
+
+  <runtime method definition of sig_mismatch8>
+
+  <runtime method definition of sig_mismatch9>
+
+  <runtime method definition of sig_mismatch10>
+
+  <runtime method definition of sig_mismatch11>
 
   <runtime method definition of method1>
 
