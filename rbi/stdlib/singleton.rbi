@@ -123,3 +123,15 @@ module Singleton
   end
   mixes_in_class_methods(SingletonClassMethods)
 end
+
+module RactorLocalSingleton
+  include Singleton::SingletonInstanceMethods
+
+  module RactorLocalSingletonClassMethods
+    include Singleton::SingletonClassMethods
+    has_attached_class!
+
+    sig {returns(T.attached_class)}
+    def instance; end
+  end
+end
