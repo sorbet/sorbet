@@ -36,7 +36,6 @@
 #include "main/pipeline/pipeline.h"
 #include "namer/namer.h"
 #include "packager/packager.h"
-#include "packager/rbi_gen.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "payload/payload.h"

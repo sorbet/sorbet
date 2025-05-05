@@ -40,6 +40,7 @@ enum class StrictDependenciesLevel {
 
 std::string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level);
 
+// TODO(jez) Why is this struct different from the `struct VisibleTo` defined in packager.cc?
 struct VisibleTo {
     MangledName packageName;
     VisibleToType visibleToType;
@@ -53,11 +54,6 @@ public:
     virtual MangledName mangledName() const = 0;
     virtual absl::Span<const core::NameRef> fullName() const = 0;
     virtual absl::Span<const std::string> pathPrefixes() const = 0;
-    // TODO(jez) Why do these methods not return the `Import`/`Export`/`VisibleTo` data structures
-    // that PackageInfoImpl operates on?
-    virtual std::vector<std::vector<core::NameRef>> exports() const = 0;
-    virtual std::vector<MangledName> imports() const = 0;
-    virtual std::vector<MangledName> testImports() const = 0;
     virtual std::vector<VisibleTo> visibleTo() const = 0;
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
     virtual std::optional<std::pair<core::packages::StrictDependenciesLevel, core::LocOffsets>>
