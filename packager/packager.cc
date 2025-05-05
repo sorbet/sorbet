@@ -1963,8 +1963,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
                 continue;
             }
 
-            core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-            auto pkg = createAndPopulatePackageInfo(ctx, file);
+            auto pkg = createAndPopulatePackageInfo(gs, file);
             if (pkg == nullptr) {
                 // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
                 // surfaced that error to the user. Nothing to do here.
@@ -1972,8 +1971,8 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             }
             auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
             if (prevPkg.exists() && prevPkg.declLoc() != pkg->declLoc()) {
-                if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
-                    auto pkgName = pkg->name.toString(ctx);
+                if (auto e = gs.beginError(pkg->loc, core::errors::Packager::RedefinitionOfPackage)) {
+                    auto pkgName = pkg->name.toString(gs);
                     e.setHeader("Redefinition of package `{}`", pkgName);
                     e.addErrorLine(prevPkg.declLoc(), "Package `{}` originally defined here", pkgName);
                 }
