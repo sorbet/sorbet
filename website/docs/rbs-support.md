@@ -224,24 +224,332 @@ understanding the cases where there is no suitable RBS replacement.
 Most RBS features can be used and will be translated to equivalent Sorbet syntax
 during type checking:
 
-| RBS Feature            | RBS syntax                               | Sorbet syntax                                                                                                        |
-| ---------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| [Class instance type]  | `Foo`                                    | [`Foo`](class-types.md)                                                                                              |
-| [Class singleton type] | `singleton(Foo)`                         | [`T.class_of(Foo)`](class-of.md)                                                                                     |
-| [Union type]           | <span><code>Foo &#124; Bar</code></span> | [`T.any(Foo, Bar)`](union-types.md)                                                                                  |
-| [Intersection type]    | `Foo & Bar`                              | [`T.all(Foo, Bar)`](intersection-types.md)                                                                           |
-| [Optional type]        | `Foo?`                                   | [`T.nilable(Foo)`](nilable-types.md)                                                                                 |
-| [Untyped type]         | `untyped`                                | [`T.untyped`](untyped.md)                                                                                            |
-| [Boolean type]         | `bool`                                   | [`T::Boolean`](class-types.md#booleans)                                                                              |
-| [Nil type]             | `nil`                                    | [`NilClass`](class-types.md#nil)                                                                                     |
-| [Top type]             | `top`                                    | [`T.anything`](anything.md)                                                                                          |
-| [Bottom type]          | `bot`                                    | [`T.noreturn`](noreturn.md)                                                                                          |
-| [Void type]            | `void`                                   | [`void`](sigs.md#returns--void-annotating-return-types)                                                              |
-| [Generic type]         | `Foo[Bar]`                               | [`Foo[Bar]`](generics.md)                                                                                            |
-| [Generic method]       | `[U] (U foo) -> U`                       | [`type_parameters(:U).params(foo: T.type_parameter(:U)).returns(T.type_parameter(:U))`](generics.md#generic-methods) |
-| [Tuple type]           | `[Foo, Bar]`                             | [`[Foo, Bar]`](tuples.md)                                                                                            |
-| [Shape type]           | `{ a: Foo, b: Bar }`                     | [`{ a: Foo, b: Bar }`](shapes.md)                                                                                    |
-| [Proc type]            | `^(Foo) -> Bar`                          | [`T.proc.params(arg: Foo).returns(Bar)`](procs.md)                                                                   |
+<table>
+<thead><tr><th>RBS Feature</th><th>RBS syntax</th><th>Sorbet syntax</th></tr></thead>
+<tbody>
+<tr><td>
+
+[Class instance type]
+
+</td><td>
+
+```plaintext
+Foo
+```
+
+</td><td><a href="class-types">
+
+```ruby
+Foo
+```
+
+</a></td></tr>
+
+<!-- end of Class instance type -->
+
+<tr><td>
+
+[Class singleton type]
+
+</td><td>
+
+```plaintext
+singleton(Foo)
+```
+
+</td><td><a href="class-of">
+
+```ruby
+T.class_of(Foo)
+```
+
+</a></td></tr>
+
+<!-- end of Class singleton type -->
+
+<tr><td>
+
+[Union type]
+
+</td><td>
+
+```plaintext
+Foo | Bar
+```
+
+</td><td><a href="union-types">
+
+```ruby
+T.any(Foo, Bar)
+```
+
+</a></td></tr>
+
+<!-- end of Union type -->
+
+<tr><td>
+
+[Intersection type]
+
+</td><td>
+
+```plaintext
+Foo & Bar
+```
+
+</td><td><a href="intersection-types">
+
+```ruby
+T.all(Foo, Bar)
+```
+
+</a></td></tr>
+
+<!-- end of Intersection type -->
+
+<tr><td>
+
+[Optional type]
+
+</td><td>
+
+```plaintext
+Foo?
+```
+
+</td><td><a href="nilable-types">
+
+```ruby
+T.nilable(Foo)
+```
+
+</a></td></tr>
+
+<!-- end of Optional type -->
+
+<tr><td>
+
+[Untyped type]
+
+</td><td>
+
+```plaintext
+untyped
+```
+
+</td><td><a href="untyped">
+
+```ruby
+T.untyped
+```
+
+</a></td></tr>
+
+<!-- end of Untyped type -->
+
+<tr><td>
+
+[Boolean type]
+
+</td><td>
+
+```plaintext
+bool
+```
+
+</td><td><a href="class-types#booleans">
+
+```ruby
+T::Boolean
+```
+
+</a></td></tr>
+
+<!-- end of Boolean type -->
+
+<tr><td>
+
+[Nil type]
+
+</td><td>
+
+```plaintext
+nil
+```
+
+</td><td><a href="class-types#nil">
+
+```ruby
+NilClass
+```
+
+</a></td></tr>
+
+<!-- end of Nil type -->
+
+<tr><td>
+
+[Top type]
+
+</td><td>
+
+```plaintext
+top
+```
+
+</td><td><a href="anything">
+
+```ruby
+T.anything
+```
+
+</a></td></tr>
+
+<!-- end of Top type -->
+
+<tr><td>
+
+[Bottom type]
+
+</td><td>
+
+```plaintext
+bot
+```
+
+</td><td><a href="noreturn">
+
+```ruby
+T.noreturn
+```
+
+</a></td></tr>
+
+<!-- end of Bottom type -->
+
+<tr><td>
+
+[Void type]
+
+</td><td>
+
+```plaintext
+void
+```
+
+</td><td><a href="sigs#returns--void-annotating-return-types">
+
+```ruby
+void
+```
+
+</a></td></tr>
+
+<!-- end of Void type -->
+
+<tr><td>
+
+[Generic type]
+
+</td><td>
+
+```plaintext
+Foo[Bar]
+```
+
+</td><td><a href="generics">
+
+```ruby
+Foo[Bar]
+```
+
+</a></td></tr>
+
+<!-- end of Generic type -->
+
+<tr><td>
+
+[Generic method]
+
+</td><td>
+
+```plaintext
+[U] (U foo) -> U
+```
+
+</td><td><a href="generics#generic-methods">
+
+```ruby
+type_parameters(:U)
+  .params(foo: T.type_parameter(:U))
+  .returns(T.type_parameter(:U))
+```
+
+</a></td></tr>
+
+<!-- end of Generic method -->
+
+<tr><td>
+
+[Tuple type]
+
+</td><td>
+
+```plaintext
+[Foo, Bar]
+```
+
+</td><td><a href="tuples">
+
+```ruby
+[Foo, Bar]
+```
+
+</a></td></tr>
+
+<!-- end of Tuple type -->
+
+<tr><td>
+
+[Shape type]
+
+</td><td>
+
+```plaintext
+{ a: Foo, b: Bar }
+```
+
+</td><td><a href="shapes">
+
+```ruby
+{ a: Foo, b: Bar }
+```
+
+</a></td></tr>
+
+<!-- end of Shape type -->
+
+<tr><td>
+
+[Proc type]
+
+</td><td>
+
+```plaintext
+^(Foo) -> Bar
+```
+
+</td><td><a href="procs">
+
+```ruby
+T.proc.params(arg: Foo).returns(Bar)
+```
+
+</a></td></tr>
+
+<!-- end of Proc type -->
+</tbody>
+</table>
 
 ## Attribute accessor types
 
