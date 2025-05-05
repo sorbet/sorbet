@@ -1955,9 +1955,10 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
     // TODO(jez) Is this sort redundant? Should we move this sort to callers?
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
 
+    Timer timeit(gs.tracer(), "packager.findPackages");
+
     // Find packages and determine their imports/exports.
     {
-        Timer timeit(gs.tracer(), "packager.findPackages");
         core::UnfreezeNameTable unfreeze(gs);
         core::packages::UnfreezePackages packages = gs.unfreezePackages();
         for (auto &file : files) {
@@ -1983,6 +1984,8 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             }
         }
     }
+
+    setPackageNameOnFiles(gs, files);
 }
 
 void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
@@ -2044,9 +2047,10 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
 
     if constexpr (buildPackageDB) {
         Packager::findPackages(gs, files);
+    } else {
+        // findPackages already called this
+        Packager::setPackageNameOnFiles(gs, files);
     }
-
-    Packager::setPackageNameOnFiles(gs, files);
 
     {
         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
