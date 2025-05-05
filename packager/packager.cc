@@ -1871,8 +1871,6 @@ void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg,
     }
 }
 
-} // namespace
-
 void validatePackage(core::Context ctx) {
     const auto &packageDB = ctx.state.packageDB();
     auto absPkg = packageDB.getPackageNameForFile(ctx.file);
@@ -1947,6 +1945,8 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
     EnforcePackagePrefix enforcePrefix(ctx, pkgImpl);
     ast::ConstShallowWalk::apply(ctx, enforcePrefix, tree);
 }
+
+} // namespace
 
 void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
     // Ensure files are in canonical order.
