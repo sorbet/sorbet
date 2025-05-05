@@ -384,34 +384,34 @@ void Resolver::finalizeSymbols(core::GlobalState &gs,
         }
     }
 
-    gs.computeLinearization();
+    vector<vector<pair<core::TypeMemberRef, core::TypeMemberRef>>> typeAliases;
+    typeAliases.resize(gs.classAndModulesUsed());
+    vector<bool> resolved;
+    resolved.resize(gs.classAndModulesUsed());
 
-    {
-        Timer timer(gs.tracer(), "resolver.resolve_type_members");
+    if (symbolsToRecompute.has_value()) {
+        Timer timer(gs.tracer(), "resolver.resolve_type_members.partial");
+        for (auto sym : *symbolsToRecompute) {
+            resolveTypeMembers(gs, sym, typeAliases, resolved);
 
-        vector<vector<pair<core::TypeMemberRef, core::TypeMemberRef>>> typeAliases;
-        typeAliases.resize(gs.classAndModulesUsed());
-        vector<bool> resolved;
-        resolved.resize(gs.classAndModulesUsed());
-
-        if (symbolsToRecompute.has_value()) {
-            for (auto sym : *symbolsToRecompute) {
-                resolveTypeMembers(gs, sym, typeAliases, resolved);
-
-                if (gs.cacheSensitiveOptions.requiresAncestorEnabled) {
-                    // Precompute the list of all required ancestors for this symbol
-                    sym.data(gs)->computeRequiredAncestorLinearization(gs);
-                }
+            if (gs.cacheSensitiveOptions.requiresAncestorEnabled) {
+                // Precompute the list of all required ancestors for this symbol
+                sym.data(gs)->computeRequiredAncestorLinearization(gs);
             }
-        } else {
-            for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
-                auto sym = core::ClassOrModuleRef(gs, i);
-                resolveTypeMembers(gs, sym, typeAliases, resolved);
+        }
+    } else {
+        // As we don't mutate mixins during incremental resolution, we only compute the linearization of the hieararchy
+        // when we don't have a known set of symbols that need to be updated.
+        gs.computeLinearization();
 
-                if (gs.cacheSensitiveOptions.requiresAncestorEnabled) {
-                    // Precompute the list of all required ancestors for this symbol
-                    sym.data(gs)->computeRequiredAncestorLinearization(gs);
-                }
+        Timer timer(gs.tracer(), "resolver.resolve_type_members");
+        for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
+            auto sym = core::ClassOrModuleRef(gs, i);
+            resolveTypeMembers(gs, sym, typeAliases, resolved);
+
+            if (gs.cacheSensitiveOptions.requiresAncestorEnabled) {
+                // Precompute the list of all required ancestors for this symbol
+                sym.data(gs)->computeRequiredAncestorLinearization(gs);
             }
         }
     }
