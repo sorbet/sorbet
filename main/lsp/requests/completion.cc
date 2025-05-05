@@ -660,11 +660,11 @@ core::MethodRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const
 // of trying to make this code prettier. If you're up to the challenge, feel free.
 string suggestedSigToSnippet(string_view suggestedSig) {
     auto result = fmt::format("{}${{0}}", suggestedSig);
+    constexpr string_view needle = "T.untyped"sv;
 
     auto tabstopId = 1;
     size_t replaceFrom = 0;
     while (true) {
-        string needle = "T.untyped";
         replaceFrom = result.find(needle, replaceFrom);
         if (replaceFrom == string::npos) {
             break;
