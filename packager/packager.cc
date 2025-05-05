@@ -543,24 +543,6 @@ public:
         return {suggestion};
     }
 
-    vector<core::packages::MangledName> imports() const {
-        vector<core::packages::MangledName> rv;
-        for (auto &i : importedPackageNames) {
-            if (i.type == core::packages::ImportType::Normal) {
-                rv.emplace_back(i.name.mangledName);
-            }
-        }
-        return rv;
-    }
-    vector<core::packages::MangledName> testImports() const {
-        vector<core::packages::MangledName> rv;
-        for (auto &i : importedPackageNames) {
-            if (i.type == core::packages::ImportType::Test) {
-                rv.emplace_back(i.name.mangledName);
-            }
-        }
-        return rv;
-    }
     vector<core::packages::VisibleTo> visibleTo() const {
         vector<core::packages::VisibleTo> rv;
         for (auto &v : visibleTo_) {

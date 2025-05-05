@@ -68,12 +68,6 @@ public:
         return false;
     }
 
-    std::vector<MangledName> imports() const {
-        return {};
-    }
-    std::vector<MangledName> testImports() const {
-        return {};
-    }
     std::vector<VisibleTo> visibleTo() const {
         return {};
     }
