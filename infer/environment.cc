@@ -1470,7 +1470,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     // wrote the `return` keyword in the code. We might want to track that with some
                     // sort of flag on the instruction. The exists and empty checks are defensive
                     if (i.whatLoc != bind.loc && i.whatLoc.exists() && !i.whatLoc.empty() &&
-                        typeAndOrigin.type != core::Types::nilClass() && !typeAndOrigin.type.isUntyped()) {
+                        typeAndOrigin.type != core::Types::nilClass() && !typeAndOrigin.type.isUntyped() &&
+                        typeAndOrigin.type != core::Types::void_()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ExplicitVoidReturn)) {
                             e.setHeader("Explicitly returning from a `{}` function", "void");
                             // TODO(jez) Error context
