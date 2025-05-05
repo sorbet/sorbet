@@ -2,7 +2,7 @@
 # enable-experimental-rbs-signatures: true
 # enable-experimental-rbs-assertions: true
 
-#: (untyped) {(String?) -> String} -> untyped
+#: (*untyped) {(String?) -> String} -> untyped
 def take_block(*args, &); end
 
 take_block { |x|

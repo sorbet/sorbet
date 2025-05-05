@@ -72,7 +72,7 @@ def hover_named_params_1(x, y, z); T.unsafe(nil); end
 #                          ^ hover: Symbol
 #                              ^ hover: T.class_of(Symbol)
 #                                  ^ hover: T.class_of(Symbol)
-def hover_keyword_params_1(x, y, z); T.unsafe(nil); end
+def hover_keyword_params_1(x:, y:, z:); T.unsafe(nil); end
 
 # Block params hover
 

@@ -40,7 +40,9 @@ end
 def sig_mismatch1(p1, p2); end
 #                     ^^ error: Malformed `sig`. Type not specified for argument `p2`
 
-#: (foo: P1) -> void # error: Unknown argument name `foo`
+#: (foo: P1) -> void
+#   ^^^ error: Argument kind mismatch for `p1`, expected `positional`, got `keyword`
+#   ^^^ error: Unknown argument name `foo`
 def sig_mismatch2(p1); end
 #                 ^^ error: Malformed `sig`. Type not specified for argument `p1`
 
@@ -136,16 +138,16 @@ def method13(x)
 end
 
 #: (?String x) -> void
-def method14(x)
+def method14(x = "")
   T.reveal_type(x) # error: Revealed type: `String`
 end
 
-#: (String x) -> void
+#: (?String x) -> void
 def method15(x = nil) # error: Argument does not have asserted type `String`
   T.reveal_type(x) # error: Revealed type: `T.nilable(String)`
 end
 
-#: (String ?x) -> void
+#: (?String? x) -> void
 def method16(x = nil)
   T.reveal_type(x) # error: Revealed type: `T.nilable(String)`
 end
@@ -224,7 +226,7 @@ class UnusedTypeAnnotation
 end
 
 class FooProc
-  #: (p: ^() -> Integer ) ?{ (Integer) [self: FooProc] -> String } -> void
+  #: (?p: ^() -> Integer ) ?{ (Integer) [self: FooProc] -> String } -> void
   def initialize(p: -> { 42 }, &block)
     T.reveal_type(p) # error: Revealed type: `T.proc.returns(Integer)`
     T.reveal_type(block) # error: Revealed type: `T.nilable(T.proc.params(arg0: Integer).returns(String))`
