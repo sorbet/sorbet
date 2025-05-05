@@ -238,26 +238,170 @@ understanding the cases where there is no suitable RBS replacement.</p>
 <p>Most RBS features can be used and will be translated to equivalent Sorbet syntax
 during type checking:</p>
 <table>
-<thead>
-<tr><th>RBS Feature</th><th>RBS syntax</th><th>Sorbet syntax</th></tr>
-</thead>
+<thead><tr><th>RBS Feature</th><th>RBS syntax</th><th>Sorbet syntax</th></tr></thead>
 <tbody>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#class-instance-type">Class instance type</a></td><td><code>Foo</code></td><td><a href="/docs/class-types"><code>Foo</code></a></td></tr>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#class-singleton-type">Class singleton type</a></td><td><code>singleton(Foo)</code></td><td><a href="/docs/class-of"><code>T.class_of(Foo)</code></a></td></tr>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#union-type">Union type</a></td><td><span><code>Foo | Bar</code></span></td><td><a href="/docs/union-types"><code>T.any(Foo, Bar)</code></a></td></tr>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#intersection-type">Intersection type</a></td><td><code>Foo &amp; Bar</code></td><td><a href="/docs/intersection-types"><code>T.all(Foo, Bar)</code></a></td></tr>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#optional-type">Optional type</a></td><td><code>Foo?</code></td><td><a href="/docs/nilable-types"><code>T.nilable(Foo)</code></a></td></tr>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types">Untyped type</a></td><td><code>untyped</code></td><td><a href="/docs/untyped"><code>T.untyped</code></a></td></tr>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#bool-or-boolish">Boolean type</a></td><td><code>bool</code></td><td><a href="/docs/class-types#booleans"><code>T::Boolean</code></a></td></tr>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#nil-or-nilclass">Nil type</a></td><td><code>nil</code></td><td><a href="/docs/class-types#nil"><code>NilClass</code></a></td></tr>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types">Top type</a></td><td><code>top</code></td><td><a href="/docs/anything"><code>T.anything</code></a></td></tr>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types">Bottom type</a></td><td><code>bot</code></td><td><a href="/docs/noreturn"><code>T.noreturn</code></a></td></tr>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types">Void type</a></td><td><code>void</code></td><td><a href="/docs/sigs#returns--void-annotating-return-types"><code>void</code></a></td></tr>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#type-variable">Generic type</a></td><td><code>Foo[Bar]</code></td><td><a href="/docs/generics"><code>Foo[Bar]</code></a></td></tr>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#type-variable">Generic method</a></td><td><code>[U] (U foo) -&gt; U</code></td><td><a href="/docs/generics#generic-methods"><code>type_parameters(:U).params(foo: T.type_parameter(:U)).returns(T.type_parameter(:U))</code></a></td></tr>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#tuple-type">Tuple type</a></td><td><code>[Foo, Bar]</code></td><td><a href="/docs/tuples"><code>[Foo, Bar]</code></a></td></tr>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#record-type">Shape type</a></td><td><code>{ a: Foo, b: Bar }</code></td><td><a href="/docs/shapes"><code>{ a: Foo, b: Bar }</code></a></td></tr>
-<tr><td><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#proc-type">Proc type</a></td><td><code>^(Foo) -&gt; Bar</code></td><td><a href="/docs/procs"><code>T.proc.params(arg: Foo).returns(Bar)</code></a></td></tr>
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#class-instance-type">Class instance type</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">Foo
+</code></pre>
+</td><td><a href="class-types">
+<pre><code class="hljs css language-ruby">Foo
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Class instance type -->
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#class-singleton-type">Class singleton type</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">singleton(Foo)
+</code></pre>
+</td><td><a href="class-of">
+<pre><code class="hljs css language-ruby">T.class_of(Foo)
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Class singleton type -->
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#union-type">Union type</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">Foo | Bar
+</code></pre>
+</td><td><a href="union-types">
+<pre><code class="hljs css language-ruby">T.any(Foo, Bar)
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Union type -->
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#intersection-type">Intersection type</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">Foo &amp; Bar
+</code></pre>
+</td><td><a href="intersection-types">
+<pre><code class="hljs css language-ruby">T.all(Foo, Bar)
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Intersection type -->
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#optional-type">Optional type</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">Foo?
+</code></pre>
+</td><td><a href="nilable-types">
+<pre><code class="hljs css language-ruby">T.nilable(Foo)
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Optional type -->
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types">Untyped type</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">untyped
+</code></pre>
+</td><td><a href="untyped">
+<pre><code class="hljs css language-ruby">T.untyped
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Untyped type -->
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#bool-or-boolish">Boolean type</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">bool
+</code></pre>
+</td><td><a href="class-types#booleans">
+<pre><code class="hljs css language-ruby">T::Boolean
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Boolean type -->
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#nil-or-nilclass">Nil type</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">nil
+</code></pre>
+</td><td><a href="class-types#nil">
+<pre><code class="hljs css language-ruby">NilClass
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Nil type -->
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types">Top type</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">top
+</code></pre>
+</td><td><a href="anything">
+<pre><code class="hljs css language-ruby">T.anything
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Top type -->
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types">Bottom type</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">bot
+</code></pre>
+</td><td><a href="noreturn">
+<pre><code class="hljs css language-ruby">T.noreturn
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Bottom type -->
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types">Void type</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">void
+</code></pre>
+</td><td><a href="sigs#returns--void-annotating-return-types">
+<pre><code class="hljs css language-ruby">void
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Void type -->
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#type-variable">Generic type</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">Foo[Bar]
+</code></pre>
+</td><td><a href="generics">
+<pre><code class="hljs css language-ruby">Foo[Bar]
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Generic type -->
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#type-variable">Generic method</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">[U] (U foo) -&gt; U
+</code></pre>
+</td><td><a href="generics#generic-methods">
+<pre><code class="hljs css language-ruby">type_parameters(<span class="hljs-symbol">:U</span>)
+  .params(<span class="hljs-symbol">foo:</span> T.type_parameter(<span class="hljs-symbol">:U</span>))
+  .returns(T.type_parameter(<span class="hljs-symbol">:U</span>))
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Generic method -->
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#tuple-type">Tuple type</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">[Foo, Bar]
+</code></pre>
+</td><td><a href="tuples">
+<pre><code class="hljs css language-ruby">[Foo, Bar]
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Tuple type -->
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#record-type">Shape type</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">{ a: Foo, b: Bar }
+</code></pre>
+</td><td><a href="shapes">
+<pre><code class="hljs css language-ruby">{ <span class="hljs-symbol">a:</span> Foo, <span class="hljs-symbol">b:</span> Bar }
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Shape type -->
+<tr><td>
+<p><a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md#proc-type">Proc type</a></p>
+</td><td>
+<pre><code class="hljs css language-plaintext">^(Foo) -&gt; Bar
+</code></pre>
+</td><td><a href="procs">
+<pre><code class="hljs css language-ruby">T.proc.params(<span class="hljs-symbol">arg:</span> Foo).returns(Bar)
+</code></pre>
+<p></a></td></tr></p>
+<!-- end of Proc type -->
 </tbody>
 </table>
 <h2><a class="anchor" aria-hidden="true" id="attribute-accessor-types"></a><a href="#attribute-accessor-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Attribute accessor types</h2>
