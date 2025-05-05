@@ -4,13 +4,9 @@
 #include "absl/synchronization/blocking_counter.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
-#include "common/sort/sort.h"
-#include "common/strings/formatting.h"
 #include "core/Context.h"
 #include "core/errors/packager.h"
-#include "core/errors/resolver.h"
 #include <algorithm>
-#include <iterator>
 
 using namespace std;
 
@@ -407,44 +403,12 @@ public:
         } else if (litSymbol.isFieldOrStaticField()) {
             isExported = litSymbol.asFieldRef().data(ctx)->flags.isExported;
         }
-
-        // Did we use a constant that wasn't exported?
-        if (!isExported && !db.allowRelaxedPackagerChecksFor(this->package.mangledName())) {
-            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
-                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
-                auto definedHereLoc = litSymbol.loc(ctx);
-                if (definedHereLoc.file().data(ctx).isRBI()) {
-                    e.addErrorSection(core::ErrorSection(
-                        core::ErrorColors::format(
-                            "Consider marking this RBI file `{}` if it is meant to declare unpackaged constants",
-                            "# packaged: false"),
-                        {core::ErrorLine(definedHereLoc, "")}));
-                } else {
-                    e.addErrorLine(definedHereLoc, "Defined here");
-                }
-
-                auto symToExport = litSymbol;
-                auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
-                if (enumClass.exists()) {
-                    symToExport = enumClass;
-                }
-                if (auto exp = pkg.addExport(ctx, symToExport)) {
-                    e.addAutocorrect(std::move(exp.value()));
-                }
-                if (!db.errorHint().empty()) {
-                    e.addErrorNote("{}", db.errorHint());
-                }
-            }
-
-            return;
-        }
-
+        isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
         auto currentImportType = this->package.importsPackage(otherPackage);
         auto wasImported = currentImportType.has_value();
         auto importedAsTest =
             wasImported && currentImportType.value() == core::packages::ImportType::Test && !this->insideTestFile;
-        if (!wasImported || importedAsTest) {
+        if (!wasImported || importedAsTest || !isExported) {
             auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
             bool isTestImport = otherFile.data(ctx).isPackagedTest() || this->insideTestFile;
             auto strictDepsLevel = this->package.strictDependenciesLevel();
@@ -468,7 +432,34 @@ public:
                               path.has_value();
             }
             if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
-                if (!wasImported) {
+                if (!isExported) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
+                        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+                        e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
+                        auto definedHereLoc = litSymbol.loc(ctx);
+                        if (definedHereLoc.file().data(ctx).isRBI()) {
+                            e.addErrorSection(core::ErrorSection(
+                                core::ErrorColors::format("Consider marking this RBI file `{}` if it is meant to "
+                                                          "declare unpackaged constants",
+                                                          "# packaged: false"),
+                                {core::ErrorLine(definedHereLoc, "")}));
+                        } else {
+                            e.addErrorLine(definedHereLoc, "Defined here");
+                        }
+
+                        auto symToExport = litSymbol;
+                        auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
+                        if (enumClass.exists()) {
+                            symToExport = enumClass;
+                        }
+                        if (auto exp = pkg.addExport(ctx, symToExport)) {
+                            e.addAutocorrect(std::move(exp.value()));
+                        }
+                        if (!db.errorHint().empty()) {
+                            e.addErrorNote("{}", db.errorHint());
+                        }
+                    }
+                } else if (!wasImported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                         e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Exported from package here");
@@ -566,7 +557,9 @@ public:
                         ENFORCE(false, "At most three reasons should be present");
                     }
                     e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
-                    if (!wasImported) {
+                    if (!isExported) {
+                        e.addErrorNote("`{}` is not exported", lit.symbol().show(ctx));
+                    } else if (!wasImported) {
                         e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
                     } else if (importedAsTest) {
                         e.addErrorNote("`{}`'s package is imported as `{}`", lit.symbol().show(ctx), "test_import");

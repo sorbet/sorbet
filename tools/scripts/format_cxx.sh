@@ -19,7 +19,7 @@ shift $((OPTIND - 1))
 
 cd "$(dirname "$0")/../.."
 
-./bazel build //tools:clang-format &> /dev/null
+./bazel build --config=dbg //tools:clang-format &> /dev/null
 
 if [ "$#" -ne 0 ]; then
     cxx_src=("$@")
