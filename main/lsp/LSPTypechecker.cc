@@ -94,10 +94,15 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
 
     // Unblock the indexer now that its state is fully initialized.
     {
+        // We copy our file table over to the indexer to ensure that we start with a consistent view of the workspace:
+        // the indexer uses presence in the file table to determine if a file is new or not.
+        auto files = gs->getFiles().subspan(1);
+        std::vector<std::shared_ptr<core::File>> indexerFiles{files.begin(), files.end()};
+
         absl::MutexLock lck{queue.getMutex()};
 
         // ensure that the next task we process initializes the indexer
-        auto initTask = std::make_unique<IndexerInitializationTask>(*config);
+        auto initTask = std::make_unique<IndexerInitializationTask>(*config, std::move(indexerFiles));
         queue.tasks().push_front(std::move(initTask));
     }
 

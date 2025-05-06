@@ -1018,4 +1018,38 @@ TEST_CASE_FIXTURE(ProtocolTest, "FindAllReferencesWithoutCacheWorks") {
     REQUIRE_EQ(3, references.size());
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "OpeningExistingFilesTakesTheFastPath") {
+    std::vector<std::pair<std::string, std::string>> files{
+        {"a.rb", "# typed: true\n"
+                 "class A\n"
+                 "end\n"},
+
+        {"b.rb", "# typed: true\n"
+                 "class B\n"
+                 "  def foo\n"
+                 "    A.new\n"
+                 "  end\n"
+                 "end\n"},
+    };
+
+    // We need to ensure that these aren't loaded, so that we consult the filesystem rather than the cache of open trees
+    // in LSPTypechecker.
+    this->writeFilesToFS(files);
+
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/a.rb", this->rootPath));
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/b.rb", this->rootPath));
+
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    auto typecheckCount = this->lspWrapper->getTypecheckCount();
+
+    for (auto &file : files) {
+        assertErrorDiagnostics(send(*openFile(file.first, file.second)), {});
+        typecheckCount++;
+
+        // Opening each file should cause one fast path to run, which will increment the typecheck count once.
+        REQUIRE_EQ(this->lspWrapper->getTypecheckCount(), typecheckCount);
+    }
+}
+
 } // namespace sorbet::test::lsp
