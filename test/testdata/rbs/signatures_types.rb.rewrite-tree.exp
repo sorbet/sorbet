@@ -320,7 +320,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(<emptyTree>::<C GenericType1>.[](<emptyTree>::<C Integer>))
+    <self>.returns(<emptyTree>::<C GenericType1>.<genericSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type5<<todo method>>(&<blk>)
@@ -328,7 +328,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(<emptyTree>::<C GenericType2>.[](<emptyTree>::<C GenericType1>.[](::<root>::<C T>.untyped()), <emptyTree>::<C GenericType3>.[](<emptyTree>::<C Integer>, <emptyTree>::<C String>, ::<root>::<C T>.untyped())))
+    <self>.returns(<emptyTree>::<C GenericType2>.<genericSquareBrackets>(<emptyTree>::<C GenericType1>.<genericSquareBrackets>(::<root>::<C T>.untyped()), <emptyTree>::<C GenericType3>.<genericSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>, ::<root>::<C T>.untyped())))
   end
 
   def generic_type6<<todo method>>(&<blk>)

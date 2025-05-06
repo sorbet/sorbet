@@ -349,9 +349,30 @@ public:
      * Is `expr` a `T` or `::T` constant node?
      */
     static bool isT(const std::unique_ptr<parser::Node> &expr) {
+        if (expr == nullptr) {
+            return false;
+        }
+
         auto t = parser::cast_node<parser::Const>(expr.get());
         return t != nullptr && t->name == core::Names::Constants::T() &&
                (t->scope == nullptr || isa_node<parser::Cbase>(t->scope.get()));
+    }
+
+    /*
+     * Is `expr` a constant node that is rooted on `::T`?
+     */
+    static bool isTRooted(const std::unique_ptr<parser::Node> &expr) {
+        if (expr == nullptr) {
+            return false;
+        }
+
+        auto constant = parser::cast_node<parser::Const>(expr.get());
+
+        if (isT(constant->scope)) {
+            return true;
+        }
+
+        return isTRooted(constant->scope);
     }
 
     /*
