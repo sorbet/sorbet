@@ -548,6 +548,46 @@ T.proc.params(arg: Foo).returns(Bar)
 </a></td></tr>
 
 <!-- end of Proc type -->
+
+<tr><td>
+
+[Block type]
+
+</td><td>
+
+```plaintext
+{ (Foo) -> Bar }
+```
+
+</td><td><a href="procs">
+
+```ruby
+T.proc.params(arg: Foo).returns(Bar)
+```
+
+</a></td></tr>
+
+<!-- end of Block type -->
+
+<tr><td>
+
+[Optional Block type]
+
+</td><td>
+
+```plaintext
+?{ (Foo) -> Bar }
+```
+
+</td><td><a href="procs#optional-blocks">
+
+```ruby
+T.nilable(T.proc.params(arg: Foo).returns(Bar))
+```
+
+</a></td></tr>
+
+<!-- end of Optional Block type -->
 </tbody>
 </table>
 
@@ -910,3 +950,7 @@ x.undefined_method
 [Tuple type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#tuple-type
 [Shape type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#record-type
 [Proc type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#proc-type
+[Block type]:
+  https://github.com/ruby/rbs/blob/master/docs/syntax.md#method-types-and-proc-types
+[Optional Block type]:
+  https://github.com/ruby/rbs/blob/master/docs/syntax.md#method-types-and-proc-types
