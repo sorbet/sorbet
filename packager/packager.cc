@@ -1580,31 +1580,6 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
 
     auto &info = *pkg;
 
-    rewritePackageSpec(gs, package, info);
-    for (auto &importedPackageName : info.importedPackageNames) {
-        populateMangledName(gs, importedPackageName.name);
-
-        if (importedPackageName.name.mangledName == info.name.mangledName) {
-            if (auto e = gs.beginError(core::Loc(package.file, importedPackageName.name.fullName.loc),
-                                       core::errors::Packager::NoSelfImport)) {
-                string import_;
-                switch (importedPackageName.type) {
-                    case core::packages::ImportType::Normal:
-                        import_ = "import";
-                        break;
-                    case core::packages::ImportType::Test:
-                        import_ = "test_import";
-                        break;
-                }
-                e.setHeader("Package `{}` cannot {} itself", info.name.toString(gs), import_);
-            }
-        }
-    }
-
-    for (auto &visibleTo : info.visibleTo_) {
-        populateMangledName(gs, visibleTo.name);
-    }
-
     auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
     auto extraPackageFilesDirectorySlashDeprecatedPrefixes =
         gs.packageDB().extraPackageFilesDirectorySlashDeprecatedPrefixes();
@@ -1654,6 +1629,31 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
         // Project/FooBar -- each constant name is a file or directory name
         info.packagePathPrefixes.emplace_back(absl::StrCat(prefix, slashDirName));
+    }
+
+    rewritePackageSpec(gs, package, info);
+    for (auto &importedPackageName : info.importedPackageNames) {
+        populateMangledName(gs, importedPackageName.name);
+
+        if (importedPackageName.name.mangledName == info.name.mangledName) {
+            if (auto e = gs.beginError(core::Loc(package.file, importedPackageName.name.fullName.loc),
+                                       core::errors::Packager::NoSelfImport)) {
+                string import_;
+                switch (importedPackageName.type) {
+                    case core::packages::ImportType::Normal:
+                        import_ = "import";
+                        break;
+                    case core::packages::ImportType::Test:
+                        import_ = "test_import";
+                        break;
+                }
+                e.setHeader("Package `{}` cannot {} itself", info.name.toString(gs), import_);
+            }
+        }
+    }
+
+    for (auto &visibleTo : info.visibleTo_) {
+        populateMangledName(gs, visibleTo.name);
     }
 
     return pkg;
