@@ -914,9 +914,9 @@ class Array < Object
   # [`Array#+`](https://docs.ruby-lang.org/en/2.7.0/Array.html#method-i-2B).
   sig do
     type_parameters(:T).params(
-        arrays: T::Array[T.type_parameter(:T)],
+        arrays: T::Array[Elem],
     )
-    .returns(T::Array[T.any(Elem, T.type_parameter(:T))])
+    .returns(T::Array[Elem])
   end
   def concat(*arrays); end
 
