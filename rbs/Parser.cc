@@ -33,6 +33,18 @@ std::string_view Parser::resolveConstant(const rbs_ast_symbol_t *symbol) const {
     return std::string_view(reinterpret_cast<const char *>(constant->start), constant->length);
 }
 
+std::string_view Parser::resolveKeyword(const rbs_keyword_t *keyword) const {
+    auto constant = rbs_constant_pool_id_to_constant(RBS_GLOBAL_CONSTANT_POOL, keyword->constant_id);
+    return std::string_view(reinterpret_cast<const char *>(constant->start), constant->length);
+}
+
+rbs_node_list_t *Parser::parseTypeParams() {
+    rbs_node_list_t *typeParams;
+    auto moduleParams = true;
+    rbs_parse_type_params(parser.get(), moduleParams, &typeParams);
+    return typeParams;
+}
+
 rbs_method_type_t *Parser::parseMethodType() {
     rbs_method_type_t *methodType = nullptr;
     rbs_parse_method_type(parser.get(), &methodType);
