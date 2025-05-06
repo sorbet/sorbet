@@ -2390,10 +2390,10 @@ void GlobalState::markAsPayload() {
     }
 }
 
-void GlobalState::replaceFile(FileRef whatFile, shared_ptr<File> withWhat) {
+std::shared_ptr<File> GlobalState::replaceFile(FileRef whatFile, shared_ptr<File> withWhat) {
     ENFORCE_NO_TIMER(whatFile.id() < filesUsed());
     ENFORCE_NO_TIMER(whatFile.dataAllowingUnsafe(*this).path() == withWhat->path());
-    files[whatFile.id()] = std::move(withWhat);
+    return std::exchange(files[whatFile.id()], std::move(withWhat));
 }
 
 FileRef GlobalState::findFileByPath(string_view path) const {
