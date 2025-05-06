@@ -3,15 +3,16 @@
 
 namespace sorbet::realmain::lsp {
 
-IndexerInitializationTask::IndexerInitializationTask(const LSPConfiguration &config)
-    : LSPTask(config, LSPMethod::SorbetIndexerInitialization) {}
+IndexerInitializationTask::IndexerInitializationTask(const LSPConfiguration &config,
+                                                     std::vector<std::shared_ptr<core::File>> files)
+    : LSPTask(config, LSPMethod::SorbetIndexerInitialization), files{std::move(files)} {}
 
 LSPTask::Phase IndexerInitializationTask::finalPhase() const {
     return LSPTask::Phase::INDEX;
 }
 
 void IndexerInitializationTask::index(LSPIndexer &indexer) {
-    indexer.initialize(*this);
+    indexer.initialize(*this, std::move(this->files));
 }
 
 void IndexerInitializationTask::run(LSPTypecheckerDelegate &typechecker) {}
