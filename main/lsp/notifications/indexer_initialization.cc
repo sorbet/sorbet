@@ -4,7 +4,7 @@
 namespace sorbet::realmain::lsp {
 
 IndexerInitializationTask::IndexerInitializationTask(const LSPConfiguration &config,
-                                                     std::vector<std::shared_ptr<core::File>> files)
+                                                     std::vector<std::shared_ptr<core::File>> &&files)
     : LSPTask(config, LSPMethod::SorbetIndexerInitialization), files{std::move(files)} {}
 
 LSPTask::Phase IndexerInitializationTask::finalPhase() const {

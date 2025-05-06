@@ -9,7 +9,7 @@ class IndexerInitializationTask final : public LSPTask {
     std::vector<std::shared_ptr<core::File>> files;
 
 public:
-    IndexerInitializationTask(const LSPConfiguration &config, std::vector<std::shared_ptr<core::File>> files);
+    IndexerInitializationTask(const LSPConfiguration &config, std::vector<std::shared_ptr<core::File>> &&files);
 
     Phase finalPhase() const override;
 

@@ -287,7 +287,7 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
     task.setKeyValueStore(std::move(this->kvstore));
 }
 
-void LSPIndexer::initialize(IndexerInitializationTask &task, std::vector<std::shared_ptr<core::File>> files) {
+void LSPIndexer::initialize(IndexerInitializationTask &task, std::vector<std::shared_ptr<core::File>> &&files) {
     if (initialized) {
         Exception::raise("Indexer is already initialized; cannot initialize a second time.");
     }

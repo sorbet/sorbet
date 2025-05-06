@@ -84,7 +84,7 @@ public:
     /**
      * Finalizes indexer initialization.
      */
-    void initialize(IndexerInitializationTask &task, std::vector<std::shared_ptr<core::File>> files);
+    void initialize(IndexerInitializationTask &task, std::vector<std::shared_ptr<core::File>> &&files);
 
     /**
      * Commits the given edit to `initialGS`, and returns a canonical LSPFileUpdates object containing indexed trees
