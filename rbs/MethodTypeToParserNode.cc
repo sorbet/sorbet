@@ -135,8 +135,8 @@ bool checkParameterKindMatch(core::MutableContext ctx, const RBSArg &arg, const 
 
     if (!kindMatch) {
         if (auto e = ctx.beginError(arg.loc, core::errors::Rewriter::RBSIncorrectParameterKind)) {
-            e.setHeader("Argument kind mismatch for `{}`, expected `{}`, got `{}`", nodeName(methodArg).show(ctx.state),
-                        nodeKindToString(methodArg), argKindToString(arg.kind));
+            e.setHeader("Argument kind mismatch for `{}`, method declares `{}`, but RBS signature declares `{}`",
+                        nodeName(methodArg).show(ctx.state), nodeKindToString(methodArg), argKindToString(arg.kind));
         }
     }
 
