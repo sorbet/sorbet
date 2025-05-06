@@ -670,6 +670,20 @@ parameter, while the RBS signature declares it as a positional parameter:
 def method(param:); end
 ```
 
+## 3557
+
+This error is raised when a class or module is annotated with multiple RBS
+generic signature comments:
+
+```ruby
+#: [T]
+#: [U]
+class A
+end
+```
+
+Only one is allowed.
+
 ## 3702
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
