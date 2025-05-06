@@ -1571,15 +1571,7 @@ void populateMangledName(core::GlobalState &gs, PackageName &pName) {
     pName.mangledName = core::packages::MangledName::mangledNameFromParts(gs, pName.fullName.parts);
 }
 
-unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, ast::ParsedFile &package) {
-    auto pkg = definePackage(gs, package);
-    if (pkg == nullptr) {
-        return pkg;
-    }
-    populateMangledName(gs, pkg->name);
-
-    auto &info = *pkg;
-
+void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
     auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
     auto extraPackageFilesDirectorySlashDeprecatedPrefixes =
         gs.packageDB().extraPackageFilesDirectorySlashDeprecatedPrefixes();
@@ -1630,7 +1622,9 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
         // Project/FooBar -- each constant name is a file or directory name
         info.packagePathPrefixes.emplace_back(absl::StrCat(prefix, slashDirName));
     }
+}
 
+void populatePackageEdges(core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
     rewritePackageSpec(gs, package, info);
     for (auto &importedPackageName : info.importedPackageNames) {
         populateMangledName(gs, importedPackageName.name);
@@ -1655,8 +1649,6 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     for (auto &visibleTo : info.visibleTo_) {
         populateMangledName(gs, visibleTo.name);
     }
-
-    return pkg;
 }
 
 // Metadata for Tarjan's algorithm
@@ -1966,12 +1958,14 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
                 continue;
             }
 
-            auto pkg = createAndPopulatePackageInfo(gs, file);
+            auto pkg = definePackage(gs, file);
             if (pkg == nullptr) {
                 // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
                 // surfaced that error to the user. Nothing to do here.
                 continue;
             }
+            populateMangledName(gs, pkg->name);
+
             auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
             if (prevPkg.exists() && prevPkg.declLoc() != pkg->declLoc()) {
                 if (auto e = gs.beginError(pkg->loc, core::errors::Packager::RedefinitionOfPackage)) {
@@ -1980,12 +1974,30 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
                     e.addErrorLine(prevPkg.declLoc(), "Package `{}` originally defined here", pkgName);
                 }
             } else {
+                populatePackagePathPrefixes(gs, file, *pkg);
                 packages.db.enterPackage(move(pkg));
             }
         }
     }
 
     setPackageNameOnFiles(gs, files);
+
+    {
+        auto packages = gs.unfreezePackages();
+
+        for (auto &file : files) {
+            if (!file.file.data(gs).isPackage(gs)) {
+                continue;
+            }
+
+            auto pkgName = gs.packageDB().getPackageNameForFile(file.file);
+            if (!pkgName.exists()) {
+                continue;
+            }
+            auto &info = PackageInfoImpl::from(gs, pkgName);
+            populatePackageEdges(gs, file, info);
+        }
+    }
 }
 
 void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
