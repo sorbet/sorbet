@@ -118,8 +118,8 @@ string nodeKindToString(const parser::Node *node) {
     return kind;
 }
 
-bool checkParameterKind(core::MutableContext ctx, const RBSArg &arg, const parser::Node *methodArg) {
-    auto kindMismatch = false;
+bool checkParameterKindMatch(core::MutableContext ctx, const RBSArg &arg, const parser::Node *methodArg) {
+    auto kindMatch = false;
 
     typecase(
         methodArg, [&](const parser::Arg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::Positional; },
@@ -337,7 +337,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
                 make_unique<parser::Pair>(arg.loc, parser::MK::Symbol(methodArg->loc, name), move(type)));
         }
 
-        checkParameterKind(ctx, arg, methodArg);
+        checkParameterKindMatch(ctx, arg, methodArg);
     }
 
     // Build the sig
