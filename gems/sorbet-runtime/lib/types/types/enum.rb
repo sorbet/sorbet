@@ -9,8 +9,13 @@ module T::Types
     attr_reader :values
 
     def initialize(values)
-      require "set" unless defined?(Set)
-      @values = values.to_set
+      case values
+      when Hash
+        @values = values
+      else
+        require "set" unless defined?(Set)
+        @values = values.to_set
+      end
     end
 
     def build_type
