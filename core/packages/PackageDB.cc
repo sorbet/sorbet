@@ -199,14 +199,6 @@ MangledName PackageDB::findPackageByPath(const core::GlobalState &gs, core::File
     return MangledName();
 }
 
-const PackageInfo &PackageDB::getPackageInfo(const core::GlobalState &gs, std::string_view nameStr) const {
-    auto cnst = core::packages::MangledName::mangledNameFromHuman(gs, nameStr);
-    if (!cnst.exists()) {
-        return NONE_PKG;
-    }
-    return getPackageInfo(cnst);
-}
-
 const PackageInfo &PackageDB::getPackageInfo(MangledName mangledName) const {
     auto it = packages_.find(mangledName);
     if (it == packages_.end()) {
