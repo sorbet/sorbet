@@ -301,6 +301,9 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
     auto *block = node.block;
     if (block) {
         auto loc = declaration.typeLocFromRange(block->base.location->rg);
+        // TODO: fix block location in RBS parser
+        loc.beginLoc = loc.beginLoc + 1;
+        loc.endLoc = loc.endLoc + 2;
         auto arg = RBSArg{loc, nullptr, (rbs_node_t *)block, RBSArg::Kind::Block};
         args.emplace_back(arg);
     }

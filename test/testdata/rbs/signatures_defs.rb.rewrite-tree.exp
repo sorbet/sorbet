@@ -91,6 +91,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:p, ::<root>::<C T>.proc().void()).void()
+  end
+
+  def sig_mismatch12<<todo method>>(p, &<blk>)
+    <emptyTree>
+  end
+
   def method1<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
@@ -380,6 +388,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <runtime method definition of sig_mismatch10>
 
   <runtime method definition of sig_mismatch11>
+
+  <runtime method definition of sig_mismatch12>
 
   <runtime method definition of method1>
 

@@ -81,6 +81,10 @@ def sig_mismatch10(**p); end
 #   ^^^^^^^^^^^ error: Argument kind mismatch for `blk`, method declares `block`, but RBS signature declares `positional`
 def sig_mismatch11(&blk); end
 
+#: { -> void } -> void
+#  ^^^^^^^^^^^ error: Argument kind mismatch for `p`, method declares `positional`, but RBS signature declares `block`
+def sig_mismatch12(p); end
+
 # Sigs
 
 # We do not create any sig if there is no RBS comment
