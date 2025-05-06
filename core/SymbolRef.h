@@ -1121,6 +1121,18 @@ public:
         return ClassOrModuleRef::fromRaw(96);
     }
 
+    static ClassOrModuleRef T_GenericWithoutRuntime() {
+        return ClassOrModuleRef::fromRaw(97);
+    }
+
+    static MethodRef T_GenericWithoutRuntime_syntheticSquareBrackets() {
+        return MethodRef::fromRaw(57);
+    }
+
+    static MethodRef T_GenericWithoutRuntime_syntheticTypeMember() {
+        return MethodRef::fromRaw(58);
+    }
+
     static FieldRef Magic_UntypedSource_super() {
         return FieldRef::fromRaw(4);
     }

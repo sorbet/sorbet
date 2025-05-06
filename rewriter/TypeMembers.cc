@@ -21,7 +21,8 @@ void TypeMembers::run(core::MutableContext ctx, ast::ClassDef *cdef) {
 
         auto rhs = ast::cast_tree<ast::Send>(assn->rhs);
         if (!rhs || !rhs->recv.isSelfReference() ||
-            (rhs->fun != core::Names::typeMember() && rhs->fun != core::Names::typeTemplate())) {
+            (rhs->fun != core::Names::typeMember() && rhs->fun != core::Names::typeTemplate() &&
+             rhs->fun != core::Names::syntheticTypeMember())) {
             continue;
         }
 
@@ -33,7 +34,7 @@ void TypeMembers::run(core::MutableContext ctx, ast::ClassDef *cdef) {
         auto it = typeMembers.find(lhs->cnst);
         if (it != typeMembers.end()) {
             if (auto e = ctx.beginIndexerError(lhs->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                auto memTem = rhs->fun == core::Names::typeMember() ? "member" : "template";
+                auto memTem = rhs->fun == core::Names::typeTemplate() ? "template" : "member";
                 e.setHeader("Duplicate type {} `{}`", memTem, lhs->cnst.show(ctx));
                 e.addErrorLine(ctx.locAt(it->second), "Previous definition");
                 e.replaceWith(fmt::format("Delete duplicate type {}", memTem), ctx.locAt(expr.loc()), "");

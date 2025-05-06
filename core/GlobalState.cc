@@ -931,6 +931,19 @@ void GlobalState::initEmpty() {
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::LoadYieldParams());
     ENFORCE_NO_TIMER(field == Symbols::Magic_UntypedSource_LoadYieldParams());
 
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::GenericWithoutRuntime());
+    ENFORCE_NO_TIMER(klass == Symbols::T_GenericWithoutRuntime());
+
+    method = enterMethod(*this, Symbols::T_GenericWithoutRuntime(), Names::syntheticSquareBrackets())
+                 .repeatedTopArg(Names::args())
+                 .build();
+    ENFORCE_NO_TIMER(method == Symbols::T_GenericWithoutRuntime_syntheticSquareBrackets());
+
+    method = enterMethod(*this, Symbols::T_GenericWithoutRuntime(), Names::syntheticTypeMember())
+                 .repeatedTopArg(Names::args())
+                 .build();
+    ENFORCE_NO_TIMER(method == Symbols::T_GenericWithoutRuntime_syntheticTypeMember());
+
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes

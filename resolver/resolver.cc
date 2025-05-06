@@ -2692,6 +2692,7 @@ public:
             case core::Names::typeAlias().rawId():
             case core::Names::typeMember().rawId():
             case core::Names::typeTemplate().rawId():
+            case core::Names::syntheticTypeMember().rawId():
                 break;
 
             default:
@@ -2797,6 +2798,7 @@ public:
             case core::Names::typeMember().rawId():
             case core::Names::typeTemplate().rawId():
             case core::Names::typeAlias().rawId():
+            case core::Names::syntheticTypeMember().rawId():
                 trackDependencies_ = false;
                 break;
 
@@ -2922,7 +2924,7 @@ public:
 
             if ((sym.isTypeAlias(ctx) && send->fun != core::Names::typeAlias()) ||
                 (sym.isTypeMember() && send->fun != core::Names::typeMember() &&
-                 send->fun != core::Names::typeTemplate())) {
+                 send->fun != core::Names::typeTemplate() && send->fun != core::Names::syntheticTypeMember())) {
                 // This is a reassignment of a constant that was declared as a type member or a type alias.
                 // The redefinition error is reported elsewhere.
                 return;

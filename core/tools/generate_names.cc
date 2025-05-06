@@ -580,6 +580,11 @@ NameDef names[] = {
     {"Account", "Account", true},
     {"Merchant", "Merchant", true},
 
+    // RBS synthetic generics
+    {"GenericWithoutRuntime", "GenericWithoutRuntime", true},
+    {"syntheticSquareBrackets", "<syntheticSquareBrackets>"},
+    {"syntheticTypeMember", "<syntheticTypeMember>"},
+
     // Typos
     {"Int", "Int", true},
     {"Timestamp", "Timestamp", true},

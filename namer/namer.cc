@@ -655,6 +655,7 @@ public:
             handleAssignment(ctx, asgn);
         } else {
             switch (send->fun.rawId()) {
+                case core::Names::syntheticTypeMember().rawId():
                 case core::Names::typeTemplate().rawId():
                 case core::Names::typeMember().rawId():
                     handleTypeMemberDefinition(ctx, send, asgn, lhs);
@@ -2069,6 +2070,7 @@ public:
             tree = handleAssignment(ctx, std::move(tree));
         } else {
             switch (send->fun.rawId()) {
+                case core::Names::syntheticTypeMember().rawId():
                 case core::Names::typeTemplate().rawId():
                 case core::Names::typeMember().rawId(): {
                     tree = handleTypeMemberDefinition(ctx, std::move(tree));
