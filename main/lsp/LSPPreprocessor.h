@@ -75,6 +75,10 @@ class LSPPreprocessor final {
     // A map from file path to file contents for open files.
     UnorderedMap<std::string, std::shared_ptr<core::File>> openFiles;
 
+    // The set of all files that are currently present in the workspace. We keep this up-to-date as we receive new
+    // events, to ensure that we can flag workspace edits as including new files.
+    UnorderedSet<std::string> knownFiles;
+
     // Indicates the next version to use on an incoming edit. Used to refer to edits by ID.
     uint32_t nextVersion = 1;
 
@@ -96,8 +100,8 @@ class LSPPreprocessor final {
                                                                  std::unique_ptr<DidOpenTextDocumentParams> openParams);
     std::unique_ptr<SorbetWorkspaceEditParams>
     canonicalizeEdits(uint32_t v, std::unique_ptr<DidCloseTextDocumentParams> closeParams);
-    std::unique_ptr<SorbetWorkspaceEditParams>
-    canonicalizeEdits(uint32_t v, std::unique_ptr<WatchmanQueryResponse> queryResponse) const;
+    std::unique_ptr<SorbetWorkspaceEditParams> canonicalizeEdits(uint32_t v,
+                                                                 std::unique_ptr<WatchmanQueryResponse> queryResponse);
 
     /**
      * Get the current contents of the file at the given path. Returns "" (empty string view) if file does not yet
@@ -111,9 +115,18 @@ class LSPPreprocessor final {
 
     std::vector<std::string_view> openFilePaths() const;
 
+    // Returns true if the file hasn't been seen before.
+    bool isNewFile(const std::string &path) const;
+
+    // Returns the contents of the file if it exists (with an empty string if it doesn't), and a boolean that indicates
+    // if the file is new.
+    std::pair<std::string, bool> readFile(const std::string &path);
+
 public:
     LSPPreprocessor(std::shared_ptr<LSPConfiguration> config, std::shared_ptr<TaskQueue> taskQueue,
                     uint32_t initialVersion = 0);
+
+    void setKnownFiles(absl::Span<const std::string> files);
 
     /**
      * Performs pre-processing on the incoming LSP request and appends it to the queue.

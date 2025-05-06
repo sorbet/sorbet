@@ -263,6 +263,7 @@ void SorbetWorkspaceEditParams::merge(SorbetWorkspaceEditParams &newerParams) {
     updates = move(newUpdates);
     mergeCount += newerParams.mergeCount + 1;
     sorbetCancellationExpected = sorbetCancellationExpected || newerParams.sorbetCancellationExpected;
+    containsNewFiles = containsNewFiles || newerParams.containsNewFiles;
     sorbetPreemptionsExpected += newerParams.sorbetPreemptionsExpected;
     // Consume newerParams' diagnostic latency timers.
     diagnosticLatencyTimers.insert(diagnosticLatencyTimers.end(),

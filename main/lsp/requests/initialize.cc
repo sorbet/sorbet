@@ -1,4 +1,5 @@
 #include "main/lsp/requests/initialize.h"
+#include "main/lsp/LSPPreprocessor.h"
 #include "main/lsp/json_types.h"
 
 using namespace std;
@@ -16,6 +17,7 @@ bool InitializeTask::canPreempt(const LSPIndexer &indexer) const {
 
 void InitializeTask::preprocess(LSPPreprocessor &preprocessor) {
     mutableConfig.setClientConfig(make_shared<LSPClientConfiguration>(*params));
+    preprocessor.setKnownFiles(config.opts.inputFileNames);
 }
 
 unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &ts) {

@@ -292,19 +292,6 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, std::vector<std::sh
         Exception::raise("Indexer is already initialized; cannot initialize a second time.");
     }
 
-    {
-        core::UnfreezeFileTable unfreezeFiles{*this->initialGS};
-
-        for (auto &file : files) {
-            auto fref = this->initialGS->findFileByPath(file->path());
-            if (fref.exists()) {
-                this->initialGS->replaceFile(fref, std::move(file));
-            } else {
-                this->initialGS->enterFile(std::move(file));
-            }
-        }
-    }
-
     initialized = true;
 }
 
@@ -330,14 +317,15 @@ std::unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams
                 newlyEvictedFiles[fref] = initialGS->getFiles()[fref.id()];
                 initialGS->replaceFile(fref, file);
             } else {
-                // This file update adds a new file to GlobalState.
-                update.hasNewFiles = true;
                 fref = initialGS->enterFile(file);
                 fref.data(*initialGS).strictLevel = pipeline::decideStrictLevel(*initialGS, fref, config->opts);
             }
             frefs.emplace_back(fref);
         }
     }
+
+    update.hasNewFiles = edit.containsNewFiles;
+    fmt::println(stderr, "has new files: {}", edit.containsNewFiles);
 
     // Index changes in initialGS. pipeline::index sorts output by file id, but we need to reorder to match the order of
     // other fields.

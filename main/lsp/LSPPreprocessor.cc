@@ -11,20 +11,40 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-namespace {
-string readFile(const string &path, const FileSystem &fs) {
+void LSPPreprocessor::setKnownFiles(absl::Span<const std::string> files) {
+    fmt::println(stderr, "seeding known files");
+    this->knownFiles.clear();
+    for (const auto &file : files) {
+        fmt::println(stderr, "known file: {}", file);
+        this->knownFiles.insert(file);
+    }
+}
+
+bool LSPPreprocessor::isNewFile(const string &path) const {
+    fmt::println(stderr, "is new? `{}`", path);
+    return !this->knownFiles.contains(path);
+}
+
+std::pair<std::string, bool> LSPPreprocessor::readFile(const string &path) {
+    std::string contents;
+    bool isNew = false;
     try {
-        return fs.readFile(path);
+        contents = this->config->opts.fs->readFile(path);
+        fmt::println(stderr, "read file: {}", path);
+        std::tie(std::ignore, isNew) = this->knownFiles.insert(path);
     } catch (FileNotFoundException e) {
         // Act as if file is completely empty.
         // NOTE: It is not appropriate to throw an error here. Sorbet does not differentiate between Watchman
         // updates that specify if a file has changed or has been deleted, so this is the 'golden path' for deleted
         // files.
         // TODO(jvilk): Use Tombstone files instead.
-        return "";
+        this->knownFiles.erase(path);
     }
+
+    return {contents, isNew};
 }
 
+namespace {
 class TerminateOnDestruction final {
     TaskQueue &queue;
 
@@ -89,7 +109,8 @@ bool TaskQueue::ready() const {
 LSPPreprocessor::LSPPreprocessor(shared_ptr<LSPConfiguration> config, shared_ptr<TaskQueue> taskQueue,
                                  uint32_t initialVersion)
     : config(move(config)), taskQueue(std::move(taskQueue)), owner(this_thread::get_id()),
-      nextVersion(initialVersion + 1) {}
+      nextVersion(initialVersion + 1) {
+}
 
 string_view LSPPreprocessor::getFileContents(string_view path) const {
     auto maybeFileContents = maybeGetFileContents(path);
@@ -439,6 +460,8 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidChangeTextDocumentP
             string fileContents = changeParams->getSource(getFileContents(localPath));
             auto fileType = core::File::Type::Normal;
             auto &slot = openFiles[localPath];
+            // didChange notifications are for already open files, so we already know that it's not a new file.
+            edit->containsNewFiles = false;
             auto file = make_shared<core::File>(move(localPath), move(fileContents), fileType, v);
             file->setIsOpenInClient(true);
             edit->updates.push_back(file);
@@ -458,6 +481,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidOpenTextDocumentPar
         if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath)) {
             auto fileType = core::File::Type::Normal;
             auto &slot = openFiles[localPath];
+            edit->containsNewFiles = this->isNewFile(localPath);
             auto file = make_shared<core::File>(move(localPath), move(openParams->textDocument->text), fileType, v);
             file->setIsOpenInClient(true);
             edit->updates.push_back(file);
@@ -478,7 +502,11 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidCloseTextDocumentPa
             openFiles.erase(localPath);
             // Use contents of file on disk.
             auto fileType = core::File::Type::Normal;
-            auto fileContents = readFile(localPath, *config->opts.fs);
+            auto [fileContents, isNew] = this->readFile(localPath);
+            // didClose notifications come from files that were already open in the editor, so they should already be
+            // present in the list of known files.
+            ENFORCE(!isNew);
+            edit->containsNewFiles = false;
             edit->updates.push_back(make_shared<core::File>(move(localPath), move(fileContents), fileType, v));
         }
     }
@@ -486,7 +514,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidCloseTextDocumentPa
 }
 
 unique_ptr<SorbetWorkspaceEditParams>
-LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse> queryResponse) const {
+LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse> queryResponse) {
     auto edit = make_unique<SorbetWorkspaceEditParams>();
     edit->epoch = v;
     for (auto &file : queryResponse->files) {
@@ -496,7 +524,8 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse>
         if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath) &&
             !openFiles.contains(localPath)) {
             auto fileType = core::File::Type::Normal;
-            auto fileContents = readFile(localPath, *config->opts.fs);
+            auto [fileContents, isNew] = this->readFile(localPath);
+            edit->containsNewFiles = isNew;
             edit->updates.push_back(make_shared<core::File>(move(localPath), move(fileContents), fileType, v));
         }
     }

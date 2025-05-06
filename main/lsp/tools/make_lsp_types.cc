@@ -1349,6 +1349,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        "uint32_t mergeCount = 0;",
                        "// Used in multithreaded tests to wait for a cancellation to occur when processing this edit.",
                        "bool sorbetCancellationExpected = false;",
+                       "// True when the edit contains files that weren't previously present in the workspace",
+                       "bool containsNewFiles = false;",
                        "// Used in multithreaded tests to wait for a preemption to occur when processing this edit.",
                        "int sorbetPreemptionsExpected = 0;",
                        "// For each edit rolled up into update, contains a timer used to report diagnostic latency.",
