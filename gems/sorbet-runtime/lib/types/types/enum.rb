@@ -9,7 +9,8 @@ module T::Types
     attr_reader :values
 
     def initialize(values)
-      @values = values
+      require "set" unless defined?(Set)
+      @values = values.to_set
     end
 
     def build_type
