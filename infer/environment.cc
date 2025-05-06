@@ -1222,7 +1222,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                            (symbol.isStaticField(ctx) &&
                             !symbol.asFieldRef().data(ctx)->flags.isStaticFieldTypeAlias) ||
                            symbol.isTypeMember()) {
-                    auto resultType = symbol.resultType(ctx);
+                    const auto &resultType = symbol.resultType(ctx);
                     if (resultType != nullptr) {
                         if (symbol.isTypeMember()) {
                             auto tm = symbol.asTypeMemberRef();

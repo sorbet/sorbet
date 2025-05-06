@@ -2060,7 +2060,7 @@ class ResolveTypeMembersAndFieldsWalk {
                     result = move(externalType);
                 } else if (cnst.symbol().isStaticField(ctx) &&
                            core::isa_type<core::ClassType>(cnst.symbol().resultType(ctx))) {
-                    auto resultType = cnst.symbol().resultType(ctx);
+                    const auto &resultType = cnst.symbol().resultType(ctx);
                     auto classType = core::cast_type_nonnull<core::ClassType>(resultType);
                     if (!classType.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
                         return;
