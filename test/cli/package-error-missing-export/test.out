@@ -50,3 +50,23 @@ use_other/foo_class.rb:13: `Foo::Bar::OtherPackage::Inner::AlsoNotExported` reso
   Note:
     Try running generate-packages.sh
 Errors: 4
+use_app_false_cycle_package/foo.rb:6: `Foo::Bar::AppFalseCyclePackage::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3727
+     6 |      Foo::Bar::AppFalseCyclePackage::OtherClass
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::AppFalseCyclePackage` to `Foo::MyPackage`:
+    `Foo::Bar::AppFalseCyclePackage` →
+    `Foo::MyPackage`
+
+    app_false_cycle_package/__package.rb:6: Package `Foo::Bar::AppFalseCyclePackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     6 |  layer 'app'
+                ^^^^^
+    app_false_cycle_package/__package.rb:7: `Foo::Bar::AppFalseCyclePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     7 |  strict_dependencies 'false'
+                              ^^^^^^^
+  Note:
+    `Foo::Bar::AppFalseCyclePackage::OtherClass` is not exported
+Errors: 1
