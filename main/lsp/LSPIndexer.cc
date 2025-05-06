@@ -292,12 +292,16 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, std::vector<std::sh
         Exception::raise("Indexer is already initialized; cannot initialize a second time.");
     }
 
-    for (auto &file : files) {
-        auto fref = this->initialGS->findFileByPath(file->path());
-        if (fref.exists()) {
-            this->initialGS->replaceFile(fref, std::move(file));
-        } else {
-            this->initialGS->enterFile(std::move(file));
+    {
+        core::UnfreezeFileTable unfreezeFiles{*this->initialGS};
+
+        for (auto &file : files) {
+            auto fref = this->initialGS->findFileByPath(file->path());
+            if (fref.exists()) {
+                this->initialGS->replaceFile(fref, std::move(file));
+            } else {
+                this->initialGS->enterFile(std::move(file));
+            }
         }
     }
 
