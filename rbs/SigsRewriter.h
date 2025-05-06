@@ -44,6 +44,7 @@ private:
     parser::NodeVec rewriteNodes(parser::NodeVec nodes);
     std::unique_ptr<parser::NodeVec> signaturesForNode(parser::Node *node);
     Comments commentsForNode(parser::Node *node);
+    void insertTypeParams(parser::Node *node, std::unique_ptr<parser::Node> *body);
 };
 
 } // namespace sorbet::rbs

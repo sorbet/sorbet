@@ -182,6 +182,13 @@ public:
     }
 
     /*
+     * Create a `T::GenericWithoutRuntime` constant node.
+     */
+    static std::unique_ptr<parser::Node> T_GenericWithoutRuntime(core::LocOffsets loc) {
+        return Const(loc, T(loc), core::Names::Constants::GenericWithoutRuntime());
+    }
+
+    /*
      * Create a `T::Hash` constant node.
      */
     static std::unique_ptr<parser::Node> T_Hash(core::LocOffsets loc) {
@@ -367,6 +374,10 @@ public:
         }
 
         auto constant = parser::cast_node<parser::Const>(expr.get());
+
+        if (constant == nullptr) {
+            return false;
+        }
 
         if (isT(constant->scope)) {
             return true;
