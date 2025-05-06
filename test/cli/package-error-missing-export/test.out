@@ -1,4 +1,4 @@
-foo_class.rb:10: `Foo::Bar::OtherPackage::NotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
+use_other/foo_class.rb:10: `Foo::Bar::OtherPackage::NotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
     10 |      Foo::Bar::OtherPackage::NotExported
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     other/other_class.rb:7: Defined here
@@ -11,7 +11,7 @@ foo_class.rb:10: `Foo::Bar::OtherPackage::NotExported` resolves but is not expor
   Note:
     Try running generate-packages.sh
 
-foo_class.rb:11: `Foo::Bar::OtherPackage::NotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
+use_other/foo_class.rb:11: `Foo::Bar::OtherPackage::NotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
     11 |      Bar::OtherPackage::NotExported
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     other/other_class.rb:7: Defined here
@@ -24,7 +24,7 @@ foo_class.rb:11: `Foo::Bar::OtherPackage::NotExported` resolves but is not expor
   Note:
     Try running generate-packages.sh
 
-foo_class.rb:12: `Foo::Bar::OtherPackage::Inner::AlsoNotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
+use_other/foo_class.rb:12: `Foo::Bar::OtherPackage::Inner::AlsoNotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
     12 |      Foo::Bar::OtherPackage::Inner::AlsoNotExported
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     other/other_class.rb:10: Defined here
@@ -37,7 +37,7 @@ foo_class.rb:12: `Foo::Bar::OtherPackage::Inner::AlsoNotExported` resolves but i
   Note:
     Try running generate-packages.sh
 
-foo_class.rb:13: `Foo::Bar::OtherPackage::Inner::AlsoNotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
+use_other/foo_class.rb:13: `Foo::Bar::OtherPackage::Inner::AlsoNotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
     13 |      Bar::OtherPackage::Inner::AlsoNotExported
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     other/other_class.rb:10: Defined here
