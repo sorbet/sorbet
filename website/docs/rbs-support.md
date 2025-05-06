@@ -699,6 +699,93 @@ class Foo
 end
 ```
 
+## Generic classes and modules
+
+RBS supports generic classes and modules.
+
+[Type members](generics#type_member--type_template) can be specified using a
+`#:` comment on the class or module:
+
+```ruby
+#: [E]
+class Box
+  #: -> void
+  def initialize
+    @elems = [] #: T::Array[E]
+  end
+
+  #: (E) -> void
+  def <<(e)
+    @elems << e
+  end
+end
+
+box = Box.new #: Box[Integer]
+box << 42
+```
+
+RBS generics do not use `T::Generic`, thus the `[]` method doesn't exist at
+runtime and Sorbet will report an error if you try to use it:
+
+```ruby
+Box[Integer].new
+   ^^^^^^^^^ error: Method `[]` does not exist on `T.class_of(Box)`
+```
+
+To define a type template, use the `#:` comment on a `class << self`:
+
+```ruby
+module Factory
+  #: [InstanceType]
+  class << self
+    #: -> InstanceType
+    def make; end
+  end
+end
+```
+
+[Variance](generics.md#in-out-and-variance) can be specified using the `in` and
+`out` keywords:
+
+```ruby
+#: [out E]
+class Box
+end
+
+box = Box.new #: Box[Integer]
+box #: Box[Numeric]
+```
+
+By default, type parameters do not have
+[bounds](generics.md#bounds-on-type_members-and-type_templates-fixed-upper-lower):
+
+```ruby
+#: [E]
+class Box; end
+
+box = Box.new #: Box[Integer]
+```
+
+Upper bounds can be specified using `>`:
+
+```ruby
+#: [E < Numeric]
+class Box; end
+
+Box.new #: Box[Integer]
+Box.new #: Box[String]
+               ^^^^^^ error: `String` is not a subtype of upper bound of type member `::Box::E`
+```
+
+Fixed bounds can be specified using `=`:
+
+```ruby
+#: [E = Integer]
+class Box; end
+```
+
+Note: the lower bound `>` syntax is not supported in RBS yet.
+
 ## Special behaviors
 
 The `#:` comment must come **immediately** before the following method
@@ -775,6 +862,17 @@ to use the literal's underlying type instead:
 - `nil` is `NilClass`
 
 You can also consider using [`T::Enum`](tenum.md).
+
+### Unchecked generics
+
+RBS `unchecked` generics are not supported by Sorbet, use `untyped` instead:
+
+```ruby
+#: [E]
+class Box; end
+
+box = Box.new #: Box[untyped]
+```
 
 ## Type assertions comments
 
