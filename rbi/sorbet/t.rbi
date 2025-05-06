@@ -220,7 +220,11 @@ module T
   def self.absurd(value); end
 end
 
+module T::GenericWithoutRuntime
+end
+
 module T::Generic
+  include T::GenericWithoutRuntime
   include T::Helpers
 
   # Type syntax for declaring a generic type variable scoped to instances of
