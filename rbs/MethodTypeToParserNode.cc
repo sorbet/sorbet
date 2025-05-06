@@ -122,25 +122,25 @@ bool checkParameterKind(core::MutableContext ctx, const RBSArg &arg, const parse
     auto kindMismatch = false;
 
     typecase(
-        methodArg, [&](const parser::Arg *parserArg) { error = arg.kind != RBSArg::Kind::Positional; },
-        [&](const parser::Optarg *parserArg) { error = arg.kind != RBSArg::Kind::OptionalPositional; },
-        [&](const parser::Restarg *parserArg) { error = arg.kind != RBSArg::Kind::RestPositional; },
-        [&](const parser::Kwarg *parserArg) { error = arg.kind != RBSArg::Kind::Keyword; },
-        [&](const parser::Kwoptarg *parserArg) { error = arg.kind != RBSArg::Kind::OptionalKeyword; },
-        [&](const parser::Kwrestarg *parserArg) { error = arg.kind != RBSArg::Kind::RestKeyword; },
-        [&](const parser::Blockarg *parserArg) { error = arg.kind != RBSArg::Kind::Block; },
+        methodArg, [&](const parser::Arg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::Positional; },
+        [&](const parser::Optarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::OptionalPositional; },
+        [&](const parser::Restarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::RestPositional; },
+        [&](const parser::Kwarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::Keyword; },
+        [&](const parser::Kwoptarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::OptionalKeyword; },
+        [&](const parser::Kwrestarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::RestKeyword; },
+        [&](const parser::Blockarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::Block; },
         [&](const parser::Node *other) {
             Exception::raise("Unexpected expression type: {}", ((parser::Node *)methodArg)->nodeName());
         });
 
-    if (error) {
+    if (!kindMatch) {
         if (auto e = ctx.beginError(arg.loc, core::errors::Rewriter::RBSIncorrectParameterKind)) {
             e.setHeader("Argument kind mismatch for `{}`, expected `{}`, got `{}`", nodeName(methodArg).show(ctx.state),
                         nodeKindToString(methodArg), argKindToString(arg.kind));
         }
     }
 
-    return error;
+    return kindMatch;
 }
 
 parser::Args *getMethodArgs(const parser::Node *node) {
