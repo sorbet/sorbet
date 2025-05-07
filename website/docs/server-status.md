@@ -51,7 +51,10 @@ or delayed response to IDE features like hover, autocompletion, go to
 definition, etc. Most phases of Sorbet cause requests for IDE features to queue
 until the end of the current operation. The exceptions are the **Idle** and
 **Typechecking in background...** phases, which don't cause requests to use IDE
-features to queue
+features to queue. In these two phases, features like [Hover](hover.md),
+[Go to Definition](go-to-def.md), [Autocompletion](autocompletion.md), and
+others should be effectively instant. When that's not the case, it implies
+something broken.
 
 The "Error list is complete?" column indicates whether the list of errors is
 up-to-date, or whether Sorbet is still working on producing all the errors in a
