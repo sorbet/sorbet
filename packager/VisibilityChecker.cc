@@ -480,6 +480,7 @@ public:
                     ENFORCE(!isTestImport);
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                         e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
+                        e.addErrorLine(pkg.declLoc(), "Defined here");
                         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                         if (auto exp = this->package.addImport(ctx, pkg, false)) {
                             e.addAutocorrect(std::move(exp.value()));
@@ -487,7 +488,6 @@ public:
                                 e.addErrorNote("{}", db.errorHint());
                             }
                         }
-                        e.addErrorLine(pkg.declLoc(), "Defined here");
                     }
                 } else {
                     ENFORCE(false);
