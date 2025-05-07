@@ -1571,38 +1571,7 @@ void populateMangledName(core::GlobalState &gs, PackageName &pName) {
     pName.mangledName = core::packages::MangledName::mangledNameFromParts(gs, pName.fullName.parts);
 }
 
-unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, ast::ParsedFile &package) {
-    auto info = definePackage(gs, package);
-    if (info == nullptr) {
-        return info;
-    }
-    populateMangledName(gs, info->name);
-
-    rewritePackageSpec(gs, package, *info);
-    for (auto &importedPackageName : info->importedPackageNames) {
-        populateMangledName(gs, importedPackageName.name);
-
-        if (importedPackageName.name.mangledName == info->name.mangledName) {
-            if (auto e = gs.beginError(core::Loc(package.file, importedPackageName.name.fullName.loc),
-                                       core::errors::Packager::NoSelfImport)) {
-                string import_;
-                switch (importedPackageName.type) {
-                    case core::packages::ImportType::Normal:
-                        import_ = "import";
-                        break;
-                    case core::packages::ImportType::Test:
-                        import_ = "test_import";
-                        break;
-                }
-                e.setHeader("Package `{}` cannot {} itself", info->name.toString(gs), import_);
-            }
-        }
-    }
-
-    for (auto &visibleTo : info->visibleTo_) {
-        populateMangledName(gs, visibleTo.name);
-    }
-
+void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
     auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
     auto extraPackageFilesDirectorySlashDeprecatedPrefixes =
         gs.packageDB().extraPackageFilesDirectorySlashDeprecatedPrefixes();
@@ -1611,17 +1580,17 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     const auto numPrefixes = extraPackageFilesDirectoryUnderscorePrefixes.size() +
                              extraPackageFilesDirectorySlashDeprecatedPrefixes.size() +
                              extraPackageFilesDirectorySlashPrefixes.size() + 1;
-    info->packagePathPrefixes.reserve(numPrefixes);
+    info.packagePathPrefixes.reserve(numPrefixes);
     auto packageFilePath = package.file.data(gs).path();
     ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
-    info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
-    const string_view shortName = info->name.mangledName.mangledName.shortName(gs);
-    const string slashDirName = absl::StrJoin(info->name.fullName.parts, "/", core::packages::NameFormatter(gs)) + "/";
+    info.packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
+    const string_view shortName = info.name.mangledName.mangledName.shortName(gs);
+    const string slashDirName = absl::StrJoin(info.name.fullName.parts, "/", core::packages::NameFormatter(gs)) + "/";
     const string_view dirNameFromShortName = shortName;
 
     for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
         // Project_FooBar -- munge with underscore
-        info->packagePathPrefixes.emplace_back(absl::StrCat(prefix, dirNameFromShortName, "/"));
+        info.packagePathPrefixes.emplace_back(absl::StrCat(prefix, dirNameFromShortName, "/"));
     }
 
     for (const string &prefix : extraPackageFilesDirectorySlashDeprecatedPrefixes) {
@@ -1646,15 +1615,40 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
         }
         additionalDirPath.push_back('/');
 
-        info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
+        info.packagePathPrefixes.emplace_back(std::move(additionalDirPath));
     }
 
     for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
         // Project/FooBar -- each constant name is a file or directory name
-        info->packagePathPrefixes.emplace_back(absl::StrCat(prefix, slashDirName));
+        info.packagePathPrefixes.emplace_back(absl::StrCat(prefix, slashDirName));
+    }
+}
+
+void populatePackageEdges(core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
+    rewritePackageSpec(gs, package, info);
+    for (auto &importedPackageName : info.importedPackageNames) {
+        populateMangledName(gs, importedPackageName.name);
+
+        if (importedPackageName.name.mangledName == info.name.mangledName) {
+            if (auto e = gs.beginError(core::Loc(package.file, importedPackageName.name.fullName.loc),
+                                       core::errors::Packager::NoSelfImport)) {
+                string import_;
+                switch (importedPackageName.type) {
+                    case core::packages::ImportType::Normal:
+                        import_ = "import";
+                        break;
+                    case core::packages::ImportType::Test:
+                        import_ = "test_import";
+                        break;
+                }
+                e.setHeader("Package `{}` cannot {} itself", info.name.toString(gs), import_);
+            }
+        }
     }
 
-    return info;
+    for (auto &visibleTo : info.visibleTo_) {
+        populateMangledName(gs, visibleTo.name);
+    }
 }
 
 // Metadata for Tarjan's algorithm
@@ -1871,8 +1865,6 @@ void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg,
     }
 }
 
-} // namespace
-
 void validatePackage(core::Context ctx) {
     const auto &packageDB = ctx.state.packageDB();
     auto absPkg = packageDB.getPackageNameForFile(ctx.file);
@@ -1948,14 +1940,17 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
     ast::ConstShallowWalk::apply(ctx, enforcePrefix, tree);
 }
 
+} // namespace
+
 void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
     // Ensure files are in canonical order.
     // TODO(jez) Is this sort redundant? Should we move this sort to callers?
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
 
+    Timer timeit(gs.tracer(), "packager.findPackages");
+
     // Find packages and determine their imports/exports.
     {
-        Timer timeit(gs.tracer(), "packager.findPackages");
         core::UnfreezeNameTable unfreeze(gs);
         core::packages::UnfreezePackages packages = gs.unfreezePackages();
         for (auto &file : files) {
@@ -1963,23 +1958,45 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
                 continue;
             }
 
-            core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-            auto pkg = createAndPopulatePackageInfo(ctx, file);
+            auto pkg = definePackage(gs, file);
             if (pkg == nullptr) {
                 // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
                 // surfaced that error to the user. Nothing to do here.
                 continue;
             }
+            populateMangledName(gs, pkg->name);
+
             auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
             if (prevPkg.exists() && prevPkg.declLoc() != pkg->declLoc()) {
-                if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
-                    auto pkgName = pkg->name.toString(ctx);
+                if (auto e = gs.beginError(pkg->loc, core::errors::Packager::RedefinitionOfPackage)) {
+                    auto pkgName = pkg->name.toString(gs);
                     e.setHeader("Redefinition of package `{}`", pkgName);
                     e.addErrorLine(prevPkg.declLoc(), "Package `{}` originally defined here", pkgName);
                 }
             } else {
+                populatePackagePathPrefixes(gs, file, *pkg);
                 packages.db.enterPackage(move(pkg));
             }
+        }
+    }
+
+    setPackageNameOnFiles(gs, files);
+
+    {
+        core::UnfreezeNameTable unfreeze(gs);
+        auto packages = gs.unfreezePackages();
+
+        for (auto &file : files) {
+            if (!file.file.data(gs).isPackage(gs)) {
+                continue;
+            }
+
+            auto pkgName = gs.packageDB().getPackageNameForFile(file.file);
+            if (!pkgName.exists()) {
+                continue;
+            }
+            auto &info = PackageInfoImpl::from(gs, pkgName);
+            populatePackageEdges(gs, file, info);
         }
     }
 }
@@ -2043,9 +2060,10 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
 
     if constexpr (buildPackageDB) {
         Packager::findPackages(gs, files);
+    } else {
+        // findPackages already called this
+        Packager::setPackageNameOnFiles(gs, files);
     }
-
-    Packager::setPackageNameOnFiles(gs, files);
 
     {
         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
