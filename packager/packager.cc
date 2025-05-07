@@ -1628,22 +1628,6 @@ void populatePackageEdges(core::GlobalState &gs, ast::ParsedFile &package, Packa
     rewritePackageSpec(gs, package, info);
     for (auto &importedPackageName : info.importedPackageNames) {
         populateMangledName(gs, importedPackageName.name);
-
-        if (importedPackageName.name.mangledName == info.name.mangledName) {
-            if (auto e = gs.beginError(core::Loc(package.file, importedPackageName.name.fullName.loc),
-                                       core::errors::Packager::NoSelfImport)) {
-                string import_;
-                switch (importedPackageName.type) {
-                    case core::packages::ImportType::Normal:
-                        import_ = "import";
-                        break;
-                    case core::packages::ImportType::Test:
-                        import_ = "test_import";
-                        break;
-                }
-                e.setHeader("Package `{}` cannot {} itself", info.name.toString(gs), import_);
-            }
-        }
     }
 
     for (auto &visibleTo : info.visibleTo_) {
@@ -1904,6 +1888,21 @@ void validatePackage(core::Context ctx) {
 
         if (!skipImportVisibilityCheck) {
             validateVisibility(ctx, pkgInfo, i);
+        }
+
+        if (i.name.mangledName == pkgInfo.name.mangledName) {
+            if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::NoSelfImport)) {
+                string import_;
+                switch (i.type) {
+                    case core::packages::ImportType::Normal:
+                        import_ = "import";
+                        break;
+                    case core::packages::ImportType::Test:
+                        import_ = "test_import";
+                        break;
+                }
+                e.setHeader("Package `{}` cannot {} itself", pkgInfo.name.toString(ctx), import_);
+            }
         }
     }
 }
