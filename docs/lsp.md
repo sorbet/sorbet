@@ -81,7 +81,6 @@ sequenceDiagram
   LSPPreprocessor --) LSPLoop: SorbetWorkspaceEditTask
   LSPLoop ->> LSPIndexer: SorbetWorkspaceEditTask::index
   LSPIndexer ->> LSPIndexer: LSPIndexer::commitEdit
-  Note right of LSPIndexer: Copy GlobalState for<br/>the slow path
   LSPLoop --) LSPTypechecker: SorbetWorkspaceEditTask::runSpecial
   LSPTypechecker ->> LSPTypechecker: LSPTypechecker::runSlowPath
   Note right of LSPTypechecker: pipeline::copyForSlowPath<br/>and run the pipeline
