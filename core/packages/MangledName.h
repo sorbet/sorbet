@@ -22,8 +22,6 @@ public:
     static MangledName mangledNameFromParts(core::GlobalState &gs, const std::vector<std::string_view> &parts);
     // [:Foo, :Bar] => :Foo_Bar
     static MangledName mangledNameFromParts(core::GlobalState &gs, const std::vector<core::NameRef> &parts);
-    // "Foo::Bar" -> :Foo_Bar
-    static MangledName mangledNameFromHuman(const core::GlobalState &gs, std::string_view human);
 
     bool operator==(const MangledName &rhs) const {
         return mangledName == rhs.mangledName;

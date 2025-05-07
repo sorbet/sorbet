@@ -25,23 +25,4 @@ MangledName MangledName::mangledNameFromParts(core::GlobalState &gs, const std::
     return MangledName(gs.enterNameConstant(packagerName));
 }
 
-MangledName MangledName::mangledNameFromHuman(const core::GlobalState &gs, string_view nameStr) {
-    auto mangled = absl::StrCat(absl::StrReplaceAll(nameStr, {{"::", "_"}}));
-    auto utf8Name = gs.lookupNameUTF8(mangled);
-    if (!utf8Name.exists()) {
-        return MangledName();
-    }
-
-    auto packagerName = gs.lookupNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
-    if (!packagerName.exists()) {
-        return MangledName();
-    }
-
-    auto cnst = gs.lookupNameConstant(packagerName);
-    if (!cnst.exists()) {
-        return MangledName();
-    }
-
-    return MangledName(cnst);
-}
 } // namespace sorbet::core::packages

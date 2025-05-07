@@ -39,9 +39,6 @@ public:
     const PackageInfo &getPackageInfo(MangledName mangledName) const;
     PackageInfo *getPackageInfoNonConst(MangledName mangledName);
 
-    // Lookup `PackageInfo` from the string representation of the un-mangled package name.
-    const PackageInfo &getPackageInfo(const core::GlobalState &gs, std::string_view str) const;
-
     // Get mangled names for all packages.
     // Packages are ordered lexicographically with respect to the NameRef's that make up their
     // namespaces.
