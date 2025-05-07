@@ -31,7 +31,7 @@ module T::Types
     private def subtype_of_single?(other)
       case other
       when Enum
-        (other.values - @values).empty?
+        (@values - other.values).empty?
       else
         false
       end
