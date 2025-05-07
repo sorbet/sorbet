@@ -1803,6 +1803,15 @@ module Opus::Types::Test
           assert_subtype(T::Enumerator[Integer], T::Enumerator[T.untyped])
         end
       end
+
+      describe 'deprecated_enum' do
+        it 'treats the elements as a union of values' do
+          refute_subtype(T.deprecated_enum(["A"]), T.deprecated_enum(["A", "B"]))
+          assert_subtype(T.deprecated_enum(["A", "B"]), T.deprecated_enum(["A", "B"]))
+          refute_subtype(T.deprecated_enum(["A", "B"]), T.deprecated_enum(["A"]))
+          refute_subtype(T.deprecated_enum(["A", "B"]), T.deprecated_enum(["C"]))
+        end
+      end
     end
 
     module TestGeneric1
