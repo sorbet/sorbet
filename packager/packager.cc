@@ -1983,6 +1983,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
     setPackageNameOnFiles(gs, files);
 
     {
+        core::UnfreezeNameTable unfreeze(gs);
         auto packages = gs.unfreezePackages();
 
         for (auto &file : files) {
