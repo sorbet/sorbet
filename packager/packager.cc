@@ -690,14 +690,41 @@ FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::Unresolve
     return fqn;
 }
 
-// Gets the package name in `tree` if applicable.
-PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
+PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit,
+                           core::ClassOrModuleRef symbol) {
     ENFORCE(constantLit != nullptr);
 
     PackageName pName;
     pName.fullName = getFullyQualifiedName(ctx, constantLit);
 
     // pname.mangledName will be populated later, when we have a mutable GlobalState
+    pName.mangledName.owner = symbol;
+
+    return pName;
+}
+
+PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
+    ENFORCE(constantLit != nullptr);
+
+    PackageName pName;
+    pName.fullName = getFullyQualifiedName(ctx, constantLit);
+
+    // Since packager now runs after namer, we know that these symbols are entered.
+    auto owner = core::Symbols::PackageSpecRegistry();
+    for (auto part : pName.fullName.parts) {
+        auto member = owner.data(ctx)->findMember(ctx, part);
+        if (!member.exists() || !member.isClassOrModule()) {
+            owner = core::Symbols::noClassOrModule();
+            break;
+        }
+        owner = member.asClassOrModuleRef();
+    }
+
+    if (owner == core::Symbols::PackageSpecRegistry()) {
+        owner = core::Symbols::noClassOrModule();
+    }
+
+    pName.mangledName.owner = owner;
 
     return pName;
 }
@@ -1231,7 +1258,7 @@ struct PackageSpecBodyWalk {
                 auto importArg = move(posArg);
                 posArg = ast::packager::prependRegistry(move(importArg));
 
-                info.importedPackageNames.emplace_back(getPackageName(ctx, target), method2ImportType(send));
+                info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target), method2ImportType(send));
             }
         }
 
@@ -1273,7 +1300,8 @@ struct PackageSpecBodyWalk {
                     auto &posArg = send.getPosArg(0);
                     auto importArg = move(target->recv);
                     posArg = ast::packager::prependRegistry(move(importArg));
-                    info.visibleTo_.emplace_back(getPackageName(ctx, recv), core::packages::VisibleToType::Wildcard);
+                    info.visibleTo_.emplace_back(getUnresolvedPackageName(ctx, recv),
+                                                 core::packages::VisibleToType::Wildcard);
                 } else {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
                         e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
@@ -1286,7 +1314,8 @@ struct PackageSpecBodyWalk {
                 auto importArg = move(posArg);
                 posArg = ast::packager::prependRegistry(move(importArg));
 
-                info.visibleTo_.emplace_back(getPackageName(ctx, target), core::packages::VisibleToType::Normal);
+                info.visibleTo_.emplace_back(getUnresolvedPackageName(ctx, target),
+                                             core::packages::VisibleToType::Normal);
             }
         }
 
@@ -1540,8 +1569,8 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
         auto nameTree = ast::cast_tree<ast::ConstantLit>(packageSpecClass->name);
         ENFORCE(nameTree != nullptr, "Invariant from rewriter");
 
-        return make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree->original()), ctx.locAt(packageSpecClass->loc),
-                                            ctx.locAt(packageSpecClass->declLoc));
+        return make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree->original(), packageSpecClass->symbol),
+                                            ctx.locAt(packageSpecClass->loc), ctx.locAt(packageSpecClass->declLoc));
     }
 
     return nullptr;
@@ -1568,7 +1597,8 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
 
 // TODO(jez) Rename this to lookupMangledName, and make it take a const GlobalState
 void populateMangledName(core::GlobalState &gs, PackageName &pName) {
-    pName.mangledName = core::packages::MangledName::mangledNameFromParts(gs, pName.fullName.parts);
+    pName.mangledName =
+        core::packages::MangledName::mangledNameFromParts(gs, pName.fullName.parts, pName.mangledName.owner);
 }
 
 void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
