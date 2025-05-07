@@ -140,7 +140,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:x, <emptyTree>::<C String>).void()
   end
 
-  def method14<<todo method>>(x, &<blk>)
+  def method14<<todo method>>(x = "", &<blk>)
     <emptyTree>::<C T>.reveal_type(x)
   end
 
@@ -148,7 +148,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:x, ::<root>::<C T>.nilable(<emptyTree>::<C String>)).void()
   end
 
-  def method16<<todo method>>(x = nil, &<blk>)
+  def method16<<todo method>>(x, &<blk>)
     <emptyTree>::<C T>.reveal_type(x)
   end
 

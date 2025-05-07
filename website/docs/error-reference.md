@@ -654,6 +654,22 @@ This error is raised when Sorbet encounters an incorrect ordering of signature
 comment prefixes, (`#:` and `#|`). First line of your signature comment should
 start with `#:` and subsequent lines should start with a `#|`.
 
+## 3556
+
+> This error is specific to RBS support when using the
+> `--enable-experimental-rbs-signatures` flag.
+
+This error is raised when the kind of parameter in the method definition does
+not match the kind of parameter in the RBS signature.
+
+For example, this method expect the parameter to be defined as a keyword
+parameter, while the RBS signature declares it as a positional parameter:
+
+```ruby
+#: (Integer) -> void
+def method(param:); end
+```
+
 ## 3702
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are

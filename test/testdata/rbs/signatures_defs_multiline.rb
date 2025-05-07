@@ -145,14 +145,14 @@ end
 #: (
 #|   ?String x
 #| ) -> void
-def method14(x)
+def method14(x = "")
   T.reveal_type(x) # error: Revealed type: `String`
 end
 
 #: (
 #|   String ?x
 #| ) -> void
-def method16(x = nil)
+def method16(x)
   T.reveal_type(x) # error: Revealed type: `T.nilable(String)`
 end
 
@@ -179,7 +179,7 @@ def method20(&block)
 end
 
 class FooProc
-  #: (p: ^() -> Integer)
+  #: (?p: ^() -> Integer)
   #| ?{
   #|   (Integer) [self: FooProc] -> String
   #| } -> void

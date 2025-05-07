@@ -20,6 +20,18 @@ struct RBSArg {
     core::LocOffsets loc;
     rbs_ast_symbol_t *name;
     rbs_node_t *type;
+
+    enum class Kind {
+        Positional,
+        OptionalPositional,
+        RestPositional,
+        Keyword,
+        OptionalKeyword,
+        RestKeyword,
+        Block,
+    };
+
+    Kind kind;
 };
 
 unique_ptr<parser::Node> handleAnnotations(unique_ptr<parser::Node> sigBuilder, const vector<Comment> &annotations) {
@@ -69,6 +81,68 @@ core::NameRef nodeName(const parser::Node *node) {
     return name;
 }
 
+string argKindToString(RBSArg::Kind kind) {
+    switch (kind) {
+        case RBSArg::Kind::Positional:
+            return "positional";
+        case RBSArg::Kind::OptionalPositional:
+            return "optional positional";
+        case RBSArg::Kind::RestPositional:
+            return "rest positional";
+        case RBSArg::Kind::Keyword:
+            return "keyword";
+        case RBSArg::Kind::OptionalKeyword:
+            return "optional keyword";
+        case RBSArg::Kind::RestKeyword:
+            return "rest keyword";
+        case RBSArg::Kind::Block:
+            return "block";
+    }
+}
+
+string nodeKindToString(const parser::Node *node) {
+    string kind;
+
+    typecase(
+        node, [&](const parser::Arg *parserArg) { kind = "positional"; },
+        [&](const parser::Optarg *parserArg) { kind = "optional positional"; },
+        [&](const parser::Restarg *parserArg) { kind = "rest positional"; },
+        [&](const parser::Kwarg *parserArg) { kind = "keyword"; },
+        [&](const parser::Kwoptarg *parserArg) { kind = "optional keyword"; },
+        [&](const parser::Kwrestarg *parserArg) { kind = "rest keyword"; },
+        [&](const parser::Blockarg *parserArg) { kind = "block"; },
+        [&](const parser::Node *other) {
+            Exception::raise("Unexpected expression type: {}", ((parser::Node *)node)->nodeName());
+        });
+
+    return kind;
+}
+
+bool checkParameterKindMatch(core::MutableContext ctx, const RBSArg &arg, const parser::Node *methodArg) {
+    auto kindMatch = false;
+
+    typecase(
+        methodArg, [&](const parser::Arg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::Positional; },
+        [&](const parser::Optarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::OptionalPositional; },
+        [&](const parser::Restarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::RestPositional; },
+        [&](const parser::Kwarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::Keyword; },
+        [&](const parser::Kwoptarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::OptionalKeyword; },
+        [&](const parser::Kwrestarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::RestKeyword; },
+        [&](const parser::Blockarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::Block; },
+        [&](const parser::Node *other) {
+            Exception::raise("Unexpected expression type: {}", ((parser::Node *)methodArg)->nodeName());
+        });
+
+    if (!kindMatch) {
+        if (auto e = ctx.beginError(arg.loc, core::errors::Rewriter::RBSIncorrectParameterKind)) {
+            e.setHeader("Argument kind mismatch for `{}`, method declares `{}`, but RBS signature declares `{}`",
+                        nodeName(methodArg).show(ctx.state), nodeKindToString(methodArg), argKindToString(arg.kind));
+        }
+    }
+
+    return kindMatch;
+}
+
 parser::Args *getMethodArgs(const parser::Node *node) {
     parser::Node *args;
 
@@ -82,7 +156,7 @@ parser::Args *getMethodArgs(const parser::Node *node) {
     return parser::cast_node<parser::Args>(args);
 }
 
-void collectArgs(const RBSDeclaration &declaration, rbs_node_list_t *field, vector<RBSArg> &args) {
+void collectArgs(const RBSDeclaration &declaration, rbs_node_list_t *field, vector<RBSArg> &args, RBSArg::Kind kind) {
     if (field == nullptr || field->length == 0) {
         return;
     }
@@ -103,12 +177,12 @@ void collectArgs(const RBSDeclaration &declaration, rbs_node_list_t *field, vect
 
         auto loc = declaration.typeLocFromRange(range);
         auto node = (rbs_types_function_param_t *)list_node->node;
-        auto arg = RBSArg{loc, node->name, node->type};
+        auto arg = RBSArg{loc, node->name, node->type, kind};
         args.emplace_back(arg);
     }
 }
 
-void collectKeywords(const RBSDeclaration &declaration, rbs_hash_t *field, vector<RBSArg> &args) {
+void collectKeywords(const RBSDeclaration &declaration, rbs_hash_t *field, vector<RBSArg> &args, RBSArg::Kind kind) {
     if (field == nullptr) {
         return;
     }
@@ -125,7 +199,7 @@ void collectKeywords(const RBSDeclaration &declaration, rbs_hash_t *field, vecto
         auto loc = declaration.typeLocFromRange(hash_node->key->location->rg);
         rbs_ast_symbol_t *keyNode = (rbs_ast_symbol_t *)hash_node->key;
         rbs_types_function_param_t *valueNode = (rbs_types_function_param_t *)hash_node->value;
-        auto arg = RBSArg{loc, keyNode, valueNode->type};
+        auto arg = RBSArg{loc, keyNode, valueNode->type, kind};
         args.emplace_back(arg);
     }
 }
@@ -188,8 +262,8 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
     vector<RBSArg> args;
 
-    collectArgs(declaration, functionType->required_positionals, args);
-    collectArgs(declaration, functionType->optional_positionals, args);
+    collectArgs(declaration, functionType->required_positionals, args, RBSArg::Kind::Positional);
+    collectArgs(declaration, functionType->optional_positionals, args, RBSArg::Kind::OptionalPositional);
 
     rbs_node_t *restPositionals = functionType->rest_positionals;
     if (restPositionals) {
@@ -199,16 +273,16 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
         auto loc = declaration.typeLocFromRange(restPositionals->location->rg);
         auto node = (rbs_types_function_param_t *)restPositionals;
-        auto arg = RBSArg{loc, node->name, node->type};
+        auto arg = RBSArg{loc, node->name, node->type, RBSArg::Kind::RestPositional};
         args.emplace_back(arg);
     }
 
-    collectArgs(declaration, functionType->trailing_positionals, args);
+    collectArgs(declaration, functionType->trailing_positionals, args, RBSArg::Kind::Positional);
 
     // Collect keywords
 
-    collectKeywords(declaration, functionType->required_keywords, args);
-    collectKeywords(declaration, functionType->optional_keywords, args);
+    collectKeywords(declaration, functionType->required_keywords, args, RBSArg::Kind::Keyword);
+    collectKeywords(declaration, functionType->optional_keywords, args, RBSArg::Kind::OptionalKeyword);
 
     rbs_node_t *restKeywords = functionType->rest_keywords;
     if (restKeywords) {
@@ -218,7 +292,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
         auto loc = declaration.typeLocFromRange(restKeywords->location->rg);
         auto node = (rbs_types_function_param_t *)restKeywords;
-        auto arg = RBSArg{loc, node->name, node->type};
+        auto arg = RBSArg{loc, node->name, node->type, RBSArg::Kind::RestKeyword};
         args.emplace_back(arg);
     }
 
@@ -226,8 +300,11 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
     auto *block = node.block;
     if (block) {
-        // TODO: RBS doesn't have location on blocks yet
-        auto arg = RBSArg{fullTypeLoc, nullptr, (rbs_node_t *)block};
+        auto loc = declaration.typeLocFromRange(block->base.location->rg);
+        // TODO: fix block location in RBS parser
+        loc.beginLoc = loc.beginLoc + 1;
+        loc.endLoc = loc.endLoc + 2;
+        auto arg = RBSArg{loc, nullptr, (rbs_node_t *)block, RBSArg::Kind::Block};
         args.emplace_back(arg);
     }
 
@@ -241,26 +318,29 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
         auto &arg = args[i];
         auto type = typeToParserNode.toParserNode(arg.type, declaration);
 
+        if (!methodArgs || i >= methodArgs->args.size()) {
+            if (auto e = ctx.beginError(fullTypeLoc, core::errors::Rewriter::RBSParameterMismatch)) {
+                e.setHeader("RBS signature has more parameters than in the method definition");
+            }
+
+            return nullptr;
+        }
+
+        auto methodArg = methodArgs->args[i].get();
+
         if (auto nameSymbol = arg.name) {
             // The RBS arg is named in the signature, so we use the explicit name used
             auto nameStr = parser.resolveConstant(nameSymbol);
             auto name = ctx.state.enterNameUTF8(nameStr);
             sigParams.emplace_back(make_unique<parser::Pair>(arg.loc, parser::MK::Symbol(arg.loc, name), move(type)));
         } else {
-            if (!methodArgs || i >= methodArgs->args.size()) {
-                if (auto e = ctx.beginError(fullTypeLoc, core::errors::Rewriter::RBSParameterMismatch)) {
-                    e.setHeader("RBS signature has more parameters than in the method definition");
-                }
-
-                return nullptr;
-            }
-
             // The RBS arg is not named in the signature, so we get it from the method definition
-            auto methodArg = methodArgs->args[i].get();
             auto name = nodeName(methodArg);
             sigParams.emplace_back(
                 make_unique<parser::Pair>(arg.loc, parser::MK::Symbol(methodArg->loc, name), move(type)));
         }
+
+        checkParameterKindMatch(ctx, arg, methodArg);
     }
 
     // Build the sig

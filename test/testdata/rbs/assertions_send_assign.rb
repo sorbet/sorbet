@@ -5,7 +5,7 @@
 # let
 
 class Let
-  #: (untyped) -> void
+  #: (*untyped) -> void
   def foo=(*args); end
 
   #: -> untyped

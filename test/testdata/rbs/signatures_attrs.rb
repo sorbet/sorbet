@@ -67,7 +67,7 @@ class AttrAnnotations
     #: Integer?
     attr_reader :foo
 
-    #: (Integer?) -> void
+    #: (?Integer?) -> void
     def initialize(foo = nil)
       @foo = foo
     end
