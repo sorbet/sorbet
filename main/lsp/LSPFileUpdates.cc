@@ -137,11 +137,6 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             // Only relevant in --stripe-packages mode. Package declarations do not have method
             // hashes. Instead we rely on recomputing packages if any __package.rb source
             // changes.
-
-            // However, a `__package.rb` file being present in the edit set means that it was opened but not modified,
-            // in which case we want to ensure that the incremental packager gets run over it. As that only happens if
-            // we're also running the incremental namer, we enable that here.
-            result.useIncrementalNamer = true;
             continue;
         }
         if (!fref.exists()) {
