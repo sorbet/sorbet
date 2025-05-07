@@ -90,5 +90,8 @@ def concat_test(x, y)
   x.concat(y) # error: Expected `T::Array[Integer]` but found `T::Array[String]` for argument `arrays`
 
   T.reveal_type(x) # error: `T::Array[Integer]`
+
+  x += y
+  T.reveal_type(x) # error: `T::Array[T.any(Integer, String)]`
 end
 
