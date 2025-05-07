@@ -37,6 +37,8 @@ Style/SingleLineMethods:
   Enabled: false
 Style/RedundantSelf:
   Enabled: false
+Style/WordArray:
+  Enabled: false
 
 # This doesn't play very well with implementations of Sorbet abstract methods
 Lint/UnusedMethodArgument:
