@@ -54,7 +54,7 @@ until the end of the current operation. The exceptions are the **Idle** and
 features to queue. In these two phases, features like [Hover](hover.md),
 [Go to Definition](go-to-def.md), [Autocompletion](autocompletion.md), and
 others should be effectively instant. When that's not the case, it implies
-something broken.
+something is broken.
 
 The "Error list is complete?" column indicates whether the list of errors is
 up-to-date, or whether Sorbet is still working on producing all the errors in a
