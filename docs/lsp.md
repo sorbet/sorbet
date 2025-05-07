@@ -17,16 +17,16 @@ sequenceDiagram
 
   LSPPreprocessor --) LSPLoop: InitializedTask
   LSPLoop ->> LSPIndexer: InitializedTask::index
-  Note left of LSPIndexer: Transfer GlobalState and<br/>kvstore to InitializedTask
+  Note left of LSPIndexer: Copy GlobalState, transfer<br/>kvstore to InitializedTask
   LSPIndexer ->> LSPLoop: TaskQueue::pause
   LSPLoop ->> LSPTypechecker: InitializedTask::run
   LSPTypechecker ->> LSPTypechecker: LSPTypechecker::runSlowPath
   Note right of LSPTypechecker: Copy the GlobalState<br/>after indexing
   LSPTypechecker --) LSPLoop: IndexerInitializedTask (at front of TaskQueue)
-  Note left of LSPTypechecker: Transfer the GlobalState<br/>copy via the task
+  Note left of LSPTypechecker: Transfer the file table<br/>copy via the task
   LSPTypechecker ->> LSPLoop: TaskQueue::resume
   LSPLoop ->> LSPIndexer: IndexerInitializedTask::index
-  Note left of LSPIndexer: Transfer the GlobalState<br/>copy to LSPIndexer
+  Note left of LSPIndexer: Install the file table copy<br/>in LSPIndexer's GlobalState
 ```
 
 Initialization begins when the `initialized` notification is sent by the client,
@@ -34,8 +34,8 @@ and received by the preprocessor thread. The preprocessor thread then immediatel
 queues a `InitializedTask` in the `TaskQueue` that the `LSPLoop` consumes.
 
 That task is dequeued in the `LSPLoop` instance running on the main thread, and
-run. When its `index` hook is called, it stashes away both the `GlobalState` and
-`KeyValueStore` that are held by the `LSPIndexer` in an instance variable, so
+run. When its `index` hook is called, it copies the indexer's `GlobalState` and takes ownership of the
+`KeyValueStore` that is held by the `LSPIndexer` in an instance variable, so
 that those values will be available later when the `run` hook for that task is
 executed in the typechecker thread. As initialization is not cancelable or
 preemptable, the task also pauses the `TaskQueue` that the `LSPLoop` is reading
@@ -44,20 +44,22 @@ from, to ensure that we don't attempt to handle any queries without a valid
 
 Next the task's `run` hook is executed on the typechecker thread. This allows
 the task to call the `LSPTypechecker::initialize` method, which kicks off a slow
-path to populate the `GlobalState` that has been borrowed from the indexer,
-using the `KeyValueStore` if it's available. Once the slow path has finished the
-indexing phase of the pipeline, it makes a copy of the the `GlobalState` that
-can be sent back to the indexer thread. This copy is made early on, as the
-indexer thread will never run passes that depend on the symbol tables being
-populated, and thus it would be a waste of memory to copy the `GlobalState` at
-the end of the whole pipeline.
+path to populate the `GlobalState` copy from the indexer,
+using the `KeyValueStore` if it's available. Once the slow path has finished,
+the typechecker makes a copy of its file table to
+send back to the indexer thread. 
 
-Once the slow path finishes, the `LSPTypechecker::initialize` method creates an
-`IndexerInitializedTask`, and moves the copied `GlobalState` to it. It then
-places the task at the front of the queue, and unblocks the main thread again.
+> [!NOTE]
+> Keeping the file tables of the indexer and typechecker threads in sync is necessary because the indexer uses
+> both presence in the file table and the hashes for an entry to make decisions about which typechecking path to take:
+> if either are missing the indexer has no way to take the fast path, and must default to the slow path.
+
+The copy of the file table that's made in the `LSPTypechecker::initialize` method is
+moved to an `IndexerInitializedTask`. The typechecker places the task
+at the front of the queue, and unblocks the main thread again.
 When the main thread wakes up and processes that event, the
-`IndexerInitializedTask::index` hook will install the copy of the `GlobalState`
-in the `LSPIndexer` instance, allowing it to begin answering queries.
+`IndexerInitializedTask::index` hook will install the move the file table entries
+into the `GlobalState` in the `LSPIndexer` instance.
 
 ## Slow Path
 
@@ -80,7 +82,7 @@ sequenceDiagram
   Note right of LSPIndexer: Copy GlobalState for<br/>the slow path
   LSPLoop --) LSPTypechecker: SorbetWorkspaceEditTask::runSpecial
   LSPTypechecker ->> LSPTypechecker: LSPTypechecker::runSlowPath
-  Note right of LSPTypechecker: Save old GlobalState<br/>and run the pipeline
+  Note right of LSPTypechecker: pipeline::copyForSlowPath<br/>and run the pipeline
 ```
 
 The slow path begins with the preprocessor thread translating edit events into a
@@ -90,16 +92,14 @@ a fast or slow path decision when its `index` hook is run.
 When it's determined that the slow path will run, the `LSPIndexer::commitEdit`
 method will be called from either the `index` hook, or the `runSpecial` hook,
 depending on how many files are modified. This method will bundle up all of the
-changes necessary for running the slow path into a `LSPFileUpdates` value,
-including a copy of its `GlobalState` for the slow path to use as a starting
-point. This copy isn't too costly, as the indexer's `GlobalState` never contains
-a populated symbol table: it only runs through the index phase of the pipeline,
-and no symbols are entered at that point.
+changes necessary for running the slow path into a `LSPFileUpdates` value.
 
 As the slow path will be run, the `SorbetWorkspaceEdit::runSpecial` hook will be
 run on the typechecker thread to typecheck the change. At this point the
-`LSPTypechecker` will save its current `GlobalState`, as well as any other state
-that it will need to revert the edit in the event of a cancelation. It begins
+`LSPTypechecker` will create a copy of its `GlobalState` that contains the file table,
+the name table, and a payload-initialized symbol table. The original `GlobalState`
+will be stashed away on an `UndoState` object, as well as any other state
+that would need to be reverted in the event of a cancelation. It begins
 running the slow path (which is very similar to initialization) and then if it
-hasn't been cancelled, it will replace the old global state with the new one,
-and discard any other undo state.
+hasn't been cancelled, it will commit the new `GlobalState` and free the
+state held by `UndoState`.
