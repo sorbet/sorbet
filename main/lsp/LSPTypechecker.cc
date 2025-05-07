@@ -200,7 +200,6 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
 
-    std::vector<core::FileRef> packageFiles;
     std::vector<core::FileRef> toTypecheck;
     toTypecheck.reserve(updates.fastPathExtraFiles.size() + updates.updatedFiles.size());
     for (auto &path : updates.fastPathExtraFiles) {
@@ -215,15 +214,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         auto fref = gs->findFileByPath(file->path());
         ENFORCE(fref.exists(), "New files are not supported in the fast path");
 
-        // We update the file even if it's a `__package.rb` file, as this will ensure that we propagate the
-        // `isOpenInClient` flag. Additionally, the indexer will only select the fast path for a `__package.rb` if the
-        // file's contents match what's already in the file table, so this will be safe.
         auto oldFile = gs->replaceFile(fref, std::move(file));
-
-        if (oldFile->isPackage(*gs)) {
-            packageFiles.emplace_back(fref);
-            continue;
-        }
 
         if (shouldRunIncrementalNamer) {
             // Only set oldFoundHashesForFiles if we're processing a real edit.
@@ -252,6 +243,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     updates.updatedFiles.clear();
 
     if (shouldRunIncrementalNamer && gs->packageDB().enabled()) {
+        std::vector<core::FileRef> packageFiles;
+
         for (auto fref : toTypecheck) {
             // Only need to re-run packager if we're going to delete constants and have to re-define
             // their visibility, which only happens if we're running incrementalNamer.
@@ -273,12 +266,15 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                     }
 
                     packageFiles.emplace_back(packageFref);
+                    if (!oldFoundHashesForFiles.contains(fref)) {
+                        oldFoundHashesForFiles.emplace(fref, fref.data(*gs).getFileHash());
+                    }
                 }
             }
         }
-    }
 
-    toTypecheck.insert(toTypecheck.end(), packageFiles.begin(), packageFiles.end());
+        toTypecheck.insert(toTypecheck.end(), packageFiles.begin(), packageFiles.end());
+    }
 
     fast_sort(toTypecheck);
     toTypecheck.erase(std::unique(toTypecheck.begin(), toTypecheck.end()), toTypecheck.end());
