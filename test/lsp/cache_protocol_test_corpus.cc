@@ -82,8 +82,8 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         // Release cache lock.
         lspWrapper = nullptr;
 
-        auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
-        auto logger = std::make_shared<spdlog::logger>("null", sink);
+        auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+        auto logger = make_shared<spdlog::logger>("null", sink);
         unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
         CHECK_EQ(kvstore->read(updatedKey).data, nullptr);
 
@@ -138,8 +138,8 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
 
         // Release cache lock.
         lspWrapper = nullptr;
-        auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
-        auto logger = std::make_shared<spdlog::logger>("null", sink);
+        auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+        auto logger = make_shared<spdlog::logger>("null", sink);
         unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
         auto updatedFileData = kvstore->read(updatedKey);
         REQUIRE_NE(updatedFileData.data, nullptr);
@@ -176,8 +176,8 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
             {{relativeFilepath, 4, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
     }
 
-    auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
-    auto nullLogger = std::make_shared<spdlog::logger>("null", sink);
+    auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+    auto nullLogger = make_shared<spdlog::logger>("null", sink);
 
     // LSP should have written cache to disk with file hashes from initialization.
     {
@@ -293,8 +293,8 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReindexingUsesTheCache") {
     // Release cache lock by dropping the entire LSP wrapper which holds onto a kvstore.
     lspWrapper = nullptr;
 
-    auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
-    auto logger = std::make_shared<spdlog::logger>("null", sink);
+    auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = make_shared<spdlog::logger>("null", sink);
     unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
 
     // The key should exist in the kvstore
@@ -364,8 +364,8 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
     // Release cache lock by dropping the entire LSP wrapper which holds onto a kvstore.
     lspWrapper = nullptr;
 
-    auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
-    auto logger = std::make_shared<spdlog::logger>("null", sink);
+    auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = make_shared<spdlog::logger>("null", sink);
     unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
 
     // The key should exist in the kvstore
@@ -465,8 +465,8 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
     // Release cache lock by dropping the entire LSP wrapper which holds onto a kvstore.
     lspWrapper = nullptr;
 
-    auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
-    auto logger = std::make_shared<spdlog::logger>("null", sink);
+    auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = make_shared<spdlog::logger>("null", sink);
     unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
 
     // The key should exist in the kvstore

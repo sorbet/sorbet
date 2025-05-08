@@ -586,7 +586,7 @@ public:
     static vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
                                             vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
-        auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
+        auto taskq = make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
         absl::BlockingCounter barrier(std::max(workers.size(), 1));
 
         for (size_t i = 0; i < files.size(); ++i) {

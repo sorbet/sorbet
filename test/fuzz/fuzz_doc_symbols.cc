@@ -18,8 +18,8 @@ const auto filePath = fmt::format("{}/{}", rootPath, fileName);
 const auto fileUri = sorbet::test::filePathToUri(rootUri, fileName);
 
 shared_ptr<sorbet::realmain::options::Options> mkOpts(string_view contents) {
-    auto opts = std::make_shared<sorbet::realmain::options::Options>();
-    opts->fs = std::make_shared<sorbet::test::MockFileSystem>(rootPath);
+    auto opts = make_shared<sorbet::realmain::options::Options>();
+    opts->fs = make_shared<sorbet::test::MockFileSystem>(rootPath);
     opts->fs->writeFile(filePath, contents);
     opts->rawInputDirNames.emplace_back(rootPath);
     opts->inputFileNames.emplace_back(filePath);
@@ -29,7 +29,7 @@ shared_ptr<sorbet::realmain::options::Options> mkOpts(string_view contents) {
 unique_ptr<sorbet::core::GlobalState> mkGlobalState(const sorbet::realmain::options::Options &opts,
                                                          unique_ptr<sorbet::KeyValueStore> &kvStore) {
     auto gs = make_unique<sorbet::core::GlobalState>(
-        (std::make_shared<sorbet::core::ErrorQueue>(*typeErrors, *console, make_shared<core::NullFlusher>())));
+        (make_shared<sorbet::core::ErrorQueue>(*typeErrors, *console, make_shared<core::NullFlusher>())));
     sorbet::payload::createInitialGlobalState(gs, opts, kvStore);
     return gs;
 }

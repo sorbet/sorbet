@@ -2068,7 +2068,7 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
     {
         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
 
-        auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
+        auto taskq = make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
         absl::BlockingCounter barrier(max(workers.size(), 1));
 
         for (size_t i = 0; i < files.size(); ++i) {
@@ -2121,7 +2121,7 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
     // building in an understanding of the dependencies between packages.
     Timer timeit(gs.tracer(), "packager.runIncremental");
 
-    auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
+    auto taskq = make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
     absl::BlockingCounter barrier(max(workers.size(), 1));
 
     for (size_t i = 0; i < files.size(); ++i) {

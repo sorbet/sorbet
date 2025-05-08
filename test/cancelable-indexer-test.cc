@@ -19,8 +19,8 @@ namespace sorbet {
 
 namespace {
 auto logger = spdlog::stderr_color_mt("error-check-test");
-auto errorCollector = std::make_shared<sorbet::core::ErrorCollector>();
-auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger, errorCollector);
+auto errorCollector = make_shared<sorbet::core::ErrorCollector>();
+auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger, errorCollector);
 } // namespace
 
 // Tests cancellation when there aren't enough files to trigger parallelism

@@ -12,8 +12,8 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     sorbet::realmain::options::Options empty;
     sorbet::realmain::options::Options opts;
     const char *argv[] = {"sorbet", "-e", ""};
-    auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
-    auto logger = std::make_shared<spdlog::logger>("null", sink);
+    auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = make_shared<spdlog::logger>("null", sink);
     sorbet::realmain::options::readOptions(opts, extensions, std::size(argv), const_cast<char **>(argv),
                                            extensionProviders, logger);
 
