@@ -931,18 +931,18 @@ void GlobalState::initEmpty() {
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::LoadYieldParams());
     ENFORCE_NO_TIMER(field == Symbols::Magic_UntypedSource_LoadYieldParams());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::GenericWithoutRuntime());
-    ENFORCE_NO_TIMER(klass == Symbols::T_GenericWithoutRuntime());
+    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::SyntheticGeneric());
+    ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_SyntheticGeneric());
 
-    method = enterMethod(*this, Symbols::T_GenericWithoutRuntime(), Names::syntheticSquareBrackets())
+    method = enterMethod(*this, Symbols::Sorbet_Private_Static_SyntheticGeneric(), Names::syntheticSquareBrackets())
                  .repeatedTopArg(Names::args())
                  .build();
-    ENFORCE_NO_TIMER(method == Symbols::T_GenericWithoutRuntime_syntheticSquareBrackets());
+    ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_SyntheticGeneric_syntheticSquareBrackets());
 
-    method = enterMethod(*this, Symbols::T_GenericWithoutRuntime(), Names::syntheticTypeMember())
+    method = enterMethod(*this, Symbols::Sorbet_Private_Static_SyntheticGeneric(), Names::syntheticTypeMember())
                  .repeatedTopArg(Names::args())
                  .build();
-    ENFORCE_NO_TIMER(method == Symbols::T_GenericWithoutRuntime_syntheticTypeMember());
+    ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_SyntheticGeneric_syntheticTypeMember());
 
     int reservedCount = 0;
 

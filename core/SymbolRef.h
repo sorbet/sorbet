@@ -1121,15 +1121,15 @@ public:
         return ClassOrModuleRef::fromRaw(96);
     }
 
-    static ClassOrModuleRef T_GenericWithoutRuntime() {
+    static ClassOrModuleRef Sorbet_Private_Static_SyntheticGeneric() {
         return ClassOrModuleRef::fromRaw(97);
     }
 
-    static MethodRef T_GenericWithoutRuntime_syntheticSquareBrackets() {
+    static MethodRef Sorbet_Private_Static_SyntheticGeneric_syntheticSquareBrackets() {
         return MethodRef::fromRaw(57);
     }
 
-    static MethodRef T_GenericWithoutRuntime_syntheticTypeMember() {
+    static MethodRef Sorbet_Private_Static_SyntheticGeneric_syntheticTypeMember() {
         return MethodRef::fromRaw(58);
     }
 

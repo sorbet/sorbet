@@ -581,7 +581,7 @@ NameDef names[] = {
     {"Merchant", "Merchant", true},
 
     // RBS synthetic generics
-    {"GenericWithoutRuntime", "GenericWithoutRuntime", true},
+    {"SyntheticGeneric", "<SyntheticGeneric>", true},
     {"syntheticSquareBrackets", "<syntheticSquareBrackets>"},
     {"syntheticTypeMember", "<syntheticTypeMember>"},
 

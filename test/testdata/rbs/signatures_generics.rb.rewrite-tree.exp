@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C UnsupportedError1><<C <todo sym>>> < (::<todo sym>)
-      <self>.extend(::<root>::<C T>::<C GenericWithoutRuntime>)
+      <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
 
       <emptyTree>::<C T> = <self>.<syntheticTypeMember>()
     end
@@ -47,7 +47,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C G1><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C T>::<C GenericWithoutRuntime>)
+    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
 
     <emptyTree>::<C U> = <self>.<syntheticTypeMember>()
   end
@@ -128,7 +128,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of initialize>
 
-    <self>.extend(::<root>::<C T>::<C GenericWithoutRuntime>)
+    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
 
     <emptyTree>::<C U> = <self>.<syntheticTypeMember>()
 
@@ -175,7 +175,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of initialize>
 
-    <self>.extend(::<root>::<C T>::<C GenericWithoutRuntime>)
+    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
 
     <emptyTree>::<C U> = <self>.<syntheticTypeMember>(:in)
 
@@ -183,7 +183,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C G4><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C T>::<C GenericWithoutRuntime>)
+    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
 
     <emptyTree>::<C U> = <self>.<syntheticTypeMember>() do ||
       {:upper => <emptyTree>::<C String>}
@@ -198,7 +198,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C G6><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C T>::<C GenericWithoutRuntime>)
+    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
 
     <emptyTree>::<C U> = <self>.<syntheticTypeMember>()
   end
@@ -216,7 +216,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(arr2)
 
   class <emptyTree>::<C G7><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C T>::<C GenericWithoutRuntime>)
+    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
 
     <emptyTree>::<C U> = <self>.<syntheticTypeMember>() do ||
       {:upper => <emptyTree>::<C Numeric>}
@@ -224,7 +224,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C G8><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C T>::<C GenericWithoutRuntime>)
+    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
 
     <emptyTree>::<C E> = <self>.<syntheticTypeMember>(:out)
   end
@@ -242,7 +242,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(g8_3)
 
   class <emptyTree>::<C G9><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C T>::<C GenericWithoutRuntime>)
+    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
 
     <emptyTree>::<C E> = <self>.<syntheticTypeMember>(:in)
   end
@@ -264,7 +264,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C V> = <self>.type_member()
 
-    <self>.extend(::<root>::<C T>::<C GenericWithoutRuntime>)
+    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
 
     <emptyTree>::<C U> = <self>.<syntheticTypeMember>()
   end
@@ -274,7 +274,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(g10)
 
   class <emptyTree>::<C G11><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C T>::<C GenericWithoutRuntime>)
+    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
 
     <emptyTree>::<C U> = <self>.<syntheticTypeMember>() do ||
       {:fixed => <emptyTree>::<C Integer>, :upper => <emptyTree>::<C Numeric>}
@@ -282,7 +282,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C G12><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C T>::<C GenericWithoutRuntime>)
+    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
 
     <emptyTree>::<C U> = <self>.<syntheticTypeMember>(:in) do ||
       {:upper => <emptyTree>::<C Numeric>}
