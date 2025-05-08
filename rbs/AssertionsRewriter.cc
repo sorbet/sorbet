@@ -198,8 +198,8 @@ bool sameConstant(core::MutableContext ctx, unique_ptr<parser::Node> &a, unique_
     return (aConst->scope == nullptr && bConst->scope == nullptr) || sameConstant(ctx, aConst->scope, bConst->scope);
 }
 
-void maybeInsertGenericInstantiationCast(core::MutableContext ctx, unique_ptr<parser::Node> *node,
-                                         unique_ptr<parser::Node> *type) {
+void maybeSupplyGenericTypeArguments(core::MutableContext ctx, unique_ptr<parser::Node> *node,
+                                     unique_ptr<parser::Node> *type) {
     // We only rewrite `.new` calls
     auto newSend = parser::cast_node<parser::Send>(node->get());
     if (newSend == nullptr || newSend->method != core::Names::new_()) {
@@ -453,7 +453,7 @@ AssertionsRewriter::insertCast(unique_ptr<parser::Node> node,
     auto type = move(pair->first);
     auto kind = pair->second;
 
-    maybeInsertGenericInstantiationCast(ctx, &node, &type);
+    maybeSupplyGenericTypeArguments(ctx, &node, &type);
 
     if (kind == InlineComment::Kind::LET) {
         return parser::MK::TLet(type->loc, move(node), move(type));
