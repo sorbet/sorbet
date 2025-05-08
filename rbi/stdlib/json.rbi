@@ -328,7 +328,7 @@ module JSON
       obj: ::T.untyped,
       opts: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
   def self.pretty_generate(obj, opts=T.unsafe(nil)); end
 
