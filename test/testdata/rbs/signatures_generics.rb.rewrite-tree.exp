@@ -41,6 +41,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <emptyTree>::<C T> = <self>.<syntheticTypeMember>()
     end
+
+    class <emptyTree>::<C UselessSignature1><<C <todo sym>>> < (::<todo sym>)
+    end
   end
 
   class <emptyTree>::<C G1><<C <todo sym>>> < (::<todo sym>)

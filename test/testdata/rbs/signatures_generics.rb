@@ -22,6 +22,10 @@ module Errors
   #: [unchecked T]
   #   ^^^^^^^^^^^ error: `unchecked` type parameters are not supported by Sorbet
   class UnsupportedError1; end
+
+  class UselessSignature1 #: [U]
+  #                       ^^^^^^ error: Unexpected RBS assertion comment found after `class` declaration
+  end
 end
 
 #: [U]
