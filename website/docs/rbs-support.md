@@ -732,7 +732,22 @@ Box[Integer].new
    ^^^^^^^^^ error: Method `[]` does not exist on `T.class_of(Box)`
 ```
 
-To define a type template, use the `#:` comment on a `class << self`:
+There is no equivalent to `type_template` in RBS. Instead, you can define type
+members on the singleton class. So this:
+
+```ruby
+module Factory
+  extend T::Sig
+  extend T::Generic
+
+  InstanceType = type_template
+
+  sig { returns(InstanceType) }
+  def self.make; end
+end
+```
+
+Can be written as:
 
 ```ruby
 module Factory
@@ -743,6 +758,9 @@ module Factory
   end
 end
 ```
+
+Note: there is no RBS equivalent to the generic `T.class_of()[]` syntax just
+yet.
 
 [Variance](generics.md#in-out-and-variance) can be specified using the `in` and
 `out` keywords:
