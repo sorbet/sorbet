@@ -370,7 +370,7 @@ optional<int> Types::getProcArity(const AppliedType &type) {
             return i;
         }
     }
-    return std::nullopt;
+    return nullopt;
 }
 
 ClassType::ClassType(ClassOrModuleRef symbol) : symbol(symbol) {
@@ -508,7 +508,7 @@ optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
         auto &lit = cast_type_nonnull<FloatLiteralType>(t);
         return this->indexForKey(lit);
     }
-    return std::nullopt;
+    return nullopt;
 }
 
 optional<size_t> ShapeType::indexForKey(const NamedLiteralType &lit) const {
@@ -520,7 +520,7 @@ optional<size_t> ShapeType::indexForKey(const NamedLiteralType &lit) const {
         return candlit.equals(lit);
     });
     if (fnd == this->keys.end()) {
-        return std::nullopt;
+        return nullopt;
     }
     return std::distance(this->keys.begin(), fnd);
 }
@@ -534,7 +534,7 @@ optional<size_t> ShapeType::indexForKey(const IntegerLiteralType &lit) const {
         return candlit.equals(lit);
     });
     if (fnd == this->keys.end()) {
-        return std::nullopt;
+        return nullopt;
     }
     return std::distance(this->keys.begin(), fnd);
 }
@@ -548,7 +548,7 @@ optional<size_t> ShapeType::indexForKey(const FloatLiteralType &lit) const {
         return candlit.equals(lit);
     });
     if (fnd == this->keys.end()) {
-        return std::nullopt;
+        return nullopt;
     }
     return std::distance(this->keys.begin(), fnd);
 }
@@ -796,7 +796,7 @@ optional<int> SendAndBlockLink::fixedArity() const {
     optional<int> arity = 0;
     for (auto &arg : argFlags) {
         if (arg.isKeyword || arg.isDefault || arg.isRepeated) {
-            arity = std::nullopt;
+            arity = nullopt;
             break;
         }
         arity = *arity + 1;

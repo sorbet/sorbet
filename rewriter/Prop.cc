@@ -181,7 +181,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             break;
 
         default:
-            return std::nullopt;
+            return nullopt;
     }
 
     auto expectedPosArgs = 3;
@@ -237,7 +237,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     ast::ExpressionPtr rulesTree = ASTUtil::mkKwArgsHash(send);
     if (rulesTree == nullptr && send->numPosArgs() >= expectedPosArgs) {
         // No rules, but 3 args including name and type. Also not a T::Props
-        return std::nullopt;
+        return nullopt;
     }
 
     if (isTNilableTUntyped(ret.type)) {

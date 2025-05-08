@@ -418,7 +418,7 @@ bool ASTUtil::isRootScopedSyntacticConstant(const ast::ExpressionPtr &expr,
 
 optional<ASTUtil::DuplicateArg> ASTUtil::findDuplicateArg(core::MutableContext ctx, const ast::Send *send) {
     if (!send) {
-        return std::nullopt;
+        return nullopt;
     }
 
     UnorderedMap<core::NameRef, core::LocOffsets> seenNames;
@@ -438,7 +438,7 @@ optional<ASTUtil::DuplicateArg> ASTUtil::findDuplicateArg(core::MutableContext c
         }
     }
 
-    return std::nullopt;
+    return nullopt;
 }
 
 } // namespace sorbet::rewriter
