@@ -28,7 +28,7 @@ shared_ptr<sorbet::realmain::options::Options> mkOpts(string_view contents) {
 
 unique_ptr<sorbet::core::GlobalState> mkGlobalState(const sorbet::realmain::options::Options &opts,
                                                          unique_ptr<sorbet::KeyValueStore> &kvStore) {
-    auto gs = std::make_unique<sorbet::core::GlobalState>(
+    auto gs = make_unique<sorbet::core::GlobalState>(
         (std::make_shared<sorbet::core::ErrorQueue>(*typeErrors, *console, make_shared<core::NullFlusher>())));
     sorbet::payload::createInitialGlobalState(gs, opts, kvStore);
     return gs;
@@ -55,10 +55,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t siz
     int nextId = 0;
     sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId);
     ENFORCE(lspWrapper
-                ->getLSPResponsesFor(sorbet::test::LSPMessage(std::make_unique<sorbet::test::RequestMessage>(
+                ->getLSPResponsesFor(sorbet::test::LSPMessage(make_unique<sorbet::test::RequestMessage>(
                     "2.0", nextId++, sorbet::test::LSPMethod::TextDocumentDocumentSymbol,
-                    std::make_unique<sorbet::test::DocumentSymbolParams>(
-                        std::make_unique<sorbet::test::TextDocumentIdentifier>(fileUri)))))
+                    make_unique<sorbet::test::DocumentSymbolParams>(
+                        make_unique<sorbet::test::TextDocumentIdentifier>(fileUri)))))
                 .size() == 1);
     return 0;
 }

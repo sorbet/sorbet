@@ -308,7 +308,7 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, vector<shared_ptr<c
 
 unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {
     Timer timeit(config->logger, "LSPIndexer::commitEdit");
-    auto result = std::make_unique<LSPFileUpdates>();
+    auto result = make_unique<LSPFileUpdates>();
     auto &update = *result;
     update.epoch = edit.epoch;
     update.editCount = edit.mergeCount + 1;

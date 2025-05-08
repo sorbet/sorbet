@@ -273,7 +273,7 @@ unique_ptr<KeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger
         return nullptr;
     }
 
-    auto kvstore = std::make_unique<const OwnedKeyValueStore>(openCache(std::move(logger), this->path, opts));
+    auto kvstore = make_unique<const OwnedKeyValueStore>(openCache(std::move(logger), this->path, opts));
 
     // If the name table entry is missing, this indicates that the cache is completely fresh and doesn't originate in a
     // copy from the result of indexing. This can happen if only the `data.mdb` file was removed from `this->path`, and

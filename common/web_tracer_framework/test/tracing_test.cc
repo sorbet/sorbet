@@ -12,7 +12,7 @@ namespace sorbet::web_tracer_framework {
 class TracingTestHelper {
 public:
     static unique_ptr<CounterImpl> generateCounterStateImpl() {
-        auto impl = std::make_unique<CounterImpl>();
+        auto impl = make_unique<CounterImpl>();
 
         // Deliberately output these in non-alphabetical order to maybe encourage the
         // linker to output the strings in such a way as to motivate the sorting below.

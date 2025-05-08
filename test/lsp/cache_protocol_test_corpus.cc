@@ -378,7 +378,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
 
     // Create a session copy of the cache, consuming the original
     auto sessionCache = realmain::cache::SessionCache::make(std::move(kvstore), *logger, *opts);
-    auto copy = std::make_unique<OwnedKeyValueStore>(sessionCache->open(logger, *opts));
+    auto copy = make_unique<OwnedKeyValueStore>(sessionCache->open(logger, *opts));
 
     // Make sure that the same key exists
     vector<uint8_t> copyContent;
@@ -414,7 +414,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
     OwnedKeyValueStore::abort(std::move(kvstore));
 
     // Reopen the copy, and make sure it still has our new value
-    copy = std::make_unique<OwnedKeyValueStore>(sessionCache->open(logger, *opts));
+    copy = make_unique<OwnedKeyValueStore>(sessionCache->open(logger, *opts));
 
     {
         auto contents = copy->read("new key");

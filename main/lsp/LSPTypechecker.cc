@@ -102,7 +102,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> 
         absl::MutexLock lck{queue.getMutex()};
 
         // ensure that the next task we process initializes the indexer
-        auto initTask = std::make_unique<IndexerInitializationTask>(*config, std::move(indexerFiles));
+        auto initTask = make_unique<IndexerInitializationTask>(*config, std::move(indexerFiles));
         queue.tasks().push_front(std::move(initTask));
     }
 
@@ -348,7 +348,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
         }
 
         this->cancellationUndoState =
-            std::make_unique<UndoState>(std::move(savedGS), std::move(this->indexedFinalGS), updates.epoch);
+            make_unique<UndoState>(std::move(savedGS), std::move(this->indexedFinalGS), updates.epoch);
     }
 
     const uint32_t epoch = updates.epoch;
@@ -706,7 +706,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const vector<cor
 }
 
 unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(absl::Span<const core::FileRef> frefs) const {
-    auto result = std::make_unique<LSPFileUpdates>();
+    auto result = make_unique<LSPFileUpdates>();
     auto &noop = *result;
     noop.typecheckingPath = TypecheckingPath::Fast;
     // Epoch isn't important for this update.
@@ -758,7 +758,7 @@ unique_ptr<OwnedKeyValueStore> LSPTypechecker::getKvStore() const {
         return nullptr;
     }
 
-    return std::make_unique<OwnedKeyValueStore>(std::move(kvstore));
+    return make_unique<OwnedKeyValueStore>(std::move(kvstore));
 }
 
 vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers) const {
