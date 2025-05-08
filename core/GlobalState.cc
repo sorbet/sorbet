@@ -2401,12 +2401,12 @@ packages::PackageDB &GlobalState::packageDB() {
     return packageDB_;
 }
 
-void GlobalState::setPackagerOptions(const std::vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                                     const std::vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                     const std::vector<string> &extraPackageFilesDirectorySlashPrefixes,
-                                     const std::vector<string> &packageSkipRBIExportEnforcementDirs,
-                                     const std::vector<string> &allowRelaxedPackagerChecksFor,
-                                     const std::vector<string> &packagerLayers, string errorHint) {
+void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                                     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                                     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
+                                     const vector<string> &packageSkipRBIExportEnforcementDirs,
+                                     const vector<string> &allowRelaxedPackagerChecksFor,
+                                     const vector<string> &packagerLayers, string errorHint) {
     ENFORCE_NO_TIMER(!packageDB_.frozen);
 
     packageDB_.enabled_ = true;
@@ -2417,9 +2417,9 @@ void GlobalState::setPackagerOptions(const std::vector<string> &extraPackageFile
     absl::c_transform(packagerLayers, std::back_inserter(packageDB_.layers_),
                       [this](const auto &layer) { return enterNameUTF8(layer); });
 
-    std::vector<core::packages::MangledName> allowRelaxedPackagerChecksFor_;
+    vector<core::packages::MangledName> allowRelaxedPackagerChecksFor_;
     for (const string &pkgName : allowRelaxedPackagerChecksFor) {
-        std::vector<string_view> pkgNameParts = absl::StrSplit(pkgName, "::");
+        vector<string_view> pkgNameParts = absl::StrSplit(pkgName, "::");
         auto mangledName = core::packages::MangledName::mangledNameFromParts(*this, pkgNameParts);
         allowRelaxedPackagerChecksFor_.emplace_back(mangledName);
     }

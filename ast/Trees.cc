@@ -1498,9 +1498,9 @@ string Self::nodeName() const {
 }
 
 ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};
-ParsedFilesOrCancelled::ParsedFilesOrCancelled(std::vector<ParsedFile> &&trees) : trees(move(trees)) {}
+ParsedFilesOrCancelled::ParsedFilesOrCancelled(vector<ParsedFile> &&trees) : trees(move(trees)) {}
 
-ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(std::vector<ParsedFile> &&trees, WorkerPool &workers) {
+ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(vector<ParsedFile> &&trees, WorkerPool &workers) {
     if (!trees.empty()) {
         // N.B.: `workers.size()` can be `0` when threads are disabled, which would result in undefined behavior for
         // `BlockingCounter`.

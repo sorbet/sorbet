@@ -176,8 +176,8 @@ public:
     // - an endless method
     // - the var for a rescueCase
     // This vector stores the locs for those nodes, so that in preTransformExpression, we can skip them.
-    std::vector<core::LocOffsets> skippedLocsRange;
-    std::vector<core::LocOffsets> skippedLocsExact;
+    vector<core::LocOffsets> skippedLocsRange;
+    vector<core::LocOffsets> skippedLocsExact;
 
     LocSearchWalk(core::Loc targetLoc)
         : targetLoc(targetLoc), enclosingScopeLoc(core::LocOffsets::none()), matchingNode(nullptr),
@@ -373,8 +373,8 @@ VariableExtractor::getExtractSingleOccurrenceEdits(const LSPTypecheckerDelegate 
 class ExpressionPtrSearchWalk {
     ast::ExpressionPtr *targetNode;
     vector<const ast::ExpressionPtr *> enclosingScopeStack;
-    std::vector<core::LocOffsets> skippedLocsRange;
-    std::vector<core::LocOffsets> skippedLocsExact;
+    vector<core::LocOffsets> skippedLocsRange;
+    vector<core::LocOffsets> skippedLocsExact;
     const std::shared_ptr<spdlog::logger> logger;
     const core::Loc selectionLoc;
 
@@ -451,8 +451,8 @@ class ExpressionPtrSearchWalk {
 public:
     vector<pair<core::LocOffsets, const ast::ExpressionPtr *>> LCAScopeStack;
     vector<core::LocOffsets> matches;
-    ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, std::vector<core::LocOffsets> skippedLocsRange,
-                            std::vector<core::LocOffsets> skippedLocsExact,
+    ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, vector<core::LocOffsets> skippedLocsRange,
+                            vector<core::LocOffsets> skippedLocsExact,
                             const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc)
         : targetNode(matchingNode), skippedLocsRange(skippedLocsRange), skippedLocsExact(skippedLocsExact),
           logger(logger), selectionLoc(selectionLoc) {}

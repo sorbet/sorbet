@@ -7,8 +7,8 @@
 
 // Default constructor of options should produce the same default option values as readOptions.
 TEST_CASE("DefaultConstructorMatchesReadOptions") {
-    std::vector<sorbet::pipeline::semantic_extension::SemanticExtensionProvider *> extensionProviders;
-    std::vector<std::unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
+    vector<sorbet::pipeline::semantic_extension::SemanticExtensionProvider *> extensionProviders;
+    vector<std::unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
     sorbet::realmain::options::Options empty;
     sorbet::realmain::options::Options opts;
     const char *argv[] = {"sorbet", "-e", ""};

@@ -14,8 +14,8 @@ void OSFileSystem::writeFile(const string &filename, string_view text) {
 }
 
 vector<string> FileSystem::listFilesInDir(std::string_view path, const UnorderedSet<string> &extensions,
-                                          bool recursive, const std::vector<string> &absoluteIgnorePatterns,
-                                          const std::vector<string> &relativeIgnorePatterns) const {
+                                          bool recursive, const vector<string> &absoluteIgnorePatterns,
+                                          const vector<string> &relativeIgnorePatterns) const {
     unique_ptr<WorkerPool> workerPool = WorkerPool::create(0, *spdlog::default_logger());
 
     return this->listFilesInDir(path, extensions, *workerPool, recursive, absoluteIgnorePatterns,
@@ -24,8 +24,8 @@ vector<string> FileSystem::listFilesInDir(std::string_view path, const Unordered
 
 vector<string> OSFileSystem::listFilesInDir(string_view path, const UnorderedSet<string> &extensions,
                                             WorkerPool &workerPool, bool recursive,
-                                            const std::vector<string> &absoluteIgnorePatterns,
-                                            const std::vector<string> &relativeIgnorePatterns) const {
+                                            const vector<string> &absoluteIgnorePatterns,
+                                            const vector<string> &relativeIgnorePatterns) const {
     return FileOps::listFilesInDir(path, extensions, workerPool, recursive, absoluteIgnorePatterns,
                                    relativeIgnorePatterns);
 }

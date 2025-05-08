@@ -213,7 +213,7 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
         sectionTitle = "Autocorrect:";
     }
 
-    std::vector<ErrorLine> messages;
+    vector<ErrorLine> messages;
     for (auto &edit : autocorrect.edits) {
         auto isInsert = edit.replacement == "";
         uint32_t n = edit.loc.endPos() - edit.loc.beginPos();

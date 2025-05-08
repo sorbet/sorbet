@@ -41,7 +41,7 @@ bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalStat
 class LocalRenamer : public AbstractRewriter {
 public:
     LocalRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string newName,
-                 std::vector<core::Loc> localUsages)
+                 vector<core::Loc> localUsages)
         : AbstractRewriter(gs, config), newName(newName), localUsages(localUsages) {
         // If the name is the same as before or empty, return an error. VS Code already prevents this on its own, but
         // other IDEs might not
@@ -70,7 +70,7 @@ public:
 
 private:
     string newName;
-    std::vector<core::Loc> localUsages;
+    vector<core::Loc> localUsages;
 };
 
 class MethodRenamer : public AbstractRewriter {
@@ -344,7 +344,7 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
                 typechecker.query(core::lsp::Query::createVarQuery(identResp->enclosingMethod,
                                                                    identResp->enclosingMethodLoc, identResp->variable),
                                   {identResp->termLoc.file()});
-            std::vector<core::Loc> locations;
+            vector<core::Loc> locations;
 
             for (auto &reference : references.responses) {
                 locations.emplace_back(reference->getLoc());

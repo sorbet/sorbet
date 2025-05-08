@@ -49,8 +49,8 @@ namespace {
 // This is adapted from
 // https://github.com/llvm/llvm-project/blob/b89e774672678ef26baf8f94c616f43551d29428/libcxx/include/__algorithm/set_intersection.h#L47-L123
 // and modified to return early when any intersection is found.
-bool intersects(const std::vector<core::WithoutUniqueNameHash> &changed,
-                const std::vector<core::WithoutUniqueNameHash> &used) {
+bool intersects(const vector<core::WithoutUniqueNameHash> &changed,
+                const vector<core::WithoutUniqueNameHash> &used) {
     auto changedIt = changed.begin();
     auto changedEnd = changed.end();
     auto usedIt = used.begin();
@@ -93,7 +93,7 @@ bool intersects(const std::vector<core::WithoutUniqueNameHash> &changed,
 // materializing a vector of `WithoutUniqueNameHash` when we're only interested in the `nameHash` components.
 class NameHashOutputIterator final {
 public:
-    using container_type = std::vector<core::WithoutUniqueNameHash>;
+    using container_type = vector<core::WithoutUniqueNameHash>;
 
     NameHashOutputIterator(container_type &container) : container{container} {}
 
@@ -121,7 +121,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
                                          const vector<shared_ptr<core::File>> &updatedFiles,
                                          const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) {
     UnorderedMap<core::FileRef, size_t> changedFiles;
-    std::vector<core::WithoutUniqueNameHash> changedSymbolNameHashes;
+    vector<core::WithoutUniqueNameHash> changedSymbolNameHashes;
 
     FastPathFilesToTypecheckResult result;
     Timer timeit(config.logger, "compute_fast_path_file_set");

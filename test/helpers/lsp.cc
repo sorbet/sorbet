@@ -37,8 +37,8 @@ std::unique_ptr<T> makeDynamicRegistrationOption(bool dynamicRegistration) {
 
 /** Constructs a vector with all enum values from MIN to MAX. Assumes a contiguous enum and properly chosen min/max
  * values. Our serialization/deserialization code will throw if we pick an improper value. */
-template <typename T, T MAX, T MIN> std::vector<T> getAllEnumKinds() {
-    std::vector<T> symbols;
+template <typename T, T MAX, T MIN> vector<T> getAllEnumKinds() {
+    vector<T> symbols;
     for (int i = (int)MIN; i <= (int)MAX; i++) {
         symbols.push_back((T)i);
     }

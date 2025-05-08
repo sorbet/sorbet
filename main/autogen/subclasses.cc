@@ -12,8 +12,8 @@ namespace sorbet::autogen {
 // Analogue of sorbet::FileOps::isFileIgnored that doesn't take a basePath, since
 // we don't need one here, and using FileOps' version meant passing some weird,
 // hard-to-understand arguments to mimic how other callers use it.
-bool Subclasses::isFileIgnored(const string &path, const std::vector<string> &absoluteIgnorePatterns,
-                               const std::vector<string> &relativeIgnorePatterns) {
+bool Subclasses::isFileIgnored(const string &path, const vector<string> &absoluteIgnorePatterns,
+                               const vector<string> &relativeIgnorePatterns) {
     for (auto &p : absoluteIgnorePatterns) {
         if (path.substr(0, p.length()) == p &&
             (sorbet::FileOps::isFile(path, p, 0) || sorbet::FileOps::isFolder(path, p, 0))) {

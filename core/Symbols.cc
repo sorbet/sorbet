@@ -2018,8 +2018,8 @@ vector<ClassOrModule::RequiredAncestor> ClassOrModule::requiredAncestors(const G
 }
 
 // All required ancestors by this class or module
-std::vector<ClassOrModule::RequiredAncestor>
-ClassOrModule::requiredAncestorsTransitiveInternal(GlobalState &gs, std::vector<ClassOrModuleRef> &seen) {
+vector<ClassOrModule::RequiredAncestor>
+ClassOrModule::requiredAncestorsTransitiveInternal(GlobalState &gs, vector<ClassOrModuleRef> &seen) {
     if (absl::c_contains(seen, this->ref(gs))) {
         return requiredAncestors(gs); // Break recursive loops if we already visited this ancestor
     }
@@ -2062,7 +2062,7 @@ vector<ClassOrModule::RequiredAncestor> ClassOrModule::requiredAncestorsTransiti
 
 void ClassOrModule::computeRequiredAncestorLinearization(GlobalState &gs) {
     ENFORCE(gs.cacheSensitiveOptions.requiresAncestorEnabled);
-    std::vector<ClassOrModuleRef> seen;
+    vector<ClassOrModuleRef> seen;
     requiredAncestorsTransitiveInternal(gs, seen);
 }
 

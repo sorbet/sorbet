@@ -318,7 +318,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReindexingUsesTheCache") {
     REQUIRE_EQ(fref.data(*gs).sourceType, core::File::Type::Normal);
 
     auto workers = WorkerPool::create(0, *logger);
-    std::vector<core::FileRef> frefs{fref};
+    vector<core::FileRef> frefs{fref};
 
     // We should be able to reindex the file multiple times, getting a cache hit for each one.
     for (auto i = 0; i < 2; ++i) {
@@ -369,7 +369,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
     unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
 
     // The key should exist in the kvstore
-    std::vector<uint8_t> origContent;
+    vector<uint8_t> origContent;
     {
         auto contents = kvstore->read(key);
         REQUIRE_NE(contents.data, nullptr);
@@ -381,7 +381,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
     auto copy = std::make_unique<OwnedKeyValueStore>(sessionCache->open(logger, *opts));
 
     // Make sure that the same key exists
-    std::vector<uint8_t> copyContent;
+    vector<uint8_t> copyContent;
 
     {
         auto contents = copy->read(key);
@@ -392,13 +392,13 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
     REQUIRE_EQ(origContent, copyContent);
 
     // Add a new key, and close out the copy.
-    std::vector<uint8_t> value{0, 1, 2, 3, 4, 5, 6, 7};
+    vector<uint8_t> value{0, 1, 2, 3, 4, 5, 6, 7};
     copy->write("new key", value);
 
     {
         auto contents = copy->read("new key");
         REQUIRE_NE(contents.data, nullptr);
-        std::vector<uint8_t> readValue(contents.data, contents.data + contents.len);
+        vector<uint8_t> readValue(contents.data, contents.data + contents.len);
         REQUIRE_EQ(value, readValue);
     }
 
@@ -419,7 +419,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
     {
         auto contents = copy->read("new key");
         REQUIRE_NE(contents.data, nullptr);
-        std::vector<uint8_t> readValue(contents.data, contents.data + contents.len);
+        vector<uint8_t> readValue(contents.data, contents.data + contents.len);
         REQUIRE_EQ(value, readValue);
     }
 
@@ -470,7 +470,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
     unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
 
     // The key should exist in the kvstore
-    std::vector<uint8_t> origContent;
+    vector<uint8_t> origContent;
     {
         auto contents = kvstore->read(key);
         REQUIRE_NE(contents.data, nullptr);
@@ -487,7 +487,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
     }
 
     auto workers = WorkerPool::create(0, *logger);
-    std::vector<string> toRemove;
+    vector<string> toRemove;
     for (auto &path : FileOps::listFilesInDir(opts->cacheDir, {".mdb"}, *workers, true, {}, {})) {
         fmt::println(stderr, "path = {}", path);
         if (path.find("/session-") != string::npos) {

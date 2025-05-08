@@ -55,7 +55,7 @@ public:
         // stores them based on the hashes of the string pointers, and that in turn depends
         // on the vagaries of where the linker decided to put the string constants for the
         // counter names.
-        std::vector<string> lines = absl::StrSplit(jsonl, '\n');
+        vector<string> lines = absl::StrSplit(jsonl, '\n');
         {
             // Don't sort empty lines.
             auto it = absl::c_find_if(lines, [](const auto &line) { return line.empty(); });

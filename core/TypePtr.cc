@@ -340,7 +340,7 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, const TypeConstraint &tc) c
 }
 
 TypePtr TypePtr::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                              const std::vector<TypePtr> &targs) const {
+                              const vector<TypePtr> &targs) const {
     switch (tag()) {
         case Tag::BlamedUntyped:
         case Tag::UnresolvedAppliedType:
