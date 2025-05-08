@@ -13,8 +13,8 @@
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
 
-namespace sorbet::test {
 using namespace std;
+namespace sorbet::test {
 
 string singleTest;
 string webTraceFile;
