@@ -135,6 +135,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   g2_1.v=(2)
 
+  g2_2 = <cast:let>(<emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Numeric>, <emptyTree>::<C String>).new(1, 2), <todo sym>, <emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Numeric>, <emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(g2_2)
+
+  g2_3 = <cast:let>(<cast:let>(<emptyTree>::<C G2>, <todo sym>, ::<root>::<C T>::<C Class>.<syntheticSquareBrackets>(<emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>))).new(1, 2), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>)))
+
+  <emptyTree>::<C T>.reveal_type(g2_3)
+
   class <emptyTree>::<C G3><<C <todo sym>>> < (::<todo sym>)
     ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
       <self>.returns(<emptyTree>::<C U>)
