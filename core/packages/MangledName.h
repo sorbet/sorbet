@@ -12,10 +12,6 @@ class GlobalState;
 
 namespace sorbet::core::packages {
 class MangledName final {
-    MangledName(ClassOrModuleRef owner) : owner(owner) {}
-
-    template <typename H> friend H AbslHashValue(H h, const MangledName &m);
-
 public:
     // The ClassOrModuleRef that this package is stored in.
     //
@@ -27,6 +23,7 @@ public:
     ClassOrModuleRef owner;
 
     MangledName() = default;
+    explicit MangledName(ClassOrModuleRef owner) : owner(owner) {}
 
     // ["Foo", "Bar"] => :Foo_Bar
     static MangledName mangledNameFromParts(GlobalState &gs, const std::vector<std::string_view> &parts,
