@@ -117,7 +117,7 @@ public:
 
 LSPTypecheckerCoordinator::LSPTypecheckerCoordinator(const shared_ptr<const LSPConfiguration> &config,
                                                      shared_ptr<core::lsp::PreemptionTaskManager> preemptionTaskManager,
-                                                     WorkerPool &workers, std::shared_ptr<TaskQueue> taskQueue)
+                                                     WorkerPool &workers, shared_ptr<TaskQueue> taskQueue)
     : preemptionTaskManager(preemptionTaskManager), shouldTerminate(false),
       typechecker(config, move(preemptionTaskManager)), config(config), hasDedicatedThread(false),
       workers(workers), taskQueue{std::move(taskQueue)},

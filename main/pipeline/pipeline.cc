@@ -636,7 +636,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
         fileq->push(move(file), 1);
     }
 
-    std::shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex(
+    shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex(
         opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
         opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
         opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint);
@@ -1129,7 +1129,7 @@ ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, vector<ast::Pa
 
 vector<ast::ParsedFile>
 incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
-                   optional<UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>>> &&foundHashesForFiles,
+                   optional<UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>>> &&foundHashesForFiles,
                    const options::Options &opts, WorkerPool &workers) {
     try {
         vector<core::ClassOrModuleRef> symbolsToRecompute;

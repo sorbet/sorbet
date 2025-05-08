@@ -806,7 +806,7 @@ vector<unique_ptr<DocumentHighlight>> &extractDocumentHighlights(ResponseMessage
 
 void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
                          int &nextId, const Location &queryLoc,
-                         const vector<std::shared_ptr<DefAssertion>> &definitions) {
+                         const vector<shared_ptr<DefAssertion>> &definitions) {
     REQUIRE_FALSE(definitions.empty());
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
@@ -1115,7 +1115,7 @@ shared_ptr<TypeDefAssertion> TypeDefAssertion::make(string_view filename, unique
 
 void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                              LSPWrapper &lspWrapper, int &nextId, string_view symbol, const Location &queryLoc,
-                             const vector<std::shared_ptr<RangeAssertion>> &typeDefs) {
+                             const vector<shared_ptr<RangeAssertion>> &typeDefs) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
     const int character = queryLoc.range->start->character;
@@ -1570,7 +1570,7 @@ void ApplyCompletionAssertion::checkAll(const vector<shared_ptr<RangeAssertion>>
     }
 }
 
-void ApplyCompletionAssertion::check(const UnorderedMap<string, std::shared_ptr<core::File>> &sourceFileContents,
+void ApplyCompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                                      LSPWrapper &wrapper, int &nextId, string errorPrefix) {
     auto completionList = doTextDocumentCompletion(wrapper, *this->range, nextId, this->filename);
     {
@@ -1670,7 +1670,7 @@ void ApplyRenameAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &as
     }
 }
 
-void ApplyRenameAssertion::check(const UnorderedMap<string, std::shared_ptr<core::File>> &sourceFileContents,
+void ApplyRenameAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                                  LSPWrapper &wrapper, int &nextId, string errorPrefix) {
     auto prepareRenameResponse = doTextDocumentPrepareRename(wrapper, *this->range, nextId, this->filename);
 
@@ -1858,7 +1858,7 @@ unique_ptr<TextDocumentEdit> ApplyCodeActionAssertion::sortEdits(unique_ptr<Text
 namespace {
 shared_ptr<sorbet::core::File>
 getFileByUri(const LSPConfiguration &config,
-             const UnorderedMap<string, std::shared_ptr<core::File>> &sourceFileContents, string uri) {
+             const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, string uri) {
     auto filename = uriToFilePath(config, uri);
     auto it = sourceFileContents.find(filename);
     {
@@ -1869,7 +1869,7 @@ getFileByUri(const LSPConfiguration &config,
 }
 } // namespace
 
-void ApplyCodeActionAssertion::check(const UnorderedMap<string, std::shared_ptr<core::File>> &sourceFileContents,
+void ApplyCodeActionAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                                      LSPWrapper &wrapper, const CodeAction &codeAction) {
     const auto &config = wrapper.config();
     for (auto &c : *codeAction.edit.value()->documentChanges) {
@@ -1893,7 +1893,7 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<string, std::shared_ptr<
 };
 
 void ApplyCodeActionAssertion::checkAll(
-    const UnorderedMap<string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+    const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
     const CodeAction &codeAction) {
     const auto &config = wrapper.config();
     UnorderedMap<string, string> accumulatedOriginalEditedContents{};
@@ -2274,9 +2274,9 @@ string FindImplementationAssertion::toString() const {
 }
 
 void FindImplementationAssertion::check(
-    const UnorderedMap<string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper, int &nextId,
+    const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper, int &nextId,
     string_view symbol, const Location &queryLoc,
-    const vector<std::shared_ptr<ImplementationAssertion>> &allImpls) {
+    const vector<shared_ptr<ImplementationAssertion>> &allImpls) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
     const int character = queryLoc.range->start->character;
@@ -2300,7 +2300,7 @@ void FindImplementationAssertion::check(
     auto &locations = extractLocations(respMsg);
 
     // casting from ImplementationAssertion to RangeAssertion
-    vector<std::shared_ptr<RangeAssertion>> allLocs(allImpls.begin(), allImpls.end());
+    vector<shared_ptr<RangeAssertion>> allLocs(allImpls.begin(), allImpls.end());
     assertLocationsMatch(config, sourceFileContents, symbol, allLocs, line, character, locSourceLine, locFilename,
                          locations, "find implementation");
 };
@@ -2379,7 +2379,7 @@ string_view trimString(string_view s) {
 }
 } // namespace
 
-std::shared_ptr<StringPropertyAssertions>
+shared_ptr<StringPropertyAssertions>
 StringPropertyAssertions::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                string_view assertionContents, string_view assertionType) {
     vector<string> values = absl::StrSplit(assertionContents, ',');
@@ -2395,7 +2395,7 @@ StringPropertyAssertions::StringPropertyAssertions(string_view filename, unique_
 
 optional<vector<string>>
 StringPropertyAssertions::getValues(string_view type,
-                                    const vector<std::shared_ptr<RangeAssertion>> &assertions) {
+                                    const vector<shared_ptr<RangeAssertion>> &assertions) {
     for (auto &assertion : assertions) {
         if (auto codeActionAssertion = dynamic_pointer_cast<StringPropertyAssertions>(assertion)) {
             if (codeActionAssertion->assertionType == type) {

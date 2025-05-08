@@ -2195,7 +2195,7 @@ void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap 
 }
 
 void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinitions, WorkerPool &workers,
-                   UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
+                   UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
                    core::FoundDefHashes *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     const auto &epochManager = *gs.epochManager;
@@ -2277,7 +2277,7 @@ void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> tre
 // Returns whether typechecking was cancelled
 [[nodiscard]] bool
 Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
-                   UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
+                   UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
                    core::FoundDefHashes *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
     auto foundDefs = findSymbols(gs, trees, workers);
     if (gs.epochManager->wasTypecheckingCanceled()) {
@@ -2306,7 +2306,7 @@ Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, Wor
 
 [[nodiscard]] bool
 Namer::runIncremental(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees,
-                      UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
+                      UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
                       WorkerPool &workers, vector<core::ClassOrModuleRef> &updatedSymbols) {
     // foundHashesOut is only used when namer is run via hashing.cc to compute a FileHash for each file
     // The incremental namer mode should never be used for hashing.

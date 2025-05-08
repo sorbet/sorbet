@@ -353,7 +353,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
               back_inserter(ignoredCodeActionKinds), getCodeActionKind);
 
     auto errors = RangeAssertion::getErrorAssertions(assertions);
-    UnorderedMap<string, vector<std::shared_ptr<RangeAssertion>>> errorsByFilename;
+    UnorderedMap<string, vector<shared_ptr<RangeAssertion>>> errorsByFilename;
     for (auto &error : errors) {
         errorsByFilename[error->filename].emplace_back(error);
     }
@@ -532,7 +532,7 @@ TEST_CASE("LSPTest") {
     Expectations test = Expectations::getExpectations(singleTest);
 
     /** All test assertions ordered by (filename, range, message). */
-    vector<std::shared_ptr<RangeAssertion>> assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    vector<shared_ptr<RangeAssertion>> assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
 
     /** The next ID to use when sending an LSP message. */
     int nextId = 0;
@@ -848,7 +848,7 @@ TEST_CASE("LSPTest") {
             auto errorPrefix = fmt::format("[*.{}.rbupdate] ", version);
             const auto &updates = test.sourceLSPFileUpdates[version];
             vector<unique_ptr<LSPMessage>> lspUpdates;
-            UnorderedMap<string, std::shared_ptr<core::File>> updatesAndContents;
+            UnorderedMap<string, shared_ptr<core::File>> updatesAndContents;
 
             for (const auto &update : updates) {
                 auto originalFile = test.folder + update.first;

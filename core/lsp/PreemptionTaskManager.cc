@@ -11,7 +11,7 @@ namespace sorbet::core::lsp {
 PreemptionTaskManager::PreemptionTaskManager(shared_ptr<TypecheckEpochManager> epochManager)
     : epochManager(move(epochManager)) {}
 
-bool PreemptionTaskManager::trySchedulePreemptionTask(std::shared_ptr<Task> task) {
+bool PreemptionTaskManager::trySchedulePreemptionTask(shared_ptr<Task> task) {
     TypecheckEpochManager::assertConsistentThread(
         processingThreadId, "PreemptionTaskManager::trySchedulePreemptionTask", "processing thread");
     bool success = false;
@@ -58,7 +58,7 @@ bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalStat
     return false;
 }
 
-bool PreemptionTaskManager::tryCancelScheduledPreemptionTask(std::shared_ptr<Task> &task) {
+bool PreemptionTaskManager::tryCancelScheduledPreemptionTask(shared_ptr<Task> &task) {
     TypecheckEpochManager::assertConsistentThread(
         processingThreadId, "PreemptionTaskManager::tryCancelScheduledPreemptionTask", "processing thread");
     return atomic_compare_exchange_strong(&preemptTask, &task, shared_ptr<Task>(nullptr));

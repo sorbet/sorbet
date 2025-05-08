@@ -27,7 +27,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 LSPLoop::LSPLoop(unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,
-                 const std::shared_ptr<LSPConfiguration> &config, unique_ptr<KeyValueStore> kvstore)
+                 const shared_ptr<LSPConfiguration> &config, unique_ptr<KeyValueStore> kvstore)
     : config(config), taskQueue(make_shared<TaskQueue>()), epochManager(initialGS->epochManager),
       preprocessor(config, taskQueue),
       typecheckerCoord(config, make_shared<core::lsp::PreemptionTaskManager>(initialGS->epochManager), workers,

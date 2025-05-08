@@ -12,7 +12,7 @@ using namespace std;
 namespace sorbet::realmain::cache {
 
 namespace {
-unique_ptr<KeyValueStore> openCache(std::shared_ptr<::spdlog::logger> logger, string cacheDir,
+unique_ptr<KeyValueStore> openCache(shared_ptr<::spdlog::logger> logger, string cacheDir,
                                     const options::Options &opts) {
     // We currently only support one flavor of cache: "default". Each flavor is a separate database in the LMDB
     // environment, and we'll write all cached trees to that database during indexing. This means that supporting
@@ -265,7 +265,7 @@ string_view SessionCache::kvstorePath() const {
     return string_view(this->path);
 }
 
-unique_ptr<KeyValueStore> SessionCache::open(std::shared_ptr<::spdlog::logger> logger,
+unique_ptr<KeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger,
                                                   const options::Options &opts) const {
     // If the session copy has disappeared, we return a nullptr to force downstream consumers to explicitly handle the
     // empty cache.
