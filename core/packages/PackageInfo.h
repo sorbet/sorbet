@@ -53,7 +53,6 @@ struct VisibleTo {
 class PackageInfo {
 public:
     virtual MangledName mangledName() const = 0;
-    virtual absl::Span<const core::NameRef> fullName() const = 0;
     virtual absl::Span<const std::string> pathPrefixes() const = 0;
     virtual std::vector<VisibleTo> visibleTo() const = 0;
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;

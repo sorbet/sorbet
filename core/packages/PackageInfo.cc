@@ -34,8 +34,7 @@ PackageInfo::~PackageInfo() {
 }
 
 string PackageInfo::show(const core::GlobalState &gs) const {
-    return absl::StrJoin(fullName(),
-                         "::", [&](string *out, core::NameRef name) { absl::StrAppend(out, name.show(gs)); });
+    return this->mangledName().owner.show(gs);
 }
 
 namespace {
@@ -61,7 +60,8 @@ core::ClassOrModuleRef lookupNameOn(const core::GlobalState &gs, const core::Cla
 } // namespace
 
 core::ClassOrModuleRef PackageInfo::getPackageScope(const core::GlobalState &gs) const {
-    return lookupNameOn(gs, core::Symbols::root(), fullName());
+    // return lookupNameOn(gs, core::Symbols::root(), fullName());
+    Exception::notImplemented();
 }
 
 core::ClassOrModuleRef PackageInfo::getPackageTestScope(const core::GlobalState &gs) const {
@@ -70,7 +70,8 @@ core::ClassOrModuleRef PackageInfo::getPackageTestScope(const core::GlobalState 
         return {};
     }
 
-    return lookupNameOn(gs, testSym.asClassOrModuleRef(), fullName());
+    // return lookupNameOn(gs, testSym.asClassOrModuleRef(), fullName());
+    Exception::notImplemented();
 }
 
 } // namespace sorbet::core::packages

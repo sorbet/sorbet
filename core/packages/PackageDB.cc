@@ -17,11 +17,6 @@ public:
         return MangledName();
     }
 
-    absl::Span<const core::NameRef> fullName() const {
-        notImplemented();
-        return absl::Span<const core::NameRef>();
-    }
-
     absl::Span<const string> pathPrefixes() const {
         notImplemented();
         return absl::Span<const string>();

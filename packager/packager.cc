@@ -95,10 +95,8 @@ struct FullyQualifiedName {
 
 struct PackageName {
     core::packages::MangledName mangledName;
-    FullyQualifiedName fullName;
 
-    PackageName(core::ClassOrModuleRef owner, FullyQualifiedName &&fullName)
-        : mangledName(core::packages::MangledName(owner)), fullName(move(fullName)) {}
+    PackageName(core::ClassOrModuleRef owner) : mangledName(core::packages::MangledName(owner)) {}
 
     // Pretty print the package's (user-observable) name (e.g. Foo::Bar)
     string toString(const core::GlobalState &gs) const {
@@ -184,10 +182,6 @@ class PackageInfoImpl final : public core::packages::PackageInfo {
 public:
     core::packages::MangledName mangledName() const {
         return name.mangledName;
-    }
-
-    absl::Span<const core::NameRef> fullName() const {
-        return absl::MakeSpan(name.fullName.parts);
     }
 
     absl::Span<const string> pathPrefixes() const {
@@ -737,7 +731,7 @@ PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *
                            core::ClassOrModuleRef symbol) {
     ENFORCE(constantLit != nullptr);
 
-    return PackageName(symbol, getFullyQualifiedName(ctx, constantLit));
+    return PackageName(symbol);
 }
 
 PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
@@ -766,7 +760,7 @@ PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedCon
         owner = core::Symbols::noClassOrModule();
     }
 
-    return PackageName(owner, move(fullName));
+    return PackageName(owner);
 }
 
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
