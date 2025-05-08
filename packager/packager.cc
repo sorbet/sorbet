@@ -80,10 +80,8 @@ struct FullyQualifiedName {
 
 struct PackageName {
     core::packages::MangledName mangledName;
-    FullyQualifiedName fullName;
 
-    PackageName(core::ClassOrModuleRef owner, FullyQualifiedName &&fullName)
-        : mangledName(core::packages::MangledName(owner)), fullName(move(fullName)) {}
+    PackageName(core::ClassOrModuleRef owner) : mangledName(core::packages::MangledName(owner)) {}
 
     // Pretty print the package's (user-observable) name (e.g. Foo::Bar)
     string toString(const core::GlobalState &gs) const {
@@ -156,10 +154,6 @@ class PackageInfoImpl final : public core::packages::PackageInfo {
 public:
     core::packages::MangledName mangledName() const {
         return name.mangledName;
-    }
-
-    absl::Span<const core::NameRef> fullName() const {
-        return absl::MakeSpan(name.fullName.parts);
     }
 
     absl::Span<const string> pathPrefixes() const {
@@ -399,7 +393,7 @@ public:
         if (!importedPackageNames.empty()) {
             core::LocOffsets importToInsertAfter;
             for (auto &import : importedPackageNames) {
-                if (import.mangledName == info.name.mangledName) {
+                if (import.mangledName == info.mangledName()) {
                     if ((importType == core::packages::ImportType::Normal &&
                          import.type != core::packages::ImportType::Normal) ||
                         (importType == core::packages::ImportType::TestHelper &&
@@ -712,7 +706,7 @@ PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *
                            core::ClassOrModuleRef symbol) {
     ENFORCE(constantLit != nullptr);
 
-    return PackageName(symbol, getFullyQualifiedName(ctx, constantLit));
+    return PackageName(symbol);
 }
 
 PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
@@ -741,7 +735,7 @@ PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedCon
         owner = core::Symbols::noClassOrModule();
     }
 
-    return PackageName(owner, move(fullName));
+    return PackageName(owner);
 }
 
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
@@ -1791,7 +1785,7 @@ void validatePackage(core::Context ctx) {
             validateVisibility(ctx, pkgInfo, i);
         }
 
-        if (i.mangledName == pkgInfo.name.mangledName) {
+        if (i.mangledName == pkgInfo.mangledName()) {
             if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoSelfImport)) {
                 string import_;
                 switch (i.type) {
