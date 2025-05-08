@@ -353,7 +353,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
               back_inserter(ignoredCodeActionKinds), getCodeActionKind);
 
     auto errors = RangeAssertion::getErrorAssertions(assertions);
-    UnorderedMap<string, std::vector<std::shared_ptr<RangeAssertion>>> errorsByFilename;
+    UnorderedMap<string, vector<std::shared_ptr<RangeAssertion>>> errorsByFilename;
     for (auto &error : errors) {
         errorsByFilename[error->filename].emplace_back(error);
     }
@@ -532,7 +532,7 @@ TEST_CASE("LSPTest") {
     Expectations test = Expectations::getExpectations(singleTest);
 
     /** All test assertions ordered by (filename, range, message). */
-    std::vector<std::shared_ptr<RangeAssertion>> assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    vector<std::shared_ptr<RangeAssertion>> assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
 
     /** The next ID to use when sending an LSP message. */
     int nextId = 0;
@@ -714,7 +714,7 @@ TEST_CASE("LSPTest") {
             CHECK_GE(entryAssertions.size(), 1);
 
             // Collect importUsageAssertions into a separate collection to handle them differently.
-            std::vector<shared_ptr<RangeAssertion>> importUsageAssertions;
+            vector<shared_ptr<RangeAssertion>> importUsageAssertions;
             entryAssertions.erase(std::remove_if(entryAssertions.begin(), entryAssertions.end(),
                                                  [&](auto &assertion) -> bool {
                                                      if (dynamic_pointer_cast<ImportUsageAssertion>(assertion)) {

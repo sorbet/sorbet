@@ -25,7 +25,7 @@ auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger, e
 
 // Tests cancellation when there aren't enough files to trigger parallelism
 TEST_CASE("CanceledWithFewFiles") {
-    std::vector<std::pair<string, string>> sources{
+    vector<std::pair<string, string>> sources{
         {"foo.rb", "# typed: true\n"
                    "class Foo\n"
                    "end"},
@@ -40,7 +40,7 @@ TEST_CASE("CanceledWithFewFiles") {
     sorbet::core::GlobalState gs(errorQueue);
     payload::createInitialGlobalState(gs, opts, kvstore);
 
-    std::vector<core::FileRef> files;
+    vector<core::FileRef> files;
     {
         core::UnfreezeFileTable fileTableAccess(gs);
         for (auto &[path, source] : sources) {
@@ -61,7 +61,7 @@ TEST_CASE("CanceledWithFewFiles") {
 
 // Tests cancelation when there are more than two files, triggering the parallel indexer.
 TEST_CASE("CanceledWithMoreFiles") {
-    std::vector<std::pair<string, string>> sources{
+    vector<std::pair<string, string>> sources{
         {"foo.rb", "# typed: true\n"
                    "class Foo\n"
                    "end"},
@@ -84,7 +84,7 @@ TEST_CASE("CanceledWithMoreFiles") {
     sorbet::core::GlobalState gs(errorQueue);
     payload::createInitialGlobalState(gs, opts, kvstore);
 
-    std::vector<core::FileRef> files;
+    vector<core::FileRef> files;
     {
         core::UnfreezeFileTable fileTableAccess(gs);
         for (auto &[path, source] : sources) {

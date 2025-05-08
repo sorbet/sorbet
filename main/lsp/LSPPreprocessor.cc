@@ -502,8 +502,8 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse>
     }
     return edit;
 }
-std::vector<std::string_view> LSPPreprocessor::openFilePaths() const {
-    std::vector<std::string_view> paths;
+vector<std::string_view> LSPPreprocessor::openFilePaths() const {
+    vector<std::string_view> paths;
     paths.reserve(openFiles.size());
     for (auto const &[path, file] : openFiles) {
         paths.emplace_back(path);

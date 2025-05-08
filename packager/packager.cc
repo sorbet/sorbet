@@ -1674,7 +1674,7 @@ class ComputePackageSCCs {
     UnorderedMap<core::packages::MangledName, NodeInfo> nodeMap;
     // As we visit packages, we push them onto the stack. Once we find the "root" of an SCC, we can use the stack to
     // determine all packages in the SCC.
-    std::vector<core::packages::MangledName> stack;
+    vector<core::packages::MangledName> stack;
 
     ComputePackageSCCs(core::GlobalState &gs) : gs{gs} {
         auto numPackages = gs.packageDB().packages().size();
@@ -2023,7 +2023,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 }
 
 void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
-    std::vector<std::pair<core::FileRef, core::packages::MangledName>> mapping;
+    vector<std::pair<core::FileRef, core::packages::MangledName>> mapping;
     mapping.reserve(files.size());
 
     {

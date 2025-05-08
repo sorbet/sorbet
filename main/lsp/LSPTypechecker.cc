@@ -35,7 +35,7 @@ using namespace std;
 namespace {
 
 void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &gs, SorbetTypecheckRunStatus status,
-                       TypecheckingPath typecheckingPath, std::vector<core::FileRef> filesTypechecked) {
+                       TypecheckingPath typecheckingPath, vector<core::FileRef> filesTypechecked) {
     if (config.getClientConfig().enableTypecheckInfo) {
         auto sorbetTypecheckInfo =
             make_unique<SorbetTypecheckRunInfo>(status, typecheckingPath, config.frefsToPaths(gs, filesTypechecked));
@@ -97,7 +97,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
         // We copy our file table over to the indexer to ensure that we start with a consistent view of the workspace:
         // the indexer uses presence in the file table to determine if a file is new or not.
         auto files = gs->getFiles().subspan(1);
-        std::vector<std::shared_ptr<core::File>> indexerFiles{files.begin(), files.end()};
+        vector<std::shared_ptr<core::File>> indexerFiles{files.begin(), files.end()};
 
         absl::MutexLock lck{queue.getMutex()};
 
@@ -200,7 +200,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
 
-    std::vector<core::FileRef> toTypecheck;
+    vector<core::FileRef> toTypecheck;
     toTypecheck.reserve(updates.fastPathExtraFiles.size() + updates.updatedFiles.size());
     for (auto &path : updates.fastPathExtraFiles) {
         auto fref = gs->findFileByPath(path);
@@ -243,7 +243,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     updates.updatedFiles.clear();
 
     if (shouldRunIncrementalNamer && gs->packageDB().enabled()) {
-        std::vector<core::FileRef> packageFiles;
+        vector<core::FileRef> packageFiles;
 
         for (auto fref : toTypecheck) {
             // Only need to re-run packager if we're going to delete constants and have to re-define
@@ -678,7 +678,7 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
 }
 } // namespace
 
-LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery,
+LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const vector<core::FileRef> &filesForQuery,
                                      WorkerPool &workers) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     // We assume gs has been through the slow path, which is guaranteed by the initialization path not being cancelable.
@@ -718,7 +718,7 @@ std::unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(absl::Span<const c
     return result;
 }
 
-std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef> frefs,
+vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef> frefs,
                                                                       WorkerPool &workers) const {
     auto updates = getNoopUpdate(frefs);
     auto errorCollector = make_shared<core::ErrorCollector>();
@@ -765,7 +765,7 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileR
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     vector<ast::ParsedFile> updatedIndexed;
 
-    std::vector<core::FileRef> toIndex;
+    vector<core::FileRef> toIndex;
     toIndex.reserve(frefs.size());
     for (auto fref : frefs) {
         const auto id = fref.id();
@@ -802,7 +802,7 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileR
 }
 
 ast::ParsedFile LSPTypechecker::getResolved(core::FileRef fref, WorkerPool &workers) const {
-    std::vector<ast::ParsedFile> trees = this->getResolved(std::initializer_list<core::FileRef>{fref}, workers);
+    vector<ast::ParsedFile> trees = this->getResolved(std::initializer_list<core::FileRef>{fref}, workers);
 
     if (trees.empty()) {
         // This case can happen if the associated file ref was to a payload file, in which case the tree will be
@@ -872,16 +872,16 @@ void LSPTypecheckerDelegate::typecheckOnFastPath(std::unique_ptr<LSPFileUpdates>
     ENFORCE(committed);
 }
 
-std::vector<std::unique_ptr<core::Error>> LSPTypecheckerDelegate::retypecheck(std::vector<core::FileRef> frefs) const {
+vector<std::unique_ptr<core::Error>> LSPTypecheckerDelegate::retypecheck(vector<core::FileRef> frefs) const {
     return typechecker.retypecheck(frefs, workers);
 }
 
 LSPQueryResult LSPTypecheckerDelegate::query(const core::lsp::Query &q,
-                                             const std::vector<core::FileRef> &filesForQuery) const {
+                                             const vector<core::FileRef> &filesForQuery) const {
     return typechecker.query(q, filesForQuery, workers);
 }
 
-std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(absl::Span<const core::FileRef> frefs) const {
+vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(absl::Span<const core::FileRef> frefs) const {
     return typechecker.getResolved(frefs, workers);
 }
 

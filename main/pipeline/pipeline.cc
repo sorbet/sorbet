@@ -578,7 +578,7 @@ ast::ParsedFilesOrCancelled mergeIndexResults(core::GlobalState &cgs, const opti
                 Timer timeit(logger, "substituteTreesWorker");
                 IndexSubstitutionJob job;
                 int numTreesProcessed = 0;
-                std::vector<ast::ParsedFile> trees;
+                vector<ast::ParsedFile> trees;
                 for (auto result = batchq->try_pop(job); !result.done(); result = batchq->try_pop(job)) {
                     if (result.gotItem()) {
                         // Unconditionally update the total to avoid starving the consumer thread
@@ -697,7 +697,7 @@ ast::ParsedFilesOrCancelled index(core::GlobalState &gs, absl::Span<const core::
 
     if (files.size() < 3) {
         // Run singlethreaded if only using 2 files
-        std::vector<ast::ParsedFile> parsed;
+        vector<ast::ParsedFile> parsed;
         parsed.reserve(files.size());
         for (auto file : files) {
             auto tree = readFileWithStrictnessOverrides(gs, file, opts, kvstore);
@@ -1132,7 +1132,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                    optional<UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>>> &&foundHashesForFiles,
                    const options::Options &opts, WorkerPool &workers) {
     try {
-        std::vector<core::ClassOrModuleRef> symbolsToRecompute;
+        vector<core::ClassOrModuleRef> symbolsToRecompute;
         auto runIncrementalNamer = foundHashesForFiles.has_value() && !foundHashesForFiles->empty();
         {
             Timer timeit(gs.tracer(), "incremental_naming");

@@ -752,7 +752,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     // resolver
     {
-        std::vector<core::ClassOrModuleRef> recomputeNoSymbols;
+        vector<core::ClassOrModuleRef> recomputeNoSymbols;
         core::UnfreezeNameTable nameTableAccess(*gs);
         core::UnfreezeSymbolTable symbolTableAccess(*gs);
         trees =

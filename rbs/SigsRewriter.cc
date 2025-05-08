@@ -247,7 +247,7 @@ Comments SigsRewriter::commentsForNode(parser::Node *node) {
 
     if (auto commentsNodesEntry = commentsByNode.find(node); commentsNodesEntry != commentsByNode.end()) {
         auto commentsNodes = commentsNodesEntry->second;
-        auto declaration_comments = std::vector<Comment>();
+        auto declaration_comments = vector<Comment>();
 
         for (auto &commentNode : commentsNodes) {
             // If the comment starts with `# @`, it's an annotation

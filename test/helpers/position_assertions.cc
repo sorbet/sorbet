@@ -718,7 +718,7 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
         opts.allowRelaxedPackagerChecksFor.emplace_back(allowRelaxedPackager.value());
     }
 
-    std::vector<string> defaultLayers = {};
+    vector<string> defaultLayers = {};
     opts.packagerLayers = StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
 
     return opts;
@@ -806,7 +806,7 @@ vector<unique_ptr<DocumentHighlight>> &extractDocumentHighlights(ResponseMessage
 
 void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
                          int &nextId, const Location &queryLoc,
-                         const std::vector<std::shared_ptr<DefAssertion>> &definitions) {
+                         const vector<std::shared_ptr<DefAssertion>> &definitions) {
     REQUIRE_FALSE(definitions.empty());
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
@@ -1115,7 +1115,7 @@ shared_ptr<TypeDefAssertion> TypeDefAssertion::make(string_view filename, unique
 
 void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                              LSPWrapper &lspWrapper, int &nextId, string_view symbol, const Location &queryLoc,
-                             const std::vector<std::shared_ptr<RangeAssertion>> &typeDefs) {
+                             const vector<std::shared_ptr<RangeAssertion>> &typeDefs) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
     const int character = queryLoc.range->start->character;
@@ -2276,7 +2276,7 @@ string FindImplementationAssertion::toString() const {
 void FindImplementationAssertion::check(
     const UnorderedMap<string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper, int &nextId,
     std::string_view symbol, const Location &queryLoc,
-    const std::vector<std::shared_ptr<ImplementationAssertion>> &allImpls) {
+    const vector<std::shared_ptr<ImplementationAssertion>> &allImpls) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
     const int character = queryLoc.range->start->character;
@@ -2300,7 +2300,7 @@ void FindImplementationAssertion::check(
     auto &locations = extractLocations(respMsg);
 
     // casting from ImplementationAssertion to RangeAssertion
-    std::vector<std::shared_ptr<RangeAssertion>> allLocs(allImpls.begin(), allImpls.end());
+    vector<std::shared_ptr<RangeAssertion>> allLocs(allImpls.begin(), allImpls.end());
     assertLocationsMatch(config, sourceFileContents, symbol, allLocs, line, character, locSourceLine, locFilename,
                          locations, "find implementation");
 };
@@ -2382,20 +2382,20 @@ string_view trimString(std::string_view s) {
 std::shared_ptr<StringPropertyAssertions>
 StringPropertyAssertions::make(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
                                std::string_view assertionContents, std::string_view assertionType) {
-    std::vector<string> values = absl::StrSplit(assertionContents, ',');
+    vector<string> values = absl::StrSplit(assertionContents, ',');
     transform(values.begin(), values.end(), values.begin(), [](auto val) { return trimString(val); });
 
     return make_shared<StringPropertyAssertions>(filename, range, assertionLine, values, assertionType);
 }
 
 StringPropertyAssertions::StringPropertyAssertions(std::string_view filename, std::unique_ptr<Range> &range,
-                                                   int assertionLine, std::vector<string> values,
+                                                   int assertionLine, vector<string> values,
                                                    std::string_view assertionType)
     : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values){};
 
-std::optional<std::vector<string>>
+std::optional<vector<string>>
 StringPropertyAssertions::getValues(std::string_view type,
-                                    const std::vector<std::shared_ptr<RangeAssertion>> &assertions) {
+                                    const vector<std::shared_ptr<RangeAssertion>> &assertions) {
     for (auto &assertion : assertions) {
         if (auto codeActionAssertion = dynamic_pointer_cast<StringPropertyAssertions>(assertion)) {
             if (codeActionAssertion->assertionType == type) {

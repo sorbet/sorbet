@@ -223,7 +223,7 @@ TEST_CASE("IntEnums") {
     auto symbols = vector<SymbolKind>();
     symbols.push_back(SymbolKind::Namespace);
     symbols.push_back((SymbolKind)-1);
-    symbolKind->valueSet = make_optional<std::vector<SymbolKind>>(std::move(symbols));
+    symbolKind->valueSet = make_optional<vector<SymbolKind>>(std::move(symbols));
     REQUIRE_THROWS_AS(symbolKind->toJSON(), InvalidEnumValueError);
 }
 

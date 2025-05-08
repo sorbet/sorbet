@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
 
     int numFiles = argc - 2;
     char **files = &argv[2];
-    std::vector<string> filenames;
+    vector<string> filenames;
     for (int i = 0; i < numFiles; ++i) {
         filenames.emplace_back(files[i]);
     }

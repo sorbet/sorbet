@@ -49,8 +49,8 @@ vector<string> MockFileSystem::listFilesInDir(string_view path, const UnorderedS
 
 vector<string> MockFileSystem::listFilesInDir(string_view path, const UnorderedSet<string> &extensions,
                                               WorkerPool &workerPool, bool recursive,
-                                              const std::vector<string> &absoluteIgnorePatterns,
-                                              const std::vector<string> &relativeIgnorePatterns) const {
+                                              const vector<string> &absoluteIgnorePatterns,
+                                              const vector<string> &relativeIgnorePatterns) const {
     Exception::raise("Not implemented.");
 }
 } // namespace sorbet::test

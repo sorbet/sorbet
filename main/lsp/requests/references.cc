@@ -21,7 +21,7 @@ bool ReferencesTask::needsMultithreading(const LSPIndexer &indexer) const {
 vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::GlobalState &gs,
                                                                     core::SymbolRef symInPackage,
                                                                     core::packages::MangledName packageName) {
-    std::vector<core::NameRef> fullName;
+    vector<core::NameRef> fullName;
 
     auto sym = symInPackage;
     while (sym.exists() && sym != core::Symbols::PackageSpecRegistry() && sym != core::Symbols::root()) {
@@ -123,7 +123,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 auto symsToCheck = getSymsToCheckWithinPackage(gs, constResp->symbolBeforeDealias, packageName);
 
                 if (!symsToCheck.empty()) {
-                    std::vector<std::unique_ptr<Location>> locations;
+                    vector<std::unique_ptr<Location>> locations;
 
                     for (auto &symToCheck : symsToCheck) {
                         for (auto &location :

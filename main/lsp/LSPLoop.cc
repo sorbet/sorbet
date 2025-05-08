@@ -124,7 +124,7 @@ void LSPLoop::processRequests(vector<unique_ptr<LSPMessage>> messages) {
         preprocessor.preprocessAndEnqueue(move(message));
     }
 
-    std::vector<std::unique_ptr<LSPTask>> tasks;
+    vector<std::unique_ptr<LSPTask>> tasks;
     while (true) {
         {
             absl::MutexLock lck(taskQueue->getMutex());

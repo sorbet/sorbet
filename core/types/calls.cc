@@ -2599,8 +2599,8 @@ private:
         return std::nullopt;
     }
 
-    static std::vector<ArgInfo::ArgFlags> argInfoByArity(std::optional<int> fixedArity) {
-        std::vector<ArgInfo::ArgFlags> res;
+    static vector<ArgInfo::ArgFlags> argInfoByArity(std::optional<int> fixedArity) {
+        vector<ArgInfo::ArgFlags> res;
         if (fixedArity) {
             for (int i = 0; i < *fixedArity; i++) {
                 res.emplace_back();

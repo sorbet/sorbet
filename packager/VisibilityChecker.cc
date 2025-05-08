@@ -119,7 +119,7 @@ class PropagateVisibility final {
     // determine the package that owns a symbol. So, to avoid this case we ensure that the symbols that correspond to
     // the package name are always owned by the package that defines them.
     void setPackageLocs(core::MutableContext ctx, core::LocOffsets loc, core::ClassOrModuleRef sym) {
-        std::vector<core::NameRef> names;
+        vector<core::NameRef> names;
 
         while (sym.exists() && sym != core::Symbols::PackageSpecRegistry()) {
             // The symbol isn't a package name if it's defined outside of the package registry.
@@ -500,7 +500,7 @@ public:
                                 : (layeringViolation ? core::errors::Packager::LayeringViolation
                                                      : core::errors::Packager::StrictDependenciesViolation);
                 if (auto e = ctx.beginError(lit.loc(), error)) {
-                    std::vector<string> reasons;
+                    vector<string> reasons;
                     if (causesCycle) {
                         reasons.emplace_back(core::ErrorColors::format(
                             "importing its package would put `{}` into a cycle", this->package.show(ctx)));
@@ -579,8 +579,8 @@ public:
         }
     }
 
-    static std::vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
-                                            std::vector<ast::ParsedFile> files) {
+    static vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
+                                            vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
         for (size_t i = 0; i < files.size(); ++i) {
@@ -607,8 +607,8 @@ public:
 };
 } // namespace
 
-std::vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
-                                                    std::vector<ast::ParsedFile> files) {
+vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
+                                                    vector<ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "visibility_checker.run");
 
     {

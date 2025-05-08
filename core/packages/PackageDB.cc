@@ -68,7 +68,7 @@ public:
         return false;
     }
 
-    std::vector<VisibleTo> visibleTo() const {
+    vector<VisibleTo> visibleTo() const {
         return {};
     }
 

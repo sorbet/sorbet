@@ -1019,7 +1019,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "FindAllReferencesWithoutCacheWorks") {
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "OpeningExistingFilesTakesTheFastPath") {
-    std::vector<std::pair<string, string>> files{
+    vector<std::pair<string, string>> files{
         {"a.rb", "# typed: true\n"
                  "class A\n"
                  "end\n"},

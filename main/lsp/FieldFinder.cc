@@ -7,7 +7,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 FieldFinder::FieldFinder(core::ClassOrModuleRef target, ast::UnresolvedIdent::Kind queryKind,
-                         std::vector<core::NameRef> &result)
+                         vector<core::NameRef> &result)
     : targetClass(target), queryKind(queryKind), result_{result} {
     ENFORCE(queryKind != ast::UnresolvedIdent::Kind::Local);
 }

@@ -1830,7 +1830,7 @@ class ResolveTypeMembersAndFieldsWalk {
     bool trackDependencies_ = false;
     vector<bool> classOfDepth_;
     vector<core::SymbolRef> dependencies_;
-    std::vector<int> nestedBlockCounts;
+    vector<int> nestedBlockCounts;
     vector<bool> inFieldAssign;
 
     void extendClassOfDepth(ast::Send &send) {
@@ -3256,8 +3256,8 @@ private:
     }
 
     struct OverloadedMethodArgInformation {
-        std::vector<core::ArgInfo> posArgs;
-        std::vector<core::ArgInfo> kwArgs;
+        vector<core::ArgInfo> posArgs;
+        vector<core::ArgInfo> kwArgs;
         std::optional<core::ArgInfo> blkArg;
     };
 
@@ -3660,7 +3660,7 @@ private:
 
     static bool hasCompatibleOverloadedSigsWithKwArgs(core::Context ctx, int numSigs,
                                                       const OverloadedMethodSigInformation &info,
-                                                      const std::vector<OverloadedMethodArgInformation> &args) {
+                                                      const vector<OverloadedMethodArgInformation> &args) {
         if (numSigs != 2) {
             return false;
         }
@@ -3711,7 +3711,7 @@ public:
         // that the first iteration of the loop it's at `1`.
         int i = 0;
         std::optional<OverloadedMethodSigInformation> combinedInfo;
-        std::vector<OverloadedMethodArgInformation> args;
+        vector<OverloadedMethodArgInformation> args;
         for (auto &sig : sigs) {
             i++;
             core::MethodRef overloadSym;

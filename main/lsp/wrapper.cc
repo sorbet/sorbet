@@ -61,7 +61,7 @@ void MultiThreadedLSPWrapper::send(std::unique_ptr<LSPMessage> message) {
     input->write(move(message));
 }
 
-void MultiThreadedLSPWrapper::send(std::vector<std::unique_ptr<LSPMessage>> &messages) {
+void MultiThreadedLSPWrapper::send(vector<std::unique_ptr<LSPMessage>> &messages) {
     input->write(move(messages));
 }
 

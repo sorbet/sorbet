@@ -3,12 +3,14 @@
 #include "ast/Helpers.h"
 #include "core/GlobalState.h"
 
+using namespace std;
+
 namespace sorbet::rewriter {
 void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
-    std::vector<ast::ExpressionPtr> stats;
+    vector<ast::ExpressionPtr> stats;
 
     // Go through all class definition statements and find all setups, tests and teardowns
-    std::vector<ast::ExpressionPtr> testSends, setupAndTeardownSends;
+    vector<ast::ExpressionPtr> testSends, setupAndTeardownSends;
     for (auto &stat : klass->rhs) {
         if (auto send = ast::cast_tree<ast::Send>(stat)) {
             if (send->fun == core::Names::test()) {

@@ -854,7 +854,7 @@ TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
 
 namespace {
 vector<TypePtr> unwrapTypeVector(Context ctx, const vector<TypePtr> &elems) {
-    std::vector<TypePtr> unwrapped;
+    vector<TypePtr> unwrapped;
     unwrapped.reserve(elems.size());
     for (auto &e : elems) {
         unwrapped.emplace_back(Types::unwrapSelfTypeParam(ctx, e));
