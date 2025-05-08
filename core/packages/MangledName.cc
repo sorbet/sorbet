@@ -13,7 +13,8 @@ MangledName MangledName::mangledNameFromParts(GlobalState &gs, const std::vector
 
     auto utf8Name = gs.enterNameUTF8(mangledName);
     auto packagerName = gs.freshNameUnique(UniqueNameKind::Packager, utf8Name, 1);
-    return MangledName(gs.enterNameConstant(packagerName), owner);
+    gs.enterNameConstant(packagerName);
+    return MangledName(owner);
 }
 
 MangledName MangledName::mangledNameFromParts(GlobalState &gs, const std::vector<NameRef> &parts,
@@ -23,7 +24,8 @@ MangledName MangledName::mangledNameFromParts(GlobalState &gs, const std::vector
 
     auto utf8Name = gs.enterNameUTF8(mangledName);
     auto packagerName = gs.freshNameUnique(UniqueNameKind::Packager, utf8Name, 1);
-    return MangledName(gs.enterNameConstant(packagerName), owner);
+    gs.enterNameConstant(packagerName);
+    return MangledName(owner);
 }
 
 MangledName MangledName::lookupMangledName(const GlobalState &gs, const vector<string> &parts) {
@@ -54,7 +56,8 @@ MangledName MangledName::lookupMangledName(const GlobalState &gs, const vector<s
         owner = core::Symbols::noClassOrModule();
     }
 
-    return MangledName(gs.lookupNameConstant(packagerName), owner);
+    gs.lookupNameConstant(packagerName);
+    return MangledName(owner);
 }
 
 } // namespace sorbet::core::packages
