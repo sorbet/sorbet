@@ -152,3 +152,10 @@ T.reveal_type(g10) # error: Revealed type: `G10[Integer, String]`
 #: [U < Numeric = Integer]
 #   ^^^^^^^^^^^^^^^^^^^^^ error: Type member is defined with bounds and `fixed`
 class G11; end
+
+#: [in U < Numeric]
+class G12; end
+
+#: (G12[Object]) -> void
+#       ^^^^^^ error-with-dupes: `Object` is not a subtype of upper bound of type member `::G12::U`
+def take_g12(g12); end

@@ -15,6 +15,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(g1)
   end
 
+  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    <self>.params(:g12, <emptyTree>::<C G12>.<syntheticSquareBrackets>(<emptyTree>::<C Object>)).void()
+  end
+
+  def take_g12<<todo method>>(g12, &<blk>)
+    <emptyTree>
+  end
+
   module <emptyTree>::<C Errors><<C <todo sym>>> < ()
     class <emptyTree>::<C ParseError1><<C <todo sym>>> < (::<todo sym>)
     end
@@ -269,4 +277,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       {:fixed => <emptyTree>::<C Integer>, :upper => <emptyTree>::<C Numeric>}
     end
   end
+
+  class <emptyTree>::<C G12><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(::<root>::<C T>::<C GenericWithoutRuntime>)
+
+    <emptyTree>::<C U> = <self>.<syntheticTypeMember>(:in) do ||
+      {:upper => <emptyTree>::<C Numeric>}
+    end
+  end
+
+  <runtime method definition of take_g12>
 end
