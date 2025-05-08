@@ -29,8 +29,7 @@ parser::NodeVec TypeParamsToParserNode::typeParams(const rbs_node_list_t *rbsTyp
         }
 
         auto nameStr = parser.resolveConstant(rbsTypeParam->name);
-        auto nameUTF8 = ctx.state.enterNameUTF8(nameStr);
-        auto nameConstant = ctx.state.enterNameConstant(nameUTF8);
+        auto nameConstant = ctx.state.enterNameConstant(nameStr);
 
         auto args = parser::NodeVec();
         if (rbsTypeParam->variance) {
