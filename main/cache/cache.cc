@@ -229,8 +229,8 @@ SessionCache::~SessionCache() noexcept(false) {
     FileOps::removeEmptyDir(this->path);
 }
 
-unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore> kvstore,
-                                                 ::spdlog::logger &logger, const options::Options &opts) {
+unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore> kvstore, ::spdlog::logger &logger,
+                                            const options::Options &opts) {
     if (kvstore == nullptr || opts.cacheDir.empty()) {
         return nullptr;
     }
@@ -265,8 +265,7 @@ string_view SessionCache::kvstorePath() const {
     return string_view(this->path);
 }
 
-unique_ptr<KeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger,
-                                                  const options::Options &opts) const {
+unique_ptr<KeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger, const options::Options &opts) const {
     // If the session copy has disappeared, we return a nullptr to force downstream consumers to explicitly handle the
     // empty cache.
     if (!FileOps::dirExists(this->path)) {

@@ -9,8 +9,7 @@ using namespace std;
 
 namespace {
 
-unique_ptr<LSPMessage> makeShowOperation(string operationName, string description,
-                                         SorbetOperationStatus status) {
+unique_ptr<LSPMessage> makeShowOperation(string operationName, string description, SorbetOperationStatus status) {
     return make_unique<LSPMessage>(make_unique<NotificationMessage>(
         "2.0", LSPMethod::SorbetShowOperation,
         make_unique<SorbetShowOperationParams>(move(operationName), move(description), status)));

@@ -7,8 +7,7 @@
 using namespace std;
 namespace sorbet::autogen {
 
-void validateAttrMap(const std::map<int, vector<string>> &hugeMap,
-                     const std::map<int, vector<string>> &liteMap) {
+void validateAttrMap(const std::map<int, vector<string>> &hugeMap, const std::map<int, vector<string>> &liteMap) {
     vector<int> hugeKeys;
     vector<int> liteKeys;
 

@@ -7,8 +7,8 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-void logDebugInfo(const shared_ptr<spdlog::logger> logger, const core::GlobalState &gs,
-                  const core::Loc selectionLoc, const string message) {
+void logDebugInfo(const shared_ptr<spdlog::logger> logger, const core::GlobalState &gs, const core::Loc selectionLoc,
+                  const string message) {
     logger->error("msg=\"ExtractToVariable: {}\" selectionLoc=\"{}\"", message, selectionLoc.showRaw(gs));
     logger->error("source=\"{}\"", absl::CEscape(selectionLoc.file().data(gs).source()));
 }
@@ -452,8 +452,8 @@ public:
     vector<pair<core::LocOffsets, const ast::ExpressionPtr *>> LCAScopeStack;
     vector<core::LocOffsets> matches;
     ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, vector<core::LocOffsets> skippedLocsRange,
-                            vector<core::LocOffsets> skippedLocsExact,
-                            const shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc)
+                            vector<core::LocOffsets> skippedLocsExact, const shared_ptr<spdlog::logger> logger,
+                            const core::Loc selectionLoc)
         : targetNode(matchingNode), skippedLocsRange(skippedLocsRange), skippedLocsExact(skippedLocsExact),
           logger(logger), selectionLoc(selectionLoc) {}
 

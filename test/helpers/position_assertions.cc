@@ -805,8 +805,7 @@ vector<unique_ptr<DocumentHighlight>> &extractDocumentHighlights(ResponseMessage
 }
 
 void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
-                         int &nextId, const Location &queryLoc,
-                         const vector<shared_ptr<DefAssertion>> &definitions) {
+                         int &nextId, const Location &queryLoc, const vector<shared_ptr<DefAssertion>> &definitions) {
     REQUIRE_FALSE(definitions.empty());
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
@@ -1241,7 +1240,7 @@ shared_ptr<StringPropertyAssertion> StringPropertyAssertion::make(string_view fi
 }
 
 optional<string> StringPropertyAssertion::getValue(string_view type,
-                                                        const vector<shared_ptr<RangeAssertion>> &assertions) {
+                                                   const vector<shared_ptr<RangeAssertion>> &assertions) {
     {
         INFO("Unrecognized string property assertion: " << type);
         CHECK_NE(assertionConstructors.find(string(type)), assertionConstructors.end());
@@ -1831,8 +1830,7 @@ optional<pair<string, string>> ApplyCodeActionAssertion::expectedFile(string fil
     return make_pair(expectedUpdatedFilePath, expectedEditedFileContents);
 }
 
-void ApplyCodeActionAssertion::assertResults(string expectedPath, string expectedContents,
-                                             string actualContents) {
+void ApplyCodeActionAssertion::assertResults(string expectedPath, string expectedContents, string actualContents) {
     CHECK_EQ_DIFF(
         expectedContents, actualContents,
         fmt::format(
@@ -1856,9 +1854,9 @@ unique_ptr<TextDocumentEdit> ApplyCodeActionAssertion::sortEdits(unique_ptr<Text
 }
 
 namespace {
-shared_ptr<sorbet::core::File>
-getFileByUri(const LSPConfiguration &config,
-             const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, string uri) {
+shared_ptr<sorbet::core::File> getFileByUri(const LSPConfiguration &config,
+                                            const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                            string uri) {
     auto filename = uriToFilePath(config, uri);
     auto it = sourceFileContents.find(filename);
     {
@@ -1892,9 +1890,8 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<string, shared_ptr<core:
     }
 };
 
-void ApplyCodeActionAssertion::checkAll(
-    const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
-    const CodeAction &codeAction) {
+void ApplyCodeActionAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                        LSPWrapper &wrapper, const CodeAction &codeAction) {
     const auto &config = wrapper.config();
     UnorderedMap<string, string> accumulatedOriginalEditedContents{};
 
@@ -2273,10 +2270,9 @@ string FindImplementationAssertion::toString() const {
     return fmt::format("find-implementation: {}", symbol);
 }
 
-void FindImplementationAssertion::check(
-    const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper, int &nextId,
-    string_view symbol, const Location &queryLoc,
-    const vector<shared_ptr<ImplementationAssertion>> &allImpls) {
+void FindImplementationAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                        LSPWrapper &wrapper, int &nextId, string_view symbol, const Location &queryLoc,
+                                        const vector<shared_ptr<ImplementationAssertion>> &allImpls) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
     const int character = queryLoc.range->start->character;
@@ -2379,23 +2375,21 @@ string_view trimString(string_view s) {
 }
 } // namespace
 
-shared_ptr<StringPropertyAssertions>
-StringPropertyAssertions::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                               string_view assertionContents, string_view assertionType) {
+shared_ptr<StringPropertyAssertions> StringPropertyAssertions::make(string_view filename, unique_ptr<Range> &range,
+                                                                    int assertionLine, string_view assertionContents,
+                                                                    string_view assertionType) {
     vector<string> values = absl::StrSplit(assertionContents, ',');
     transform(values.begin(), values.end(), values.begin(), [](auto val) { return trimString(val); });
 
     return make_shared<StringPropertyAssertions>(filename, range, assertionLine, values, assertionType);
 }
 
-StringPropertyAssertions::StringPropertyAssertions(string_view filename, unique_ptr<Range> &range,
-                                                   int assertionLine, vector<string> values,
-                                                   string_view assertionType)
+StringPropertyAssertions::StringPropertyAssertions(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                   vector<string> values, string_view assertionType)
     : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values){};
 
-optional<vector<string>>
-StringPropertyAssertions::getValues(string_view type,
-                                    const vector<shared_ptr<RangeAssertion>> &assertions) {
+optional<vector<string>> StringPropertyAssertions::getValues(string_view type,
+                                                             const vector<shared_ptr<RangeAssertion>> &assertions) {
     for (auto &assertion : assertions) {
         if (auto codeActionAssertion = dynamic_pointer_cast<StringPropertyAssertions>(assertion)) {
             if (codeActionAssertion->assertionType == type) {

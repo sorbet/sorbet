@@ -25,8 +25,7 @@ core::TypePtr dropConstructor(core::Context ctx, core::Loc loc, core::TypePtr tp
     return tp;
 }
 
-bool typeTestReferencesVar(const InlinedVector<pair<cfg::LocalRef, core::TypePtr>, 1> &typeTest,
-                           cfg::LocalRef var) {
+bool typeTestReferencesVar(const InlinedVector<pair<cfg::LocalRef, core::TypePtr>, 1> &typeTest, cfg::LocalRef var) {
     return absl::c_any_of(typeTest, [var](auto &test) { return test.first == var; });
 }
 } // namespace
