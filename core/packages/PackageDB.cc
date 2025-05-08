@@ -107,6 +107,26 @@ public:
         return nullopt;
     }
 
+    void trackMissingImport(const core::FileRef file, const core::packages::MangledName toImport,
+                            const core::packages::ImportType importType,
+                            const core::AutocorrectSuggestion autocorrect) {
+        notImplemented();
+    }
+
+    void untrackMissingImportsFor(const core::FileRef file) {
+        notImplemented();
+    }
+
+    core::AutocorrectSuggestion aggregateMissingImports() const {
+        notImplemented();
+        return core::AutocorrectSuggestion{"notImplemented", {}};
+    }
+
+    core::AutocorrectSuggestion aggregateMissingImports(const core::FileRef file) const {
+        notImplemented();
+        return core::AutocorrectSuggestion{"notImplemented", {}};
+    }
+
     ~NonePackage() {}
 
 private:
