@@ -672,8 +672,11 @@ def method(param:); end
 
 ## 3557
 
+> This error is specific to RBS support when using the
+> `--enable-experimental-rbs-signatures` flag.
+
 This error is raised when a class or module is annotated with multiple RBS
-generic signature comments:
+generic type parameters comments:
 
 ```ruby
 #: [U]
