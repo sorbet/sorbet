@@ -766,7 +766,7 @@ class Box; end
 box = Box.new #: Box[Integer]
 ```
 
-Upper bounds can be specified using `>`:
+Upper bounds can be specified using `<`:
 
 ```ruby
 #: [E < Numeric]
