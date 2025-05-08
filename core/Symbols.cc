@@ -2662,7 +2662,7 @@ void ClassOrModule::removeLocsForFile(core::FileRef file) {
     removeLocsForFileImpl(this->locs_, file);
 }
 
-vector<std::pair<NameRef, SymbolRef>> ClassOrModule::membersStableOrderSlow(const GlobalState &gs) const {
+vector<pair<NameRef, SymbolRef>> ClassOrModule::membersStableOrderSlow(const GlobalState &gs) const {
     vector<pair<NameRef, SymbolRef>> result;
     result.reserve(members().size());
     for (const auto &e : members()) {

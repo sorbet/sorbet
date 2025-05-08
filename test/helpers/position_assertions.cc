@@ -1900,7 +1900,7 @@ void ApplyCodeActionAssertion::checkAll(
 
     // actualEditedFileContents -> (expectedUpdatedFilePath, expectedEditedFileContents)
     // Maps original file contents to a edited filename and contents
-    UnorderedMap<string, std::pair<string, string>> fileToUpdatedFile;
+    UnorderedMap<string, pair<string, string>> fileToUpdatedFile;
     string actualEditedFileContents;
     for (auto &c : *codeAction.edit.value()->documentChanges) {
         auto file = getFileByUri(config, sourceFileContents, c->textDocument->uri);

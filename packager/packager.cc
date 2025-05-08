@@ -995,7 +995,7 @@ class EnforcePackagePrefix final {
     // but also in any eventual docs on the package system).
     int rootConsts = 0;
     bool useTestNamespace = false;
-    vector<std::pair<core::NameRef, core::LocOffsets>> tmpNameParts;
+    vector<pair<core::NameRef, core::LocOffsets>> tmpNameParts;
 
 public:
     EnforcePackagePrefix(core::Context ctx, const PackageInfoImpl &pkg)
@@ -2023,7 +2023,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 }
 
 void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
-    vector<std::pair<core::FileRef, core::packages::MangledName>> mapping;
+    vector<pair<core::FileRef, core::packages::MangledName>> mapping;
     mapping.reserve(files.size());
 
     {
