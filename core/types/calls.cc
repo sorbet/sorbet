@@ -369,7 +369,7 @@ struct GuessOverloadCandidate {
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
-    vector<std::pair<MethodRef, size_t>> allCandidates;
+    vector<pair<MethodRef, size_t>> allCandidates;
 
     { // create candidates and sort them by number of arguments(stable by symbol id)
         size_t i = 0;
