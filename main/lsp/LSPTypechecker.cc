@@ -72,13 +72,13 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
 
     LSPFileUpdates updates;
 
-    // Initialize the global state for the indexer
-    initialGS->trackUntyped = currentConfig.getClientConfig().enableHighlightUntyped;
-
     // We should always initialize with epoch 0.
     updates.epoch = 0;
     updates.typecheckingPath = TypecheckingPath::Slow;
     this->gs = std::move(initialGS);
+
+    // Initialize settings that come through from the client.
+    this->gs->trackUntyped = currentConfig.getClientConfig().enableHighlightUntyped;
 
     // Initialization typecheck is not cancelable.
     // TODO(jvilk): Make it preemptible.
@@ -178,7 +178,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                                                   bool isNoopUpdateForRetypecheck) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
-    // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
+    // We assume gs has been through the slow path, which is guaranteed by the initialization path not being cancelable.
     ENFORCE(gs->lspTypecheckCount > 0,
             "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
     // This property is set to 'true' in tests only if the update is expected to take the slow path and get cancelled.
@@ -681,7 +681,7 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
 LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery,
                                      WorkerPool &workers) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
-    // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
+    // We assume gs has been through the slow path, which is guaranteed by the initialization path not being cancelable.
     ENFORCE(gs->lspTypecheckCount > 0,
             "Tried to run a query with a GlobalState object that never had inferencer and resolver runs.");
 

@@ -149,7 +149,6 @@ TEST_CASE("IgnoresWatchmanUpdatesFromOpenFiles") {
     CHECK_EQ(updates->updates[0]->source(), fileContents);
 }
 
-// When deepCopying initialGS for typechecking, it should always have all previous updates applied to it.
 TEST_CASE("ClonesTypecheckingGSAtCorrectLogicalTime") {
     string fileV1 = "# typed: true";
     // V1 => V2: Slow path
@@ -292,7 +291,7 @@ TEST_CASE("MergesFileUpdatesProperlyAfterCancelation") {
         CHECK_EQ(contents, updates->updates[0]->source());
     }
 
-    // Cancel hover requests, and ensure that initialGS has the proper value of foo.rb
+    // Cancel hover requests, and ensure that the typechecker's GlobalState has the proper value of foo.rb
     vector<pair<int, string>> entries = {
         {0, fileV2},
         {1, fileV3},
