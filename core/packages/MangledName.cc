@@ -9,7 +9,7 @@ namespace sorbet::core::packages {
 MangledName MangledName::mangledNameFromParts(GlobalState &gs, const std::vector<std::string_view> &parts,
                                               ClassOrModuleRef owner) {
     // Foo::Bar => Foo_Bar
-    auto mangledName = absl::StrCat(absl::StrJoin(parts, "_"));
+    auto mangledName = absl::StrJoin(parts, "_");
 
     auto utf8Name = gs.enterNameUTF8(mangledName);
     auto packagerName = gs.freshNameUnique(UniqueNameKind::Packager, utf8Name, 1);
@@ -19,11 +19,42 @@ MangledName MangledName::mangledNameFromParts(GlobalState &gs, const std::vector
 MangledName MangledName::mangledNameFromParts(GlobalState &gs, const std::vector<NameRef> &parts,
                                               ClassOrModuleRef owner) {
     // Foo::Bar => Foo_Bar
-    auto mangledName = absl::StrCat(absl::StrJoin(parts, "_", NameFormatter(gs)));
+    auto mangledName = absl::StrJoin(parts, "_", NameFormatter(gs));
 
     auto utf8Name = gs.enterNameUTF8(mangledName);
     auto packagerName = gs.freshNameUnique(UniqueNameKind::Packager, utf8Name, 1);
     return MangledName(gs.enterNameConstant(packagerName), owner);
+}
+
+MangledName MangledName::lookupMangledName(const GlobalState &gs, const vector<string> &parts) {
+    // Foo::Bar => Foo_Bar
+    auto mangledName = absl::StrJoin(parts, "_");
+
+    auto utf8Name = gs.lookupNameUTF8(mangledName);
+    if (!utf8Name.exists()) {
+        return MangledName();
+    }
+
+    auto packagerName = gs.lookupNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
+    if (!packagerName.exists()) {
+        return MangledName();
+    }
+
+    auto owner = core::Symbols::PackageSpecRegistry();
+    for (auto part : parts) {
+        auto member = owner.data(gs)->findMember(gs, gs.lookupNameConstant(part));
+        if (!member.exists() || !member.isClassOrModule()) {
+            owner = core::Symbols::noClassOrModule();
+            break;
+        }
+        owner = member.asClassOrModuleRef();
+    }
+
+    if (owner == core::Symbols::PackageSpecRegistry()) {
+        owner = core::Symbols::noClassOrModule();
+    }
+
+    return MangledName(gs.lookupNameConstant(packagerName), owner);
 }
 
 } // namespace sorbet::core::packages
