@@ -581,9 +581,7 @@ NameDef names[] = {
     {"Merchant", "Merchant", true},
 
     // RBS synthetic generics
-    {"SyntheticGeneric", "<SyntheticGeneric>", true},
     {"syntheticSquareBrackets", "<syntheticSquareBrackets>"},
-    {"syntheticTypeMember", "<syntheticTypeMember>"},
 
     // Typos
     {"Int", "Int", true},

@@ -37,9 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C UnsupportedError1><<C <todo sym>>> < (::<todo sym>)
-      <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
-
-      <emptyTree>::<C T> = <self>.<syntheticTypeMember>()
+      <emptyTree>::<C T> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member()
     end
 
     class <emptyTree>::<C UselessSignature1><<C <todo sym>>> < (::<todo sym>)
@@ -47,9 +45,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C G1><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
-
-    <emptyTree>::<C U> = <self>.<syntheticTypeMember>()
+    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member()
   end
 
   g1_1 = <emptyTree>::<C G1>.new()
@@ -128,11 +124,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of initialize>
 
-    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
+    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member()
 
-    <emptyTree>::<C U> = <self>.<syntheticTypeMember>()
-
-    <emptyTree>::<C V> = <self>.<syntheticTypeMember>()
+    <emptyTree>::<C V> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member()
   end
 
   g2_1 = <cast:let>(<emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>).new(1, 2), <todo sym>, <emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>))
@@ -175,17 +169,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of initialize>
 
-    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
+    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member(:in)
 
-    <emptyTree>::<C U> = <self>.<syntheticTypeMember>(:in)
-
-    <emptyTree>::<C V> = <self>.<syntheticTypeMember>(:out)
+    <emptyTree>::<C V> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member(:out)
   end
 
   class <emptyTree>::<C G4><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
-
-    <emptyTree>::<C U> = <self>.<syntheticTypeMember>() do ||
+    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member() do ||
       {:upper => <emptyTree>::<C String>}
     end
   end
@@ -198,9 +188,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C G6><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
-
-    <emptyTree>::<C U> = <self>.<syntheticTypeMember>()
+    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member()
   end
 
   g6 = <emptyTree>::<C G6>.[](<emptyTree>::<C Integer>).new()
@@ -216,17 +204,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(arr2)
 
   class <emptyTree>::<C G7><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
-
-    <emptyTree>::<C U> = <self>.<syntheticTypeMember>() do ||
+    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member() do ||
       {:upper => <emptyTree>::<C Numeric>}
     end
   end
 
   class <emptyTree>::<C G8><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
-
-    <emptyTree>::<C E> = <self>.<syntheticTypeMember>(:out)
+    <emptyTree>::<C E> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member(:out)
   end
 
   g8_1 = <cast:let>(<emptyTree>::<C G8>.<syntheticSquareBrackets>(<emptyTree>::<C Numeric>).new(), <todo sym>, <emptyTree>::<C G8>.<syntheticSquareBrackets>(<emptyTree>::<C Numeric>))
@@ -242,9 +226,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(g8_3)
 
   class <emptyTree>::<C G9><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
-
-    <emptyTree>::<C E> = <self>.<syntheticTypeMember>(:in)
+    <emptyTree>::<C E> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member(:in)
   end
 
   g9_1 = <cast:let>(<emptyTree>::<C G9>.<syntheticSquareBrackets>(<emptyTree>::<C Numeric>).new(), <todo sym>, <emptyTree>::<C G9>.<syntheticSquareBrackets>(<emptyTree>::<C Numeric>))
@@ -264,9 +246,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C V> = <self>.type_member()
 
-    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
-
-    <emptyTree>::<C U> = <self>.<syntheticTypeMember>()
+    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member()
   end
 
   g10 = <cast:let>(<emptyTree>::<C G10>.[](<emptyTree>::<C Integer>, <emptyTree>::<C String>).new(), <todo sym>, <emptyTree>::<C G10>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>))
@@ -274,17 +254,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(g10)
 
   class <emptyTree>::<C G11><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
-
-    <emptyTree>::<C U> = <self>.<syntheticTypeMember>() do ||
+    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member() do ||
       {:fixed => <emptyTree>::<C Integer>, :upper => <emptyTree>::<C Numeric>}
     end
   end
 
   class <emptyTree>::<C G12><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(::<root>::<C Sorbet>::<C Private>::<C Static>::<C <SyntheticGeneric>>)
-
-    <emptyTree>::<C U> = <self>.<syntheticTypeMember>(:in) do ||
+    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member(:in) do ||
       {:upper => <emptyTree>::<C Numeric>}
     end
   end

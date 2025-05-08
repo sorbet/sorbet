@@ -182,13 +182,6 @@ public:
     }
 
     /*
-     * Create a `Sorbet::Private::Static::SyntheticGeneric` constant node.
-     */
-    static std::unique_ptr<parser::Node> SorbetPrivateStaticSyntheticGeneric(core::LocOffsets loc) {
-        return Const(loc, SorbetPrivateStatic(loc), core::Names::Constants::SyntheticGeneric());
-    }
-
-    /*
      * Create a `T::Hash` constant node.
      */
     static std::unique_ptr<parser::Node> T_Hash(core::LocOffsets loc) {

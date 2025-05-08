@@ -1125,11 +1125,7 @@ public:
         return MethodRef::fromRaw(57);
     }
 
-    static ClassOrModuleRef Sorbet_Private_Static_SyntheticGeneric() {
-        return ClassOrModuleRef::fromRaw(97);
-    }
-
-    static MethodRef Sorbet_Private_Static_SyntheticGeneric_syntheticTypeMember() {
+    static MethodRef Sorbet_Private_Static_typeMember() {
         return MethodRef::fromRaw(58);
     }
 

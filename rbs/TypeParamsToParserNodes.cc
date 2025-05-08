@@ -42,7 +42,8 @@ parser::NodeVec TypeParamsToParserNode::typeParams(const rbs_node_list_t *rbsTyp
         }
 
         auto typeConst = parser::MK::Const(loc, nullptr, nameConstant);
-        auto typeSend = parser::MK::Send(loc, parser::MK::Self(loc), core::Names::syntheticTypeMember(), loc, move(args));
+        auto typeSend =
+            parser::MK::Send(loc, parser::MK::SorbetPrivateStatic(loc), core::Names::typeMember(), loc, move(args));
 
         if (rbsTypeParam->default_type || rbsTypeParam->upper_bound) {
             auto typeTranslator = TypeToParserNode(ctx, vector<pair<core::LocOffsets, core::NameRef>>(), parser);

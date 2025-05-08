@@ -235,12 +235,6 @@ void SigsRewriter::insertTypeParams(parser::Node *node, unique_ptr<parser::Node>
     auto begin = parser::cast_node<parser::Begin>(body->get());
     ENFORCE(begin != nullptr);
 
-    auto send =
-        parser::MK::Send1(signature.commentLoc(), parser::MK::Self(signature.commentLoc()), core::Names::extend(),
-                          signature.commentLoc(), parser::MK::SorbetPrivateStaticSyntheticGeneric(signature.commentLoc()));
-
-    begin->stmts.emplace_back(move(send));
-
     for (auto &typeParam : typeParams) {
         begin->stmts.emplace_back(move(typeParam));
     }
