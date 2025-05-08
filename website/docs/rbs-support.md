@@ -703,6 +703,8 @@ end
 
 RBS supports generic classes and modules.
 
+### Type members
+
 [Type members](generics#type_member--type_template) can be specified using a
 `#:` comment on the class or module:
 
@@ -731,6 +733,43 @@ runtime and Sorbet will report an error if you try to use it:
 Box[Integer].new
    ^^^^^^^^^ error: Method `[]` does not exist on `T.class_of(Box)`
 ```
+
+Because of this, Sorbet will use the RBS comment type as the type of the class
+being instantiated:
+
+```ruby
+box = Box.new #: Box[Integer]
+T.reveal_type(box) # Revealed type: `Box[Integer]`
+```
+
+To change the type of the class being instantiated, the expression can be broken
+into multiple lines:
+
+```ruby
+nilable_box = Box #: Class[Box[Integer]]
+   .new #: Box[Integer]?
+T.reveal_type(nilable_box) # => `T.nilable(Box[Integer])`
+
+1.times do
+  nilable_box = nil
+end
+```
+
+You can also use an intermediate variable to change the type of the class being
+instantiated:
+
+```ruby
+box_of_integer = Box.new("foo") #: Box[Integer]
+T.reveal_type(box_of_integer) # => `Box[Integer]`
+nilable_box = box_of_integer #: as Box[Integer]?
+T.reveal_type(nilable_box) # => `T.nilable(Box[Integer])`
+
+1.times do
+  nilable_box = nil
+end
+```
+
+### Type templates
 
 There is no equivalent to `type_template` in RBS. Instead, you can define type
 members on the singleton class. So this:
@@ -762,6 +801,8 @@ end
 Note: there is no RBS equivalent to the generic `T.class_of()[]` syntax just
 yet.
 
+### Variance
+
 [Variance](generics.md#in-out-and-variance) can be specified using the `in` and
 `out` keywords:
 
@@ -773,6 +814,8 @@ end
 box = Box.new #: Box[Integer]
 box #: Box[Numeric]
 ```
+
+### Bounds
 
 By default, type parameters do not have
 [bounds](generics.md#bounds-on-type_members-and-type_templates-fixed-upper-lower):
