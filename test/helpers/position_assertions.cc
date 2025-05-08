@@ -1840,7 +1840,7 @@ void ApplyCodeActionAssertion::assertResults(string expectedPath, string expecte
             expectedPath, expectedContents, actualContents));
 }
 
-std::unique_ptr<TextDocumentEdit> ApplyCodeActionAssertion::sortEdits(std::unique_ptr<TextDocumentEdit> changes) {
+unique_ptr<TextDocumentEdit> ApplyCodeActionAssertion::sortEdits(unique_ptr<TextDocumentEdit> changes) {
     // First, sort the edits by increasing starting location and verify that none overlap.
     fast_sort(changes->edits, [](const auto &l, const auto &r) -> bool { return l->range->cmp(*r->range) < 0; });
     for (uint32_t i = 1; i < changes->edits.size(); i++) {
@@ -2380,7 +2380,7 @@ string_view trimString(std::string_view s) {
 } // namespace
 
 std::shared_ptr<StringPropertyAssertions>
-StringPropertyAssertions::make(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+StringPropertyAssertions::make(std::string_view filename, unique_ptr<Range> &range, int assertionLine,
                                std::string_view assertionContents, std::string_view assertionType) {
     vector<string> values = absl::StrSplit(assertionContents, ',');
     transform(values.begin(), values.end(), values.begin(), [](auto val) { return trimString(val); });
@@ -2388,7 +2388,7 @@ StringPropertyAssertions::make(std::string_view filename, std::unique_ptr<Range>
     return make_shared<StringPropertyAssertions>(filename, range, assertionLine, values, assertionType);
 }
 
-StringPropertyAssertions::StringPropertyAssertions(std::string_view filename, std::unique_ptr<Range> &range,
+StringPropertyAssertions::StringPropertyAssertions(std::string_view filename, unique_ptr<Range> &range,
                                                    int assertionLine, vector<string> values,
                                                    std::string_view assertionType)
     : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values){};

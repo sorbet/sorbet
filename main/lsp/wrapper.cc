@@ -57,11 +57,11 @@ vector<unique_ptr<LSPMessage>> SingleThreadedLSPWrapper::getLSPResponsesFor(cons
     return getLSPResponsesFor(LSPMessage::fromClient(json));
 }
 
-void MultiThreadedLSPWrapper::send(std::unique_ptr<LSPMessage> message) {
+void MultiThreadedLSPWrapper::send(unique_ptr<LSPMessage> message) {
     input->write(move(message));
 }
 
-void MultiThreadedLSPWrapper::send(vector<std::unique_ptr<LSPMessage>> &messages) {
+void MultiThreadedLSPWrapper::send(vector<unique_ptr<LSPMessage>> &messages) {
     input->write(move(messages));
 }
 
@@ -109,7 +109,7 @@ MultiThreadedLSPWrapper::~MultiThreadedLSPWrapper() {
 unique_ptr<SingleThreadedLSPWrapper>
 SingleThreadedLSPWrapper::createWithGlobalState(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> options,
                                                 shared_ptr<spdlog::logger> logger,
-                                                std::unique_ptr<KeyValueStore> kvstore, bool disableFastPath) {
+                                                unique_ptr<KeyValueStore> kvstore, bool disableFastPath) {
     options->runLSP = true;
     pipeline::setGlobalStateOptions(*gs, *options);
     // Note: To keep the constructor private, we need to construct with `new` and put it into a `unique_ptr` privately.

@@ -119,7 +119,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
 #endif
 }
 
-std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts) {
+unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts) {
     if (opts.cacheSensitiveOptions.noStdlib) {
         auto result = std::make_unique<core::GlobalState>(from.errorQueue, from.epochManager);
         result->initEmpty();

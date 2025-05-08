@@ -17,7 +17,7 @@ void UndoState::restore(unique_ptr<core::GlobalState> &gs, UnorderedMap<int, ast
     gs = move(evictedGs);
 }
 
-const std::unique_ptr<core::GlobalState> &UndoState::getEvictedGs() {
+const unique_ptr<core::GlobalState> &UndoState::getEvictedGs() {
     return evictedGs;
 }
 

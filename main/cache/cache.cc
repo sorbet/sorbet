@@ -229,7 +229,7 @@ SessionCache::~SessionCache() noexcept(false) {
     FileOps::removeEmptyDir(this->path);
 }
 
-std::unique_ptr<SessionCache> SessionCache::make(std::unique_ptr<const OwnedKeyValueStore> kvstore,
+unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore> kvstore,
                                                  ::spdlog::logger &logger, const options::Options &opts) {
     if (kvstore == nullptr || opts.cacheDir.empty()) {
         return nullptr;
@@ -258,14 +258,14 @@ std::unique_ptr<SessionCache> SessionCache::make(std::unique_ptr<const OwnedKeyV
     OwnedKeyValueStore::abort(std::move(kvstore));
 
     // Explicit construction because the constructor is private.
-    return std::unique_ptr<SessionCache>(new SessionCache{std::move(path)});
+    return unique_ptr<SessionCache>(new SessionCache{std::move(path)});
 }
 
 std::string_view SessionCache::kvstorePath() const {
     return std::string_view(this->path);
 }
 
-std::unique_ptr<KeyValueStore> SessionCache::open(std::shared_ptr<::spdlog::logger> logger,
+unique_ptr<KeyValueStore> SessionCache::open(std::shared_ptr<::spdlog::logger> logger,
                                                   const options::Options &opts) const {
     // If the session copy has disappeared, we return a nullptr to force downstream consumers to explicitly handle the
     // empty cache.

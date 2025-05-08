@@ -64,8 +64,8 @@ LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
 
 LSPTypechecker::~LSPTypechecker() {}
 
-void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalState> initialGS,
-                                std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers,
+void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> initialGS,
+                                unique_ptr<KeyValueStore> kvstore, WorkerPool &workers,
                                 const LSPConfiguration &currentConfig) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(!this->initialized);
@@ -109,7 +109,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
     config->logger->error("Resuming");
 }
 
-bool LSPTypechecker::typecheck(std::unique_ptr<LSPFileUpdates> updates, WorkerPool &workers,
+bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &workers,
                                vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
@@ -323,7 +323,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     return toTypecheck;
 }
 
-bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, std::unique_ptr<const OwnedKeyValueStore> ownedKvstore,
+bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const OwnedKeyValueStore> ownedKvstore,
                                  WorkerPool &workers, shared_ptr<core::ErrorFlusher> errorFlusher,
                                  LSPTypechecker::SlowPathMode mode) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
@@ -705,7 +705,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const vector<cor
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
 }
 
-std::unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(absl::Span<const core::FileRef> frefs) const {
+unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(absl::Span<const core::FileRef> frefs) const {
     auto result = std::make_unique<LSPFileUpdates>();
     auto &noop = *result;
     noop.typecheckingPath = TypecheckingPath::Fast;
@@ -718,7 +718,7 @@ std::unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(absl::Span<const c
     return result;
 }
 
-vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef> frefs,
+vector<unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef> frefs,
                                                                       WorkerPool &workers) const {
     auto updates = getNoopUpdate(frefs);
     auto errorCollector = make_shared<core::ErrorCollector>();
@@ -748,7 +748,7 @@ ast::ParsedFile LSPTypechecker::getIndexed(core::FileRef fref) const {
     return pipeline::indexOne(this->config->opts, *this->gs, fref);
 }
 
-std::unique_ptr<OwnedKeyValueStore> LSPTypechecker::getKvStore() const {
+unique_ptr<OwnedKeyValueStore> LSPTypechecker::getKvStore() const {
     if (this->sessionCache == nullptr) {
         return nullptr;
     }
@@ -851,8 +851,8 @@ void LSPTypechecker::updateGsFromOptions(const DidChangeConfigurationParams &opt
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &workers, LSPTypechecker &typechecker)
     : typechecker(typechecker), queue{queue}, workers(workers) {}
 
-void LSPTypecheckerDelegate::initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
-                                        std::unique_ptr<KeyValueStore> kvstore, const LSPConfiguration &currentConfig) {
+void LSPTypecheckerDelegate::initialize(InitializedTask &task, unique_ptr<core::GlobalState> gs,
+                                        unique_ptr<KeyValueStore> kvstore, const LSPConfiguration &currentConfig) {
     return typechecker.initialize(this->queue, std::move(gs), std::move(kvstore), this->workers, currentConfig);
 }
 
@@ -862,7 +862,7 @@ void LSPTypecheckerDelegate::resumeTaskQueue(InitializedTask &task) {
     this->queue.resume();
 }
 
-void LSPTypecheckerDelegate::typecheckOnFastPath(std::unique_ptr<LSPFileUpdates> updates,
+void LSPTypecheckerDelegate::typecheckOnFastPath(unique_ptr<LSPFileUpdates> updates,
                                                  vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
     if (updates->typecheckingPath != TypecheckingPath::Fast) {
         Exception::raise("Tried to typecheck a slow path edit on the fast path.");
@@ -872,7 +872,7 @@ void LSPTypecheckerDelegate::typecheckOnFastPath(std::unique_ptr<LSPFileUpdates>
     ENFORCE(committed);
 }
 
-vector<std::unique_ptr<core::Error>> LSPTypecheckerDelegate::retypecheck(vector<core::FileRef> frefs) const {
+vector<unique_ptr<core::Error>> LSPTypecheckerDelegate::retypecheck(vector<core::FileRef> frefs) const {
     return typechecker.retypecheck(frefs, workers);
 }
 
@@ -900,7 +900,7 @@ void LSPTypecheckerDelegate::updateGsFromOptions(const DidChangeConfigurationPar
     typechecker.updateGsFromOptions(options);
 }
 
-std::unique_ptr<LSPFileUpdates> LSPTypecheckerDelegate::getNoopUpdate(absl::Span<const core::FileRef> frefs) const {
+unique_ptr<LSPFileUpdates> LSPTypecheckerDelegate::getNoopUpdate(absl::Span<const core::FileRef> frefs) const {
     return typechecker.getNoopUpdate(frefs);
 }
 

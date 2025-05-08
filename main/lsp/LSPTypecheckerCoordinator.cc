@@ -140,7 +140,7 @@ void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task) {
 }
 
 shared_ptr<core::lsp::Task>
-LSPTypecheckerCoordinator::trySchedulePreemption(std::unique_ptr<LSPQueuePreemptionTask> preemptTask) {
+LSPTypecheckerCoordinator::trySchedulePreemption(unique_ptr<LSPQueuePreemptionTask> preemptTask) {
     auto wrappedTask = make_shared<TypecheckerTask>(
         *config, move(preemptTask), make_unique<LSPTypecheckerDelegate>(*taskQueue, *preemptionWorkers, typechecker),
         /* collectCounters */ false);

@@ -11,7 +11,7 @@ namespace sorbet::web_tracer_framework {
 
 class TracingTestHelper {
 public:
-    static std::unique_ptr<CounterImpl> generateCounterStateImpl() {
+    static unique_ptr<CounterImpl> generateCounterStateImpl() {
         auto impl = std::make_unique<CounterImpl>();
 
         // Deliberately output these in non-alphabetical order to maybe encourage the

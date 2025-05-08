@@ -312,7 +312,7 @@ ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol) : storage
     _sanityCheck();
 }
 
-ConstantLit::ConstantLit(core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original)
+ConstantLit::ConstantLit(core::SymbolRef symbol, unique_ptr<UnresolvedConstantLit> original)
     : storage(symbol, std::move(original)) {
     categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();

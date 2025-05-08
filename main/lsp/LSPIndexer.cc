@@ -306,7 +306,7 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, vector<std::shared_
     initialized = true;
 }
 
-std::unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {
+unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {
     Timer timeit(config->logger, "LSPIndexer::commitEdit");
     auto result = std::make_unique<LSPFileUpdates>();
     auto &update = *result;
@@ -426,7 +426,7 @@ std::unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams
     return result;
 }
 
-std::unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
+unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
     ENFORCE(edit.updates.size() <= config->opts.lspMaxFilesOnFastPath, "Too many files to index serially");
     return commitEdit(edit, *emptyWorkers);
 }

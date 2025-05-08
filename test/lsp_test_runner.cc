@@ -526,7 +526,7 @@ void verifyTypecheckRunInfo(const string &errorPrefix, vector<unique_ptr<LSPMess
 TEST_CASE("LSPTest") {
     /** The path to the test Ruby files on disk */
     vector<string> filenames;
-    std::unique_ptr<LSPWrapper> lspWrapper;
+    unique_ptr<LSPWrapper> lspWrapper;
 
     /** Test expectations. */
     Expectations test = Expectations::getExpectations(singleTest);

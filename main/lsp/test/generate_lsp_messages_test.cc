@@ -10,7 +10,7 @@ using namespace sorbet::realmain::lsp;
 
 namespace sorbet::realmain::lsp::test {
 
-template <typename T> using ParseTestLambda = function<void(std::unique_ptr<T> &)>;
+template <typename T> using ParseTestLambda = function<void(unique_ptr<T> &)>;
 
 template <typename T> unique_ptr<T> fromJSON(const string &jsonStr) {
     rapidjson::MemoryPoolAllocator<> alloc;
