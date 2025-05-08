@@ -381,7 +381,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             if (!overload.exists()) {
                 Exception::raise("Corruption of overloads?");
             } else {
-                allCandidates.emplace_back(std::make_pair(overload, getArity(gs, overload)));
+                allCandidates.emplace_back(make_pair(overload, getArity(gs, overload)));
                 current = overload;
             }
         }
