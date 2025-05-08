@@ -214,9 +214,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         auto fref = gs->findFileByPath(file->path());
         ENFORCE(fref.exists(), "New files are not supported in the fast path");
 
-        if (file->isPackage(*gs)) {
-            continue;
-        }
+        auto oldFile = gs->replaceFile(fref, std::move(file));
 
         if (shouldRunIncrementalNamer) {
             // Only set oldFoundHashesForFiles if we're processing a real edit.
@@ -233,10 +231,9 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             // This does mean that runFastPath for retypecheck will fail to report those type member
             // errors (because no-op edits will not run incremental namer), but that's fine because
             // GlobalState doesn't change for no-op edits, and retypecheck already drops all errors.
-            oldFoundHashesForFiles.emplace(fref, fref.data(*gs).getFileHash());
+            oldFoundHashesForFiles.emplace(fref, oldFile->getFileHash());
         }
 
-        gs->replaceFile(fref, std::move(file));
         // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
         fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
 
@@ -269,6 +266,9 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                     }
 
                     packageFiles.emplace_back(packageFref);
+                    if (!oldFoundHashesForFiles.contains(fref)) {
+                        oldFoundHashesForFiles.emplace(fref, fref.data(*gs).getFileHash());
+                    }
                 }
             }
         }
