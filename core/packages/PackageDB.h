@@ -72,6 +72,11 @@ public:
     const bool enforceLayering() const;
 
     const std::string_view errorHint() const;
+
+    // Expects to be called after packages have been defined, so that string package names provided
+    // at the command line can be resolved to actual packages.
+    void resolvePackagesWithRelaxedChecks(GlobalState &gs);
+
     bool allowRelaxedPackagerChecksFor(const MangledName mangledName) const;
 
 private:
@@ -81,7 +86,8 @@ private:
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;
     std::string errorHint_;
     std::vector<std::string> skipRBIExportEnforcementDirs_;
-    std::vector<MangledName> allowRelaxedPackagerChecksFor_;
+    std::vector<std::string> allowRelaxedPackagerChecksFor_;
+    UnorderedSet<MangledName> packagesWithRelaxedChecks_;
     std::vector<core::NameRef> layers_;
 
     // This vector is kept in sync with the size of the file table in the global state by

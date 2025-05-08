@@ -2012,6 +2012,9 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
                 packages.db.enterPackage(move(pkg));
             }
         }
+
+        // Must be called after any calls to enterPackage (i.e., only here)
+        gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
     }
 
     setPackageNameOnFiles(gs, files);
