@@ -676,13 +676,19 @@ This error is raised when a class or module is annotated with multiple RBS
 generic signature comments:
 
 ```ruby
-#: [T]
 #: [U]
+#: [V]
 class A
 end
 ```
 
-Only one is allowed.
+Only one signature is allowed:
+
+```ruby
+#: [U, V]
+class A
+end
+```
 
 ## 3702
 
