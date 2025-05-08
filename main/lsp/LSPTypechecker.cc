@@ -57,7 +57,7 @@ vector<ast::ParsedFile> sortParsedFiles(const core::GlobalState &gs, ErrorReport
 }
 } // namespace
 
-LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
+LSPTypechecker::LSPTypechecker(shared_ptr<const LSPConfiguration> config,
                                shared_ptr<core::lsp::PreemptionTaskManager> preemptManager)
     : typecheckerThreadId(this_thread::get_id()), config(move(config)), preemptManager(move(preemptManager)),
       errorReporter(make_shared<ErrorReporter>(this->config)) {}
@@ -97,7 +97,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> 
         // We copy our file table over to the indexer to ensure that we start with a consistent view of the workspace:
         // the indexer uses presence in the file table to determine if a file is new or not.
         auto files = gs->getFiles().subspan(1);
-        vector<std::shared_ptr<core::File>> indexerFiles{files.begin(), files.end()};
+        vector<shared_ptr<core::File>> indexerFiles{files.begin(), files.end()};
 
         absl::MutexLock lck{queue.getMutex()};
 
@@ -209,7 +209,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     }
 
     config->logger->debug("Added {} files that were not part of the edit to the update set", toTypecheck.size());
-    UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>> oldFoundHashesForFiles;
+    UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> oldFoundHashesForFiles;
     for (auto &file : updates.updatedFiles) {
         auto fref = gs->findFileByPath(file->path());
         ENFORCE(fref.exists(), "New files are not supported in the fast path");

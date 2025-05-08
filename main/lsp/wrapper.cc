@@ -70,7 +70,7 @@ void MultiThreadedLSPWrapper::send(const string &json) {
 }
 
 LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> opts,
-                       std::shared_ptr<spdlog::logger> logger,
+                       shared_ptr<spdlog::logger> logger,
                        shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
                        shared_ptr<spdlog::logger> typeErrorsConsole, unique_ptr<KeyValueStore> kvstore,
                        bool disableFastPath)

@@ -29,7 +29,7 @@ bool isComment(string_view line) {
 
 } // namespace
 
-void ConfigParser::readArgsFromFile(std::shared_ptr<spdlog::logger> logger, string_view filename,
+void ConfigParser::readArgsFromFile(shared_ptr<spdlog::logger> logger, string_view filename,
                                     vector<string> &stringArgs) {
     try {
         string argsP = FileOps::read(string(filename));
@@ -53,7 +53,7 @@ void ConfigParser::readArgsFromFile(std::shared_ptr<spdlog::logger> logger, stri
     }
 }
 
-cxxopts::ParseResult ConfigParser::parseConfig(std::shared_ptr<spdlog::logger> logger, int &argc, char **&argv,
+cxxopts::ParseResult ConfigParser::parseConfig(shared_ptr<spdlog::logger> logger, int &argc, char **&argv,
                                                cxxopts::Options options) {
     // Pointers into those args will be passed in argv
     vector<string> stringArgs;

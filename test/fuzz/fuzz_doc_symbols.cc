@@ -17,7 +17,7 @@ const auto fileName = "file.rb";
 const auto filePath = fmt::format("{}/{}", rootPath, fileName);
 const auto fileUri = sorbet::test::filePathToUri(rootUri, fileName);
 
-std::shared_ptr<sorbet::realmain::options::Options> mkOpts(string_view contents) {
+shared_ptr<sorbet::realmain::options::Options> mkOpts(string_view contents) {
     auto opts = std::make_shared<sorbet::realmain::options::Options>();
     opts->fs = std::make_shared<sorbet::test::MockFileSystem>(rootPath);
     opts->fs->writeFile(filePath, contents);

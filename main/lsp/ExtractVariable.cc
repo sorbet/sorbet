@@ -7,7 +7,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-void logDebugInfo(const std::shared_ptr<spdlog::logger> logger, const core::GlobalState &gs,
+void logDebugInfo(const shared_ptr<spdlog::logger> logger, const core::GlobalState &gs,
                   const core::Loc selectionLoc, const string message) {
     logger->error("msg=\"ExtractToVariable: {}\" selectionLoc=\"{}\"", message, selectionLoc.showRaw(gs));
     logger->error("source=\"{}\"", absl::CEscape(selectionLoc.file().data(gs).source()));
@@ -375,7 +375,7 @@ class ExpressionPtrSearchWalk {
     vector<const ast::ExpressionPtr *> enclosingScopeStack;
     vector<core::LocOffsets> skippedLocsRange;
     vector<core::LocOffsets> skippedLocsExact;
-    const std::shared_ptr<spdlog::logger> logger;
+    const shared_ptr<spdlog::logger> logger;
     const core::Loc selectionLoc;
 
     // NOTE: Might want to profile and switch to UnorderedSet.
@@ -453,7 +453,7 @@ public:
     vector<core::LocOffsets> matches;
     ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, vector<core::LocOffsets> skippedLocsRange,
                             vector<core::LocOffsets> skippedLocsExact,
-                            const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc)
+                            const shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc)
         : targetNode(matchingNode), skippedLocsRange(skippedLocsRange), skippedLocsExact(skippedLocsExact),
           logger(logger), selectionLoc(selectionLoc) {}
 

@@ -13,11 +13,11 @@ using namespace std;
 
 namespace sorbet::realmain::lsp::watchman {
 
-WatchmanProcess::WatchmanProcess(std::shared_ptr<spdlog::logger> logger, string_view watchmanPath,
+WatchmanProcess::WatchmanProcess(shared_ptr<spdlog::logger> logger, string_view watchmanPath,
                                  string_view workSpace, vector<string> extensions,
                                  MessageQueueState &messageQueue, absl::Mutex &messageQueueMutex,
                                  absl::Notification &initializedNotification,
-                                 std::shared_ptr<const LSPConfiguration> config)
+                                 shared_ptr<const LSPConfiguration> config)
     : logger(std::move(logger)), watchmanPath(string(watchmanPath)), workSpace(string(workSpace)),
       extensions(std::move(extensions)),
       thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))), messageQueue(messageQueue),

@@ -19,7 +19,7 @@ bool isTypecheckRun(const LSPMessage &msg) {
 }
 } // namespace
 
-void ProtocolTest::resetState(std::shared_ptr<realmain::options::Options> opts) {
+void ProtocolTest::resetState(shared_ptr<realmain::options::Options> opts) {
     fs = make_shared<MockFileSystem>(rootPath);
     diagnostics.clear();
     sourceFileContents.clear();
