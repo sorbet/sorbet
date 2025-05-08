@@ -992,7 +992,7 @@ CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, uni
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCompletion), params(move(params)) {}
 
 unique_ptr<CompletionItem> CompletionTask::getCompletionItemForUntyped(const core::GlobalState &gs, core::Loc queryLoc,
-                                                                       size_t sortIdx, std::string_view message) {
+                                                                       size_t sortIdx, string_view message) {
     string label(message);
     auto item = make_unique<CompletionItem>(label);
     item->sortText = formatSortIndex(sortIdx);

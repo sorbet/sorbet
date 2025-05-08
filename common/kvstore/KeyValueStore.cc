@@ -203,7 +203,7 @@ int OwnedKeyValueStore::commit() {
     return rc;
 }
 
-std::string_view OwnedKeyValueStore::kvstorePath() const {
+string_view OwnedKeyValueStore::kvstorePath() const {
     ENFORCE(kvstore != nullptr);
     // This is used in error handling code, so we want to degrade gracefully if the ENFORCE is broken.
     if (kvstore == nullptr) {
@@ -217,7 +217,7 @@ OwnedKeyValueStore::~OwnedKeyValueStore() {
     abort();
 }
 
-void OwnedKeyValueStore::writeInternal(std::string_view key, void *value, size_t len) {
+void OwnedKeyValueStore::writeInternal(string_view key, void *value, size_t len) {
     if (writerId != this_thread::get_id()) {
         throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0, kvstorePath());
     }
@@ -490,7 +490,7 @@ void OwnedKeyValueStore::copyTo(const string &path) const {
         if (rc == ENOENT) {
         }
         try {
-            filesystem::create_directories(std::string_view(path));
+            filesystem::create_directories(string_view(path));
         } catch (filesystem::filesystem_error &e) {
             fmt::print(stderr,
                        "'{}' does not exist and could not be created. "

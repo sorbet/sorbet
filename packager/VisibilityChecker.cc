@@ -281,7 +281,7 @@ public:
             // great to remove this, but this was the behavior of the previous packager implementation.
             exportParentNamespace(ctx, sym.data(ctx)->owner);
         } else {
-            std::string_view kind = ""sv;
+            string_view kind = ""sv;
             switch (litSymbol.kind()) {
                 case core::SymbolRef::Kind::ClassOrModule:
                 case core::SymbolRef::Kind::FieldOrStaticField:

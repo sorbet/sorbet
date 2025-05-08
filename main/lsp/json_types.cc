@@ -247,7 +247,7 @@ void SorbetWorkspaceEditParams::merge(SorbetWorkspaceEditParams &newerParams) {
     // 'newerParams' has newer updates, so merge its contents into this object.
     epoch = newerParams.epoch;
 
-    UnorderedSet<std::string_view> encounteredFiles;
+    UnorderedSet<string_view> encounteredFiles;
     auto newUpdates = move(newerParams.updates);
 
     for (auto &f : newUpdates) {

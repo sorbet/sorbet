@@ -8,7 +8,7 @@
 using namespace std;
 
 namespace sorbet::core::packages {
-std::string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level) {
+string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level) {
     switch (level) {
         case core::packages::StrictDependenciesLevel::False:
             return "false";

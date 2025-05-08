@@ -471,7 +471,7 @@ public:
                 exportLoc = loc.endPos() - "end"sv.size() - 1;
             }
 
-            std::string_view file_source = loc.file().data(gs).source();
+            string_view file_source = loc.file().data(gs).source();
 
             // Defensively guard against the first export loc or the package's loc being invalid.
             if (exportLoc <= 0 || exportLoc >= file_source.size()) {

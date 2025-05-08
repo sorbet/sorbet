@@ -17,7 +17,7 @@ const auto fileName = "file.rb";
 const auto filePath = fmt::format("{}/{}", rootPath, fileName);
 const auto fileUri = sorbet::test::filePathToUri(rootUri, fileName);
 
-std::shared_ptr<sorbet::realmain::options::Options> mkOpts(std::string_view contents) {
+std::shared_ptr<sorbet::realmain::options::Options> mkOpts(string_view contents) {
     auto opts = std::make_shared<sorbet::realmain::options::Options>();
     opts->fs = std::make_shared<sorbet::test::MockFileSystem>(rootPath);
     opts->fs->writeFile(filePath, contents);
@@ -34,7 +34,7 @@ unique_ptr<sorbet::core::GlobalState> mkGlobalState(const sorbet::realmain::opti
     return gs;
 }
 
-unique_ptr<sorbet::realmain::lsp::SingleThreadedLSPWrapper> mkLSPWrapper(std::string_view contents) {
+unique_ptr<sorbet::realmain::lsp::SingleThreadedLSPWrapper> mkLSPWrapper(string_view contents) {
     unique_ptr<sorbet::KeyValueStore> kvStore;
     auto opts = mkOpts(contents);
     static const auto commonGs = mkGlobalState(*opts, kvStore);

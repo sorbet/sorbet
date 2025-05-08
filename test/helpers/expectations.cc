@@ -193,7 +193,7 @@ Expectations Expectations::getExpectations(string singleTest) {
 }
 
 // A variant of CHECK_EQ that prints a diff on failure.
-void CHECK_EQ_DIFF(std::string_view expected, std::string_view actual, std::string_view errorMessage) {
+void CHECK_EQ_DIFF(string_view expected, string_view actual, string_view errorMessage) {
     if (expected == actual) {
         return;
     }

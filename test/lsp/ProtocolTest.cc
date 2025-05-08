@@ -220,7 +220,7 @@ void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messa
     }
 }
 
-string ProtocolTest::readFile(std::string_view uri) {
+string ProtocolTest::readFile(string_view uri) {
     auto readFileResponses = send(LSPMessage(make_unique<RequestMessage>(
         "2.0", nextId++, LSPMethod::SorbetReadFile, make_unique<TextDocumentIdentifier>(string(uri)))));
     CHECK_EQ(readFileResponses.size(), 1);
@@ -233,7 +233,7 @@ string ProtocolTest::readFile(std::string_view uri) {
     return "";
 }
 
-vector<unique_ptr<Location>> ProtocolTest::getDefinitions(std::string_view uri, int line, int character) {
+vector<unique_ptr<Location>> ProtocolTest::getDefinitions(string_view uri, int line, int character) {
     auto defResponses = send(*getDefinition(uri, line, character));
     CHECK_EQ(defResponses.size(), 1);
     if (defResponses.size() == 1) {
@@ -245,7 +245,7 @@ vector<unique_ptr<Location>> ProtocolTest::getDefinitions(std::string_view uri, 
     return {};
 }
 
-vector<unique_ptr<Location>> ProtocolTest::getReferences(std::string_view uri, int line, int character) {
+vector<unique_ptr<Location>> ProtocolTest::getReferences(string_view uri, int line, int character) {
     auto refResponses = send(*getReference(uri, line, character));
     CHECK_EQ(refResponses.size(), 1);
     if (refResponses.size() == 1) {

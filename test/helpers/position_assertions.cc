@@ -2078,7 +2078,7 @@ string pluralized_count(string_view word, int count) {
 
 void addFailureAtLocationWithSource(const Location &location,
                                     const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                                    const LSPConfiguration &config, std::string_view message) {
+                                    const LSPConfiguration &config, string_view message) {
     if (!config.isUriInWorkspace(location.uri)) {
         ADD_FAIL_CHECK_AT(location.uri.c_str(), location.range->start->line + 1,
                           fmt::format("{}\n(source unavailable for {})\n", message, location.uri));
@@ -2275,7 +2275,7 @@ string FindImplementationAssertion::toString() const {
 
 void FindImplementationAssertion::check(
     const UnorderedMap<string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper, int &nextId,
-    std::string_view symbol, const Location &queryLoc,
+    string_view symbol, const Location &queryLoc,
     const vector<std::shared_ptr<ImplementationAssertion>> &allImpls) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
@@ -2368,7 +2368,7 @@ string ShowSymbolAssertion::toString() const {
 }
 
 namespace {
-string_view trimString(std::string_view s) {
+string_view trimString(string_view s) {
     const char *whitespace = " \t";
     size_t begin = s.find_first_not_of(whitespace);
     if (begin == string::npos) {
@@ -2380,21 +2380,21 @@ string_view trimString(std::string_view s) {
 } // namespace
 
 std::shared_ptr<StringPropertyAssertions>
-StringPropertyAssertions::make(std::string_view filename, unique_ptr<Range> &range, int assertionLine,
-                               std::string_view assertionContents, std::string_view assertionType) {
+StringPropertyAssertions::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                               string_view assertionContents, string_view assertionType) {
     vector<string> values = absl::StrSplit(assertionContents, ',');
     transform(values.begin(), values.end(), values.begin(), [](auto val) { return trimString(val); });
 
     return make_shared<StringPropertyAssertions>(filename, range, assertionLine, values, assertionType);
 }
 
-StringPropertyAssertions::StringPropertyAssertions(std::string_view filename, unique_ptr<Range> &range,
+StringPropertyAssertions::StringPropertyAssertions(string_view filename, unique_ptr<Range> &range,
                                                    int assertionLine, vector<string> values,
-                                                   std::string_view assertionType)
+                                                   string_view assertionType)
     : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values){};
 
 std::optional<vector<string>>
-StringPropertyAssertions::getValues(std::string_view type,
+StringPropertyAssertions::getValues(string_view type,
                                     const vector<std::shared_ptr<RangeAssertion>> &assertions) {
     for (auto &assertion : assertions) {
         if (auto codeActionAssertion = dynamic_pointer_cast<StringPropertyAssertions>(assertion)) {

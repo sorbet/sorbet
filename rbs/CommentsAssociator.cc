@@ -11,9 +11,9 @@ using namespace std;
 
 namespace sorbet::rbs {
 
-const std::string_view CommentsAssociator::RBS_PREFIX = "#:";
-const std::string_view CommentsAssociator::ANNOTATION_PREFIX = "# @";
-const std::string_view CommentsAssociator::MULTILINE_RBS_PREFIX = "#|";
+const string_view CommentsAssociator::RBS_PREFIX = "#:";
+const string_view CommentsAssociator::ANNOTATION_PREFIX = "# @";
+const string_view CommentsAssociator::MULTILINE_RBS_PREFIX = "#|";
 
 namespace {
 bool isVisibilitySend(const parser::Send *send) {
