@@ -1119,7 +1119,7 @@ public:
                     // If the insert succeeds below, the current definition is the first one.
                     // We need to use the first def for out-of-order checking, since any
                     // reference *before* the first def will be out of order.
-                    firstDefinitionLocs.insert(std::make_pair(sym, declLoc));
+                    firstDefinitionLocs.insert(make_pair(sym, declLoc));
                 }
             }
         }
@@ -1273,7 +1273,7 @@ public:
                     // If the insert succeeds below, the current definition is the first one.
                     // We need to use the first def for out-of-order checking, since any
                     // reference *before* the first def will be out of order.
-                    firstDefinitionLocs.insert(std::make_pair(id->symbol(), declLoc));
+                    firstDefinitionLocs.insert(make_pair(id->symbol(), declLoc));
                 }
             }
         }
