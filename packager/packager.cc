@@ -104,6 +104,9 @@ struct PackageName {
     core::packages::MangledName mangledName;
     FullyQualifiedName fullName;
 
+    PackageName(core::ClassOrModuleRef owner, FullyQualifiedName &&fullName)
+        : mangledName(core::packages::MangledName(owner)), fullName(move(fullName)) {}
+
     // Pretty print the package's (user-observable) name (e.g. Foo::Bar)
     string toString(const core::GlobalState &gs) const {
         return absl::StrJoin(fullName.parts, "::", core::packages::NameFormatter(gs));
@@ -698,24 +701,17 @@ PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *
                            core::ClassOrModuleRef symbol) {
     ENFORCE(constantLit != nullptr);
 
-    PackageName pName;
-    pName.fullName = getFullyQualifiedName(ctx, constantLit);
-
-    // pname.mangledName will be populated later, when we have a mutable GlobalState
-    pName.mangledName.owner = symbol;
-
-    return pName;
+    return PackageName(symbol, getFullyQualifiedName(ctx, constantLit));
 }
 
 PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     ENFORCE(constantLit != nullptr);
 
-    PackageName pName;
-    pName.fullName = getFullyQualifiedName(ctx, constantLit);
+    auto fullName = getFullyQualifiedName(ctx, constantLit);
 
     // Since packager now runs after namer, we know that these symbols are entered.
     auto owner = core::Symbols::PackageSpecRegistry();
-    for (auto part : pName.fullName.parts) {
+    for (auto part : fullName.parts) {
         auto member = owner.data(ctx)->findMember(ctx, part);
         if (!member.exists() || !member.isClassOrModule()) {
             owner = core::Symbols::noClassOrModule();
@@ -728,9 +724,7 @@ PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedCon
         owner = core::Symbols::noClassOrModule();
     }
 
-    pName.mangledName.owner = owner;
-
-    return pName;
+    return PackageName(owner, move(fullName));
 }
 
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
@@ -1599,12 +1593,6 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     bodyWalk.finalize(ctx);
 }
 
-// TODO(jez) Rename this to lookupMangledName, and make it take a const GlobalState
-void populateMangledName(core::GlobalState &gs, PackageName &pName) {
-    pName.mangledName =
-        core::packages::MangledName::mangledNameFromParts(gs, pName.fullName.parts, pName.mangledName.owner);
-}
-
 void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
     auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
     auto extraPackageFilesDirectorySlashDeprecatedPrefixes =
@@ -1661,8 +1649,6 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
 void populatePackageEdges(core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
     rewritePackageSpec(gs, package, info);
     for (auto &importedPackageName : info.importedPackageNames) {
-        populateMangledName(gs, importedPackageName.name);
-
         if (importedPackageName.name.mangledName == info.name.mangledName) {
             if (auto e = gs.beginError(core::Loc(package.file, importedPackageName.name.fullName.loc),
                                        core::errors::Packager::NoSelfImport)) {
@@ -1678,10 +1664,6 @@ void populatePackageEdges(core::GlobalState &gs, ast::ParsedFile &package, Packa
                 e.setHeader("Package `{}` cannot {} itself", info.name.toString(gs), import_);
             }
         }
-    }
-
-    for (auto &visibleTo : info.visibleTo_) {
-        populateMangledName(gs, visibleTo.name);
     }
 }
 
@@ -1998,7 +1980,6 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
                 // surfaced that error to the user. Nothing to do here.
                 continue;
             }
-            populateMangledName(gs, pkg->name);
 
             auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
             if (prevPkg.exists() && prevPkg.declLoc() != pkg->declLoc()) {
