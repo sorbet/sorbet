@@ -2918,7 +2918,8 @@ public:
         auto sym = id->symbol();
         auto send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send && (sym.isTypeAlias(ctx) || sym.isTypeMember())) {
-            ENFORCE(!sym.isTypeMember() || send->recv.isSelfReference());
+            ENFORCE(!sym.isTypeMember() ||
+                    (send->recv.isSelfReference() || ast::MK::isSorbetPrivateStatic(send->recv)));
 
             if ((sym.isTypeAlias(ctx) && send->fun != core::Names::typeAlias()) ||
                 (sym.isTypeMember() && send->fun != core::Names::typeMember() &&

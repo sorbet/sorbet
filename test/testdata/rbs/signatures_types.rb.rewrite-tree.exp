@@ -160,7 +160,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Array>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_array<<todo method>>(&<blk>)
@@ -168,7 +168,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Array>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_array_root<<todo method>>(&<blk>)
@@ -176,7 +176,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Class>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Class>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_class<<todo method>>(&<blk>)
@@ -184,7 +184,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Class>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Class>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_class_root<<todo method>>(&<blk>)
@@ -192,7 +192,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Enumerable>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Enumerable>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerable<<todo method>>(&<blk>)
@@ -200,7 +200,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Enumerable>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Enumerable>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerable_root<<todo method>>(&<blk>)
@@ -208,7 +208,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Enumerator>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Enumerator>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerator<<todo method>>(&<blk>)
@@ -216,7 +216,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Enumerator>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Enumerator>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerator_root<<todo method>>(&<blk>)
@@ -224,7 +224,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Lazy>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Lazy>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerator_lazy<<todo method>>(&<blk>)
@@ -232,7 +232,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Lazy>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Lazy>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerator_lazy_root<<todo method>>(&<blk>)
@@ -240,7 +240,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Chain>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Chain>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerator_chain<<todo method>>(&<blk>)
@@ -248,7 +248,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Chain>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Chain>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_enumerator_chain_root<<todo method>>(&<blk>)
@@ -256,7 +256,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Hash>.[](<emptyTree>::<C String>, <emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Hash>.<syntheticSquareBrackets>(<emptyTree>::<C String>, <emptyTree>::<C Integer>))
   end
 
   def generic_type_hash<<todo method>>(&<blk>)
@@ -264,7 +264,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Hash>.[](<emptyTree>::<C String>, <emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Hash>.<syntheticSquareBrackets>(<emptyTree>::<C String>, <emptyTree>::<C Integer>))
   end
 
   def generic_type_hash_root<<todo method>>(&<blk>)
@@ -272,7 +272,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Set>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Set>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_set<<todo method>>(&<blk>)
@@ -280,7 +280,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Set>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Set>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_set_root<<todo method>>(&<blk>)
@@ -288,7 +288,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Range>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Range>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_range<<todo method>>(&<blk>)
@@ -296,7 +296,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(::<root>::<C T>::<C Range>.[](<emptyTree>::<C Integer>))
+    <self>.returns(::<root>::<C T>::<C Range>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_range_root<<todo method>>(&<blk>)
@@ -304,7 +304,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C Integer>))
+    <self>.returns(<emptyTree>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type_t_array<<todo method>>(&<blk>)
@@ -312,7 +312,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C String>, <emptyTree>::<C Integer>))
+    <self>.returns(<emptyTree>::<C T>::<C Hash>.<syntheticSquareBrackets>(<emptyTree>::<C String>, <emptyTree>::<C Integer>))
   end
 
   def generic_type_t_hash<<todo method>>(&<blk>)
@@ -320,7 +320,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(<emptyTree>::<C GenericType1>.[](<emptyTree>::<C Integer>))
+    <self>.returns(<emptyTree>::<C GenericType1>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
   def generic_type5<<todo method>>(&<blk>)
@@ -328,7 +328,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.returns(<emptyTree>::<C GenericType2>.[](<emptyTree>::<C GenericType1>.[](::<root>::<C T>.untyped()), <emptyTree>::<C GenericType3>.[](<emptyTree>::<C Integer>, <emptyTree>::<C String>, ::<root>::<C T>.untyped())))
+    <self>.returns(<emptyTree>::<C GenericType2>.<syntheticSquareBrackets>(<emptyTree>::<C GenericType1>.<syntheticSquareBrackets>(::<root>::<C T>.untyped()), <emptyTree>::<C GenericType3>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>, ::<root>::<C T>.untyped())))
   end
 
   def generic_type6<<todo method>>(&<blk>)

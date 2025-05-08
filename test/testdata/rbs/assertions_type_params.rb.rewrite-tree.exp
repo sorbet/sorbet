@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     begin
       x = <cast:let>(a, <todo sym>, ::<root>::<C T>.type_parameter(:A))
       <emptyTree>::<C T>.reveal_type(x)
-      y = <cast:let>([], <todo sym>, ::<root>::<C T>::<C Array>.[](::<root>::<C T>.type_parameter(:B)))
+      y = <cast:let>([], <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(::<root>::<C T>.type_parameter(:B)))
       <emptyTree>::<C T>.reveal_type(y)
       z = <cast:let>(nil, <todo sym>, ::<root>::<C T>.nilable(::<root>::<C T>.type_parameter(:C)))
       <emptyTree>::<C T>.reveal_type(z)

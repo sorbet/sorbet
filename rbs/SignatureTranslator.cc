@@ -1,6 +1,7 @@
 #include "rbs/SignatureTranslator.h"
 #include "core/errors/rewriter.h"
 #include "rbs/MethodTypeToParserNode.h"
+#include "rbs/TypeParamsToParserNodes.h"
 #include "rbs/TypeToParserNode.h"
 #include "rbs/rbs_common.h"
 
@@ -111,6 +112,28 @@ unique_ptr<parser::Node> SignatureTranslator::translateType(const RBSDeclaration
 
     auto typeTranslator = TypeToParserNode(ctx, vector<pair<core::LocOffsets, core::NameRef>>(), parser);
     return typeTranslator.toParserNode(rbsType, declaration);
+}
+
+parser::NodeVec SignatureTranslator::translateTypeParams(const RBSDeclaration &declaration) {
+    rbs_string_t rbsString = makeRBSString(declaration.string);
+    const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
+
+    Parser parser(rbsString, encoding);
+    rbs_node_list_t *rbsTypeParams = parser.parseTypeParams();
+
+    if (parser.hasError()) {
+        rbs_range_t tokenRange = parser.getError()->token.range;
+        core::LocOffsets offset = declaration.typeLocFromRange(tokenRange);
+
+        if (auto e = ctx.beginError(offset, core::errors::Rewriter::RBSSyntaxError)) {
+            e.setHeader("Failed to parse RBS type parameters ({})", parser.getError()->message);
+        }
+
+        return parser::NodeVec();
+    }
+
+    auto typeParamsToParserNode = TypeParamsToParserNode(ctx, std::move(parser));
+    return typeParamsToParserNode.typeParams(rbsTypeParams, declaration);
 }
 
 } // namespace sorbet::rbs

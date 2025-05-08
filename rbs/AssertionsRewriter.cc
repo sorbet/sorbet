@@ -178,6 +178,48 @@ vector<pair<core::LocOffsets, core::NameRef>> extractTypeParams(parser::Node *si
     return typeParams;
 }
 
+bool sameConstant(core::MutableContext ctx, unique_ptr<parser::Node> &a, unique_ptr<parser::Node> &b) {
+    auto aConst = parser::cast_node<parser::Const>(a.get());
+    auto bConst = parser::cast_node<parser::Const>(b.get());
+
+    if (aConst == nullptr || bConst == nullptr) {
+        return false;
+    }
+
+    if (aConst->name != bConst->name) {
+        return false;
+    }
+
+    if ((aConst->scope == nullptr && bConst->scope != nullptr) ||
+        (aConst->scope != nullptr && bConst->scope == nullptr)) {
+        return false;
+    }
+
+    return (aConst->scope == nullptr && bConst->scope == nullptr) || sameConstant(ctx, aConst->scope, bConst->scope);
+}
+
+void maybeSupplyGenericTypeArguments(core::MutableContext ctx, unique_ptr<parser::Node> *node,
+                                     unique_ptr<parser::Node> *type) {
+    // We only rewrite `.new` calls
+    auto newSend = parser::cast_node<parser::Send>(node->get());
+    if (newSend == nullptr || newSend->method != core::Names::new_()) {
+        return;
+    }
+
+    // We only rewrite when casted to a generic type
+    auto bracketSend = parser::cast_node<parser::Send>(type->get());
+    if (bracketSend == nullptr || bracketSend->method != core::Names::syntheticSquareBrackets()) {
+        return;
+    }
+
+    // We only rewrite when the generic type is the same as the instantiated one
+    if (!sameConstant(ctx, newSend->receiver, bracketSend->receiver)) {
+        return;
+    }
+
+    newSend->receiver = type->get()->deepCopy();
+}
+
 } // namespace
 
 /**
@@ -410,6 +452,8 @@ AssertionsRewriter::insertCast(unique_ptr<parser::Node> node,
 
     auto type = move(pair->first);
     auto kind = pair->second;
+
+    maybeSupplyGenericTypeArguments(ctx, &node, &type);
 
     if (kind == InlineComment::Kind::LET) {
         return parser::MK::TLet(type->loc, move(node), move(type));

@@ -266,7 +266,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
-    <self>.type_parameters(:X).params(:x, ::<root>::<C T>.all(::<root>::<C T>.type_parameter(:X), <emptyTree>::<C Object>)).returns(::<root>::<C T>::<C Class>.[](::<root>::<C T>.type_parameter(:X)))
+    <self>.type_parameters(:X).params(:x, ::<root>::<C T>.all(::<root>::<C T>.type_parameter(:X), <emptyTree>::<C Object>)).returns(::<root>::<C T>::<C Class>.<syntheticSquareBrackets>(::<root>::<C T>.type_parameter(:X)))
   end
 
   def method19<<todo method>>(x, &<blk>)

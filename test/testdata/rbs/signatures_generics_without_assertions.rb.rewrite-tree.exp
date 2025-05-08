@@ -1,0 +1,13 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C G1><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member()
+  end
+
+  g1_1 = <emptyTree>::<C G1>.new()
+
+  <emptyTree>::<C T>.reveal_type(g1_1)
+
+  g1_2 = <emptyTree>::<C G1>.new()
+
+  <emptyTree>::<C T>.reveal_type(g1_2)
+end

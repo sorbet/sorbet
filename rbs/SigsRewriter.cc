@@ -6,6 +6,7 @@
 #include "core/errors/rewriter.h"
 #include "parser/helper.h"
 #include "rbs/SignatureTranslator.h"
+#include "rbs/TypeParamsToParserNodes.h"
 
 using namespace std;
 
@@ -205,6 +206,40 @@ void insertHelpers(unique_ptr<parser::Node> *body, parser::NodeVec helpers) {
 
 } // namespace
 
+void SigsRewriter::insertTypeParams(parser::Node *node, unique_ptr<parser::Node> *body) {
+    ENFORCE(parser::isa_node<parser::Class>(node) || parser::isa_node<parser::Module>(node) ||
+                parser::isa_node<parser::SClass>(node),
+            "Unimplemented node type: {}", node->nodeName());
+
+    auto comments = commentsForNode(node);
+    if (comments.signatures.empty()) {
+        return;
+    }
+
+    if (comments.signatures.size() > 1) {
+        if (auto e = ctx.beginError(comments.signatures[0].commentLoc(),
+                                    core::errors::Rewriter::RBSMultipleGenericSignatures)) {
+            e.setHeader("Generic classes and modules can only have one RBS generic signature");
+            return;
+        }
+    }
+
+    auto signature = comments.signatures[0];
+    auto typeParamsTranslator = SignatureTranslator(ctx);
+    auto typeParams = typeParamsTranslator.translateTypeParams(signature);
+
+    if (typeParams.empty()) {
+        return;
+    }
+
+    auto begin = parser::cast_node<parser::Begin>(body->get());
+    ENFORCE(begin != nullptr);
+
+    for (auto &typeParam : typeParams) {
+        begin->stmts.emplace_back(move(typeParam));
+    }
+}
+
 Comments SigsRewriter::commentsForNode(parser::Node *node) {
     auto comments = Comments{};
     enum class SignatureState { None, Started, Multiline };
@@ -371,12 +406,9 @@ unique_ptr<parser::Node> SigsRewriter::rewriteClass(unique_ptr<parser::Node> nod
     }
 
     auto comments = commentsForNode(node.get());
-    if (comments.annotations.empty()) {
-        return node;
-    }
-
     auto helpers = extractHelpers(ctx, comments.annotations);
-    if (helpers.empty()) {
+
+    if (helpers.empty() && comments.signatures.empty()) {
         return node;
     }
 
@@ -384,18 +416,27 @@ unique_ptr<parser::Node> SigsRewriter::rewriteClass(unique_ptr<parser::Node> nod
         node.get(),
         [&](parser::Class *klass) {
             klass->body = maybeWrapBody(node, move(klass->body));
-            maybeInsertExtendTHelpers(&klass->body);
-            insertHelpers(&klass->body, move(helpers));
+            if (!helpers.empty()) {
+                maybeInsertExtendTHelpers(&klass->body);
+                insertHelpers(&klass->body, move(helpers));
+            }
+            insertTypeParams(klass, &klass->body);
         },
         [&](parser::Module *module) {
             module->body = maybeWrapBody(node, move(module->body));
-            maybeInsertExtendTHelpers(&module->body);
-            insertHelpers(&module->body, move(helpers));
+            if (!helpers.empty()) {
+                maybeInsertExtendTHelpers(&module->body);
+                insertHelpers(&module->body, move(helpers));
+            }
+            insertTypeParams(module, &module->body);
         },
         [&](parser::SClass *sclass) {
             sclass->body = maybeWrapBody(node, move(sclass->body));
-            maybeInsertExtendTHelpers(&sclass->body);
-            insertHelpers(&sclass->body, move(helpers));
+            if (!helpers.empty()) {
+                maybeInsertExtendTHelpers(&sclass->body);
+                insertHelpers(&sclass->body, move(helpers));
+            }
+            insertTypeParams(sclass, &sclass->body);
         },
         [&](parser::Node *other) { Exception::raise("Unimplemented node type: {}", other->nodeName()); });
 

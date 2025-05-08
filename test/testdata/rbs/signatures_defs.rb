@@ -250,7 +250,6 @@ def method24(x)
 end
 
 class UnusedTypeAnnotation
-  #: -> void # error: Unused RBS signature comment. No method definition found after it
   class Inner
     def foo; end # error: The method `foo` does not have a `sig`
   end

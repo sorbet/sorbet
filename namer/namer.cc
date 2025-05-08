@@ -649,7 +649,7 @@ public:
         auto send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send == nullptr) {
             fillAssign(ctx, asgn);
-        } else if (!send->recv.isSelfReference()) {
+        } else if (!send->recv.isSelfReference() && !ast::MK::isSorbetPrivateStatic(send->recv)) {
             handleAssignment(ctx, asgn);
         } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope)) {
             handleAssignment(ctx, asgn);
@@ -2063,7 +2063,7 @@ public:
         auto send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send == nullptr) {
             tree = handleAssignment(ctx, std::move(tree));
-        } else if (!send->recv.isSelfReference()) {
+        } else if (!send->recv.isSelfReference() && !ast::MK::isSorbetPrivateStatic(send->recv)) {
             tree = handleAssignment(ctx, std::move(tree));
         } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope)) {
             tree = handleAssignment(ctx, std::move(tree));

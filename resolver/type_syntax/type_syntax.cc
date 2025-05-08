@@ -1347,7 +1347,8 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
 
             appliedKlass = recvi->symbol();
         } else if (auto recvi = ast::cast_tree<ast::Send>(s.recv)) {
-            if (recvi->fun != core::Names::classOf() || s.fun != core::Names::squareBrackets()) {
+            if (recvi->fun != core::Names::classOf() ||
+                (s.fun != core::Names::squareBrackets() && s.fun != core::Names::syntheticSquareBrackets())) {
                 return reportUnknownTypeSyntaxError(ctx, s, move(result));
             }
 
@@ -1366,7 +1367,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             return reportUnknownTypeSyntaxError(ctx, s, move(result));
         }
 
-        if (s.fun != core::Names::squareBrackets()) {
+        if (s.fun != core::Names::squareBrackets() && s.fun != core::Names::syntheticSquareBrackets()) {
             return reportUnknownTypeSyntaxError(ctx, s, move(result));
         }
 

@@ -670,6 +670,29 @@ parameter, while the RBS signature declares it as a positional parameter:
 def method(param:); end
 ```
 
+## 3557
+
+> This error is specific to RBS support when using the
+> `--enable-experimental-rbs-signatures` flag.
+
+This error is raised when a class or module is annotated with multiple RBS
+generic type parameters comments:
+
+```ruby
+#: [U]
+#: [V]
+class A
+end
+```
+
+Only one signature is allowed:
+
+```ruby
+#: [U, V]
+class A
+end
+```
+
 ## 3702
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are

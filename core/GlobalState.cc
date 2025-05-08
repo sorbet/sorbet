@@ -931,6 +931,17 @@ void GlobalState::initEmpty() {
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::LoadYieldParams());
     ENFORCE_NO_TIMER(field == Symbols::Magic_UntypedSource_LoadYieldParams());
 
+    method = enterMethod(*this, Symbols::Module(), Names::syntheticSquareBrackets())
+                 .repeatedUntypedArg(Names::arg())
+                 .build();
+    ENFORCE_NO_TIMER(method == Symbols::Module_syntheticSquareBrackets());
+
+    method =
+        enterMethod(*this, Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this), Names::typeMember())
+            .repeatedTopArg(Names::args())
+            .build();
+    ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_typeMember());
+
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes

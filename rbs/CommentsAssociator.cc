@@ -51,28 +51,27 @@ void CommentsAssociator::consumeCommentsUntilLine(int line) {
     commentByLine.erase(commentByLine.begin(), it);
 }
 
-void CommentsAssociator::associateCommentsToNode(parser::Node *node, absl::Span<const std::string_view> prefixes) {
+void CommentsAssociator::associateCommentsToNode(parser::Node *node) {
     auto nodeStartLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
 
     vector<CommentNode> comments;
 
     for (auto it = commentByLine.begin(); it != commentByLine.end();) {
-        if (it->first < nodeStartLine) {
-            bool found = false;
-            for (const auto &prefix : prefixes) {
-                if (absl::StartsWith(it->second.string, prefix)) {
-                    comments.emplace_back(it->second);
-                    it = commentByLine.erase(it);
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                it++;
-            }
-        } else {
+        auto commentLine = it->first;
+
+        if (commentLine >= nodeStartLine) {
             break;
         }
+
+        if (absl::StartsWith(it->second.string, RBS_PREFIX) ||
+            absl::StartsWith(it->second.string, MULTILINE_RBS_PREFIX) ||
+            absl::StartsWith(it->second.string, ANNOTATION_PREFIX)) {
+            comments.emplace_back(it->second);
+            it = commentByLine.erase(it);
+            continue;
+        }
+
+        it++;
     }
 
     commentsByNode[node] = move(comments);
@@ -99,7 +98,7 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
             consumeCommentsUntilLine(endLine);
         },
         [&](parser::Class *cls) {
-            associateCommentsToNode(node, {ANNOTATION_PREFIX});
+            associateCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
 
@@ -110,7 +109,7 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
             consumeCommentsUntilLine(endLine);
         },
         [&](parser::SClass *sclass) {
-            associateCommentsToNode(node, {ANNOTATION_PREFIX});
+            associateCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
 
@@ -121,7 +120,7 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
             consumeCommentsUntilLine(endLine);
         },
         [&](parser::Module *mod) {
-            associateCommentsToNode(node, {ANNOTATION_PREFIX});
+            associateCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
 
@@ -142,24 +141,24 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
             consumeCommentsUntilLine(endLine);
         },
         [&](parser::DefMethod *def) {
-            associateCommentsToNode(node, {RBS_PREFIX, ANNOTATION_PREFIX, MULTILINE_RBS_PREFIX});
+            associateCommentsToNode(node);
             walkNodes(def->body.get());
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsUntilLine(endLine);
         },
         [&](parser::DefS *def) {
-            associateCommentsToNode(node, {RBS_PREFIX, ANNOTATION_PREFIX, MULTILINE_RBS_PREFIX});
+            associateCommentsToNode(node);
             walkNodes(def->body.get());
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsUntilLine(endLine);
         },
         [&](parser::Send *send) {
             if (isVisibilitySend(send)) {
-                associateCommentsToNode(send->args[0].get(), {RBS_PREFIX, ANNOTATION_PREFIX, MULTILINE_RBS_PREFIX});
+                associateCommentsToNode(send->args[0].get());
                 auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
                 consumeCommentsUntilLine(endLine);
             } else if (isAttrAccessorSend(send)) {
-                associateCommentsToNode(send, {RBS_PREFIX, ANNOTATION_PREFIX, MULTILINE_RBS_PREFIX});
+                associateCommentsToNode(send);
                 auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
                 consumeCommentsUntilLine(endLine);
             }
