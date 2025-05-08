@@ -580,7 +580,7 @@ public:
     }
 
     static vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
-                                            vector<ast::ParsedFile> files) {
+                                       vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
         for (size_t i = 0; i < files.size(); ++i) {
@@ -608,7 +608,7 @@ public:
 } // namespace
 
 vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
-                                                    vector<ast::ParsedFile> files) {
+                                               vector<ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "visibility_checker.run");
 
     {
