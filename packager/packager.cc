@@ -1566,9 +1566,8 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     bodyWalk.finalize(ctx);
 }
 
-// TODO(jez) Rename this to lookupMangledName, and make it take a const GlobalState
-void populateMangledName(core::GlobalState &gs, PackageName &pName) {
-    pName.mangledName = core::packages::MangledName::mangledNameFromParts(gs, pName.fullName.parts);
+void tryPopulateMangledName(const core::GlobalState &gs, PackageName &pName) {
+    pName.mangledName = core::packages::MangledName::lookupMangledName(gs, pName.fullName.parts);
 }
 
 void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
@@ -1624,10 +1623,11 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     }
 }
 
-void populatePackageEdges(core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
+void populatePackageEdges(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
     rewritePackageSpec(gs, package, info);
     for (auto &importedPackageName : info.importedPackageNames) {
-        populateMangledName(gs, importedPackageName.name);
+        tryPopulateMangledName(gs, importedPackageName.name);
+        // TODO(jez) Can report an error about importing non-existent package if MangledName doesn't exist
 
         if (importedPackageName.name.mangledName == info.name.mangledName) {
             if (auto e = gs.beginError(core::Loc(package.file, importedPackageName.name.fullName.loc),
@@ -1647,7 +1647,8 @@ void populatePackageEdges(core::GlobalState &gs, ast::ParsedFile &package, Packa
     }
 
     for (auto &visibleTo : info.visibleTo_) {
-        populateMangledName(gs, visibleTo.name);
+        tryPopulateMangledName(gs, visibleTo.name);
+        // TODO(jez) Can report an error about marking visible_to non-existent package if MangledName doesn't exist
     }
 }
 
@@ -1964,7 +1965,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
                 // surfaced that error to the user. Nothing to do here.
                 continue;
             }
-            populateMangledName(gs, pkg->name);
+            pkg->name.mangledName = core::packages::MangledName::mangledNameFromParts(gs, pkg->name.fullName.parts);
 
             auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
             if (prevPkg.exists() && prevPkg.declLoc() != pkg->declLoc()) {

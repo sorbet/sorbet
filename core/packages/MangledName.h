@@ -23,6 +23,10 @@ public:
     // [:Foo, :Bar] => :Foo_Bar
     static MangledName mangledNameFromParts(core::GlobalState &gs, const std::vector<core::NameRef> &parts);
 
+    // [:Foo, :Bar] => :Foo_Bar
+    // (might not exist)
+    static MangledName lookupMangledName(const core::GlobalState &gs, const std::vector<core::NameRef> &parts);
+
     bool operator==(const MangledName &rhs) const {
         return mangledName == rhs.mangledName;
     }
