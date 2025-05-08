@@ -82,7 +82,7 @@ bool AbstractRewriter::getInvalid() {
     return invalid;
 }
 
-std::string AbstractRewriter::getError() {
+string AbstractRewriter::getError() {
     return error;
 }
 

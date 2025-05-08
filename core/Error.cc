@@ -136,7 +136,7 @@ void ErrorSection::Collector::addErrorDetails(ErrorSection::Collector &&e) {
 
 void toErrorSectionHelper(const ErrorSection::Collector &e, vector<ErrorLine> &result, int indentLevel) {
     ENFORCE(e.message.length() > 0);
-    std::string message = fmt::format("{}{}", string(indentLevel * 2, ' '), e.message);
+    string message = fmt::format("{}{}", string(indentLevel * 2, ' '), e.message);
     result.push_back(ErrorLine(core::Loc::none(), move(message), ErrorLine::LocDisplay::Hidden));
     for (auto &c : e.children) {
         toErrorSectionHelper(c, result, indentLevel + 1);
@@ -238,12 +238,12 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     this->autocorrects.emplace_back(move(autocorrect));
 }
 
-void ErrorBuilder::didYouMean(const std::string &replacement, Loc loc) {
+void ErrorBuilder::didYouMean(const string &replacement, Loc loc) {
     if (!gs.didYouMean) {
         return;
     }
 
-    std::string formatted = fmt::format("Replace with `{}`", replacement);
+    string formatted = fmt::format("Replace with `{}`", replacement);
     auto isDidYouMean = true;
     addAutocorrect(
         AutocorrectSuggestion{move(formatted), {AutocorrectSuggestion::Edit{loc, replacement}}, isDidYouMean});

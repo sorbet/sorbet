@@ -12,7 +12,7 @@ using namespace std;
 namespace sorbet::realmain::cache {
 
 namespace {
-unique_ptr<KeyValueStore> openCache(std::shared_ptr<::spdlog::logger> logger, std::string cacheDir,
+unique_ptr<KeyValueStore> openCache(std::shared_ptr<::spdlog::logger> logger, string cacheDir,
                                     const options::Options &opts) {
     // We currently only support one flavor of cache: "default". Each flavor is a separate database in the LMDB
     // environment, and we'll write all cached trees to that database during indexing. This means that supporting
@@ -207,7 +207,7 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
     return kvstore;
 }
 
-SessionCache::SessionCache(std::string path) : path{std::move(path)} {}
+SessionCache::SessionCache(string path) : path{std::move(path)} {}
 
 SessionCache::~SessionCache() noexcept(false) {
     if (!FileOps::dirExists(this->path)) {
@@ -235,7 +235,7 @@ std::unique_ptr<SessionCache> SessionCache::make(std::unique_ptr<const OwnedKeyV
         return nullptr;
     }
 
-    std::string path;
+    string path;
 
     // Pretty unlikely that we'll see a collision, as we're removing the directory on exit and also generating random
     // names, but make two attempts to find a new one anyway.

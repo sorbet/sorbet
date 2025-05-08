@@ -186,7 +186,7 @@ class PropagateVisibility final {
         const auto path = file.data(ctx).path();
 
         return absl::c_any_of(ctx.state.packageDB().skipRBIExportEnforcementDirs(),
-                              [&](const std::string &dir) { return absl::StartsWith(path, dir); });
+                              [&](const string &dir) { return absl::StartsWith(path, dir); });
     }
 
     // Checks that the package that a symbol is defined in can be exported from the package we're currently checking.
@@ -227,7 +227,7 @@ class PropagateVisibility final {
         auto enumClass = getEnumClassForEnumValue(ctx.state, sym);
         if (enumClass.exists()) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
-                std::string enumClassName = enumClass.show(ctx);
+                string enumClassName = enumClass.show(ctx);
                 e.setHeader("Cannot export enum value `{}`. Instead, export the entire enum `{}`", sym.show(ctx),
                             enumClassName);
                 e.addErrorLine(sym.loc(ctx), "Defined here");
@@ -416,7 +416,7 @@ public:
             bool layeringViolation = false;
             bool strictDependenciesTooLow = false;
             bool causesCycle = false;
-            std::optional<std::string> path;
+            std::optional<string> path;
             if (!isTestImport && db.enforceLayering()) {
                 layeringViolation = strictDepsLevel.has_value() &&
                                     strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&
@@ -500,7 +500,7 @@ public:
                                 : (layeringViolation ? core::errors::Packager::LayeringViolation
                                                      : core::errors::Packager::StrictDependenciesViolation);
                 if (auto e = ctx.beginError(lit.loc(), error)) {
-                    std::vector<std::string> reasons;
+                    std::vector<string> reasons;
                     if (causesCycle) {
                         reasons.emplace_back(core::ErrorColors::format(
                             "importing its package would put `{}` into a cycle", this->package.show(ctx)));
@@ -546,7 +546,7 @@ public:
                     }
 
                     ENFORCE(!reasons.empty(), "At least one reason should be present");
-                    std::string reason;
+                    string reason;
                     if (reasons.size() == 1) {
                         reason = reasons[0];
                     } else if (reasons.size() == 2) {

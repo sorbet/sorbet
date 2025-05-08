@@ -50,7 +50,7 @@ extern "C" int LLVMFuzzerInitialize(const int *argc, const char ***argv) {
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, const std::size_t size) {
-    std::string contents((const char *)data, size);
+    string contents((const char *)data, size);
     auto lspWrapper = mkLSPWrapper(contents);
     int nextId = 0;
     sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId);

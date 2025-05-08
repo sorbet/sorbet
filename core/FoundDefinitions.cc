@@ -136,7 +136,7 @@ string FoundTypeMember::toString(const core::GlobalState &gs, const FoundDefinit
     return fmt::format("{{ id = {}, owner = {}, name = {} }}", id, owner.idx(), name.toString(gs));
 }
 
-std::string FoundMethod::toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
+string FoundMethod::toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
     return fmt::format("{{ id = {}, owner = {}, name = {} }}", id, owner.idx(), name.toString(gs));
 }
 

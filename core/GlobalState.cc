@@ -2412,12 +2412,12 @@ packages::PackageDB &GlobalState::packageDB() {
     return packageDB_;
 }
 
-void GlobalState::setPackagerOptions(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                                     const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
-                                     const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
-                                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
-                                     const std::vector<std::string> &packagerLayers, std::string errorHint) {
+void GlobalState::setPackagerOptions(const std::vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                                     const std::vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                                     const std::vector<string> &extraPackageFilesDirectorySlashPrefixes,
+                                     const std::vector<string> &packageSkipRBIExportEnforcementDirs,
+                                     const std::vector<string> &allowRelaxedPackagerChecksFor,
+                                     const std::vector<string> &packagerLayers, string errorHint) {
     ENFORCE_NO_TIMER(!packageDB_.frozen);
 
     packageDB_.enabled_ = true;

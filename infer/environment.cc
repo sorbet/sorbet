@@ -75,7 +75,7 @@ struct KnowledgeFact {
 
     void sanityCheck() const;
 
-    std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
+    string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 };
 
 KnowledgeFilter::KnowledgeFilter(core::Context ctx, cfg::CFG &cfg) {

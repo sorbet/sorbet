@@ -426,7 +426,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
     OwnedKeyValueStore::abort(std::move(copy));
 
     // Close the session cache, and make sure that it removes the directory.
-    std::string sessionPath(sessionCache->kvstorePath());
+    string sessionPath(sessionCache->kvstorePath());
     REQUIRE(FileOps::exists(sessionPath));
     sessionCache.reset();
     REQUIRE(!FileOps::exists(sessionPath));
@@ -487,10 +487,10 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
     }
 
     auto workers = WorkerPool::create(0, *logger);
-    std::vector<std::string> toRemove;
+    std::vector<string> toRemove;
     for (auto &path : FileOps::listFilesInDir(opts->cacheDir, {".mdb"}, *workers, true, {}, {})) {
         fmt::println(stderr, "path = {}", path);
-        if (path.find("/session-") != std::string::npos) {
+        if (path.find("/session-") != string::npos) {
             toRemove.emplace_back(std::move(path));
         }
     }
@@ -499,7 +499,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
     REQUIRE(!toRemove.empty());
 
     auto start = toRemove.front().rfind('/');
-    std::string sessionCacheDir = toRemove.front().substr(0, start);
+    string sessionCacheDir = toRemove.front().substr(0, start);
 
     // Verify that we can't open when the database files have been removed
     for (auto &file : toRemove) {

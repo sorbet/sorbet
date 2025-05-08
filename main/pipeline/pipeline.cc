@@ -1526,7 +1526,7 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
 
         writer.String("path");
         if (sym.exists() && sym.loc(gs).exists()) {
-            writer.String(std::string(sym.loc(gs).file().data(gs).path()));
+            writer.String(string(sym.loc(gs).file().data(gs).path()));
 
         } else {
             writer.String("<none>");

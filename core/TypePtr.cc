@@ -128,13 +128,13 @@ int TypePtr::kind() const {
     }
 }
 
-std::string TypePtr::tagToString(Tag tag) {
+string TypePtr::tagToString(Tag tag) {
 #define TYPE_TO_STRING(T) return #T;
     GENERATE_TAG_SWITCH(tag, TYPE_TO_STRING)
 #undef TYPE_TO_STRING
 }
 
-std::string TypePtr::typeName() const {
+string TypePtr::typeName() const {
     return TypePtr::tagToString(tag());
 }
 
@@ -399,13 +399,13 @@ uint32_t TypePtr::hash(const GlobalState &gs) const {
 #undef HASH
 }
 
-std::string TypePtr::show(const GlobalState &gs, ShowOptions options) const {
+string TypePtr::show(const GlobalState &gs, ShowOptions options) const {
 #define SHOW(T) return cast_type_nonnull<T>(*this).show(gs, options);
     GENERATE_TAG_SWITCH(tag(), SHOW)
 #undef SHOW
 }
 
-std::string TypePtr::showWithMoreInfo(const GlobalState &gs) const {
+string TypePtr::showWithMoreInfo(const GlobalState &gs) const {
 #define SHOW_WITH_MORE_INFO(T) return CALL_MEMBER_showWithMoreInfo<const T>::call(cast_type_nonnull<T>(*this), gs);
     GENERATE_TAG_SWITCH(tag(), SHOW_WITH_MORE_INFO)
 #undef SHOW_WITH_MORE_INFO

@@ -65,7 +65,7 @@ void MultiThreadedLSPWrapper::send(std::vector<std::unique_ptr<LSPMessage>> &mes
     input->write(move(messages));
 }
 
-void MultiThreadedLSPWrapper::send(const std::string &json) {
+void MultiThreadedLSPWrapper::send(const string &json) {
     send(LSPMessage::fromClient(json));
 }
 

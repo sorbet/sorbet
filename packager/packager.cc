@@ -189,7 +189,7 @@ public:
         return absl::MakeSpan(name.fullName.parts);
     }
 
-    absl::Span<const std::string> pathPrefixes() const {
+    absl::Span<const string> pathPrefixes() const {
         return absl::MakeSpan(packagePathPrefixes);
     }
 
@@ -216,7 +216,7 @@ public:
     // loc for the package definition. Single line (just the class def). Used for error messages.
     core::Loc declLoc_;
     // The possible path prefixes associated with files in the package, including path separator at end.
-    vector<std::string> packagePathPrefixes = {};
+    vector<string> packagePathPrefixes = {};
     // The names of each package imported by this package.
     vector<Import> importedPackageNames = {};
     // List of exported items that form the body of this package's public API.
@@ -1620,7 +1620,7 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
 
     for (const string &prefix : extraPackageFilesDirectorySlashDeprecatedPrefixes) {
         // project/Foo_bar -- convert camel-case to snake-case and munge with slash
-        std::string additionalDirPath;
+        string additionalDirPath;
         additionalDirPath.reserve(prefix.size() + 2 * dirNameFromShortName.length() + 1);
         additionalDirPath += prefix;
         for (int i = 0; i < dirNameFromShortName.length(); i++) {

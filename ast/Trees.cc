@@ -1010,20 +1010,20 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) const {
     return fmt::to_string(buf);
 }
 
-std::string RuntimeMethodDefinition::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
+string RuntimeMethodDefinition::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     string prefix = this->isSelfMethod ? "self." : "";
     return fmt::format("<runtime method definition of {}{}>", prefix, this->name.toString(gs));
 }
 
-std::string RuntimeMethodDefinition::showRaw(const core::GlobalState &gs, int tabs) const {
+string RuntimeMethodDefinition::showRaw(const core::GlobalState &gs, int tabs) const {
     return this->toStringWithTabs(gs, tabs);
 }
 
-std::string Self::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
+string Self::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return "<self>";
 }
 
-std::string Self::showRaw(const core::GlobalState &gs, int tabs) const {
+string Self::showRaw(const core::GlobalState &gs, int tabs) const {
     return "Self";
 }
 

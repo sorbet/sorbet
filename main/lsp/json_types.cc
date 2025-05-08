@@ -78,7 +78,7 @@ InvalidTypeError::InvalidTypeError(string_view fieldName, string_view expectedTy
     : SerializationError(fmt::format("Expected field `{}` to have value of type `{}`, but had value `{}`.", fieldName,
                                      expectedType, stringify(*found))) {}
 
-const std::string JSONBaseType::defaultFieldName = "root";
+const string JSONBaseType::defaultFieldName = "root";
 
 string JSONBaseType::toJSON(bool prettyPrint) const {
     auto buffer = toJSONBuffer(prettyPrint);

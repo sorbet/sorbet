@@ -785,7 +785,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 int main(int argc, char *argv[]) {
     cxxopts::Options options("test_corpus", "Test corpus for Sorbet typechecker");
     options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
-                                                       cxxopts::value<std::string>()->default_value(""), "testpath");
+                                                       cxxopts::value<string>()->default_value(""), "testpath");
     auto res = options.parse(argc, argv);
 
     if (res.count("single_test") != 1) {
@@ -793,7 +793,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    sorbet::test::singleTest = res["single_test"].as<std::string>();
+    sorbet::test::singleTest = res["single_test"].as<string>();
 
     doctest::Context context(argc, argv);
     return context.run();

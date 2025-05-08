@@ -138,11 +138,11 @@ TEST_CASE("VariantField") {
         auto numberId = get_if<int>(&cancelParamsNumber->id);
         REQUIRE_NE(numberId, nullptr);
         REQUIRE_EQ(*numberId, 4);
-        REQUIRE_EQ(get_if<std::string>(&cancelParamsNumber->id), nullptr);
+        REQUIRE_EQ(get_if<string>(&cancelParamsNumber->id), nullptr);
     });
 
     parseTest<CancelParams>("{\"id\": \"iamanid\"}", [](auto &cancelParamsString) -> void {
-        auto stringId = get_if<std::string>(&cancelParamsString->id);
+        auto stringId = get_if<string>(&cancelParamsString->id);
         REQUIRE_NE(stringId, nullptr);
         REQUIRE_EQ(*stringId, "iamanid");
         REQUIRE_EQ(get_if<int>(&cancelParamsString->id), nullptr);
@@ -159,7 +159,7 @@ TEST_CASE("VariantField") {
 
     // Create CancelParams with a variant field in an erroneous state.
     // See https://en.cppreference.com/w/cpp/utility/variant/valueless_by_exception
-    auto cancelParams = make_unique<CancelParams>(variant<int, std::string>());
+    auto cancelParams = make_unique<CancelParams>(variant<int, string>());
     try {
         cancelParams->id.emplace<int>(ExceptionThrower());
     } catch (runtime_error e) {
