@@ -102,22 +102,22 @@ struct FullyQualifiedName {
 
 struct PackageName {
     core::packages::MangledName mangledName;
-    FullyQualifiedName fullName;
 
-    PackageName(core::ClassOrModuleRef owner, FullyQualifiedName &&fullName)
-        : mangledName(core::packages::MangledName(owner)), fullName(move(fullName)) {}
+    PackageName(core::ClassOrModuleRef owner) : mangledName(core::packages::MangledName(owner)) {}
 
     // Pretty print the package's (user-observable) name (e.g. Foo::Bar)
     string toString(const core::GlobalState &gs) const {
-        return absl::StrJoin(fullName.parts, "::", core::packages::NameFormatter(gs));
+        return mangledName.owner.show(gs);
     }
 };
 
 struct Import {
     PackageName name;
+    core::LocOffsets loc;
     core::packages::ImportType type;
 
-    Import(PackageName &&name, core::packages::ImportType type) : name(std::move(name)), type(type) {}
+    Import(PackageName &&name, core::LocOffsets loc, core::packages::ImportType type)
+        : name(std::move(name)), loc(loc), type(type) {}
 };
 
 struct Export {
@@ -137,9 +137,11 @@ struct Export {
 
 struct VisibleTo {
     PackageName name;
+    core::LocOffsets loc;
     core::packages::VisibleToType type;
 
-    VisibleTo(PackageName &&name, core::packages::VisibleToType type) : name(move(name)), type(type) {}
+    VisibleTo(PackageName &&name, core::LocOffsets loc, core::packages::VisibleToType type)
+        : name(move(name)), loc(loc), type(type) {}
 };
 
 // For a given vector of NameRefs, this represents the "next" vector that does not begin with its
@@ -183,10 +185,6 @@ class PackageInfoImpl final : public core::packages::PackageInfo {
 public:
     core::packages::MangledName mangledName() const {
         return name.mangledName;
-    }
-
-    absl::Span<const core::NameRef> fullName() const {
-        return absl::MakeSpan(name.fullName.parts);
     }
 
     absl::Span<const std::string> pathPrefixes() const {
@@ -426,7 +424,7 @@ public:
                         // importToInsertAfter already tracks where we need to insert the import.
                         // So we can craft an edit to delete the `test_import` line, and then use the regular logic for
                         // adding an import to insert the `import`.
-                        auto importLoc = core::Loc(fullLoc().file(), import.name.fullName.loc);
+                        auto importLoc = core::Loc(fullLoc().file(), import.loc);
                         auto [lineStart, numWhitespace] = importLoc.findStartOfIndentation(gs);
                         auto beginPos =
                             lineStart.adjust(gs, -numWhitespace, 0).beginPos(); // -numWhitespace for the indentation
@@ -441,19 +439,19 @@ public:
 
                 auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
                 if (!importInfo.exists()) {
-                    importToInsertAfter = import.name.fullName.loc;
+                    importToInsertAfter = import.loc;
                     continue;
                 }
 
                 auto compareResult =
                     orderImports(gs, info, isTestImport, importInfo, import.type == core::packages::ImportType::Test);
                 if (compareResult == 1 || compareResult == 0) {
-                    importToInsertAfter = import.name.fullName.loc;
+                    importToInsertAfter = import.loc;
                 }
             }
             if (!importToInsertAfter.exists()) {
                 // Insert before the first import
-                core::Loc beforePackageName = {loc.file(), importedPackageNames.front().name.fullName.loc};
+                core::Loc beforePackageName = {loc.file(), importedPackageNames.front().loc};
                 auto [beforeImport, numWhitespace] = beforePackageName.findStartOfIndentation(gs);
                 auto endOfPrevLine = beforeImport.adjust(gs, -numWhitespace - 1, 0);
                 insertionLoc = endOfPrevLine.copyWithZeroLength();
@@ -701,7 +699,7 @@ PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *
                            core::ClassOrModuleRef symbol) {
     ENFORCE(constantLit != nullptr);
 
-    return PackageName(symbol, getFullyQualifiedName(ctx, constantLit));
+    return PackageName(symbol);
 }
 
 PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
@@ -724,7 +722,7 @@ PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedCon
         owner = core::Symbols::noClassOrModule();
     }
 
-    return PackageName(owner, move(fullName));
+    return PackageName(owner);
 }
 
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
@@ -1580,12 +1578,12 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
     if (gs.packageDB().enforceLayering()) {
         if (!bodyWalk.foundLayerDeclaration) {
-            if (auto e = ctx.beginError(info.name.fullName.loc, core::errors::Packager::InvalidLayer)) {
+            if (auto e = gs.beginError(info.declLoc(), core::errors::Packager::InvalidLayer)) {
                 e.setHeader("This package does not declare a `{}`", "layer");
             }
         }
         if (!bodyWalk.foundStrictDependenciesDeclaration) {
-            if (auto e = ctx.beginError(info.name.fullName.loc, core::errors::Packager::InvalidStrictDependencies)) {
+            if (auto e = gs.beginError(info.declLoc(), core::errors::Packager::InvalidStrictDependencies)) {
                 e.setHeader("This package does not declare a `{}` level", "strict_dependencies");
             }
         }
