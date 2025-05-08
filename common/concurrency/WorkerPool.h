@@ -14,6 +14,11 @@ public:
     using Task = std::function<void()>;
     static std::unique_ptr<WorkerPool> create(int size, spdlog::logger &logger);
     virtual void multiplexJob(std::string_view taskName, Task t) = 0;
+
+    // A version of multiplexJob that can be used when the caller is only interested in blocking until the workers have
+    // finished.
+    virtual void multiplexJobWait(std::string_view taskName, Task t) = 0;
+
     virtual ~WorkerPool() = 0;
     virtual int size() = 0;
     WorkerPool() = default;

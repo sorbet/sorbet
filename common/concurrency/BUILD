@@ -26,6 +26,7 @@ cc_library(
         "//common/enforce_no_timer",
         "//common/exception",
         "//common/os",
+        "@com_google_absl//absl/synchronization",
         "@concurrentqueue",
         "@spdlog",
     ],
