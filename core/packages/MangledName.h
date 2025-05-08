@@ -12,9 +12,7 @@ class GlobalState;
 
 namespace sorbet::core::packages {
 class MangledName final {
-    MangledName(NameRef mangledName, ClassOrModuleRef owner) : mangledName(mangledName), owner(owner) {}
-
-    NameRef mangledName;
+    MangledName(ClassOrModuleRef owner) : owner(owner) {}
 
     template <typename H> friend H AbslHashValue(H h, const MangledName &m);
 
@@ -41,7 +39,7 @@ public:
     static MangledName lookupMangledName(const core::GlobalState &gs, const std::vector<std::string> &parts);
 
     bool operator==(const MangledName &rhs) const {
-        return mangledName == rhs.mangledName;
+        return owner == rhs.owner;
     }
 
     bool operator!=(const MangledName &rhs) const {
@@ -49,7 +47,7 @@ public:
     }
 
     bool exists() const {
-        return this->mangledName.exists();
+        return this->owner.exists();
     }
 };
 
@@ -68,7 +66,7 @@ public:
 };
 
 template <typename H> H AbslHashValue(H h, const MangledName &m) {
-    return H::combine(std::move(h), m.mangledName);
+    return H::combine(std::move(h), m.owner);
 }
 } // namespace sorbet::core::packages
 #endif
