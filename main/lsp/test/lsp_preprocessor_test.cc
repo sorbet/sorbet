@@ -149,7 +149,6 @@ TEST_CASE("IgnoresWatchmanUpdatesFromOpenFiles") {
     CHECK_EQ(updates->updates[0]->source(), fileContents);
 }
 
-// it.
 TEST_CASE("ClonesTypecheckingGSAtCorrectLogicalTime") {
     string fileV1 = "# typed: true";
     // V1 => V2: Slow path
