@@ -322,4 +322,3 @@ def register_sorbet_dependencies():
         strip_prefix = "rbs-f8d9d5186c39eebffcd350b5452c6041f7ca6e6c",
         build_file = "@com_stripe_ruby_typer//third_party:rbs_parser.BUILD",
     )
-
