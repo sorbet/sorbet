@@ -3936,7 +3936,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
-    auto computeAllSymbols = std::nullopt;
+    auto computeAllSymbols = nullopt;
     finalizeSymbols(gs, computeAllSymbols);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);

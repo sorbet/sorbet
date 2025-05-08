@@ -553,7 +553,7 @@ public:
 
     optional<core::packages::ImportType> importsPackage(core::packages::MangledName mangledName) const {
         if (!mangledName.exists()) {
-            return std::nullopt;
+            return nullopt;
         }
 
         auto imp =

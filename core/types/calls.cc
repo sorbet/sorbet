@@ -2596,7 +2596,7 @@ private:
             return Types::getProcArity(*appliedType);
         }
 
-        return std::nullopt;
+        return nullopt;
     }
 
     static vector<ArgInfo::ArgFlags> argInfoByArity(optional<int> fixedArity) {

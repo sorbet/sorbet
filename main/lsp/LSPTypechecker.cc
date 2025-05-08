@@ -314,7 +314,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto presorted = true;
     const auto cancelable = false;
-    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, std::nullopt, presorted);
+    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, nullopt, presorted);
     gs->lspTypecheckCount++;
 
     auto duration = timeit.setEndTime();
