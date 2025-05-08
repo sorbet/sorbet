@@ -5,6 +5,8 @@
 #include "main/options/options.h"
 #include "spdlog/sinks/null_sink.h"
 
+using namespace std;
+
 // Default constructor of options should produce the same default option values as readOptions.
 TEST_CASE("DefaultConstructorMatchesReadOptions") {
     vector<sorbet::pipeline::semantic_extension::SemanticExtensionProvider *> extensionProviders;
