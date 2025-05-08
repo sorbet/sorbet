@@ -34,10 +34,10 @@ public:
         return CounterState{generateCounterStateImpl()};
     }
 
-    static std::string generateJSON(pid_t pid, microseconds now, bool strict) {
+    static string generateJSON(pid_t pid, microseconds now, bool strict) {
         CounterState state(TracingTestHelper::generateCounterState());
 
-        std::string jsonl = Tracing::stateToJSONL(state, pid, now);
+        string jsonl = Tracing::stateToJSONL(state, pid, now);
 
         // The first line of `jsonl` is going to contain information about the Sorbet
         // version.  We don't really care about that, and handling that would make the
@@ -55,7 +55,7 @@ public:
         // stores them based on the hashes of the string pointers, and that in turn depends
         // on the vagaries of where the linker decided to put the string constants for the
         // counter names.
-        std::vector<std::string> lines = absl::StrSplit(jsonl, '\n');
+        std::vector<string> lines = absl::StrSplit(jsonl, '\n');
         {
             // Don't sort empty lines.
             auto it = absl::c_find_if(lines, [](const auto &line) { return line.empty(); });
@@ -76,7 +76,7 @@ TEST_SUITE("Tracing") {
         microseconds now{20200928};
 
         const bool strict = false;
-        std::string json = TracingTestHelper::generateJSON(pid, now, strict);
+        string json = TracingTestHelper::generateJSON(pid, now, strict);
 
         // clang-format off
         CHECK_EQ("[\n"
@@ -92,7 +92,7 @@ TEST_SUITE("Tracing") {
         microseconds now{20200928};
 
         const bool strict = true;
-        std::string json = TracingTestHelper::generateJSON(pid, now, strict);
+        string json = TracingTestHelper::generateJSON(pid, now, strict);
 
         // clang-format off
         CHECK_EQ("[\n"

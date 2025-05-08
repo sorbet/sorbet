@@ -75,8 +75,8 @@ int MsgpackWriterBase::validateVersion(int version, int lo, int hi) {
     return version;
 }
 
-MsgpackWriterBase::MsgpackWriterBase(int version, const std::vector<std::string> &refAttrs,
-                                     const std::vector<std::string> &defAttrs, const std::vector<std::string> &pfAttrs)
+MsgpackWriterBase::MsgpackWriterBase(int version, const std::vector<string> &refAttrs,
+                                     const std::vector<string> &defAttrs, const std::vector<string> &pfAttrs)
     : version(version), refAttrs(refAttrs), defAttrs(defAttrs), pfAttrs(pfAttrs) {}
 
 void MsgpackWriterBase::packReferenceRef(mpack_writer_t *writer, ReferenceRef ref) {
@@ -295,8 +295,8 @@ string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenC
     return ret;
 }
 
-string buildGlobalHeader(int version, int serializedVersion, size_t numFiles, const std::vector<std::string> &refAttrs,
-                         const std::vector<std::string> &defAttrs, const std::vector<std::string> &pfAttrs) {
+string buildGlobalHeader(int version, int serializedVersion, size_t numFiles, const std::vector<string> &refAttrs,
+                         const std::vector<string> &defAttrs, const std::vector<string> &pfAttrs) {
     string header;
 
     mpack_writer_t writer;

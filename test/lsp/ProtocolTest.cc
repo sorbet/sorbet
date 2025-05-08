@@ -163,7 +163,7 @@ vector<unique_ptr<LSPMessage>> verify(const vector<unique_ptr<LSPMessage>> &msgs
     return reparsedMessages;
 }
 
-std::vector<std::unique_ptr<LSPMessage>> ProtocolTest::sendRaw(const std::string &json) {
+std::vector<std::unique_ptr<LSPMessage>> ProtocolTest::sendRaw(const string &json) {
     auto responses = verify(getLSPResponsesFor(*lspWrapper, LSPMessage::fromClient(json)));
     updateDiagnostics(responses);
     return responses;
@@ -220,7 +220,7 @@ void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messa
     }
 }
 
-std::string ProtocolTest::readFile(std::string_view uri) {
+string ProtocolTest::readFile(std::string_view uri) {
     auto readFileResponses = send(LSPMessage(make_unique<RequestMessage>(
         "2.0", nextId++, LSPMethod::SorbetReadFile, make_unique<TextDocumentIdentifier>(string(uri)))));
     CHECK_EQ(readFileResponses.size(), 1);

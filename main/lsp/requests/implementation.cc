@@ -14,7 +14,7 @@ struct MethodImplementationResults {
     unique_ptr<ResponseError> error;
 };
 
-unique_ptr<ResponseError> makeInvalidParamsError(std::string error) {
+unique_ptr<ResponseError> makeInvalidParamsError(string error) {
     return make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams, error);
 }
 

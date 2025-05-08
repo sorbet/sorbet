@@ -14,7 +14,7 @@ using namespace std;
 namespace sorbet::realmain::lsp::watchman {
 
 WatchmanProcess::WatchmanProcess(std::shared_ptr<spdlog::logger> logger, std::string_view watchmanPath,
-                                 std::string_view workSpace, std::vector<std::string> extensions,
+                                 std::string_view workSpace, std::vector<string> extensions,
                                  MessageQueueState &messageQueue, absl::Mutex &messageQueueMutex,
                                  absl::Notification &initializedNotification,
                                  std::shared_ptr<const LSPConfiguration> config)
@@ -66,7 +66,7 @@ void WatchmanProcess::start() {
             "\"fields\": [\"name\"], "
             "\"empty_on_fresh_instance\": true"
             "}}]",
-            workSpace, subscriptionName, fmt::map_join(extensions, ", ", [](const std::string &ext) -> string {
+            workSpace, subscriptionName, fmt::map_join(extensions, ", ", [](const string &ext) -> string {
                 return fmt::format("[\"suffix\", \"{}\"]", ext);
             }));
         p.send(subscribeCommand.c_str(), subscribeCommand.size());
@@ -154,7 +154,7 @@ bool WatchmanProcess::isStopped() {
     return stopped;
 }
 
-void WatchmanProcess::exitWithCode(int code, const std::optional<std::string> &msg) {
+void WatchmanProcess::exitWithCode(int code, const std::optional<string> &msg) {
     absl::MutexLock lck(&mutex);
     if (!stopped) {
         stopped = true;
@@ -189,7 +189,7 @@ void WatchmanProcess::processStateLeave(std::unique_ptr<sorbet::realmain::lsp::W
     enqueueNotification(move(notification));
 }
 
-void WatchmanProcess::processExit(int watchmanExitCode, const std::optional<std::string> &msg) {
+void WatchmanProcess::processExit(int watchmanExitCode, const std::optional<string> &msg) {
     {
         absl::MutexLock lck(&messageQueueMutex);
         if (!messageQueue.terminate) {

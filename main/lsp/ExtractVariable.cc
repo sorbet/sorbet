@@ -8,7 +8,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 void logDebugInfo(const std::shared_ptr<spdlog::logger> logger, const core::GlobalState &gs,
-                  const core::Loc selectionLoc, const std::string message) {
+                  const core::Loc selectionLoc, const string message) {
     logger->error("msg=\"ExtractToVariable: {}\" selectionLoc=\"{}\"", message, selectionLoc.showRaw(gs));
     logger->error("source=\"{}\"", absl::CEscape(selectionLoc.file().data(gs).source()));
 }

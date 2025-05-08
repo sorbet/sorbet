@@ -482,7 +482,7 @@ unique_ptr<KeyValueStore> OwnedKeyValueStore::bestEffortCommit(spdlog::logger &l
     return move(ownedKvstore->kvstore);
 }
 
-void OwnedKeyValueStore::copyTo(const std::string &path) const {
+void OwnedKeyValueStore::copyTo(const string &path) const {
     this->abort();
 
     auto rc = mdb_env_copy(this->kvstore->dbState->env, path.c_str());
