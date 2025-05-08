@@ -144,11 +144,10 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             continue;
         }
 
-        // When run from the indexer, the old file will actually have been evicted from the initialGS
-        // so that the initialGS containing the new file can be given to the pipeline to be indexed
-        // (and thus have the new hashes computed), so that the `updatedFile` and
-        // `fref.data(gs)` actually are the same File object. For this case, we have to find the
-        // old File's hashes in `evictedFiles`.
+        // When run from the indexer, the old file will actually have been evicted from the GlobalState so that the new
+        // file can be given to the pipeline to be indexed (and thus have the new hashes computed), so that the
+        // `updatedFile` and `fref.data(gs)` actually are the same File object. For this case, we have to find the old
+        // File's hashes in `evictedFiles`.
         //
         // When run from the typechecker, the old file will not yet have been evicted before
         // fastPathFilesToTypecheck is called (it will be evicted later on that thread, right
