@@ -1,5 +1,5 @@
 #include "core/packages/PackageDB.h"
-#include "absl/strings/match.h"
+#include "absl/strings/str_split.h"
 #include "absl/types/span.h"
 #include "common/sort/sort.h"
 #include "core/AutocorrectSuggestion.h"
@@ -253,8 +253,18 @@ const std::string_view PackageDB::errorHint() const {
     return errorHint_;
 }
 
+void PackageDB::resolvePackagesWithRelaxedChecks(GlobalState &gs) {
+    UnorderedSet<MangledName> packagesWithRelaxedChecks;
+    for (const auto &pkgName : allowRelaxedPackagerChecksFor_) {
+        auto pkgNameParts = absl::StrSplit(pkgName, "::");
+        auto mangledName = MangledName::lookupMangledName(gs, pkgNameParts);
+        packagesWithRelaxedChecks.emplace(mangledName);
+    }
+    this->packagesWithRelaxedChecks_ = move(packagesWithRelaxedChecks);
+}
+
 bool PackageDB::allowRelaxedPackagerChecksFor(MangledName mangledName) const {
-    return absl::c_contains(allowRelaxedPackagerChecksFor_, mangledName);
+    return this->packagesWithRelaxedChecks_.contains(mangledName);
 }
 
 PackageDB PackageDB::deepCopy() const {
@@ -282,6 +292,9 @@ PackageDB PackageDB::deepCopy() const {
     // interned layer NameRefs at the same IDs as the current PackageDB.
     result.layers_ = this->layers_;
     result.allowRelaxedPackagerChecksFor_ = this->allowRelaxedPackagerChecksFor_;
+    // Likewise, this assumes that we've entered MangledNames in the target GlobalState, but ALSO
+    // that we've copied symbols, because MangledNames store ClassOrModuleRef's now
+    result.packagesWithRelaxedChecks_ = this->packagesWithRelaxedChecks_;
     result.errorHint_ = this->errorHint_;
 
     return result;

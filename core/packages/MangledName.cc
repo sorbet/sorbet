@@ -26,4 +26,35 @@ MangledName MangledName::mangledNameFromParts(GlobalState &gs, const std::vector
     return MangledName(gs.enterNameConstant(packagerName), owner);
 }
 
+MangledName MangledName::lookupMangledName(const GlobalState &gs, const vector<string> &parts) {
+    // Foo::Bar => Foo_Bar
+    auto mangledName = absl::StrJoin(parts, "_");
+
+    auto utf8Name = gs.lookupNameUTF8(mangledName);
+    if (!utf8Name.exists()) {
+        return MangledName();
+    }
+
+    auto packagerName = gs.lookupNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
+    if (!packagerName.exists()) {
+        return MangledName();
+    }
+
+    auto owner = core::Symbols::PackageSpecRegistry();
+    for (auto part : parts) {
+        auto member = owner.data(gs)->findMember(gs, gs.lookupNameConstant(part));
+        if (!member.exists() || !member.isClassOrModule()) {
+            owner = core::Symbols::noClassOrModule();
+            break;
+        }
+        owner = member.asClassOrModuleRef();
+    }
+
+    if (owner == core::Symbols::PackageSpecRegistry()) {
+        owner = core::Symbols::noClassOrModule();
+    }
+
+    return MangledName(gs.lookupNameConstant(packagerName), owner);
+}
+
 } // namespace sorbet::core::packages
