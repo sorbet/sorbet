@@ -934,10 +934,10 @@ void GlobalState::initEmpty() {
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::SyntheticGeneric());
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_SyntheticGeneric());
 
-    method = enterMethod(*this, Symbols::Sorbet_Private_Static_SyntheticGeneric(), Names::syntheticSquareBrackets())
-                 .repeatedTopArg(Names::args())
+    method = enterMethod(*this, Symbols::Module(), Names::syntheticSquareBrackets())
+                 .repeatedUntypedArg(Names::arg())
                  .build();
-    ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_SyntheticGeneric_syntheticSquareBrackets());
+    ENFORCE_NO_TIMER(method == Symbols::Module_syntheticSquareBrackets());
 
     method = enterMethod(*this, Symbols::Sorbet_Private_Static_SyntheticGeneric(), Names::syntheticTypeMember())
                  .repeatedTopArg(Names::args())

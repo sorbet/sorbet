@@ -11,11 +11,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <self>.puts(<cast:cast>(42, <todo sym>, <emptyTree>::<C String>), <cast:cast>(42, <todo sym>, <emptyTree>::<C String>))
 
-  arr_nil = <cast:let>(nil, <todo sym>, ::<root>::<C T>.nilable(::<root>::<C T>::<C Array>.[](::<root>::<C T>.untyped())))
+  arr_nil = <cast:let>(nil, <todo sym>, ::<root>::<C T>.nilable(::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(::<root>::<C T>.untyped())))
 
   ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :puts, ::<Magic>.<splat>(::<root>::<C T>.must(arr_nil)).concat(::<Magic>.<splat>(::<root>::<C T>.must(arr_nil))), nil)
 
-  hash_nil = <cast:let>(nil, <todo sym>, ::<root>::<C T>.nilable(::<root>::<C T>::<C Hash>.[](::<root>::<C T>.untyped(), ::<root>::<C T>.untyped())))
+  hash_nil = <cast:let>(nil, <todo sym>, ::<root>::<C T>.nilable(::<root>::<C T>::<C Hash>.<syntheticSquareBrackets>(::<root>::<C T>.untyped(), ::<root>::<C T>.untyped())))
 
   <self>.puts(begin
       <hashTemp>$2 = ::<Magic>.<to-hash-dup>(::<root>::<C T>.must(hash_nil))

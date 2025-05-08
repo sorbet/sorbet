@@ -35,7 +35,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   let3 = <emptyTree>::<C Let>.new()
 
-  let3.foo().foo=(<cast:let>(["foo", "bar"], <todo sym>, ::<root>::<C T>::<C Array>.[](<emptyTree>::<C String>)))
+  let3.foo().foo=(<cast:let>(["foo", "bar"], <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C String>)))
 
   <emptyTree>::<C T>.reveal_type(let3.foo())
 end

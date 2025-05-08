@@ -366,27 +366,6 @@ public:
     }
 
     /*
-     * Is `expr` a constant node that is rooted on `::T`?
-     */
-    static bool isTRooted(const std::unique_ptr<parser::Node> &expr) {
-        if (expr == nullptr) {
-            return false;
-        }
-
-        auto constant = parser::cast_node<parser::Const>(expr.get());
-
-        if (constant == nullptr) {
-            return false;
-        }
-
-        if (isT(constant->scope)) {
-            return true;
-        }
-
-        return isTRooted(constant->scope);
-    }
-
-    /*
      * Is `expr` a `T.untyped()` or `::T.untyped()` send node?
      */
     static bool isTUntyped(const std::unique_ptr<parser::Node> &expr) {

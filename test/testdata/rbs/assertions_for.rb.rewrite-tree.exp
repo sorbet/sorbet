@@ -10,7 +10,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  <cast:let>(<emptyTree>::<C ARGV>, <todo sym>, ::<root>::<C T>::<C Array>.[](<emptyTree>::<C String>)).each() do |x|
+  <cast:let>(<emptyTree>::<C ARGV>, <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C String>)).each() do |x|
     <emptyTree>
   end
 

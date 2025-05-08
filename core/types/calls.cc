@@ -4534,8 +4534,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::bind(), &DeclBuilderForProcs_bind},
 
     {Symbols::T_Generic(), Intrinsic::Kind::Instance, Names::squareBrackets(), &T_Generic_squareBrackets},
-    {Symbols::Sorbet_Private_Static_SyntheticGeneric(), Intrinsic::Kind::Instance, Names::syntheticSquareBrackets(),
-     &T_Generic_squareBrackets},
+    {Symbols::Module(), Intrinsic::Kind::Instance, Names::syntheticSquareBrackets(), &T_Generic_squareBrackets},
 
     {Symbols::T_Array(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Hash(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},

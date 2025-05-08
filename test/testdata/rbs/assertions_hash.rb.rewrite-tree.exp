@@ -3,28 +3,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <emptyTree>::<C T>.reveal_type(hash1)
 
-  <cast:let>({:a => 1, :b => 2}, <todo sym>, ::<root>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>))
+  <cast:let>({:a => 1, :b => 2}, <todo sym>, ::<root>::<C T>::<C Hash>.<syntheticSquareBrackets>(<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>))
 
-  hash2 = <cast:let>({}, <todo sym>, ::<root>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>))
+  hash2 = <cast:let>({}, <todo sym>, ::<root>::<C T>::<C Hash>.<syntheticSquareBrackets>(<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>))
 
   <emptyTree>::<C T>.reveal_type(hash2)
 
   hash3 = <cast:let>(begin
     <hashTemp>$6 = ::<Magic>.<to-hash-dup>(hash2)
     <hashTemp>$6
-  end, <todo sym>, ::<root>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>))
+  end, <todo sym>, ::<root>::<C T>::<C Hash>.<syntheticSquareBrackets>(<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>))
 
   <emptyTree>::<C T>.reveal_type(hash3)
 
   hash4 = begin
-    <hashTemp>$7 = ::<Magic>.<to-hash-dup>(<cast:cast>(hash2, <todo sym>, ::<root>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>)))
+    <hashTemp>$7 = ::<Magic>.<to-hash-dup>(<cast:cast>(hash2, <todo sym>, ::<root>::<C T>::<C Hash>.<syntheticSquareBrackets>(<emptyTree>::<C Symbol>, <emptyTree>::<C String>)))
     <hashTemp>$7
   end
 
   <emptyTree>::<C T>.reveal_type(hash4)
 
   hash5 = begin
-    <hashTemp>$8 = ::<Magic>.<to-hash-dup>(<cast:cast>(hash2, <todo sym>, ::<root>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>)))
+    <hashTemp>$8 = ::<Magic>.<to-hash-dup>(<cast:cast>(hash2, <todo sym>, ::<root>::<C T>::<C Hash>.<syntheticSquareBrackets>(<emptyTree>::<C Symbol>, <emptyTree>::<C String>)))
     <hashTemp>$8
   end
 

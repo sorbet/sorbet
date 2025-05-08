@@ -103,7 +103,6 @@ T.reveal_type(g4) # error: Revealed type: `G4[T.untyped]`
 #     ^ error: Failed to parse RBS type parameters (expected a token `tUIDENT`)
 class G5; end
 
-
 #: [U]
 class G6; end
 

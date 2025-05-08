@@ -64,7 +64,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     if ::NilClass.===(<assignTemp>$5)
       ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$5)
     else
-      <assignTemp>$5.foo=(<cast:let>(["foo", "bar"], <todo sym>, ::<root>::<C T>::<C Array>.[](<emptyTree>::<C String>)))
+      <assignTemp>$5.foo=(<cast:let>(["foo", "bar"], <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C String>)))
     end
   end
 end

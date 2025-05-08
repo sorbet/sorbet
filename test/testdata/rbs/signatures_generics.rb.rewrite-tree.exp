@@ -207,7 +207,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <emptyTree>::<C T>.reveal_type(g6)
 
-  arr1 = <cast:let>(<emptyTree>::<C Array>.new(), <todo sym>, <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C Integer>))
+  arr1 = <cast:let>(<emptyTree>::<C Array>.new(), <todo sym>, <emptyTree>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
 
   <emptyTree>::<C T>.reveal_type(arr1)
 
