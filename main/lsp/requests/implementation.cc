@@ -59,7 +59,7 @@ core::MethodRef findOverriddenMethod(const core::GlobalState &gs, const core::Me
 } // namespace
 
 ImplementationTask::ImplementationTask(const LSPConfiguration &config, MessageId id,
-                                       std::unique_ptr<ImplementationParams> params)
+                                       unique_ptr<ImplementationParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentImplementation), params(move(params)) {}
 
 unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegate &typechecker) {

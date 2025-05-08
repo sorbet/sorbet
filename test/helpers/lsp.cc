@@ -29,7 +29,7 @@ string uriToFilePath(const LSPConfiguration &config, string_view uri) {
 }
 
 template <typename T = DynamicRegistrationOption>
-std::unique_ptr<T> makeDynamicRegistrationOption(bool dynamicRegistration) {
+unique_ptr<T> makeDynamicRegistrationOption(bool dynamicRegistration) {
     auto option = std::make_unique<T>();
     option->dynamicRegistration = dynamicRegistration;
     return option;
@@ -145,7 +145,7 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities(bo
 unique_ptr<InitializeParams>
 makeInitializeParams(std::optional<variant<string, JSONNullObject>> rootPath, variant<string, JSONNullObject> rootUri,
                      bool supportsMarkdown, bool supportsCodeActionResolve,
-                     std::optional<std::unique_ptr<SorbetInitializationOptions>> initOptions) {
+                     std::optional<unique_ptr<SorbetInitializationOptions>> initOptions) {
     auto initializeParams = make_unique<InitializeParams>(rootUri, make_unique<ClientCapabilities>());
     if (rootPath) {
         initializeParams->rootPath = rootPath;
@@ -488,7 +488,7 @@ unique_ptr<LSPMessage> makeClose(string_view uri) {
     return make_unique<LSPMessage>(move(didCloseNotif));
 }
 
-std::unique_ptr<LSPMessage> makeConfigurationChange(std::unique_ptr<DidChangeConfigurationParams> params) {
+unique_ptr<LSPMessage> makeConfigurationChange(unique_ptr<DidChangeConfigurationParams> params) {
     auto changeConfigNotification =
         make_unique<NotificationMessage>("2.0", LSPMethod::WorkspaceDidChangeConfiguration, move(params));
     return make_unique<LSPMessage>(move(changeConfigNotification));

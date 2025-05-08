@@ -274,7 +274,7 @@ void ErrorReporter::sanityCheck() const {
 }
 
 ErrorEpoch::ErrorEpoch(ErrorReporter &errorReporter, uint32_t epoch, bool isIncremental,
-                       vector<std::unique_ptr<Timer>> diagnosticLatencyTimers)
+                       vector<unique_ptr<Timer>> diagnosticLatencyTimers)
     : errorReporter(errorReporter), epoch(epoch) {
     errorReporter.beginEpoch(epoch, isIncremental, move(diagnosticLatencyTimers));
 };

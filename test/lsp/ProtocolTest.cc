@@ -163,7 +163,7 @@ vector<unique_ptr<LSPMessage>> verify(const vector<unique_ptr<LSPMessage>> &msgs
     return reparsedMessages;
 }
 
-vector<std::unique_ptr<LSPMessage>> ProtocolTest::sendRaw(const string &json) {
+vector<unique_ptr<LSPMessage>> ProtocolTest::sendRaw(const string &json) {
     auto responses = verify(getLSPResponsesFor(*lspWrapper, LSPMessage::fromClient(json)));
     updateDiagnostics(responses);
     return responses;

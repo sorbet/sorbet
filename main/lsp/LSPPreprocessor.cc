@@ -70,11 +70,11 @@ CounterState &TaskQueue::getCounters() {
     return this->counters;
 }
 
-const std::deque<std::unique_ptr<LSPTask>> &TaskQueue::tasks() const {
+const std::deque<unique_ptr<LSPTask>> &TaskQueue::tasks() const {
     return this->pendingTasks;
 }
 
-std::deque<std::unique_ptr<LSPTask>> &TaskQueue::tasks() {
+std::deque<unique_ptr<LSPTask>> &TaskQueue::tasks() {
     return this->pendingTasks;
 }
 

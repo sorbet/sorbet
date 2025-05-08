@@ -32,11 +32,11 @@ bool InitializedTask::needsMultithreading(const LSPIndexer &indexer) const {
     return true;
 }
 
-void InitializedTask::setGlobalState(std::unique_ptr<core::GlobalState> gs) {
+void InitializedTask::setGlobalState(unique_ptr<core::GlobalState> gs) {
     this->gs = std::move(gs);
 }
 
-void InitializedTask::setKeyValueStore(std::unique_ptr<KeyValueStore> kvstore) {
+void InitializedTask::setKeyValueStore(unique_ptr<KeyValueStore> kvstore) {
     this->kvstore = std::move(kvstore);
 }
 

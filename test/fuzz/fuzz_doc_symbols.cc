@@ -26,16 +26,16 @@ std::shared_ptr<sorbet::realmain::options::Options> mkOpts(std::string_view cont
     return opts;
 }
 
-std::unique_ptr<sorbet::core::GlobalState> mkGlobalState(const sorbet::realmain::options::Options &opts,
-                                                         std::unique_ptr<sorbet::KeyValueStore> &kvStore) {
+unique_ptr<sorbet::core::GlobalState> mkGlobalState(const sorbet::realmain::options::Options &opts,
+                                                         unique_ptr<sorbet::KeyValueStore> &kvStore) {
     auto gs = std::make_unique<sorbet::core::GlobalState>(
         (std::make_shared<sorbet::core::ErrorQueue>(*typeErrors, *console, make_shared<core::NullFlusher>())));
     sorbet::payload::createInitialGlobalState(gs, opts, kvStore);
     return gs;
 }
 
-std::unique_ptr<sorbet::realmain::lsp::SingleThreadedLSPWrapper> mkLSPWrapper(std::string_view contents) {
-    std::unique_ptr<sorbet::KeyValueStore> kvStore;
+unique_ptr<sorbet::realmain::lsp::SingleThreadedLSPWrapper> mkLSPWrapper(std::string_view contents) {
+    unique_ptr<sorbet::KeyValueStore> kvStore;
     auto opts = mkOpts(contents);
     static const auto commonGs = mkGlobalState(*opts, kvStore);
     // TODO how to use opts and avoid another mkOpts()?

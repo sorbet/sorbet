@@ -11,7 +11,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 DocumentFormattingTask::DocumentFormattingTask(const LSPConfiguration &config, MessageId id,
-                                               std::unique_ptr<DocumentFormattingParams> params)
+                                               unique_ptr<DocumentFormattingParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentFormatting), params(move(params)) {}
 
 // Processed on the preprocess thread so it doesn't wait for typechecking.

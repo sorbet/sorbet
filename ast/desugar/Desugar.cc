@@ -848,7 +848,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         argnodes.erase(fwdRestIt);
                     }
 
-                    std::unique_ptr<parser::Node> array = make_unique<parser::Array>(locZeroLen, std::move(argnodes));
+                    unique_ptr<parser::Node> array = make_unique<parser::Array>(locZeroLen, std::move(argnodes));
                     auto args = node2TreeImpl(dctx, array);
 
                     if (hasFwdArgs) {
@@ -1506,7 +1506,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // Replace the original method name with a new special one that conveys that this is a CSend, so
                     // that a&.foo is treated as different from a.foo when checking for structural equality.
                     auto newFun = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::DesugarCsend, csend->method, 1);
-                    std::unique_ptr<parser::Node> sendNode = make_unique<parser::Send>(
+                    unique_ptr<parser::Node> sendNode = make_unique<parser::Send>(
                         loc, std::move(csend->receiver), newFun, csend->methodLoc, std::move(csend->args));
                     auto send = node2TreeImpl(dctx, sendNode);
                     result = std::move(send);
@@ -1765,7 +1765,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 // Do this by synthesizing a `Send` parse node and letting our
                 // Send desugar handle it.
                 auto method = maybeTypedSuper(dctx);
-                std::unique_ptr<parser::Node> send =
+                unique_ptr<parser::Node> send =
                     make_unique<parser::Send>(super->loc, nullptr, method, super->loc, std::move(super->args));
                 auto res = node2TreeImpl(dctx, send);
                 result = std::move(res);
