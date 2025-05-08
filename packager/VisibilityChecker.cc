@@ -416,7 +416,7 @@ public:
             bool layeringViolation = false;
             bool strictDependenciesTooLow = false;
             bool causesCycle = false;
-            std::optional<string> path;
+            optional<string> path;
             if (!isTestImport && db.enforceLayering()) {
                 layeringViolation = strictDepsLevel.has_value() &&
                                     strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&

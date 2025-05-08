@@ -364,7 +364,7 @@ TypePtr Types::dropNil(const GlobalState &gs, const TypePtr &from) {
     return Types::dropSubtypesOf(gs, from, toDrop);
 }
 
-std::optional<int> Types::getProcArity(const AppliedType &type) {
+optional<int> Types::getProcArity(const AppliedType &type) {
     for (int i = 0; i <= Symbols::MAX_PROC_ARITY; i++) {
         if (type.klass == Symbols::Proc(i)) {
             return i;
@@ -495,7 +495,7 @@ TypePtr ShapeType::underlying(const GlobalState &gs) const {
     return Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeUnderlying());
 }
 
-std::optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
+optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
     if (isa_type<NamedLiteralType>(t)) {
         const auto &lit = cast_type_nonnull<NamedLiteralType>(t);
         return this->indexForKey(lit);
@@ -511,7 +511,7 @@ std::optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
     return std::nullopt;
 }
 
-std::optional<size_t> ShapeType::indexForKey(const NamedLiteralType &lit) const {
+optional<size_t> ShapeType::indexForKey(const NamedLiteralType &lit) const {
     auto fnd = absl::c_find_if(this->keys, [&lit](const auto &candidate) -> bool {
         if (!isa_type<NamedLiteralType>(candidate)) {
             return false;
@@ -525,7 +525,7 @@ std::optional<size_t> ShapeType::indexForKey(const NamedLiteralType &lit) const 
     return std::distance(this->keys.begin(), fnd);
 }
 
-std::optional<size_t> ShapeType::indexForKey(const IntegerLiteralType &lit) const {
+optional<size_t> ShapeType::indexForKey(const IntegerLiteralType &lit) const {
     auto fnd = absl::c_find_if(keys, [&](auto &candidate) -> bool {
         if (!isa_type<IntegerLiteralType>(candidate)) {
             return false;
@@ -539,7 +539,7 @@ std::optional<size_t> ShapeType::indexForKey(const IntegerLiteralType &lit) cons
     return std::distance(this->keys.begin(), fnd);
 }
 
-std::optional<size_t> ShapeType::indexForKey(const FloatLiteralType &lit) const {
+optional<size_t> ShapeType::indexForKey(const FloatLiteralType &lit) const {
     auto fnd = absl::c_find_if(keys, [&](auto &candidate) -> bool {
         if (!isa_type<FloatLiteralType>(candidate)) {
             return false;

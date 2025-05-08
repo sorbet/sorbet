@@ -143,7 +143,7 @@ void toErrorSectionHelper(const ErrorSection::Collector &e, vector<ErrorLine> &r
     }
 }
 
-std::optional<ErrorSection> ErrorSection::Collector::toErrorSection() const {
+optional<ErrorSection> ErrorSection::Collector::toErrorSection() const {
     if (children.size() == 0) {
         return nullopt;
     }

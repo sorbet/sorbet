@@ -524,7 +524,7 @@ struct IndexSubstitutionJob {
     // of serially in the main thread.
     unique_ptr<core::GlobalState> threadGs;
 
-    std::optional<core::NameSubstitution> subst;
+    optional<core::NameSubstitution> subst;
     vector<ast::ParsedFile> trees;
 
     // Please see the comment on `IndexResult::numTreesProcessed` for a more thorough description about why this might

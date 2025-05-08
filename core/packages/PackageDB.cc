@@ -42,13 +42,13 @@ public:
         return Loc::none();
     }
 
-    std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
+    optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                          bool isTestImport) const {
         notImplemented();
         return nullopt;
     }
 
-    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
+    optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                          const core::SymbolRef name) const {
         return {};
     }
@@ -97,12 +97,12 @@ public:
         return core::packages::StrictDependenciesLevel::False;
     }
 
-    std::optional<string> pathTo(const core::GlobalState &gs, const MangledName dest) const {
+    optional<string> pathTo(const core::GlobalState &gs, const MangledName dest) const {
         notImplemented();
         return nullopt;
     }
 
-    std::optional<ImportType> importsPackage(MangledName mangledName) const {
+    optional<ImportType> importsPackage(MangledName mangledName) const {
         notImplemented();
         return nullopt;
     }

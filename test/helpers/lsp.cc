@@ -143,9 +143,9 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities(bo
 }
 
 unique_ptr<InitializeParams>
-makeInitializeParams(std::optional<variant<string, JSONNullObject>> rootPath, variant<string, JSONNullObject> rootUri,
+makeInitializeParams(optional<variant<string, JSONNullObject>> rootPath, variant<string, JSONNullObject> rootUri,
                      bool supportsMarkdown, bool supportsCodeActionResolve,
-                     std::optional<unique_ptr<SorbetInitializationOptions>> initOptions) {
+                     optional<unique_ptr<SorbetInitializationOptions>> initOptions) {
     auto initializeParams = make_unique<InitializeParams>(rootUri, make_unique<ClientCapabilities>());
     if (rootPath) {
         initializeParams->rootPath = rootPath;

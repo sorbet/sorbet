@@ -106,7 +106,7 @@ void MsgpackWriterFull::packRange(mpack_writer_t *writer, uint32_t begin, uint32
 
 void MsgpackWriterFull::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
                                        const AutogenConfig &autogenCfg) {
-    std::optional<MsgpackArray> defsArray;
+    optional<MsgpackArray> defsArray;
 
     if (version <= 6) {
         defsArray.emplace(writer, defAttrs.size());
@@ -142,7 +142,7 @@ void MsgpackWriterFull::packDefinition(mpack_writer_t *writer, core::Context ctx
 }
 
 void MsgpackWriterFull::packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref) {
-    std::optional<MsgpackArray> refArray;
+    optional<MsgpackArray> refArray;
 
     if (version <= 6) {
         refArray.emplace(writer, refAttrs.size());

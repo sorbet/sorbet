@@ -558,7 +558,7 @@ public:
         return rv;
     }
 
-    std::optional<core::packages::ImportType> importsPackage(core::packages::MangledName mangledName) const {
+    optional<core::packages::ImportType> importsPackage(core::packages::MangledName mangledName) const {
         if (!mangledName.exists()) {
             return std::nullopt;
         }

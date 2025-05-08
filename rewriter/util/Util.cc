@@ -416,7 +416,7 @@ bool ASTUtil::isRootScopedSyntacticConstant(const ast::ExpressionPtr &expr,
     return ast::MK::isRootScope(*p);
 }
 
-std::optional<ASTUtil::DuplicateArg> ASTUtil::findDuplicateArg(core::MutableContext ctx, const ast::Send *send) {
+optional<ASTUtil::DuplicateArg> ASTUtil::findDuplicateArg(core::MutableContext ctx, const ast::Send *send) {
     if (!send) {
         return std::nullopt;
     }

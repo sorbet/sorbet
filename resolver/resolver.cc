@@ -173,7 +173,7 @@ private:
 
         bool isSuperclass; // true if superclass, false for mixin
         bool isInclude;    // true if include, false if extend
-        std::optional<uint16_t> mixinIndex;
+        optional<uint16_t> mixinIndex;
 
         AncestorResolutionItem() = default;
         AncestorResolutionItem(AncestorResolutionItem &&rhs) noexcept = default;
@@ -2960,7 +2960,7 @@ public:
 
     static ResolveTypeMembersAndFieldsResult
     run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
-        std::optional<absl::Span<const core::ClassOrModuleRef>> symbolsToRecompute) {
+        optional<absl::Span<const core::ClassOrModuleRef>> symbolsToRecompute) {
         Timer timeit(gs.tracer(), "resolver.type_params");
 
         auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
@@ -3258,7 +3258,7 @@ private:
     struct OverloadedMethodArgInformation {
         vector<core::ArgInfo> posArgs;
         vector<core::ArgInfo> kwArgs;
-        std::optional<core::ArgInfo> blkArg;
+        optional<core::ArgInfo> blkArg;
     };
 
     // This structure serves double duty: it holds information about a single sig and the
@@ -3271,7 +3271,7 @@ private:
         bool hasMissingArgument = false;
 
         // This is used solely in the information for a single sig.
-        std::optional<OverloadedMethodArgInformation> args;
+        optional<OverloadedMethodArgInformation> args;
 
         void merge(OverloadedMethodSigInformation &other) {
             this->hasKwArgs &= other.hasKwArgs;
@@ -3710,7 +3710,7 @@ public:
         // Unique overload names must have an index that's > 0 associated with them, so we start `i` at `0` to ensure
         // that the first iteration of the loop it's at `1`.
         int i = 0;
-        std::optional<OverloadedMethodSigInformation> combinedInfo;
+        optional<OverloadedMethodSigInformation> combinedInfo;
         vector<OverloadedMethodArgInformation> args;
         for (auto &sig : sigs) {
             i++;
