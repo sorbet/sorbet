@@ -1,6 +1,7 @@
 #include "packager/packager.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
+#include "absl/strings/str_replace.h"
 #include "absl/synchronization/blocking_counter.h"
 #include "ast/packager/packager.h"
 #include "ast/treemap/treemap.h"
@@ -34,12 +35,15 @@ bool visibilityApplies(const core::GlobalState &gs, const core::packages::Visibl
                        core::packages::MangledName name) {
     if (vt.visibleToType == core::packages::VisibleToType::Wildcard) {
         // a wildcard will match if it's a proper prefix of the package name
-        // TODO(jez) Replace this with looking up in ownership nesting hierarchy
-        auto curPkgName = name.mangledName.shortName(gs);
-        auto prefix = vt.packageName.mangledName.shortName(gs);
-        return absl::StartsWith(curPkgName, prefix) &&
-               // Have to check '_' to make sure we're on a package boundary.
-               (curPkgName.size() == prefix.size() || curPkgName[prefix.size()] == '_');
+        auto curPkg = name.owner;
+        auto prefix = vt.packageName.owner;
+        do {
+            if (curPkg == prefix) {
+                return true;
+            }
+            curPkg = curPkg.data(gs)->owner;
+        } while (curPkg != core::Symbols::root());
+        return false;
     } else {
         // otherwise it needs to be the same
         return vt.packageName == name;
@@ -1614,7 +1618,7 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     auto packageFilePath = package.file.data(gs).path();
     ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
     info.packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
-    const string_view shortName = info.name.mangledName.mangledName.shortName(gs);
+    const auto shortName = absl::StrReplaceAll(info.name.mangledName.owner.show(gs), {{"::", "_"}});
     const string slashDirName = absl::StrJoin(info.name.fullName.parts, "/", core::packages::NameFormatter(gs)) + "/";
     const string_view dirNameFromShortName = shortName;
 

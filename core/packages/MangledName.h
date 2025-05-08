@@ -14,9 +14,11 @@ namespace sorbet::core::packages {
 class MangledName final {
     MangledName(NameRef mangledName, ClassOrModuleRef owner) : mangledName(mangledName), owner(owner) {}
 
-public:
     NameRef mangledName;
 
+    template <typename H> friend H AbslHashValue(H h, const MangledName &m);
+
+public:
     // The ClassOrModuleRef that this package is stored in.
     //
     // This is only to ease the transition to storing packages in the symbol table--eventually,
