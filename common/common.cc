@@ -168,7 +168,7 @@ string_view sorbet::FileOps::getExtension(string_view path) {
     return path.substr(found + 1);
 }
 
-bool sorbet::FileOps::hasAllowedExtension(std::string_view path, const UnorderedSet<string> &extensions) {
+bool sorbet::FileOps::hasAllowedExtension(string_view path, const UnorderedSet<string> &extensions) {
     auto dotLocation = path.rfind('.');
     if (dotLocation == string_view::npos) {
         return false;

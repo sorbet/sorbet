@@ -13,7 +13,7 @@ void OSFileSystem::writeFile(const string &filename, string_view text) {
     return FileOps::write(filename, text);
 }
 
-vector<string> FileSystem::listFilesInDir(std::string_view path, const UnorderedSet<string> &extensions,
+vector<string> FileSystem::listFilesInDir(string_view path, const UnorderedSet<string> &extensions,
                                           bool recursive, const vector<string> &absoluteIgnorePatterns,
                                           const vector<string> &relativeIgnorePatterns) const {
     unique_ptr<WorkerPool> workerPool = WorkerPool::create(0, *spdlog::default_logger());

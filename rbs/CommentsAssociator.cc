@@ -11,9 +11,9 @@ using namespace std;
 
 namespace sorbet::rbs {
 
-const std::string_view CommentsAssociator::RBS_PREFIX = "#:";
-const std::string_view CommentsAssociator::ANNOTATION_PREFIX = "# @";
-const std::string_view CommentsAssociator::MULTILINE_RBS_PREFIX = "#|";
+const string_view CommentsAssociator::RBS_PREFIX = "#:";
+const string_view CommentsAssociator::ANNOTATION_PREFIX = "# @";
+const string_view CommentsAssociator::MULTILINE_RBS_PREFIX = "#|";
 
 namespace {
 bool isVisibilitySend(const parser::Send *send) {
@@ -51,7 +51,7 @@ void CommentsAssociator::consumeCommentsUntilLine(int line) {
     commentByLine.erase(commentByLine.begin(), it);
 }
 
-void CommentsAssociator::associateCommentsToNode(parser::Node *node, absl::Span<const std::string_view> prefixes) {
+void CommentsAssociator::associateCommentsToNode(parser::Node *node, absl::Span<const string_view> prefixes) {
     auto nodeStartLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
 
     vector<CommentNode> comments;

@@ -21,8 +21,8 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
 
 SessionCache::~SessionCache() noexcept(false) {}
 
-std::string_view SessionCache::kvstorePath() const {
-    return std::string_view(this->path);
+string_view SessionCache::kvstorePath() const {
+    return string_view(this->path);
 }
 
 unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore> kvstore,

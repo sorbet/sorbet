@@ -169,14 +169,14 @@ makeInitializeParams(std::optional<variant<string, JSONNullObject>> rootPath, va
     return initializeParams;
 }
 
-unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int line, int character) {
+unique_ptr<LSPMessage> makeDefinitionRequest(int id, string_view uri, int line, int character) {
     return make_unique<LSPMessage>(make_unique<RequestMessage>(
         "2.0", id, LSPMethod::TextDocumentDefinition,
         make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(uri)),
                                                 make_unique<Position>(line, character))));
 }
 
-unique_ptr<LSPMessage> makeReferenceRequest(int id, std::string_view uri, int line, int character, bool includeDecl) {
+unique_ptr<LSPMessage> makeReferenceRequest(int id, string_view uri, int line, int character, bool includeDecl) {
     return make_unique<LSPMessage>(
         make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentReferences,
                                     make_unique<ReferenceParams>(make_unique<TextDocumentIdentifier>(string(uri)),
@@ -184,14 +184,14 @@ unique_ptr<LSPMessage> makeReferenceRequest(int id, std::string_view uri, int li
                                                                  make_unique<ReferenceContext>(includeDecl))));
 }
 
-unique_ptr<LSPMessage> makeHover(int id, std::string_view uri, int line, int character) {
+unique_ptr<LSPMessage> makeHover(int id, string_view uri, int line, int character) {
     return make_unique<LSPMessage>(make_unique<RequestMessage>(
         "2.0", id, LSPMethod::TextDocumentHover,
         make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(uri)),
                                                 make_unique<Position>(line, character))));
 }
 
-unique_ptr<LSPMessage> makeCodeAction(int id, std::string_view uri, int line, int character) {
+unique_ptr<LSPMessage> makeCodeAction(int id, string_view uri, int line, int character) {
     auto textDocument = make_unique<TextDocumentIdentifier>(string(uri));
     auto range = make_unique<Range>(make_unique<Position>(line, character), make_unique<Position>(line, character));
     auto context = make_unique<CodeActionContext>(vector<unique_ptr<Diagnostic>>{});
@@ -200,14 +200,14 @@ unique_ptr<LSPMessage> makeCodeAction(int id, std::string_view uri, int line, in
                                     make_unique<CodeActionParams>(move(textDocument), move(range), move(context))));
 }
 
-unique_ptr<LSPMessage> makeCompletion(int id, std::string_view uri, int line, int character) {
+unique_ptr<LSPMessage> makeCompletion(int id, string_view uri, int line, int character) {
     return make_unique<LSPMessage>(
         make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentCompletion,
                                     make_unique<CompletionParams>(make_unique<TextDocumentIdentifier>(string(uri)),
                                                                   make_unique<Position>(line, character))));
 }
 
-unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view query) {
+unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, string_view query) {
     return make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::WorkspaceSymbol,
                                                                make_unique<WorkspaceSymbolParams>(string(query))));
 }

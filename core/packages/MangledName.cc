@@ -7,7 +7,7 @@
 using namespace std;
 
 namespace sorbet::core::packages {
-MangledName MangledName::mangledNameFromParts(core::GlobalState &gs, const vector<std::string_view> &parts) {
+MangledName MangledName::mangledNameFromParts(core::GlobalState &gs, const vector<string_view> &parts) {
     // Foo::Bar => Foo_Bar
     auto mangledName = absl::StrCat(absl::StrJoin(parts, "_"));
 

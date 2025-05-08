@@ -249,7 +249,7 @@ absl::Span<const string> PackageDB::extraPackageFilesDirectorySlashPrefixes() co
     return absl::MakeSpan(extraPackageFilesDirectorySlashPrefixes_);
 }
 
-const std::string_view PackageDB::errorHint() const {
+const string_view PackageDB::errorHint() const {
     return errorHint_;
 }
 
