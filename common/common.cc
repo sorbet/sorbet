@@ -301,8 +301,7 @@ using JobOutput = variant<std::monostate, sorbet::FileNotFoundException, sorbet:
 
 void appendFilesInDir(string_view basePath, const string &path, const sorbet::UnorderedSet<string> &extensions,
                       sorbet::WorkerPool &workers, bool recursive, vector<string> &allPaths,
-                      const vector<string> &absoluteIgnorePatterns,
-                      const vector<string> &relativeIgnorePatterns) {
+                      const vector<string> &absoluteIgnorePatterns, const vector<string> &relativeIgnorePatterns) {
     auto numWorkers = max(workers.size(), 1);
     auto jobq = make_shared<ConcurrentUnBoundedQueue<Job>>();
     auto resultq = make_shared<BlockingBoundedQueue<JobOutput>>(numWorkers);

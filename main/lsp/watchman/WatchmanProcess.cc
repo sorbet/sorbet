@@ -13,10 +13,9 @@ using namespace std;
 
 namespace sorbet::realmain::lsp::watchman {
 
-WatchmanProcess::WatchmanProcess(shared_ptr<spdlog::logger> logger, string_view watchmanPath,
-                                 string_view workSpace, vector<string> extensions,
-                                 MessageQueueState &messageQueue, absl::Mutex &messageQueueMutex,
-                                 absl::Notification &initializedNotification,
+WatchmanProcess::WatchmanProcess(shared_ptr<spdlog::logger> logger, string_view watchmanPath, string_view workSpace,
+                                 vector<string> extensions, MessageQueueState &messageQueue,
+                                 absl::Mutex &messageQueueMutex, absl::Notification &initializedNotification,
                                  shared_ptr<const LSPConfiguration> config)
     : logger(std::move(logger)), watchmanPath(string(watchmanPath)), workSpace(string(workSpace)),
       extensions(std::move(extensions)),
@@ -55,20 +54,20 @@ void WatchmanProcess::start() {
         // laptops have 4.9.0. Thus, we use [ "anyof", [ "suffix", "suffix1" ], [ "suffix", "suffix2" ], ... ].
         // Note 2: `empty_on_fresh_instance` prevents Watchman from sending entire contents of folder if this
         // subscription starts the daemon / causes the daemon to watch this folder for the first time.
-        string subscribeCommand = fmt::format(
-            "[\"subscribe\", \"{}\", \"{}\", {{"
-            "\"expression\": [\"allof\", "
-            "[\"type\", \"f\"], "
-            "[\"anyof\", {}], "
-            // Exclude rsync tmpfiles
-            "[\"not\", [\"match\", \"**/.~tmp~/**\", \"wholename\", {{\"includedotfiles\": true}}]]"
-            "], "
-            "\"fields\": [\"name\"], "
-            "\"empty_on_fresh_instance\": true"
-            "}}]",
-            workSpace, subscriptionName, fmt::map_join(extensions, ", ", [](const string &ext) -> string {
-                return fmt::format("[\"suffix\", \"{}\"]", ext);
-            }));
+        string subscribeCommand =
+            fmt::format("[\"subscribe\", \"{}\", \"{}\", {{"
+                        "\"expression\": [\"allof\", "
+                        "[\"type\", \"f\"], "
+                        "[\"anyof\", {}], "
+                        // Exclude rsync tmpfiles
+                        "[\"not\", [\"match\", \"**/.~tmp~/**\", \"wholename\", {{\"includedotfiles\": true}}]]"
+                        "], "
+                        "\"fields\": [\"name\"], "
+                        "\"empty_on_fresh_instance\": true"
+                        "}}]",
+                        workSpace, subscriptionName, fmt::map_join(extensions, ", ", [](const string &ext) -> string {
+                            return fmt::format("[\"suffix\", \"{}\"]", ext);
+                        }));
         p.send(subscribeCommand.c_str(), subscribeCommand.size());
         logger->debug(subscribeCommand);
 

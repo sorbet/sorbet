@@ -108,8 +108,8 @@ MultiThreadedLSPWrapper::~MultiThreadedLSPWrapper() {
 
 unique_ptr<SingleThreadedLSPWrapper>
 SingleThreadedLSPWrapper::createWithGlobalState(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> options,
-                                                shared_ptr<spdlog::logger> logger,
-                                                unique_ptr<KeyValueStore> kvstore, bool disableFastPath) {
+                                                shared_ptr<spdlog::logger> logger, unique_ptr<KeyValueStore> kvstore,
+                                                bool disableFastPath) {
     options->runLSP = true;
     pipeline::setGlobalStateOptions(*gs, *options);
     // Note: To keep the constructor private, we need to construct with `new` and put it into a `unique_ptr` privately.

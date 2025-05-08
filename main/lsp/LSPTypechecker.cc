@@ -718,8 +718,7 @@ unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(absl::Span<const core::
     return result;
 }
 
-vector<unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef> frefs,
-                                                                      WorkerPool &workers) const {
+vector<unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef> frefs, WorkerPool &workers) const {
     auto updates = getNoopUpdate(frefs);
     auto errorCollector = make_shared<core::ErrorCollector>();
     bool isNoopUpdateForRetypecheck = true;

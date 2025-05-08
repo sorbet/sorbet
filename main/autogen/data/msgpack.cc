@@ -75,8 +75,8 @@ int MsgpackWriterBase::validateVersion(int version, int lo, int hi) {
     return version;
 }
 
-MsgpackWriterBase::MsgpackWriterBase(int version, const vector<string> &refAttrs,
-                                     const vector<string> &defAttrs, const vector<string> &pfAttrs)
+MsgpackWriterBase::MsgpackWriterBase(int version, const vector<string> &refAttrs, const vector<string> &defAttrs,
+                                     const vector<string> &pfAttrs)
     : version(version), refAttrs(refAttrs), defAttrs(defAttrs), pfAttrs(pfAttrs) {}
 
 void MsgpackWriterBase::packReferenceRef(mpack_writer_t *writer, ReferenceRef ref) {

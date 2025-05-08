@@ -27,7 +27,7 @@ shared_ptr<sorbet::realmain::options::Options> mkOpts(string_view contents) {
 }
 
 unique_ptr<sorbet::core::GlobalState> mkGlobalState(const sorbet::realmain::options::Options &opts,
-                                                         unique_ptr<sorbet::KeyValueStore> &kvStore) {
+                                                    unique_ptr<sorbet::KeyValueStore> &kvStore) {
     auto gs = make_unique<sorbet::core::GlobalState>(
         (make_shared<sorbet::core::ErrorQueue>(*typeErrors, *console, make_shared<core::NullFlusher>())));
     sorbet::payload::createInitialGlobalState(gs, opts, kvStore);

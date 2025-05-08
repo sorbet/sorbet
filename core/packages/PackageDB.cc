@@ -43,13 +43,12 @@ public:
     }
 
     optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
-                                                         bool isTestImport) const {
+                                                    bool isTestImport) const {
         notImplemented();
         return nullopt;
     }
 
-    optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
-                                                         const core::SymbolRef name) const {
+    optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const core::SymbolRef name) const {
         return {};
     }
 
