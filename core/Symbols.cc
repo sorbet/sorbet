@@ -476,7 +476,7 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
     return Types::arrayOf(ctx, instantiated);
 }
 
-void ClassOrModule::addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> index) {
+void ClassOrModule::addMixinAt(ClassOrModuleRef sym, optional<uint16_t> index) {
     if (index.has_value()) {
         auto i = index.value();
         ENFORCE(mixins_.size() > i);
@@ -487,7 +487,7 @@ void ClassOrModule::addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> ind
     }
 }
 
-bool ClassOrModule::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional<uint16_t> index) {
+bool ClassOrModule::addMixin(const GlobalState &gs, ClassOrModuleRef sym, optional<uint16_t> index) {
     // Note: Symbols without an explicit declaration may not have class or module set. They default to modules in
     // GlobalPass.cc. We also do not complain if the mixin is BasicObject.
     bool isValidMixin =

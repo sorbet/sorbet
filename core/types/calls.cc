@@ -2591,7 +2591,7 @@ private:
         }
     }
 
-    static std::optional<int> getArityForBlock(const TypePtr &blockType) {
+    static optional<int> getArityForBlock(const TypePtr &blockType) {
         if (auto appliedType = cast_type<AppliedType>(blockType)) {
             return Types::getProcArity(*appliedType);
         }
@@ -2599,7 +2599,7 @@ private:
         return std::nullopt;
     }
 
-    static vector<ArgInfo::ArgFlags> argInfoByArity(std::optional<int> fixedArity) {
+    static vector<ArgInfo::ArgFlags> argInfoByArity(optional<int> fixedArity) {
         vector<ArgInfo::ArgFlags> res;
         if (fixedArity) {
             for (int i = 0; i < *fixedArity; i++) {
@@ -2655,7 +2655,7 @@ private:
                 // Create a new proc of correct arity, with everything as untyped,
                 // and then use this type instead of passedInBlockType in later subtype checks.
                 // This allows the generic parameters to be instantiated with untyped rather than bottom.
-                if (std::optional<int> procArity = Magic_callWithBlock::getArityForBlock(nonNilableBlockType)) {
+                if (optional<int> procArity = Magic_callWithBlock::getArityForBlock(nonNilableBlockType)) {
                     vector<core::TypePtr> targs(*procArity + 1, core::Types::untypedUntracked());
                     auto procWithCorrectArity = core::Symbols::Proc(*procArity);
                     passedInBlockType = make_type<core::AppliedType>(procWithCorrectArity, move(targs));
@@ -2772,7 +2772,7 @@ public:
         TypePtr finalBlockType =
             Magic_callWithBlock::typeToProc(gs, *args.args[2], args.locs.file, args.locs.call, args.locs.args[2],
                                             args.locs.fun, args.originForUninitialized, args.suppressErrors);
-        std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
+        optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         core::SendAndBlockLink link{fn, Magic_callWithBlock::argInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
@@ -2886,7 +2886,7 @@ public:
         TypePtr finalBlockType =
             Magic_callWithBlock::typeToProc(gs, *args.args[4], args.locs.file, args.locs.call, args.locs.args[4],
                                             args.locs.fun, args.originForUninitialized, args.suppressErrors);
-        std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
+        optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         core::SendAndBlockLink link{fn, Magic_callWithBlock::argInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
@@ -4241,7 +4241,7 @@ public:
             return;
         }
 
-        std::optional<int> numberOfPositionalBlockParams = args.block->fixedArity();
+        optional<int> numberOfPositionalBlockParams = args.block->fixedArity();
         if (!numberOfPositionalBlockParams || *numberOfPositionalBlockParams > core::Symbols::MAX_PROC_ARITY) {
             res.returnType = core::Types::procClass();
             return;

@@ -96,7 +96,7 @@ struct ProcessStatResult {
     core::TypePtr type;
 };
 
-std::optional<ProcessStatResult> processStat(core::MutableContext ctx, ast::ClassDef *klass, ast::ExpressionPtr &stat,
+optional<ProcessStatResult> processStat(core::MutableContext ctx, ast::ClassDef *klass, ast::ExpressionPtr &stat,
                                              FromWhere fromWhere) {
     auto asgn = ast::cast_tree<ast::Assign>(stat);
     if (asgn == nullptr) {

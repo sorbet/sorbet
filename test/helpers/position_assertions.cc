@@ -1935,7 +1935,7 @@ void ApplyCodeActionAssertion::checkAll(
 }
 SymbolSearchAssertion::SymbolSearchAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                              string_view query, optional<string> name, optional<string> container,
-                                             std::optional<int> rank, optional<string> uri)
+                                             optional<int> rank, optional<string> uri)
     : RangeAssertion(filename, range, assertionLine), query(query), name(move(name)), container(move(container)),
       rank(rank), uri(move(uri)) {}
 
@@ -2396,7 +2396,7 @@ StringPropertyAssertions::StringPropertyAssertions(string_view filename, unique_
                                                    string_view assertionType)
     : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values){};
 
-std::optional<vector<string>>
+optional<vector<string>>
 StringPropertyAssertions::getValues(string_view type,
                                     const vector<std::shared_ptr<RangeAssertion>> &assertions) {
     for (auto &assertion : assertions) {

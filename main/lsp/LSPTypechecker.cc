@@ -279,7 +279,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     fast_sort(toTypecheck);
     toTypecheck.erase(std::unique(toTypecheck.begin(), toTypecheck.end()), toTypecheck.end());
 
-    std::optional<ShowOperation> op;
+    optional<ShowOperation> op;
     if (toTypecheck.size() > config->opts.lspMaxFilesOnFastPath / 2) {
         op.emplace(*config, ShowOperation::Kind::FastPath);
     }
@@ -363,7 +363,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
             this->gs->errorQueue =
                 make_shared<core::ErrorQueue>(this->gs->errorQueue->logger, this->gs->errorQueue->tracer, errorFlusher);
 
-            std::optional<Timer> timeit;
+            optional<Timer> timeit;
             ShowOperation op(*config, ShowOperation::Kind::Indexing);
 
             switch (mode) {

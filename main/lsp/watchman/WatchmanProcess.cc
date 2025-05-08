@@ -154,7 +154,7 @@ bool WatchmanProcess::isStopped() {
     return stopped;
 }
 
-void WatchmanProcess::exitWithCode(int code, const std::optional<string> &msg) {
+void WatchmanProcess::exitWithCode(int code, const optional<string> &msg) {
     absl::MutexLock lck(&mutex);
     if (!stopped) {
         stopped = true;
@@ -189,7 +189,7 @@ void WatchmanProcess::processStateLeave(unique_ptr<sorbet::realmain::lsp::Watchm
     enqueueNotification(move(notification));
 }
 
-void WatchmanProcess::processExit(int watchmanExitCode, const std::optional<string> &msg) {
+void WatchmanProcess::processExit(int watchmanExitCode, const optional<string> &msg) {
     {
         absl::MutexLock lck(&messageQueueMutex);
         if (!messageQueue.terminate) {

@@ -41,7 +41,7 @@ Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method
 
         auto &dst = arg.flags.isKeyword ? sig.kw : sig.pos;
         if (arg.flags.isRepeated) {
-            dst.rest = std::optional<reference_wrapper<const core::ArgInfo>>{arg};
+            dst.rest = optional<reference_wrapper<const core::ArgInfo>>{arg};
         } else if (arg.flags.isDefault) {
             dst.optional.push_back(arg);
         } else {
