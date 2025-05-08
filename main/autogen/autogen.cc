@@ -117,7 +117,7 @@ public:
 
         // does it define behavior? It is impossible for .rbi files to define behavior (unless they are from the
         // allow-listed set of RBI paths).
-        std::string_view filePath = ctx.file.data(ctx).path();
+        string_view filePath = ctx.file.data(ctx).path();
         bool ignoreRBI = ctx.file.data(ctx).isRBI() &&
                          !absl::c_any_of(autogenCfg->behaviorAllowedInRBIsPaths,
                                          [&](auto &allowedPath) { return absl::StartsWith(filePath, allowedPath); });
@@ -320,7 +320,7 @@ public:
         }
 
         if (ctx.file.data(ctx).isRBI()) {
-            std::string_view filePath = ctx.file.data(ctx).path();
+            string_view filePath = ctx.file.data(ctx).path();
             // Mostly, we are only concerned with references in RBI files so that dependencies can be
             // accurately tracked. Definitions of casgns are not needed.
             //

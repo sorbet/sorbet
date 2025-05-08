@@ -70,11 +70,11 @@ CounterState &TaskQueue::getCounters() {
     return this->counters;
 }
 
-const std::deque<std::unique_ptr<LSPTask>> &TaskQueue::tasks() const {
+const std::deque<unique_ptr<LSPTask>> &TaskQueue::tasks() const {
     return this->pendingTasks;
 }
 
-std::deque<std::unique_ptr<LSPTask>> &TaskQueue::tasks() {
+std::deque<unique_ptr<LSPTask>> &TaskQueue::tasks() {
     return this->pendingTasks;
 }
 
@@ -502,8 +502,8 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse>
     }
     return edit;
 }
-std::vector<std::string_view> LSPPreprocessor::openFilePaths() const {
-    std::vector<std::string_view> paths;
+vector<string_view> LSPPreprocessor::openFilePaths() const {
+    vector<string_view> paths;
     paths.reserve(openFiles.size());
     for (auto const &[path, file] : openFiles) {
         paths.emplace_back(path);

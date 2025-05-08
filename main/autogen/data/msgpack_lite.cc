@@ -11,7 +11,7 @@ namespace sorbet::autogen {
 
 void MsgpackWriterLite::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
                                        const AutogenConfig &autogenCfg) {
-    std::optional<MsgpackArray> defArray;
+    optional<MsgpackArray> defArray;
 
     if (version <= 6) {
         defArray.emplace(writer, defAttrs.size());
@@ -45,7 +45,7 @@ void MsgpackWriterLite::packDefinition(mpack_writer_t *writer, core::Context ctx
 }
 
 void MsgpackWriterLite::packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref) {
-    std::optional<MsgpackArray> refArray;
+    optional<MsgpackArray> refArray;
 
     if (version <= 6) {
         refArray.emplace(writer, refAttrs.size());

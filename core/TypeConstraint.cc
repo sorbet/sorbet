@@ -242,7 +242,7 @@ InlinedVector<SymbolRef, 4> TypeConstraint::getDomain() const {
     return ret;
 }
 
-UnorderedMap<TypeArgumentRef, std::pair<TypePtr, TypePtr>> TypeConstraint::collateBounds(const GlobalState &gs) const {
+UnorderedMap<TypeArgumentRef, pair<TypePtr, TypePtr>> TypeConstraint::collateBounds(const GlobalState &gs) const {
     auto collated = UnorderedMap<TypeArgumentRef, pair<TypePtr, TypePtr>>{};
 
     for (const auto &[sym, lowerBound] : this->lowerBounds) {

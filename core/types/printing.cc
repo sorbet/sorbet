@@ -417,7 +417,7 @@ string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 
 string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
     fmt::memory_buffer buf;
-    if (std::optional<int> procArity = Types::getProcArity(*this)) {
+    if (optional<int> procArity = Types::getProcArity(*this)) {
         fmt::format_to(std::back_inserter(buf), "T.proc");
 
         // The first element in targs is the return type.

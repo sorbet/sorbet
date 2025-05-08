@@ -8,7 +8,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 SorbetShowSymbolTask::SorbetShowSymbolTask(const LSPConfiguration &config, MessageId id,
-                                           std::unique_ptr<TextDocumentPositionParams> params)
+                                           unique_ptr<TextDocumentPositionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::SorbetShowSymbol), params(move(params)) {}
 
 unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDelegate &typechecker) {

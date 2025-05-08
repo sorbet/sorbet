@@ -123,7 +123,7 @@ class PropagateVisibility final {
     // determine the package that owns a symbol. So, to avoid this case we ensure that the symbols that correspond to
     // the package name are always owned by the package that defines them.
     void setPackageLocs(core::MutableContext ctx, core::LocOffsets loc, core::ClassOrModuleRef sym) {
-        std::vector<core::NameRef> names;
+        vector<core::NameRef> names;
 
         while (sym.exists() && sym != core::Symbols::PackageSpecRegistry()) {
             // The symbol isn't a package name if it's defined outside of the package registry.
@@ -190,7 +190,7 @@ class PropagateVisibility final {
         const auto path = file.data(ctx).path();
 
         return absl::c_any_of(ctx.state.packageDB().skipRBIExportEnforcementDirs(),
-                              [&](const std::string &dir) { return absl::StartsWith(path, dir); });
+                              [&](const string &dir) { return absl::StartsWith(path, dir); });
     }
 
     // Checks that the package that a symbol is defined in can be exported from the package we're currently checking.
@@ -231,7 +231,7 @@ class PropagateVisibility final {
         auto enumClass = getEnumClassForEnumValue(ctx.state, sym);
         if (enumClass.exists()) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
-                std::string enumClassName = enumClass.show(ctx);
+                string enumClassName = enumClass.show(ctx);
                 e.setHeader("Cannot export enum value `{}`. Instead, export the entire enum `{}`", sym.show(ctx),
                             enumClassName);
                 e.addErrorLine(sym.loc(ctx), "Defined here");
@@ -285,7 +285,7 @@ public:
             // great to remove this, but this was the behavior of the previous packager implementation.
             exportParentNamespace(ctx, sym.data(ctx)->owner);
         } else {
-            std::string_view kind = ""sv;
+            string_view kind = ""sv;
             switch (litSymbol.kind()) {
                 case core::SymbolRef::Kind::ClassOrModule:
                 case core::SymbolRef::Kind::FieldOrStaticField:
@@ -452,7 +452,7 @@ public:
             bool layeringViolation = false;
             bool strictDependenciesTooLow = false;
             bool causesCycle = false;
-            std::optional<std::string> path;
+            optional<string> path;
             if (!isTestImport && db.enforceLayering()) {
                 layeringViolation = strictDepsLevel.has_value() &&
                                     strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&
@@ -506,7 +506,7 @@ public:
                                 : (layeringViolation ? core::errors::Packager::LayeringViolation
                                                      : core::errors::Packager::StrictDependenciesViolation);
                 if (auto e = ctx.beginError(lit.loc(), error)) {
-                    std::vector<std::string> reasons;
+                    vector<string> reasons;
                     if (causesCycle) {
                         reasons.emplace_back(core::ErrorColors::format(
                             "importing its package would put `{}` into a cycle", this->package.show(ctx)));
@@ -552,7 +552,7 @@ public:
                     }
 
                     ENFORCE(!reasons.empty(), "At least one reason should be present");
-                    std::string reason;
+                    string reason;
                     if (reasons.size() == 1) {
                         reason = reasons[0];
                     } else if (reasons.size() == 2) {
@@ -583,10 +583,10 @@ public:
         }
     }
 
-    static std::vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
-                                            std::vector<ast::ParsedFile> files) {
+    static vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
+                                       vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
-        auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
+        auto taskq = make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
         absl::BlockingCounter barrier(std::max(workers.size(), 1));
 
         for (size_t i = 0; i < files.size(); ++i) {
@@ -617,8 +617,8 @@ public:
 };
 } // namespace
 
-std::vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
-                                                    std::vector<ast::ParsedFile> files) {
+vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
+                                               vector<ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "visibility_checker.run");
 
     {

@@ -117,7 +117,7 @@ public:
 
 LSPTypecheckerCoordinator::LSPTypecheckerCoordinator(const shared_ptr<const LSPConfiguration> &config,
                                                      shared_ptr<core::lsp::PreemptionTaskManager> preemptionTaskManager,
-                                                     WorkerPool &workers, std::shared_ptr<TaskQueue> taskQueue)
+                                                     WorkerPool &workers, shared_ptr<TaskQueue> taskQueue)
     : preemptionTaskManager(preemptionTaskManager), shouldTerminate(false),
       typechecker(config, move(preemptionTaskManager)), config(config), hasDedicatedThread(false),
       workers(workers), taskQueue{std::move(taskQueue)}, emptyWorkers(WorkerPool::create(0, *config->logger)) {}
@@ -139,7 +139,7 @@ void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task) {
 }
 
 shared_ptr<core::lsp::Task>
-LSPTypecheckerCoordinator::trySchedulePreemption(std::unique_ptr<LSPQueuePreemptionTask> preemptTask) {
+LSPTypecheckerCoordinator::trySchedulePreemption(unique_ptr<LSPQueuePreemptionTask> preemptTask) {
     auto wrappedTask = make_shared<TypecheckerTask>(
         *config, move(preemptTask), make_unique<LSPTypecheckerDelegate>(*taskQueue, *emptyWorkers, typechecker),
         /* collectCounters */ false);

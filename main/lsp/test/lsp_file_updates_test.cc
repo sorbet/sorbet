@@ -20,13 +20,13 @@ unique_ptr<core::FileHash> getFileHash() {
     return hash;
 }
 
-shared_ptr<core::File> makeFile(std::string path, std::string contents) {
+shared_ptr<core::File> makeFile(string path, string contents) {
     auto file = make_shared<core::File>(move(path), move(contents), core::File::Type::Normal);
     file->setFileHash(getFileHash());
     return file;
 }
 
-void addFile(LSPFileUpdates &updates, core::FileRef fref, std::string path, std::string contents) {
+void addFile(LSPFileUpdates &updates, core::FileRef fref, string path, string contents) {
     updates.updatedFiles.push_back(makeFile(move(path), move(contents)));
 }
 

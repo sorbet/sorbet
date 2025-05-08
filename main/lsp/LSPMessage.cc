@@ -69,7 +69,7 @@ unique_ptr<LSPMessage> makeSorbetError(LSPErrorCodes code, string_view message, 
     }
 }
 
-unique_ptr<LSPMessage> LSPMessage::fromClient(std::string_view json) {
+unique_ptr<LSPMessage> LSPMessage::fromClient(string_view json) {
     rapidjson::MemoryPoolAllocator<> alloc;
     rapidjson::Document d(&alloc);
     if (d.Parse(json.data(), json.size()).HasParseError()) {
@@ -114,7 +114,7 @@ LSPMessage::RawLSPMessage fromJSONValue(rapidjson::Document &d) {
     }
 }
 
-LSPMessage::RawLSPMessage fromJSON(std::string_view json) {
+LSPMessage::RawLSPMessage fromJSON(string_view json) {
     rapidjson::MemoryPoolAllocator<> alloc;
     rapidjson::Document d(&alloc);
     d.Parse(json.data(), json.size());
@@ -125,7 +125,7 @@ LSPMessage::LSPMessage(RawLSPMessage msg) : msg(move(msg)) {}
 
 LSPMessage::LSPMessage(rapidjson::Document &d) : LSPMessage::LSPMessage(fromJSONValue(d)) {}
 
-LSPMessage::LSPMessage(std::string_view json) : LSPMessage::LSPMessage(fromJSON(json)) {}
+LSPMessage::LSPMessage(string_view json) : LSPMessage::LSPMessage(fromJSON(json)) {}
 
 LSPMessage::~LSPMessage() = default;
 

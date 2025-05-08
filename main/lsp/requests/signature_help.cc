@@ -52,7 +52,7 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::MethodRef method,
 }
 
 SignatureHelpTask::SignatureHelpTask(const LSPConfiguration &config, MessageId id,
-                                     std::unique_ptr<TextDocumentPositionParams> params)
+                                     unique_ptr<TextDocumentPositionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentSignatureHelp), params(move(params)) {}
 
 unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate &typechecker) {

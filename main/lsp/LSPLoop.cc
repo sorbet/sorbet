@@ -26,8 +26,8 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,
-                 const std::shared_ptr<LSPConfiguration> &config, std::unique_ptr<KeyValueStore> kvstore)
+LSPLoop::LSPLoop(unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,
+                 const shared_ptr<LSPConfiguration> &config, unique_ptr<KeyValueStore> kvstore)
     : config(config), taskQueue(make_shared<TaskQueue>()), epochManager(initialGS->epochManager),
       preprocessor(config, taskQueue),
       typecheckerCoord(config, make_shared<core::lsp::PreemptionTaskManager>(initialGS->epochManager), workers,
@@ -113,7 +113,7 @@ void LSPLoop::processRequest(const string &json) {
     LSPLoop::processRequests(move(messages));
 }
 
-void LSPLoop::processRequest(std::unique_ptr<LSPMessage> msg) {
+void LSPLoop::processRequest(unique_ptr<LSPMessage> msg) {
     vector<unique_ptr<LSPMessage>> messages;
     messages.push_back(move(msg));
     processRequests(move(messages));
@@ -124,7 +124,7 @@ void LSPLoop::processRequests(vector<unique_ptr<LSPMessage>> messages) {
         preprocessor.preprocessAndEnqueue(move(message));
     }
 
-    std::vector<std::unique_ptr<LSPTask>> tasks;
+    vector<unique_ptr<LSPTask>> tasks;
     while (true) {
         {
             absl::MutexLock lck(taskQueue->getMutex());

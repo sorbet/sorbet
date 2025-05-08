@@ -382,7 +382,7 @@ pair<Loc, uint32_t> Loc::findStartOfIndentation(const GlobalState &gs) const {
     auto maybeLineStart = Loc::detail2Pos(this->file().data(gs), {startDetail.line, 1});
     ENFORCE_NO_TIMER(maybeLineStart.has_value());
     auto lineStart = maybeLineStart.value();
-    std::string_view lineView = this->file().data(gs).source().substr(lineStart);
+    string_view lineView = this->file().data(gs).source().substr(lineStart);
 
     size_t padding = lineView.find_first_not_of(" \t");
     if (padding == string::npos) {

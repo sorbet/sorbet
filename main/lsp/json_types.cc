@@ -78,7 +78,7 @@ InvalidTypeError::InvalidTypeError(string_view fieldName, string_view expectedTy
     : SerializationError(fmt::format("Expected field `{}` to have value of type `{}`, but had value `{}`.", fieldName,
                                      expectedType, stringify(*found))) {}
 
-const std::string JSONBaseType::defaultFieldName = "root";
+const string JSONBaseType::defaultFieldName = "root";
 
 string JSONBaseType::toJSON(bool prettyPrint) const {
     auto buffer = toJSONBuffer(prettyPrint);
@@ -112,7 +112,7 @@ unique_ptr<Range> Range::fromLoc(const core::GlobalState &gs, core::Loc loc) {
                               make_unique<Position>(pair.second.line - 1, pair.second.column - 1));
 }
 
-std::optional<core::Loc> Range::toLoc(const core::GlobalState &gs, core::FileRef file) const {
+optional<core::Loc> Range::toLoc(const core::GlobalState &gs, core::FileRef file) const {
     ENFORCE(start->line >= 0);
     ENFORCE(start->character >= 0);
     ENFORCE(end->line >= 0);
@@ -247,7 +247,7 @@ void SorbetWorkspaceEditParams::merge(SorbetWorkspaceEditParams &newerParams) {
     // 'newerParams' has newer updates, so merge its contents into this object.
     epoch = newerParams.epoch;
 
-    UnorderedSet<std::string_view> encounteredFiles;
+    UnorderedSet<string_view> encounteredFiles;
     auto newUpdates = move(newerParams.updates);
 
     for (auto &f : newUpdates) {

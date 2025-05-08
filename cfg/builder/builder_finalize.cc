@@ -473,13 +473,13 @@ struct WorkItem {
 
 } // namespace
 
-std::vector<int> CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int numBlocks, BasicBlock *entryBB) {
+vector<int> CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int numBlocks, BasicBlock *entryBB) {
     ENFORCE(target.empty(), "The output vector must be empty to start with");
 
     target.reserve(numBlocks);
 
-    std::vector<int> forwardIndex(numBlocks, UNVISITED);
-    std::vector<WorkItem> work;
+    vector<int> forwardIndex(numBlocks, UNVISITED);
+    vector<WorkItem> work;
 
     // Arbitrary, could use tuning
     work.reserve(10);

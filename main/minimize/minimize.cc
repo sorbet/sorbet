@@ -402,7 +402,7 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
 } // namespace
 
 void Minimize::indexAndResolveForMinimize(core::GlobalState &sourceGS, core::GlobalState &rbiGS, options::Options &opts,
-                                          WorkerPool &workers, std::string minimizeRBI) {
+                                          WorkerPool &workers, string minimizeRBI) {
     Timer timeit(sourceGS.tracer(), "Minimize::indexAndResolveForMinimize");
 
     ENFORCE(!sourceGS.findFileByPath(minimizeRBI).exists(),

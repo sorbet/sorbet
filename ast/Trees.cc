@@ -313,7 +313,7 @@ ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol) : storage
     _sanityCheck();
 }
 
-ConstantLit::ConstantLit(core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original)
+ConstantLit::ConstantLit(core::SymbolRef symbol, unique_ptr<UnresolvedConstantLit> original)
     : storage(symbol, std::move(original)) {
     categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();
@@ -1011,20 +1011,20 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) const {
     return fmt::to_string(buf);
 }
 
-std::string RuntimeMethodDefinition::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
+string RuntimeMethodDefinition::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     string prefix = this->isSelfMethod ? "self." : "";
     return fmt::format("<runtime method definition of {}{}>", prefix, this->name.toString(gs));
 }
 
-std::string RuntimeMethodDefinition::showRaw(const core::GlobalState &gs, int tabs) const {
+string RuntimeMethodDefinition::showRaw(const core::GlobalState &gs, int tabs) const {
     return this->toStringWithTabs(gs, tabs);
 }
 
-std::string Self::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
+string Self::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return "<self>";
 }
 
-std::string Self::showRaw(const core::GlobalState &gs, int tabs) const {
+string Self::showRaw(const core::GlobalState &gs, int tabs) const {
     return "Self";
 }
 
@@ -1498,9 +1498,9 @@ string Self::nodeName() const {
 }
 
 ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};
-ParsedFilesOrCancelled::ParsedFilesOrCancelled(std::vector<ParsedFile> &&trees) : trees(move(trees)) {}
+ParsedFilesOrCancelled::ParsedFilesOrCancelled(vector<ParsedFile> &&trees) : trees(move(trees)) {}
 
-ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(std::vector<ParsedFile> &&trees, WorkerPool &workers) {
+ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(vector<ParsedFile> &&trees, WorkerPool &workers) {
     if (!trees.empty()) {
         // N.B.: `workers.size()` can be `0` when threads are disabled, which would result in undefined behavior for
         // `BlockingCounter`.

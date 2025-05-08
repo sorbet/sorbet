@@ -168,7 +168,7 @@ Expectations getExpectationsForTest(string_view parentDir, string_view testName)
 
 } // namespace
 
-Expectations Expectations::getExpectations(std::string singleTest) {
+Expectations Expectations::getExpectations(string singleTest) {
     if (singleTest.empty()) {
         Exception::raise("No test specified. Pass one with --single_test=<test_path>");
     }
@@ -193,7 +193,7 @@ Expectations Expectations::getExpectations(std::string singleTest) {
 }
 
 // A variant of CHECK_EQ that prints a diff on failure.
-void CHECK_EQ_DIFF(std::string_view expected, std::string_view actual, std::string_view errorMessage) {
+void CHECK_EQ_DIFF(string_view expected, string_view actual, string_view errorMessage) {
     if (expected == actual) {
         return;
     }

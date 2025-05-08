@@ -47,7 +47,7 @@ string spacesForTabLevel(int tabs) {
         CASE_STATEMENT(body, KeepAlive)           \
     }
 
-std::string InstructionPtr::toString(const core::GlobalState &gs, const CFG &cfg) const {
+string InstructionPtr::toString(const core::GlobalState &gs, const CFG &cfg) const {
     auto *ptr = get();
 
 #define TO_STRING(name) return static_cast<const name *>(ptr)->toString(gs, cfg);
@@ -55,7 +55,7 @@ std::string InstructionPtr::toString(const core::GlobalState &gs, const CFG &cfg
 #undef TO_STRING
 }
 
-std::string InstructionPtr::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
+string InstructionPtr::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     auto *ptr = get();
 
 #define SHOW_RAW(name) return static_cast<const name *>(ptr)->showRaw(gs, cfg, tabs);

@@ -594,7 +594,7 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typecheck
     auto result = allSimilarFields(gs, klass, prefix);
 
     if (resolved.file.data(gs).strictLevel < core::StrictLevel::Strict) {
-        std::vector<core::NameRef> fields;
+        vector<core::NameRef> fields;
         FieldFinder fieldFinder(klass, kind, fields);
         auto ctx = core::Context(gs, core::Symbols::root(), resolved.file);
         ast::ConstTreeWalk::apply(ctx, fieldFinder, resolved.tree);
@@ -625,7 +625,7 @@ vector<core::NameRef> localNamesForMethod(LSPTypecheckerDelegate &typechecker, c
                                           const core::Loc queryLoc, const ast::ParsedFile &resolved) {
     const auto &gs = typechecker.state();
 
-    std::vector<core::NameRef> result;
+    vector<core::NameRef> result;
     LocalVarFinder localVarFinder(method, queryLoc, result);
     auto ctx = core::Context(gs, core::Symbols::root(), resolved.file);
     ast::ConstTreeWalk::apply(ctx, localVarFinder, resolved.tree);
@@ -992,7 +992,7 @@ CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, uni
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCompletion), params(move(params)) {}
 
 unique_ptr<CompletionItem> CompletionTask::getCompletionItemForUntyped(const core::GlobalState &gs, core::Loc queryLoc,
-                                                                       size_t sortIdx, std::string_view message) {
+                                                                       size_t sortIdx, string_view message) {
     string label(message);
     auto item = make_unique<CompletionItem>(label);
     item->sortText = formatSortIndex(sortIdx);

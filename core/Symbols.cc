@@ -476,7 +476,7 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
     return Types::arrayOf(ctx, instantiated);
 }
 
-void ClassOrModule::addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> index) {
+void ClassOrModule::addMixinAt(ClassOrModuleRef sym, optional<uint16_t> index) {
     if (index.has_value()) {
         auto i = index.value();
         ENFORCE(mixins_.size() > i);
@@ -487,7 +487,7 @@ void ClassOrModule::addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> ind
     }
 }
 
-bool ClassOrModule::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional<uint16_t> index) {
+bool ClassOrModule::addMixin(const GlobalState &gs, ClassOrModuleRef sym, optional<uint16_t> index) {
     // Note: Symbols without an explicit declaration may not have class or module set. They default to modules in
     // GlobalPass.cc. We also do not complain if the mixin is BasicObject.
     bool isValidMixin =
@@ -2018,8 +2018,8 @@ vector<ClassOrModule::RequiredAncestor> ClassOrModule::requiredAncestors(const G
 }
 
 // All required ancestors by this class or module
-std::vector<ClassOrModule::RequiredAncestor>
-ClassOrModule::requiredAncestorsTransitiveInternal(GlobalState &gs, std::vector<ClassOrModuleRef> &seen) {
+vector<ClassOrModule::RequiredAncestor>
+ClassOrModule::requiredAncestorsTransitiveInternal(GlobalState &gs, vector<ClassOrModuleRef> &seen) {
     if (absl::c_contains(seen, this->ref(gs))) {
         return requiredAncestors(gs); // Break recursive loops if we already visited this ancestor
     }
@@ -2062,7 +2062,7 @@ vector<ClassOrModule::RequiredAncestor> ClassOrModule::requiredAncestorsTransiti
 
 void ClassOrModule::computeRequiredAncestorLinearization(GlobalState &gs) {
     ENFORCE(gs.cacheSensitiveOptions.requiresAncestorEnabled);
-    std::vector<ClassOrModuleRef> seen;
+    vector<ClassOrModuleRef> seen;
     requiredAncestorsTransitiveInternal(gs, seen);
 }
 
@@ -2155,7 +2155,7 @@ ClassOrModule ClassOrModule::deepCopy(const GlobalState &to, bool keepGsId) cons
     result.name = NameRef(to, this->name);
     result.locs_ = this->locs_;
     if (this->typeParams) {
-        result.typeParams = std::make_unique<InlinedVector<TypeMemberRef, 4>>(*this->typeParams);
+        result.typeParams = make_unique<InlinedVector<TypeMemberRef, 4>>(*this->typeParams);
     }
     if (keepGsId) {
         result.members_ = this->members_;
@@ -2178,7 +2178,7 @@ Method Method::deepCopy(const GlobalState &to) const {
     result.name = NameRef(to, this->name);
     result.locs_ = this->locs_;
     if (this->typeArgs) {
-        result.typeArgs = std::make_unique<InlinedVector<TypeArgumentRef, 4>>(*this->typeArgs);
+        result.typeArgs = make_unique<InlinedVector<TypeArgumentRef, 4>>(*this->typeArgs);
     }
     result.arguments.reserve(this->arguments.size());
     for (auto &mem : this->arguments) {
@@ -2662,7 +2662,7 @@ void ClassOrModule::removeLocsForFile(core::FileRef file) {
     removeLocsForFileImpl(this->locs_, file);
 }
 
-vector<std::pair<NameRef, SymbolRef>> ClassOrModule::membersStableOrderSlow(const GlobalState &gs) const {
+vector<pair<NameRef, SymbolRef>> ClassOrModule::membersStableOrderSlow(const GlobalState &gs) const {
     vector<pair<NameRef, SymbolRef>> result;
     result.reserve(members().size());
     for (const auto &e : members()) {

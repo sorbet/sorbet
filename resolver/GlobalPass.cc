@@ -335,7 +335,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
 }
 
 void Resolver::finalizeSymbols(core::GlobalState &gs,
-                               std::optional<absl::Span<const core::ClassOrModuleRef>> symbolsToRecompute) {
+                               optional<absl::Span<const core::ClassOrModuleRef>> symbolsToRecompute) {
     Timer timer(gs.tracer(), "resolver.finalize_resolution");
     // TODO(nelhage): Properly this first loop should go in finalizeAncestors,
     // but we currently compute mixes_in_class_methods during the same AST walk

@@ -75,8 +75,8 @@ int MsgpackWriterBase::validateVersion(int version, int lo, int hi) {
     return version;
 }
 
-MsgpackWriterBase::MsgpackWriterBase(int version, const std::vector<std::string> &refAttrs,
-                                     const std::vector<std::string> &defAttrs, const std::vector<std::string> &pfAttrs)
+MsgpackWriterBase::MsgpackWriterBase(int version, const vector<string> &refAttrs, const vector<string> &defAttrs,
+                                     const vector<string> &pfAttrs)
     : version(version), refAttrs(refAttrs), defAttrs(defAttrs), pfAttrs(pfAttrs) {}
 
 void MsgpackWriterBase::packReferenceRef(mpack_writer_t *writer, ReferenceRef ref) {
@@ -106,7 +106,7 @@ void MsgpackWriterFull::packRange(mpack_writer_t *writer, uint32_t begin, uint32
 
 void MsgpackWriterFull::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
                                        const AutogenConfig &autogenCfg) {
-    std::optional<MsgpackArray> defsArray;
+    optional<MsgpackArray> defsArray;
 
     if (version <= 6) {
         defsArray.emplace(writer, defAttrs.size());
@@ -142,7 +142,7 @@ void MsgpackWriterFull::packDefinition(mpack_writer_t *writer, core::Context ctx
 }
 
 void MsgpackWriterFull::packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref) {
-    std::optional<MsgpackArray> refArray;
+    optional<MsgpackArray> refArray;
 
     if (version <= 6) {
         refArray.emplace(writer, refAttrs.size());
@@ -295,8 +295,8 @@ string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenC
     return ret;
 }
 
-string buildGlobalHeader(int version, int serializedVersion, size_t numFiles, const std::vector<std::string> &refAttrs,
-                         const std::vector<std::string> &defAttrs, const std::vector<std::string> &pfAttrs) {
+string buildGlobalHeader(int version, int serializedVersion, size_t numFiles, const vector<string> &refAttrs,
+                         const vector<string> &defAttrs, const vector<string> &pfAttrs) {
     string header;
 
     mpack_writer_t writer;

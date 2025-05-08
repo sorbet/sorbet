@@ -82,7 +82,7 @@ uint32_t hashFullNameRef(const GlobalState &gs, NameRef nm) {
 WithoutUniqueNameHash::WithoutUniqueNameHash(const GlobalState &gs, NameRef nm)
     : _hashValue(incZero(hashNameRefWithoutUniques(gs, nm))){};
 
-void WithoutUniqueNameHash::sortAndDedupe(std::vector<core::WithoutUniqueNameHash> &hashes) {
+void WithoutUniqueNameHash::sortAndDedupe(vector<core::WithoutUniqueNameHash> &hashes) {
     fast_sort(hashes);
     hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
     hashes.shrink_to_fit();
@@ -90,7 +90,7 @@ void WithoutUniqueNameHash::sortAndDedupe(std::vector<core::WithoutUniqueNameHas
 
 FullNameHash::FullNameHash(const GlobalState &gs, NameRef nm) : _hashValue(incZero(hashFullNameRef(gs, nm))) {}
 
-void FullNameHash::sortAndDedupe(std::vector<core::FullNameHash> &hashes) {
+void FullNameHash::sortAndDedupe(vector<core::FullNameHash> &hashes) {
     fast_sort(hashes);
     hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
     hashes.shrink_to_fit();

@@ -285,7 +285,7 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
     task.setKeyValueStore(std::move(this->kvstore));
 }
 
-void LSPIndexer::initialize(IndexerInitializationTask &task, std::vector<std::shared_ptr<core::File>> &&files) {
+void LSPIndexer::initialize(IndexerInitializationTask &task, vector<shared_ptr<core::File>> &&files) {
     if (initialized) {
         Exception::raise("Indexer is already initialized; cannot initialize a second time.");
     }
@@ -306,9 +306,9 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, std::vector<std::sh
     initialized = true;
 }
 
-std::unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {
+unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {
     Timer timeit(config->logger, "LSPIndexer::commitEdit");
-    auto result = std::make_unique<LSPFileUpdates>();
+    auto result = make_unique<LSPFileUpdates>();
     auto &update = *result;
     update.epoch = edit.epoch;
     update.editCount = edit.mergeCount + 1;
@@ -426,7 +426,7 @@ std::unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams
     return result;
 }
 
-std::unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
+unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
     ENFORCE(edit.updates.size() <= config->opts.lspMaxFilesOnFastPath, "Too many files to index serially");
     return commitEdit(edit, *emptyWorkers);
 }
