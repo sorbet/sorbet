@@ -1500,7 +1500,7 @@ unique_ptr<ast::UnresolvedConstantLit> SerializerImpl::unpickleUnresolvedConstan
     auto loc = unpickleLocOffsets(p);
     NameRef cnst = unpickleNameRef(p);
     auto scope = unpickleExpr(p, gs);
-    return std::make_unique<ast::UnresolvedConstantLit>(loc, std::move(scope), cnst);
+    return make_unique<ast::UnresolvedConstantLit>(loc, std::move(scope), cnst);
 }
 
 ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalState &gs) {

@@ -30,7 +30,7 @@ string uriToFilePath(const LSPConfiguration &config, string_view uri) {
 
 template <typename T = DynamicRegistrationOption>
 unique_ptr<T> makeDynamicRegistrationOption(bool dynamicRegistration) {
-    auto option = std::make_unique<T>();
+    auto option = make_unique<T>();
     option->dynamicRegistration = dynamicRegistration;
     return option;
 };

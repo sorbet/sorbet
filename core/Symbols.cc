@@ -2155,7 +2155,7 @@ ClassOrModule ClassOrModule::deepCopy(const GlobalState &to, bool keepGsId) cons
     result.name = NameRef(to, this->name);
     result.locs_ = this->locs_;
     if (this->typeParams) {
-        result.typeParams = std::make_unique<InlinedVector<TypeMemberRef, 4>>(*this->typeParams);
+        result.typeParams = make_unique<InlinedVector<TypeMemberRef, 4>>(*this->typeParams);
     }
     if (keepGsId) {
         result.members_ = this->members_;
@@ -2178,7 +2178,7 @@ Method Method::deepCopy(const GlobalState &to) const {
     result.name = NameRef(to, this->name);
     result.locs_ = this->locs_;
     if (this->typeArgs) {
-        result.typeArgs = std::make_unique<InlinedVector<TypeArgumentRef, 4>>(*this->typeArgs);
+        result.typeArgs = make_unique<InlinedVector<TypeArgumentRef, 4>>(*this->typeArgs);
     }
     result.arguments.reserve(this->arguments.size());
     for (auto &mem : this->arguments) {
