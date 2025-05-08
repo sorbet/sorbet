@@ -583,13 +583,11 @@ public:
                                             std::vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
-        absl::BlockingCounter barrier(std::max(workers.size(), 1));
-
         for (size_t i = 0; i < files.size(); ++i) {
             taskq->push(i, 1);
         }
 
-        workers.multiplexJob("VisibilityChecker", [&gs, &files, &barrier, taskq]() {
+        workers.multiplexJobWait("VisibilityChecker", [&gs, &files, taskq]() {
             size_t idx;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 ast::ParsedFile &f = files[idx];
@@ -602,11 +600,7 @@ public:
                     }
                 }
             }
-
-            barrier.DecrementCount();
         });
-
-        barrier.Wait();
 
         return files;
     }

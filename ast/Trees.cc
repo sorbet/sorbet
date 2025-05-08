@@ -1,6 +1,5 @@
 #include "ast/Trees.h"
 #include "absl/strings/escaping.h"
-#include "absl/synchronization/blocking_counter.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/strings/formatting.h"
@@ -1502,15 +1501,12 @@ ParsedFilesOrCancelled::ParsedFilesOrCancelled(std::vector<ParsedFile> &&trees) 
 
 ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(std::vector<ParsedFile> &&trees, WorkerPool &workers) {
     if (!trees.empty()) {
-        // N.B.: `workers.size()` can be `0` when threads are disabled, which would result in undefined behavior for
-        // `BlockingCounter`.
-        absl::BlockingCounter threadBarrier(std::max(workers.size(), 1));
         auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
         for (auto &tree : trees) {
             fileq->push(move(tree), 1);
         }
 
-        workers.multiplexJob("deleteTrees", [fileq, &threadBarrier]() {
+        workers.multiplexJobWait("deleteTrees", [fileq]() {
             {
                 ast::ParsedFile job;
                 for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
@@ -1518,11 +1514,7 @@ ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(std::vector<ParsedFile> &&
                     job.tree.reset();
                 }
             }
-            threadBarrier.DecrementCount();
         });
-
-        // Wait for threads to complete destructing the trees.
-        threadBarrier.Wait();
     }
 
     return ParsedFilesOrCancelled();

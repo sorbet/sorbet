@@ -2086,14 +2086,13 @@ public:
 AllFoundDefinitions findSymbols(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.findSymbols");
     auto taskq = make_shared<ConcurrentBoundedQueue<size_t>>(trees.size());
-    absl::BlockingCounter barrier(max(workers.size(), 1));
     AllFoundDefinitions allFoundDefinitions(trees.size());
 
     for (size_t i = 0, size = trees.size(); i < size; ++i) {
         taskq->push(i, 1);
     }
 
-    workers.multiplexJob("findSymbols", [&gs, &barrier, &allFoundDefinitions, trees, taskq]() {
+    workers.multiplexJobWait("findSymbols", [&gs, &allFoundDefinitions, trees, taskq]() {
         Timer timeit(gs.tracer(), "naming.findSymbolsWorker");
         SymbolFinder finder;
         size_t idx;
@@ -2106,11 +2105,7 @@ AllFoundDefinitions findSymbols(const core::GlobalState &gs, absl::Span<ast::Par
                 allFoundDefinitions[idx] = make_pair(parsedFile.file, finder.getAndClearFoundDefinitions());
             }
         }
-
-        barrier.DecrementCount();
     });
-
-    barrier.Wait();
 
     return allFoundDefinitions;
 }
@@ -2257,13 +2252,11 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
 void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
     auto taskq = make_shared<ConcurrentBoundedQueue<size_t>>(trees.size());
-    absl::BlockingCounter barrier(max(workers.size(), 1));
-
     for (size_t i = 0, size = trees.size(); i < size; ++i) {
         taskq->push(i, 1);
     }
 
-    workers.multiplexJob("symbolizeTrees", [&gs, &barrier, trees, taskq]() {
+    workers.multiplexJobWait("symbolizeTrees", [&gs, trees, taskq]() {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
         TreeSymbolizer inserter;
         size_t idx;
@@ -2276,11 +2269,7 @@ void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> tre
                 ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
             }
         }
-
-        barrier.DecrementCount();
     });
-
-    barrier.Wait();
 }
 
 } // namespace

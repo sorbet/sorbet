@@ -2069,7 +2069,6 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
 
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
-        absl::BlockingCounter barrier(max(workers.size(), 1));
 
         for (size_t i = 0; i < files.size(); ++i) {
             taskq->push(i, 1);
@@ -2081,7 +2080,7 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
             }
         }
 
-        workers.multiplexJob("rewritePackagesAndFiles", [&gs = as_const(gs), &files, &barrier, taskq]() {
+        workers.multiplexJobWait("rewritePackagesAndFiles", [&gs = as_const(gs), &files, taskq]() {
             Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
             size_t idx;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
@@ -2101,11 +2100,7 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
                     validatePackagedFile(ctx, job.tree);
                 }
             }
-
-            barrier.DecrementCount();
         });
-
-        barrier.Wait();
     }
 }
 } // namespace
@@ -2122,12 +2117,10 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
     Timer timeit(gs.tracer(), "packager.runIncremental");
 
     auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
-    absl::BlockingCounter barrier(max(workers.size(), 1));
-
     for (size_t i = 0; i < files.size(); ++i) {
         taskq->push(i, 1);
     }
-    workers.multiplexJob("validatePackagesAndFiles", [&gs, &files, &barrier, taskq]() {
+    workers.multiplexJobWait("validatePackagesAndFiles", [&gs, &files, taskq]() {
         size_t idx;
         for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
             if (!result.gotItem()) {
@@ -2148,9 +2141,7 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
                 validatePackagedFile(ctx, file.tree);
             }
         }
-        barrier.DecrementCount();
     });
-    barrier.Wait();
     return files;
 }
 
