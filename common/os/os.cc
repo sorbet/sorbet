@@ -9,8 +9,8 @@
 using namespace std;
 
 // When changing this, you should also update the -stack-size flag in main/BUILD.
-// 64 Megabytes
-constexpr int REQUIRED_STACK_SIZE = 64 * 1024 * 1024;
+// 16 Megabytes
+constexpr int REQUIRED_STACK_SIZE = 16 * 1024 * 1024;
 
 void *Joinable::trampoline(void *ptr) {
     Joinable &self = *static_cast<Joinable *>(ptr);

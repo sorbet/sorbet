@@ -57,16 +57,6 @@ config_setting(
 )
 
 config_setting(
-    name = "darwindbg",
-    constraint_values = [
-        "@platforms//os:osx",
-    ],
-    values = {
-        "compilation_mode": "dbg",
-    },
-)
-
-config_setting(
     name = "release",
     values = {
         "define": "release=true",
