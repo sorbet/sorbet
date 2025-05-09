@@ -262,7 +262,7 @@ unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file
         auto sigsRewriter = rbs::SigsRewriter(ctx, commentsByNode);
         node = sigsRewriter.run(move(node));
 
-        auto assertionsRewriter = rbs::AssertionsRewriter(ctx);
+        auto assertionsRewriter = rbs::AssertionsRewriter(ctx, commentsByNode);
         node = assertionsRewriter.run(move(node));
 
         if (print.RBSRewriteTree.enabled) {
