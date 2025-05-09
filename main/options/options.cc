@@ -880,34 +880,36 @@ void readOptions(Options &opts,
             parseIgnorePatterns(rawIgnorePatterns, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
         }
 
-        int maxInputFileThreads = raw["max-threads"].as<int>();
-        auto workerPool = WorkerPool::create(maxInputFileThreads, *logger);
+        {
+            int maxInputFileThreads = raw["max-threads"].as<int>();
+            auto workerPool = WorkerPool::create(maxInputFileThreads, *logger);
 
-        opts.pathPrefix = raw["remove-path-prefix"].as<string>();
-        if (raw.count("files") > 0) {
-            const auto &rawFiles = raw["files"].as<vector<string>>();
-            struct stat s;
-            for (auto &file : rawFiles) {
-                if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
-                    addFilesFromDir(opts, file, *workerPool, logger);
-                } else {
-                    opts.rawInputFileNames.push_back(file);
-                    opts.inputFileNames.push_back(file);
+            opts.pathPrefix = raw["remove-path-prefix"].as<string>();
+            if (raw.count("files") > 0) {
+                const auto &rawFiles = raw["files"].as<vector<string>>();
+                struct stat s;
+                for (auto &file : rawFiles) {
+                    if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
+                        addFilesFromDir(opts, file, *workerPool, logger);
+                    } else {
+                        opts.rawInputFileNames.push_back(file);
+                        opts.inputFileNames.push_back(file);
+                    }
                 }
             }
-        }
 
-        if (raw.count("file") > 0) {
-            const auto &files = raw["file"].as<vector<string>>();
-            opts.rawInputFileNames.insert(opts.rawInputFileNames.end(), files.begin(), files.end());
-            opts.inputFileNames.insert(opts.inputFileNames.end(), files.begin(), files.end());
-        }
+            if (raw.count("file") > 0) {
+                const auto &files = raw["file"].as<vector<string>>();
+                opts.rawInputFileNames.insert(opts.rawInputFileNames.end(), files.begin(), files.end());
+                opts.inputFileNames.insert(opts.inputFileNames.end(), files.begin(), files.end());
+            }
 
-        if (raw.count("dir") > 0) {
-            const auto &rawDirs = raw["dir"].as<vector<string>>();
-            for (auto &dir : rawDirs) {
-                // Since we don't stat here, we're unsure if the directory exists / is a directory.
-                addFilesFromDir(opts, dir, *workerPool, logger);
+            if (raw.count("dir") > 0) {
+                const auto &rawDirs = raw["dir"].as<vector<string>>();
+                for (auto &dir : rawDirs) {
+                    // Since we don't stat here, we're unsure if the directory exists / is a directory.
+                    addFilesFromDir(opts, dir, *workerPool, logger);
+                }
             }
         }
 
