@@ -635,6 +635,16 @@ module Psych
   def self.safe_load_file(filename, **kwargs); end
 end
 
+class Object
+  ###
+  # call-seq: to_yaml(options = {})
+  #
+  # Convert an object to YAML.  See Psych.dump for more information on the
+  # available +options+.
+  sig { params(options: T::Hash[Symbol, T.untyped]).returns(String) }
+  def to_yaml(options = {}); end
+end
+
 class Psych::Exception < RuntimeError
 end
 
