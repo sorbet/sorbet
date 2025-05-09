@@ -255,7 +255,7 @@ class UnusedTypeAnnotation
   end
 
   def foo # error: The method `foo` does not have a `sig`
-    #: -> void # error: Unused RBS signature comment. No method definition found after it
+    #: -> void # error: Unexpected RBS assertion comment found in `method`
   end
   def bar; end # error: The method `bar` does not have a `sig`
 end

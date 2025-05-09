@@ -54,10 +54,10 @@ take_g1_2(g1_1)
 take_g1_2(g1_2)
 take_g1_2(g1_3) # error: Expected `G1[Integer]` but found `G1[String]` for argument `g1`
 
-#: [U, V]
+#: [out U, V]
 class G2
   #: U
-  attr_accessor :u
+  attr_reader :u
 
   #: V
   attr_accessor :v
@@ -75,12 +75,13 @@ T.reveal_type(g2_1) # error: Revealed type: `G2[Integer, String]`
 
 g2_1.v = 2 # error: Assigning a value to `v` that does not match expected type `String`
 
-g2_2 = G2 #: Class[G2[Integer, String]]
-   .new(1, 2) #: G2[Numeric, String]
-#          ^ error: Expected `String` but found `Integer(2)` for argument `v`
+g2_2 = G2 #: as Class[G2[Integer, String]]
+   .new("a", 2) #: G2[Numeric, String]
+#       ^^^ error: Expected `Integer` but found `String("a")` for argument `u`
+#            ^ error: Expected `String` but found `Integer(2)` for argument `v`
 T.reveal_type(g2_2) # error: Revealed type: `G2[Numeric, String]`
 
-g2_3 = G2 #: Class[G2[Integer, String]]
+g2_3 = G2 #: as Class[G2[Integer, String]]
    .new(1, 2) #: G2[Integer, String]?
 #          ^ error: Expected `String` but found `Integer(2)` for argument `v`
 T.reveal_type(g2_3) # error: Revealed type: `T.nilable(G2[Integer, String])`

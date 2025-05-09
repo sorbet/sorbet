@@ -7,6 +7,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     next(<cast:let>([<emptyTree>::<C ARGV>.shift(), "foo"], <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C String>)))
   end
 
+  while <emptyTree>::<C ARGV>.any?()
+    next([<cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>), <cast:let>("foo", <todo sym>, <emptyTree>::<C String>)])
+  end
+
   while <emptyTree>::<C ARGV>.shift()
     next(<emptyTree>)
   end
