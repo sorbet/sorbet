@@ -17,7 +17,7 @@ WorkerPool::~WorkerPool() {
 
 WorkerPoolImpl::WorkerPoolImpl(int size, spdlog::logger &logger) : _size(size), logger(logger) {
     logger.trace("Creating {} worker threads", _size);
-    if (sorbet::emscripten_build) {
+    if constexpr (sorbet::emscripten_build) {
         ENFORCE_NO_TIMER(size == 0);
         this->_size = 0;
     } else {
