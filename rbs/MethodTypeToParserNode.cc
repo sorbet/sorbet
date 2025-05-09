@@ -18,6 +18,7 @@ namespace {
 
 struct RBSArg {
     core::LocOffsets loc;
+    core::LocOffsets nameLoc;
     rbs_ast_symbol_t *name;
     rbs_node_t *type;
 
@@ -166,18 +167,10 @@ void collectArgs(const RBSDeclaration &declaration, rbs_node_list_t *field, vect
                 "Unexpected node type `{}` in function parameter list, expected `{}`",
                 rbs_node_type_name(list_node->node), "FunctionParam");
 
-        auto range = list_node->node->location->rg;
-
-        // If the arg is named, we need to adjust the location to point to the name
-        auto nameRange = list_node->node->location->children->entries[0].rg;
-        if (nameRange.start != -1 && nameRange.end != -1) {
-            range.start.char_pos = nameRange.start;
-            range.end.char_pos = nameRange.end;
-        }
-
-        auto loc = declaration.typeLocFromRange(range);
+        auto loc = declaration.typeLocFromRange(list_node->node->location->rg);
+        auto nameLoc = adjustNameLoc(declaration, list_node->node);
         auto node = (rbs_types_function_param_t *)list_node->node;
-        auto arg = RBSArg{loc, node->name, node->type, kind};
+        auto arg = RBSArg{loc, nameLoc, node->name, node->type, kind};
         args.emplace_back(arg);
     }
 }
@@ -196,10 +189,11 @@ void collectKeywords(const RBSDeclaration &declaration, rbs_hash_t *field, vecto
                 "Unexpected node type `{}` in keyword argument value, expected `{}`",
                 rbs_node_type_name(hash_node->value), "FunctionParam");
 
-        auto loc = declaration.typeLocFromRange(hash_node->key->location->rg);
+        auto nameLoc = declaration.typeLocFromRange(hash_node->key->location->rg);
+        auto loc = nameLoc.join(declaration.typeLocFromRange(hash_node->value->location->rg));
         rbs_ast_symbol_t *keyNode = (rbs_ast_symbol_t *)hash_node->key;
         rbs_types_function_param_t *valueNode = (rbs_types_function_param_t *)hash_node->value;
-        auto arg = RBSArg{loc, keyNode, valueNode->type, kind};
+        auto arg = RBSArg{loc, nameLoc, keyNode, valueNode->type, kind};
         args.emplace_back(arg);
     }
 }
@@ -272,8 +266,9 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
                 rbs_node_type_name(restPositionals), "FunctionParam");
 
         auto loc = declaration.typeLocFromRange(restPositionals->location->rg);
+        auto nameLoc = adjustNameLoc(declaration, restPositionals);
         auto node = (rbs_types_function_param_t *)restPositionals;
-        auto arg = RBSArg{loc, node->name, node->type, RBSArg::Kind::RestPositional};
+        auto arg = RBSArg{loc, nameLoc, node->name, node->type, RBSArg::Kind::RestPositional};
         args.emplace_back(arg);
     }
 
@@ -291,8 +286,9 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
                 "FunctionParam");
 
         auto loc = declaration.typeLocFromRange(restKeywords->location->rg);
+        auto nameLoc = adjustNameLoc(declaration, restKeywords);
         auto node = (rbs_types_function_param_t *)restKeywords;
-        auto arg = RBSArg{loc, node->name, node->type, RBSArg::Kind::RestKeyword};
+        auto arg = RBSArg{loc, nameLoc, node->name, node->type, RBSArg::Kind::RestKeyword};
         args.emplace_back(arg);
     }
 
@@ -304,7 +300,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
         // TODO: fix block location in RBS parser
         loc.beginLoc = loc.beginLoc + 1;
         loc.endLoc = loc.endLoc + 2;
-        auto arg = RBSArg{loc, nullptr, (rbs_node_t *)block, RBSArg::Kind::Block};
+        auto arg = RBSArg{loc, loc, nullptr, (rbs_node_t *)block, RBSArg::Kind::Block};
         args.emplace_back(arg);
     }
 
@@ -332,7 +328,8 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
             // The RBS arg is named in the signature, so we use the explicit name used
             auto nameStr = parser.resolveConstant(nameSymbol);
             auto name = ctx.state.enterNameUTF8(nameStr);
-            sigParams.emplace_back(make_unique<parser::Pair>(arg.loc, parser::MK::Symbol(arg.loc, name), move(type)));
+            sigParams.emplace_back(
+                make_unique<parser::Pair>(arg.loc, parser::MK::Symbol(arg.nameLoc, name), move(type)));
         } else {
             // The RBS arg is not named in the signature, so we get it from the method definition
             auto name = nodeName(methodArg);
