@@ -20,3 +20,5 @@ def uri_regexp
 end
 
 URI::Generic.new(nil,nil,nil,nil,nil,nil,nil,nil,nil).to_str
+
+T.assert_type!(URI::HTTP.build(host: 'www.example.com', path: '/foo/bar').origin, String)
