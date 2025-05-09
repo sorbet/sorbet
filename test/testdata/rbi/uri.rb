@@ -21,4 +21,4 @@ end
 
 URI::Generic.new(nil,nil,nil,nil,nil,nil,nil,nil,nil).to_str
 
-T.assert_type!(URI::HTTP.build(host: 'www.example.com', path: '/foo/bar').origin, String)
+T.assert_type!(URI::HTTP.new('http',nil,'www.example.com',nil,nil,'/foo/bar',nil,nil,nil).origin, String)
