@@ -35,6 +35,23 @@ struct RBSArg {
     Kind kind;
 };
 
+struct Autocorrect {
+    core::Loc loc;
+    string source;
+};
+
+core::LocOffsets adjustNameLoc(const RBSDeclaration &declaration, rbs_node_t *node) {
+    auto range = node->location->rg;
+
+    auto nameRange = node->location->children->entries[0].rg;
+    if (nameRange.start != -1 && nameRange.end != -1) {
+        range.start.char_pos = nameRange.start;
+        range.end.char_pos = nameRange.end;
+    }
+
+    return declaration.typeLocFromRange(range);
+}
+
 unique_ptr<parser::Node> handleAnnotations(unique_ptr<parser::Node> sigBuilder, const vector<Comment> &annotations) {
     for (auto &annotation : annotations) {
         if (annotation.string == "final") {
@@ -119,7 +136,82 @@ string nodeKindToString(const parser::Node *node) {
     return kind;
 }
 
-bool checkParameterKindMatch(core::MutableContext ctx, const RBSArg &arg, const parser::Node *methodArg) {
+optional<Autocorrect> autocorrectArg(core::MutableContext ctx, const parser::Node *methodArg, RBSArg arg,
+                                     unique_ptr<parser::Node> type) {
+    if (arg.kind == RBSArg::Kind::Block || parser::isa_node<parser::Blockarg>((parser::Node *)methodArg)) {
+        // Block arguments are not autocorrected
+        return nullopt;
+    }
+
+    string corrected;
+    auto source = ctx.file.data(ctx.state).source();
+    auto typeString = source.substr(type->loc.beginPos(), type->loc.endPos() - type->loc.beginPos());
+
+    typecase(
+        methodArg,
+        // Should be: `Type name`
+        [&](const parser::Arg *a) {
+            if (arg.name) {
+                auto nameString = nodeName(a).toString(ctx.state);
+                corrected = fmt::format("{} {}", typeString, nameString);
+            } else {
+                corrected = fmt::format("{}", typeString);
+            }
+        },
+        // Should be: `?Type name`
+        [&](const parser::Optarg *a) {
+            if (arg.name) {
+                auto nameString = nodeName(a).toString(ctx.state);
+                corrected = fmt::format("?{} {}", typeString, nameString);
+            } else {
+                corrected = fmt::format("?{}", typeString);
+            }
+        },
+        // Should be: `*Type name`
+        [&](const parser::Restarg *a) {
+            if (arg.name) {
+                auto nameString = nodeName(a).toString(ctx.state);
+                corrected = fmt::format("*{} {}", typeString, nameString);
+            } else {
+                corrected = fmt::format("*{}", typeString);
+            }
+        },
+        // Should be: `name: Type`
+        [&](const parser::Kwarg *a) {
+            auto nameString = nodeName(a).toString(ctx.state);
+            corrected = fmt::format("{}: {}", nameString, typeString);
+        },
+        // Should be: `?name: Type`
+        [&](const parser::Kwoptarg *a) {
+            auto nameString = nodeName(a).toString(ctx.state);
+            corrected = fmt::format("?{}: {}", nameString, typeString);
+        },
+        // Should be: `**Type name`
+        [&](const parser::Kwrestarg *a) {
+            if (arg.name) {
+                auto nameString = nodeName(a).toString(ctx.state);
+                corrected = fmt::format("**{} {}", typeString, nameString);
+            } else {
+                corrected = fmt::format("**{}", typeString);
+            }
+        },
+        [&](const parser::Node *other) { Exception::raise("Unexpected expression type: {}", other->nodeName()); });
+
+    core::LocOffsets loc = arg.loc;
+
+    // Adjust the location to account for the autocorrect
+    // TODO: remove this once we fixed the location generation by the parser
+    if (arg.kind == RBSArg::Kind::OptionalPositional || arg.kind == RBSArg::Kind::RestPositional ||
+        arg.kind == RBSArg::Kind::OptionalKeyword) {
+        loc.beginLoc -= 1;
+    } else if (arg.kind == RBSArg::Kind::RestKeyword) {
+        loc.beginLoc -= 2;
+    }
+
+    return Autocorrect{ctx.locAt(loc), corrected};
+}
+
+bool checkParameterKindMatch(const RBSArg &arg, const parser::Node *methodArg) {
     auto kindMatch = false;
 
     typecase(
@@ -130,16 +222,7 @@ bool checkParameterKindMatch(core::MutableContext ctx, const RBSArg &arg, const 
         [&](const parser::Kwoptarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::OptionalKeyword; },
         [&](const parser::Kwrestarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::RestKeyword; },
         [&](const parser::Blockarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::Block; },
-        [&](const parser::Node *other) {
-            Exception::raise("Unexpected expression type: {}", ((parser::Node *)methodArg)->nodeName());
-        });
-
-    if (!kindMatch) {
-        if (auto e = ctx.beginError(arg.loc, core::errors::Rewriter::RBSIncorrectParameterKind)) {
-            e.setHeader("Argument kind mismatch for `{}`, method declares `{}`, but RBS signature declares `{}`",
-                        nodeName(methodArg).show(ctx.state), nodeKindToString(methodArg), argKindToString(arg.kind));
-        }
-    }
+        [&](const parser::Node *other) { Exception::raise("Unexpected expression type: {}", methodArg->nodeName()); });
 
     return kindMatch;
 }
@@ -324,6 +407,20 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
         auto methodArg = methodArgs->args[i].get();
 
+        if (!checkParameterKindMatch(arg, methodArg)) {
+            if (auto e = ctx.beginError(arg.loc, core::errors::Rewriter::RBSIncorrectParameterKind)) {
+                e.setHeader("Argument kind mismatch for `{}`, method declares `{}`, but RBS signature declares `{}`",
+                            nodeName(methodArg).show(ctx.state), nodeKindToString(methodArg),
+                            argKindToString(arg.kind));
+
+                if (auto autocorrect = autocorrectArg(ctx, methodArg, arg, type->deepCopy())) {
+                    e.addAutocorrect(core::AutocorrectSuggestion{
+                        fmt::format("Replace with `{}`", argKindToString(arg.kind)),
+                        {core::AutocorrectSuggestion::Edit{autocorrect->loc, autocorrect->source}}});
+                }
+            }
+        }
+
         if (auto nameSymbol = arg.name) {
             // The RBS arg is named in the signature, so we use the explicit name used
             auto nameStr = parser.resolveConstant(nameSymbol);
@@ -336,8 +433,6 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
             sigParams.emplace_back(
                 make_unique<parser::Pair>(arg.loc, parser::MK::Symbol(methodArg->loc, name), move(type)));
         }
-
-        checkParameterKindMatch(ctx, arg, methodArg);
     }
 
     // Build the sig
