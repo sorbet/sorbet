@@ -61,7 +61,7 @@ public:
     inline DequeueResult wait_pop_timed(Elem &elem, std::chrono::duration<Rep, Period> const &timeout,
                                         spdlog::logger &log, bool silent = false) noexcept {
         DequeueResult ret;
-        if (!sorbet::emscripten_build) {
+        if constexpr (!sorbet::emscripten_build) {
             ret.shouldRetry = elementsLeftToPush.load(std::memory_order_acquire) != 0;
             if (ret.shouldRetry) {
                 std::unique_ptr<sorbet::Timer> time;
