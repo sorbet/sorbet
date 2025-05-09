@@ -6,6 +6,7 @@
 #include "core/errors/rewriter.h"
 #include "parser/helper.h"
 #include "rbs/SignatureTranslator.h"
+#include <regex>
 
 using namespace std;
 
@@ -15,23 +16,95 @@ const string_view CommentsAssociator::RBS_PREFIX = "#:";
 const string_view CommentsAssociator::ANNOTATION_PREFIX = "# @";
 const string_view CommentsAssociator::MULTILINE_RBS_PREFIX = "#|";
 
-namespace {
-bool isVisibilitySend(const parser::Send *send) {
-    return send->receiver == nullptr && send->args.size() == 1 &&
-           (parser::isa_node<parser::DefMethod>(send->args[0].get()) ||
-            parser::isa_node<parser::DefS>(send->args[0].get())) &&
-           (send->method == core::Names::private_() || send->method == core::Names::protected_() ||
-            send->method == core::Names::public_() || send->method == core::Names::privateClassMethod() ||
-            send->method == core::Names::publicClassMethod() || send->method == core::Names::packagePrivate() ||
-            send->method == core::Names::packagePrivateClassMethod());
+// Static regex pattern to avoid recompilation
+static const std::regex HEREDOC_PATTERN("\\s*=?\\s*<<(-|~)[^,\\s\\n#]+(,\\s*<<(-|~)[^,\\s\\n#]+)*");
+
+/**
+ * Check if the given range is the start of a heredoc assignment `= <<~FOO` and return the position of the end of the
+ * heredoc marker.
+ *
+ * Returns -1 if no heredoc marker is found.
+ */
+uint32_t hasHeredocMarker(core::Context ctx, const uint32_t fromPos, const uint32_t toPos) {
+    std::string_view source(ctx.file.data(ctx).source().substr(fromPos, toPos - fromPos));
+
+    std::string source_str(source);
+    std::smatch match;
+    if (std::regex_search(source_str, HEREDOC_PATTERN)) {
+        return fromPos + source_str.length();
+    }
+    return UINT32_MAX;
 }
 
-bool isAttrAccessorSend(const parser::Send *send) {
-    return (send->receiver == nullptr || parser::isa_node<parser::Self>(send->receiver.get())) &&
-           (send->method == core::Names::attrReader() || send->method == core::Names::attrWriter() ||
-            send->method == core::Names::attrAccessor());
+uint32_t CommentsAssociator::locateTargetLine(parser::Node *node) {
+    uint32_t result = UINT32_MAX;
+    if (node == nullptr) {
+        return result;
+    }
+
+    typecase(
+        node,
+        [&](parser::String *lit) {
+            if (hasHeredocMarker(ctx, lit->loc.beginPos(), lit->loc.endPos()) != UINT32_MAX) {
+                result = core::Loc::pos2Detail(ctx.file.data(ctx), lit->loc.beginPos()).line;
+            }
+        },
+        [&](parser::DString *lit) {
+            if (hasHeredocMarker(ctx, lit->loc.beginPos(), lit->loc.endPos()) != UINT32_MAX) {
+                result = core::Loc::pos2Detail(ctx.file.data(ctx), lit->loc.beginPos()).line;
+            }
+        },
+        [&](parser::Array *arr) {
+            for (auto &elem : arr->elts) {
+                result = locateTargetLine(elem.get());
+                if (result != UINT32_MAX) {
+                    break;
+                }
+            }
+        },
+        [&](parser::Send *send) { result = locateTargetLine(send->receiver.get()); }, [&](parser::Node *expr) {});
+
+    return result;
 }
-}; // namespace
+
+void CommentsAssociator::consumeCommentsBetweenLines(int startLine, int endLine, string kind) {
+    auto it = commentByLine.begin();
+    while (it != commentByLine.end() && it->first < startLine) {
+        ++it;
+    }
+    if (it == commentByLine.end()) {
+        return;
+    }
+    auto startIt = it;
+
+    while (it != commentByLine.end()) {
+        if (it->first < endLine) {
+            if (absl::StartsWith(it->second.string, RBS_PREFIX) ||
+                absl::StartsWith(it->second.string, MULTILINE_RBS_PREFIX)) {
+                if (it->first == startLine) {
+                    if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
+                        e.setHeader("Unexpected RBS assertion comment found after `{}` declaration", kind);
+                    }
+                } else {
+                    if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
+                        e.setHeader("Unexpected RBS assertion comment found in `{}`", kind);
+                    }
+                }
+            }
+        } else if (it->first == endLine) {
+            if (absl::StartsWith(it->second.string, RBS_PREFIX) ||
+                absl::StartsWith(it->second.string, MULTILINE_RBS_PREFIX)) {
+                if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSAssertionError)) {
+                    e.setHeader("Unexpected RBS assertion comment found after `{}` end", kind);
+                }
+            }
+        } else {
+            break;
+        }
+        ++it;
+    }
+    commentByLine.erase(startIt, it);
+}
 
 void CommentsAssociator::consumeCommentsUntilLine(int line) {
     auto it = commentByLine.begin();
@@ -51,7 +124,27 @@ void CommentsAssociator::consumeCommentsUntilLine(int line) {
     commentByLine.erase(commentByLine.begin(), it);
 }
 
-void CommentsAssociator::associateCommentsToNode(parser::Node *node) {
+void CommentsAssociator::associateAssertionCommentsToNode(parser::Node *node, bool adjustLocForHeredoc = false) {
+    uint32_t targetLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+    if (adjustLocForHeredoc) {
+        targetLine = locateTargetLine(node);
+        if (targetLine == UINT32_MAX) {
+            targetLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+        }
+    }
+
+    vector<CommentNode> comments;
+
+    auto it = commentByLine.find(targetLine);
+    if (it != commentByLine.end() && absl::StartsWith(it->second.string, RBS_PREFIX)) {
+        comments.emplace_back(it->second);
+        commentByLine.erase(it);
+
+        commentsByNode[node] = move(comments);
+    }
+}
+
+void CommentsAssociator::associateSignatureCommentsToNode(parser::Node *node) {
     auto nodeStartLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
 
     vector<CommentNode> comments;
@@ -85,20 +178,98 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
     typecase(
         node,
 
-        // Nodes that need to consume preceding comments as well as comments until the end of the node
-
-        [&](parser::Kwbegin *kwbegin) {
+        [&](parser::And *and_) {
+            associateAssertionCommentsToNode(node);
+            walkNodes(and_->right.get());
+            walkNodes(and_->left.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "and");
+        },
+        [&](parser::AndAsgn *andAsgn) {
+            associateAssertionCommentsToNode(andAsgn->right.get(), true);
+            walkNodes(andAsgn->right.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "and_asgn");
+        },
+        [&](parser::Array *array) {
+            associateAssertionCommentsToNode(node);
+            for (auto &elem : array->elts) {
+                walkNodes(elem.get());
+            }
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "array");
+        },
+        [&](parser::Assign *assign) {
+            associateAssertionCommentsToNode(assign->rhs.get(), true);
+            walkNodes(assign->rhs.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "assign");
+        },
+        [&](parser::Begin *begin) {
+            // This is a workaround that will be removed once we migrate to prism. We need to differentiate between
+            // implicit and explicit begin nodes.
+            //
+            // (let4 &&= "foo") #: Integer
+            // vs
+            // take_block { |x|
+            //   puts x
+            //   x #: as String
+            // }
+            if (begin->stmts.size() > 0 && begin->stmts[0]->loc.endPos() + 1 == node->loc.endPos()) {
+                associateAssertionCommentsToNode(node);
+            }
+            for (auto &stmt : begin->stmts) {
+                walkNodes(stmt.get());
+            }
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "begin");
+        },
+        [&](parser::Block *block) {
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
 
-            for (auto &stmt : kwbegin->stmts) {
-                walkNodes(stmt.get());
-            }
+            associateAssertionCommentsToNode(node);
+            walkNodes(block->send.get());
+            walkNodes(block->body.get());
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
+            consumeCommentsBetweenLines(beginLine, endLine, "block");
+        },
+        [&](parser::Break *break_) {
+            // Only associate comments if the last expression is on the same line as the break
+            if (!break_->exprs.empty()) {
+                auto breakLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+                auto lastExprLine =
+                    core::Loc::pos2Detail(ctx.file.data(ctx), break_->exprs.back()->loc.beginPos()).line;
+                if (lastExprLine == breakLine) {
+                    associateAssertionCommentsToNode(node);
+                }
+            }
+
+            for (auto it = break_->exprs.rbegin(); it != break_->exprs.rend(); ++it) {
+                walkNodes(it->get());
+            }
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "break");
+        },
+        [&](parser::Case *case_) {
+            associateAssertionCommentsToNode(node);
+            walkNodes(case_->condition.get());
+            for (auto &when : case_->whens) {
+                walkNodes(when.get());
+            }
+            walkNodes(case_->else_.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "case");
         },
         [&](parser::Class *cls) {
-            associateCommentsToNode(node);
+            associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
 
@@ -106,21 +277,98 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
                 walkNodes(body);
             }
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
+            consumeCommentsBetweenLines(beginLine, endLine, "class");
         },
-        [&](parser::SClass *sclass) {
-            associateCommentsToNode(node);
-            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
-            consumeCommentsUntilLine(beginLine);
-
-            if (auto body = sclass->body.get()) {
-                walkNodes(body);
+        [&](parser::CSend *csend) {
+            if (csend->method.isSetter(ctx.state) && csend->args.size() == 1) {
+                // This is a `foo&.x=(y)` method, we treat it as a `x = y` assignment
+                associateAssertionCommentsToNode(csend->args[0].get());
+                return;
             }
+            associateAssertionCommentsToNode(node);
+            walkNodes(csend->receiver.get());
+            for (auto &arg : csend->args) {
+                walkNodes(arg.get());
+            }
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
+            consumeCommentsBetweenLines(beginLine, endLine, "csend");
+        },
+        [&](parser::DefMethod *def) {
+            associateSignatureCommentsToNode(node);
+            walkNodes(def->body.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "method");
+        },
+        [&](parser::DefS *def) {
+            associateSignatureCommentsToNode(node);
+            walkNodes(def->body.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "method");
+        },
+        [&](parser::Ensure *ensure) {
+            walkNodes(ensure->body.get());
+            walkNodes(ensure->ensure.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "ensure");
+        },
+        [&](parser::For *for_) {
+            associateAssertionCommentsToNode(node);
+            walkNodes(for_->expr.get());
+            walkNodes(for_->vars.get());
+            walkNodes(for_->body.get());
+
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "for");
+        },
+        [&](parser::Hash *hash) {
+            if (!hash->kwargs) {
+                associateAssertionCommentsToNode(node);
+            }
+            for (auto &elem : hash->pairs) {
+                walkNodes(elem.get());
+            }
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "hash");
+        },
+        [&](parser::If *if_) {
+            associateAssertionCommentsToNode(node);
+            walkNodes(if_->condition.get());
+            walkNodes(if_->then_.get());
+            walkNodes(if_->else_.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "if");
+        },
+        [&](parser::Kwsplat *kwsplat) {
+            walkNodes(kwsplat->expr.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "kwsplat");
+        },
+        [&](parser::Kwbegin *kwbegin) {
+            associateAssertionCommentsToNode(node);
+            for (auto &stmt : kwbegin->stmts) {
+                walkNodes(stmt.get());
+            }
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "begin");
+        },
+        [&](parser::Masgn *masgn) {
+            associateAssertionCommentsToNode(masgn->rhs.get(), true);
+            walkNodes(masgn->rhs.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "masgn");
         },
         [&](parser::Module *mod) {
-            associateCommentsToNode(node);
+            associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
 
@@ -128,145 +376,216 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
                 walkNodes(body);
             }
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
+            consumeCommentsBetweenLines(beginLine, endLine, "module");
         },
+        [&](parser::Next *next) {
+            // Only associate comments if the last expression is on the same line as the next
+            if (!next->exprs.empty()) {
+                auto nextLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+                auto lastExprLine = core::Loc::pos2Detail(ctx.file.data(ctx), next->exprs.back()->loc.beginPos()).line;
+                if (lastExprLine == nextLine) {
+                    associateAssertionCommentsToNode(node);
+                }
+            }
 
-        // Nodes that need to consume comments until the end of the node
-
-        [&](parser::Begin *begin) {
-            for (auto &stmt : begin->stmts) {
-                walkNodes(stmt.get());
+            for (auto &expr : next->exprs) {
+                walkNodes(expr.get());
             }
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
-        },
-        [&](parser::DefMethod *def) {
-            associateCommentsToNode(node);
-            walkNodes(def->body.get());
-            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
-        },
-        [&](parser::DefS *def) {
-            associateCommentsToNode(node);
-            walkNodes(def->body.get());
-            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
-        },
-        [&](parser::Send *send) {
-            if (isVisibilitySend(send)) {
-                associateCommentsToNode(send->args[0].get());
-                auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-                consumeCommentsUntilLine(endLine);
-            } else if (isAttrAccessorSend(send)) {
-                associateCommentsToNode(send);
-                auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-                consumeCommentsUntilLine(endLine);
-            }
-        },
-        [&](parser::Assign *assign) {
-            if (auto rhs = assign->rhs.get()) {
-                walkNodes(rhs);
-            }
-            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
-        },
-        [&](parser::AndAsgn *andAsgn) {
-            if (auto rhs = andAsgn->right.get()) {
-                walkNodes(rhs);
-            }
-            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
-        },
-        [&](parser::OrAsgn *orAsgn) {
-            if (auto rhs = orAsgn->right.get()) {
-                walkNodes(rhs);
-            }
-            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
+            consumeCommentsBetweenLines(beginLine, endLine, "next");
         },
         [&](parser::OpAsgn *opAsgn) {
-            if (auto rhs = opAsgn->right.get()) {
-                walkNodes(rhs);
-            }
-            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
-        },
-        [&](parser::Masgn *masgn) {
-            walkNodes(masgn->rhs.get());
-            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
-        },
-        [&](parser::Block *block) {
+            associateAssertionCommentsToNode(opAsgn->right.get(), true);
+            walkNodes(opAsgn->right.get());
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
-            consumeCommentsUntilLine(beginLine);
-
-            walkNodes(block->body.get());
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
+            consumeCommentsBetweenLines(beginLine, endLine, "op_asgn");
         },
-        [&](parser::For *forNode) {
+        [&](parser::Or *or_) {
+            associateAssertionCommentsToNode(node);
+            walkNodes(or_->right.get());
+            walkNodes(or_->left.get());
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
-            consumeCommentsUntilLine(beginLine);
-
-            walkNodes(forNode->body.get());
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
+            consumeCommentsBetweenLines(beginLine, endLine, "or");
         },
-        [&](parser::Array *array) {
-            for (auto &elem : array->elts) {
-                walkNodes(elem.get());
-            }
+        [&](parser::OrAsgn *orAsgn) {
+            associateAssertionCommentsToNode(orAsgn->right.get(), true);
+            walkNodes(orAsgn->right.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
+            consumeCommentsBetweenLines(beginLine, endLine, "or_asgn");
         },
-        [&](parser::Rescue *rescue) {
-            walkNodes(rescue->body.get());
-            for (auto &rescued : rescue->rescue) {
-                walkNodes(rescued.get());
-            }
-            walkNodes(rescue->else_.get());
+        [&](parser::Pair *pair) {
+            walkNodes(pair->value.get());
+            walkNodes(pair->key.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
-        },
-        [&](parser::Ensure *ensure) {
-            walkNodes(ensure->body.get());
-            walkNodes(ensure->ensure.get());
-            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
-        },
-        [&](parser::If *if_) {
-            walkNodes(if_->then_.get());
-            walkNodes(if_->else_.get());
-            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
+            consumeCommentsBetweenLines(beginLine, endLine, "pair");
         },
         [&](parser::Resbody *resbody) {
             walkNodes(resbody->body.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
+            consumeCommentsBetweenLines(beginLine, endLine, "rescue");
         },
-        [&](parser::Case *case_) {
-            for (auto &when : case_->whens) {
-                walkNodes(when.get());
-            }
-            walkNodes(case_->else_.get());
+        [&](parser::Rescue *rescue) {
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
+
+            if (beginLine == endLine) {
+                // Single line rescue that may have an assertion comment so we need to start from the else node
+                walkNodes(rescue->else_.get());
+                for (auto &rescued : rescue->rescue) {
+                    walkNodes(rescued.get());
+                }
+                walkNodes(rescue->body.get());
+            } else {
+                walkNodes(rescue->body.get());
+                for (auto &rescued : rescue->rescue) {
+                    walkNodes(rescued.get());
+                }
+                walkNodes(rescue->else_.get());
+            }
+            consumeCommentsBetweenLines(beginLine, endLine, "rescue");
+        },
+        [&](parser::Return *ret) {
+            // Only associate comments if the last expression is on the same line as the return
+            if (!ret->exprs.empty()) {
+                auto returnLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+                auto lastExprLine = core::Loc::pos2Detail(ctx.file.data(ctx), ret->exprs.back()->loc.beginPos()).line;
+                if (lastExprLine == returnLine) {
+                    associateAssertionCommentsToNode(node);
+                }
+            }
+
+            for (auto &expr : ret->exprs) {
+                walkNodes(expr.get());
+            }
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "return");
+        },
+        [&](parser::SClass *sclass) {
+            associateSignatureCommentsToNode(node);
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            consumeCommentsUntilLine(beginLine);
+
+            if (auto body = sclass->body.get()) {
+                walkNodes(body);
+            }
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "sclass");
+        },
+        [&](parser::Send *send) {
+            if (parser::MK::isVisibilitySend(send)) {
+                associateSignatureCommentsToNode(send->args[0].get());
+                auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+                auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+                consumeCommentsBetweenLines(beginLine, endLine, "send");
+            } else if (parser::MK::isAttrAccessorSend(send)) {
+                associateSignatureCommentsToNode(send);
+                auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+                auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+                consumeCommentsBetweenLines(beginLine, endLine, "send");
+            } else {
+                if (send->method == core::Names::squareBracketsEq()) {
+                    // This is a `foo[key]=(y)` method, walk y for chained method calls
+                    walkNodes(send->args.back().get());
+                    return;
+                } else if (send->method.isSetter(ctx.state) && send->args.size() == 1) {
+                    // This is a `foo.x=(y)` method, we treat it as a `x = y` assignment
+                    associateAssertionCommentsToNode(send->args[0].get());
+                    return;
+                }
+                associateAssertionCommentsToNode(send);
+
+                walkNodes(send->receiver.get());
+
+                for (auto &arg : send->args) {
+                    walkNodes(arg.get());
+                }
+                auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+                auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+                consumeCommentsBetweenLines(beginLine, endLine, "send");
+            }
+        },
+        [&](parser::Splat *splat) {
+            walkNodes(splat->var.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "splat");
+        },
+        [&](parser::Until *until) {
+            associateAssertionCommentsToNode(node);
+            walkNodes(until->cond.get());
+            walkNodes(until->body.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "until");
+        },
+        [&](parser::UntilPost *untilPost) {
+            walkNodes(untilPost->cond.get());
+            walkNodes(untilPost->body.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "until");
         },
         [&](parser::When *when) {
             walkNodes(when->body.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsUntilLine(endLine);
+            consumeCommentsBetweenLines(beginLine, endLine, "when");
+        },
+        [&](parser::While *while_) {
+            associateAssertionCommentsToNode(node);
+            walkNodes(while_->cond.get());
+            walkNodes(while_->body.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "while");
+        },
+        [&](parser::WhilePost *whilePost) {
+            walkNodes(whilePost->cond.get());
+            walkNodes(whilePost->body.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "while");
         },
         [&](parser::Node *other) {
-            // Do nothing
+            associateAssertionCommentsToNode(node);
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "other");
         });
 }
 
 std::map<parser::Node *, vector<CommentNode>> CommentsAssociator::run(unique_ptr<parser::Node> &node) {
+    // Remove any comments that don't start with RBS prefixes
+    for (auto it = commentByLine.begin(); it != commentByLine.end();) {
+        if (!absl::StartsWith(it->second.string, RBS_PREFIX) &&
+            !absl::StartsWith(it->second.string, ANNOTATION_PREFIX) &&
+            !absl::StartsWith(it->second.string, MULTILINE_RBS_PREFIX)) {
+            it = commentByLine.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
     walkNodes(node.get());
+
+    // Check for any remaining comments
+    for (const auto &[line, comment] : commentByLine) {
+        if (absl::StartsWith(comment.string, RBS_PREFIX) || absl::StartsWith(comment.string, MULTILINE_RBS_PREFIX)) {
+            if (auto e = ctx.beginError(comment.loc, core::errors::Rewriter::RBSUnusedComment)) {
+                e.setHeader("Unused RBS comment. Couldn't associate it with a method definition or a type assertion");
+            }
+        }
+    }
+
     return move(commentsByNode);
-};
+}
 
 CommentsAssociator::CommentsAssociator(core::MutableContext ctx, vector<core::LocOffsets> commentLocations)
     : ctx(ctx), commentLocations(commentLocations), commentByLine() {

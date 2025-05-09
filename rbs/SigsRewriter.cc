@@ -14,31 +14,15 @@ namespace sorbet::rbs {
 
 namespace {
 
-bool isVisibilitySend(const parser::Send *send) {
-    return send->receiver == nullptr && send->args.size() == 1 &&
-           (parser::isa_node<parser::DefMethod>(send->args[0].get()) ||
-            parser::isa_node<parser::DefS>(send->args[0].get())) &&
-           (send->method == core::Names::private_() || send->method == core::Names::protected_() ||
-            send->method == core::Names::public_() || send->method == core::Names::privateClassMethod() ||
-            send->method == core::Names::publicClassMethod() || send->method == core::Names::packagePrivate() ||
-            send->method == core::Names::packagePrivateClassMethod());
-}
-
-bool isAttrAccessorSend(const parser::Send *send) {
-    return (send->receiver == nullptr || parser::isa_node<parser::Self>(send->receiver.get())) &&
-           (send->method == core::Names::attrReader() || send->method == core::Names::attrWriter() ||
-            send->method == core::Names::attrAccessor());
-}
-
 parser::Node *signaturesTarget(parser::Node *node) {
     if (parser::isa_node<parser::DefMethod>(node) || parser::cast_node<parser::DefS>(node)) {
         return node;
     }
 
     if (auto send = parser::cast_node<parser::Send>(node)) {
-        if (isVisibilitySend(send)) {
+        if (parser::MK::isVisibilitySend(send)) {
             return send->args[0].get();
-        } else if (isAttrAccessorSend(send)) {
+        } else if (parser::MK::isAttrAccessorSend(send)) {
             return node;
         }
     }
