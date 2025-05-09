@@ -21,14 +21,6 @@ cc_binary(
     srcs = [
         "main.cc",
     ],
-    # When changing this, you should also update the REQUIRED_STACK_SIZE variable in common/os/os.cc.
-    linkopts = select({
-        "//tools/config:darwindbg": [
-            "-Wl,-stack_size",
-            "-Wl,0x4000000",
-        ],
-        "//conditions:default": [],
-    }),
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
