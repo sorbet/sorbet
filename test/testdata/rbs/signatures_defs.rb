@@ -41,7 +41,7 @@ def sig_mismatch1(p1, p2); end
 #                     ^^ error: Malformed `sig`. Type not specified for argument `p2`
 
 #: (foo: P1) -> void
-#   ^^^ error: Argument kind mismatch for `p1`, method declares `positional`, but RBS signature declares `keyword`
+#   ^^^^^^^ error: Argument kind mismatch for `p1`, method declares `positional`, but RBS signature declares `keyword`
 #   ^^^ error: Unknown argument name `foo`
 def sig_mismatch2(p1); end
 #                 ^^ error: Malformed `sig`. Type not specified for argument `p1`
@@ -66,11 +66,11 @@ def sig_mismatch6(p:); end
 def sig_mismatch7(*p); end
 
 #: (?p: Integer) -> void
-#    ^ error: Argument kind mismatch for `p`, method declares `keyword`, but RBS signature declares `optional keyword`
+#    ^^^^^^^^^^ error: Argument kind mismatch for `p`, method declares `keyword`, but RBS signature declares `optional keyword`
 def sig_mismatch8(p:); end
 
 #: (p: Integer) -> void
-#   ^ error: Argument kind mismatch for `p`, method declares `optional keyword`, but RBS signature declares `keyword`
+#   ^^^^^^^^^^ error: Argument kind mismatch for `p`, method declares `optional keyword`, but RBS signature declares `keyword`
 def sig_mismatch9(p: 42); end
 
 #: (*Integer) -> void
