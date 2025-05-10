@@ -120,12 +120,16 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
     }
 
     if (params.initializationOptions) {
-        auto &initOptions = *params.initializationOptions;
-        enableOperationNotifications = initOptions->supportsOperationNotifications.value_or(false);
-        enableTypecheckInfo = initOptions->enableTypecheckInfo.value_or(false);
-        enableSorbetURIs = initOptions->supportsSorbetURIs.value_or(false);
-        enableHighlightUntyped = parseEnableHighlightUntyped(*initOptions, core::TrackUntyped::Nowhere);
-        enableTypedFalseCompletionNudges = initOptions->enableTypedFalseCompletionNudges.value_or(true);
+        try {
+            auto &initOptions = *params.initializationOptions;
+            enableOperationNotifications = initOptions->supportsOperationNotifications.value_or(false);
+            enableTypecheckInfo = initOptions->enableTypecheckInfo.value_or(false);
+            enableSorbetURIs = initOptions->supportsSorbetURIs.value_or(false);
+            enableHighlightUntyped = parseEnableHighlightUntyped(*initOptions, core::TrackUntyped::Nowhere);
+            enableTypedFalseCompletionNudges = initOptions->enableTypedFalseCompletionNudges.value_or(true);
+        } catch (const DeserializationError &e) {
+            // Default values are already set in the class definition
+        }
     }
 }
 
