@@ -127,7 +127,9 @@ unique_ptr<Diagnostic> errorToDiagnostic(const core::GlobalState &gs, const core
     if (!error.loc.exists()) {
         return nullptr;
     }
-    return make_unique<Diagnostic>(Range::fromLoc(gs, error.loc), error.header);
+    auto diag = make_unique<Diagnostic>(Range::fromLoc(gs, error.loc), error.header);
+    diag->code.emplace(error.what.code);
+    return diag;
 }
 
 class ExpectationHandler {
@@ -636,6 +638,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     // Check warnings and errors
     {
+        map<string, vector<unique_ptr<Diagnostic>>> parserDiagnostics;
         map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
         for (auto &error : handler.errors) {
             if (error->isSilenced) {
@@ -645,8 +648,19 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             ENFORCE(diag != nullptr, "Error was given no valid location - '{}'", error->toString(*gs));
 
             auto path = error->loc.file().data(*gs).path();
-            diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
+
+            ENFORCE(diag->code.has_value(), "Diagnostics must have error codes");
+            auto *code = std::get_if<int>(&diag->code.value());
+            ENFORCE(code != nullptr, "Diagnostic is missing a numeric error code");
+
+            if (*code >= 2000 && *code < 3000) {
+                parserDiagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
+            } else {
+                diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
+            }
         }
+        ParserErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getParserErrorAssertions(assertions),
+                                       parserDiagnostics);
         ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
     }
 

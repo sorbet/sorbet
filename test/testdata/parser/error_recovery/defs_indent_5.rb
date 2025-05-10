@@ -5,5 +5,5 @@ class E
   end
 
   def self.method2
-# ^^^ error: Hint: this "def" token might not be properly closed
-end # error: unexpected token "end of file"
+# ^^^ parser-error: Hint: this "def" token might not be properly closed
+end # parser-error: unexpected token "end of file"

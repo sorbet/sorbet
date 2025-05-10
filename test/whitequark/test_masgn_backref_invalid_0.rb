@@ -1,3 +1,3 @@
 # typed: true
 
-$1, = foo # error: cannot assign to a back-reference variable
+$1, = foo # parser-error: cannot assign to a back-reference variable
