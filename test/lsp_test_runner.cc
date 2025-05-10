@@ -548,6 +548,8 @@ TEST_CASE("LSPTest") {
         opts.lspExtractToVariableEnabled =
             BooleanPropertyAssertion::getValue("enable-experimental-lsp-extract-to-variable", assertions)
                 .value_or(false);
+        opts.lspExtractToMethodEnabled =
+            BooleanPropertyAssertion::getValue("enable-experimental-lsp-extract-to-method", assertions).value_or(false);
         opts.disableWatchman = true;
         opts.rubyfmtPath = "test/testdata/lsp/rubyfmt-stub/rubyfmt";
 

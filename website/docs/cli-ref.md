@@ -244,6 +244,8 @@ Usage:
                                 Enable experimental LSP feature: Signature Help
       --enable-experimental-lsp-extract-to-variable
                                 Enable experimental LSP feature: Extract To Variable
+      --enable-experimental-lsp-extract-to-method
+                                Enable experimental LSP feature: Extract To Method
       --enable-all-experimental-lsp-features
                                 Enable every experimental LSP feature. (WARNING: can be
                                 crashy; for developer use only. End users should prefer
