@@ -82,6 +82,7 @@ typecheck() {
       version="${version_suffix#-}"
       # Resort to locating using the GEM_PATH, this takes ~200ms
       sorbet="$(VISUAL=echo gem open sorbet-static -v "${version}")/libexec/sorbet"
+      sorbet="bazel-bin/main/sorbet"
     fi
 
     # if we still don't know the sorbet binary

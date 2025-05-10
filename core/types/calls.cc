@@ -730,10 +730,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto isSetter = targetName.isSetter(gs);
             auto methodPrefix = isSetter ? "Setter method" : "Method";
             if (args.fullType.type != args.thisType) {
-                e.setHeader("{} `{}` does not exist on {}`{}` component of `{}`", methodPrefix, targetName.show(gs),
+                e.setHeader("#1# {} `{}` does not exist on {}`{}` component of `{}`", methodPrefix, targetName.show(gs),
                             ancestorsOf, thisStr, args.fullType.type.show(gs));
             } else {
-                e.setHeader("{} `{}` does not exist on {}`{}`", methodPrefix, targetName.show(gs), ancestorsOf,
+                e.setHeader("#2# {} `{}` does not exist on {}`{}`", methodPrefix, targetName.show(gs), ancestorsOf,
                             thisStr);
             }
             e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
@@ -2101,6 +2101,16 @@ public:
         res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
     }
 } T_proc_void;
+
+class T_proc_narrows_to: public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto sym = core::Symbols::Proc(0);
+        vector<core::TypePtr> targs;
+        targs.emplace_back(core::Types::void_());
+        res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
+    }
+} T_proc_narrows_to;
 
 class T_proc_returns : public IntrinsicMethod {
 public:
@@ -4530,6 +4540,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::proc(), &T_proc},
     {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::params(), &T_proc_params},
     {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::void_(), &T_proc_void},
+    {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::narrowsTo(), &T_proc_narrows_to},
     {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::returns(), &T_proc_returns},
     {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::bind(), &DeclBuilderForProcs_bind},
 
