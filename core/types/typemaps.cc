@@ -339,6 +339,19 @@ TypePtr LambdaParam::_instantiate(const GlobalState &gs, absl::Span<const TypeMe
             return targs[&el - &params.front()];
         }
     }
+
+    // If no direct match, try to find through inheritance chain
+    for (auto &el : params) {
+        // Check if el's owner derives from this->definition's owner or vice versa
+        if (el.data(gs)->owner.asClassOrModuleRef().data(gs)->derivesFrom(gs, this->definition.data(gs)->owner.asClassOrModuleRef()) ||
+            this->definition.data(gs)->owner.asClassOrModuleRef().data(gs)->derivesFrom(gs, el.data(gs)->owner.asClassOrModuleRef())) {
+            // If they're related, check if they represent the same type parameter
+            if (el.data(gs)->name == this->definition.data(gs)->name) {
+                return targs[&el - &params.front()];
+            }
+        }
+    }
+
     return nullptr;
 }
 

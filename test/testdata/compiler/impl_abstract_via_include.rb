@@ -18,9 +18,10 @@ module FooImpl
   def foo; 0.1617; end
 end
 
-class Foo
-  include FooImpl
-  include IFoo
-end
+  class Foo
+# ^^^^^^^^^ error: Return type `Float` does not match return type of abstract method `IFoo#foo`
+    include FooImpl
+    include IFoo
+  end
 
 p Foo.new.foo
