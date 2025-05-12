@@ -57,6 +57,11 @@ tweak how Sorbet works to support the use case.
 
 Sorbet couldn't find a file.
 
+## 1005
+
+Sorbet encountered a deprecated CLI flag. Change the supplied command or your
+`sorbet/config` to use the appropriate flag mentioned in the error message.
+
 ## 2001
 
 There was a Ruby syntax error. Sorbet was unable to parse the source code. If

@@ -328,11 +328,8 @@ public:
         // Some calls to `super` are not type checked due to incomplete/imperfect information.
         bool typedSuper = true;
 
-        // Whether to parse RBS-style type annotations out of comments
-        bool rbsSignaturesEnabled = false;
-
-        // Whether to parse RBS-style type assertions out of end-of-line comments
-        bool rbsAssertionsEnabled = false;
+        // Whether to parse RBS-style type annotations and assertions out of comments
+        bool rbsEnabled = false;
 
         // Whether to allow `requires_ancestor`, which allows modeling certain kinds of indirect
         // inheritance hierarchies, at the expense of implementation complexity and soundness

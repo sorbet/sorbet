@@ -56,8 +56,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     gs.pathPrefix = opts.pathPrefix;
     gs.errorUrlBase = opts.errorUrlBase;
 
-    gs.cacheSensitiveOptions.rbsSignaturesEnabled = opts.cacheSensitiveOptions.rbsSignaturesEnabled;
-    gs.cacheSensitiveOptions.rbsAssertionsEnabled = opts.cacheSensitiveOptions.rbsAssertionsEnabled;
+    gs.cacheSensitiveOptions.rbsEnabled = opts.cacheSensitiveOptions.rbsEnabled;
     gs.cacheSensitiveOptions.requiresAncestorEnabled = opts.cacheSensitiveOptions.requiresAncestorEnabled;
     gs.cacheSensitiveOptions.typedSuper = opts.cacheSensitiveOptions.typedSuper;
 
@@ -229,8 +228,7 @@ parser::Parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file,
     {
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
         auto indentationAware = false;               // Don't start in indentation-aware error recovery mode
-        auto collectComments =
-            gs.cacheSensitiveOptions.rbsSignaturesEnabled; // Collect comments for RBS signature translation
+        auto collectComments = gs.cacheSensitiveOptions.rbsEnabled; // Collect comments for RBS signature translation
         auto settings = parser::Parser::Settings{traceLexer, traceParser, indentationAware, collectComments};
         result = parser::Parser::run(gs, file, settings);
     }
@@ -254,22 +252,19 @@ unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file
     auto node = move(parseResult.tree);
     auto commentLocations = move(parseResult.commentLocations);
 
-    if (gs.cacheSensitiveOptions.rbsSignaturesEnabled || gs.cacheSensitiveOptions.rbsAssertionsEnabled) {
+    if (gs.cacheSensitiveOptions.rbsEnabled) {
         Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
         core::MutableContext ctx(gs, core::Symbols::root(), file);
         core::UnfreezeNameTable nameTableAccess(gs);
 
-        if (gs.cacheSensitiveOptions.rbsSignaturesEnabled) {
-            auto associator = rbs::CommentsAssociator(ctx, commentLocations);
-            auto commentsByNode = associator.run(node);
+        auto associator = rbs::CommentsAssociator(ctx, commentLocations);
+        auto commentsByNode = associator.run(node);
 
-            auto rewriter = rbs::SigsRewriter(ctx, commentsByNode);
-            node = rewriter.run(move(node));
-        }
-        if (gs.cacheSensitiveOptions.rbsAssertionsEnabled) {
-            auto rewriter = rbs::AssertionsRewriter(ctx);
-            node = rewriter.run(move(node));
-        }
+        auto sigsRewriter = rbs::SigsRewriter(ctx, commentsByNode);
+        node = sigsRewriter.run(move(node));
+
+        auto assertionsRewriter = rbs::AssertionsRewriter(ctx);
+        node = assertionsRewriter.run(move(node));
 
         if (print.RBSRewriteTree.enabled) {
             print.RBSRewriteTree.fmt("{}\n", node->toStringWithTabs(gs, 0));
