@@ -40,9 +40,12 @@ class LSPTypecheckerCoordinator final {
     // the global state for the first time.
     std::shared_ptr<TaskQueue> taskQueue;
 
-    // The worker pool used specifically for preemption tasks. This pool has the same number of threads as `workers`,
-    // because running preemption tasks implies that `workers` pool is suspended waiting for the preemption task to
-    // finish.
+    // The worker pool used specifically for preemption tasks. This pool has the same number of
+    // threads as `workers` so that running preemption tasks can use as many threads as a slowpath
+    // task would.
+    //
+    // (When running preemption tasks, every thread in the main `workers` pool is suspended, which
+    // is why we have a second pool.)
     std::unique_ptr<WorkerPool> preemptionWorkers;
 
     /**
