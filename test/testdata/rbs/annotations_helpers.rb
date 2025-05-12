@@ -1,5 +1,5 @@
 # typed: strict
-# enable-experimental-rbs-signatures: true
+# enable-experimental-rbs-comments: true
 
 # @abstract
 class Abstract1; end

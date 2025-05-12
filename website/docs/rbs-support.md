@@ -7,8 +7,8 @@ sidebar_label: RBS Comments
 ## Signature comments
 
 > This feature is experimental and might be changed or removed without notice.
-> To enable it pass the `--enable-experimental-rbs-signatures` option to Sorbet
-> or add it to your `sorbet/config`.
+> To enable it pass the `--enable-experimental-rbs-comments` option to Sorbet or
+> add it to your `sorbet/config`.
 
 Sorbet has experimental support for comment-only type syntax, powered by
 [RBS](https://github.com/ruby/rbs) annotations.
@@ -938,8 +938,8 @@ box = Box.new #: Box[untyped]
 ## Type assertions comments
 
 > This feature is experimental and might be changed or removed without notice.
-> To enable it pass the `--enable-experimental-rbs-assertions` option to Sorbet
-> or add it to your `sorbet/config`.
+> To enable it pass the `--enable-experimental-rbs-comments` option to Sorbet or
+> add it to your `sorbet/config`.
 
 ### `T.let` assertions
 

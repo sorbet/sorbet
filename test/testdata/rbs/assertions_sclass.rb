@@ -1,6 +1,5 @@
 # typed: strict
-# enable-experimental-rbs-signatures: true
-# enable-experimental-rbs-assertions: true
+# enable-experimental-rbs-comments: true
 
 class SClassErr1
   class << self #: as String # error: Unexpected RBS assertion comment found after `sclass` declaration

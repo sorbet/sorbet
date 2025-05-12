@@ -1,6 +1,5 @@
 # typed: strict
-# enable-experimental-rbs-signatures: true
-# enable-experimental-rbs-assertions: true
+# enable-experimental-rbs-comments: true
 
 if ARGV.any?
   if1 = ARGV.shift #: as String

@@ -1,6 +1,5 @@
 # typed: strict
-# enable-experimental-rbs-signatures: true
-# enable-experimental-rbs-assertions: true
+# enable-experimental-rbs-comments: true
 
 class ClassErr1 #: as String # error: Unexpected RBS assertion comment found after `class` declaration
 end

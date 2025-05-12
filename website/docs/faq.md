@@ -641,7 +641,7 @@ Ruby 3.
 
 > **February 2025 update**: We're experimenting with limited support for RBS
 > signatures as comments. This feature is protected by the
-> `--enable-experimental-rbs-signatures` flag. See the
+> `--enable-experimental-rbs-comments` flag. See the
 > [RBS support](rbs-support.md) page for more details.
 
 ## Can I use Sorbet for duck typed code?

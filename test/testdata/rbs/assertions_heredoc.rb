@@ -1,6 +1,5 @@
 # typed: strict
-# enable-experimental-rbs-signatures: true
-# enable-experimental-rbs-assertions: true
+# enable-experimental-rbs-comments: true
 
 HEREDOC1 = <<~MSG.strip # error: Constants must have type annotations with `T.let` when specifying `# typed: strict
   #: Integer

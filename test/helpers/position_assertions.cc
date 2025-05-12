@@ -254,8 +254,7 @@ const UnorderedMap<
         {"uniquely-defined-behavior", BooleanPropertyAssertion::make},
         {"check-out-of-order-constant-references", BooleanPropertyAssertion::make},
         {"enable-packager", BooleanPropertyAssertion::make},
-        {"enable-experimental-rbs-signatures", BooleanPropertyAssertion::make},
-        {"enable-experimental-rbs-assertions", BooleanPropertyAssertion::make},
+        {"enable-experimental-rbs-comments", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
         {"experimental-ruby3-keyword-args", BooleanPropertyAssertion::make},
         {"typed-super", BooleanPropertyAssertion::make},
@@ -675,10 +674,8 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
     realmain::options::Options opts;
 
     opts.cacheSensitiveOptions.noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
-    opts.cacheSensitiveOptions.rbsSignaturesEnabled =
-        BooleanPropertyAssertion::getValue("enable-experimental-rbs-signatures", assertions).value_or(false);
-    opts.cacheSensitiveOptions.rbsAssertionsEnabled =
-        BooleanPropertyAssertion::getValue("enable-experimental-rbs-assertions", assertions).value_or(false);
+    opts.cacheSensitiveOptions.rbsEnabled =
+        BooleanPropertyAssertion::getValue("enable-experimental-rbs-comments", assertions).value_or(false);
     opts.cacheSensitiveOptions.requiresAncestorEnabled =
         BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
     opts.ruby3KeywordArgs =

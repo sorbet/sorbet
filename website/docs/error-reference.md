@@ -57,11 +57,6 @@ tweak how Sorbet works to support the use case.
 
 Sorbet couldn't find a file.
 
-## 1005
-
-Sorbet encountered a deprecated CLI flag. Change the supplied command or your
-`sorbet/config` to use the appropriate flag mentioned in the error message.
-
 ## 2001
 
 There was a Ruby syntax error. Sorbet was unable to parse the source code. If
@@ -603,7 +598,7 @@ end
 ## 3550
 
 > This error is specific to RBS support when using the
-> `--enable-experimental-rbs-signatures` flag.
+> `--enable-experimental-rbs-comments` flag.
 
 This error is raised when a RBS signature comment contains a syntax error. See
 the
@@ -613,7 +608,7 @@ for more details on the RBS syntax.
 ## 3551
 
 > This error is specific to RBS support when using the
-> `--enable-experimental-rbs-signatures` flag.
+> `--enable-experimental-rbs-comments` flag.
 
 This error is raised when a RBS signature comment contains a feature not
 supported by Sorbet. See
@@ -622,7 +617,7 @@ supported by Sorbet. See
 ## 3552
 
 > This error is specific to RBS support when using the
-> `--enable-experimental-rbs-signatures` flag.
+> `--enable-experimental-rbs-comments` flag.
 
 This error is raised when a RBS signature comment has more parameters than the
 method definition it represents.
@@ -630,7 +625,7 @@ method definition it represents.
 ## 3553
 
 > This error is specific to RBS support when using the
-> `--enable-experimental-rbs-signatures` flag.
+> `--enable-experimental-rbs-comments` flag.
 
 This error is raised when a RBS assertion comment is found in a place where it
 is not allowed.
@@ -645,7 +640,7 @@ end
 ## 3554
 
 > This error is specific to RBS support when using the
-> `--enable-experimental-rbs-signatures` flag.
+> `--enable-experimental-rbs-comments` flag.
 
 This error is raised when Sorbet couldn't match a RBS signature comment with a
 method definition. Ensure your comment is followed by a method definition.
@@ -653,7 +648,7 @@ method definition. Ensure your comment is followed by a method definition.
 ## 3555
 
 > This error is specific to RBS support when using the
-> `--enable-experimental-rbs-signatures` flag.
+> `--enable-experimental-rbs-comments` flag.
 
 This error is raised when Sorbet encounters an incorrect ordering of signature
 comment prefixes, (`#:` and `#|`). First line of your signature comment should
@@ -662,7 +657,7 @@ start with `#:` and subsequent lines should start with a `#|`.
 ## 3556
 
 > This error is specific to RBS support when using the
-> `--enable-experimental-rbs-signatures` flag.
+> `--enable-experimental-rbs-comments` flag.
 
 This error is raised when the kind of parameter in the method definition does
 not match the kind of parameter in the RBS signature.
@@ -678,7 +673,7 @@ def method(param:); end
 ## 3557
 
 > This error is specific to RBS support when using the
-> `--enable-experimental-rbs-signatures` flag.
+> `--enable-experimental-rbs-comments` flag.
 
 This error is raised when a class or module is annotated with multiple RBS
 generic type parameters comments:

@@ -1,6 +1,5 @@
 # typed: strict
-# enable-experimental-rbs-signatures: true
-# enable-experimental-rbs-assertions: true
+# enable-experimental-rbs-comments: true
 
 #: [A, B, C] (A, B?, C) -> void
 def type_params1(a, b, c)
