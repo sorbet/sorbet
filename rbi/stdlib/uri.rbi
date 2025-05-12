@@ -1664,6 +1664,23 @@ class URI::HTTP < URI::Generic
   # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/URI/HTTP.html) URIs as per RFC
   # 1738.
   def self.build(args); end
+
+  #
+  # == Description
+  #
+  # Returns the origin for an HTTP uri, as defined in
+  # https://www.rfc-editor.org/rfc/rfc6454.
+  #
+  #
+  # Example:
+  #
+  #     URI::HTTP.build(host: 'www.example.com', path: '/foo/bar').origin #=> "http://www.example.com"
+  #     URI::HTTP.build(host: 'www.example.com', port: 8000, path: '/foo/bar').origin #=> "http://www.example.com:8000"
+  #     URI::HTTP.build(host: 'www.example.com', port: 80, path: '/foo/bar').origin #=> "http://www.example.com"
+  #     URI::HTTPS.build(host: 'www.example.com', path: '/foo/bar').origin #=> "https://www.example.com"
+  #
+  sig { returns(String) }
+  def origin; end
 end
 
 # The default port for
