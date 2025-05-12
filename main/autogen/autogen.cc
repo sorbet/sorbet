@@ -72,7 +72,7 @@ class AutogenWalk {
 
                     // append the name in reverse order to the hitherto-built name vector,
                     // then break out of the loop.
-                    out.insert(out.end(), std::move(resolvedScopeName).rbegin(), std::move(resolvedScopeName).rend());
+                    out.insert(out.end(), resolvedScopeName.rbegin(), resolvedScopeName.rend());
                     break;
                 }
             }
