@@ -2247,13 +2247,6 @@ public:
     }
 } Class_new;
 
-class Class_subclasses : public IntrinsicMethod {
-public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        res.returnType = Types::arrayOf(gs, args.thisType);
-    }
-} Class_subclasses;
-
 class T_Generic_squareBrackets : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -4550,7 +4543,6 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},
 
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::new_(), &Class_new},
-    {Symbols::Class(), Intrinsic::Kind::Instance, Names::subclasses(), &Class_subclasses},
 
     {Symbols::Sorbet_Private_Static(), Intrinsic::Kind::Singleton, Names::sig(), &SorbetPrivateStatic_sig},
 

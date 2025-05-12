@@ -196,7 +196,7 @@ class Class < Module
   # B.subclasses        #=> [C]
   # C.subclasses        #=> []
   # ```
-  sig { returns(T::Array[T::Class[T.anything]]) }
+  sig { returns(T::Array[T::Class[T.attached_class]]) }
   def subclasses(); end
 
   # Returns the superclass of *class*, or `nil`.
