@@ -819,7 +819,7 @@ class Module < Object
   sig do
     params(
         arg0: T.any(Symbol, String),
-        arg1: T.any(Proc, Method, UnboundMethod)
+        arg1: T.any(T::Proc[T.untyped], Method, UnboundMethod)
     )
     .returns(Symbol)
   end
