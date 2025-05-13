@@ -1,5 +1,5 @@
 # typed: strict
-# enable-experimental-rbs-signatures: true
+# enable-experimental-rbs-comments: true
 
 Class.new do
   #: -> String

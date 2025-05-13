@@ -1,6 +1,5 @@
 # typed: strict
-# enable-experimental-rbs-signatures: true
-# enable-experimental-rbs-assertions: true
+# enable-experimental-rbs-comments: true
 
 #: -> void
 def defErr1 #: as String # error: Unexpected RBS assertion comment found after `method` declaration

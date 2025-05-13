@@ -3,8 +3,7 @@ set -euo pipefail
 
 main/sorbet \
   --print=rbs-rewrite-tree \
-  --enable-experimental-rbs-signatures \
-  --enable-experimental-rbs-assertions \
+  --enable-experimental-rbs-comments \
   --silence-dev-message \
   test/cli/rbs-print-rewrite-tree/test.rb 2>&1
 

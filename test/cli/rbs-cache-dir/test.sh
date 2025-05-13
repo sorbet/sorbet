@@ -8,7 +8,7 @@ main/sorbet \
   --silence-dev-message \
   --print=index-tree \
   --cache-dir=my-cache-dir \
-  --enable-experimental-rbs-signatures \
+  --enable-experimental-rbs-comments \
   test/cli/rbs-cache-dir/test.rb 2>&1
 
 echo --------------------------------------------------------------------------
