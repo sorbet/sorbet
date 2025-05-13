@@ -402,6 +402,7 @@ NameDef names[] = {
 
     {"isA_p", "is_a?"},
     {"kindOf_p", "kind_of?"},
+    {"instanceOf_p", "instance_of?"},
     {"lessThan", "<"},
     {"greaterThan", ">"},
     {"equal_p", "equal?"},

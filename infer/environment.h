@@ -179,7 +179,7 @@ class Environment {
 
     // Handles updateKnowledge for Kernel#kind_of?, Kernel#is_a?, and Module#===
     void updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, core::Loc loc, const core::TypePtr &klassType,
-                               cfg::LocalRef ref, KnowledgeFilter &knowledgeFilter);
+                               cfg::LocalRef ref, KnowledgeFilter &knowledgeFilter, core::NameRef fun);
 
     /* Special case sources of knowledge */
     void updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send *send,
