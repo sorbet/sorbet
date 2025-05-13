@@ -721,6 +721,9 @@ PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedCon
     }
 
     if (owner == core::Symbols::PackageSpecRegistry()) {
+        // This is a weird case, because I don't think it's possible to get here, but we can handle it anyways.
+        // This whole function should go away with the switch to PackageRef anyways.
+        ENFORCE(pName.fullName.parts.empty());
         owner = core::Symbols::noClassOrModule();
     }
 
