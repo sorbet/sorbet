@@ -2431,7 +2431,10 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &extraPackag
     std::vector<core::packages::MangledName> allowRelaxedPackagerChecksFor_;
     for (const string &pkgName : allowRelaxedPackagerChecksFor) {
         std::vector<string_view> pkgNameParts = absl::StrSplit(pkgName, "::");
-        auto mangledName = core::packages::MangledName::mangledNameFromParts(*this, pkgNameParts);
+        // TODO(jez) Figure out how to defer handling these things until we have symbols for
+        // packages, not mangled names.
+        auto mangledName =
+            core::packages::MangledName::mangledNameFromParts(*this, pkgNameParts, core::Symbols::noClassOrModule());
         allowRelaxedPackagerChecksFor_.emplace_back(mangledName);
     }
     packageDB_.allowRelaxedPackagerChecksFor_ = allowRelaxedPackagerChecksFor_;
