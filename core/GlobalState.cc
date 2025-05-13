@@ -2425,19 +2425,9 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &extraPackag
     packageDB_.extraPackageFilesDirectorySlashDeprecatedPrefixes_ = extraPackageFilesDirectorySlashDeprecatedPrefixes;
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;
     packageDB_.skipRBIExportEnforcementDirs_ = packageSkipRBIExportEnforcementDirs;
+    packageDB_.allowRelaxedPackagerChecksFor_ = allowRelaxedPackagerChecksFor;
     absl::c_transform(packagerLayers, std::back_inserter(packageDB_.layers_),
                       [this](const auto &layer) { return enterNameUTF8(layer); });
-
-    std::vector<core::packages::MangledName> allowRelaxedPackagerChecksFor_;
-    for (const string &pkgName : allowRelaxedPackagerChecksFor) {
-        std::vector<string_view> pkgNameParts = absl::StrSplit(pkgName, "::");
-        // TODO(jez) Figure out how to defer handling these things until we have symbols for
-        // packages, not mangled names.
-        auto mangledName =
-            core::packages::MangledName::mangledNameFromParts(*this, pkgNameParts, core::Symbols::noClassOrModule());
-        allowRelaxedPackagerChecksFor_.emplace_back(mangledName);
-    }
-    packageDB_.allowRelaxedPackagerChecksFor_ = allowRelaxedPackagerChecksFor_;
     packageDB_.errorHint_ = errorHint;
 }
 
