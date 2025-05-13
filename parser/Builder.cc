@@ -1550,7 +1550,8 @@ public:
                 }
             } else {
                 auto *s = parser::cast_node<String>(firstPart);
-                return make_unique<String>(s->loc, s->val);
+                auto loc = tokLoc(begin).join(tokLoc(end));
+                return make_unique<String>(loc, s->val);
             }
         } else {
             core::LocOffsets loc = collectionLoc(begin, parts, end);
