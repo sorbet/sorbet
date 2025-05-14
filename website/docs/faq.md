@@ -524,8 +524,10 @@ The `sorbet-runtime` gem is tested on
 Importantly, `sorbet-runtime` no longer supports Ruby 2.6, which is the last
 version before
 [the `bind_call` method](https://docs.ruby-lang.org/en/3.3/UnboundMethod.html#method-i-bind_call)
-was added, which substantially improves the speed of `sorbet-runtime`. Feel free
-to report runtime issues for any current or future Ruby version.
+was added, which substantially improves the speed of `sorbet-runtime`. More
+recent versions of Ruby than `sorbet-runtime` is tested against usually also
+work fine. Feel free to report runtime issues for any current or future Ruby
+version.
 
 The `sorbet-static` gem is known to support Ruby versions as far back as 2.4.
 The Ruby language itself (ignoring the standard library) rarely removes
