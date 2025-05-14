@@ -218,7 +218,7 @@ void SigsRewriter::insertTypeParams(parser::Node *node, unique_ptr<parser::Node>
 
     if (comments.signatures.size() > 1) {
         if (auto e = ctx.beginIndexerError(comments.signatures[0].commentLoc(),
-                                    core::errors::Rewriter::RBSMultipleGenericSignatures)) {
+                                           core::errors::Rewriter::RBSMultipleGenericSignatures)) {
             e.setHeader("Generic classes and modules can only have one RBS generic signature");
             return;
         }
@@ -265,7 +265,8 @@ Comments SigsRewriter::commentsForNode(parser::Node *node) {
             // If the comment starts with `#:`, it's a signature
             if (absl::StartsWith(commentNode.string, "#:")) {
                 if (state == SignatureState::Multiline) {
-                    if (auto e = ctx.beginIndexerError(commentNode.loc, core::errors::Rewriter::RBSMultilineMisformatted)) {
+                    if (auto e =
+                            ctx.beginIndexerError(commentNode.loc, core::errors::Rewriter::RBSMultilineMisformatted)) {
                         e.setHeader("Signature start (\"#:\") cannot appear after a multiline signature (\"#|\")");
                         return comments;
                     }
@@ -293,7 +294,8 @@ Comments SigsRewriter::commentsForNode(parser::Node *node) {
             // If the comment starts with `#|`, it's a multiline signature
             if (absl::StartsWith(commentNode.string, "#|")) {
                 if (state == SignatureState::None) {
-                    if (auto e = ctx.beginIndexerError(commentNode.loc, core::errors::Rewriter::RBSMultilineMisformatted)) {
+                    if (auto e =
+                            ctx.beginIndexerError(commentNode.loc, core::errors::Rewriter::RBSMultilineMisformatted)) {
                         e.setHeader("Multiline signature (\"#|\") must be preceded by a signature start (\"#:\")");
                         return comments;
                     }

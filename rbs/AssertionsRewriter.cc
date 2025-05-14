@@ -383,7 +383,8 @@ optional<rbs::InlineComment> AssertionsRewriter::commentForNode(unique_ptr<parse
 
 void AssertionsRewriter::checkDanglingCommentWithDecl(uint32_t nodeEnd, uint32_t declEnd, string kind) {
     if (auto assertion = commentForPos(nodeEnd)) {
-        if (auto e = ctx.beginIndexerError(assertion.value().comment.commentLoc, core::errors::Rewriter::RBSAssertionError)) {
+        if (auto e = ctx.beginIndexerError(assertion.value().comment.commentLoc,
+                                           core::errors::Rewriter::RBSAssertionError)) {
             e.setHeader("Unexpected RBS assertion comment found after `{}` end", kind);
         }
     }
@@ -393,8 +394,8 @@ void AssertionsRewriter::checkDanglingCommentWithDecl(uint32_t nodeEnd, uint32_t
 
     if ((endLine > decLine)) {
         if (auto assertion = commentForPos(declEnd)) {
-            if (auto e =
-                    ctx.beginIndexerError(assertion.value().comment.commentLoc, core::errors::Rewriter::RBSAssertionError)) {
+            if (auto e = ctx.beginIndexerError(assertion.value().comment.commentLoc,
+                                               core::errors::Rewriter::RBSAssertionError)) {
                 e.setHeader("Unexpected RBS assertion comment found after `{}` declaration", kind);
             }
         }
@@ -403,7 +404,8 @@ void AssertionsRewriter::checkDanglingCommentWithDecl(uint32_t nodeEnd, uint32_t
 
 void AssertionsRewriter::checkDanglingComment(uint32_t nodeEnd, string kind) {
     if (auto assertion = commentForPos(nodeEnd)) {
-        if (auto e = ctx.beginIndexerError(assertion.value().comment.commentLoc, core::errors::Rewriter::RBSAssertionError)) {
+        if (auto e = ctx.beginIndexerError(assertion.value().comment.commentLoc,
+                                           core::errors::Rewriter::RBSAssertionError)) {
             e.setHeader("Unexpected RBS assertion comment found after `{}`", kind);
         }
     }
