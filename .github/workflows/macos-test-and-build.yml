@@ -1,0 +1,13 @@
+name: "macOS test and build"
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: test-static-sanitized.sh
+      run: .buildkite/test-static-sanitized.sh
+    - name: build-static-release.sh
+      run: .buildkite/build-static-release.sh
