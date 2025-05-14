@@ -165,7 +165,7 @@ unique_ptr<parser::Node> TypeToParserNode::functionType(const rbs_types_function
         unique_ptr<parser::Node> innerType;
 
         if (paramNode->type != RBS_TYPES_FUNCTION_PARAM) {
-            if (auto e = ctx.beginError(loc, core::errors::Internal::InternalError)) {
+            if (auto e = ctx.beginIndexerError(loc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in function parameter type, expected `{}`",
                             rbs_node_type_name(paramNode), "FunctionParam");
             }
@@ -204,7 +204,7 @@ unique_ptr<parser::Node> TypeToParserNode::procType(const rbs_types_proc_t *node
         }
         default: {
             auto errLoc = declaration.typeLocFromRange(functionTypeNode->location->rg);
-            if (auto e = ctx.beginError(errLoc, core::errors::Internal::InternalError)) {
+            if (auto e = ctx.beginIndexerError(errLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in proc type, expected `{}`",
                             rbs_node_type_name(functionTypeNode), "Function");
             }
@@ -235,7 +235,7 @@ unique_ptr<parser::Node> TypeToParserNode::blockType(const rbs_types_block_t *no
         }
         default: {
             auto errLoc = declaration.typeLocFromRange(functionTypeNode->location->rg);
-            if (auto e = ctx.beginError(errLoc, core::errors::Internal::InternalError)) {
+            if (auto e = ctx.beginIndexerError(errLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in block type, expected `{}`",
                             rbs_node_type_name(functionTypeNode), "Function");
             }
@@ -293,7 +293,7 @@ unique_ptr<parser::Node> TypeToParserNode::recordType(const rbs_types_record_t *
                 break;
             }
             default: {
-                if (auto e = ctx.beginError(loc, core::errors::Internal::InternalError)) {
+                if (auto e = ctx.beginIndexerError(loc, core::errors::Internal::InternalError)) {
                     e.setHeader("Unexpected node type `{}` in record key type, expected `{}`",
                                 rbs_node_type_name(hash_node->key), "Symbol");
                 }
@@ -302,7 +302,7 @@ unique_ptr<parser::Node> TypeToParserNode::recordType(const rbs_types_record_t *
         }
 
         if (hash_node->value->type != RBS_TYPES_RECORD_FIELD_TYPE) {
-            if (auto e = ctx.beginError(loc, core::errors::Internal::InternalError)) {
+            if (auto e = ctx.beginIndexerError(loc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in record value type, expected `{}`",
                             rbs_node_type_name(hash_node->value), "RecordFieldtype");
             }
@@ -329,7 +329,7 @@ unique_ptr<parser::Node> TypeToParserNode::toParserNode(const rbs_node_t *node, 
     auto nodeLoc = declaration.typeLocFromRange(((rbs_node_t *)node)->location->rg);
     switch (node->type) {
         case RBS_TYPES_ALIAS: {
-            if (auto e = ctx.beginError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
+            if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS aliases are not supported");
             }
             return parser::MK::TUntyped(nodeLoc);
@@ -341,7 +341,7 @@ unique_ptr<parser::Node> TypeToParserNode::toParserNode(const rbs_node_t *node, 
         case RBS_TYPES_BASES_BOTTOM:
             return parser::MK::TNoReturn(nodeLoc);
         case RBS_TYPES_BASES_CLASS: {
-            if (auto e = ctx.beginError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
+            if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS type `{}` is not supported", "class");
             }
             return parser::MK::TUntyped(nodeLoc);
@@ -365,7 +365,7 @@ unique_ptr<parser::Node> TypeToParserNode::toParserNode(const rbs_node_t *node, 
         case RBS_TYPES_FUNCTION:
             return functionType((rbs_types_function_t *)node, nodeLoc, declaration);
         case RBS_TYPES_INTERFACE: {
-            if (auto e = ctx.beginError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
+            if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS interfaces are not supported");
             }
             return parser::MK::TUntyped(nodeLoc);
@@ -373,7 +373,7 @@ unique_ptr<parser::Node> TypeToParserNode::toParserNode(const rbs_node_t *node, 
         case RBS_TYPES_INTERSECTION:
             return intersectionType((rbs_types_intersection_t *)node, nodeLoc, declaration);
         case RBS_TYPES_LITERAL: {
-            if (auto e = ctx.beginError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
+            if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS literal types are not supported");
             }
             return parser::MK::TUntyped(nodeLoc);
@@ -391,7 +391,7 @@ unique_ptr<parser::Node> TypeToParserNode::toParserNode(const rbs_node_t *node, 
         case RBS_TYPES_VARIABLE:
             return variableType((rbs_types_variable_t *)node, nodeLoc);
         default: {
-            if (auto e = ctx.beginError(nodeLoc, core::errors::Internal::InternalError)) {
+            if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}`", rbs_node_type_name((rbs_node_t *)node));
             }
 

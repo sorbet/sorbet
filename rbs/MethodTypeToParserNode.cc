@@ -311,7 +311,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
     if (node.type->type != RBS_TYPES_FUNCTION) {
         auto errLoc = declaration.typeLocFromRange(node.type->location->rg);
-        if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::RBSUnsupported)) {
+        if (auto e = ctx.beginIndexerError(errLoc, core::errors::Rewriter::RBSUnsupported)) {
             e.setHeader("Unexpected node type `{}` in method signature, expected `{}`", rbs_node_type_name(node.type),
                         "Function");
         }
@@ -398,7 +398,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
         auto type = typeToParserNode.toParserNode(arg.type, declaration);
 
         if (!methodArgs || i >= methodArgs->args.size()) {
-            if (auto e = ctx.beginError(fullTypeLoc, core::errors::Rewriter::RBSParameterMismatch)) {
+            if (auto e = ctx.beginIndexerError(fullTypeLoc, core::errors::Rewriter::RBSParameterMismatch)) {
                 e.setHeader("RBS signature has more parameters than in the method definition");
             }
 
@@ -408,7 +408,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
         auto methodArg = methodArgs->args[i].get();
 
         if (!checkParameterKindMatch(arg, methodArg)) {
-            if (auto e = ctx.beginError(arg.loc, core::errors::Rewriter::RBSIncorrectParameterKind)) {
+            if (auto e = ctx.beginIndexerError(arg.loc, core::errors::Rewriter::RBSIncorrectParameterKind)) {
                 e.setHeader("Argument kind mismatch for `{}`, method declares `{}`, but RBS signature declares `{}`",
                             nodeName(methodArg).show(ctx.state), nodeKindToString(methodArg),
                             argKindToString(arg.kind));
@@ -496,7 +496,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
     sigBuilder = handleAnnotations(std::move(sigBuilder), annotations);
 
     if (send->args.size() == 0) {
-        if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::RBSUnsupported)) {
+        if (auto e = ctx.beginIndexerError(send->loc, core::errors::Rewriter::RBSUnsupported)) {
             e.setHeader("RBS signatures do not support accessor without arguments");
         }
 
@@ -508,7 +508,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
 
     if (send->method == core::Names::attrWriter()) {
         if (send->args.size() > 1) {
-            if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::RBSUnsupported)) {
+            if (auto e = ctx.beginIndexerError(send->loc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS signatures for attr_writer do not support multiple arguments");
             }
 

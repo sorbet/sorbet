@@ -23,7 +23,7 @@ parser::NodeVec TypeParamsToParserNode::typeParams(const rbs_node_list_t *rbsTyp
         auto loc = declaration.typeLocFromRange(list_node->node->location->rg);
 
         if (rbsTypeParam->unchecked) {
-            if (auto e = ctx.beginError(loc, core::errors::Rewriter::RBSUnsupported)) {
+            if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("`{}` type parameters are not supported by Sorbet", "unchecked");
             }
         }

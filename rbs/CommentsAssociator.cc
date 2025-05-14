@@ -39,7 +39,7 @@ void CommentsAssociator::consumeCommentsUntilLine(int line) {
         if (it->first < line) {
             if (absl::StartsWith(it->second.string, RBS_PREFIX) ||
                 absl::StartsWith(it->second.string, MULTILINE_RBS_PREFIX)) {
-                if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
+                if (auto e = ctx.beginIndexerError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
                     e.setHeader("Unused RBS signature comment. No method definition found after it");
                 }
             }
