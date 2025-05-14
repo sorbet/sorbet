@@ -121,7 +121,9 @@ sig {params(<span class="hljs-symbol">x:</span> Object).void}
 <p>The complete list of constructs that affect Sorbet’s flow-sensitive typing:</p>
 <ul>
 <li><code>if</code> expressions / <code>case</code> expressions</li>
-<li><code>is_a?</code> / <code>kind_of?</code> (check if an object is an instance of a specific class)</li>
+<li><code>is_a?</code> / <code>kind_of?</code> / <code>instance_of?</code> (check if an object is an instance of a
+specific class. Note that <code>instance_of?</code> checks that the class matches exactly
+while the others consult the inheritance chain)</li>
 <li><code>nil?</code></li>
 <li><code>blank?</code> / <code>present?</code> (these assume a Rails-compatible monkey patch on both
 <code>NilClass</code> and <code>Object</code>)</li>
