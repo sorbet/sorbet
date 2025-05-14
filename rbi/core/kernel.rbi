@@ -978,7 +978,7 @@ module Kernel
         base: Integer,
         exception: T::Boolean
     )
-    .returns(Integer)
+    .returns(T.nilable(Integer))
   end
   def Integer(arg, base=T.unsafe(nil), exception: true); end
   ### As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
