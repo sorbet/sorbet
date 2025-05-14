@@ -177,9 +177,9 @@ class Environment {
     /* variable was reasigned. Forget everything about previous value */
     void clearKnowledge(core::Context ctx, cfg::LocalRef reassigned, KnowledgeFilter &knowledgeFilter);
 
-    // Handles updateKnowledge for Kernel#kind_of?, Kernel#is_a?, and Module#===
+    // Handles updateKnowledge for methods that behave like Kernel#is_a?, Module#===, etc.
     void updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, core::Loc loc, const core::TypePtr &klassType,
-                               cfg::LocalRef ref, KnowledgeFilter &knowledgeFilter);
+                               cfg::LocalRef ref, KnowledgeFilter &knowledgeFilter, core::NameRef fun);
 
     /* Special case sources of knowledge */
     void updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send *send,

@@ -290,6 +290,7 @@ bool NameRef::isUpdateKnowledgeName() const {
         case Names::equal_p().rawId():
         case Names::isA_p().rawId():
         case Names::kindOf_p().rawId():
+        case Names::instanceOf_p().rawId():
         case Names::leq().rawId():
         case Names::lessThan().rawId():
         case Names::neq().rawId():

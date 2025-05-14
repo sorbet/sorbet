@@ -521,7 +521,7 @@ bool isSingleton(core::Context ctx, const core::TypePtr &ty, bool includeSinglet
 
 void Environment::updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, core::Loc loc,
                                         const core::TypePtr &klassType, cfg::LocalRef ref,
-                                        KnowledgeFilter &knowledgeFilter) {
+                                        KnowledgeFilter &knowledgeFilter, core::NameRef fun) {
     auto &whoKnows = getKnowledge(local);
 
     core::ClassOrModuleRef klass = core::Types::getRepresentedClass(ctx, klassType);
@@ -529,7 +529,11 @@ void Environment::updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, 
         auto ty = klass.data(ctx)->externalType();
         if (!ty.isUntyped()) {
             whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, ty);
-            whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, ty);
+            if (fun != core::Names::instanceOf_p() || klass.data(ctx)->flags.isFinal) {
+                // x.instance_of(y) checks wether `x`'s class is directly equal to `y`
+                // If the expression is false, we can't addNoTypeTest unless we know there are no subclasses.
+                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, ty);
+            }
         }
     } else if (auto klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
         if (klassTypeApp->klass == core::Symbols::Class()) {
@@ -618,10 +622,11 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     // TODO(jez) We should probably update this to be aware of T::NonForcingConstants.non_forcing_is_a?
-    if (send->fun == core::Names::kindOf_p() || send->fun == core::Names::isA_p()) {
+    if (send->fun == core::Names::kindOf_p() || send->fun == core::Names::isA_p() ||
+        send->fun == core::Names::instanceOf_p()) {
         const auto &klassType = send->args[0].type;
         auto ref = send->recv.variable;
-        updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter);
+        updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter, send->fun);
         whoKnows.sanityCheck();
         return;
     }
@@ -659,7 +664,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         const auto &klassType = send->recv.type;
         auto ref = send->args[0].variable;
         // `when` against class literal
-        updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter);
+        updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter, send->fun);
 
         // `when` against singleton
         // check if s is a singleton. in this case we can learn that
