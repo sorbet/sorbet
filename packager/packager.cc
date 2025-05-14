@@ -1649,10 +1649,6 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     }
 }
 
-void populatePackageEdges(core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
-    rewritePackageSpec(gs, package, info);
-}
-
 // Metadata for Tarjan's algorithm
 // https://www.cs.cmu.edu/~15451-f18/lectures/lec19-DFS-strong-components.pdf provides a good overview of the
 // algorithm.
@@ -2015,7 +2011,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
                 continue;
             }
             auto &info = PackageInfoImpl::from(gs, pkgName);
-            populatePackageEdges(gs, file, info);
+            rewritePackageSpec(gs, file, info);
         }
     }
 }
