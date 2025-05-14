@@ -519,16 +519,29 @@ bundle exec srb rbi suggest-typed
 
 ## What platforms does Sorbet support?
 
-The `sorbet-runtime` gem is currently only tested on Ruby 2.6 and Ruby 2.7. It
-is known to not support Ruby 2.4. Feel free to report runtime issues for any
-current or future Ruby version.
+The `sorbet-runtime` gem is tested on
+[these Ruby versions](https://github.com/sorbet/sorbet/blob/master/.buildkite/build-sorbet-runtime.sh#L10).
+Importantly, `sorbet-runtime` no longer supports Ruby 2.6, which is the last
+version before
+[the `bind_call` method](https://docs.ruby-lang.org/en/3.3/UnboundMethod.html#method-i-bind_call)
+was added, which substantially improves the speed of `sorbet-runtime`. More
+recent versions of Ruby than `sorbet-runtime` is tested against usually also
+work fine. Feel free to report runtime issues for any current or future Ruby
+version.
 
-The `sorbet-static` gem is known to support Ruby 2.4, Ruby 2.5, Ruby 2.6, and
-Ruby 2.7 to a minimum level (i.e., it can at least parse syntax introduced in
-those versions). Some language features are typed more strictly than others
-(generally, language features in newer Ruby versions have looser type support).
-This is not by design, just by convenience. Feel free to open feature requests
-that various (new or old) language features be typed more strictly.
+The `sorbet-static` gem is known to support Ruby versions as far back as 2.4.
+The Ruby language itself (ignoring the standard library) rarely removes
+features, which means that Sorbet typically does not drop support for old Ruby
+versions. However, Sorbet does not attempt to warn when a project is using newer
+Ruby syntax but will run on an older Ruby version: if a project is using new
+syntax, Sorbet assumes it will run with a new enough version of Ruby. Other
+tools (for example Rubocop) can validate whether a project is using incorrect
+syntax for a given Ruby version.
+
+Some language features are typed more strictly than others (generally, language
+features in newer Ruby versions have looser type support). This is not by
+design, just a matter of priorities. Feel free to open feature requests that
+various (new or old) language features be typed more strictly.
 
 Sorbet bundles [RBI files](rbi.md) for the standard library. In Ruby the
 standard library changes with the Ruby version being used, but Sorbet only ships
@@ -536,7 +549,8 @@ one set of RBI definitions for the standard library. In particular, Sorbet's RBI
 files for the standard library might reflect classes, methods, or APIs that are
 only available in a version of Ruby newer than the one used to run a given
 project. You will have to rely on (runtime) test suites to verify that your
-project does not use new standard library APIs with an old Ruby version.
+project does not use new standard library APIs with an old Ruby version, or does
+not use removed standard library APIs with a new Ruby version.
 
 The `sorbet-static` gem is only tested on macOS 10.14 (Mojave), macOS 15.0
 (Sequoia) on Apple Silicon, and Ubuntu 18 (Bionic Beaver). There is currently no
@@ -550,27 +564,6 @@ feel free to discuss this change in the #discuss channel on our
 [Sorbet Slack](/slack).
 
 The `sorbet` gem has runtime dependencies on `git` and `bash`.
-
-Combined, these points mean that if you are using one of the official minimal
-Ruby Docker images (which are based on Apline Linux), you will need to install
-some support libraries:
-
-```Dockerfile
-FROM ruby:2.6-alpine
-
-RUN apk add --no-cache --update \
-    git \
-    bash \
-    ca-certificates \
-    wget
-
-ENV GLIBC_RELEASE_VERSION 2.30-r0
-RUN wget -nv -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub && \
-    wget -nv https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_RELEASE_VERSION}/glibc-${GLIBC_RELEASE_VERSION}.apk && \
-    apk add glibc-${GLIBC_RELEASE_VERSION}.apk && \
-    rm /etc/apk/keys/sgerrand.rsa.pub && \
-    rm glibc-${GLIBC_RELEASE_VERSION}.apk
-```
 
 ## Does Sorbet support ActiveRecord (and Rails?)
 
