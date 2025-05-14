@@ -1,6 +1,6 @@
 # -- test/testdata/rbs/signatures_params_autocorrect.rb --
 # typed: strict
-# enable-experimental-rbs-signatures: true
+# enable-experimental-rbs-comments: true
 
 # correct to required positional
 
