@@ -7,6 +7,8 @@
 #include "common/sort/sort.h"
 #include "common/web_tracer_framework/tracing.h"
 
+using namespace std;
+
 namespace sorbet::web_tracer_framework {
 
 class TracingTestHelper {
