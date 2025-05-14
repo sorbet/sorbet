@@ -1649,119 +1649,125 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     }
 }
 
-// Metadata for Tarjan's algorithm
-// https://www.cs.cmu.edu/~15451-f18/lectures/lec19-DFS-strong-components.pdf provides a good overview of the
-// algorithm.
-const int UNVISITED = 0;
-struct NodeInfo {
-    // A given package's index in the DFS traversal; ie. when it was first visited. The default value of 0 means the
-    // package hasn't been visited yet.
-    int index = UNVISITED;
-    // The lowest index reachable from a given package (in the same SCC) by following any number of tree edges
-    // and at most one back/cross edge
-    int lowLink = 0;
-    // Fast way to check if a package is on the stack
-    bool onStack = false;
-};
+class ComputePackageSCCs {
+    core::GlobalState &gs;
 
-struct ComputeSCCsMetadata {
     int nextIndex = 1;
     int nextSCCId = 0;
+
+    // Metadata for Tarjan's algorithm
+    // https://www.cs.cmu.edu/~15451-f18/lectures/lec19-DFS-strong-components.pdf provides a good overview of the
+    // algorithm.
+    struct NodeInfo {
+        static constexpr int UNVISITED = 0;
+
+        // A given package's index in the DFS traversal; ie. when it was first visited. The default value of 0 means the
+        // package hasn't been visited yet.
+        int index = UNVISITED;
+        // The lowest index reachable from a given package (in the same SCC) by following any number of tree edges
+        // and at most one back/cross edge
+        int lowLink = 0;
+        // Fast way to check if a package is on the stack
+        bool onStack = false;
+    };
+
     UnorderedMap<core::packages::MangledName, NodeInfo> nodeMap;
     // As we visit packages, we push them onto the stack. Once we find the "root" of an SCC, we can use the stack to
     // determine all packages in the SCC.
     std::vector<core::packages::MangledName> stack;
-};
 
-// DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
-// detecting SCCs.
-void strongConnect(core::GlobalState &gs, ComputeSCCsMetadata &metadata, core::packages::MangledName pkgName,
-                   NodeInfo &infoAtEntry) {
-    auto *pkgInfoPtr = gs.packageDB().getPackageInfoNonConst(pkgName);
-    if (!pkgInfoPtr) {
-        // This is to handle the case where the user imports a package that doesn't exist.
-        return;
+    ComputePackageSCCs(core::GlobalState &gs) : gs{gs} {
+        auto numPackages = gs.packageDB().packages().size();
+        this->stack.reserve(numPackages);
+        this->nodeMap.reserve(numPackages);
     }
-    auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
 
-    infoAtEntry.index = metadata.nextIndex;
-    infoAtEntry.lowLink = metadata.nextIndex;
-    metadata.nextIndex++;
-    metadata.stack.push_back(pkgName);
-    infoAtEntry.onStack = true;
-
-    for (auto &i : pkgInfo.importedPackageNames) {
-        if (i.type == core::packages::ImportType::Test) {
-            continue;
+    // DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
+    // detecting SCCs.
+    void strongConnect(core::packages::MangledName pkgName, NodeInfo &infoAtEntry) {
+        auto *pkgInfoPtr = gs.packageDB().getPackageInfoNonConst(pkgName);
+        if (!pkgInfoPtr) {
+            // This is to handle the case where the user imports a package that doesn't exist.
+            return;
         }
-        // We need to be careful with this; it's not valid after a call to `strongConnect`,
-        // because our reference might disappear from underneath us during that call.
-        auto &importInfo = metadata.nodeMap[i.name.mangledName];
-        if (importInfo.index == UNVISITED) {
-            // This is a tree edge (ie. a forward edge that we haven't visited yet).
-            strongConnect(gs, metadata, i.name.mangledName, importInfo);
+        auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
 
-            // Need to re-lookup for the reason above.
-            auto &importInfo = metadata.nodeMap[i.name.mangledName];
-            if (importInfo.index == UNVISITED) {
-                // This is to handle early return above.
+        infoAtEntry.index = this->nextIndex;
+        infoAtEntry.lowLink = this->nextIndex;
+        this->nextIndex++;
+        this->stack.push_back(pkgName);
+        infoAtEntry.onStack = true;
+
+        for (auto &i : pkgInfo.importedPackageNames) {
+            if (i.type == core::packages::ImportType::Test) {
                 continue;
             }
-            // Since we can follow any number of tree edges for lowLink, the lowLink of child is valid for this package
-            // too.
-            //
-            // Note that we cannot use `infoAtEntry` here because it might have been invalidated.
-            auto &pkgLink = metadata.nodeMap[pkgName].lowLink;
-            pkgLink = std::min(pkgLink, importInfo.lowLink);
-        } else if (importInfo.onStack) {
-            // This is a back edge (edge to ancestor) or cross edge (edge to a different subtree). Since we can only
-            // follow at most one back/cross edge, the best update we can make to lowlink of the current package is the
-            // child's index.
-            //
-            // Note that we cannot use `infoAtEntry` here because it might have been invalidated.
-            auto &pkgLink = metadata.nodeMap[pkgName].lowLink;
-            pkgLink = std::min(pkgLink, importInfo.index);
+            // We need to be careful with this; it's not valid after a call to `strongConnect`,
+            // because our reference might disappear from underneath us during that call.
+            auto &importInfo = this->nodeMap[i.name.mangledName];
+            if (importInfo.index == NodeInfo::UNVISITED) {
+                // This is a tree edge (ie. a forward edge that we haven't visited yet).
+                this->strongConnect(i.name.mangledName, importInfo);
+
+                // Need to re-lookup for the reason above.
+                auto &importInfo = this->nodeMap[i.name.mangledName];
+                if (importInfo.index == NodeInfo::UNVISITED) {
+                    // This is to handle early return above.
+                    continue;
+                }
+                // Since we can follow any number of tree edges for lowLink, the lowLink of child is valid for this
+                // package too.
+                //
+                // Note that we cannot use `infoAtEntry` here because it might have been invalidated.
+                auto &pkgLink = this->nodeMap[pkgName].lowLink;
+                pkgLink = std::min(pkgLink, importInfo.lowLink);
+            } else if (importInfo.onStack) {
+                // This is a back edge (edge to ancestor) or cross edge (edge to a different subtree). Since we can only
+                // follow at most one back/cross edge, the best update we can make to lowlink of the current package is
+                // the child's index.
+                //
+                // Note that we cannot use `infoAtEntry` here because it might have been invalidated.
+                auto &pkgLink = this->nodeMap[pkgName].lowLink;
+                pkgLink = std::min(pkgLink, importInfo.index);
+            }
+            // If the child package is already visited and not on the stack, it's in a different SCC, so no update to
+            // the lowlink.
         }
-        // If the child package is already visited and not on the stack, it's in a different SCC, so no update to the
-        // lowlink.
-    }
 
-    // We cannot re-use `infoAtEntry` here because `nodeMap` might have been re-allocated and
-    // invalidate our reference.
-    auto &ourInfo = metadata.nodeMap[pkgName];
-    if (ourInfo.index == ourInfo.lowLink) {
-        // This is the root of an SCC. This means that all packages on the stack from this package to the top of the top
-        // of the stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them the same
-        // SCC ID.
-        core::packages::MangledName poppedPkgName;
-        do {
-            poppedPkgName = metadata.stack.back();
-            metadata.stack.pop_back();
-            metadata.nodeMap[poppedPkgName].onStack = false;
-            PackageInfoImpl &poppedPkgInfo =
-                PackageInfoImpl::from(*(gs.packageDB().getPackageInfoNonConst(poppedPkgName)));
-            poppedPkgInfo.sccID_ = metadata.nextSCCId;
-        } while (poppedPkgName != pkgName);
-        metadata.nextSCCId++;
-    }
-}
-
-// Tarjan's algorithm for finding strongly connected components
-// NOTE: This function must be called every time a non-test import is added or removed from a package.
-// It is relatively fast, so calling it on every __package.rb edit is an okay overapproximation for simplicity.
-void computeSCCs(core::GlobalState &gs) {
-    Timer timeit(gs.tracer(), "packager::computeSCCs");
-    ComputeSCCsMetadata metadata;
-    auto allPackages = gs.packageDB().packages();
-    metadata.stack.reserve(allPackages.size());
-    metadata.nodeMap.reserve(allPackages.size());
-    for (auto package : allPackages) {
-        auto &info = metadata.nodeMap[package];
-        if (info.index == UNVISITED) {
-            strongConnect(gs, metadata, package, info);
+        // We cannot re-use `infoAtEntry` here because `nodeMap` might have been re-allocated and
+        // invalidate our reference.
+        auto &ourInfo = this->nodeMap[pkgName];
+        if (ourInfo.index == ourInfo.lowLink) {
+            // This is the root of an SCC. This means that all packages on the stack from this package to the top of the
+            // top of the stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them
+            // the same SCC ID.
+            core::packages::MangledName poppedPkgName;
+            const auto sccId = this->nextSCCId++;
+            do {
+                poppedPkgName = this->stack.back();
+                this->stack.pop_back();
+                this->nodeMap[poppedPkgName].onStack = false;
+                auto &poppedPkgInfo = PackageInfoImpl::from(*(gs.packageDB().getPackageInfoNonConst(poppedPkgName)));
+                poppedPkgInfo.sccID_ = sccId;
+            } while (poppedPkgName != pkgName);
         }
     }
-}
+
+public:
+    // Tarjan's algorithm for finding strongly connected components
+    // NOTE: This function must be called every time a non-test import is added or removed from a package.
+    // It is relatively fast, so calling it on every __package.rb edit is an okay overapproximation for simplicity.
+    static void run(core::GlobalState &gs) {
+        Timer timeit(gs.tracer(), "packager::computeSCCs");
+        ComputePackageSCCs scc(gs);
+        for (auto package : gs.packageDB().packages()) {
+            auto &info = scc.nodeMap[package];
+            if (info.index == NodeInfo::UNVISITED) {
+                scc.strongConnect(package, info);
+            }
+        }
+    }
+};
 
 void validateLayering(const core::Context &ctx, const Import &i) {
     if (i.type == core::packages::ImportType::Test) {
@@ -2091,7 +2097,7 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
 
         if constexpr (buildPackageDB) {
             if (gs.packageDB().enforceLayering()) {
-                computeSCCs(gs);
+                ComputePackageSCCs::run(gs);
             }
         }
 
