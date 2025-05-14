@@ -439,22 +439,35 @@ constantly, without warning.</p>
 bundle <span class="hljs-built_in">exec</span> srb rbi suggest-typed
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="what-platforms-does-sorbet-support"></a><a href="#what-platforms-does-sorbet-support" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What platforms does Sorbet support?</h2>
-<p>The <code>sorbet-runtime</code> gem is currently only tested on Ruby 2.6 and Ruby 2.7. It
-is known to not support Ruby 2.4. Feel free to report runtime issues for any
-current or future Ruby version.</p>
-<p>The <code>sorbet-static</code> gem is known to support Ruby 2.4, Ruby 2.5, Ruby 2.6, and
-Ruby 2.7 to a minimum level (i.e., it can at least parse syntax introduced in
-those versions). Some language features are typed more strictly than others
-(generally, language features in newer Ruby versions have looser type support).
-This is not by design, just by convenience. Feel free to open feature requests
-that various (new or old) language features be typed more strictly.</p>
+<p>The <code>sorbet-runtime</code> gem is tested on
+<a href="https://github.com/sorbet/sorbet/blob/master/.buildkite/build-sorbet-runtime.sh#L10">these Ruby versions</a>.
+Importantly, <code>sorbet-runtime</code> no longer supports Ruby 2.6, which is the last
+version before
+<a href="https://docs.ruby-lang.org/en/3.3/UnboundMethod.html#method-i-bind_call">the <code>bind_call</code> method</a>
+was added, which substantially improves the speed of <code>sorbet-runtime</code>. More
+recent versions of Ruby than <code>sorbet-runtime</code> is tested against usually also
+work fine. Feel free to report runtime issues for any current or future Ruby
+version.</p>
+<p>The <code>sorbet-static</code> gem is known to support Ruby versions as far back as 2.4.
+The Ruby language itself (ignoring the standard library) rarely removes
+features, which means that Sorbet typically does not drop support for old Ruby
+versions. However, Sorbet does not attempt to warn when a project is using newer
+Ruby syntax but will run on an older Ruby version: if a project is using new
+syntax, Sorbet assumes it will run with a new enough version of Ruby. Other
+tools (for example Rubocop) can validate whether a project is using incorrect
+syntax for a given Ruby version.</p>
+<p>Some language features are typed more strictly than others (generally, language
+features in newer Ruby versions have looser type support). This is not by
+design, just a matter of priorities. Feel free to open feature requests that
+various (new or old) language features be typed more strictly.</p>
 <p>Sorbet bundles <a href="/docs/rbi">RBI files</a> for the standard library. In Ruby the
 standard library changes with the Ruby version being used, but Sorbet only ships
 one set of RBI definitions for the standard library. In particular, Sorbet’s RBI
 files for the standard library might reflect classes, methods, or APIs that are
 only available in a version of Ruby newer than the one used to run a given
 project. You will have to rely on (runtime) test suites to verify that your
-project does not use new standard library APIs with an old Ruby version.</p>
+project does not use new standard library APIs with an old Ruby version, or does
+not use removed standard library APIs with a new Ruby version.</p>
 <p>The <code>sorbet-static</code> gem is only tested on macOS 10.14 (Mojave), macOS 15.0
 (Sequoia) on Apple Silicon, and Ubuntu 18 (Bionic Beaver). There is currently no
 Windows support. We expect <code>sorbet-static</code> to work as far back as macOS 10.10
@@ -465,24 +478,6 @@ for macOS on Apple Silicon. If you encounter bugs, please
 feel free to discuss this change in the #discuss channel on our
 <a href="/slack">Sorbet Slack</a>.</p>
 <p>The <code>sorbet</code> gem has runtime dependencies on <code>git</code> and <code>bash</code>.</p>
-<p>Combined, these points mean that if you are using one of the official minimal
-Ruby Docker images (which are based on Apline Linux), you will need to install
-some support libraries:</p>
-<pre><code class="hljs css language-Dockerfile"><span class="hljs-keyword">FROM</span> ruby:<span class="hljs-number">2.6</span>-alpine
-
-<span class="hljs-keyword">RUN</span><span class="bash"> apk add --no-cache --update \
-    git \
-    bash \
-    ca-certificates \
-    wget</span>
-
-<span class="hljs-keyword">ENV</span> GLIBC_RELEASE_VERSION <span class="hljs-number">2.30</span>-r0
-<span class="hljs-keyword">RUN</span><span class="bash"> wget -nv -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub &amp;&amp; \
-    wget -nv https://github.com/sgerrand/alpine-pkg-glibc/releases/download/<span class="hljs-variable">${GLIBC_RELEASE_VERSION}</span>/glibc-<span class="hljs-variable">${GLIBC_RELEASE_VERSION}</span>.apk &amp;&amp; \
-    apk add glibc-<span class="hljs-variable">${GLIBC_RELEASE_VERSION}</span>.apk &amp;&amp; \
-    rm /etc/apk/keys/sgerrand.rsa.pub &amp;&amp; \
-    rm glibc-<span class="hljs-variable">${GLIBC_RELEASE_VERSION}</span>.apk</span>
-</code></pre>
 <h2><a class="anchor" aria-hidden="true" id="does-sorbet-support-activerecord-and-rails"></a><a href="#does-sorbet-support-activerecord-and-rails" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Does Sorbet support ActiveRecord (and Rails?)</h2>
 <p>Sorbet doesn’t support Rails, but
 <a href="https://github.com/Shopify/tapioca#generating-rbi-files-for-rails-and-other-dsls">Tapioca can generate RBI files for it</a>.</p>
