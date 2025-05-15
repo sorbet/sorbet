@@ -30,7 +30,6 @@ steps:
 
   - label: ":mac: test-static-sanitized.sh (master only)"
     command: '.buildkite/test-static-sanitized.sh < /dev/null'
-    branches: "master"
     artifact_paths: _out_/profile.json
     agents:
       os: mac
@@ -63,7 +62,6 @@ steps:
 
   - label: ":mac: build-static-release.sh (master only)"
     command: '.buildkite/build-static-release.sh < /dev/null'
-    branches: master
     artifact_paths: _out_/**/*
     agents:
       os: mac
