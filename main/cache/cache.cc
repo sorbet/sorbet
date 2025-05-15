@@ -30,7 +30,9 @@ unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(shared_ptr<::spdlog::log
     if (opts.cacheDir.empty()) {
         return nullptr;
     }
-    return make_unique<OwnedKeyValueStore>(openCache(std::move(logger), opts.cacheDir, opts));
+    auto ownedKvstore = make_unique<OwnedKeyValueStore>(openCache(logger, opts.cacheDir, opts));
+    auto kvstore = OwnedKeyValueStore::bestEffortCommit(*logger, move(ownedKvstore));
+    return make_unique<OwnedKeyValueStore>(move(kvstore));
 }
 
 namespace {
