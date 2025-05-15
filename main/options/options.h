@@ -196,12 +196,14 @@ struct Options {
 
         bool stripePackages : 1;
 
+        // HELLO! adding/removing MUST also change this number!!
+        constexpr static uint8_t NUMBER_OF_FLAGS = 6;
+
         // In C++20 we can replace this with bit field initializers
         CacheSensitiveOptions()
             : noStdlib(false), typedSuper(true), rbsEnabled(false), requiresAncestorEnabled(false),
               runningUnderAutogen(false), stripePackages(false) {}
 
-        constexpr static uint8_t NUMBER_OF_FLAGS = 7;
         constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         uint8_t serialize() const {
