@@ -4,10 +4,17 @@ set -euo pipefail
 
 echo "--- Pre-setup :bazel:"
 
+case "$(uname -s)" in
+  # newer versions of macOS don't allow writing to /usr/local
+  Linux*)     usr_local_var="/usr/local/var";;
+  Darwin*)    usr_local_var="/opt/homebrew/var";;
+  *)          exit 1
+esac
+
 if [ "${CLEAN_BUILD:-}" != "" ]; then
   echo "--- cleanup"
-  chmod -R 755 /usr/local/var/bazelcache/
-  rm -rf /usr/local/var/bazelcache/*
+  chmod -R 755 "$usr_local_var/bazelcache/"
+  rm -rf "$usr_local_var"/bazelcache/*
 fi
 
 rm -f bazel-*
@@ -17,13 +24,17 @@ function finish {
   rm .bazelrc.local
 }
 
-mkdir -p "/usr/local/var/bazelcache/output-bases/${JOB_NAME}" /usr/local/var/bazelcache/build /usr/local/var/bazelcache/repos
-{
-  echo 'common --curses=no --color=yes'
-  echo "startup --output_base=/usr/local/var/bazelcache/output-bases/${JOB_NAME}"
-  echo 'build  --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
-  echo 'test   --disk_cache=/usr/local/var/bazelcache/build --repository_cache=/usr/local/var/bazelcache/repos'
-} > .bazelrc.local
+mkdir -p \
+  "$usr_local_var/bazelcache/output-bases/${JOB_NAME}" \
+  "$usr_local_var/bazelcache/build" \
+  "$usr_local_var/bazelcache/repos"
+
+cat > .bazelrc.local <<EOF
+common --curses=no --color=yes
+startup --output_base=$usr_local_var/bazelcache/output-bases/${JOB_NAME}
+build  --disk_cache=$usr_local_var/bazelcache/build --repository_cache=$usr_local_var/bazelcache/repos
+test   --disk_cache=$usr_local_var/bazelcache/build --repository_cache=$usr_local_var/bazelcache/repos
+EOF
 
 ./bazel version
 PATH=$PATH:$(pwd)
