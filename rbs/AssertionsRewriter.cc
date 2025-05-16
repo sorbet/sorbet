@@ -168,7 +168,7 @@ bool AssertionsRewriter::hasConsumedComment(core::LocOffsets loc) {
  *
  * Returns `nullopt` if no comment is found or if the comment was already consumed.
  */
-optional<rbs::InlineComment> AssertionsRewriter::commentForNode(unique_ptr<parser::Node> &node) {
+optional<rbs::InlineComment> AssertionsRewriter::commentForNode(const unique_ptr<parser::Node> &node) {
     if (auto it = commentsByNode.find(node.get()); it != commentsByNode.end()) {
         for (const auto &commentNode : it->second) {
             if (absl::StartsWith(commentNode.string, RBS_PREFIX)) {
@@ -294,7 +294,7 @@ unique_ptr<parser::Node> AssertionsRewriter::maybeInsertCast(unique_ptr<parser::
 /**
  * Rewrite a collection of nodes, wrap them in an array and cast the array.
  */
-parser::NodeVec AssertionsRewriter::rewriteNodesAsArray(unique_ptr<parser::Node> &node, parser::NodeVec nodes) {
+parser::NodeVec AssertionsRewriter::rewriteNodesAsArray(const unique_ptr<parser::Node> &node, parser::NodeVec nodes) {
     auto inlineComment = commentForNode(node);
 
     if (inlineComment) {

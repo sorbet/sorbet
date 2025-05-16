@@ -37,11 +37,11 @@ private:
     void consumeComment(core::LocOffsets loc);
     bool hasConsumedComment(core::LocOffsets loc);
     std::optional<InlineComment> commentForPos(uint32_t fromPos, std::vector<char> allowedTokens);
-    std::optional<InlineComment> commentForNode(std::unique_ptr<parser::Node> &node);
+    std::optional<InlineComment> commentForNode(const std::unique_ptr<parser::Node> &node);
 
     std::unique_ptr<parser::Node> rewriteBody(std::unique_ptr<parser::Node> tree);
     std::unique_ptr<parser::Node> rewriteNode(std::unique_ptr<parser::Node> tree);
-    parser::NodeVec rewriteNodesAsArray(std::unique_ptr<parser::Node> &node, parser::NodeVec nodes);
+    parser::NodeVec rewriteNodesAsArray(const std::unique_ptr<parser::Node> &node, parser::NodeVec nodes);
     void rewriteNodes(parser::NodeVec *nodes);
 
     bool saveTypeParams(parser::Block *block);
