@@ -1,12 +1,12 @@
-#ifndef SORBET_CONCURRENCY_PATTERNS_H
-#define SORBET_CONCURRENCY_PATTERNS_H
+#ifndef SORBET_CONCURRENCY_PARALLEL_H
+#define SORBET_CONCURRENCY_PARALLEL_H
 
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
 
 namespace sorbet {
 
-class ConcurrencyPatterns {
+class Parallel {
 public:
     // Parallelize running `body` over all of the elements of `args` using the worker pool provided. This function will
     // return when all arguments have been processed.

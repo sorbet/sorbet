@@ -1,12 +1,10 @@
 #include "packager/packager.h"
-#include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_replace.h"
-#include "absl/synchronization/blocking_counter.h"
 #include "ast/packager/packager.h"
 #include "ast/treemap/treemap.h"
 #include "common/FileOps.h"
-#include "common/concurrency/patterns.h"
+#include "common/concurrency/Parallel.h"
 #include "common/sort/sort.h"
 #include "common/strings/formatting.h"
 #include "core/AutocorrectSuggestion.h"
@@ -2096,19 +2094,19 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
 
         {
             Timer timeit(gs.tracer(), "packager.validatePackagesAndFiles");
-            ConcurrencyPatterns::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files),
-                                         [&gs = as_const(gs)](auto &job) {
-                                             auto file = job.file;
-                                             core::Context ctx(gs, core::Symbols::root(), file);
+            Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files),
+                              [&gs = as_const(gs)](auto &job) {
+                                  auto file = job.file;
+                                  core::Context ctx(gs, core::Symbols::root(), file);
 
-                                             if (file.data(gs).isPackage(gs)) {
-                                                 ENFORCE(buildPackageDB);
-                                                 validatePackage(ctx);
-                                             } else {
-                                                 ENFORCE(validatePackagedFiles);
-                                                 validatePackagedFile(ctx, job.tree);
-                                             }
-                                         });
+                                  if (file.data(gs).isPackage(gs)) {
+                                      ENFORCE(buildPackageDB);
+                                      validatePackage(ctx);
+                                  } else {
+                                      ENFORCE(validatePackagedFiles);
+                                      validatePackagedFile(ctx, job.tree);
+                                  }
+                              });
         }
     }
 }
@@ -2125,21 +2123,20 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
     // building in an understanding of the dependencies between packages.
     Timer timeit(gs.tracer(), "packager.runIncremental");
 
-    ConcurrencyPatterns::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files),
-                                 [&gs = as_const(gs)](auto &file) {
-                                     core::Context ctx(gs, core::Symbols::root(), file.file);
-                                     if (file.file.data(gs).isPackage(gs)) {
-                                         // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
-                                         // report some syntactic packager errors.
-                                         auto info = definePackage(gs, file);
-                                         if (info != nullptr) {
-                                             rewritePackageSpec(gs, file, *info);
-                                         }
-                                         validatePackage(ctx);
-                                     } else {
-                                         validatePackagedFile(ctx, file.tree);
-                                     }
-                                 });
+    Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files), [&gs = as_const(gs)](auto &file) {
+        core::Context ctx(gs, core::Symbols::root(), file.file);
+        if (file.file.data(gs).isPackage(gs)) {
+            // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
+            // report some syntactic packager errors.
+            auto info = definePackage(gs, file);
+            if (info != nullptr) {
+                rewritePackageSpec(gs, file, *info);
+            }
+            validatePackage(ctx);
+        } else {
+            validatePackagedFile(ctx, file.tree);
+        }
+    });
 
     return files;
 }

@@ -1,13 +1,10 @@
 #include "packager/VisibilityChecker.h"
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
-#include "absl/synchronization/blocking_counter.h"
 #include "ast/treemap/treemap.h"
-#include "common/concurrency/ConcurrentQueue.h"
-#include "common/concurrency/patterns.h"
+#include "common/concurrency/Parallel.h"
 #include "core/Context.h"
 #include "core/errors/packager.h"
-#include <algorithm>
 
 using namespace std;
 
@@ -583,7 +580,7 @@ public:
     static vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
                                        vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
-        ConcurrencyPatterns::iterate(workers, "VisibilityChecker", absl::MakeSpan(files), [&gs](ast::ParsedFile &f) {
+        Parallel::iterate(workers, "VisibilityChecker", absl::MakeSpan(files), [&gs](ast::ParsedFile &f) {
             if (!f.file.data(gs).isPackage(gs)) {
                 auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                 if (pkgName.exists()) {

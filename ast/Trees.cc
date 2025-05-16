@@ -1,10 +1,9 @@
 #include "ast/Trees.h"
 #include "absl/strings/escaping.h"
-#include "common/concurrency/patterns.h"
+#include "common/concurrency/Parallel.h"
 #include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/Symbols.h"
-#include <sstream>
 #include <utility>
 
 using namespace std;
@@ -1499,7 +1498,7 @@ ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};
 ParsedFilesOrCancelled::ParsedFilesOrCancelled(vector<ParsedFile> &&trees) : trees(move(trees)) {}
 
 ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(std::vector<ParsedFile> &&trees, WorkerPool &workers) {
-    ConcurrencyPatterns::iterate(workers, "deleteTrees", absl::MakeSpan(trees), [](auto &job) {
+    Parallel::iterate(workers, "deleteTrees", absl::MakeSpan(trees), [](auto &job) {
         // Force the destructor of `ast::ExpressionPtr` to run for `job.tree`.
         job.tree.reset();
     });
