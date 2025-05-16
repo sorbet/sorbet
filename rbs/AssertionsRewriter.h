@@ -22,7 +22,7 @@ struct InlineComment {
 
 class AssertionsRewriter {
 public:
-    AssertionsRewriter(core::MutableContext ctx, std::map<parser::Node *, std::vector<CommentNode>> commentsByNode)
+    AssertionsRewriter(core::MutableContext ctx, std::map<parser::Node *, std::vector<CommentNode>> &commentsByNode)
         : ctx(ctx), commentsByNode(commentsByNode){};
     std::unique_ptr<parser::Node> run(std::unique_ptr<parser::Node> tree);
 
@@ -30,7 +30,7 @@ private:
     static const std::string_view RBS_PREFIX;
 
     core::MutableContext ctx;
-    std::map<parser::Node *, std::vector<CommentNode>> commentsByNode;
+    std::map<parser::Node *, std::vector<CommentNode>> &commentsByNode;
     std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams = {};
     std::set<std::pair<uint32_t, uint32_t>> consumedComments = {};
 
