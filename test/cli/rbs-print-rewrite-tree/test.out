@@ -16,29 +16,15 @@ Begin {
     }
     Block {
       send = Send {
-        receiver = Const {
-          scope = Const {
-            scope = Const {
-              scope = Cbase {
-              }
-              name = <C <U Sorbet>>
-            }
-            name = <C <U Private>>
-          }
-          name = <C <U Static>>
+        receiver = ResolvedConst {
+          symbol = module <C <U Sorbet>>::<C <U Private>>::<C <U Static>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/sorbet.rbi start=2:1 end=2:31}
+
         }
         method = <U sig>
         args = [
-          Const {
-            scope = Const {
-              scope = Const {
-                scope = Cbase {
-                }
-                name = <C <U T>>
-              }
-              name = <C <U Sig>>
-            }
-            name = <C <U WithoutRuntime>>
+          ResolvedConst {
+            symbol = module <C <U T>>::<C <U Sig>>::<C <U WithoutRuntime>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi start=9:1 end=9:30}
+
           }
         ]
       }
