@@ -25,7 +25,7 @@ public:
                 taskq->push(i, 1);
             }
 
-            workers.multiplexJobWait(taskName, [taskq, &args, body]() {
+            workers.multiplexJobWait(taskName, [taskq, &args, body]() mutable {
                 size_t idx;
                 for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                     if (result.gotItem()) {

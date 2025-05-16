@@ -10,6 +10,7 @@
 #include "ast/treemap/treemap.h"
 #include "class_flatten/class_flatten.h"
 #include "common/concurrency/ConcurrentQueue.h"
+#include "common/concurrency/Parallel.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/sort/sort.h"
 #include "common/timers/Timer.h"
@@ -2251,24 +2252,10 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
 
 void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
-    auto taskq = make_shared<ConcurrentBoundedQueue<size_t>>(trees.size());
-    for (size_t i = 0, size = trees.size(); i < size; ++i) {
-        taskq->push(i, 1);
-    }
-
-    workers.multiplexJobWait("symbolizeTrees", [&gs, trees, taskq]() {
-        Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
-        TreeSymbolizer inserter;
-        size_t idx;
-        for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
-            if (result.gotItem()) {
-                auto &parsedFile = trees[idx];
-                Timer timeit(gs.tracer(), "naming.symbolizeTreesOne",
-                             {{"file", string(parsedFile.file.data(gs).path())}});
-                core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
-                ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
-            }
-        }
+    Parallel::iterate(workers, "symbolizeTrees", trees, [&gs, inserter = TreeSymbolizer()](auto &parsedFile) mutable {
+        Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(parsedFile.file.data(gs).path())}});
+        core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
+        ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
     });
 }
 
