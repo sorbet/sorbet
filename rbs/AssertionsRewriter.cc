@@ -183,7 +183,7 @@ optional<rbs::InlineComment> AssertionsRewriter::commentForNode(const unique_ptr
         auto content = commentNode.string.substr(2);        // skip the #: prefix
 
         // Skip whitespace after the #:
-        while (contentStart < commentNode.loc.endPos() && content[0] == ' ') {
+        while (contentStart < commentNode.loc.endPos() && std::isspace(content[0])) {
             contentStart++;
             content = content.substr(1);
         }
