@@ -179,8 +179,8 @@ optional<rbs::InlineComment> AssertionsRewriter::commentForNode(const unique_ptr
             continue;
         }
 
-        auto contentStart = commentNode.loc.beginPos() + 2;
-        auto content = commentNode.string.substr(2);
+        auto contentStart = commentNode.loc.beginPos() + 2; // +2 for the #: prefix
+        auto content = commentNode.string.substr(2);        // skip the #: prefix
 
         // Skip whitespace after the #:
         while (contentStart < commentNode.loc.endPos() && content[0] == ' ') {
