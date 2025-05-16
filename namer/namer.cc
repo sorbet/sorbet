@@ -2,7 +2,6 @@
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
-#include "absl/synchronization/blocking_counter.h"
 #include "ast/ArgParsing.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"

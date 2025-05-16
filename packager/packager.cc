@@ -1,8 +1,6 @@
 #include "packager/packager.h"
-#include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_replace.h"
-#include "absl/synchronization/blocking_counter.h"
 #include "ast/packager/packager.h"
 #include "ast/treemap/treemap.h"
 #include "common/FileOps.h"
