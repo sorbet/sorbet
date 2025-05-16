@@ -300,9 +300,7 @@ unique_ptr<parser::Node> AssertionsRewriter::maybeInsertCast(unique_ptr<parser::
  * Rewrite a collection of nodes, wrap them in an array and cast the array.
  */
 parser::NodeVec AssertionsRewriter::rewriteNodesAsArray(const unique_ptr<parser::Node> &node, parser::NodeVec nodes) {
-    auto inlineComment = commentForNode(node);
-
-    if (inlineComment) {
+    if (auto inlineComment = commentForNode(node)) {
         if (nodes.size() > 1) {
             auto loc = nodes.front()->loc.join(nodes.back()->loc);
             auto arr = parser::MK::Array(loc, move(nodes));
