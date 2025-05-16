@@ -10,8 +10,9 @@
 #include "main/lsp/requests/initialize.h"
 #include "test/helpers/lsp.h"
 
-namespace sorbet::test {
 using namespace std;
+
+namespace sorbet::test {
 
 string filePathToUri(const LSPConfiguration &config, string_view filePath) {
     return fmt::format("{}/{}", config.getClientConfig().rootUri, filePath);

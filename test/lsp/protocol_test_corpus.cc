@@ -6,8 +6,9 @@
 #include "common/common.h"
 #include "test/helpers/lsp.h"
 
-namespace sorbet::test::lsp {
 using namespace std;
+
+namespace sorbet::test::lsp {
 using namespace sorbet::realmain::lsp;
 
 // Adds two new files that have errors, and asserts that Sorbet returns errors for both of them.

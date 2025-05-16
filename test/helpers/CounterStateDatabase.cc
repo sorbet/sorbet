@@ -2,8 +2,9 @@
 // ^ Violates linting rules, so include first.
 #include "test/helpers/CounterStateDatabase.h"
 
-namespace sorbet::test::lsp {
 using namespace std;
+
+namespace sorbet::test::lsp {
 CounterStateDatabase::CounterStateDatabase(CounterState counters) : counters(move(counters)) {
     CHECK_FALSE(this->counters.hasNullCounters());
     // Combines counters with the same name but different char* pointers.

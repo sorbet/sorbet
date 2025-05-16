@@ -4,8 +4,9 @@
 #include "common/common.h"
 #include "test/helpers/lsp.h"
 
-namespace sorbet::test::lsp {
 using namespace std;
+
+namespace sorbet::test::lsp {
 using namespace sorbet::realmain::lsp;
 
 // Adds a file to the file system with an error, and asserts that Sorbet returns an error.

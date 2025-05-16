@@ -46,8 +46,9 @@
 #include <sys/types.h>
 #include <vector>
 
-namespace sorbet::test {
 using namespace std;
+
+namespace sorbet::test {
 
 string singleTest;
 
