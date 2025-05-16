@@ -17,7 +17,7 @@ const string_view CommentsAssociator::ANNOTATION_PREFIX = "# @";
 const string_view CommentsAssociator::MULTILINE_RBS_PREFIX = "#|";
 
 // Static regex pattern to avoid recompilation
-static const std::regex HEREDOC_PATTERN("\\s*=?\\s*<<(-|~)[^,\\s\\n#]+(,\\s*<<(-|~)[^,\\s\\n#]+)*");
+static const regex HEREDOC_PATTERN("\\s*=?\\s*<<(-|~)[^,\\s\\n#]+(,\\s*<<(-|~)[^,\\s\\n#]+)*");
 
 /**
  * Check if the given range is the start of a heredoc assignment `= <<~FOO` and return the position of the end of the
@@ -26,11 +26,11 @@ static const std::regex HEREDOC_PATTERN("\\s*=?\\s*<<(-|~)[^,\\s\\n#]+(,\\s*<<(-
  * Returns -1 if no heredoc marker is found.
  */
 uint32_t hasHeredocMarker(core::Context ctx, const uint32_t fromPos, const uint32_t toPos) {
-    std::string_view source(ctx.file.data(ctx).source().substr(fromPos, toPos - fromPos));
+    string_view source(ctx.file.data(ctx).source().substr(fromPos, toPos - fromPos));
 
-    std::string source_str(source);
-    std::smatch match;
-    if (std::regex_search(source_str, HEREDOC_PATTERN)) {
+    string source_str(source);
+    smatch match;
+    if (regex_search(source_str, HEREDOC_PATTERN)) {
         return fromPos + source_str.length();
     }
     return UINT32_MAX;
@@ -561,7 +561,7 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
         });
 }
 
-std::map<parser::Node *, vector<CommentNode>> CommentsAssociator::run(unique_ptr<parser::Node> &node) {
+map<parser::Node *, vector<CommentNode>> CommentsAssociator::run(unique_ptr<parser::Node> &node) {
     // Remove any comments that don't start with RBS prefixes
     for (auto it = commentByLine.begin(); it != commentByLine.end();) {
         if (!absl::StartsWith(it->second.string, RBS_PREFIX) &&

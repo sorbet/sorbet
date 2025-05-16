@@ -431,7 +431,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
     // Build the sig
 
     auto sigBuilder = parser::MK::Self(fullTypeLoc);
-    sigBuilder = handleAnnotations(std::move(sigBuilder), annotations);
+    sigBuilder = handleAnnotations(move(sigBuilder), annotations);
 
     if (typeParams.size() > 0) {
         auto typeParamsVector = parser::NodeVec();
@@ -486,7 +486,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
     auto commentLoc = declaration.commentLoc();
 
     auto sigBuilder = parser::MK::Self(fullTypeLoc.copyWithZeroLength());
-    sigBuilder = handleAnnotations(std::move(sigBuilder), annotations);
+    sigBuilder = handleAnnotations(move(sigBuilder), annotations);
 
     if (send->args.size() == 0) {
         if (auto e = ctx.beginIndexerError(send->loc, core::errors::Rewriter::RBSUnsupported)) {
