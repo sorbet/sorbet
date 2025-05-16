@@ -9,8 +9,9 @@
 #include <iostream>
 #include <memory>
 
-namespace sorbet::realmain::lsp {
 using namespace std;
+
+namespace sorbet::realmain::lsp {
 
 namespace {
 constexpr string_view uriPrefix = "file:///"sv;
