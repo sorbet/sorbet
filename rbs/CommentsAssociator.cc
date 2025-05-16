@@ -493,10 +493,12 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
                 if (send->method == core::Names::squareBracketsEq()) {
                     // This is a `foo[key]=(y)` method, walk y for chained method calls
                     walkNodes(send->args.back().get());
+                    walkNodes(send->receiver.get());
                     return;
                 } else if (send->method.isSetter(ctx.state) && send->args.size() == 1) {
                     // This is a `foo.x=(y)` method, we treat it as a `x = y` assignment
                     associateAssertionCommentsToNode(send->args[0].get());
+                    walkNodes(send->receiver.get());
                     return;
                 }
                 associateAssertionCommentsToNode(send);
