@@ -169,46 +169,51 @@ bool AssertionsRewriter::hasConsumedComment(core::LocOffsets loc) {
  * Returns `nullopt` if no comment is found or if the comment was already consumed.
  */
 optional<rbs::InlineComment> AssertionsRewriter::commentForNode(const unique_ptr<parser::Node> &node) {
-    if (auto it = commentsByNode.find(node.get()); it != commentsByNode.end()) {
-        for (const auto &commentNode : it->second) {
-            if (absl::StartsWith(commentNode.string, RBS_PREFIX)) {
-                auto contentStart = commentNode.loc.beginPos() + 2;
-                auto content = commentNode.string.substr(2);
+    auto it = commentsByNode.find(node.get());
+    if (it == commentsByNode.end()) {
+        return std::nullopt;
+    }
 
-                // Skip whitespace after the #:
-                while (contentStart < commentNode.loc.endPos() && content[0] == ' ') {
-                    contentStart++;
-                    content = content.substr(1);
-                }
+    for (const auto &commentNode : it->second) {
+        if (!absl::StartsWith(commentNode.string, RBS_PREFIX)) {
+            continue;
+        }
 
-                auto kind = InlineComment::Kind::LET;
-                if (absl::StartsWith(content, "as ")) {
-                    kind = InlineComment::Kind::CAST;
-                    contentStart += 3;
-                    content = content.substr(3);
+        auto contentStart = commentNode.loc.beginPos() + 2;
+        auto content = commentNode.string.substr(2);
 
-                    if (regex_match(content.begin(), content.end(), not_nil_pattern)) {
-                        kind = InlineComment::Kind::MUST;
-                    } else if (regex_match(content.begin(), content.end(), untyped_pattern)) {
-                        kind = InlineComment::Kind::UNSAFE;
-                    }
-                }
+        // Skip whitespace after the #:
+        while (contentStart < commentNode.loc.endPos() && content[0] == ' ') {
+            contentStart++;
+            content = content.substr(1);
+        }
 
-                if (hasConsumedComment(commentNode.loc)) {
-                    continue;
-                }
-                consumeComment(commentNode.loc);
+        auto kind = InlineComment::Kind::LET;
+        if (absl::StartsWith(content, "as ")) {
+            kind = InlineComment::Kind::CAST;
+            contentStart += 3;
+            content = content.substr(3);
 
-                return InlineComment{
-                    rbs::Comment{
-                        commentNode.loc,
-                        core::LocOffsets{contentStart, commentNode.loc.endPos()},
-                        content,
-                    },
-                    kind,
-                };
+            if (regex_match(content.begin(), content.end(), not_nil_pattern)) {
+                kind = InlineComment::Kind::MUST;
+            } else if (regex_match(content.begin(), content.end(), untyped_pattern)) {
+                kind = InlineComment::Kind::UNSAFE;
             }
         }
+
+        if (hasConsumedComment(commentNode.loc)) {
+            continue;
+        }
+        consumeComment(commentNode.loc);
+
+        return InlineComment{
+            rbs::Comment{
+                commentNode.loc,
+                core::LocOffsets{contentStart, commentNode.loc.endPos()},
+                content,
+            },
+            kind,
+        };
     }
 
     return nullopt;
