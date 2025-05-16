@@ -199,6 +199,13 @@ public:
     }
 
     /*
+     * Create a `T::Sig::WithoutRuntime` resolved constant node.
+     */
+    static std::unique_ptr<parser::Node> T_Sig_WithoutRuntime(core::LocOffsets loc) {
+        return std::make_unique<parser::ResolvedConst>(loc, core::Symbols::T_Sig_WithoutRuntime());
+    }
+
+    /*
      * Create a `T::Range` constant node.
      */
     static std::unique_ptr<parser::Node> T_Range(core::LocOffsets loc) {
