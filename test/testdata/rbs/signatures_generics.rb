@@ -171,3 +171,19 @@ class G12; end
 #: (G12[Object]) -> void
 #       ^^^^^^ error-with-dupes: `Object` is not a subtype of upper bound of type member `::G12::U`
 def take_g12(g12); end
+
+#: [
+#|   A,
+#|   B
+#| ]
+class G13
+  #: (A | B) -> void
+  def foo(x)
+    T.reveal_type(x) # error: Revealed type: `T.any(G13::A, G13::B)`
+  end
+end
+
+x = G13.new #: G13[Integer, String]
+x.foo(1)
+x.foo("a")
+x.foo(nil) # error: Expected `T.any(Integer, String)` but found `NilClass` for argument `x`
