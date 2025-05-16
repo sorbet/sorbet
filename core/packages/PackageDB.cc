@@ -303,4 +303,19 @@ UnfreezePackages PackageDB::unfreeze() {
     return UnfreezePackages(*this);
 }
 
+PackageDB::SCCId  PackageDB::pushSCCNode(PackageDB::SCCNode &&node) {
+    auto id = this->condensation.size();
+    this->condensation.emplace_back(std::move(node));
+
+    if (node.imports.empty()) {
+        this->roots.emplace_back(id);
+    }
+
+    return id;
+}
+
+absl::Span<const PackageDB::SCCNode> PackageDB::sccNodes() const {
+    return absl::MakeSpan(this->condensation);
+}
+
 } // namespace sorbet::core::packages
