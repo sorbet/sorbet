@@ -274,4 +274,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   <runtime method definition of take_g12>
+
+  class <emptyTree>::<C G13><<C <todo sym>>> < (::<todo sym>)
+    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+      <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C A>, <emptyTree>::<C B>)).void()
+    end
+
+    def foo<<todo method>>(x, &<blk>)
+      <emptyTree>::<C T>.reveal_type(x)
+    end
+
+    <runtime method definition of foo>
+
+    <emptyTree>::<C A> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member()
+
+    <emptyTree>::<C B> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member()
+  end
+
+  x = <cast:let>(<emptyTree>::<C G13>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>).new(), <todo sym>, <emptyTree>::<C G13>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>))
+
+  x.foo(1)
+
+  x.foo("a")
+
+  x.foo(nil)
 end
