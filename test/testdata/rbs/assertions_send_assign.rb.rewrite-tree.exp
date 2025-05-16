@@ -60,4 +60,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   brackets_assign.[]=(:a, :b, ::<root>::<C T>.unsafe("baz").unexisting_method())
 
   brackets_assign.[]=(:a, :b, :c, ::<root>::<C T>.unsafe("qux").unexisting_method())
+
+  ::<root>::<C T>.unsafe(<self>).unexisting_method=(42)
 end

@@ -41,3 +41,6 @@ brackets_assign[:a, :b] = "baz" #: as untyped
 
 brackets_assign[:a, :b, :c] = "qux" #: as untyped
   .unexisting_method
+
+self #: as untyped
+  .unexisting_method = 42
