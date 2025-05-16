@@ -1,5 +1,5 @@
+#include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
-#include "absl/strings/str_split.h"
 #include "common/common.h"
 #include "common/sort/sort.h"
 #include "common/typecase.h"
@@ -11,7 +11,6 @@
 #include "core/TypeErrorDiagnostics.h"
 #include "core/Types.h"
 #include "core/errors/infer.h"
-#include "core/errors/resolver.h"
 #include <algorithm> // find_if, sort
 
 #include "absl/strings/str_cat.h"

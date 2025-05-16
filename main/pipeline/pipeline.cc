@@ -6,7 +6,6 @@
 // ^^ has to go first
 #include "common/json2msgpack/json2msgpack.h"
 #include "packager/packager.h"
-#include "rapidjson/ostreamwrapper.h"
 #include "rapidjson/writer.h"
 #include <sstream>
 #endif

@@ -8,7 +8,6 @@
 #include "core/Error.h"
 #include "core/Names.h"
 #include "core/StrictLevel.h"
-#include "core/TypeErrorDiagnostics.h"
 #include "core/core.h"
 #include "core/errors/internal.h"
 #include "core/lsp/TypecheckEpochManager.h"
@@ -17,7 +16,6 @@
 #include "resolver/type_syntax/type_syntax.h"
 
 #include "absl/algorithm/container.h"
-#include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/timers/Timer.h"

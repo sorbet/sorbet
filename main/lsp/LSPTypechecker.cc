@@ -1,13 +1,10 @@
 #include "main/lsp/LSPTypechecker.h"
 #include "LSPFileUpdates.h"
 #include "absl/synchronization/mutex.h"
-#include "absl/synchronization/notification.h"
 #include "ast/treemap/treemap.h"
-#include "common/concurrency/ConcurrentQueue.h"
 #include "common/sort/sort.h"
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
-#include "core/NullFlusher.h"
 #include "core/Unfreeze.h"
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/lsp/TypecheckEpochManager.h"
@@ -27,7 +24,6 @@
 #include "main/lsp/UndoState.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/notifications/indexer_initialization.h"
-#include "main/lsp/notifications/sorbet_resume.h"
 #include "main/pipeline/pipeline.h"
 
 namespace sorbet::realmain::lsp {
