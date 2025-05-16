@@ -15,11 +15,12 @@ struct CommentNode {
 
 class CommentsAssociator {
 public:
+    static const std::string_view RBS_PREFIX;
+
     CommentsAssociator(core::MutableContext ctx, std::vector<core::LocOffsets> commentLocations);
     std::map<parser::Node *, std::vector<CommentNode>> run(std::unique_ptr<parser::Node> &tree);
 
 private:
-    static const std::string_view RBS_PREFIX;
     static const std::string_view ANNOTATION_PREFIX;
     static const std::string_view MULTILINE_RBS_PREFIX;
 

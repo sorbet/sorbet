@@ -13,8 +13,6 @@ using namespace std;
 
 namespace sorbet::rbs {
 
-const string_view AssertionsRewriter::RBS_PREFIX = "#:";
-
 namespace {
 
 const regex not_nil_pattern("^\\s*!nil\\s*(#.*)?$");
@@ -175,7 +173,7 @@ optional<rbs::InlineComment> AssertionsRewriter::commentForNode(const unique_ptr
     }
 
     for (const auto &commentNode : it->second) {
-        if (!absl::StartsWith(commentNode.string, RBS_PREFIX)) {
+        if (!absl::StartsWith(commentNode.string, CommentsAssociator::RBS_PREFIX)) {
             continue;
         }
 

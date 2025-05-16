@@ -27,8 +27,6 @@ public:
     std::unique_ptr<parser::Node> run(std::unique_ptr<parser::Node> tree);
 
 private:
-    static const std::string_view RBS_PREFIX;
-
     core::MutableContext ctx;
     std::map<parser::Node *, std::vector<CommentNode>> &commentsByNode;
     std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams = {};
