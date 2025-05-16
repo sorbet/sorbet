@@ -349,7 +349,7 @@ unique_ptr<parser::Node> TypeToParserNode::toParserNode(const rbs_node_t *node, 
         case RBS_TYPES_BASES_INSTANCE:
             return parser::MK::TAttachedClass(nodeLoc);
         case RBS_TYPES_BASES_NIL:
-            return parser::MK::Const(nodeLoc, parser::MK::Cbase(nodeLoc), core::Names::Constants::NilClass());
+            return make_unique<parser::ResolvedConst>(nodeLoc, core::Symbols::NilClass());
         case RBS_TYPES_BASES_SELF:
             return parser::MK::TSelfType(nodeLoc);
         case RBS_TYPES_BASES_TOP:

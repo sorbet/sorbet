@@ -136,7 +136,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::<root>::<C NilClass>)
+    <self>.returns(::NilClass)
   end
 
   def base_type5<<todo method>>(&<blk>)
