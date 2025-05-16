@@ -149,7 +149,7 @@ unique_ptr<parser::Node> TypeToParserNode::optionalType(const rbs_types_optional
 }
 
 unique_ptr<parser::Node> TypeToParserNode::voidType(const rbs_types_bases_void_t *node, core::LocOffsets loc) {
-    return parser::MK::Const(loc, parser::MK::SorbetPrivateStatic(loc), core::Names::Constants::Void());
+    return make_unique<parser::ResolvedConst>(loc, core::Symbols::void_());
 }
 
 unique_ptr<parser::Node> TypeToParserNode::functionType(const rbs_types_function_t *node, core::LocOffsets loc,
