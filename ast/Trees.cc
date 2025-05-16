@@ -1,7 +1,6 @@
 #include "ast/Trees.h"
 #include "absl/strings/escaping.h"
-#include "common/concurrency/ConcurrentQueue.h"
-#include "common/concurrency/WorkerPool.h"
+#include "common/concurrency/patterns.h"
 #include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/Symbols.h"
@@ -1499,23 +1498,11 @@ string Self::nodeName() const {
 ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};
 ParsedFilesOrCancelled::ParsedFilesOrCancelled(vector<ParsedFile> &&trees) : trees(move(trees)) {}
 
-ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(vector<ParsedFile> &&trees, WorkerPool &workers) {
-    if (!trees.empty()) {
-        auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
-        for (auto &tree : trees) {
-            fileq->push(move(tree), 1);
-        }
-
-        workers.multiplexJobWait("deleteTrees", [fileq]() {
-            {
-                ast::ParsedFile job;
-                for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                    // Force the destructor of `ast::ExpressionPtr` to run for `job.tree`.
-                    job.tree.reset();
-                }
-            }
-        });
-    }
+ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(std::vector<ParsedFile> &&trees, WorkerPool &workers) {
+    ConcurrencyPatterns::iterate(workers, "deleteTrees", absl::MakeSpan(trees), [](auto &job) {
+        // Force the destructor of `ast::ExpressionPtr` to run for `job.tree`.
+        job.tree.reset();
+    });
 
     return ParsedFilesOrCancelled();
 }

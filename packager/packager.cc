@@ -6,8 +6,7 @@
 #include "ast/packager/packager.h"
 #include "ast/treemap/treemap.h"
 #include "common/FileOps.h"
-#include "common/concurrency/ConcurrentQueue.h"
-#include "common/concurrency/WorkerPool.h"
+#include "common/concurrency/patterns.h"
 #include "common/sort/sort.h"
 #include "common/strings/formatting.h"
 #include "core/AutocorrectSuggestion.h"
@@ -2089,39 +2088,28 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
     {
         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
 
-        auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
-
-        for (size_t i = 0; i < files.size(); ++i) {
-            taskq->push(i, 1);
-        }
-
         if constexpr (buildPackageDB) {
             if (gs.packageDB().enforceLayering()) {
                 ComputePackageSCCs::run(gs);
             }
         }
 
-        workers.multiplexJobWait("rewritePackagesAndFiles", [&gs = as_const(gs), &files, taskq]() {
-            Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
-            size_t idx;
-            for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
-                if (!result.gotItem()) {
-                    continue;
-                }
+        {
+            Timer timeit(gs.tracer(), "packager.validatePackagesAndFiles");
+            ConcurrencyPatterns::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files),
+                                         [&gs = as_const(gs)](auto &job) {
+                                             auto file = job.file;
+                                             core::Context ctx(gs, core::Symbols::root(), file);
 
-                ast::ParsedFile &job = files[idx];
-                auto file = job.file;
-                core::Context ctx(gs, core::Symbols::root(), file);
-
-                if (file.data(gs).isPackage(gs)) {
-                    ENFORCE(buildPackageDB);
-                    validatePackage(ctx);
-                } else {
-                    ENFORCE(validatePackagedFiles);
-                    validatePackagedFile(ctx, job.tree);
-                }
-            }
-        });
+                                             if (file.data(gs).isPackage(gs)) {
+                                                 ENFORCE(buildPackageDB);
+                                                 validatePackage(ctx);
+                                             } else {
+                                                 ENFORCE(validatePackagedFiles);
+                                                 validatePackagedFile(ctx, job.tree);
+                                             }
+                                         });
+        }
     }
 }
 } // namespace
@@ -2137,32 +2125,22 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
     // building in an understanding of the dependencies between packages.
     Timer timeit(gs.tracer(), "packager.runIncremental");
 
-    auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
-    for (size_t i = 0; i < files.size(); ++i) {
-        taskq->push(i, 1);
-    }
-    workers.multiplexJobWait("validatePackagesAndFiles", [&gs, &files, taskq]() {
-        size_t idx;
-        for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
-            if (!result.gotItem()) {
-                continue;
-            }
+    ConcurrencyPatterns::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files),
+                                 [&gs = as_const(gs)](auto &file) {
+                                     core::Context ctx(gs, core::Symbols::root(), file.file);
+                                     if (file.file.data(gs).isPackage(gs)) {
+                                         // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
+                                         // report some syntactic packager errors.
+                                         auto info = definePackage(gs, file);
+                                         if (info != nullptr) {
+                                             rewritePackageSpec(gs, file, *info);
+                                         }
+                                         validatePackage(ctx);
+                                     } else {
+                                         validatePackagedFile(ctx, file.tree);
+                                     }
+                                 });
 
-            ast::ParsedFile &file = files[idx];
-            core::Context ctx(gs, core::Symbols::root(), file.file);
-            if (file.file.data(gs).isPackage(gs)) {
-                // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
-                // report some syntactic packager errors.
-                auto info = definePackage(gs, file);
-                if (info != nullptr) {
-                    rewritePackageSpec(gs, file, *info);
-                }
-                validatePackage(ctx);
-            } else {
-                validatePackagedFile(ctx, file.tree);
-            }
-        }
-    });
     return files;
 }
 

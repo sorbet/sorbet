@@ -4,6 +4,7 @@
 #include "absl/synchronization/blocking_counter.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
+#include "common/concurrency/patterns.h"
 #include "core/Context.h"
 #include "core/errors/packager.h"
 #include <algorithm>
@@ -582,22 +583,13 @@ public:
     static vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
                                        vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
-        auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
-        for (size_t i = 0; i < files.size(); ++i) {
-            taskq->push(i, 1);
-        }
-
-        workers.multiplexJobWait("VisibilityChecker", [&gs, &files, taskq]() {
-            size_t idx;
-            for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
-                ast::ParsedFile &f = files[idx];
-                if (!f.file.data(gs).isPackage(gs)) {
-                    auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
-                    if (pkgName.exists()) {
-                        core::Context ctx{gs, core::Symbols::root(), f.file};
-                        VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
-                        ast::TreeWalk::apply(ctx, pass, f.tree);
-                    }
+        ConcurrencyPatterns::iterate(workers, "VisibilityChecker", absl::MakeSpan(files), [&gs](ast::ParsedFile &f) {
+            if (!f.file.data(gs).isPackage(gs)) {
+                auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
+                if (pkgName.exists()) {
+                    core::Context ctx{gs, core::Symbols::root(), f.file};
+                    VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
+                    ast::TreeWalk::apply(ctx, pass, f.tree);
                 }
             }
         });
