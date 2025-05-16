@@ -40,7 +40,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(let3.foo())
 
   class <emptyTree>::<C BracketsAssign><<C <todo sym>>> < (::<todo sym>)
-    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:args, ::<root>::<C T>.untyped()).void()
     end
 
