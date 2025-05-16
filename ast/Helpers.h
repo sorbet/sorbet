@@ -547,24 +547,6 @@ public:
             return recv->symbol() == core::Symbols::Sorbet_Private_Static();
         }
 
-        if (auto recv = cast_tree<UnresolvedConstantLit>(expr)) {
-            if (recv->cnst != core::Names::Constants::Static()) {
-                return false;
-            }
-
-            auto scope = cast_tree<ast::UnresolvedConstantLit>(recv->scope);
-            if (scope == nullptr || scope->cnst != core::Names::Constants::Private()) {
-                return false;
-            }
-
-            scope = cast_tree<ast::UnresolvedConstantLit>(scope->scope);
-            if (scope == nullptr || scope->cnst != core::Names::Constants::Sorbet()) {
-                return false;
-            }
-
-            return scope->scope == nullptr || isRootScope(scope->scope);
-        }
-
         return false;
     }
 

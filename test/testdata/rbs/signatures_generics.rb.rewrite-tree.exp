@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:g1, <emptyTree>::<C G1>).void()
   end
 
@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(g1)
   end
 
-  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:g1, <emptyTree>::<C G1>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>)).void()
   end
 
@@ -15,7 +15,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(g1)
   end
 
-  ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:g12, <emptyTree>::<C G12>.<syntheticSquareBrackets>(<emptyTree>::<C Object>)).void()
   end
 
@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C UnsupportedError1><<C <todo sym>>> < (::<todo sym>)
-      <emptyTree>::<C T> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member()
+      <emptyTree>::<C T> = ::Sorbet::Private::Static.type_member()
     end
 
     class <emptyTree>::<C UselessSignature1><<C <todo sym>>> < (::<todo sym>)
@@ -45,7 +45,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C G1><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member()
+    <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member()
   end
 
   g1_1 = <emptyTree>::<C G1>.new()
@@ -71,7 +71,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.take_g1_2(g1_3)
 
   class <emptyTree>::<C G2><<C <todo sym>>> < (::<todo sym>)
-    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C U>)
     end
 
@@ -79,7 +79,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @u
     end
 
-    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:u, <emptyTree>::<C U>).returns(<emptyTree>::<C U>)
     end
 
@@ -87,7 +87,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @u = u
     end
 
-    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C V>)
     end
 
@@ -95,7 +95,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @v
     end
 
-    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:v, <emptyTree>::<C V>).returns(<emptyTree>::<C V>)
     end
 
@@ -103,7 +103,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @v = v
     end
 
-    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:u, <emptyTree>::<C U>, :v, <emptyTree>::<C V>).void()
     end
 
@@ -124,9 +124,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of initialize>
 
-    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member()
+    <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member()
 
-    <emptyTree>::<C V> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member()
+    <emptyTree>::<C V> = ::Sorbet::Private::Static.type_member()
   end
 
   g2_1 = <cast:let>(<emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>).new(1, 2), <todo sym>, <emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>))
@@ -144,7 +144,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(g2_3)
 
   class <emptyTree>::<C G3><<C <todo sym>>> < (::<todo sym>)
-    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C U>)
     end
 
@@ -152,7 +152,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @u
     end
 
-    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:v, <emptyTree>::<C V>).returns(<emptyTree>::<C V>)
     end
 
@@ -160,7 +160,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @v = v
     end
 
-    ::<root>::<C Sorbet>::<C Private>::<C Static>.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:u, <emptyTree>::<C U>, :v, <emptyTree>::<C V>).void()
     end
 
@@ -177,13 +177,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of initialize>
 
-    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member(:in)
+    <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member(:in)
 
-    <emptyTree>::<C V> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member(:out)
+    <emptyTree>::<C V> = ::Sorbet::Private::Static.type_member(:out)
   end
 
   class <emptyTree>::<C G4><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member() do ||
+    <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member() do ||
       {:upper => <emptyTree>::<C String>}
     end
   end
@@ -196,7 +196,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C G6><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member()
+    <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member()
   end
 
   g6 = <emptyTree>::<C G6>.[](<emptyTree>::<C Integer>).new()
@@ -212,13 +212,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(arr2)
 
   class <emptyTree>::<C G7><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member() do ||
+    <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member() do ||
       {:upper => <emptyTree>::<C Numeric>}
     end
   end
 
   class <emptyTree>::<C G8><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>::<C E> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member(:out)
+    <emptyTree>::<C E> = ::Sorbet::Private::Static.type_member(:out)
   end
 
   g8_1 = <cast:let>(<emptyTree>::<C G8>.<syntheticSquareBrackets>(<emptyTree>::<C Numeric>).new(), <todo sym>, <emptyTree>::<C G8>.<syntheticSquareBrackets>(<emptyTree>::<C Numeric>))
@@ -234,7 +234,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(g8_3)
 
   class <emptyTree>::<C G9><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>::<C E> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member(:in)
+    <emptyTree>::<C E> = ::Sorbet::Private::Static.type_member(:in)
   end
 
   g9_1 = <cast:let>(<emptyTree>::<C G9>.<syntheticSquareBrackets>(<emptyTree>::<C Numeric>).new(), <todo sym>, <emptyTree>::<C G9>.<syntheticSquareBrackets>(<emptyTree>::<C Numeric>))
@@ -254,7 +254,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C V> = <self>.type_member()
 
-    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member()
+    <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member()
   end
 
   g10 = <cast:let>(<emptyTree>::<C G10>.[](<emptyTree>::<C Integer>, <emptyTree>::<C String>).new(), <todo sym>, <emptyTree>::<C G10>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>))
@@ -262,13 +262,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(g10)
 
   class <emptyTree>::<C G11><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member() do ||
+    <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member() do ||
       {:fixed => <emptyTree>::<C Integer>, :upper => <emptyTree>::<C Numeric>}
     end
   end
 
   class <emptyTree>::<C G12><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>::<C U> = ::<root>::<C Sorbet>::<C Private>::<C Static>.type_member(:in) do ||
+    <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member(:in) do ||
       {:upper => <emptyTree>::<C Numeric>}
     end
   end

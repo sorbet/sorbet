@@ -281,13 +281,6 @@ void collectKeywords(const RBSDeclaration &declaration, rbs_hash_t *field, vecto
     }
 }
 
-unique_ptr<parser::Node> assembleTSigWithoutRuntime(const core::LocOffsets &loc) {
-    auto t = parser::MK::T(loc);
-    auto t_sig = parser::MK::Const(loc, move(t), core::Names::Constants::Sig());
-    auto t_sig_withoutRuntime = parser::MK::Const(loc, move(t_sig), core::Names::Constants::WithoutRuntime());
-    return t_sig_withoutRuntime;
-}
-
 } // namespace
 
 unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::Node *methodDef,
@@ -470,7 +463,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
     }
 
     auto sigArgs = parser::NodeVec();
-    sigArgs.emplace_back(assembleTSigWithoutRuntime(firstLineTypeLoc));
+    sigArgs.emplace_back(parser::MK::T_Sig_WithoutRuntime(firstLineTypeLoc));
 
     auto final = absl::c_find_if(annotations, [](const Comment &annotation) { return annotation.string == "final"; });
     if (final != annotations.end()) {
@@ -537,7 +530,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
         parser::MK::Send1(fullTypeLoc, move(sigBuilder), core::Names::returns(), returnType->loc, move(returnType));
 
     auto sigArgs = parser::NodeVec();
-    sigArgs.emplace_back(assembleTSigWithoutRuntime(firstLineTypeLoc));
+    sigArgs.emplace_back(parser::MK::T_Sig_WithoutRuntime(firstLineTypeLoc));
 
     auto final = absl::c_find_if(annotations, [](const Comment &annotation) { return annotation.string == "final"; });
     if (final != annotations.end()) {

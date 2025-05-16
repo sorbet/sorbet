@@ -118,11 +118,7 @@ public:
      * Create a `Sorbet::Private::Static` constant node.
      */
     static std::unique_ptr<parser::Node> SorbetPrivateStatic(core::LocOffsets loc) {
-        auto cSorbet = parser::MK::Const(loc, parser::MK::Cbase(loc), core::Names::Constants::Sorbet());
-        auto cPrivate = parser::MK::Const(loc, move(cSorbet), core::Names::Constants::Private());
-        auto cStatic = parser::MK::Const(loc, move(cPrivate), core::Names::Constants::Static());
-
-        return cStatic;
+        return std::make_unique<parser::ResolvedConst>(loc, core::Symbols::Sorbet_Private_Static());
     }
 
     /*
@@ -200,6 +196,13 @@ public:
      */
     static std::unique_ptr<parser::Node> T_Set(core::LocOffsets loc) {
         return Const(loc, T(loc), core::Names::Constants::Set());
+    }
+
+    /*
+     * Create a `T::Sig::WithoutRuntime` resolved constant node.
+     */
+    static std::unique_ptr<parser::Node> T_Sig_WithoutRuntime(core::LocOffsets loc) {
+        return std::make_unique<parser::ResolvedConst>(loc, core::Symbols::T_Sig_WithoutRuntime());
     }
 
     /*

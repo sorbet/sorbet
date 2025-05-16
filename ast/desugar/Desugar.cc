@@ -2447,6 +2447,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = std::move(res);
             },
             [&](parser::EmptyElse *else_) { result = MK::EmptyTree(); },
+            [&](parser::ResolvedConst *resolvedConst) {
+                result = make_expression<ConstantLit>(resolvedConst->loc, std::move(resolvedConst->symbol));
+            },
 
             [&](parser::BlockPass *blockPass) { Exception::raise("Send should have already handled the BlockPass"); },
             [&](parser::Node *node) { Exception::raise("Unimplemented Parser Node: {}", node->nodeName()); });

@@ -149,7 +149,7 @@ unique_ptr<parser::Node> TypeToParserNode::optionalType(const rbs_types_optional
 }
 
 unique_ptr<parser::Node> TypeToParserNode::voidType(const rbs_types_bases_void_t *node, core::LocOffsets loc) {
-    return parser::MK::Const(loc, parser::MK::SorbetPrivateStatic(loc), core::Names::Constants::Void());
+    return make_unique<parser::ResolvedConst>(loc, core::Symbols::void_());
 }
 
 unique_ptr<parser::Node> TypeToParserNode::functionType(const rbs_types_function_t *node, core::LocOffsets loc,
@@ -349,7 +349,7 @@ unique_ptr<parser::Node> TypeToParserNode::toParserNode(const rbs_node_t *node, 
         case RBS_TYPES_BASES_INSTANCE:
             return parser::MK::TAttachedClass(nodeLoc);
         case RBS_TYPES_BASES_NIL:
-            return parser::MK::Const(nodeLoc, parser::MK::Cbase(nodeLoc), core::Names::Constants::NilClass());
+            return make_unique<parser::ResolvedConst>(nodeLoc, core::Symbols::NilClass());
         case RBS_TYPES_BASES_SELF:
             return parser::MK::TSelfType(nodeLoc);
         case RBS_TYPES_BASES_TOP:
