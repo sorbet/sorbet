@@ -1672,7 +1672,7 @@ class ComputePackageSCCs {
     UnorderedMap<core::packages::MangledName, NodeInfo> nodeMap;
     // As we visit packages, we push them onto the stack. Once we find the "root" of an SCC, we can use the stack to
     // determine all packages in the SCC.
-    vector<core::packages::MangledName> stack;
+    vector<PackageInfoImpl *> stack;
 
     ComputePackageSCCs(core::GlobalState &gs) : gs{gs} {
         auto numPackages = gs.packageDB().packages().size();
@@ -1693,7 +1693,7 @@ class ComputePackageSCCs {
         infoAtEntry.index = this->nextIndex;
         infoAtEntry.lowLink = this->nextIndex;
         this->nextIndex++;
-        this->stack.push_back(pkgName);
+        this->stack.push_back(&pkgInfo);
         infoAtEntry.onStack = true;
 
         for (auto &i : pkgInfo.importedPackageNames) {
@@ -1742,11 +1742,11 @@ class ComputePackageSCCs {
             core::packages::MangledName poppedPkgName;
             const auto sccId = this->nextSCCId++;
             do {
-                poppedPkgName = this->stack.back();
+                auto *poppedPkgInfo = this->stack.back();
+                poppedPkgName = poppedPkgInfo->name.mangledName;
                 this->stack.pop_back();
                 this->nodeMap[poppedPkgName].onStack = false;
-                auto &poppedPkgInfo = PackageInfoImpl::from(*(gs.packageDB().getPackageInfoNonConst(poppedPkgName)));
-                poppedPkgInfo.sccID_ = sccId;
+                poppedPkgInfo->sccID_ = sccId;
             } while (poppedPkgName != pkgName);
         }
     }
