@@ -79,7 +79,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @u
     end
 
-    ::Sorbet::Private::Static.sig(::<root>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C V>)
     end
 
