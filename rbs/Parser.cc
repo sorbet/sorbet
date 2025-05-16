@@ -1,5 +1,7 @@
 #include "rbs/Parser.h"
 
+using namespace std;
+
 namespace sorbet::rbs {
 
 namespace {
@@ -28,9 +30,9 @@ RBSLibraryInitializer rbsLibraryInitializer;
 Parser::Parser(rbs_string_t rbsString, const rbs_encoding_t *encoding)
     : parser(rbs_parser_new(rbsString, encoding, 0, rbsString.end - rbsString.start), rbs_parser_free) {}
 
-std::string_view Parser::resolveConstant(const rbs_ast_symbol_t *symbol) const {
+string_view Parser::resolveConstant(const rbs_ast_symbol_t *symbol) const {
     auto constant = rbs_constant_pool_id_to_constant(&parser->constant_pool, symbol->constant_id);
-    return std::string_view(reinterpret_cast<const char *>(constant->start), constant->length);
+    return string_view(reinterpret_cast<const char *>(constant->start), constant->length);
 }
 
 std::string_view Parser::resolveKeyword(const rbs_keyword_t *keyword) const {

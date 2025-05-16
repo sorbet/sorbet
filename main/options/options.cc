@@ -422,7 +422,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "Include 'unsafe' autocorrects, e.g. those which can be fixed by wrapping code in `T.unsafe` or using "
         "`T.untyped`. Provide a custom <method> to wrap with `<method>(...)` instead of `T.unsafe(...)`. This "
         "supersedes certain autocorrects, especially T.must.",
-        cxxopts::value<std::string>()->implicit_value("T.unsafe"), "<method>");
+        cxxopts::value<string>()->implicit_value("T.unsafe"), "<method>");
     options.add_options(section)("did-you-mean",
                                  "Whether to include 'Did you mean' suggestions in autocorrects. For large codemods, "
                                  "it's usually better to avoid spurious changes by setting this to false",
@@ -721,7 +721,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("minimize-to-rbi",
                                  "[experimental] Output a minimal RBI containing the diff between Sorbet's view of a "
                                  "codebase and the definitions present in this file",
-                                 cxxopts::value<std::string>()->default_value(""), "<file.rbi>");
+                                 cxxopts::value<string>()->default_value(""), "<file.rbi>");
     options.add_options(section)("h,help",
                                  "Show help. Can pass an optional SECTION to show help for only one section instead of "
                                  "the default of all sections",

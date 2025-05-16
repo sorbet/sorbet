@@ -12,7 +12,7 @@ static string fileName;
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
     cxxopts::Options options("fuzz_hover", "Fuzz all potential LSP hovers given a file");
     options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
-                                                       cxxopts::value<std::string>()->default_value(""), "testpath");
+                                                       cxxopts::value<string>()->default_value(""), "testpath");
     options.add_options()("lsp-disable-fastpath", "disable fastpath in lsp tests");
     auto res = options.parse(*argc, *argv);
 
@@ -21,7 +21,7 @@ extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
         return 1;
     }
 
-    fileName = res["single_test"].as<std::string>();
+    fileName = res["single_test"].as<string>();
     disableFastPath = res["lsp-disable-fastpath"].as<bool>();
     return 0;
 }

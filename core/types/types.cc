@@ -364,13 +364,13 @@ TypePtr Types::dropNil(const GlobalState &gs, const TypePtr &from) {
     return Types::dropSubtypesOf(gs, from, toDrop);
 }
 
-std::optional<int> Types::getProcArity(const AppliedType &type) {
+optional<int> Types::getProcArity(const AppliedType &type) {
     for (int i = 0; i <= Symbols::MAX_PROC_ARITY; i++) {
         if (type.klass == Symbols::Proc(i)) {
             return i;
         }
     }
-    return std::nullopt;
+    return nullopt;
 }
 
 ClassType::ClassType(ClassOrModuleRef symbol) : symbol(symbol) {
@@ -495,7 +495,7 @@ TypePtr ShapeType::underlying(const GlobalState &gs) const {
     return Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeUnderlying());
 }
 
-std::optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
+optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
     if (isa_type<NamedLiteralType>(t)) {
         const auto &lit = cast_type_nonnull<NamedLiteralType>(t);
         return this->indexForKey(lit);
@@ -508,10 +508,10 @@ std::optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
         auto &lit = cast_type_nonnull<FloatLiteralType>(t);
         return this->indexForKey(lit);
     }
-    return std::nullopt;
+    return nullopt;
 }
 
-std::optional<size_t> ShapeType::indexForKey(const NamedLiteralType &lit) const {
+optional<size_t> ShapeType::indexForKey(const NamedLiteralType &lit) const {
     auto fnd = absl::c_find_if(this->keys, [&lit](const auto &candidate) -> bool {
         if (!isa_type<NamedLiteralType>(candidate)) {
             return false;
@@ -520,12 +520,12 @@ std::optional<size_t> ShapeType::indexForKey(const NamedLiteralType &lit) const 
         return candlit.equals(lit);
     });
     if (fnd == this->keys.end()) {
-        return std::nullopt;
+        return nullopt;
     }
     return std::distance(this->keys.begin(), fnd);
 }
 
-std::optional<size_t> ShapeType::indexForKey(const IntegerLiteralType &lit) const {
+optional<size_t> ShapeType::indexForKey(const IntegerLiteralType &lit) const {
     auto fnd = absl::c_find_if(keys, [&](auto &candidate) -> bool {
         if (!isa_type<IntegerLiteralType>(candidate)) {
             return false;
@@ -534,12 +534,12 @@ std::optional<size_t> ShapeType::indexForKey(const IntegerLiteralType &lit) cons
         return candlit.equals(lit);
     });
     if (fnd == this->keys.end()) {
-        return std::nullopt;
+        return nullopt;
     }
     return std::distance(this->keys.begin(), fnd);
 }
 
-std::optional<size_t> ShapeType::indexForKey(const FloatLiteralType &lit) const {
+optional<size_t> ShapeType::indexForKey(const FloatLiteralType &lit) const {
     auto fnd = absl::c_find_if(keys, [&](auto &candidate) -> bool {
         if (!isa_type<FloatLiteralType>(candidate)) {
             return false;
@@ -548,7 +548,7 @@ std::optional<size_t> ShapeType::indexForKey(const FloatLiteralType &lit) const 
         return candlit.equals(lit);
     });
     if (fnd == this->keys.end()) {
-        return std::nullopt;
+        return nullopt;
     }
     return std::distance(this->keys.begin(), fnd);
 }
@@ -796,7 +796,7 @@ optional<int> SendAndBlockLink::fixedArity() const {
     optional<int> arity = 0;
     for (auto &arg : argFlags) {
         if (arg.isKeyword || arg.isDefault || arg.isRepeated) {
-            arity = std::nullopt;
+            arity = nullopt;
             break;
         }
         arity = *arity + 1;
@@ -854,7 +854,7 @@ TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
 
 namespace {
 vector<TypePtr> unwrapTypeVector(Context ctx, const vector<TypePtr> &elems) {
-    std::vector<TypePtr> unwrapped;
+    vector<TypePtr> unwrapped;
     unwrapped.reserve(elems.size());
     for (auto &e : elems) {
         unwrapped.emplace_back(Types::unwrapSelfTypeParam(ctx, e));

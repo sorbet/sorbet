@@ -25,8 +25,7 @@ core::TypePtr dropConstructor(core::Context ctx, core::Loc loc, core::TypePtr tp
     return tp;
 }
 
-bool typeTestReferencesVar(const InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> &typeTest,
-                           cfg::LocalRef var) {
+bool typeTestReferencesVar(const InlinedVector<pair<cfg::LocalRef, core::TypePtr>, 1> &typeTest, cfg::LocalRef var) {
     return absl::c_any_of(typeTest, [var](auto &test) { return test.first == var; });
 }
 } // namespace
@@ -66,16 +65,16 @@ const InlinedVector<cfg::LocalRef, 1> TypeTestReverseIndex::empty;
 struct KnowledgeFact {
     bool isDead = false;
     /* the following type tests are known to be true */
-    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> yesTypeTests;
+    InlinedVector<pair<cfg::LocalRef, core::TypePtr>, 1> yesTypeTests;
     /* the following type tests are known to be false */
-    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> noTypeTests;
+    InlinedVector<pair<cfg::LocalRef, core::TypePtr>, 1> noTypeTests;
 
     /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
     void min(core::Context ctx, const KnowledgeFact &other);
 
     void sanityCheck() const;
 
-    std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
+    string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 };
 
 KnowledgeFilter::KnowledgeFilter(core::Context ctx, cfg::CFG &cfg) {
@@ -246,7 +245,7 @@ string KnowledgeFact::toString(const core::GlobalState &gs, const cfg::CFG &cfg)
     return fmt::format("{}{}", fmt::join(buf1, ""), fmt::join(buf2, ""));
 }
 
-KnowledgeRef::KnowledgeRef() : knowledge(std::make_shared<KnowledgeFact>()) {}
+KnowledgeRef::KnowledgeRef() : knowledge(make_shared<KnowledgeFact>()) {}
 
 const KnowledgeFact &KnowledgeRef::operator*() const {
     return *knowledge.get();

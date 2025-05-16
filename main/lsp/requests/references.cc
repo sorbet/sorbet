@@ -11,7 +11,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-ReferencesTask::ReferencesTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<ReferenceParams> params)
+ReferencesTask::ReferencesTask(const LSPConfiguration &config, MessageId id, unique_ptr<ReferenceParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentReferences), params(move(params)) {}
 
 bool ReferencesTask::needsMultithreading(const LSPIndexer &indexer) const {
@@ -21,7 +21,7 @@ bool ReferencesTask::needsMultithreading(const LSPIndexer &indexer) const {
 vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::GlobalState &gs,
                                                                     core::SymbolRef symInPackage,
                                                                     core::packages::MangledName packageName) {
-    std::vector<core::NameRef> fullName;
+    vector<core::NameRef> fullName;
 
     auto sym = symInPackage;
     while (sym.exists() && sym != core::Symbols::PackageSpecRegistry() && sym != core::Symbols::root()) {
@@ -123,7 +123,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 auto symsToCheck = getSymsToCheckWithinPackage(gs, constResp->symbolBeforeDealias, packageName);
 
                 if (!symsToCheck.empty()) {
-                    std::vector<std::unique_ptr<Location>> locations;
+                    vector<unique_ptr<Location>> locations;
 
                     for (auto &symToCheck : symsToCheck) {
                         for (auto &location :

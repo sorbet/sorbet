@@ -11,9 +11,9 @@ using namespace std;
 
 namespace sorbet::rbs {
 
-const std::string_view CommentsAssociator::RBS_PREFIX = "#:";
-const std::string_view CommentsAssociator::ANNOTATION_PREFIX = "# @";
-const std::string_view CommentsAssociator::MULTILINE_RBS_PREFIX = "#|";
+const string_view CommentsAssociator::RBS_PREFIX = "#:";
+const string_view CommentsAssociator::ANNOTATION_PREFIX = "# @";
+const string_view CommentsAssociator::MULTILINE_RBS_PREFIX = "#|";
 
 namespace {
 bool isVisibilitySend(const parser::Send *send) {
@@ -263,12 +263,12 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
         });
 }
 
-std::map<parser::Node *, std::vector<CommentNode>> CommentsAssociator::run(unique_ptr<parser::Node> &node) {
+std::map<parser::Node *, vector<CommentNode>> CommentsAssociator::run(unique_ptr<parser::Node> &node) {
     walkNodes(node.get());
     return move(commentsByNode);
 };
 
-CommentsAssociator::CommentsAssociator(core::MutableContext ctx, std::vector<core::LocOffsets> commentLocations)
+CommentsAssociator::CommentsAssociator(core::MutableContext ctx, vector<core::LocOffsets> commentLocations)
     : ctx(ctx), commentLocations(commentLocations), commentByLine() {
     for (auto &loc : commentLocations) {
         auto comment_string = ctx.file.data(ctx).source().substr(loc.beginPos(), loc.endPos() - loc.beginPos());

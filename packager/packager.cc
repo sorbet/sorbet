@@ -189,7 +189,7 @@ public:
         return absl::MakeSpan(name.fullName.parts);
     }
 
-    absl::Span<const std::string> pathPrefixes() const {
+    absl::Span<const string> pathPrefixes() const {
         return absl::MakeSpan(packagePathPrefixes);
     }
 
@@ -216,7 +216,7 @@ public:
     // loc for the package definition. Single line (just the class def). Used for error messages.
     core::Loc declLoc_;
     // The possible path prefixes associated with files in the package, including path separator at end.
-    vector<std::string> packagePathPrefixes = {};
+    vector<string> packagePathPrefixes = {};
     // The names of each package imported by this package.
     vector<Import> importedPackageNames = {};
     // List of exported items that form the body of this package's public API.
@@ -471,7 +471,7 @@ public:
                 exportLoc = loc.endPos() - "end"sv.size() - 1;
             }
 
-            std::string_view file_source = loc.file().data(gs).source();
+            string_view file_source = loc.file().data(gs).source();
 
             // Defensively guard against the first export loc or the package's loc being invalid.
             if (exportLoc <= 0 || exportLoc >= file_source.size()) {
@@ -558,9 +558,9 @@ public:
         return rv;
     }
 
-    std::optional<core::packages::ImportType> importsPackage(core::packages::MangledName mangledName) const {
+    optional<core::packages::ImportType> importsPackage(core::packages::MangledName mangledName) const {
         if (!mangledName.exists()) {
-            return std::nullopt;
+            return nullopt;
         }
 
         auto imp =
@@ -995,7 +995,7 @@ class EnforcePackagePrefix final {
     // but also in any eventual docs on the package system).
     int rootConsts = 0;
     bool useTestNamespace = false;
-    vector<std::pair<core::NameRef, core::LocOffsets>> tmpNameParts;
+    vector<pair<core::NameRef, core::LocOffsets>> tmpNameParts;
 
 public:
     EnforcePackagePrefix(core::Context ctx, const PackageInfoImpl &pkg)
@@ -1620,7 +1620,7 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
 
     for (const string &prefix : extraPackageFilesDirectorySlashDeprecatedPrefixes) {
         // project/Foo_bar -- convert camel-case to snake-case and munge with slash
-        std::string additionalDirPath;
+        string additionalDirPath;
         additionalDirPath.reserve(prefix.size() + 2 * dirNameFromShortName.length() + 1);
         additionalDirPath += prefix;
         for (int i = 0; i < dirNameFromShortName.length(); i++) {
@@ -1674,7 +1674,7 @@ class ComputePackageSCCs {
     UnorderedMap<core::packages::MangledName, NodeInfo> nodeMap;
     // As we visit packages, we push them onto the stack. Once we find the "root" of an SCC, we can use the stack to
     // determine all packages in the SCC.
-    std::vector<core::packages::MangledName> stack;
+    vector<core::packages::MangledName> stack;
 
     ComputePackageSCCs(core::GlobalState &gs) : gs{gs} {
         auto numPackages = gs.packageDB().packages().size();
@@ -2023,7 +2023,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 }
 
 void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
-    std::vector<std::pair<core::FileRef, core::packages::MangledName>> mapping;
+    vector<pair<core::FileRef, core::packages::MangledName>> mapping;
     mapping.reserve(files.size());
 
     {

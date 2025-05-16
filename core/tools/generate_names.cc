@@ -606,7 +606,7 @@ void emit_name_string(ostream &out, NameDef &name) {
     out << "const char *" << name.srcName << " = \"";
     out << absl::CEscape(name.val) << "\";" << '\n';
 
-    out << "std::string_view " << name.srcName << "_DESC{(char*)";
+    out << "string_view " << name.srcName << "_DESC{(char*)";
     out << name.srcName << "," << name.val.size() << "};" << '\n';
     out << '\n';
 }
@@ -693,6 +693,7 @@ int main(int argc, char **argv) {
         classfile << "#include \"core/GlobalState.h\"" << '\n' << '\n';
         classfile << "#include \"core/Names.h\"" << '\n' << '\n';
         classfile << "#include \"core/Names_gen.h\"" << '\n' << '\n';
+        classfile << "using namespace std;" << '\n';
         classfile << "namespace sorbet {" << '\n';
         classfile << "namespace core {" << '\n';
         classfile << "namespace Names {" << '\n';

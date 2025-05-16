@@ -4,8 +4,9 @@
 #include "common/common.h"
 #include "test/helpers/lsp.h"
 
-namespace sorbet::test::lsp {
 using namespace std;
+
+namespace sorbet::test::lsp {
 using namespace sorbet::realmain::lsp;
 
 // Adds a file to the file system with an error, and asserts that Sorbet returns an error.
@@ -121,7 +122,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergesMultipleWatchmanUpdates") {
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
-    auto opts = std::make_shared<realmain::options::Options>();
+    auto opts = make_shared<realmain::options::Options>();
     opts->cacheSensitiveOptions.stripePackages = true;
     this->resetState(std::move(opts));
 

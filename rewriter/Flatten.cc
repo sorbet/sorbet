@@ -133,7 +133,7 @@ class FlattenWalk {
                 return MethodData(back);
             } else {
                 stack.pop_back();
-                return std::nullopt;
+                return nullopt;
             }
         }
 

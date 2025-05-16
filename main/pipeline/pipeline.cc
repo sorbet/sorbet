@@ -119,9 +119,9 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
 #endif
 }
 
-std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts) {
+unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts) {
     if (opts.cacheSensitiveOptions.noStdlib) {
-        auto result = std::make_unique<core::GlobalState>(from.errorQueue, from.epochManager);
+        auto result = make_unique<core::GlobalState>(from.errorQueue, from.epochManager);
         result->initEmpty();
         return result;
     }
@@ -524,7 +524,7 @@ struct IndexSubstitutionJob {
     // of serially in the main thread.
     unique_ptr<core::GlobalState> threadGs;
 
-    std::optional<core::NameSubstitution> subst;
+    optional<core::NameSubstitution> subst;
     vector<ast::ParsedFile> trees;
 
     // Please see the comment on `IndexResult::numTreesProcessed` for a more thorough description about why this might
@@ -578,7 +578,7 @@ ast::ParsedFilesOrCancelled mergeIndexResults(core::GlobalState &cgs, const opti
                 Timer timeit(logger, "substituteTreesWorker");
                 IndexSubstitutionJob job;
                 int numTreesProcessed = 0;
-                std::vector<ast::ParsedFile> trees;
+                vector<ast::ParsedFile> trees;
                 for (auto result = batchq->try_pop(job); !result.done(); result = batchq->try_pop(job)) {
                     if (result.gotItem()) {
                         // Unconditionally update the total to avoid starving the consumer thread
@@ -636,7 +636,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
         fileq->push(move(file), 1);
     }
 
-    std::shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex(
+    shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex(
         opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
         opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
         opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint);
@@ -697,7 +697,7 @@ ast::ParsedFilesOrCancelled index(core::GlobalState &gs, absl::Span<const core::
 
     if (files.size() < 3) {
         // Run singlethreaded if only using 2 files
-        std::vector<ast::ParsedFile> parsed;
+        vector<ast::ParsedFile> parsed;
         parsed.reserve(files.size());
         for (auto file : files) {
             auto tree = readFileWithStrictnessOverrides(gs, file, opts, kvstore);
@@ -1129,10 +1129,10 @@ ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, vector<ast::Pa
 
 vector<ast::ParsedFile>
 incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
-                   optional<UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>>> &&foundHashesForFiles,
+                   optional<UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>>> &&foundHashesForFiles,
                    const options::Options &opts, WorkerPool &workers) {
     try {
-        std::vector<core::ClassOrModuleRef> symbolsToRecompute;
+        vector<core::ClassOrModuleRef> symbolsToRecompute;
         auto runIncrementalNamer = foundHashesForFiles.has_value() && !foundHashesForFiles->empty();
         {
             Timer timeit(gs.tracer(), "incremental_naming");
@@ -1526,7 +1526,7 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
 
         writer.String("path");
         if (sym.exists() && sym.loc(gs).exists()) {
-            writer.String(std::string(sym.loc(gs).file().data(gs).path()));
+            writer.String(string(sym.loc(gs).file().data(gs).path()));
 
         } else {
             writer.String("<none>");

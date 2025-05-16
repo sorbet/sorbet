@@ -6,8 +6,9 @@
 #include "common/common.h"
 #include "test/helpers/lsp.h"
 
-namespace sorbet::test::lsp {
 using namespace std;
+
+namespace sorbet::test::lsp {
 using namespace sorbet::realmain::lsp;
 
 // Adds two new files that have errors, and asserts that Sorbet returns errors for both of them.
@@ -617,7 +618,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "RejectsUnrecognizedRequests") {
     REQUIRE_FALSE(r.result);
     REQUIRE(r.error);
     auto &error = *r.error;
-    REQUIRE_NE(error->message.find("Unsupported LSP method"), std::string::npos);
+    REQUIRE_NE(error->message.find("Unsupported LSP method"), string::npos);
     REQUIRE_EQ(error->code, (int)LSPErrorCodes::MethodNotFound);
 }
 
@@ -633,7 +634,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsThatDontTypecheck") {
     REQUIRE_FALSE(r.result);
     REQUIRE(r.error);
     auto &error = *r.error;
-    REQUIRE_NE(error->message.find("Unable to deserialize LSP request"), std::string::npos);
+    REQUIRE_NE(error->message.find("Unable to deserialize LSP request"), string::npos);
     REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidParams);
 }
 
@@ -788,7 +789,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "DoesNotCrashOnFormattingNonWorkspaceURIs") {
     // We don't support formatting ignored or unknown files, so the response must be an error.
     auto error = std::move(resp.front()->asResponse().error);
     REQUIRE(error.has_value());
-    REQUIRE_NE(error.value()->message.find("Unable to format ignored/unknown file"), std::string::npos);
+    REQUIRE_NE(error.value()->message.find("Unable to format ignored/unknown file"), string::npos);
 }
 
 // Tests that Sorbet reports metrics about the request's response status for certain requests
@@ -1019,7 +1020,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "FindAllReferencesWithoutCacheWorks") {
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "OpeningExistingFilesTakesTheFastPath") {
-    std::vector<std::pair<std::string, std::string>> files{
+    vector<pair<string, string>> files{
         {"a.rb", "# typed: true\n"
                  "class A\n"
                  "end\n"},

@@ -29,8 +29,8 @@ bool isComment(string_view line) {
 
 } // namespace
 
-void ConfigParser::readArgsFromFile(std::shared_ptr<spdlog::logger> logger, string_view filename,
-                                    std::vector<std::string> &stringArgs) {
+void ConfigParser::readArgsFromFile(shared_ptr<spdlog::logger> logger, string_view filename,
+                                    vector<string> &stringArgs) {
     try {
         string argsP = FileOps::read(string(filename));
         string_view argsPView = argsP;
@@ -53,10 +53,10 @@ void ConfigParser::readArgsFromFile(std::shared_ptr<spdlog::logger> logger, stri
     }
 }
 
-cxxopts::ParseResult ConfigParser::parseConfig(std::shared_ptr<spdlog::logger> logger, int &argc, char **&argv,
+cxxopts::ParseResult ConfigParser::parseConfig(shared_ptr<spdlog::logger> logger, int &argc, char **&argv,
                                                cxxopts::Options options) {
     // Pointers into those args will be passed in argv
-    std::vector<std::string> stringArgs;
+    vector<string> stringArgs;
 
     if (argc > 0) {
         // $0 / $PROGRAM_NAME should always be first
@@ -86,7 +86,7 @@ cxxopts::ParseResult ConfigParser::parseConfig(std::shared_ptr<spdlog::logger> l
     }
 
     // Recompose the `argv` array from what we parsed previously
-    std::vector<char *> args;
+    vector<char *> args;
     args.reserve(stringArgs.size());
     for (auto &arg : stringArgs) {
         args.emplace_back(const_cast<char *>(arg.c_str()));

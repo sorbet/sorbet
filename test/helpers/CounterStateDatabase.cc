@@ -2,8 +2,9 @@
 // ^ Violates linting rules, so include first.
 #include "test/helpers/CounterStateDatabase.h"
 
-namespace sorbet::test::lsp {
 using namespace std;
+
+namespace sorbet::test::lsp {
 CounterStateDatabase::CounterStateDatabase(CounterState counters) : counters(move(counters)) {
     CHECK_FALSE(this->counters.hasNullCounters());
     // Combines counters with the same name but different char* pointers.
@@ -66,7 +67,7 @@ CounterStateDatabase::getTimings(ConstExprStr counter, vector<pair<ConstExprStr,
     for (const auto &timing : counters.counters->timings) {
         auto timing_tags_size = timing.tags == nullptr ? 0 : timing.tags->size();
         if (strncmp(timing.measure, counter.str, counter.size + 1) == 0 && timing_tags_size >= tags.size()) {
-            absl::flat_hash_map<std::string, const char *> timingTags;
+            absl::flat_hash_map<string, const char *> timingTags;
             if (timing.tags != nullptr) {
                 for (const auto &tag : *timing.tags) {
                     timingTags[tag.first] = tag.second;

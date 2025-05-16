@@ -369,7 +369,7 @@ struct GuessOverloadCandidate {
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
-    vector<std::pair<MethodRef, size_t>> allCandidates;
+    vector<pair<MethodRef, size_t>> allCandidates;
 
     { // create candidates and sort them by number of arguments(stable by symbol id)
         size_t i = 0;
@@ -381,7 +381,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             if (!overload.exists()) {
                 Exception::raise("Corruption of overloads?");
             } else {
-                allCandidates.emplace_back(std::make_pair(overload, getArity(gs, overload)));
+                allCandidates.emplace_back(make_pair(overload, getArity(gs, overload)));
                 current = overload;
             }
         }
@@ -2591,16 +2591,16 @@ private:
         }
     }
 
-    static std::optional<int> getArityForBlock(const TypePtr &blockType) {
+    static optional<int> getArityForBlock(const TypePtr &blockType) {
         if (auto appliedType = cast_type<AppliedType>(blockType)) {
             return Types::getProcArity(*appliedType);
         }
 
-        return std::nullopt;
+        return nullopt;
     }
 
-    static std::vector<ArgInfo::ArgFlags> argInfoByArity(std::optional<int> fixedArity) {
-        std::vector<ArgInfo::ArgFlags> res;
+    static vector<ArgInfo::ArgFlags> argInfoByArity(optional<int> fixedArity) {
+        vector<ArgInfo::ArgFlags> res;
         if (fixedArity) {
             for (int i = 0; i < *fixedArity; i++) {
                 res.emplace_back();
@@ -2655,7 +2655,7 @@ private:
                 // Create a new proc of correct arity, with everything as untyped,
                 // and then use this type instead of passedInBlockType in later subtype checks.
                 // This allows the generic parameters to be instantiated with untyped rather than bottom.
-                if (std::optional<int> procArity = Magic_callWithBlock::getArityForBlock(nonNilableBlockType)) {
+                if (optional<int> procArity = Magic_callWithBlock::getArityForBlock(nonNilableBlockType)) {
                     vector<core::TypePtr> targs(*procArity + 1, core::Types::untypedUntracked());
                     auto procWithCorrectArity = core::Symbols::Proc(*procArity);
                     passedInBlockType = make_type<core::AppliedType>(procWithCorrectArity, move(targs));
@@ -2772,7 +2772,7 @@ public:
         TypePtr finalBlockType =
             Magic_callWithBlock::typeToProc(gs, *args.args[2], args.locs.file, args.locs.call, args.locs.args[2],
                                             args.locs.fun, args.originForUninitialized, args.suppressErrors);
-        std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
+        optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         core::SendAndBlockLink link{fn, Magic_callWithBlock::argInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
@@ -2886,7 +2886,7 @@ public:
         TypePtr finalBlockType =
             Magic_callWithBlock::typeToProc(gs, *args.args[4], args.locs.file, args.locs.call, args.locs.args[4],
                                             args.locs.fun, args.originForUninitialized, args.suppressErrors);
-        std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
+        optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         core::SendAndBlockLink link{fn, Magic_callWithBlock::argInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
@@ -4241,7 +4241,7 @@ public:
             return;
         }
 
-        std::optional<int> numberOfPositionalBlockParams = args.block->fixedArity();
+        optional<int> numberOfPositionalBlockParams = args.block->fixedArity();
         if (!numberOfPositionalBlockParams || *numberOfPositionalBlockParams > core::Symbols::MAX_PROC_ARITY) {
             res.returnType = core::Types::procClass();
             return;

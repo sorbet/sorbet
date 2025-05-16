@@ -6,8 +6,9 @@
 #include "test/helpers/lsp.h"
 #include "test/lsp/ProtocolTest.h"
 
-namespace sorbet::test::lsp {
 using namespace std;
+
+namespace sorbet::test::lsp {
 using namespace sorbet::realmain::lsp;
 
 namespace {

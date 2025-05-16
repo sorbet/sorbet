@@ -7,12 +7,12 @@
 using namespace std;
 
 namespace sorbet::resolver {
-std::string getIndent(core::Context ctx, const core::Loc loc) {
+string getIndent(core::Context ctx, const core::Loc loc) {
     auto [_, indentLen] = loc.findStartOfIndentation(ctx);
     return string(indentLen, ' ');
 }
 
-std::string indented(const std::string &s) {
+string indented(const string &s) {
     vector<string_view> lines = absl::StrSplit(s, '\n');
     return fmt::format("{}", fmt::map_join(lines, "\n", [](auto line) -> string { return fmt::format("  {}", line); }));
 }

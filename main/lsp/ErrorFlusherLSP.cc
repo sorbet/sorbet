@@ -11,7 +11,7 @@ bool ErrorFlusherLSP::wouldFlushErrors(core::FileRef file) const {
 
 void ErrorFlusherLSP::flushErrors(spdlog::logger &logger, const core::GlobalState &gs, core::FileRef file,
                                   vector<unique_ptr<core::ErrorQueueMessage>> errors) {
-    vector<std::unique_ptr<core::Error>> errorsAccumulated;
+    vector<unique_ptr<core::Error>> errorsAccumulated;
 
     for (auto &error : errors) {
         if (error->kind == core::ErrorQueueMessage::Kind::Error) {

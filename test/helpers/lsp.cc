@@ -10,8 +10,9 @@
 #include "main/lsp/requests/initialize.h"
 #include "test/helpers/lsp.h"
 
-namespace sorbet::test {
 using namespace std;
+
+namespace sorbet::test {
 
 string filePathToUri(const LSPConfiguration &config, string_view filePath) {
     return fmt::format("{}/{}", config.getClientConfig().rootUri, filePath);
@@ -29,16 +30,16 @@ string uriToFilePath(const LSPConfiguration &config, string_view uri) {
 }
 
 template <typename T = DynamicRegistrationOption>
-std::unique_ptr<T> makeDynamicRegistrationOption(bool dynamicRegistration) {
-    auto option = std::make_unique<T>();
+unique_ptr<T> makeDynamicRegistrationOption(bool dynamicRegistration) {
+    auto option = make_unique<T>();
     option->dynamicRegistration = dynamicRegistration;
     return option;
 };
 
 /** Constructs a vector with all enum values from MIN to MAX. Assumes a contiguous enum and properly chosen min/max
  * values. Our serialization/deserialization code will throw if we pick an improper value. */
-template <typename T, T MAX, T MIN> std::vector<T> getAllEnumKinds() {
-    std::vector<T> symbols;
+template <typename T, T MAX, T MIN> vector<T> getAllEnumKinds() {
+    vector<T> symbols;
     for (int i = (int)MIN; i <= (int)MAX; i++) {
         symbols.push_back((T)i);
     }
@@ -142,10 +143,10 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities(bo
     return capabilities;
 }
 
-unique_ptr<InitializeParams>
-makeInitializeParams(std::optional<variant<string, JSONNullObject>> rootPath, variant<string, JSONNullObject> rootUri,
-                     bool supportsMarkdown, bool supportsCodeActionResolve,
-                     std::optional<std::unique_ptr<SorbetInitializationOptions>> initOptions) {
+unique_ptr<InitializeParams> makeInitializeParams(optional<variant<string, JSONNullObject>> rootPath,
+                                                  variant<string, JSONNullObject> rootUri, bool supportsMarkdown,
+                                                  bool supportsCodeActionResolve,
+                                                  optional<unique_ptr<SorbetInitializationOptions>> initOptions) {
     auto initializeParams = make_unique<InitializeParams>(rootUri, make_unique<ClientCapabilities>());
     if (rootPath) {
         initializeParams->rootPath = rootPath;
@@ -169,14 +170,14 @@ makeInitializeParams(std::optional<variant<string, JSONNullObject>> rootPath, va
     return initializeParams;
 }
 
-unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int line, int character) {
+unique_ptr<LSPMessage> makeDefinitionRequest(int id, string_view uri, int line, int character) {
     return make_unique<LSPMessage>(make_unique<RequestMessage>(
         "2.0", id, LSPMethod::TextDocumentDefinition,
         make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(uri)),
                                                 make_unique<Position>(line, character))));
 }
 
-unique_ptr<LSPMessage> makeReferenceRequest(int id, std::string_view uri, int line, int character, bool includeDecl) {
+unique_ptr<LSPMessage> makeReferenceRequest(int id, string_view uri, int line, int character, bool includeDecl) {
     return make_unique<LSPMessage>(
         make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentReferences,
                                     make_unique<ReferenceParams>(make_unique<TextDocumentIdentifier>(string(uri)),
@@ -184,14 +185,14 @@ unique_ptr<LSPMessage> makeReferenceRequest(int id, std::string_view uri, int li
                                                                  make_unique<ReferenceContext>(includeDecl))));
 }
 
-unique_ptr<LSPMessage> makeHover(int id, std::string_view uri, int line, int character) {
+unique_ptr<LSPMessage> makeHover(int id, string_view uri, int line, int character) {
     return make_unique<LSPMessage>(make_unique<RequestMessage>(
         "2.0", id, LSPMethod::TextDocumentHover,
         make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(uri)),
                                                 make_unique<Position>(line, character))));
 }
 
-unique_ptr<LSPMessage> makeCodeAction(int id, std::string_view uri, int line, int character) {
+unique_ptr<LSPMessage> makeCodeAction(int id, string_view uri, int line, int character) {
     auto textDocument = make_unique<TextDocumentIdentifier>(string(uri));
     auto range = make_unique<Range>(make_unique<Position>(line, character), make_unique<Position>(line, character));
     auto context = make_unique<CodeActionContext>(vector<unique_ptr<Diagnostic>>{});
@@ -200,14 +201,14 @@ unique_ptr<LSPMessage> makeCodeAction(int id, std::string_view uri, int line, in
                                     make_unique<CodeActionParams>(move(textDocument), move(range), move(context))));
 }
 
-unique_ptr<LSPMessage> makeCompletion(int id, std::string_view uri, int line, int character) {
+unique_ptr<LSPMessage> makeCompletion(int id, string_view uri, int line, int character) {
     return make_unique<LSPMessage>(
         make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentCompletion,
                                     make_unique<CompletionParams>(make_unique<TextDocumentIdentifier>(string(uri)),
                                                                   make_unique<Position>(line, character))));
 }
 
-unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view query) {
+unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, string_view query) {
     return make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::WorkspaceSymbol,
                                                                make_unique<WorkspaceSymbolParams>(string(query))));
 }
@@ -488,7 +489,7 @@ unique_ptr<LSPMessage> makeClose(string_view uri) {
     return make_unique<LSPMessage>(move(didCloseNotif));
 }
 
-std::unique_ptr<LSPMessage> makeConfigurationChange(std::unique_ptr<DidChangeConfigurationParams> params) {
+unique_ptr<LSPMessage> makeConfigurationChange(unique_ptr<DidChangeConfigurationParams> params) {
     auto changeConfigNotification =
         make_unique<NotificationMessage>("2.0", LSPMethod::WorkspaceDidChangeConfiguration, move(params));
     return make_unique<LSPMessage>(move(changeConfigNotification));

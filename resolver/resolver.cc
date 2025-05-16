@@ -173,7 +173,7 @@ private:
 
         bool isSuperclass; // true if superclass, false for mixin
         bool isInclude;    // true if include, false if extend
-        std::optional<uint16_t> mixinIndex;
+        optional<uint16_t> mixinIndex;
 
         AncestorResolutionItem() = default;
         AncestorResolutionItem(AncestorResolutionItem &&rhs) noexcept = default;
@@ -1119,7 +1119,7 @@ public:
                     // If the insert succeeds below, the current definition is the first one.
                     // We need to use the first def for out-of-order checking, since any
                     // reference *before* the first def will be out of order.
-                    firstDefinitionLocs.insert(std::make_pair(sym, declLoc));
+                    firstDefinitionLocs.insert(make_pair(sym, declLoc));
                 }
             }
         }
@@ -1273,7 +1273,7 @@ public:
                     // If the insert succeeds below, the current definition is the first one.
                     // We need to use the first def for out-of-order checking, since any
                     // reference *before* the first def will be out of order.
-                    firstDefinitionLocs.insert(std::make_pair(id->symbol(), declLoc));
+                    firstDefinitionLocs.insert(make_pair(id->symbol(), declLoc));
                 }
             }
         }
@@ -1830,7 +1830,7 @@ class ResolveTypeMembersAndFieldsWalk {
     bool trackDependencies_ = false;
     vector<bool> classOfDepth_;
     vector<core::SymbolRef> dependencies_;
-    std::vector<int> nestedBlockCounts;
+    vector<int> nestedBlockCounts;
     vector<bool> inFieldAssign;
 
     void extendClassOfDepth(ast::Send &send) {
@@ -2960,7 +2960,7 @@ public:
 
     static ResolveTypeMembersAndFieldsResult
     run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
-        std::optional<absl::Span<const core::ClassOrModuleRef>> symbolsToRecompute) {
+        optional<absl::Span<const core::ClassOrModuleRef>> symbolsToRecompute) {
         Timer timeit(gs.tracer(), "resolver.type_params");
 
         auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
@@ -3256,9 +3256,9 @@ private:
     }
 
     struct OverloadedMethodArgInformation {
-        std::vector<core::ArgInfo> posArgs;
-        std::vector<core::ArgInfo> kwArgs;
-        std::optional<core::ArgInfo> blkArg;
+        vector<core::ArgInfo> posArgs;
+        vector<core::ArgInfo> kwArgs;
+        optional<core::ArgInfo> blkArg;
     };
 
     // This structure serves double duty: it holds information about a single sig and the
@@ -3271,7 +3271,7 @@ private:
         bool hasMissingArgument = false;
 
         // This is used solely in the information for a single sig.
-        std::optional<OverloadedMethodArgInformation> args;
+        optional<OverloadedMethodArgInformation> args;
 
         void merge(OverloadedMethodSigInformation &other) {
             this->hasKwArgs &= other.hasKwArgs;
@@ -3660,7 +3660,7 @@ private:
 
     static bool hasCompatibleOverloadedSigsWithKwArgs(core::Context ctx, int numSigs,
                                                       const OverloadedMethodSigInformation &info,
-                                                      const std::vector<OverloadedMethodArgInformation> &args) {
+                                                      const vector<OverloadedMethodArgInformation> &args) {
         if (numSigs != 2) {
             return false;
         }
@@ -3710,8 +3710,8 @@ public:
         // Unique overload names must have an index that's > 0 associated with them, so we start `i` at `0` to ensure
         // that the first iteration of the loop it's at `1`.
         int i = 0;
-        std::optional<OverloadedMethodSigInformation> combinedInfo;
-        std::vector<OverloadedMethodArgInformation> args;
+        optional<OverloadedMethodSigInformation> combinedInfo;
+        vector<OverloadedMethodArgInformation> args;
         for (auto &sig : sigs) {
             i++;
             core::MethodRef overloadSym;
@@ -3937,7 +3937,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
-    auto computeAllSymbols = std::nullopt;
+    auto computeAllSymbols = nullopt;
     finalizeSymbols(gs, computeAllSymbols);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);

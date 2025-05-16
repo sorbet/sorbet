@@ -18,7 +18,7 @@ rbs_string_t makeRBSString(const string &str) {
 } // namespace
 
 unique_ptr<parser::Node>
-SignatureTranslator::translateAssertionType(vector<std::pair<core::LocOffsets, core::NameRef>> typeParams,
+SignatureTranslator::translateAssertionType(vector<pair<core::LocOffsets, core::NameRef>> typeParams,
                                             const rbs::RBSDeclaration &assertion) {
     rbs_string_t rbsString = makeRBSString(assertion.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];

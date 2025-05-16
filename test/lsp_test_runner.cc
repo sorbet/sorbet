@@ -13,8 +13,8 @@
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
 
-namespace sorbet::test {
 using namespace std;
+namespace sorbet::test {
 
 string singleTest;
 string webTraceFile;
@@ -353,7 +353,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
               back_inserter(ignoredCodeActionKinds), getCodeActionKind);
 
     auto errors = RangeAssertion::getErrorAssertions(assertions);
-    UnorderedMap<string, std::vector<std::shared_ptr<RangeAssertion>>> errorsByFilename;
+    UnorderedMap<string, vector<shared_ptr<RangeAssertion>>> errorsByFilename;
     for (auto &error : errors) {
         errorsByFilename[error->filename].emplace_back(error);
     }
@@ -525,14 +525,14 @@ void verifyTypecheckRunInfo(const string &errorPrefix, vector<unique_ptr<LSPMess
 
 TEST_CASE("LSPTest") {
     /** The path to the test Ruby files on disk */
-    vector<std::string> filenames;
-    std::unique_ptr<LSPWrapper> lspWrapper;
+    vector<string> filenames;
+    unique_ptr<LSPWrapper> lspWrapper;
 
     /** Test expectations. */
     Expectations test = Expectations::getExpectations(singleTest);
 
     /** All test assertions ordered by (filename, range, message). */
-    std::vector<std::shared_ptr<RangeAssertion>> assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    vector<shared_ptr<RangeAssertion>> assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
 
     /** The next ID to use when sending an LSP message. */
     int nextId = 0;
@@ -714,7 +714,7 @@ TEST_CASE("LSPTest") {
             CHECK_GE(entryAssertions.size(), 1);
 
             // Collect importUsageAssertions into a separate collection to handle them differently.
-            std::vector<shared_ptr<RangeAssertion>> importUsageAssertions;
+            vector<shared_ptr<RangeAssertion>> importUsageAssertions;
             entryAssertions.erase(std::remove_if(entryAssertions.begin(), entryAssertions.end(),
                                                  [&](auto &assertion) -> bool {
                                                      if (dynamic_pointer_cast<ImportUsageAssertion>(assertion)) {
@@ -848,7 +848,7 @@ TEST_CASE("LSPTest") {
             auto errorPrefix = fmt::format("[*.{}.rbupdate] ", version);
             const auto &updates = test.sourceLSPFileUpdates[version];
             vector<unique_ptr<LSPMessage>> lspUpdates;
-            UnorderedMap<std::string, std::shared_ptr<core::File>> updatesAndContents;
+            UnorderedMap<string, shared_ptr<core::File>> updatesAndContents;
 
             for (const auto &update : updates) {
                 auto originalFile = test.folder + update.first;
@@ -934,9 +934,9 @@ TEST_CASE("LSPTest") {
 int main(int argc, char *argv[]) {
     cxxopts::Options options("lsp_test_corpus", "Test corpus for Sorbet's language server");
     options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
-                                                       cxxopts::value<std::string>()->default_value(""), "testpath");
+                                                       cxxopts::value<string>()->default_value(""), "testpath");
     options.add_options("advanced")("web-trace-file", "Web trace file. For use with chrome about://tracing",
-                                    cxxopts::value<std::string>()->default_value(""), "file");
+                                    cxxopts::value<string>()->default_value(""), "file");
     auto res = options.parse(argc, argv);
 
     if (res.count("single_test") != 1) {
@@ -944,8 +944,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    sorbet::test::singleTest = res["single_test"].as<std::string>();
-    sorbet::test::webTraceFile = res["web-trace-file"].as<std::string>();
+    sorbet::test::singleTest = res["single_test"].as<string>();
+    sorbet::test::webTraceFile = res["web-trace-file"].as<string>();
 
     doctest::Context context(argc, argv);
     return context.run();

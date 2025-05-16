@@ -11,7 +11,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 DocumentFormattingTask::DocumentFormattingTask(const LSPConfiguration &config, MessageId id,
-                                               std::unique_ptr<DocumentFormattingParams> params)
+                                               unique_ptr<DocumentFormattingParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentFormatting), params(move(params)) {}
 
 // Processed on the preprocess thread so it doesn't wait for typechecking.
@@ -83,7 +83,7 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
         config.output->write(move(response));
         return;
     }
-    std::string_view sourceView = maybeFileContents.value();
+    string_view sourceView = maybeFileContents.value();
 
     // Don't format `__package.rb` files, since currently formatting them
     // can potentially break some pay-server tooling
