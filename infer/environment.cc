@@ -1,7 +1,6 @@
 #include "environment.h"
 #include "absl/strings/match.h"
 #include "common/sort/sort.h"
-#include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/GlobalState.h"
 #include "core/TypeConstraint.h"

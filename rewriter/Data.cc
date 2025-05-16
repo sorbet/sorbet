@@ -1,12 +1,10 @@
 #include "rewriter/Data.h"
-#include "absl/strings/match.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
 #include "core/errors/rewriter.h"
-#include "rewriter/rewriter.h"
 #include "rewriter/util/Util.h"
 
 using namespace std;

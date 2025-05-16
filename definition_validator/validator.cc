@@ -1,4 +1,3 @@
-#include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
@@ -6,7 +5,6 @@
 #include "ast/treemap/treemap.h"
 #include "common/sort/sort.h"
 #include "common/timers/Timer.h"
-#include "core/TypeErrorDiagnostics.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
 #include "core/source_generator/source_generator.h"
@@ -15,7 +13,6 @@
 
 #include "core/sig_finder/sig_finder.h"
 #include "definition_validator/variance.h"
-#include <regex>
 
 using namespace std;
 

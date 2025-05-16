@@ -7,9 +7,6 @@
 #include "common/statsd/statsd.h"
 #include "common/timers/Timer.h"
 #include "common/web_tracer_framework/tracing.h"
-#include "core/errors/internal.h"
-#include "core/errors/namer.h"
-#include "core/errors/resolver.h"
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/LSPConfiguration.h"
@@ -20,7 +17,6 @@
 #include "main/lsp/json_types.h"
 #include "main/lsp/notifications/sorbet_workspace_edit.h"
 #include "main/lsp/watchman/WatchmanProcess.h"
-#include "sorbet_version/sorbet_version.h"
 
 using namespace std;
 
