@@ -27,6 +27,7 @@ cc_library(
         "//common/exception",
         "//common/os",
         "@com_google_absl//absl/synchronization",
+        "@com_google_absl//absl/types:span",
         "@concurrentqueue",
         "@spdlog",
     ],
