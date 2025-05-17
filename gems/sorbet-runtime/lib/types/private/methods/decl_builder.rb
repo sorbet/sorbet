@@ -2,7 +2,7 @@
 # typed: true
 
 module T::Private::Methods
-  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :raw)
+  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :raw, :narrows_to)
 
   class DeclBuilder
     attr_reader :decl
@@ -27,7 +27,8 @@ module T::Private::Methods
         ARG_NOT_PROVIDED, # on_failure
         nil, # override_allow_incompatible
         ARG_NOT_PROVIDED, # type_parameters
-        raw
+        raw,
+        ARG_NOT_PROVIDED # narrows
       )
     end
 
@@ -55,6 +56,21 @@ module T::Private::Methods
       end
 
       decl.params = params
+
+      self
+    end
+
+    def narrows_to(type)
+      check_live!
+
+      if decl.returns.is_a?(T::Private::Types::Void)
+        raise BuilderError.new("You can't call .narrows_to after calling .void.")
+      end
+      if !decl.narrows_to.equal?(ARG_NOT_PROVIDED)
+        raise BuilderError.new("You can't call .narrows_to multiple times in a signature.")
+      end
+
+      decl.narrows_to = type
 
       self
     end

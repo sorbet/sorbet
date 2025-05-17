@@ -533,6 +533,33 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
             }
             case core::Names::onFailure().rawId():
                 break;
+            case core::Names::narrowsTo().rawId(): {
+                if (send->hasKwArgs()) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("`{}` does not accept keyword arguments", send->fun.show(ctx));
+                    }
+                    break;
+                }
+
+                if (send->numPosArgs() != 1) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", "returns", 1,
+                                    send->numPosArgs());
+                    }
+                    break;
+                }
+
+                auto maybeReturns = getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent, args);
+                if (!maybeReturns.has_value()) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("`{}` must be given a class or module as its argument", "narrows_to");
+                    }
+                }
+
+                sig.narrowsTo = move(maybeReturns.value());
+                sig.narrowsToLoc = ctx.locAt(send->loc);
+                break;
+            }
             case core::Names::final_().rawId():
                 if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                     reportedInvalidMethod = true;

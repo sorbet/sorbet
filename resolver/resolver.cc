@@ -3354,6 +3354,12 @@ private:
         bool seenOptional = false;
 
         methodInfo->resultType = sig.returns;
+        methodInfo->narrowsTo = sig.narrowsTo;
+        // if (sig.narrowsTo != nullptr) {
+        //     if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
+        //         e.setHeader("Malformed `{}`: Narrowing type `{}` is not allowed here", "sig", sig.narrowsTo.show(ctx));
+        //     }
+        // }
         int i = -1;
         for (auto &arg : methodInfo->arguments) {
             ++i;

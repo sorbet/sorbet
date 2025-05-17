@@ -129,6 +129,7 @@ NameDef names[] = {
     {"checked"},
     {"never"},
     {"onFailure", "on_failure"},
+    {"narrowsTo", "narrows_to"},
 
     {"all"},
     {"any"},
@@ -365,6 +366,7 @@ NameDef names[] = {
     {"lambdaTLet", "<lambda T.let>"},
     {"returnType", "return_type"},
     {"nil_p", "nil?"},
+    {"custom_p", "custom?"},
     {"blank_p", "blank?"},
     {"present_p", "present?"},
     {"nil"},

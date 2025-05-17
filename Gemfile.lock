@@ -1,0 +1,38 @@
+PATH
+  remote: gems/sorbet-runtime
+  specs:
+    sorbet-runtime (0.0.0)
+
+PATH
+  remote: gems/sorbet-static-and-runtime
+  specs:
+    sorbet-static-and-runtime (0.0.0)
+      sorbet (= 0.0.0)
+      sorbet-runtime (= 0.0.0)
+
+PATH
+  remote: gems/sorbet-static
+  specs:
+    sorbet-static (0.0.0-arm64-darwin-24)
+
+PATH
+  remote: gems/sorbet
+  specs:
+    sorbet (0.0.0)
+      sorbet-static (= 0.0.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+
+PLATFORMS
+  arm64-darwin-24
+
+DEPENDENCIES
+  sorbet!
+  sorbet-runtime!
+  sorbet-static!
+  sorbet-static-and-runtime!
+
+BUNDLED WITH
+   2.6.7
