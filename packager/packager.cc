@@ -255,6 +255,14 @@ public:
         return sccID_;
     }
 
+    // ID of the strongly-connected component that this package's tests are in, according to its graph of import
+    // dependencies
+    optional<int> testSccID_ = nullopt;
+
+    optional<int> testSccID() const {
+        return testSccID_;
+    }
+
     // PackageInfoImpl is the only implementation of PackageInfo
     static PackageInfoImpl &from(core::GlobalState &gs, core::packages::MangledName pkg) {
         ENFORCE(pkg.exists());
@@ -1682,8 +1690,10 @@ class ComputePackageSCCs {
 
     // DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
     // detecting SCCs.
-    void strongConnect(core::packages::MangledName pkgName, NodeInfo &infoAtEntry) {
-        auto *pkgInfoPtr = gs.packageDB().getPackageInfoNonConst(pkgName);
+    void strongConnect(core::packages::MangledName pkgName, NodeInfo &infoAtEntry,
+                       core::packages::ImportType edgeType) {
+        auto &packageDB = gs.packageDB();
+        auto *pkgInfoPtr = packageDB.getPackageInfoNonConst(pkgName);
         if (!pkgInfoPtr) {
             // This is to handle the case where the user imports a package that doesn't exist.
             return;
@@ -1697,7 +1707,7 @@ class ComputePackageSCCs {
         infoAtEntry.onStack = true;
 
         for (auto &i : pkgInfo.importedPackageNames) {
-            if (i.type == core::packages::ImportType::Test) {
+            if (i.type != edgeType || !i.name.mangledName.exists()) {
                 continue;
             }
             // We need to be careful with this; it's not valid after a call to `strongConnect`,
@@ -1705,7 +1715,7 @@ class ComputePackageSCCs {
             auto &importInfo = this->nodeMap[i.name.mangledName];
             if (importInfo.index == NodeInfo::UNVISITED) {
                 // This is a tree edge (ie. a forward edge that we haven't visited yet).
-                this->strongConnect(i.name.mangledName, importInfo);
+                this->strongConnect(i.name.mangledName, importInfo, edgeType);
 
                 // Need to re-lookup for the reason above.
                 auto &importInfo = this->nodeMap[i.name.mangledName];
@@ -1741,13 +1751,52 @@ class ComputePackageSCCs {
             // the same SCC ID.
             core::packages::MangledName poppedPkgName;
             const auto sccId = this->nextSCCId++;
+            core::packages::PackageDB::SCCNode node;
+            node.id = sccId;
+            node.type = edgeType;
+
+            // Set the SCC ids for all of the members of the SCC
             do {
                 poppedPkgName = this->stack.back();
+                node.members.push_back(poppedPkgName);
                 this->stack.pop_back();
                 this->nodeMap[poppedPkgName].onStack = false;
-                auto &poppedPkgInfo = PackageInfoImpl::from(*(gs.packageDB().getPackageInfoNonConst(poppedPkgName)));
-                poppedPkgInfo.sccID_ = sccId;
+
+                auto &poppedPkgInfo = PackageInfoImpl::from(*(packageDB.getPackageInfoNonConst(poppedPkgName)));
+                switch (edgeType) {
+                    case core::packages::ImportType::Normal: {
+                        poppedPkgInfo.sccID_ = sccId;
+                        break;
+                    }
+
+                    case core::packages::ImportType::Test: {
+                        poppedPkgInfo.testSccID_ = sccId;
+
+                        // Tests have an implicit dependency on their package's application code, but those should
+                        // already exist as we've already traversed the graph once.
+                        auto appSccId = poppedPkgInfo.sccID_;
+                        ENFORCE(appSccId.has_value());
+                        node.imports.insert(*appSccId);
+                        break;
+                    }
+                }
             } while (poppedPkgName != pkgName);
+
+            // Iterate the imports of each member, adding edges to those SCCs as well
+            for (auto name : node.members) {
+                auto &member = PackageInfoImpl::from(*(packageDB.getPackageInfoNonConst(name)));
+                for (auto &i : member.importedPackageNames) {
+                    if (i.type != edgeType || !i.name.mangledName.exists()) {
+                        continue;
+                    }
+
+                    auto sccId = packageDB.getPackageInfo(i.name.mangledName).sccID();
+                    ENFORCE(sccId.has_value());
+                    node.imports.insert(*sccId);
+                }
+            }
+
+            packageDB.pushSCCNode(move(node));
         }
     }
 
@@ -1758,10 +1807,31 @@ public:
     static void run(core::GlobalState &gs) {
         Timer timeit(gs.tracer(), "packager::computeSCCs");
         ComputePackageSCCs scc(gs);
+
+        // First, construct the SCCs for application code
         for (auto package : gs.packageDB().packages()) {
             auto &info = scc.nodeMap[package];
             if (info.index == NodeInfo::UNVISITED) {
-                scc.strongConnect(package, info);
+                scc.strongConnect(package, info, core::packages::ImportType::Normal);
+            }
+        }
+
+        // Next, traverse the test_import imports
+        scc.nodeMap.clear();
+        ENFORCE(scc.stack.empty());
+        for (auto package : gs.packageDB().packages()) {
+            auto &info = scc.nodeMap[package];
+            if (info.index == NodeInfo::UNVISITED) {
+                scc.strongConnect(package, info, core::packages::ImportType::Test);
+            }
+        }
+
+        for (auto &node : gs.packageDB().sccNodes()) {
+            fmt::println("SCC {}", node.id);
+
+            for (auto member : node.members) {
+                fmt::println("  - {}{}", node.type == core::packages::ImportType::Test ? "(test)" : "",
+                             member.owner.showFullName(gs));
             }
         }
     }

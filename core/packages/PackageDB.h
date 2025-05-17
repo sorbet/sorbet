@@ -39,6 +39,25 @@ public:
     const PackageInfo &getPackageInfo(MangledName mangledName) const;
     PackageInfo *getPackageInfoNonConst(MangledName mangledName);
 
+    using SCCId = uint32_t;
+
+    struct SCCNode {
+        // The other SCCNodes that this node imports.
+        UnorderedSet<SCCId> imports;
+
+        // The packages that make up this SCC.
+        std::vector<MangledName> members;
+
+        // The id of this node
+        SCCId id;
+
+        // What sort of node is this?
+        ImportType type;
+    };
+
+    SCCId pushSCCNode(SCCNode &&node);
+    absl::Span<const SCCNode> sccNodes() const;
+
     // Get mangled names for all packages.
     // Packages are ordered lexicographically with respect to the NameRef's that make up their
     // namespaces.
@@ -101,6 +120,13 @@ private:
 
     bool frozen = true;
     std::thread::id writerThread;
+
+    // This is the condensation of the package graph (the graph whose nodes are strongly connected components of the
+    // of the package graph).
+    std::vector<SCCNode> condensation;
+
+    // The roots of the condensation.
+    std::vector<SCCId> roots;
 
     friend class UnfreezePackages;
 };
