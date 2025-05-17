@@ -247,7 +247,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                 auto rbsSignatures = rbs::SigsRewriter(ctx, commentsByNode);
                 nodes = rbsSignatures.run(std::move(nodes));
 
-                auto rbsAssertions = rbs::AssertionsRewriter(ctx);
+                auto rbsAssertions = rbs::AssertionsRewriter(ctx, commentsByNode);
                 nodes = rbsAssertions.run(std::move(nodes));
             }
 
@@ -691,7 +691,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             auto rbsSignatures = rbs::SigsRewriter(ctx, commentsByNode);
             parseResult.tree = rbsSignatures.run(std::move(parseResult.tree));
 
-            auto rbsAssertions = rbs::AssertionsRewriter(ctx);
+            auto rbsAssertions = rbs::AssertionsRewriter(ctx, commentsByNode);
             parseResult.tree = rbsAssertions.run(std::move(parseResult.tree));
         }
         auto nodes = move(parseResult.tree);

@@ -38,4 +38,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   let3.foo().foo=(<cast:let>(["foo", "bar"], <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C String>)))
 
   <emptyTree>::<C T>.reveal_type(let3.foo())
+
+  class <emptyTree>::<C BracketsAssign><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:args, ::<root>::<C T>.untyped()).void()
+    end
+
+    def []=<<todo method>>(*args, &<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of []=>
+  end
+
+  brackets_assign = <emptyTree>::<C BracketsAssign>.new()
+
+  brackets_assign.[]=(::<root>::<C T>.unsafe("foo").unexisting_method())
+
+  brackets_assign.[]=(:a, ::<root>::<C T>.unsafe("bar").unexisting_method())
+
+  brackets_assign.[]=(:a, :b, ::<root>::<C T>.unsafe("baz").unexisting_method())
+
+  brackets_assign.[]=(:a, :b, :c, ::<root>::<C T>.unsafe("qux").unexisting_method())
+
+  ::<root>::<C T>.unsafe(<self>).unexisting_method=(42)
 end

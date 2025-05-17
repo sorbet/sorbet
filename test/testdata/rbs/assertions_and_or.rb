@@ -34,3 +34,17 @@ ARGV.first || ARGV.last #: as String
 y = ARGV.first && ARGV.last #: as String
 
 ARGV.first && ARGV.last #: as String
+
+(
+  ARGV.first #: as String?
+) || (
+  ARGV.last #: as String
+)
+
+ARGV.first || ( #: as String? # error: Unexpected RBS assertion comment found after `begin`
+  ARGV.last #: as String
+)
+
+ARGV.first && ( #: as String # error: Unexpected RBS assertion comment found after `begin`
+  ARGV.last #: as String
+)

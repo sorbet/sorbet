@@ -109,6 +109,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <emptyTree>::<C T>.reveal_type(cast7)
 
+  cast8 = ::<root>::<C T>.unsafe("a").random_method_name()
+
   must_x = <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
 
   must1 = ::<root>::<C T>.must(must_x)
