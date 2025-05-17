@@ -21,9 +21,8 @@ sequenceDiagram
   LSPIndexer ->> LSPLoop: TaskQueue::pause
   LSPLoop ->> LSPTypechecker: InitializedTask::run
   LSPTypechecker ->> LSPTypechecker: LSPTypechecker::runSlowPath
-  Note right of LSPTypechecker: Copy the GlobalState<br/>after indexing
   LSPTypechecker --) LSPLoop: IndexerInitializedTask (at front of TaskQueue)
-  Note left of LSPTypechecker: Transfer the file table<br/>copy via the task
+  Note left of LSPTypechecker: Copy the typechecker's<br/>file table
   LSPTypechecker ->> LSPLoop: TaskQueue::resume
   LSPLoop ->> LSPIndexer: IndexerInitializedTask::index
   Note left of LSPIndexer: Install the file table copy<br/>in LSPIndexer's GlobalState
