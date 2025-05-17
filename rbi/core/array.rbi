@@ -1701,10 +1701,10 @@ class Array < Object
   # a #=>  ["", "b", "c!", "d!"]
   # ```
   sig do
-    type_parameters(:U).params(
-        blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
+    params(
+        blk: T.proc.params(arg0: Elem).returns(Elem),
     )
-    .returns(T::Array[T.type_parameter(:U)])
+    .returns(T::Array[Elem])
   end
   sig {returns(T::Enumerator[Elem])}
   def map!(&blk); end
