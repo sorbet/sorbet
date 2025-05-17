@@ -1,3 +1,3 @@
 # typed: true
 
-def foo *rest, ...; end # error: ... after rest argument
+def foo *rest, ...; end # parser-error: ... after rest argument
