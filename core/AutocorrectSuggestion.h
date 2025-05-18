@@ -18,7 +18,7 @@ struct AutocorrectSuggestion {
 
     bool isDidYouMean;
 
-    AutocorrectSuggestion(std::string title, std::vector<Edit> edits, bool isDidYouMean = false)
+    AutocorrectSuggestion(std::string_view title, std::vector<Edit> edits, bool isDidYouMean = false)
         : title(title), edits(edits), isDidYouMean(isDidYouMean) {}
 
     // Reads all the files to be edited, and then accumulates all the edits that need to be applied
