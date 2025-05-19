@@ -45,9 +45,9 @@ TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
 TypePtr Types::any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     auto ret = lub(gs, t1, t2);
-    SLOW_ENFORCE(Types::isSubType(gs, t1, ret), "\n{}\nis not a super type of\n{}\nwas lubbing with {}",
+    SLOW_ENFORCE(Types::isSubType(gs, t1, ret), "\n{}\nis not a supertype of\n{}\nwas lubbing with {}",
                  ret.toString(gs), t1.toString(gs), t2.toString(gs));
-    SLOW_ENFORCE(Types::isSubType(gs, t2, ret), "\n{}\nis not a super type of\n{}\nwas lubbing with {}",
+    SLOW_ENFORCE(Types::isSubType(gs, t2, ret), "\n{}\nis not a supertype of\n{}\nwas lubbing with {}",
                  ret.toString(gs), t2.toString(gs), t1.toString(gs));
 
     //  TODO: @dmitry, reenable

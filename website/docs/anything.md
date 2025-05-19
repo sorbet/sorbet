@@ -73,7 +73,7 @@ that the type is what they expect.
 - `T.anything` is a supertype of all other types, **but** is not a subtype of
   any other type (except itself).
 
-- `T.untyped` is a super type of all other types, **and** is a subtype of all
+- `T.untyped` is a supertype of all other types, **and** is a subtype of all
   other types (which is a contradiction that lies at the core of a
   [gradual type system](gradual.md)).
 

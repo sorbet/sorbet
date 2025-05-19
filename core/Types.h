@@ -71,14 +71,14 @@ public:
     /** Greater lower bound: the widest type that is subtype of both t1 and t2 */
     static TypePtr all(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
-    /** Lower upper bound: the narrowest type that is super type of both t1 and t2 */
+    /** Lower upper bound: the narrowest type that is supertype of both t1 and t2 */
     static TypePtr any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
     /**
      * is every instance of  t1 an  instance of t2?
      *
      * The parameter `mode` controls whether or not `T.untyped` is
-     * considered to be a super type or subtype of all other types */
+     * considered to be a supertype or subtype of all other types */
 
     /**
      * The `errorDetailsCollector` parameter is used to pass additional details out of isSubType
@@ -106,7 +106,7 @@ public:
     static bool equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                      const TypePtr &t2, T &errorDetailsCollector);
 
-    /** check that t1 <: t2, but do not consider `T.untyped` as super type or a subtype of all other types */
+    /** check that t1 <: t2, but do not consider `T.untyped` as supertype or a subtype of all other types */
     static bool isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     static bool equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
