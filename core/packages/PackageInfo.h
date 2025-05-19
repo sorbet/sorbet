@@ -23,6 +23,7 @@ class PackageDB;
 
 enum class ImportType {
     Normal,
+    TestHelper,
     Test,
 };
 
