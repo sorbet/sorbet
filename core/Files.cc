@@ -89,6 +89,10 @@ bool isTestPath(string_view path) {
     return absl::EndsWith(path, ".test.rb") || absl::StrContains(path, "/test/");
 }
 
+bool isTestHelperPath(string_view path) {
+    return absl::StrContains(path, "/test/") && !absl::EndsWith(path, ".test.rb");
+}
+
 bool isPackageRBIPath(string_view path) {
     return absl::EndsWith(path, ".package.rbi");
 }
@@ -107,7 +111,7 @@ bool File::isPackagePath(string_view path) {
 }
 
 File::Flags::Flags(string_view path)
-    : hasIndexErrors(false), isPackagedTest(isTestPath(path)), hasPackageRBIPath(isPackageRBIPath(path)),
+    : hasIndexErrors(false), isPackagedTestHelper(isTestHelperPath(path)), isPackagedTest(isTestPath(path)), hasPackageRBIPath(isPackageRBIPath(path)),
       hasPackageRbPath(isPackagePath(path)), isOpenInClient(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)

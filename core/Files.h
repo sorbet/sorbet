@@ -100,6 +100,8 @@ private:
     struct Flags {
         // some reasonable invariants don't hold for invalid files
         bool hasIndexErrors : 1;
+        // only relevant in --stripe-packages mode: is the file contained in a `/test/` directory?
+        bool isPackagedTestHelper : 1;
         // only relevant in --stripe-packages mode: is the file a `.test.rb` file?
         bool isPackagedTest : 1;
         // Caches whether the file's path ends with `*.package.rbi`, i.e. whether the file is an RBI
