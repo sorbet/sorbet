@@ -399,7 +399,7 @@ public:
         }
 
         // If the imported symbol comes from the test namespace, we must also be in the test namespace.
-        if (otherFile.data(ctx).isPackagedTestHelper() && this->isAnyTestFile()) {
+        if ((otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) && !this->isAnyTestFile()) {
             if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                 e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
                             litSymbol.show(ctx));
