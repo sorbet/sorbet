@@ -435,9 +435,6 @@ public:
                                       currentImportType.value() == core::packages::ImportType::TestUnit &&
                                       this->fileType != FileType::TestUnitFile;
 
-        ctx.state.tracer().error("checkin' {} in {}", tree.toString(ctx), ctx.file.data(ctx).path());
-        ctx.state.tracer().error("  current file type: {}", this->fileType == FileType::TestUnitFile);
-
         if (!wasImported || testImportInProd || testUnitImportInHelper || !isExported) {
             auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
