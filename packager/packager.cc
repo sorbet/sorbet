@@ -818,6 +818,8 @@ bool isRootScopedDefinition(const ast::ConstantLit *lit) {
     return false;
 }
 
+// Some of this gets simpler after we move packager into namer, because we can stop defining package
+// symbols under PackageSpecRegistry.
 core::packages::MangledName packageForSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     // Skip until we get to the ClassOrModule things (ignore static-fields / type members to find package namespace)
     while (!sym.isClassOrModule()) {
@@ -1134,9 +1136,11 @@ private:
         auto reqMangledName = packageForNamespace(gs);
         if (reqMangledName.exists()) {
             auto &reqPkg = gs.packageDB().getPackageInfo(reqMangledName);
-            const auto &[scopeSym, _scopeLoc] = scope.back();
-            e.addErrorLine(reqPkg.declLoc(), "Must belong to this package, given constant name `{}`",
-                           scopeSym.show(gs));
+            if (reqPkg.exists()) {
+                const auto &[scopeSym, _scopeLoc] = scope.back();
+                e.addErrorLine(reqPkg.declLoc(), "Must belong to this package, given constant name `{}`",
+                               scopeSym.show(gs));
+            }
         }
     }
 };
