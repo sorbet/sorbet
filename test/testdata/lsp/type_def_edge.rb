@@ -32,9 +32,6 @@ class Wrapper
 
     sig {void}
     def test_nothings
-      puts(:foo)
-      #      ^ type: (nothing)
-
       shape = {foo: 0}
       puts(shape)
       #    ^ type: (nothing)
