@@ -62,6 +62,7 @@ public:
 
     // flag accessors
     bool isPackagedTest() const;
+    bool isPackagedTestHelper() const;
 
     bool hasIndexErrors() const;
     void setHasIndexErrors(bool value);
