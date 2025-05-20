@@ -25,10 +25,6 @@ namespace {
 
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 
-bool isTestNamespace(const core::NameRef ns) {
-    return ns == core::packages::PackageDB::TEST_NAMESPACE;
-}
-
 bool visibilityApplies(const core::GlobalState &gs, const core::packages::VisibleTo &vt,
                        core::packages::MangledName name) {
     if (vt.visibleToType == core::packages::VisibleToType::Wildcard) {
@@ -107,7 +103,7 @@ struct PackageName {
 
     // Pretty print the package's (user-observable) name (e.g. Foo::Bar)
     string toString(const core::GlobalState &gs) const {
-        return absl::StrJoin(fullName.parts, "::", core::packages::NameFormatter(gs));
+        return mangledName.owner.show(gs);
     }
 };
 
@@ -811,209 +807,72 @@ const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRe
     return nullptr;
 }
 
-// Binary search to find a packages index in the global packages list
-uint16_t findPackageIndex(core::Context ctx, const PackageInfoImpl &pkg) {
-    auto packages = ctx.state.packageDB().packages();
-    return std::lower_bound(packages.begin(), packages.end(), pkg.fullName(),
-                            [ctx](auto pkgName, auto &curFileFullName) {
-                                auto &pkg = ctx.state.packageDB().getPackageInfo(pkgName);
-                                return core::packages::PackageInfo::lexCmp(pkg.fullName(), curFileFullName);
-                            }) -
-           packages.begin();
+bool isRootScopedDefinition(const ast::ConstantLit *lit) {
+    while (lit != nullptr && lit->original() != nullptr) {
+        lit = ast::cast_tree<ast::ConstantLit>(lit->original()->scope);
+        if (lit != nullptr && lit->symbol() == core::Symbols::root()) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
-// Interface for traversing the tree of package namespaces.
-// Compactly represent current position in this tree with begin/end offsets. This relies on
-// lexicographic sorting of the packages vector. Push operations take advantage of binary search
-// to be O(log(end - begin)).
-//
-// For example with names=[Foo, Bar]
-// 0 Foo
-// 1 Foo::Bar::Baz    <-- begin
-// 2 Foo::Bar::Blub
-// 3 Foo::Buzz        <-- end
-// 4 Quuz::Bang
-// 5 Yaz
-// 6 <end of list>
-class PackageNamespaces final {
-    using Bound = pair<uint16_t, uint16_t>;
-
-    const absl::Span<const core::packages::MangledName> packages; // Mangled names sorted lexicographically
-    const PackageInfoImpl &filePkg;                               // Package for current file
-    // Current bounds:
-    uint16_t begin;
-    uint16_t end;
-
-    const bool isTestFile;
-    const uint16_t filePkgIdx;
-
-    // Count of pushes once we have narrowed down to one possible package:
-    int skips = 0;
-
-    vector<Bound> bounds;
-    vector<core::NameRef> nameParts;
-    vector<core::LocOffsets> namePartsLocs;
-    vector<pair<core::packages::MangledName, uint16_t>> curPkg;
-    core::NameRef foundTestNS = core::NameRef::noName();
-    core::LocOffsets foundTestNSLoc;
-
-    static constexpr uint16_t SKIP_BOUND_VAL = 0;
-
-public:
-    PackageNamespaces(core::Context ctx, const PackageInfoImpl &filePkg)
-        : packages(ctx.state.packageDB().packages()), filePkg(filePkg), begin(0), end(packages.size()),
-          isTestFile(ctx.file.data(ctx).isPackagedTest()), filePkgIdx(findPackageIndex(ctx, filePkg)) {
-        ENFORCE(packages.size() < numeric_limits<uint16_t>::max());
+core::packages::MangledName packageForSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
+    // Skip until we get to the ClassOrModule things (ignore static-fields / type members to find package namespace)
+    while (!sym.isClassOrModule()) {
+        sym = sym.owner(gs);
     }
 
-    int depth() const {
-        ENFORCE(nameParts.size() == namePartsLocs.size());
-        return nameParts.size();
+    vector<core::NameRef> fullNameReversed;
+
+    auto klassSym = sym.asClassOrModuleRef();
+    while (klassSym != core::Symbols::root()) {
+        ENFORCE(klassSym != core::Symbols::PackageSpecRegistry(), "Should only be called from non-__package.rb file");
+
+        fullNameReversed.emplace_back(klassSym.data(gs)->name);
+        klassSym = klassSym.data(gs)->owner;
     }
 
-    const vector<pair<core::NameRef, core::LocOffsets>> currentConstantName() const {
-        vector<pair<core::NameRef, core::LocOffsets>> res;
+    if (fullNameReversed.empty()) {
+        // This would be like, a static field at the top level?
+        return {};
+    }
 
-        if (foundTestNS.exists()) {
-            res.emplace_back(foundTestNS, foundTestNSLoc);
+    if (fullNameReversed.back() == core::packages::PackageDB::TEST_NAMESPACE) {
+        fullNameReversed.pop_back();
+    }
+
+    auto best = core::packages::MangledName(core::Symbols::PackageSpecRegistry());
+    for (auto it = fullNameReversed.rbegin(); it != fullNameReversed.rend(); it++) {
+        auto curr = best.owner.data(gs)->findMember(gs, *it);
+        if (!curr.exists()) {
+            return core::packages::MangledName(best);
         }
 
-        ENFORCE(nameParts.size() == namePartsLocs.size());
-        for (size_t i = 0; i < nameParts.size(); ++i) {
-            res.emplace_back(nameParts[i], namePartsLocs[i]);
-        }
-        return res;
+        ENFORCE(curr.isClassOrModule(), "All names on path to PackageSpec should be ClassOrModule");
+        best = core::packages::MangledName(curr.asClassOrModuleRef());
     }
 
-    core::packages::MangledName packageForNamespace() const {
-        if (curPkg.empty()) {
-            return core::packages::MangledName();
-        }
-        return curPkg.back().first;
+    if (best.owner == core::Symbols::PackageSpecRegistry()) {
+        return {};
     }
+    return best;
+}
 
-    bool onPackagePath(core::Context ctx) {
-        if (begin <= filePkgIdx && filePkgIdx < end) {
+bool ownsPackage(const core::GlobalState &gs, const core::packages::MangledName owningPkg,
+                 core::packages::MangledName pkg) {
+    auto owner = pkg.owner;
+    while (owner != core::Symbols::PackageSpecRegistry()) {
+        if (owner == owningPkg.owner) {
             return true;
         }
-        if (!curPkg.empty() && curPkg.back().first == filePkg.mangledName()) {
-            return true;
-        }
-        return false;
+
+        owner = owner.data(gs)->owner;
     }
 
-    void pushName(core::Context ctx, core::NameRef name, core::LocOffsets loc) {
-        if (skips > 0) {
-            skips++;
-            return;
-        }
-        bool boundsEmpty = bounds.empty();
-
-        if (isTestFile && boundsEmpty && !foundTestNS.exists()) {
-            if (isTestNamespace(name)) {
-                foundTestNS = name;
-                foundTestNSLoc = loc;
-                return;
-            } else if (!isTestOnlyPackage(ctx, filePkg)) {
-                // In test-only packages, code can freely be inside the package's namespace, or the
-                // package's test namespace (i.e., either Critic or Test::Critic).
-                // Convention would say that the former is for test helpers and the latter is for
-                // runnable tests, but there is nothing enforcing this convention in Sorbet.
-                //
-                // If this *not* a test-only package, set bounds such that begin == end, stopping
-                // any subsequent search.
-                bounds.emplace_back(begin, end);
-                nameParts.emplace_back(name);
-                namePartsLocs.emplace_back(loc);
-                begin = end = 0;
-                return;
-            }
-        }
-
-        if (!boundsEmpty && end - begin == 1 && packages[begin] == filePkg.mangledName() &&
-            nameParts.size() >= ctx.state.packageDB().getPackageInfo(packages[begin]).fullName().size()) {
-            // We have descended into a package with no sub-packages. At this point it is safe to
-            // skip tracking of deeper constants.
-            curPkg.emplace_back(packages[begin], SKIP_BOUND_VAL);
-            skips++;
-            return;
-        }
-
-        bounds.emplace_back(begin, end);
-        nameParts.emplace_back(name);
-        namePartsLocs.emplace_back(loc);
-
-        auto lb = std::lower_bound(packages.begin() + begin, packages.begin() + end, nameParts,
-                                   [ctx](auto pkgNr, auto &nameParts) -> bool {
-                                       return core::packages::PackageInfo::lexCmp(
-                                           ctx.state.packageDB().getPackageInfo(pkgNr).fullName(), nameParts);
-                                   });
-        auto ub =
-            std::upper_bound(lb, packages.begin() + end, LexNext(nameParts), [ctx](auto &next, auto pkgNr) -> bool {
-                return next < ctx.state.packageDB().getPackageInfo(pkgNr).fullName();
-            });
-
-        begin = lb - packages.begin();
-        end = ub - packages.begin();
-
-        if (begin != end) {
-            auto &pkgInfo = ctx.state.packageDB().getPackageInfo(*lb);
-            ENFORCE(pkgInfo.exists());
-            if (nameParts.size() == pkgInfo.fullName().size()) {
-                curPkg.emplace_back(*lb, bounds.size());
-            }
-        }
-    }
-
-    void popName() {
-        auto prevSkips = skips;
-        if (skips > 0) {
-            skips--;
-            if (skips > 0) {
-                return;
-            }
-        }
-
-        if (isTestFile && bounds.size() == 0 && foundTestNS.exists()) {
-            ENFORCE(nameParts.empty());
-            foundTestNS = core::NameRef::noName();
-            foundTestNSLoc = core::LocOffsets::none();
-            return;
-        }
-
-        if (prevSkips == 1) {
-            ENFORCE(curPkg.back().second == SKIP_BOUND_VAL);
-            curPkg.pop_back();
-            return;
-        }
-
-        if (begin != end && !curPkg.empty()) {
-            ENFORCE(!curPkg.empty());
-            auto back = curPkg.back();
-            if (bounds.size() == back.second) {
-                curPkg.pop_back();
-            }
-        }
-        ENFORCE(!bounds.empty());
-        begin = bounds.back().first;
-        end = bounds.back().second;
-        bounds.pop_back();
-        nameParts.pop_back();
-        namePartsLocs.pop_back();
-    }
-
-    ~PackageNamespaces() {
-        // Book-keeping sanity checks
-        ENFORCE(bounds.empty());
-        ENFORCE(nameParts.empty());
-        ENFORCE(namePartsLocs.empty());
-        ENFORCE(begin == 0);
-        ENFORCE(end = packages.size());
-        ENFORCE(curPkg.empty());
-        ENFORCE(!foundTestNS.exists());
-        ENFORCE(skips == 0);
-    }
-};
+    return false;
+}
 
 // Visitor that ensures for constants defined within a package that all have the package as a
 // prefix.
@@ -1029,26 +888,25 @@ class EnforcePackagePrefix final {
     // for the package.)
     const bool mustUseTestNamespace;
 
-    PackageNamespaces namespaces;
-    // Counter to avoid duplicate errors:
-    // - Only emit errors when depth is 0
-    // - Upon emitting an error increment
-    // - Once greater than 0, all preTransform* increment, postTransform* decrement
-    int errorDepth = 0;
+    // TODO(jez) Document me
+    vector<pair<core::SymbolRef, core::LocOffsets>> scope;
 
     // Meant to track when we're inside something like `class ::A; class B; end; end` instead of
     // `class A; class B; end; end`. Classes that start from an absolutely qualified "cbase" with a
     // leading `::` are opted out of the EnforcePackagePrefix checks.
     // TODO(jez) Document this in the public docs for the packager (at least in the error reference,
     // but also in any eventual docs on the package system).
-    int rootConsts = 0;
-    bool useTestNamespace = false;
-    vector<pair<core::NameRef, core::LocOffsets>> tmpNameParts;
+    size_t rootConsts = 0;
+
+    // Counter to avoid duplicate errors:
+    // - Only emit errors when depth is 0
+    // - Upon emitting an error increment
+    // - Once greater than 0, all preTransform* increment, postTransform* decrement
+    int errorDepth = 0;
 
 public:
     EnforcePackagePrefix(core::Context ctx, const PackageInfoImpl &pkg)
-        : pkg(pkg), mustUseTestNamespace(ctx.file.data(ctx).isPackagedTest() && !isTestOnlyPackage(ctx, pkg)),
-          namespaces(ctx, pkg) {
+        : pkg(pkg), mustUseTestNamespace(ctx.file.data(ctx).isPackagedTest() && !isTestOnlyPackage(ctx, pkg)) {
         ENFORCE(pkg.exists());
     }
 
@@ -1067,19 +925,30 @@ public:
             return;
         }
 
-        pushConstantLit(ctx, constantLit);
+        pushScope(constantLit);
 
-        if (rootConsts == 0) {
-            if (hasParentClass(classDef)) {
-                // A class definition that includes a parent `class Foo::Bar < Baz`
-                // must be made in that package
-                checkBehaviorLoc(ctx, classDef.declLoc);
-            } else if (!namespaces.onPackagePath(ctx)) {
-                ENFORCE(errorDepth == 0);
-                errorDepth++;
-                if (auto e = ctx.beginError(constantLit->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
-                    definitionPackageMismatch(ctx, e);
-                }
+        if (rootConsts > 0) {
+            // This is a root-scoped constant, like `class ::A; end`.
+            // These are exempted from package prefix checking.
+            //
+            // TODO(jez) It's not clear what the long term behavior for this should be.
+            // I think that we're going to have to invent a concept of "prelude packages" and have
+            // all root-scoped stuff like this live in those prelude packages.
+            //
+            // (The motivation is: if 100% of code in a repo is packaged, where do monkey patches
+            // live, because the stdlib and gems are unpackaged?)
+            return;
+        }
+
+        if (hasParentClass(classDef)) {
+            // A class definition that includes a parent `class Foo::Bar < Baz`
+            // must be made in that package
+            checkBehaviorLoc(ctx, classDef.declLoc);
+        } else if (!onPackagePath(ctx)) {
+            ENFORCE(errorDepth == 0);
+            errorDepth++;
+            if (auto e = ctx.beginError(constantLit->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
+                definitionPackageMismatch(ctx, e);
             }
         }
     }
@@ -1105,7 +974,7 @@ public:
             return;
         }
 
-        popConstantLit(constantLit);
+        popScope(constantLit);
     }
 
     void preTransformAssign(core::Context ctx, const ast::Assign &asgn) {
@@ -1115,24 +984,26 @@ public:
         }
         auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
 
-        if (lhs != nullptr && rootConsts == 0) {
-            if (lhs->symbol().name(ctx).hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
-                // Don't need to report definitionPackageMismatch if the symbol was mangle renamed
-                return;
-            }
-
-            pushConstantLit(ctx, lhs);
-
-            if (rootConsts == 0 && namespaces.packageForNamespace() != pkg.mangledName()) {
-                ENFORCE(errorDepth == 0);
-                errorDepth++;
-                if (auto e = ctx.beginError(lhs->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
-                    definitionPackageMismatch(ctx, e);
-                }
-            }
-
-            popConstantLit(lhs);
+        if (lhs == nullptr || rootConsts > 0) {
+            return;
         }
+
+        if (lhs->symbol().name(ctx).hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
+            // Don't need to report definitionPackageMismatch if the symbol was mangle renamed
+            return;
+        }
+
+        pushScope(lhs);
+
+        if (rootConsts == 0 && packageForNamespace(ctx) != pkg.mangledName()) {
+            ENFORCE(errorDepth == 0);
+            errorDepth++;
+            if (auto e = ctx.beginError(lhs->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
+                definitionPackageMismatch(ctx, e);
+            }
+        }
+
+        popScope(lhs);
     }
 
     void postTransformAssign(core::Context ctx, const ast::Assign &asgn) {
@@ -1171,67 +1042,71 @@ public:
 
     void checkBehaviorLoc(core::Context ctx, core::LocOffsets loc) {
         ENFORCE(errorDepth == 0);
-        if (rootConsts > 0 || namespaces.depth() == 0) {
+        if (rootConsts > 0 || scope.empty()) {
+            // Doing `class ::A; end` to monkey patch something lets you define behavior (monkey patch)
+            // You can also do arbitrary behavior at the top-level outside of any definitions.
+            // (Stripe's codebase enforces that the )
             return;
         }
-        auto packageForNamespace = namespaces.packageForNamespace();
-        if (packageForNamespace != pkg.mangledName()) {
+        auto pkgForNamespace = packageForNamespace(ctx);
+        if (pkgForNamespace != pkg.mangledName()) {
             ENFORCE(errorDepth == 0);
             errorDepth++;
             if (auto e = ctx.beginError(loc, core::errors::Packager::DefinitionPackageMismatch)) {
                 e.setHeader("This file must only define behavior in enclosing package `{}`", requiredNamespace(ctx));
-                const auto &constantName = namespaces.currentConstantName();
-                e.addErrorLine(ctx.locAt(constantName.back().second), "Defining behavior in `{}` instead:",
-                               fmt::map_join(constantName, "::", [&](const auto &nr) { return nr.first.show(ctx); }));
+                const auto &[scopeSym, scopeLoc] = scope.back();
+                e.addErrorLine(ctx.locAt(scopeLoc), "Defining behavior in `{}` instead:", scopeSym.show(ctx));
                 e.addErrorLine(pkg.declLoc(), "Enclosing package `{}` declared here", pkg.name.toString(ctx));
-                if (packageForNamespace.exists()) {
-                    auto &packageInfo = ctx.state.packageDB().getPackageInfo(packageForNamespace);
-                    e.addErrorLine(packageInfo.declLoc(), "Package `{}` declared here",
-                                   constantName.back().first.show(ctx));
+                if (pkgForNamespace.exists()) {
+                    auto &packageInfo = ctx.state.packageDB().getPackageInfo(pkgForNamespace);
+                    e.addErrorLine(packageInfo.declLoc(), "Package `{}` declared here", scopeSym.show(ctx));
                 }
             }
         }
     }
 
 private:
-    void pushConstantLit(core::Context ctx, const ast::ConstantLit *lit) {
-        ENFORCE(tmpNameParts.empty());
-        auto prevDepth = namespaces.depth();
-        while (lit != nullptr && lit->original() != nullptr) {
-            tmpNameParts.emplace_back(lit->original()->cnst, lit->loc());
-            lit = ast::cast_tree<ast::ConstantLit>(lit->original()->scope);
-            if (lit != nullptr && lit->symbol() == core::Symbols::root()) {
-                rootConsts++;
-            }
+    void pushScope(const ast::ConstantLit *lit) {
+        // TODO(jez) Do I need to handle things like
+        //
+        //     class A
+        //       class B::C
+        //       end
+        //     end
+        //
+        // and things like
+        //
+        //     A::B::X = 1
+        //
+        // ?
+        scope.emplace_back(lit->symbol(), lit->loc());
+        if (isRootScopedDefinition(lit)) {
+            rootConsts++;
         }
-        if (rootConsts == 0) {
-            for (auto it = tmpNameParts.rbegin(); it != tmpNameParts.rend(); ++it) {
-                namespaces.pushName(ctx, it->first, it->second);
-            }
-        }
-
-        if (prevDepth == 0 && mustUseTestNamespace && namespaces.depth() > 0) {
-            useTestNamespace = true;
-        }
-
-        tmpNameParts.clear();
     }
 
-    void popConstantLit(const ast::ConstantLit *lit) {
-        while (lit != nullptr && lit->original() != nullptr) {
-            if (rootConsts == 0) {
-                namespaces.popName();
-            }
-            lit = ast::cast_tree<ast::ConstantLit>(lit->original()->scope);
-            if (lit != nullptr && lit->symbol() == core::Symbols::root()) {
-                rootConsts--;
-            }
+    void popScope(const ast::ConstantLit *lit) {
+        if (isRootScopedDefinition(lit)) {
+            rootConsts--;
         }
+        scope.pop_back();
+    }
+
+    core::packages::MangledName packageForNamespace(const core::GlobalState &gs) const {
+        const auto &[scopeSym, _scopeLoc] = scope.back();
+        return packageForSymbol(gs, scopeSym);
+    }
+
+    bool onPackagePath(const core::GlobalState &gs) const {
+        const auto &[scopeSym, _scopeLoc] = scope.back();
+        auto pkgForScope = packageForSymbol(gs, scopeSym);
+
+        return ownsPackage(gs, pkgForScope, this->pkg.mangledName());
     }
 
     const string requiredNamespace(const core::GlobalState &gs) const {
         auto result = pkg.name.toString(gs);
-        if (useTestNamespace) {
+        if (mustUseTestNamespace) {
             result = fmt::format("{}::{}", core::packages::PackageDB::TEST_NAMESPACE.show(gs), result);
         }
         return result;
@@ -1244,7 +1119,7 @@ private:
 
     void definitionPackageMismatch(const core::GlobalState &gs, core::ErrorBuilder &e) const {
         auto requiredName = requiredNamespace(gs);
-        if (useTestNamespace) {
+        if (mustUseTestNamespace) {
             e.setHeader("Tests in the `{}` package must define tests in the `{}` namespace", pkg.show(gs),
                         requiredName);
             // TODO: If the only thing missing is a `Test::` prefix (e.g., if this were not a test
@@ -1256,12 +1131,12 @@ private:
 
         e.addErrorLine(pkg.declLoc(), "Enclosing package declared here");
 
-        auto reqMangledName = namespaces.packageForNamespace();
+        auto reqMangledName = packageForNamespace(gs);
         if (reqMangledName.exists()) {
             auto &reqPkg = gs.packageDB().getPackageInfo(reqMangledName);
-            auto givenNamespace =
-                absl::StrJoin(namespaces.currentConstantName(), "::", core::packages::NameFormatter(gs));
-            e.addErrorLine(reqPkg.declLoc(), "Must belong to this package, given constant name `{}`", givenNamespace);
+            const auto &[scopeSym, _scopeLoc] = scope.back();
+            e.addErrorLine(reqPkg.declLoc(), "Must belong to this package, given constant name `{}`",
+                           scopeSym.show(gs));
         }
     }
 };
