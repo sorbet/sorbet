@@ -25,7 +25,7 @@ static const regex HEREDOC_PATTERN("\\s*=?\\s*<<(-|~)[^,\\s\\n#]+(,\\s*<<(-|~)[^
  *
  * Returns -1 if no heredoc marker is found.
  */
-uint32_t hasHeredocMarker(core::Context ctx, const uint32_t fromPos, const uint32_t toPos) {
+optional<uint32_t> hasHeredocMarker(core::Context ctx, const uint32_t fromPos, const uint32_t toPos) {
     string_view source(ctx.file.data(ctx).source().substr(fromPos, toPos - fromPos));
 
     string source_str(source);
@@ -33,7 +33,8 @@ uint32_t hasHeredocMarker(core::Context ctx, const uint32_t fromPos, const uint3
     if (regex_search(source_str, HEREDOC_PATTERN)) {
         return fromPos + source_str.length();
     }
-    return UINT32_MAX;
+
+    return nullopt;
 }
 
 uint32_t CommentsAssociator::locateTargetLine(parser::Node *node) {
@@ -45,12 +46,12 @@ uint32_t CommentsAssociator::locateTargetLine(parser::Node *node) {
     typecase(
         node,
         [&](parser::String *lit) {
-            if (hasHeredocMarker(ctx, lit->loc.beginPos(), lit->loc.endPos()) != UINT32_MAX) {
+            if (hasHeredocMarker(ctx, lit->loc.beginPos(), lit->loc.endPos())) {
                 result = core::Loc::pos2Detail(ctx.file.data(ctx), lit->loc.beginPos()).line;
             }
         },
         [&](parser::DString *lit) {
-            if (hasHeredocMarker(ctx, lit->loc.beginPos(), lit->loc.endPos()) != UINT32_MAX) {
+            if (hasHeredocMarker(ctx, lit->loc.beginPos(), lit->loc.endPos())) {
                 result = core::Loc::pos2Detail(ctx.file.data(ctx), lit->loc.beginPos()).line;
             }
         },
