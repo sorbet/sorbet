@@ -24,7 +24,7 @@ class PackageDB;
 enum class ImportType {
     Normal,
     TestHelper,
-    Test,
+    TestUnit,
 };
 
 enum class VisibleToType {
