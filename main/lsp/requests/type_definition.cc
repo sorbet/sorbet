@@ -53,9 +53,6 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, const core::TypePtr &
                 result.emplace_back(loc);
             }
         },
-        [&](const core::NamedLiteralType &_) {
-            // nothing
-        },
         [&](const core::ShapeType &_) {
             // nothing
         },
@@ -78,6 +75,11 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, const core::TypePtr &
             ENFORCE(false, "Please add a test case for this test, and delete this enforce.");
         },
         [&](const core::TypePtr &t) {
+            if (core::is_proxy_type(type)) {
+                auto type = t.underlying(gs);
+                result = locsForType(gs, type);
+                return;
+            }
             Exception::raise("Unhandled case in textDocument/typeDefinition: {}", core::TypePtr::tagToString(t.tag()));
         });
     return result;
