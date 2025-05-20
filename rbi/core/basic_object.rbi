@@ -172,10 +172,12 @@ class BasicObject
     params(
         arg0: Symbol,
         arg1: BasicObject,
+        kwargs: T.nilable(T::Hash[Symbol, BasicObject]),
+        blk: T.nilable(T.proc.returns(T.untyped)),
     )
     .returns(T.untyped)
   end
-  def __send__(arg0, *arg1); end
+  def __send__(arg0, *arg1, **kwargs, &blk); end
 
   # Equality --- At the
   # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) level, #==
