@@ -414,7 +414,7 @@ public:
     }
 
     optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
-                                                    bool isTestImport) const {
+                                                    core::packages::ImportType importType) const {
         auto &info = PackageInfoImpl::from(pkg);
         auto insertionLoc = core::Loc::none(loc.file());
         optional<core::AutocorrectSuggestion::Edit> deleteTestImportEdit = nullopt;
@@ -422,7 +422,8 @@ public:
             core::LocOffsets importToInsertAfter;
             for (auto &import : importedPackageNames) {
                 if (import.name.mangledName == info.name.mangledName) {
-                    if (!isTestImport && import.isTestImport()) {
+                    if (importType == core::packages::ImportType::Normal &&
+                        import.type != core::packages::ImportType::Normal) {
                         // There's already a test import for this package, so we'll convert it to a regular import.
                         // importToInsertAfter already tracks where we need to insert the import.
                         // So we can craft an edit to delete the `test_import` line, and then use the regular logic for
@@ -446,7 +447,8 @@ public:
                     continue;
                 }
 
-                auto compareResult = orderImports(gs, info, isTestImport, importInfo, import.isTestImport());
+                auto compareResult = orderImports(gs, info, importType != core::packages::ImportType::Normal,
+                                                  importInfo, import.isTestImport());
                 if (compareResult == 1 || compareResult == 0) {
                     importToInsertAfter = import.name.fullName.loc;
                 }
@@ -494,10 +496,28 @@ public:
         ENFORCE(insertionLoc.exists());
 
         auto packageToImport = info.name.toString(gs);
-        auto suggestionTitle = fmt::format("{} `{}` in package `{}`", isTestImport ? "Test Import" : "Import",
-                                           packageToImport, name.toString(gs));
+        string_view importTypeHuman;
+        string_view importTypeMethod;
+        string_view importTypeTrailing = "";
+        switch (importType) {
+            case core::packages::ImportType::Normal:
+                importTypeHuman = "Import";
+                importTypeMethod = "import";
+                break;
+            case core::packages::ImportType::TestUnit:
+                importTypeHuman = "Test Import";
+                importTypeMethod = "test_import";
+                importTypeTrailing = " for: :TEST_RB_ONLY";
+                break;
+            case core::packages::ImportType::TestHelper:
+                importTypeHuman = "Test Import";
+                importTypeMethod = "test_import";
+                break;
+        }
+        auto suggestionTitle =
+            fmt::format("{} `{}` in package `{}`", importTypeHuman, packageToImport, name.toString(gs));
         vector<core::AutocorrectSuggestion::Edit> edits = {
-            {insertionLoc, fmt::format("\n  {} {}", isTestImport ? "test_import" : "import", packageToImport)}};
+            {insertionLoc, fmt::format("\n  {} {}{}", importTypeMethod, packageToImport, importTypeTrailing)}};
         if (deleteTestImportEdit.has_value()) {
             edits.push_back(deleteTestImportEdit.value());
             suggestionTitle = fmt::format("Convert `{}` to `{}`", "test_import", "import");
