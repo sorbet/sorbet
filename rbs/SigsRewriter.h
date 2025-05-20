@@ -29,13 +29,13 @@ struct Comments {
 
 class SigsRewriter {
 public:
-    SigsRewriter(core::MutableContext ctx, std::map<parser::Node *, std::vector<rbs::CommentNode>> commentsByNode)
+    SigsRewriter(core::MutableContext ctx, std::map<parser::Node *, std::vector<rbs::CommentNode>> &commentsByNode)
         : ctx(ctx), commentsByNode(commentsByNode){};
     std::unique_ptr<parser::Node> run(std::unique_ptr<parser::Node> tree);
 
 private:
     core::MutableContext ctx;
-    std::map<parser::Node *, std::vector<rbs::CommentNode>> commentsByNode;
+    std::map<parser::Node *, std::vector<rbs::CommentNode>> &commentsByNode;
 
     std::unique_ptr<parser::Node> rewriteBegin(std::unique_ptr<parser::Node> tree);
     std::unique_ptr<parser::Node> rewriteBody(std::unique_ptr<parser::Node> tree);

@@ -368,6 +368,28 @@ public:
         auto send = parser::cast_node<parser::Send>(expr.get());
         return send != nullptr && send->method == core::Names::untyped() && isT(send->receiver);
     }
+
+    /**
+     * Is `send` a visibility modifier (private, protected, public, etc.)?
+     */
+    static bool isVisibilitySend(const parser::Send *send) {
+        return send->receiver == nullptr && send->args.size() == 1 &&
+               (parser::isa_node<parser::DefMethod>(send->args[0].get()) ||
+                parser::isa_node<parser::DefS>(send->args[0].get())) &&
+               (send->method == core::Names::private_() || send->method == core::Names::protected_() ||
+                send->method == core::Names::public_() || send->method == core::Names::privateClassMethod() ||
+                send->method == core::Names::publicClassMethod() || send->method == core::Names::packagePrivate() ||
+                send->method == core::Names::packagePrivateClassMethod());
+    }
+
+    /**
+     * Is `send` an attribute accessor (attr_reader, attr_writer, attr_accessor)?
+     */
+    static bool isAttrAccessorSend(const parser::Send *send) {
+        return (send->receiver == nullptr || parser::isa_node<parser::Self>(send->receiver.get())) &&
+               (send->method == core::Names::attrReader() || send->method == core::Names::attrWriter() ||
+                send->method == core::Names::attrAccessor());
+    }
 };
 
 } // namespace sorbet::parser

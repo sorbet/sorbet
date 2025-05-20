@@ -642,8 +642,8 @@ end
 > This error is specific to RBS support when using the
 > `--enable-experimental-rbs-comments` flag.
 
-This error is raised when Sorbet couldn't match a RBS signature comment with a
-method definition. Ensure your comment is followed by a method definition.
+This error is raised when Sorbet couldn't match a RBS comment with a method
+definition or a type assertion.
 
 ## 3555
 

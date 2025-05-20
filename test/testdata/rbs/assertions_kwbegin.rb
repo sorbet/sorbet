@@ -1,7 +1,7 @@
 # typed: strict
 # enable-experimental-rbs-comments: true
 
-begin #: as String # error Unexpected RBS assertion comment found after `begin` declaration
+begin #: as String # error: Unexpected RBS assertion comment found after `begin` declaration
 end
 
 x = begin

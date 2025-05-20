@@ -80,14 +80,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:u, <emptyTree>::<C U>).returns(<emptyTree>::<C U>)
-    end
-
-    def u=<<todo method>>(u, &<blk>)
-      @u = u
-    end
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C V>)
     end
 
@@ -116,15 +108,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of u>
 
-    <runtime method definition of u=>
-
     <runtime method definition of v>
 
     <runtime method definition of v=>
 
     <runtime method definition of initialize>
 
-    <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member()
+    <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member(:out)
 
     <emptyTree>::<C V> = ::Sorbet::Private::Static.type_member()
   end
@@ -135,11 +125,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   g2_1.v=(2)
 
-  g2_2 = <cast:let>(<emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Numeric>, <emptyTree>::<C String>).new(1, 2), <todo sym>, <emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Numeric>, <emptyTree>::<C String>))
+  g2_2 = <cast:let>(<cast:cast>(<emptyTree>::<C G2>, <todo sym>, ::<root>::<C T>::<C Class>.<syntheticSquareBrackets>(<emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>))).new("a", 2), <todo sym>, <emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Numeric>, <emptyTree>::<C String>))
 
   <emptyTree>::<C T>.reveal_type(g2_2)
 
-  g2_3 = <cast:let>(<cast:let>(<emptyTree>::<C G2>, <todo sym>, ::<root>::<C T>::<C Class>.<syntheticSquareBrackets>(<emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>))).new(1, 2), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>)))
+  g2_3 = <cast:let>(<cast:cast>(<emptyTree>::<C G2>, <todo sym>, ::<root>::<C T>::<C Class>.<syntheticSquareBrackets>(<emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>))).new(1, 2), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C G2>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>)))
 
   <emptyTree>::<C T>.reveal_type(g2_3)
 

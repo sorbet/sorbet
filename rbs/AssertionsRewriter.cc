@@ -18,81 +18,6 @@ namespace {
 const regex not_nil_pattern("^\\s*!nil\\s*(#.*)?$");
 const regex untyped_pattern("^\\s*untyped\\s*(#.*)?$");
 
-/**
- * Check if the given range is the start of a heredoc assignment `= <<~FOO` and return the position of the end of the
- * heredoc marker.
- *
- * Returns -1 if no heredoc marker is found.
- */
-uint32_t hasHeredocMarker(core::Context ctx, const uint32_t fromPos, const uint32_t toPos) {
-    string source(ctx.file.data(ctx).source().substr(fromPos, toPos - fromPos));
-    regex heredoc_pattern("\\s*=?\\s*<<(-|~)[^,\\s\\n#]+(,\\s*<<(-|~)[^,\\s\\n#]+)*");
-    smatch match;
-    if (regex_search(source, match, heredoc_pattern)) {
-        return fromPos + match.length();
-    }
-    return UINT32_MAX;
-}
-
-/**
- * Check if the given expression is a heredoc
- */
-uint32_t heredocPos(core::Context ctx, core::LocOffsets assignLoc, const unique_ptr<parser::Node> &node) {
-    if (node == nullptr) {
-        return UINT32_MAX;
-    }
-
-    uint32_t result = UINT32_MAX;
-    typecase(
-        node.get(),
-        [&](parser::String *lit) {
-            // For some reason, heredoc strings are parser differently if they contain a single line or more.
-            //
-            // Single line heredocs do not contain the `<<-` or `<<~` markers inside their location.
-            //
-            // For example, this heredoc:
-            //
-            //     <<~MSG
-            //       foo
-            //     MSG
-
-            // has the `<<-` or `<<~` markers **outside** its location.
-            //
-            // While this heredoc:
-            //
-            //     <<~MSG
-            //       foo
-            //     MSG
-            //
-            // has the `<<-` or `<<~` markers **inside** its location.
-
-            auto lineStart = core::Loc::pos2Detail(ctx.file.data(ctx), lit->loc.beginLoc).line;
-            auto lineEnd = core::Loc::pos2Detail(ctx.file.data(ctx), lit->loc.endLoc).line;
-
-            if (lineEnd - lineStart <= 1) {
-                // Single line heredoc, we look for the heredoc marker outside, ie. between the assign `=` sign
-                // and the begining of the string.
-                result = hasHeredocMarker(ctx, assignLoc.endPos(), lit->loc.beginPos());
-            } else {
-                // Multi-line heredoc, we look for the heredoc marker inside the string itself.
-                result = hasHeredocMarker(ctx, lit->loc.beginPos(), lit->loc.endPos());
-            }
-        },
-        [&](parser::DString *lit) { result = hasHeredocMarker(ctx, lit->loc.beginPos(), lit->loc.endPos()); },
-        [&](parser::Array *arr) {
-            for (auto &elem : arr->elts) {
-                result = heredocPos(ctx, assignLoc, elem);
-                if (result != UINT32_MAX) {
-                    break;
-                }
-            }
-        },
-        [&](parser::Send *send) { result = heredocPos(ctx, assignLoc, send->receiver); },
-        [&](parser::Node *expr) { result = false; });
-
-    return result;
-}
-
 /*
  * Parse the comment and return the type as a `parser::Node` and the kind of assertion we need to apply (let, cast,
  * must, unsafe).
@@ -237,178 +162,59 @@ bool AssertionsRewriter::hasConsumedComment(core::LocOffsets loc) {
 }
 
 /*
- * Get the RBS comment for the given position.
- *
- * This function looks up for a comment starting at the given position until the end of the line.
- *
- * Returns `nullopt` if no comment is found.
- *
- * This function will mark the comment location as consumed so it won't be picked up by subsequent calls to this
- * function. This is to avoid applying the same comment multiple times:
- *
- *     foo x #: as !nil
- *
- * We only want to apply the `as !nil` comment on the `foo` call and not on the `x` argument.
- */
-optional<rbs::InlineComment> AssertionsRewriter::commentForPos(uint32_t fromPos, vector<char> allowedTokens = {}) {
-    auto source = ctx.file.data(ctx).source();
-
-    // Get the position of the end of the line from the startingLoc
-    auto endPos = source.find('\n', fromPos);
-    if (endPos == string::npos) {
-        // If we don't find a newline, we just use the rest of the file
-        endPos = source.size();
-    }
-
-    if (fromPos == endPos) {
-        // We reached the end of the line, we don't have a comment
-        return nullopt;
-    }
-
-    auto commentStart = fromPos;
-    while (commentStart < endPos) {
-        char c = source[commentStart];
-        if (c == ' ') {
-            // Skip whitespace until we find a `#:`
-            commentStart++;
-            continue;
-        } else if (find(allowedTokens.begin(), allowedTokens.end(), c) != allowedTokens.end()) {
-            // Skip allowed tokens like `,` or `.` depending on the callsite
-            commentStart++;
-            continue;
-        } else if (c == '#' && commentStart + 1 < endPos && source[commentStart + 1] == ':') {
-            // We found a `#:`
-            break;
-        } else {
-            // We found a character that is not a space or a `#`, so we don't have a comment
-            return nullopt;
-        }
-    }
-
-    if (commentStart == endPos) {
-        // We didn't find a `#:`
-        return nullopt;
-    }
-
-    // Consume the spaces after the `#:`
-    auto contentStart = commentStart + 2;
-    char c = source[contentStart];
-    while (c == ' ' && contentStart < endPos) {
-        contentStart++;
-        c = source[contentStart];
-    }
-
-    auto content = source.substr(contentStart, endPos - contentStart);
-    auto kind = InlineComment::Kind::LET;
-
-    if (absl::StartsWith(content, "as ")) {
-        // We found a `as` keyword, this is a `T.cast` comment
-        kind = InlineComment::Kind::CAST;
-        contentStart += 3;
-        content = content.substr(3);
-
-        if (regex_match(content.begin(), content.end(), not_nil_pattern)) {
-            // We found a `as !nil`, so a `T.must` comment
-            kind = InlineComment::Kind::MUST;
-        } else if (regex_match(content.begin(), content.end(), untyped_pattern)) {
-            // We found a `as untyped`, so a `T.unsafe` comment
-            kind = InlineComment::Kind::UNSAFE;
-        }
-    }
-
-    auto commentLoc = core::LocOffsets{(uint32_t)commentStart, static_cast<uint32_t>(endPos)};
-
-    // If we already consumed this comment, we don't return it since it's been "consumed" already
-    if (hasConsumedComment(commentLoc)) {
-        return nullopt;
-    }
-
-    // We consume the comment so it won't be picked up by subsequent calls to this function
-    consumeComment(commentLoc);
-
-    return InlineComment{
-        rbs::Comment{
-            commentLoc,
-            core::LocOffsets{(uint32_t)contentStart, static_cast<uint32_t>(endPos)},
-            content,
-        },
-        kind,
-    };
-}
-
-/*
  * Get the RBS comment for the given node.
  *
  * Returns `nullopt` if no comment is found or if the comment was already consumed.
- *
- * The `fromLoc` param is used to detect heredocs if any. Consider this example:
- *
- *     foo = <<~MSG
- *       bar
- *     MSG
- *
- * Since heredocs are parsed differently, we need to special case them. Using `fromLoc` as the end of the `foo` lhs
- * location, we can detect the heredoc between the `=` sign and the end of the line.
- *
- * This hack won't be necessary once we migrate the parsing to Prism.
  */
-optional<rbs::InlineComment> AssertionsRewriter::commentForNode(unique_ptr<parser::Node> &node,
-                                                                core::LocOffsets fromLoc,
-                                                                vector<char> allowedTokens = {}) {
-    // We want to find the comment right after the end of the assign
-    auto fromPos = node->loc.endPos();
+optional<rbs::InlineComment> AssertionsRewriter::commentForNode(const unique_ptr<parser::Node> &node) {
+    auto it = commentsByNode.find(node.get());
+    if (it == commentsByNode.end()) {
+        return nullopt;
+    }
 
-    // On heredocs, adding the comment at the end of the assign won't work because this is invalid Ruby syntax:
-    // ```
-    // <<~MSG
-    //   foo
-    // MSG #: String
-    // ```
-    // We add a special case for heredocs to allow adding the comment at the end of the assign:
-    // ```
-    // <<~MSG #: String
-    //   foo
-    // MSG
-    // ```
-    if (fromLoc.exists()) {
-        if (auto pos = heredocPos(ctx, fromLoc, node)) {
-            if (pos != -1) {
-                fromPos = pos;
+    for (const auto &commentNode : it->second) {
+        if (!absl::StartsWith(commentNode.string, CommentsAssociator::RBS_PREFIX)) {
+            continue;
+        }
+
+        auto contentStart = commentNode.loc.beginPos() + 2; // +2 for the #: prefix
+        auto content = commentNode.string.substr(2);        // skip the #: prefix
+
+        // Skip whitespace after the #:
+        while (contentStart < commentNode.loc.endPos() && isspace(content[0])) {
+            contentStart++;
+            content = content.substr(1);
+        }
+
+        auto kind = InlineComment::Kind::LET;
+        if (absl::StartsWith(content, "as ")) {
+            kind = InlineComment::Kind::CAST;
+            contentStart += 3;
+            content = content.substr(3);
+
+            if (regex_match(content.begin(), content.end(), not_nil_pattern)) {
+                kind = InlineComment::Kind::MUST;
+            } else if (regex_match(content.begin(), content.end(), untyped_pattern)) {
+                kind = InlineComment::Kind::UNSAFE;
             }
         }
-    }
 
-    return commentForPos(fromPos, allowedTokens);
-}
-
-void AssertionsRewriter::checkDanglingCommentWithDecl(uint32_t nodeEnd, uint32_t declEnd, string kind) {
-    if (auto assertion = commentForPos(nodeEnd)) {
-        if (auto e = ctx.beginIndexerError(assertion.value().comment.commentLoc,
-                                           core::errors::Rewriter::RBSAssertionError)) {
-            e.setHeader("Unexpected RBS assertion comment found after `{}` end", kind);
+        if (hasConsumedComment(commentNode.loc)) {
+            continue;
         }
+        consumeComment(commentNode.loc);
+
+        return InlineComment{
+            rbs::Comment{
+                commentNode.loc,
+                core::LocOffsets{contentStart, commentNode.loc.endPos()},
+                content,
+            },
+            kind,
+        };
     }
 
-    auto decLine = core::Loc::pos2Detail(ctx.file.data(ctx), declEnd).line;
-    auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), nodeEnd).line;
-
-    if ((endLine > decLine)) {
-        if (auto assertion = commentForPos(declEnd)) {
-            if (auto e = ctx.beginIndexerError(assertion.value().comment.commentLoc,
-                                               core::errors::Rewriter::RBSAssertionError)) {
-                e.setHeader("Unexpected RBS assertion comment found after `{}` declaration", kind);
-            }
-        }
-    }
-}
-
-void AssertionsRewriter::checkDanglingComment(uint32_t nodeEnd, string kind) {
-    if (auto assertion = commentForPos(nodeEnd)) {
-        if (auto e = ctx.beginIndexerError(assertion.value().comment.commentLoc,
-                                           core::errors::Rewriter::RBSAssertionError)) {
-            e.setHeader("Unexpected RBS assertion comment found after `{}`", kind);
-        }
-    }
+    return nullopt;
 }
 
 /**
@@ -472,15 +278,14 @@ AssertionsRewriter::insertCast(unique_ptr<parser::Node> node,
 
 /**
  * Insert a cast into the given node if there is an not yet consumed RBS assertion comment after the node.
+ * Optionally accepts another node to associate its comments instead.
  */
-unique_ptr<parser::Node> AssertionsRewriter::maybeInsertCast(unique_ptr<parser::Node> node,
-                                                             core::LocOffsets assignLoc = core::LocOffsets::none(),
-                                                             vector<char> allowedTokens = {}) {
+unique_ptr<parser::Node> AssertionsRewriter::maybeInsertCast(unique_ptr<parser::Node> node) {
     if (node == nullptr) {
         return node;
     }
 
-    if (auto inlineComment = commentForNode(node, assignLoc, allowedTokens)) {
+    if (auto inlineComment = commentForNode(node)) {
         if (auto type = parseComment(ctx, inlineComment.value(), typeParams)) {
             return insertCast(move(node), move(type));
         }
@@ -492,22 +297,24 @@ unique_ptr<parser::Node> AssertionsRewriter::maybeInsertCast(unique_ptr<parser::
 /**
  * Rewrite a collection of nodes, wrap them in an array and cast the array.
  */
-parser::NodeVec AssertionsRewriter::rewriteNodesAsArray(parser::NodeVec nodes) {
-    if (nodes.size() == 1) {
-        rewriteNodes(&nodes);
-        return nodes;
+parser::NodeVec AssertionsRewriter::rewriteNodesAsArray(const unique_ptr<parser::Node> &node, parser::NodeVec nodes) {
+    if (auto inlineComment = commentForNode(node)) {
+        if (nodes.size() > 1) {
+            auto loc = nodes.front()->loc.join(nodes.back()->loc);
+            auto arr = parser::MK::Array(loc, move(nodes));
+            arr = rewriteNode(move(arr));
+
+            auto vector = parser::NodeVec();
+            vector.emplace_back(move(arr));
+            nodes = move(vector);
+        }
+        if (auto type = parseComment(ctx, inlineComment.value(), typeParams)) {
+            nodes.front() = insertCast(move(nodes.front()), move(type));
+        }
     }
 
-    auto loc = core::LocOffsets{
-        nodes.front()->loc.beginPos(),
-        nodes.back()->loc.endPos(),
-    };
-    auto arr = parser::MK::Array(loc, move(nodes));
-    arr = rewriteNode(move(arr));
-
-    auto vector = parser::NodeVec();
-    vector.emplace_back(move(arr));
-    return vector;
+    rewriteNodes(&nodes);
+    return nodes;
 }
 
 /**
@@ -552,35 +359,30 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
 
         [&](parser::Module *module) {
             module->body = rewriteBody(move(module->body));
-            checkDanglingCommentWithDecl(module->loc.endPos(), module->declLoc.endPos(), "module");
             result = move(node);
 
             typeParams.clear();
         },
         [&](parser::Class *klass) {
             klass->body = rewriteBody(move(klass->body));
-            checkDanglingCommentWithDecl(klass->loc.endPos(), klass->declLoc.endPos(), "class");
             result = move(node);
 
             typeParams.clear();
         },
         [&](parser::SClass *sclass) {
             sclass->body = rewriteBody(move(sclass->body));
-            checkDanglingCommentWithDecl(sclass->loc.endPos(), sclass->declLoc.endPos() + 8, "sclass");
             result = move(node);
 
             typeParams.clear();
         },
         [&](parser::DefMethod *method) {
             method->body = rewriteBody(move(method->body));
-            checkDanglingCommentWithDecl(method->loc.endPos(), method->declLoc.endPos(), "method");
             result = move(node);
 
             typeParams.clear();
         },
         [&](parser::DefS *method) {
             method->body = rewriteBody(move(method->body));
-            checkDanglingCommentWithDecl(method->loc.endPos(), method->declLoc.endPos(), "method");
             result = move(node);
 
             typeParams.clear();
@@ -603,25 +405,24 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
 
         [&](parser::Assign *asgn) {
             asgn->lhs = rewriteNode(move(asgn->lhs));
-            asgn->rhs = maybeInsertCast(move(asgn->rhs), asgn->lhs->loc);
             asgn->rhs = rewriteNode(move(asgn->rhs));
             result = move(node);
         },
         [&](parser::AndAsgn *andAsgn) {
             andAsgn->left = rewriteNode(move(andAsgn->left));
-            andAsgn->right = maybeInsertCast(move(andAsgn->right), andAsgn->left->loc);
+            andAsgn->right = maybeInsertCast(move(andAsgn->right));
             andAsgn->right = rewriteNode(move(andAsgn->right));
             result = move(node);
         },
         [&](parser::OpAsgn *opAsgn) {
             opAsgn->left = rewriteNode(move(opAsgn->left));
-            opAsgn->right = maybeInsertCast(move(opAsgn->right), opAsgn->left->loc);
+            opAsgn->right = maybeInsertCast(move(opAsgn->right));
             opAsgn->right = rewriteNode(move(opAsgn->right));
             result = move(node);
         },
         [&](parser::OrAsgn *orAsgn) {
             orAsgn->left = rewriteNode(move(orAsgn->left));
-            orAsgn->right = maybeInsertCast(move(orAsgn->right), orAsgn->left->loc);
+            orAsgn->right = maybeInsertCast(move(orAsgn->right));
             orAsgn->right = rewriteNode(move(orAsgn->right));
             result = move(node);
         },
@@ -635,10 +436,21 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
         // Sends
 
         [&](parser::Send *send) {
-            send->receiver = maybeInsertCast(move(send->receiver), core::LocOffsets::none(), {'.'});
+            // Skip visibility sends and attr_accessor sends as their comments are not assertions
+            if (parser::MK::isVisibilitySend(send) || parser::MK::isAttrAccessorSend(send)) {
+                result = move(node);
+                return;
+            }
+
+            send->receiver = maybeInsertCast(move(send->receiver));
             send->receiver = rewriteNode(move(send->receiver));
 
-            if (send->method.isSetter(ctx.state) && send->args.size() == 1) {
+            if (send->method == core::Names::squareBracketsEq()) {
+                // This is a `foo[key]=(y)` method, walk y for chained method calls
+                send->args.back() = rewriteNode(move(send->args.back()));
+                result = move(node);
+                return;
+            } else if (send->method.isSetter(ctx.state) && send->args.size() == 1) {
                 // This is a `foo.x=(y)` method, we treat it as a `x = y` assignment
                 send->args[0] = maybeInsertCast(move(send->args[0]));
                 result = move(node);
@@ -651,26 +463,19 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
                 arg = rewriteNode(move(arg));
 
                 if (auto splat = parser::cast_node<parser::Splat>(arg.get())) {
-                    splat->var = maybeInsertCast(move(splat->var), core::LocOffsets::none(), {','});
+                    splat->var = maybeInsertCast(move(splat->var));
                 } else if (auto kwsplat = parser::cast_node<parser::Kwsplat>(arg.get())) {
-                    kwsplat->expr = maybeInsertCast(move(kwsplat->expr), core::LocOffsets::none(), {','});
+                    kwsplat->expr = maybeInsertCast(move(kwsplat->expr));
                 } else {
-                    arg = maybeInsertCast(move(arg), core::LocOffsets::none(), {','});
+                    arg = maybeInsertCast(move(arg));
                 }
             }
 
             result = move(node);
         },
         [&](parser::CSend *csend) {
-            csend->receiver = maybeInsertCast(move(csend->receiver), core::LocOffsets::none(), {'&', '.'});
+            csend->receiver = maybeInsertCast(move(csend->receiver));
             csend->receiver = rewriteNode(move(csend->receiver));
-
-            if (csend->method.isSetter(ctx.state) && csend->args.size() == 1) {
-                // This is a `foo&.x=(y)` method, we treat it as a `x = y` assignment
-                csend->args[0] = maybeInsertCast(move(csend->args[0]));
-                result = move(node);
-                return;
-            }
 
             node = maybeInsertCast(move(node));
 
@@ -678,11 +483,11 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
                 arg = rewriteNode(move(arg));
 
                 if (auto splat = parser::cast_node<parser::Splat>(arg.get())) {
-                    splat->var = maybeInsertCast(move(splat->var), core::LocOffsets::none(), {','});
+                    splat->var = maybeInsertCast(move(splat->var));
                 } else if (auto kwsplat = parser::cast_node<parser::Kwsplat>(arg.get())) {
-                    kwsplat->expr = maybeInsertCast(move(kwsplat->expr), core::LocOffsets::none(), {','});
+                    kwsplat->expr = maybeInsertCast(move(kwsplat->expr));
                 } else {
-                    arg = maybeInsertCast(move(arg), core::LocOffsets::none(), {','});
+                    arg = maybeInsertCast(move(arg));
                 }
             }
 
@@ -736,32 +541,41 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
 
         [&](parser::Break *break_) {
             if (break_->exprs.empty()) {
-                checkDanglingComment(break_->loc.endPos(), "break");
                 result = move(node);
                 return;
             }
 
-            break_->exprs = rewriteNodesAsArray(move(break_->exprs));
+            for (auto &expr : break_->exprs) {
+                expr = rewriteNode(move(expr));
+            }
+
+            break_->exprs = rewriteNodesAsArray(node, move(break_->exprs));
             result = move(node);
         },
         [&](parser::Next *next) {
             if (next->exprs.empty()) {
-                checkDanglingComment(next->loc.endPos(), "next");
                 result = move(node);
                 return;
             }
 
-            next->exprs = rewriteNodesAsArray(move(next->exprs));
+            for (auto &expr : next->exprs) {
+                expr = rewriteNode(move(expr));
+            }
+
+            next->exprs = rewriteNodesAsArray(node, move(next->exprs));
             result = move(node);
         },
         [&](parser::Return *ret) {
             if (ret->exprs.empty()) {
-                checkDanglingComment(ret->loc.endPos(), "return");
                 result = move(node);
                 return;
             }
 
-            ret->exprs = rewriteNodesAsArray(move(ret->exprs));
+            for (auto &expr : ret->exprs) {
+                expr = rewriteNode(move(expr));
+            }
+
+            ret->exprs = rewriteNodesAsArray(node, move(ret->exprs));
             result = move(node);
         },
 
@@ -795,13 +609,6 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
             result = move(node);
         },
         [&](parser::Resbody *resbody) {
-            if (resbody->var) {
-                checkDanglingComment(resbody->var->loc.endPos(), "rescue");
-            } else if (resbody->exception) {
-                checkDanglingComment(resbody->exception->loc.endPos(), "rescue");
-            } else {
-                checkDanglingComment(resbody->loc.beginPos() + 6, "rescue");
-            }
             resbody->body = rewriteBody(move(resbody->body));
             result = move(node);
         },
@@ -813,11 +620,13 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
         // Others
 
         [&](parser::And *and_) {
+            node = maybeInsertCast(move(node));
             and_->left = rewriteNode(move(and_->left));
             and_->right = rewriteNode(move(and_->right));
             result = move(node);
         },
         [&](parser::Or *or_) {
+            node = maybeInsertCast(move(node));
             or_->left = rewriteNode(move(or_->left));
             or_->right = rewriteNode(move(or_->right));
             result = move(node);
@@ -830,11 +639,11 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
                 elem = rewriteNode(move(elem));
 
                 if (auto pair = parser::cast_node<parser::Pair>(elem.get())) {
-                    pair->value = maybeInsertCast(move(pair->value), core::LocOffsets::none(), {','});
+                    pair->value = maybeInsertCast(move(pair->value));
                 } else if (auto splat = parser::cast_node<parser::Splat>(elem.get())) {
-                    splat->var = maybeInsertCast(move(splat->var), core::LocOffsets::none(), {','});
+                    splat->var = maybeInsertCast(move(splat->var));
                 } else if (auto kwsplat = parser::cast_node<parser::Kwsplat>(elem.get())) {
-                    kwsplat->expr = maybeInsertCast(move(kwsplat->expr), core::LocOffsets::none(), {','});
+                    kwsplat->expr = maybeInsertCast(move(kwsplat->expr));
                 } else {
                     continue;
                 }
@@ -855,11 +664,11 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
                 elem = rewriteNode(move(elem));
 
                 if (auto splat = parser::cast_node<parser::Splat>(elem.get())) {
-                    splat->var = maybeInsertCast(move(splat->var), core::LocOffsets::none(), {','});
+                    splat->var = maybeInsertCast(move(splat->var));
                 } else if (auto kwsplat = parser::cast_node<parser::Kwsplat>(elem.get())) {
-                    kwsplat->expr = maybeInsertCast(move(kwsplat->expr), core::LocOffsets::none(), {','});
+                    kwsplat->expr = maybeInsertCast(move(kwsplat->expr));
                 } else {
-                    elem = maybeInsertCast(move(elem), core::LocOffsets::none(), {','});
+                    elem = maybeInsertCast(move(elem));
                 }
             }
 

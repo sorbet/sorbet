@@ -34,7 +34,7 @@ SignatureTranslator::translateAssertionType(vector<pair<core::LocOffsets, core::
         return nullptr;
     }
 
-    auto typeToParserNode = TypeToParserNode(ctx, typeParams, std::move(parser));
+    auto typeToParserNode = TypeToParserNode(ctx, typeParams, move(parser));
     return typeToParserNode.toParserNode(rbsType, assertion);
 }
 
@@ -66,7 +66,7 @@ unique_ptr<parser::Node> SignatureTranslator::translateAttrSignature(const parse
         return nullptr;
     }
 
-    auto methodTypeToParserNode = MethodTypeToParserNode(ctx, std::move(parser));
+    auto methodTypeToParserNode = MethodTypeToParserNode(ctx, move(parser));
     return methodTypeToParserNode.attrSignature(send, rbsType, declaration, annotations);
 }
 
@@ -90,7 +90,7 @@ unique_ptr<parser::Node> SignatureTranslator::translateMethodSignature(const par
         return nullptr;
     }
 
-    auto methodTypeToParserNode = MethodTypeToParserNode(ctx, std::move(parser));
+    auto methodTypeToParserNode = MethodTypeToParserNode(ctx, move(parser));
     return methodTypeToParserNode.methodSignature(methodDef, rbsMethodType, declaration, annotations);
 }
 
@@ -132,7 +132,7 @@ parser::NodeVec SignatureTranslator::translateTypeParams(const RBSDeclaration &d
         return parser::NodeVec();
     }
 
-    auto typeParamsToParserNode = TypeParamsToParserNode(ctx, std::move(parser));
+    auto typeParamsToParserNode = TypeParamsToParserNode(ctx, move(parser));
     return typeParamsToParserNode.typeParams(rbsTypeParams, declaration);
 }
 

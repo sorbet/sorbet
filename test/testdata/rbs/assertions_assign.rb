@@ -80,6 +80,9 @@ T.reveal_type(cast6) # error: Revealed type: `String`
 cast7 = ARGV.first#:as String # some comment
 T.reveal_type(cast7) # error: Revealed type: `String`
 
+cast8 = "a" #: as untyped
+  .random_method_name
+
 # must
 
 must_x = ARGV.first #:as String?
@@ -99,7 +102,7 @@ T.reveal_type(must4) # error: Revealed type: `String`
 must5 = must_x#: as !nil # some comment
 T.reveal_type(must5) # error: Revealed type: `String`
 
-# unsage
+# unsafe
 
 unsafe_x = ARGV.first #:as String?
 

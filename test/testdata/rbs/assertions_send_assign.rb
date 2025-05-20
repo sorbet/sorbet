@@ -22,3 +22,25 @@ T.reveal_type(let2.foo) # error: Revealed type: `T.untyped`
 let3 = Let.new
 let3.foo.foo = "foo", "bar" #: Array[String]
 T.reveal_type(let3.foo) # error: Revealed type: `T.untyped`
+
+class BracketsAssign
+  #: (*untyped) -> void
+  def []=(*args); end
+end
+
+brackets_assign = BracketsAssign.new
+
+brackets_assign[] = "foo" #: as untyped
+  .unexisting_method
+
+brackets_assign[:a] = "bar" #: as untyped
+  .unexisting_method
+
+brackets_assign[:a, :b] = "baz" #: as untyped
+  .unexisting_method
+
+brackets_assign[:a, :b, :c] = "qux" #: as untyped
+  .unexisting_method
+
+self #: as untyped
+  .unexisting_method = 42
