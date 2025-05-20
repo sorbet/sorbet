@@ -1278,7 +1278,8 @@ struct PackageSpecBodyWalk {
                     // if it's not a literal, then it'll get caught elsewhere
                     if (valLit && (!valLit->isSymbol() || valLit->asSymbol() != core::Names::testRbOnly())) {
                         if (auto e = ctx.beginError(value.loc(), core::errors::Packager::InvalidPackageExpression)) {
-                            e.setHeader("Invalid expression in package: the only valid value for `{}` is `{}`", "for:", "TEST_RB_ONLY");
+                            e.setHeader("Invalid expression in package: the only valid value for `{}` is `{}`",
+                                        "for:", "TEST_RB_ONLY");
                         }
                     }
                 }
