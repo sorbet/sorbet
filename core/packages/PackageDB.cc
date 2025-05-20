@@ -43,7 +43,7 @@ public:
     }
 
     optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
-                                                    bool isTestImport) const {
+                                                    ImportType importType) const {
         notImplemented();
         return nullopt;
     }
