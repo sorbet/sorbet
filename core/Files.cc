@@ -111,8 +111,8 @@ bool File::isPackagePath(string_view path) {
 }
 
 File::Flags::Flags(string_view path)
-    : hasIndexErrors(false), isPackagedTestHelper(isTestHelperPath(path)), isPackagedTest(isTestPath(path)), hasPackageRBIPath(isPackageRBIPath(path)),
-      hasPackageRbPath(isPackagePath(path)), isOpenInClient(false) {}
+    : hasIndexErrors(false), isPackagedTestHelper(isTestHelperPath(path)), isPackagedTest(isTestPath(path)),
+      hasPackageRBIPath(isPackageRBIPath(path)), hasPackageRbPath(isPackagePath(path)), isOpenInClient(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(path_), packagedLevel{File::filePackagedSigil(source_)},
@@ -285,6 +285,10 @@ string File::censorFilePathForSnapshotTests(string_view orig) {
 
 bool File::isPackagedTest() const {
     return flags.isPackagedTest;
+}
+
+bool File::isPackagedTestHelper() const {
+    return flags.isPackagedTestHelper;
 }
 
 bool File::isPackageRBI() const {
