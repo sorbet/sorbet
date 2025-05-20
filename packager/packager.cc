@@ -1260,6 +1260,20 @@ struct PackageSpecBodyWalk {
 
                 info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target), method2ImportType(send));
             }
+            // also validate the keyword args, since one is valid
+            for (auto [key, value] : send.kwArgPairs()) {
+                auto keyLit = ast::cast_tree<ast::Literal>(key);
+                ENFORCE(keyLit);
+                if (keyLit->asSymbol() == core::Names::for_()) {
+                    auto valLit = ast::cast_tree<ast::Literal>(value);
+                    // if it's not a literal, then it'll get caught elsewhere
+                    if (valLit && (!valLit->isSymbol() || valLit->asSymbol() != core::Names::testRbOnly())) {
+                        if (auto e = ctx.beginError(value.loc(), core::errors::Packager::InvalidPackageExpression)) {
+                            e.setHeader("Invalid expression in package: the only valid value for `{}` is `{}`", "for:", "TEST_RB_ONLY");
+                        }
+                    }
+                }
+            }
         }
 
         if (send.fun == core::Names::restrictToService() && send.numPosArgs() == 1) {
@@ -1478,6 +1492,8 @@ struct PackageSpecBodyWalk {
             case core::Names::import().rawId():
                 return core::packages::ImportType::Normal;
             case core::Names::testImport().rawId():
+                // we'll validate elsewhere that the only valid keyword args to appear here are `for: :TEST_RB_ONLY`,
+                // which means if there are keyword args _at all_, they must indicate a test unit import
                 if (send.numKwArgs() > 0) {
                     return core::packages::ImportType::TestUnit;
                 } else {
