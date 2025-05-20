@@ -439,6 +439,12 @@ public:
         if (!wasImported || testImportInProd || testUnitImportInHelper || !isExported) {
             auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
+            optional<core::packages::ImportType> testImportType = {};
+            if (isTestImport && this->fileType == FileType::TestHelperFile) {
+                testImportType = {core::packages::ImportType::TestHelper};
+            } else {
+                testImportType = {core::packages::ImportType::TestUnit};
+            }
             auto strictDepsLevel = this->package.strictDependenciesLevel();
             auto importStrictDepsLevel = pkg.strictDependenciesLevel();
             bool layeringViolation = false;
@@ -491,7 +497,7 @@ public:
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                         e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                        if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
+                        if (auto exp = this->package.addImport(ctx, pkg, *testImportType)) {
                             e.addAutocorrect(std::move(exp.value()));
                             if (!db.errorHint().empty()) {
                                 e.addErrorNote("{}", db.errorHint());
@@ -510,7 +516,7 @@ public:
                         e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Defined here");
                         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                        if (auto exp = this->package.addImport(ctx, pkg, false)) {
+                        if (auto exp = this->package.addImport(ctx, pkg, core::packages::ImportType::Normal)) {
                             e.addAutocorrect(std::move(exp.value()));
                             if (!db.errorHint().empty()) {
                                 e.addErrorNote("{}", db.errorHint());
@@ -523,7 +529,7 @@ public:
                                     litSymbol.show(ctx), ".test.rb");
                         e.addErrorLine(pkg.declLoc(), "Defined here");
                         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                        if (auto exp = this->package.addImport(ctx, pkg, false)) {
+                        if (auto exp = this->package.addImport(ctx, pkg, core::packages::ImportType::TestHelper)) {
                             e.addAutocorrect(std::move(exp.value()));
                             if (!db.errorHint().empty()) {
                                 e.addErrorNote("{}", db.errorHint());
