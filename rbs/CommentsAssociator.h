@@ -34,7 +34,7 @@ private:
     void associateSignatureCommentsToNode(parser::Node *node);
     void consumeCommentsBetweenLines(int startLine, int endLine, std::string kind);
     void consumeCommentsUntilLine(int line);
-    uint32_t locateTargetLine(parser::Node *node);
+    std::optional<uint32_t> locateTargetLine(parser::Node *node);
 };
 
 } // namespace sorbet::rbs

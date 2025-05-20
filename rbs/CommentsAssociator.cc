@@ -37,8 +37,9 @@ optional<uint32_t> hasHeredocMarker(core::Context ctx, const uint32_t fromPos, c
     return nullopt;
 }
 
-uint32_t CommentsAssociator::locateTargetLine(parser::Node *node) {
-    uint32_t result = UINT32_MAX;
+optional<uint32_t> CommentsAssociator::locateTargetLine(parser::Node *node) {
+    optional<uint32_t> result = nullopt;
+
     if (node == nullptr) {
         return result;
     }
@@ -57,8 +58,8 @@ uint32_t CommentsAssociator::locateTargetLine(parser::Node *node) {
         },
         [&](parser::Array *arr) {
             for (auto &elem : arr->elts) {
-                result = locateTargetLine(elem.get());
-                if (result != UINT32_MAX) {
+                if (auto line = locateTargetLine(elem.get())) {
+                    result = *line;
                     break;
                 }
             }
@@ -128,9 +129,8 @@ void CommentsAssociator::consumeCommentsUntilLine(int line) {
 void CommentsAssociator::associateAssertionCommentsToNode(parser::Node *node, bool adjustLocForHeredoc = false) {
     uint32_t targetLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
     if (adjustLocForHeredoc) {
-        targetLine = locateTargetLine(node);
-        if (targetLine == UINT32_MAX) {
-            targetLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+        if (auto line = locateTargetLine(node)) {
+            targetLine = *line;
         }
     }
 
