@@ -640,6 +640,7 @@ void LSPTypechecker::cacheUpdatedFiles(absl::Span<const ast::ParsedFile> indexed
 }
 
 unique_ptr<core::GlobalState> LSPTypechecker::destroy() {
+    this->sessionCache.reset();
     return move(gs);
 }
 
