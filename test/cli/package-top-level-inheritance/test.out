@@ -5,7 +5,7 @@ a/foo.rb:5: `Main::B` resolves but its package is not imported https://srb.help/
      3 |class Main < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    a/__package.rb:3: Insert `import Main`
+    a/__package.rb:3: Insert `test_import Main, for: :TEST_RB_ONLY`
      3 |class Main::A < PackageSpec
                                    ^
 Errors: 1

@@ -172,7 +172,7 @@ TEST_CASE("Simple add import") {
     CHECK_EQ(expected, replaced);
 }
 
-TEST_CASE("Simple test import") {
+TEST_CASE("Simple test helper import") {
     core::GlobalState gs(errorQueue);
     makeDefaultPackagerGlobalState(gs);
 
@@ -193,6 +193,32 @@ TEST_CASE("Simple test import") {
     ENFORCE(myPkg.exists());
 
     auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::TestHelper);
+    ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = applySuggestion(gs, *addImport);
+    CHECK_EQ(expected, replaced);
+}
+
+TEST_CASE("Simple test unit import") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs);
+
+    string pkg_source = "class MyPackage < PackageSpec\n"
+                        "  import SomethingElse\n"
+                        "end\n";
+
+    string expected = "class MyPackage < PackageSpec\n"
+                      "  import SomethingElse\n"
+                      "  test_import ExamplePackage, for: :TEST_RB_ONLY\n"
+                      "end\n";
+
+    auto parsedFiles =
+        enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
+    ENFORCE(examplePkg.exists());
+    ENFORCE(myPkg.exists());
+
+    auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::TestUnit);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
     auto replaced = applySuggestion(gs, *addImport);
     CHECK_EQ(expected, replaced);
