@@ -177,6 +177,12 @@ void CommentsAssociator::associateSignatureCommentsToNode(parser::Node *node) {
     commentsByNode[node] = move(comments);
 }
 
+void CommentsAssociator::walkNodes(parser::NodeVec &nodes) {
+    for (auto &node : nodes) {
+        walkNode(node.get());
+    }
+}
+
 void CommentsAssociator::walkNode(parser::Node *node) {
     if (node == nullptr) {
         return;
@@ -198,9 +204,7 @@ void CommentsAssociator::walkNode(parser::Node *node) {
         },
         [&](parser::Array *array) {
             associateAssertionCommentsToNode(node);
-            for (auto &elem : array->elts) {
-                walkNode(elem.get());
-            }
+            walkNodes(array->elts);
             consumeCommentsInsideNode(node, "array");
         },
         [&](parser::Assign *assign) {
@@ -221,9 +225,7 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             if (begin->stmts.size() > 0 && begin->stmts[0]->loc.endPos() + 1 == node->loc.endPos()) {
                 associateAssertionCommentsToNode(node);
             }
-            for (auto &stmt : begin->stmts) {
-                walkNode(stmt.get());
-            }
+            walkNodes(begin->stmts);
             consumeCommentsInsideNode(node, "begin");
         },
         [&](parser::Block *block) {
@@ -247,26 +249,20 @@ void CommentsAssociator::walkNode(parser::Node *node) {
                 }
             }
 
-            for (auto it = break_->exprs.rbegin(); it != break_->exprs.rend(); ++it) {
-                walkNode(it->get());
-            }
+            walkNodes(break_->exprs);
             consumeCommentsInsideNode(node, "break");
         },
         [&](parser::Case *case_) {
             associateAssertionCommentsToNode(node);
             walkNode(case_->condition.get());
-            for (auto &when : case_->whens) {
-                walkNode(when.get());
-            }
+            walkNodes(case_->whens);
             walkNode(case_->else_.get());
             consumeCommentsInsideNode(node, "case");
         },
         [&](parser::CaseMatch *case_) {
             associateAssertionCommentsToNode(node);
             walkNode(case_->expr.get());
-            for (auto &inBody : case_->inBodies) {
-                walkNode(inBody.get());
-            }
+            walkNodes(case_->inBodies);
             walkNode(case_->elseBody.get());
             consumeCommentsInsideNode(node, "case");
         },
@@ -286,9 +282,7 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             }
             associateAssertionCommentsToNode(node);
             walkNode(csend->receiver.get());
-            for (auto &arg : csend->args) {
-                walkNode(arg.get());
-            }
+            walkNodes(csend->args);
             consumeCommentsInsideNode(node, "csend");
         },
         [&](parser::DefMethod *def) {
@@ -317,9 +311,7 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             if (!hash->kwargs) {
                 associateAssertionCommentsToNode(node);
             }
-            for (auto &elem : hash->pairs) {
-                walkNode(elem.get());
-            }
+            walkNodes(hash->pairs);
             consumeCommentsInsideNode(node, "hash");
         },
         [&](parser::If *if_) {
@@ -352,9 +344,7 @@ void CommentsAssociator::walkNode(parser::Node *node) {
         },
         [&](parser::Kwbegin *kwbegin) {
             associateAssertionCommentsToNode(node);
-            for (auto &stmt : kwbegin->stmts) {
-                walkNode(stmt.get());
-            }
+            walkNodes(kwbegin->stmts);
             consumeCommentsInsideNode(node, "begin");
         },
         [&](parser::Masgn *masgn) {
@@ -380,9 +370,7 @@ void CommentsAssociator::walkNode(parser::Node *node) {
                 }
             }
 
-            for (auto &expr : next->exprs) {
-                walkNode(expr.get());
-            }
+            walkNodes(next->exprs);
             consumeCommentsInsideNode(node, "next");
         },
         [&](parser::OpAsgn *opAsgn) {
@@ -417,17 +405,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             if (beginLine == endLine) {
                 // Single line rescue that may have an assertion comment so we need to start from the else node
                 walkNode(rescue->else_.get());
-                for (auto &rescued : rescue->rescue) {
-                    walkNode(rescued.get());
-                }
+                walkNodes(rescue->rescue);
                 walkNode(rescue->body.get());
             } else {
                 walkNode(rescue->body.get());
-                for (auto &rescued : rescue->rescue) {
-                    walkNode(rescued.get());
-                }
+                walkNodes(rescue->rescue);
                 walkNode(rescue->else_.get());
             }
+
             consumeCommentsBetweenLines(beginLine, endLine, "rescue");
         },
         [&](parser::Return *ret) {
@@ -440,9 +425,7 @@ void CommentsAssociator::walkNode(parser::Node *node) {
                 }
             }
 
-            for (auto &expr : ret->exprs) {
-                walkNode(expr.get());
-            }
+            walkNodes(ret->exprs);
             consumeCommentsInsideNode(node, "return");
         },
         [&](parser::SClass *sclass) {
@@ -479,10 +462,7 @@ void CommentsAssociator::walkNode(parser::Node *node) {
                 associateAssertionCommentsToNode(send);
 
                 walkNode(send->receiver.get());
-
-                for (auto &arg : send->args) {
-                    walkNode(arg.get());
-                }
+                walkNodes(send->args);
                 consumeCommentsInsideNode(node, "send");
             }
         },
