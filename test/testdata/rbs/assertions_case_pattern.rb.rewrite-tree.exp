@@ -1,0 +1,13 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <assignTemp>$2 = <emptyTree>::<C ARGV>.first()
+
+  if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+  else
+    if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C Integer>)
+    else
+      ::<root>::<C T>.unsafe(<emptyTree>::<C ARGV>.first())
+    end
+  end
+end

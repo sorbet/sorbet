@@ -599,6 +599,19 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
             when->body = rewriteBody(move(when->body));
             result = move(node);
         },
+        [&](parser::CaseMatch *caseMatch) {
+            node = maybeInsertCast(move(node));
+            caseMatch->expr = rewriteNode(move(caseMatch->expr));
+            rewriteNodes(&caseMatch->inBodies);
+            caseMatch->elseBody = rewriteBody(move(caseMatch->elseBody));
+            result = move(node);
+        },
+        [&](parser::InPattern *inPattern) {
+            inPattern->pattern = rewriteNode(move(inPattern->pattern));
+            inPattern->guard = rewriteNode(move(inPattern->guard));
+            inPattern->body = rewriteBody(move(inPattern->body));
+            result = move(node);
+        },
 
         // Rescues
 
