@@ -173,7 +173,7 @@ class BasicObject
         arg0: Symbol,
         arg1: BasicObject,
         kwargs: T.nilable(T::Hash[Symbol, BasicObject]),
-        blk: T.nilable(T.proc.returns(T.untyped)),
+        blk: T.untyped,
     )
     .returns(T.untyped)
   end
