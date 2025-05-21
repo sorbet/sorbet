@@ -254,6 +254,14 @@ public:
         return sccID_;
     }
 
+    // ID of the strongly-connected component that this package's tests are in, according to its graph of import
+    // dependencies
+    optional<int> testSccID_ = nullopt;
+
+    optional<int> testSccID() const {
+        return testSccID_;
+    }
+
     // PackageInfoImpl is the only implementation of PackageInfo
     static PackageInfoImpl &from(core::GlobalState &gs, core::packages::MangledName pkg) {
         ENFORCE(pkg.exists());
@@ -1681,7 +1689,8 @@ class ComputePackageSCCs {
 
     // DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
     // detecting SCCs.
-    void strongConnect(core::packages::MangledName pkgName, NodeInfo &infoAtEntry) {
+    void strongConnect(core::packages::MangledName pkgName, NodeInfo &infoAtEntry,
+                       core::packages::ImportType edgeType) {
         auto *pkgInfoPtr = gs.packageDB().getPackageInfoNonConst(pkgName);
         if (!pkgInfoPtr) {
             // This is to handle the case where the user imports a package that doesn't exist.
@@ -1696,7 +1705,7 @@ class ComputePackageSCCs {
         infoAtEntry.onStack = true;
 
         for (auto &i : pkgInfo.importedPackageNames) {
-            if (i.type == core::packages::ImportType::Test) {
+            if (i.type != edgeType) {
                 continue;
             }
             // We need to be careful with this; it's not valid after a call to `strongConnect`,
@@ -1704,7 +1713,7 @@ class ComputePackageSCCs {
             auto &importInfo = this->nodeMap[i.name.mangledName];
             if (importInfo.index == NodeInfo::UNVISITED) {
                 // This is a tree edge (ie. a forward edge that we haven't visited yet).
-                this->strongConnect(i.name.mangledName, importInfo);
+                this->strongConnect(i.name.mangledName, importInfo, edgeType);
 
                 // Need to re-lookup for the reason above.
                 auto &importInfo = this->nodeMap[i.name.mangledName];
@@ -1745,24 +1754,42 @@ class ComputePackageSCCs {
                 this->stack.pop_back();
                 this->nodeMap[poppedPkgName].onStack = false;
                 auto &poppedPkgInfo = PackageInfoImpl::from(*(gs.packageDB().getPackageInfoNonConst(poppedPkgName)));
-                poppedPkgInfo.sccID_ = sccId;
+
+                switch (edgeType) {
+                    case core::packages::ImportType::Normal: {
+                        poppedPkgInfo.sccID_ = sccId;
+                        break;
+                    }
+                    case core::packages::ImportType::Test: {
+                        poppedPkgInfo.testSccID_ = sccId;
+                        break;
+                    }
+                }
+
             } while (poppedPkgName != pkgName);
         }
     }
 
-public:
     // Tarjan's algorithm for finding strongly connected components
+    void tarjan(core::packages::ImportType edgeType) {
+        this->nodeMap.clear();
+        ENFORCE(this->stack.empty());
+        for (auto package : gs.packageDB().packages()) {
+            auto &info = this->nodeMap[package];
+            if (info.index == NodeInfo::UNVISITED) {
+                this->strongConnect(package, info, edgeType);
+            }
+        }
+    }
+
+public:
     // NOTE: This function must be called every time a non-test import is added or removed from a package.
     // It is relatively fast, so calling it on every __package.rb edit is an okay overapproximation for simplicity.
     static void run(core::GlobalState &gs) {
         Timer timeit(gs.tracer(), "packager::computeSCCs");
         ComputePackageSCCs scc(gs);
-        for (auto package : gs.packageDB().packages()) {
-            auto &info = scc.nodeMap[package];
-            if (info.index == NodeInfo::UNVISITED) {
-                scc.strongConnect(package, info);
-            }
-        }
+        scc.tarjan(core::packages::ImportType::Normal);
+        scc.tarjan(core::packages::ImportType::Test);
     }
 };
 
