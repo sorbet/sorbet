@@ -692,7 +692,6 @@ public:
 
 private:
     const core::FoundDefinitions &foundDefs;
-    const core::FoundDefHashes *oldFoundHashes;
 
     vector<core::ClassOrModuleRef> &symbolsToRecompute;
 
@@ -1525,64 +1524,62 @@ private:
     }
 
 public:
-    void deleteOldDefinitions(core::MutableContext ctx, const SymbolDefiner::State &state) {
+    void deleteOldDefinitions(core::MutableContext ctx, const SymbolDefiner::State &state,
+                              const core::FoundDefHashes &oldFoundHashes) {
         Timer timeit(ctx.state.tracer(), "deleteOldDefinitions");
-        if (oldFoundHashes != nullptr) {
-            for (const auto &oldStaticFieldHash : oldFoundHashes->staticFieldHashes) {
-                deleteStaticFieldViaFullNameHash(ctx, state, oldStaticFieldHash);
-            }
+        for (const auto &oldStaticFieldHash : oldFoundHashes.staticFieldHashes) {
+            deleteStaticFieldViaFullNameHash(ctx, state, oldStaticFieldHash);
+        }
 
-            for (const auto &oldTypeMemberHash : oldFoundHashes->typeMemberHashes) {
-                deleteTypeMemberViaFullNameHash(ctx, state, oldTypeMemberHash);
-            }
+        for (const auto &oldTypeMemberHash : oldFoundHashes.typeMemberHashes) {
+            deleteTypeMemberViaFullNameHash(ctx, state, oldTypeMemberHash);
+        }
 
-            for (auto klass : state.definedClasses) {
-                // In the process of recovering from "parent type member must be re-declared in child" errors,
-                // GlobalPass will create type members even if there isn't a `type_member` in the child class' body.
-                // There won't be an entry in the old typeMemberHashes for these type members, so we have to
-                // delete them manually.
-                auto currentClass = klass;
-                vector<core::TypeMemberRef> toDelete;
-                do {
-                    const auto &typeMembers = currentClass.data(ctx)->typeMembers();
-                    toDelete.reserve(typeMembers.size());
-                    for (const auto &typeMember : typeMembers) {
-                        if (typeMember.data(ctx)->name == core::Names::Constants::AttachedClass()) {
-                            // <AttachedClass> type templates are created when the singleton class was created.
-                            // Since we don't delete and re-add classes on the fast path, we both can and must leave
-                            // these `<AttachedClass>` type templates alone
-                            continue;
-                        }
-                        toDelete.emplace_back(typeMember);
+        for (auto klass : state.definedClasses) {
+            // In the process of recovering from "parent type member must be re-declared in child" errors,
+            // GlobalPass will create type members even if there isn't a `type_member` in the child class' body.
+            // There won't be an entry in the old typeMemberHashes for these type members, so we have to
+            // delete them manually.
+            auto currentClass = klass;
+            vector<core::TypeMemberRef> toDelete;
+            do {
+                const auto &typeMembers = currentClass.data(ctx)->typeMembers();
+                toDelete.reserve(typeMembers.size());
+                for (const auto &typeMember : typeMembers) {
+                    if (typeMember.data(ctx)->name == core::Names::Constants::AttachedClass()) {
+                        // <AttachedClass> type templates are created when the singleton class was created.
+                        // Since we don't delete and re-add classes on the fast path, we both can and must leave
+                        // these `<AttachedClass>` type templates alone
+                        continue;
                     }
+                    toDelete.emplace_back(typeMember);
+                }
 
-                    currentClass = currentClass.data(ctx)->lookupSingletonClass(ctx);
-                } while (currentClass.exists());
+                currentClass = currentClass.data(ctx)->lookupSingletonClass(ctx);
+            } while (currentClass.exists());
 
-                for (auto oldTypeMember : toDelete) {
-                    oldTypeMember.data(ctx)->removeLocsForFile(ctx.file);
-                    if (oldTypeMember.data(ctx)->locs().empty()) {
-                        ctx.state.deleteTypeMemberSymbol(oldTypeMember);
-                    }
+            for (auto oldTypeMember : toDelete) {
+                oldTypeMember.data(ctx)->removeLocsForFile(ctx.file);
+                if (oldTypeMember.data(ctx)->locs().empty()) {
+                    ctx.state.deleteTypeMemberSymbol(oldTypeMember);
                 }
             }
+        }
 
-            for (const auto &oldFieldHash : oldFoundHashes->fieldHashes) {
-                deleteFieldViaFullNameHash(ctx, state, oldFieldHash);
-            }
+        for (const auto &oldFieldHash : oldFoundHashes.fieldHashes) {
+            deleteFieldViaFullNameHash(ctx, state, oldFieldHash);
+        }
 
-            for (const auto &oldMethodHash : oldFoundHashes->methodHashes) {
-                // Since we've already processed all the non-method symbols (which includes classes), we now
-                // guarantee that deleteViaFullNameHash can use getOwnerSymbol to lookup an old owner
-                // ref in the new definedClasses vector.
-                deleteMethodViaFullNameHash(ctx, state, oldMethodHash);
-            }
+        for (const auto &oldMethodHash : oldFoundHashes.methodHashes) {
+            // Since we've already processed all the non-method symbols (which includes classes), we now
+            // guarantee that deleteViaFullNameHash can use getOwnerSymbol to lookup an old owner
+            // ref in the new definedClasses vector.
+            deleteMethodViaFullNameHash(ctx, state, oldMethodHash);
         }
     }
 
-    SymbolDefiner(const core::FoundDefinitions &foundDefs, const core::FoundDefHashes *oldFoundHashes,
-                  vector<core::ClassOrModuleRef> &symbolsToRecompute)
-        : foundDefs(foundDefs), oldFoundHashes(oldFoundHashes), symbolsToRecompute{symbolsToRecompute} {}
+    SymbolDefiner(const core::FoundDefinitions &foundDefs, vector<core::ClassOrModuleRef> &symbolsToRecompute)
+        : foundDefs(foundDefs), symbolsToRecompute{symbolsToRecompute} {}
 
     SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs,
                                                ClassBehaviorLocsMap &classBehaviorLocs) {
@@ -2211,12 +2208,13 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
         }
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
-        auto frefIt = oldFoundHashesForFiles.find(fref);
-        auto *oldFoundHashes = frefIt == oldFoundHashesForFiles.end() ? nullptr : &frefIt->second->foundHashes;
-        SymbolDefiner symbolDefiner(*fileFoundDefinitions, oldFoundHashes, updatedSymbols);
+        SymbolDefiner symbolDefiner(*fileFoundDefinitions, updatedSymbols);
         auto state = symbolDefiner.enterClassDefinitions(ctx, willDeleteOldDefs, classBehaviorLocs);
         if (willDeleteOldDefs) {
-            symbolDefiner.deleteOldDefinitions(ctx, state);
+            auto frefIt = oldFoundHashesForFiles.find(fref);
+            if (frefIt != oldFoundHashesForFiles.end()) {
+                symbolDefiner.deleteOldDefinitions(ctx, state, frefIt->second->foundHashes);
+            }
         }
         incrementalDefinitions[fref] = move(state);
         if (foundHashesOut != nullptr) {
@@ -2234,14 +2232,9 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
             return;
         }
 
-        // The contents of this don't matter for incremental definition.  The
-        // old definitions should only matter when deleting old symbols (which
-        // happened in the previous phase of incremental namer), not here when
-        // entering symbols.
-        const core::FoundDefHashes *oldFoundHashes = nullptr;
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
-        SymbolDefiner symbolDefiner(*fileFoundDefinitions, oldFoundHashes, updatedSymbols);
+        SymbolDefiner symbolDefiner(*fileFoundDefinitions, updatedSymbols);
         symbolDefiner.enterNewDefinitions(ctx, move(incrementalDefinitions[fref]));
     }
     return;
