@@ -269,6 +269,17 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "case");
         },
+        [&](parser::CaseMatch *case_) {
+            associateAssertionCommentsToNode(node);
+            walkNodes(case_->expr.get());
+            for (auto &inBody : case_->inBodies) {
+                walkNodes(inBody.get());
+            }
+            walkNodes(case_->elseBody.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "case");
+        },
         [&](parser::Class *cls) {
             associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
@@ -345,6 +356,14 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "if");
+        },
+        [&](parser::InPattern *inPattern) {
+            walkNodes(inPattern->pattern.get());
+            walkNodes(inPattern->guard.get());
+            walkNodes(inPattern->body.get());
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+            consumeCommentsBetweenLines(beginLine, endLine, "in_pattern");
         },
         [&](parser::Kwsplat *kwsplat) {
             walkNodes(kwsplat->expr.get());
