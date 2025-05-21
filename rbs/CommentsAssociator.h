@@ -32,6 +32,7 @@ private:
     void walkNodes(parser::Node *node);
     void associateAssertionCommentsToNode(parser::Node *node, bool adjustLocForHeredoc);
     void associateSignatureCommentsToNode(parser::Node *node);
+    void consumeCommentsInsideNode(parser::Node *node, std::string kind);
     void consumeCommentsBetweenLines(int startLine, int endLine, std::string kind);
     void consumeCommentsUntilLine(int line);
     std::optional<uint32_t> locateTargetLine(parser::Node *node);
