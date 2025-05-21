@@ -274,10 +274,7 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
             associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
-
-            if (auto body = cls->body.get()) {
-                walkNodes(body);
-            }
+            walkNodes(cls->body.get());
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "class");
         },
@@ -369,10 +366,7 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
             associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
-
-            if (auto body = mod->body.get()) {
-                walkNodes(body);
-            }
+            walkNodes(mod->body.get());
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "module");
         },
@@ -455,10 +449,7 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
             associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
-
-            if (auto body = sclass->body.get()) {
-                walkNodes(body);
-            }
+            walkNodes(sclass->body.get());
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "sclass");
         },
