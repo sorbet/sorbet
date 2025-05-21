@@ -820,9 +820,13 @@ bool isRootScopedDefinition(const ast::ConstantLit *lit) {
 
 // Some of this gets simpler after we move packager into namer, because we can stop defining package
 // symbols under PackageSpecRegistry.
-core::packages::MangledName packageForSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
+// TODO(jez) Make this a struct with named fields.
+// TODO(jez) This solution is hacky: is it the best?
+pair<core::packages::MangledName, bool> packageForSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     // Skip until we get to the ClassOrModule things (ignore static-fields / type members to find package namespace)
+    bool couldBePrefix = true;
     while (!sym.isClassOrModule()) {
+        couldBePrefix = false;
         sym = sym.owner(gs);
     }
 
@@ -838,7 +842,7 @@ core::packages::MangledName packageForSymbol(const core::GlobalState &gs, core::
 
     if (fullNameReversed.empty()) {
         // This would be like, a static field at the top level?
-        return {};
+        return {{}, couldBePrefix};
     }
 
     if (fullNameReversed.back() == core::packages::PackageDB::TEST_NAMESPACE) {
@@ -849,7 +853,8 @@ core::packages::MangledName packageForSymbol(const core::GlobalState &gs, core::
     for (auto it = fullNameReversed.rbegin(); it != fullNameReversed.rend(); it++) {
         auto curr = best.owner.data(gs)->findMember(gs, *it);
         if (!curr.exists()) {
-            return core::packages::MangledName(best);
+            // Can't be prefix, because there was extra stuff we're dropping that we could not find
+            return {core::packages::MangledName(best), false};
         }
 
         ENFORCE(curr.isClassOrModule(), "All names on path to PackageSpec should be ClassOrModule");
@@ -857,9 +862,10 @@ core::packages::MangledName packageForSymbol(const core::GlobalState &gs, core::
     }
 
     if (best.owner == core::Symbols::PackageSpecRegistry()) {
+        // TODO(jez) I this actually dead?
         return {};
     }
-    return best;
+    return {best, couldBePrefix};
 }
 
 bool ownsPackage(const core::GlobalState &gs, const core::packages::MangledName owningPkg,
@@ -1096,14 +1102,19 @@ private:
 
     core::packages::MangledName packageForNamespace(const core::GlobalState &gs) const {
         const auto &[scopeSym, _scopeLoc] = scope.back();
-        return packageForSymbol(gs, scopeSym);
+        const auto &[pkg, _couldBePrefix] = packageForSymbol(gs, scopeSym);
+        return pkg;
     }
 
     bool onPackagePath(const core::GlobalState &gs) const {
         const auto &[scopeSym, _scopeLoc] = scope.back();
-        auto pkgForScope = packageForSymbol(gs, scopeSym);
+        const auto &[pkgForScope, couldBePrefix] = packageForSymbol(gs, scopeSym);
 
-        return ownsPackage(gs, pkgForScope, this->pkg.mangledName());
+        if (couldBePrefix) {
+            return ownsPackage(gs, pkgForScope, this->pkg.mangledName());
+        } else {
+            return pkgForScope == this->pkg.mangledName();
+        }
     }
 
     const string requiredNamespace(const core::GlobalState &gs) const {
