@@ -516,7 +516,7 @@ public:
             case core::packages::ImportType::TestUnit:
                 importTypeHuman = "Test Import";
                 importTypeMethod = "test_import";
-                importTypeTrailing = " for: :TEST_RB_ONLY";
+                importTypeTrailing = ", for: :TEST_RB_ONLY";
                 break;
             case core::packages::ImportType::TestHelper:
                 importTypeHuman = "Test Import";
