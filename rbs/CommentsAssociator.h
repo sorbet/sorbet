@@ -29,7 +29,7 @@ private:
     std::map<int, CommentNode> commentByLine;
     std::map<parser::Node *, std::vector<CommentNode>> commentsByNode;
 
-    void walkNodes(parser::Node *node);
+    void walkNode(parser::Node *node);
     void associateAssertionCommentsToNode(parser::Node *node, bool adjustLocForHeredoc);
     void associateSignatureCommentsToNode(parser::Node *node);
     void consumeCommentsInsideNode(parser::Node *node, std::string kind);
