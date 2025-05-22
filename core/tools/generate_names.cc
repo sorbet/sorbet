@@ -469,8 +469,8 @@ NameDef names[] = {
     {"dag"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
-    {"for_", "for"},
-    {"testRbOnly", "TEST_RB_ONLY"},
+    {"only"},
+    {"testRb", "test_rb"},
 
     // GlobalState initEmpty()
     {"Top", "T.anything", true},

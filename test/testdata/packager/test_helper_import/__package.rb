@@ -4,5 +4,5 @@
 class RootPkg < PackageSpec
   import A
   test_import B
-  test_import C, for: :TEST_RB_ONLY
+  test_import C, only: :test_rb
 end

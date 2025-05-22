@@ -19,7 +19,7 @@ a/foo.rb:5: `Y::Foo` resolves but its package is not imported https://srb.help/3
      3 |class Y < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    a/__package.rb:7: Insert `test_import Y, for: :TEST_RB_ONLY`
+    a/__package.rb:7: Insert `test_import Y, only: :test_rb`
      7 |  import B
                   ^
 Errors: 2
