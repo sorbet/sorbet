@@ -129,14 +129,12 @@ class PropagateVisibility final {
             sym = sym.data(ctx)->owner;
         }
 
-        absl::c_reverse(names);
-
         auto &db = ctx.state.packageDB();
 
         {
             auto packageSym = core::Symbols::root();
-            for (auto name : names) {
-                auto member = packageSym.data(ctx)->findMember(ctx, name);
+            for (auto name = names.rbegin(); name != names.rend(); name++) {
+                auto member = packageSym.data(ctx)->findMember(ctx, *name);
                 if (!member.exists() || !member.isClassOrModule()) {
                     packageSym = core::Symbols::noClassOrModule();
                     break;
@@ -161,8 +159,8 @@ class PropagateVisibility final {
             }
 
             testSym = member.asClassOrModuleRef();
-            for (auto name : names) {
-                auto member = testSym.data(ctx)->findMember(ctx, name);
+            for (auto name = names.rbegin(); name != names.rend(); name++) {
+                auto member = testSym.data(ctx)->findMember(ctx, *name);
                 if (!member.exists() || !member.isClassOrModule()) {
                     testSym = core::Symbols::noClassOrModule();
                     break;
