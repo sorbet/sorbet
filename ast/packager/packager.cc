@@ -1,6 +1,7 @@
 #include "ast/packager/packager.h"
 #include "ast/Helpers.h"
-#include "common/common.h"
+
+using namespace std;
 
 namespace sorbet::ast::packager {
 

@@ -80,6 +80,8 @@ class PropagateVisibility final {
         // `A::B`, we explicitly lookup and export them here. This is a design decision inherited from the previous
         // packages implementation, and we could remove it after migrating Stripe's codebase to not depend on package
         // names being exported by default.
+        //
+        // TODO(jez) This method becomes trivial if we can get packages' tests back into `A::B::Test`
         for (auto name : this->package.fullName()) {
             auto next = sym.data(gs)->findMember(gs, name);
             if (!next.exists() || !next.isClassOrModule()) {

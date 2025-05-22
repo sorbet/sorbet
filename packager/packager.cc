@@ -719,7 +719,10 @@ PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedCon
 
     if (owner == core::Symbols::PackageSpecRegistry()) {
         // This is a weird case, because I don't think it's possible to get here, but we can handle it anyways.
-        // This whole function should go away with the switch to PackageRef anyways.
+        // This whole function should go away with the switch to PackageRef anyways. As in, we
+        // should probably be able to pre-resolve the constants in import/visible_to/etc. lines at
+        // this point, and report an eager error if those package names fail to resolve, rather than
+        // resorting handling this (impossible?) edge case.
         ENFORCE(fullName.parts.empty());
         owner = core::Symbols::noClassOrModule();
     }
@@ -2126,8 +2129,6 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
     Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files), [&gs = as_const(gs)](auto &file) {
         core::Context ctx(gs, core::Symbols::root(), file.file);
         if (file.file.data(gs).isPackage(gs)) {
-            // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
-            // report some syntactic packager errors.
             auto info = definePackage(gs, file);
             if (info != nullptr) {
                 rewritePackageSpec(gs, file, *info);
