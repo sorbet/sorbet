@@ -626,6 +626,7 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
             result = move(node);
         },
         [&](parser::Ensure *ensure) {
+            ensure->ensure = rewriteBody(move(ensure->ensure));
             ensure->body = rewriteBody(move(ensure->body));
             result = move(node);
         },
