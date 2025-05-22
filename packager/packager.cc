@@ -680,6 +680,15 @@ bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) 
 
 FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     FullyQualifiedName fqn;
+
+    if (constantLit != nullptr && constantLit->cnst == core::Names::Constants::PackageSpec_Storage()) {
+        if (auto resolvedLit = ast::cast_tree<ast::ConstantLit>(constantLit->scope)) {
+            constantLit = resolvedLit->original();
+        } else {
+            constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(constantLit->scope);
+        }
+    }
+
     fqn.loc = constantLit->loc;
     while (constantLit != nullptr) {
         fqn.parts.emplace_back(constantLit->cnst);
@@ -707,7 +716,7 @@ PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedCon
     auto fullName = getFullyQualifiedName(ctx, constantLit);
 
     // Since packager now runs after namer, we know that these symbols are entered.
-    auto owner = core::Symbols::PackageSpecRegistry();
+    auto owner = core::Symbols::root();
     for (auto part : fullName.parts) {
         auto member = owner.data(ctx)->findMember(ctx, part);
         if (!member.exists() || !member.isClassOrModule()) {
@@ -717,7 +726,15 @@ PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedCon
         owner = member.asClassOrModuleRef();
     }
 
-    if (owner == core::Symbols::PackageSpecRegistry()) {
+    if (owner.exists()) {
+        auto member = owner.data(ctx)->findMember(ctx, core::Names::Constants::PackageSpec_Storage());
+        if (!member.exists() || !member.isClassOrModule()) {
+            owner = core::Symbols::noClassOrModule();
+        }
+        owner = member.asClassOrModuleRef();
+    }
+
+    if (owner == core::Symbols::root()) {
         // This is a weird case, because I don't think it's possible to get here, but we can handle it anyways.
         // This whole function should go away with the switch to PackageRef anyways. As in, we
         // should probably be able to pre-resolve the constants in import/visible_to/etc. lines at
@@ -1254,20 +1271,20 @@ struct PackageSpecBodyWalk {
         if ((send.fun == core::Names::import() || send.fun == core::Names::testImport()) && send.numPosArgs() == 1) {
             // null indicates an invalid import.
             if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
-                // Transform: `import Foo` -> `import <PackageSpecRegistry>::Foo`
+                // Transform: `import Foo` -> `import Foo::<PackageSpec>`
                 auto &posArg = send.getPosArg(0);
                 auto importArg = move(posArg);
-                posArg = ast::packager::prependRegistry(move(importArg));
+                posArg = ast::packager::appendRegistry(move(importArg));
 
                 info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target), method2ImportType(send));
             }
         }
 
         if (send.fun == core::Names::restrictToService() && send.numPosArgs() == 1) {
-            // Transform: `restrict_to_service Foo` -> `restrict_to_service <PackageSpecRegistry>::Foo`
+            // Transform: `restrict_to_service Foo` -> `restrict_to_service Foo::<PackageSpec>`
             auto &posArg = send.getPosArg(0);
             auto importArg = move(posArg);
-            posArg = ast::packager::prependRegistry(move(importArg));
+            posArg = ast::packager::appendRegistry(move(importArg));
         }
 
         if (send.fun == core::Names::exportAll() && send.numPosArgs() == 0) {
@@ -1300,7 +1317,7 @@ struct PackageSpecBodyWalk {
                 if (auto *recv = verifyConstant(ctx, send.fun, target->recv)) {
                     auto &posArg = send.getPosArg(0);
                     auto importArg = move(target->recv);
-                    posArg = ast::packager::prependRegistry(move(importArg));
+                    posArg = ast::packager::appendRegistry(move(importArg));
                     info.visibleTo_.emplace_back(getUnresolvedPackageName(ctx, recv),
                                                  core::packages::VisibleToType::Wildcard);
                 } else {
@@ -1313,7 +1330,7 @@ struct PackageSpecBodyWalk {
             } else if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto &posArg = send.getPosArg(0);
                 auto importArg = move(posArg);
-                posArg = ast::packager::prependRegistry(move(importArg));
+                posArg = ast::packager::appendRegistry(move(importArg));
 
                 info.visibleTo_.emplace_back(getUnresolvedPackageName(ctx, target),
                                              core::packages::VisibleToType::Normal);
