@@ -171,7 +171,7 @@ module JSON
       obj: ::T.untyped,
       opts: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .returns(String)
   end
   def self.fast_generate(obj, opts=T.unsafe(nil)); end
 
@@ -189,7 +189,7 @@ module JSON
       obj: ::T.untyped,
       opts: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .returns(String)
   end
   def self.generate(obj, opts=T.unsafe(nil)); end
 
