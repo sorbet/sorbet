@@ -23,20 +23,26 @@ public:
 private:
     static const std::string_view ANNOTATION_PREFIX;
     static const std::string_view MULTILINE_RBS_PREFIX;
+    static const std::string_view BIND_PREFIX;
 
     core::MutableContext ctx;
     std::vector<core::LocOffsets> commentLocations;
     std::map<int, CommentNode> commentByLine;
     std::map<parser::Node *, std::vector<CommentNode>> commentsByNode;
+    int lastLine;
 
     void walkNode(parser::Node *node);
     void walkNodes(parser::NodeVec &nodes);
+    void walkStatements(parser::NodeVec &nodes);
+    std::unique_ptr<parser::Node> walkBody(parser::Node *node, std::unique_ptr<parser::Node> body);
     void associateAssertionCommentsToNode(parser::Node *node, bool adjustLocForHeredoc);
     void associateSignatureCommentsToNode(parser::Node *node);
     void consumeCommentsInsideNode(parser::Node *node, std::string kind);
     void consumeCommentsBetweenLines(int startLine, int endLine, std::string kind);
     void consumeCommentsUntilLine(int line);
     std::optional<uint32_t> locateTargetLine(parser::Node *node);
+
+    int maybeInsertStandalonePlaceholders(parser::NodeVec &nodes, int index, int lastLine, int currentLine);
 };
 
 } // namespace sorbet::rbs
