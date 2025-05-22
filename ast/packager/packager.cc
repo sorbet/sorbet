@@ -5,15 +5,9 @@ using namespace std;
 
 namespace sorbet::ast::packager {
 
-ExpressionPtr prependRegistry(ExpressionPtr scope) {
-    auto lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
-    ENFORCE(lastConstLit != nullptr);
-    while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
-        lastConstLit = constLit;
-    }
-    lastConstLit->scope =
-        ast::MK::Constant(lastConstLit->scope.loc().copyWithZeroLength(), core::Symbols::PackageSpecRegistry());
-    return scope;
+ExpressionPtr appendRegistry(ExpressionPtr scope) {
+    return ast::MK::UnresolvedConstant(scope.loc().copyEndWithZeroLength(), move(scope),
+                                       core::Names::Constants::PackageSpec_Storage());
 }
 
 const ast::ClassDef *asPackageSpecClass(const ast::ExpressionPtr &expr) {

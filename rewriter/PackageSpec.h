@@ -16,12 +16,8 @@ namespace sorbet::rewriter {
  *
  * to
  *
- *     class <PackageSpecRegistry>::Foo::Bar < ::Sorbet::Private::Static::PackageSpec
+ *     class Foo::Bar::<PackageSpec> < ::Sorbet::Private::Static::PackageSpec
  *     end
- *
- * TODO(jez) When we move packages into the symbol table, we can drop the `<PackageSpecRegistry>`
- * bit, which is only required because there could be a class or module symbol with the `Foo::Bar`
- * name that collides with the package definition.
  */
 class PackageSpec final {
 public:

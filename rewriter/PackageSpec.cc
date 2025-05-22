@@ -115,14 +115,13 @@ void PackageSpec::run(core::MutableContext ctx, ast::ClassDef *klass) {
         }
 
         // Pre-resolve the super class. This makes it easier to detect that this is a package
-        // spec-related class def in later passes without having to recursively walk up the constant
-        // lit's scope to find if it starts with <PackageSpecRegistry>.
+        // spec-related class def in later passes.
         superClass = ast::make_expression<ast::ConstantLit>(core::Symbols::PackageSpec(),
                                                             superClass.toUnique<ast::UnresolvedConstantLit>());
 
-        // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
+        // `class Foo < PackageSpec` -> `class Foo::<PackageSpec> < PackageSpec`
         // This removes the PackageSpec's themselves from the top-level namespace
-        packageSpecClass->name = ast::packager::prependRegistry(move(packageSpecClass->name));
+        packageSpecClass->name = ast::packager::appendRegistry(move(packageSpecClass->name));
 
         // Return eagerly so we don't report duplicate errors on subsequent statements:
         // we'll let those errors be reported in the tree walk later as a bad node type.
