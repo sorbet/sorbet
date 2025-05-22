@@ -11,6 +11,7 @@ namespace sorbet::rbs {
 struct InlineComment {
     enum class Kind {
         ABSURD,
+        BIND,
         CAST,
         LET,
         MUST,
@@ -45,6 +46,7 @@ private:
 
     bool saveTypeParams(parser::Block *block);
     std::unique_ptr<parser::Node> maybeInsertCast(std::unique_ptr<parser::Node> node);
+    std::unique_ptr<parser::Node> replaceSyntheticBind(std::unique_ptr<parser::Node> node);
     std::unique_ptr<parser::Node>
     insertCast(std::unique_ptr<parser::Node> node,
                std::optional<std::pair<std::unique_ptr<parser::Node>, InlineComment::Kind>> pair);

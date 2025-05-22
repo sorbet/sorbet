@@ -249,6 +249,10 @@ public:
         return Send0(loc, T(loc), core::Names::attachedClass(), loc);
     }
 
+    static std::unique_ptr<parser::Node> TBind(core::LocOffsets loc, std::unique_ptr<parser::Node> type) {
+        return Send2(loc, T(loc), core::Names::bind(), loc, MK::Self(loc), move(type));
+    }
+
     /*
      * Create a `T.cast(value, type)` send node.
      */

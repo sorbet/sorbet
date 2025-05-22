@@ -195,6 +195,10 @@ optional<rbs::InlineComment> AssertionsRewriter::commentForNode(const unique_ptr
             }
         } else if (regex_match(content.begin(), content.end(), absurd_pattern)) {
             kind = InlineComment::Kind::ABSURD;
+        } else if (absl::StartsWith(content, "self as ")) {
+            kind = InlineComment::Kind::BIND;
+            contentStart += 8;
+            content = content.substr(8);
         }
 
         if (hasConsumedComment(commentNode.loc)) {
@@ -271,6 +275,11 @@ AssertionsRewriter::insertCast(unique_ptr<parser::Node> node,
         return parser::MK::TUnsafe(type->loc, move(node));
     } else if (kind == InlineComment::Kind::ABSURD) {
         return parser::MK::TAbsurd(type->loc, move(node));
+    } else if (kind == InlineComment::Kind::BIND) {
+        if (auto e = ctx.beginIndexerError(type->loc, core::errors::Rewriter::RBSUnsupported)) {
+            e.setHeader("`{}` binding can't be used as a trailing comment", "self");
+        }
+        return node;
     } else {
         Exception::raise("Unknown assertion kind");
     }
@@ -292,6 +301,36 @@ unique_ptr<parser::Node> AssertionsRewriter::maybeInsertCast(unique_ptr<parser::
     }
 
     return node;
+}
+
+/**
+ * Replace the synthetic node with a `T.bind` call.
+ */
+unique_ptr<parser::Node> AssertionsRewriter::replaceSyntheticBind(unique_ptr<parser::Node> node) {
+    auto inlineComment = commentForNode(node);
+
+    if (!inlineComment) {
+        // This should never happen
+        Exception::raise("No inline comment found for synthetic bind");
+    }
+
+    auto pair = parseComment(ctx, inlineComment.value(), typeParams);
+
+    if (!pair) {
+        // We already raised an error while parsing the comment, so we just bind to `T.untyped`
+        return parser::MK::TBind(node->loc, parser::MK::TUntyped(node->loc));
+    }
+
+    auto kind = pair->second;
+
+    if (kind != InlineComment::Kind::BIND) {
+        // This should never happen
+        Exception::raise("Invalid inline comment for synthetic bind");
+    }
+
+    auto type = move(pair->first);
+
+    return parser::MK::TBind(type->loc, move(type));
 }
 
 /**
@@ -696,6 +735,14 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
         [&](parser::Kwsplat *splat) {
             splat->expr = rewriteNode(move(splat->expr));
             result = move(node);
+        },
+
+        [&](parser::RBSPlaceholder *placeholder) {
+            if (placeholder->kind == core::Names::Constants::RBSBind()) {
+                result = replaceSyntheticBind(move(node));
+            } else {
+                Exception::raise("Unknown RBS placeholder kind");
+            }
         },
 
         [&](parser::Node *other) { result = maybeInsertCast(move(node)); });
