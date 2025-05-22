@@ -78,6 +78,7 @@ tuple<string, string> MESSAGES[] = {
     {"NoAnonymousBlockArg", "no anonymous block parameter"},
     {"NoAnonymousRestArg", "no anonymous rest parameter"},
     {"NoAnonymousKwrestArg", "no anonymous keyword rest parameter"},
+    {"InvalidKey", "key must be valid as local variables"},
 
     // Error recovery hints
     {"DedentedEnd", "Hint: this {} token might not be properly closed"},
