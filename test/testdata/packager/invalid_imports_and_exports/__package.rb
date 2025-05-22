@@ -29,8 +29,8 @@ class A < PackageSpec
 
   test_import B
   test_import C
-  test_import C, for: :A_MYSTERIOUS_PURPOSE # error: Invalid expression in package
-  test_import C, for: "something else" # error: Invalid expression in package
-  test_import C, for: -> { "naught" } # error: Invalid expression in package
+  test_import C, only: :A_MYSTERIOUS_PURPOSE # error: Invalid expression in package
+  test_import C, only: "something else" # error: Invalid expression in package
+  test_import C, only: -> { "naught" } # error: Invalid expression in package
   test_import C, with: "cheese" # error: Unrecognized keyword argument
 end
