@@ -1263,6 +1263,35 @@ module CGI::Util
     .returns(::T.untyped)
   end
   def unescape_html(_); end
+
+  # URL-encode a string following RFC 3986 Space characters (+“ ”+) are encoded with (+“%20”+)
+  #
+  # ```ruby
+  # url_encoded_string = CGI.escape("'Stop!' said Fred")
+  #    # => "%27Stop%21%27%20said%20Fred"
+  # ```
+  sig do
+    params(
+      string: ::T.untyped
+    )
+    .returns(::String)
+  end
+  def escapeURIComponent(string); end
+
+  # URL-decode a string following RFC 3986 with encoding(optional).
+  #
+  # ```ruby
+  # string = CGI.unescape("%27Stop%21%27+said%20Fred")
+  #    # => "'Stop!'+said Fred"
+  # ```
+  sig do
+    params(
+      string: ::T.untyped,
+      encoding: ::T.untyped
+    )
+    .returns(::String)
+  end
+  def unescapeURIComponent(string, encoding = T.unsafe(nil)); end
 end
 
 module CGI::Escape
