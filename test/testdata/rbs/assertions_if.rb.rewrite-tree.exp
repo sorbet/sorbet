@@ -66,4 +66,26 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   else
     <emptyTree>
   end
+
+  if <emptyTree>::<C ARGV>.size().==(1)
+    <cast:let>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C Integer>)
+  else
+    if <emptyTree>::<C ARGV>.size().==(2)
+      <cast:let>([<emptyTree>::<C ARGV>.shift(), <emptyTree>::<C ARGV>.shift()], <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+    else
+      <cast:let>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C NilClass>)
+    end
+  end
+
+  <cast:let>(if <emptyTree>::<C ARGV>.any?()
+    42
+  else
+    <emptyTree>
+  end, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+
+  <cast:let>(if <emptyTree>::<C ARGV>.empty?()
+    <emptyTree>
+  else
+    42
+  end, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
 end
