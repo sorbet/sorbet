@@ -1206,6 +1206,10 @@ public:
                 // Label key is a symbol `sym: val`
                 return match_var_hash(label->loc, key->val.show(gs_));
             } else if (auto *key = parser::cast_node<DSymbol>(pair->key.get())) {
+                if (key->nodes.empty()) {
+                    error_without_recovery(ruby_parser::dclass::InvalidKey, key->loc);
+                    return error_node(key->loc.beginPos(), key->loc.endPos());
+                }
                 // Label key is a quoted string `"sym": val`
                 return match_var_hash_from_str(std::move(key->nodes));
             }
@@ -1276,6 +1280,8 @@ public:
     }
 
     unique_ptr<Node> match_var_hash_from_str(sorbet::parser::NodeVec strings) {
+        ENFORCE(!strings.empty());
+
         auto loc = collectionLoc(strings);
         if (strings.size() > 1) {
             error_without_recovery(ruby_parser::dclass::PatternInterpInVarName, loc);
