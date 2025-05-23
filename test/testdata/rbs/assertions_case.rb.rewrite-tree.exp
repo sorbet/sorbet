@@ -62,4 +62,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
   end
+
+  begin
+    <assignTemp>$7 = <emptyTree>::<C ARGV>.shift()
+    if "foo".===(<assignTemp>$7)
+      <emptyTree>
+    else
+      <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+    end
+  end
 end

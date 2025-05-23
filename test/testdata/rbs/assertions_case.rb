@@ -35,3 +35,8 @@ T.reveal_type(c1) # error: Revealed type: `Integer`
 case ARGV.shift #: as String
 when "foo"
 end
+
+case ARGV.shift
+when "foo"
+else ARGV.shift #: as String
+end
