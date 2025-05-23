@@ -1084,6 +1084,28 @@ x = T.unsafe(42)
 x.undefined_method
 ```
 
+### `T.absurd`
+
+[`T.absurd`](exhaustiveness.md) can be expressed using RBS comments:
+
+```ruby
+#: (Integer | String) -> void
+def foo(x)
+  case x
+  when Integer
+  when String
+  else
+    x #: absurd
+  end
+end
+```
+
+This is equivalent to:
+
+```ruby
+T.absurd(x)
+```
+
 [Class instance type]:
   https://github.com/ruby/rbs/blob/master/docs/syntax.md#class-instance-type
 [Class singleton type]:
