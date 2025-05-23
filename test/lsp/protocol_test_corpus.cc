@@ -1053,4 +1053,13 @@ TEST_CASE_FIXTURE(ProtocolTest, "OpeningExistingFilesTakesTheFastPath") {
     }
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "ImplementationOnBrokenLambda") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "->... {}")), {{"foo.rb", 0, "unexpected token \"...\""}});
+
+    auto responses = send(*implementation("foo.rb", 0, 2));
+    const auto numResponses = absl::c_count_if(responses, [](const auto &m) { return m->isResponse(); });
+    REQUIRE_EQ(1, numResponses);
+}
+
 } // namespace sorbet::test::lsp

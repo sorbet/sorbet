@@ -123,6 +123,10 @@ unique_ptr<LSPMessage> ProtocolTest::getDefinition(string_view path, int line, i
     return makeDefinitionRequest(nextId++, getUri(path), line, character);
 }
 
+unique_ptr<LSPMessage> ProtocolTest::implementation(string_view path, int line, int character) {
+    return makeImplementationRequest(nextId++, getUri(path), line, character);
+}
+
 unique_ptr<LSPMessage> ProtocolTest::getReference(string_view path, int line, int character) {
     return makeReferenceRequest(nextId++, getUri(path), line, character);
 }
