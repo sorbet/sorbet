@@ -8,6 +8,9 @@ a/__package.rb:4: Cannot export `A::B` because it is owned by another package ht
 ab/ab.rb:3: `A::B` was previously defined as a `class` https://srb.help/4012
      3 |module A::B
         ^^^^^^^^^^^
+    ab/__package.rb:3: Previous definition
+     3 |class A::B < PackageSpec
+              ^^^^
     a/a.rb:4: Previous definition
      4 |  class B; end
           ^^^^^^^
