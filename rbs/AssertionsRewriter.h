@@ -10,8 +10,9 @@ namespace sorbet::rbs {
 
 struct InlineComment {
     enum class Kind {
-        LET,
+        ABSURD,
         CAST,
+        LET,
         MUST,
         UNSAFE,
     };

@@ -17,6 +17,7 @@ namespace {
 
 const regex not_nil_pattern("^\\s*!nil\\s*(#.*)?$");
 const regex untyped_pattern("^\\s*untyped\\s*(#.*)?$");
+const regex absurd_pattern("^\\s*absurd\\s*(#.*)?$");
 
 /*
  * Parse the comment and return the type as a `parser::Node` and the kind of assertion we need to apply (let, cast,
@@ -29,13 +30,8 @@ const regex untyped_pattern("^\\s*untyped\\s*(#.*)?$");
 optional<pair<unique_ptr<parser::Node>, InlineComment::Kind>>
 parseComment(core::MutableContext ctx, InlineComment comment,
              vector<pair<core::LocOffsets, core::NameRef>> typeParams) {
-    if (comment.kind == InlineComment::Kind::MUST) {
-        return pair<unique_ptr<parser::Node>, InlineComment::Kind>{
-            // The type should never be used but we need to hold the location...
-            make_unique<parser::Nil>(comment.comment.typeLoc),
-            comment.kind,
-        };
-    } else if (comment.kind == InlineComment::Kind::UNSAFE) {
+    if (comment.kind == InlineComment::Kind::MUST || comment.kind == InlineComment::Kind::UNSAFE ||
+        comment.kind == InlineComment::Kind::ABSURD) {
         return pair<unique_ptr<parser::Node>, InlineComment::Kind>{
             // The type should never be used but we need to hold the location...
             make_unique<parser::Nil>(comment.comment.typeLoc),
@@ -197,6 +193,8 @@ optional<rbs::InlineComment> AssertionsRewriter::commentForNode(const unique_ptr
             } else if (regex_match(content.begin(), content.end(), untyped_pattern)) {
                 kind = InlineComment::Kind::UNSAFE;
             }
+        } else if (regex_match(content.begin(), content.end(), absurd_pattern)) {
+            kind = InlineComment::Kind::ABSURD;
         }
 
         if (hasConsumedComment(commentNode.loc)) {
@@ -271,6 +269,8 @@ AssertionsRewriter::insertCast(unique_ptr<parser::Node> node,
         return parser::MK::TMust(type->loc, move(node));
     } else if (kind == InlineComment::Kind::UNSAFE) {
         return parser::MK::TUnsafe(type->loc, move(node));
+    } else if (kind == InlineComment::Kind::ABSURD) {
+        return parser::MK::TAbsurd(type->loc, move(node));
     } else {
         Exception::raise("Unknown assertion kind");
     }

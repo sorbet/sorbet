@@ -215,6 +215,13 @@ public:
     /* T methods */
 
     /*
+     * Create a `T.absurd()` send node.
+     */
+    static std::unique_ptr<parser::Node> TAbsurd(core::LocOffsets loc, std::unique_ptr<parser::Node> node) {
+        return Send1(loc, T(loc), core::Names::absurd(), loc, move(node));
+    }
+
+    /*
      * Create a `T.all(args...)` send node.
      */
     static std::unique_ptr<parser::Node> TAll(core::LocOffsets loc, parser::NodeVec args) {
