@@ -1,0 +1,5 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C Integer>)
+ensure
+  <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+end

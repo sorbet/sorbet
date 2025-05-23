@@ -1106,6 +1106,33 @@ This is equivalent to:
 T.absurd(x)
 ```
 
+### `T.bind`
+
+[`T.bind`](type-assertions.md#tbind) can be expressed using RBS comments with
+the special `self as` construct:
+
+```ruby
+class Foo
+  def foo; end
+end
+
+def bar
+  #: self as Foo
+
+  foo
+end
+```
+
+This is equivalent to:
+
+```ruby
+def bar
+  T.bind(self, Foo)
+
+  foo
+end
+```
+
 [Class instance type]:
   https://github.com/ruby/rbs/blob/master/docs/syntax.md#class-instance-type
 [Class singleton type]:

@@ -621,6 +621,12 @@ NodeDef nodes[] = {
         "rational",
         vector<FieldDef>({{"val", FieldType::String}}),
     },
+    // RBS placeholder for a bind comment
+    {
+        "RBSPlaceholder",
+        "rbs_placeholder",
+        vector<FieldDef>({{"kind", FieldType::Name}}),
+    },
     // `redo` keyword
     {
         "Redo",
