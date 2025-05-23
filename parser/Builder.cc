@@ -1208,7 +1208,7 @@ public:
             } else if (auto *key = parser::cast_node<DSymbol>(pair->key.get())) {
                 if (key->nodes.empty()) {
                     error_without_recovery(ruby_parser::dclass::InvalidKey, key->loc);
-                    return make_unique<MatchVar>(key->loc, gs_.enterNameUTF8(""));
+                    return error_node(key->loc.beginPos(), key->loc.endPos());
                 }
                 // Label key is a quoted string `"sym": val`
                 return match_var_hash_from_str(std::move(key->nodes));
