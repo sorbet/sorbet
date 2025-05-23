@@ -520,9 +520,6 @@ class DateTime < Date
   sig {returns(DateTime)}
   def to_datetime(); end
 
-  sig {returns(FalseClass)}
-  def blank?(); end
-
   sig do
     params(
       locale: T.untyped,

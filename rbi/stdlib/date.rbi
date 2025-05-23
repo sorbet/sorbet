@@ -488,9 +488,6 @@ class Date
   sig {returns(T::Boolean)}
   def saturday?(); end
 
-  sig {returns(FalseClass)}
-  def blank?(); end
-
   # This method is equivalent to step(min, -1){|date| ...}.
   sig {params(arg0: T.untyped).returns(T.untyped)}
   def downto(arg0); end
