@@ -488,7 +488,7 @@ class Date
   sig {returns(T::Boolean)}
   def saturday?(); end
 
-  sig {returns(T::Boolean)}
+  sig {returns(FalseClass)}
   def blank?(); end
 
   # This method is equivalent to step(min, -1){|date| ...}.

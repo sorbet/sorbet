@@ -520,7 +520,7 @@ class DateTime < Date
   sig {returns(DateTime)}
   def to_datetime(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(FalseClass)}
   def blank?(); end
 
   sig do
