@@ -512,7 +512,10 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
         },
         [&](parser::When *when) {
             walkNodes(when->body.get());
-            consumeCommentsInsideNode(node, "when");
+
+            if (auto body = when->body.get()) {
+                consumeCommentsInsideNode(body, "when");
+            }
         },
         [&](parser::While *while_) {
             associateAssertionCommentsToNode(node);
