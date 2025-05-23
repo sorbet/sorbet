@@ -28,6 +28,8 @@ public:
 private:
     std::unique_ptr<parser::Node> typeNameType(const rbs_type_name_t *typeName, bool isGeneric,
                                                const RBSDeclaration &declaration);
+    std::unique_ptr<parser::Node> aliasType(const rbs_types_alias_t *node, core::LocOffsets loc,
+                                            const RBSDeclaration &declaration);
     std::unique_ptr<parser::Node> classInstanceType(const rbs_types_class_instance_t *node, core::LocOffsets loc,
                                                     const RBSDeclaration &declaration);
     std::unique_ptr<parser::Node> classSingletonType(const rbs_types_class_singleton_t *node, core::LocOffsets loc,
