@@ -48,3 +48,14 @@ T.reveal_type(if8) # error: Revealed type: `Float`
 if9 = if ARGV.empty? #: as Integer
 else
 end
+
+if ARGV.size == 1
+  ARGV.shift #: Integer
+elsif ARGV.size == 2
+  [ARGV.shift, ARGV.shift] #: Array[Integer]
+else
+  ARGV.shift #: NilClass
+end
+
+42 if ARGV.any? #: Integer?
+42 unless ARGV.empty? #: Integer?

@@ -326,10 +326,21 @@ void CommentsAssociator::walkNodes(parser::Node *node) {
             consumeCommentsInsideNode(node, "hash");
         },
         [&](parser::If *if_) {
-            associateAssertionCommentsToNode(node);
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+
+            if (beginLine == endLine) {
+                associateAssertionCommentsToNode(node);
+            }
+
             walkNodes(if_->condition.get());
             walkNodes(if_->then_.get());
             walkNodes(if_->else_.get());
+
+            if (beginLine != endLine) {
+                associateAssertionCommentsToNode(node);
+            }
+
             consumeCommentsInsideNode(node, "if");
         },
         [&](parser::InPattern *inPattern) {
