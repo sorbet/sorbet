@@ -318,7 +318,7 @@ unique_ptr<parser::Node> AssertionsRewriter::replaceSyntheticBind(unique_ptr<par
 
     if (!pair) {
         // We already raised an error while parsing the comment, so we just bind to `T.untyped`
-        return parser::MK::TBind(node->loc, parser::MK::TUntyped(node->loc));
+        return parser::MK::TBindSelf(node->loc, parser::MK::TUntyped(node->loc));
     }
 
     auto kind = pair->second;
@@ -330,7 +330,7 @@ unique_ptr<parser::Node> AssertionsRewriter::replaceSyntheticBind(unique_ptr<par
 
     auto type = move(pair->first);
 
-    return parser::MK::TBind(type->loc, move(type));
+    return parser::MK::TBindSelf(type->loc, move(type));
 }
 
 /**
