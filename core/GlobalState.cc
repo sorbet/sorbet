@@ -599,9 +599,6 @@ void GlobalState::initEmpty() {
                  .build();
     ENFORCE_NO_TIMER(method == Symbols::SorbetPrivateStaticSingleton_sig());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpecRegistry());
-    ENFORCE_NO_TIMER(klass == Symbols::PackageSpecRegistry());
-
     // PackageSpec is a class that can be subclassed.
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), Names::Constants::PackageSpec());
     klass.data(*this)->setIsModule(false);
