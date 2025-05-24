@@ -280,6 +280,12 @@
           "description": "Shows warning for untyped values.",
           "default": "nowhere"
         },
+        "sorbet.gemfileDirectory": {
+          "type": "string",
+          "default": "",
+          "description": "Specifies the relative path from the workspace root to the directory containing the Gemfile. Example: 'backend'. Leave empty to auto-detect.",
+          "scope": "resource"
+        },
         "sorbet.typedFalseCompletionNudges": {
           "type": "boolean",
           "description": "Displays an auto-complete nudge in `typed: false` files.",
