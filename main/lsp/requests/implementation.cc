@@ -75,11 +75,12 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
         return response;
     }
 
+    vector<unique_ptr<Location>> result;
     if (queryResult.responses.empty()) {
+        response->result = std::move(result);
         return response;
     }
 
-    vector<unique_ptr<Location>> result;
     auto queryResponse = move(queryResult.responses[0]);
     if (auto def = queryResponse->isMethodDef()) {
         // User called "Go to Implementation" from the abstract function definition

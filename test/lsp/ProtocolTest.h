@@ -69,6 +69,8 @@ protected:
 
     std::unique_ptr<LSPMessage> getDefinition(std::string_view path, int line, int character);
 
+    std::unique_ptr<LSPMessage> implementation(std::string_view path, int line, int character);
+
     std::unique_ptr<LSPMessage> getReference(std::string_view path, int line, int character);
 
     std::unique_ptr<LSPMessage> hover(std::string_view path, int line, int character);

@@ -177,6 +177,13 @@ unique_ptr<LSPMessage> makeDefinitionRequest(int id, string_view uri, int line, 
                                                 make_unique<Position>(line, character))));
 }
 
+unique_ptr<LSPMessage> makeImplementationRequest(int id, string_view uri, int line, int character) {
+    return make_unique<LSPMessage>(
+        make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentImplementation,
+                                    make_unique<ImplementationParams>(make_unique<TextDocumentIdentifier>(string(uri)),
+                                                                      make_unique<Position>(line, character))));
+}
+
 unique_ptr<LSPMessage> makeReferenceRequest(int id, string_view uri, int line, int character, bool includeDecl) {
     return make_unique<LSPMessage>(
         make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentReferences,

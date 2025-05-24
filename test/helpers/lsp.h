@@ -22,6 +22,9 @@ makeInitializeParams(std::optional<std::variant<std::string, JSONNullObject>> ro
 /** Create an LSPMessage containing a textDocument/definition request. */
 std::unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int line, int character);
 
+/** Create an LSPMessage containing a textDocument/implementation request. */
+std::unique_ptr<LSPMessage> makeImplementationRequest(int id, std::string_view uri, int line, int character);
+
 /** Create an LSPMessage containing a textDocument/hover request. */
 std::unique_ptr<LSPMessage> makeHover(int id, std::string_view uri, int line, int character);
 
