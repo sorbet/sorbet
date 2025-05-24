@@ -83,10 +83,6 @@ constexpr size_t SIZE_BYTES = sizeof(int) / sizeof(uint8_t);
 constexpr int LZ4_COMPRESSION_SETTING = 1;
 
 vector<uint8_t> Pickler::result() {
-    if (zeroCounter != 0) {
-        data.emplace_back(zeroCounter);
-        zeroCounter = 0;
-    }
     const size_t maxDstSize = LZ4_compressBound(data.size());
     vector<uint8_t> compressedData;
     compressedData.resize(2048 + maxDstSize); // give extra room for compression
@@ -135,98 +131,78 @@ string_view UnPickler::getStr() {
 }
 
 void Pickler::putU1(uint8_t u) {
-    if (zeroCounter != 0) {
-        data.emplace_back(zeroCounter);
-        zeroCounter = 0;
-    }
     data.emplace_back(u);
 }
 
 uint8_t UnPickler::getU1() {
-    ENFORCE_NO_TIMER(zeroCounter == 0);
     auto res = data[pos++];
     return res;
 }
 
 // Note that this does not necessarily write 4 bytes:
 // smaller numbers may take fewer bytes.
-//
-// NOTE(froydnj): SQLite has a different encoding for varints:
-//     https://sqlite.org/src4/doc/trunk/www/varint.wiki
-// Given that varint decoding is a signification fraction of cache reading time,
-// it may make sense to experiment using this in Sorbet.
 void Pickler::putU4(uint32_t u) {
-    if (u == 0) {
-        if (zeroCounter != 0) {
-            if (zeroCounter == UCHAR_MAX) {
-                data.emplace_back(UCHAR_MAX);
-                zeroCounter = 0;
-                putU4(u);
-                return;
-            }
-            zeroCounter++;
-            return;
-        } else {
-            data.emplace_back(0);
-            zeroCounter = 1;
-        }
-    } else {
-        if (zeroCounter != 0) {
-            data.emplace_back(zeroCounter);
-            zeroCounter = 0;
-        }
-        while (u > 127) {
-            data.emplace_back(128 | (u & 127));
-            u = u >> 7;
-        }
-        data.emplace_back(u & 127);
+    if (u <= 240) {
+        this->putU1(static_cast<uint8_t>(u));
+        return;
     }
+
+    if (u <= 2287) {
+        u -= 240;
+        this->putU1(u / 256 + 241);
+        this->putU1(u % 256);
+        return;
+    }
+
+    if (u <= 67823) {
+        this->putU1(249);
+
+        u -= 2288;
+        this->putU1(u / 256);
+        this->putU1(u % 256);
+        return;
+    }
+
+    if (u <= 16777215) {
+        this->putU1(250);
+        this->putU1(u >> 16);
+        this->putU1(u >> 8);
+        this->putU1(u);
+        return;
+    }
+
+    this->putU1(251);
+    this->putU1(u >> 24);
+    this->putU1(u >> 16);
+    this->putU1(u >> 8);
+    this->putU1(u);
+    return;
 }
 
 uint32_t UnPickler::getU4() {
-    if (zeroCounter != 0) {
-        zeroCounter--;
-        return 0;
+    uint32_t a0 = this->getU1();
+    if (a0 <= 240) {
+        return a0;
     }
-    uint8_t r = data[pos++];
-    if (r == 0) {
-        zeroCounter = data[pos++];
-        zeroCounter--;
-        return r;
-    } else {
-        uint32_t res = r & 127;
-        uint32_t vle = r;
-        if ((vle & 128) == 0) {
-            goto done;
-        }
 
-        vle = data[pos++];
-        res |= (vle & 127) << 7;
-        if ((vle & 128) == 0) {
-            goto done;
-        }
-
-        vle = data[pos++];
-        res |= (vle & 127) << 14;
-        if ((vle & 128) == 0) {
-            goto done;
-        }
-
-        vle = data[pos++];
-        res |= (vle & 127) << 21;
-        if ((vle & 128) == 0) {
-            goto done;
-        }
-
-        vle = data[pos++];
-        res |= (vle & 127) << 28;
-        if ((vle & 128) == 0) {
-            goto done;
-        }
-
-    done:
-        return res;
+    uint32_t a1 = this->getU1();
+    if (a0 <= 248) {
+        return 240 + 256 * (a0 - 241) + a1;
     }
+
+    uint32_t a2 = this->getU1();
+    if (a0 == 249) {
+        return 2288 + 256 * a1 + a2;
+    }
+
+    uint32_t a3 = this->getU1();
+    if (a0 == 250) {
+        return (a1 << 16) + (a2 << 8) + a3;
+    }
+
+    ENFORCE(a0 == 251);
+    uint32_t a4 = this->getU1();
+    return (a1 << 24) + (a2 << 16) + (a3 << 8) + a4;
 }
 
 void Pickler::putS8(const int64_t i) {
