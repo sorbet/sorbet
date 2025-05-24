@@ -1,3 +1,3 @@
 # typed: true
 
-def foo(Abc); end # error: formal argument cannot be a constant
+def foo(Abc); end # parser-error: formal argument cannot be a constant
