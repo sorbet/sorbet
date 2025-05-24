@@ -67,7 +67,7 @@ public:
         return false;
     }
 
-    vector<VisibleTo> visibleTo() const {
+    absl::Span<const VisibleTo> visibleTo() const {
         return {};
     }
 
