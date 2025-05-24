@@ -30,6 +30,9 @@ class T::Private::Methods::DeclBuilder
   sig {returns(T::Private::Methods::DeclBuilder)}
   def void; end
 
+  sig {params(type: T.untyped).returns(T::Private::Methods::DeclBuilder)}
+  def narrows_to(type); end
+
   sig {params(args: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def on_failure(*args); end
 
