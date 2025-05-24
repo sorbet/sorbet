@@ -40,13 +40,11 @@ enum class StrictDependenciesLevel {
 
 std::string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level);
 
-// TODO(jez) Why is this struct different from the `struct VisibleTo` defined in packager.cc?
 struct VisibleTo {
-    MangledName packageName;
+    ClassOrModuleRef sym;
     VisibleToType visibleToType;
 
-    VisibleTo(MangledName packageName, VisibleToType visibleToType)
-        : packageName(std::move(packageName)), visibleToType(visibleToType){};
+    VisibleTo(ClassOrModuleRef sym, VisibleToType visibleToType) : sym(sym), visibleToType(visibleToType){};
 };
 
 class PackageInfo {
@@ -54,7 +52,7 @@ public:
     virtual MangledName mangledName() const = 0;
     virtual absl::Span<const core::NameRef> fullName() const = 0;
     virtual absl::Span<const std::string> pathPrefixes() const = 0;
-    virtual std::vector<VisibleTo> visibleTo() const = 0;
+    virtual absl::Span<const VisibleTo> visibleTo() const = 0;
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
     virtual std::optional<std::pair<core::packages::StrictDependenciesLevel, core::LocOffsets>>
     strictDependenciesLevel() const = 0;

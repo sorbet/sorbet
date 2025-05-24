@@ -33,7 +33,7 @@ bool visibilityApplies(const core::GlobalState &gs, const core::packages::Visibl
     if (vt.visibleToType == core::packages::VisibleToType::Wildcard) {
         // a wildcard will match if it's a proper prefix of the package name
         auto curPkg = name.owner;
-        auto prefix = vt.packageName.owner;
+        auto prefix = vt.sym;
         do {
             if (curPkg == prefix) {
                 return true;
@@ -43,7 +43,7 @@ bool visibilityApplies(const core::GlobalState &gs, const core::packages::Visibl
         return false;
     } else {
         // otherwise it needs to be the same
-        return vt.packageName == name;
+        return vt.sym == name.owner;
     }
 }
 
@@ -130,13 +130,6 @@ struct Export {
         // Lex sort by name.
         return core::packages::PackageInfo::lexCmp(a.parts(), b.parts());
     }
-};
-
-struct VisibleTo {
-    PackageName name;
-    core::packages::VisibleToType type;
-
-    VisibleTo(PackageName &&name, core::packages::VisibleToType type) : name(move(name)), type(type) {}
 };
 
 // For a given vector of NameRefs, this represents the "next" vector that does not begin with its
@@ -231,7 +224,7 @@ public:
     // but also any package name underneath it. `Normal` means the package can be imported
     // by the referenced package name but not any child packages (unless they have a separate
     // `visible_to` line of their own.)
-    vector<VisibleTo> visibleTo_ = {};
+    vector<core::packages::VisibleTo> visibleTo_ = {};
 
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
@@ -547,12 +540,8 @@ public:
         return {suggestion};
     }
 
-    vector<core::packages::VisibleTo> visibleTo() const {
-        vector<core::packages::VisibleTo> rv;
-        for (auto &v : visibleTo_) {
-            rv.emplace_back(v.name.mangledName, v.type);
-        }
-        return rv;
+    absl::Span<const core::packages::VisibleTo> visibleTo() const {
+        return this->visibleTo_;
     }
 
     optional<core::packages::ImportType> importsPackage(core::packages::MangledName mangledName) const {
@@ -710,38 +699,43 @@ PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *
     return PackageName(symbol, getFullyQualifiedName(ctx, constantLit));
 }
 
-PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
-    ENFORCE(constantLit != nullptr);
-
-    auto fullName = getFullyQualifiedName(ctx, constantLit);
-
+core::ClassOrModuleRef resolveConstantToClassOrModule(core::Context ctx, const ast::UnresolvedConstantLit *constantLit,
+                                                      const FullyQualifiedName &fullName) {
     // Since packager now runs after namer, we know that these symbols are entered.
-    auto owner = core::Symbols::root();
+    auto sym = core::Symbols::root();
     for (auto part : fullName.parts) {
-        auto member = owner.data(ctx)->findMember(ctx, part);
+        auto member = sym.data(ctx)->findMember(ctx, part);
         if (!member.exists() || !member.isClassOrModule()) {
-            owner = core::Symbols::noClassOrModule();
+            sym = core::Symbols::noClassOrModule();
             break;
         }
-        owner = member.asClassOrModuleRef();
+        sym = member.asClassOrModuleRef();
     }
 
-    if (owner.exists()) {
-        auto member = owner.data(ctx)->findMember(ctx, core::Names::Constants::PackageSpec_Storage());
-        if (!member.exists() || !member.isClassOrModule()) {
-            owner = core::Symbols::noClassOrModule();
-        }
-        owner = member.asClassOrModuleRef();
-    }
-
-    if (owner == core::Symbols::root()) {
+    if (sym == core::Symbols::root()) {
         // This is a weird case, because I don't think it's possible to get here, but we can handle it anyways.
         // This whole function should go away with the switch to PackageRef anyways. As in, we
         // should probably be able to pre-resolve the constants in import/visible_to/etc. lines at
         // this point, and report an eager error if those package names fail to resolve, rather than
         // resorting handling this (impossible?) edge case.
         ENFORCE(fullName.parts.empty());
-        owner = core::Symbols::noClassOrModule();
+        sym = core::Symbols::noClassOrModule();
+    }
+
+    return sym;
+}
+
+PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
+    ENFORCE(constantLit != nullptr);
+
+    auto fullName = getFullyQualifiedName(ctx, constantLit);
+    auto owner = resolveConstantToClassOrModule(ctx, constantLit, fullName);
+    if (constantLit->cnst == core::Names::Constants::PackageSpec_Storage()) {
+        auto member = owner.data(ctx)->findMember(ctx, core::Names::Constants::PackageSpec_Storage());
+        if (!member.exists() || !member.isClassOrModule()) {
+            owner = core::Symbols::noClassOrModule();
+        }
+        owner = member.asClassOrModuleRef();
     }
 
     return PackageName(owner, move(fullName));
@@ -1270,21 +1264,22 @@ struct PackageSpecBodyWalk {
 
         if ((send.fun == core::Names::import() || send.fun == core::Names::testImport()) && send.numPosArgs() == 1) {
             // null indicates an invalid import.
-            if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
+            if (verifyConstant(ctx, send.fun, send.getPosArg(0)) != nullptr) {
                 // Transform: `import Foo` -> `import Foo::<PackageSpec>`
-                auto &posArg = send.getPosArg(0);
-                auto importArg = move(posArg);
-                posArg = ast::packager::appendRegistry(move(importArg));
+                auto importArg = ast::packager::appendRegistry(move(send.getPosArg(0)));
+                send.getPosArg(0) = move(importArg);
+                auto target = ast::cast_tree<ast::UnresolvedConstantLit>(send.getPosArg(0));
 
                 info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target), method2ImportType(send));
             }
         }
 
         if (send.fun == core::Names::restrictToService() && send.numPosArgs() == 1) {
+            // TODO(jez) We don't actually need this anymore--we're not at risk of these constants
+            // failing to resolve if we omit this transformation, and we don't per it anyways.
             // Transform: `restrict_to_service Foo` -> `restrict_to_service Foo::<PackageSpec>`
-            auto &posArg = send.getPosArg(0);
-            auto importArg = move(posArg);
-            posArg = ast::packager::appendRegistry(move(importArg));
+            auto importArg = ast::packager::appendRegistry(move(send.getPosArg(0)));
+            send.getPosArg(0) = move(importArg);
         }
 
         if (send.fun == core::Names::exportAll() && send.numPosArgs() == 0) {
@@ -1317,9 +1312,10 @@ struct PackageSpecBodyWalk {
                 if (auto *recv = verifyConstant(ctx, send.fun, target->recv)) {
                     auto &posArg = send.getPosArg(0);
                     auto importArg = move(target->recv);
-                    posArg = ast::packager::appendRegistry(move(importArg));
-                    info.visibleTo_.emplace_back(getUnresolvedPackageName(ctx, recv),
-                                                 core::packages::VisibleToType::Wildcard);
+                    posArg = move(importArg);
+                    auto fullName = getFullyQualifiedName(ctx, recv);
+                    auto sym = resolveConstantToClassOrModule(ctx, recv, fullName);
+                    info.visibleTo_.emplace_back(sym, core::packages::VisibleToType::Wildcard);
                 } else {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
                         e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
@@ -1327,13 +1323,14 @@ struct PackageSpecBodyWalk {
                     }
                     return;
                 }
-            } else if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
-                auto &posArg = send.getPosArg(0);
-                auto importArg = move(posArg);
-                posArg = ast::packager::appendRegistry(move(importArg));
+            } else if (verifyConstant(ctx, send.fun, send.getPosArg(0)) != nullptr) {
+                auto importArg = ast::packager::appendRegistry(move(send.getPosArg(0)));
+                send.getPosArg(0) = move(importArg);
+                auto target = ast::cast_tree<ast::UnresolvedConstantLit>(send.getPosArg(0));
+                auto fullName = getFullyQualifiedName(ctx, target);
+                auto sym = resolveConstantToClassOrModule(ctx, target, fullName);
 
-                info.visibleTo_.emplace_back(getUnresolvedPackageName(ctx, target),
-                                             core::packages::VisibleToType::Normal);
+                info.visibleTo_.emplace_back(sym, core::packages::VisibleToType::Normal);
             }
         }
 
@@ -1912,12 +1909,12 @@ void validatePackage(core::Context ctx) {
     }
 
     for (auto &i : pkgInfo.importedPackageNames) {
-        auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
-
-        // this might mean the other package doesn't exist, but that should have been caught already
-        if (!otherPkg.exists()) {
-            continue;
-        }
+        // auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+        //
+        //// this might mean the other package doesn't exist, but that should have been caught already
+        // if (!otherPkg.exists()) {
+        //     continue;
+        // }
 
         if (enforceLayering) {
             validateLayering(ctx, i);
