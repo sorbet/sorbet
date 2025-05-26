@@ -268,7 +268,20 @@ shared_ptr<AbstractRewriter> makeRenamer(const core::GlobalState &gs,
                                          const sorbet::realmain::lsp::LSPConfiguration &config, core::SymbolRef symbol,
                                          const string newName) {
     if (symbol.isMethod()) {
-        auto originalName = symbol.name(gs).show(gs);
+        auto method = symbol.asMethodRef();
+        // If this is an overload, we need to find the original definition so that we get a name that lacks the trailing
+        // overload information, like "foo (overload.1)".
+        if (method.data(gs)->flags.isOverloaded) {
+            auto owner = method.data(gs)->owner;
+            auto name = method.data(gs)->name;
+            ENFORCE(name.kind() == core::NameKind::UNIQUE);
+
+            name = name.dataUnique(gs)->original;
+            method = owner.data(gs)->findMethod(gs, name);
+            ENFORCE(method.exists());
+        }
+
+        auto originalName = method.data(gs)->name.show(gs);
         return make_shared<MethodRenamer>(gs, config, originalName, newName);
     } else if (symbol.isField(gs)) {
         return make_shared<FieldRenamer>(gs, config, newName);
