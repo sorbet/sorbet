@@ -3777,8 +3777,6 @@ public:
                     e.setHeader("Abstract methods must not contain any code in their body");
                     e.replaceWith("Delete the body", ctx.locAt(mdef.rhs.loc()), "");
                 }
-
-                mdef.rhs = ast::MK::EmptyTree();
             }
             if (!mdef.symbol.enclosingClass(ctx).data(ctx)->flags.isAbstract) {
                 if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
