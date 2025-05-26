@@ -355,15 +355,13 @@ ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef e
         }
 
         for (auto &exp : bodySeq->stats) {
-            exp = runUnderEach(ctx, eachName, absl::MakeSpan(destructuringStmts), std::move(exp), args, iteratee,
-                               insideDescribe);
+            exp = runUnderEach(ctx, eachName, destructuringStmts, std::move(exp), args, iteratee, insideDescribe);
         }
 
-        bodySeq->expr = runUnderEach(ctx, eachName, absl::MakeSpan(destructuringStmts), std::move(bodySeq->expr), args,
-                                     iteratee, insideDescribe);
+        bodySeq->expr =
+            runUnderEach(ctx, eachName, destructuringStmts, std::move(bodySeq->expr), args, iteratee, insideDescribe);
     } else {
-        body = runUnderEach(ctx, eachName, absl::MakeSpan(destructuringStmts), std::move(body), args, iteratee,
-                            insideDescribe);
+        body = runUnderEach(ctx, eachName, destructuringStmts, std::move(body), args, iteratee, insideDescribe);
     }
 
     return body;
