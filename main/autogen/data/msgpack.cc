@@ -208,8 +208,7 @@ string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenC
 
         // requires
         {
-            MsgpackArray
-                requires(&writer, pf.requireStatements.size());
+            MsgpackArray requires_(&writer, pf.requireStatements.size());
             for (auto nm : pf.requireStatements) {
                 packString(&writer, nm.show(ctx));
             }
