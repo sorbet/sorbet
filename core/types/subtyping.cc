@@ -1139,7 +1139,7 @@ void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypeP
 template <class T>
 bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &constr, UntypedMode mode, const TypePtr &t1,
                                     const TypePtr &t2, T &errorDetailsCollector) {
-    constexpr auto shouldAddErrorDetails = std::is_same<T, ErrorSection::Collector>::value;
+    constexpr auto shouldAddErrorDetails = std::is_same_v<T, ErrorSection::Collector>;
 
     ENFORCE(t1 != nullptr);
     ENFORCE(t2 != nullptr);
@@ -1558,7 +1558,7 @@ bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t
 template <class T>
 bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                      const TypePtr &t2, UntypedMode mode, T &errorDetailsCollector) {
-    constexpr auto shouldAddErrorDetails = std::is_same<T, ErrorSection::Collector>::value;
+    constexpr auto shouldAddErrorDetails = std::is_same_v<T, ErrorSection::Collector>;
 
     if (t1 == t2) {
         return true;
@@ -1725,7 +1725,7 @@ bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, 
 
     auto subCollector = errorDetailsCollector.newCollector();
     auto rightSubLeft = isSubTypeUnderConstraint(gs, constr, t2, t1, mode, subCollector);
-    if constexpr (std::is_same<T, ErrorSection::Collector>::value) {
+    if constexpr (std::is_same_v<T, ErrorSection::Collector>) {
         if (!rightSubLeft) {
             auto message = ErrorColors::format(
                 "`{}` is a subtype of `{}` but not the reverse, so they are not equivalent", t1.show(gs), t2.show(gs));

@@ -106,8 +106,8 @@ template <typename ToCheck, std::size_t ExpectedAlign, std::size_t RealAlign = a
     }
 
 template <class From, class To> To *fast_cast(From *what) {
-    constexpr bool isFinal = std::is_final<To>::value;
-    if (std::is_same<From, To>::value) {
+    constexpr bool isFinal = std::is_final_v<To>;
+    if (std::is_same_v<From, To>) {
         return static_cast<To *>(what);
     }
     if (what == nullptr) {

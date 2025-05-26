@@ -435,16 +435,14 @@ template <class To> bool isa_instruction(const InstructionPtr &what) {
 }
 
 template <class To> core::UntaggedPtr<To> cast_instruction(InstructionPtr &what) {
-    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
-    static_assert(std::is_assignable<Instruction *&, To *>::value,
-                  "Ill Formed To, has to be a subclass of Instruction");
+    static_assert(!std::is_pointer_v<To>, "To has to be a pointer");
+    static_assert(std::is_assignable_v<Instruction *&, To *>, "Ill Formed To, has to be a subclass of Instruction");
     return what.as_instruction<To>();
 }
 
 template <class To> core::UntaggedPtr<const To> cast_instruction(const InstructionPtr &what) {
-    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
-    static_assert(std::is_assignable<Instruction *&, To *>::value,
-                  "Ill Formed To, has to be a subclass of Instruction");
+    static_assert(!std::is_pointer_v<To>, "To has to be a pointer");
+    static_assert(std::is_assignable_v<Instruction *&, To *>, "Ill Formed To, has to be a subclass of Instruction");
     return what.as_instruction<To>();
 }
 
