@@ -471,6 +471,7 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
     auto name = method.data(ctx)->name;
     auto klassData = klass.data(ctx);
     InlinedVector<core::MethodRef, 4> overriddenMethods;
+    core::MethodRef mostSpecificImpl;
 
     // Matches the behavior of the runtime checks
     // NOTE(jez): I don't think this check makes all that much sense, but I haven't thought about it.
@@ -478,16 +479,6 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
     if (klassData->flags.isInterface && method.data(ctx)->flags.isProtected) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
             e.setHeader("Interface method `{}` cannot be protected", method.show(ctx));
-        }
-    }
-
-    if (method.data(ctx)->flags.isAbstract && klassData->isSingletonClass(ctx)) {
-        auto attached = klassData->attachedClass(ctx);
-        if (attached.exists() && attached.data(ctx)->isModule()) {
-            if (auto e =
-                    ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::StaticAbstractModuleMethod)) {
-                e.setHeader("Static methods in a module cannot be abstract");
-            }
         }
     }
 
@@ -518,7 +509,38 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
         }
     }
 
-    if (overriddenMethods.size() == 0 && method.data(ctx)->flags.isOverride &&
+    // Find most specific implementation based on override flag
+    if (method.data(ctx)->flags.isOverride) {
+        // If marked with override, try concrete implementation first
+        for (auto &overriddenMethod : overriddenMethods) {
+            if (!overriddenMethod.data(ctx)->flags.isAbstract) {
+                mostSpecificImpl = overriddenMethod;
+                break;
+            }
+        }
+    }
+
+    // If no implementation found yet, use first abstract method
+    if (!mostSpecificImpl.exists()) {
+        for (auto &overriddenMethod : overriddenMethods) {
+            if (overriddenMethod.data(ctx)->flags.isAbstract) {
+                mostSpecificImpl = overriddenMethod;
+                break;
+            }
+        }
+    }
+
+    if (method.data(ctx)->flags.isAbstract && klassData->isSingletonClass(ctx)) {
+        auto attached = klassData->attachedClass(ctx);
+        if (attached.exists() && attached.data(ctx)->isModule()) {
+            if (auto e =
+                    ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::StaticAbstractModuleMethod)) {
+                e.setHeader("Static methods in a module cannot be abstract");
+            }
+        }
+    }
+
+    if (overriddenMethods.empty() && method.data(ctx)->flags.isOverride &&
         !method.data(ctx)->flags.isIncompatibleOverride) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("Method `{}` is marked `{}` but does not override anything", method.show(ctx), "override");
@@ -568,11 +590,14 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
                 }
             }
         }
-        if ((overriddenMethod.data(ctx)->flags.isAbstract || overriddenMethod.data(ctx)->flags.isOverridable ||
-             (overriddenMethod.data(ctx)->hasSig() && method.data(ctx)->flags.isOverride)) &&
+        if ((overriddenMethod == mostSpecificImpl ||
+             (method.data(ctx)->name == core::Names::initialize() && overriddenMethod.data(ctx)->flags.isAbstract &&
+              overriddenMethod.enclosingClass(ctx).data(ctx)->flags.isInterface)) &&
             !method.data(ctx)->flags.isIncompatibleOverride && !isRBI &&
             !method.data(ctx)->flags.isRewriterSynthesized &&
-            overriddenMethod != core::Symbols::BasicObject_initialize()) {
+            overriddenMethod != core::Symbols::BasicObject_initialize() &&
+            (overriddenMethod.data(ctx)->flags.isAbstract || overriddenMethod.data(ctx)->flags.isOverridable ||
+             overriddenMethod.data(ctx)->hasSig())) {
             // We only ignore BasicObject#initialize for backwards compatibility.
             // One day, we may want to build something like overridable(allow_incompatible: true)
             // and mark certain methods in the standard library as possible to be overridden incompatibly,
