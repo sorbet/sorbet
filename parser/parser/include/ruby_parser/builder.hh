@@ -197,7 +197,7 @@ struct builder {
     ForeignPtr (*xstring_compose)(SelfPtr builder, const token *begin, const node_list *parts, const token *end);
 };
 
-static_assert(std::is_pod<builder>::value, "`builder` must be a POD type");
+static_assert(std::is_pod_v<builder>, "`builder` must be a POD type");
 
 } // namespace ruby_parser
 
