@@ -195,7 +195,7 @@ public:
     template <typename... Args>
     void replaceWith(const std::string &title, Loc loc, fmt::format_string<Args...> replacement, Args &&...args) {
         std::string formatted = fmt::format(replacement, std::forward<Args>(args)...);
-        addAutocorrect(AutocorrectSuggestion{title, {AutocorrectSuggestion::Edit{loc, std::move(formatted)}}});
+        addAutocorrect(AutocorrectSuggestion(title, {AutocorrectSuggestion::Edit(loc, std::move(formatted))}));
     }
     void didYouMean(const std::string &replacement, Loc loc);
 
