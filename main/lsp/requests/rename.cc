@@ -273,7 +273,15 @@ shared_ptr<AbstractRewriter> makeRenamer(const core::GlobalState &gs,
     }
 
     if (symbol.isMethod()) {
-        auto originalName = symbol.name(gs).show(gs);
+        auto method = symbol.asMethodRef();
+        auto name = method.data(gs)->name;
+
+        // TODO: support renaming of overloaded symbols by finding all the overload signatures.
+        if (method.data(gs)->flags.isOverloaded || name.isOverloadName(gs)) {
+            return nullptr;
+        }
+
+        auto originalName = name.show(gs);
         return make_shared<MethodRenamer>(gs, config, originalName, newName);
     } else if (symbol.isField(gs)) {
         return make_shared<FieldRenamer>(gs, config, newName);
