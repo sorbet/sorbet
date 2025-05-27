@@ -1045,7 +1045,7 @@ TypeSyntax::ResultType reportUnknownTypeSyntaxError(core::Context ctx, const ast
                                                     TypeSyntax::ResultType &&result) {
     if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
         auto klass = sendLooksLikeBadTypeApplication(ctx, s);
-        if (klass.exists()) {
+        if (klass.exists() && s.hasPosArgs()) {
             auto scope =
                 s.recv.isSelfReference() ? "" : fmt::format("{}::", ctx.locAt(s.recv.loc()).source(ctx).value());
             auto replacement =
