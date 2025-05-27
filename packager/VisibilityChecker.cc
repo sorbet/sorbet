@@ -138,6 +138,26 @@ class PropagateVisibility final {
         if (packageSym.exists()) {
             auto file = packageSym.data(ctx)->loc().file();
             if (db.getPackageNameForFile(file) != this->package.mangledName()) {
+                // Note: this is a hack. This is the only place outside of the incremental namer
+                // where we remove a loc from a symbol.
+                //
+                // We should eventually be able to remove this call, by removing this entire
+                // setPackageLocs method, and switching to nesting as the source of truth for packge
+                // ownership.
+                //
+                // The problem we're solving: with the switch to `A::B::<PackageSpec>` names, `::A`
+                // and `::A::B` will already have `__package.rb` entries in their loc lists. When we
+                // were using `<PackageSpecRegistry>` to hold all the packages, resolving the
+                // `__package.rb` file would not add locs to `::A` or `::A::B`. Since
+                // `VisibilityChecker` ran after resolver, it meant that calling `addLoc` would
+                // always add a loc to to the locs list on a Symbol, and ties would always be broken
+                // in favor of "last one wins" so `__package.rb` file wins.
+                //
+                // In the new world, since there is already a `__package.rb` loc in the list, the
+                // `addLoc` call only updates that loc, it doesn't change its relative position in
+                // the list (e.g., the intended use case is to update the offset information for the
+                // fast path). Removing and re-adding ensures that the `__package.rb` always wins.
+                packageSym.data(ctx)->removeLocsForFile(ctx.file);
                 packageSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
             }
         }
