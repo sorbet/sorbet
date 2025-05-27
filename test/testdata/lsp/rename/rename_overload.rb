@@ -6,6 +6,6 @@ class Main
     sig {params(val: T::Set[String]).returns(T.nilable(String))}
     def set(val)
         val.first
-          # ^ apply-rename: [A] newName: second placeholderText: first
+          # ^ apply-rename: [A] newName: second placeholderText: first invalid: true
     end
 end
