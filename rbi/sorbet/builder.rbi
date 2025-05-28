@@ -27,6 +27,9 @@ class T::Private::Methods::DeclBuilder
   sig {params(type: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def returns(type); end
 
+  sig {params(type: T.untyped).returns(T::Private::Methods::DeclBuilder)}
+  def narrows_to(type); end
+
   sig {returns(T::Private::Methods::DeclBuilder)}
   def void; end
 
