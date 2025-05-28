@@ -373,6 +373,28 @@ const FileType fileTypeFromCtx(const core::Context ctx) {
 }
 
 class VisibilityCheckerPass final {
+    void addPackagedFalseNote(core::Context ctx, core::ErrorBuilder &e) {
+        if (!ctx.file.data(ctx).isPackaged()) {
+            e.addErrorNote("A `{}` file is allowed to define constants outside of the package's "
+                           "namespace,\n    "
+                           "but must still respect its enclosing package's imports.",
+                           "# packaged: false");
+        }
+    }
+
+    void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol) {
+        auto definedHereLoc = litSymbol.loc(ctx);
+        if (definedHereLoc.file().data(ctx).isRBI()) {
+            e.addErrorSection(
+                core::ErrorSection(core::ErrorColors::format("Consider marking this RBI file `{}` if it is meant to "
+                                                             "declare unpackaged constants",
+                                                             "# packaged: false"),
+                                   {core::ErrorLine(definedHereLoc, "")}));
+        } else {
+            e.addErrorLine(definedHereLoc, "Defined here");
+        }
+    }
+
 public:
     const core::packages::PackageInfo &package;
     const FileType fileType;
@@ -486,16 +508,7 @@ public:
                 if (!isExported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
                         e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
-                        auto definedHereLoc = litSymbol.loc(ctx);
-                        if (definedHereLoc.file().data(ctx).isRBI()) {
-                            e.addErrorSection(core::ErrorSection(
-                                core::ErrorColors::format("Consider marking this RBI file `{}` if it is meant to "
-                                                          "declare unpackaged constants",
-                                                          "# packaged: false"),
-                                {core::ErrorLine(definedHereLoc, "")}));
-                        } else {
-                            e.addErrorLine(definedHereLoc, "Defined here");
-                        }
+                        addExportInfo(ctx, e, litSymbol);
 
                         if (exportAutocorrect.has_value()) {
                             e.addAutocorrect(std::move(exportAutocorrect.value()));
@@ -514,12 +527,7 @@ public:
                                 e.addErrorNote("{}", db.errorHint());
                             }
                         }
-                        if (!ctx.file.data(ctx).isPackaged()) {
-                            e.addErrorNote("A `{}` file is allowed to define constants outside of the package's "
-                                           "namespace,\n    "
-                                           "but must still respect its enclosing package's imports.",
-                                           "# packaged: false");
-                        }
+                        addPackagedFalseNote(ctx, e);
                     }
                 } else if (testImportInProd) {
                     ENFORCE(!isTestImport);
