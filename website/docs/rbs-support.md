@@ -624,13 +624,6 @@ specify them using `@` annotation comments.
 The following signatures are equivalent:
 
 ```ruby
-# @abstract
-#: (Integer) -> void
-def foo1(x); end
-
-sig { abstract.params(x: Integer).void }
-def foo2(x); end
-
 # @override
 #: (Integer) -> void
 def bar1(x); end
@@ -653,9 +646,12 @@ sig(:final) { params(x: Integer).void }
 def qux2(x); end
 ```
 
-Note: these annotations like `@abstract` use normal comments, like `# @abstract`
+Note: these annotations like `@override` use normal comments, like `# @override`
 (not the special `#:` comment). This makes it possible to reuse any existing
 YARD or RDoc annotations.
+
+> While the `@abstract` method annotation is technically supported, it is not
+> recommended. [Read more about abstract methods below.](#abstract-methods)
 
 ## Class and module annotations
 
@@ -870,6 +866,73 @@ Note that non-generic types are not translated, so `Array` without a type
 argument stays `Array`.
 
 ## Unsupported features
+
+### Abstract methods
+
+While the `@abstract` annotation is technically supported for methods, it is
+currently not recommended. To understand why, take the following example:
+
+```ruby
+# @abstract
+class Foo
+  # @abstract
+  # -> void
+  def foo; end
+end
+
+class Bar < Foo
+  # @override
+  # -> void
+  def foo
+    super
+  end
+end
+```
+
+When using traditional Sorbet sigs, the call to `super` inside of `Bar#foo`
+would error at runtime, because `sorbet-runtime` uses metaprogramming to remove
+the `Foo#foo` method. Any mistaken calls to this method would raise an error at
+runtime.
+
+However, RBS signatures have no runtime component. This means that any
+inadvertent calls to abstract methods will silently no-op, which has the
+potential to create subtle bugs and unintended behavior in production.
+
+Instead of using the `@abstract` annotation on methods, place any abstract
+methods in a separate `.rbi` shim file.
+
+Modifying the example above, leave only the abstract class definition in the
+Ruby file, along with the definition of its subclass.
+
+Note: the class `Foo` **must** still be defined in a Ruby file. Without this
+definition, `Foo` will not exist at Runtime, and the program will error when
+referencing the `Foo` class.
+
+```ruby
+# @abstract
+class Foo; end
+
+class Bar < Foo
+  # @override
+  # -> void
+  def foo
+    super
+  end
+end
+```
+
+Then, in a separate shim file, add any abstract methods:
+
+```ruby
+class Foo
+  sig { abstract.returns(String) }
+  def foo; end
+end
+```
+
+Using this approach, the abstract method will be visible to Sorbet during static
+type checking, but it will not exist at runtime, resulting in obvious errors if
+any child classes attempt to call it.
 
 ### Class types
 
