@@ -933,8 +933,19 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                 if (member.first.kind() == NameKind::CONSTANT &&
                     member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
                     if (onlySuggestPackageSpecs) {
-                        if (!member.second.isClassOrModule() ||
-                            !member.second.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
+                        if (!member.second.isClassOrModule()) {
+                            continue;
+                        }
+
+                        // Use the list of locs where the ClassOrModule symbol was defined as a way
+                        // to know whether it is either a PackageSpec (`::A::B::<PackageSpec>`) or a prefix of some
+                        // eventual PackageSpec symbol (`::A`).
+                        //
+                        // Short circuit and say that symbols with huge loc lists _might_ be package
+                        // symbols, even if they don't, for performance (500 chosen by gut feel).
+                        const auto &locs = member.second.asClassOrModuleRef().data(gs)->locs();
+                        if (locs.size() <= 500 &&
+                            absl::c_none_of(locs, [&gs](auto loc) { return loc.file().isPackage(gs); })) {
                             continue;
                         }
                     }
