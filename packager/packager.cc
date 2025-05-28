@@ -2032,12 +2032,12 @@ void validatePackage(core::Context ctx) {
     }
 
     for (auto &i : pkgInfo.importedPackageNames) {
-        // auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
-        //
-        //// this might mean the other package doesn't exist, but that should have been caught already
-        // if (!otherPkg.exists()) {
-        //     continue;
-        // }
+        auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+
+        // this might mean the other package doesn't exist, but that should have been caught already
+        if (!otherPkg.exists()) {
+            continue;
+        }
 
         if (enforceLayering) {
             validateLayering(ctx, i);
