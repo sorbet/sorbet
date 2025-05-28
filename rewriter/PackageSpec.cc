@@ -93,6 +93,23 @@ void PackageSpec::run(core::MutableContext ctx, ast::ClassDef *klass) {
 
         // ---- Mutates the tree ----
 
+        for (auto &specStmt : packageSpecClass->rhs) {
+            auto send = ast::cast_tree<ast::Send>(specStmt);
+            if (send == nullptr || send->fun != core::Names::visibleTo() || send->numPosArgs() == 0) {
+                continue;
+            }
+
+            auto &arg = send->getPosArg(0);
+            auto visibleToArg = ast::cast_tree<ast::Send>(arg);
+            if (visibleToArg == nullptr) {
+                continue;
+            }
+
+            if (visibleToArg->fun == core::Names::star()) {
+                visibleToArg->fun = core::Names::visibleToWildcard();
+            }
+        }
+
         auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(packageSpecClass->name);
         if (!validatePackageName(ctx, nameTree)) {
             reportedError = true;

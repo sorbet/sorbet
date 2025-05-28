@@ -778,7 +778,7 @@ PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedCon
 
     auto fullName = getFullyQualifiedName(ctx, constantLit);
     auto owner = resolveConstantToClassOrModule(ctx, constantLit, fullName);
-    if (constantLit->cnst == core::Names::Constants::PackageSpec_Storage()) {
+    if (owner.exists() && constantLit->cnst == core::Names::Constants::PackageSpec_Storage()) {
         auto member = owner.data(ctx)->findMember(ctx, core::Names::Constants::PackageSpec_Storage());
         if (!member.exists() || !member.isClassOrModule()) {
             owner = core::Symbols::noClassOrModule();
@@ -1356,8 +1356,8 @@ struct PackageSpecBodyWalk {
             } else if (auto target = ast::cast_tree<ast::Send>(send.getPosArg(0))) {
                 // Constant::* is valid Ruby, and parses as a send of the method * to Constant
                 // so let's take advantage of this to implement wildcards
-                if (target->fun != core::Names::star() || target->numPosArgs() > 0 || target->numKwArgs() > 0 ||
-                    target->hasBlock()) {
+                if (target->fun != core::Names::visibleToWildcard() || target->numPosArgs() > 0 ||
+                    target->numKwArgs() > 0 || target->hasBlock()) {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
                         e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
                                     send.fun.show(ctx), "\"tests\"");
@@ -1383,10 +1383,9 @@ struct PackageSpecBodyWalk {
                 auto importArg = ast::packager::appendRegistry(move(send.getPosArg(0)));
                 send.getPosArg(0) = move(importArg);
                 auto target = ast::cast_tree<ast::UnresolvedConstantLit>(send.getPosArg(0));
-                auto fullName = getFullyQualifiedName(ctx, target);
-                auto sym = resolveConstantToClassOrModule(ctx, target, fullName);
+                auto pkgName = getUnresolvedPackageName(ctx, target);
 
-                info.visibleTo_.emplace_back(sym, core::packages::VisibleToType::Normal);
+                info.visibleTo_.emplace_back(pkgName.mangledName.owner, core::packages::VisibleToType::Normal);
             }
         }
 

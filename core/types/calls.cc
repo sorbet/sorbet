@@ -712,6 +712,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             return result;
         }
 
+        if (args.name == Names::visibleToWildcard()) {
+            // Silence a `__package.rb`-related inference error.
+            return result;
+        }
+
         auto unknownMethodCode = args.name == Names::super()
                                      // So we can attach super-specific autocorrects at some point in the future
                                      ? errors::Infer::UnknownSuperMethod

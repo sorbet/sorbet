@@ -459,6 +459,7 @@ NameDef names[] = {
     {"legacy"},
     {"strict"},
     {"visibleTo", "visible_to"},
+    {"visibleToWildcard", "<*>"},
     {"tests"},
     {"exportAll", "export_all!"},
     {"layer"},
