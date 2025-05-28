@@ -10,6 +10,7 @@
 #include "core/AutocorrectSuggestion.h"
 #include "core/Unfreeze.h"
 #include "core/errors/packager.h"
+#include "core/packages/Condensation.h"
 #include "core/packages/MangledName.h"
 #include "core/packages/PackageInfo.h"
 #include <algorithm>
@@ -1654,107 +1655,6 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     }
 }
 
-class Condensation {
-public:
-    struct Node {
-        // The packages that make up this SCC.
-        std::vector<core::packages::MangledName> members;
-
-        // The other SCCNodes that this node imports.
-        UnorderedSet<uint32_t> imports;
-
-        // The id of this node
-        uint32_t id = 0;
-
-        // The number of imports that have not yet been traversed
-        int neededImports = 0;
-
-        // What sort of node is this?
-        core::packages::ImportType type = core::packages::ImportType::Normal;
-    };
-
-private:
-    // SCC ids in packages will be valid indices into this vector when the traversals of the package graph have
-    // completed.
-    vector<Node> nodes;
-
-public:
-    Node &pushNode() {
-        auto id = this->nodes.size();
-        auto &node = this->nodes.emplace_back();
-        node.id = id;
-        return node;
-    }
-
-    void computeTraversal(core::GlobalState &gs) {
-        // The nodes we're currently exploring, and will explore on the next iteration.
-        vector<uint32_t> frontier;
-        vector<uint32_t> next;
-
-        vector<UnorderedSet<uint32_t>> backEdges;
-        backEdges.resize(this->nodes.size());
-
-        // Seed the needed imports for the traversal from the roots.
-        for (auto &node : this->nodes) {
-            node.neededImports = node.imports.size();
-
-            if (node.imports.empty()) {
-                frontier.emplace_back(node.id);
-            }
-
-            for (auto imp : node.imports) {
-                backEdges[imp].insert(node.id);
-            }
-        }
-
-        vector<uint32_t> parallelGroups;
-        vector<uint32_t> sccs;
-        parallelGroups.reserve(this->nodes.size());
-        sccs.reserve(this->nodes.size());
-
-        vector<std::pair<core::packages::ImportType, core::packages::MangledName>> traversal;
-        traversal.reserve(gs.packageDB().packages().size());
-
-        while (!frontier.empty()) {
-            next.clear();
-            uint32_t length = 0;
-            for (auto sccId : frontier) {
-                auto &node = this->nodes[sccId];
-                ENFORCE(node.neededImports == 0);
-
-                // Insert the members of the SCC into the traversal
-                length += node.members.size();
-                sccs.emplace_back(node.members.size());
-
-                for (auto member : node.members) {
-                    traversal.emplace_back(node.type, member);
-                }
-
-                // Queue up the dependents in the next frontier, decrementing their imports by one
-                for (auto dep : backEdges[sccId]) {
-                    auto &needed = this->nodes[dep].neededImports;
-
-                    ENFORCE(needed > 0);
-                    needed -= 1;
-
-                    // `neededImports` should never go below zero, but as a defensive measure, we keep it signed and
-                    // handle that case at runtime.
-                    if (needed <= 0) {
-                        next.emplace_back(dep);
-                    }
-                }
-            }
-
-            ENFORCE(length > 0, "No packages made it through this iteration of the topo sort");
-            parallelGroups.emplace_back(length);
-
-            // TODO: should we sort the sub-spans here to ensure a consistent traversal order?
-
-            swap(frontier, next);
-        }
-    }
-};
-
 class ComputePackageSCCs {
     core::GlobalState &gs;
 
@@ -1781,7 +1681,7 @@ class ComputePackageSCCs {
     // determine all packages in the SCC.
     vector<core::packages::MangledName> stack;
 
-    Condensation condensation;
+    core::packages::Condensation condensation;
 
     ComputePackageSCCs(core::GlobalState &gs) : gs{gs} {
         auto numPackages = gs.packageDB().packages().size();
@@ -1851,9 +1751,8 @@ class ComputePackageSCCs {
             // top of the stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them
             // the same SCC ID.
             core::packages::MangledName poppedPkgName;
-            auto &node = this->condensation.pushNode();
+            auto &node = this->condensation.pushNode(edgeType);
             auto sccId = node.id;
-            node.type = edgeType;
 
             // Set the SCC ids for all of the members of the SCC
             do {
@@ -1922,18 +1821,15 @@ public:
     // NOTE: This function must be called every time a non-test import is added or removed from a package.
     // It is relatively fast, so calling it on every __package.rb edit is an okay overapproximation for simplicity.
     static void run(core::GlobalState &gs) {
+        Timer timeit(gs.tracer(), "packager::computeSCCs");
         ComputePackageSCCs scc(gs);
-        {
-            Timer timeit(gs.tracer(), "packager::computeSCCs");
-            // First, construct the SCCs for application code
-            scc.tarjan(core::packages::ImportType::Normal);
-            scc.tarjan(core::packages::ImportType::Test);
-        }
 
-        {
-            Timer timeit(gs.tracer(), "packager::computeTraversal");
-            scc.condensation.computeTraversal(gs);
-        }
+        // First, compute the SCCs for application code, and then for test code. This allows us to have more granular
+        // SCCs, as test_import edges aren't subject to the same restrictions that import edges are.
+        scc.tarjan(core::packages::ImportType::Normal);
+        scc.tarjan(core::packages::ImportType::Test);
+
+        gs.packageDB().setCondensation(move(scc.condensation));
     }
 };
 

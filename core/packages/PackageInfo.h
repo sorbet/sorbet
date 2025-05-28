@@ -60,7 +60,11 @@ public:
     strictDependenciesLevel() const = 0;
     virtual std::optional<std::pair<core::NameRef, core::LocOffsets>> layer() const = 0;
     virtual std::optional<int> sccID() const = 0;
+
+    // The ID of the SCC that this package's tests belong to. This ID is only useful in the context of the package graph
+    // condensation graph.
     virtual std::optional<int> testSccID() const = 0;
+
     virtual core::Loc fullLoc() const = 0;
     virtual core::Loc declLoc() const = 0;
     virtual bool exists() const final;

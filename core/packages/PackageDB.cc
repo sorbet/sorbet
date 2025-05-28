@@ -308,4 +308,12 @@ UnfreezePackages PackageDB::unfreeze() {
     return UnfreezePackages(*this);
 }
 
+void PackageDB::setCondensation(Condensation &&condensation) {
+    this->condensation_ = std::move(condensation);
+}
+
+const Condensation &PackageDB::condensation() const {
+    return this->condensation_;
+}
+
 } // namespace sorbet::core::packages
