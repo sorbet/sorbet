@@ -177,6 +177,13 @@ class Environment {
     /* variable was reasigned. Forget everything about previous value */
     void clearKnowledge(core::Context ctx, cfg::LocalRef reassigned, KnowledgeFilter &knowledgeFilter);
 
+    // Find narrowsTo type for a method in the given receiver type
+    core::TypePtr findNarrowsToType(core::Context ctx, const core::TypePtr &recvType, core::NameRef methodName);
+    
+    // Update knowledge based on narrowsTo annotation
+    void updateKnowledgeNarrowsTo(core::Context ctx, cfg::LocalRef local, const cfg::Send *send,
+                                  const core::TypePtr &narrowsToType);
+
     // Handles updateKnowledge for Kernel#kind_of?, Kernel#is_a?, and Module#===
     void updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, core::Loc loc, const core::TypePtr &klassType,
                                cfg::LocalRef ref, KnowledgeFilter &knowledgeFilter);
