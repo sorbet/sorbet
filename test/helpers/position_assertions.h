@@ -14,6 +14,7 @@ using namespace sorbet::realmain::lsp;
 extern realmain::options::Parser parser;
 
 class ErrorAssertion;
+class WarningAssertion;
 class UntypedAssertion;
 
 /**
@@ -97,6 +98,32 @@ public:
 
     ErrorAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
                    std::string_view message, bool matchesDuplicateErrors);
+
+    std::string toString() const override;
+
+    bool check(const Diagnostic &diagnostic, std::string_view sourceLine, std::string_view errorPrefix);
+};
+
+class WarningAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<WarningAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                int assertionLine, std::string_view assertionContents,
+                                                std::string_view assertionType);
+
+    /**
+     * Given a set of position-based assertions and Sorbet-generated diagnostics, check that the assertions pass.
+     */
+    static bool checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &files,
+                         std::vector<std::shared_ptr<WarningAssertion>> warningAssertions,
+                         std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
+                         std::string warningPrefix = "");
+
+    const std::string message;
+    const bool matchesDuplicateErrors;  // Template compatibility - same as matchesDuplicateWarnings
+    static constexpr DiagnosticSeverity severity = DiagnosticSeverity::Warning;
+
+    WarningAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                   std::string_view message, bool matchesDuplicateWarnings);
 
     std::string toString() const override;
 
