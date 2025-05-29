@@ -463,6 +463,8 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
     auto targs = this->targs;
     auto typeMembers = this->klass.data(gs)->typeMembers();
     if (typeMembers.size() < targs.size()) {
+        // We have too many arguments at the application site, let's truncate them to match the number of type members
+        // that are defined for this generic.
         targs.erase(targs.begin() + typeMembers.size());
     }
 
@@ -483,6 +485,12 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
 
     auto it = targs.begin();
     for (auto typeMember : typeMembers) {
+        // We can have fewer arguments than the generic has type members, which might cause our type args list to empty
+        // before we've iterated all the type members.
+        if (targs.empty()) {
+            break;
+        }
+
         auto tm = typeMember;
         if (tm.data(gs)->flags.isFixed) {
             it = targs.erase(it);
