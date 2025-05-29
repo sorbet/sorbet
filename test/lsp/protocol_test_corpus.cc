@@ -1062,4 +1062,22 @@ TEST_CASE_FIXTURE(ProtocolTest, "ImplementationOnBrokenLambda") {
     REQUIRE_EQ(1, numResponses);
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "CompletionWithBadHierarchy") {
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class Enumerable\n"
+                                                    "  extend T::Generic\n"
+                                                    "  X = type_member\n"
+                                                    "end")),
+                           {{"foo.rb", 1, "`Enumerable` was previously defined as a `module`"}});
+
+    // Trigger completion at the first `:` of `T::Generic`
+    auto responses = send(*completion("foo.rb", 2, 10));
+
+    REQUIRE_EQ(1, responses.size());
+    REQUIRE(responses.front()->isResponse());
+    REQUIRE(responses.front()->asResponse().result.has_value());
+}
+
 } // namespace sorbet::test::lsp
