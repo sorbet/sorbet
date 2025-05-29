@@ -169,3 +169,24 @@ def main
   # ^ hover-line: 11 # result type:
   # ^ hover-line: 12 T.noreturn
 end
+
+# Test deprecated method hover
+class DeprecatedTestClass
+  extend T::Sig
+  
+  sig { deprecated.returns(String) }
+  def deprecated_method
+    "old way"
+  end
+  
+  sig { returns(String) }
+  def normal_method
+    "new way"
+  end
+end
+
+deprecated_obj = DeprecatedTestClass.new
+deprecated_obj.deprecated_method
+#              ^^^^^^^^^^^^^^^^^ hover: sig { deprecated.returns(String) }
+deprecated_obj.normal_method
+#              ^^^^^^^^^^^^^ hover: sig { returns(String) }

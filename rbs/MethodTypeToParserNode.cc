@@ -143,6 +143,9 @@ unique_ptr<parser::Node> handleAnnotations(core::MutableContext ctx, const parse
         } else if (annotation.string == "override") {
             sigBuilder =
                 parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::override_(), annotation.typeLoc);
+        } else if (annotation.string == "deprecated") {
+            sigBuilder =
+                parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::deprecated(), annotation.typeLoc);
         } else if (annotation.string == "override(allow_incompatible: true)") {
             auto pairs = parser::NodeVec();
             auto key = parser::MK::Symbol(annotation.typeLoc, core::Names::allowIncompatible());

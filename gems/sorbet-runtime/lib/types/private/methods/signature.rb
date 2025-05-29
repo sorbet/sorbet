@@ -6,7 +6,7 @@ class T::Private::Methods::Signature
               :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind,
               :return_type, :mode, :req_arg_count, :req_kwarg_names, :has_rest, :has_keyrest,
               :check_level, :parameters, :on_failure, :override_allow_incompatible,
-              :defined_raw
+              :defined_raw, :deprecated
 
   UNNAMED_REQUIRED_PARAMETERS = [[:req]].freeze
 
@@ -36,7 +36,7 @@ class T::Private::Methods::Signature
     )
   end
 
-  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: method.parameters, override_allow_incompatible: false, defined_raw: false)
+  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: method.parameters, override_allow_incompatible: false, defined_raw: false, deprecated: false)
     @method = method
     @method_name = method_name
     @block_type = nil
@@ -55,6 +55,7 @@ class T::Private::Methods::Signature
     @on_failure = on_failure
     @override_allow_incompatible = override_allow_incompatible
     @defined_raw = defined_raw
+    @deprecated = deprecated
 
     # Use T.untyped in lieu of T.nilable to try to avoid unnecessary allocations.
     arg_types = T.let(nil, T.untyped)

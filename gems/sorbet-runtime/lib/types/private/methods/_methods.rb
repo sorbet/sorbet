@@ -387,6 +387,7 @@ module T::Private::Methods
         on_failure: current_declaration.on_failure,
         override_allow_incompatible: current_declaration.override_allow_incompatible,
         defined_raw: current_declaration.raw,
+        deprecated: current_declaration.deprecated,
       )
 
       SignatureValidation.validate(signature)

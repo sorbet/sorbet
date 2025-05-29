@@ -85,6 +85,7 @@ constexpr ErrorClass TNilableArity{5076, StrictLevel::False};
 constexpr ErrorClass UnsupportedLiteralType{5077, StrictLevel::False};
 constexpr ErrorClass GenericArgumentCountMismatch{5078, StrictLevel::True};
 constexpr ErrorClass GenericArgumentKeywordArgs{5079, StrictLevel::False};
+constexpr ErrorClass OverrideMustBeDeprecated{5080, StrictLevel::True};
 } // namespace sorbet::core::errors::Resolver
 
 #endif

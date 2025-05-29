@@ -586,6 +586,59 @@ module Opus::Types::Test
       end
     end
 
+    it 'allows deprecated' do
+      builder = nil
+      mod = Module.new do
+        extend T::Sig
+        sig do
+          builder = deprecated.returns(String)
+        end
+        def self.old_method
+          "legacy"
+        end
+      end
+      mod.old_method # executes the sig block
+
+      assert(builder)
+      assert_equal(true, builder.decl.deprecated)
+      assert_equal(String, builder.decl.returns)
+      assert_equal('standard', builder.decl.mode)
+      
+      # Check that the signature also has the deprecated flag
+      method_obj = mod.method(:old_method)
+      signature = T::Private::Methods.signature_for_method(method_obj)
+      assert_equal(true, signature.deprecated)
+    end
+
+    it 'prevents calling deprecated twice' do
+      ex = assert_raises do
+        Class.new do
+          extend T::Sig
+          sig {deprecated.deprecated.returns(String)}
+          def self.test_method; "test"; end; test_method
+        end
+      end
+      assert_includes(ex.message, ".deprecated cannot be repeated in a single signature")
+    end
+
+    it 'allows deprecated with other modifiers' do
+      builder = nil
+      mod = Module.new do
+        extend T::Sig
+        sig do
+          builder = deprecated.overridable.returns(String)
+        end
+        def self.old_method
+          "legacy"
+        end
+      end
+      mod.old_method # executes the sig block
+
+      assert(builder)
+      assert_equal(true, builder.decl.deprecated)
+      assert_equal('overridable', builder.decl.mode)
+    end
+
     it 'includes line numbers in errors' do
       line = nil
       klass = Class.new do
