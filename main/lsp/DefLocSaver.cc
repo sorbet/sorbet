@@ -6,6 +6,20 @@
 using namespace std;
 namespace sorbet::realmain::lsp {
 
+void DefLocSaver::preTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+    const auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+
+    if (ctx.file.isPackage(ctx)) {
+        sendStack.emplace_back(send.fun);
+    }
+}
+
+void DefLocSaver::postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+    if (ctx.file.isPackage(ctx)) {
+        sendStack.pop_back();
+    }
+}
+
 void DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
@@ -99,13 +113,15 @@ core::MethodRef enclosingMethodFromContext(core::Context ctx) {
 }
 
 void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Query &lspQuery,
-                  core::SymbolRef symbolBeforeDealias) {
-    // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
+                  core::SymbolRef symbolBeforeDealias, bool onlyTopSymbolRef) {
+    bool isTop = true;
+    // Iterate. Ensures that we match "Foo" in "Foo::Bar" references (unless onlyTopRef == true).
     auto symbol = symbolBeforeDealias.dealias(ctx);
     while (lit && symbol.exists() && lit->original()) {
         auto &unresolved = *lit->original();
-        if (lspQuery.matchesLoc(ctx.locAt(lit->loc())) || lspQuery.matchesSymbol(symbol) ||
-            lspQuery.matchesSymbol(symbolBeforeDealias)) {
+        if (lspQuery.matchesLoc(ctx.locAt(lit->loc())) ||
+            ((!onlyTopSymbolRef || isTop) &&
+             (lspQuery.matchesSymbol(symbol) || lspQuery.matchesSymbol(symbolBeforeDealias)))) {
             // This basically approximates the cfg::Alias case from Environment::processBinding.
             core::TypeAndOrigins tp;
             tp.origins.emplace_back(symbol.loc(ctx));
@@ -132,6 +148,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
                                                     tp, enclosingMethod);
             core::lsp::QueryResponse::pushQueryResponse(ctx, resp);
         }
+        isTop = false;
         lit = ast::cast_tree<ast::ConstantLit>(unresolved.scope);
         if (lit) {
             symbolBeforeDealias = lit->symbol();
@@ -153,31 +170,41 @@ bool shouldLeaveAncestorForIDE(const ast::ExpressionPtr &anc) {
     return true;
 }
 
+bool onlyTopConstantLit(core::Context ctx, const vector<core::NameRef> &sendStack) {
+    // For constant references in packages, if we're inside an `import` line, we only want to match
+    // the top-most reference of the literal (i.e., the `...::<PackageSpec>` literal).
+    return ctx.file.isPackage(ctx) && sendStack.back() == core::Names::import();
+}
+
 } // namespace
 
 void DefLocSaver::postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
     auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-    matchesQuery(ctx, &lit, lspQuery, lit.symbol());
+    matchesQuery(ctx, &lit, lspQuery, lit.symbol(), onlyTopConstantLit(ctx, sendStack));
 }
 
 void DefLocSaver::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
     auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
     if (ast::isa_tree<ast::EmptyTree>(classDef.name)) {
+        // The `<root>` class we wrap all code with uses EmptyTree for the ClassDef::name field.
         ENFORCE(classDef.symbol == core::Symbols::root());
     } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(classDef.name)) {
         ENFORCE(ident->name == core::Names::singleton());
     } else {
-        // The `<root>` class we wrap all code with uses EmptyTree for the ClassDef::name field.
         auto lit = ast::cast_tree<ast::ConstantLit>(classDef.name);
-        matchesQuery(ctx, lit, lspQuery, lit->symbol());
+        // For __package.rb files, we only want to match the top-most symbol (the `...::<PackageSpec>` name),
+        // not any of the namespaces.
+        auto onlyTopRef = ctx.file.isPackage(ctx);
+        matchesQuery(ctx, lit, lspQuery, lit->symbol(), onlyTopRef);
     }
 
     if (classDef.kind == ast::ClassDef::Kind::Class && !classDef.ancestors.empty() &&
         shouldLeaveAncestorForIDE(classDef.ancestors.front())) {
         auto lit = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front());
-        matchesQuery(ctx, lit, lspQuery, lit->symbol());
+        auto onlyTopRef = false;
+        matchesQuery(ctx, lit, lspQuery, lit->symbol(), onlyTopRef);
     }
 }
 

@@ -5,7 +5,21 @@
 namespace sorbet::realmain::lsp {
 
 class DefLocSaver {
+    // Only populated for package files--tracks the enclosing method name.
+    //
+    // Note: we don't handle SendResponse's in DefLocSaver: we do that in inference, where we
+    // actually have the dispatch results. Don't abuse this for attempting to handle SendResponse's.
+    std::vector<core::NameRef> sendStack;
+
 public:
+    DefLocSaver() {
+        // Start with an empty name so that we can always ask for `.back()` of this vector.
+        sendStack.emplace_back(core::NameRef::noName());
+    }
+
+    void preTransformSend(core::Context ctx, ast::ExpressionPtr &send);
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &send);
+
     // Handles loc and symbol requests for method definitions.
     void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &methodDef);
     // Handles loc and symbol requests for instance variables.

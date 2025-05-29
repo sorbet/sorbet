@@ -5,7 +5,6 @@
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
-#include "packager/packager.h"
 
 using namespace std;
 
@@ -21,51 +20,40 @@ bool ReferencesTask::needsMultithreading(const LSPIndexer &indexer) const {
 vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::GlobalState &gs,
                                                                     core::SymbolRef symInPackage,
                                                                     core::packages::MangledName packageName) {
+    if (symInPackage.name(gs) == core::Names::Constants::PackageSpec_Storage()) {
+        symInPackage = symInPackage.owner(gs);
+    }
+
+    vector<core::SymbolRef> result;
+    result.emplace_back(symInPackage);
+
     vector<core::NameRef> fullName;
 
     auto sym = symInPackage;
     while (sym.exists() && sym != core::Symbols::root()) {
-        auto name = sym.name(gs);
-        if (name != core::Names::Constants::PackageSpec()) {
-            fullName.emplace_back(name);
-        }
+        fullName.emplace_back(sym.name(gs));
         sym = sym.owner(gs);
     }
-    reverse(fullName.begin(), fullName.end());
 
-    vector<core::SymbolRef> result;
-    vector<core::SymbolRef> namespacesToCheck = {
-        core::Symbols::root(),
-        core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE),
-    };
+    auto symInTest = core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE);
+    if (!symInTest.exists()) {
+        return result;
+    }
 
-    for (auto &namespaceToCheck : namespacesToCheck) {
-        if (!namespaceToCheck.exists()) {
-            continue;
+    for (auto &part : fullName) {
+        symInTest = symInTest.asClassOrModuleRef().data(gs)->findMember(gs, part);
+        if (!symInTest.exists()) {
+            return result;
         }
+    }
 
-        auto symFound = findSym(gs, fullName, namespaceToCheck);
-        // Do nothing if the symbol is not found or is from the same package -- i.e. for class ... < PackageSpec
-        // declarations
-        if (symFound.exists() && gs.packageDB().getPackageNameForFile(symFound.loc(gs).file()) != packageName) {
-            result.emplace_back(std::move(symFound));
-        }
+    // Do nothing if the symbol is not found or is from the same package -- i.e. for class ... < PackageSpec
+    // declarations
+    if (gs.packageDB().getPackageNameForFile(symInTest.loc(gs).file()) != packageName) {
+        result.emplace_back(symInTest);
     }
 
     return result;
-}
-
-core::SymbolRef ReferencesTask::findSym(const core::GlobalState &gs, const vector<core::NameRef> &fullName,
-                                        core::SymbolRef underNamespace) {
-    core::SymbolRef symToCheck = underNamespace;
-    for (auto &part : fullName) {
-        symToCheck = symToCheck.asClassOrModuleRef().data(gs)->findMember(gs, part);
-        if (!symToCheck.exists()) {
-            return symToCheck;
-        }
-    }
-
-    return symToCheck;
 }
 
 unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &typechecker) {
@@ -124,7 +112,13 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 //  Returns all global usages of Foo::A
 
                 auto packageName = gs.packageDB().getPackageNameForFile(fref);
-                auto symsToCheck = getSymsToCheckWithinPackage(gs, constResp->symbolBeforeDealias, packageName);
+                auto [symToCheck, excludePackageNameReferences, limitToCurrentPackage] =
+                    nameMeBetter(gs, fref, constResp->symbolBeforeDealias, queryResponses);
+                vector<core::SymbolRef> symsToCheck;
+                if (limitToCurrentPackage) {
+                    symsToCheck = getSymsToCheckWithinPackage(gs, symToCheck, packageName);
+                    symsToCheck.emplace_back(symToCheck);
+                }
 
                 if (!symsToCheck.empty()) {
                     vector<unique_ptr<Location>> locations;
@@ -141,8 +135,8 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 } else {
                     // Fall back to normal case when we are not querying for an external symbol, e.g. class Foo <
                     // PackageSpec declarations, or export statements.
-                    response->result = extractLocations(
-                        typechecker.state(), getReferencesToSymbol(typechecker, constResp->symbolBeforeDealias));
+                    response->result =
+                        extractLocations(typechecker.state(), getReferencesToSymbol(typechecker, symToCheck));
                 }
             } else {
                 // Normal handling for non-package files

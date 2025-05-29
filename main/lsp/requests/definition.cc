@@ -73,8 +73,9 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
         // Only support go-to-definition on constants and fields in untyped files.
         if (auto c = resp->isConstant()) {
             auto sym = c->symbolBeforeDealias;
+            auto locs = getLocsForConstantViewedFromFile(gs, fref, sym, queryResponses);
             vector<pair<core::Loc, unique_ptr<Location>>> locMapping;
-            for (auto loc : sym.locs(gs)) {
+            for (auto loc : locs) {
                 locMapping.emplace_back(loc, config.loc2Location(gs, loc));
             }
             {

@@ -125,5 +125,17 @@ std::unique_ptr<core::lsp::QueryResponse>
 getQueryResponseForFindAllReferences(const core::GlobalState &gs,
                                      std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
 
+std::vector<core::Loc>
+getLocsForConstantViewedFromFile(const core::GlobalState &gs, core::FileRef fref, core::SymbolRef sym,
+                                 const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
+
+struct NameMeBetterResult {
+    core::SymbolRef sym;
+    bool excludePackageNameReferences;
+    bool limitToCurrentPackage;
+};
+NameMeBetterResult nameMeBetter(const core::GlobalState &gs, core::FileRef fref, core::SymbolRef sym,
+                                const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
+
 } // namespace sorbet::realmain::lsp
 #endif // RUBY_TYPER_LSPLOOP_H

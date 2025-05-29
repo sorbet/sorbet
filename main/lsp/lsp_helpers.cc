@@ -247,6 +247,147 @@ getQueryResponseForFindAllReferences(const core::GlobalState &gs,
     return skipLiteralIfMethodDef(gs, queryResponses);
 }
 
+namespace {
+
+// Note: takes advantage of the fact that we move the relevant QueryResponse out of the vector
+// once we've selected it, leaving behind a `nullptr` in its place so we can start our search
+// "above" the enclosing query result.
+core::NameRef isInsidePackagerDSL(const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    size_t idx = 0;
+    for (; idx < queryResponses.size(); idx++) {
+        if (queryResponses[idx] == nullptr) {
+            idx++;
+            break;
+        }
+    }
+
+    for (; idx < queryResponses.size(); idx++) {
+        const auto &resp = queryResponses[idx];
+        auto send = resp->isSend();
+        if (send == nullptr) {
+            continue;
+        }
+
+        if (send->callerSideName == core::Names::import() || send->callerSideName == core::Names::testImport() ||
+            send->callerSideName == core::Names::export_() || send->callerSideName == core::Names::visibleTo()) {
+            return send->callerSideName;
+        }
+    }
+
+    return core::NameRef::noName();
+}
+
+vector<core::Loc> onlyPackageFileLocs(const core::GlobalState &gs, absl::Span<const core::Loc> locs) {
+    vector<core::Loc> results;
+    for (auto loc : locs) {
+        if (loc.file().isPackage(gs)) {
+            results.emplace_back(loc);
+        }
+    }
+
+    return results;
+}
+
+vector<core::Loc> onlyNonPackageFileLocs(const core::GlobalState &gs, absl::Span<const core::Loc> locs) {
+    vector<core::Loc> results;
+    for (auto loc : locs) {
+        if (!loc.file().isPackage(gs)) {
+            results.emplace_back(loc);
+        }
+    }
+
+    return results;
+}
+
+} // namespace
+
+// This method is somewhat historically motivated: an old desugaring of symbols in `__package.rb`
+// files enforced a pretty clean separation of definitions/references depending on the context you
+// started from.
+//
+// This method recreates that old behavior, given the new structure of the symbol table for packages.
+vector<core::Loc> getLocsForConstantViewedFromFile(const core::GlobalState &gs, core::FileRef fref, core::SymbolRef sym,
+                                                   const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    if (fref.isPackage(gs)) {
+        auto maybePackagerDSL = isInsidePackagerDSL(queryResponses);
+        switch (maybePackagerDSL.rawId()) {
+            case core::Names::export_().rawId():
+                // In an export position, we always want to show real code, because you export
+                // constants, not packages.
+                return onlyNonPackageFileLocs(gs, sym.locs(gs));
+
+            case core::Names::import().rawId():
+            case core::Names::testImport().rawId():
+            case core::Names::visibleTo().rawId():
+                // In an import-ish position, we always want to show packages, because you only
+                // import packages, not their individual constants.
+                return onlyPackageFileLocs(gs, sym.locs(gs));
+
+            default: {
+                // All locs if we don't know anything better.
+                vector<core::Loc> results;
+                for (auto loc : sym.locs(gs)) {
+                    results.emplace_back(loc);
+                }
+
+                return results;
+            }
+        }
+    } else {
+        // Should be impossible to have what would have previously been a `<PackageSpecRegistry>`
+        // constant or what is now a `<PackageSpec>` constant referenced in a non-__package.rb file,
+        // so for backwards compat with the old behavior, we want to keep only showing the normal
+        // file locations.
+        return onlyNonPackageFileLocs(gs, sym.locs(gs));
+    }
+}
+
+// TODO(jez) make a struct
+NameMeBetterResult nameMeBetter(const core::GlobalState &gs, core::FileRef fref, core::SymbolRef sym,
+                                const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    if (fref.isPackage(gs)) {
+        auto maybePackagerDSL = isInsidePackagerDSL(queryResponses);
+        switch (maybePackagerDSL.rawId()) {
+            case core::Names::export_().rawId():
+                // Just find the sym. Might include __package.rb references.
+                return {sym, true, false};
+
+            case core::Names::visibleTo().rawId():
+                // TODO(jez) Probably going to want special visible_to handling to handle wildcards.
+                // For now, do nothing special.
+                // I think that what you're probably going to want is:
+                return {sym, false, false};
+
+            default: {
+                auto nameMeBetterSym = sym;
+                if (sym.isClassOrModule() &&
+                    sym.asClassOrModuleRef().data(gs)->name != core::Names::Constants::PackageSpec_Storage()) {
+                    auto maybePackageSym = sym.asClassOrModuleRef().data(gs)->findMember(
+                        gs, core::Names::Constants::PackageSpec_Storage());
+                    if (maybePackageSym.exists()) {
+                        // If we're in an import-ish position and a <PackageSpec> symbol exists
+                        // under us, ONLY find that symbol.
+                        //
+                        // (If the symbol under us is an intervening namespace that doesn't
+                        // necessarily have a `<PackageSpec>`, find all references to it, which
+                        // might find references outside of `__package.rb` files.)
+                        nameMeBetterSym = maybePackageSym;
+                    }
+                }
+
+                if (maybePackagerDSL == core::Names::import() || maybePackagerDSL == core::Names::testImport()) {
+                    return {nameMeBetterSym, false, true};
+                } else {
+                    return {nameMeBetterSym, false, false};
+                }
+            }
+        }
+    } else {
+        auto excludePackageNameReferences = true;
+        return {sym, excludePackageNameReferences, false};
+    }
+}
+
 /**
  * Retrieves the documentation above a symbol.
  * - Returned documentation has one trailing newline (if it exists)
