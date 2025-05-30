@@ -521,6 +521,33 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
     return item;
 }
 
+unique_ptr<CompletionItem> getCompletionItemForKwarg(const core::GlobalState &gs, const LSPConfiguration &config,
+                                                     const core::NameRef local, const core::Loc queryLoc,
+                                                     string_view prefix, size_t sortIdx) {
+    auto label = local.shortName(gs);
+    auto item = make_unique<CompletionItem>(absl::StrCat(label, ": (keyword argument)"));
+    item->sortText = formatSortIndex(sortIdx);
+    item->kind = CompletionItemKind::Keyword;
+
+    string replacementText;
+
+    if (config.getClientConfig().clientCompletionItemSnippetSupport) {
+        item->insertTextFormat = InsertTextFormat::Snippet;
+        replacementText = absl::StrCat(label, ": $1");
+    } else {
+        item->insertTextFormat = InsertTextFormat::PlainText;
+        replacementText = absl::StrCat(label, ": ");
+    }
+
+    if (auto replacementRange = replacementRangeForQuery(gs, queryLoc, prefix)) {
+        item->textEdit = make_unique<TextEdit>(std::move(replacementRange), move(replacementText));
+    } else {
+        item->insertText = move(replacementText);
+    }
+
+    return item;
+}
+
 unique_ptr<CompletionItem> getCompletionItemForLocalName(const core::GlobalState &gs, const LSPConfiguration &config,
                                                          const core::NameRef local, const core::Loc queryLoc,
                                                          string_view prefix, size_t sortIdx) {
@@ -1091,7 +1118,8 @@ CompletionTask::SearchParams CompletionTask::searchParamsForEmptyAssign(const co
         prefix,
         methodSearchParamsForEmptyAssign(gs, enclosingMethod),
         suggestKeywords,
-        enclosingMethod, // locals
+        enclosingMethod,   // locals
+        core::MethodRef{}, // do not suggest kwargs
         core::lsp::ConstantResponse::Scopes{enclosingMethod.data(gs)->owner},
     };
 }
@@ -1135,6 +1163,21 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
         }
     }
 
+    // ----- kwargs -----
+
+    vector<core::NameRef> similarKwargs;
+    if (params.sendMethod.exists()) {
+        Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".determine_kwargs");
+
+        vector<core::NameRef> kwargs;
+        kwargs.reserve(params.sendMethod.data(gs)->arguments.size());
+        for (auto &param : params.sendMethod.data(gs)->arguments) {
+            if (param.flags.isKeyword && hasSimilarName(gs, param.name, params.prefix)) {
+                similarKwargs.emplace_back(param.name);
+            }
+        }
+    }
+
     // ----- keywords -----
 
     auto similarKeywords = params.suggestKeywords ? allSimilarKeywords(params.prefix) : vector<RubyKeyword>{};
@@ -1158,7 +1201,8 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
 
     // ----- final sort -----
 
-    // TODO(jez) Do something smarter here than "all keywords then all locals then all methods then all constants"
+    // TODO(jez) Do something smarter here than "all keywords then all kwargs then all locals then all methods then all
+    // constants"
 
     vector<unique_ptr<CompletionItem>> items;
     {
@@ -1166,6 +1210,13 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
         for (auto &similarKeyword : similarKeywords) {
             items.push_back(getCompletionItemForKeyword(gs, this->config, similarKeyword, params.queryLoc,
                                                         params.prefix, items.size()));
+        }
+    }
+    {
+        Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".kwarg_items");
+        for (auto &similarKwarg : similarKwargs) {
+            items.push_back(getCompletionItemForKwarg(gs, this->config, similarKwarg, params.queryLoc, params.prefix,
+                                                      items.size()));
         }
     }
     {
@@ -1298,14 +1349,14 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             if (recv.exists()) {
                 scopes.emplace_back(recv);
             }
-
             auto params = SearchParams{
                 queryLoc,
                 prefix,
                 nullopt,           // do not suggest methods
                 false,             // do not suggest keywords
                 core::MethodRef{}, // do not suggest locals
-                scopes,
+                core::MethodRef{}, // do not suggest kwargs
+                move(scopes),
             };
             items = this->getCompletionItems(typechecker, params, resolved);
         } else {
@@ -1320,6 +1371,31 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             auto suggestKeywords = wantLocalsAndKeywords;
             // `enclosingMethod` existing indicates whether we want local variable completion results.
             auto enclosingMethod = wantLocalsAndKeywords ? sendResp->enclosingMethod : core::MethodRef{};
+
+            core::MethodRef kwargsMethod;
+            if (prefix.empty()) {
+                // If the location of the method doesn't include our query, we can assume that we're inside of the
+                // argument list.
+                if (!sendResp->funLocOffsets.contains(queryLoc.offsets())) {
+                    kwargsMethod = sendResp->dispatchResult->main.method;
+                }
+            } else if (queryResponses.size() > 1) {
+                // We only want to enable kwarg completion if completion is requested at the end of the pattern.
+                auto fullPrefix = queryLoc.adjust(gs, -1 * static_cast<int32_t>(prefix.size()), 0);
+                if (fullPrefix.exists() && fullPrefix.source(gs) == prefix) {
+                    // As we know the prefix is non-empty, that means the first query response will have been for things
+                    // related to the query prefix. If there's a second query response that's also a send result, that
+                    // means we're inside the args list of another send, and we can add in kwargs for that method to the
+                    // list.
+                    for (auto &resp : absl::MakeSpan(queryResponses).subspan(1)) {
+                        if (auto *enclosingSend = resp->isSend()) {
+                            kwargsMethod = enclosingSend->dispatchResult->main.method;
+                            break;
+                        }
+                    }
+                }
+            }
+
             auto params = SearchParams{
                 queryLoc,
                 prefix,
@@ -1330,6 +1406,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 },
                 suggestKeywords,
                 enclosingMethod,
+                kwargsMethod,
                 core::lsp::ConstantResponse::Scopes{}, // constants don't make sense here
             };
             items = this->getCompletionItems(typechecker, params, resolved);
@@ -1359,7 +1436,13 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             auto suggestKeywords = false;
             auto enclosingMethod = core::MethodRef{};
             params = SearchParams{
-                queryLoc, prefix, methodSearchParams, suggestKeywords, enclosingMethod, std::move(constantResp->scopes),
+                queryLoc,
+                prefix,
+                methodSearchParams,
+                suggestKeywords,
+                enclosingMethod,
+                core::MethodRef{}, // do not suggest kwargs
+                move(constantResp->scopes),
             };
         }
         items = this->getCompletionItems(typechecker, params, resolved);
@@ -1387,6 +1470,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 methodSearchParamsForEmptyAssign(gs, identResp->enclosingMethod),
                 suggestKeywords,
                 identResp->enclosingMethod,
+                core::MethodRef{}, // do not suggest kwargs
                 core::lsp::ConstantResponse::Scopes{identResp->enclosingMethod.data(gs)->owner},
             };
             items = this->getCompletionItems(typechecker, params, resolved);
