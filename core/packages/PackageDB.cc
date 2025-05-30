@@ -86,6 +86,11 @@ public:
         return nullopt;
     }
 
+    optional<int> testSccID() const {
+        notImplemented();
+        return nullopt;
+    }
+
     bool causesLayeringViolation(const core::packages::PackageDB &packageDB, const PackageInfo &otherPkg) const {
         notImplemented();
         return false;
@@ -301,6 +306,14 @@ PackageDB PackageDB::deepCopy() const {
 
 UnfreezePackages PackageDB::unfreeze() {
     return UnfreezePackages(*this);
+}
+
+void PackageDB::setCondensation(Condensation &&condensation) {
+    this->condensation_ = std::move(condensation);
+}
+
+const Condensation &PackageDB::condensation() const {
+    return this->condensation_;
 }
 
 } // namespace sorbet::core::packages
