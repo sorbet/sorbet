@@ -1346,8 +1346,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             auto prefix = name == core::Names::Constants::ConstantNameMissing() ? "" : name.shortName(gs);
             if (prefix != "") {
                 auto behindCursor = queryLoc.adjust(gs, -1 * static_cast<int32_t>(prefix.size()), 0);
-                auto precedingChar = queryLoc.adjust(gs, -1, 0);
-                if (behindCursor.source(gs) != prefix && precedingChar.source(gs) == ":") {
+                if (!behindCursor.exists() || behindCursor.source(gs) != prefix) {
                     // Probably a case like this:
                     //   A::|
                     //   B::C
