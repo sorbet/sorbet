@@ -1047,11 +1047,11 @@ module CGI::Util
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      string: ::String,
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
-  def escape(_); end
+  def escape(string); end
 
   # Escape only the tags of certain HTML elements in `string`.
   #
@@ -1074,10 +1074,10 @@ module CGI::Util
   # [`escape_element`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escape_element)
   sig do
     params(
-      string: ::T.untyped,
-      elements: ::T.untyped,
+      string: ::String,
+      elements: ::T.any(::T::Array[::String], ::String)
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
   def escapeElement(string, *elements); end
 
@@ -1094,11 +1094,11 @@ module CGI::Util
   # [`h`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-h)
   sig do
     params(
-      _: ::T.untyped,
+      string: ::String,
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
-  def escapeHTML(_); end
+  def escapeHTML(string); end
 
   # Synonym for
   # [`CGI.escapeElement(str)`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escapeElement)
@@ -1107,10 +1107,10 @@ module CGI::Util
   # [`escapeElement`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escapeElement)
   sig do
     params(
-      string: ::T.untyped,
-      elements: ::T.untyped,
+      string: ::String,
+      elements: ::T.any(::T::Array[::String], ::String)
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
   def escape_element(string, *elements); end
 
@@ -1121,21 +1121,21 @@ module CGI::Util
   # [`escapeHTML`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escapeHTML)
   sig do
     params(
-      _: ::T.untyped,
+      string: ::String,
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
-  def escape_html(_); end
+  def escape_html(string); end
 
   # Alias for:
   # [`escapeHTML`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escapeHTML)
   sig do
     params(
-      _: ::T.untyped,
+      string: ::String,
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
-  def h(_); end
+  def h(string); end
 
   # Prettify (indent) an HTML string.
   #
@@ -1157,10 +1157,10 @@ module CGI::Util
   # ```
   sig do
     params(
-      string: ::T.untyped,
-      shift: ::T.untyped,
+      string: ::String,
+      shift: ::String,
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
   def pretty(string, shift=T.unsafe(nil)); end
 
@@ -1174,9 +1174,9 @@ module CGI::Util
   # ```
   sig do
     params(
-      time: ::T.untyped,
+      time: ::Time,
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
   def rfc1123_date(time); end
 
@@ -1188,11 +1188,12 @@ module CGI::Util
   # ```
   sig do
     params(
-      _: ::T.untyped,
+      string: ::String,
+      encoding: ::String
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
-  def unescape(*_); end
+  def unescape(string, encoding = T.unsafe(nil)); end
 
   # Undo escaping such as that done by
   # [`CGI.escapeElement()`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escapeElement)
@@ -1212,10 +1213,10 @@ module CGI::Util
   # [`unescape_element`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-unescape_element)
   sig do
     params(
-      string: ::T.untyped,
-      elements: ::T.untyped,
+      string: ::String,
+      elements: ::T.any(::T::Array[::String], ::String)
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
   def unescapeElement(string, *elements); end
 
@@ -1231,11 +1232,11 @@ module CGI::Util
   # [`unescape_html`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-unescape_html)
   sig do
     params(
-      _: ::T.untyped,
+      string: ::String,
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
-  def unescapeHTML(_); end
+  def unescapeHTML(string); end
 
   # Synonym for
   # [`CGI.unescapeElement(str)`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-unescapeElement)
@@ -1244,10 +1245,10 @@ module CGI::Util
   # [`unescapeElement`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-unescapeElement)
   sig do
     params(
-      string: ::T.untyped,
-      elements: ::T.untyped,
+      string: ::String,
+      elements: ::T.any(::T::Array[::String], ::String)
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
   def unescape_element(string, *elements); end
 
@@ -1258,11 +1259,11 @@ module CGI::Util
   # [`unescapeHTML`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-unescapeHTML)
   sig do
     params(
-      _: ::T.untyped,
+      string: ::String,
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
-  def unescape_html(_); end
+  def unescape_html(string); end
 
   # URL-encode a string following RFC 3986 Space characters (+“ ”+) are encoded with (+“%20”+)
   #
@@ -1272,7 +1273,7 @@ module CGI::Util
   # ```
   sig do
     params(
-      string: ::T.untyped
+      string: ::String
     )
     .returns(::String)
   end
@@ -1286,8 +1287,8 @@ module CGI::Util
   # ```
   sig do
     params(
-      string: ::T.untyped,
-      encoding: ::T.untyped
+      string: ::String,
+      encoding: ::String
     )
     .returns(::String)
   end
@@ -1297,35 +1298,53 @@ end
 module CGI::Escape
   sig do
     params(
-      _: ::T.untyped,
+      string: ::String,
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
-  def escape(_); end
+  def escape(string); end
 
   sig do
     params(
-      _: ::T.untyped,
+      string: ::String,
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
-  def escapeHTML(_); end
+  def escapeHTML(string); end
 
   sig do
     params(
-      _: ::T.untyped,
+      string: ::String,
+      encoding: ::String
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
-  def unescape(*_); end
+  def unescape(string, encoding = T.unsafe(nil)); end
 
   sig do
     params(
-      _: ::T.untyped,
+      string: ::String,
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
-  def unescapeHTML(_); end
+  def unescapeHTML(string); end
+
+  sig do
+    params(
+      string: ::String
+    )
+    .returns(::String)
+  end
+  def escapeURIComponent(string); end
+
+  sig do
+    params(
+      string: ::String,
+      encoding: ::String
+    )
+    .returns(::String)
+  end
+  def unescapeURIComponent(string, encoding = T.unsafe(nil)); end
 end
 
 # [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html) raised when
