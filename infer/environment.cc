@@ -553,6 +553,51 @@ void Environment::updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, 
 
 void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send *send,
                                   KnowledgeFilter &knowledgeFilter) {
+    if (knowledgeFilter.isNeeded(local)) {
+        auto recv = send->recv.variable;
+        core::TypePtr narrowsToType = nullptr;
+        auto &recvType = send->recv.type;
+        
+        if (core::isa_type<core::ClassType>(recvType)) {
+            auto classType = core::cast_type_nonnull<core::ClassType>(recvType);
+            auto methodSymbol = classType.symbol.data(ctx)->findMethod(ctx, send->fun);
+            if (methodSymbol.exists() && methodSymbol.data(ctx)->narrowsTo != nullptr) {
+                narrowsToType = methodSymbol.data(ctx)->narrowsTo;
+            }
+        }
+        
+        if (narrowsToType == nullptr && core::isa_type<core::OrType>(recvType)) {
+            std::function<core::TypePtr(const core::TypePtr&)> findNarrowsToInUnion = 
+                [&](const core::TypePtr& type) -> core::TypePtr {
+                if (core::isa_type<core::ClassType>(type)) {
+                    auto classType = core::cast_type_nonnull<core::ClassType>(type);
+                    auto methodSymbol = classType.symbol.data(ctx)->findMethod(ctx, send->fun);
+                    if (methodSymbol.exists() && methodSymbol.data(ctx)->narrowsTo != nullptr) {
+                        return methodSymbol.data(ctx)->narrowsTo;
+                    }
+                } else if (core::isa_type<core::OrType>(type)) {
+                    auto &orType = core::cast_type_nonnull<core::OrType>(type);
+                    auto leftResult = findNarrowsToInUnion(orType.left);
+                    if (leftResult != nullptr) {
+                        return leftResult;
+                    }
+                    return findNarrowsToInUnion(orType.right);
+                }
+                return nullptr;
+            };
+            
+            narrowsToType = findNarrowsToInUnion(recvType);
+        }
+
+        if (narrowsToType != nullptr && !narrowsToType.isUntyped()) {
+            auto &whoKnows = getKnowledge(local);
+            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, recv, narrowsToType);
+            whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, recv, narrowsToType);
+            whoKnows.sanityCheck();
+            return;
+        }
+    }
+
     if (!send->fun.isUpdateKnowledgeName()) {
         // We short circuit here (1) for an honestly negligible performance improvement, but
         // importantly (2) so that if a new method is added to this method, you'll be forced to add it
@@ -1119,6 +1164,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         }
                     }
 
+                    // ここだ！！！！！！
                     if (it->main.method.exists() && it->main.method.data(ctx)->flags.isPackagePrivate) {
                         core::ClassOrModuleRef klass = it->main.method.data(ctx)->owner;
                         if (klass.exists()) {
