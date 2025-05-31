@@ -1,6 +1,9 @@
 # typed: true
 require 'csv'
 
+# Test the `CSV::Converters` constant type
+T.assert_type!(CSV::Converters, T::Hash[Symbol, T.any(Proc, T::Array[Symbol])])
+
 T.assert_type!(CSV.foreach('source.csv', headers: true), T.nilable(T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)]))
 T.assert_type!(CSV.foreach('source.csv', 'r:bom|utf-8'), T.nilable(T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)]))
 T.assert_type!(CSV.foreach('source.csv', headers: true, col_sep: ','), T.nilable(T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)]))
