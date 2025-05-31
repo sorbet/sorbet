@@ -617,6 +617,7 @@ void GlobalState::initEmpty() {
 
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::testImport())
                  .typedArg(Names::arg0(), make_type<ClassType>(Symbols::PackageSpecSingleton()))
+                 .defaultKeywordArg(Names::only())
                  .build();
     ENFORCE_NO_TIMER(method == Symbols::PackageSpec_test_import());
 

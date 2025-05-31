@@ -115,6 +115,10 @@ struct Import {
     core::packages::ImportType type;
 
     Import(PackageName &&name, core::packages::ImportType type) : name(std::move(name)), type(type) {}
+
+    bool isTestImport() const {
+        return type != core::packages::ImportType::Normal;
+    }
 };
 
 struct Export {
@@ -410,7 +414,7 @@ public:
     }
 
     optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
-                                                    bool isTestImport) const {
+                                                    core::packages::ImportType importType) const {
         auto &info = PackageInfoImpl::from(pkg);
         auto insertionLoc = core::Loc::none(loc.file());
         optional<core::AutocorrectSuggestion::Edit> deleteTestImportEdit = nullopt;
@@ -418,7 +422,8 @@ public:
             core::LocOffsets importToInsertAfter;
             for (auto &import : importedPackageNames) {
                 if (import.name.mangledName == info.name.mangledName) {
-                    if (!isTestImport && import.type == core::packages::ImportType::Test) {
+                    if (importType == core::packages::ImportType::Normal &&
+                        import.type != core::packages::ImportType::Normal) {
                         // There's already a test import for this package, so we'll convert it to a regular import.
                         // importToInsertAfter already tracks where we need to insert the import.
                         // So we can craft an edit to delete the `test_import` line, and then use the regular logic for
@@ -442,8 +447,8 @@ public:
                     continue;
                 }
 
-                auto compareResult =
-                    orderImports(gs, info, isTestImport, importInfo, import.type == core::packages::ImportType::Test);
+                auto compareResult = orderImports(gs, info, importType != core::packages::ImportType::Normal,
+                                                  importInfo, import.isTestImport());
                 if (compareResult == 1 || compareResult == 0) {
                     importToInsertAfter = import.name.fullName.loc;
                 }
@@ -491,10 +496,28 @@ public:
         ENFORCE(insertionLoc.exists());
 
         auto packageToImport = info.name.toString(gs);
-        auto suggestionTitle = fmt::format("{} `{}` in package `{}`", isTestImport ? "Test Import" : "Import",
-                                           packageToImport, name.toString(gs));
+        string_view importTypeHuman;
+        string_view importTypeMethod;
+        string_view importTypeTrailing = "";
+        switch (importType) {
+            case core::packages::ImportType::Normal:
+                importTypeHuman = "Import";
+                importTypeMethod = "import";
+                break;
+            case core::packages::ImportType::TestUnit:
+                importTypeHuman = "Test Import";
+                importTypeMethod = "test_import";
+                importTypeTrailing = ", only: :test_rb";
+                break;
+            case core::packages::ImportType::TestHelper:
+                importTypeHuman = "Test Import";
+                importTypeMethod = "test_import";
+                break;
+        }
+        auto suggestionTitle =
+            fmt::format("{} `{}` in package `{}`", importTypeHuman, packageToImport, name.toString(gs));
         vector<core::AutocorrectSuggestion::Edit> edits = {
-            {insertionLoc, fmt::format("\n  {} {}", isTestImport ? "test_import" : "import", packageToImport)}};
+            {insertionLoc, fmt::format("\n  {} {}{}", importTypeMethod, packageToImport, importTypeTrailing)}};
         if (deleteTestImportEdit.has_value()) {
             edits.push_back(deleteTestImportEdit.value());
             suggestionTitle = fmt::format("Convert `{}` to `{}`", "test_import", "import");
@@ -656,8 +679,7 @@ public:
             auto &currInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfo(curr));
             for (auto &import : currInfo.importedPackageNames) {
                 auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
-                if (!importInfo.exists() || import.type == core::packages::ImportType::Test ||
-                    visited.contains(import.name.mangledName)) {
+                if (!importInfo.exists() || import.isTestImport() || visited.contains(import.name.mangledName)) {
                     continue;
                 }
                 if (!prev.contains(import.name.mangledName)) {
@@ -1258,6 +1280,21 @@ struct PackageSpecBodyWalk {
 
                 info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target), method2ImportType(send));
             }
+            // also validate the keyword args, since one is valid
+            for (auto [key, value] : send.kwArgPairs()) {
+                auto keyLit = ast::cast_tree<ast::Literal>(key);
+                ENFORCE(keyLit);
+                if (keyLit->asSymbol() == core::Names::only()) {
+                    auto valLit = ast::cast_tree<ast::Literal>(value);
+                    // if it's not a literal, then it'll get caught elsewhere
+                    if (valLit && (!valLit->isSymbol() || valLit->asSymbol() != core::Names::testRb())) {
+                        if (auto e = ctx.beginError(value.loc(), core::errors::Packager::InvalidPackageExpression)) {
+                            e.setHeader("Invalid expression in package: the only valid value for `{}` is `{}`",
+                                        "only:", "test_rb");
+                        }
+                    }
+                }
+            }
         }
 
         if (send.fun == core::Names::restrictToService() && send.numPosArgs() == 1) {
@@ -1476,7 +1513,13 @@ struct PackageSpecBodyWalk {
             case core::Names::import().rawId():
                 return core::packages::ImportType::Normal;
             case core::Names::testImport().rawId():
-                return core::packages::ImportType::Test;
+                // we'll validate elsewhere that the only valid keyword args to appear here are `only: :test_rb`,
+                // which means if there are keyword args _at all_, they must indicate a test unit import
+                if (send.numKwArgs() > 0) {
+                    return core::packages::ImportType::TestUnit;
+                } else {
+                    return core::packages::ImportType::TestHelper;
+                }
             default:
                 ENFORCE(false);
                 Exception::notImplemented();
@@ -1696,7 +1739,7 @@ class ComputePackageSCCs {
         infoAtEntry.onStack = true;
 
         for (auto &i : pkgInfo.importedPackageNames) {
-            if (i.type == core::packages::ImportType::Test) {
+            if (i.isTestImport()) {
                 continue;
             }
             // We need to be careful with this; it's not valid after a call to `strongConnect`,
@@ -1767,7 +1810,7 @@ public:
 };
 
 void validateLayering(const core::Context &ctx, const Import &i) {
-    if (i.type == core::packages::ImportType::Test) {
+    if (i.isTestImport()) {
         return;
     }
 
@@ -1849,7 +1892,7 @@ void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg,
         return;
     }
 
-    if (otherPkg.visibleToTests() && i.type == core::packages::ImportType::Test) {
+    if (otherPkg.visibleToTests() && i.isTestImport()) {
         return;
     }
 
@@ -1914,7 +1957,8 @@ void validatePackage(core::Context ctx) {
                     case core::packages::ImportType::Normal:
                         import_ = "import";
                         break;
-                    case core::packages::ImportType::Test:
+                    case core::packages::ImportType::TestUnit:
+                    case core::packages::ImportType::TestHelper:
                         import_ = "test_import";
                         break;
                 }
