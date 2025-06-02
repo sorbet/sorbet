@@ -1172,7 +1172,7 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
         vector<core::NameRef> kwargs;
         kwargs.reserve(params.sendMethod.data(gs)->arguments.size());
         for (auto &param : params.sendMethod.data(gs)->arguments) {
-            if (param.flags.isKeyword && hasSimilarName(gs, param.name, params.prefix)) {
+            if (param.flags.isKeyword && !param.flags.isRepeated && hasSimilarName(gs, param.name, params.prefix)) {
                 similarKwargs.emplace_back(param.name);
             }
         }
