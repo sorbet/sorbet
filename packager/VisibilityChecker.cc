@@ -395,6 +395,15 @@ class VisibilityCheckerPass final {
         }
     }
 
+    core::AutocorrectSuggestion combineImportExportAutocorrect(core::AutocorrectSuggestion &importAutocorrect,
+                                                               core::AutocorrectSuggestion &exportAutocorrect) {
+        auto combinedTitle = fmt::format("{} and {}", importAutocorrect.title, exportAutocorrect.title);
+        importAutocorrect.edits.insert(importAutocorrect.edits.end(), exportAutocorrect.edits.begin(),
+                                       exportAutocorrect.edits.end());
+        core::AutocorrectSuggestion combinedAutocorrect(combinedTitle, importAutocorrect.edits);
+        return importAutocorrect;
+    }
+
 public:
     const core::packages::PackageInfo &package;
     const FileType fileType;
@@ -505,7 +514,25 @@ public:
                         exportAutocorrect.emplace(exp.value());
                     }
                 }
-                if (!isExported) {
+
+                if (!isExported && !wasImported) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
+                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is not imported",
+                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx));
+                        addExportInfo(ctx, e, litSymbol);
+                        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
+                            core::AutocorrectSuggestion combinedAutocorrect =
+                                combineImportExportAutocorrect(importAutocorrect.value(), exportAutocorrect.value());
+                            e.addAutocorrect(std::move(combinedAutocorrect));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        } else {
+                            ENFORCE(false);
+                        }
+                        addPackagedFalseNote(ctx, e);
+                    }
+                } else if (!isExported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
                         e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
                         addExportInfo(ctx, e, litSymbol);
