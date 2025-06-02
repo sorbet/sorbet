@@ -617,12 +617,30 @@ public:
         return members_;
     };
 
+    template <typename P>
+    std::vector<std::pair<NameRef, SymbolRef>> membersStableOrderSlowPredicate(const GlobalState &gs,
+                                                                               P predicate) const {
+        std::vector<std::pair<NameRef, SymbolRef>> result;
+
+        for (const auto &e : this->members()) {
+            if (predicate(e.first, e.second)) {
+                result.emplace_back(e);
+            }
+        }
+
+        sortMembersStableOrder(gs, result);
+
+        return result;
+    }
+
     std::vector<std::pair<NameRef, SymbolRef>> membersStableOrderSlow(const GlobalState &gs) const;
 
     ClassOrModule deepCopy(const GlobalState &to, bool keepGsId = false) const;
     void sanityCheck(const GlobalState &gs) const;
 
 private:
+    static void sortMembersStableOrder(const GlobalState &gs, std::vector<std::pair<NameRef, SymbolRef>> &out);
+
     friend class serialize::SerializerImpl;
     friend class GlobalState;
 
