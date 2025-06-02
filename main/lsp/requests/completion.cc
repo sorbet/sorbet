@@ -920,13 +920,18 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
     return items;
 }
 
+struct MethodResults {
+    vector<SimilarMethod> methods;
+    vector<SimilarMethod> operators;
+};
+
 const string OPERATOR_CHARS = "+-*/%&|^><=!~[]`:.";
 
-vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
-                                            bool isPrivateOk, string_view prefix) {
+MethodResults computeDedupedMethods(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
+                                    bool isPrivateOk, string_view prefix) {
     ENFORCE(!dispatchResult.main.receiver.isUntyped());
 
-    vector<SimilarMethod> dedupedSimilarMethods;
+    MethodResults result;
 
     Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".determine_methods");
     SimilarMethodsByName similarMethodsByName = allSimilarMethods(gs, dispatchResult, prefix);
@@ -961,38 +966,40 @@ vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const c
             continue;
         }
 
-        dedupedSimilarMethods.emplace_back(similarMethod);
+        auto name = methodName.shortName(gs);
+        ENFORCE(!name.empty());
+        if (absl::c_contains(OPERATOR_CHARS, name.front())) {
+            result.operators.emplace_back(similarMethod);
+        } else {
+            result.methods.emplace_back(similarMethod);
+        }
     }
 
-    fast_sort(dedupedSimilarMethods, [&](const auto &left, const auto &right) -> bool {
+    auto compareMethods = [&](const auto &left, const auto &right) -> bool {
         if (left.depth != right.depth) {
             return left.depth < right.depth;
         }
 
         auto leftShortName = left.method.data(gs)->name.shortName(gs);
         auto rightShortName = right.method.data(gs)->name.shortName(gs);
-        if (leftShortName == rightShortName) {
-            return left.method.id() < right.method.id();
+        if (leftShortName != rightShortName) {
+            if (absl::StartsWith(leftShortName, prefix) && !absl::StartsWith(rightShortName, prefix)) {
+                return true;
+            }
+            if (!absl::StartsWith(leftShortName, prefix) && absl::StartsWith(rightShortName, prefix)) {
+                return false;
+            }
+
+            return leftShortName < rightShortName;
         }
 
-        if (absl::StartsWith(leftShortName, prefix) && !absl::StartsWith(rightShortName, prefix)) {
-            return true;
-        }
-        if (!absl::StartsWith(leftShortName, prefix) && absl::StartsWith(rightShortName, prefix)) {
-            return false;
-        }
+        return left.method.id() < right.method.id();
+    };
 
-        // We want to sort operators later, but still keep lower depth operators higher in the list.
-        bool leftOper = absl::c_contains(OPERATOR_CHARS, leftShortName.front());
-        bool rightOper = absl::c_contains(OPERATOR_CHARS, rightShortName.front());
-        if (leftOper != rightOper) {
-            return !leftOper;
-        }
+    fast_sort(result.methods, compareMethods);
+    fast_sort(result.operators, compareMethods);
 
-        return leftShortName < rightShortName;
-    });
-
-    return dedupedSimilarMethods;
+    return result;
 }
 
 } // namespace
@@ -1152,7 +1159,7 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
 
     // ----- methods -----
 
-    vector<SimilarMethod> dedupedSimilarMethods;
+    MethodResults methodResults;
     bool receiverIsUntyped = false;
 
     if (params.forMethods != nullopt) {
@@ -1160,7 +1167,7 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
         if (forMethods.dispatchResult->main.receiver.isUntyped()) {
             receiverIsUntyped = true;
         } else {
-            dedupedSimilarMethods =
+            methodResults =
                 computeDedupedMethods(gs, *forMethods.dispatchResult, forMethods.isPrivateOk, params.prefix);
         }
     }
@@ -1198,7 +1205,12 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
         if (receiverIsUntyped) {
             items.push_back(getCompletionItemForUntyped(gs, params.queryLoc, items.size(), "(call site is T.untyped)"));
         } else {
-            for (auto &similarMethod : dedupedSimilarMethods) {
+            for (auto &similarMethod : methodResults.methods) {
+                items.push_back(getCompletionItemForMethod(
+                    typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType,
+                    params.queryLoc, resolved, params.prefix, items.size(), params.forMethods->totalArgs));
+            }
+            for (auto &similarMethod : methodResults.operators) {
                 items.push_back(getCompletionItemForMethod(
                     typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType,
                     params.queryLoc, resolved, params.prefix, items.size(), params.forMethods->totalArgs));
