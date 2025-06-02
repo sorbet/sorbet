@@ -532,6 +532,22 @@ public:
                         }
                         addPackagedFalseNote(ctx, e);
                     }
+                } else if (!isExported && testImportInProd) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed",
+                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import");
+                        addExportInfo(ctx, e, litSymbol);
+                        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
+                            core::AutocorrectSuggestion combinedAutocorrect =
+                                combineImportExportAutocorrect(importAutocorrect.value(), exportAutocorrect.value());
+                            e.addAutocorrect(std::move(combinedAutocorrect));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        } else {
+                            ENFORCE(false);
+                        }
+                    }
                 } else if (!isExported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
                         e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
