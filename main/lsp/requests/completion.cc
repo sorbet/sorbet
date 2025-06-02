@@ -180,15 +180,18 @@ SimilarMethodsByName mergeSimilarMethods(SimilarMethodsByName &&left, SimilarMet
     auto result = SimilarMethodsByName{};
 
     for (auto &[methodName, leftSimilarMethods] : left) {
-        if (right.contains(methodName)) {
-            auto &methods = result[methodName];
+        auto it = right.find(methodName);
+        if (it == right.end()) {
+            continue;
+        }
 
-            for (auto &similarMethod : leftSimilarMethods) {
-                methods.emplace_back(similarMethod);
-            }
-            for (auto &similarMethod : right[methodName]) {
-                methods.emplace_back(similarMethod);
-            }
+        auto &methods = result[methodName];
+
+        for (auto &similarMethod : leftSimilarMethods) {
+            methods.emplace_back(similarMethod);
+        }
+        for (auto &similarMethod : it->second) {
+            methods.emplace_back(similarMethod);
         }
     }
     return result;
