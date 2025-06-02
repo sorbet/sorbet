@@ -920,6 +920,8 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
     return items;
 }
 
+const string OPERATOR_CHARS = "+-*/%&|^><=!~[]`:.";
+
 vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
                                             bool isPrivateOk, string_view prefix) {
     ENFORCE(!dispatchResult.main.receiver.isUntyped());
@@ -969,18 +971,25 @@ vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const c
 
         auto leftShortName = left.method.data(gs)->name.shortName(gs);
         auto rightShortName = right.method.data(gs)->name.shortName(gs);
-        if (leftShortName != rightShortName) {
-            if (absl::StartsWith(leftShortName, prefix) && !absl::StartsWith(rightShortName, prefix)) {
-                return true;
-            }
-            if (!absl::StartsWith(leftShortName, prefix) && absl::StartsWith(rightShortName, prefix)) {
-                return false;
-            }
-
-            return leftShortName < rightShortName;
+        if (leftShortName == rightShortName) {
+            return left.method.id() < right.method.id();
         }
 
-        return left.method.id() < right.method.id();
+        if (absl::StartsWith(leftShortName, prefix) && !absl::StartsWith(rightShortName, prefix)) {
+            return true;
+        }
+        if (!absl::StartsWith(leftShortName, prefix) && absl::StartsWith(rightShortName, prefix)) {
+            return false;
+        }
+
+        // We want to sort operators later, but still keep lower depth operators higher in the list.
+        bool leftOper = absl::c_contains(OPERATOR_CHARS, leftShortName.front());
+        bool rightOper = absl::c_contains(OPERATOR_CHARS, rightShortName.front());
+        if (leftOper != rightOper) {
+            return !leftOper;
+        }
+
+        return leftShortName < rightShortName;
     });
 
     return dedupedSimilarMethods;
