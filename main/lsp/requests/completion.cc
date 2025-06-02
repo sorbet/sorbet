@@ -176,18 +176,20 @@ SimilarMethodsByName similarMethodsForClass(const core::GlobalState &gs, core::C
 
 // Unconditionally creates an intersection of the methods
 // (for both union and intersection types, it's only valid to call a method by name if it exists on all components)
-SimilarMethodsByName mergeSimilarMethods(SimilarMethodsByName left, SimilarMethodsByName right) {
+SimilarMethodsByName mergeSimilarMethods(SimilarMethodsByName &&left, SimilarMethodsByName &&right) {
     auto result = SimilarMethodsByName{};
 
     for (auto &[methodName, leftSimilarMethods] : left) {
-        if (right.contains(methodName)) {
-            for (auto &similarMethod : leftSimilarMethods) {
-                result[methodName].emplace_back(similarMethod);
-            }
-            for (auto &similarMethod : right[methodName]) {
-                result[methodName].emplace_back(similarMethod);
-            }
+        auto it = right.find(methodName);
+        if (it == right.end()) {
+            continue;
         }
+
+        auto &methods = result[methodName];
+
+        methods.insert(methods.end(), make_move_iterator(leftSimilarMethods.begin()),
+                       make_move_iterator(leftSimilarMethods.end()));
+        methods.insert(methods.end(), make_move_iterator(it->second.begin()), make_move_iterator(it->second.end()));
     }
     return result;
 }
@@ -233,7 +235,7 @@ SimilarMethodsByName allSimilarMethods(const core::GlobalState &gs, const core::
     if (dispatchResult.secondary != nullptr) {
         // Right now we completely ignore the secondaryKind (either AND or OR), and always intersect.
         // (See comment above mergeSimilarMethods)
-        result = mergeSimilarMethods(result, allSimilarMethods(gs, *dispatchResult.secondary, prefix));
+        result = mergeSimilarMethods(std::move(result), allSimilarMethods(gs, *dispatchResult.secondary, prefix));
     }
 
     return result;
