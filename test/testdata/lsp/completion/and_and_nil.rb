@@ -11,8 +11,9 @@ class A
 
     # Remember, we only show completion results that are valid. Asking for
     # completion results for `a.foo.even?` here would not return any results.
-    if a.foo && a.foo.to_s.empty?
-      #                   ^ completion: to_s
+    if a.foo && a.foo.to
+      #               ^^ error-with-dupes: does not exist
+      #                 ^ completion: to_c, to_f, to_i, to_r, to_s, ...
       puts a.foo
     end
   end

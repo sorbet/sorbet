@@ -1182,7 +1182,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 if (lspQueryMatch && !ignoreSendForLSPQuery) {
                     auto fun = send.fun;
                     if (fun == core::Names::checkAndAnd() && core::isa_type<core::NamedLiteralType>(args[1]->type)) {
-                        auto lit = core::cast_type_nonnull<core::NamedLiteralType>(args[2]->type);
+                        auto lit = core::cast_type_nonnull<core::NamedLiteralType>(args[1]->type);
                         if (lit.derivesFrom(ctx, core::Symbols::Symbol())) {
                             fun = lit.asName();
                         }
