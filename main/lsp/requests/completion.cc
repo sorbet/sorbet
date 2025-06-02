@@ -126,7 +126,6 @@ struct SimilarMethod final {
 
     // Populated later
     core::TypePtr receiverType = nullptr;
-    shared_ptr<core::TypeConstraint> constr = nullptr;
 };
 
 bool hasAngleBrackets(string_view haystack) {
