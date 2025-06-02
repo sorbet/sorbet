@@ -187,12 +187,8 @@ SimilarMethodsByName mergeSimilarMethods(SimilarMethodsByName &&left, SimilarMet
 
         auto &methods = result[methodName];
 
-        for (auto &similarMethod : leftSimilarMethods) {
-            methods.emplace_back(similarMethod);
-        }
-        for (auto &similarMethod : it->second) {
-            methods.emplace_back(similarMethod);
-        }
+        methods.insert(methods.end(), make_move_iterator(leftSimilarMethods.begin()), make_move_iterator(leftSimilarMethods.end()));
+        methods.insert(methods.end(), make_move_iterator(it->second.begin()), make_move_iterator(it->second.end()));
     }
     return result;
 }
