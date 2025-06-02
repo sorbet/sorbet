@@ -181,11 +181,13 @@ SimilarMethodsByName mergeSimilarMethods(SimilarMethodsByName left, SimilarMetho
 
     for (auto &[methodName, leftSimilarMethods] : left) {
         if (right.contains(methodName)) {
+            auto &methods = result[methodName];
+
             for (auto &similarMethod : leftSimilarMethods) {
-                result[methodName].emplace_back(similarMethod);
+                methods.emplace_back(similarMethod);
             }
             for (auto &similarMethod : right[methodName]) {
-                result[methodName].emplace_back(similarMethod);
+                methods.emplace_back(similarMethod);
             }
         }
     }
