@@ -2663,12 +2663,11 @@ void ClassOrModule::removeLocsForFile(core::FileRef file) {
 }
 
 vector<pair<NameRef, SymbolRef>> ClassOrModule::membersStableOrderSlow(const GlobalState &gs) const {
-    vector<pair<NameRef, SymbolRef>> result;
-    result.reserve(members().size());
-    for (const auto &e : members()) {
-        result.emplace_back(e);
-    }
-    fast_sort(result, [&](auto const &lhs, auto const &rhs) -> bool {
+    return membersStableOrderSlowPredicate(gs, [](const auto _name, const auto _sym) -> bool { return true; });
+}
+
+void ClassOrModule::sortMembersStableOrder(const GlobalState &gs, std::vector<std::pair<NameRef, SymbolRef>> &out) {
+    fast_sort(out, [&](auto const &lhs, auto const &rhs) -> bool {
         auto lhsShort = lhs.first.shortName(gs);
         auto rhsShort = rhs.first.shortName(gs);
         auto compareShort = lhsShort.compare(rhsShort);
@@ -2702,7 +2701,6 @@ vector<pair<NameRef, SymbolRef>> ClassOrModule::membersStableOrderSlow(const Glo
         ENFORCE(false, "no stable sort");
         return false;
     });
-    return result;
 }
 
 ClassOrModuleData::ClassOrModuleData(ClassOrModule &ref, GlobalState &gs) : DebugOnlyCheck(gs), symbol(ref) {}

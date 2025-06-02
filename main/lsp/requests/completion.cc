@@ -882,13 +882,12 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
             continue;
         }
 
-        // TODO(jez) This membersStableOrderSlow is the only ordering we have on constant items right now.
-        // We should probably at least sort by whether the prefix of the suggested constant matches.
-        for (auto [_name, sym] : scope.asClassOrModuleRef().data(gs)->membersStableOrderSlow(gs)) {
-            if (isSimilarConstant(gs, prefix, sym)) {
-                items.push_back(
-                    getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, initialSortIdx + items.size()));
-            }
+        for (auto [_name, sym] : scope.asClassOrModuleRef().data(gs)->membersStableOrderSlowPredicate(
+                 gs, [&gs, prefix](const auto _name, const auto sym) -> bool {
+                     return isSimilarConstant(gs, prefix, sym);
+                 })) {
+            items.push_back(
+                getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, initialSortIdx + items.size()));
         }
     }
 
@@ -908,11 +907,12 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
             continue;
         }
 
-        for (auto [_name, sym] : ancestor.data(gs)->membersStableOrderSlow(gs)) {
-            if (isSimilarConstant(gs, prefix, sym)) {
-                items.push_back(
-                    getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, initialSortIdx + items.size()));
-            }
+        for (auto [_name, sym] : ancestor.data(gs)->membersStableOrderSlowPredicate(
+                 gs, [&gs, prefix](const auto _name, const auto sym) -> bool {
+                     return isSimilarConstant(gs, prefix, sym);
+                 })) {
+            items.push_back(
+                getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, initialSortIdx + items.size()));
         }
     }
 
