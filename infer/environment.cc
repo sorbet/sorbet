@@ -1181,11 +1181,11 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 const bool ignoreSendForLSPQuery = isDesugarTripleEqSend || isSuggestConstantType;
                 if (lspQueryMatch && !ignoreSendForLSPQuery) {
                     auto fun = send.fun;
-                    if ((fun == core::Names::checkAndAnd() || fun == core::Names::callWithSplat()) && core::isa_type<core::NamedLiteralType>(args[1]->type)) {
+                    if (fun == core::Names::checkAndAnd() || fun == core::Names::callWithSplat()) {
+                        ENFORCE(send.numPosArgs > 2, "Desugar invariant");
                         auto lit = core::cast_type_nonnull<core::NamedLiteralType>(args[1]->type);
-                        if (lit.derivesFrom(ctx, core::Symbols::Symbol())) {
-                            fun = lit.asName();
-                        }
+                        ENFORCE(lit.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol);
+                        fun = lit.asName();
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
                         ctx, core::lsp::SendResponse(retainedResult, send.argLocs, fun, ctx.owner.asMethodRef(),
