@@ -104,9 +104,9 @@ public:
             return;
         }
 
-        if (sendResp->callerSideName == core::Names::callWithSplat() ||
-            sendResp->callerSideName == core::Names::callWithBlock() ||
-            sendResp->callerSideName == core::Names::callWithSplatAndBlock()) {
+        if (sendResp->originalName == core::Names::callWithSplat() ||
+            sendResp->originalName == core::Names::callWithBlock() ||
+            sendResp->originalName == core::Names::callWithSplatAndBlock()) {
             // These are too hard... skipping for the time being.
             return;
         }

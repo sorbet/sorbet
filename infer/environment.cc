@@ -1181,22 +1181,17 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 const bool ignoreSendForLSPQuery = isDesugarTripleEqSend || isSuggestConstantType;
                 if (lspQueryMatch && !ignoreSendForLSPQuery) {
                     auto fun = send.fun;
-                    if (fun == core::Names::checkAndAnd() && core::isa_type<core::NamedLiteralType>(args[1]->type)) {
+                    if (fun == core::Names::checkAndAnd() || fun == core::Names::callWithSplat() ||
+                        fun == core::Names::callWithBlock() || fun == core::Names::callWithSplatAndBlock()) {
+                        ENFORCE(send.numPosArgs > 2, "Desugar invariant");
                         auto lit = core::cast_type_nonnull<core::NamedLiteralType>(args[1]->type);
-                        if (lit.derivesFrom(ctx, core::Symbols::Symbol())) {
-                            fun = lit.asName();
-                        }
-                    }
-                    if (fun == core::Names::callWithSplat() && core::isa_type<core::NamedLiteralType>(args[1]->type)) {
-                        auto lit = core::cast_type_nonnull<core::NamedLiteralType>(args[1]->type);
-                        if (lit.derivesFrom(ctx, core::Symbols::Symbol())) {
-                            fun = lit.asName();
-                        }
+                        ENFORCE(lit.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol);
+                        fun = lit.asName();
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::SendResponse(retainedResult, send.argLocs, fun, ctx.owner.asMethodRef(),
-                                                     send.isPrivateOk, ctx.file, bind.loc, send.receiverLoc,
-                                                     send.funLoc, locWithoutBlock));
+                        ctx, core::lsp::SendResponse(retainedResult, send.argLocs, fun, send.fun,
+                                                     ctx.owner.asMethodRef(), send.isPrivateOk, ctx.file, bind.loc,
+                                                     send.receiverLoc, send.funLoc, locWithoutBlock));
                 }
                 if (send.link) {
                     send.link->result = move(retainedResult);
