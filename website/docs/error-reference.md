@@ -3842,6 +3842,21 @@ result =
 T.reveal_type(result) # => T::Boolean
 ```
 
+## 7052
+
+This error occurs when calling a method that has been marked as deprecated.
+
+```ruby
+class Example
+  sig { deprecated.returns(String) }
+  def foo
+        # ...
+  end
+end
+
+Example.new.foo # error!
+```
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues

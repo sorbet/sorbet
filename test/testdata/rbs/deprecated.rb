@@ -3,7 +3,6 @@
 
 # Basic deprecated method
 class BasicDeprecated
-  extend T::Sig
   
   # @deprecated
   #: -> String
@@ -21,7 +20,6 @@ BasicDeprecated.new.old_method # error: Method `BasicDeprecated#old_method` is d
 BasicDeprecated.new.new_method
 
 class DeprecatedVoid
-  extend T::Sig
   
   # @deprecated
   #: -> void
@@ -33,7 +31,6 @@ DeprecatedVoid.new.old_method # error: Method `DeprecatedVoid#old_method` is dep
 
 # Deprecated with parameters
 class DeprecatedWithParams
-  extend T::Sig
   
   # @deprecated
   #: (String x, Integer y) -> String
@@ -46,7 +43,6 @@ DeprecatedWithParams.new.old_method("test", 42) # error: Method `DeprecatedWithP
 
 # Deprecated class method
 class DeprecatedClassMethod
-  extend T::Sig
   
   # @deprecated
   #: -> String
@@ -59,7 +55,6 @@ DeprecatedClassMethod.old_method # error: Method `DeprecatedClassMethod.old_meth
 
 # Deprecated with inheritance - deprecated method in parent
 class ParentWithDeprecated
-  extend T::Sig
   
   # @deprecated
   #: -> String
@@ -76,7 +71,6 @@ class ParentWithDeprecated
 end
 
 class ChildInheritsDeprecated < ParentWithDeprecated
-  extend T::Sig
   
   # Child overrides deprecated method - should still be deprecated
   # @override
@@ -91,7 +85,6 @@ ChildInheritsDeprecated.new.inherited_deprecated # error: Method `ParentWithDepr
 ChildInheritsDeprecated.new.overridable_deprecated # error: Method `ChildInheritsDeprecated#overridable_deprecated` is deprecated
 
 class ChildMissingInheritedDeprecated < ParentWithDeprecated
-  extend T::Sig
   
   # Child overrides deprecated method - should still be deprecated
   # @override
@@ -105,10 +98,8 @@ ChildMissingInheritedDeprecated.new.inherited_deprecated # error: Method `Parent
 ChildMissingInheritedDeprecated.new.overridable_deprecated
 
 # Deprecated with other annotations
+# @abstract
 class DeprecatedCombinations
-  extend T::Sig
-  extend T::Helpers
-  abstract!
   
   # @overridable
   # @deprecated
@@ -118,7 +109,8 @@ class DeprecatedCombinations
   end
   
   # Can be both deprecated and abstract
-  sig { deprecated.abstract.void }
+  # @deprecated
+  #: -> void
   def deprecated_abstract; end
   
   # Can't be both deprecated and final (if we add validation)
@@ -129,7 +121,6 @@ class DeprecatedCombinations
 end
 
 class ConcreteDeprecatedCombinations < DeprecatedCombinations
-  extend T::Sig
   
   # @override
   #: -> String
@@ -144,7 +135,6 @@ ConcreteDeprecatedCombinations.new.deprecated_final # error: Method `DeprecatedC
 
 # Test deprecated with attr_accessor-style methods
 class DeprecatedAccessors
-  extend T::Sig
   
   # @deprecated
   #: String?
@@ -153,7 +143,14 @@ class DeprecatedAccessors
   # @deprecated
   #: String
   attr_writer :old_attr
+
+  # @deprecated
+  #: String?
+  attr_accessor :accessor_attr
 end
 accessor_instance = DeprecatedAccessors.new
 accessor_instance.old_attr # error: Method `DeprecatedAccessors#old_attr` is deprecated
 accessor_instance.old_attr = "test" # error: Method `DeprecatedAccessors#old_attr=` is deprecated
+
+accessor_instance.accessor_attr # error: Method `DeprecatedAccessors#accessor_attr` is deprecated
+accessor_instance.accessor_attr = "test" # error: Method `DeprecatedAccessors#accessor_attr=` is deprecated
