@@ -1181,7 +1181,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 const bool ignoreSendForLSPQuery = isDesugarTripleEqSend || isSuggestConstantType;
                 if (lspQueryMatch && !ignoreSendForLSPQuery) {
                     auto fun = send.fun;
-                    if (fun == core::Names::checkAndAnd() || fun == core::Names::callWithSplat()) {
+                    if (fun == core::Names::checkAndAnd() || fun == core::Names::callWithSplat() || fun == core::Names::callWithBlock() || fun == core::Names::callWithSplatAndBlock()) {
                         ENFORCE(send.numPosArgs > 2, "Desugar invariant");
                         auto lit = core::cast_type_nonnull<core::NamedLiteralType>(args[1]->type);
                         ENFORCE(lit.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol);
