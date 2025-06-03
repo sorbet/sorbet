@@ -69,33 +69,33 @@ void reportMissingError(const string &filename, const T &assertion, string_view 
 void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine,
                            string_view errorPrefix) {
     std::string messageType;
-	if (diagnostic.severity == DiagnosticSeverity::Error) {
-		messageType = "error";
-	} else if (diagnostic.severity == DiagnosticSeverity::Warning) {
-		messageType = "warning";
-	} else if (diagnostic.severity == DiagnosticSeverity::Information) {
-		messageType = "untyped";
-	} else if (diagnostic.severity == DiagnosticSeverity::Hint) {
-		messageType = "hint";
-	} else {
-		messageType = "unknown";
-	}
+    if (diagnostic.severity == DiagnosticSeverity::Error) {
+        messageType = "error";
+    } else if (diagnostic.severity == DiagnosticSeverity::Warning) {
+        messageType = "warning";
+    } else if (diagnostic.severity == DiagnosticSeverity::Information) {
+        messageType = "untyped";
+    } else if (diagnostic.severity == DiagnosticSeverity::Hint) {
+        messageType = "hint";
+    } else {
+        messageType = "unknown";
+    }
 
-	std::string diagnosticMessage = fmt::format("{}: {}", messageType, diagnostic.message);
+    std::string diagnosticMessage = fmt::format("{}: {}", messageType, diagnostic.message);
 
-	ADD_FAIL_CHECK_AT(
-		filename.c_str(), diagnostic.range->start->line + 1,
-		fmt::format(
-			"{}Found unexpected error:\n{}\nNote: If there is already an assertion for this error, then this is a "
-			"duplicate error. Change the assertion to `# error-with-dupes: <error message>` if the duplicate is "
-			"expected.",
-			errorPrefix, prettyPrintRangeComment(sourceLine, *diagnostic.range, diagnosticMessage)));
+    ADD_FAIL_CHECK_AT(
+        filename.c_str(), diagnostic.range->start->line + 1,
+        fmt::format(
+            "{}Found unexpected error:\n{}\nNote: If there is already an assertion for this error, then this is a "
+            "duplicate error. Change the assertion to `# error-with-dupes: <error message>` if the duplicate is "
+            "expected.",
+            errorPrefix, prettyPrintRangeComment(sourceLine, *diagnostic.range, diagnosticMessage)));
 }
 string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const string &filename,
-					 int line) {
-	if (absl::StartsWith(filename, core::File::URL_PREFIX)) {
-		return "";
-	}
+                     int line) {
+    if (absl::StartsWith(filename, core::File::URL_PREFIX)) {
+        return "";
+    }
 
     auto it = sourceFileContents.find(filename);
     if (it == sourceFileContents.end()) {
@@ -492,9 +492,9 @@ shared_ptr<ErrorAssertion> ErrorAssertion::make(string_view filename, unique_ptr
 }
 
 shared_ptr<WarningAssertion> WarningAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                                   string_view assertionContents, string_view assertionType) {
+                                                    string_view assertionContents, string_view assertionType) {
     return make_shared<WarningAssertion>(filename, range, assertionLine, assertionContents,
-                                        assertionType == "warning-with-dupes");
+                                         assertionType == "warning-with-dupes");
 }
 
 string ErrorAssertion::toString() const {
@@ -515,9 +515,9 @@ bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine,
 }
 
 WarningAssertion::WarningAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                 string_view message, bool matchesDuplicateWarnings)
-    : RangeAssertion(filename, range, assertionLine), message(message), matchesDuplicateErrors(matchesDuplicateWarnings) {
-}
+                                   string_view message, bool matchesDuplicateWarnings)
+    : RangeAssertion(filename, range, assertionLine), message(message),
+      matchesDuplicateErrors(matchesDuplicateWarnings) {}
 
 string WarningAssertion::toString() const {
     return fmt::format("{}: {}", (matchesDuplicateErrors ? "warning-with-dupes" : "warning"), message);
@@ -537,9 +537,9 @@ bool WarningAssertion::check(const Diagnostic &diagnostic, string_view sourceLin
 }
 
 bool WarningAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>> &files,
-                               vector<shared_ptr<WarningAssertion>> warningAssertions,
-                               map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
-                               string warningPrefix) {
+                                vector<shared_ptr<WarningAssertion>> warningAssertions,
+                                map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
+                                string warningPrefix) {
     return checkAllInner<WarningAssertion>(files, warningAssertions, filenamesAndDiagnostics, warningPrefix);
 }
 
@@ -1274,7 +1274,7 @@ optional<bool> BooleanPropertyAssertion::getValue(string_view type,
 
 BooleanPropertyAssertion::BooleanPropertyAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                    bool value, string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value){};
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value) {};
 
 string BooleanPropertyAssertion::toString() const {
     return fmt::format("{}: {}", assertionType, value);
@@ -1305,7 +1305,7 @@ optional<string> StringPropertyAssertion::getValue(string_view type,
 
 StringPropertyAssertion::StringPropertyAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                  string value, string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value){};
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value) {};
 
 string StringPropertyAssertion::toString() const {
     return fmt::format("{}: {}", assertionType, value);
@@ -2434,7 +2434,7 @@ shared_ptr<StringPropertyAssertions> StringPropertyAssertions::make(string_view 
 
 StringPropertyAssertions::StringPropertyAssertions(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                    vector<string> values, string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values){};
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values) {};
 
 optional<vector<string>> StringPropertyAssertions::getValues(string_view type,
                                                              const vector<shared_ptr<RangeAssertion>> &assertions) {
