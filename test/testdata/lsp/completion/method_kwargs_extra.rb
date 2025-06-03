@@ -31,14 +31,22 @@ A.test(a: 10, ar, argument: 20)
 
 begin
   A.
-#   ^ completion: test, allocate, ...
+  # ^ completion: test, allocate, ...
 end # error: unexpected token
 
 def bar(other: nil)
 end
 
-A.test(arg: def foo(x = bar()); end)
-#                           ^ completion: other: (keyword argument), ...
+begin
+  A.test(arg: def foo(x = bar()); end)
+  #                           ^ completion: other: (keyword argument), x, ...
+
+  # This case should not include any keyword arguments from `A.test`, as we're
+  # no longer supplying arguments directly to that send.
+  A.test(arg: def foo(x = a); end)
+  #                       ^  error: Method `a` does not exist
+  #                        ^ completion: alias, and, bar, class, ...
+end
 
 def other(message:, mes:)
   A.test(mess)
@@ -65,4 +73,33 @@ def other(message:, mes:)
   #               ^^^  error: Unrecognized keyword argument `mes`
   #             ^      error: unexpected token ","
   #                  ^ completion: message: (keyword argument), mes, message, ...
+end
+
+class B
+  def self.foo(foo_arg: nil, &blk)
+    self.bar(&blk)
+    #            ^ completion: blk
+
+    self.bar(&blk)
+    #        ^ completion: bar_arg: (keyword argument), blk, foo_arg, ...
+
+    # This would be nice to fix in the future, as `bar_arg:` is already
+    # supplied.
+    self.bar(bar_arg: foo_arg, &blk)
+    #                         ^ completion: bar_arg: (keyword argument), blk, foo_arg, ...
+  end
+
+  def self.bar(bar_arg: nil, &blk)
+  end
+end
+
+# This seems like a bug as the query responses are empty. Perhaps we're not
+# generating send query results for call-with-block?
+B.bar() do
+#     ^ completion: (nothing)
+end
+
+B.bar() do
+  B.foo()
+  #     ^ completion: foo_arg: (keyword argument), bar, foo, ...
 end

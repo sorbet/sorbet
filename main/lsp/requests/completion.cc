@@ -1010,6 +1010,11 @@ core::MethodRef findEnclosingSend(const core::GlobalState &gs,
     core::MethodRef result;
 
     for (auto &resp : responses) {
+        // Walking past a method definition means we're out of the context of a send.
+        if (resp->isMethodDef()) {
+            break;
+        }
+
         if (auto *enclosingSend = resp->isSend()) {
             result = enclosingSend->dispatchResult->main.method;
             break;
