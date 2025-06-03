@@ -1077,7 +1077,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
 
     std::string prettyType;
 
-    if (what.data(gs)->flags.isOverloaded) {
+    if (isOverloaded) {
         vector<string> overloadTypes;
         auto origName = what.data(gs)->name;
         int i = 0;
