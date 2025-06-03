@@ -1,0 +1,325 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  $global_var = <cast:let>("string", <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+
+  class <emptyTree>::<C TestAssertNil><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def initialize<<todo method>>(&<blk>)
+      @instance_var = <cast:let>("string", <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:value, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).void()
+    end
+
+    def test_assert_nil_local<<todo method>>(value, &<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(value)
+        if value.nil?().!()
+          <self>.raise()
+        else
+          <emptyTree>
+        end
+        <emptyTree>::<C T>.reveal_type(value)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:value, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).void()
+    end
+
+    def test_assert_not_nil_local<<todo method>>(value, &<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(value)
+        if value.nil?()
+          <self>.raise()
+        else
+          <emptyTree>
+        end
+        <emptyTree>::<C T>.reveal_type(value)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:value, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).void()
+    end
+
+    def test_refute_nil_local<<todo method>>(value, &<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(value)
+        if value.nil?()
+          <self>.raise()
+        else
+          <emptyTree>
+        end
+        <emptyTree>::<C T>.reveal_type(value)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def test_assert_nil_instance_variable<<todo method>>(&<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(@instance_var)
+        if @instance_var.nil?().!()
+          <self>.raise()
+        else
+          <emptyTree>
+        end
+        <emptyTree>::<C T>.reveal_type(@instance_var)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def test_assert_not_nil_instance_variable<<todo method>>(&<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(@instance_var)
+        if @instance_var.nil?()
+          <self>.raise()
+        else
+          <emptyTree>
+        end
+        <emptyTree>::<C T>.reveal_type(@instance_var)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def test_refute_nil_instance_variable<<todo method>>(&<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(@instance_var)
+        if @instance_var.nil?()
+          <self>.raise()
+        else
+          <emptyTree>
+        end
+        <emptyTree>::<C T>.reveal_type(@instance_var)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def test_assert_nil_class_variable<<todo method>>(&<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(@@class_var)
+        if @@class_var.nil?().!()
+          <self>.raise()
+        else
+          <emptyTree>
+        end
+        <emptyTree>::<C T>.reveal_type(@@class_var)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def test_assert_not_nil_class_variable<<todo method>>(&<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(@@class_var)
+        if @@class_var.nil?()
+          <self>.raise()
+        else
+          <emptyTree>
+        end
+        <emptyTree>::<C T>.reveal_type(@@class_var)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def test_refute_nil_class_variable<<todo method>>(&<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(@@class_var)
+        if @@class_var.nil?()
+          <self>.raise()
+        else
+          <emptyTree>
+        end
+        <emptyTree>::<C T>.reveal_type(@@class_var)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:value, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).void()
+    end
+
+    def test_assert_nil_message<<todo method>>(value, &<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(value)
+        if value.nil?().!()
+          <self>.raise()
+        else
+          <emptyTree>
+        end
+        <emptyTree>::<C T>.reveal_type(value)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:value, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).void()
+    end
+
+    def test_assert_not_nil_message<<todo method>>(value, &<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(value)
+        if value.nil?()
+          <self>.raise()
+        else
+          <emptyTree>
+        end
+        <emptyTree>::<C T>.reveal_type(value)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:value, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).void()
+    end
+
+    def test_refute_nil_message<<todo method>>(value, &<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(value)
+        if value.nil?()
+          <self>.raise()
+        else
+          <emptyTree>
+        end
+        <emptyTree>::<C T>.reveal_type(value)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def test_no_args<<todo method>>(&<blk>)
+      begin
+        <self>.assert_nil()
+        <self>.assert_not_nil()
+        <self>.refute_nil()
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:value, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).void()
+    end
+
+    def test_too_many_args<<todo method>>(value, &<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(value)
+        <self>.assert_nil(value, "message", "other")
+        <self>.assert_not_nil(value, "message", "other")
+        <self>.refute_nil(value, "message", "other")
+        <emptyTree>::<C T>.reveal_type(value)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def test_global_variable<<todo method>>(&<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type($global_var)
+        <self>.assert_nil($global_var)
+        <self>.assert_not_nil($global_var)
+        <self>.refute_nil($global_var)
+        <emptyTree>::<C T>.reveal_type($global_var)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def test_non_assignable<<todo method>>(&<blk>)
+      begin
+        <self>.assert_nil("string")
+        <self>.assert_not_nil("string")
+        <self>.refute_nil("string")
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:args, <emptyTree>::<C T>.anything()).void()
+    end
+
+    def assert_nil<<todo method>>(*args, &<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:args, <emptyTree>::<C T>.anything()).void()
+    end
+
+    def assert_not_nil<<todo method>>(*args, &<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:args, <emptyTree>::<C T>.anything()).void()
+    end
+
+    def refute_nil<<todo method>>(*args, &<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    @@class_var = <cast:let>("string", <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+
+    <runtime method definition of initialize>
+
+    <runtime method definition of test_assert_nil_local>
+
+    <runtime method definition of test_assert_not_nil_local>
+
+    <runtime method definition of test_refute_nil_local>
+
+    <runtime method definition of test_assert_nil_instance_variable>
+
+    <runtime method definition of test_assert_not_nil_instance_variable>
+
+    <runtime method definition of test_refute_nil_instance_variable>
+
+    <runtime method definition of test_assert_nil_class_variable>
+
+    <runtime method definition of test_assert_not_nil_class_variable>
+
+    <runtime method definition of test_refute_nil_class_variable>
+
+    <runtime method definition of test_assert_nil_message>
+
+    <runtime method definition of test_assert_not_nil_message>
+
+    <runtime method definition of test_refute_nil_message>
+
+    <runtime method definition of test_no_args>
+
+    <runtime method definition of test_too_many_args>
+
+    <runtime method definition of test_global_variable>
+
+    <runtime method definition of test_non_assignable>
+
+    <runtime method definition of assert_nil>
+
+    <runtime method definition of assert_not_nil>
+
+    <runtime method definition of refute_nil>
+  end
+end
