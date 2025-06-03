@@ -527,23 +527,15 @@ unique_ptr<CompletionItem> getCompletionItemForKwarg(const core::GlobalState &gs
     auto label = local.shortName(gs);
     auto item = make_unique<CompletionItem>(absl::StrCat(label, ": (keyword argument)"));
     item->sortText = formatSortIndex(sortIdx);
-    item->kind = CompletionItemKind::Keyword;
+    item->kind = CompletionItemKind::Property;
 
-    string replacementText;
-
-    if (config.getClientConfig().clientCompletionItemSnippetSupport) {
-        item->insertTextFormat = InsertTextFormat::Snippet;
-        replacementText = absl::StrCat(label, ": $1");
-    } else {
-        item->insertTextFormat = InsertTextFormat::PlainText;
-        replacementText = absl::StrCat(label, ": ");
-    }
-
+    auto replacementText = absl::StrCat(label, ":");
     if (auto replacementRange = replacementRangeForQuery(gs, queryLoc, prefix)) {
         item->textEdit = make_unique<TextEdit>(std::move(replacementRange), move(replacementText));
     } else {
         item->insertText = move(replacementText);
     }
+    item->insertTextFormat = InsertTextFormat::PlainText;
 
     return item;
 }
@@ -1166,12 +1158,12 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     // ----- kwargs -----
 
     vector<core::NameRef> similarKwargs;
-    if (params.sendMethod.exists()) {
+    if (params.kwargsMethod.exists()) {
         Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".determine_kwargs");
 
         vector<core::NameRef> kwargs;
-        kwargs.reserve(params.sendMethod.data(gs)->arguments.size());
-        for (auto &param : params.sendMethod.data(gs)->arguments) {
+        kwargs.reserve(params.kwargsMethod.data(gs)->arguments.size());
+        for (auto &param : params.kwargsMethod.data(gs)->arguments) {
             if (param.flags.isKeyword && !param.flags.isRepeated && hasSimilarName(gs, param.name, params.prefix)) {
                 similarKwargs.emplace_back(param.name);
             }

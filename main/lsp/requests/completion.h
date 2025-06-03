@@ -35,7 +35,7 @@ class CompletionTask final : public LSPRequestTask {
         core::MethodRef enclosingMethod;
 
         // If not exists(), won't suggest kwargs for the method that this query occurs in the arg list of.
-        core::MethodRef sendMethod;
+        core::MethodRef kwargsMethod;
 
         // If empty(), won't suggest constants.
         core::lsp::ConstantResponse::Scopes scopes;
