@@ -1005,6 +1005,20 @@ vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const c
     return dedupedSimilarMethods;
 }
 
+core::MethodRef findEnclosingSend(const core::GlobalState &gs,
+                                  absl::Span<unique_ptr<core::lsp::QueryResponse>> responses) {
+    core::MethodRef result;
+
+    for (auto &resp : responses) {
+        if (auto *enclosingSend = resp->isSend()) {
+            result = enclosingSend->dispatchResult->main.method;
+            break;
+        }
+    }
+
+    return result;
+}
+
 } // namespace
 
 CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CompletionParams> params)
@@ -1379,12 +1393,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                     // related to the query prefix. If there's a second query response that's also a send result, that
                     // means we're inside the args list of another send, and we can add in kwargs for that method to the
                     // list.
-                    for (auto &resp : absl::MakeSpan(queryResponses).subspan(1)) {
-                        if (auto *enclosingSend = resp->isSend()) {
-                            kwargsMethod = enclosingSend->dispatchResult->main.method;
-                            break;
-                        }
-                    }
+                    kwargsMethod = findEnclosingSend(gs, absl::MakeSpan(queryResponses).subspan(1));
                 }
             }
 
@@ -1454,6 +1463,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
         auto termLocPrefix = identResp->termLoc.adjustLen(gs, 0, nameLen);
 
         if (queryLoc.adjustLen(gs, -1 * nameLen, nameLen).source(gs) == prefix) {
+            auto kwargsMethod = findEnclosingSend(gs, absl::MakeSpan(queryResponses).subspan(1));
             // Cursor at end of variable name
             auto suggestKeywords = true;
             auto params = SearchParams{
@@ -1462,7 +1472,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 methodSearchParamsForEmptyAssign(gs, identResp->enclosingMethod),
                 suggestKeywords,
                 identResp->enclosingMethod,
-                core::MethodRef{}, // do not suggest kwargs
+                kwargsMethod,
                 core::lsp::ConstantResponse::Scopes{identResp->enclosingMethod.data(gs)->owner},
             };
             items = this->getCompletionItems(typechecker, params, resolved);
