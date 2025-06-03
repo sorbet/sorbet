@@ -21,7 +21,7 @@ A.test(arg1: 10, mess)
 #                ^^^^  error: Unrecognized keyword argument
 #                ^^^^  error: positional arg
 
-A.test(message: $1)
+A.test(message:)
 #      ^^^^  error: Method `mess` does not exist
 #          ^ apply-completion: [A] item: 0
 

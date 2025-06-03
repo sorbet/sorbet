@@ -25,7 +25,7 @@ A.test(mess)
 #      ^^^^  error: Method `mess` does not exist
 #          ^ apply-completion: [A] item: 0
 
-A.test(message: "hi", arg1: $1)
+A.test(message: "hi", arg1:)
 #                       ^ apply-completion: [B] item: 0
 #                     ^^  error: Method `ar` does not exist
 #      ^^^^^^^^^^^^^^^^^  error: Missing required keyword argument
