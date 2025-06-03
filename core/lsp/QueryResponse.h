@@ -11,13 +11,14 @@ class TypeConstraint;
 class SendResponse final {
 public:
     SendResponse(std::shared_ptr<core::DispatchResult> dispatchResult, InlinedVector<core::LocOffsets, 2> argLocOffsets,
-                 core::NameRef callerSideName, core::NameRef originalName, core::MethodRef enclosingMethod, bool isPrivateOk, core::FileRef file,
-                 core::LocOffsets termLocOffsets, core::LocOffsets receiverLocOffsets, core::LocOffsets funLocOffsets,
+                 core::NameRef callerSideName, core::NameRef originalName, core::MethodRef enclosingMethod,
+                 bool isPrivateOk, core::FileRef file, core::LocOffsets termLocOffsets,
+                 core::LocOffsets receiverLocOffsets, core::LocOffsets funLocOffsets,
                  core::LocOffsets locOffsetsWithoutBlock)
         : dispatchResult(std::move(dispatchResult)), argLocOffsets(std::move(argLocOffsets)),
-          callerSideName(callerSideName), originalName(originalName), enclosingMethod(enclosingMethod), isPrivateOk(isPrivateOk), file(file),
-          termLocOffsets(termLocOffsets), receiverLocOffsets(receiverLocOffsets), funLocOffsets(funLocOffsets),
-          locOffsetsWithoutBlock(locOffsetsWithoutBlock){};
+          callerSideName(callerSideName), originalName(originalName), enclosingMethod(enclosingMethod),
+          isPrivateOk(isPrivateOk), file(file), termLocOffsets(termLocOffsets), receiverLocOffsets(receiverLocOffsets),
+          funLocOffsets(funLocOffsets), locOffsetsWithoutBlock(locOffsetsWithoutBlock){};
     const std::shared_ptr<core::DispatchResult> dispatchResult;
     const InlinedVector<core::LocOffsets, 2> argLocOffsets;
     // The actual name we wind up invoking; in the case of `<Magic>` methods
