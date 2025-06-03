@@ -135,7 +135,14 @@ class DeprecatedAccessors
   
   sig { deprecated.params(old_attr: String).returns(String) }
   attr_writer :old_attr
+
+  sig { deprecated.returns(T.nilable(String)) }
+  attr_accessor :accessor_attr
 end
 accessor_instance = DeprecatedAccessors.new
 accessor_instance.old_attr # error: Method `DeprecatedAccessors#old_attr` is deprecated
 accessor_instance.old_attr = "test" # error: Method `DeprecatedAccessors#old_attr=` is deprecated
+
+accessor_instance.accessor_attr # error: Method `DeprecatedAccessors#accessor_attr` is deprecated
+accessor_instance.accessor_attr = "test" # error: Method `DeprecatedAccessors#accessor_attr=` is deprecated
+
