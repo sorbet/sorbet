@@ -1,0 +1,19 @@
+# typed: true
+# selective-apply-code-action: refactor.rewrite
+extend T::Sig
+
+class A
+  extend T::Sig
+
+  sig {params(this: A).returns(T.nilable(String))}
+  def self.returns_nilable(this)
+    # | apply-code-action: [A] Convert to singleton class method (best effort)
+  end
+end
+
+# Our <Magic> methods are hard.
+if A.returns_nilable(A.new) && A.returns_nilable(A.new).start_with?("prefix") # error: assumes result type doesn't change
+  puts "yup"
+else
+  puts "nope"
+end
