@@ -921,11 +921,18 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
     return items;
 }
 
-vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
-                                            bool isPrivateOk, string_view prefix) {
+struct MethodResults {
+    vector<SimilarMethod> methods;
+    vector<SimilarMethod> operators;
+};
+
+const string OPERATOR_CHARS = "+-*/%&|^><=!~[]`:.";
+
+MethodResults computeDedupedMethods(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
+                                    bool isPrivateOk, string_view prefix) {
     ENFORCE(!dispatchResult.main.receiver.isUntyped());
 
-    vector<SimilarMethod> dedupedSimilarMethods;
+    MethodResults result;
 
     Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".determine_methods");
     SimilarMethodsByName similarMethodsByName = allSimilarMethods(gs, dispatchResult, prefix);
@@ -960,10 +967,16 @@ vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const c
             continue;
         }
 
-        dedupedSimilarMethods.emplace_back(similarMethod);
+        auto name = methodName.shortName(gs);
+        ENFORCE(!name.empty());
+        if (absl::c_contains(OPERATOR_CHARS, name.front())) {
+            result.operators.emplace_back(similarMethod);
+        } else {
+            result.methods.emplace_back(similarMethod);
+        }
     }
 
-    fast_sort(dedupedSimilarMethods, [&](const auto &left, const auto &right) -> bool {
+    auto compareMethods = [&](const auto &left, const auto &right) -> bool {
         if (left.depth != right.depth) {
             return left.depth < right.depth;
         }
@@ -982,9 +995,12 @@ vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const c
         }
 
         return left.method.id() < right.method.id();
-    });
+    };
 
-    return dedupedSimilarMethods;
+    fast_sort(result.methods, compareMethods);
+    fast_sort(result.operators, compareMethods);
+
+    return result;
 }
 
 } // namespace
@@ -1144,7 +1160,7 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
 
     // ----- methods -----
 
-    vector<SimilarMethod> dedupedSimilarMethods;
+    MethodResults methodResults;
     bool receiverIsUntyped = false;
 
     if (params.forMethods != nullopt) {
@@ -1152,7 +1168,7 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
         if (forMethods.dispatchResult->main.receiver.isUntyped()) {
             receiverIsUntyped = true;
         } else {
-            dedupedSimilarMethods =
+            methodResults =
                 computeDedupedMethods(gs, *forMethods.dispatchResult, forMethods.isPrivateOk, params.prefix);
         }
     }
@@ -1190,7 +1206,12 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
         if (receiverIsUntyped) {
             items.push_back(getCompletionItemForUntyped(gs, params.queryLoc, items.size(), "(call site is T.untyped)"));
         } else {
-            for (auto &similarMethod : dedupedSimilarMethods) {
+            for (auto &similarMethod : methodResults.methods) {
+                items.push_back(getCompletionItemForMethod(
+                    typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType,
+                    params.queryLoc, resolved, params.prefix, items.size(), params.forMethods->totalArgs));
+            }
+            for (auto &similarMethod : methodResults.operators) {
                 items.push_back(getCompletionItemForMethod(
                     typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType,
                     params.queryLoc, resolved, params.prefix, items.size(), params.forMethods->totalArgs));
