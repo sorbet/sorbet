@@ -427,9 +427,7 @@ public:
         auto wasImported = currentImportType.has_value();
 
         // Is this a test import (whether test helper or not) used in a production context?
-        auto testImportInProd = wasImported &&
-                                (currentImportType.value() == core::packages::ImportType::TestHelper ||
-                                 currentImportType.value() == core::packages::ImportType::TestUnit) &&
+        auto testImportInProd = wasImported && currentImportType.value() != core::packages::ImportType::Normal &&
                                 this->fileType == FileType::ProdFile;
         // Is this a test import not intended for use in helpers?
         auto testUnitImportInHelper = wasImported &&
@@ -440,10 +438,12 @@ public:
             auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
             optional<core::packages::ImportType> testImportType = {};
-            if (isTestImport && this->fileType == FileType::TestHelperFile) {
-                testImportType = {core::packages::ImportType::TestHelper};
-            } else {
-                testImportType = {core::packages::ImportType::TestUnit};
+            if (isTestImport) {
+                if (this->fileType == FileType::TestHelperFile) {
+                    testImportType = {core::packages::ImportType::TestHelper};
+                } else {
+                    testImportType = {core::packages::ImportType::TestUnit};
+                }
             }
             auto strictDepsLevel = this->package.strictDependenciesLevel();
             auto importStrictDepsLevel = pkg.strictDependenciesLevel();
@@ -528,6 +528,9 @@ public:
                         e.setHeader("The `{}` constant `{}` can only be used in `{}` files", "test_import",
                                     litSymbol.show(ctx), ".test.rb");
                         e.addErrorLine(pkg.declLoc(), "Defined here");
+                        e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
+                                       "only be used in `{}` files.",
+                                       "test_import", "only: 'test_rb'", ".test.rb");
                         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                         if (auto exp = this->package.addImport(ctx, pkg, core::packages::ImportType::TestHelper)) {
                             e.addAutocorrect(std::move(exp.value()));
