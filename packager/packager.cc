@@ -507,7 +507,7 @@ public:
             case core::packages::ImportType::TestUnit:
                 importTypeHuman = "Test Import";
                 importTypeMethod = "test_import";
-                importTypeTrailing = ", only: :test_rb";
+                importTypeTrailing = ", only: \"test_rb\"";
                 break;
             case core::packages::ImportType::TestHelper:
                 importTypeHuman = "Test Import";
@@ -1287,10 +1287,10 @@ struct PackageSpecBodyWalk {
                 if (keyLit->asSymbol() == core::Names::only()) {
                     auto valLit = ast::cast_tree<ast::Literal>(value);
                     // if it's not a literal, then it'll get caught elsewhere
-                    if (valLit && (!valLit->isSymbol() || valLit->asSymbol() != core::Names::testRb())) {
+                    if (valLit && (!valLit->isString() || valLit->isString() != core::Names::testRb())) {
                         if (auto e = ctx.beginError(value.loc(), core::errors::Packager::InvalidPackageExpression)) {
                             e.setHeader("Invalid expression in package: the only valid value for `{}` is `{}`",
-                                        "only:", "test_rb");
+                                        "only:", "\"test_rb\"");
                         }
                     }
                 }
