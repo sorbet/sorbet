@@ -5,6 +5,7 @@
 #include "absl/types/span.h"
 #include "common/common.h"
 #include "core/packages/MangledName.h"
+#include <string>
 #include <utility>
 #include <vector>
 

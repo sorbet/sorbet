@@ -1,4 +1,5 @@
 #include "core/packages/Condensation.h"
+#include "common/strings/formatting.h"
 #include "core/GlobalState.h"
 
 using namespace std;
@@ -35,26 +36,27 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
         }
     }
 
-    // The reservations for `result.packages` and `result.sccs` are important: we are constructing spans into both
-    // vectors as we traverse the graph, and a reallocation will invalidate those spans.
     result.packages.reserve(2 * gs.packageDB().packages().size());
-    result.sccs.reserve(this->nodes_.size());
+
+    vector<uint32_t> sccLengths;
+    vector<uint32_t> layerLengths;
 
     while (!frontier.empty()) {
         next.clear();
-        auto parallelStart = result.sccs.size();
+
+        ENFORCE(!frontier.empty(), "No packages made it through this iteration of the topo sort");
+        layerLengths.emplace_back(frontier.size());
+
         for (auto sccId : frontier) {
             auto &node = this->nodes_[sccId];
             ENFORCE(neededImports[node.id] == 0);
-
-            auto sccStart = result.packages.size();
 
             // Insert the members of the SCC into the packages vector.
             absl::c_copy(node.members, back_inserter(result.packages));
 
             auto &scc = result.sccs.emplace_back();
             scc.isTest = node.isTest;
-            scc.members = absl::MakeSpan(result.packages).subspan(sccStart);
+            sccLengths.emplace_back(node.members.size());
 
             // Queue up the dependents in the next frontier, decrementing their imports by one
             for (auto dep : backEdges[sccId]) {
@@ -71,15 +73,28 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
             }
         }
 
-        auto parallelGroup = absl::MakeSpan(result.sccs).subspan(parallelStart);
-        ENFORCE(parallelGroup.size() > 0, "No packages made it through this iteration of the topo sort");
-        result.parallel.emplace_back(parallelGroup);
-
-        // TODO: should we sort the parallelGroup span here to ensure a consistent traversal order?
-
         swap(frontier, next);
+    }
+
+    // Fill in the scc member spans
+    ENFORCE(result.sccs.size() == sccLengths.size());
+    int i = -1;
+    size_t offset = 0;
+    for (auto length : sccLengths) {
+        i++;
+        result.sccs[i].members = absl::MakeSpan(result.packages).subspan(offset, length);
+        offset += length;
+    }
+
+    // Fill in the parallel layer spans
+    result.parallel.reserve(layerLengths.size());
+    offset = 0;
+    for (auto length : layerLengths) {
+        result.parallel.emplace_back(absl::MakeSpan(result.sccs).subspan(offset, length));
+        offset += length;
     }
 
     return result;
 }
+
 } // namespace sorbet::core::packages
