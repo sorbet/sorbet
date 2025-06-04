@@ -1025,6 +1025,7 @@ TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
     {
         INFO("The first layer should be the A->B->D->A application code cycle");
         REQUIRE_EQ(1, traversal.parallel[0].size());
+        CHECK_EQ(1, absl::c_count_if(traversal.parallel[0], [](auto &scc) { return !scc.isTest; }));
 
         for (auto pkg : {pkgA, pkgB, pkgD}) {
             INFO("Checking for application package " << pkg.owner.showFullName(gs));
@@ -1043,9 +1044,9 @@ TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
     }
 
     {
-        INFO("The second layer should include C, and the test packages of A and D");
-        REQUIRE_EQ(3, traversal.parallel[1].size());
-        CHECK_EQ(2, absl::c_count_if(traversal.parallel[1], [](auto &scc) { return scc.isTest; }));
+        INFO("The second layer should include only the application code of C");
+        REQUIRE_EQ(1, traversal.parallel[1].size());
+        CHECK_EQ(1, absl::c_count_if(traversal.parallel[1], [](auto &scc) { return !scc.isTest; }));
 
         for (auto pkg : {pkgC}) {
             INFO("Checking for application package " << pkg.owner.showFullName(gs));
@@ -1063,31 +1064,14 @@ TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
             }
             CHECK(found);
         }
-
-        for (auto pkg : {pkgA, pkgD}) {
-            INFO("Checking for test package " << pkg.owner.showFullName(gs));
-
-            auto found = false;
-            for (auto scc : traversal.parallel[1]) {
-                if (!scc.isTest) {
-                    continue;
-                }
-                auto it = absl::c_find(scc.members, pkg);
-                if (it != scc.members.end()) {
-                    found = true;
-                    break;
-                }
-            }
-            CHECK(found);
-        }
     }
 
     {
-        INFO("The third layer should include the test packages of B and C");
-        REQUIRE_EQ(2, traversal.parallel[2].size());
-        CHECK_EQ(2, absl::c_count_if(traversal.parallel[2], [](auto &scc) { return scc.isTest; }));
+        INFO("The third layer should include all of the test packages");
+        REQUIRE_EQ(1, traversal.parallel[2].size());
+        CHECK_EQ(1, absl::c_count_if(traversal.parallel[2], [](auto &scc) { return scc.isTest; }));
 
-        for (auto pkg : {pkgB, pkgC}) {
+        for (auto pkg : {pkgA, pkgB, pkgC, pkgD}) {
             INFO("Checking for test package " << pkg.owner.showFullName(gs));
 
             auto found = false;
