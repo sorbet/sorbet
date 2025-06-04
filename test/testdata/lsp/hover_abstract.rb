@@ -18,3 +18,24 @@ class Dog < AbstractItem
     'Dog'
   end
 end
+
+module MyInterface
+  extend T::Sig
+  extend T::Helpers
+  interface!
+
+  # Some docstring explaining how to use the method
+  sig {abstract.params(x: Integer).returns(String)}
+  def frob(x); end
+end
+
+class MyImplementation
+  extend T::Sig
+  include MyInterface
+
+  sig {override.params(x: Integer).returns(String)}
+  def frob(x)
+    # ^ hover: Some docstring explaining how to use the method
+    "implemented"
+  end
+end
