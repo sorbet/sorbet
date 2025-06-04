@@ -208,7 +208,7 @@ TEST_CASE("Simple test unit import") {
 
     string expected = "class MyPackage < PackageSpec\n"
                       "  import SomethingElse\n"
-                      "  test_import ExamplePackage, only: :test_rb\n"
+                      "  test_import ExamplePackage, only: \"test_rb\"\n"
                       "end\n";
 
     auto parsedFiles =
