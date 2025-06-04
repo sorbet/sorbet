@@ -1708,7 +1708,8 @@ class ComputePackageSCCs {
         infoAtEntry.onStack = true;
 
         for (auto &i : pkgInfo.importedPackageNames) {
-            if (i.type != edgeType) {
+            // We want to consider all imports from test code, but only normal imports for application code.
+            if (i.type > edgeType) {
                 continue;
             }
             // We need to be careful with this; it's not valid after a call to `strongConnect`,
@@ -1786,7 +1787,7 @@ class ComputePackageSCCs {
             for (auto name : node.members) {
                 auto &member = PackageInfoImpl::from(*(packageDB.getPackageInfoNonConst(name)));
                 for (auto &i : member.importedPackageNames) {
-                    if (i.type != edgeType || !i.name.mangledName.exists()) {
+                    if (i.type > edgeType || !i.name.mangledName.exists()) {
                         continue;
                     }
 
