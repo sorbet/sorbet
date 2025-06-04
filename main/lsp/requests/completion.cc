@@ -1078,7 +1078,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     std::string prettyType;
 
     if (isOverloaded) {
-        vector<string> overloadTypes;
+        vector<string> defParts;
         auto origName = what.data(gs)->name;
         int i = 0;
         while (true) {
@@ -1087,8 +1087,8 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
             ENFORCE(overloadName.exists());
             auto overload = what.data(gs)->owner.data(gs)->findMethod(gs, overloadName);
             ENFORCE(overload.exists());
-            overloadTypes.emplace_back(
-                core::source_generator::prettyTypeForMethod(gs, overload, receiverType, core::ShowOptions()));
+            defParts.emplace_back(
+                core::source_generator::prettySigForMethod(gs, overload, receiverType, core::ShowOptions()));
 
             // The last overload signature always lacks the `isOverloaded` flag to terminate the chain.
             if (!overload.data(gs)->flags.isOverloaded) {
@@ -1096,7 +1096,9 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
             }
         }
 
-        prettyType = absl::StrJoin(overloadTypes, "\n");
+        defParts.emplace_back(core::source_generator::prettyDefForMethod(gs, what, core::ShowOptions()));
+
+        prettyType = absl::StrJoin(defParts, "\n");
 
     } else {
         prettyType = core::source_generator::prettyTypeForMethod(gs, maybeAlias, receiverType,
