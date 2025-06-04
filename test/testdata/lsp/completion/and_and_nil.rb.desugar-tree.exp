@@ -1,0 +1,31 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
+
+    def foo<<todo method>>(&<blk>)
+      nil
+    end
+
+    def bar<<todo method>>(&<blk>)
+      begin
+        a = <emptyTree>::<C A>.new()
+        if begin
+            &&$2 = a.foo()
+            if &&$2
+              ::<Magic>.<check-and-and>(a.foo(), :to, &&$2)
+            else
+              &&$2
+            end
+          end
+          <self>.puts(a.foo())
+        else
+          <emptyTree>
+        end
+      end
+    end
+  end
+end
