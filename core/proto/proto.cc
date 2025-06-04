@@ -66,6 +66,8 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
                     break;
                 case UniqueNameKind::DesugarCsend:
                     Exception::raise("UniqueNameKind::DesugarCsend should only be used in Extract to Variable");
+                case UniqueNameKind::Setter:
+                    protoName.set_unique(com::stripe::rubytyper::Name::SETTER);
             }
             break;
         case NameKind::CONSTANT:

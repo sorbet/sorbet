@@ -79,6 +79,9 @@ string NameRef::showRaw(const GlobalState &gs) const {
                 case UniqueNameKind::DesugarCsend:
                     kind = "&";
                     break;
+                case UniqueNameKind::Setter:
+                    kind = "=";
+                    break;
             }
             if (gs.censorForSnapshotTests && unique->uniqueNameKind == UniqueNameKind::Namer &&
                 unique->original == core::Names::staticInit()) {
@@ -219,6 +222,7 @@ bool NameRef::isClassName(const GlobalState &gs) const {
                 case UniqueNameKind::TypeVarName:
                 case UniqueNameKind::PositionalArg:
                 case UniqueNameKind::MangledKeywordArg:
+                case UniqueNameKind::Setter:
                     return false;
                 case UniqueNameKind::DesugarCsend:
                     Exception::raise("UniqueNameKind::DesugarCsend should only be used in Extract to Variable");
@@ -258,6 +262,7 @@ bool NameRef::isValidConstantName(const GlobalState &gs) const {
                 case UniqueNameKind::TypeVarName:
                 case UniqueNameKind::PositionalArg:
                 case UniqueNameKind::MangledKeywordArg:
+                case UniqueNameKind::Setter:
                     return false;
                 case UniqueNameKind::DesugarCsend:
                     Exception::raise("UniqueNameKind::DesugarCsend should only be used in Extract to Variable");
@@ -403,30 +408,27 @@ const ConstantNameData NameRef::dataCnst(const GlobalState &gs) const {
 }
 
 NameRef NameRef::addEq(GlobalState &gs) const {
-    auto name = this->dataUtf8(gs);
-    string nameEq = absl::StrCat(name->utf8, "=");
-    return gs.enterNameUTF8(nameEq);
+    return gs.freshNameUnique(UniqueNameKind::Setter, *this, 1);
 }
 
 NameRef NameRef::lookupWithEq(const GlobalState &gs) const {
-    auto name = this->dataUtf8(gs);
-    string nameEq = absl::StrCat(name->utf8, "=");
-    return gs.lookupNameUTF8(nameEq);
+    return gs.lookupNameUnique(UniqueNameKind::Setter, *this, 1);
 }
 
-bool NameRef::isSetter(const GlobalState &gs) const {
-    if (this->kind() != NameKind::UTF8) {
-        return false;
-    }
-    const string_view rawName = this->dataUtf8(gs)->utf8;
+bool NameRef::isSetterLabel(string_view rawName) {
     if (rawName.size() < 2) {
         return false;
     }
-    if (rawName.back() == '=') {
-        return !(*this == Names::leq() || *this == Names::geq() || *this == Names::tripleEq() ||
-                 *this == Names::eqeq() || *this == Names::neq());
+
+    if (rawName.back() != '=') {
+        return false;
     }
-    return false;
+
+    return "<="sv != rawName && ">="sv != rawName && "==="sv != rawName && "=="sv != rawName && "!="sv != rawName;
+}
+
+bool NameRef::isSetter(const GlobalState &gs) const {
+    return this->kind() == NameKind::UTF8 && this->dataUnique(gs)->uniqueNameKind == UniqueNameKind::Setter;
 }
 
 NameRef NameRef::addQuestion(GlobalState &gs) const {

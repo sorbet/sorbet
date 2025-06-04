@@ -34,6 +34,7 @@ enum class UniqueNameKind : uint8_t {
     Struct,
     Packager,
     DesugarCsend, // Used for Extract to Variable; see the CSend case in desugar.cc for more details
+    Setter,
 };
 
 struct UniqueName final {
