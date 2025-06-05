@@ -8,6 +8,8 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
+
+namespace {
 void addSignatureHelpItem(const core::GlobalState &gs, core::MethodRef method,
                           vector<unique_ptr<SignatureInformation>> &sigs, const core::lsp::SendResponse &resp,
                           int activeParameter) {
@@ -51,6 +53,11 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::MethodRef method,
     sigs.push_back(move(sig));
 }
 
+bool hasAngleBrackets(string_view haystack) {
+    return absl::c_any_of(haystack, [](char c) { return c == '<' || c == '>'; });
+}
+} // namespace
+
 SignatureHelpTask::SignatureHelpTask(const LSPConfiguration &config, MessageId id,
                                      unique_ptr<TextDocumentPositionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentSignatureHelp), params(move(params)) {}
@@ -80,8 +87,7 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate
         auto resp = move(queryResponses[0]);
         // only triggers on sends. Some SignatureHelps are triggered when the variable is being typed.
         if (auto sendResp = resp->isSend()) {
-            auto funLoc = sendResp->funLoc();
-            if (!funLoc.exists()) {
+            if (hasAngleBrackets(sendResp->callerSideName.shortName(gs))) {
                 // The method location doesn't exist, which means that we're dealing with a synthesized send. Don't
                 // generate any help.
                 response->result = make_unique<SignatureHelp>(move(signatures));
