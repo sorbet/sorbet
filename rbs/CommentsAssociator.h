@@ -4,6 +4,7 @@
 #include "common/common.h"
 #include "parser/parser.h"
 #include <memory>
+#include <regex>
 #include <string_view>
 
 namespace sorbet::rbs {
@@ -24,11 +25,13 @@ private:
     static const std::string_view ANNOTATION_PREFIX;
     static const std::string_view MULTILINE_RBS_PREFIX;
     static const std::string_view BIND_PREFIX;
+    static const std::regex TYPE_ALIAS_PATTERN;
 
     core::MutableContext ctx;
     std::vector<core::LocOffsets> commentLocations;
     std::map<int, CommentNode> commentByLine;
     std::map<parser::Node *, std::vector<CommentNode>> commentsByNode;
+    std::vector<parser::Node *> nesting;
     int lastLine;
 
     void walkNode(parser::Node *node);
@@ -43,6 +46,7 @@ private:
     std::optional<uint32_t> locateTargetLine(parser::Node *node);
 
     int maybeInsertStandalonePlaceholders(parser::NodeVec &nodes, int index, int lastLine, int currentLine);
+    bool nestingAllowsTypeAlias();
 };
 
 } // namespace sorbet::rbs
