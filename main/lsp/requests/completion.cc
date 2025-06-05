@@ -1395,9 +1395,11 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
 
     if (auto sendResp = resp->isSend()) {
         auto callerSideName = sendResp->callerSideName;
-        auto prefix = (callerSideName == core::Names::methodNameMissing() || !sendResp->funLoc().contains(queryLoc))
-                          ? ""
-                          : callerSideName.shortName(gs);
+        auto funLoc = sendResp->funLoc();
+        auto prefix =
+            (callerSideName == core::Names::methodNameMissing() || (funLoc.exists() && !funLoc.contains(queryLoc)))
+                ? ""
+                : callerSideName.shortName(gs);
         if (prefix == "" && queryLoc.adjust(gs, -2, 0).source(gs) == "::") {
             // Probably a case like this:
             //   A::|
