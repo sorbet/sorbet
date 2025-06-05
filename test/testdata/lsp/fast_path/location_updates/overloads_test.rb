@@ -48,4 +48,4 @@ end
 
 
 A.new.my_metho # error: does not exist
-#             ^ completion: my_method, my_method
+#             ^ completion: my_method

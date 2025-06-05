@@ -16,13 +16,13 @@ end
 sig { params(avec: T::Array[A], blk: T.proc.params(a0: A).returns(T.untyped)).returns(T.untyped) }
 def call_with_block(avec, &blk)
   avec.su(&blk) # error: does not exist
-#        ^ completion: sum, sum, sum, sum
+#        ^ completion: sum
 end
 
 sig { params(as: A, blk: T.proc.params(a0: A).returns(T.untyped)).returns(T.untyped) }
 def sumup_splat_with_block(*as, &blk)
   as.su(&blk) # error: does not exist
-#      ^ completion: sum, sum, sum, sum
+#      ^ completion: sum
 end
 
 sig { params(avec: T::Array[A]).returns(T.untyped) }
