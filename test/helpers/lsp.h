@@ -34,6 +34,9 @@ std::unique_ptr<LSPMessage> makeCodeAction(int id, std::string_view uri, int lin
 /** Create an LSPMessage containing a textDocument/completion request. */
 std::unique_ptr<LSPMessage> makeCompletion(int id, std::string_view uri, int line, int character);
 
+/** Create an LSPMessage containing a textDocument/completion request. */
+std::unique_ptr<LSPMessage> makeSignatureHelp(int id, std::string_view uri, int line, int character);
+
 /** Create an LSPMessage containing a WorkspaceSymbol request. */
 std::unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view query);
 

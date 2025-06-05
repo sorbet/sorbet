@@ -119,6 +119,10 @@ unique_ptr<LSPMessage> ProtocolTest::completion(string_view path, int line, int 
     return makeCompletion(nextId++, getUri(path), line, character);
 }
 
+unique_ptr<LSPMessage> ProtocolTest::signatureHelp(string_view path, int line, int character) {
+    return makeSignatureHelp(nextId++, getUri(path), line, character);
+}
+
 unique_ptr<LSPMessage> ProtocolTest::getDefinition(string_view path, int line, int character) {
     return makeDefinitionRequest(nextId++, getUri(path), line, character);
 }

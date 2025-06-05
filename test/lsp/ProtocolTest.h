@@ -79,6 +79,8 @@ protected:
 
     std::unique_ptr<LSPMessage> completion(std::string_view path, int line, int character);
 
+    std::unique_ptr<LSPMessage> signatureHelp(std::string_view path, int line, int character);
+
     std::unique_ptr<LSPMessage> cancelRequest(int id);
 
     void writeFilesToFS(std::vector<std::pair<std::string, std::string>> files);

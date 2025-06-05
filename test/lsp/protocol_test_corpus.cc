@@ -1080,4 +1080,30 @@ TEST_CASE_FIXTURE(ProtocolTest, "CompletionWithBadHierarchy") {
     REQUIRE(responses.front()->asResponse().result.has_value());
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "SignatureHelpInMagicBuildHash") {
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "xs = {\n"
+                                                    "  :example => '', \n"
+                                                    "}")),
+                           {});
+
+    // Trigger signatureHelp right after the comma in the hash literal. This will resolve to <Magic>.<build-hash>, which
+    // we don't want to trigger any help for.
+    auto responses = send(*signatureHelp("foo.rb", 2, 17));
+
+    REQUIRE_EQ(1, responses.size());
+    REQUIRE(responses.front()->isResponse());
+    auto &response = responses.front()->asResponse();
+    REQUIRE(response.result.has_value());
+    REQUIRE_EQ(response.requestMethod, LSPMethod::TextDocumentSignatureHelp);
+    auto *help = std::get_if<variant<JSONNullObject, unique_ptr<SignatureHelp>>>(&response.result.value());
+    REQUIRE_NE(help, nullptr);
+    auto *sigHelp = std::get_if<unique_ptr<SignatureHelp>>(help);
+    REQUIRE_NE(sigHelp, nullptr);
+    REQUIRE_NE(*sigHelp, nullptr);
+    REQUIRE((*sigHelp)->signatures.empty());
+}
+
 } // namespace sorbet::test::lsp
