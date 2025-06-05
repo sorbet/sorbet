@@ -114,8 +114,9 @@ struct PackageName {
 struct Import {
     PackageName name;
     core::packages::ImportType type;
+    core::LocOffsets loc;
 
-    Import(PackageName &&name, core::packages::ImportType type) : name(std::move(name)), type(type) {}
+    Import(PackageName &&name, core::packages::ImportType type, core::LocOffsets loc) : name(std::move(name)), type(type), loc(loc) {}
 
     bool isTestImport() const {
         return type != core::packages::ImportType::Normal;
@@ -431,19 +432,31 @@ public:
             core::LocOffsets importToInsertAfter;
             for (auto &import : importedPackageNames) {
                 if (import.name.mangledName == info.name.mangledName) {
-                    if (importType == core::packages::ImportType::Normal &&
-                        import.type != core::packages::ImportType::Normal) {
-                        // There's already a test import for this package, so we'll convert it to a regular import.
-                        // importToInsertAfter already tracks where we need to insert the import.
-                        // So we can craft an edit to delete the `test_import` line, and then use the regular logic for
-                        // adding an import to insert the `import`.
-                        auto importLoc = core::Loc(fullLoc().file(), import.name.fullName.loc);
+                    if ((importType == core::packages::ImportType::Normal &&
+                         import.type != core::packages::ImportType::Normal) ||
+                        (importType == core::packages::ImportType::TestHelper &&
+                         import.type == core::packages::ImportType::TestUnit)
+                        ) {
+                        // There's already an import for this package, so we'll "upgrade" it to the desired import.
+                        // importToInsertAfter already tracks where we need to insert the import.  So we can craft an
+                        // edit to delete the existing line, and then use the regular logic for adding an import to
+                        // insert the `import`.
+                        auto importLoc = core::Loc(fullLoc().file(), import.loc);
                         auto [lineStart, numWhitespace] = importLoc.findStartOfIndentation(gs);
                         auto beginPos =
                             lineStart.adjust(gs, -numWhitespace, 0).beginPos(); // -numWhitespace for the indentation
                         auto endPos = importLoc.endPos();
                         core::Loc replaceLoc(importLoc.file(), beginPos, endPos);
+
                         deleteTestImportEdit = {replaceLoc, ""};
+
+                        // as a special-case: if we're converting a `test_import` to remove `only:`, then we want to
+                        // re-insert it at this exact same point (since we sort those together.) Let's find the previous
+                        // import!
+                        if (importType == core::packages::ImportType::TestHelper) {
+                            insertionLoc = {importLoc.file(), beginPos - 1, beginPos - 1};
+                            break;
+                        }
                     } else {
                         // we already import this, and if so, don't return an autocorrect
                         return nullopt;
@@ -529,8 +542,9 @@ public:
             {insertionLoc, fmt::format("\n  {} {}{}", importTypeMethod, packageToImport, importTypeTrailing)}};
         if (deleteTestImportEdit.has_value()) {
             edits.push_back(deleteTestImportEdit.value());
-            suggestionTitle = fmt::format("Convert `{}` to `{}`", "test_import", "import");
+            suggestionTitle = fmt::format("Convert existing import to `{}`", "test_import", importTypeMethod);
         }
+
         core::AutocorrectSuggestion suggestion(suggestionTitle, edits);
         return {suggestion};
     }
@@ -1287,7 +1301,7 @@ struct PackageSpecBodyWalk {
                 auto importArg = move(posArg);
                 posArg = ast::packager::prependRegistry(move(importArg));
 
-                info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target), method2ImportType(send));
+                info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target), method2ImportType(send), send.loc);
             }
             // also validate the keyword args, since one is valid
             for (auto [key, value] : send.kwArgPairs()) {
