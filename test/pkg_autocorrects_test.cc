@@ -920,13 +920,13 @@ TEST_CASE("Convert test unit import to test helper import") {
     makeDefaultPackagerGlobalState(gs, LAYERS_LIB_APP);
 
     string myPackage = "class MyPackage < PackageSpec\n"
-        "  strict_dependencies 'layered'\n"
-        "  layer 'app'\n"
-        "  import FalsePackageA\n"
-        "  import DagPackageA\n"
-        "\n"
-        "  test_import LayeredPackageA, only: \"test_rb\"\n"
-        "end";
+                       "  strict_dependencies 'layered'\n"
+                       "  layer 'app'\n"
+                       "  import FalsePackageA\n"
+                       "  import DagPackageA\n"
+                       "\n"
+                       "  test_import LayeredPackageA, only: \"test_rb\"\n"
+                       "end";
     string myPackagePath = "my_package/__package.rb";
 
     auto parsedFiles = enterPackages(gs, {{myPackagePath, myPackage},
@@ -1031,7 +1031,6 @@ TEST_CASE("Adding a test unit import with existing imports") {
                       "  test_import ExamplePackage, only: \"test_rb\"\n"
                       "end\n";
 
-
     auto parsedFiles = enterPackages(gs, {{examplePackagePath, examplePackage},
                                           {"my_package/__package.rb", pkg_source},
                                           {"a/__package.rb", "class A < PackageSpec\nend\n"},
@@ -1062,7 +1061,6 @@ TEST_CASE("Adding a test unit import with existing imports and test imports") {
                       "  test_import ExamplePackage, only: \"test_rb\"\n"
                       "end\n";
 
-
     auto parsedFiles = enterPackages(gs, {{examplePackagePath, examplePackage},
                                           {"my_package/__package.rb", pkg_source},
                                           {"a/__package.rb", "class A < PackageSpec\nend\n"},
@@ -1092,7 +1090,6 @@ TEST_CASE("Adding a test unit import with existing imports and test imports") {
                       "  test_import B\n"
                       "  test_import ExamplePackage, only: \"test_rb\"\n"
                       "end\n";
-
 
     auto parsedFiles = enterPackages(gs, {{examplePackagePath, examplePackage},
                                           {"my_package/__package.rb", pkg_source},

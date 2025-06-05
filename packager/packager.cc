@@ -116,7 +116,8 @@ struct Import {
     core::packages::ImportType type;
     core::LocOffsets loc;
 
-    Import(PackageName &&name, core::packages::ImportType type, core::LocOffsets loc) : name(std::move(name)), type(type), loc(loc) {}
+    Import(PackageName &&name, core::packages::ImportType type, core::LocOffsets loc)
+        : name(std::move(name)), type(type), loc(loc) {}
 
     bool isTestImport() const {
         return type != core::packages::ImportType::Normal;
@@ -435,8 +436,7 @@ public:
                     if ((importType == core::packages::ImportType::Normal &&
                          import.type != core::packages::ImportType::Normal) ||
                         (importType == core::packages::ImportType::TestHelper &&
-                         import.type == core::packages::ImportType::TestUnit)
-                        ) {
+                         import.type == core::packages::ImportType::TestUnit)) {
                         // There's already an import for this package, so we'll "upgrade" it to the desired import.
                         // importToInsertAfter already tracks where we need to insert the import.  So we can craft an
                         // edit to delete the existing line, and then use the regular logic for adding an import to
@@ -1301,7 +1301,8 @@ struct PackageSpecBodyWalk {
                 auto importArg = move(posArg);
                 posArg = ast::packager::prependRegistry(move(importArg));
 
-                info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target), method2ImportType(send), send.loc);
+                info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target), method2ImportType(send),
+                                                       send.loc);
             }
             // also validate the keyword args, since one is valid
             for (auto [key, value] : send.kwArgPairs()) {
