@@ -153,6 +153,7 @@ enum class TreeMapKind {
     Map,
     Walk,
     ConstWalk,
+    Query,
 };
 
 template <TreeMapKind> struct MapFunctions;
@@ -190,6 +191,23 @@ template <> struct MapFunctions<TreeMapKind::ConstWalk> {
 #undef VISITOR_ARG_TYPE
 };
 
+enum class QueryControl {
+    Continue,
+    Done,
+    Skip,
+};
+
+template <> struct MapFunctions<TreeMapKind::Query> {
+    using return_type = QueryControl;
+    using arg_type = const ExpressionPtr &;
+    static const ExpressionPtr &pass(const ExpressionPtr &p) {
+        return p;
+    }
+#define VISITOR_ARG_TYPE(class_name) std::declval<const class_name &>()
+    GENERATE_METAPROGRAMMING_FOR(std::declval<core::MutableContext>());
+#undef VISITOR_ARG_TYPE
+};
+
 enum class TreeMapDepthKind {
     Full,
     Shallow,
@@ -209,6 +227,7 @@ private:
     friend class ShallowWalk;
     friend class ConstTreeWalk;
     friend class ConstShallowWalk;
+    friend class TreeQuery;
 
     using Funcs = MapFunctions<Kind>;
     using return_type = typename Funcs::return_type;
@@ -226,15 +245,24 @@ private:
 
     TreeMapper(FUNC &func) : func(func) {}
 
-#define CALL_PRE(member)                                                                                           \
-    if constexpr (Funcs::template HAS_MEMBER_preTransform##member<FUNC>()) {                                       \
-        if constexpr (Kind == TreeMapKind::Map) {                                                                  \
-            v = Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, Funcs::pass(v));           \
-        } else if constexpr (Kind == TreeMapKind::Walk) {                                                          \
-            Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, Funcs::pass(v));               \
-        } else if constexpr (Kind == TreeMapKind::ConstWalk) {                                                     \
-            Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, cast_tree_nonnull<member>(v)); \
-        }                                                                                                          \
+#define CALL_PRE(member)                                                                                               \
+    bool _queryRunMap = true;                                                                                          \
+    if constexpr (Funcs::template HAS_MEMBER_preTransform##member<FUNC>()) {                                           \
+        if constexpr (Kind == TreeMapKind::Map) {                                                                      \
+            v = Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, Funcs::pass(v));               \
+        } else if constexpr (Kind == TreeMapKind::Walk) {                                                              \
+            Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, Funcs::pass(v));                   \
+        } else if constexpr (Kind == TreeMapKind::ConstWalk) {                                                         \
+            Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, cast_tree_nonnull<member>(v));     \
+        } else if constexpr (Kind == TreeMapKind::Query) {                                                             \
+            auto ret =                                                                                                 \
+                Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, cast_tree_nonnull<member>(v)); \
+            if (ret == QueryControl::Done) {                                                                           \
+                return QueryControl::Done;                                                                             \
+            } else if (ret == QueryControl::Skip) {                                                                    \
+                _queryRunMap = false;                                                                                  \
+            }                                                                                                          \
+        }                                                                                                              \
     }
 
 #define CALL_POST(member)                                                                                           \
@@ -251,6 +279,12 @@ private:
         if constexpr (Funcs::template HAS_MEMBER_postTransform##member<FUNC>()) {                                   \
             Funcs::template CALL_MEMBER_postTransform##member<FUNC>::call(func, ctx, cast_tree_nonnull<member>(v)); \
         }                                                                                                           \
+    } else if constexpr (Kind == TreeMapKind::Query) {                                                              \
+        if constexpr (Funcs::template HAS_MEMBER_postTransform##member<FUNC>()) {                                   \
+            return Funcs::template CALL_MEMBER_postTransform##member<FUNC>::call(func, ctx,                         \
+                                                                                 cast_tree_nonnull<member>(v));     \
+        }                                                                                                           \
+        return QueryControl::Continue;                                                                              \
     }
 
 #define CALL_MAP(tree, ctx)                                \
@@ -260,6 +294,13 @@ private:
         mapIt(Funcs::pass(tree), ctx);                     \
     } else if constexpr (Kind == TreeMapKind::ConstWalk) { \
         mapIt(Funcs::pass(tree), ctx);                     \
+    } else if constexpr (Kind == TreeMapKind::Query) {     \
+        if (_queryRunMap) {                                \
+            auto ret = mapIt(Funcs::pass(tree), ctx);      \
+            if (ret == QueryControl::Done) {               \
+                return QueryControl::Done;                 \
+            }                                              \
+        }                                                  \
     }
 
     return_type mapClassDef(arg_type v, CTX ctx) {
@@ -506,6 +547,8 @@ private:
                 return;
             } else if constexpr (Kind == TreeMapKind::ConstWalk) {
                 return;
+            } else if constexpr (Kind == TreeMapKind::Query) {
+                return QueryControl::Continue;
             }
         }
 
@@ -530,6 +573,8 @@ private:
                         return;
                     } else if constexpr (Kind == TreeMapKind::ConstWalk) {
                         return;
+                    } else if constexpr (Kind == TreeMapKind::Query) {
+                        return QueryControl::Continue;
                     }
 
                 case Tag::Send:
@@ -620,6 +665,8 @@ private:
                         return;
                     } else if constexpr (Kind == TreeMapKind::ConstWalk) {
                         return;
+                    } else if constexpr (Kind == TreeMapKind::Query) {
+                        return QueryControl::Continue;
                     }
 
                 case Tag::Block:
@@ -742,6 +789,22 @@ public:
             throw exception.reported;
         }
     }
+};
+
+class TreeQuery {
+public:
+    template <typename CTX, typename FUNC> static void apply(CTX ctx, FUNC &func, const ExpressionPtr &to) {
+        TreeMapper<FUNC, CTX, TreeMapKind::Query, TreeMapDepthKind::Full> walker(func);
+        try {
+            walker.mapIt(to, ctx);
+        } catch (ReportedRubyException &exception) {
+            Exception::failInFuzzer();
+            if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
+                e.setHeader("Failed to process tree (backtrace is above)");
+            }
+            throw exception.reported;
+        }
+    };
 };
 
 } // namespace sorbet::ast
