@@ -13,13 +13,9 @@ sidebar_label: RubyKaigi 2019
 
 ## Abstract
 
-We have developed a type system for Ruby at Stripe with a goal of helping
-developers understand code better, write code with more confidence, and
-detect+prevent significant classes of bugs.
+We have developed a type system for Ruby at Stripe with a goal of helping developers understand code better, write code with more confidence, and detect+prevent significant classes of bugs.
 
-This talk shares experience of Stripe successfully adopting Sorbet in our
-codebase which had millions lines of code that were written before the
-typechecker had been conceived. The talk will describe:
+This talk shares experience of Stripe successfully adopting Sorbet in our codebase which had millions lines of code that were written before the typechecker had been conceived. The talk will describe:
 
 - the process used to add typing to existing code;
 - many tools developed to support this process;
@@ -27,5 +23,4 @@ typechecker had been conceived. The talk will describe:
 
 We also have some exciting announcements!
 
-The talk does not require any previous knowledge of types and should be
-accessible to a broad audience.
+The talk does not require any previous knowledge of types and should be accessible to a broad audience.

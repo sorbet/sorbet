@@ -4,14 +4,9 @@ title: Class Types
 sidebar_label: Class Types (Integer, String)
 ---
 
-> **Note**: Class types are used to describe values that are instances of a
-> class---these are the most commonly used types. To instead learn about types
-> for class objects themselves, see [T.class_of](class-of.md).
+> **Note**: Class types are used to describe values that are instances of a class---these are the most commonly used types. To instead learn about types for class objects themselves, see [T.class_of](class-of.md).
 
-Every Ruby class and module doubles as a type in Sorbet. Class types supersede
-the notion some other languages have of "primitive" types. For example, `"abc"`
-is an instance of the `String` class, and so `"abc"` has type `String`. The same
-goes for many other values in Ruby:
+Every Ruby class and module doubles as a type in Sorbet. Class types supersede the notion some other languages have of "primitive" types. For example, `"abc"` is an instance of the `String` class, and so `"abc"` has type `String`. The same goes for many other values in Ruby:
 
 | Type       | Example value |
 | ---------- | ------------- |
@@ -21,9 +16,7 @@ goes for many other values in Ruby:
 | `Float`    | `3.14`        |
 | `NilClass` | `nil`         |
 
-To reiterate: a class type means "any value which is an instance of this class".
-If `x.is_a?(SomeClass)` would return `true` when run, then `x` has type
-`SomeClass`.
+To reiterate: a class type means "any value which is an instance of this class". If `x.is_a?(SomeClass)` would return `true` when run, then `x` has type `SomeClass`.
 
 We can mention class types directly in a [method signature](sigs.md):
 
@@ -41,11 +34,7 @@ end
 
 ## Booleans
 
-One gotcha is that `false` is an instance of `FalseClass`, and `true` is an
-instance of `TrueClass`---there is no `Boolean` class in Ruby. So to represent
-the type of booleans in Sorbet, the `sorbet-runtime` uses
-[type aliases](type-aliases.md) and [union types](union-types.md) to define a
-convenient name for "either `true` or `false`": `T::Boolean`.
+One gotcha is that `false` is an instance of `FalseClass`, and `true` is an instance of `TrueClass`---there is no `Boolean` class in Ruby. So to represent the type of booleans in Sorbet, the `sorbet-runtime` uses [type aliases](type-aliases.md) and [union types](union-types.md) to define a convenient name for "either `true` or `false`": `T::Boolean`.
 
 ```ruby
 extend T::Sig
@@ -68,8 +57,7 @@ There's a lot to say about `nil`, so it gets [its own doc](nilable-types.md).
 
 ## User-defined class types
 
-Everything we've seen so far has used classes built into Ruby, but it works the
-exact same for any classes we define ourselves:
+Everything we've seen so far has used classes built into Ruby, but it works the exact same for any classes we define ourselves:
 
 ```ruby
 extend T::Sig
@@ -86,9 +74,7 @@ end
 
 <!-- id="inheritance" is important because other pages link here, so please don't change the section title -->
 
-Ruby is object-oriented, so an instance of a child class is also an instance of
-the child class's superclass. To make this more explicit, let's look at an
-example:
+Ruby is object-oriented, so an instance of a child class is also an instance of the child class's superclass. To make this more explicit, let's look at an example:
 
 ```ruby
 extend T::Sig
@@ -109,10 +95,7 @@ foo(ChildClass.new)        # ok
 
 ## `Object` vs `BasicObject`
 
-Another note about inheritance in Ruby concerns the distinction between `Object`
-and `BasicObject`. `Object` is what classes subclass by default, unless they
-explicitly subclass from `BasicObject`. `Object` subclasses from `BasicObject`.
-Again, let's make this clear with an example:
+Another note about inheritance in Ruby concerns the distinction between `Object` and `BasicObject`. `Object` is what classes subclass by default, unless they explicitly subclass from `BasicObject`. `Object` subclasses from `BasicObject`. Again, let's make this clear with an example:
 
 ```ruby
 # Some helper methods to play with
@@ -139,10 +122,7 @@ takes_object(BasicObjectChild.new)         # error
 
 ## Modules
 
-Modules can be used as "class types" in exactly the same way as classes can. For
-a module, the meaning is not "an instance of this class" but "an instance of a
-class which `include`s this module". This is compatible with how
-`x.is_a?(SomeModule)` works in Ruby. Here's an example:
+Modules can be used as "class types" in exactly the same way as classes can. For a module, the meaning is not "an instance of this class" but "an instance of a class which `include`s this module". This is compatible with how `x.is_a?(SomeModule)` works in Ruby. Here's an example:
 
 ```ruby
 extend T::Sig

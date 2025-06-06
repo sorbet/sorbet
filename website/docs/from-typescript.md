@@ -4,20 +4,11 @@ title: TypeScript ↔ Sorbet Reference
 sidebar_label: TypeScript ↔ Sorbet
 ---
 
-Many people learning Sorbet for the first time come from a TypeScript
-background. We've built this quick reference table mapping some common
-TypeScript features to the corresponding feature in Sorbet. (This is not a
-document about automatically interoperating between Sorbet and TypeScript; it is
-merely provided for educational purposes.)
+Many people learning Sorbet for the first time come from a TypeScript background. We've built this quick reference table mapping some common TypeScript features to the corresponding feature in Sorbet. (This is not a document about automatically interoperating between Sorbet and TypeScript; it is merely provided for educational purposes.)
 
-Note that Sorbet is not affiliated with TypeScript in any official way, and the
-information in this table may become out of date as TypeScript evolves
-independently of Sorbet. Please use the "Edit" button at the top of the page to
-help correct inaccuracies.
+Note that Sorbet is not affiliated with TypeScript in any official way, and the information in this table may become out of date as TypeScript evolves independently of Sorbet. Please use the "Edit" button at the top of the page to help correct inaccuracies.
 
-Also note that Sorbet features do not always map to an exactly equivalent
-TypeScript feature. Be sure to read the relevant Sorbet docs to learn more about
-the features Sorbet provides.
+Also note that Sorbet features do not always map to an exactly equivalent TypeScript feature. Be sure to read the relevant Sorbet docs to learn more about the features Sorbet provides.
 
 <table>
   <thead>
@@ -416,10 +407,7 @@ end</code></pre>
   </tbody>
 </table>
 
-This table is unfortunately not exhaustive. If you were looking for something in
-this table but couldn't find it, please either use the "Edit" button above to
-add it, or reach out to a member of the Sorbet team asking whether it can be
-updated.
+This table is unfortunately not exhaustive. If you were looking for something in this table but couldn't find it, please either use the "Edit" button above to add it, or reach out to a member of the Sorbet team asking whether it can be updated.
 
 <!--
   NOTE!

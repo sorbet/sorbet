@@ -7,21 +7,13 @@ Type checking with Sorbet is composed of two key components:
 
 - `srb`
 
-  This is the command-line interface to Sorbet. It includes the core type
-  checker, which analyzes a project **statically** (before the code runs) to
-  report potential mistakes in the code. It also contains utilities to set up a
-  project to work with Sorbet for the first time.
+  This is the command-line interface to Sorbet. It includes the core type checker, which analyzes a project **statically** (before the code runs) to report potential mistakes in the code. It also contains utilities to set up a project to work with Sorbet for the first time.
 
 - `sorbet-runtime`
 
-  This is the gem that enables adding type annotations to normal Ruby code. It
-  exposes the top-level `T` namespace and the `sig` method, which we'll see more
-  of in [Signatures](sigs.md). It also **dynamically** type checks the code
-  while it runs.
+  This is the gem that enables adding type annotations to normal Ruby code. It exposes the top-level `T` namespace and the `sig` method, which we'll see more of in [Signatures](sigs.md). It also **dynamically** type checks the code while it runs.
 
-These two components are developed in tandem, and in fact compound each others'
-guarantees. Sorbet makes predictions about the runtime, and the runtime enforces
-those predictions with contracts.
+These two components are developed in tandem, and in fact compound each others' guarantees. Sorbet makes predictions about the runtime, and the runtime enforces those predictions with contracts.
 
 Here's a taste of what Sorbet can do:
 
@@ -56,8 +48,7 @@ end
 
 - [Gradual Type Checking and Sorbet](gradual.md)
 
-  Learn about how Sorbet works, and how it's different from other type systems
-  you might be familiar with.
+  Learn about how Sorbet works, and how it's different from other type systems you might be familiar with.
 
 - [Enabling Static Checks](static.md)
 
