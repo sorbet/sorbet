@@ -61,12 +61,9 @@
             });
         </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/rbs-support.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">RBS Comments Support</h1></header><article><div><span><h2><a class="anchor" aria-hidden="true" id="signature-comments"></a><a href="#signature-comments" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Signature comments</h2>
 <blockquote>
-<p>This feature is experimental and might be changed or removed without notice.
-To enable it pass the <code>--enable-experimental-rbs-comments</code> option to Sorbet or
-add it to your <code>sorbet/config</code>.</p>
+<p>This feature is experimental and might be changed or removed without notice. To enable it pass the <code>--enable-experimental-rbs-comments</code> option to Sorbet or add it to your <code>sorbet/config</code>.</p>
 </blockquote>
-<p>Sorbet has experimental support for comment-only type syntax, powered by
-<a href="https://github.com/ruby/rbs">RBS</a> annotations.</p>
+<p>Sorbet has experimental support for comment-only type syntax, powered by <a href="https://github.com/ruby/rbs">RBS</a> annotations.</p>
 <p>The syntax looks like this:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment">#: (Integer) -&gt; String</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
@@ -78,15 +75,13 @@ add it to your <code>sorbet/config</code>.</p>
 str = foo(<span class="hljs-number">42</span>)
 T.reveal_type(str) <span class="hljs-comment"># Revealed type: `String`</span>
 </code></pre>
-<p>This feature is powered by translating RBS comments to equivalent <code>sig</code> syntax.
-For example, the previous example is similar to having written a <code>sig</code> directly:</p>
+<p>This feature is powered by translating RBS comments to equivalent <code>sig</code> syntax. For example, the previous example is similar to having written a <code>sig</code> directly:</p>
 <pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">x:</span> Integer).returns(String) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
   ...
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Long signatures can be broken into multiple lines using the <code>#|</code> continuation
-comment:</p>
+<p>Long signatures can be broken into multiple lines using the <code>#|</code> continuation comment:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment">#: (</span>
 <span class="hljs-comment">#|  Integer,</span>
 <span class="hljs-comment">#|  String</span>
@@ -95,95 +90,52 @@ comment:</p>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="caveats"></a><a href="#caveats" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Caveats</h2>
 <blockquote>
-<p>Support for this feature is experimental, and we actively discourage depending
-on it for anything other than to offer feedback to the Sorbet developers.</p>
+<p>Support for this feature is experimental, and we actively discourage depending on it for anything other than to offer feedback to the Sorbet developers.</p>
 </blockquote>
-<p>There are numerous shortcomings of the comment-based syntax versus <code>sig</code> syntax.
-By contrast, the near-sole upside is that the syntax is terser.</p>
+<p>There are numerous shortcomings of the comment-based syntax versus <code>sig</code> syntax. By contrast, the near-sole upside is that the syntax is terser.</p>
 <h3><a class="anchor" aria-hidden="true" id="the-comment-based-syntax-is-second-class"></a><a href="#the-comment-based-syntax-is-second-class" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The comment-based syntax is second class</h3>
-<p>The comment-based syntax uses <a href="https://github.com/ruby/rbs">RBS syntax</a>. RBS is
-an alternative annotation syntax for Ruby. The headline features of RBS:</p>
+<p>The comment-based syntax uses <a href="https://github.com/ruby/rbs">RBS syntax</a>. RBS is an alternative annotation syntax for Ruby. The headline features of RBS:</p>
 <ul>
-<li>It’s the type annotation syntax blessed by the Ruby core team, and Matz in
-particular (the lead of the Ruby project).</li>
+<li>It’s the type annotation syntax blessed by the Ruby core team, and Matz in particular (the lead of the Ruby project).</li>
 <li>RBS supports certain enticing features, like duck typing.</li>
 <li>The syntax is terse.</li>
 <li>The Ruby distribution bundles a gem for parsing RBS annotations.</li>
 </ul>
-<p>However, there are a number of problems which mean that RBS syntax has a
-second-class position in Sorbet:</p>
+<p>However, there are a number of problems which mean that RBS syntax has a second-class position in Sorbet:</p>
 <h3><a class="anchor" aria-hidden="true" id="rbs-syntax-does-not-match-the-semantics-of-sorbet"></a><a href="#rbs-syntax-does-not-match-the-semantics-of-sorbet" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>RBS syntax does not match the semantics of Sorbet</h3>
-<p>Sorbet’s type annotation syntax evolved differently from the evolution of RBS
-syntax. Unfortunately, this difference is not syntax-deep: it affects the
-semantics of the types too.</p>
-<p>Sure, there are similarities: both syntaxes offer a way to express union types,
-for example. But there are also semantic differences, and RBS syntax reflects
-these differences. Things which are possible to express in RBS syntax have no
-analogue in Sorbet and vice versa. Some examples:</p>
+<p>Sorbet’s type annotation syntax evolved differently from the evolution of RBS syntax. Unfortunately, this difference is not syntax-deep: it affects the semantics of the types too.</p>
+<p>Sure, there are similarities: both syntaxes offer a way to express union types, for example. But there are also semantic differences, and RBS syntax reflects these differences. Things which are possible to express in RBS syntax have no analogue in Sorbet and vice versa. Some examples:</p>
 <ul>
-<li>RBS supports duck typing via interfaces (different from Sorbet’s
-<a href="/docs/abstract">interfaces</a>), but
-<a href="/docs/faq#can-i-use-sorbet-for-duck-typed-code">Sorbet does not support duck typing</a>,
-by design.</li>
-<li>With Sorbet all class singleton classes are generic
-(<a href="/docs/class-of#tclass_of-applying-type-arguments-to-a-singleton-class-type"><code>T.class_of(...)[...]</code></a>).
-RBS does not have syntax to represent this.</li>
-<li>By extension, Sorbet allows singleton classes to declare their own generic
-type parameters (with
-<a href="/docs/generics#type_member--type_template">type_template</a>). This also cannot be
-translated from RBS for the same limitation with RBS’s singleton class type
-annotation.</li>
+<li>RBS supports duck typing via interfaces (different from Sorbet’s <a href="/docs/abstract">interfaces</a>), but <a href="/docs/faq#can-i-use-sorbet-for-duck-typed-code">Sorbet does not support duck typing</a>, by design.</li>
+<li>With Sorbet all class singleton classes are generic (<a href="/docs/class-of#tclass_of-applying-type-arguments-to-a-singleton-class-type"><code>T.class_of(...)[...]</code></a>). RBS does not have syntax to represent this.</li>
+<li>By extension, Sorbet allows singleton classes to declare their own generic type parameters (with <a href="/docs/generics#type_member--type_template">type_template</a>). This also cannot be translated from RBS for the same limitation with RBS’s singleton class type annotation.</li>
 <li>RBS supports literal value types. Sorbet does not.</li>
 </ul>
-<p>Because of these differences, it’s reasonable to assume that a codebase wishing
-to take full advantage of Sorbet’s unique features will eventually need to have
-annotations that use <code>sig</code> syntax. The moment a method’s annotation needs to use
-Sorbet-only syntax, the entire annotation needs to get rewritten—it’s not
-possible to embed Sorbet-only syntax within the context of an RBS signature.
-While it is possible for RBS comment signatures to coexist with Sorbet <code>sig</code>
-signatures, needing to flip between them adds development friction.</p>
+<p>Because of these differences, it’s reasonable to assume that a codebase wishing to take full advantage of Sorbet’s unique features will eventually need to have annotations that use <code>sig</code> syntax. The moment a method’s annotation needs to use Sorbet-only syntax, the entire annotation needs to get rewritten—it’s not possible to embed Sorbet-only syntax within the context of an RBS signature. While it is possible for RBS comment signatures to coexist with Sorbet <code>sig</code> signatures, needing to flip between them adds development friction.</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbet-has-minimal-influence-over-the-evolution-of-rbs-syntax"></a><a href="#sorbet-has-minimal-influence-over-the-evolution-of-rbs-syntax" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sorbet has minimal influence over the evolution of RBS syntax</h3>
-<p>Sorbet continues to evolve its type syntax. For example, <code>T.anything</code>,
-<code>T::Class</code>, and <code>has_attached_class!</code> are additions to Sorbet which arrived 6
-years after Sorbet’s inception—Sorbet development is anything but stale!</p>
-<p>Sorbet can adapt more quickly to the needs of Sorbet users by building on its
-own syntax. Historically, it has been difficult to advocate to adding RBS
-features that benefit Sorbet specifically.</p>
-<p>Our belief is that syntax matters less than semantics; that “what’s possible to
-express in the type system” matters more than “how to express it.” Time spent
-bikeshedding syntax detracts from meaningful improvements to the type system.</p>
+<p>Sorbet continues to evolve its type syntax. For example, <code>T.anything</code>, <code>T::Class</code>, and <code>has_attached_class!</code> are additions to Sorbet which arrived 6 years after Sorbet’s inception—Sorbet development is anything but stale!</p>
+<p>Sorbet can adapt more quickly to the needs of Sorbet users by building on its own syntax. Historically, it has been difficult to advocate to adding RBS features that benefit Sorbet specifically.</p>
+<p>Our belief is that syntax matters less than semantics; that “what’s possible to express in the type system” matters more than “how to express it.” Time spent bikeshedding syntax detracts from meaningful improvements to the type system.</p>
 <h3><a class="anchor" aria-hidden="true" id="ide-integration-is-more-difficult"></a><a href="#ide-integration-is-more-difficult" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>IDE integration is more difficult</h3>
-<p>Sorbet’s type syntax doubles as Ruby syntax. Setting aside other benefits of
-reusing Ruby syntax for type annotations (e.g., <a href="/docs/runtime">runtime checking</a>,
-no need to transpile, seamless integration with linters, etc.), Sorbet’s syntax
-integrates easily with existing editors.</p>
+<p>Sorbet’s type syntax doubles as Ruby syntax. Setting aside other benefits of reusing Ruby syntax for type annotations (e.g., <a href="/docs/runtime">runtime checking</a>, no need to transpile, seamless integration with linters, etc.), Sorbet’s syntax integrates easily with existing editors.</p>
 <p>There are a lot of features that come for free by reusing Ruby syntax:</p>
 <ul>
 <li><p>Syntax highlighting</p>
-<p>Highlighting for RBS comment-based type annotations is provided through the
-<a href="https://github.com/Shopify/ruby-lsp">Ruby LSP</a>. Without it, they will be
-monochromatic, highlighted like comments.</p></li>
+<p>Highlighting for RBS comment-based type annotations is provided through the <a href="https://github.com/Shopify/ruby-lsp">Ruby LSP</a>. Without it, they will be monochromatic, highlighted like comments.</p></li>
 <li><p>Syntax error tolerance and recovery</p>
-<p>The RBS comment parser does not recover from syntax errors. If there’s a
-syntax error in an RBS comment, Sorbet will ignore the entire <code>sig</code> until the
-error is fixed.</p></li>
+<p>The RBS comment parser does not recover from syntax errors. If there’s a syntax error in an RBS comment, Sorbet will ignore the entire <code>sig</code> until the error is fixed.</p></li>
 <li><p>Autocompletion</p>
 <p>Without error tolerance, autocompletion support is unreliable.</p></li>
 </ul>
-<p>In fairness, these are technical, implementation considerations, and thus could
-hope to improve one day. But they remain problems today.</p>
+<p>In fairness, these are technical, implementation considerations, and thus could hope to improve one day. But they remain problems today.</p>
 <h3><a class="anchor" aria-hidden="true" id="performance-is-worse"></a><a href="#performance-is-worse" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Performance is worse</h3>
 <p>The chosen implementation for RBS annotations in comments is:</p>
 <ol>
 <li>Scan and parse the file, like normal.</li>
-<li>Using the parsed file contents, re-scan the file, looking for comments,
-because Sorbet does not feed parsed comments throughout its pipeline.</li>
-<li>Parse the RBS comments, using a third-party RBS parser, which manages memory
-allocations using it’s own internal data structures.</li>
-<li>Translate the parsed RBS types to equivalent Ruby ASTs, and splice those
-ASTs into the parse result.</li>
-<li>Allow Sorbet to continue, where signatures and type annotations will be
-analyzed later in the pipeline.</li>
+<li>Using the parsed file contents, re-scan the file, looking for comments, because Sorbet does not feed parsed comments throughout its pipeline.</li>
+<li>Parse the RBS comments, using a third-party RBS parser, which manages memory allocations using it’s own internal data structures.</li>
+<li>Translate the parsed RBS types to equivalent Ruby ASTs, and splice those ASTs into the parse result.</li>
+<li>Allow Sorbet to continue, where signatures and type annotations will be analyzed later in the pipeline.</li>
 </ol>
 <pre><code class="hljs">┌──────────────┐
 │  <span class="hljs-built_in">scan</span>+<span class="hljs-built_in">parse</span>  │
@@ -207,36 +159,21 @@ analyzed later in the pipeline.</li>
 │  ingest types  │
 └────────────────┘
 </code></pre>
-<p>This implementation is simple, making it easy to verify correctness. The RBS
-parser can be developed as a library and tested independently. As long as the
-translation produces Sorbet ASTs equivalent to <code>sig</code> annotations that a user
-would have written, ingesting the types will work correctly.</p>
-<p>But steps 2 and 4 are pure overhead (step 3 is a wash). Not only does this
-implementation scan every file which <em>might</em> use RBS comments twice, but it does
-not parse straight into Sorbet’s internal type representation.</p>
-<p>In large codebases, this adds nontrivial overhead, and is a blocker in the way
-of being able to advocate for using this syntax more widely.</p>
+<p>This implementation is simple, making it easy to verify correctness. The RBS parser can be developed as a library and tested independently. As long as the translation produces Sorbet ASTs equivalent to <code>sig</code> annotations that a user would have written, ingesting the types will work correctly.</p>
+<p>But steps 2 and 4 are pure overhead (step 3 is a wash). Not only does this implementation scan every file which <em>might</em> use RBS comments twice, but it does not parse straight into Sorbet’s internal type representation.</p>
+<p>In large codebases, this adds nontrivial overhead, and is a blocker in the way of being able to advocate for using this syntax more widely.</p>
 <h4><a class="anchor" aria-hidden="true" id="runtime-checking-is-a-feature"></a><a href="#runtime-checking-is-a-feature" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Runtime checking is a feature</h4>
 <blockquote>
-<p>Note that runtime checking of RBS signatures is not implemented, so type
-safety is reduced.</p>
+<p>Note that runtime checking of RBS signatures is not implemented, so type safety is reduced.</p>
 </blockquote>
-<p>Sorbet’s signatures are not just static type annotations: they are also
-<a href="/docs/runtime">checked at runtime</a>. Runtime-checked signatures are a key reason
-why Sorbet type annotations are so accurate: authors can’t “lie” when writing
-type annotations.</p>
+<p>Sorbet’s signatures are not just static type annotations: they are also <a href="/docs/runtime">checked at runtime</a>. Runtime-checked signatures are a key reason why Sorbet type annotations are so accurate: authors can’t “lie” when writing type annotations.</p>
 <p>For more information on why runtime checking is valuable, see here:</p>
 <p>→ <a href="https://blog.jez.io/runtime-type-checking/">Runtime type checking is great</a></p>
-<p>In fact, runtime checking for signatures is actually load bearing: simply
-disabling runtime checking can make the code change behavior when run.</p>
+<p>In fact, runtime checking for signatures is actually load bearing: simply disabling runtime checking can make the code change behavior when run.</p>
 <h4><a class="anchor" aria-hidden="true" id="the-sorbet-docs-will-continue-using-sorbet-syntax"></a><a href="#the-sorbet-docs-will-continue-using-sorbet-syntax" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The Sorbet docs will continue using Sorbet syntax</h4>
-<p>There are no plans to rewrite the Sorbet website to present RBS alternatives
-alongside the existing Sorbet syntax. In the mean time, users will need to
-mentally translate from Sorbet syntax to RBS syntax on their own, including
-understanding the cases where there is no suitable RBS replacement.</p>
+<p>There are no plans to rewrite the Sorbet website to present RBS alternatives alongside the existing Sorbet syntax. In the mean time, users will need to mentally translate from Sorbet syntax to RBS syntax on their own, including understanding the cases where there is no suitable RBS replacement.</p>
 <h2><a class="anchor" aria-hidden="true" id="quick-reference"></a><a href="#quick-reference" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Quick reference</h2>
-<p>Most RBS features can be used and will be translated to equivalent Sorbet syntax
-during type checking:</p>
+<p>Most RBS features can be used and will be translated to equivalent Sorbet syntax during type checking:</p>
 <table>
 <thead><tr><th>RBS Feature</th><th>RBS syntax</th><th>Sorbet syntax</th></tr></thead>
 <tbody>
@@ -443,8 +380,7 @@ during type checking:</p>
 <span class="hljs-keyword">attr_reader</span> <span class="hljs-symbol">:foo</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="method-annotations"></a><a href="#method-annotations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Method annotations</h2>
-<p>While RBS does not support the same modifiers as Sorbet, it is possible to
-specify them using <code>@</code> annotation comments.</p>
+<p>While RBS does not support the same modifiers as Sorbet, it is possible to specify them using <code>@</code> annotation comments.</p>
 <p>The following signatures are equivalent:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># <span class="hljs-doctag">@override</span></span>
 <span class="hljs-comment">#: (Integer) -&gt; void</span>
@@ -467,16 +403,12 @@ sig { override(<span class="hljs-symbol">allow_incompatible:</span> <span class=
 sig(<span class="hljs-symbol">:final</span>) { params(<span class="hljs-symbol">x:</span> Integer).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">qux2</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Note: these annotations like <code>@override</code> use normal comments, like <code># @override</code>
-(not the special <code>#:</code> comment). This makes it possible to reuse any existing
-YARD or RDoc annotations.</p>
+<p>Note: these annotations like <code>@override</code> use normal comments, like <code># @override</code> (not the special <code>#:</code> comment). This makes it possible to reuse any existing YARD or RDoc annotations.</p>
 <blockquote>
-<p>While the <code>@abstract</code> method annotation is technically supported, it is not
-recommended. <a href="#abstract-methods">Read more about abstract methods below.</a></p>
+<p>While the <code>@abstract</code> method annotation is technically supported, it is not recommended. <a href="#abstract-methods">Read more about abstract methods below.</a></p>
 </blockquote>
 <h2><a class="anchor" aria-hidden="true" id="class-and-module-annotations"></a><a href="#class-and-module-annotations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Class and module annotations</h2>
-<p>RBS annotations can be used to add Sorbet helpers to classes like
-<a href="/docs/abstract"><code>abstract!</code></a>:</p>
+<p>RBS annotations can be used to add Sorbet helpers to classes like <a href="/docs/abstract"><code>abstract!</code></a>:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># <span class="hljs-doctag">@abstract</span></span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
@@ -488,10 +420,8 @@ recommended. <a href="#abstract-methods">Read more about abstract methods below.
   abstract!
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>The <a href="/docs/abstract"><code>@interface!</code></a>, <a href="/docs/final"><code>@final!</code></a>, and
-<a href="/docs/sealed"><code>@sealed!</code></a> annotations are supported in the same way.</p>
-<p>The <a href="/docs/requires-ancestor"><code>@requires_ancestor</code></a> annotation expects an argument
-to represent the ancestor to require:</p>
+<p>The <a href="/docs/abstract"><code>@interface!</code></a>, <a href="/docs/final"><code>@final!</code></a>, and <a href="/docs/sealed"><code>@sealed!</code></a> annotations are supported in the same way.</p>
+<p>The <a href="/docs/requires-ancestor"><code>@requires_ancestor</code></a> annotation expects an argument to represent the ancestor to require:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># <span class="hljs-doctag">@requires</span>_ancestor: ::Some::Ancestor</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span>;</span> <span class="hljs-keyword">end</span>
 </code></pre>
@@ -505,8 +435,7 @@ to represent the ancestor to require:</p>
 <h2><a class="anchor" aria-hidden="true" id="generic-classes-and-modules"></a><a href="#generic-classes-and-modules" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Generic classes and modules</h2>
 <p>RBS supports generic classes and modules.</p>
 <h3><a class="anchor" aria-hidden="true" id="type-members"></a><a href="#type-members" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Type members</h3>
-<p><a href="generics#type_member--type_template">Type members</a> can be specified using a
-<code>#:</code> comment on the class or module:</p>
+<p><a href="generics#type_member--type_template">Type members</a> can be specified using a <code>#:</code> comment on the class or module:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment">#: [E]</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Box</span></span>
   <span class="hljs-comment">#: -&gt; void</span>
@@ -523,18 +452,15 @@ to represent the ancestor to require:</p>
 box = Box.new <span class="hljs-comment">#: Box[Integer]</span>
 box &lt;&lt; <span class="hljs-number">42</span>
 </code></pre>
-<p>RBS generics do not use <code>T::Generic</code>, thus the <code>[]</code> method doesn’t exist at
-runtime and Sorbet will report an error if you try to use it:</p>
+<p>RBS generics do not use <code>T::Generic</code>, thus the <code>[]</code> method doesn’t exist at runtime and Sorbet will report an error if you try to use it:</p>
 <pre><code class="hljs css language-ruby">Box[Integer].new
    ^^^^^^^^^ <span class="hljs-symbol">error:</span> Method <span class="hljs-string">`[]`</span> does <span class="hljs-keyword">not</span> exist on <span class="hljs-string">`T.class_of(Box)`</span>
 </code></pre>
-<p>Because of this, Sorbet will use the RBS comment type as the type of the class
-being instantiated:</p>
+<p>Because of this, Sorbet will use the RBS comment type as the type of the class being instantiated:</p>
 <pre><code class="hljs css language-ruby">box = Box.new <span class="hljs-comment">#: Box[Integer]</span>
 T.reveal_type(box) <span class="hljs-comment"># Revealed type: `Box[Integer]`</span>
 </code></pre>
-<p>To change the type of the class being instantiated, the expression can be broken
-into multiple lines:</p>
+<p>To change the type of the class being instantiated, the expression can be broken into multiple lines:</p>
 <pre><code class="hljs css language-ruby">nilable_box = Box <span class="hljs-comment">#: Class[Box[Integer]]</span>
    .new <span class="hljs-comment">#: Box[Integer]?</span>
 T.reveal_type(nilable_box) <span class="hljs-comment"># =&gt; `T.nilable(Box[Integer])`</span>
@@ -543,8 +469,7 @@ T.reveal_type(nilable_box) <span class="hljs-comment"># =&gt; `T.nilable(Box[Int
   nilable_box = <span class="hljs-literal">nil</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>You can also use an intermediate variable to change the type of the class being
-instantiated:</p>
+<p>You can also use an intermediate variable to change the type of the class being instantiated:</p>
 <pre><code class="hljs css language-ruby">box_of_integer = Box.new(<span class="hljs-string">"foo"</span>) <span class="hljs-comment">#: Box[Integer]</span>
 T.reveal_type(box_of_integer) <span class="hljs-comment"># =&gt; `Box[Integer]`</span>
 nilable_box = box_of_integer <span class="hljs-comment">#: as Box[Integer]?</span>
@@ -555,8 +480,7 @@ T.reveal_type(nilable_box) <span class="hljs-comment"># =&gt; `T.nilable(Box[Int
 <span class="hljs-keyword">end</span>
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="type-templates"></a><a href="#type-templates" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Type templates</h3>
-<p>There is no equivalent to <code>type_template</code> in RBS. Instead, you can define type
-members on the singleton class. So this:</p>
+<p>There is no equivalent to <code>type_template</code> in RBS. Instead, you can define type members on the singleton class. So this:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Factory</span></span>
   extend T::Sig
   extend T::Generic
@@ -576,11 +500,9 @@ members on the singleton class. So this:</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Note: there is no RBS equivalent to the generic <code>T.class_of()[]</code> syntax just
-yet.</p>
+<p>Note: there is no RBS equivalent to the generic <code>T.class_of()[]</code> syntax just yet.</p>
 <h3><a class="anchor" aria-hidden="true" id="variance"></a><a href="#variance" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Variance</h3>
-<p><a href="/docs/generics#in-out-and-variance">Variance</a> can be specified using the <code>in</code> and
-<code>out</code> keywords:</p>
+<p><a href="/docs/generics#in-out-and-variance">Variance</a> can be specified using the <code>in</code> and <code>out</code> keywords:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment">#: [out E]</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Box</span></span>
 <span class="hljs-keyword">end</span>
@@ -589,8 +511,7 @@ box = Box.new <span class="hljs-comment">#: Box[Integer]</span>
 box <span class="hljs-comment">#: Box[Numeric]</span>
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="bounds"></a><a href="#bounds" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Bounds</h3>
-<p>By default, type parameters do not have
-<a href="/docs/generics#bounds-on-type_members-and-type_templates-fixed-upper-lower">bounds</a>:</p>
+<p>By default, type parameters do not have <a href="/docs/generics#bounds-on-type_members-and-type_templates-fixed-upper-lower">bounds</a>:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment">#: [E]</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Box</span>;</span> <span class="hljs-keyword">end</span>
 
@@ -610,11 +531,8 @@ Box.new <span class="hljs-comment">#: Box[String]</span>
 </code></pre>
 <p>Note: the lower bound <code>&gt;</code> syntax is not supported in RBS yet.</p>
 <h2><a class="anchor" aria-hidden="true" id="special-behaviors"></a><a href="#special-behaviors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Special behaviors</h2>
-<p>The <code>#:</code> comment must come <strong>immediately</strong> before the following method
-definition. If there is a blank line between the comment and method definition,
-the comment will be ignored.</p>
-<p>Generic types like <code>Array</code> or <code>Hash</code> are translated to their <code>T::</code> Sorbet types
-equivalent:</p>
+<p>The <code>#:</code> comment must come <strong>immediately</strong> before the following method definition. If there is a blank line between the comment and method definition, the comment will be ignored.</p>
+<p>Generic types like <code>Array</code> or <code>Hash</code> are translated to their <code>T::</code> Sorbet types equivalent:</p>
 <ul>
 <li><code>Array[Integer]</code> is translated to <code>T::Array[Integer]</code></li>
 <li><code>Class[Integer]</code> is translated to <code>T::Class[Integer]</code></li>
@@ -626,12 +544,10 @@ equivalent:</p>
 <li><code>Range[Integer]</code> is translated to <code>T::Range[Integer]</code></li>
 <li><code>Set[Integer]</code> is translated to <code>T::Set[Integer]</code></li>
 </ul>
-<p>Note that non-generic types are not translated, so <code>Array</code> without a type
-argument stays <code>Array</code>.</p>
+<p>Note that non-generic types are not translated, so <code>Array</code> without a type argument stays <code>Array</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="unsupported-features"></a><a href="#unsupported-features" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Unsupported features</h2>
 <h3><a class="anchor" aria-hidden="true" id="abstract-methods"></a><a href="#abstract-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Abstract methods</h3>
-<p>While the <code>@abstract</code> annotation is technically supported for methods, it is
-currently not recommended. To understand why, take the following example:</p>
+<p>While the <code>@abstract</code> annotation is technically supported for methods, it is currently not recommended. To understand why, take the following example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># <span class="hljs-doctag">@abstract</span></span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span></span>
   <span class="hljs-comment"># <span class="hljs-doctag">@abstract</span></span>
@@ -647,20 +563,11 @@ currently not recommended. To understand why, take the following example:</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>When using traditional Sorbet sigs, the call to <code>super</code> inside of <code>Bar#foo</code>
-would error at runtime, because <code>sorbet-runtime</code> uses metaprogramming to remove
-the <code>Foo#foo</code> method. Any mistaken calls to this method would raise an error at
-runtime.</p>
-<p>However, RBS signatures have no runtime component. This means that any
-inadvertent calls to abstract methods will silently no-op, which has the
-potential to create subtle bugs and unintended behavior in production.</p>
-<p>Instead of using the <code>@abstract</code> annotation on methods, place any abstract
-methods in a separate <code>.rbi</code> shim file.</p>
-<p>Modifying the example above, leave only the abstract class definition in the
-Ruby file, along with the definition of its subclass.</p>
-<p>Note: the class <code>Foo</code> <strong>must</strong> still be defined in a Ruby file. Without this
-definition, <code>Foo</code> will not exist at Runtime, and the program will error when
-referencing the <code>Foo</code> class.</p>
+<p>When using traditional Sorbet sigs, the call to <code>super</code> inside of <code>Bar#foo</code> would error at runtime, because <code>sorbet-runtime</code> uses metaprogramming to remove the <code>Foo#foo</code> method. Any mistaken calls to this method would raise an error at runtime.</p>
+<p>However, RBS signatures have no runtime component. This means that any inadvertent calls to abstract methods will silently no-op, which has the potential to create subtle bugs and unintended behavior in production.</p>
+<p>Instead of using the <code>@abstract</code> annotation on methods, place any abstract methods in a separate <code>.rbi</code> shim file.</p>
+<p>Modifying the example above, leave only the abstract class definition in the Ruby file, along with the definition of its subclass.</p>
+<p>Note: the class <code>Foo</code> <strong>must</strong> still be defined in a Ruby file. Without this definition, <code>Foo</code> will not exist at Runtime, and the program will error when referencing the <code>Foo</code> class.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># <span class="hljs-doctag">@abstract</span></span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span>;</span> <span class="hljs-keyword">end</span>
 
@@ -678,13 +585,9 @@ referencing the <code>Foo</code> class.</p>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Using this approach, the abstract method will be visible to Sorbet during static
-type checking, but it will not exist at runtime, resulting in obvious errors if
-any child classes attempt to call it.</p>
+<p>Using this approach, the abstract method will be visible to Sorbet during static type checking, but it will not exist at runtime, resulting in obvious errors if any child classes attempt to call it.</p>
 <h3><a class="anchor" aria-hidden="true" id="class-types"></a><a href="#class-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Class types</h3>
-<p>The <code>class</code> type in RBS is context sensitive (depends on the class where it is
-used) and Sorbet does not support this feature yet. Instead, use the equivalent
-Sorbet syntax:</p>
+<p>The <code>class</code> type in RBS is context sensitive (depends on the class where it is used) and Sorbet does not support this feature yet. Instead, use the equivalent Sorbet syntax:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span></span>
   sig { returns(T.attached_class) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
@@ -709,8 +612,7 @@ sig { params(<span class="hljs-symbol">x:</span> Bool).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="literal-types"></a><a href="#literal-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Literal types</h3>
-<p>Sorbet does not support RBS’s concept of &quot;literal types&quot;. The next best thing is
-to use the literal’s underlying type instead:</p>
+<p>Sorbet does not support RBS’s concept of &quot;literal types&quot;. The next best thing is to use the literal’s underlying type instead:</p>
 <ul>
 <li><code>1</code> is <code>Integer</code></li>
 <li><code>&quot;foo&quot;</code> is <code>String</code></li>
@@ -729,13 +631,10 @@ box = Box.new <span class="hljs-comment">#: Box[untyped]</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="type-assertions-comments"></a><a href="#type-assertions-comments" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Type assertions comments</h2>
 <blockquote>
-<p>This feature is experimental and might be changed or removed without notice.
-To enable it pass the <code>--enable-experimental-rbs-comments</code> option to Sorbet or
-add it to your <code>sorbet/config</code>.</p>
+<p>This feature is experimental and might be changed or removed without notice. To enable it pass the <code>--enable-experimental-rbs-comments</code> option to Sorbet or add it to your <code>sorbet/config</code>.</p>
 </blockquote>
 <h3><a class="anchor" aria-hidden="true" id="tlet-assertions"></a><a href="#tlet-assertions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.let</code> assertions</h3>
-<p><a href="/docs/type-assertions#tlet"><code>T.let</code></a> assertions can be expressed using RBS
-comments:</p>
+<p><a href="/docs/type-assertions#tlet"><code>T.let</code></a> assertions can be expressed using RBS comments:</p>
 <pre><code class="hljs css language-ruby">x = <span class="hljs-number">42</span> <span class="hljs-comment">#: Integer</span>
 @x = <span class="hljs-number">42</span> <span class="hljs-comment">#: Integer</span>
 X = <span class="hljs-number">42</span> <span class="hljs-comment">#: Integer</span>
@@ -745,30 +644,24 @@ X = <span class="hljs-number">42</span> <span class="hljs-comment">#: Integer</s
 @x = T.let(<span class="hljs-number">42</span>, Integer)
 X = T.let(<span class="hljs-number">42</span>, Integer)
 </code></pre>
-<p>The comment must be placed at the end of the assignment. Either on the same line
-if the assignment is on a single line, or on the last line if the assignment
-spans multiple lines:</p>
+<p>The comment must be placed at the end of the assignment. Either on the same line if the assignment is on a single line, or on the last line if the assignment spans multiple lines:</p>
 <pre><code class="hljs css language-ruby">x = [
   <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>
 ] <span class="hljs-comment">#: Array[Integer]</span>
 </code></pre>
-<p>The only exception is for HEREDOCs, where the comment may be placed on the first
-line of the HEREDOC:</p>
+<p>The only exception is for HEREDOCs, where the comment may be placed on the first line of the HEREDOC:</p>
 <pre><code class="hljs css language-ruby">X = <span class="hljs-string">&lt;&lt;~MSG #: String
   foo
 MSG</span>
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="tcast-assertions"></a><a href="#tcast-assertions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.cast</code> assertions</h3>
-<p><a href="/docs/type-assertions#tcast"><code>T.cast</code></a> assertions can be expressed using RBS
-comments with the <code>as</code> keyword:</p>
+<p><a href="/docs/type-assertions#tcast"><code>T.cast</code></a> assertions can be expressed using RBS comments with the <code>as</code> keyword:</p>
 <pre><code class="hljs css language-ruby">x = <span class="hljs-number">42</span> <span class="hljs-comment">#: as Integer</span>
 </code></pre>
 <p>This is equivalent to:</p>
 <pre><code class="hljs css language-ruby">x = T.cast(<span class="hljs-number">42</span>, Integer)
 </code></pre>
-<p>The comment is always applied to the outermost expression. For example, in this
-method call, the cast is applied to the value returned by <code>foo</code> and not the
-argument <code>x</code>:</p>
+<p>The comment is always applied to the outermost expression. For example, in this method call, the cast is applied to the value returned by <code>foo</code> and not the argument <code>x</code>:</p>
 <pre><code class="hljs css language-ruby">foo x <span class="hljs-comment">#: as Integer</span>
 </code></pre>
 <p>This is equivalent to:</p>
@@ -801,22 +694,19 @@ x = <span class="hljs-keyword">if</span> foo
 <span class="hljs-keyword">end</span> <span class="hljs-comment">#: as Integer</span>
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="tmust-assertions"></a><a href="#tmust-assertions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.must</code> assertions</h3>
-<p><a href="/docs/type-assertions#tmust"><code>T.must</code></a> are denoted with the special <code>as !nil</code>
-comment:</p>
+<p><a href="/docs/type-assertions#tmust"><code>T.must</code></a> are denoted with the special <code>as !nil</code> comment:</p>
 <pre><code class="hljs css language-ruby">foo <span class="hljs-comment">#: as !nil</span>
 </code></pre>
 <p>This is equivalent to:</p>
 <pre><code class="hljs css language-ruby">T.must(foo)
 </code></pre>
-<p>The <code>as !nil</code> comment can be used in any context where a cast is valid and
-follows the same rules as <code>as Type</code> comments:</p>
+<p>The <code>as !nil</code> comment can be used in any context where a cast is valid and follows the same rules as <code>as Type</code> comments:</p>
 <pre><code class="hljs css language-ruby">foo(
   x <span class="hljs-comment">#: as !nil</span>
 )
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="tunsafe-escape-hatch"></a><a href="#tunsafe-escape-hatch" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.unsafe</code> escape hatch</h3>
-<p><a href="/docs/static#call-site-granularity-tunsafe"><code>T.unsafe</code></a> can be replaced with the
-special <code>as untyped</code> annotation:</p>
+<p><a href="/docs/static#call-site-granularity-tunsafe"><code>T.unsafe</code></a> can be replaced with the special <code>as untyped</code> annotation:</p>
 <pre><code class="hljs css language-ruby">x = <span class="hljs-number">42</span> <span class="hljs-comment">#: as untyped</span>
 x.undefined_method <span class="hljs-comment"># no error statically, but will fail at runtime</span>
 </code></pre>
@@ -840,8 +730,7 @@ x.undefined_method
 <pre><code class="hljs css language-ruby">T.absurd(x)
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="tbind"></a><a href="#tbind" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.bind</code></h3>
-<p><a href="/docs/type-assertions#tbind"><code>T.bind</code></a> can be expressed using RBS comments with
-the special <code>self as</code> construct:</p>
+<p><a href="/docs/type-assertions#tbind"><code>T.bind</code></a> can be expressed using RBS comments with the special <code>self as</code> construct:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span></span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Enabling Runtime Checks · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="As we&#x27;ve mentioned before, Sorbet is a [gradual](/docs/gradual) system: it can be"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Enabling Runtime Checks · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="As we&#x27;ve mentioned before, Sorbet is a [gradual](/docs/gradual) system: it can be"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Enabling Runtime Checks · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="As we&#x27;ve mentioned before, Sorbet is a [gradual](/docs/gradual) system: it can be turned on and off at will. This means the predictions Sorbet makes statically can be wrong."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Enabling Runtime Checks · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="As we&#x27;ve mentioned before, Sorbet is a [gradual](/docs/gradual) system: it can be turned on and off at will. This means the predictions Sorbet makes statically can be wrong."/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments); }
               gtag('js', new Date());
@@ -59,12 +59,8 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/runtime.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Enabling Runtime Checks</h1></header><article><div><span><p>As we’ve mentioned before, Sorbet is a <a href="/docs/gradual">gradual</a> system: it can be
-turned on and off at will. This means the predictions Sorbet makes statically
-can be wrong.</p>
-<p>That’s why Sorbet also uses <strong>runtime checks</strong>: even if a static prediction was
-wrong, it will get checked during runtime, making things fail loudly and
-immediately, rather than silently and after the fact.</p>
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/runtime.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Enabling Runtime Checks</h1></header><article><div><span><p>As we’ve mentioned before, Sorbet is a <a href="/docs/gradual">gradual</a> system: it can be turned on and off at will. This means the predictions Sorbet makes statically can be wrong.</p>
+<p>That’s why Sorbet also uses <strong>runtime checks</strong>: even if a static prediction was wrong, it will get checked during runtime, making things fail loudly and immediately, rather than silently and after the fact.</p>
 <p>In this doc we’ll answer:</p>
 <ul>
 <li>What’s the runtime effect of adding a <code>sig</code> to a method?</li>
@@ -72,11 +68,8 @@ immediately, rather than silently and after the fact.</p>
 <li>What are our options if we don’t want <code>sig</code>s to affect the runtime?</li>
 </ul>
 <h2><a class="anchor" aria-hidden="true" id="runtime-checked-sigs"></a><a href="#runtime-checked-sigs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Runtime-checked <code>sig</code>s</h2>
-<p>Adding a method signature opts that method into runtime typechecks (in addition
-to opting it into <a href="/docs/static">more static checks</a>). In this sense,
-<code>sorbet-runtime</code> is similar to libraries for adding runtime contracts.</p>
-<p>Concretely, adding a <code>sig</code> wraps the method defined beneath it in a new method
-that:</p>
+<p>Adding a method signature opts that method into runtime typechecks (in addition to opting it into <a href="/docs/static">more static checks</a>). In this sense, <code>sorbet-runtime</code> is similar to libraries for adding runtime contracts.</p>
+<p>Concretely, adding a <code>sig</code> wraps the method defined beneath it in a new method that:</p>
 <ul>
 <li>validates the types of arguments passed in against the types in the <code>sig</code></li>
 <li>calls the original method</li>
@@ -106,32 +99,19 @@ Caller: example.rb:11
 Definition: example.rb:6
 ...
 </code></pre>
-<p>In this small example, we have a <code>main</code> method defined to take an Integer, but
-we’re passing an Array at the call site. When we run <code>ruby</code> on our example file,
-sorbet-runtime raises an exception because the signature was violated.</p>
+<p>In this small example, we have a <code>main</code> method defined to take an Integer, but we’re passing an Array at the call site. When we run <code>ruby</code> on our example file, sorbet-runtime raises an exception because the signature was violated.</p>
 <h2><a class="anchor" aria-hidden="true" id="why-have-runtime-checks"></a><a href="#why-have-runtime-checks" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why have runtime checks?</h2>
-<p>Runtime checks have been invaluable when developing Sorbet and rolling it out in
-large Ruby codebases like Stripe’s. Type annotations in a codebase are near
-useless if developers don’t trust them (consider how often YARD annotations fall
-out of sync with the code… 😰).</p>
-<p>Adding a <code>sig</code> to a method is only as good as the predictions it lets Sorbet
-make about a codebase. Wrong sigs are actively harmful. Specifically, when
-<code>sig</code>s in our codebase are wrong:</p>
+<p>Runtime checks have been invaluable when developing Sorbet and rolling it out in large Ruby codebases like Stripe’s. Type annotations in a codebase are near useless if developers don’t trust them (consider how often YARD annotations fall out of sync with the code… 😰).</p>
+<p>Adding a <code>sig</code> to a method is only as good as the predictions it lets Sorbet make about a codebase. Wrong sigs are actively harmful. Specifically, when <code>sig</code>s in our codebase are wrong:</p>
 <ul>
-<li>we can’t use them to find code to refactor. Sorbet will think some code paths
-can never be reached when they actually can.</li>
-<li>they’re effectively as good as out-of-date documentation, with little added
-benefit over just comments.</li>
-<li>we could never use them to make Ruby code run faster. In the future, we hope
-to use Sorbet types to make Ruby faster, but <code>sig</code>s that lie will actually
-make code <em>slower</em> than no types at all.</li>
+<li>we can’t use them to find code to refactor. Sorbet will think some code paths can never be reached when they actually can.</li>
+<li>they’re effectively as good as out-of-date documentation, with little added benefit over just comments.</li>
+<li>we could never use them to make Ruby code run faster. In the future, we hope to use Sorbet types to make Ruby faster, but <code>sig</code>s that lie will actually make code <em>slower</em> than no types at all.</li>
 </ul>
-<p>By leveraging runtime checks, we can gain lots of confidence and trust in our
-type annotations:</p>
+<p>By leveraging runtime checks, we can gain lots of confidence and trust in our type annotations:</p>
 <ul>
 <li>Automated test runs become tests of our type annotations!</li>
-<li>Our production observability and monitoring catch bad sigs <strong>early</strong>, before
-they propagate false assumptions throughout a codebase.</li>
+<li>Our production observability and monitoring catch bad sigs <strong>early</strong>, before they propagate false assumptions throughout a codebase.</li>
 </ul>
 <p>To drive these points home, let’s look at a concrete example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
@@ -152,24 +132,11 @@ they propagate false assumptions throughout a codebase.</li>
 
 Example.add_one(Example.some_untyped_method)
 </code></pre>
-<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Arequire%20'sorbet-runtime'%0A%0Aclass%20Example%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20def%20self.some_untyped_method%0A%20%20%20%20nil%0A%20%20end%0A%0A%20%20sig%20%7Bparams(x%3A%20Integer).returns(Integer)%7D%0A%20%20def%20self.add_one(x)%0A%20%20%20%20x%20%2B%201%0A%20%20end%0Aend%0A%0AExample.add_one(Example.some_untyped_method)">→
-View on sorbet.run</a></p>
-<p>In this example, <code>srb tc</code> reports that there were <strong>no errors statically</strong>. But
-if we were to run this code with <code>ruby</code>, <code>some_untyped_method</code> would return
-<code>nil</code>, we’d try to add <code>1</code> to it, and Ruby would raise a NoMethodError for <code>+</code>.
-By adding a <code>sig</code> to <code>add_one</code>, the Sorbet runtime will raise an exception
-before even starting to execute the method. This makes typing errors from
-untyped code manifest early and loudly and right at the source, rather than
-silently, long after a sig was added, and far removed from this line of code.</p>
-<p>Most people are <em>either</em> familiar with a completely typed language (Java, Go,
-etc.) or a completely untyped language like Ruby; a
-<a href="/docs/gradual">gradual type system</a> can be very foreign at first. Including these
-runtime checks by default protects typed code from untyped code, making it
-easier to drive adoption of types in the long run.</p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Arequire%20'sorbet-runtime'%0A%0Aclass%20Example%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20def%20self.some_untyped_method%0A%20%20%20%20nil%0A%20%20end%0A%0A%20%20sig%20%7Bparams(x%3A%20Integer).returns(Integer)%7D%0A%20%20def%20self.add_one(x)%0A%20%20%20%20x%20%2B%201%0A%20%20end%0Aend%0A%0AExample.add_one(Example.some_untyped_method)">→ View on sorbet.run</a></p>
+<p>In this example, <code>srb tc</code> reports that there were <strong>no errors statically</strong>. But if we were to run this code with <code>ruby</code>, <code>some_untyped_method</code> would return <code>nil</code>, we’d try to add <code>1</code> to it, and Ruby would raise a NoMethodError for <code>+</code>. By adding a <code>sig</code> to <code>add_one</code>, the Sorbet runtime will raise an exception before even starting to execute the method. This makes typing errors from untyped code manifest early and loudly and right at the source, rather than silently, long after a sig was added, and far removed from this line of code.</p>
+<p>Most people are <em>either</em> familiar with a completely typed language (Java, Go, etc.) or a completely untyped language like Ruby; a <a href="/docs/gradual">gradual type system</a> can be very foreign at first. Including these runtime checks by default protects typed code from untyped code, making it easier to drive adoption of types in the long run.</p>
 <h2><a class="anchor" aria-hidden="true" id="changing-the-runtime-behavior"></a><a href="#changing-the-runtime-behavior" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Changing the runtime behavior</h2>
-<p>While having runtime checks is the default, it’s possible to change the behavior
-of the runtime system via configuration settings. These configuration settings
-live in under the <code>T::Configuration</code> module within the <code>sorbet-runtime</code> gem.</p>
+<p>While having runtime checks is the default, it’s possible to change the behavior of the runtime system via configuration settings. These configuration settings live in under the <code>T::Configuration</code> module within the <code>sorbet-runtime</code> gem.</p>
 <p>There are two main ways to change Sorbet’s runtime:</p>
 <ul>
 <li><p><strong>When</strong> the runtime checks fail, what to do in response.</p>
@@ -179,8 +146,7 @@ live in under the <code>T::Configuration</code> module within the <code>sorbet-r
 </ul>
 <p>In the next sections, we’ll give some examples of how to use both.</p>
 <h2><a class="anchor" aria-hidden="true" id="on_failure-changing-what-happens-on-runtime-errors"></a><a href="#on_failure-changing-what-happens-on-runtime-errors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>.on_failure</code>: Changing what happens on runtime errors</h2>
-<p>By adding <code>.on_failure(...)</code> to a sig and registering a <code>T::Configuration</code>
-callback, we can change what happens when a sig check fails. For example:</p>
+<p>By adding <code>.on_failure(...)</code> to a sig and registering a <code>T::Configuration</code> callback, we can change what happens when a sig check fails. For example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
 
 <span class="hljs-comment"># (1) Register call_validation_error_handler callback.</span>
@@ -216,15 +182,8 @@ Main.main(<span class="hljs-number">42</span>)
 <span class="hljs-comment"># Definition: example.rb:18</span>
 <span class="hljs-comment"># 42</span>
 </code></pre>
-<p>We defined our own meaning for <code>.on_failure</code> with <code>T::Configuration</code>. Without
-doing this, <code>.on_failure</code> has no effect. Because of this, <code>.on_failure</code> can be
-completely customized within any codebase to change what it means to fail. For
-example at Stripe, we use <code>.on_failure</code> to attach team ownership information to
-a failure.</p>
-<p>The <code>T::Configuration</code> handler we wrote branches on whether <code>.on_failure</code> was
-provided, which means the logging behavior is opt in. This is nice because it
-means the default behavior is still to make problems with types fail loudly and
-early, rather than silently as a log. If we wanted, we could have inverted this:</p>
+<p>We defined our own meaning for <code>.on_failure</code> with <code>T::Configuration</code>. Without doing this, <code>.on_failure</code> has no effect. Because of this, <code>.on_failure</code> can be completely customized within any codebase to change what it means to fail. For example at Stripe, we use <code>.on_failure</code> to attach team ownership information to a failure.</p>
+<p>The <code>T::Configuration</code> handler we wrote branches on whether <code>.on_failure</code> was provided, which means the logging behavior is opt in. This is nice because it means the default behavior is still to make problems with types fail loudly and early, rather than silently as a log. If we wanted, we could have inverted this:</p>
 <pre><code class="hljs css language-ruby">T::Configuration.call_validation_error_handler = lambda <span class="hljs-keyword">do</span> <span class="hljs-params">|signature, opts|</span>
   <span class="hljs-comment">#                                                       ┌────┐</span>
   <span class="hljs-keyword">if</span> signature&amp;.on_failure &amp;&amp; signature&amp;.on_failure[<span class="hljs-number">0</span>] == <span class="hljs-symbol">:raise</span>
@@ -239,30 +198,14 @@ early, rather than silently as a log. If we wanted, we could have inverted this:
 <span class="hljs-comment">#                                       ┌─────────────────┐</span>
 sig {params(<span class="hljs-symbol">argv:</span> T::Array[String]).void.on_failure(<span class="hljs-symbol">:raise</span>)}
 </code></pre>
-<p>With this <code>T::Configuration</code> handler, the default is to log, and we can use
-<code>.on_failure</code> to opt specific sigs into raising on failure.</p>
-<p>We haven’t depicted it here, but the <code>T::Configuration</code> handler will get an
-array of every argument that was provided to <code>.on_failure</code> for this
-sig—specifically there’s no restriction that <code>.on_failure</code> must be given only
-one arg nor that the arg is a Symbol. For more on the various <code>T::Configuration</code>
-handlers, see <a href="/docs/tconfiguration">Runtime Configuration</a>.</p>
+<p>With this <code>T::Configuration</code> handler, the default is to log, and we can use <code>.on_failure</code> to opt specific sigs into raising on failure.</p>
+<p>We haven’t depicted it here, but the <code>T::Configuration</code> handler will get an array of every argument that was provided to <code>.on_failure</code> for this sig—specifically there’s no restriction that <code>.on_failure</code> must be given only one arg nor that the arg is a Symbol. For more on the various <code>T::Configuration</code> handlers, see <a href="/docs/tconfiguration">Runtime Configuration</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="checked-whether-to-check-in-the-first-place"></a><a href="#checked-whether-to-check-in-the-first-place" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>.checked</code>: Whether to check in the first place</h2>
 <blockquote>
-<p><strong>Careful!</strong> Opting out of runtime checks can significantly degrade the
-trustworthiness of type signatures. Only disable the runtime after
-understanding the tradeoffs. See <a href="/docs/gradual">Gradual Type Checking</a> to learn
-more.</p>
+<p><strong>Careful!</strong> Opting out of runtime checks can significantly degrade the trustworthiness of type signatures. Only disable the runtime after understanding the tradeoffs. See <a href="/docs/gradual">Gradual Type Checking</a> to learn more.</p>
 </blockquote>
-<p>In our examples above with <code>.on_failure</code>, every method call had the runtime type
-checks run to determine whether the <code>T::Configuration</code> handler should be called
-in the first place. This comes with an overhead, and we carefully audit and
-monitor the performance of <code>sorbet-runtime</code> as a result. The overhead of these
-checks are usually very small.</p>
-<p>But in some cases, especially when calling certain methods in tight loops or
-other latency-sensitive paths, the overhead of even doing the checks (regardless
-of what happens on failure) is prohibitively expensive. To handle these cases,
-Sorbet offers <code>.checked(...)</code> which declares in what environments a sig should
-be checked:</p>
+<p>In our examples above with <code>.on_failure</code>, every method call had the runtime type checks run to determine whether the <code>T::Configuration</code> handler should be called in the first place. This comes with an overhead, and we carefully audit and monitor the performance of <code>sorbet-runtime</code> as a result. The overhead of these checks are usually very small.</p>
+<p>But in some cases, especially when calling certain methods in tight loops or other latency-sensitive paths, the overhead of even doing the checks (regardless of what happens on failure) is prohibitively expensive. To handle these cases, Sorbet offers <code>.checked(...)</code> which declares in what environments a sig should be checked:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) Runtime checks always run.</span>
 sig {params(<span class="hljs-symbol">xs:</span> T::Array[String]).void.checked(<span class="hljs-symbol">:always</span>)}
 
@@ -273,40 +216,19 @@ sig {params(<span class="hljs-symbol">xs:</span> T::Array[String]).void.checked(
 <span class="hljs-comment"># (3) Never runs the runtime checks. Careful!</span>
 sig {params(<span class="hljs-symbol">xs:</span> T::Array[String]).void.checked(<span class="hljs-symbol">:never</span>)}
 </code></pre>
-<p>If <code>.checked(...)</code> is omitted on a sig, the default is <code>.checked(:always)</code>. The
-default checked level can also be configured. For example:</p>
+<p>If <code>.checked(...)</code> is omitted on a sig, the default is <code>.checked(:always)</code>. The default checked level can also be configured. For example:</p>
 <pre><code class="hljs css language-ruby">T::Configuration.default_checked_level = <span class="hljs-symbol">:tests</span>
 </code></pre>
-<p>This can also be set via the <code>SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL</code> environment
-variable, see <a href="/docs/tconfiguration#environment-variables">Environment Variables</a>
-for more.</p>
-<p>Writing this will make it so that any sig which does not have a <code>.checked(...)</code>
-call in it will behave as if the user had written <code>.checked(:tests)</code>. To prevent
-accidental misuse, <code>sorbet-runtime</code> will require that this setting is changed
-before any <code>sig</code> is evaluated at runtime.</p>
-<p><strong>Note</strong>: For <code>.checked(:tests)</code> to work correctly, checking in tests must be
-enabled in every entry point into the tests. To declare that a certain entry
-point is a test, run:</p>
+<p>This can also be set via the <code>SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL</code> environment variable, see <a href="/docs/tconfiguration#environment-variables">Environment Variables</a> for more.</p>
+<p>Writing this will make it so that any sig which does not have a <code>.checked(...)</code> call in it will behave as if the user had written <code>.checked(:tests)</code>. To prevent accidental misuse, <code>sorbet-runtime</code> will require that this setting is changed before any <code>sig</code> is evaluated at runtime.</p>
+<p><strong>Note</strong>: For <code>.checked(:tests)</code> to work correctly, checking in tests must be enabled in every entry point into the tests. To declare that a certain entry point is a test, run:</p>
 <pre><code class="hljs css language-ruby">T::Configuration.enable_checking_for_sigs_marked_checked_tests
 </code></pre>
-<p>This can also be set via the <code>SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS</code>
-environment variable, see
-<a href="/docs/tconfiguration#environment-variables">Environment Variables</a> for more.</p>
-<p>For example, this should probably be placed as the first line of any <code>rake test</code>
-target, as well as any other entry point to a project’s tests. If this line is
-absent, <code>.checked(:tests)</code> sigs behave as if they had been <code>.checked(:never)</code>.</p>
+<p>This can also be set via the <code>SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS</code> environment variable, see <a href="/docs/tconfiguration#environment-variables">Environment Variables</a> for more.</p>
+<p>For example, this should probably be placed as the first line of any <code>rake test</code> target, as well as any other entry point to a project’s tests. If this line is absent, <code>.checked(:tests)</code> sigs behave as if they had been <code>.checked(:never)</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="tsigwithoutruntimesig"></a><a href="#tsigwithoutruntimesig" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T::Sig::WithoutRuntime.sig</code></h2>
-<p>Even with <code>.checked(:never)</code>, there is some slight runtime overhead. The block
-for a <code>sig {...}</code> above a method is not evaluated until the first time that
-method is called. But Sorbet can only know whether a sig is <code>.checked(:never)</code>
-or not until the block is evaluated. So even if a sig is marked
-<code>.checked(:never)</code>, Sorbet will still wrap the method. The first time the method
-is called, Sorbet will discover the <code>.checked(:never)</code> and put back the original
-method.</p>
-<p>Sometimes even this tiny amount of runtime metaprogramming is unacceptable at
-runtime. To completely eliminate all runtime side effects when defining a
-signature, replace <code>sig</code> with <code>T::Sig::WithoutRuntime.sig</code> when annotating
-methods:</p>
+<p>Even with <code>.checked(:never)</code>, there is some slight runtime overhead. The block for a <code>sig {...}</code> above a method is not evaluated until the first time that method is called. But Sorbet can only know whether a sig is <code>.checked(:never)</code> or not until the block is evaluated. So even if a sig is marked <code>.checked(:never)</code>, Sorbet will still wrap the method. The first time the method is called, Sorbet will discover the <code>.checked(:never)</code> and put back the original method.</p>
+<p>Sometimes even this tiny amount of runtime metaprogramming is unacceptable at runtime. To completely eliminate all runtime side effects when defining a signature, replace <code>sig</code> with <code>T::Sig::WithoutRuntime.sig</code> when annotating methods:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 <span class="hljs-keyword">require</span> <span class="hljs-string">"sorbet-runtime"</span>
 
@@ -323,41 +245,23 @@ methods:</p>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p><strong>Note</strong>: For consistency in large codebases, it’s best to avoid
-<code>T::Sig::WithoutRuntime</code> unless it can’t be avoided, because the performance win
-versus simply using <code>.checked(:never)</code> is marginal. Some examples:</p>
+<p><strong>Note</strong>: For consistency in large codebases, it’s best to avoid <code>T::Sig::WithoutRuntime</code> unless it can’t be avoided, because the performance win versus simply using <code>.checked(:never)</code> is marginal. Some examples:</p>
 <ul>
-<li>Circumstances make it impossible to put <code>extend T::Sig</code> in the class, but
-<code>sorbet-runtime</code> is still loaded.</li>
-<li>The method is <code>method_missing</code> or <code>respond_to_missing?</code>, as <code>sorbet-runtime</code>
-does not support wrapping these methods.</li>
-<li>Some code not under your control is trying to reflect on the result of
-<code>.parameters</code> or <code>.arity</code> of the sig’ed method. (Note that this precludes code
-under <em>your</em> control: Sorbet provides <a href="https://github.com/sorbet/sorbet/blob/0dbaf2c465314556b5acecec6ec63937f2b9e836/gems/sorbet-runtime/lib/types/utils.rb#L63-L68"><code>T::Utils.signature_for_method</code></a>, which
-exposes the arity of the underlying method.)</li>
-<li>After careful measurements, even the first call to a method is performance
-sensitive. This is rare, but can happen when trying to optimize speed of code
-loading specifically.</li>
+<li>Circumstances make it impossible to put <code>extend T::Sig</code> in the class, but <code>sorbet-runtime</code> is still loaded.</li>
+<li>The method is <code>method_missing</code> or <code>respond_to_missing?</code>, as <code>sorbet-runtime</code> does not support wrapping these methods.</li>
+<li>Some code not under your control is trying to reflect on the result of <code>.parameters</code> or <code>.arity</code> of the sig’ed method. (Note that this precludes code under <em>your</em> control: Sorbet provides <a href="https://github.com/sorbet/sorbet/blob/0dbaf2c465314556b5acecec6ec63937f2b9e836/gems/sorbet-runtime/lib/types/utils.rb#L63-L68"><code>T::Utils.signature_for_method</code></a>, which exposes the arity of the underlying method.)</li>
+<li>After careful measurements, even the first call to a method is performance sensitive. This is rare, but can happen when trying to optimize speed of code loading specifically.</li>
 </ul>
-<p>If none of these reasons apply, it’s best to avoid <code>T::Sig::WithoutRuntime</code>,
-because it will stand out versus most other usages of <code>sig</code> in a codebase.</p>
+<p>If none of these reasons apply, it’s best to avoid <code>T::Sig::WithoutRuntime</code>, because it will stand out versus most other usages of <code>sig</code> in a codebase.</p>
 <h2><a class="anchor" aria-hidden="true" id="tlet-tcast-tmust-tbind"></a><a href="#tlet-tcast-tmust-tbind" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>T.let, T.cast, T.must, T.bind</h2>
-<p>Type assertions like <code>T.let</code>, <code>T.cast</code>, <code>T.must</code>, and <code>T.bind</code> are normally
-checked at runtime, just like <code>sig</code> annotations on methods, unless runtime
-checks have been disabled.</p>
-<p>Unlike method signatures, type assertions <em>always</em> have a performance cost,
-whether or not they are checked at runtime. See
-<a href="/docs/type-assertions">Type Assertions</a> for tips on patterns that reduce or avoid
-this cost.</p>
+<p>Type assertions like <code>T.let</code>, <code>T.cast</code>, <code>T.must</code>, and <code>T.bind</code> are normally checked at runtime, just like <code>sig</code> annotations on methods, unless runtime checks have been disabled.</p>
+<p>Unlike method signatures, type assertions <em>always</em> have a performance cost, whether or not they are checked at runtime. See <a href="/docs/type-assertions">Type Assertions</a> for tips on patterns that reduce or avoid this cost.</p>
 <h2><a class="anchor" aria-hidden="true" id="whats-next"></a><a href="#whats-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s next?</h2>
 <ul>
 <li><p><a href="/docs/sigs">Signatures</a></p>
-<p>Method signatures are the primary way that we add static and dynamic type
-checking in our code. Learn the available syntax advanced features of
-signatures.</p></li>
+<p>Method signatures are the primary way that we add static and dynamic type checking in our code. Learn the available syntax advanced features of signatures.</p></li>
 <li><p><a href="/docs/tconfiguration">Runtime Configuration</a></p>
-<p>Learn how to change or disable Sorbet’s runtime type checks via settings and
-callbacks.</p></li>
+<p>Learn how to change or disable Sorbet’s runtime type checks via settings and callbacks.</p></li>
 </ul>
 <hr class="footnotes-sep">
 <section class="footnotes">

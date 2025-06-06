@@ -62,19 +62,11 @@
         </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/overview.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Overview</h1></header><article><div><span><p>Type checking with Sorbet is composed of two key components:</p>
 <ul>
 <li><p><code>srb</code></p>
-<p>This is the command-line interface to Sorbet. It includes the core type
-checker, which analyzes a project <strong>statically</strong> (before the code runs) to
-report potential mistakes in the code. It also contains utilities to set up a
-project to work with Sorbet for the first time.</p></li>
+<p>This is the command-line interface to Sorbet. It includes the core type checker, which analyzes a project <strong>statically</strong> (before the code runs) to report potential mistakes in the code. It also contains utilities to set up a project to work with Sorbet for the first time.</p></li>
 <li><p><code>sorbet-runtime</code></p>
-<p>This is the gem that enables adding type annotations to normal Ruby code. It
-exposes the top-level <code>T</code> namespace and the <code>sig</code> method, which we’ll see more
-of in <a href="/docs/sigs">Signatures</a>. It also <strong>dynamically</strong> type checks the code
-while it runs.</p></li>
+<p>This is the gem that enables adding type annotations to normal Ruby code. It exposes the top-level <code>T</code> namespace and the <code>sig</code> method, which we’ll see more of in <a href="/docs/sigs">Signatures</a>. It also <strong>dynamically</strong> type checks the code while it runs.</p></li>
 </ul>
-<p>These two components are developed in tandem, and in fact compound each others’
-guarantees. Sorbet makes predictions about the runtime, and the runtime enforces
-those predictions with contracts.</p>
+<p>These two components are developed in tandem, and in fact compound each others’ guarantees. Sorbet makes predictions about the runtime, and the runtime enforces those predictions with contracts.</p>
 <p>Here’s a taste of what Sorbet can do:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 <span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
@@ -101,8 +93,7 @@ those predictions with contracts.</p>
 <li><p><a href="/docs/adopting">Adopting Sorbet</a></p>
 <p>Learn how to adopt Sorbet in an existing codebase.</p></li>
 <li><p><a href="/docs/gradual">Gradual Type Checking and Sorbet</a></p>
-<p>Learn about how Sorbet works, and how it’s different from other type systems
-you might be familiar with.</p></li>
+<p>Learn about how Sorbet works, and how it’s different from other type systems you might be familiar with.</p></li>
 <li><p><a href="/docs/static">Enabling Static Checks</a></p>
 <p>Learn how to get <strong>more power</strong> out of Sorbet by enabling static checks.</p></li>
 <li><p><a href="/docs/runtime">Enabling Runtime Checks</a></p>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Flow-Sensitive Typing · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Sorbet implements a **control flow-sensitive** type system. It models control"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Flow-Sensitive Typing · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="Sorbet implements a **control flow-sensitive** type system. It models control"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Flow-Sensitive Typing · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Sorbet implements a **control flow-sensitive** type system. It models control flow through a program and uses it to track the program&#x27;s types more accurately.[^control]"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Flow-Sensitive Typing · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="Sorbet implements a **control flow-sensitive** type system. It models control flow through a program and uses it to track the program&#x27;s types more accurately.[^control]"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments); }
               gtag('js', new Date());
@@ -59,9 +59,7 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/flow-sensitive.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Flow-Sensitive Typing</h1></header><article><div><span><p>Sorbet implements a <strong>control flow-sensitive</strong> type system. It models control
-flow through a program and uses it to track the program’s types more
-accurately.<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p>
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/flow-sensitive.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Flow-Sensitive Typing</h1></header><article><div><span><p>Sorbet implements a <strong>control flow-sensitive</strong> type system. It models control flow through a program and uses it to track the program’s types more accurately.<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p>
 <!-- prettier-ignore-start -->
 <!-- prettier-ignore-end -->
 <h2><a class="anchor" aria-hidden="true" id="example"></a><a href="#example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h2>
@@ -85,8 +83,7 @@ sig {params(<span class="hljs-symbol">x:</span> T.nilable(String), <span class="
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>In this example, we ask Sorbet (<a href="/docs/troubleshooting">using T.reveal_type</a>) what
-the type of <code>x</code> is at three places, and get different answers each time:</p>
+<p>In this example, we ask Sorbet (<a href="/docs/troubleshooting">using T.reveal_type</a>) what the type of <code>x</code> is at three places, and get different answers each time:</p>
 <ul>
 <li>Outside the <code>if</code>, Sorbet only knows what the <code>sig</code> said about <code>x</code>.</li>
 <li>In the <code>if</code> branch, Sorbet knows <code>x</code> is <strong>not</strong> <code>nil</code>.</li>
@@ -121,27 +118,20 @@ sig {params(<span class="hljs-symbol">x:</span> Object).void}
 <p>The complete list of constructs that affect Sorbet’s flow-sensitive typing:</p>
 <ul>
 <li><code>if</code> expressions / <code>case</code> expressions</li>
-<li><code>is_a?</code> / <code>kind_of?</code> / <code>instance_of?</code> (check if an object is an instance of a
-specific class. Note that <code>instance_of?</code> checks that the class matches exactly
-while the others consult the inheritance chain)</li>
+<li><code>is_a?</code> / <code>kind_of?</code> / <code>instance_of?</code> (check if an object is an instance of a specific class. Note that <code>instance_of?</code> checks that the class matches exactly while the others consult the inheritance chain)</li>
 <li><code>nil?</code></li>
-<li><code>blank?</code> / <code>present?</code> (these assume a Rails-compatible monkey patch on both
-<code>NilClass</code> and <code>Object</code>)</li>
+<li><code>blank?</code> / <code>present?</code> (these assume a Rails-compatible monkey patch on both <code>NilClass</code> and <code>Object</code>)</li>
 <li><code>Module#===</code> (this is how <code>case</code> on a class object works)</li>
-<li><code>Module#&lt;</code>, <code>Module#&lt;=</code> (like <code>is_a?</code>, but for class objects instead of
-instances of classes)</li>
+<li><code>Module#&lt;</code>, <code>Module#&lt;=</code> (like <code>is_a?</code>, but for class objects instead of instances of classes)</li>
 <li>Negated conditions (including both <code>!</code> and <code>unless</code>)</li>
 <li>Truthiness (everything but <code>nil</code> and <code>false</code> is truthy in Ruby)</li>
 <li><code>block_given?</code> (internally, this is a special case of truthiness)</li>
 </ul>
 <blockquote>
-<p><strong>Warning</strong>: Sorbet’s analysis for these constructs hinges on them not being
-overridden! For example, Sorbet can behave unpredictably when overriding
-<code>is_a?</code> in weird ways.</p>
+<p><strong>Warning</strong>: Sorbet’s analysis for these constructs hinges on them not being overridden! For example, Sorbet can behave unpredictably when overriding <code>is_a?</code> in weird ways.</p>
 </blockquote>
 <h2><a class="anchor" aria-hidden="true" id="what-about-respond_to"></a><a href="#what-about-respond_to" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What about <code>respond_to?</code>?</h2>
-<p>Sorbet cannot support flow sensitivity for <code>respond_to?</code> in the way that most
-people expect.</p>
+<p>Sorbet cannot support flow sensitivity for <code>respond_to?</code> in the way that most people expect.</p>
 <p>For example:</p>
 <pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">x:</span> Object).void}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">flow_sensitivity</span><span class="hljs-params">(x)</span></span>
@@ -152,32 +142,15 @@ people expect.</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>In this example, knowing that <code>x</code> responds to a method with the name <code>foo</code> does
-not tell Sorbet anything more specific about the type for <code>x</code>. Sorbet does not
-have any sort of duck-typed interfaces that let Sorbet update its knowledge of
-the type of <code>x</code> to &quot;<code>Object</code> plus responds to <code>foo</code>&quot;, so it must keep the type
-of <code>x</code> at <code>Object</code>, which does not allow calling <code>foo</code>.</p>
-<p>Note that even if Sorbet did support such a type, it’s likely that
-flow-sensitive type updates for <code>respond_to?</code> would <em>still</em> not be supported,
-because knowing that the method <code>foo</code> exists says nothing about what parameters
-that method expects, what their types are, or what the return type of that
-function is.</p>
-<p>It’s possible that someday Sorbet could support a limited form of
-<code>x.respond_to?(:foo)</code> when one of the component types of <code>x</code> is a type which has
-a known method called <code>foo</code>. There is more information
-<a href="https://github.com/sorbet/sorbet/issues/3469">in this issue</a>, which details the
-implementation complexity and limitations involved in supporting such a feature.</p>
-<p>Code making the most of Sorbet is best written to avoid needing to use
-<code>respond_to?</code>. Some alternatives include:</p>
+<p>In this example, knowing that <code>x</code> responds to a method with the name <code>foo</code> does not tell Sorbet anything more specific about the type for <code>x</code>. Sorbet does not have any sort of duck-typed interfaces that let Sorbet update its knowledge of the type of <code>x</code> to &quot;<code>Object</code> plus responds to <code>foo</code>&quot;, so it must keep the type of <code>x</code> at <code>Object</code>, which does not allow calling <code>foo</code>.</p>
+<p>Note that even if Sorbet did support such a type, it’s likely that flow-sensitive type updates for <code>respond_to?</code> would <em>still</em> not be supported, because knowing that the method <code>foo</code> exists says nothing about what parameters that method expects, what their types are, or what the return type of that function is.</p>
+<p>It’s possible that someday Sorbet could support a limited form of <code>x.respond_to?(:foo)</code> when one of the component types of <code>x</code> is a type which has a known method called <code>foo</code>. There is more information <a href="https://github.com/sorbet/sorbet/issues/3469">in this issue</a>, which details the implementation complexity and limitations involved in supporting such a feature.</p>
+<p>Code making the most of Sorbet is best written to avoid needing to use <code>respond_to?</code>. Some alternatives include:</p>
 <ul>
-<li>Use <a href="/docs/union-types">union types</a> alongside one of the flow-sensitivity
-mechanisms that Sorbet already understands, like <code>is_a?</code> or <code>case</code></li>
-<li>Use <a href="/docs/abstract">interface types</a> to require that a given interface method
-must exist.</li>
+<li>Use <a href="/docs/union-types">union types</a> alongside one of the flow-sensitivity mechanisms that Sorbet already understands, like <code>is_a?</code> or <code>case</code></li>
+<li>Use <a href="/docs/abstract">interface types</a> to require that a given interface method must exist.</li>
 </ul>
-<p>If using <code>respond_to?</code> is absolutely necessary, use
-<a href="/docs/troubleshooting#escape-hatches"><code>T.unsafe</code></a> to call the method after
-checking for its existence:</p>
+<p>If using <code>respond_to?</code> is absolutely necessary, use <a href="/docs/troubleshooting#escape-hatches"><code>T.unsafe</code></a> to call the method after checking for its existence:</p>
 <pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">x:</span> Object).void}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">flow_sensitivity</span><span class="hljs-params">(x)</span></span>
   <span class="hljs-keyword">if</span> x.respond_to?(<span class="hljs-symbol">:foo</span>)
@@ -187,11 +160,7 @@ checking for its existence:</p>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="flow-sensitivity-and-the-singleton-module"></a><a href="#flow-sensitivity-and-the-singleton-module" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Flow-sensitivity and the <code>Singleton</code> module</h2>
-<p>Ruby has a module in the standard library called
-<a href="https://ruby-doc.org/stdlib-3.1.2/libdoc/singleton/rdoc/Singleton.html"><code>'singleton'</code></a>,
-which can be used to create a class that has exactly one instance. Sorbet has
-special support for flow-sensitivity on classes that include <code>Singleton</code> and
-also are marked <a href="/docs/final"><code>final!</code></a>:</p>
+<p>Ruby has a module in the standard library called <a href="https://ruby-doc.org/stdlib-3.1.2/libdoc/singleton/rdoc/Singleton.html"><code>'singleton'</code></a>, which can be used to create a class that has exactly one instance. Sorbet has special support for flow-sensitivity on classes that include <code>Singleton</code> and also are marked <a href="/docs/final"><code>final!</code></a>:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 extend T::Sig
 <span class="hljs-keyword">require</span> <span class="hljs-string">'singleton'</span>
@@ -231,66 +200,35 @@ sig {params(<span class="hljs-symbol">x:</span> T.nilable(Integer)).void}
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0Arequire%20'singleton'%0A%0Aclass%20Unset%0A%20%20include%20Singleton%0A%20%20extend%20T%3A%3AHelpers%0A%20%20final!%0Aend%0A%0Asig%20%7Bparams%28x%3A%20T.nilable%28T.any%28Unset%2C%20Integer%29%29%29.void%7D%0Adef%20example1%28x%3A%20Unset.instance%29%0A%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60T.nilable%28T.any%28Unset%2C%20Integer%29%29%0A%0A%20%20%23%20%60%3D%3D%60%20comparisons%20on%20Singleton%20types%20update%20the%20type%20in%0A%20%20%23%20both%20the%20%60if%60%20and%20the%20%60else%60%20case%3A%0A%0A%20%20if%20x%20%3D%3D%20Unset.instance%0A%20%20%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60Unset%60%0A%20%20else%0A%20%20%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60T.nilable%28Integer%29%60%0A%20%20end%0Aend%0A%0Asig%20%7Bparams%28x%3A%20T.nilable%28Integer%29%29.void%7D%0Adef%20example2%28x%3A%20nil%29%0A%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60T.nilable%28Integer%29%0A%20%20if%20x%20%3D%3D%200%0A%20%20%20%20%23%20All%20%60%3D%3D%60%20comparisons%20on%20non-Singleton%20types%20only%20update%0A%20%20%20%20%23%20the%20type%20if%20the%20type%20test%20is%20true.%0A%20%20%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60Integer%60%0A%20%20else%0A%20%20%20%20%23%20When%20the%20%60%3D%3D%60%20comparison%20above%20is%20false%2C%20the%20type%20of%20%60x%60%0A%20%20%20%20%23%20remains%20identical%20to%20what%20it%20was%20outside%20the%20%60if%60.%0A%20%20%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60T.nilable%28Integer%29%60%0A%20%20end%0Aend">→ View on sorbet.run</a></p>
-<p>As mentioned in the example above, normally <code>==</code> only gives additional,
-flow-sensitive information about the type of a variable in the case that the
-type test was truthy.</p>
-<p>But as we see within the <code>example1</code> method above, using <code>==</code> on a <code>Singleton</code>
-value will allow Sorbet to update its knowledge about the type of <code>x</code> both when
-the <code>==</code> comparison is true and when it is false.</p>
-<p>As seen shown in the example above, this technique can be useful to distinguish
-between cases when a possibly-<code>nil</code>, optional argument was explicitly passed at
-the call site and set to <code>nil</code>, or when a value was omitted at the call site and
-the default value of <code>Unset.instance</code> was used.</p>
-<p>Note that using <code>final!</code> is required, as without it, the <code>==</code> comparison could
-return <code>true</code> in the presence of subclasses of <code>Singleton</code> classes.</p>
+<p>As mentioned in the example above, normally <code>==</code> only gives additional, flow-sensitive information about the type of a variable in the case that the type test was truthy.</p>
+<p>But as we see within the <code>example1</code> method above, using <code>==</code> on a <code>Singleton</code> value will allow Sorbet to update its knowledge about the type of <code>x</code> both when the <code>==</code> comparison is true and when it is false.</p>
+<p>As seen shown in the example above, this technique can be useful to distinguish between cases when a possibly-<code>nil</code>, optional argument was explicitly passed at the call site and set to <code>nil</code>, or when a value was omitted at the call site and the default value of <code>Unset.instance</code> was used.</p>
+<p>Note that using <code>final!</code> is required, as without it, the <code>==</code> comparison could return <code>true</code> in the presence of subclasses of <code>Singleton</code> classes.</p>
 <p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0Arequire%20'singleton'%0A%0Aclass%20Unset%0A%20%20include%20Singleton%0A%20%20extend%20T%3A%3AHelpers%0Aend%0A%0Aclass%20UnsetChild%20%3C%20Unset%3B%20end%0A%0Asig%20%7Bparams%28x%3A%20T.nilable%28T.any%28Unset%2C%20Integer%29%29%29.void%7D%0Adef%20example1%28x%3A%20Unset.instance%29%0A%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60T.nilable%28T.any%28Unset%2C%20Integer%29%29%0A%0A%20%20if%20x%20%3D%3D%20Unset.instance%0A%20%20%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60Unset%60%0A%20%20else%0A%20%20%20%20%23%20Can%20still%20reach%20here%20because%20any%20number%20of%20child%20classes%0A%20%20%20%20%23%20of%20%60Unset%60%20could%20also%20exist%2C%20so%20Sorbet%20has%20to%20think%20that%0A%20%20%20%20%23%20the%20type%20could%20still%20include%20%60Unset%60%0A%20%20%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60T.nilable%28T.any%28Unset%2C%20Integer%29%29%0A%20%20end%0Aend%0A%0Aexample1%28x%3A%20UnsetChild.instance%29">→ Example of <code>Singleton</code> but not <code>final!</code></a></p>
 <h2><a class="anchor" aria-hidden="true" id="limitations-of-flow-sensitivity"></a><a href="#limitations-of-flow-sensitivity" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Limitations of flow-sensitivity</h2>
-<p>An alternative title for this section: &quot;<em>Why does Sorbet think this is nil? I
-just checked that it’s not!</em>&quot;</p>
-<p>Flow-sensitive type checking only works for local variables, not for values
-returned from method calls. Why? Sorbet can’t know that if a method is called
-twice in a row that it returns the same thing each time. Put another way, Sorbet
-never assumes that a method call is <strong>pure</strong>.</p>
-<p>For example, consider that we have some method <code>maybe_int</code> which when called
-either returns an Integer or <code>nil</code>. This code doesn’t typecheck:</p>
+<p>An alternative title for this section: &quot;<em>Why does Sorbet think this is nil? I just checked that it’s not!</em>&quot;</p>
+<p>Flow-sensitive type checking only works for local variables, not for values returned from method calls. Why? Sorbet can’t know that if a method is called twice in a row that it returns the same thing each time. Put another way, Sorbet never assumes that a method call is <strong>pure</strong>.</p>
+<p>For example, consider that we have some method <code>maybe_int</code> which when called either returns an Integer or <code>nil</code>. This code doesn’t typecheck:</p>
 <pre><code class="hljs css language-ruby">x = !maybe_int.<span class="hljs-literal">nil</span>? &amp;&amp; (<span class="hljs-number">2</span> * maybe_int)
 </code></pre>
-<p>This problem is subtle because <code>maybe_int</code> looks like a variable when it’s
-actually a method! Things become more clear if we rewrite that last line like
-this:</p>
+<p>This problem is subtle because <code>maybe_int</code> looks like a variable when it’s actually a method! Things become more clear if we rewrite that last line like this:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># This is the same as above:</span>
 x = !maybe_int().<span class="hljs-literal">nil</span>? &amp;&amp; (<span class="hljs-number">2</span> * maybe_int())
 </code></pre>
-<p>Sorbet can’t know that two calls to <code>maybe_int</code> return identical things because,
-in general, methods are not pure. The solution is to store the result of the
-method call in a <strong>temporary variable</strong>:</p>
+<p>Sorbet can’t know that two calls to <code>maybe_int</code> return identical things because, in general, methods are not pure. The solution is to store the result of the method call in a <strong>temporary variable</strong>:</p>
 <pre><code class="hljs css language-ruby">tmp = maybe_int
 y = !tmp.<span class="hljs-literal">nil</span>? &amp;&amp; (<span class="hljs-number">2</span> * tmp)
 </code></pre>
-<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Breturns(T.nilable(Integer))%7D%0Adef%20maybe_int%3B%201%3B%20end%0A%0A%23%20Problem%3A%0Ax%20%3D%20!maybe_int.nil%3F%20%26%26%20(2%20*%20maybe_int)%0A%0A%23%20%5E%20this%20is%20essentially%3A%0A%23%20x%20%3D%20!maybe_int().nil%3F%20%26%26%20(2%20*%20maybe_int())%0A%0A%23%20Solution%3A%0Atmp%20%3D%20maybe_int%0Ay%20%3D%20!tmp.nil%3F%20%26%26%20(2%20*%20tmp)">→
-View full example on sorbet.run</a></p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Breturns(T.nilable(Integer))%7D%0Adef%20maybe_int%3B%201%3B%20end%0A%0A%23%20Problem%3A%0Ax%20%3D%20!maybe_int.nil%3F%20%26%26%20(2%20*%20maybe_int)%0A%0A%23%20%5E%20this%20is%20essentially%3A%0A%23%20x%20%3D%20!maybe_int().nil%3F%20%26%26%20(2%20*%20maybe_int())%0A%0A%23%20Solution%3A%0Atmp%20%3D%20maybe_int%0Ay%20%3D%20!tmp.nil%3F%20%26%26%20(2%20*%20tmp)">→ View full example on sorbet.run</a></p>
 <blockquote>
-<p><strong>Note</strong>: Many Ruby constructs that look like local variables are actually
-method calls without parens! Specifically, watch out for <code>attr_reader</code> and
-zero-argument method definitions.</p>
+<p><strong>Note</strong>: Many Ruby constructs that look like local variables are actually method calls without parens! Specifically, watch out for <code>attr_reader</code> and zero-argument method definitions.</p>
 </blockquote>
-<p>Note that given Sorbet’s architecture, it’s not possible to implement some sort
-of annotation that would mark a method as “pure” or “constant,” declaring that a
-method always returns the same value across consecutive calls to the method
-(this also precludes special support for methods defined via <code>const</code> or
-<code>attr_reader</code>). For more information on why, see
-<a href="https://blog.jez.io/syntactic-control-flow/">this blog post</a> which explains
-that control flow in Sorbet is a syntactic property, not a semantic property
-(which could be influenced by semantic annotations like this).</p>
+<p>Note that given Sorbet’s architecture, it’s not possible to implement some sort of annotation that would mark a method as “pure” or “constant,” declaring that a method always returns the same value across consecutive calls to the method (this also precludes special support for methods defined via <code>const</code> or <code>attr_reader</code>). For more information on why, see <a href="https://blog.jez.io/syntactic-control-flow/">this blog post</a> which explains that control flow in Sorbet is a syntactic property, not a semantic property (which could be influenced by semantic annotations like this).</p>
 <h2><a class="anchor" aria-hidden="true" id="tips"></a><a href="#tips" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Tips</h2>
-<p>These are some helpful tips for helping Sorbet track the types of expressions
-throughout a program.</p>
+<p>These are some helpful tips for helping Sorbet track the types of expressions throughout a program.</p>
 <h3><a class="anchor" aria-hidden="true" id="prefer-xscompact-to-xsrejectnil"></a><a href="#prefer-xscompact-to-xsrejectnil" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Prefer <code>xs.compact</code> to <code>xs.reject(&amp;:nil?)</code></h3>
-<p>Sorbet does not use the boolean predicate accepted by methods like
-<code>Array#select</code>, <code>Array#filter</code>, or <code>Array#reject</code> to infer a more narrow type
-about the element of the list.</p>
-<p>To remove the <code>nil</code> values from an Array and have Sorbet understand that they
-are gone, use <code>Array#compact</code> instead:</p>
+<p>Sorbet does not use the boolean predicate accepted by methods like <code>Array#select</code>, <code>Array#filter</code>, or <code>Array#reject</code> to infer a more narrow type about the element of the list.</p>
+<p>To remove the <code>nil</code> values from an Array and have Sorbet understand that they are gone, use <code>Array#compact</code> instead:</p>
 <pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">xs:</span> T::Array[T.nilable(Integer)]).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(xs)</span></span>
   ys = xs.reject(&amp;<span class="hljs-symbol">:nil?</span>)
@@ -300,14 +238,10 @@ are gone, use <code>Array#compact</code> instead:</p>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p><a
-href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.nilable%28Integer%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.reject%28%26%3Anil%3F%29%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20still%20nilable%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.compact%20%23%20%3C-%20non-nil%20%E2%9C%85%0Aend">View
-on sorbet.run</a></p>
+href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.nilable%28Integer%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.reject%28%26%3Anil%3F%29%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20still%20nilable%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.compact%20%23%20%3C-%20non-nil%20%E2%9C%85%0Aend">View on sorbet.run</a></p>
 <h3><a class="anchor" aria-hidden="true" id="prefer-xsgrepa-to-xsfilter--x-xis_aa-"></a><a href="#prefer-xsgrepa-to-xsfilter--x-xis_aa-" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Prefer <code>xs.grep(A)</code> to <code>xs.filter { |x| x.is_a?(A) }</code></h3>
-<p>Sorbet does not use the boolean predicate accepted by methods like
-<code>Array#select</code>, <code>Array#filter</code>, or <code>Array#reject</code> to infer a more narrow type
-about the element of the list.</p>
-<p>For the specific case of filtering a list using <code>is_a?</code>, prefer using
-<code>Enumerable#grep</code>:</p>
+<p>Sorbet does not use the boolean predicate accepted by methods like <code>Array#select</code>, <code>Array#filter</code>, or <code>Array#reject</code> to infer a more narrow type about the element of the list.</p>
+<p>For the specific case of filtering a list using <code>is_a?</code>, prefer using <code>Enumerable#grep</code>:</p>
 <pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">xs:</span> T::Array[T.any(Integer, String)]).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(xs)</span></span>
   ys = xs.select { <span class="hljs-params">|x|</span> x.is_a?(Integer) }
@@ -317,8 +251,7 @@ about the element of the list.</p>
   T.reveal_type(ys) <span class="hljs-comment"># &lt;- only Integers ✅</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.any%28Integer%2C%20String%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.select%20%7B%20%7Cx%7C%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20not%20just%20Integer%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.grep%28Integer%29%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20only%20Integers%20%E2%9C%85%0Aend">View
-on sorbet.run</a></p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.any%28Integer%2C%20String%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.select%20%7B%20%7Cx%7C%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20not%20just%20Integer%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.grep%28Integer%29%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20only%20Integers%20%E2%9C%85%0Aend">View on sorbet.run</a></p>
 <p>Two gotchas:</p>
 <ul>
 <li>This requires the RBI definitions inside Sorbet 0.5.11388 or higher.</li>
@@ -326,11 +259,8 @@ on sorbet.run</a></p>
 </ul>
 <p>If either of these gotchas apply, see the <code>filter_map</code> tip below.</p>
 <h3><a class="anchor" aria-hidden="true" id="prefer-xsfilter_map----to-xsfilter---"></a><a href="#prefer-xsfilter_map----to-xsfilter---" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Prefer <code>xs.filter_map { ... }</code> to <code>xs.filter { ... }</code></h3>
-<p>Sorbet does not use the boolean predicate accepted by methods like
-<code>Array#select</code>, <code>Array#filter</code>, or <code>Array#reject</code> to infer a more narrow type
-about the element of the list.</p>
-<p>For complicated flow-sensitive predicates (i.e., more than just checking for
-<code>nil?</code> or <code>is_a?</code>), use <code>Array#filter_map</code>. For example:</p>
+<p>Sorbet does not use the boolean predicate accepted by methods like <code>Array#select</code>, <code>Array#filter</code>, or <code>Array#reject</code> to infer a more narrow type about the element of the list.</p>
+<p>For complicated flow-sensitive predicates (i.e., more than just checking for <code>nil?</code> or <code>is_a?</code>), use <code>Array#filter_map</code>. For example:</p>
 <pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">xs:</span> T::Array[T.any(Integer, String)]).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(xs)</span></span>
   ys = xs.select { <span class="hljs-params">|x|</span> x.is_a?(Integer) &amp;&amp; x.even? }
@@ -341,13 +271,8 @@ about the element of the list.</p>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p><a
-href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.any%28Integer%2C%20String%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.select%20%7B%20%7Cx%7C%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20not%20just%20Integer%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.filter_map%20%7B%20%7Cx%7C%20x%20if%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20only%20integers%20%E2%9C%85%0Aend">View
-on sorbet.run</a></p>
-<p><code>Array#filter_map</code> removes any element for which the filter returns a falsy
-value. If the value is truthy, the value at that index is mapped to the new,
-truthy value. The <code>x if x.is_a?(Integer)</code> evaluates to <code>x</code> (an <code>Integer</code>, thus
-always truthy) if it’s an Integer, or implicitly returns <code>nil</code> (which is falsy)
-if it’s a String.</p>
+href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.any%28Integer%2C%20String%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.select%20%7B%20%7Cx%7C%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20not%20just%20Integer%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.filter_map%20%7B%20%7Cx%7C%20x%20if%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20only%20integers%20%E2%9C%85%0Aend">View on sorbet.run</a></p>
+<p><code>Array#filter_map</code> removes any element for which the filter returns a falsy value. If the value is truthy, the value at that index is mapped to the new, truthy value. The <code>x if x.is_a?(Integer)</code> evaluates to <code>x</code> (an <code>Integer</code>, thus always truthy) if it’s an Integer, or implicitly returns <code>nil</code> (which is falsy) if it’s a String.</p>
 <hr class="footnotes-sep">
 <section class="footnotes">
 <ol class="footnotes-list">

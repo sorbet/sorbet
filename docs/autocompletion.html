@@ -65,130 +65,71 @@
 </video>
 <p>Some basic features of autocompletion in Sorbet:</p>
 <ul>
-<li><p>Sorbet supports completion for method calls, local, instance, and class
-variables, Ruby keywords, classes, and constants.</p></li>
-<li><p>Completion items will include documentation for the suggestion, when
-available. Sorbet assumes that a comment immediately above the definition of
-things like classes, methods, and constants is the documentation for a given
-item.</p>
+<li><p>Sorbet supports completion for method calls, local, instance, and class variables, Ruby keywords, classes, and constants.</p></li>
+<li><p>Completion items will include documentation for the suggestion, when available. Sorbet assumes that a comment immediately above the definition of things like classes, methods, and constants is the documentation for a given item.</p>
 <p>Different language clients may or may not show this information by default.</p></li>
-<li><p>Completion items are sorted by inheritance. Methods defined lower in the
-inheritance hierarchy show up higher in the completion results. (This is not a
-perfect heuristic, but it is how Sorbet works.)</p></li>
+<li><p>Completion items are sorted by inheritance. Methods defined lower in the inheritance hierarchy show up higher in the completion results. (This is not a perfect heuristic, but it is how Sorbet works.)</p></li>
 </ul>
 <p>There are some more complicated features worth calling out in their own section.</p>
 <h2><a class="anchor" aria-hidden="true" id="troubleshooting"></a><a href="#troubleshooting" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Troubleshooting</h2>
 <h3><a class="anchor" aria-hidden="true" id="no-completion-results"></a><a href="#no-completion-results" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>No completion results</h3>
-<p>Support for autocompletion is minimal in <code># typed: false</code> files,
-<a href="/docs/lsp-typed-level#support-by-lsp-feature">like most other LSP features</a>.</p>
-<p>If the file is <code># typed: true</code> and there are still no completion results, it
-might be that Sorbet is busy with an ongoing operation. See
-<a href="/docs/server-status">Showing the Language Server Status</a> to understand what the
-server statuses mean, and whether Sorbet is able to respond to completion
-requests given a certain status.</p>
-<p>If Sorbet is “Idle” (or “Typechecking in background…”) and there are still no
-completion results, it might be that Sorbet failed to recover from a syntax
-error in the file. See
-<a href="#syntax-error-recovery-and-completion">Syntax error recovery and completion</a>.</p>
-<p>If there is no syntax error, it might be that the code path is unreachable.
-Sorbet does not show completion results for dead/unreachable code paths.</p>
+<p>Support for autocompletion is minimal in <code># typed: false</code> files, <a href="/docs/lsp-typed-level#support-by-lsp-feature">like most other LSP features</a>.</p>
+<p>If the file is <code># typed: true</code> and there are still no completion results, it might be that Sorbet is busy with an ongoing operation. See <a href="/docs/server-status">Showing the Language Server Status</a> to understand what the server statuses mean, and whether Sorbet is able to respond to completion requests given a certain status.</p>
+<p>If Sorbet is “Idle” (or “Typechecking in background…”) and there are still no completion results, it might be that Sorbet failed to recover from a syntax error in the file. See <a href="#syntax-error-recovery-and-completion">Syntax error recovery and completion</a>.</p>
+<p>If there is no syntax error, it might be that the code path is unreachable. Sorbet does not show completion results for dead/unreachable code paths.</p>
 <h3><a class="anchor" aria-hidden="true" id="wrong-completion-results"></a><a href="#wrong-completion-results" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Wrong completion results</h3>
-<p>If the completion results are present but look wrong, inspect the kind of
-completion item. For example, VS Code uses these icons to show the completion
-item kinds:</p>
+<p>If the completion results are present but look wrong, inspect the kind of completion item. For example, VS Code uses these icons to show the completion item kinds:</p>
 <p><img src="/img/lsp/vscode-completion-list.png" alt=""></p>
-<p>Sorbet will only ever return completion items with the kind <code>method</code>,
-<code>variable</code>, <code>field</code>, <code>class</code>, <code>interface</code>, <code>module</code>, <code>enum</code>, or <code>keyword</code> (and
-sometimes <code>snippet</code>).</p>
-<p><strong>Notably</strong>, the “abc” icon (<code>word</code>) means the results came either from VS
-Code’s <code>editor.wordBasedSuggestions</code> setting or some other generic autocomplete
-extension. (Or, if not using VS Code, then from some other plugin.) Sorbet
-<strong>never</strong> produces <code>word</code> completion items.</p>
-<p>In specific circumstances (see
-<a href="#completion-for-method-signatures">Completion for method signatures</a> and
-<a href="#completion-for-yard-snippets">Completion for YARD snippets</a>), Sorbet will also
-produce <code>snippet</code> items. In all other cases, <code>snippet</code> items come from some
-other snippet provider, not Sorbet.</p>
-<p>If the completion results still look wrong, please
-<a href="https://github.com/sorbet/sorbet/issues/new/choose">report a bug</a>.</p>
+<p>Sorbet will only ever return completion items with the kind <code>method</code>, <code>variable</code>, <code>field</code>, <code>class</code>, <code>interface</code>, <code>module</code>, <code>enum</code>, or <code>keyword</code> (and sometimes <code>snippet</code>).</p>
+<p><strong>Notably</strong>, the “abc” icon (<code>word</code>) means the results came either from VS Code’s <code>editor.wordBasedSuggestions</code> setting or some other generic autocomplete extension. (Or, if not using VS Code, then from some other plugin.) Sorbet <strong>never</strong> produces <code>word</code> completion items.</p>
+<p>In specific circumstances (see <a href="#completion-for-method-signatures">Completion for method signatures</a> and <a href="#completion-for-yard-snippets">Completion for YARD snippets</a>), Sorbet will also produce <code>snippet</code> items. In all other cases, <code>snippet</code> items come from some other snippet provider, not Sorbet.</p>
+<p>If the completion results still look wrong, please <a href="https://github.com/sorbet/sorbet/issues/new/choose">report a bug</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="syntax-error-recovery-and-completion"></a><a href="#syntax-error-recovery-and-completion" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Syntax error recovery and completion</h2>
-<p>One of the biggest reasons why Sorbet fails to produce completion results is
-because it failed to recover from a syntax error in the file.</p>
-<p>Sorbet has a custom Ruby syntax parser which attempts to recover from many
-common syntax errors, but it is not perfect. For example:</p>
+<p>One of the biggest reasons why Sorbet fails to produce completion results is because it failed to recover from a syntax error in the file.</p>
+<p>Sorbet has a custom Ruby syntax parser which attempts to recover from many common syntax errors, but it is not perfect. For example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
   x.
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>This Ruby program has a syntax error, and yet Sorbet is able to recover from it,
-understanding that this method contains a call on <code>x</code> which is missing the
-method name.</p>
-<p>To see all the known cases where Sorbet fails to recover from parsing a file
-with a syntax error, see
-<a href="https://github.com/sorbet/sorbet/issues?q=is%3Aissue+is%3Aopen+label%3Aparser">all issues labeled <code>parser</code></a>.</p>
-<p>The biggest known case where Sorbet fails to recover is with mismatched
-parentheses, brackets, and quotes.</p>
-<p>If you think you’ve found another example that Sorbet should be able to recover
-from, please open an issue. The <a href="https://sorbet.run">Sorbet Playground</a> allows
-showing the parse result for a file, which is useful for debugging whether
-Sorbet parsed or failed to parse a given syntax error: simply pass <a href="https://sorbet.run/?arg=--print=parse-tree-whitequark#%23%20typed%3A%20true%0A%23%20Craft%20your%20test%20case%2C%20then%20click%20%22Create%20issue%20with%20example%22%0A%23%20in%20the%20%22Examples%20%E2%98%B0%22%20menu%20above.%0Adef%20foo%0A%20%20puts%20'hello'%0Aend">the
-<code>?arg=--print=parse-tree-whitequark</code> flag</a> in the query string.</p>
+<p>This Ruby program has a syntax error, and yet Sorbet is able to recover from it, understanding that this method contains a call on <code>x</code> which is missing the method name.</p>
+<p>To see all the known cases where Sorbet fails to recover from parsing a file with a syntax error, see <a href="https://github.com/sorbet/sorbet/issues?q=is%3Aissue+is%3Aopen+label%3Aparser">all issues labeled <code>parser</code></a>.</p>
+<p>The biggest known case where Sorbet fails to recover is with mismatched parentheses, brackets, and quotes.</p>
+<p>If you think you’ve found another example that Sorbet should be able to recover from, please open an issue. The <a href="https://sorbet.run">Sorbet Playground</a> allows showing the parse result for a file, which is useful for debugging whether Sorbet parsed or failed to parse a given syntax error: simply pass <a href="https://sorbet.run/?arg=--print=parse-tree-whitequark#%23%20typed%3A%20true%0A%23%20Craft%20your%20test%20case%2C%20then%20click%20%22Create%20issue%20with%20example%22%0A%23%20in%20the%20%22Examples%20%E2%98%B0%22%20menu%20above.%0Adef%20foo%0A%20%20puts%20'hello'%0Aend">the <code>?arg=--print=parse-tree-whitequark</code> flag</a> in the query string.</p>
 <h2><a class="anchor" aria-hidden="true" id="completion-for-method-signatures"></a><a href="#completion-for-method-signatures" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Completion for method signatures</h2>
-<p>Sorbet can suggest signatures for methods without signatures. Simply typing
-<code>sig</code> above a method without a signature will trigger a completion item that
-expands to a snippet with one parameter in the <code>sig</code> for each parameter in the
-method definition immediately following the <code>sig</code>.</p>
-<p>For more information, see
-<a href="/docs/sig-suggestion">Automatically suggesting method signatures</a></p>
+<p>Sorbet can suggest signatures for methods without signatures. Simply typing <code>sig</code> above a method without a signature will trigger a completion item that expands to a snippet with one parameter in the <code>sig</code> for each parameter in the method definition immediately following the <code>sig</code>.</p>
+<p>For more information, see <a href="/docs/sig-suggestion">Automatically suggesting method signatures</a></p>
 <p><img src="/img/suggest-sig-completion-item-01.png" alt=""></p>
 <h2><a class="anchor" aria-hidden="true" id="pre-declared-snippets"></a><a href="#pre-declared-snippets" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Pre-declared snippets</h2>
-<p>Snippets expand a pre-defined template and allow pieces of the template to be
-filled in with values (most language clients allow pressing <code>TAB</code> to cycle
-through the parts of the template that need to be filled in).</p>
-<p>Sorbet includes some snippet autocompletion results. These show up in addition
-to any snippets that editors might already be configured with. Snippets from
-Sorbet always show up prefixed with <code>(sorbet)</code>:</p>
+<p>Snippets expand a pre-defined template and allow pieces of the template to be filled in with values (most language clients allow pressing <code>TAB</code> to cycle through the parts of the template that need to be filled in).</p>
+<p>Sorbet includes some snippet autocompletion results. These show up in addition to any snippets that editors might already be configured with. Snippets from Sorbet always show up prefixed with <code>(sorbet)</code>:</p>
 <p><img src="/img/lsp/struct-snippet.png" alt=""></p>
-<p>In VS Code, snippets also show up with a “square with dashed bottom line” icon.
-See <a href="#wrong-completion-results">Wrong completion results</a>.</p>
-<p>If a snippet has the “square with dashed bottom line” icon but does not start
-with <code>(sorbet)</code>, it came from some other extension in your developer environment
-and is configured separately.</p>
+<p>In VS Code, snippets also show up with a “square with dashed bottom line” icon. See <a href="#wrong-completion-results">Wrong completion results</a>.</p>
+<p>If a snippet has the “square with dashed bottom line” icon but does not start with <code>(sorbet)</code>, it came from some other extension in your developer environment and is configured separately.</p>
 <p>These are the snippets Sorbet includes.</p>
 <h3><a class="anchor" aria-hidden="true" id="snippets-for-all-ruby-keywords"></a><a href="#snippets-for-all-ruby-keywords" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Snippets for all Ruby keywords.</h3>
-<p>For example, typing <code>case</code> brings up a completion item which, when accepted,
-expands to</p>
+<p>For example, typing <code>case</code> brings up a completion item which, when accepted, expands to</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-keyword">case</span> expr
 <span class="hljs-keyword">when</span> expr
 
 <span class="hljs-keyword">else</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Other notable keyword snippets include snippets for <code>def</code>, <code>class</code>, <code>module</code>,
-and <code>if</code>.</p>
+<p>Other notable keyword snippets include snippets for <code>def</code>, <code>class</code>, <code>module</code>, and <code>if</code>.</p>
 <h3><a class="anchor" aria-hidden="true" id="snippets-for-sorbet-specific-constructs"></a><a href="#snippets-for-sorbet-specific-constructs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Snippets for Sorbet-specific constructs.</h3>
-<p>You can type <code>struct</code> or <code>enum</code> and have these auto-expand to
-<a href="/docs/tstruct">T::Struct</a> and <a href="/docs/tenum">T::Enum</a> classes:</p>
+<p>You can type <code>struct</code> or <code>enum</code> and have these auto-expand to <a href="/docs/tstruct">T::Struct</a> and <a href="/docs/tenum">T::Enum</a> classes:</p>
 <video autoplay loop muted playsinline style="max-width: calc(min(727px, 100%));">
   <source src="/img/lsp/struct-enum-snippet.mp4" type="video/mp4">
 </video>
-<p>The <code>struct</code> and <code>enum</code> snippet triggers are not methods that exist at runtime:
-they’re only indicators to Sorbet that you’re trying to define a <code>T::Struct</code> or
-<code>T::Enum</code>.</p>
-<p>These completions will only show up if there is no explicit receiver for a
-method call (e.g., <code>x.struct</code> will not show the <code>T::Struct</code> snippet suggestion,
-only <code>struct</code>).</p>
+<p>The <code>struct</code> and <code>enum</code> snippet triggers are not methods that exist at runtime: they’re only indicators to Sorbet that you’re trying to define a <code>T::Struct</code> or <code>T::Enum</code>.</p>
+<p>These completions will only show up if there is no explicit receiver for a method call (e.g., <code>x.struct</code> will not show the <code>T::Struct</code> snippet suggestion, only <code>struct</code>).</p>
 <h3><a class="anchor" aria-hidden="true" id="completion-for-yard-snippets"></a><a href="#completion-for-yard-snippets" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Completion for YARD snippets</h3>
 <p>Sorbet can suggest a YARD doc snippet for methods.</p>
 <video autoplay loop muted playsinline style="max-width: calc(min(813px, 100%));">
   <source src="/img/lsp/yard-snippet.mp4" type="video/mp4">
 </video>
-<p>It will appear after typing <code>##</code> above a Ruby method or signature, and
-pre-populate the snippet with one <code>@param</code> for each parameter the method has.
-Some reminders about these docs:</p>
+<p>It will appear after typing <code>##</code> above a Ruby method or signature, and pre-populate the snippet with one <code>@param</code> for each parameter the method has. Some reminders about these docs:</p>
 <ul>
-<li><p>Sorbet recognizes Markdown syntax in these docs, and VS Code will render the
-Markdown to rich text when showing the documentation.</p>
+<li><p>Sorbet recognizes Markdown syntax in these docs, and VS Code will render the Markdown to rich text when showing the documentation.</p>
 <p>Get creative and show examples of how to use your API!</p></li>
 <li><p>These docs show up on hover and in autocompletion items.</p></li>
 <li><p>Sorbet <strong>does not</strong> read YARD docs for type annotations.</p></li>

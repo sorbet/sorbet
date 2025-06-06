@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Class Types · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&gt; **Note**: Class types are used to describe values that are instances of a"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Class Types · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&gt; **Note**: Class types are used to describe values that are instances of a"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Class Types · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&gt; **Note**: Class types are used to describe values that are instances of a class---these are the most commonly used types. To instead learn about types for class objects themselves, see [T.class_of](/docs/class-of)."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Class Types · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&gt; **Note**: Class types are used to describe values that are instances of a class---these are the most commonly used types. To instead learn about types for class objects themselves, see [T.class_of](/docs/class-of)."/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments); }
               gtag('js', new Date());
@@ -60,14 +60,9 @@
               }
             });
         </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/class-types.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Class Types</h1></header><article><div><span><blockquote>
-<p><strong>Note</strong>: Class types are used to describe values that are instances of a
-class—these are the most commonly used types. To instead learn about types
-for class objects themselves, see <a href="/docs/class-of">T.class_of</a>.</p>
+<p><strong>Note</strong>: Class types are used to describe values that are instances of a class—these are the most commonly used types. To instead learn about types for class objects themselves, see <a href="/docs/class-of">T.class_of</a>.</p>
 </blockquote>
-<p>Every Ruby class and module doubles as a type in Sorbet. Class types supersede
-the notion some other languages have of “primitive” types. For example, <code>&quot;abc&quot;</code>
-is an instance of the <code>String</code> class, and so <code>&quot;abc&quot;</code> has type <code>String</code>. The same
-goes for many other values in Ruby:</p>
+<p>Every Ruby class and module doubles as a type in Sorbet. Class types supersede the notion some other languages have of “primitive” types. For example, <code>&quot;abc&quot;</code> is an instance of the <code>String</code> class, and so <code>&quot;abc&quot;</code> has type <code>String</code>. The same goes for many other values in Ruby:</p>
 <table>
 <thead>
 <tr><th>Type</th><th>Example value</th></tr>
@@ -80,9 +75,7 @@ goes for many other values in Ruby:</p>
 <tr><td><code>NilClass</code></td><td><code>nil</code></td></tr>
 </tbody>
 </table>
-<p>To reiterate: a class type means &quot;any value which is an instance of this class&quot;.
-If <code>x.is_a?(SomeClass)</code> would return <code>true</code> when run, then <code>x</code> has type
-<code>SomeClass</code>.</p>
+<p>To reiterate: a class type means &quot;any value which is an instance of this class&quot;. If <code>x.is_a?(SomeClass)</code> would return <code>true</code> when run, then <code>x</code> has type <code>SomeClass</code>.</p>
 <p>We can mention class types directly in a <a href="/docs/sigs">method signature</a>:</p>
 <pre><code class="hljs css language-ruby">sig {returns(Integer)}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">age</span></span>
@@ -95,11 +88,7 @@ sig {params(<span class="hljs-symbol">x:</span> Float).returns(String)}
 <span class="hljs-keyword">end</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="booleans"></a><a href="#booleans" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Booleans</h2>
-<p>One gotcha is that <code>false</code> is an instance of <code>FalseClass</code>, and <code>true</code> is an
-instance of <code>TrueClass</code>—there is no <code>Boolean</code> class in Ruby. So to represent
-the type of booleans in Sorbet, the <code>sorbet-runtime</code> uses
-<a href="/docs/type-aliases">type aliases</a> and <a href="/docs/union-types">union types</a> to define a
-convenient name for &quot;either <code>true</code> or <code>false</code>&quot;: <code>T::Boolean</code>.</p>
+<p>One gotcha is that <code>false</code> is an instance of <code>FalseClass</code>, and <code>true</code> is an instance of <code>TrueClass</code>—there is no <code>Boolean</code> class in Ruby. So to represent the type of booleans in Sorbet, the <code>sorbet-runtime</code> uses <a href="/docs/type-aliases">type aliases</a> and <a href="/docs/union-types">union types</a> to define a convenient name for &quot;either <code>true</code> or <code>false</code>&quot;: <code>T::Boolean</code>.</p>
 <pre><code class="hljs css language-ruby">extend T::Sig
 
 sig {params(<span class="hljs-symbol">new_value:</span> T::Boolean).void}
@@ -115,8 +104,7 @@ set_flag(<span class="hljs-literal">false</span>)
 <p>Note that the class (and type) of <code>nil</code> is <code>NilClass</code>.</p>
 <p>There’s a lot to say about <code>nil</code>, so it gets <a href="/docs/nilable-types">its own doc</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="user-defined-class-types"></a><a href="#user-defined-class-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>User-defined class types</h2>
-<p>Everything we’ve seen so far has used classes built into Ruby, but it works the
-exact same for any classes we define ourselves:</p>
+<p>Everything we’ve seen so far has used classes built into Ruby, but it works the exact same for any classes we define ourselves:</p>
 <pre><code class="hljs css language-ruby">extend T::Sig
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span>;</span> <span class="hljs-keyword">end</span>
@@ -128,9 +116,7 @@ sig {returns(MyClass)}
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="inheritance"></a><a href="#inheritance" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Inheritance</h2>
 <!-- id="inheritance" is important because other pages link here, so please don't change the section title -->
-<p>Ruby is object-oriented, so an instance of a child class is also an instance of
-the child class’s superclass. To make this more explicit, let’s look at an
-example:</p>
+<p>Ruby is object-oriented, so an instance of a child class is also an instance of the child class’s superclass. To make this more explicit, let’s look at an example:</p>
 <pre><code class="hljs css language-ruby">extend T::Sig
 
 <span class="hljs-comment"># Set up an inheritance relationship between three classes</span>
@@ -147,10 +133,7 @@ foo(ParentClass.new)       <span class="hljs-comment"># ok</span>
 foo(ChildClass.new)        <span class="hljs-comment"># ok</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="object-vs-basicobject"></a><a href="#object-vs-basicobject" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Object</code> vs <code>BasicObject</code></h2>
-<p>Another note about inheritance in Ruby concerns the distinction between <code>Object</code>
-and <code>BasicObject</code>. <code>Object</code> is what classes subclass by default, unless they
-explicitly subclass from <code>BasicObject</code>. <code>Object</code> subclasses from <code>BasicObject</code>.
-Again, let’s make this clear with an example:</p>
+<p>Another note about inheritance in Ruby concerns the distinction between <code>Object</code> and <code>BasicObject</code>. <code>Object</code> is what classes subclass by default, unless they explicitly subclass from <code>BasicObject</code>. <code>Object</code> subclasses from <code>BasicObject</code>. Again, let’s make this clear with an example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># Some helper methods to play with</span>
 sig {params(<span class="hljs-symbol">x:</span> Object).void}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">takes_object</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
@@ -173,10 +156,7 @@ takes_object(ObjectChild.new)              <span class="hljs-comment"># ok</span
 takes_object(BasicObjectChild.new)         <span class="hljs-comment"># error</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="modules"></a><a href="#modules" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Modules</h2>
-<p>Modules can be used as “class types” in exactly the same way as classes can. For
-a module, the meaning is not “an instance of this class” but &quot;an instance of a
-class which <code>include</code>s this module&quot;. This is compatible with how
-<code>x.is_a?(SomeModule)</code> works in Ruby. Here’s an example:</p>
+<p>Modules can be used as “class types” in exactly the same way as classes can. For a module, the meaning is not “an instance of this class” but &quot;an instance of a class which <code>include</code>s this module&quot;. This is compatible with how <code>x.is_a?(SomeModule)</code> works in Ruby. Here’s an example:</p>
 <pre><code class="hljs css language-ruby">extend T::Sig
 
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">MyModule</span></span>

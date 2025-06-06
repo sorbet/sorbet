@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Typed Enums via T::Enum · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Enumerations allow for type-safe declarations of a fixed set of values. &quot;Type"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Typed Enums via T::Enum · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="Enumerations allow for type-safe declarations of a fixed set of values. &quot;Type"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Typed Enums via T::Enum · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Enumerations allow for type-safe declarations of a fixed set of values. &quot;Type safe&quot; means that the values in this set are the only values that belong to this type. Here&#x27;s an example of how to define a typed enum with Sorbet:"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Typed Enums via T::Enum · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="Enumerations allow for type-safe declarations of a fixed set of values. &quot;Type safe&quot; means that the values in this set are the only values that belong to this type. Here&#x27;s an example of how to define a typed enum with Sorbet:"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments); }
               gtag('js', new Date());
@@ -59,9 +59,7 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/tenum.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Typed Enums via T::Enum</h1></header><article><div><span><p>Enumerations allow for type-safe declarations of a fixed set of values. “Type
-safe” means that the values in this set are the only values that belong to this
-type. Here’s an example of how to define a typed enum with Sorbet:</p>
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/tenum.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Typed Enums via T::Enum</h1></header><article><div><span><p>Enumerations allow for type-safe declarations of a fixed set of values. “Type safe” means that the values in this set are the only values that belong to this type. Here’s an example of how to define a typed enum with Sorbet:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) New enumerations are defined by creating a subclass of T::Enum</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Suit</span> &lt; T::Enum</span>
   <span class="hljs-comment"># (2) Enum values are declared within an `enums do` block</span>
@@ -73,28 +71,18 @@ type. Here’s an example of how to define a typed enum with Sorbet:</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Note how each enum value is created by calling <code>new</code>: each enum value is an
-instance of the enumeration class itself. This means that
-<code>Suit::Spades.is_a?(Suit)</code>, and the same for all the other enum values. This
-guarantees that one enum value cannot be used where some other type is expected,
-and vice versa.</p>
-<p>This also means that once an enum has been defined as a subclass of <code>T::Enum</code>,
-it behaves like any other <a href="/docs/class-types">Class Type</a> and can be used in method
-signatures, type aliases, <code>T.let</code> annotations, and any other place a class type
-can be used:</p>
+<p>Note how each enum value is created by calling <code>new</code>: each enum value is an instance of the enumeration class itself. This means that <code>Suit::Spades.is_a?(Suit)</code>, and the same for all the other enum values. This guarantees that one enum value cannot be used where some other type is expected, and vice versa.</p>
+<p>This also means that once an enum has been defined as a subclass of <code>T::Enum</code>, it behaves like any other <a href="/docs/class-types">Class Type</a> and can be used in method signatures, type aliases, <code>T.let</code> annotations, and any other place a class type can be used:</p>
 <pre><code class="hljs css language-ruby">sig {returns(Suit)}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">random_suit</span></span>
   T.cast(Suit.values.sample, Suit)
 <span class="hljs-keyword">end</span>
 </code></pre>
 <blockquote>
-<p>The <code>T.cast</code> is necessary because of how
-<a href="/docs/faq#sigs-are-vague-for-stdlib-methods-that-accept-keyword-arguments--have-multiple-return-types">Sorbet behaves with <code>Array#sample</code></a>.</p>
+<p>The <code>T.cast</code> is necessary because of how <a href="/docs/faq#sigs-are-vague-for-stdlib-methods-that-accept-keyword-arguments--have-multiple-return-types">Sorbet behaves with <code>Array#sample</code></a>.</p>
 </blockquote>
 <h2><a class="anchor" aria-hidden="true" id="exhaustiveness"></a><a href="#exhaustiveness" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Exhaustiveness</h2>
-<p>Sorbet knows about the values in an enumeration statically, and so it can use
-<a href="/docs/exhaustiveness">exhaustiveness checking</a> to check whether all enum values
-have been considered. The easiest way is to use a <code>case</code> statement:</p>
+<p>Sorbet knows about the values in an enumeration statically, and so it can use <a href="/docs/exhaustiveness">exhaustiveness checking</a> to check whether all enum values have been considered. The easiest way is to use a <code>case</code> statement:</p>
 <pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">suit:</span> Suit).void}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">describe_suit_color</span><span class="hljs-params">(suit)</span></span>
   <span class="hljs-keyword">case</span> suit
@@ -106,22 +94,14 @@ have been considered. The easiest way is to use a <code>case</code> statement:</
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Because of the call to <code>T.absurd</code>, if any of the individual suits had not been
-handled, Sorbet would report an error statically that one of the cases was
-missing. For more information on how exhaustiveness checking works, see
-<a href="/docs/exhaustiveness">Exhaustiveness Checking</a>.</p>
+<p>Because of the call to <code>T.absurd</code>, if any of the individual suits had not been handled, Sorbet would report an error statically that one of the cases was missing. For more information on how exhaustiveness checking works, see <a href="/docs/exhaustiveness">Exhaustiveness Checking</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="enum-values-in-types"></a><a href="#enum-values-in-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Enum values in types</h2>
-<p>Sorbet allows using individual enum values in types, especially in union types
-and type aliases. For example:</p>
+<p>Sorbet allows using individual enum values in types, especially in union types and type aliases. For example:</p>
 <pre><code class="hljs css language-ruby">RedSuit = T.type_alias { T.any(Suit::Hearts, Suit::Diamonds) }
 </code></pre>
-<p>This defines a <a href="/docs/type-aliases">type alias</a> <code>RedSuit</code> composed of only hearts
-and diamonds. (Contrast this with the type <code>Suit</code>, composed of all four enum
-values.)</p>
+<p>This defines a <a href="/docs/type-aliases">type alias</a> <code>RedSuit</code> composed of only hearts and diamonds. (Contrast this with the type <code>Suit</code>, composed of all four enum values.)</p>
 <h2><a class="anchor" aria-hidden="true" id="defining-a-subset-of-an-enum"></a><a href="#defining-a-subset-of-an-enum" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defining a subset of an enum</h2>
-<p>We can combine the techniques from the two previous sections to define subsets
-of enum values within an enum, as well as checked cast functions that convert
-into those subsets safely.</p>
+<p>We can combine the techniques from the two previous sections to define subsets of enum values within an enum, as well as checked cast functions that convert into those subsets safely.</p>
 <p>For example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Suit</span> &lt; T::Enum</span>
   enums <span class="hljs-keyword">do</span>
@@ -145,11 +125,8 @@ RedSuit = T.type_alias { T.any(Suit::Hearts, Suit::Diamonds) }
 </code></pre>
 <p>There are two components to this example:</p>
 <ol>
-<li><p>We’ve defined the <code>RedSuit</code> enum subset with a type alias. Due to
-limitations in <code>T::Enum</code>, this type alias must be declared outside of the
-enum itself (we expect to lift this restriction in the future).</p></li>
-<li><p>We’ve added a <code>to_red_suit</code> instance method on <code>Suit</code> which converts that
-enum value to either <code>nil</code> if called on a black suit, or itself otherwise.</p></li>
+<li><p>We’ve defined the <code>RedSuit</code> enum subset with a type alias. Due to limitations in <code>T::Enum</code>, this type alias must be declared outside of the enum itself (we expect to lift this restriction in the future).</p></li>
+<li><p>We’ve added a <code>to_red_suit</code> instance method on <code>Suit</code> which converts that enum value to either <code>nil</code> if called on a black suit, or itself otherwise.</p></li>
 </ol>
 <p>This <code>to_red_suit</code> conversion function could be called like this:</p>
 <pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">red_suit:</span> Suit).void }
@@ -167,44 +144,19 @@ sig { params(<span class="hljs-symbol">suit:</span> Suit).void }
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20Suit%20%3C%20T%3A%3AEnum%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20enums%20do%0A%20%20%20%20Spades%20%3D%20new%0A%20%20%20%20Hearts%20%3D%20new%0A%20%20%20%20Clubs%20%3D%20new%0A%20%20%20%20Diamonds%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7B%20returns%28T.nilable%28RedSuit%29%29%20%7D%0A%20%20def%20to_red_suit%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Spades%2C%20Clubs%20then%20nil%0A%20%20%20%20else%0A%20%20%20%20%20%20self%0A%20%20%20%20end%0A%20%20end%0Aend%0A%0ARedSuit%20%3D%20T.type_alias%20%7B%20T.any%28Suit%3A%3AHearts%2C%20Suit%3A%3ADiamonds%29%20%7D%0A%0Asig%20%7B%20params%28red_suit%3A%20Suit%29.void%20%7D%0Adef%20takes_red_suit%28red_suit%29%0A%20%20%23%20...%0Aend%0A%0Asig%20%7B%20params%28suit%3A%20Suit%29.void%20%7D%0Adef%20example%28suit%29%0A%20%20if%20%28red_suit%20%3D%20suit.to_red_suit%29%0A%20%20%20%20takes_red_suit%28red_suit%29%0A%20%20else%0A%20%20%20%20puts%28%22%23%7Bsuit%7D%20was%20not%20a%20red%20suit%22%29%0A%20%20end%0Aend">→
-View full example on sorbet.run</a></p>
-<p>Sorbet knows that <code>to_red_suit</code> returns <code>nil</code> if the suit was not red, so by
-assigning to a local variable and using <code>if</code>, Sorbet’s
-<a href="/docs/flow-sensitive">flow-sensitive type checking</a> kicks in and allows using
-<code>red_suit</code> with the non-nil type <code>RedSuit</code> inside the <code>if</code> condition.</p>
-<p>Note that the structure of the <code>to_red_suit</code> method implementation is
-intentional: it specifies the examples of what is <strong>not</strong> a red suit, instead of
-specifying all the cases of what is a red suit in order to be <strong>safe in the
-presence of refactors</strong>.</p>
-<p>To outline the refactor-safety of this method, here’s an extended explanation.
-For our <code>Suit</code> example it gets a little contrived, because there are always only
-four suits and that’s very unlikely to change. But we can pretend anyways:</p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20Suit%20%3C%20T%3A%3AEnum%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20enums%20do%0A%20%20%20%20Spades%20%3D%20new%0A%20%20%20%20Hearts%20%3D%20new%0A%20%20%20%20Clubs%20%3D%20new%0A%20%20%20%20Diamonds%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7B%20returns%28T.nilable%28RedSuit%29%29%20%7D%0A%20%20def%20to_red_suit%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Spades%2C%20Clubs%20then%20nil%0A%20%20%20%20else%0A%20%20%20%20%20%20self%0A%20%20%20%20end%0A%20%20end%0Aend%0A%0ARedSuit%20%3D%20T.type_alias%20%7B%20T.any%28Suit%3A%3AHearts%2C%20Suit%3A%3ADiamonds%29%20%7D%0A%0Asig%20%7B%20params%28red_suit%3A%20Suit%29.void%20%7D%0Adef%20takes_red_suit%28red_suit%29%0A%20%20%23%20...%0Aend%0A%0Asig%20%7B%20params%28suit%3A%20Suit%29.void%20%7D%0Adef%20example%28suit%29%0A%20%20if%20%28red_suit%20%3D%20suit.to_red_suit%29%0A%20%20%20%20takes_red_suit%28red_suit%29%0A%20%20else%0A%20%20%20%20puts%28%22%23%7Bsuit%7D%20was%20not%20a%20red%20suit%22%29%0A%20%20end%0Aend">→ View full example on sorbet.run</a></p>
+<p>Sorbet knows that <code>to_red_suit</code> returns <code>nil</code> if the suit was not red, so by assigning to a local variable and using <code>if</code>, Sorbet’s <a href="/docs/flow-sensitive">flow-sensitive type checking</a> kicks in and allows using <code>red_suit</code> with the non-nil type <code>RedSuit</code> inside the <code>if</code> condition.</p>
+<p>Note that the structure of the <code>to_red_suit</code> method implementation is intentional: it specifies the examples of what is <strong>not</strong> a red suit, instead of specifying all the cases of what is a red suit in order to be <strong>safe in the presence of refactors</strong>.</p>
+<p>To outline the refactor-safety of this method, here’s an extended explanation. For our <code>Suit</code> example it gets a little contrived, because there are always only four suits and that’s very unlikely to change. But we can pretend anyways:</p>
 <ul>
-<li><p>If a new enum value is added, maybe called <code>Stars</code>, Sorbet will catch that the
-<code>else</code> branch has type <code>T.any(Hearts, Diamonds, Stars)</code>, which is not a
-subtype of <code>RedSuit</code>.</p>
-<p>To treat <code>Stars</code> as a red suit, we’d want to update the definition of
-<code>RedSuit</code> to mention it. To treat it as not a red suit, we’d want to add it to
-the <code>when ... nil</code> statement.</p></li>
-<li><p>If an enum value is removed from <code>RedSuit</code>, then Sorbet will report that as a
-type error similar to the above. After removing a suit from the type alias,
-the fix would be to explicitly list that removed suit in the <code>when ... nil</code>
-statement.</p></li>
-<li><p>If an enum value is removed from <code>Suit</code> entirely, Sorbet reports this as an
-“Unable to resolve constant” error. The fix will be to either remove the
-reference from the <code>RedSuit</code> type alias, or from the <code>when ... nil</code> statement
-(depending on what was removed from <code>Suit</code>).</p></li>
+<li><p>If a new enum value is added, maybe called <code>Stars</code>, Sorbet will catch that the <code>else</code> branch has type <code>T.any(Hearts, Diamonds, Stars)</code>, which is not a subtype of <code>RedSuit</code>.</p>
+<p>To treat <code>Stars</code> as a red suit, we’d want to update the definition of <code>RedSuit</code> to mention it. To treat it as not a red suit, we’d want to add it to the <code>when ... nil</code> statement.</p></li>
+<li><p>If an enum value is removed from <code>RedSuit</code>, then Sorbet will report that as a type error similar to the above. After removing a suit from the type alias, the fix would be to explicitly list that removed suit in the <code>when ... nil</code> statement.</p></li>
+<li><p>If an enum value is removed from <code>Suit</code> entirely, Sorbet reports this as an “Unable to resolve constant” error. The fix will be to either remove the reference from the <code>RedSuit</code> type alias, or from the <code>when ... nil</code> statement (depending on what was removed from <code>Suit</code>).</p></li>
 </ul>
-<p>(It would be possible to achieve the same effect with
-<a href="#exhaustiveness">exhaustiveness on enums</a>, but in this particular case that
-ends up being overkill—we can get the same safety guarantees with less
-redundancy.)</p>
+<p>(It would be possible to achieve the same effect with <a href="#exhaustiveness">exhaustiveness on enums</a>, but in this particular case that ends up being overkill—we can get the same safety guarantees with less redundancy.)</p>
 <h2><a class="anchor" aria-hidden="true" id="converting-enums-to-other-types"></a><a href="#converting-enums-to-other-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Converting enums to other types</h2>
-<p>Enumerations do not implicitly convert to any other type. Instead, all
-conversion must be done explicitly. One particularly convenient way to implement
-these conversion functions is to define instance methods on the enum class
-itself:</p>
+<p>Enumerations do not implicitly convert to any other type. Instead, all conversion must be done explicitly. One particularly convenient way to implement these conversion functions is to define instance methods on the enum class itself:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Suit</span> &lt; T::Enum</span>
   enums <span class="hljs-keyword">do</span>
     <span class="hljs-comment"># ...</span>
@@ -225,22 +177,17 @@ itself:</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>A particularly common case is to convert an enum to a String. Because this is so
-common, this conversion method is built in:</p>
+<p>A particularly common case is to convert an enum to a String. Because this is so common, this conversion method is built in:</p>
 <pre><code class="hljs css language-ruby">Suit::Spades.serialize <span class="hljs-comment"># =&gt; 'spades'</span>
 Suit::Hearts.serialize <span class="hljs-comment"># =&gt; 'hearts'</span>
 <span class="hljs-comment"># ...</span>
 </code></pre>
-<p>Again: this conversion to a string must still be done explicitly. When
-attempting to implicitly convert an enum value to a string, you’ll get a
-non-human-friendly representation of the enum:</p>
+<p>Again: this conversion to a string must still be done explicitly. When attempting to implicitly convert an enum value to a string, you’ll get a non-human-friendly representation of the enum:</p>
 <pre><code class="hljs css language-ruby">suit = Suit::Spades
 puts <span class="hljs-string">"Got suit: <span class="hljs-subst">#{suit}</span>"</span>
 <span class="hljs-comment"># =&gt;  Got suit: #&lt;Suit::Spades&gt;</span>
 </code></pre>
-<p>The default value used for serializing an enum is the name of the enum, all
-lowercase. To specify an alternative serialized value, pass an argument to
-<code>new</code>:</p>
+<p>The default value used for serializing an enum is the name of the enum, all lowercase. To specify an alternative serialized value, pass an argument to <code>new</code>:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Suit</span> &lt; T::Enum</span>
   enums <span class="hljs-keyword">do</span>
     Spades = new(<span class="hljs-string">'SPADES'</span>)
@@ -252,27 +199,20 @@ lowercase. To specify an alternative serialized value, pass an argument to
 
 Suit::Diamonds.serialize <span class="hljs-comment"># =&gt; 'DIAMONDS'</span>
 </code></pre>
-<p>Each serialized value must be unique compared to all other serialized values for
-this enum. The argument to <code>new</code> currently accepts <code>T.untyped</code>, meaning you can
-pass any value to <code>new</code> (including things like <code>Symbol</code>s or <code>Integer</code>s). A
-future change to Sorbet may restrict this; we strongly recommend that you pass
-<code>String</code> values as the explicit serialization values.</p>
+<p>Each serialized value must be unique compared to all other serialized values for this enum. The argument to <code>new</code> currently accepts <code>T.untyped</code>, meaning you can pass any value to <code>new</code> (including things like <code>Symbol</code>s or <code>Integer</code>s). A future change to Sorbet may restrict this; we strongly recommend that you pass <code>String</code> values as the explicit serialization values.</p>
 <h2><a class="anchor" aria-hidden="true" id="converting-from-other-types-to-enums"></a><a href="#converting-from-other-types-to-enums" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Converting from other types to enums</h2>
-<p>Another common conversion is to take the serialized value and deserialize it
-back to the original enum value. This is also built into <code>T::Enum</code>:</p>
+<p>Another common conversion is to take the serialized value and deserialize it back to the original enum value. This is also built into <code>T::Enum</code>:</p>
 <pre><code class="hljs css language-ruby">serialized = Suit::Spades.serialize
 suit = Suit.deserialize(serialized)
 
 puts suit
 <span class="hljs-comment"># =&gt; #&lt;Suit::Spades&gt;</span>
 </code></pre>
-<p>When the value being deserialized doesn’t exist, a <code>KeyError</code> exception is
-raised:</p>
+<p>When the value being deserialized doesn’t exist, a <code>KeyError</code> exception is raised:</p>
 <pre><code class="hljs css language-ruby">Suit.deserialize(<span class="hljs-string">'bad value'</span>)
 <span class="hljs-comment"># =&gt; KeyError: Enum Suit key not found: "bad value"</span>
 </code></pre>
-<p>If this is not the behavior you want, you can use <code>try_deserialize</code> which
-returns <code>nil</code> when the value doesn’t deserialize to anything:</p>
+<p>If this is not the behavior you want, you can use <code>try_deserialize</code> which returns <code>nil</code> when the value doesn’t deserialize to anything:</p>
 <pre><code class="hljs css language-ruby">Suit.try_deserialize(<span class="hljs-string">'bad value'</span>)
 <span class="hljs-comment"># =&gt; nil</span>
 </code></pre>
@@ -289,26 +229,16 @@ Suit.has_serialized?(<span class="hljs-string">'bad value'</span>)
 <span class="hljs-comment"># =&gt; [#&lt;Suit::Spades&gt;, #&lt;Suit::Heart&gt;, #&lt;Suit::Clubs&gt;, #&lt;Suit::Diamonds&gt;]</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="attaching-metadata-to-an-enum"></a><a href="#attaching-metadata-to-an-enum" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Attaching metadata to an enum</h2>
-<p>It can be tempting to “attach metadata” to each enum value by overriding the
-constructor for a <code>T::Enum</code> subclass such that it accepts more information and
-stores it on an instance variable.</p>
-<p>This is <strong>strongly discouraged</strong>. It’s likely that Sorbet will enforce this
-discouragement with a future change.</p>
+<p>It can be tempting to “attach metadata” to each enum value by overriding the constructor for a <code>T::Enum</code> subclass such that it accepts more information and stores it on an instance variable.</p>
+<p>This is <strong>strongly discouraged</strong>. It’s likely that Sorbet will enforce this discouragement with a future change.</p>
 <p>Concretely, consider some code like this that is discouraged:</p>
-<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aclass%20Suit%20%3C%20T%3A%3AEnum%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20attr_reader%20%3Arank%0A%0A%20%20sig%20%7Bparams(serialized_val%3A%20String%2C%20rank%3A%20Integer).void%7D%0A%20%20def%20initialize(serialized_val%2C%20rank)%0A%20%20%20%20super(serialized_val)%0A%20%20%20%20%40rank%20%3D%20T.let(rank%2C%20Integer)%0A%20%20end%0A%0A%20%20enums%20do%0A%20%20%20%20Spades%20%3D%20new('spades'%2C%201)%0A%20%20%20%20Hearts%20%3D%20new('hearts'%2C%202)%0A%20%20%20%20Clubs%20%3D%20new('clubs'%2C%203)%0A%20%20%20%20Diamonds%20%3D%20new('diamonds'%2C%204)%0A%20%20end%0Aend%0A">→
-View on sorbet.run</a></p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aclass%20Suit%20%3C%20T%3A%3AEnum%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20attr_reader%20%3Arank%0A%0A%20%20sig%20%7Bparams(serialized_val%3A%20String%2C%20rank%3A%20Integer).void%7D%0A%20%20def%20initialize(serialized_val%2C%20rank)%0A%20%20%20%20super(serialized_val)%0A%20%20%20%20%40rank%20%3D%20T.let(rank%2C%20Integer)%0A%20%20end%0A%0A%20%20enums%20do%0A%20%20%20%20Spades%20%3D%20new('spades'%2C%201)%0A%20%20%20%20Hearts%20%3D%20new('hearts'%2C%202)%0A%20%20%20%20Clubs%20%3D%20new('clubs'%2C%203)%0A%20%20%20%20Diamonds%20%3D%20new('diamonds'%2C%204)%0A%20%20end%0Aend%0A">→ View on sorbet.run</a></p>
 <p>This code is discouraged because it…</p>
 <ul>
-<li>overrides the <code>T::Enum</code> constructor, making it brittle to potential future
-changes in the <code>T::Enum</code> API.</li>
-<li>stores state on each enum value. Enum values are singleton instances, meaning
-that if someone accidentally mutates this state, it’s observed globally
-throughout an entire program.</li>
+<li>overrides the <code>T::Enum</code> constructor, making it brittle to potential future changes in the <code>T::Enum</code> API.</li>
+<li>stores state on each enum value. Enum values are singleton instances, meaning that if someone accidentally mutates this state, it’s observed globally throughout an entire program.</li>
 </ul>
-<p>Rather than thinking of enums as data containers, instead think of them as dumb
-immutable values. A more idiomatic way to express the code above looks similar
-to the example given in the section
-<a href="#converting-enums-to-other-types">Converting enums to other types</a> above:</p>
+<p>Rather than thinking of enums as data containers, instead think of them as dumb immutable values. A more idiomatic way to express the code above looks similar to the example given in the section <a href="#converting-enums-to-other-types">Converting enums to other types</a> above:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Suit</span> &lt; T::Enum</span>
   extend T::Sig
@@ -332,39 +262,24 @@ to the example given in the section
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aclass%20Suit%20%3C%20T%3A%3AEnum%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20enums%20do%0A%20%20%20%20Spades%20%3D%20new%0A%20%20%20%20Hearts%20%3D%20new%0A%20%20%20%20Clubs%20%3D%20new%0A%20%20%20%20Diamonds%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20def%20rank%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Spades%20then%201%0A%20%20%20%20when%20Hearts%20then%202%0A%20%20%20%20when%20Clubs%20then%203%0A%20%20%20%20when%20Diamonds%20then%204%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0Aend">→
-View on sorbet.run</a></p>
-<p>This example uses <a href="/docs/exhaustiveness">exhaustiveness</a> on the enum to associate a
-rank with each suit. It does this without needing to override anything built
-into <code>T::Enum</code>, and without mutating state.</p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aclass%20Suit%20%3C%20T%3A%3AEnum%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20enums%20do%0A%20%20%20%20Spades%20%3D%20new%0A%20%20%20%20Hearts%20%3D%20new%0A%20%20%20%20Clubs%20%3D%20new%0A%20%20%20%20Diamonds%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20def%20rank%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Spades%20then%201%0A%20%20%20%20when%20Hearts%20then%202%0A%20%20%20%20when%20Clubs%20then%203%0A%20%20%20%20when%20Diamonds%20then%204%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0Aend">→ View on sorbet.run</a></p>
+<p>This example uses <a href="/docs/exhaustiveness">exhaustiveness</a> on the enum to associate a rank with each suit. It does this without needing to override anything built into <code>T::Enum</code>, and without mutating state.</p>
 <blockquote>
-<p>If you need exhaustiveness over a set of cases which do carry data, see
-<a href="/docs/sealed#approximating-algebraic-data-types">Approximating algebraic data types</a>.</p>
+<p>If you need exhaustiveness over a set of cases which do carry data, see <a href="/docs/sealed#approximating-algebraic-data-types">Approximating algebraic data types</a>.</p>
 </blockquote>
 <h2><a class="anchor" aria-hidden="true" id="defining-one-enum-as-a-subset-of-another-enum"></a><a href="#defining-one-enum-as-a-subset-of-another-enum" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defining one enum as a subset of another enum</h2>
 <blockquote>
-<p>This section has been superseded by the
-<a href="#defining-a-subset-of-an-enum">Defining a subset of an enum</a> section above.
-This section is older, and describes workarounds relevant before that section
-above existed. We include this section here mostly for inspiration (the ideas
-in this section are not discouraged, just verbose).</p>
+<p>This section has been superseded by the <a href="#defining-a-subset-of-an-enum">Defining a subset of an enum</a> section above. This section is older, and describes workarounds relevant before that section above existed. We include this section here mostly for inspiration (the ideas in this section are not discouraged, just verbose).</p>
 </blockquote>
-<p>In addition to <a href="#defining-a-subset-of-an-enum">defining a subset of an enum</a>
-with type aliases and conversion methods, there are two other ways to define one
-enum as a subset of another:</p>
+<p>In addition to <a href="#defining-a-subset-of-an-enum">defining a subset of an enum</a> with type aliases and conversion methods, there are two other ways to define one enum as a subset of another:</p>
 <ol>
 <li>By using a <a href="/docs/sealed">sealed module</a></li>
 <li>By explicitly converting between multiple enums</li>
 </ol>
 <p>Let’s elaborate on those two one at a time.</p>
-<p>All the examples below will be for days of the week. There are 7 days total, but
-there are two clear groups: weekdays and weekends, and sometimes it makes sense
-to have the type system enforce that a value can <strong>only</strong> be a weekday enum
-value or <strong>only</strong> a weekend enum value.</p>
+<p>All the examples below will be for days of the week. There are 7 days total, but there are two clear groups: weekdays and weekends, and sometimes it makes sense to have the type system enforce that a value can <strong>only</strong> be a weekday enum value or <strong>only</strong> a weekend enum value.</p>
 <h3><a class="anchor" aria-hidden="true" id="by-using-a-sealed-module"></a><a href="#by-using-a-sealed-module" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>By using a sealed module</h3>
-<p><a href="/docs/sealed">Sealed modules</a> are a way to limit where a module is allowed to be
-included. See <a href="/docs/sealed">the docs</a> if you’d like to learn more, but here’s how
-they can be used together with <code>T::Enum</code>:</p>
+<p><a href="/docs/sealed">Sealed modules</a> are a way to limit where a module is allowed to be included. See <a href="/docs/sealed">the docs</a> if you’d like to learn more, but here’s how they can be used together with <code>T::Enum</code>:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) Define an interface / module</span>
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">DayOfWeek</span></span>
   extend T::Helpers
@@ -394,46 +309,27 @@ they can be used together with <code>T::Enum</code>:</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aclass%20Module%0A%20%20include%20T%3A%3ASig%0Aend%0A%0Amodule%20DayOfWeek%0A%20%20extend%20T%3A%3AHelpers%0A%20%20sealed!%0Aend%0A%0Aclass%20Weekday%20%3C%20T%3A%3AEnum%0A%20%20include%20DayOfWeek%0A%0A%20%20enums%20do%0A%20%20%20%20Monday%20%3D%20new%0A%20%20%20%20Tuesday%20%3D%20new%0A%20%20%20%20Wednesday%20%3D%20new%0A%20%20%20%20Thursday%20%3D%20new%0A%20%20%20%20Friday%20%3D%20new%0A%20%20end%0Aend%0A%0Aclass%20Weekend%20%3C%20T%3A%3AEnum%0A%20%20include%20DayOfWeek%0A%0A%20%20enums%20do%0A%20%20%20%20Saturday%20%3D%20new%0A%20%20%20%20Sunday%20%3D%20new%0A%20%20end%0Aend%0A%0Asig%20%7Bparams(day%3A%20DayOfWeek).void%7D%0Adef%20foo(day)%0A%20%20case%20day%0A%20%20when%20Weekday%3A%3AMonday%20then%20nil%0A%20%20when%20Weekday%3A%3ATuesday%20then%20nil%0A%20%20when%20Weekday%3A%3AWednesday%20then%20nil%0A%20%20when%20Weekday%3A%3AThursday%20then%20nil%0A%20%20when%20Weekday%3A%3AFriday%20then%20nil%0A%0A%20%20when%20Weekend%3A%3ASaturday%20then%20nil%0A%20%20%23when%20Weekend%3A%3ASunday%20then%20nil%0A%20%20else%20T.absurd(day)%0A%20%20end%0Aend%0A">→
-view full example on sorbet.run</a></p>
-<p>Now we can use the type <code>DayOfWeek</code> for “any day of the week” or the types
-<code>Weekday</code> &amp; <code>Weekend</code> in places where only one specific enum is allowed.</p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aclass%20Module%0A%20%20include%20T%3A%3ASig%0Aend%0A%0Amodule%20DayOfWeek%0A%20%20extend%20T%3A%3AHelpers%0A%20%20sealed!%0Aend%0A%0Aclass%20Weekday%20%3C%20T%3A%3AEnum%0A%20%20include%20DayOfWeek%0A%0A%20%20enums%20do%0A%20%20%20%20Monday%20%3D%20new%0A%20%20%20%20Tuesday%20%3D%20new%0A%20%20%20%20Wednesday%20%3D%20new%0A%20%20%20%20Thursday%20%3D%20new%0A%20%20%20%20Friday%20%3D%20new%0A%20%20end%0Aend%0A%0Aclass%20Weekend%20%3C%20T%3A%3AEnum%0A%20%20include%20DayOfWeek%0A%0A%20%20enums%20do%0A%20%20%20%20Saturday%20%3D%20new%0A%20%20%20%20Sunday%20%3D%20new%0A%20%20end%0Aend%0A%0Asig%20%7Bparams(day%3A%20DayOfWeek).void%7D%0Adef%20foo(day)%0A%20%20case%20day%0A%20%20when%20Weekday%3A%3AMonday%20then%20nil%0A%20%20when%20Weekday%3A%3ATuesday%20then%20nil%0A%20%20when%20Weekday%3A%3AWednesday%20then%20nil%0A%20%20when%20Weekday%3A%3AThursday%20then%20nil%0A%20%20when%20Weekday%3A%3AFriday%20then%20nil%0A%0A%20%20when%20Weekend%3A%3ASaturday%20then%20nil%0A%20%20%23when%20Weekend%3A%3ASunday%20then%20nil%0A%20%20else%20T.absurd(day)%0A%20%20end%0Aend%0A">→ view full example on sorbet.run</a></p>
+<p>Now we can use the type <code>DayOfWeek</code> for “any day of the week” or the types <code>Weekday</code> &amp; <code>Weekend</code> in places where only one specific enum is allowed.</p>
 <p>There are a couple limitations with this approach:</p>
 <ol>
-<li><p>Sorbet doesn’t allow calling methods on <code>T::Enum</code> when we have a value of
-type <code>DayOfWeek</code>. Since it’s an interface, only the methods defined that
-interface can be called (so for example <code>day_of_week.serialize</code> doesn’t type
-check).</p>
-<p>One way to get around this is to declare <a href="/docs/abstract">abstract methods</a> for
-all of the <code>T::Enum</code> methods that we’d like to be able to call (<code>serialize</code>,
-for example).</p></li>
-<li><p>It’s not the case that <code>T.class_of(DayOfWeek)</code> is a valid
-<code>T.class_of(T::Enum)</code>. This means that we can’t pass <code>DayOfWeek</code> (the class
-object) to a method that calls <code>enum_class.values</code> on whatever enum class it
-was given to list the valid values of an enum.</p></li>
+<li><p>Sorbet doesn’t allow calling methods on <code>T::Enum</code> when we have a value of type <code>DayOfWeek</code>. Since it’s an interface, only the methods defined that interface can be called (so for example <code>day_of_week.serialize</code> doesn’t type check).</p>
+<p>One way to get around this is to declare <a href="/docs/abstract">abstract methods</a> for all of the <code>T::Enum</code> methods that we’d like to be able to call (<code>serialize</code>, for example).</p></li>
+<li><p>It’s not the case that <code>T.class_of(DayOfWeek)</code> is a valid <code>T.class_of(T::Enum)</code>. This means that we can’t pass <code>DayOfWeek</code> (the class object) to a method that calls <code>enum_class.values</code> on whatever enum class it was given to list the valid values of an enum.</p></li>
 </ol>
 <p>The second approach addresses these two issues, at the cost of some verbosity.</p>
 <h3><a class="anchor" aria-hidden="true" id="by-explicitly-converting-between-multiple-enums"></a><a href="#by-explicitly-converting-between-multiple-enums" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>By explicitly converting between multiple enums</h3>
-<p>The second approach is to define multiple enums, each of which overlap values
-with the other enums, and to define explicit conversion functions between the
-enums:</p>
-<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aclass%20Module%0A%20%20include%20T%3A%3ASig%0Aend%0A%0Aclass%20DayOfWeek%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20Monday%20%3D%20new%0A%20%20%20%20Tuesday%20%3D%20new%0A%20%20%20%20Wednesday%20%3D%20new%0A%20%20%20%20Thursday%20%3D%20new%0A%20%20%20%20Friday%20%3D%20new%0A%0A%20%20%20%20Saturday%20%3D%20new%0A%20%20%20%20Sunday%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7Breturns(T.nilable(Weekday))%7D%0A%20%20def%20to_weekday%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Monday%20then%20Weekday%3A%3AMonday%0A%20%20%20%20when%20Tuesday%20then%20Weekday%3A%3ATuesday%0A%20%20%20%20when%20Wednesday%20then%20Weekday%3A%3AWednesday%0A%20%20%20%20when%20Thursday%20then%20Weekday%3A%3AThursday%0A%20%20%20%20when%20Friday%20then%20Weekday%3A%3AFriday%0A%20%20%20%20when%20Saturday%20then%20nil%0A%20%20%20%20when%20Sunday%20then%20nil%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0A%0A%20%20sig%20%7Breturns(T.nilable(Weekend))%7D%0A%20%20def%20to_weekend%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Saturday%20then%20Weekend%3A%3ASaturday%0A%20%20%20%20when%20Sunday%20then%20Weekend%3A%3ASunday%0A%20%20%20%20when%20Monday%20then%20nil%0A%20%20%20%20when%20Tuesday%20then%20nil%0A%20%20%20%20when%20Wednesday%20then%20nil%0A%20%20%20%20when%20Thursday%20then%20nil%0A%20%20%20%20when%20Friday%20then%20nil%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0Aend%0A%0Aclass%20Weekday%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20Monday%20%3D%20new%0A%20%20%20%20Tuesday%20%3D%20new%0A%20%20%20%20Wednesday%20%3D%20new%0A%20%20%20%20Thursday%20%3D%20new%0A%20%20%20%20Friday%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7Breturns(DayOfWeek)%7D%0A%20%20def%20to_day_of_week%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Monday%20then%20DayOfWeek%3A%3AMonday%0A%20%20%20%20when%20Tuesday%20then%20DayOfWeek%3A%3ATuesday%0A%20%20%20%20when%20Wednesday%20then%20DayOfWeek%3A%3AWednesday%0A%20%20%20%20when%20Thursday%20then%20DayOfWeek%3A%3AThursday%0A%20%20%20%20when%20Friday%20then%20DayOfWeek%3A%3AFriday%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0Aend%0A%0Aclass%20Weekend%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20Saturday%20%3D%20new%0A%20%20%20%20Sunday%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7Breturns(DayOfWeek)%7D%0A%20%20def%20to_day_of_week%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Saturday%20then%20DayOfWeek%3A%3ASaturday%0A%20%20%20%20when%20Sunday%20then%20DayOfWeek%3A%3ASunday%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0Aend%0A">→
-View full example on sorbet.run</a></p>
-<p>As you can see, this example is significantly more verbose, but it is an
-alternative when the type safety is worth the tradeoff.</p>
+<p>The second approach is to define multiple enums, each of which overlap values with the other enums, and to define explicit conversion functions between the enums:</p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aclass%20Module%0A%20%20include%20T%3A%3ASig%0Aend%0A%0Aclass%20DayOfWeek%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20Monday%20%3D%20new%0A%20%20%20%20Tuesday%20%3D%20new%0A%20%20%20%20Wednesday%20%3D%20new%0A%20%20%20%20Thursday%20%3D%20new%0A%20%20%20%20Friday%20%3D%20new%0A%0A%20%20%20%20Saturday%20%3D%20new%0A%20%20%20%20Sunday%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7Breturns(T.nilable(Weekday))%7D%0A%20%20def%20to_weekday%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Monday%20then%20Weekday%3A%3AMonday%0A%20%20%20%20when%20Tuesday%20then%20Weekday%3A%3ATuesday%0A%20%20%20%20when%20Wednesday%20then%20Weekday%3A%3AWednesday%0A%20%20%20%20when%20Thursday%20then%20Weekday%3A%3AThursday%0A%20%20%20%20when%20Friday%20then%20Weekday%3A%3AFriday%0A%20%20%20%20when%20Saturday%20then%20nil%0A%20%20%20%20when%20Sunday%20then%20nil%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0A%0A%20%20sig%20%7Breturns(T.nilable(Weekend))%7D%0A%20%20def%20to_weekend%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Saturday%20then%20Weekend%3A%3ASaturday%0A%20%20%20%20when%20Sunday%20then%20Weekend%3A%3ASunday%0A%20%20%20%20when%20Monday%20then%20nil%0A%20%20%20%20when%20Tuesday%20then%20nil%0A%20%20%20%20when%20Wednesday%20then%20nil%0A%20%20%20%20when%20Thursday%20then%20nil%0A%20%20%20%20when%20Friday%20then%20nil%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0Aend%0A%0Aclass%20Weekday%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20Monday%20%3D%20new%0A%20%20%20%20Tuesday%20%3D%20new%0A%20%20%20%20Wednesday%20%3D%20new%0A%20%20%20%20Thursday%20%3D%20new%0A%20%20%20%20Friday%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7Breturns(DayOfWeek)%7D%0A%20%20def%20to_day_of_week%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Monday%20then%20DayOfWeek%3A%3AMonday%0A%20%20%20%20when%20Tuesday%20then%20DayOfWeek%3A%3ATuesday%0A%20%20%20%20when%20Wednesday%20then%20DayOfWeek%3A%3AWednesday%0A%20%20%20%20when%20Thursday%20then%20DayOfWeek%3A%3AThursday%0A%20%20%20%20when%20Friday%20then%20DayOfWeek%3A%3AFriday%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0Aend%0A%0Aclass%20Weekend%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20Saturday%20%3D%20new%0A%20%20%20%20Sunday%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7Breturns(DayOfWeek)%7D%0A%20%20def%20to_day_of_week%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Saturday%20then%20DayOfWeek%3A%3ASaturday%0A%20%20%20%20when%20Sunday%20then%20DayOfWeek%3A%3ASunday%0A%20%20%20%20else%20T.absurd(self)%0A%20%20%20%20end%0A%20%20end%0Aend%0A">→ View full example on sorbet.run</a></p>
+<p>As you can see, this example is significantly more verbose, but it is an alternative when the type safety is worth the tradeoff.</p>
 <h2><a class="anchor" aria-hidden="true" id="whats-next"></a><a href="#whats-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s next?</h2>
 <ul>
 <li><p><a href="/docs/union-types">Union types</a></p>
-<p>Enums are great for defining simple sets of related constants. When the values
-are not simple constants (for example, “any instance of these two classes”),
-union types provide a more powerful mechanism for organizing code.</p></li>
+<p>Enums are great for defining simple sets of related constants. When the values are not simple constants (for example, “any instance of these two classes”), union types provide a more powerful mechanism for organizing code.</p></li>
 <li><p><a href="/docs/sealed">Sealed Classes and Modules</a></p>
-<p>While union types provide an ad hoc mechanism to group related types, sealed
-classes and modules provide a way to establish this grouping at these types’
-definitions.</p></li>
+<p>While union types provide an ad hoc mechanism to group related types, sealed classes and modules provide a way to establish this grouping at these types’ definitions.</p></li>
 <li><p><a href="/docs/exhaustiveness">Exhaustiveness Checking</a></p>
-<p>For union types, sealed classes, and enums, Sorbet has powerful exhaustiveness
-checking that can statically catch when certain cases have not been handled.</p></li>
+<p>For union types, sealed classes, and enums, Sorbet has powerful exhaustiveness checking that can statically catch when certain cases have not been handled.</p></li>
 </ul>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/tstruct"><span class="arrow-prev">← </span><span>T::Struct</span></a><a class="docs-next button" href="/docs/untyped"><span>T.untyped</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#exhaustiveness">Exhaustiveness</a></li><li><a href="#enum-values-in-types">Enum values in types</a></li><li><a href="#defining-a-subset-of-an-enum">Defining a subset of an enum</a></li><li><a href="#converting-enums-to-other-types">Converting enums to other types</a></li><li><a href="#converting-from-other-types-to-enums">Converting from other types to enums</a></li><li><a href="#listing-the-values-of-an-enum">Listing the values of an enum</a></li><li><a href="#attaching-metadata-to-an-enum">Attaching metadata to an enum</a></li><li><a href="#defining-one-enum-as-a-subset-of-another-enum">Defining one enum as a subset of another enum</a><ul class="toc-headings"><li><a href="#by-using-a-sealed-module">By using a sealed module</a></li><li><a href="#by-explicitly-converting-between-multiple-enums">By explicitly converting between multiple enums</a></li></ul></li><li><a href="#whats-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer"><svg width="99" height="28" viewBox="0 0 99 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.98432 20H6.27432C8.44932 20 9.81432 18.905 9.81432 17.03C9.81432 15.665 9.00432 14.72 7.78932 14.39C8.61432 14.105 9.45432 13.415 9.45432 12.035C9.45432 10.235 8.23932 9.23 5.95932 9.23H1.98432V20ZM3.37932 13.85V10.445H5.83932C7.27932 10.445 8.07432 11 8.07432 12.155C8.07432 13.295 7.27932 13.85 5.83932 13.85H3.37932ZM3.37932 15.08H6.21432C7.65432 15.08 8.43432 15.83 8.43432 16.925C8.43432 18.035 7.65432 18.785 6.21432 18.785H3.37932V15.08ZM18.0294 12.155H16.6794V16.88C16.6794 18.185 15.6894 18.92 14.7144 18.92C13.5594 18.92 13.0794 18.17 13.0794 17.06V12.155H11.7294V17.345C11.7294 19.01 12.6744 20.165 14.3544 20.165C15.4644 20.165 16.2294 19.58 16.6794 18.92V20H18.0294V12.155ZM20.5112 10.79H21.9812V9.23H20.5112V10.79ZM21.9212 12.155H20.5712V20H21.9212V12.155ZM25.8247 9.23H24.4747V20H25.8247V9.23ZM28.5882 18.125C28.5882 19.625 29.3532 20.075 30.6882 20.075C31.1382 20.075 31.5282 20.03 31.8732 19.955V18.8C31.5582 18.875 31.3332 18.89 31.0182 18.89C30.3282 18.89 29.9232 18.74 29.9232 17.915V13.31H31.7082V12.155H29.9232V9.86H28.5882V12.155H27.3732V13.31H28.5882V18.125ZM41.0199 20.165C43.1949 20.165 44.4399 18.305 44.4399 16.085C44.4399 13.85 43.1949 12.005 41.0199 12.005C39.9249 12.005 39.0549 12.53 38.5899 13.295V9.23H37.2399V20H38.5899V18.86C39.0549 19.64 39.9249 20.165 41.0199 20.165ZM38.5599 15.815C38.5599 13.985 39.6699 13.19 40.7799 13.19C42.2499 13.19 43.0749 14.39 43.0749 16.085C43.0749 17.765 42.2499 18.98 40.7799 18.98C39.6699 18.98 38.5599 18.17 38.5599 16.37V15.815ZM49.1804 20.855L52.5554 12.155H51.1454L48.9704 18.155L46.7654 12.155H45.3404L48.2504 19.715L47.8754 20.645C47.5604 21.425 47.2454 21.635 46.6604 21.635C46.4354 21.635 46.2704 21.62 46.0154 21.56V22.73C46.2554 22.775 46.4204 22.79 46.7504 22.79C48.1154 22.79 48.7304 22.04 49.1804 20.855Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M98.7993 15.7838C98.7993 12.8786 97.3871 10.5862 94.688 10.5862C91.9774 10.5862 90.3374 12.8786 90.3374 15.7611C90.3374 19.177 92.2735 20.9019 95.0524 20.9019C96.4077 20.9019 97.4327 20.5955 98.2071 20.1643V17.8946C97.4327 18.2804 96.5443 18.5188 95.4168 18.5188C94.3121 18.5188 93.3327 18.1329 93.2074 16.7938H98.7766C98.7766 16.6463 98.7993 16.0561 98.7993 15.7838ZM93.1732 14.7057C93.1732 13.4233 93.9591 12.8899 94.6766 12.8899C95.3713 12.8899 96.1116 13.4233 96.1116 14.7057H93.1732Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M85.9413 10.5862C84.8251 10.5862 84.1076 11.1082 83.709 11.4714L83.561 10.7678H81.0554V24.0001L83.9026 23.3986L83.914 20.187C84.324 20.482 84.9276 20.9019 85.9299 20.9019C87.9685 20.9019 89.8249 19.2678 89.8249 15.6703C89.8135 12.3792 87.9343 10.5862 85.9413 10.5862ZM85.2579 18.4053C84.586 18.4053 84.1874 18.167 83.914 17.8719L83.9026 13.6616C84.1988 13.3325 84.6088 13.1055 85.2579 13.1055C86.2943 13.1055 87.0118 14.2631 87.0118 15.7497C87.0118 17.2704 86.3057 18.4053 85.2579 18.4053Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M77.1377 9.91656L79.9963 9.30374V7L77.1377 7.60147V9.91656Z" fill="white"></path><path d="M79.9963 10.7791H77.1377V20.709H79.9963V10.7791Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M74.074 11.6187L73.8918 10.7789H71.4318V20.7088H74.279V13.9792C74.9509 13.1054 76.0898 13.2642 76.4429 13.3891V10.7789C76.0784 10.6427 74.7459 10.3931 74.074 11.6187Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M68.3796 8.31641L65.6007 8.90653L65.5894 17.9966C65.5894 19.6762 66.8535 20.9132 68.5391 20.9132C69.473 20.9132 70.1563 20.743 70.5321 20.5387V18.235C70.1677 18.3825 68.3682 18.9045 68.3682 17.225V13.1962H70.5321V10.779H68.3682L68.3796 8.31641Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M60.6807 13.6616C60.6807 13.219 61.0452 13.0488 61.6488 13.0488C62.5143 13.0488 63.6076 13.3098 64.4732 13.7751V11.1082C63.5279 10.7337 62.594 10.5862 61.6488 10.5862C59.3368 10.5862 57.7993 11.7891 57.7993 13.7978C57.7993 16.93 62.1271 16.4306 62.1271 17.7811C62.1271 18.3031 61.6715 18.4734 61.0338 18.4734C60.0885 18.4734 58.8813 18.0875 57.9246 17.5655V20.2664C58.9838 20.7204 60.0543 20.9133 61.0338 20.9133C63.4026 20.9133 65.0313 19.7444 65.0313 17.713C65.0199 14.3312 60.6807 14.9326 60.6807 13.6616Z" fill="white"></path></svg><a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div><div id="csat-extension-config" data-notify="#sorbet-team"></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {

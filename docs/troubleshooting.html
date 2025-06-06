@@ -71,20 +71,14 @@
 <li>Regardless of why, <a href="#escape-hatches">how to <strong>get unstuck</strong></a>.</li>
 </ul>
 <h2><a class="anchor" aria-hidden="true" id="validating-our-assumptions"></a><a href="#validating-our-assumptions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Validating our assumptions</h2>
-<p>When faced with a type error, checking our assumptions is step number one. The
-first question to ask is:</p>
+<p>When faced with a type error, checking our assumptions is step number one. The first question to ask is:</p>
 <blockquote>
 <p>Are my files <code># typed: false</code> or <code># typed: true</code>?</p>
 </blockquote>
 <p>There are also some tools for helping debug type-related errors:</p>
 <h3><a class="anchor" aria-hidden="true" id="treveal_type"></a><a href="#treveal_type" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.reveal_type</code></h3>
-<p>If we wrap a variable or method call in <code>T.reveal_type</code>, Sorbet will show us
-what type it thinks that variable has in the output of <code>srb tc</code>. This is a super
-powerful debugging technique! <code>T.reveal_type</code> should be <strong>one of the first
-tools</strong> to reach for when debugging a confusing error.</p>
-<p>Try making a hypothesis of what the problem is (“I think the problem is…”) and
-then create small examples in <a href="https://sorbet.run">https://sorbet.run</a> to test the hypothesis with
-<code>T.reveal_type</code>. For example:</p>
+<p>If we wrap a variable or method call in <code>T.reveal_type</code>, Sorbet will show us what type it thinks that variable has in the output of <code>srb tc</code>. This is a super powerful debugging technique! <code>T.reveal_type</code> should be <strong>one of the first tools</strong> to reach for when debugging a confusing error.</p>
+<p>Try making a hypothesis of what the problem is (“I think the problem is…”) and then create small examples in <a href="https://sorbet.run">https://sorbet.run</a> to test the hypothesis with <code>T.reveal_type</code>. For example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 extend T::Sig
 
@@ -97,12 +91,9 @@ sig {params(<span class="hljs-symbol">xs:</span> T::Array[Integer]).returns(Inte
 → View on sorbet.run
 </a></p>
 <p>With this example we see that <code>xs.first</code> returns <code>T.nilable(Integer)</code>.</p>
-<p>Frequently when troubleshooting type errors, either something is <code>nil</code> or
-<code>T.untyped</code> unexpectedly. We can use <code>T.reveal_type</code> to track down where the
-type originated.</p>
+<p>Frequently when troubleshooting type errors, either something is <code>nil</code> or <code>T.untyped</code> unexpectedly. We can use <code>T.reveal_type</code> to track down where the type originated.</p>
 <blockquote>
-<p><strong>Remember</strong>: Sorbet is a <a href="/docs/gradual">gradual type system</a>. Even if most code
-in a codebase is typed, it’s still possible for code to be untyped!</p>
+<p><strong>Remember</strong>: Sorbet is a <a href="/docs/gradual">gradual type system</a>. Even if most code in a codebase is typed, it’s still possible for code to be untyped!</p>
 </blockquote>
 <h3><a class="anchor" aria-hidden="true" id="sorbetrun"></a><a href="#sorbetrun" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>sorbet.run</h3>
 <p>Sorbet is available in an online sandbox:</p>
@@ -113,57 +104,35 @@ in a codebase is typed, it’s still possible for code to be untyped!</p>
 <li>Ruby standard libraries (like <code>Array</code> and <code>Hash</code>)</li>
 <li><strong>select</strong> DSLs (like <code>T::Struct</code> <code>prop</code>s)</li>
 </ul>
-<p>Using <a href="https://sorbet.run">sorbet.run</a> to make a minimal repro is a great way to
-isolate whether something is “just how Sorbet works” or is acting strangely in
-conjunction with the code in a specific project locally.</p>
+<p>Using <a href="https://sorbet.run">sorbet.run</a> to make a minimal repro is a great way to isolate whether something is “just how Sorbet works” or is acting strangely in conjunction with the code in a specific project locally.</p>
 <blockquote>
-<p><strong>Note</strong>: sorbet.run only shows how the static component of Sorbet works. To
-test the runtime component, see the <a href="/docs/quickref">Quick Reference</a>.</p>
+<p><strong>Note</strong>: sorbet.run only shows how the static component of Sorbet works. To test the runtime component, see the <a href="/docs/quickref">Quick Reference</a>.</p>
 </blockquote>
 <h3><a class="anchor" aria-hidden="true" id="run-the-code"></a><a href="#run-the-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Run the code</h3>
-<p>Types predict values. Is Sorbet’s prediction accurate? Try using a Ruby REPL
-(like <code>irb</code> or <code>binding.pry</code>) to run code. Does it actually work? If it doesn’t
-actually work, Sorbet caught a bug!</p>
-<p>Otherwise, there are a handful of reasons why Sorbet predicts code will not work
-even when it does:</p>
+<p>Types predict values. Is Sorbet’s prediction accurate? Try using a Ruby REPL (like <code>irb</code> or <code>binding.pry</code>) to run code. Does it actually work? If it doesn’t actually work, Sorbet caught a bug!</p>
+<p>Otherwise, there are a handful of reasons why Sorbet predicts code will not work even when it does:</p>
 <ul>
-<li><p>Maybe the code ran fine for all provided input values, but there’s an edge
-case being left untested.</p></li>
-<li><p>Maybe the code uses a method from the standard library that is missing or
-typed incorrectly (our standard library shims are sometimes incomplete).</p></li>
-<li><p>Maybe a method Sorbet thinks doesn’t exist actually <strong>does</strong> exist because it
-was dynamically defined with <code>define_method</code> or <code>missing_method</code>. See
-<a href="#escape-hatches">Escape Hatches</a> below for working around this.</p></li>
+<li><p>Maybe the code ran fine for all provided input values, but there’s an edge case being left untested.</p></li>
+<li><p>Maybe the code uses a method from the standard library that is missing or typed incorrectly (our standard library shims are sometimes incomplete).</p></li>
+<li><p>Maybe a method Sorbet thinks doesn’t exist actually <strong>does</strong> exist because it was dynamically defined with <code>define_method</code> or <code>missing_method</code>. See <a href="#escape-hatches">Escape Hatches</a> below for working around this.</p></li>
 </ul>
 <h3><a class="anchor" aria-hidden="true" id="rbi-files--missing-methods"></a><a href="#rbi-files--missing-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>*.rbi</code> files &amp; missing methods</h3>
-<p>One of the most confusing errors from Sorbet can be “7003: Method does not
-exist.” Ruby is a very dynamic language, and methods can be defined in ways
-Sorbet cannot see statically. It’s possible that even though a method exists at
-runtime, Sorbet cannot see it.</p>
-<p>However, we can use <code>*.rbi</code> files to declare methods to Sorbet so that it
-<strong>can</strong> see them statically. For more information about RBI files:</p>
+<p>One of the most confusing errors from Sorbet can be “7003: Method does not exist.” Ruby is a very dynamic language, and methods can be defined in ways Sorbet cannot see statically. It’s possible that even though a method exists at runtime, Sorbet cannot see it.</p>
+<p>However, we can use <code>*.rbi</code> files to declare methods to Sorbet so that it <strong>can</strong> see them statically. For more information about RBI files:</p>
 <p><a href="/docs/rbi">→ RBI files</a></p>
 <h3><a class="anchor" aria-hidden="true" id="help-with-common-errors"></a><a href="#help-with-common-errors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Help with common errors</h3>
-<p>The tips above are very generic and apply to lots of cases. For some common
-gotchas when using Sorbet, here are two more specific resources:</p>
+<p>The tips above are very generic and apply to lots of cases. For some common gotchas when using Sorbet, here are two more specific resources:</p>
 <ul>
 <li><p><a href="/docs/error-reference">Sorbet Error Reference</a></p>
-<p>This document is a collaborative reference with suggestions for commonly
-encountered error codes. You should see links to this document in Sorbet’s
-error output.</p></li>
+<p>This document is a collaborative reference with suggestions for commonly encountered error codes. You should see links to this document in Sorbet’s error output.</p></li>
 <li><p><a href="/docs/faq">FAQ</a></p>
-<p>This is a list of questions people commonly have when working with Sorbet and
-the runtime type system. Skim it to see if it says anything useful!</p></li>
+<p>This is a list of questions people commonly have when working with Sorbet and the runtime type system. Skim it to see if it says anything useful!</p></li>
 </ul>
 <h2><a class="anchor" aria-hidden="true" id="escape-hatches"></a><a href="#escape-hatches" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Escape Hatches</h2>
-<p>Regardless of whether we can figure out the root cause of the error at hand,
-Sorbet is designed as a <a href="/docs/gradual">gradual type system</a>. This means there will
-always be <strong>escape hatches</strong> to silence the problem.</p>
+<p>Regardless of whether we can figure out the root cause of the error at hand, Sorbet is designed as a <a href="/docs/gradual">gradual type system</a>. This means there will always be <strong>escape hatches</strong> to silence the problem.</p>
 <h3><a class="anchor" aria-hidden="true" id="tunsafe"></a><a href="#tunsafe" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.unsafe</code></h3>
-<p>By wrapping an expression like <code>x</code> in <code>T.unsafe(...)</code> we can ask Sorbet to
-forget the result type of something.</p>
-<p>One case when this is useful is when we know for sure that a method exists, but
-Sorbet doesn’t know that method exists statically:</p>
+<p>By wrapping an expression like <code>x</code> in <code>T.unsafe(...)</code> we can ask Sorbet to forget the result type of something.</p>
+<p>One case when this is useful is when we know for sure that a method exists, but Sorbet doesn’t know that method exists statically:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method_missing</span><span class="hljs-params">(method)</span></span>
@@ -173,12 +142,8 @@ Sorbet doesn’t know that method exists statically:</p>
 
 A.new.foo <span class="hljs-comment"># error: Method `foo` does not exist on `A`</span>
 </code></pre>
-<p>In cases like this, we have a couple options. The first one is just: rewrite the
-code. Code that’s hard for Sorbet to understand is frequently hard for
-developers to understand. By rewriting confusing code, we benefit all future
-readers.</p>
-<p>However, in the case when we’re <strong>sure</strong> that we don’t want to refactor the
-code, we have an escape hatch: <code>T.unsafe</code>. It looks like this:</p>
+<p>In cases like this, we have a couple options. The first one is just: rewrite the code. Code that’s hard for Sorbet to understand is frequently hard for developers to understand. By rewriting confusing code, we benefit all future readers.</p>
+<p>However, in the case when we’re <strong>sure</strong> that we don’t want to refactor the code, we have an escape hatch: <code>T.unsafe</code>. It looks like this:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method_missing</span><span class="hljs-params">(method)</span></span>
@@ -188,12 +153,9 @@ code, we have an escape hatch: <code>T.unsafe</code>. It looks like this:</p>
 
 T.unsafe(A.new).foo <span class="hljs-comment"># =&gt; ok</span>
 </code></pre>
-<p>The <code>T.unsafe</code> call effectively says to Sorbet, “trust me, I know what I’m
-doing.” At this point, the burden of correctness shifts from Sorbet to the
-programmer.</p>
+<p>The <code>T.unsafe</code> call effectively says to Sorbet, “trust me, I know what I’m doing.” At this point, the burden of correctness shifts from Sorbet to the programmer.</p>
 <h3><a class="anchor" aria-hidden="true" id="tunsafeself"></a><a href="#tunsafeself" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.unsafe(self)</code></h3>
-<p>Note that the call to <code>T.unsafe</code> must wrap the <a href="https://stackoverflow.com/questions/916572/in-ruby-what-does-the-receiver-refer-to">receiver</a> of the method call. In
-this example:</p>
+<p>Note that the call to <code>T.unsafe</code> must wrap the <a href="https://stackoverflow.com/questions/916572/in-ruby-what-does-the-receiver-refer-to">receiver</a> of the method call. In this example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method_missing</span><span class="hljs-params">(method)</span></span>
@@ -205,10 +167,7 @@ this example:</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p><code>foo</code> is a method that’s being called without on the implicit receiver of
-<code>self</code>. Another way of saying that is that <code>foo</code> is the same as <code>self.foo</code> in
-Ruby. So to use unsafe to silence this error, we have to make the <code>self.foo</code>
-explicit:</p>
+<p><code>foo</code> is a method that’s being called without on the implicit receiver of <code>self</code>. Another way of saying that is that <code>foo</code> is the same as <code>self.foo</code> in Ruby. So to use unsafe to silence this error, we have to make the <code>self.foo</code> explicit:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method_missing</span><span class="hljs-params">(method)</span></span>
@@ -221,21 +180,13 @@ explicit:</p>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="tcast-a-safer-alternative-to-tunsafe"></a><a href="#tcast-a-safer-alternative-to-tunsafe" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.cast</code>: a safer alternative to <code>T.unsafe</code></h3>
-<p><code>T.unsafe</code> is maximally unsafe. It forces Sorbet to forget all type information
-statically—sometimes this is more power than we need. For the cases where we
-the programmer know of an invariant that isn’t currently expressed in the type
-system, <a href="type-assertions#tcast"><code>T.cast</code></a> is a good middle-ground.</p>
+<p><code>T.unsafe</code> is maximally unsafe. It forces Sorbet to forget all type information statically—sometimes this is more power than we need. For the cases where we the programmer know of an invariant that isn’t currently expressed in the type system, <a href="type-assertions#tcast"><code>T.cast</code></a> is a good middle-ground.</p>
 <h3><a class="anchor" aria-hidden="true" id="changing-when-runtime-exceptions-are-raised"></a><a href="#changing-when-runtime-exceptions-are-raised" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Changing when runtime exceptions are raised</h3>
-<p>Both <code>T.unsafe</code> and <code>T.cast</code> relax Sorbet’s static checks. They don’t silence
-any exceptions that would be raised for type errors at runtime.</p>
-<p>There are also ways to change the runtime behavior; these escape hatches are
-documented elsewhere. See:</p>
+<p>Both <code>T.unsafe</code> and <code>T.cast</code> relax Sorbet’s static checks. They don’t silence any exceptions that would be raised for type errors at runtime.</p>
+<p>There are also ways to change the runtime behavior; these escape hatches are documented elsewhere. See:</p>
 <ul>
-<li><p><a href="/docs/runtime">Enabling Runtime Checks</a>, which has docs on how to configure and
-opt out of certain runtime checks.</p></li>
-<li><p><a href="/docs/tconfiguration">Runtime Configuration</a>, which has docs on how to write
-low-level configuration handlers that intercept any exceptions that the
-runtime could raise.</p></li>
+<li><p><a href="/docs/runtime">Enabling Runtime Checks</a>, which has docs on how to configure and opt out of certain runtime checks.</p></li>
+<li><p><a href="/docs/tconfiguration">Runtime Configuration</a>, which has docs on how to write low-level configuration handlers that intercept any exceptions that the runtime could raise.</p></li>
 </ul>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/tconfiguration"><span class="arrow-prev">← </span><span>Runtime Configuration</span></a><a class="docs-next button" href="/docs/why-type-annotations"><span>Why type annotations?</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#validating-our-assumptions">Validating our assumptions</a><ul class="toc-headings"><li><a href="#treveal_type"><code>T.reveal_type</code></a></li><li><a href="#sorbetrun">sorbet.run</a></li><li><a href="#run-the-code">Run the code</a></li><li><a href="#rbi-files--missing-methods"><code>*.rbi</code> files &amp; missing methods</a></li><li><a href="#help-with-common-errors">Help with common errors</a></li></ul></li><li><a href="#escape-hatches">Escape Hatches</a><ul class="toc-headings"><li><a href="#tunsafe"><code>T.unsafe</code></a></li><li><a href="#tunsafeself"><code>T.unsafe(self)</code></a></li><li><a href="#tcast-a-safer-alternative-to-tunsafe"><code>T.cast</code>: a safer alternative to <code>T.unsafe</code></a></li><li><a href="#changing-when-runtime-exceptions-are-raised">Changing when runtime exceptions are raised</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer"><svg width="99" height="28" viewBox="0 0 99 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.98432 20H6.27432C8.44932 20 9.81432 18.905 9.81432 17.03C9.81432 15.665 9.00432 14.72 7.78932 14.39C8.61432 14.105 9.45432 13.415 9.45432 12.035C9.45432 10.235 8.23932 9.23 5.95932 9.23H1.98432V20ZM3.37932 13.85V10.445H5.83932C7.27932 10.445 8.07432 11 8.07432 12.155C8.07432 13.295 7.27932 13.85 5.83932 13.85H3.37932ZM3.37932 15.08H6.21432C7.65432 15.08 8.43432 15.83 8.43432 16.925C8.43432 18.035 7.65432 18.785 6.21432 18.785H3.37932V15.08ZM18.0294 12.155H16.6794V16.88C16.6794 18.185 15.6894 18.92 14.7144 18.92C13.5594 18.92 13.0794 18.17 13.0794 17.06V12.155H11.7294V17.345C11.7294 19.01 12.6744 20.165 14.3544 20.165C15.4644 20.165 16.2294 19.58 16.6794 18.92V20H18.0294V12.155ZM20.5112 10.79H21.9812V9.23H20.5112V10.79ZM21.9212 12.155H20.5712V20H21.9212V12.155ZM25.8247 9.23H24.4747V20H25.8247V9.23ZM28.5882 18.125C28.5882 19.625 29.3532 20.075 30.6882 20.075C31.1382 20.075 31.5282 20.03 31.8732 19.955V18.8C31.5582 18.875 31.3332 18.89 31.0182 18.89C30.3282 18.89 29.9232 18.74 29.9232 17.915V13.31H31.7082V12.155H29.9232V9.86H28.5882V12.155H27.3732V13.31H28.5882V18.125ZM41.0199 20.165C43.1949 20.165 44.4399 18.305 44.4399 16.085C44.4399 13.85 43.1949 12.005 41.0199 12.005C39.9249 12.005 39.0549 12.53 38.5899 13.295V9.23H37.2399V20H38.5899V18.86C39.0549 19.64 39.9249 20.165 41.0199 20.165ZM38.5599 15.815C38.5599 13.985 39.6699 13.19 40.7799 13.19C42.2499 13.19 43.0749 14.39 43.0749 16.085C43.0749 17.765 42.2499 18.98 40.7799 18.98C39.6699 18.98 38.5599 18.17 38.5599 16.37V15.815ZM49.1804 20.855L52.5554 12.155H51.1454L48.9704 18.155L46.7654 12.155H45.3404L48.2504 19.715L47.8754 20.645C47.5604 21.425 47.2454 21.635 46.6604 21.635C46.4354 21.635 46.2704 21.62 46.0154 21.56V22.73C46.2554 22.775 46.4204 22.79 46.7504 22.79C48.1154 22.79 48.7304 22.04 49.1804 20.855Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M98.7993 15.7838C98.7993 12.8786 97.3871 10.5862 94.688 10.5862C91.9774 10.5862 90.3374 12.8786 90.3374 15.7611C90.3374 19.177 92.2735 20.9019 95.0524 20.9019C96.4077 20.9019 97.4327 20.5955 98.2071 20.1643V17.8946C97.4327 18.2804 96.5443 18.5188 95.4168 18.5188C94.3121 18.5188 93.3327 18.1329 93.2074 16.7938H98.7766C98.7766 16.6463 98.7993 16.0561 98.7993 15.7838ZM93.1732 14.7057C93.1732 13.4233 93.9591 12.8899 94.6766 12.8899C95.3713 12.8899 96.1116 13.4233 96.1116 14.7057H93.1732Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M85.9413 10.5862C84.8251 10.5862 84.1076 11.1082 83.709 11.4714L83.561 10.7678H81.0554V24.0001L83.9026 23.3986L83.914 20.187C84.324 20.482 84.9276 20.9019 85.9299 20.9019C87.9685 20.9019 89.8249 19.2678 89.8249 15.6703C89.8135 12.3792 87.9343 10.5862 85.9413 10.5862ZM85.2579 18.4053C84.586 18.4053 84.1874 18.167 83.914 17.8719L83.9026 13.6616C84.1988 13.3325 84.6088 13.1055 85.2579 13.1055C86.2943 13.1055 87.0118 14.2631 87.0118 15.7497C87.0118 17.2704 86.3057 18.4053 85.2579 18.4053Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M77.1377 9.91656L79.9963 9.30374V7L77.1377 7.60147V9.91656Z" fill="white"></path><path d="M79.9963 10.7791H77.1377V20.709H79.9963V10.7791Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M74.074 11.6187L73.8918 10.7789H71.4318V20.7088H74.279V13.9792C74.9509 13.1054 76.0898 13.2642 76.4429 13.3891V10.7789C76.0784 10.6427 74.7459 10.3931 74.074 11.6187Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M68.3796 8.31641L65.6007 8.90653L65.5894 17.9966C65.5894 19.6762 66.8535 20.9132 68.5391 20.9132C69.473 20.9132 70.1563 20.743 70.5321 20.5387V18.235C70.1677 18.3825 68.3682 18.9045 68.3682 17.225V13.1962H70.5321V10.779H68.3682L68.3796 8.31641Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M60.6807 13.6616C60.6807 13.219 61.0452 13.0488 61.6488 13.0488C62.5143 13.0488 63.6076 13.3098 64.4732 13.7751V11.1082C63.5279 10.7337 62.594 10.5862 61.6488 10.5862C59.3368 10.5862 57.7993 11.7891 57.7993 13.7978C57.7993 16.93 62.1271 16.4306 62.1271 17.7811C62.1271 18.3031 61.6715 18.4734 61.0338 18.4734C60.0885 18.4734 58.8813 18.0875 57.9246 17.5655V20.2664C58.9838 20.7204 60.0543 20.9133 61.0338 20.9133C63.4026 20.9133 65.0313 19.7444 65.0313 17.713C65.0199 14.3312 60.6807 14.9326 60.6807 13.6616Z" fill="white"></path></svg><a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div><div id="csat-extension-config" data-notify="#sorbet-team"></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {

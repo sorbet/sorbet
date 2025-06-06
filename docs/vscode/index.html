@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Extension for Visual Studio Code · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="The"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Extension for Visual Studio Code · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="The"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Extension for Visual Studio Code · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="The [Sorbet extension for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension) integrates with the [Sorbet language server](/docs/lsp) to provide IDE-like features for typed Ruby files."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Extension for Visual Studio Code · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="The [Sorbet extension for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension) integrates with the [Sorbet language server](/docs/lsp) to provide IDE-like features for typed Ruby files."/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments); }
               gtag('js', new Date());
@@ -59,47 +59,26 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/vscode.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Extension for Visual Studio Code</h1></header><article><div><span><p>The
-<a href="https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension">Sorbet extension for Visual Studio Code</a>
-integrates with the <a href="/docs/lsp">Sorbet language server</a> to provide IDE-like
-features for typed Ruby files.</p>
-<p>This doc covers certain VS Code-specific points, like how to install and
-configure the VS Code extension. Most of Sorbet’s editor features are not VS
-Code-specific, and are documented in their own pages (see the “Editor Features”
-section of the page listing).</p>
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/vscode.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Extension for Visual Studio Code</h1></header><article><div><span><p>The <a href="https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension">Sorbet extension for Visual Studio Code</a> integrates with the <a href="/docs/lsp">Sorbet language server</a> to provide IDE-like features for typed Ruby files.</p>
+<p>This doc covers certain VS Code-specific points, like how to install and configure the VS Code extension. Most of Sorbet’s editor features are not VS Code-specific, and are documented in their own pages (see the “Editor Features” section of the page listing).</p>
 <h2><a class="anchor" aria-hidden="true" id="installing-and-enabling-the-extension"></a><a href="#installing-and-enabling-the-extension" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installing and enabling the extension</h2>
-<p>Install
-<a href="https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension">the Sorbet extension</a>
-from the VS Code extension marketplace.</p>
-<p>As long as the current project has a <a href="/docs/cli#config-file"><code>sorbet/config</code></a> file,
-Sorbet should start automatically whenever a Ruby file is open. To check that
-Sorbet has started working, look for &quot;<strong>Sorbet: …</strong>&quot; in the VS Code status
-bar.</p>
-<p>As long as it does not say “Sorbet: Disabled,” then Sorbet is working. See
-<a href="/docs/server-status">Server Status</a> for more information on what the statuses like
-“Idle” mean.</p>
+<p>Install <a href="https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension">the Sorbet extension</a> from the VS Code extension marketplace.</p>
+<p>As long as the current project has a <a href="/docs/cli#config-file"><code>sorbet/config</code></a> file, Sorbet should start automatically whenever a Ruby file is open. To check that Sorbet has started working, look for &quot;<strong>Sorbet: …</strong>&quot; in the VS Code status bar.</p>
+<p>As long as it does not say “Sorbet: Disabled,” then Sorbet is working. See <a href="/docs/server-status">Server Status</a> for more information on what the statuses like “Idle” mean.</p>
 <p><img src="/img/sorbet-idle.png" alt=""></p>
 <h3><a class="anchor" aria-hidden="true" id="troubleshooting-startup"></a><a href="#troubleshooting-startup" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Troubleshooting startup</h3>
 <h4><a class="anchor" aria-hidden="true" id="im-not-seeing-sorbet--in-the-status-bar"></a><a href="#im-not-seeing-sorbet--in-the-status-bar" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>I’m not seeing “Sorbet: …” in the status bar</h4>
 <p>The extension is not active. Here are some steps to try:</p>
 <ul>
-<li><p>Is a Ruby file open? The Sorbet extension does not activate until at least one
-Ruby file is open.</p></li>
-<li><p>Make sure the VS Code window is wide enough to display the entire contents of
-the status bar.</p></li>
-<li><p>Do not use VS Code’s
-<a href="https://code.visualstudio.com/docs/editor/multi-root-workspaces">multi-root workspaces</a>.
-The Sorbet extension does not support this feature.</p></li>
+<li><p>Is a Ruby file open? The Sorbet extension does not activate until at least one Ruby file is open.</p></li>
+<li><p>Make sure the VS Code window is wide enough to display the entire contents of the status bar.</p></li>
+<li><p>Do not use VS Code’s <a href="https://code.visualstudio.com/docs/editor/multi-root-workspaces">multi-root workspaces</a>. The Sorbet extension does not support this feature.</p></li>
 </ul>
 <h4><a class="anchor" aria-hidden="true" id="i-see-sorbet-disabled-in-the-status-bar"></a><a href="#i-see-sorbet-disabled-in-the-status-bar" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>I see “Sorbet: Disabled” in the status bar</h4>
-<p>Sorbet is installed and active, but has chosen not to start the Sorbet process
-automatically. To manually enable Sorbet, either:</p>
+<p>Sorbet is installed and active, but has chosen not to start the Sorbet process automatically. To manually enable Sorbet, either:</p>
 <ul>
-<li><p>Use the <a href="#sorbet-enable"><code>&gt;Sorbet: Enable</code></a> command. The server will start with
-<a href="#sorbet-lspconfigs">the default server command</a>.</p></li>
-<li><p>Use the <a href="#sorbet-configure"><code>&gt;Sorbet: Configure</code></a> command. A prompt will appear to choose which
-server configuration to start the Sorbet process with. See
-<a href="#sorbet-lspconfigs">the configuration docs</a> to change the configurations.</p></li>
+<li><p>Use the <a href="#sorbet-enable"><code>&gt;Sorbet: Enable</code></a> command. The server will start with <a href="#sorbet-lspconfigs">the default server command</a>.</p></li>
+<li><p>Use the <a href="#sorbet-configure"><code>&gt;Sorbet: Configure</code></a> command. A prompt will appear to choose which server configuration to start the Sorbet process with. See <a href="#sorbet-lspconfigs">the configuration docs</a> to change the configurations.</p></li>
 <li><p>Edit the <code>.vscode/settings.json</code> for the current workspace to include this:</p>
 <pre><code class="hljs css language-json">{
   <span class="hljs-attr">"sorbet.enabled"</span>: <span class="hljs-literal">true</span>
@@ -108,63 +87,43 @@ server configuration to start the Sorbet process with. See
 <p>This may require restarting VS Code.</p></li>
 </ul>
 <h4><a class="anchor" aria-hidden="true" id="sorbet-keeps-restarting"></a><a href="#sorbet-keeps-restarting" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sorbet keeps restarting</h4>
-<p>The Sorbet extension restarts the server process when it stops. If the process
-crashes on startup, this can cause Sorbet to restart in a loop. Fixing requires
-fixing the underlying reason for the crash.</p>
-<p>Click on “Sorbet: …” in the status bar and then choose “View Output” (or use
-the <a href="#sorbet-show-output"><code>&gt;Sorbet: Show Output</code></a> command) to see the Sorbet extension logs.</p>
+<p>The Sorbet extension restarts the server process when it stops. If the process crashes on startup, this can cause Sorbet to restart in a loop. Fixing requires fixing the underlying reason for the crash.</p>
+<p>Click on “Sorbet: …” in the status bar and then choose “View Output” (or use the <a href="#sorbet-show-output"><code>&gt;Sorbet: Show Output</code></a> command) to see the Sorbet extension logs.</p>
 <p><img src="/img/view-output.png" alt=""></p>
-<p>There is usually an error message which gives a hint why Sorbet crashed. For
-example:</p>
+<p>There is usually an error message which gives a hint why Sorbet crashed. For example:</p>
 <pre><code class="hljs">[<span class="hljs-builtin-name">Error</span> - 9:36:32 AM]<span class="hljs-built_in"> Connection </span><span class="hljs-keyword">to</span><span class="hljs-built_in"> server </span>got closed.<span class="hljs-built_in"> Server </span>will <span class="hljs-keyword">not</span> be restarted.
 Running Sorbet LSP with:
     bundle exec srb typecheck --lsp
 Could <span class="hljs-keyword">not</span> locate Gemfile <span class="hljs-keyword">or</span> .bundle/ directory
 </code></pre>
 <p>See below for help with specific error messages.</p>
-<p>Note that the “Server will not be restarted” message is logged by a library that
-the Sorbet VS Code extension uses—the actual restart logic lives at a higher
-level, so this error message is misleading. Sorbet <strong>will</strong> be restarted
-whenever the server process crashes.</p>
+<p>Note that the “Server will not be restarted” message is logged by a library that the Sorbet VS Code extension uses—the actual restart logic lives at a higher level, so this error message is misleading. Sorbet <strong>will</strong> be restarted whenever the server process crashes.</p>
 <h4><a class="anchor" aria-hidden="true" id="could-not-locate-gemfile-or-bundle-directory"></a><a href="#could-not-locate-gemfile-or-bundle-directory" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>“Could not locate Gemfile or .bundle/ directory”</h4>
 <p>The Sorbet extension uses this command to start the server process by default:</p>
 <pre><code class="hljs"><span class="hljs-title">bundle</span> exec srb typecheck <span class="hljs-comment">--lsp</span>
 </code></pre>
-<p>This assumes the project uses <a href="https://bundler.io/">Bundler</a> to manage Ruby
-dependencies. If that’s not the case,
-<a href="#sorbet-lspconfigs">configure how to launch</a> the Sorbet process.</p>
+<p>This assumes the project uses <a href="https://bundler.io/">Bundler</a> to manage Ruby dependencies. If that’s not the case, <a href="#sorbet-lspconfigs">configure how to launch</a> the Sorbet process.</p>
 <h4><a class="anchor" aria-hidden="true" id="bundler-command-not-found-srb"></a><a href="#bundler-command-not-found-srb" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>“bundler: command not found: srb”</h4>
 <p>Either:</p>
 <ul>
 <li><p>The <code>Gemfile</code> does not include the <code>sorbet</code> gem</p>
-<p>Edit the <code>Gemfile</code> as per <a href="/docs/adopting">the instructions here</a>, and then run
-<code>bundle install</code>.</p></li>
+<p>Edit the <code>Gemfile</code> as per <a href="/docs/adopting">the instructions here</a>, and then run <code>bundle install</code>.</p></li>
 <li><p>The <code>sorbet</code> gem is included in the Gemfile, but not yet installed.</p>
 <p>Run <code>bundle install</code>, then try again.</p></li>
 </ul>
 <h4><a class="anchor" aria-hidden="true" id="sorbets-language-server-requires-at-least-one-input-directory"></a><a href="#sorbets-language-server-requires-at-least-one-input-directory" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>“Sorbet’s language server requires at least one input directory”</h4>
 <p>Sorbet in LSP mode requires a single input directory.</p>
-<p>See
-<a href="/docs/lsp#a-single-input-directory">Sorbet Language Server &gt; Prerequisites &gt; A single input directory</a>
-for more.</p>
+<p>See <a href="/docs/lsp#a-single-input-directory">Sorbet Language Server &gt; Prerequisites &gt; A single input directory</a> for more.</p>
 <h4><a class="anchor" aria-hidden="true" id="sorbets-language-server-requires-a-single-input-directory"></a><a href="#sorbets-language-server-requires-a-single-input-directory" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>“Sorbet’s language server requires a single input directory”</h4>
 <p>Sorbet in LSP mode requires a single input directory.</p>
-<p>See
-<a href="/docs/lsp#a-single-input-directory">Sorbet Language Server &gt; Prerequisites &gt; A single input directory</a>
-for more.</p>
+<p>See <a href="/docs/lsp#a-single-input-directory">Sorbet Language Server &gt; Prerequisites &gt; A single input directory</a> for more.</p>
 <h4><a class="anchor" aria-hidden="true" id="watchman-is-required-for-sorbet-to-detect-changes-to-files"></a><a href="#watchman-is-required-for-sorbet-to-detect-changes-to-files" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>“Watchman is required for Sorbet to detect changes to files”</h4>
-<p>For the best experience, Sorbet requires
-<a href="https://facebook.github.io/watchman/">Watchman</a>, which listens for changes to
-the files on disk in addition to edits that happen to files open in the editor.</p>
-<p>See <a href="/docs/lsp#watchman">Sorbet Language Server &gt; Prerequisites &gt; Watchman</a> for
-more.</p>
+<p>For the best experience, Sorbet requires <a href="https://facebook.github.io/watchman/">Watchman</a>, which listens for changes to the files on disk in addition to edits that happen to files open in the editor.</p>
+<p>See <a href="/docs/lsp#watchman">Sorbet Language Server &gt; Prerequisites &gt; Watchman</a> for more.</p>
 <h4><a class="anchor" aria-hidden="true" id="something-else"></a><a href="#something-else" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Something else</h4>
-<p>If you had to troubleshoot an error message you think is common when installing
-Sorbet, please help by
-<a href="https://github.com/sorbet/sorbet/edit/master/website/docs/sorbet-uris.md">editing this page</a>!</p>
+<p>If you had to troubleshoot an error message you think is common when installing Sorbet, please help by <a href="https://github.com/sorbet/sorbet/edit/master/website/docs/sorbet-uris.md">editing this page</a>!</p>
 <h2><a class="anchor" aria-hidden="true" id="disabling-the-extension"></a><a href="#disabling-the-extension" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Disabling the extension</h2>
-<p>There are multiple ways to disable the Sorbet extension, which will stop the
-Sorbet server process:</p>
+<p>There are multiple ways to disable the Sorbet extension, which will stop the Sorbet server process:</p>
 <ul>
 <li><p>Use the <a href="#sorbet-disable"><code>&gt;Sorbet: Disable</code></a> command.</p></li>
 <li><p>Click on “Sorbet: …” in the status bar and then choose “Disable Sorbet.”</p></li>
@@ -173,53 +132,29 @@ Sorbet server process:</p>
   <span class="hljs-attr">"sorbet.enabled"</span>: <span class="hljs-literal">false</span>
 }
 </code></pre>
-<p>This is particularly useful to disable Sorbet for all contributors to a given
-project, if there’s some reason why Sorbet should not be used in that project.</p></li>
+<p>This is particularly useful to disable Sorbet for all contributors to a given project, if there’s some reason why Sorbet should not be used in that project.</p></li>
 </ul>
 <h2><a class="anchor" aria-hidden="true" id="command-reference"></a><a href="#command-reference" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Command Reference</h2>
-<p>To run these commands, use VS Code’s
-<a href="https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette">Command Palette</a>.
-To bring up the command palette, use ⇧⌘P on macOS or Ctrl + Shift + P on Linux.</p>
-<p>The <code>&gt;</code> character in the command names below does not need to be typed, unless
-it’s been deleted from the text box, or if the palette was opened with the
-“Quick Open” menu (⌘P on macOS, Ctrl + P on Linux.)</p>
+<p>To run these commands, use VS Code’s <a href="https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette">Command Palette</a>. To bring up the command palette, use ⇧⌘P on macOS or Ctrl + Shift + P on Linux.</p>
+<p>The <code>&gt;</code> character in the command names below does not need to be typed, unless it’s been deleted from the text box, or if the palette was opened with the “Quick Open” menu (⌘P on macOS, Ctrl + P on Linux.)</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbet-enable"></a><a href="#sorbet-enable" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>&gt;Sorbet: Enable</code></h3>
-<p>Enables Sorbet, causing the Sorbet server process to start. It will use the most
-recently selected <a href="#sorbet-lspconfigs">server launch configuration</a>, or else the
-default.</p>
+<p>Enables Sorbet, causing the Sorbet server process to start. It will use the most recently selected <a href="#sorbet-lspconfigs">server launch configuration</a>, or else the default.</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbet-disable"></a><a href="#sorbet-disable" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>&gt;Sorbet: Disable</code></h3>
 <p>Disables Sorbet, causing the Sorbet server process to stop.</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbet-restart"></a><a href="#sorbet-restart" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>&gt;Sorbet: Restart</code></h3>
-<p>Disables Sorbet, causing the Sorbet server process to stop, then re-enables
-Sorbet, causing it to launch again, using the current server configuration.</p>
+<p>Disables Sorbet, causing the Sorbet server process to stop, then re-enables Sorbet, causing it to launch again, using the current server configuration.</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbet-configure"></a><a href="#sorbet-configure" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>&gt;Sorbet: Configure</code></h3>
-<p>Chooses which configuration to run Sorbet with, or choose to disable Sorbet.
-After choosing a configuration, any running Sorbet process will stop, and a new
-one will be launched with the chosen configuration.</p>
-<p>By default, <a href="#sorbet-lspconfigs">there are three configurations</a>, which allow
-opting into experimental features. A given workspace may choose to define its
-own configurations.</p>
+<p>Chooses which configuration to run Sorbet with, or choose to disable Sorbet. After choosing a configuration, any running Sorbet process will stop, and a new one will be launched with the chosen configuration.</p>
+<p>By default, <a href="#sorbet-lspconfigs">there are three configurations</a>, which allow opting into experimental features. A given workspace may choose to define its own configurations.</p>
 <p><img src="/img/configure.png" alt=""></p>
 <h3><a class="anchor" aria-hidden="true" id="sorbet-show-output"></a><a href="#sorbet-show-output" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>&gt;Sorbet: Show Output</code></h3>
-<p>Opens the Sorbet extension’s logs in the output pane. Mostly useful for
-<a href="#troubleshooting-startup">Troubleshooting startup</a>. For debugging the Sorbet
-extension itself, consider also using <a href="#sorbet-set-log-level"><code>&gt;Sorbet: Set Log Level...</code></a> to make the
-logs more verbose.</p>
-<p>Note that the Sorbet output <strong>only</strong> includes logs from the Sorbet extension. It
-does not include debug output from the Sorbet server process. To control log
-output from the Sorbet server process, see the
-<a href="/docs/cli-ref#debugging-options"><code>--debug-log-file</code></a> command line option. This
-flag is not passed by default. To pass it, change the
-<a href="#sorbet-lspconfigs">server configurations</a>.</p>
+<p>Opens the Sorbet extension’s logs in the output pane. Mostly useful for <a href="#troubleshooting-startup">Troubleshooting startup</a>. For debugging the Sorbet extension itself, consider also using <a href="#sorbet-set-log-level"><code>&gt;Sorbet: Set Log Level...</code></a> to make the logs more verbose.</p>
+<p>Note that the Sorbet output <strong>only</strong> includes logs from the Sorbet extension. It does not include debug output from the Sorbet server process. To control log output from the Sorbet server process, see the <a href="/docs/cli-ref#debugging-options"><code>--debug-log-file</code></a> command line option. This flag is not passed by default. To pass it, change the <a href="#sorbet-lspconfigs">server configurations</a>.</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbet-set-log-level"></a><a href="#sorbet-set-log-level" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>&gt;Sorbet: Set Log Level...</code></h3>
-<p>The Sorbet extension includes various logs designed to help developers
-troubleshoot problems in the Sorbet extension itself. Use this command to
-control how verbose Sorbet’s log should be. It may also be helpful to enable
-<a href="https://github.com/sorbet/sorbet/blob/master/docs/lsp-dev-guide.md#by-trying-it-in-a-client">logging at VS Code’s language client level</a>.</p>
+<p>The Sorbet extension includes various logs designed to help developers troubleshoot problems in the Sorbet extension itself. Use this command to control how verbose Sorbet’s log should be. It may also be helpful to enable <a href="https://github.com/sorbet/sorbet/blob/master/docs/lsp-dev-guide.md#by-trying-it-in-a-client">logging at VS Code’s language client level</a>.</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbet-copy-symbol-to-clipboard"></a><a href="#sorbet-copy-symbol-to-clipboard" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>&gt;Sorbet: Copy Symbol to Clipboard</code></h3>
 <p>Copies the fully-qualified name of the symbol under the cursor to the clipboard.</p>
-<p>This feature is powered by a custom extension to the LSP specification:
-<a href="/docs/lsp#sorbetshowsymbol-request"><code>sorbet/showSymbol</code> request</a>.</p>
+<p>This feature is powered by a custom extension to the LSP specification: <a href="/docs/lsp#sorbetshowsymbol-request"><code>sorbet/showSymbol</code> request</a>.</p>
 <p>The same feature is also available as a right-click context menu item:</p>
 <video autoplay loop muted playsinline style="max-width: 597px;">
   <source src="/img/copy-symbol.mp4" type="video/mp4">
@@ -229,68 +164,40 @@ control how verbose Sorbet’s log should be. It may also be helpful to enable
 <h3><a class="anchor" aria-hidden="true" id="sorbet-toggle-highlighting-untyped-code"></a><a href="#sorbet-toggle-highlighting-untyped-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>&gt;Sorbet: Toggle highlighting untyped code</code></h3>
 <p>See <a href="/docs/highlight-untyped">Highlighting untyped code</a></p>
 <h3><a class="anchor" aria-hidden="true" id="-sorbet-toggle-the-autocomplete-nudge-in-typed-false-files-"></a><a href="#-sorbet-toggle-the-autocomplete-nudge-in-typed-false-files-" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>&gt;Sorbet: Toggle the autocomplete nudge in `typed: false` files</code></h3>
-<p>By default, Sorbet shows a completion item in <code># typed: false</code> files when there
-are no completion results due to the file being <code># typed: false</code>, like this:</p>
+<p>By default, Sorbet shows a completion item in <code># typed: false</code> files when there are no completion results due to the file being <code># typed: false</code>, like this:</p>
 <p><img src="/img/typed-false-nudge.png" style="max-width: 463px; margin-left: 0;" /></p>
-<p>The goal of the nudge is to encourage upgrading the current file
-<a href="/docs/static">from <code># typed: false</code> to <code># typed: true</code></a>. Use this command to
-disable the nudge.</p>
-<p>As a reminder, most features, including autocompletion,
-<a href="/docs/lsp-typed-level">have degraded support</a> in <code># typed: false</code> files.</p>
+<p>The goal of the nudge is to encourage upgrading the current file <a href="/docs/static">from <code># typed: false</code> to <code># typed: true</code></a>. Use this command to disable the nudge.</p>
+<p>As a reminder, most features, including autocompletion, <a href="/docs/lsp-typed-level">have degraded support</a> in <code># typed: false</code> files.</p>
 <h2><a class="anchor" aria-hidden="true" id="configuration-reference"></a><a href="#configuration-reference" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuration Reference</h2>
-<p>This section documents configuration options which live in the
-<a href="https://code.visualstudio.com/docs/getstarted/settings">User or Workspace Settings</a>
-of VS Code.</p>
-<p>For a complete reference of the Sorbet extension’s configuration options, their
-types, and their defaults, see the <code>&quot;configuration&quot;</code> section of the
-<a href="https://github.com/sorbet/sorbet/blob/master/vscode_extension/package.json">package.json</a>
-file.</p>
+<p>This section documents configuration options which live in the <a href="https://code.visualstudio.com/docs/getstarted/settings">User or Workspace Settings</a> of VS Code.</p>
+<p>For a complete reference of the Sorbet extension’s configuration options, their types, and their defaults, see the <code>&quot;configuration&quot;</code> section of the <a href="https://github.com/sorbet/sorbet/blob/master/vscode_extension/package.json">package.json</a> file.</p>
 <h3><a class="anchor" aria-hidden="true" id="sticky-configuration"></a><a href="#sticky-configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sticky configuration</h3>
-<p>Sorbet extension settings are <em>sticky</em>: even if the <code>settings.json</code> file for the
-workspace or the user has a given setting, Sorbet will remember when the user
-previously changed that the setting from the UI. These choices persist across
-reboots of VS Code.</p>
-<p>For example, consider the <a href="#sorbet-enabled"><code>sorbet.enabled</code></a> setting and the
-<a href="#sorbet-enable"><code>&gt;Sorbet: Enable</code></a> command in this scenario:</p>
+<p>Sorbet extension settings are <em>sticky</em>: even if the <code>settings.json</code> file for the workspace or the user has a given setting, Sorbet will remember when the user previously changed that the setting from the UI. These choices persist across reboots of VS Code.</p>
+<p>For example, consider the <a href="#sorbet-enabled"><code>sorbet.enabled</code></a> setting and the <a href="#sorbet-enable"><code>&gt;Sorbet: Enable</code></a> command in this scenario:</p>
 <ol>
 <li><p>Initially, the <code>.vscode/settings.json</code> file for a given workspace has</p>
 <pre><code class="hljs css language-json">{
   <span class="hljs-attr">"sorbet.enabled"</span>: <span class="hljs-literal">false</span>
 }
 </code></pre>
-<p>When VS Code starts up, it sees that Sorbet is disabled and does not launch
-Sorbet.</p></li>
-<li><p>The user then runs <code>&gt;Sorbet: Enable</code> to start Sorbet, does some work, and
-quits VS Code.</p></li>
-<li><p>The next time VS Code is opened in this workspace, Sorbet will still be
-enabled and start automatically.</p></li>
+<p>When VS Code starts up, it sees that Sorbet is disabled and does not launch Sorbet.</p></li>
+<li><p>The user then runs <code>&gt;Sorbet: Enable</code> to start Sorbet, does some work, and quits VS Code.</p></li>
+<li><p>The next time VS Code is opened in this workspace, Sorbet will still be enabled and start automatically.</p></li>
 </ol>
-<p>It’s not that the <code>&gt;Sorbet: Enable</code> command edited the contents of the
-<code>.vscode/settings.json</code> file to flip it to <code>true</code>, but rather that the Sorbet
-extension remembers whether a setting has been changed via a command after
-starting up.</p>
-<p>The only settings that are not sticky like this are the settings which do not
-have a <a href="#command-reference">command</a> to change the corresponding
-<a href="#configuration-reference">configuration setting</a>.</p>
+<p>It’s not that the <code>&gt;Sorbet: Enable</code> command edited the contents of the <code>.vscode/settings.json</code> file to flip it to <code>true</code>, but rather that the Sorbet extension remembers whether a setting has been changed via a command after starting up.</p>
+<p>The only settings that are not sticky like this are the settings which do not have a <a href="#command-reference">command</a> to change the corresponding <a href="#configuration-reference">configuration setting</a>.</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbetenabled"></a><a href="#sorbetenabled" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>sorbet.enabled</code></h3>
 <p>Whether Sorbet should be enabled or disabled in this workspace.</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbetlspconfigs"></a><a href="#sorbetlspconfigs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>sorbet.lspConfigs</code></h3>
 <p>This setting controls the command used to launch the Sorbet server process.</p>
-<p>The Sorbet extension supports switching between multiple configurations to make
-it easy to try out experimental features or register custom command line
-options. By default, it ships with three configurations: <code>Sorbet</code>,
-<code>Sorbet (Beta)</code>, and <code>Sorbet (Experimental)</code>.</p>
-<p>Users can switch between these configurations using the <a href="#sorbet-configure"><code>&gt;Sorbet: Configure</code></a>
-command, or by clicking on “Sorbet: …” in the status bar and selecting
-&quot;Configure Sorbet&quot;.</p>
+<p>The Sorbet extension supports switching between multiple configurations to make it easy to try out experimental features or register custom command line options. By default, it ships with three configurations: <code>Sorbet</code>, <code>Sorbet (Beta)</code>, and <code>Sorbet (Experimental)</code>.</p>
+<p>Users can switch between these configurations using the <a href="#sorbet-configure"><code>&gt;Sorbet: Configure</code></a> command, or by clicking on “Sorbet: …” in the status bar and selecting &quot;Configure Sorbet&quot;.</p>
 <p>As mentioned elsewhere:</p>
 <ul>
 <li>Changing the config will cause Sorbet to restart in the chosen configuration.</li>
-<li>Using the UI to change this setting is sticky: Sorbet will use the most
-recently chosen configuration when next launched.</li>
+<li>Using the UI to change this setting is sticky: Sorbet will use the most recently chosen configuration when next launched.</li>
 </ul>
-<p>An example configuration would look like this. Consisder a project that uses
-Sorbet but that does not use Bundler:</p>
+<p>An example configuration would look like this. Consisder a project that uses Sorbet but that does not use Bundler:</p>
 <pre><code class="hljs css language-json">{
   <span class="hljs-attr">"sorbet.lspConfigs"</span>: [
     {
@@ -303,38 +210,22 @@ Sorbet but that does not use Bundler:</p>
   ]
 }
 </code></pre>
-<p>This project would not use <code>bundle exec [...]</code> to launch the Sorbet server
-process.</p>
+<p>This project would not use <code>bundle exec [...]</code> to launch the Sorbet server process.</p>
 <p>Some other ideas for how to use this configuration feature:</p>
 <ul>
-<li><p>Pass custom, <a href="/docs/cli-ref#lsp-options">LSP-specific options</a> that don’t belong
-in the <a href="/docs/cli#config-file"><code>sorbet/config</code></a>.</p></li>
-<li><p>Wrap the call to <code>srb tc</code> in a custom script for the current project, which
-might do things like make sure the environment is set up correctly before
-starting Sorbet.</p></li>
+<li><p>Pass custom, <a href="/docs/cli-ref#lsp-options">LSP-specific options</a> that don’t belong in the <a href="/docs/cli#config-file"><code>sorbet/config</code></a>.</p></li>
+<li><p>Wrap the call to <code>srb tc</code> in a custom script for the current project, which might do things like make sure the environment is set up correctly before starting Sorbet.</p></li>
 <li><p>Start the server process using a custom, local build of the Sorbet binary.</p></li>
 </ul>
-<p>When setting this setting, it’s recommended to refer to the more complete
-documentation in the Sorbet extension’s
-<a href="https://github.com/sorbet/sorbet/blob/master/vscode_extension/package.json">package.json</a>
-file.</p>
+<p>When setting this setting, it’s recommended to refer to the more complete documentation in the Sorbet extension’s <a href="https://github.com/sorbet/sorbet/blob/master/vscode_extension/package.json">package.json</a> file.</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbetuserlspconfigs"></a><a href="#sorbetuserlspconfigs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>sorbet.userLspConfigs</code></h3>
-<p>This setting is largely the same as <code>sorbet.lspConfigs</code>, but has higher
-precedence. It’s designed to allow users to keep their own Sorbet configurations
-in VS Code’s User settings.</p>
-<p>Normally, Workspace Settings
-<a href="https://code.visualstudio.com/docs/getstarted/settings#_settings-precedence">take precedence over</a>
-User Settings. Having this option gives users the chance to invert that.</p>
-<p>Because of this, it’s usually not recommended to commit this setting to
-<code>.vscode/settings.json</code> in a workspace, because it prevents users from launching
-Sorbet according to their own preferences.</p>
+<p>This setting is largely the same as <code>sorbet.lspConfigs</code>, but has higher precedence. It’s designed to allow users to keep their own Sorbet configurations in VS Code’s User settings.</p>
+<p>Normally, Workspace Settings <a href="https://code.visualstudio.com/docs/getstarted/settings#_settings-precedence">take precedence over</a> User Settings. Having this option gives users the chance to invert that.</p>
+<p>Because of this, it’s usually not recommended to commit this setting to <code>.vscode/settings.json</code> in a workspace, because it prevents users from launching Sorbet according to their own preferences.</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbetselectedlspconfigid"></a><a href="#sorbetselectedlspconfigid" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>sorbet.selectedLspConfigId</code></h3>
-<p>Which LSP configuration to pick first (see
-<a href="#sorbet-lspconfigs"><code>sorbet.lspConfigs</code></a>).</p>
+<p>Which LSP configuration to pick first (see <a href="#sorbet-lspconfigs"><code>sorbet.lspConfigs</code></a>).</p>
 <p>If unset, picks the first one, giving precedence to <code>sorbet.userLspConfigs</code>.</p>
-<p>Remember that <a href="#sticky-configuration">settings are sticky</a>, so if the user has
-used <a href="#sorbet-configure"><code>&gt;Sorbet: Configure</code></a> to change the configuration, that most recently
-selected configuration will take precedence over this setting.</p>
+<p>Remember that <a href="#sticky-configuration">settings are sticky</a>, so if the user has used <a href="#sorbet-configure"><code>&gt;Sorbet: Configure</code></a> to change the configuration, that most recently selected configuration will take precedence over this setting.</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbethighlightuntyped"></a><a href="#sorbethighlightuntyped" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>sorbet.highlightUntyped</code></h3>
 <p>Whether to highlight untyped, and where. Defaults to <code>&quot;nowhere&quot;</code>.</p>
 <p>See <a href="/docs/highlight-untyped">Highlighting untyped code</a></p>
@@ -342,15 +233,9 @@ selected configuration will take precedence over this setting.</p>
 <p>Whether to enable <code># typed: false</code> completion nudges. Defaults to <code>true</code>.</p>
 <p>See <a href="#-sorbet-toggle-the-autocomplete-nudge-in-typed-false-files-"><code>&gt;Sorbet: Toggle the autocomplete nudge in `typed: false` files</code></a>.</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbetconfigfilepatterns"></a><a href="#sorbetconfigfilepatterns" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>sorbet.configFilePatterns</code></h3>
-<p>A list of workspace file patterns that contribute to Sorbet’s configuration.
-Changes to any of those files should trigger a restart of any actively running
-Sorbet language server.</p>
-<p>For example, changes to the <code>sorbet/config</code> file or the <code>Gemfile.lock</code> could
-mean that the Sorbet process needs to restart (to pick up new options, or a new
-version, respectively). The default <code>sorbet.configFilePattern</code> tracks these two
-files are tracked</p>
-<p>Projects that have custom scripts that launch Sorbet likely want to set this
-setting.</p>
+<p>A list of workspace file patterns that contribute to Sorbet’s configuration. Changes to any of those files should trigger a restart of any actively running Sorbet language server.</p>
+<p>For example, changes to the <code>sorbet/config</code> file or the <code>Gemfile.lock</code> could mean that the Sorbet process needs to restart (to pick up new options, or a new version, respectively). The default <code>sorbet.configFilePattern</code> tracks these two files are tracked</p>
+<p>Projects that have custom scripts that launch Sorbet likely want to set this setting.</p>
 <p>Careful: setting this setting completely overwrites the default.</p>
 <h3><a class="anchor" aria-hidden="true" id="sorbetrevealoutputonerror"></a><a href="#sorbetrevealoutputonerror" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>sorbet.revealOutputOnError</code></h3>
 <p>Shows the extension output window on errors. Defaults to <code>false</code>.</p>
@@ -358,31 +243,18 @@ setting.</p>
 <h2><a class="anchor" aria-hidden="true" id="extension-api"></a><a href="#extension-api" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Extension API</h2>
 <h3><a class="anchor" aria-hidden="true" id="reporting-metrics"></a><a href="#reporting-metrics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Reporting metrics</h3>
 <blockquote>
-<p>Sorbet does not require metrics gathering for full functionality. If you are
-seeing a log line like “Sorbet metrics gathering disabled,” Sorbet is working
-as intended.</p>
+<p>Sorbet does not require metrics gathering for full functionality. If you are seeing a log line like “Sorbet metrics gathering disabled,” Sorbet is working as intended.</p>
 </blockquote>
-<p>It is possible to ask the Sorbet VS Code extension to collect and report usage
-metrics. This is predominantly useful if you maintain a large Ruby codebase that
-uses Sorbet, and want to gather metrics on things like daily users and editor
-responsiveness.</p>
-<p>To start gathering metrics, implement a
-<a href="https://code.visualstudio.com/api/extension-guides/command#creating-new-commands">custom VS Code command</a>
-using the name <code>sorbet.metrics.getExportedApi</code>.</p>
+<p>It is possible to ask the Sorbet VS Code extension to collect and report usage metrics. This is predominantly useful if you maintain a large Ruby codebase that uses Sorbet, and want to gather metrics on things like daily users and editor responsiveness.</p>
+<p>To start gathering metrics, implement a <a href="https://code.visualstudio.com/api/extension-guides/command#creating-new-commands">custom VS Code command</a> using the name <code>sorbet.metrics.getExportedApi</code>.</p>
 <p>The implementation of this command should simply return an object like this:</p>
 <pre><code class="hljs css language-js">{
   <span class="hljs-attr">metricsEmitter</span>: ...
 }
 </code></pre>
-<p>The <code>metricsEmitter</code> value should conform to the <a href="https://github.com/sorbet/sorbet/blob/2b850340e9bccd689d6a976cddbbfecf533933ae/vscode_extension/src/veneur.ts#L11"><code>MetricsEmitter</code> interface</a>
-declared in the Sorbet VS Code extension source code. Most likely, you will want
-to implement this interface by importing a StatsD client, connecting to an
-internal metrics reporting host, and forwarding requests from the
-<code>MetricEmitter</code> interface function calls to the StatsD client of your choice.</p>
+<p>The <code>metricsEmitter</code> value should conform to the <a href="https://github.com/sorbet/sorbet/blob/2b850340e9bccd689d6a976cddbbfecf533933ae/vscode_extension/src/veneur.ts#L11"><code>MetricsEmitter</code> interface</a> declared in the Sorbet VS Code extension source code. Most likely, you will want to implement this interface by importing a StatsD client, connecting to an internal metrics reporting host, and forwarding requests from the <code>MetricEmitter</code> interface function calls to the StatsD client of your choice.</p>
 <h3><a class="anchor" aria-hidden="true" id="tracking-server-status-changes"></a><a href="#tracking-server-status-changes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Tracking server status changes</h3>
-<p>Starting from version 0.3.41, the Sorbet extension exports an API to track
-server status changes. To ensure backward and forward compatibility, all
-properties are nullable.</p>
+<p>Starting from version 0.3.41, the Sorbet extension exports an API to track server status changes. To ensure backward and forward compatibility, all properties are nullable.</p>
 <ul>
 <li><code>status</code>: Represents Sorbet status, or <code>undefined</code> if the state is unknown.</li>
 <li><code>onStatusChanged</code>: An event triggered whenever the status changes.</li>
@@ -396,37 +268,24 @@ ext?.exports?.status;
 <p>The <code>status</code> field may take on the following string values:</p>
 <ul>
 <li><code>&quot;disabled&quot;</code>: Indicates that the Sorbet Language Server has been disabled.</li>
-<li><code>&quot;error&quot;</code>: Indicates that the Sorbet Language Server encountered an error.
-This status does <strong>not</strong> mean that there are type checking errors: it means
-there was an error with the language client itself.</li>
+<li><code>&quot;error&quot;</code>: Indicates that the Sorbet Language Server encountered an error. This status does <strong>not</strong> mean that there are type checking errors: it means there was an error with the language client itself.</li>
 <li><code>&quot;running&quot;</code>: Indicates that the Sorbet Language Server is running.</li>
-<li><code>&quot;start&quot;</code>: Indicates that the Sorbet Language Server is starting. This status
-may repeat in case of an error.</li>
+<li><code>&quot;start&quot;</code>: Indicates that the Sorbet Language Server is starting. This status may repeat in case of an error.</li>
 </ul>
 <h2><a class="anchor" aria-hidden="true" id="troubleshooting-and-faq"></a><a href="#troubleshooting-and-faq" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Troubleshooting and FAQ</h2>
 <!-- TODO(jez) Make separate pages for these features, and document them there.
 Most of these are not VS Code-specific. -->
 <h3><a class="anchor" aria-hidden="true" id="diagnostics--error-squiggles"></a><a href="#diagnostics--error-squiggles" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Diagnostics / error squiggles</h3>
 <h4><a class="anchor" aria-hidden="true" id="sorbet-is-reporting-diagnostics-error-squiggles-that-dont-make-sense"></a><a href="#sorbet-is-reporting-diagnostics-error-squiggles-that-dont-make-sense" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sorbet is reporting diagnostics (error squiggles) that don’t make sense.</h4>
-<p>If the errors are persistent, and you can reproduce your problem in the sandbox
-at <a href="https://sorbet.run/">https://sorbet.run/</a>, then you’ve found an issue with Sorbet in general, not
-necessarily the VS Code Sorbet extension. Please file a bug tagged with “IDE” on
-the <a href="https://github.com/sorbet/sorbet/issues">issue tracker</a>.</p>
+<p>If the errors are persistent, and you can reproduce your problem in the sandbox at <a href="https://sorbet.run/">https://sorbet.run/</a>, then you’ve found an issue with Sorbet in general, not necessarily the VS Code Sorbet extension. Please file a bug tagged with “IDE” on the <a href="https://github.com/sorbet/sorbet/issues">issue tracker</a>.</p>
 <p>If the errors are not persistent:</p>
 <ul>
-<li>First, is Sorbet still typechecking? If it is, wait for the status bar to
-display “Sorbet: Idle.” before judging the diagnostics.</li>
-<li>If the diagnostics remain nonsensical when Sorbet is Idle, try restarting
-Sorbet (click on Sorbet in the status bar, and click on Restart Sorbet).</li>
-<li>If the diagnostics become fixed, then you might have discovered a bug in
-Sorbet.</li>
-<li>Another thing to check is whether the Problems tab in VS Code has the same
-errors as what Sorbet would report when run from the command line (assuming
-all files have been saved). If the list of errors is different, this usually
-represents a bug in Sorbet (so long as Sorbet is “Idle” in the IDE).</li>
+<li>First, is Sorbet still typechecking? If it is, wait for the status bar to display “Sorbet: Idle.” before judging the diagnostics.</li>
+<li>If the diagnostics remain nonsensical when Sorbet is Idle, try restarting Sorbet (click on Sorbet in the status bar, and click on Restart Sorbet).</li>
+<li>If the diagnostics become fixed, then you might have discovered a bug in Sorbet.</li>
+<li>Another thing to check is whether the Problems tab in VS Code has the same errors as what Sorbet would report when run from the command line (assuming all files have been saved). If the list of errors is different, this usually represents a bug in Sorbet (so long as Sorbet is “Idle” in the IDE).</li>
 </ul>
-<p>If you arrive at a set of edits that mess up the diagnostics, please file a bug
-on the <a href="https://github.com/sorbet/sorbet/issues">issue tracker</a>.</p>
+<p>If you arrive at a set of edits that mess up the diagnostics, please file a bug on the <a href="https://github.com/sorbet/sorbet/issues">issue tracker</a>.</p>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/quickref"><span class="arrow-prev">← </span><span>Quick Reference</span></a><a class="docs-next button" href="/docs/from-typescript"><span class="function-name-prevnext">TypeScript ↔ Sorbet</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#installing-and-enabling-the-extension">Installing and enabling the extension</a><ul class="toc-headings"><li><a href="#troubleshooting-startup">Troubleshooting startup</a></li></ul></li><li><a href="#disabling-the-extension">Disabling the extension</a></li><li><a href="#command-reference">Command Reference</a><ul class="toc-headings"><li><a href="#sorbet-enable"><code>&gt;Sorbet: Enable</code></a></li><li><a href="#sorbet-disable"><code>&gt;Sorbet: Disable</code></a></li><li><a href="#sorbet-restart"><code>&gt;Sorbet: Restart</code></a></li><li><a href="#sorbet-configure"><code>&gt;Sorbet: Configure</code></a></li><li><a href="#sorbet-show-output"><code>&gt;Sorbet: Show Output</code></a></li><li><a href="#sorbet-set-log-level"><code>&gt;Sorbet: Set Log Level...</code></a></li><li><a href="#sorbet-copy-symbol-to-clipboard"><code>&gt;Sorbet: Copy Symbol to Clipboard</code></a></li><li><a href="#sorbet-configure-untyped-code-highligting"><code>&gt;Sorbet: Configure untyped code highligting</code></a></li><li><a href="#sorbet-toggle-highlighting-untyped-code"><code>&gt;Sorbet: Toggle highlighting untyped code</code></a></li><li><a href="#-sorbet-toggle-the-autocomplete-nudge-in-typed-false-files-"><code>&gt;Sorbet: Toggle the autocomplete nudge in `typed: false` files</code></a></li></ul></li><li><a href="#configuration-reference">Configuration Reference</a><ul class="toc-headings"><li><a href="#sticky-configuration">Sticky configuration</a></li><li><a href="#sorbetenabled"><code>sorbet.enabled</code></a></li><li><a href="#sorbetlspconfigs"><code>sorbet.lspConfigs</code></a></li><li><a href="#sorbetuserlspconfigs"><code>sorbet.userLspConfigs</code></a></li><li><a href="#sorbetselectedlspconfigid"><code>sorbet.selectedLspConfigId</code></a></li><li><a href="#sorbethighlightuntyped"><code>sorbet.highlightUntyped</code></a></li><li><a href="#sorbettypedfalsecompletionnudges"><code>sorbet.typedFalseCompletionNudges</code></a></li><li><a href="#sorbetconfigfilepatterns"><code>sorbet.configFilePatterns</code></a></li><li><a href="#sorbetrevealoutputonerror"><code>sorbet.revealOutputOnError</code></a></li></ul></li><li><a href="#extension-api">Extension API</a><ul class="toc-headings"><li><a href="#reporting-metrics">Reporting metrics</a></li><li><a href="#tracking-server-status-changes">Tracking server status changes</a></li></ul></li><li><a href="#troubleshooting-and-faq">Troubleshooting and FAQ</a><ul class="toc-headings"><li><a href="#diagnostics--error-squiggles">Diagnostics / error squiggles</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer"><svg width="99" height="28" viewBox="0 0 99 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.98432 20H6.27432C8.44932 20 9.81432 18.905 9.81432 17.03C9.81432 15.665 9.00432 14.72 7.78932 14.39C8.61432 14.105 9.45432 13.415 9.45432 12.035C9.45432 10.235 8.23932 9.23 5.95932 9.23H1.98432V20ZM3.37932 13.85V10.445H5.83932C7.27932 10.445 8.07432 11 8.07432 12.155C8.07432 13.295 7.27932 13.85 5.83932 13.85H3.37932ZM3.37932 15.08H6.21432C7.65432 15.08 8.43432 15.83 8.43432 16.925C8.43432 18.035 7.65432 18.785 6.21432 18.785H3.37932V15.08ZM18.0294 12.155H16.6794V16.88C16.6794 18.185 15.6894 18.92 14.7144 18.92C13.5594 18.92 13.0794 18.17 13.0794 17.06V12.155H11.7294V17.345C11.7294 19.01 12.6744 20.165 14.3544 20.165C15.4644 20.165 16.2294 19.58 16.6794 18.92V20H18.0294V12.155ZM20.5112 10.79H21.9812V9.23H20.5112V10.79ZM21.9212 12.155H20.5712V20H21.9212V12.155ZM25.8247 9.23H24.4747V20H25.8247V9.23ZM28.5882 18.125C28.5882 19.625 29.3532 20.075 30.6882 20.075C31.1382 20.075 31.5282 20.03 31.8732 19.955V18.8C31.5582 18.875 31.3332 18.89 31.0182 18.89C30.3282 18.89 29.9232 18.74 29.9232 17.915V13.31H31.7082V12.155H29.9232V9.86H28.5882V12.155H27.3732V13.31H28.5882V18.125ZM41.0199 20.165C43.1949 20.165 44.4399 18.305 44.4399 16.085C44.4399 13.85 43.1949 12.005 41.0199 12.005C39.9249 12.005 39.0549 12.53 38.5899 13.295V9.23H37.2399V20H38.5899V18.86C39.0549 19.64 39.9249 20.165 41.0199 20.165ZM38.5599 15.815C38.5599 13.985 39.6699 13.19 40.7799 13.19C42.2499 13.19 43.0749 14.39 43.0749 16.085C43.0749 17.765 42.2499 18.98 40.7799 18.98C39.6699 18.98 38.5599 18.17 38.5599 16.37V15.815ZM49.1804 20.855L52.5554 12.155H51.1454L48.9704 18.155L46.7654 12.155H45.3404L48.2504 19.715L47.8754 20.645C47.5604 21.425 47.2454 21.635 46.6604 21.635C46.4354 21.635 46.2704 21.62 46.0154 21.56V22.73C46.2554 22.775 46.4204 22.79 46.7504 22.79C48.1154 22.79 48.7304 22.04 49.1804 20.855Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M98.7993 15.7838C98.7993 12.8786 97.3871 10.5862 94.688 10.5862C91.9774 10.5862 90.3374 12.8786 90.3374 15.7611C90.3374 19.177 92.2735 20.9019 95.0524 20.9019C96.4077 20.9019 97.4327 20.5955 98.2071 20.1643V17.8946C97.4327 18.2804 96.5443 18.5188 95.4168 18.5188C94.3121 18.5188 93.3327 18.1329 93.2074 16.7938H98.7766C98.7766 16.6463 98.7993 16.0561 98.7993 15.7838ZM93.1732 14.7057C93.1732 13.4233 93.9591 12.8899 94.6766 12.8899C95.3713 12.8899 96.1116 13.4233 96.1116 14.7057H93.1732Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M85.9413 10.5862C84.8251 10.5862 84.1076 11.1082 83.709 11.4714L83.561 10.7678H81.0554V24.0001L83.9026 23.3986L83.914 20.187C84.324 20.482 84.9276 20.9019 85.9299 20.9019C87.9685 20.9019 89.8249 19.2678 89.8249 15.6703C89.8135 12.3792 87.9343 10.5862 85.9413 10.5862ZM85.2579 18.4053C84.586 18.4053 84.1874 18.167 83.914 17.8719L83.9026 13.6616C84.1988 13.3325 84.6088 13.1055 85.2579 13.1055C86.2943 13.1055 87.0118 14.2631 87.0118 15.7497C87.0118 17.2704 86.3057 18.4053 85.2579 18.4053Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M77.1377 9.91656L79.9963 9.30374V7L77.1377 7.60147V9.91656Z" fill="white"></path><path d="M79.9963 10.7791H77.1377V20.709H79.9963V10.7791Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M74.074 11.6187L73.8918 10.7789H71.4318V20.7088H74.279V13.9792C74.9509 13.1054 76.0898 13.2642 76.4429 13.3891V10.7789C76.0784 10.6427 74.7459 10.3931 74.074 11.6187Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M68.3796 8.31641L65.6007 8.90653L65.5894 17.9966C65.5894 19.6762 66.8535 20.9132 68.5391 20.9132C69.473 20.9132 70.1563 20.743 70.5321 20.5387V18.235C70.1677 18.3825 68.3682 18.9045 68.3682 17.225V13.1962H70.5321V10.779H68.3682L68.3796 8.31641Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M60.6807 13.6616C60.6807 13.219 61.0452 13.0488 61.6488 13.0488C62.5143 13.0488 63.6076 13.3098 64.4732 13.7751V11.1082C63.5279 10.7337 62.594 10.5862 61.6488 10.5862C59.3368 10.5862 57.7993 11.7891 57.7993 13.7978C57.7993 16.93 62.1271 16.4306 62.1271 17.7811C62.1271 18.3031 61.6715 18.4734 61.0338 18.4734C60.0885 18.4734 58.8813 18.0875 57.9246 17.5655V20.2664C58.9838 20.7204 60.0543 20.9133 61.0338 20.9133C63.4026 20.9133 65.0313 19.7444 65.0313 17.713C65.0199 14.3312 60.6807 14.9326 60.6807 13.6616Z" fill="white"></path></svg><a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div><div id="csat-extension-config" data-notify="#sorbet-team"></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {

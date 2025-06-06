@@ -62,73 +62,51 @@
         </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/highlight-untyped.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Highlighting untyped code</h1></header><article><div><span><blockquote>
 <p><strong>Note</strong>: This feature is in beta. Please give us feedback!</p>
 </blockquote>
-<p>Sorbet can highlight regions of <a href="/docs/untyped">untyped</a> Ruby code in editors. Here’s what it
-looks like:<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p>
+<p>Sorbet can highlight regions of <a href="/docs/untyped">untyped</a> Ruby code in editors. Here’s what it looks like:<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p>
 <p><img src="/img/highlight-untyped.png" alt=""></p>
-<p>VS Code renders these untyped code highlights with a blue squiggly underline.
-Other language clients may present them differently, depending on how they
-render diagnostics with an <a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#diagnosticSeverity">Information</a> severity.</p>
+<p>VS Code renders these untyped code highlights with a blue squiggly underline. Other language clients may present them differently, depending on how they render diagnostics with an <a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#diagnosticSeverity">Information</a> severity.</p>
 <h2><a class="anchor" aria-hidden="true" id="version-requirements"></a><a href="#version-requirements" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Version requirements</h2>
 <ul>
 <li>Sorbet
 <ul>
-<li>The <code>highlightUntyped</code> feature first appeared in Sorbet 0.5.10754
-(2023-04-06), but was a simple <code>true</code>/<code>false</code> toggle.</li>
-<li>The <code>highlightUntyped</code> feature changed to an enum
-(<code>&quot;everywhere&quot;</code>/<code>&quot;nowhere&quot;</code>/<code>&quot;everywhere-but-tests&quot;</code>) in Sorbet 0.5.11175
-(2024-01-03).</li>
+<li>The <code>highlightUntyped</code> feature first appeared in Sorbet 0.5.10754 (2023-04-06), but was a simple <code>true</code>/<code>false</code> toggle.</li>
+<li>The <code>highlightUntyped</code> feature changed to an enum (<code>&quot;everywhere&quot;</code>/<code>&quot;nowhere&quot;</code>/<code>&quot;everywhere-but-tests&quot;</code>) in Sorbet 0.5.11175 (2024-01-03).</li>
 </ul></li>
 <li>VS Code extension
 <ul>
-<li>The “Sorbet: Toggle highlighting untyped code” setting first appeared in
-version 0.3.19 of the VS Code extension (2023-04-06).</li>
-<li>Support for <code>&quot;everywhere-but-tests&quot;</code> first appeared in 0.3.32 of the VS Code
-extension (2024-01-11)</li>
+<li>The “Sorbet: Toggle highlighting untyped code” setting first appeared in version 0.3.19 of the VS Code extension (2023-04-06).</li>
+<li>Support for <code>&quot;everywhere-but-tests&quot;</code> first appeared in 0.3.32 of the VS Code extension (2024-01-11)</li>
 </ul></li>
 </ul>
-<p>Newer versions of the VS Code extension are backwards compatible with older
-versions of Sorbet.</p>
+<p>Newer versions of the VS Code extension are backwards compatible with older versions of Sorbet.</p>
 <h2><a class="anchor" aria-hidden="true" id="enabling-untyped-code-highlights"></a><a href="#enabling-untyped-code-highlights" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Enabling untyped code highlights</h2>
 <h3><a class="anchor" aria-hidden="true" id="in-vs-code"></a><a href="#in-vs-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>In VS Code</h3>
 <p>There are multiple ways to enable untyped code highlights.</p>
 <ul>
-<li><p>Open a Ruby file, and run the <code>Sorbet: Configure highlighting untyped code</code>
-command from the command palette (accessed via ⇧⌘P on macOS, or ⌃⇧P on Windows
-and Linux).</p>
+<li><p>Open a Ruby file, and run the <code>Sorbet: Configure highlighting untyped code</code> command from the command palette (accessed via ⇧⌘P on macOS, or ⌃⇧P on Windows and Linux).</p>
 <p>You will be able to choose where to highlight untyped code:</p>
 <ul>
 <li><p>Nowhere (the default)</p></li>
 <li><p>Everywhere</p></li>
 <li><p>Everywhere but tests</p>
-<p>Sorbet treats any file in a folder named <code>test</code> or ending with the
-<code>.test.rb</code> suffix as a test file. This is not yet configurable.</p></li>
+<p>Sorbet treats any file in a folder named <code>test</code> or ending with the <code>.test.rb</code> suffix as a test file. This is not yet configurable.</p></li>
 </ul>
 <p>The new setting will be logged in the “Sorbet” output window.</p></li>
-<li><p>Open a Ruby file, and run the <code>Sorbet: Toggle highlighting untyped code</code>
-command from the command palette.</p>
-<p>The toggle command remembers the “previous” highlight untyped setting, and
-will go back to it. If there was no “previous” setting chosen via the
-Configure command, then <code>Nowhere</code> will toggle to <code>Everywhere</code> and
-<code>Everywhere</code>/<code>Everywhere but tests</code> will toggle to <code>Nowhere</code>.</p>
+<li><p>Open a Ruby file, and run the <code>Sorbet: Toggle highlighting untyped code</code> command from the command palette.</p>
+<p>The toggle command remembers the “previous” highlight untyped setting, and will go back to it. If there was no “previous” setting chosen via the Configure command, then <code>Nowhere</code> will toggle to <code>Everywhere</code> and <code>Everywhere</code>/<code>Everywhere but tests</code> will toggle to <code>Nowhere</code>.</p>
 <p>After toggling, the new setting will be logged in the “Sorbet” output window.</p></li>
-<li><p>Set the <code>&quot;sorbet.highlightUntyped&quot;: ...</code> setting in the VS Code preferences.
-This changes the <em>default</em> setting–values chosen with the Configure and
-Toggle commands above will not change this value.</p>
-<p>For example, to have a workspace default to highlighting untyped code
-everywhere, add this to the project’s <code>.vscode/settings.json</code> file:</p>
+<li><p>Set the <code>&quot;sorbet.highlightUntyped&quot;: ...</code> setting in the VS Code preferences. This changes the <em>default</em> setting–values chosen with the Configure and Toggle commands above will not change this value.</p>
+<p>For example, to have a workspace default to highlighting untyped code everywhere, add this to the project’s <code>.vscode/settings.json</code> file:</p>
 <pre><code class="hljs css language-json">  "sorbet.highlightUntyped": "everywhere"
 </code></pre></li>
 </ul>
 <h3><a class="anchor" aria-hidden="true" id="in-other-lsp-clients"></a><a href="#in-other-lsp-clients" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>In other LSP clients</h3>
 <p>This feature relies on two LSP features:</p>
 <ul>
-<li><p>The <code>initializationOptions</code> parameter in the <code>initialize</code> request that starts
-<a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#initialize">every language server protocol session</a>.</p></li>
-<li><p>The <code>settings</code> parameter in the <code>workspace/didChangeConfiguration</code>
-notification.</p></li>
+<li><p>The <code>initializationOptions</code> parameter in the <code>initialize</code> request that starts <a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#initialize">every language server protocol session</a>.</p></li>
+<li><p>The <code>settings</code> parameter in the <code>workspace/didChangeConfiguration</code> notification.</p></li>
 </ul>
-<p>For both the <code>initializationOptions</code> and <code>settings</code> parameters, Sorbet allows
-passing a JSON object containing</p>
+<p>For both the <code>initializationOptions</code> and <code>settings</code> parameters, Sorbet allows passing a JSON object containing</p>
 <pre><code class="hljs css language-json">  "highlightUntyped": ...,
 </code></pre>
 <p>Where <code>...</code> is one of</p>
@@ -136,32 +114,16 @@ passing a JSON object containing</p>
 <li><code>&quot;nowhere&quot;</code></li>
 <li><code>&quot;everywhere&quot;</code></li>
 <li><code>&quot;everywhere-but-tests&quot;</code></li>
-<li><code>true</code> / <code>false</code> (for backwards compatibility only; use <code>&quot;everywhere&quot;</code> /
-<code>&quot;nowhere&quot;</code> when possible)</li>
+<li><code>true</code> / <code>false</code> (for backwards compatibility only; use <code>&quot;everywhere&quot;</code> / <code>&quot;nowhere&quot;</code> when possible)</li>
 </ul>
-<p>For example, in Neovim, this <code>highlightUntyped</code> setting can be provided via the
-<a href="https://neovim.io/doc/user/lsp.html#:~:text=initializationOptions"><code>init_options</code> argument</a> to the <code>vim.lsp.start_client()</code> function, which then
-passes it to the underlying <code>initialize</code> request.</p>
+<p>For example, in Neovim, this <code>highlightUntyped</code> setting can be provided via the <a href="https://neovim.io/doc/user/lsp.html#:~:text=initializationOptions"><code>init_options</code> argument</a> to the <code>vim.lsp.start_client()</code> function, which then passes it to the underlying <code>initialize</code> request.</p>
 <h2><a class="anchor" aria-hidden="true" id="notes"></a><a href="#notes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Notes</h2>
 <ul>
-<li><p>This feature is not enabled in <code># typed: false</code> files. A <code># typed: false</code> file
-is essentially a file where the entire contents would need to be underlined.
-Sorbet does not actually underline the entire content of such a file, as it
-would be too noisy.</p></li>
-<li><p>This feature will only display diagnostics for <strong>open files</strong>. VS Code scales
-poorly when language servers report a very large number number of diagnostics,
-and using this feature adds a non-trivial slowdown to Sorbet itself.</p></li>
-<li><p>These blue-underline diagnostics are <strong>not type errors</strong>. In this mode, type
-errors continue to be reported exclusively with red squiggles (at least in VS
-Code). Files that contain regions of code flagged by this editor mode will
-still type check without error according to <code>srb tc</code> at the command line.</p></li>
-<li><p>The diagnostics reported in this mode can be converted into proper errors
-(i.e., red-underline diagnostics) by marking the file <code># typed: strong</code>. For
-more information, see <a href="/docs/strong">the docs for <code># typed: strong</code></a>.</p></li>
-<li><p>It may be helpful to use the filtering mechanism built into VS Code’s
-“Problems” pane to filter these errors. A filter of <code>!7047</code> should hide these
-in the problems pane. (<a href="/docs/error-reference#7047">7047</a> is the code for this
-diagnostic, and the <code>!</code> negates the filter.)</p></li>
+<li><p>This feature is not enabled in <code># typed: false</code> files. A <code># typed: false</code> file is essentially a file where the entire contents would need to be underlined. Sorbet does not actually underline the entire content of such a file, as it would be too noisy.</p></li>
+<li><p>This feature will only display diagnostics for <strong>open files</strong>. VS Code scales poorly when language servers report a very large number number of diagnostics, and using this feature adds a non-trivial slowdown to Sorbet itself.</p></li>
+<li><p>These blue-underline diagnostics are <strong>not type errors</strong>. In this mode, type errors continue to be reported exclusively with red squiggles (at least in VS Code). Files that contain regions of code flagged by this editor mode will still type check without error according to <code>srb tc</code> at the command line.</p></li>
+<li><p>The diagnostics reported in this mode can be converted into proper errors (i.e., red-underline diagnostics) by marking the file <code># typed: strong</code>. For more information, see <a href="/docs/strong">the docs for <code># typed: strong</code></a>.</p></li>
+<li><p>It may be helpful to use the filtering mechanism built into VS Code’s “Problems” pane to filter these errors. A filter of <code>!7047</code> should hide these in the problems pane. (<a href="/docs/error-reference#7047">7047</a> is the code for this diagnostic, and the <code>!</code> negates the filter.)</p></li>
 </ul>
 <h2><a class="anchor" aria-hidden="true" id="how-can-i-avoid-using-tuntyped"></a><a href="#how-can-i-avoid-using-tuntyped" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>How can I avoid using <code>T.untyped</code>?</h2>
 <p>→ <a href="/docs/strong#how-can-i-avoid-using-tuntyped">How can I avoid using <code>T.untyped</code></a></p>
@@ -169,47 +131,31 @@ diagnostic, and the <code>!</code> negates the filter.)</p></li>
 <p>This feature is currently under development, and we’d love your feedback!</p>
 <p>Some known limitations:</p>
 <ul>
-<li><p>Sometimes, the region Sorbet highlights does not precisely match the code
-which is untyped.</p>
-<p>For example, a previous version of this feature accidentally highlighted an
-entire block (from <code>do</code> until <code>end</code>) when the value returned from the block
-was <code>T.untyped</code>. This was fixed by reporting exactly the block’s return value.</p>
+<li><p>Sometimes, the region Sorbet highlights does not precisely match the code which is untyped.</p>
+<p>For example, a previous version of this feature accidentally highlighted an entire block (from <code>do</code> until <code>end</code>) when the value returned from the block was <code>T.untyped</code>. This was fixed by reporting exactly the block’s return value.</p>
 <p>Please report cases like these!</p>
-<p>You can use <a href="https://sorbet.run/#%23%20typed%3A%20strong%0A%23%20To%20report%20an%20issue%2C%20click%20%22Examples%20%E2%98%B0%20%3E%20Create%20issue%20with%20example%22%0A%0AT.unsafe%28nil%29.foo">this Sorbet playground</a> as a starting point to report issues with
-this feature.</p></li>
+<p>You can use <a href="https://sorbet.run/#%23%20typed%3A%20strong%0A%23%20To%20report%20an%20issue%2C%20click%20%22Examples%20%E2%98%B0%20%3E%20Create%20issue%20with%20example%22%0A%0AT.unsafe%28nil%29.foo">this Sorbet playground</a> as a starting point to report issues with this feature.</p></li>
 <li><p>Not all sources of <code>T.untyped</code> are accounted for.</p>
-<p>As we further develop this feature, <strong>more sources of untyped will start being
-reported</strong>. Feel free to report instances where it would be nice for Sorbet to
-highlight a region of untyped code, but know that we have less time to focus
-on these sorts of improvements at the moment.</p>
-<p>Importantly, things with type <code>T::Array[T.untyped]</code> or similar, where
-<code>T.untyped</code> appears in the middle of the type somewhere, are counted as typed.
-Code is only highlighted if it is entirely <code>T.untyped</code>.</p>
+<p>As we further develop this feature, <strong>more sources of untyped will start being reported</strong>. Feel free to report instances where it would be nice for Sorbet to highlight a region of untyped code, but know that we have less time to focus on these sorts of improvements at the moment.</p>
+<p>Importantly, things with type <code>T::Array[T.untyped]</code> or similar, where <code>T.untyped</code> appears in the middle of the type somewhere, are counted as typed. Code is only highlighted if it is entirely <code>T.untyped</code>.</p>
 <p>Also, untyped method parameters are not highlighted. For example:</p>
 <pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">arg0:</span> T.untyped).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(arg<span class="hljs-number">0</span>)</span></span>; <span class="hljs-keyword">end</span>
 foo(<span class="hljs-number">0</span>)
 </code></pre>
-<p>Sorbet does not highlight anything about the call to <code>foo</code>, even though the
-<code>arg0</code> argument is untyped.</p></li>
-<li><p>Sometimes, the source of untyped comes from RBI files that do not yet have
-types.</p>
+<p>Sorbet does not highlight anything about the call to <code>foo</code>, even though the <code>arg0</code> argument is untyped.</p></li>
+<li><p>Sometimes, the source of untyped comes from RBI files that do not yet have types.</p>
 <p>In this case, please help by contributing better types!<br>
 See <a href="faq#it-looks-like-sorbets-types-for-the-stdlib-are-wrong">this FAQ entry</a> for help contributing RBI improvements.</p></li>
 <li><p>Sometimes, the source of the untyped is Sorbet itself.</p>
-<p>Certain features of Ruby are hard to statically type and have historically
-been supported on a “best effort” basis by marking them <code>T.untyped</code>.</p>
-<p>Feel free to browse our <a href="https://github.com/sorbet/sorbet/milestone/20">Untyped code milestone</a> to see if it looks like
-someone has already reported a bug. Otherwise, use <a href="https://sorbet.run/#%23%20typed%3A%20strong%0A%23%20To%20report%20an%20issue%2C%20click%20%22Examples%20%E2%98%B0%20%3E%20Create%20issue%20with%20example%22%0A%0AT.unsafe%28nil%29.foo">this Sorbet playground</a> to
-craft a test case and report it to us.</p></li>
+<p>Certain features of Ruby are hard to statically type and have historically been supported on a “best effort” basis by marking them <code>T.untyped</code>.</p>
+<p>Feel free to browse our <a href="https://github.com/sorbet/sorbet/milestone/20">Untyped code milestone</a> to see if it looks like someone has already reported a bug. Otherwise, use <a href="https://sorbet.run/#%23%20typed%3A%20strong%0A%23%20To%20report%20an%20issue%2C%20click%20%22Examples%20%E2%98%B0%20%3E%20Create%20issue%20with%20example%22%0A%0AT.unsafe%28nil%29.foo">this Sorbet playground</a> to craft a test case and report it to us.</p></li>
 </ul>
-<p>Again, to browse the most up-to-date known limitations with this feature, check
-the <a href="https://github.com/sorbet/sorbet/milestone/20">Untyped code milestone</a> for the Sorbet project.</p>
+<p>Again, to browse the most up-to-date known limitations with this feature, check the <a href="https://github.com/sorbet/sorbet/milestone/20">Untyped code milestone</a> for the Sorbet project.</p>
 <hr class="footnotes-sep">
 <section class="footnotes">
 <ol class="footnotes-list">
-<li id="fn1"  class="footnote-item"><p>This screenshot uses the <a href="https://marketplace.visualstudio.com/items?itemName=usernamehw.errorlens">Error Lens</a> VS Code extension to display
-diagnostic titles inline. <a href="#fnref1" class="footnote-backref">↩</a></p>
+<li id="fn1"  class="footnote-item"><p>This screenshot uses the <a href="https://marketplace.visualstudio.com/items?itemName=usernamehw.errorlens">Error Lens</a> VS Code extension to display diagnostic titles inline. <a href="#fnref1" class="footnote-backref">↩</a></p>
 </li>
 </ol>
 </section>

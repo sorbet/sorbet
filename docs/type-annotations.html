@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Declaring types for non-methods · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Sorbet provides the most value when it has a wealth of programmer-supplied"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Declaring types for non-methods · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="Sorbet provides the most value when it has a wealth of programmer-supplied"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Declaring types for non-methods · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Sorbet provides the most value when it has a wealth of programmer-supplied static types."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Declaring types for non-methods · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="Sorbet provides the most value when it has a wealth of programmer-supplied static types."/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments); }
               gtag('js', new Date());
@@ -59,33 +59,16 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/type-annotations.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Declaring types for non-methods</h1></header><article><div><span><p>Sorbet provides the most value when it has a wealth of programmer-supplied
-static types.</p>
-<p>However, because Sorbet implements a <a href="/docs/gradual">gradual type system</a>, it
-treats most definitions without explicit annotations as <a href="/docs/untyped">untyped</a>.
-This means that Sorbet can only use static types for methods, constants,
-instance variables, and class variables if they are accompanied with explicit
-static types.</p>
-<p>For more information on why type annotations are required in Sorbet, see
-<a href="/docs/why-type-annotations">Why does Sorbet sometimes need type annotations?</a>.</p>
-<p>Type annotations for methods are provided using a <code>sig</code> before the method
-definition. Method type annotations are
-<a href="/docs/sigs">described in great detail on the Method Signatures</a>.</p>
-<p>Other type annotations are provided using the <code>T.let</code>
-<a href="/docs/type-assertions">type assertion</a>.</p>
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/type-annotations.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Declaring types for non-methods</h1></header><article><div><span><p>Sorbet provides the most value when it has a wealth of programmer-supplied static types.</p>
+<p>However, because Sorbet implements a <a href="/docs/gradual">gradual type system</a>, it treats most definitions without explicit annotations as <a href="/docs/untyped">untyped</a>. This means that Sorbet can only use static types for methods, constants, instance variables, and class variables if they are accompanied with explicit static types.</p>
+<p>For more information on why type annotations are required in Sorbet, see <a href="/docs/why-type-annotations">Why does Sorbet sometimes need type annotations?</a>.</p>
+<p>Type annotations for methods are provided using a <code>sig</code> before the method definition. Method type annotations are <a href="/docs/sigs">described in great detail on the Method Signatures</a>.</p>
+<p>Other type annotations are provided using the <code>T.let</code> <a href="/docs/type-assertions">type assertion</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="annotating-local-variables"></a><a href="#annotating-local-variables" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Annotating local variables</h2>
-<p>Sorbet does not usually need type annotations for local variables, as it can
-infer the type of the local variable based on how it is initialized. For
-example, in the following program, Sorbet can tell <code>x</code> is an <code>Integer</code> based on
-the fact that it is initialized with an expression that evaluates to an
-<code>Integer</code>:</p>
+<p>Sorbet does not usually need type annotations for local variables, as it can infer the type of the local variable based on how it is initialized. For example, in the following program, Sorbet can tell <code>x</code> is an <code>Integer</code> based on the fact that it is initialized with an expression that evaluates to an <code>Integer</code>:</p>
 <pre><code class="hljs css language-ruby">x = <span class="hljs-number">2</span> + <span class="hljs-number">3</span>
 </code></pre>
-<p>You may still provide a wider type annotation if you would like. This can
-occasionally be helpful if you want the type of a variable to be broader than
-Sorbet’s inferred type, such as in situations where you are changing the value
-of a variable in a loop or block to something that is broader than the
-expression used to initialize the variable:</p>
+<p>You may still provide a wider type annotation if you would like. This can occasionally be helpful if you want the type of a variable to be broader than Sorbet’s inferred type, such as in situations where you are changing the value of a variable in a loop or block to something that is broader than the expression used to initialize the variable:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># without this T.let, x would have the inferred type NilClass</span>
 x = T.let(<span class="hljs-literal">nil</span>, T.nilable(Integer))
 (<span class="hljs-number">0</span>..<span class="hljs-number">10</span>).each <span class="hljs-keyword">do</span> <span class="hljs-params">|n|</span>
@@ -93,41 +76,20 @@ x = T.let(<span class="hljs-literal">nil</span>, T.nilable(Integer))
 <span class="hljs-keyword">end</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="annotating-constants"></a><a href="#annotating-constants" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Annotating constants</h2>
-<p>Sorbet does <em>very</em> minimal inference for types of constants. These are the cases
-where Sorbet infers constant types:</p>
+<p>Sorbet does <em>very</em> minimal inference for types of constants. These are the cases where Sorbet infers constant types:</p>
 <ul>
-<li><p>Constants initialized with simple literals (like <code>&quot;foo&quot;</code>, <code>123</code>, or <code>[&quot;&quot;]</code>)
-will have their types inferred. Importantly, this does not include <code>Hash</code>
-literals.</p></li>
-<li><p>Constants initialized as an alias to another constant, like <code>X = Y</code>. Sorbet
-infers the type of <code>X</code> to be whatever the type of <code>Y</code> is (if <code>Y</code> has neither
-an explicit nor an inferred type, <code>X</code> will be inferred to be <code>T.untyped</code>).</p></li>
-<li><p>Array literal type inference is recursive, so Sorbet will only assume an array
-type for an array literal if the contents of the array are all literals
-(including class or module constant literals).</p></li>
-<li><p>Array literals are inferred to have type <code>T::Array[...]</code> where <code>...</code> is a
-<a href="/docs/union-types">union type</a> of all the types of elements in the array. If the
-array literal is also frozen with the <code>.freeze</code> method, the inferred type will
-be a <a href="/docs/tuples">tuple type</a> instead. This array vs tuple decision is not
-recursive, because <code>.freeze</code> is not recursive. To have Sorbet infer array of
-tuples types, call <code>.freeze</code> on each array nested inside the top-level array.</p></li>
-<li><p>Constants initialized with a call to <code>SomeClass.new</code> will have their type
-inferred to <code>SomeClass</code>. Importantly, this assumption happens <strong>regardless</strong>
-of whether the <code>new</code> method actually returns an instance of <code>SomeClass</code>, which
-might not be the case if the <code>new</code> method has been overridden.</p>
-<p>In these cases, Sorbet reports an error stating that it requires an explicit
-type annotation to correct the faulty assumption. This only applies at the
-top-level (e.g., not inside arrays).</p></li>
+<li><p>Constants initialized with simple literals (like <code>&quot;foo&quot;</code>, <code>123</code>, or <code>[&quot;&quot;]</code>) will have their types inferred. Importantly, this does not include <code>Hash</code> literals.</p></li>
+<li><p>Constants initialized as an alias to another constant, like <code>X = Y</code>. Sorbet infers the type of <code>X</code> to be whatever the type of <code>Y</code> is (if <code>Y</code> has neither an explicit nor an inferred type, <code>X</code> will be inferred to be <code>T.untyped</code>).</p></li>
+<li><p>Array literal type inference is recursive, so Sorbet will only assume an array type for an array literal if the contents of the array are all literals (including class or module constant literals).</p></li>
+<li><p>Array literals are inferred to have type <code>T::Array[...]</code> where <code>...</code> is a <a href="/docs/union-types">union type</a> of all the types of elements in the array. If the array literal is also frozen with the <code>.freeze</code> method, the inferred type will be a <a href="/docs/tuples">tuple type</a> instead. This array vs tuple decision is not recursive, because <code>.freeze</code> is not recursive. To have Sorbet infer array of tuples types, call <code>.freeze</code> on each array nested inside the top-level array.</p></li>
+<li><p>Constants initialized with a call to <code>SomeClass.new</code> will have their type inferred to <code>SomeClass</code>. Importantly, this assumption happens <strong>regardless</strong> of whether the <code>new</code> method actually returns an instance of <code>SomeClass</code>, which might not be the case if the <code>new</code> method has been overridden.</p>
+<p>In these cases, Sorbet reports an error stating that it requires an explicit type annotation to correct the faulty assumption. This only applies at the top-level (e.g., not inside arrays).</p></li>
 </ul>
-<p>In all other cases, Sorbet does not infer the types of constants, and will
-assume a type of <code>T.untyped</code>. In <a href="/docs/static"><code># typed: strict</code></a> files, Sorbet
-reports an error requiring that a type be specified, so that Sorbet does not
-assume <code>T.untyped</code>.</p>
+<p>In all other cases, Sorbet does not infer the types of constants, and will assume a type of <code>T.untyped</code>. In <a href="/docs/static"><code># typed: strict</code></a> files, Sorbet reports an error requiring that a type be specified, so that Sorbet does not assume <code>T.untyped</code>.</p>
 <p>To specify the type of a constant, use <code>T.let</code>:</p>
 <pre><code class="hljs css language-ruby">NAMES = T.let([<span class="hljs-string">"Nelson"</span>, <span class="hljs-string">"Dmitry"</span>, <span class="hljs-string">"Paul"</span>], T::Array[String])
 </code></pre>
-<p>In codebases that require calling <code>.freeze</code> on constants, the call to <code>.freeze</code>
-<strong>must</strong> go inside the <code>T.let</code>, or Sorbet will not see the call to <code>T.let</code>.</p>
+<p>In codebases that require calling <code>.freeze</code> on constants, the call to <code>.freeze</code> <strong>must</strong> go inside the <code>T.let</code>, or Sorbet will not see the call to <code>T.let</code>.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># ✅ Good</span>
 NAMES = T.let([<span class="hljs-string">"Nelson"</span>, <span class="hljs-string">"Dmitry"</span>, <span class="hljs-string">"Paul"</span>].freeze, T::Array[String])
 <span class="hljs-comment">#                                         ^^^^^^^ ✅</span>
@@ -136,19 +98,16 @@ NAMES = T.let([<span class="hljs-string">"Nelson"</span>, <span class="hljs-stri
 NAMES = T.let([<span class="hljs-string">"Nelson"</span>, <span class="hljs-string">"Dmitry"</span>, <span class="hljs-string">"Paul"</span>], T::Array[String]).freeze
 <span class="hljs-comment">#                                                         ❌ ^^^^^^^</span>
 </code></pre>
-<p>We recommend using the <a href="https://github.com/Shopify/rubocop-sorbet"><code>rubocop-sorbet</code></a> gem, which modifies the behavior of
-RuboCop’s <code>Style/MutableConstant</code> rule, making it aware of <code>T.let</code>.</p>
+<p>We recommend using the <a href="https://github.com/Shopify/rubocop-sorbet"><code>rubocop-sorbet</code></a> gem, which modifies the behavior of RuboCop’s <code>Style/MutableConstant</code> rule, making it aware of <code>T.let</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="declaring-class-and-instance-variables"></a><a href="#declaring-class-and-instance-variables" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Declaring class and instance variables</h2>
-<p>To declare the static type of an instance variable, we can use <code>T.let</code> in a
-class’s constructor:</p>
+<p>To declare the static type of an instance variable, we can use <code>T.let</code> in a class’s constructor:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyObj</span></span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span></span>
     @foo = T.let(<span class="hljs-number">0</span>, Integer)
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>We can also declare class variables and instance variables on a singleton class
-using <code>T.let</code> at the top-level of a class:</p>
+<p>We can also declare class variables and instance variables on a singleton class using <code>T.let</code> at the top-level of a class:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HasVariables</span></span>
   <span class="hljs-comment"># Class variable</span>
   @@llamas = T.let([], T::Array[Llama])
@@ -157,11 +116,7 @@ using <code>T.let</code> at the top-level of a class:</p>
   @alpaca_count = T.let(<span class="hljs-number">0</span>, Integer)
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Sorbet requires that instance and class variables are defined in these specific
-places to guarantee that they’re initialized. But sometimes requiring that these
-variables be declared in specific places is too restrictive. Sorbet allows an
-instance variable to be declared <strong>anywhere</strong> so long as the type is at least
-nilable:</p>
+<p>Sorbet requires that instance and class variables are defined in these specific places to guarantee that they’re initialized. But sometimes requiring that these variables be declared in specific places is too restrictive. Sorbet allows an instance variable to be declared <strong>anywhere</strong> so long as the type is at least nilable:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>
     <span class="hljs-comment"># Does NOT have to be declared in `initialize`, because it's nilable:</span>
@@ -175,9 +130,7 @@ nilable:</p>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="declaring-lazily-initialized-instance-variables"></a><a href="#declaring-lazily-initialized-instance-variables" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Declaring lazily-initialized instance variables</h2>
-<p>Sorbet also supports <code>T.let</code> type annotations for instance variables that are
-lazily initialized with <code>||=</code>, just like those initialized eagerly with <code>=</code>. The
-syntax looks just the same:</p>
+<p>Sorbet also supports <code>T.let</code> type annotations for instance variables that are lazily initialized with <code>||=</code>, just like those initialized eagerly with <code>=</code>. The syntax looks just the same:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">B</span></span>
   sig {returns(String)}
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">current_user</span></span>
@@ -185,20 +138,12 @@ syntax looks just the same:</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Note that the same restrictions about the variable being declared <code>T.nilable</code>
-apply, but that Sorbet’s <a href="/docs/flow-sensitive">control flow-sensitive</a> typing is
-smart enough to understand that either:</p>
+<p>Note that the same restrictions about the variable being declared <code>T.nilable</code> apply, but that Sorbet’s <a href="/docs/flow-sensitive">control flow-sensitive</a> typing is smart enough to understand that either:</p>
 <ol>
-<li><code>@user</code> has already been initialized to a non-nil value, so the <code>||</code>
-condition is truthy and thus must return a <code>String</code>, or</li>
-<li><code>@user</code> has not yet been initialized, but the initial value, computed using
-<code>ENV.fetch('USER')</code>, has type <code>String</code> (and is thus non-nil).</li>
+<li><code>@user</code> has already been initialized to a non-nil value, so the <code>||</code> condition is truthy and thus must return a <code>String</code>, or</li>
+<li><code>@user</code> has not yet been initialized, but the initial value, computed using <code>ENV.fetch('USER')</code>, has type <code>String</code> (and is thus non-nil).</li>
 </ol>
-<p>Note that using <code>||=</code> like this only works when <code>nil</code> is the same as
-“uninitialized.” If it’s possible for the instance variable to be initialized
-and also possibly <code>nil</code> (meaning that there’s no need to attempt to
-re-initialize it on subsequent calls), use the <code>defined?</code> keyword built into
-Ruby:</p>
+<p>Note that using <code>||=</code> like this only works when <code>nil</code> is the same as “uninitialized.” If it’s possible for the instance variable to be initialized and also possibly <code>nil</code> (meaning that there’s no need to attempt to re-initialize it on subsequent calls), use the <code>defined?</code> keyword built into Ruby:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">B</span></span>
   sig {returns(T.nilable(String))}
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">current_git_dir</span></span>
@@ -208,12 +153,7 @@ Ruby:</p>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="limitations-on-instance-variable-inference"></a><a href="#limitations-on-instance-variable-inference" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Limitations on instance variable inference</h2>
-<p>A current shortcoming of Sorbet is that in many cases it cannot reuse static
-type knowledge in order to automatically determine the type of an instance or
-class variable. In the following example, Sorbet will naturally understand that
-<code>@x</code> is of type <code>Integer</code>, but it cannot determine the static type of <code>@y</code>
-without a <code>T.let</code> and therefore treats it as <code>T.untyped</code> when used in other
-methods:</p>
+<p>A current shortcoming of Sorbet is that in many cases it cannot reuse static type knowledge in order to automatically determine the type of an instance or class variable. In the following example, Sorbet will naturally understand that <code>@x</code> is of type <code>Integer</code>, but it cannot determine the static type of <code>@y</code> without a <code>T.let</code> and therefore treats it as <code>T.untyped</code> when used in other methods:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span></span>
   sig {params(<span class="hljs-symbol">x:</span> Integer, <span class="hljs-symbol">y:</span> Integer).void}
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(x, y)</span></span>
@@ -228,21 +168,9 @@ methods:</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Sorbet can only infer the types of instance variables in a relatively specific
-context: in particular, only when that instance variable is initialized to the
-exact value of a parameter to the constructor in the body of the constructor. In
-other cases, you will need to use <code>T.let</code> to explicitly give the types of
-instance variables.</p>
+<p>Sorbet can only infer the types of instance variables in a relatively specific context: in particular, only when that instance variable is initialized to the exact value of a parameter to the constructor in the body of the constructor. In other cases, you will need to use <code>T.let</code> to explicitly give the types of instance variables.</p>
 <blockquote>
-<p><strong>Note</strong>: This particular limitation is because of how Sorbet performs
-typechecking: it needs to know the types of instance variables <em>before</em> it
-typechecks method definitions, but even a simple expression like <code>y + 0</code> will
-require a typechecking pass to determine what its resulting type is, which
-means Sorbet won’t be able to tell what type to infer for an instance variable
-until <em>after</em> it has already started typechecking the method where instance
-variables are defined. Sorbet resolves this cyclical dependency by either
-using types that you have explicitly defined with <code>T.let</code>, or by relying on
-simple code patterns like the one described above.</p>
+<p><strong>Note</strong>: This particular limitation is because of how Sorbet performs typechecking: it needs to know the types of instance variables <em>before</em> it typechecks method definitions, but even a simple expression like <code>y + 0</code> will require a typechecking pass to determine what its resulting type is, which means Sorbet won’t be able to tell what type to infer for an instance variable until <em>after</em> it has already started typechecking the method where instance variables are defined. Sorbet resolves this cyclical dependency by either using types that you have explicitly defined with <code>T.let</code>, or by relying on simple code patterns like the one described above.</p>
 </blockquote>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/sigs"><span class="arrow-prev">← </span><span>sig</span></a><a class="docs-next button" href="/docs/type-assertions"><span>T.let, T.cast, T.must, T.bind</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#annotating-local-variables">Annotating local variables</a></li><li><a href="#annotating-constants">Annotating constants</a></li><li><a href="#declaring-class-and-instance-variables">Declaring class and instance variables</a></li><li><a href="#declaring-lazily-initialized-instance-variables">Declaring lazily-initialized instance variables</a></li><li><a href="#limitations-on-instance-variable-inference">Limitations on instance variable inference</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer"><svg width="99" height="28" viewBox="0 0 99 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.98432 20H6.27432C8.44932 20 9.81432 18.905 9.81432 17.03C9.81432 15.665 9.00432 14.72 7.78932 14.39C8.61432 14.105 9.45432 13.415 9.45432 12.035C9.45432 10.235 8.23932 9.23 5.95932 9.23H1.98432V20ZM3.37932 13.85V10.445H5.83932C7.27932 10.445 8.07432 11 8.07432 12.155C8.07432 13.295 7.27932 13.85 5.83932 13.85H3.37932ZM3.37932 15.08H6.21432C7.65432 15.08 8.43432 15.83 8.43432 16.925C8.43432 18.035 7.65432 18.785 6.21432 18.785H3.37932V15.08ZM18.0294 12.155H16.6794V16.88C16.6794 18.185 15.6894 18.92 14.7144 18.92C13.5594 18.92 13.0794 18.17 13.0794 17.06V12.155H11.7294V17.345C11.7294 19.01 12.6744 20.165 14.3544 20.165C15.4644 20.165 16.2294 19.58 16.6794 18.92V20H18.0294V12.155ZM20.5112 10.79H21.9812V9.23H20.5112V10.79ZM21.9212 12.155H20.5712V20H21.9212V12.155ZM25.8247 9.23H24.4747V20H25.8247V9.23ZM28.5882 18.125C28.5882 19.625 29.3532 20.075 30.6882 20.075C31.1382 20.075 31.5282 20.03 31.8732 19.955V18.8C31.5582 18.875 31.3332 18.89 31.0182 18.89C30.3282 18.89 29.9232 18.74 29.9232 17.915V13.31H31.7082V12.155H29.9232V9.86H28.5882V12.155H27.3732V13.31H28.5882V18.125ZM41.0199 20.165C43.1949 20.165 44.4399 18.305 44.4399 16.085C44.4399 13.85 43.1949 12.005 41.0199 12.005C39.9249 12.005 39.0549 12.53 38.5899 13.295V9.23H37.2399V20H38.5899V18.86C39.0549 19.64 39.9249 20.165 41.0199 20.165ZM38.5599 15.815C38.5599 13.985 39.6699 13.19 40.7799 13.19C42.2499 13.19 43.0749 14.39 43.0749 16.085C43.0749 17.765 42.2499 18.98 40.7799 18.98C39.6699 18.98 38.5599 18.17 38.5599 16.37V15.815ZM49.1804 20.855L52.5554 12.155H51.1454L48.9704 18.155L46.7654 12.155H45.3404L48.2504 19.715L47.8754 20.645C47.5604 21.425 47.2454 21.635 46.6604 21.635C46.4354 21.635 46.2704 21.62 46.0154 21.56V22.73C46.2554 22.775 46.4204 22.79 46.7504 22.79C48.1154 22.79 48.7304 22.04 49.1804 20.855Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M98.7993 15.7838C98.7993 12.8786 97.3871 10.5862 94.688 10.5862C91.9774 10.5862 90.3374 12.8786 90.3374 15.7611C90.3374 19.177 92.2735 20.9019 95.0524 20.9019C96.4077 20.9019 97.4327 20.5955 98.2071 20.1643V17.8946C97.4327 18.2804 96.5443 18.5188 95.4168 18.5188C94.3121 18.5188 93.3327 18.1329 93.2074 16.7938H98.7766C98.7766 16.6463 98.7993 16.0561 98.7993 15.7838ZM93.1732 14.7057C93.1732 13.4233 93.9591 12.8899 94.6766 12.8899C95.3713 12.8899 96.1116 13.4233 96.1116 14.7057H93.1732Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M85.9413 10.5862C84.8251 10.5862 84.1076 11.1082 83.709 11.4714L83.561 10.7678H81.0554V24.0001L83.9026 23.3986L83.914 20.187C84.324 20.482 84.9276 20.9019 85.9299 20.9019C87.9685 20.9019 89.8249 19.2678 89.8249 15.6703C89.8135 12.3792 87.9343 10.5862 85.9413 10.5862ZM85.2579 18.4053C84.586 18.4053 84.1874 18.167 83.914 17.8719L83.9026 13.6616C84.1988 13.3325 84.6088 13.1055 85.2579 13.1055C86.2943 13.1055 87.0118 14.2631 87.0118 15.7497C87.0118 17.2704 86.3057 18.4053 85.2579 18.4053Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M77.1377 9.91656L79.9963 9.30374V7L77.1377 7.60147V9.91656Z" fill="white"></path><path d="M79.9963 10.7791H77.1377V20.709H79.9963V10.7791Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M74.074 11.6187L73.8918 10.7789H71.4318V20.7088H74.279V13.9792C74.9509 13.1054 76.0898 13.2642 76.4429 13.3891V10.7789C76.0784 10.6427 74.7459 10.3931 74.074 11.6187Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M68.3796 8.31641L65.6007 8.90653L65.5894 17.9966C65.5894 19.6762 66.8535 20.9132 68.5391 20.9132C69.473 20.9132 70.1563 20.743 70.5321 20.5387V18.235C70.1677 18.3825 68.3682 18.9045 68.3682 17.225V13.1962H70.5321V10.779H68.3682L68.3796 8.31641Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M60.6807 13.6616C60.6807 13.219 61.0452 13.0488 61.6488 13.0488C62.5143 13.0488 63.6076 13.3098 64.4732 13.7751V11.1082C63.5279 10.7337 62.594 10.5862 61.6488 10.5862C59.3368 10.5862 57.7993 11.7891 57.7993 13.7978C57.7993 16.93 62.1271 16.4306 62.1271 17.7811C62.1271 18.3031 61.6715 18.4734 61.0338 18.4734C60.0885 18.4734 58.8813 18.0875 57.9246 17.5655V20.2664C58.9838 20.7204 60.0543 20.9133 61.0338 20.9133C63.4026 20.9133 65.0313 19.7444 65.0313 17.713C65.0199 14.3312 60.6807 14.9326 60.6807 13.6616Z" fill="white"></path></svg><a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div><div id="csat-extension-config" data-notify="#sorbet-team"></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {

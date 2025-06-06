@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Method Signatures · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&gt; This page describes the syntax of method signatures, or `sig`s. For a complete"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Method Signatures · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&gt; This page describes the syntax of method signatures, or `sig`s. For a complete"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Method Signatures · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&gt; This page describes the syntax of method signatures, or `sig`s. For a complete reference of the types available for use within a `sig`, see the &quot;Type System&quot; section to the left."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Method Signatures · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&gt; This page describes the syntax of method signatures, or `sig`s. For a complete reference of the types available for use within a `sig`, see the &quot;Type System&quot; section to the left."/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments); }
               gtag('js', new Date());
@@ -60,18 +60,14 @@
               }
             });
         </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/sigs.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Method Signatures</h1></header><article><div><span><blockquote>
-<p>This page describes the syntax of method signatures, or <code>sig</code>s. For a complete
-reference of the types available for use within a <code>sig</code>, see the “Type System”
-section to the left.</p>
+<p>This page describes the syntax of method signatures, or <code>sig</code>s. For a complete reference of the types available for use within a <code>sig</code>, see the “Type System” section to the left.</p>
 </blockquote>
-<p>Method signatures are the primary way that we enable static and dynamic type
-checking in our code. In this document, we’ll answer:</p>
+<p>Method signatures are the primary way that we enable static and dynamic type checking in our code. In this document, we’ll answer:</p>
 <ul>
 <li>How to add signatures to methods.</li>
 <li>Why we’d want to add signatures in the first place.</li>
 </ul>
-<p>Signatures are valid Ruby syntax. To be able to write signatures, we first
-<code>extend T::Sig</code> at the top of our class or module:</p>
+<p>Signatures are valid Ruby syntax. To be able to write signatures, we first <code>extend T::Sig</code> at the top of our class or module:</p>
 <pre><code class="hljs css language-ruby">extend T::Sig
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="sig-annotating-method-signatures"></a><a href="#sig-annotating-method-signatures" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>sig</code>: Annotating method signatures</h2>
@@ -79,8 +75,7 @@ checking in our code. In this document, we’ll answer:</p>
 <pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">x:</span> SomeType, <span class="hljs-symbol">y:</span> SomeOtherType).returns(MyReturnType)}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x, y)</span></span>; ...; <span class="hljs-keyword">end</span>
 </code></pre>
-<p>It’s also possible to break a <code>sig</code> up across multiple lines. Here’s the same
-signature as above, rearranged:</p>
+<p>It’s also possible to break a <code>sig</code> up across multiple lines. Here’s the same signature as above, rearranged:</p>
 <pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
   params(
     <span class="hljs-symbol">x:</span> SomeType,
@@ -90,8 +85,7 @@ signature as above, rearranged:</p>
 <span class="hljs-keyword">end</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x, y)</span></span>; ...; <span class="hljs-keyword">end</span>
 </code></pre>
-<p>In every signature, there is an optional <code>params</code> section, and a required
-<code>returns</code> section. Here’s a complete example:</p>
+<p>In every signature, there is an optional <code>params</code> section, and a required <code>returns</code> section. Here’s a complete example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 <span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
 
@@ -105,13 +99,9 @@ signature as above, rearranged:</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Arequire%20'sorbet-runtime'%0A%0Aclass%20Main%0A%20%20%23%20Bring%20the%20%60sig%60%20method%20into%20scope%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20String).returns(Integer)%7D%0A%20%20def%20self.main(x)%0A%20%20%20%20x.length%0A%20%20end%0Aend">→
-View on sorbet.run</a></p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Arequire%20'sorbet-runtime'%0A%0Aclass%20Main%0A%20%20%23%20Bring%20the%20%60sig%60%20method%20into%20scope%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20String).returns(Integer)%7D%0A%20%20def%20self.main(x)%0A%20%20%20%20x.length%0A%20%20end%0Aend">→ View on sorbet.run</a></p>
 <h2><a class="anchor" aria-hidden="true" id="params-annotating-parameter-types"></a><a href="#params-annotating-parameter-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>params</code>: Annotating parameter types</h2>
-<p>In the <code>sig</code> we refer to all parameters <strong>by their name</strong>, regardless of whether
-it’s a positional, keyword, block, or rest parameter. Once we’ve annotated the
-method, Sorbet will automatically infer the types of any local variables we use
-in the method body.</p>
+<p>In the <code>sig</code> we refer to all parameters <strong>by their name</strong>, regardless of whether it’s a positional, keyword, block, or rest parameter. Once we’ve annotated the method, Sorbet will automatically infer the types of any local variables we use in the method body.</p>
 <h3><a class="anchor" aria-hidden="true" id="positional-parameters"></a><a href="#positional-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Positional parameters</h3>
 <p>Here’s the syntax for required and optional <strong>positional</strong> parameters:</p>
 <pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
@@ -141,11 +131,8 @@ in the method body.</p>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="rest-parameters"></a><a href="#rest-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Rest parameters</h3>
-<p>Sometimes called splats. There are two kinds of rest parameters: “all the
-arguments” (<code>*args</code>) and “all the keyword arguments” (<code>**kwargs</code>):</p>
-<p>Types for rest parameters frequently trip people up. There’s a difference
-between what’s written in the sig annotation and what type that variable has in
-the method body:</p>
+<p>Sometimes called splats. There are two kinds of rest parameters: “all the arguments” (<code>*args</code>) and “all the keyword arguments” (<code>**kwargs</code>):</p>
+<p>Types for rest parameters frequently trip people up. There’s a difference between what’s written in the sig annotation and what type that variable has in the method body:</p>
 <pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
   params(
     <span class="hljs-comment"># Integer describes a single element of args</span>
@@ -163,14 +150,10 @@ the method body:</p>
   T.reveal_type(kwargs) <span class="hljs-comment"># =&gt; Revealed: type `T::Hash[Symbol, Float]`</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Notice that in the sig, <code>args</code> is declared as <code>Integer</code>, but in the method body
-Sorbet knows that <code>args</code> is actually a <code>T::Array[Integer]</code> because it can see
-from the method definition that <code>args</code> is a rest parameter.</p>
-<p>It’s similar for <code>kwargs</code>: it’s declared as <code>Float</code>, but in the method body
-Sorbet knows that it’ll be a Hash from <code>Symbol</code> keys to <code>Float</code> values.</p>
+<p>Notice that in the sig, <code>args</code> is declared as <code>Integer</code>, but in the method body Sorbet knows that <code>args</code> is actually a <code>T::Array[Integer]</code> because it can see from the method definition that <code>args</code> is a rest parameter.</p>
+<p>It’s similar for <code>kwargs</code>: it’s declared as <code>Float</code>, but in the method body Sorbet knows that it’ll be a Hash from <code>Symbol</code> keys to <code>Float</code> values.</p>
 <blockquote>
-<p><strong>Note</strong>: The choice to use this syntax for annotating rest parameters in
-Sorbet was informed by precedent in other languages (most notably Scala).</p>
+<p><strong>Note</strong>: The choice to use this syntax for annotating rest parameters in Sorbet was informed by precedent in other languages (most notably Scala).</p>
 </blockquote>
 <h3><a class="anchor" aria-hidden="true" id="block-parameters"></a><a href="#block-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Block parameters</h3>
 <pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
@@ -183,8 +166,7 @@ Sorbet was informed by precedent in other languages (most notably Scala).</p>
   <span class="hljs-comment"># ...</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>See <a href="/docs/procs">Blocks, Procs and Lambda Types</a> for more information on how to
-write type annotations for a method’s block parameter.</p>
+<p>See <a href="/docs/procs">Blocks, Procs and Lambda Types</a> for more information on how to write type annotations for a method’s block parameter.</p>
 <h3><a class="anchor" aria-hidden="true" id="no-parameters"></a><a href="#no-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>No parameters</h3>
 <p>When a method has no parameters, omit the <code>params</code> from the <code>sig</code>:</p>
 <pre><code class="hljs css language-ruby">sig {returns(Integer)}
@@ -194,50 +176,33 @@ write type annotations for a method’s block parameter.</p>
 </code></pre>
 <p>See the next section for more information.</p>
 <h2><a class="anchor" aria-hidden="true" id="returns--void-annotating-return-types"></a><a href="#returns--void-annotating-return-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>returns</code> &amp; <code>void</code>: Annotating return types</h2>
-<p>Unlike <code>params</code>, we <em>have</em> to tell Sorbet what our method returns, even if it
-has “no useful return.” For example, consider this method:</p>
+<p>Unlike <code>params</code>, we <em>have</em> to tell Sorbet what our method returns, even if it has “no useful return.” For example, consider this method:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">main</span></span>
   <span class="hljs-number">5</span>.times <span class="hljs-keyword">do</span>
     puts <span class="hljs-string">'Hello, world!'</span>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>We care more about what <strong>effect</strong> this method has (printing to the screen) than
-what this method <strong>returns</strong> (<code>5</code>). We <em>could</em> write a <code>sig</code> like this:</p>
+<p>We care more about what <strong>effect</strong> this method has (printing to the screen) than what this method <strong>returns</strong> (<code>5</code>). We <em>could</em> write a <code>sig</code> like this:</p>
 <pre><code class="hljs css language-ruby">sig {returns(Integer)}   <span class="hljs-comment"># ← Problematic! Read why below...</span>
 </code></pre>
 <p>This is annoying for a bunch of reasons:</p>
 <ul>
-<li><p>We’d get a useless type error if someone added <code>puts 'Goodbye, world!'</code> at the
-bottom of <code>main</code>. Instead of returning <code>5</code> (<code>Integer</code>), the method would now
-return <code>nil</code> (<code>NilClass</code>).</p></li>
-<li><p>Call sites in untyped code can implicitly depend on us always returning an
-<code>Integer</code>. For example, what if people think returning <code>5</code> is actually some
-sort of exit code?</p></li>
+<li><p>We’d get a useless type error if someone added <code>puts 'Goodbye, world!'</code> at the bottom of <code>main</code>. Instead of returning <code>5</code> (<code>Integer</code>), the method would now return <code>nil</code> (<code>NilClass</code>).</p></li>
+<li><p>Call sites in untyped code can implicitly depend on us always returning an <code>Integer</code>. For example, what if people think returning <code>5</code> is actually some sort of exit code?</p></li>
 </ul>
-<p>Instead, Sorbet has a special way to mark methods where we only care about the
-effect: <code>void</code>:</p>
+<p>Instead, Sorbet has a special way to mark methods where we only care about the effect: <code>void</code>:</p>
 <pre><code class="hljs css language-ruby">sig {void}
 </code></pre>
 <p>Using <code>void</code> instead of <code>returns(...)</code> does a number of things:</p>
 <ul>
-<li><p>Statically, Sorbet will let us return any value (for example, returning either
-<code>5</code> or <code>nil</code> is valid).</p></li>
-<li><p>Also statically, Sorbet will error when typed code tries to inspect the result
-of a <code>void</code> method.</p></li>
-<li><p>In the runtime, <code>sorbet-runtime</code> will <em>throw away</em> the result of our method,
-and return a dummy value instead. (All <code>void</code> methods return the same dummy
-value.)</p>
-<p>If you do not want this behavior, either use <code>returns(T.anything)</code> instead
-(<a href="/docs/anything">docs for <code>T.anything</code></a>), or
-<a href="/docs/runtime">disable runtime checking</a> for that method (or all methods).</p></li>
+<li><p>Statically, Sorbet will let us return any value (for example, returning either <code>5</code> or <code>nil</code> is valid).</p></li>
+<li><p>Also statically, Sorbet will error when typed code tries to inspect the result of a <code>void</code> method.</p></li>
+<li><p>In the runtime, <code>sorbet-runtime</code> will <em>throw away</em> the result of our method, and return a dummy value instead. (All <code>void</code> methods return the same dummy value.)</p>
+<p>If you do not want this behavior, either use <code>returns(T.anything)</code> instead (<a href="/docs/anything">docs for <code>T.anything</code></a>), or <a href="/docs/runtime">disable runtime checking</a> for that method (or all methods).</p></li>
 </ul>
-<p>Replacing the return value with a meaningless value prevents untyped code from
-silently depending on what a typed method returns, so that the implementation is
-free to change without worry of breaking existing code which silently depended
-on the result of the method being meaningful.</p>
-<p>Concretely, here’s a full example of how to use <code>void</code> to type methods with
-useless returns:</p>
+<p>Replacing the return value with a meaningless value prevents untyped code from silently depending on what a typed method returns, so that the implementation is free to change without worry of breaking existing code which silently depended on the result of the method being meaningful.</p>
+<p>Concretely, here’s a full example of how to use <code>void</code> to type methods with useless returns:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 <span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
 
@@ -261,9 +226,7 @@ useless returns:</p>
 Main.name_length(Main.greet(<span class="hljs-string">'Alice'</span>)) <span class="hljs-comment"># =&gt; error!</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="adding-sigs-to-class-methods"></a><a href="#adding-sigs-to-class-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Adding sigs to class methods</h2>
-<p>There are many ways to define class (static) methods in Ruby. How a method is
-defined changes where the <code>extend T::Sig</code> line needs to go. These are the two
-preferred ways to define class methods with sigs:</p>
+<p>There are many ways to define class (static) methods in Ruby. How a method is defined changes where the <code>extend T::Sig</code> line needs to go. These are the two preferred ways to define class methods with sigs:</p>
 <ol>
 <li><p><code>def self.greet</code></p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Main</span></span>
@@ -292,78 +255,49 @@ preferred ways to define class methods with sigs:</p>
 </ol>
 <h2><a class="anchor" aria-hidden="true" id="why-do-we-need-signatures"></a><a href="#why-do-we-need-signatures" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why do we need signatures?</h2>
 <p>Taking a step back, why do we need <code>sig</code>s in the first place?</p>
-<p>Sorbet does type inference for local variables within methods, and then requires
-annotations for method parameters and return types. This mix of type inference
-and type annotations balances being <strong>explicit</strong> with being <strong>powerful</strong>:</p>
+<p>Sorbet does type inference for local variables within methods, and then requires annotations for method parameters and return types. This mix of type inference and type annotations balances being <strong>explicit</strong> with being <strong>powerful</strong>:</p>
 <ul>
-<li>With a small amount of information, Sorbet can power <strong>autocompletion
-results</strong> and catch <strong>type errors</strong>.</li>
-<li>Since there’s no type inference across methods, each method can be typechecked
-<strong>100% in parallel</strong>, for fast performance. Other people can’t write code
-which makes typechecking <em>your</em> code slow.</li>
-<li>Method signatures serve as machine-checked documentation for whoever reads the
-code.</li>
+<li>With a small amount of information, Sorbet can power <strong>autocompletion results</strong> and catch <strong>type errors</strong>.</li>
+<li>Since there’s no type inference across methods, each method can be typechecked <strong>100% in parallel</strong>, for fast performance. Other people can’t write code which makes typechecking <em>your</em> code slow.</li>
+<li>Method signatures serve as machine-checked documentation for whoever reads the code.</li>
 </ul>
-<p>So basically: the complexity of Ruby requires it, it enables Sorbet to be
-performant, and it encourages better development practices. Anecdotally, we’ve
-seen all three of these things have a positive effect on development.</p>
+<p>So basically: the complexity of Ruby requires it, it enables Sorbet to be performant, and it encourages better development practices. Anecdotally, we’ve seen all three of these things have a positive effect on development.</p>
 <h2><a class="anchor" aria-hidden="true" id="why-are-signatures-ruby-syntax"></a><a href="#why-are-signatures-ruby-syntax" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why are signatures Ruby syntax?</h2>
-<p>For example, Sorbet could have re-used YARD annotations, or extended Ruby with
-new syntax.</p>
-<p>There are a number of reasons why we have type annotations as valid Ruby method
-calls:</p>
+<p>For example, Sorbet could have re-used YARD annotations, or extended Ruby with new syntax.</p>
+<p>There are a number of reasons why we have type annotations as valid Ruby method calls:</p>
 <ul>
 <li><p>The existing ecosystem of Ruby tooling still works.</p>
-<p>Editor syntax highlighting, Ruby parsers, RuboCop, IDEs, and text editors, and
-more all work out of the box with Sorbet’s type annotations.</p></li>
+<p>Editor syntax highlighting, Ruby parsers, RuboCop, IDEs, and text editors, and more all work out of the box with Sorbet’s type annotations.</p></li>
 <li><p>No runtime changes required.</p>
-<p>If Sorbet introduced new syntax, type-annotated code would no longer be
-directly runnable simply with <code>ruby</code> at the command line. This means no build
-step is required, and no special changes to the core language.</p></li>
+<p>If Sorbet introduced new syntax, type-annotated code would no longer be directly runnable simply with <code>ruby</code> at the command line. This means no build step is required, and no special changes to the core language.</p></li>
 <li><p>Runtime checking is a feature.</p>
-<p>In a <a href="/docs/gradual">gradual type system</a> like Sorbet, the static checks can be
-turned off at any time. Having <a href="/docs/runtime">runtime-validated</a> type
-annotations gives greater confidence in the predictions that Sorbet
-<a href="/docs/static">makes statically</a>.</p></li>
+<p>In a <a href="/docs/gradual">gradual type system</a> like Sorbet, the static checks can be turned off at any time. Having <a href="/docs/runtime">runtime-validated</a> type annotations gives greater confidence in the predictions that Sorbet <a href="/docs/static">makes statically</a>.</p></li>
 <li><p>Type assertions in code would be inevitable.</p>
-<p>Having constructs like <a href="/docs/type-assertions"><code>T.let</code> and <code>T.cast</code></a> work in line
-requires that type annotations already be syntactically valid Ruby (having
-<code>T.let</code> and <code>T.cast</code> to do type refinements and assertions are central to
-Sorbet being a gradual type system). Since types must already be valid Ruby,
-it makes sense to have <code>sig</code>s be valid Ruby too.</p></li>
+<p>Having constructs like <a href="/docs/type-assertions"><code>T.let</code> and <code>T.cast</code></a> work in line requires that type annotations already be syntactically valid Ruby (having <code>T.let</code> and <code>T.cast</code> to do type refinements and assertions are central to Sorbet being a gradual type system). Since types must already be valid Ruby, it makes sense to have <code>sig</code>s be valid Ruby too.</p></li>
 </ul>
 <h2><a class="anchor" aria-hidden="true" id="can-i-skip-writing-extend-tsig-everywhere"></a><a href="#can-i-skip-writing-extend-tsig-everywhere" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Can I skip writing <code>extend T::Sig</code> everywhere?</h2>
-<p>To skip writing <code>extend T::Sig</code> inside every class that wants to use <code>sig</code>, use
-this monkey patch:</p>
+<p>To skip writing <code>extend T::Sig</code> inside every class that wants to use <code>sig</code>, use this monkey patch:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Module</span></span>
   <span class="hljs-keyword">include</span> T::Sig
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Since every singleton class descends from <code>Module</code>, this will make the <code>sig</code>
-method available in every class body.</p>
-<p>This involves a monkey patch, and is <strong>not</strong> required to use Sorbet. But the
-most earnest users of Sorbet all eventually add this monkey patch, because
-<code>extend T::Sig</code> ends up getting written into almost every class.</p>
+<p>Since every singleton class descends from <code>Module</code>, this will make the <code>sig</code> method available in every class body.</p>
+<p>This involves a monkey patch, and is <strong>not</strong> required to use Sorbet. But the most earnest users of Sorbet all eventually add this monkey patch, because <code>extend T::Sig</code> ends up getting written into almost every class.</p>
 <p>We recommend putting this monkeypatch in the same file that</p>
 <ul>
 <li>requires <code>sorbet-runtime</code>, and</li>
-<li>sets up any <a href="/docs/tconfiguration"><code>T::Configuration</code></a> <code>sorbet-runtime</code>
-configurations</li>
+<li>sets up any <a href="/docs/tconfiguration"><code>T::Configuration</code></a> <code>sorbet-runtime</code> configurations</li>
 </ul>
 <p>So that it’s impossible to get one of these three things without the others.</p>
 <p>The upside:</p>
 <ul>
-<li><p>Drops the “activation energy” required to add the first <code>sig</code> to a class.
-Simply start writing <code>sig</code> above the current method.</p></li>
+<li><p>Drops the “activation energy” required to add the first <code>sig</code> to a class. Simply start writing <code>sig</code> above the current method.</p></li>
 <li><p>Fewer lines dedicated to type annotations.</p></li>
 </ul>
 <p>The downside:</p>
 <ul>
-<li><p>Adds a monkey patch to a Ruby standard library class, which might conflict
-with other methods defined by the current project or its gems.</p></li>
-<li><p>If users have <em>only</em> required <code>sorbet-runtime</code> and forgotten to require the
-file defining this monkey patch, the code can fail at runtime in unexpected
-ways.</p></li>
+<li><p>Adds a monkey patch to a Ruby standard library class, which might conflict with other methods defined by the current project or its gems.</p></li>
+<li><p>If users have <em>only</em> required <code>sorbet-runtime</code> and forgotten to require the file defining this monkey patch, the code can fail at runtime in unexpected ways.</p></li>
 </ul>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/unsupported"><span class="arrow-prev">← </span><span>Unsupported Ruby Features</span></a><a class="docs-next button" href="/docs/type-annotations"><span>Type Annotations (non-sig)</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#sig-annotating-method-signatures"><code>sig</code>: Annotating method signatures</a></li><li><a href="#params-annotating-parameter-types"><code>params</code>: Annotating parameter types</a><ul class="toc-headings"><li><a href="#positional-parameters">Positional parameters</a></li><li><a href="#keyword-parameters-kwargs">Keyword parameters (kwargs)</a></li><li><a href="#rest-parameters">Rest parameters</a></li><li><a href="#block-parameters">Block parameters</a></li><li><a href="#no-parameters">No parameters</a></li></ul></li><li><a href="#returns--void-annotating-return-types"><code>returns</code> &amp; <code>void</code>: Annotating return types</a></li><li><a href="#adding-sigs-to-class-methods">Adding sigs to class methods</a></li><li><a href="#why-do-we-need-signatures">Why do we need signatures?</a></li><li><a href="#why-are-signatures-ruby-syntax">Why are signatures Ruby syntax?</a></li><li><a href="#can-i-skip-writing-extend-tsig-everywhere">Can I skip writing <code>extend T::Sig</code> everywhere?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer"><svg width="99" height="28" viewBox="0 0 99 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.98432 20H6.27432C8.44932 20 9.81432 18.905 9.81432 17.03C9.81432 15.665 9.00432 14.72 7.78932 14.39C8.61432 14.105 9.45432 13.415 9.45432 12.035C9.45432 10.235 8.23932 9.23 5.95932 9.23H1.98432V20ZM3.37932 13.85V10.445H5.83932C7.27932 10.445 8.07432 11 8.07432 12.155C8.07432 13.295 7.27932 13.85 5.83932 13.85H3.37932ZM3.37932 15.08H6.21432C7.65432 15.08 8.43432 15.83 8.43432 16.925C8.43432 18.035 7.65432 18.785 6.21432 18.785H3.37932V15.08ZM18.0294 12.155H16.6794V16.88C16.6794 18.185 15.6894 18.92 14.7144 18.92C13.5594 18.92 13.0794 18.17 13.0794 17.06V12.155H11.7294V17.345C11.7294 19.01 12.6744 20.165 14.3544 20.165C15.4644 20.165 16.2294 19.58 16.6794 18.92V20H18.0294V12.155ZM20.5112 10.79H21.9812V9.23H20.5112V10.79ZM21.9212 12.155H20.5712V20H21.9212V12.155ZM25.8247 9.23H24.4747V20H25.8247V9.23ZM28.5882 18.125C28.5882 19.625 29.3532 20.075 30.6882 20.075C31.1382 20.075 31.5282 20.03 31.8732 19.955V18.8C31.5582 18.875 31.3332 18.89 31.0182 18.89C30.3282 18.89 29.9232 18.74 29.9232 17.915V13.31H31.7082V12.155H29.9232V9.86H28.5882V12.155H27.3732V13.31H28.5882V18.125ZM41.0199 20.165C43.1949 20.165 44.4399 18.305 44.4399 16.085C44.4399 13.85 43.1949 12.005 41.0199 12.005C39.9249 12.005 39.0549 12.53 38.5899 13.295V9.23H37.2399V20H38.5899V18.86C39.0549 19.64 39.9249 20.165 41.0199 20.165ZM38.5599 15.815C38.5599 13.985 39.6699 13.19 40.7799 13.19C42.2499 13.19 43.0749 14.39 43.0749 16.085C43.0749 17.765 42.2499 18.98 40.7799 18.98C39.6699 18.98 38.5599 18.17 38.5599 16.37V15.815ZM49.1804 20.855L52.5554 12.155H51.1454L48.9704 18.155L46.7654 12.155H45.3404L48.2504 19.715L47.8754 20.645C47.5604 21.425 47.2454 21.635 46.6604 21.635C46.4354 21.635 46.2704 21.62 46.0154 21.56V22.73C46.2554 22.775 46.4204 22.79 46.7504 22.79C48.1154 22.79 48.7304 22.04 49.1804 20.855Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M98.7993 15.7838C98.7993 12.8786 97.3871 10.5862 94.688 10.5862C91.9774 10.5862 90.3374 12.8786 90.3374 15.7611C90.3374 19.177 92.2735 20.9019 95.0524 20.9019C96.4077 20.9019 97.4327 20.5955 98.2071 20.1643V17.8946C97.4327 18.2804 96.5443 18.5188 95.4168 18.5188C94.3121 18.5188 93.3327 18.1329 93.2074 16.7938H98.7766C98.7766 16.6463 98.7993 16.0561 98.7993 15.7838ZM93.1732 14.7057C93.1732 13.4233 93.9591 12.8899 94.6766 12.8899C95.3713 12.8899 96.1116 13.4233 96.1116 14.7057H93.1732Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M85.9413 10.5862C84.8251 10.5862 84.1076 11.1082 83.709 11.4714L83.561 10.7678H81.0554V24.0001L83.9026 23.3986L83.914 20.187C84.324 20.482 84.9276 20.9019 85.9299 20.9019C87.9685 20.9019 89.8249 19.2678 89.8249 15.6703C89.8135 12.3792 87.9343 10.5862 85.9413 10.5862ZM85.2579 18.4053C84.586 18.4053 84.1874 18.167 83.914 17.8719L83.9026 13.6616C84.1988 13.3325 84.6088 13.1055 85.2579 13.1055C86.2943 13.1055 87.0118 14.2631 87.0118 15.7497C87.0118 17.2704 86.3057 18.4053 85.2579 18.4053Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M77.1377 9.91656L79.9963 9.30374V7L77.1377 7.60147V9.91656Z" fill="white"></path><path d="M79.9963 10.7791H77.1377V20.709H79.9963V10.7791Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M74.074 11.6187L73.8918 10.7789H71.4318V20.7088H74.279V13.9792C74.9509 13.1054 76.0898 13.2642 76.4429 13.3891V10.7789C76.0784 10.6427 74.7459 10.3931 74.074 11.6187Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M68.3796 8.31641L65.6007 8.90653L65.5894 17.9966C65.5894 19.6762 66.8535 20.9132 68.5391 20.9132C69.473 20.9132 70.1563 20.743 70.5321 20.5387V18.235C70.1677 18.3825 68.3682 18.9045 68.3682 17.225V13.1962H70.5321V10.779H68.3682L68.3796 8.31641Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M60.6807 13.6616C60.6807 13.219 61.0452 13.0488 61.6488 13.0488C62.5143 13.0488 63.6076 13.3098 64.4732 13.7751V11.1082C63.5279 10.7337 62.594 10.5862 61.6488 10.5862C59.3368 10.5862 57.7993 11.7891 57.7993 13.7978C57.7993 16.93 62.1271 16.4306 62.1271 17.7811C62.1271 18.3031 61.6715 18.4734 61.0338 18.4734C60.0885 18.4734 58.8813 18.0875 57.9246 17.5655V20.2664C58.9838 20.7204 60.0543 20.9133 61.0338 20.9133C63.4026 20.9133 65.0313 19.7444 65.0313 17.713C65.0199 14.3312 60.6807 14.9326 60.6807 13.6616Z" fill="white"></path></svg><a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div><div id="csat-extension-config" data-notify="#sorbet-team"></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {

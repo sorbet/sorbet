@@ -61,34 +61,18 @@
             });
         </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/gradual.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Gradual Type Checking &amp; Sorbet</h1></header><article><div><span><p>Sorbet is a gradual type checker, which is a blessing and a curse.</p>
 <h2><a class="anchor" aria-hidden="true" id="what-is-a-gradual-type-system"></a><a href="#what-is-a-gradual-type-system" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What is a gradual type system?</h2>
-<p>In large codebases, complete rewrites are expensive and dangerous. A complete
-halt on new features to pay down technical debt? Oof. “Ah, but if we just
-rewrite in <em>&lt;my favorite language&gt;</em>, we’ll be fine!” Maybe… This risk pays
-off only in extreme circumstances.</p>
-<p><strong>Gradual type systems</strong> solve this. Types can be adopted incrementally,
-team-by-team or file-by-file, according to the velocity of individual teams. In
-the face of large user asks, quarterly planning, and re-orgs, migrations to
-gradual type systems are resilient to shifting priorities.</p>
-<p>To deliver on this promise, gradual type systems make a compromise: type checks
-can be “turned off” at any time and at any level of granularity. In Sorbet, we
-can opt out of type checking at a call site, a method definition, a class, or
-even an entire file.</p>
-<p>This is the fundamental tension in a gradual type system: when a program
-typechecks, it’s not clear how confident we can be in the typechecker’s
-assessment of our code. But it’s precisely this feature that lets us plow
-forward adding types while simultaneously adding features.</p>
+<p>In large codebases, complete rewrites are expensive and dangerous. A complete halt on new features to pay down technical debt? Oof. “Ah, but if we just rewrite in <em>&lt;my favorite language&gt;</em>, we’ll be fine!” Maybe… This risk pays off only in extreme circumstances.</p>
+<p><strong>Gradual type systems</strong> solve this. Types can be adopted incrementally, team-by-team or file-by-file, according to the velocity of individual teams. In the face of large user asks, quarterly planning, and re-orgs, migrations to gradual type systems are resilient to shifting priorities.</p>
+<p>To deliver on this promise, gradual type systems make a compromise: type checks can be “turned off” at any time and at any level of granularity. In Sorbet, we can opt out of type checking at a call site, a method definition, a class, or even an entire file.</p>
+<p>This is the fundamental tension in a gradual type system: when a program typechecks, it’s not clear how confident we can be in the typechecker’s assessment of our code. But it’s precisely this feature that lets us plow forward adding types while simultaneously adding features.</p>
 <h2><a class="anchor" aria-hidden="true" id="tuntyped-a-double-edged-sword"></a><a href="#tuntyped-a-double-edged-sword" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>T.untyped: A double-edged sword</h2>
-<p>The defining characteristic of a gradual type system is to be able to turn it
-off at any granularity. So what <em>specifically</em> makes Sorbet gradual? The answer:
-<a href="/docs/untyped"><code>T.untyped</code></a>.</p>
-<p><code>T.untyped</code> is a <strong>type</strong> in Sorbet’s type system, but it’s unlike any type
-found in say, Go or Java. <code>T.untyped</code> has two special properties:</p>
+<p>The defining characteristic of a gradual type system is to be able to turn it off at any granularity. So what <em>specifically</em> makes Sorbet gradual? The answer: <a href="/docs/untyped"><code>T.untyped</code></a>.</p>
+<p><code>T.untyped</code> is a <strong>type</strong> in Sorbet’s type system, but it’s unlike any type found in say, Go or Java. <code>T.untyped</code> has two special properties:</p>
 <ol>
 <li>Every value can be asserted to have type <code>T.untyped</code>.</li>
 <li>Every value of type <code>T.untyped</code> can be asserted to be <em>any other type</em>!</li>
 </ol>
-<p>If this sounds counterintuitive, that’s because it is. Let’s see why with an
-example:</p>
+<p>If this sounds counterintuitive, that’s because it is. Let’s see why with an example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># T.let asserts that an expression has a type:</span>
 x = T.let(<span class="hljs-number">0</span>, Integer)
 
@@ -104,12 +88,8 @@ T.reveal_type(z) <span class="hljs-comment"># =&gt; String</span>
 
 <span class="hljs-comment"># ... z = 0, but its type is String!</span>
 </code></pre>
-<p>Follow what this example is doing: we start with <code>x = 0</code>, then set <code>y = x</code>, then
-<code>z = y</code>, so in the end <code>z = 0</code>. But at the same time, Sorbet thinks that <code>z</code> has
-type String!</p>
-<p>At first blush, it looks like we <strong>do not</strong> want this property in our type
-system. It lets us make wildly inaccurate claims! But let’s withhold judgement
-for a second, and see what this property enables:</p>
+<p>Follow what this example is doing: we start with <code>x = 0</code>, then set <code>y = x</code>, then <code>z = y</code>, so in the end <code>z = 0</code>. But at the same time, Sorbet thinks that <code>z</code> has type String!</p>
+<p>At first blush, it looks like we <strong>do not</strong> want this property in our type system. It lets us make wildly inaccurate claims! But let’s withhold judgement for a second, and see what this property enables:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># --- File we haven't typed yet ---</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span></span>
@@ -129,32 +109,17 @@ sig {params(<span class="hljs-symbol">person:</span> Person).returns(Integer)}
   len
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Look at the line marked <code>(*)</code>. Sorbet knows about the <code>Person</code> class, and knows
-that it has a method <code>#name</code>, but implicitly assumes this method’s return type
-is <code>T.untyped</code>. Why? This is what Sorbet assumes for any methods that don’t have
-a corresponding <code>sig</code> annotation.</p>
-<p>Since <code>T.untyped</code> <em>could be</em> any type, when <code>name.length</code> runs, Sorbet
-optimistically assumes that <code>name</code> <em>will</em> have some type which has a <code>#length</code>
-method. Then it also optimistically assumes that the thing <code>#length</code> returns (in
-this case, <code>len</code>) could be an <code>Integer</code>. Thus, Sorbet declares that this method
-type checks.</p>
-<p>In a sense, “being optimistic” is really just a way of the programmer telling
-Sorbet, “I believe this code is correct.” And realistically, we might be
-convinced of our code’s correctness for a number of reasons:</p>
+<p>Look at the line marked <code>(*)</code>. Sorbet knows about the <code>Person</code> class, and knows that it has a method <code>#name</code>, but implicitly assumes this method’s return type is <code>T.untyped</code>. Why? This is what Sorbet assumes for any methods that don’t have a corresponding <code>sig</code> annotation.</p>
+<p>Since <code>T.untyped</code> <em>could be</em> any type, when <code>name.length</code> runs, Sorbet optimistically assumes that <code>name</code> <em>will</em> have some type which has a <code>#length</code> method. Then it also optimistically assumes that the thing <code>#length</code> returns (in this case, <code>len</code>) could be an <code>Integer</code>. Thus, Sorbet declares that this method type checks.</p>
+<p>In a sense, “being optimistic” is really just a way of the programmer telling Sorbet, “I believe this code is correct.” And realistically, we might be convinced of our code’s correctness for a number of reasons:</p>
 <ul>
 <li>because this code is well tested,</li>
 <li>because this code has been running in production just fine, or</li>
 <li>because we’ve carefully reviewed the code for correctness.</li>
 </ul>
-<p>But as many of us have experienced, our faith is frequently misplaced when it
-comes to believing that some code is correct. As we add type annotations, Sorbet
-helps uncover and check hidden assumptions, providing even more evidence in
-favor of our code’s correctness. The next question becomes: what if our
-annotations are wrong?</p>
+<p>But as many of us have experienced, our faith is frequently misplaced when it comes to believing that some code is correct. As we add type annotations, Sorbet helps uncover and check hidden assumptions, providing even more evidence in favor of our code’s correctness. The next question becomes: what if our annotations are wrong?</p>
 <h2><a class="anchor" aria-hidden="true" id="checking-our-assertions-at-runtime"></a><a href="#checking-our-assertions-at-runtime" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Checking our assertions at runtime</h2>
-<p>In our <code>name_length</code> example above, we added a type annotation to a previously
-untyped method. What if our annotation was wrong? For example, what if we
-accidentally typed the return as a String:</p>
+<p>In our <code>name_length</code> example above, we added a type annotation to a previously untyped method. What if our annotation was wrong? For example, what if we accidentally typed the return as a String:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span></span>
   <span class="hljs-keyword">attr_accessor</span> <span class="hljs-symbol">:name</span>
 <span class="hljs-keyword">end</span>
@@ -169,42 +134,30 @@ person = Person.new
 person.name = <span class="hljs-string">'Jenny Rosen'</span>
 name_length(person)
 </code></pre>
-<p>Because <code>Person#name</code> returns <code>T.untyped</code>, Sorbet does not have enough
-information statically to check that <code>#length</code> returns an Integer. But if we
-were to run this code, we’d know at the moment our method returns that our
-result didn’t match our declaration.</p>
-<p>Enter the <a href="/docs/runtime">runtime system</a>. At runtime, the <code>sig</code> above a method def
-wraps our method into a new method which does three things:</p>
+<p>Because <code>Person#name</code> returns <code>T.untyped</code>, Sorbet does not have enough information statically to check that <code>#length</code> returns an Integer. But if we were to run this code, we’d know at the moment our method returns that our result didn’t match our declaration.</p>
+<p>Enter the <a href="/docs/runtime">runtime system</a>. At runtime, the <code>sig</code> above a method def wraps our method into a new method which does three things:</p>
 <ul>
 <li>checks that it was called with arguments matching the <code>sig</code>'s declared params</li>
 <li>calls our method and gets the result</li>
 <li>checks that our result matches the <code>sig</code>'s declared return</li>
 </ul>
-<p>This means we can leverage our existing test coverage and our production
-assertion monitoring to build confidence that our type annotations are correct.
-In the early days of <a href="/docs/adopting">adopting Sorbet</a> in a codebase this is super
-valuable because <strong>most</strong> things are going to be <code>T.untyped</code>!</p>
+<p>This means we can leverage our existing test coverage and our production assertion monitoring to build confidence that our type annotations are correct. In the early days of <a href="/docs/adopting">adopting Sorbet</a> in a codebase this is super valuable because <strong>most</strong> things are going to be <code>T.untyped</code>!</p>
 <h2><a class="anchor" aria-hidden="true" id="the-lifecycle-of-tuntyped"></a><a href="#the-lifecycle-of-tuntyped" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The lifecycle of T.untyped</h2>
 <p>By now we have a pretty good understanding of <code>T.untyped</code>:</p>
 <ul>
 <li>It’s useful for spurring short-term adoption.</li>
 <li>It harms our long-term ability to statically analyze our code.</li>
 </ul>
-<p>When a codebase is adopting a gradual type checker we see an adoption curve
-where <code>T.untyped</code> shows up everywhere then slowly gets phased out. There are
-three main phases of <code>T.untyped</code> in a codebase:</p>
+<p>When a codebase is adopting a gradual type checker we see an adoption curve where <code>T.untyped</code> shows up everywhere then slowly gets phased out. There are three main phases of <code>T.untyped</code> in a codebase:</p>
 <ol>
 <li>The initial ramp up, where only early adopters are using types.</li>
 <li>The transitional period, where a codebase’s core abstractions gain types.</li>
 <li>The long tail, where typed code becomes the majority.</li>
 </ol>
-<p>For context, at Stripe we’re somewhere about halfway between (2) and (3). We’ve
-already enabled <code>typed: true</code> in the vast majority of files in our main
-codebase, but most methods and even a few core abstractions are not typed yet.</p>
+<p>For context, at Stripe we’re somewhere about halfway between (2) and (3). We’ve already enabled <code>typed: true</code> in the vast majority of files in our main codebase, but most methods and even a few core abstractions are not typed yet.</p>
 <p>There are a number of tools for managing <code>T.untyped</code> in a codebase:</p>
 <ul>
-<li><a href="/docs/static">Strictness levels</a> (<code>typed: true</code>, <code>typed: strict</code>, and
-<code>typed: strong</code>).
+<li><a href="/docs/static">Strictness levels</a> (<code>typed: true</code>, <code>typed: strict</code>, and <code>typed: strong</code>).
 <ul>
 <li>These levels control when <code>T.untyped</code> is allowed.</li>
 </ul></li>
@@ -221,24 +174,15 @@ codebase, but most methods and even a few core abstractions are not typed yet.</
 <li>Knowing which things are <code>T.untyped</code> is half the battle.</li>
 </ul></li>
 </ul>
-<p>These tools are the bread and butter for rolling out types in a gradual type
-system. Mostly that means they’re tools that the Developer Productivity team
-uses, but understanding that they’re there can help give context when
-troubleshooting. See <a href="/docs/troubleshooting">Troubleshooting</a> for more information.</p>
+<p>These tools are the bread and butter for rolling out types in a gradual type system. Mostly that means they’re tools that the Developer Productivity team uses, but understanding that they’re there can help give context when troubleshooting. See <a href="/docs/troubleshooting">Troubleshooting</a> for more information.</p>
 <h2><a class="anchor" aria-hidden="true" id="whats-next"></a><a href="#whats-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s next?</h2>
-<p>Gradual type systems make it tractable to mix feature development with adopting
-a typed language. The guarantees they provide are necessarily weaker than
-languages without a type like <code>T.untyped</code>, because <code>T.untyped</code> allows us to “opt
-out” of type checking. But it’s precisely this property which enables
-incremental adoption through a large codebase.</p>
+<p>Gradual type systems make it tractable to mix feature development with adopting a typed language. The guarantees they provide are necessarily weaker than languages without a type like <code>T.untyped</code>, because <code>T.untyped</code> allows us to “opt out” of type checking. But it’s precisely this property which enables incremental adoption through a large codebase.</p>
 <p>Armed with this knowledge, here are some resources to check out next:</p>
 <ul>
 <li><p><a href="/docs/static">Enabling Static Checks</a></p>
-<p>How to opt into higher strictness levels and add type annotations so that
-Sorbet can report more errors.</p></li>
+<p>How to opt into higher strictness levels and add type annotations so that Sorbet can report more errors.</p></li>
 <li><p><a href="/docs/runtime">Enabling Runtime Checks</a></p>
-<p>Learn more about what benefits the runtime system provides, and how to work
-with it.</p></li>
+<p>Learn more about what benefits the runtime system provides, and how to work with it.</p></li>
 </ul>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/from-typescript"><span class="arrow-prev">← </span><span class="function-name-prevnext">TypeScript ↔ Sorbet</span></a><a class="docs-next button" href="/docs/static"><span>Enabling Static Checks</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#what-is-a-gradual-type-system">What is a gradual type system?</a></li><li><a href="#tuntyped-a-double-edged-sword">T.untyped: A double-edged sword</a></li><li><a href="#checking-our-assertions-at-runtime">Checking our assertions at runtime</a></li><li><a href="#the-lifecycle-of-tuntyped">The lifecycle of T.untyped</a></li><li><a href="#whats-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer"><svg width="99" height="28" viewBox="0 0 99 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.98432 20H6.27432C8.44932 20 9.81432 18.905 9.81432 17.03C9.81432 15.665 9.00432 14.72 7.78932 14.39C8.61432 14.105 9.45432 13.415 9.45432 12.035C9.45432 10.235 8.23932 9.23 5.95932 9.23H1.98432V20ZM3.37932 13.85V10.445H5.83932C7.27932 10.445 8.07432 11 8.07432 12.155C8.07432 13.295 7.27932 13.85 5.83932 13.85H3.37932ZM3.37932 15.08H6.21432C7.65432 15.08 8.43432 15.83 8.43432 16.925C8.43432 18.035 7.65432 18.785 6.21432 18.785H3.37932V15.08ZM18.0294 12.155H16.6794V16.88C16.6794 18.185 15.6894 18.92 14.7144 18.92C13.5594 18.92 13.0794 18.17 13.0794 17.06V12.155H11.7294V17.345C11.7294 19.01 12.6744 20.165 14.3544 20.165C15.4644 20.165 16.2294 19.58 16.6794 18.92V20H18.0294V12.155ZM20.5112 10.79H21.9812V9.23H20.5112V10.79ZM21.9212 12.155H20.5712V20H21.9212V12.155ZM25.8247 9.23H24.4747V20H25.8247V9.23ZM28.5882 18.125C28.5882 19.625 29.3532 20.075 30.6882 20.075C31.1382 20.075 31.5282 20.03 31.8732 19.955V18.8C31.5582 18.875 31.3332 18.89 31.0182 18.89C30.3282 18.89 29.9232 18.74 29.9232 17.915V13.31H31.7082V12.155H29.9232V9.86H28.5882V12.155H27.3732V13.31H28.5882V18.125ZM41.0199 20.165C43.1949 20.165 44.4399 18.305 44.4399 16.085C44.4399 13.85 43.1949 12.005 41.0199 12.005C39.9249 12.005 39.0549 12.53 38.5899 13.295V9.23H37.2399V20H38.5899V18.86C39.0549 19.64 39.9249 20.165 41.0199 20.165ZM38.5599 15.815C38.5599 13.985 39.6699 13.19 40.7799 13.19C42.2499 13.19 43.0749 14.39 43.0749 16.085C43.0749 17.765 42.2499 18.98 40.7799 18.98C39.6699 18.98 38.5599 18.17 38.5599 16.37V15.815ZM49.1804 20.855L52.5554 12.155H51.1454L48.9704 18.155L46.7654 12.155H45.3404L48.2504 19.715L47.8754 20.645C47.5604 21.425 47.2454 21.635 46.6604 21.635C46.4354 21.635 46.2704 21.62 46.0154 21.56V22.73C46.2554 22.775 46.4204 22.79 46.7504 22.79C48.1154 22.79 48.7304 22.04 49.1804 20.855Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M98.7993 15.7838C98.7993 12.8786 97.3871 10.5862 94.688 10.5862C91.9774 10.5862 90.3374 12.8786 90.3374 15.7611C90.3374 19.177 92.2735 20.9019 95.0524 20.9019C96.4077 20.9019 97.4327 20.5955 98.2071 20.1643V17.8946C97.4327 18.2804 96.5443 18.5188 95.4168 18.5188C94.3121 18.5188 93.3327 18.1329 93.2074 16.7938H98.7766C98.7766 16.6463 98.7993 16.0561 98.7993 15.7838ZM93.1732 14.7057C93.1732 13.4233 93.9591 12.8899 94.6766 12.8899C95.3713 12.8899 96.1116 13.4233 96.1116 14.7057H93.1732Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M85.9413 10.5862C84.8251 10.5862 84.1076 11.1082 83.709 11.4714L83.561 10.7678H81.0554V24.0001L83.9026 23.3986L83.914 20.187C84.324 20.482 84.9276 20.9019 85.9299 20.9019C87.9685 20.9019 89.8249 19.2678 89.8249 15.6703C89.8135 12.3792 87.9343 10.5862 85.9413 10.5862ZM85.2579 18.4053C84.586 18.4053 84.1874 18.167 83.914 17.8719L83.9026 13.6616C84.1988 13.3325 84.6088 13.1055 85.2579 13.1055C86.2943 13.1055 87.0118 14.2631 87.0118 15.7497C87.0118 17.2704 86.3057 18.4053 85.2579 18.4053Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M77.1377 9.91656L79.9963 9.30374V7L77.1377 7.60147V9.91656Z" fill="white"></path><path d="M79.9963 10.7791H77.1377V20.709H79.9963V10.7791Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M74.074 11.6187L73.8918 10.7789H71.4318V20.7088H74.279V13.9792C74.9509 13.1054 76.0898 13.2642 76.4429 13.3891V10.7789C76.0784 10.6427 74.7459 10.3931 74.074 11.6187Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M68.3796 8.31641L65.6007 8.90653L65.5894 17.9966C65.5894 19.6762 66.8535 20.9132 68.5391 20.9132C69.473 20.9132 70.1563 20.743 70.5321 20.5387V18.235C70.1677 18.3825 68.3682 18.9045 68.3682 17.225V13.1962H70.5321V10.779H68.3682L68.3796 8.31641Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M60.6807 13.6616C60.6807 13.219 61.0452 13.0488 61.6488 13.0488C62.5143 13.0488 63.6076 13.3098 64.4732 13.7751V11.1082C63.5279 10.7337 62.594 10.5862 61.6488 10.5862C59.3368 10.5862 57.7993 11.7891 57.7993 13.7978C57.7993 16.93 62.1271 16.4306 62.1271 17.7811C62.1271 18.3031 61.6715 18.4734 61.0338 18.4734C60.0885 18.4734 58.8813 18.0875 57.9246 17.5655V20.2664C58.9838 20.7204 60.0543 20.9133 61.0338 20.9133C63.4026 20.9133 65.0313 19.7444 65.0313 17.713C65.0199 14.3312 60.6807 14.9326 60.6807 13.6616Z" fill="white"></path></svg><a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div><div id="csat-extension-config" data-notify="#sorbet-team"></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Sorbet Compiler: An experimental, ahead-of-time compiler for Ruby · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="For the past year, the [Sorbet](https://sorbet.org/) team has been working on an"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Sorbet Compiler: An experimental, ahead-of-time compiler for Ruby · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/blog/2021/07/30/open-sourcing-sorbet-compiler"/><meta property="og:description" content="For the past year, the [Sorbet](https://sorbet.org/) team has been working on an"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Sorbet Compiler: An experimental, ahead-of-time compiler for Ruby · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="For the past year, the [Sorbet](https://sorbet.org/) team has been working on an experimental, ahead-of-time compiler for Ruby, powered by Sorbet and LLVM. Today we&#x27;re sharing the source code for it. It lives alongside the existing code for Sorbet on GitHub, mostly in the `compiler/` folder:"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Sorbet Compiler: An experimental, ahead-of-time compiler for Ruby · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/blog/2021/07/30/open-sourcing-sorbet-compiler"/><meta property="og:description" content="For the past year, the [Sorbet](https://sorbet.org/) team has been working on an experimental, ahead-of-time compiler for Ruby, powered by Sorbet and LLVM. Today we&#x27;re sharing the source code for it. It lives alongside the existing code for Sorbet on GitHub, mostly in the `compiler/` folder:"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments); }
               gtag('js', new Date());
@@ -59,63 +59,36 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer postContainer blogContainer"><div class="wrapper"><div class="lonePost"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle"><a href="/blog/2021/07/30/open-sourcing-sorbet-compiler">Sorbet Compiler: An experimental, ahead-of-time compiler for Ruby</a></h1><p class="post-meta">July 30, 2021</p><div class="authorBlock"></div></header><div><span><p>For the past year, the <a href="https://sorbet.org/">Sorbet</a> team has been working on an
-experimental, ahead-of-time compiler for Ruby, powered by Sorbet and LLVM. Today
-we’re sharing the source code for it. It lives alongside the existing code for
-Sorbet on GitHub, mostly in the <code>compiler/</code> folder:</p>
+        </script></nav></div><div class="container mainContainer postContainer blogContainer"><div class="wrapper"><div class="lonePost"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle"><a href="/blog/2021/07/30/open-sourcing-sorbet-compiler">Sorbet Compiler: An experimental, ahead-of-time compiler for Ruby</a></h1><p class="post-meta">July 30, 2021</p><div class="authorBlock"></div></header><div><span><p>For the past year, the <a href="https://sorbet.org/">Sorbet</a> team has been working on an experimental, ahead-of-time compiler for Ruby, powered by Sorbet and LLVM. Today we’re sharing the source code for it. It lives alongside the existing code for Sorbet on GitHub, mostly in the <code>compiler/</code> folder:</p>
 <p>→ <a href="https://github.com/sorbet/sorbet/tree/master/compiler/">https://github.com/sorbet/sorbet/tree/master/compiler/</a></p>
-<p>We want to be clear up front: the code is nowhere near ready for external use
-right now, but we welcome you to read the code and give us feedback on our
-approach!</p>
-<p>We teased this a few weeks back in a tweet, which drew a fair bit of attention,
-and also a lot of questions:</p>
+<p>We want to be clear up front: the code is nowhere near ready for external use right now, but we welcome you to read the code and give us feedback on our approach!</p>
+<p>We teased this a few weeks back in a tweet, which drew a fair bit of attention, and also a lot of questions:</p>
 <!--truncate-->
 <blockquote class="twitter-tweet"><p lang="en" dir="ltr">We&#39;re big believers in multi-year infrastructure bets. After a few years of Ruby infra work, our in-house Ruby compiler is now 22–170% faster than Ruby&#39;s default implementation for Stripe&#39;s production API traffic. If interested in working on such problems, we&#39;re hiring!</p>&mdash; Patrick Collison (@patrickc) <a href="https://twitter.com/patrickc/status/1410269843585069056?ref_src=twsrc%5Etfw">June 30, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 <p>Before answering the questions raised in the above discussion, some disclaimers:</p>
 <ul>
-<li><p>If you’re an existing Sorbet user, nothing changes for you! You can continue
-to use Sorbet to typecheck your Ruby codebases exactly as you do now. While
-the Sorbet Compiler code lives in the Sorbet repo, it doesn’t change anything
-about Sorbet, nor is it required to use Sorbet.</p></li>
-<li><p>There are no Sorbet Compiler binary releases. If it works out, we may some day
-publish pre-built binaries of the Sorbet Compiler, but right now we don’t have
-any firm plans. We welcome you to read the source and try to compile it
-yourself if you’re curious.</p></li>
-<li><p>While we are using the Sorbet Compiler at Stripe in production, it should NOT
-be considered “production ready.” We won’t prioritize fixing issues that don’t
-also affect Stripe. It is an internal experiment developed in the open.</p></li>
+<li><p>If you’re an existing Sorbet user, nothing changes for you! You can continue to use Sorbet to typecheck your Ruby codebases exactly as you do now. While the Sorbet Compiler code lives in the Sorbet repo, it doesn’t change anything about Sorbet, nor is it required to use Sorbet.</p></li>
+<li><p>There are no Sorbet Compiler binary releases. If it works out, we may some day publish pre-built binaries of the Sorbet Compiler, but right now we don’t have any firm plans. We welcome you to read the source and try to compile it yourself if you’re curious.</p></li>
+<li><p>While we are using the Sorbet Compiler at Stripe in production, it should NOT be considered “production ready.” We won’t prioritize fixing issues that don’t also affect Stripe. It is an internal experiment developed in the open.</p></li>
 </ul>
-<p>With those disclaimers out of the way, let’s dive into the frequently asked
-questions.</p>
+<p>With those disclaimers out of the way, let’s dive into the frequently asked questions.</p>
 <h2><a class="anchor" aria-hidden="true" id="whats-your-goal-in-open-sourcing-it-now"></a><a href="#whats-your-goal-in-open-sourcing-it-now" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s your goal in open sourcing it now?</h2>
 <p>We have a few goals. The first handful are entirely pragmatic:</p>
 <ul>
-<li>Even though the Sorbet Compiler’s repo was private, we had already shared it
-with a handful of companies and individuals, which was toilsome.</li>
-<li>Sometimes improving the compiler requires improving Sorbet. Such changes will
-only require one PR in one repo now.</li>
-<li>The Sorbet Compiler depends on Sorbet’s internal data structures. Now that the
-two repos are one, they can share internal data structures directly.</li>
-<li>Much of the Bazel build and test infrastructure in the two repos was
-duplicated, but can now be shared.</li>
+<li>Even though the Sorbet Compiler’s repo was private, we had already shared it with a handful of companies and individuals, which was toilsome.</li>
+<li>Sometimes improving the compiler requires improving Sorbet. Such changes will only require one PR in one repo now.</li>
+<li>The Sorbet Compiler depends on Sorbet’s internal data structures. Now that the two repos are one, they can share internal data structures directly.</li>
+<li>Much of the Bazel build and test infrastructure in the two repos was duplicated, but can now be shared.</li>
 </ul>
-<p>Apart from these pragmatic considerations, we’re interested in gathering
-feedback from the larger community on our approach. Feel free to read the source
-code and <a href="https://sorbet.org/en/community">reach out to us</a> with what you have
-to say.</p>
+<p>Apart from these pragmatic considerations, we’re interested in gathering feedback from the larger community on our approach. Feel free to read the source code and <a href="https://sorbet.org/en/community">reach out to us</a> with what you have to say.</p>
 <h2><a class="anchor" aria-hidden="true" id="why-does-stripe-care-about-ruby-performance"></a><a href="#why-does-stripe-care-about-ruby-performance" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why does Stripe care about Ruby performance?</h2>
-<p>At Stripe, our primary product is an API. In an API,
-<a href="https://blog.nelhage.com/post/reflections-on-performance/">latency is a feature</a>
-just as much as what the API lets you do. Stripe is a users-first company, and
-those users have asked for lower latency.</p>
+<p>At Stripe, our primary product is an API. In an API, <a href="https://blog.nelhage.com/post/reflections-on-performance/">latency is a feature</a> just as much as what the API lets you do. Stripe is a users-first company, and those users have asked for lower latency.</p>
 <p>Improving latency involves doing one of two things:</p>
 <ul>
 <li>Spending less time doing IO (e.g. network and storage), or</li>
 <li>Spending less time in compute (i.e., Ruby)</li>
 </ul>
-<p>Other teams at Stripe are tackling latency from the IO angle. In parallel, we’ve
-been working on building a &quot;<a href="https://youtu.be/sT6VJkkhy0o?t=454">big hammer</a>&quot;
-for improving Ruby compute performance.</p>
+<p>Other teams at Stripe are tackling latency from the IO angle. In parallel, we’ve been working on building a &quot;<a href="https://youtu.be/sT6VJkkhy0o?t=454">big hammer</a>&quot; for improving Ruby compute performance.</p>
 <h2><a class="anchor" aria-hidden="true" id="why-build-a-compiler"></a><a href="#why-build-a-compiler" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why build a compiler…?</h2>
 <p>This is our most popular question, and it comes in a bunch of different forms:</p>
 <ul>
@@ -127,145 +100,44 @@ for improving Ruby compute performance.</p>
 <p>You really want to know why, so here it is!</p>
 <h3><a class="anchor" aria-hidden="true" id="why-build-an-ahead-of-time-compiler-instead-of-a-jit-compiler"></a><a href="#why-build-an-ahead-of-time-compiler-instead-of-a-jit-compiler" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why build an ahead-of-time compiler, instead of a JIT compiler?</h3>
 <p>There are a handful of reasons, which we’ll address one by one.</p>
-<p>First, instead of having to ship an entire language runtime to production, with
-an ahead-of-time compiler the compilation happens once in CI. We already ship
-various generated code and data files in our deploy archives—compiled artifacts
-fit seamlessly with our existing build pipelines. This also limits the blast
-radius if something were to go wrong: if we need to “turn off” the compiler, we
-just stop loading the compiled archives and let the Ruby VM run the original
-source.</p>
-<p>Another point: ahead-of-time compilers are conceptually simpler. When we kicked
-off the Sorbet Compiler project, we estimated that it would take us less time to
-build an ahead-of-time compiler delivering real-world performance improvements
-than it would take to build a JIT that fulfills both our latency goals and
-Stripe security requirements. As we’ll discuss below, our chosen implementation
-strategy makes ahead-of-time compilation simpler and easier to roll out
-gradually.</p>
-<p>And finally, ahead-of-time compilation lets the project exploit type information
-present statically, after Sorbet has type checked a project. While a JIT
-observes the types at runtime to inform how it compiles the code, Sorbet already
-has this information present (unless the code uses
-<a href="https://sorbet.org/docs/untyped"><code>T.untyped</code></a>). Of course, this is a classic
-tradeoff between a compiler and a JIT: sometimes the runtime type information is
-actually better, because JITs can see through interfaces and polymorphism. We
-don’t claim to have solved this tradeoff in the Sorbet Compiler, but Stripe’s
-Ruby codebase is extensively covered by Sorbet, and is thus uniquely positioned
-to make use of this static type information.</p>
+<p>First, instead of having to ship an entire language runtime to production, with an ahead-of-time compiler the compilation happens once in CI. We already ship various generated code and data files in our deploy archives—compiled artifacts fit seamlessly with our existing build pipelines. This also limits the blast radius if something were to go wrong: if we need to “turn off” the compiler, we just stop loading the compiled archives and let the Ruby VM run the original source.</p>
+<p>Another point: ahead-of-time compilers are conceptually simpler. When we kicked off the Sorbet Compiler project, we estimated that it would take us less time to build an ahead-of-time compiler delivering real-world performance improvements than it would take to build a JIT that fulfills both our latency goals and Stripe security requirements. As we’ll discuss below, our chosen implementation strategy makes ahead-of-time compilation simpler and easier to roll out gradually.</p>
+<p>And finally, ahead-of-time compilation lets the project exploit type information present statically, after Sorbet has type checked a project. While a JIT observes the types at runtime to inform how it compiles the code, Sorbet already has this information present (unless the code uses <a href="https://sorbet.org/docs/untyped"><code>T.untyped</code></a>). Of course, this is a classic tradeoff between a compiler and a JIT: sometimes the runtime type information is actually better, because JITs can see through interfaces and polymorphism. We don’t claim to have solved this tradeoff in the Sorbet Compiler, but Stripe’s Ruby codebase is extensively covered by Sorbet, and is thus uniquely positioned to make use of this static type information.</p>
 <h3><a class="anchor" aria-hidden="true" id="why-build-a-compiler-instead-of-using-jruby-or-truffleruby"></a><a href="#why-build-a-compiler-instead-of-using-jruby-or-truffleruby" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why build a compiler, instead of using JRuby or TruffleRuby?</h3>
-<p>Many people in the Ruby community have found success replacing the Ruby VM with
-either JRuby or TruffleRuby. JRuby makes it easy for Ruby to interoperate with
-other JVM languages, and the same goes for TruffleRuby with GraalVM. Both claim
-impressive performance improvements as well as enticing features like multicore,
-shared-memory concurrency.</p>
-<p>But nearly all of Stripe’s codebase is implemented in Ruby running on the
-default Ruby VM (YARV). Not only did we not need Java VM-level interoperability,
-choosing either alternative Ruby implementation would have made for a difficult
-migration path. Stripe relies heavily on gems with native extensions, and as you
-can imagine, a multi-million line Ruby codebase over time starts to depend on
-Ruby-the-implementation, not just Ruby-the-language.</p>
-<p>Another hurdle in switching to one of these implementations is that it has to be
-done at a service boundary. We could have migrated some of Stripe’s smaller
-services, but Stripe’s most latency-sensitive services are large, monolithic
-Ruby services without clear breaking points. To adopt JRuby or TruffleRuby in
-Stripe’s most important services, we’d have to be able to run all the code or
-none of the code (at least on a subset of traffic).</p>
-<p>Below we’ll talk below the implementation of the Sorbet Compiler, which solves
-for this situation in a couple of ways:</p>
+<p>Many people in the Ruby community have found success replacing the Ruby VM with either JRuby or TruffleRuby. JRuby makes it easy for Ruby to interoperate with other JVM languages, and the same goes for TruffleRuby with GraalVM. Both claim impressive performance improvements as well as enticing features like multicore, shared-memory concurrency.</p>
+<p>But nearly all of Stripe’s codebase is implemented in Ruby running on the default Ruby VM (YARV). Not only did we not need Java VM-level interoperability, choosing either alternative Ruby implementation would have made for a difficult migration path. Stripe relies heavily on gems with native extensions, and as you can imagine, a multi-million line Ruby codebase over time starts to depend on Ruby-the-implementation, not just Ruby-the-language.</p>
+<p>Another hurdle in switching to one of these implementations is that it has to be done at a service boundary. We could have migrated some of Stripe’s smaller services, but Stripe’s most latency-sensitive services are large, monolithic Ruby services without clear breaking points. To adopt JRuby or TruffleRuby in Stripe’s most important services, we’d have to be able to run all the code or none of the code (at least on a subset of traffic).</p>
+<p>Below we’ll talk below the implementation of the Sorbet Compiler, which solves for this situation in a couple of ways:</p>
 <ol>
-<li><p>The Sorbet compiler targets Ruby native extensions, which trivially
-interoperate with all other Ruby code. We don’t have to give up the Ruby VM
-(quirks and all), and can continue to use all our existing gems and native
-extensions.</p></li>
-<li><p>Because it compiles to native extensions, we can enable the compiler at the
-source file level instead of the service level. While we iron out the bugs in
-our compiler and adopt it in production, we can carve out arbitrarily large
-or small swaths of Stripe’s codebase to experiment with.</p></li>
+<li><p>The Sorbet compiler targets Ruby native extensions, which trivially interoperate with all other Ruby code. We don’t have to give up the Ruby VM (quirks and all), and can continue to use all our existing gems and native extensions.</p></li>
+<li><p>Because it compiles to native extensions, we can enable the compiler at the source file level instead of the service level. While we iron out the bugs in our compiler and adopt it in production, we can carve out arbitrarily large or small swaths of Stripe’s codebase to experiment with.</p></li>
 </ol>
 <h3><a class="anchor" aria-hidden="true" id="why-build-a-compiler-instead-of-making-improvements-to-the-ruby-vm"></a><a href="#why-build-a-compiler-instead-of-making-improvements-to-the-ruby-vm" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why build a compiler, instead of making improvements to the Ruby VM?</h3>
-<p>Another way of phrasing this question: are you going to upstream your changes to
-the Ruby VM?</p>
-<p>Ruby is fundamentally an interpreted language. Apart from maybe having a CI step
-to pre-download third-party gems, many Ruby projects do not have any sort of
-build step—the project’s Ruby source code is meant to run unprocessed by the
-Ruby VM.</p>
-<p>By contrast, our hypothesis was that we could deliver substantial performance
-improvements by paying the cost of a one-time compilation step. Stripe already
-has an extensive Ruby build pipeline, so this cost is minor.</p>
-<p>And as mentioned above, the Sorbet Compiler relies entirely on Sorbet.
-Specifically: it <strong>cannot</strong> work in a project that has not already adopted
-Sorbet. The Ruby maintainers have made it very clear that they do not want to
-force static typing on all users of the language, so there’s no place for the
-Sorbet Compiler upstream.</p>
+<p>Another way of phrasing this question: are you going to upstream your changes to the Ruby VM?</p>
+<p>Ruby is fundamentally an interpreted language. Apart from maybe having a CI step to pre-download third-party gems, many Ruby projects do not have any sort of build step—the project’s Ruby source code is meant to run unprocessed by the Ruby VM.</p>
+<p>By contrast, our hypothesis was that we could deliver substantial performance improvements by paying the cost of a one-time compilation step. Stripe already has an extensive Ruby build pipeline, so this cost is minor.</p>
+<p>And as mentioned above, the Sorbet Compiler relies entirely on Sorbet. Specifically: it <strong>cannot</strong> work in a project that has not already adopted Sorbet. The Ruby maintainers have made it very clear that they do not want to force static typing on all users of the language, so there’s no place for the Sorbet Compiler upstream.</p>
 <h3><a class="anchor" aria-hidden="true" id="why-build-a-compiler-for-ruby-instead-of-using-another-language"></a><a href="#why-build-a-compiler-for-ruby-instead-of-using-another-language" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why build a compiler for Ruby, instead of using another language?</h3>
 <p>Great question, and the answer is: at Stripe we’re doing both!</p>
-<p>A handful of teams at Stripe urgently need their code to run faster. Maybe a
-team’s highest priority is improving latency in a small service with clear
-boundaries. Or maybe a team is starting a greenfield project and anticipates
-performance bottlenecks. Teams at Stripe have the choice between Ruby, Java, and
-Go to build services in, depending on their needs.</p>
-<p>But Stripe’s existing Ruby codebase is many millions of lines, and implements
-Stripe’s most business-critical workloads. Even if we wanted to get rid of Ruby
-(remember: many people value the unique expressiveness of Ruby!), it would take
-a long time to rewrite all of Stripe’s Ruby code into another language.</p>
-<p>As teams rewrite or build smaller projects in other languages, our team has been
-working to tackle the elephant in the room: the millions of lines of existing
-Ruby code powering Stripe’s core products.</p>
+<p>A handful of teams at Stripe urgently need their code to run faster. Maybe a team’s highest priority is improving latency in a small service with clear boundaries. Or maybe a team is starting a greenfield project and anticipates performance bottlenecks. Teams at Stripe have the choice between Ruby, Java, and Go to build services in, depending on their needs.</p>
+<p>But Stripe’s existing Ruby codebase is many millions of lines, and implements Stripe’s most business-critical workloads. Even if we wanted to get rid of Ruby (remember: many people value the unique expressiveness of Ruby!), it would take a long time to rewrite all of Stripe’s Ruby code into another language.</p>
+<p>As teams rewrite or build smaller projects in other languages, our team has been working to tackle the elephant in the room: the millions of lines of existing Ruby code powering Stripe’s core products.</p>
 <h2><a class="anchor" aria-hidden="true" id="how-does-it-work"></a><a href="#how-does-it-work" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>How does it work?</h2>
-<p>The Sorbet Compiler is an ahead-of-time compiler for Ruby codebases that use
-Sorbet, powered by LLVM and the existing Ruby VM. The high level technique looks
-like this:</p>
+<p>The Sorbet Compiler is an ahead-of-time compiler for Ruby codebases that use Sorbet, powered by LLVM and the existing Ruby VM. The high level technique looks like this:</p>
 <p><img src="/img/sorbet-compiler-high-level.png" alt=""></p>
-<p>There are two phases: what happens in CI (to compile the code), and what happens
-in production (to run the code).</p>
-<p>When compiling the code, we start with normal <code>*.rb</code> source files, feeding them
-to Sorbet to be typechecked. The output of type checking is a custom
-type-annotated intermediate representation (IR), which the Sorbet Compiler
-consumes to generate LLVM IR. LLVM takes this IR and generates native shared
-object (<code>*.so</code>) files.</p>
-<p>These shared objects are actually valid Ruby native extensions, conforming to
-and using the same APIs as gems which include native extensions use. Thus, the
-compiled artifacts use the same object model and runtime representation that all
-other Ruby code uses!</p>
-<p>The Ruby VM exposes quite an extensive set of APIs to extension authors, which
-are sufficient to call back into the Ruby VM when a faster compilation strategy
-doesn’t exist for a particular language feature. We might write more in the
-future about how specifically we go from Sorbet’s typed IR to Ruby native
-extensions, but this means that there is very little the Sorbet Compiler <em>can’t</em>
-handle.</p>
-<p>The decision to compile or not compile a file is made by adding a
-<code># compiled: true</code> or <code># compiled: false</code> comment to the top of a Ruby source
-file. If a file is compiled, the compiled artifact is bundled into a service’s
-deploy archive like all other Ruby and data files.</p>
-<p>At runtime, a small support module monkeypatches <code>require_relative</code> to skip
-requiring the original <code>*.rb</code> file and instead require the newly compiled <code>*.so</code>
-file if possible. Since these compiled artifacts are Ruby native extensions,
-they can define classes, modules, and methods just the same as if a Ruby file
-had been required.</p>
-<p>Architected this way, the Sorbet Compiler turns Ruby into a language for writing
-Ruby native extensions! Instead of having to write C, C++, Rust, or some other
-compiled language to write native extensions, people can continue to write Ruby
-but gain the benefits of native compiled speeds.</p>
+<p>There are two phases: what happens in CI (to compile the code), and what happens in production (to run the code).</p>
+<p>When compiling the code, we start with normal <code>*.rb</code> source files, feeding them to Sorbet to be typechecked. The output of type checking is a custom type-annotated intermediate representation (IR), which the Sorbet Compiler consumes to generate LLVM IR. LLVM takes this IR and generates native shared object (<code>*.so</code>) files.</p>
+<p>These shared objects are actually valid Ruby native extensions, conforming to and using the same APIs as gems which include native extensions use. Thus, the compiled artifacts use the same object model and runtime representation that all other Ruby code uses!</p>
+<p>The Ruby VM exposes quite an extensive set of APIs to extension authors, which are sufficient to call back into the Ruby VM when a faster compilation strategy doesn’t exist for a particular language feature. We might write more in the future about how specifically we go from Sorbet’s typed IR to Ruby native extensions, but this means that there is very little the Sorbet Compiler <em>can’t</em> handle.</p>
+<p>The decision to compile or not compile a file is made by adding a <code># compiled: true</code> or <code># compiled: false</code> comment to the top of a Ruby source file. If a file is compiled, the compiled artifact is bundled into a service’s deploy archive like all other Ruby and data files.</p>
+<p>At runtime, a small support module monkeypatches <code>require_relative</code> to skip requiring the original <code>*.rb</code> file and instead require the newly compiled <code>*.so</code> file if possible. Since these compiled artifacts are Ruby native extensions, they can define classes, modules, and methods just the same as if a Ruby file had been required.</p>
+<p>Architected this way, the Sorbet Compiler turns Ruby into a language for writing Ruby native extensions! Instead of having to write C, C++, Rust, or some other compiled language to write native extensions, people can continue to write Ruby but gain the benefits of native compiled speeds.</p>
 <h2><a class="anchor" aria-hidden="true" id="how-fast-is-it"></a><a href="#how-fast-is-it" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>How fast is it?</h2>
-<p>We’re still very early on in the project, but we’re encouraged by our initial
-results. We’ve been running the Sorbet Compiler in production at Stripe for
-about a year, and as the tweet above mentioned, we’re finally starting to see
-the payoff, with varying results depending on the workload.</p>
-<p>That being said, we don’t have much more to share about performance right now.
-We measure ourselves not against synthetic benchmarks, but against real-world
-Stripe workloads, which are not public. We have some synthetic benchmarks
-checked into the source repository, but none of these are representative and
-mostly serve to help us debug and minimize performance problems we’ve seen in
-the wild.</p>
-<p>If you have a production workload you’d like to try the Sorbet Compiler on feel
-free to take the source code and get it running your benchmark (of course: a
-pre-requisite will be getting the benchmark to typecheck with Sorbet). Expect
-hiccups and maybe even show-stopping bugs, as we have not tested the compiler in
-environments that differ from Stripe’s internal production environment. If you
-do try things out, feel free to let us know!</p>
+<p>We’re still very early on in the project, but we’re encouraged by our initial results. We’ve been running the Sorbet Compiler in production at Stripe for about a year, and as the tweet above mentioned, we’re finally starting to see the payoff, with varying results depending on the workload.</p>
+<p>That being said, we don’t have much more to share about performance right now. We measure ourselves not against synthetic benchmarks, but against real-world Stripe workloads, which are not public. We have some synthetic benchmarks checked into the source repository, but none of these are representative and mostly serve to help us debug and minimize performance problems we’ve seen in the wild.</p>
+<p>If you have a production workload you’d like to try the Sorbet Compiler on feel free to take the source code and get it running your benchmark (of course: a pre-requisite will be getting the benchmark to typecheck with Sorbet). Expect hiccups and maybe even show-stopping bugs, as we have not tested the compiler in environments that differ from Stripe’s internal production environment. If you do try things out, feel free to let us know!</p>
 <h2><a class="anchor" aria-hidden="true" id="whats-next"></a><a href="#whats-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s next?</h2>
-<p>Over the next six months we’re going to be heads down focusing on making the
-Sorbet Compiler perform even better on real-world code at Stripe. We’re excited
-to share more with you once we’ve made more progress!</p>
+<p>Over the next six months we’re going to be heads down focusing on making the Sorbet Compiler perform even better on real-world code at Stripe. We’re excited to share more with you once we’ve made more progress!</p>
 <p>To get in touch with us, find us on our Sorbet Slack:</p>
 <p>→ <a href="https://sorbet.org/slack">https://sorbet.org/slack</a></p>
 <p>Thanks!<br>
