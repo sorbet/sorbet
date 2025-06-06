@@ -1080,4 +1080,51 @@ TEST_CASE_FIXTURE(ProtocolTest, "CompletionWithBadHierarchy") {
     REQUIRE(responses.front()->asResponse().result.has_value());
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "SignatureHelpInMagicBuildHash") {
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "xs = {\n"
+                                                    "  :example => '', \n"
+                                                    "}\n"
+                                                    "f = T.let(->(){}, T.proc.params(x: Integer).void)\n"
+                                                    "f.()")),
+                           {{"foo.rb", 5, "Not enough arguments provided"}});
+
+    {
+        // Trigger signatureHelp right after the comma in the hash literal. This will resolve to <Magic>.<build-hash>,
+        // which we don't want to trigger any help for.
+        auto responses = send(*signatureHelp("foo.rb", 2, 17));
+
+        REQUIRE_EQ(1, responses.size());
+        REQUIRE(responses.front()->isResponse());
+        auto &response = responses.front()->asResponse();
+        REQUIRE(response.result.has_value());
+        REQUIRE_EQ(response.requestMethod, LSPMethod::TextDocumentSignatureHelp);
+        auto *help = std::get_if<variant<JSONNullObject, unique_ptr<SignatureHelp>>>(&response.result.value());
+        REQUIRE_NE(help, nullptr);
+        auto *sigHelp = std::get_if<unique_ptr<SignatureHelp>>(help);
+        REQUIRE_NE(sigHelp, nullptr);
+        REQUIRE_NE(*sigHelp, nullptr);
+        REQUIRE((*sigHelp)->signatures.empty());
+    }
+
+    {
+        // Trigger signatureHelp in the middle of the parens of `f.()` to ensure that we do get signature help.
+        auto responses = send(*signatureHelp("foo.rb", 5, 3));
+
+        REQUIRE_EQ(1, responses.size());
+        REQUIRE(responses.front()->isResponse());
+        auto &response = responses.front()->asResponse();
+        REQUIRE(response.result.has_value());
+        REQUIRE_EQ(response.requestMethod, LSPMethod::TextDocumentSignatureHelp);
+        auto *help = std::get_if<variant<JSONNullObject, unique_ptr<SignatureHelp>>>(&response.result.value());
+        REQUIRE_NE(help, nullptr);
+        auto *sigHelp = std::get_if<unique_ptr<SignatureHelp>>(help);
+        REQUIRE_NE(sigHelp, nullptr);
+        REQUIRE_NE(*sigHelp, nullptr);
+        REQUIRE_EQ(1, (*sigHelp)->signatures.size());
+    }
+}
+
 } // namespace sorbet::test::lsp
