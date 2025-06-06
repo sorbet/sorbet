@@ -15,19 +15,19 @@ A.test()
 
 A.test(a: 10, arg: ar, message: "message")
 #                  ^^  error: Method `ar` does not exist
-#                    ^ completion: arg: (keyword argument), argument: (keyword argument), arg, ...
+#                    ^ completion: argument: (keyword argument), arg, ...
 
 A.test(a: 10, ar argument: 20)
 #             ^^  error: Method `ar` does not exist
 #             ^^  error: Unrecognized keyword argument `ar`
 #             ^^  error: positional arg "ar" after keyword arg
-#               ^ completion: arg: (keyword argument), argument: (keyword argument), arg, ...
+#               ^ completion: arg: (keyword argument), arg, ...
 
 A.test(a: 10, ar, argument: 20)
 #           ^     error: unexpected token ","
 #             ^^  error: Method `ar` does not exist
 #             ^^  error: Unrecognized keyword argument `ar`
-#               ^ completion: arg: (keyword argument), argument: (keyword argument), arg, ...
+#               ^ completion: arg: (keyword argument), arg, ...
 
 begin
   A.
