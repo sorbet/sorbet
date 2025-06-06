@@ -46,15 +46,20 @@ Please refer to our [website style guide](website/style-guide.md).
 
 ## ... a bug fix, new feature, or refactor of Sorbet itself
 
-We are **very particular** about changes to Sorbet itself.
+We are **very particular** about changes to Sorbet itself. Sorbet itself is something that tons of people use and love every day, so when we change it we want to make sure to preserve the good parts and play to Sorbet's strengths.
 
 **Introducing yourself** and your intention to change Sorbet is the best way to get started. You can always find us in in the [#internals](https://sorbet-ruby.slack.com/archives/CFT8Y4909) channel of the [Sorbet Slack](https://sorbet.org/slack).
 
 It puts us in an awkward position when the first time we hear from you is after you've opened a PR with a few hundred or few thousand lines of new code written in a vacuum, and but the PR stems from a fundamental misunderstanding that requires going back to the drawing board!
 
-We love getting to chat with people looking to make changes to Sorbet, and the eventual rate of success is much higher when we can help start people down the right direction.
+We love getting to chat with people looking to change Sorbet, because your enthusiasm for making Sorbet better energizes us as well! Successful contributions happen tend to come when we've helped start people down the right direction. Usually, this means that we chat briefly, with a goal of:
 
-Please, please, please **introduce yourself** before making large changes!
+- Agreeing on a definition of the problem (usually an issue) and motivation
+- Having a discussion about the solution space and potential alternatives
+- Double-checking implementation considerations that preclude otherwise-good solutions
+- Estimating difficulty and other nuance in the change itself
+
+Please, please, please **introduce yourself** before making large changes, so we can start these kinds of conversations!
 
 Asking on Slack is typically better than commenting on old issues, because it can be hard to keep up with discussions on GitHub issues (there are so many, and people sometimes get into lengthy back-and-forth's which drown out productive discussions). You're welcome to try asking on the GitHub issue first, but consider switching to Slack if you don't get a response within a few days.
 
