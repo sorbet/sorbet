@@ -1204,9 +1204,9 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
         // TODO: for a prefix of just "@", we should provide class variables
         // along with instance variables.
         auto kind = ast::UnresolvedIdent::Kind::Local;
-        if (params.prefix.size() >= 2 && absl::StartsWith(params.prefix, "@@")) {
+        if (absl::StartsWith(params.prefix, "@@")) {
             kind = ast::UnresolvedIdent::Kind::Class;
-        } else if (params.prefix.size() >= 1 && absl::StartsWith(params.prefix, "@")) {
+        } else if (absl::StartsWith(params.prefix, "@")) {
             kind = ast::UnresolvedIdent::Kind::Instance;
         }
 
