@@ -15,7 +15,7 @@ module Errors
   class ParseError3; end
 
   #: [T
-  # ^^^ error: Failed to parse RBS type parameters (expected a token `tUIDENT`)
+  # ^^^ error: Failed to parse RBS type parameters (expected ',' or ']' after type parameter, got pEOF)
   class ParseError4; end
 
   #: [unchecked T]

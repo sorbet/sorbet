@@ -26,7 +26,7 @@ class AttrsMultiline
   #| P1,
   #|  P2
   #| -> void
-  #  ^^ error: Failed to parse RBS type (expected a token `tUIDENT`)
+  #  ^^ error: Failed to parse RBS type (expected ',' or ']' after type parameter, got pARROW)
   attr_reader :parse_error3 # error: The method `parse_error3` does not have a `sig`
 
   #:
