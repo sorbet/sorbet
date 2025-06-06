@@ -2,8 +2,6 @@
 
 Thanks for taking an interest in improving Sorbet!
 
-**Table of Contents**
-
 - [I want to contribute...](#i-want-to-contribute)
   - [... an improvement to Sorbet's RBIs](#-an-improvement-to-sorbets-rbis)
   - [... a change to the sorbet.org docs website](#-a-change-to-the-sorbetorg-docs-website)
