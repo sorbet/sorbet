@@ -11,12 +11,12 @@
 #include "core/lsp/QueryResponse.h"
 #include "core/source_generator/source_generator.h"
 #include "main/lsp/FieldFinder.h"
+#include "main/lsp/KwargsFinder.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/NextMethodFinder.h"
 #include "main/lsp/json_types.h"
-#include "rapidjson/writer.h"
 
 using namespace std;
 
@@ -1022,9 +1022,14 @@ MethodResults computeDedupedMethods(const core::GlobalState &gs, const core::Dis
     return result;
 }
 
-core::MethodRef findEnclosingSend(const core::GlobalState &gs,
-                                  absl::Span<unique_ptr<core::lsp::QueryResponse>> responses) {
-    core::MethodRef result;
+struct EnclosingSend {
+    core::LocOffsets funLoc;
+    core::MethodRef method;
+};
+
+EnclosingSend findEnclosingSend(const core::GlobalState &gs,
+                                absl::Span<unique_ptr<core::lsp::QueryResponse>> responses) {
+    EnclosingSend result;
 
     for (auto &resp : responses) {
         // Walking past a method definition means we're out of the context of a send.
@@ -1033,7 +1038,8 @@ core::MethodRef findEnclosingSend(const core::GlobalState &gs,
         }
 
         if (auto *enclosingSend = resp->isSend()) {
-            result = enclosingSend->dispatchResult->main.method;
+            result.funLoc = enclosingSend->funLoc().offsets();
+            result.method = enclosingSend->dispatchResult->main.method;
             break;
         }
     }
@@ -1177,8 +1183,9 @@ CompletionTask::SearchParams CompletionTask::searchParamsForEmptyAssign(const co
         prefix,
         methodSearchParamsForEmptyAssign(gs, enclosingMethod),
         suggestKeywords,
-        enclosingMethod,   // locals
-        core::MethodRef{}, // do not suggest kwargs
+        enclosingMethod,    // locals
+        core::MethodRef{},  // do not suggest kwargs
+        core::LocOffsets{}, // no fun loc available
         core::lsp::ConstantResponse::Scopes{enclosingMethod.data(gs)->owner},
     };
 }
@@ -1228,12 +1235,28 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     if (params.kwargsMethod.exists()) {
         Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".determine_kwargs");
 
-        vector<core::NameRef> kwargs;
-        kwargs.reserve(params.kwargsMethod.data(gs)->arguments.size());
+        // Find the kwargs already passed into this send
+        vector<core::NameRef> existing;
+        if (params.funLoc.exists()) {
+            existing = KwargsFinder::findKwargs(gs, resolved, params.funLoc);
+        }
+
+        vector<core::NameRef> allKwargs;
+        allKwargs.reserve(params.kwargsMethod.data(gs)->arguments.size());
         for (auto &param : params.kwargsMethod.data(gs)->arguments) {
             if (param.flags.isKeyword && !param.flags.isRepeated && hasSimilarName(gs, param.name, params.prefix)) {
-                similarKwargs.emplace_back(param.name);
+                allKwargs.emplace_back(param.name);
             }
+        }
+
+        auto compareNames = +[](core::NameRef l, core::NameRef r) -> bool { return l.rawId() < r.rawId(); };
+
+        if (!existing.empty()) {
+            fast_sort(existing, compareNames);
+            fast_sort(allKwargs, compareNames);
+            absl::c_set_difference(allKwargs, existing, back_inserter(similarKwargs), compareNames);
+        } else {
+            similarKwargs = move(allKwargs);
         }
     }
 
@@ -1418,10 +1441,11 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             auto params = SearchParams{
                 queryLoc,
                 prefix,
-                nullopt,           // do not suggest methods
-                false,             // do not suggest keywords
-                core::MethodRef{}, // do not suggest locals
-                core::MethodRef{}, // do not suggest kwargs
+                nullopt,            // do not suggest methods
+                false,              // do not suggest keywords
+                core::MethodRef{},  // do not suggest locals
+                core::MethodRef{},  // do not suggest kwargs
+                core::LocOffsets{}, // no kwargs send loc available
                 move(scopes),
             };
             items = this->getCompletionItems(typechecker, params, resolved);
@@ -1438,12 +1462,13 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             // `enclosingMethod` existing indicates whether we want local variable completion results.
             auto enclosingMethod = wantLocalsAndKeywords ? sendResp->enclosingMethod : core::MethodRef{};
 
-            core::MethodRef kwargsMethod;
+            EnclosingSend kwargsSend;
             if (prefix.empty()) {
                 // If the location of the method doesn't include our query, we can assume that we're inside of the
                 // argument list.
                 if (!sendResp->funLocOffsets.contains(queryLoc.offsets())) {
-                    kwargsMethod = sendResp->dispatchResult->main.method;
+                    kwargsSend.funLoc = funLoc.offsets();
+                    kwargsSend.method = sendResp->dispatchResult->main.method;
                 }
             } else if (queryResponses.size() > 1) {
                 // We only want to enable kwarg completion if completion is requested at the end of the pattern.
@@ -1453,7 +1478,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                     // related to the query prefix. If there's a second query response that's also a send result, that
                     // means we're inside the args list of another send, and we can add in kwargs for that method to the
                     // list.
-                    kwargsMethod = findEnclosingSend(gs, absl::MakeSpan(queryResponses).subspan(1));
+                    kwargsSend = findEnclosingSend(gs, absl::MakeSpan(queryResponses).subspan(1));
                 }
             }
 
@@ -1467,7 +1492,8 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 },
                 suggestKeywords,
                 enclosingMethod,
-                kwargsMethod,
+                kwargsSend.method,
+                kwargsSend.funLoc,
                 core::lsp::ConstantResponse::Scopes{}, // constants don't make sense here
             };
             items = this->getCompletionItems(typechecker, params, resolved);
@@ -1502,7 +1528,8 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 methodSearchParams,
                 suggestKeywords,
                 enclosingMethod,
-                core::MethodRef{}, // do not suggest kwargs
+                core::MethodRef{},  // do not suggest kwargs
+                core::LocOffsets{}, // no kwargs send available
                 move(constantResp->scopes),
             };
         }
@@ -1532,7 +1559,8 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 methodSearchParamsForEmptyAssign(gs, identResp->enclosingMethod),
                 suggestKeywords,
                 identResp->enclosingMethod,
-                kwargsMethod,
+                kwargsMethod.method,
+                kwargsMethod.funLoc,
                 core::lsp::ConstantResponse::Scopes{identResp->enclosingMethod.data(gs)->owner},
             };
             items = this->getCompletionItems(typechecker, params, resolved);

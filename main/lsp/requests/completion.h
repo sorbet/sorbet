@@ -37,6 +37,9 @@ class CompletionTask final : public LSPRequestTask {
         // If not exists(), won't suggest kwargs for the method that this query occurs in the arg list of.
         core::MethodRef kwargsMethod;
 
+        // The location of the method in a send, if applicable.
+        core::LocOffsets funLoc;
+
         // If empty(), won't suggest constants.
         core::lsp::ConstantResponse::Scopes scopes;
     };
