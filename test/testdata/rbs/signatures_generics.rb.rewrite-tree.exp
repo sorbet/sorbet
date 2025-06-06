@@ -183,7 +183,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(g4)
 
   class <emptyTree>::<C G5><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member() do ||
+      {:lower => <emptyTree>::<C BasicObject>}
+    end
   end
+
+  g5 = <cast:let>(<emptyTree>::<C G5>.<syntheticSquareBrackets>(<emptyTree>::<C String>).new(), <todo sym>, <emptyTree>::<C G5>.<syntheticSquareBrackets>(<emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(g5)
 
   class <emptyTree>::<C G6><<C <todo sym>>> < (::<todo sym>)
     <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member()

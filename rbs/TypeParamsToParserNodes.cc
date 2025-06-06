@@ -45,20 +45,27 @@ parser::NodeVec TypeParamsToParserNode::typeParams(const rbs_node_list_t *rbsTyp
         auto typeSend =
             parser::MK::Send(loc, parser::MK::SorbetPrivateStatic(loc), core::Names::typeMember(), loc, move(args));
 
-        if (rbsTypeParam->default_type || rbsTypeParam->upper_bound) {
+        auto defaultType = rbsTypeParam->default_type;
+        auto upperBound = rbsTypeParam->upper_bound;
+        auto lowerBound = rbsTypeParam->lower_bound;
+
+        if (defaultType || upperBound || lowerBound) {
             auto typeTranslator = TypeToParserNode(ctx, vector<pair<core::LocOffsets, core::NameRef>>(), parser);
             auto pairs = parser::NodeVec();
 
-            if (rbsTypeParam->default_type) {
-                pairs.emplace_back(
-                    make_unique<parser::Pair>(loc, parser::MK::Symbol(loc, core::Names::fixed()),
-                                              typeTranslator.toParserNode(rbsTypeParam->default_type, declaration)));
+            if (defaultType) {
+                pairs.emplace_back(make_unique<parser::Pair>(loc, parser::MK::Symbol(loc, core::Names::fixed()),
+                                                             typeTranslator.toParserNode(defaultType, declaration)));
             }
 
-            if (rbsTypeParam->upper_bound) {
-                pairs.emplace_back(
-                    make_unique<parser::Pair>(loc, parser::MK::Symbol(loc, core::Names::upper()),
-                                              typeTranslator.toParserNode(rbsTypeParam->upper_bound, declaration)));
+            if (upperBound) {
+                pairs.emplace_back(make_unique<parser::Pair>(loc, parser::MK::Symbol(loc, core::Names::upper()),
+                                                             typeTranslator.toParserNode(upperBound, declaration)));
+            }
+
+            if (lowerBound) {
+                pairs.emplace_back(make_unique<parser::Pair>(loc, parser::MK::Symbol(loc, core::Names::lower()),
+                                                             typeTranslator.toParserNode(lowerBound, declaration)));
             }
 
             auto body = parser::MK::Hash(loc, false, move(pairs));

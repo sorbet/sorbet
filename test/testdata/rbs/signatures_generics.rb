@@ -15,7 +15,7 @@ module Errors
   class ParseError3; end
 
   #: [T
-  # ^^^ error: Failed to parse RBS type parameters (expected a token `tUIDENT`)
+  # ^^^ error: Failed to parse RBS type parameters (expected ',' or ']' after type parameter, got pEOF)
   class ParseError4; end
 
   #: [unchecked T]
@@ -108,10 +108,12 @@ g4 = G4.new #: G4[Integer]
 #                 ^^^^^^^ error-with-dupes: `Integer` is not a subtype of upper bound of type member `::G4::U`
 T.reveal_type(g4) # error: Revealed type: `G4[T.untyped]`
 
-# TODO: unsupported yet, working on it
-#: [U > String]
-#     ^ error: Failed to parse RBS type parameters (expected a token `tUIDENT`)
+#: [U > BasicObject]
 class G5; end
+
+g5 = G5.new #: G5[String]
+#                 ^^^^^^ error-with-dupes: `String` is not a supertype of lower bound of type member `::G5::U`
+T.reveal_type(g5) # error: Revealed type: `G5[T.untyped]`
 
 #: [U]
 class G6; end
