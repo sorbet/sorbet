@@ -161,7 +161,7 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
             vector<DiagnosticTag> tags;
             tags.push_back(DiagnosticTag::Deprecated);
             diagnostic->tags = move(tags);
-            diagnostic->severity = DiagnosticSeverity::Warning;
+            diagnostic->severity = DiagnosticSeverity::Hint;
         }
         if (error->what == sorbet::core::errors::Infer::UntypedValueInformation) {
             diagnostic->severity = DiagnosticSeverity::Information;

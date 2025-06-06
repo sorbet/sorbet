@@ -254,7 +254,7 @@ const UnorderedMap<
         {"untyped", UntypedAssertion::make},
         {"error", ErrorAssertion::make},
         {"error-with-dupes", ErrorAssertion::make},
-        {"warning", WarningAssertion::make},
+        {"hint", HintAssertion::make},
         {"usage", UsageAssertion::make},
         {"import", ImportAssertion::make},
         {"importusage", ImportUsageAssertion::make},
@@ -491,10 +491,10 @@ shared_ptr<ErrorAssertion> ErrorAssertion::make(string_view filename, unique_ptr
                                        assertionType == "error-with-dupes");
 }
 
-shared_ptr<WarningAssertion> WarningAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+shared_ptr<HintAssertion> HintAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                     string_view assertionContents, string_view assertionType) {
-    return make_shared<WarningAssertion>(filename, range, assertionLine, assertionContents,
-                                         assertionType == "warning-with-dupes");
+    return make_shared<HintAssertion>(filename, range, assertionLine, assertionContents,
+                                         assertionType == "hint-with-dupes");
 }
 
 string ErrorAssertion::toString() const {
@@ -514,33 +514,33 @@ bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine,
     return true;
 }
 
-WarningAssertion::WarningAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                   string_view message, bool matchesDuplicateWarnings)
+HintAssertion::HintAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                   string_view message, bool matchesDuplicateHints)
     : RangeAssertion(filename, range, assertionLine), message(message),
-      matchesDuplicateErrors(matchesDuplicateWarnings) {}
+      matchesDuplicateErrors(matchesDuplicateHints) {}
 
-string WarningAssertion::toString() const {
-    return fmt::format("{}: {}", (matchesDuplicateErrors ? "warning-with-dupes" : "warning"), message);
+string HintAssertion::toString() const {
+    return fmt::format("{}: {}", (matchesDuplicateErrors ? "hint-with-dupes" : "hint"), message);
 }
 
-bool WarningAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
-    // The warning message must contain `message`.
+bool HintAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
+    // The hint message must contain `message`.
     if (diagnostic.message.find(message) == string::npos) {
         ADD_FAIL_CHECK_AT(filename.c_str(), range->start->line + 1,
-                          fmt::format("{}Expected warning of form:\n{}\nFound warning:\n{}", errorPrefix,
+                          fmt::format("{}Expected hint of form:\n{}\nFound hint:\n{}", errorPrefix,
                                       prettyPrintRangeComment(sourceLine, *range, toString()),
                                       prettyPrintRangeComment(sourceLine, *diagnostic.range,
-                                                              fmt::format("warning: {}", diagnostic.message))));
+                                                              fmt::format("hint: {}", diagnostic.message))));
         return false;
     }
     return true;
 }
 
-bool WarningAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>> &files,
-                                vector<shared_ptr<WarningAssertion>> warningAssertions,
+bool HintAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>> &files,
+                                vector<shared_ptr<HintAssertion>> hintAssertions,
                                 map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
-                                string warningPrefix) {
-    return checkAllInner<WarningAssertion>(files, warningAssertions, filenamesAndDiagnostics, warningPrefix);
+                                string hintPrefix) {
+    return checkAllInner<HintAssertion>(files, hintAssertions, filenamesAndDiagnostics, hintPrefix);
 }
 
 UntypedAssertion::UntypedAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
