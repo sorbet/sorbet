@@ -4,8 +4,7 @@ title: Types and documentation on Hover
 sidebar_label: Hover
 ---
 
-Sorbet can show the types and documentation for parts of the program via the LSP
-Hover feature.
+Sorbet can show the types and documentation for parts of the program via the LSP Hover feature.
 
 <img src="/img/lsp/hover.png" style="max-width: 346px" />
 
@@ -21,47 +20,30 @@ The key features:
 
 - Markdown support (conditional on language client)
 
-  Consult the docs for your language client to ensure whether it requests Hover
-  results in Markdown or plain text. Some terminal-based clients request plain
-  text.
+  Consult the docs for your language client to ensure whether it requests Hover results in Markdown or plain text. Some terminal-based clients request plain text.
 
-  (Sorbet surfaces comment content unchanged, which may or may not use Markdown
-  syntax. It only wraps types in Markdown fenced code blocks if the client
-  supports it.)
+  (Sorbet surfaces comment content unchanged, which may or may not use Markdown syntax. It only wraps types in Markdown fenced code blocks if the client supports it.)
 
 ## Troubleshooting
 
 ### VS Code shows "Loading..."
 
-Sorbet will only show Hover results when it is in the `Idle` or
-`Typechecking in background...` states.
+Sorbet will only show Hover results when it is in the `Idle` or `Typechecking in background...` states.
 
-Read about all of Sorbet's [server statuses](server-status.md) for more
-information on these states.
+Read about all of Sorbet's [server statuses](server-status.md) for more information on these states.
 
-If Sorbet is in the Idle state and hovering still shows `Loading...`, that
-usually suggests a bug in Sorbet. Double check whether the server process
-crashed, or whether Sorbet is using excessive CPU cycles (Sorbet should consume
-virtually no CPU cycles when Idle).
+If Sorbet is in the Idle state and hovering still shows `Loading...`, that usually suggests a bug in Sorbet. Double check whether the server process crashed, or whether Sorbet is using excessive CPU cycles (Sorbet should consume virtually no CPU cycles when Idle).
 
 ### No hover results
 
-Is the file `# typed: false` or `# typed: ignore`? Hover support is degraded in
-these files. Similarly, is the call site [untyped](untyped.md)? If so, consider
-[troubleshooting why](troubleshooting.md).
+Is the file `# typed: false` or `# typed: ignore`? Hover support is degraded in these files. Similarly, is the call site [untyped](untyped.md)? If so, consider [troubleshooting why](troubleshooting.md).
 
-See [Feature support by strictness level](lsp-typed-level.md) to learn what's
-expected.
+See [Feature support by strictness level](lsp-typed-level.md) to learn what's expected.
 
-If the file is `# typed: true`, the server is in the Idle status, and there are
-still no results, this could either be that there is nothing under the cursor
-(expected), or that Sorbet mistakenly thinks there's nothing under the cursor
-(unexpected, please file a bug).
+If the file is `# typed: true`, the server is in the Idle status, and there are still no results, this could either be that there is nothing under the cursor (expected), or that Sorbet mistakenly thinks there's nothing under the cursor (unexpected, please file a bug).
 
 ### Hover isn't showing documentation comments
 
-Double check that there isn't a blank line between the documentation comment and
-the definition.
+Double check that there isn't a blank line between the documentation comment and the definition.
 
-Otherwise, read [Documentation Comments](doc-comments.md) to confirm what the
-expected behavior is, and consider reporting a bug.
+Otherwise, read [Documentation Comments](doc-comments.md) to confirm what the expected behavior is, and consider reporting a bug.

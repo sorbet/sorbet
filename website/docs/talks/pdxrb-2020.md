@@ -12,6 +12,4 @@ sidebar_label: PDX.rb 2020
 
 ## Abstract
 
-Getty and Trevor discuss why and how Sorbet was built, including how specific
-choices and tradeoffs affected its design and adoption, their experiences in
-adopting, using, and open-sourcing Sorbet, and where Sorbet is going from here.
+Getty and Trevor discuss why and how Sorbet was built, including how specific choices and tradeoffs affected its design and adoption, their experiences in adopting, using, and open-sourcing Sorbet, and where Sorbet is going from here.
