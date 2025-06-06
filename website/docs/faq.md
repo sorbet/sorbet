@@ -695,3 +695,7 @@ There are also third-party tools that offer the ability to sort and filter
 Sorbet's errors, like [spoom].
 
 [spoom]: https://github.com/Shopify/spoom#errors-sorting-and-filtering
+
+## TODO: Contributing
+
+TODO(jez) Write this
