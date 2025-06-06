@@ -1,50 +1,146 @@
-We welcome contributions from the community. This doc describes the process to contribute patches and the general guidelines we expect contributors to follow.
+# Contributing to Sorbet
 
-# Communication
-* Before starting work on a major feature, please reach out to us via GitHub, Slack,
-  email, etc. We will make sure no one else is already working on it and ask you to open a
-  GitHub issue.
-* A "major feature" is defined as any change that is > 100 LOC altered (not including tests), or
-  changes any user-facing behavior. We will use the GitHub issue to discuss the feature and come to
-  agreement. This is to prevent your time being wasted, as well as ours.
-* Small patches and bug fixes don't need prior communication.
-* Some good tasks to get started with are [available in the issue tracker](https://github.com/sorbet/sorbet/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
+Thanks for taking an interest in improving Sorbet!
 
-# Release cadence
-* Currently we are targeting approximately quarterly official releases. We may change this based
-  on customer demand.
-* In general, master is assumed to be release candidate quality at all times for documented
-  features. For undocumented or clearly under development features, use caution or ask about
-  current status when running master. Stripe runs master in production, typically deploying every
-  week.
-* We currently provide binary packages available via [releases page](https://github.com/sorbet/sorbet/releases).
+**Table of Contents**
 
-# Writing Documentation
-Documentation improvements are very welcome. The source of [sorbet.org](https://sorbet.org) is located in website/ in the tree.
+- [I want to contribute...](#i-want-to-contribute)
+  - [... an improvement to Sorbet's RBIs](#-an-improvement-to-sorbets-rbis)
+  - [... a change to the sorbet.org docs website](#-a-change-to-the-sorbetorg-docs-website)
+  - [... a bug fix, new feature, or refactor of Sorbet itself](#-a-bug-fix-new-feature-or-refactor-of-sorbet-itself)
+- [Choosing what to work on](#choosing-what-to-work-on)
+  - [Good first issues](#good-first-issues)
+  - [Issues labeled `hard`](#issues-labeled-hard)
+  - [Changes to user-facing syntax and APIs](#changes-to-user-facing-syntax-and-apis)
+  - [Other kinds of changes](#other-kinds-of-changes)
+- [Testing](#testing)
+- [Review expectations](#review-expectations)
+- [Design Proposals: Scoping large features](#design-proposals-scoping-large-features)
+
+
+# I want to contribute...
+
+
+## ... an improvement to Sorbet's RBIs
+
+Great, thanks!
+
+This is by far the most common kind of external contribution to Sorbet, and is typically very low touch.
+
+Please read these sections of the Sorbet docs:
+
+→ [It looks like Sorbet's types for the stdlib are wrong](https://sorbet.org/docs/faq#it-looks-like-sorbets-types-for-the-stdlib-are-wrong)<br>
+→ [Versioning for standard library RBIs](https://sorbet.org/docs/rbi#versioning-for-standard-library-rbis)
+
+**Do I need to write tests?**
+
+No, but you can if you want to. All changes (RBI changes included) are tested by running a one-off build of Sorbet using the build produced from the PR against Stripe's massive Ruby codebase.
+
+If you want to write tests, find an example test file in `test/testdata/rbi/` and either add to it or create a new such file. See the [README](README.md#writing-tests) for how to write these tests.
+
+
+## ... a change to the sorbet.org docs website
+
+Awesome!
+
+Please refer to our [website style guide](website/style-guide.md).
+
+
+## ... a bug fix, new feature, or refactor of Sorbet itself
+
+We are **very particular** about changes to Sorbet itself.
+
+The best way to start changing Sorbet is to **introduce yourself** and your intention to make a change to Sorbet to the team in the [#internals](https://sorbet-ruby.slack.com/archives/CFT8Y4909) channel of the [Sorbet Slack](https://sorbet.org/slack). It puts us in an awkward position when the first time we hear from you is after you've opened a PR with a few hundred or few thousand lines of new code written in a vacuum.
+
+We love getting to chat with people looking to make changes to Sorbet, and the eventual rate of success is much higher when we can help start people down the right direction.
+
+Please, please, please **introduce yourself** before making large changes!
+
+Asking on Slack is typically better than commenting on old issues, because it can be hard to keep up with discussions on GitHub issues (there are so many, and people sometimes get into lengthy back-and-forth's which drown out productive discussions). You're welcome to try asking on the GitHub issue first, but consider switching to Slack if you don't get a response within a few days.
+
+
+# Choosing what to work on
+
+
+## Good first issues
+
+Issues labeled [`good first issue`](https://github.com/sorbet/sorbet/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) in the Sorbet issue tracker are the best way to start when you're new to Sorbet.
+
+Every one of these issues has been hand-curated by a member of the Sorbet team:
+
+- They're changes we definitely want fixed!
+- They're already "scoped" meaning that it's unlikely unknown blockers will come up in the course of implementing the feature.
+- They're bite-sized: it would take someone on the Sorbet team anywhere from a few hours to a few days to fully build the feature.
+
+If you [introduce yourself](#https://git.corp.stripe.com/gist/#-a-bug-fix-new-feature-or-refactor-of-sorbet-itself) and say you want to work on a `good first issue`, we'll usually say hi, offer help if you want it, and otherwise be eager to see what you come up with!
+
+
+## Issues labeled `hard`
+
+Please do not attempt issues labeled `hard`. Hard issues are not a "challenge" to step up to once you've become familiar enough with Sorbet. Rather, issues labeled hard track somewhat fundamentally hard issues that would require near-complete rewrites of parts or all of Sorbet.
+
+In rare cases, members of the Sorbet team might have hypotheses of possible ways to approach the problem, but merely validating the hypothesis or accurately describing the hypothesis well enough would amount to outright implementing the feature. That is: even in cases where we might think a hard issue is possible, it's _also_ hard to communicate the hardness in a satisfying way to an external contributor.
+
+In most cases, hard issues are suspected to never be fixed. Because of the expected return on investment in thinking about these issues, the Sorbet team nearly always prioritizes other, more achievable work.
+
+We track `hard` issues anyways, despite all of this, for two reasons:
+
+1.  To communicate that someone has at least recognized the problem, and possibly even thought about solutions. This allows members of the community to be aware of the context.
+
+2.  To remind ourselves of the existence of the problem, in case we ever revisit it.
+
+From time to time, [we do close `hard` issues](https://github.com/sorbet/sorbet/issues/?q=is%3Aissue%20state%3Aclosed%20label%3Ahard%20sort%3Aupdated-desc). In almost all of these cases, the issue was closed because someone on the Sorbet team had a spark of inspiration in passing which reframed the problem as an easy (or at least: tractable) one. If you think you have such an idea about a hard problem, feel free to reach out.
+
+
+## Changes to user-facing syntax and APIs
+
+Changes to user-facing syntax **always** require a [design proposal](#design-proposals-scoping-large-features). This includes changes to `sig` and associated builder methods, `T.let`, type syntax, `# typed:`, any `sorbet-runtime` API which is either directly exposed (e.g. `T::Types`, `T::Configuration`, etc.) or indirectly exposed (e.g., what's stored on runtime `Signature` objects).
+
+[See below](#design-proposals-scoping-large-features) for more.
+
+
+## Other kinds of changes
+
+Please [introduce yourself](#https://git.corp.stripe.com/gist/#-a-bug-fix-new-feature-or-refactor-of-sorbet-itself) and we'll be happy to help you figure out what the best next step would be.
+
+There are many kinds of changes that Sorbet sees, from tiny bug fixes, error message improvements, and variable name changes, to large new features and backwards-incompatible type system improvements—it's hard to give advice for all of them. If the kind of change you want to make doesn't align with any of the previous sections, please reach out.
+
+Some common next steps might be
+
+- The change is a change we definitely want, but it needs a [design proposal](#design-proposals-scoping-large-features) before work should begin.
+
+- The change has been attempted before, meaning that we can help avoid any pitfalls this time before you get started.
+
+- We suspect the change will introduce an onerous number of errors in existing Sorbet projects (even if the feature itself would have been good to implement in a vacuum). These changes can be hard to navigate, and can end with us opting to decline accepting an otherwise-good feature.
+
+- The change you're proposing is not a change we want, even if someone else implemented it on their own time. We may not want changes for any number of considerations: architectural, user experience, conflicts with future plans, etc. Please recognize that not all features are features we want.
+
+When it's unclear, ask 🙂
+
 
 # Testing
-* Our CI runs all tests with [UBSan](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) and [ASan](https://clang.llvm.org/docs/AddressSanitizer.html). You can run them locally by passing `--config=sanitize` when running tests.
-* We expect all assumptions made when writing code to be spelled explicitly via `ENFORCE(myAssumption);` statements.
-* Some characteristics of good tests:
-    * includes comments: what is being tested and why?
-    * be minimal, deterministic, stable (unaffected by irrelevant changes), easy to understand and review
-    * have minimal dependencies: a typechecker bug test should not depend on, e.g. the Ruby standard library
 
-# Submitting a PR
-* Create small PRs that are narrowly focused on addressing a single concern. We often receive PRs that are trying to fix several things at a time, but if only one fix is considered acceptable, nothing gets merged and both author's & review's time is wasted. Create more PRs to address different concerns and everyone will be happy.
-* Bug fixes should include regression tests -- in the same commit as the fix. If testing isn't feasible, the commit message should explain why.
-* New features and enhancements must be motivated by adding common usage as tests. Please reach out to the team on the `#internals` channel of the [sorbet-slack](https://sorbet.org/slack) before starting on new features.
-* Follow the Boy Scout Rule: "Always leave the code behind in a better state than you found it"
-* We will **not** merge any PR that is not passing tests.
-* Your PR description should have details on what the PR does. If it fixes an existing issue it should end with "Fixes #XXX".
-* When all of the tests are passing and all other conditions described herein are satisfied, a maintainer will be assigned to review and merge the PR.
-* We expect that once a PR is opened, it will be actively worked on until it is merged or closed. We reserve the right to close PRs that are not making progress (no changes for 7 days), or that include functionality the core team isn't aligned on supporting. PRs that are closed due to lack of activity can be reopened later. Closing stale PRs helps us to keep on top of all of the work currently in flight.
-* Please consider joining the [sorbet-slack](https://sorbet.org/slack).
+You will be asked to write tests (except for RBI and website changes). There is extensive documentation about how to write tests in the [README](README.md#writing-tests).
 
-# PR review policy for maintainers
-* We try to turn around reviews within one week, though sometimes we slip up. If you feel like your PR has gotten lost and it's been open for more than a week, please reach out on the `#internals` channel on the [sorbet-slack](https://sorbet.org/slack).
-* It is generally expected that at least a single maintainer should review every PR.
-* If there is a question on who should review a PR please discuss in Slack.
-* Anyone is welcome to review any PR that they want, whether they are a maintainer or not.
-* As PR's are merged, they are tested against Stripe internal codebase and are pushed in squashed form to GitHub.
-* Please **clean up the title and body** before merging. By default, our merge bot fills the squash merge title with the original title, and the commit body with every individual commit from the PR.
+CI will not run your tests until someone from the Sorbet team manually starts the tests on your build. You can run the tests locally, or ask in the [#internals](https://sorbet-ruby.slack.com/archives/CFT8Y4909) or [#buildkite-blocked](https://sorbet-ruby.slack.com/archives/CMYPHC6AJ) channels on the [Sorbet Slack](https://sorbet.org/slack) to have someone start the tests for your commits.
+
+For changes that we suspect might have introduce new, backwards-incompatible type errors on existing Sorbet projects, a member of the Sorbet team will run a one-off run of Sorbet over Stripe's codebase using the changes in your PR. You will not be able to see this test result—a member of the Sorbet team will summarize the results for you.
+
+
+# Review expectations
+
+Someone from the Sorbet team will be automatically assigned to review your change.
+
+For most changes, especially RBI changes, we review the change the same business day.
+
+For larger changes, we try to get around to reviewing the PR within one week.
+
+If you feel like your PR has gotten lost and it's been open for more than a week, please reach out on the [#internals](https://sorbet-ruby.slack.com/archives/CFT8Y4909) channel on the [Sorbet Slack](https://sorbet.org/slack).
+
+
+# Design Proposals: Scoping large features
+
+- [ ] @jez Write this section
+
+<!-- vim:tw=0
+-->
