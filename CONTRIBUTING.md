@@ -48,7 +48,9 @@ Please refer to our [website style guide](website/style-guide.md).
 
 We are **very particular** about changes to Sorbet itself.
 
-The best way to start changing Sorbet is to **introduce yourself** and your intention to make a change to Sorbet to the team in the [#internals](https://sorbet-ruby.slack.com/archives/CFT8Y4909) channel of the [Sorbet Slack](https://sorbet.org/slack). It puts us in an awkward position when the first time we hear from you is after you've opened a PR with a few hundred or few thousand lines of new code written in a vacuum.
+**Introducing yourself** and your intention to change Sorbet is the best way to get started. You can always find us in in the [#internals](https://sorbet-ruby.slack.com/archives/CFT8Y4909) channel of the [Sorbet Slack](https://sorbet.org/slack).
+
+It puts us in an awkward position when the first time we hear from you is after you've opened a PR with a few hundred or few thousand lines of new code written in a vacuum, and but the PR stems from a fundamental misunderstanding that requires going back to the drawing board!
 
 We love getting to chat with people looking to make changes to Sorbet, and the eventual rate of success is much higher when we can help start people down the right direction.
 
