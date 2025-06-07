@@ -872,7 +872,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     e = assert_raises {instance.foo}
     assert_equal("foo", e.message)
     e = assert_raises {instance.foo}
-    assert_match(/A previous invocation of #<UnboundMethod: /, e.message)
+    assert_match(/A previous invocation of \[\d+, :foo\] raised/, e.message)
   end
 
   it 'does not crash when two threads call the same wrapper' do
