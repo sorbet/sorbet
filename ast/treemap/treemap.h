@@ -192,8 +192,12 @@ template <> struct MapFunctions<TreeMapKind::ConstWalk> {
 };
 
 enum class QueryControl {
+    // Indicates that the traversal should continue.
     Continue,
+    // When returned from any transform hook, this causes the traversal to abort early and return.
     Done,
+    // When returned during a pre-transform hook, this causes the traversal to skip the current node, continuing
+    // processing in the parent.
     Skip,
 };
 
@@ -246,7 +250,6 @@ private:
     TreeMapper(FUNC &func) : func(func) {}
 
 #define CALL_PRE(member)                                                                                               \
-    bool _queryRunMap = true;                                                                                          \
     if constexpr (Funcs::template HAS_MEMBER_preTransform##member<FUNC>()) {                                           \
         if constexpr (Kind == TreeMapKind::Map) {                                                                      \
             v = Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, Funcs::pass(v));               \
@@ -257,10 +260,13 @@ private:
         } else if constexpr (Kind == TreeMapKind::Query) {                                                             \
             auto ret =                                                                                                 \
                 Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, cast_tree_nonnull<member>(v)); \
-            if (ret == QueryControl::Done) {                                                                           \
-                return QueryControl::Done;                                                                             \
-            } else if (ret == QueryControl::Skip) {                                                                    \
-                _queryRunMap = false;                                                                                  \
+            switch (ret) {                                                                                             \
+                case QueryControl::Continue:                                                                           \
+                    break;                                                                                             \
+                case QueryControl::Done:                                                                               \
+                    return QueryControl::Done;                                                                         \
+                case QueryControl::Skip:                                                                               \
+                    return QueryControl::Continue;                                                                     \
             }                                                                                                          \
         }                                                                                                              \
     }
@@ -281,8 +287,15 @@ private:
         }                                                                                                           \
     } else if constexpr (Kind == TreeMapKind::Query) {                                                              \
         if constexpr (Funcs::template HAS_MEMBER_postTransform##member<FUNC>()) {                                   \
-            return Funcs::template CALL_MEMBER_postTransform##member<FUNC>::call(func, ctx,                         \
-                                                                                 cast_tree_nonnull<member>(v));     \
+            auto ret = Funcs::template CALL_MEMBER_postTransform##member<FUNC>::call(func, ctx,                     \
+                                                                                     cast_tree_nonnull<member>(v)); \
+            switch (ret) {                                                                                          \
+                case QueryControl::Continue:                                                                        \
+                case QueryControl::Skip:                                                                            \
+                    break;                                                                                          \
+                case QueryControl::Done:                                                                            \
+                    return QueryControl::Done;                                                                      \
+            }                                                                                                       \
         }                                                                                                           \
         return QueryControl::Continue;                                                                              \
     }
@@ -295,11 +308,13 @@ private:
     } else if constexpr (Kind == TreeMapKind::ConstWalk) { \
         mapIt(Funcs::pass(tree), ctx);                     \
     } else if constexpr (Kind == TreeMapKind::Query) {     \
-        if (_queryRunMap) {                                \
-            auto ret = mapIt(Funcs::pass(tree), ctx);      \
-            if (ret == QueryControl::Done) {               \
+        auto ret = mapIt(Funcs::pass(tree), ctx);          \
+        switch (ret) {                                     \
+            case QueryControl::Continue:                   \
+            case QueryControl::Skip:                       \
+                break;                                     \
+            case QueryControl::Done:                       \
                 return QueryControl::Done;                 \
-            }                                              \
         }                                                  \
     }
 
