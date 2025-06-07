@@ -1,0 +1,8 @@
+test/cli/default-strictness-level/default-strictness-level.rb:4: Method `bar` does not exist on `Foo` https://srb.help/7003
+     4 |Foo.new.bar
+                ^^^
+  Got `Foo` originating from:
+    test/cli/default-strictness-level/default-strictness-level.rb:4:
+     4 |Foo.new.bar
+        ^^^^^^^
+Errors: 1
