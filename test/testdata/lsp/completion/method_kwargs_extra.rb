@@ -66,13 +66,23 @@ def other(message:, mes:)
   #               ^^^  error: Method `mes` does not exist
   #               ^^^  error: Unrecognized keyword argument `mes`
   #               ^^^  error: positional arg "mes" after keyword arg
-  #                  ^ completion: message: (keyword argument), mes, message, ...
+  #                  ^ completion: mes, message, ...
+
+  A.test(arg: 10, a message: "")
+  #               ^  error: Method `a` does not exist
+  #               ^  error: positional arg "a" after keyword arg
+  #                ^ completion: alias, and, argument: (keyword argument), message, ...
 
   A.test(arg: 10, mes, message: "")
   #               ^^^  error: Method `mes` does not exist
   #               ^^^  error: Unrecognized keyword argument `mes`
   #             ^      error: unexpected token ","
-  #                  ^ completion: message: (keyword argument), mes, message, ...
+  #                  ^ completion: mes, message, ...
+
+  A.test(arg: 10, a, message: "")
+  #               ^  error: Method `a` does not exist
+  #             ^    error: unexpected token ","
+  #                ^ completion: alias, and, argument: (keyword argument), message, ...
 end
 
 class B
@@ -86,7 +96,7 @@ class B
     # This would be nice to fix in the future, as `bar_arg:` is already
     # supplied.
     self.bar(bar_arg: foo_arg, &blk)
-    #                         ^ completion: bar_arg: (keyword argument), blk, foo_arg, ...
+    #                         ^ completion: blk, foo_arg, ...
   end
 
   def self.bar(bar_arg: nil, &blk)

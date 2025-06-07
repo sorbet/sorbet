@@ -38,7 +38,7 @@ vector<core::NameRef> KwargsFinder::findKwargs(const core::GlobalState &gs, cons
                                                core::LocOffsets funLoc) {
     core::Context ctx{gs, core::Symbols::root(), ast.file};
     SendTraversal traversal{funLoc};
-    ast::ConstShallowWalk::apply(ctx, traversal, ast.tree);
+    ast::ConstTreeWalk::apply(ctx, traversal, ast.tree);
     return move(traversal.kwargs);
 }
 
