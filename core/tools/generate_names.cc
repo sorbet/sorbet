@@ -311,6 +311,11 @@ NameDef names[] = {
     {"test"},
     {"setup"},
     {"teardown"},
+
+    {"assertNil", "assert_nil"},
+    {"assertNotNil", "assert_not_nil"},
+    {"refuteNil", "refute_nil"},
+
     // end DSL methods
 
     // The next two names are used as keys in SymbolInfo::members to store

@@ -3,6 +3,7 @@
 #include "ast/verifier/verifier.h"
 #include "common/typecase.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
+#include "rewriter/AssertNil.h"
 #include "rewriter/AttrReader.h"
 #include "rewriter/ClassNew.h"
 #include "rewriter/Cleanup.h"
@@ -189,6 +190,11 @@ public:
         }
 
         if (auto expr = TypeAssertion::run(ctx, send)) {
+            tree = std::move(expr);
+            return;
+        }
+
+        if (auto expr = AssertNil::run(ctx, send)) {
             tree = std::move(expr);
             return;
         }
