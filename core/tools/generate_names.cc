@@ -28,9 +28,9 @@ NameDef names[] = {
     {"initialize"},
     {"andAnd", "&&"},
     {"orOr", "||"},
-    {"orAsgn", "||="},
-    {"andAsgn", "&&="},
-    {"opAsgn", "op="},
+    {"orAsgn", "<||=>"},
+    {"andAsgn", "<&&=>"},
+    {"opAsgn", "<op=>"},
     {"toS", "to_s"},
     {"toA", "to_a"},
     {"toAry", "to_ary"},
@@ -43,7 +43,6 @@ NameDef names[] = {
     {"call"},
     {"bang", "!"},
     {"squareBrackets", "[]"},
-    {"squareBracketsEq", "[]="},
     {"unaryPlus", "+@"},
     {"unaryMinus", "-@"},
     {"plus", "+"},
@@ -605,6 +604,18 @@ void emit_name_header(ostream &out, NameDef &name) {
     out << '\n';
 }
 
+// TODO(jez) Make this more generic
+void emit_name_header_unique(ostream &out) {
+    out << "#ifndef NAME_squareBracketsEq" << '\n';
+    out << "#define NAME_squareBracketsEq" << '\n';
+    out << "    // \"[]=\"" << '\n';
+    out << "    static inline constexpr NameRef squareBracketsEq() {" << '\n';
+    out << "        return NameRef(NameRef::WellKnown{}, NameKind::UNIQUE, 1);" << '\n';
+    out << "    }" << '\n';
+    out << "#endif" << '\n';
+    out << '\n';
+}
+
 void emit_name_string(ostream &out, NameDef &name) {
     out << "const char *" << name.srcName << " = \"";
     out << absl::CEscape(name.val) << "\";" << '\n';
@@ -625,6 +636,9 @@ void emit_register(ostream &out) {
         out << "    ENFORCE(" << name.srcName << "_id." << (name.isConstant ? "constantIndex" : "utf8Index")
             << "() == " << name.id << "); /* " << name.srcName << "() */" << '\n';
     }
+    // out << "    NameRef squareBracketsEq_id = gs.freshNameUnique(UniqueNameKind::Setter, Names::squareBrackets(),
+    // 1);"
+    //     << '\n';
     out << '\n';
     out << "}" << '\n';
 }
@@ -661,6 +675,8 @@ int main(int argc, char **argv) {
                 emit_name_header(header, name);
             }
         }
+
+        emit_name_header_unique(header);
 
         header << "namespace Constants {" << '\n';
         for (auto &name : names) {
