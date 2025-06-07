@@ -49,6 +49,7 @@ struct ParsedSig {
         bool params = false;
         bool abstract = false;
         bool override_ = false;
+        bool deprecated_ = false;
         bool overridable = false;
         bool returns = false;
         bool void_ = false;

@@ -68,9 +68,21 @@ void reportMissingError(const string &filename, const T &assertion, string_view 
 
 void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine,
                            string_view errorPrefix) {
-    auto diagnosticMessage = (diagnostic.severity == DiagnosticSeverity::Information)
-                                 ? fmt::format("untyped: {}", diagnostic.message)
-                                 : fmt::format("error: {}", diagnostic.message);
+    std::string messageType;
+    if (diagnostic.severity == DiagnosticSeverity::Error) {
+        messageType = "error";
+    } else if (diagnostic.severity == DiagnosticSeverity::Warning) {
+        messageType = "warning";
+    } else if (diagnostic.severity == DiagnosticSeverity::Information) {
+        messageType = "untyped";
+    } else if (diagnostic.severity == DiagnosticSeverity::Hint) {
+        messageType = "hint";
+    } else {
+        messageType = "unknown";
+    }
+
+    std::string diagnosticMessage = fmt::format("{}: {}", messageType, diagnostic.message);
+
     ADD_FAIL_CHECK_AT(
         filename.c_str(), diagnostic.range->start->line + 1,
         fmt::format(
@@ -242,6 +254,7 @@ const UnorderedMap<
         {"untyped", UntypedAssertion::make},
         {"error", ErrorAssertion::make},
         {"error-with-dupes", ErrorAssertion::make},
+        {"hint", HintAssertion::make},
         {"usage", UsageAssertion::make},
         {"import", ImportAssertion::make},
         {"importusage", ImportUsageAssertion::make},
@@ -478,6 +491,12 @@ shared_ptr<ErrorAssertion> ErrorAssertion::make(string_view filename, unique_ptr
                                        assertionType == "error-with-dupes");
 }
 
+shared_ptr<HintAssertion> HintAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                    string_view assertionContents, string_view assertionType) {
+    return make_shared<HintAssertion>(filename, range, assertionLine, assertionContents,
+                                         assertionType == "hint-with-dupes");
+}
+
 string ErrorAssertion::toString() const {
     return fmt::format("{}: {}", (matchesDuplicateErrors ? "error-with-dupes" : "error"), message);
 }
@@ -493,6 +512,35 @@ bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine,
         return false;
     }
     return true;
+}
+
+HintAssertion::HintAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                   string_view message, bool matchesDuplicateHints)
+    : RangeAssertion(filename, range, assertionLine), message(message),
+      matchesDuplicateErrors(matchesDuplicateHints) {}
+
+string HintAssertion::toString() const {
+    return fmt::format("{}: {}", (matchesDuplicateErrors ? "hint-with-dupes" : "hint"), message);
+}
+
+bool HintAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
+    // The hint message must contain `message`.
+    if (diagnostic.message.find(message) == string::npos) {
+        ADD_FAIL_CHECK_AT(filename.c_str(), range->start->line + 1,
+                          fmt::format("{}Expected hint of form:\n{}\nFound hint:\n{}", errorPrefix,
+                                      prettyPrintRangeComment(sourceLine, *range, toString()),
+                                      prettyPrintRangeComment(sourceLine, *diagnostic.range,
+                                                              fmt::format("hint: {}", diagnostic.message))));
+        return false;
+    }
+    return true;
+}
+
+bool HintAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>> &files,
+                                vector<shared_ptr<HintAssertion>> hintAssertions,
+                                map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
+                                string hintPrefix) {
+    return checkAllInner<HintAssertion>(files, hintAssertions, filenamesAndDiagnostics, hintPrefix);
 }
 
 UntypedAssertion::UntypedAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
@@ -1226,7 +1274,7 @@ optional<bool> BooleanPropertyAssertion::getValue(string_view type,
 
 BooleanPropertyAssertion::BooleanPropertyAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                    bool value, string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value){};
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value) {};
 
 string BooleanPropertyAssertion::toString() const {
     return fmt::format("{}: {}", assertionType, value);
@@ -1257,7 +1305,7 @@ optional<string> StringPropertyAssertion::getValue(string_view type,
 
 StringPropertyAssertion::StringPropertyAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                  string value, string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value){};
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value) {};
 
 string StringPropertyAssertion::toString() const {
     return fmt::format("{}: {}", assertionType, value);
@@ -2386,7 +2434,7 @@ shared_ptr<StringPropertyAssertions> StringPropertyAssertions::make(string_view 
 
 StringPropertyAssertions::StringPropertyAssertions(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                    vector<string> values, string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values){};
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values) {};
 
 optional<vector<string>> StringPropertyAssertions::getValues(string_view type,
                                                              const vector<shared_ptr<RangeAssertion>> &assertions) {

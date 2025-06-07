@@ -483,6 +483,9 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 }
                 sig.seen.overridable = true;
                 break;
+            case core::Names::deprecated().rawId():
+                sig.seen.deprecated_ = true;
+                break;
             case core::Names::returns().rawId(): {
                 sig.seen.returns = true;
                 if (send->hasKwArgs()) {
