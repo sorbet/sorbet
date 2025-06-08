@@ -1,4 +1,4 @@
 # typed: true
 
 -> { rescue; }
-#    ^^^^^^ error: unexpected token "rescue"
+#    ^^^^^^ parser-error: unexpected token "rescue"

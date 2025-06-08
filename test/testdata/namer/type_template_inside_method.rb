@@ -6,7 +6,7 @@ module A
 
   sig {params(x: C1).returns(NilClass)}
   def f(x)
-    C2 = type_template # error: dynamic constant assignment
+    C2 = type_template # parser-error: dynamic constant assignment
     #    ^^^^^^^^^^^^^ error: Method `type_template` does not exist on `A`
     nil
   end
