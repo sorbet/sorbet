@@ -249,6 +249,15 @@ def method24(x)
   end
 end
 
+# Test prepending modules with signatures
+
+Integer.prepend(Module.new do
+  #: (Integer) -> void
+  def bar(x)
+    T.reveal_type(x) # error: Revealed type: `Integer`
+  end
+end)
+
 class UnusedTypeAnnotation
   class Inner
     def foo; end # error: The method `foo` does not have a `sig`
