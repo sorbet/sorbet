@@ -778,7 +778,7 @@ class Box; end
 Type aliases can be declared using a standalone comment:
 
 ```ruby
-#: int_or_string = Integer | String
+#: type int_or_string = Integer | String
 
 #: (int_or_string) -> void
 def foo(x); end
@@ -786,6 +786,14 @@ def foo(x); end
 foo(1) # no error
 foo("foo") # no error
 foo(nil) # error: Expected `T.any(Integer, String)` but found `NilClass` for argument `x`
+```
+
+Multiline syntax is also supported:
+
+```ruby
+#: type int_or_string =
+#|   Integer |
+#|   String
 ```
 
 ## Special behaviors

@@ -114,7 +114,7 @@ begin
 end while ARGV.first == "foo"
 
 module TypeAlias
-  #: foo = String
+  #: type foo = String
   #: self as foo
   T.reveal_type(self) # error: Revealed type: `String`
 end

@@ -5,24 +5,24 @@ module Errors
   #: A = Integer
   #  ^ error: Failed to parse RBS signature (expected a token `pARROW`)
 
-  #: e1 = ->
-  #       ^^ error: Failed to parse RBS type (unexpected token for simple type)
+  #: type e1 = ->
+  #            ^^ error: Failed to parse RBS type (unexpected token for simple type)
 
-  #: e2 = # error: Failed to parse RBS type (unexpected token for simple type)
+  #: type e2 = # error: Failed to parse RBS type (unexpected token for simple type)
 
-  #: e3 = 123
-  #       ^^^ error: RBS literal types are not supported
+  #: type e3 = 123
+  #            ^^^ error: RBS literal types are not supported
 
   #: -> void
   def foo
-    #: a = Integer
-  # ^^^^^^^^^^^^^^ error: Unexpected RBS assertion comment found in `method`
+    #: type a = Integer
+  # ^^^^^^^^^^^^^^^^^^^ error: Unexpected RBS assertion comment found in `method`
   end
 
   #: -> void
   def bar
-    #: a = Integer
-  # ^^^^^^^^^^^^^^ error: Unexpected RBS type alias comment
+    #: type a = Integer
+  # ^^^^^^^^^^^^^^^^^^^ error: Unexpected RBS type alias comment
     foo
   end
 
@@ -32,7 +32,7 @@ module Errors
 
   #: [Elem]
   module Generic
-    #: elem = Elem # error: Defining a `type_alias` to a generic `type_member` is not allowed
+    #: type elem = Elem # error: Defining a `type_alias` to a generic `type_member` is not allowed
 
     #: -> elem
     def foo
@@ -42,7 +42,7 @@ module Errors
 end
 
 module TypeAliasSimple
-  #: a = Integer
+  #: type a = Integer
 
   #: (a a) -> Integer
   def bar(a)
@@ -52,7 +52,7 @@ module TypeAliasSimple
 end
 
 module TypeAliasUnion
-  #: int_or_string = Integer | String
+  #: type int_or_string = Integer | String
 
   #: (int_or_string) -> void
   def self.foo(x); end
@@ -63,9 +63,9 @@ module TypeAliasUnion
 end
 
 module TypeAliasOfTypeAlias
-  #: a = Integer
+  #: type a = Integer
 
-  #: b = a
+  #: type b = a
 
   #: (a a, b b) -> void
   def bar(a, b)
@@ -75,7 +75,7 @@ module TypeAliasOfTypeAlias
 end
 
 module TypeAliasTuple
-  #: tuple = [
+  #: type tuple = [
   #|   Integer,
   #|   String,
   #|   Float,
@@ -94,7 +94,7 @@ module TypeAliasTuple
 end
 
 module TypeAliasSelf
-  #: a = self
+  #: type a = self
 
   #: -> a
   def foo
