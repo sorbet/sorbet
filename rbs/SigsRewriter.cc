@@ -20,9 +20,7 @@ parser::Node *signaturesTarget(parser::Node *node) {
     }
 
     if (auto send = parser::cast_node<parser::Send>(node)) {
-        if (parser::MK::isVisibilitySend(send)) {
-            return send->args[0].get();
-        } else if (parser::MK::isAttrAccessorSend(send)) {
+        if (parser::MK::isAttrAccessorSend(send) || parser::MK::isVisibilitySend(send)) {
             return node;
         }
     }
@@ -320,9 +318,16 @@ unique_ptr<parser::NodeVec> SigsRewriter::signaturesForNode(parser::Node *node) 
 
             signatures->emplace_back(move(sig));
         } else if (auto send = parser::cast_node<parser::Send>(node)) {
-            auto sig = signatureTranslator.translateAttrSignature(send, declaration, comments.annotations);
-
-            signatures->emplace_back(move(sig));
+            if (parser::MK::isVisibilitySend(send)) {
+                auto sig = signatureTranslator.translateMethodSignature(send->args[0].get(), declaration,
+                                                                        comments.annotations);
+                signatures->emplace_back(move(sig));
+            } else if (parser::MK::isAttrAccessorSend(send)) {
+                auto sig = signatureTranslator.translateAttrSignature(send, declaration, comments.annotations);
+                signatures->emplace_back(move(sig));
+            } else {
+                Exception::raise("Unimplemented node type: {}", node->nodeName());
+            }
         } else {
             Exception::raise("Unimplemented node type: {}", node->nodeName());
         }
@@ -561,6 +566,10 @@ unique_ptr<parser::Node> SigsRewriter::rewriteNode(unique_ptr<parser::Node> node
         },
         [&](parser::When *when) {
             when->body = rewriteBody(move(when->body));
+            result = move(node);
+        },
+        [&](parser::Send *send) {
+            send->args = rewriteNodes(move(send->args));
             result = move(node);
         },
         [&](parser::RBSPlaceholder *placeholder) {

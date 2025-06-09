@@ -619,7 +619,7 @@ void CommentsAssociator::walkNode(parser::Node *node) {
         },
         [&](parser::Send *send) {
             if (parser::MK::isVisibilitySend(send)) {
-                associateSignatureCommentsToNode(send->args[0].get());
+                associateSignatureCommentsToNode(send);
                 consumeCommentsInsideNode(node, "send");
             } else if (parser::MK::isAttrAccessorSend(send)) {
                 associateSignatureCommentsToNode(send);
