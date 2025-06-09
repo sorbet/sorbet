@@ -956,7 +956,6 @@ TEST_CASE("Condensation Graph - Four packages without deps") {
     core::GlobalState gs(errorQueue);
     makeDefaultPackagerGlobalState(gs, LAYERS_UTIL_LIB_APP);
 
-    // Enter a single package, and verify that we get out a condensation with two parallel layers.
     auto parsedFiles = enterPackages(gs, {{"lib/foo/a/__package.rb", makePackageRB("Lib::Foo::A", "layered", "lib")},
                                           {"lib/foo/b/__package.rb", makePackageRB("Lib::Foo::B", "layered", "lib")},
                                           {"lib/foo/c/__package.rb", makePackageRB("Lib::Foo::C", "layered", "lib")},
@@ -1001,7 +1000,6 @@ TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
     core::GlobalState gs(errorQueue);
     makeDefaultPackagerGlobalState(gs, LAYERS_UTIL_LIB_APP);
 
-    // Enter a single package, and verify that we get out a condensation with two parallel layers.
     auto parsedFiles = enterPackages(
         gs,
         {{"lib/foo/a/__package.rb", makePackageRB("Lib::Foo::A", "layered", "lib", {"Lib::Foo::B"}, {"Lib::Foo::B"})},

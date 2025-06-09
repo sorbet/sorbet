@@ -1819,7 +1819,7 @@ class ComputePackageSCCs {
     }
 
 public:
-    // NOTE: This function must be called every time a non-test import is added or removed from a package.
+    // NOTE: This function must be called every time an import is added or removed from a package.
     // It is relatively fast, so calling it on every __package.rb edit is an okay overapproximation for simplicity.
     static void run(core::GlobalState &gs) {
         Timer timeit(gs.tracer(), "packager::computeSCCs");
