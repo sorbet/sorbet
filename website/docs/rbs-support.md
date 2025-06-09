@@ -755,14 +755,23 @@ Box.new #: Box[String]
                ^^^^^^ error: `String` is not a subtype of upper bound of type member `::Box::E`
 ```
 
+Lower bounds can be specified using `>`:
+
+```ruby
+#: [E > Numeric]
+class Box; end
+
+Box.new #: Box[Object]
+Box.new #: Box[Integer]
+               ^^^^^^^ error: `Integer` is not a supertype of lower bound of type member `::Box::E`
+```
+
 Fixed bounds can be specified using `=`:
 
 ```ruby
 #: [E = Integer]
 class Box; end
 ```
-
-Note: the lower bound `>` syntax is not supported in RBS yet.
 
 ## Special behaviors
 
