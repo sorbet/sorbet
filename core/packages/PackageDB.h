@@ -80,7 +80,8 @@ public:
 
     bool allowRelaxedPackagerChecksFor(const MangledName mangledName) const;
 
-    // Overwrite the condensation graph for the current package set.
+    // Overwrite the condensation graph for the current package set. This method is only meant to be used from
+    // `ComputePackageSCCs::run`.
     //
     // WARNING: Modifying the contents of the package DB after this operation will cause the condensation to go out of
     // date.
