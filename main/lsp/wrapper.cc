@@ -17,6 +17,26 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 namespace {
+void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
+    if (!options.uniquelyDefinedBehavior) {
+        // Definitions in multiple locations interact poorly with autoloader this error is enforced
+        // in Stripe code.
+        gs.suppressErrorClass(sorbet::core::errors::Namer::MultipleBehaviorDefs.code);
+    }
+
+    if (!options.outOfOrderReferenceChecksEnabled) {
+        gs.suppressErrorClass(sorbet::core::errors::Resolver::OutOfOrderConstantAccess.code);
+    }
+
+    gs.requiresAncestorEnabled = options.requiresAncestorEnabled;
+    gs.ruby3KeywordArgs = options.ruby3KeywordArgs;
+    gs.typedSuper = options.typedSuper;
+    gs.suppressPayloadSuperclassRedefinitionFor = options.suppressPayloadSuperclassRedefinitionFor;
+    gs.parseWithPrism = options.parser == options::Parser::PRISM;
+
+    // Ensure LSP is enabled.
+    options.runLSP = true;
+}
 
 pair<unique_ptr<core::GlobalState>, unique_ptr<KeyValueStore>>
 createGlobalStateAndOtherObjects(string_view rootPath, options::Options &options, int numWorkerThreads,
@@ -25,8 +45,6 @@ createGlobalStateAndOtherObjects(string_view rootPath, options::Options &options
                                  shared_ptr<spdlog::logger> &typeErrorsConsoleOut) {
     options.rawInputDirNames.emplace_back(rootPath);
     options.threads = numWorkerThreads;
-    // Ensure LSP is enabled.
-    options.runLSP = true;
 
     // All of this stuff is ignored by LSP, but we need it to construct ErrorQueue/GlobalState.
     stderrColorSinkOut = make_shared<spdlog::sinks::ansicolor_stderr_sink_mt>();
@@ -36,8 +54,8 @@ createGlobalStateAndOtherObjects(string_view rootPath, options::Options &options
     auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*typeErrorsConsoleOut, *loggerOut));
 
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(loggerOut, options);
-    payload::createInitialGlobalState(*gs, options, kvstore);
-    pipeline::setGlobalStateOptions(*gs, options);
+    payload::createInitialGlobalState(gs, options, kvstore);
+    setRequiredLSPOptions(*gs, options);
     return make_pair(move(gs), OwnedKeyValueStore::abort(move(kvstore)));
 }
 
@@ -57,20 +75,20 @@ vector<unique_ptr<LSPMessage>> SingleThreadedLSPWrapper::getLSPResponsesFor(cons
     return getLSPResponsesFor(LSPMessage::fromClient(json));
 }
 
-void MultiThreadedLSPWrapper::send(unique_ptr<LSPMessage> message) {
+void MultiThreadedLSPWrapper::send(std::unique_ptr<LSPMessage> message) {
     input->write(move(message));
 }
 
-void MultiThreadedLSPWrapper::send(vector<unique_ptr<LSPMessage>> &messages) {
+void MultiThreadedLSPWrapper::send(std::vector<std::unique_ptr<LSPMessage>> &messages) {
     input->write(move(messages));
 }
 
-void MultiThreadedLSPWrapper::send(const string &json) {
+void MultiThreadedLSPWrapper::send(const std::string &json) {
     send(LSPMessage::fromClient(json));
 }
 
 LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> opts,
-                       shared_ptr<spdlog::logger> logger,
+                       std::shared_ptr<spdlog::logger> logger,
                        shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
                        shared_ptr<spdlog::logger> typeErrorsConsole, unique_ptr<KeyValueStore> kvstore,
                        bool disableFastPath)
@@ -108,10 +126,9 @@ MultiThreadedLSPWrapper::~MultiThreadedLSPWrapper() {
 
 unique_ptr<SingleThreadedLSPWrapper>
 SingleThreadedLSPWrapper::createWithGlobalState(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> options,
-                                                shared_ptr<spdlog::logger> logger, unique_ptr<KeyValueStore> kvstore,
-                                                bool disableFastPath) {
-    options->runLSP = true;
-    pipeline::setGlobalStateOptions(*gs, *options);
+                                                shared_ptr<spdlog::logger> logger,
+                                                std::unique_ptr<KeyValueStore> kvstore, bool disableFastPath) {
+    setRequiredLSPOptions(*gs, *options);
     // Note: To keep the constructor private, we need to construct with `new` and put it into a `unique_ptr` privately.
     // `make_unique` doesn't work because that method doesn't have access to the constructor.
     auto wrapper = new SingleThreadedLSPWrapper(move(gs), move(options), move(logger), nullptr, nullptr, move(kvstore),
