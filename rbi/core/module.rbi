@@ -390,7 +390,7 @@ class Module < Object
   sig do
     type_parameters(:U).params(
         blk: T.proc
-              .bind(T.untyped)
+              .bind(T.self_type)
               .params(m: T.untyped)
               .returns(T.type_parameter(:U))
     )
@@ -1211,7 +1211,7 @@ class Module < Object
   sig do
     type_parameters(:U).params(
         blk: T.proc
-              .bind(T.untyped)
+              .bind(T.self_type)
               .params(m: T.untyped)
               .returns(T.type_parameter(:U))
     )
