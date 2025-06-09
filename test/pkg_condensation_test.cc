@@ -1,7 +1,7 @@
 #include "doctest/doctest.h"
 
-#include "core/GlobalState.h"
 #include "core/ErrorQueue.h"
+#include "core/GlobalState.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "test/helpers/packages.h"
 
@@ -45,6 +45,48 @@ TEST_CASE("Condensation Graph - One package") {
         INFO("Test packages must come after application code in the traversal");
         CHECK(!traversal.sccs[0].isTest);
         CHECK(traversal.sccs[1].isTest);
+    }
+}
+
+TEST_CASE("Condensation Graph - Two packages") {
+    core::GlobalState gs(errorQueue);
+    test::PackageHelpers::makeDefaultPackagerGlobalState(gs, test::PackageHelpers::LAYERS_UTIL_LIB_APP);
+
+    auto parsedFiles = test::PackageHelpers::enterPackages(
+        gs, {{"lib/foo/a/__package.rb",
+              test::PackageHelpers::makePackageRB("Lib::Foo::A", "layered", "lib", {"Lib::Foo::B"})},
+             {"lib/foo/b/__package.rb", test::PackageHelpers::makePackageRB("Lib::Foo::B", "layered", "lib")}});
+
+    auto &condensation = gs.packageDB().condensation();
+    {
+        INFO("The condensation graph should contain two nodes for each package");
+        CHECK_EQ(4, condensation.nodes().size());
+    }
+
+    auto traversal = condensation.computeTraversal(gs);
+
+    {
+        INFO("The traversal should include three parallel layers, and four SCCs");
+        REQUIRE_EQ(3, traversal.parallel.size());
+        CHECK_EQ(4, traversal.sccs.size());
+    }
+
+    {
+        INFO("The first layer should be B's application code");
+        CHECK_EQ(1, absl::c_count_if(traversal.parallel[0], [](auto &scc) { return !scc.isTest; }));
+        CHECK_EQ(0, absl::c_count_if(traversal.parallel[0], [](auto &scc) { return scc.isTest; }));
+    }
+
+    {
+        INFO("The second layer should be A's application code and B's test");
+        CHECK_EQ(1, absl::c_count_if(traversal.parallel[1], [](auto &scc) { return !scc.isTest; }));
+        CHECK_EQ(1, absl::c_count_if(traversal.parallel[1], [](auto &scc) { return scc.isTest; }));
+    }
+
+    {
+        INFO("The third layer should be A's application code");
+        CHECK_EQ(0, absl::c_count_if(traversal.parallel[2], [](auto &scc) { return !scc.isTest; }));
+        CHECK_EQ(1, absl::c_count_if(traversal.parallel[2], [](auto &scc) { return scc.isTest; }));
     }
 }
 
