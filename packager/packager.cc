@@ -1691,8 +1691,8 @@ class ComputePackageSCCs {
 
     // DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
     // detecting SCCs.
-    void strongConnect(core::packages::MangledName pkgName, NodeInfo &infoAtEntry,
-                       core::packages::ImportType edgeType) {
+    template <core::packages::ImportType EdgeType>
+    void strongConnect(core::packages::MangledName pkgName, NodeInfo &infoAtEntry) {
         auto &packageDB = gs.packageDB();
         auto *pkgInfoPtr = packageDB.getPackageInfoNonConst(pkgName);
         if (!pkgInfoPtr) {
@@ -1709,15 +1709,17 @@ class ComputePackageSCCs {
 
         for (auto &i : pkgInfo.importedPackageNames) {
             // We want to consider all imports from test code, but only normal imports for application code.
-            if (i.type > edgeType) {
-                continue;
+            if constexpr (EdgeType == core::packages::ImportType::Normal) {
+                if (i.type != core::packages::ImportType::Normal) {
+                    continue;
+                }
             }
             // We need to be careful with this; it's not valid after a call to `strongConnect`,
             // because our reference might disappear from underneath us during that call.
             auto &importInfo = this->nodeMap[i.name.mangledName];
             if (importInfo.index == NodeInfo::UNVISITED) {
                 // This is a tree edge (ie. a forward edge that we haven't visited yet).
-                this->strongConnect(i.name.mangledName, importInfo, edgeType);
+                this->strongConnect<EdgeType>(i.name.mangledName, importInfo);
 
                 // Need to re-lookup for the reason above.
                 auto &importInfo = this->nodeMap[i.name.mangledName];
@@ -1752,7 +1754,7 @@ class ComputePackageSCCs {
             // top of the stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them
             // the same SCC ID.
             core::packages::MangledName poppedPkgName;
-            auto &node = this->condensation.pushNode(edgeType);
+            auto &node = this->condensation.pushNode(EdgeType);
             auto sccId = node.id;
 
             // Set the SCC ids for all of the members of the SCC
@@ -1763,22 +1765,16 @@ class ComputePackageSCCs {
                 this->nodeMap[poppedPkgName].onStack = false;
 
                 auto &poppedPkgInfo = PackageInfoImpl::from(*(packageDB.getPackageInfoNonConst(poppedPkgName)));
-                switch (edgeType) {
-                    case core::packages::ImportType::Normal: {
-                        poppedPkgInfo.sccID_ = sccId;
-                        break;
-                    }
+                if constexpr (EdgeType == core::packages::ImportType::Normal) {
+                    poppedPkgInfo.sccID_ = sccId;
+                } else if constexpr (EdgeType == core::packages::ImportType::Test) {
+                    poppedPkgInfo.testSccID_ = sccId;
 
-                    case core::packages::ImportType::Test: {
-                        poppedPkgInfo.testSccID_ = sccId;
-
-                        // Tests have an implicit dependency on their package's application code. Those scc ids must
-                        // exist at this point, as we've already traversed all packages once.
-                        auto appSccId = poppedPkgInfo.sccID_;
-                        ENFORCE(appSccId.has_value());
-                        node.imports.insert(*appSccId);
-                        break;
-                    }
+                    // Tests have an implicit dependency on their package's application code. Those scc ids must
+                    // exist at this point, as we've already traversed all packages once.
+                    auto appSccId = poppedPkgInfo.sccID_;
+                    ENFORCE(appSccId.has_value());
+                    node.imports.insert(*appSccId);
                 }
             } while (poppedPkgName != pkgName);
 
@@ -1787,7 +1783,15 @@ class ComputePackageSCCs {
             for (auto name : node.members) {
                 auto &member = PackageInfoImpl::from(*(packageDB.getPackageInfoNonConst(name)));
                 for (auto &i : member.importedPackageNames) {
-                    if (i.type > edgeType || !i.name.mangledName.exists()) {
+                    // We want to consider all imports from test code, but only normal imports for application code.
+                    if constexpr (EdgeType == core::packages::ImportType::Normal) {
+                        if (i.type != core::packages::ImportType::Normal) {
+                            continue;
+                        }
+                    }
+
+                    // The mangled name won't exist if the import was to a package that doesn't exist.
+                    if (!i.name.mangledName.exists()) {
                         continue;
                     }
 
@@ -1807,13 +1811,13 @@ class ComputePackageSCCs {
     }
 
     // Tarjan's algorithm for finding strongly connected components
-    void tarjan(core::packages::ImportType edgeType) {
+    template <core::packages::ImportType EdgeType> void tarjan() {
         this->nodeMap.clear();
         ENFORCE(this->stack.empty());
         for (auto package : gs.packageDB().packages()) {
             auto &info = this->nodeMap[package];
             if (info.index == NodeInfo::UNVISITED) {
-                this->strongConnect(package, info, edgeType);
+                this->strongConnect<EdgeType>(package, info);
             }
         }
     }
@@ -1827,8 +1831,8 @@ public:
 
         // First, compute the SCCs for application code, and then for test code. This allows us to have more granular
         // SCCs, as test_import edges aren't subject to the same restrictions that import edges are.
-        scc.tarjan(core::packages::ImportType::Normal);
-        scc.tarjan(core::packages::ImportType::Test);
+        scc.tarjan<core::packages::ImportType::Normal>();
+        scc.tarjan<core::packages::ImportType::Test>();
 
         gs.packageDB().setCondensation(move(scc.condensation));
     }
