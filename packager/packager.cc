@@ -1754,13 +1754,13 @@ class ComputePackageSCCs {
             // top of the stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them
             // the same SCC ID.
             core::packages::MangledName poppedPkgName;
-            auto &node = this->condensation.pushNode(EdgeType);
-            auto sccId = node.id;
+            auto &condensationNode = this->condensation.pushNode(EdgeType);
+            auto sccId = condensationNode.id;
 
             // Set the SCC ids for all of the members of the SCC
             do {
                 poppedPkgName = this->stack.back();
-                node.members.push_back(poppedPkgName);
+                condensationNode.members.push_back(poppedPkgName);
                 this->stack.pop_back();
                 this->nodeMap[poppedPkgName].onStack = false;
 
@@ -1774,13 +1774,13 @@ class ComputePackageSCCs {
                     // exist at this point, as we've already traversed all packages once.
                     auto appSccId = poppedPkgInfo.sccID_;
                     ENFORCE(appSccId.has_value());
-                    node.imports.insert(*appSccId);
+                    condensationNode.imports.insert(*appSccId);
                 }
             } while (poppedPkgName != pkgName);
 
             // Iterate the imports of each member, building the edges of the condensation. This step is performed after
             // we've visited all members of the SCC once, to ensure that their ids have all been populated.
-            for (auto name : node.members) {
+            for (auto name : condensationNode.members) {
                 auto &member = PackageInfoImpl::from(*(packageDB.getPackageInfoNonConst(name)));
                 for (auto &i : member.importedPackageNames) {
                     // We want to consider all imports from test code, but only normal imports for application code.
@@ -1804,7 +1804,7 @@ class ComputePackageSCCs {
                         continue;
                     }
 
-                    node.imports.insert(*impId);
+                    condensationNode.imports.insert(*impId);
                 }
             }
         }
