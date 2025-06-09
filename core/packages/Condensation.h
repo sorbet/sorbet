@@ -78,6 +78,9 @@ public:
         Traversal &operator=(Traversal &&other) = default;
     };
 
+    // Compute a traversal through the condensation graph, that yields groups of SCCs that have no dependencies on each
+    // other. These groups are acceptable to typecheck in parallel, under the assumption that the package graph is
+    // well-formed.
     const Traversal computeTraversal(const GlobalState &gs) const;
 
     absl::Span<const Node> nodes() const {
