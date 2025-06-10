@@ -115,6 +115,7 @@ compilation_database(
         "//test:parser_test_runner",
         "//test:pipeline_test_runner",
         "//test:pkg-autocorrects-test",
+        "//test:pkg-condensation-test",
         "//test:print_document_symbols",
         "//test/fuzz:fuzz_dash_e",
         "//test/fuzz:fuzz_dash_e_impl",

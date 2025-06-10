@@ -6,6 +6,7 @@
 #include "common/common.h"
 #include "core/Files.h"
 #include "core/Names.h"
+#include "core/packages/Condensation.h"
 #include "core/packages/PackageInfo.h"
 
 namespace sorbet::core::packages {
@@ -79,6 +80,16 @@ public:
 
     bool allowRelaxedPackagerChecksFor(const MangledName mangledName) const;
 
+    // Overwrite the condensation graph for the current package set. This method is only meant to be used from
+    // `ComputePackageSCCs::run`.
+    //
+    // WARNING: Modifying the contents of the package DB after this operation will cause the condensation to go out of
+    // date.
+    void setCondensation(Condensation &&condensation);
+
+    // Fetch the condensation graph for queries.
+    const Condensation &condensation() const;
+
 private:
     bool enabled_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
@@ -101,6 +112,8 @@ private:
 
     bool frozen = true;
     std::thread::id writerThread;
+
+    Condensation condensation_;
 
     friend class UnfreezePackages;
 };
