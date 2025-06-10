@@ -3304,7 +3304,7 @@ private:
             method.data(ctx)->flags.isAbstract = true;
         }
         if (sig.seen.incompatibleOverride.exists()) {
-            method.data(ctx)->flags.isIncompatibleOverride = true;
+            method.data(ctx)->flags.allowIncompatibleOverrideAll = true;
         }
         if (!sig.typeArgs.empty()) {
             method.data(ctx)->flags.isGenericMethod = true;

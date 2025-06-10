@@ -77,7 +77,7 @@ public:
         bool isOverridable : 1;
         bool isFinal : 1;
         bool isOverride : 1;
-        bool isIncompatibleOverride : 1;
+        bool allowIncompatibleOverrideAll : 1;
         bool isPackagePrivate : 1;
 
         constexpr static uint16_t NUMBER_OF_FLAGS = 11;
@@ -85,7 +85,7 @@ public:
         Flags() noexcept
             : isRewriterSynthesized(false), isProtected(false), isPrivate(false), isOverloaded(false),
               isAbstract(false), isGenericMethod(false), isOverridable(false), isFinal(false), isOverride(false),
-              isIncompatibleOverride(false), isPackagePrivate(false) {}
+              allowIncompatibleOverrideAll(false), isPackagePrivate(false) {}
 
         uint16_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint16_t));

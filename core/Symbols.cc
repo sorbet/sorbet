@@ -1372,7 +1372,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
     if (sym->flags.isOverride) {
         methodFlags.emplace_back("override");
     }
-    if (sym->flags.isIncompatibleOverride) {
+    if (sym->flags.allowIncompatibleOverrideAll) {
         methodFlags.emplace_back("allow_incompatible");
     }
     if (sym->flags.isFinal) {
