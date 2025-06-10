@@ -200,11 +200,5 @@ Some further tips for good design proposals:
 
 [user-facing design principles]: README.md#sorbet-user-facing-design-principles
 
-
-
-
-
-
-
 <!-- vim:tw=0
 -->
