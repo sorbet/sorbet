@@ -300,13 +300,21 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::Type
     ENFORCE_NO_TIMER((namesByHashSize & (namesByHashSize - 1)) == 0, "namesByHashSize is not a power of 2");
 }
 
-unique_ptr<GlobalState> GlobalState::makeEmptyGlobalStateForHashing(spdlog::logger &logger) {
+unique_ptr<GlobalState> GlobalState::makeEmptyGlobalStateForHashing(spdlog::logger &logger, Storage &&storage) {
     // Note: Private constructor.
     unique_ptr<GlobalState> rv(
         new GlobalState(make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>()),
                         make_shared<lsp::TypecheckEpochManager>(), -1));
+    storage.clear();
+    rv->storage = std::move(storage);
     rv->initEmpty();
     return rv;
+}
+
+GlobalState::Storage GlobalState::releaseStorage(unique_ptr<GlobalState> gs) {
+    Storage result = std::move(gs->storage);
+    gs.reset();
+    return result;
 }
 
 void GlobalState::initEmpty() {
@@ -2632,43 +2640,34 @@ GlobalState::Storage GlobalState::Storage::deepCopy(const core::GlobalState &to,
     return result;
 }
 
-void GlobalState::Storage::reset(Snapshot snapshot) {
-    ENFORCE(snapshot.numFiles <= this->files.size());
-    this->files.resize(snapshot.numFiles);
+void GlobalState::Storage::clear() {
+    this->files.clear();
     this->fileRefByPath.clear();
-    auto id = 0;
-    for (auto &file : absl::MakeSpan(this->files).subspan(1)) {
-        ++id;
-        this->fileRefByPath[file->path()] = core::FileRef(id);
-    }
+    this->classAndModules.clear();
+    this->methods.clear();
+    this->fields.clear();
+    this->typeMembers.clear();
+    this->typeArguments.clear();
 
-    ENFORCE(snapshot.numClassesAndModules <= this->classAndModules.size());
-    this->classAndModules.resize(snapshot.numClassesAndModules);
+    // TODO: we can probably avoid resetting the name table
+    this->utf8Names.clear();
+    this->constantNames.clear();
+    this->uniqueNames.clear();
+    this->namesByHash.clear();
 
-    ENFORCE(snapshot.numMethods <= this->methods.size());
-    this->methods.resize(snapshot.numMethods);
+    // Ensure that initial capacity is correct for the payload
+    this->utf8Names.reserve(PAYLOAD_MAX_UTF8_NAME_COUNT);
+    this->constantNames.reserve(PAYLOAD_MAX_CONSTANT_NAME_COUNT);
+    this->uniqueNames.reserve(PAYLOAD_MAX_UNIQUE_NAME_COUNT);
+    this->classAndModules.reserve(PAYLOAD_MAX_CLASS_AND_MODULE_COUNT);
+    this->methods.reserve(PAYLOAD_MAX_METHOD_COUNT);
+    this->fields.reserve(PAYLOAD_MAX_FIELD_COUNT);
+    this->typeArguments.reserve(PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
+    this->typeMembers.reserve(PAYLOAD_MAX_TYPE_MEMBER_COUNT);
 
-    ENFORCE(snapshot.numFields <= this->fields.size());
-    this->fields.resize(snapshot.numFields);
-
-    ENFORCE(snapshot.numTypeMembers <= this->typeMembers.size());
-    this->typeMembers.resize(snapshot.numTypeMembers);
-
-    ENFORCE(snapshot.numTypeArguments <= this->typeArguments.size());
-    this->typeArguments.resize(snapshot.numTypeArguments);
-}
-
-GlobalState::Snapshot GlobalState::Storage::snapshot() const {
-    Snapshot result;
-
-    result.numFiles = this->files.size();
-    result.numClassesAndModules = this->classAndModules.size();
-    result.numMethods = this->methods.size();
-    result.numFields = this->fields.size();
-    result.numTypeMembers = this->typeMembers.size();
-    result.numTypeArguments = this->typeArguments.size();
-
-    return result;
+    int namesByHashSize = nextPowerOfTwo(
+        2 * (PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT + PAYLOAD_MAX_UNIQUE_NAME_COUNT));
+    this->namesByHash.resize(namesByHashSize);
 }
 
 } // namespace sorbet::core

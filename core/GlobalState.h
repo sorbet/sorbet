@@ -43,30 +43,6 @@ class GlobalState final {
     static constexpr int STRINGS_PAGE_SIZE = 4096;
 
 public:
-    class Storage;
-
-    class Snapshot {
-        friend class GlobalState::Storage;
-
-        size_t numFiles;
-        size_t numClassesAndModules;
-        size_t numMethods;
-        size_t numFields;
-        size_t numTypeMembers;
-        size_t numTypeArguments;
-
-    public:
-        Snapshot()
-            : numFiles{0}, numClassesAndModules{0}, numMethods{0}, numFields{0}, numTypeMembers{0},
-              numTypeArguments{0} {}
-
-        Snapshot(const Snapshot &other) = delete;
-        Snapshot(Snapshot &&other) = default;
-
-        Snapshot &operator=(const Snapshot &other) = delete;
-        Snapshot &operator=(Snapshot &&other) = default;
-    };
-
     class Storage {
         friend class GlobalState;
         friend NameRef;
@@ -115,11 +91,8 @@ public:
         Storage &operator=(const Storage &other) = delete;
         Storage &operator=(Storage &&other) = default;
 
-        // Reset the storage state, optionally up to the given snapshot.
-        void reset(Snapshot snapshot = Snapshot());
-
-        // Compute a snapshot of the storage as it is now.
-        Snapshot snapshot() const;
+        // Clear out the storage{0}, but keep the allocation.
+        void clear();
     };
 
 private:
@@ -154,9 +127,8 @@ public:
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue, std::shared_ptr<lsp::TypecheckEpochManager> epochManager);
 
-    // Creates an empty global state for hashing. Bypasses important sanity checks that are used for other types of
-    // global states.
-    static std::unique_ptr<GlobalState> makeEmptyGlobalStateForHashing(spdlog::logger &logger);
+    // Create a global state using this storage.
+    static std::unique_ptr<GlobalState> makeEmptyGlobalStateForHashing(spdlog::logger &logger, Storage &&storage);
 
     // Clean up this global state, and release its storage back for further use.
     static Storage releaseStorage(std::unique_ptr<GlobalState> gs);

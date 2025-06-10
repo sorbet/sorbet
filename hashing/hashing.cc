@@ -87,9 +87,9 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, core::G
 
 // Note: lgs is an outparameter.
 core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<core::File> forWhat,
-                                          unique_ptr<core::GlobalState> &lgs,
+                                          unique_ptr<core::GlobalState> &lgs, core::GlobalState::Storage &&storage,
                                           const realmain::options::Options &hashingOpts) {
-    lgs = core::GlobalState::makeEmptyGlobalStateForHashing(logger);
+    lgs = core::GlobalState::makeEmptyGlobalStateForHashing(logger, move(storage));
     realmain::pipeline::setGlobalStateOptions(*lgs, hashingOpts);
     lgs->silenceErrors = true;
     {
@@ -100,11 +100,13 @@ core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<cor
     }
 }
 
-unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat, spdlog::logger &logger,
-                                                  const realmain::options::Options &hashingOpts) {
+pair<unique_ptr<core::FileHash>, core::GlobalState::Storage>
+computeFileHashForFile(shared_ptr<core::File> forWhat, spdlog::logger &logger, core::GlobalState::Storage &&storage,
+                       const realmain::options::Options &hashingOpts) {
     Timer timeit(logger, "computeFileHash");
     unique_ptr<core::GlobalState> lgs;
-    core::FileRef fref = makeEmptyGlobalStateForFile(logger, move(forWhat), /* out param */ lgs, hashingOpts);
+    core::FileRef fref =
+        makeEmptyGlobalStateForFile(logger, move(forWhat), /* out param */ lgs, move(storage), hashingOpts);
     auto ast = realmain::pipeline::indexOne(opts(), *lgs, fref);
 
     // Calculate UsageHash. We use LazyNameSubstitution for this purpose, but it will not do any actual substitution
@@ -112,7 +114,8 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
     core::LazyNameSubstitution subst(*lgs, *lgs);
     core::MutableContext ctx(*lgs, core::Symbols::root(), fref);
     ast = ast::Substitute::run(ctx, subst, move(ast));
-    return computeFileHashForAST(logger, *lgs, subst.getAllNames(), move(ast));
+    auto hash = computeFileHashForAST(logger, *lgs, subst.getAllNames(), move(ast));
+    return {move(hash), core::GlobalState::releaseStorage(move(lgs))};
 }
 }; // namespace
 
@@ -133,6 +136,7 @@ void Hashing::computeFileHashes(absl::Span<const shared_ptr<core::File>> files, 
         int processedByThread = 0;
         size_t job;
         {
+            core::GlobalState::Storage storage;
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
                     processedByThread++;
@@ -141,7 +145,9 @@ void Hashing::computeFileHashes(absl::Span<const shared_ptr<core::File>> files, 
                         continue;
                     }
 
-                    threadResult.emplace_back(job, computeFileHashForFile(files[job], logger, opts));
+                    unique_ptr<core::FileHash> hash;
+                    std::tie(hash, storage) = computeFileHashForFile(files[job], logger, move(storage), opts);
+                    threadResult.emplace_back(job, move(hash));
                 }
             }
         }
@@ -193,6 +199,7 @@ Hashing::indexAndComputeFileHashes(core::GlobalState &gs, const realmain::option
         int processedByThread = 0;
         size_t job;
         {
+            core::GlobalState::Storage storage;
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
                     if (timeit == nullptr) {
@@ -207,11 +214,14 @@ Hashing::indexAndComputeFileHashes(core::GlobalState &gs, const realmain::option
                     }
 
                     unique_ptr<core::GlobalState> lgs;
-                    auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs, opts);
+                    auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs,
+                                                               move(storage), opts);
                     auto [rewrittenAST, usageHash] = rewriteAST(sharedGs, *lgs, newFref, ast);
 
                     threadResult.emplace_back(ast.file,
                                               computeFileHashForAST(logger, *lgs, move(usageHash), move(rewrittenAST)));
+
+                    storage = core::GlobalState::releaseStorage(move(lgs));
                 }
             }
         }
