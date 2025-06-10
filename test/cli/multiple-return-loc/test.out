@@ -18,5 +18,5 @@ test.rb:13: Revealed type: `[Integer(1), Integer(2)] (2-tuple)` https://srb.help
   Got `[Integer(1), Integer(2)] (2-tuple)` originating from:
     test.rb:10:
     10 |  break 1, 2
-                ^^^^
+          ^^^^^^^^^^
 Errors: 2
