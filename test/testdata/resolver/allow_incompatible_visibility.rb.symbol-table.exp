@@ -17,14 +17,14 @@ class ::<root> < ::Object ()
     method ::<Class:ChildBadSymbol>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible_visibility.rb:26
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::ChildBadTypes < ::Parent () @ test/testdata/resolver/allow_incompatible_visibility.rb:20
-    method ::ChildBadTypes#some_public_api : private|override (<blk>) -> String @ test/testdata/resolver/allow_incompatible_visibility.rb:22
+    method ::ChildBadTypes#some_public_api : private|override|allow_incompatible(:visibility) (<blk>) -> String @ test/testdata/resolver/allow_incompatible_visibility.rb:22
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::<Class:ChildBadTypes>[<AttachedClass>] < ::<Class:Parent> () @ test/testdata/resolver/allow_incompatible_visibility.rb:20
     type-member(+) ::<Class:ChildBadTypes>::<AttachedClass> -> T.attached_class (of ChildBadTypes) @ test/testdata/resolver/allow_incompatible_visibility.rb:20
     method ::<Class:ChildBadTypes>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible_visibility.rb:20
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::ChildOkay < ::Parent () @ test/testdata/resolver/allow_incompatible_visibility.rb:15
-    method ::ChildOkay#some_public_api : private|override (<blk>) -> Integer @ test/testdata/resolver/allow_incompatible_visibility.rb:17
+    method ::ChildOkay#some_public_api : private|override|allow_incompatible(:visibility) (<blk>) -> Integer @ test/testdata/resolver/allow_incompatible_visibility.rb:17
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::<Class:ChildOkay>[<AttachedClass>] < ::<Class:Parent> () @ test/testdata/resolver/allow_incompatible_visibility.rb:15
     type-member(+) ::<Class:ChildOkay>::<AttachedClass> -> T.attached_class (of ChildOkay) @ test/testdata/resolver/allow_incompatible_visibility.rb:15

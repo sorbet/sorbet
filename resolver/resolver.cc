@@ -3303,8 +3303,16 @@ private:
         if (sig.seen.abstract.exists()) {
             method.data(ctx)->flags.isAbstract = true;
         }
-        if (sig.seen.incompatibleOverride.exists()) {
+        if (sig.seen.incompatibleOverride.exists() && sig.seen.incompatibleOverrideVisibility.exists()) {
+            if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
+                e.setHeader("Malformed `{}`: Don't use both `{}` and `{}", "sig", "override(allow_incompatible: true)",
+                            "override(allow_incompatible: :visibility)");
+            }
             method.data(ctx)->flags.allowIncompatibleOverrideAll = true;
+        } else if (sig.seen.incompatibleOverride.exists()) {
+            method.data(ctx)->flags.allowIncompatibleOverrideAll = true;
+        } else if (sig.seen.incompatibleOverrideVisibility.exists()) {
+            method.data(ctx)->flags.allowIncompatibleOverrideVisibility = true;
         }
         if (!sig.typeArgs.empty()) {
             method.data(ctx)->flags.isGenericMethod = true;
