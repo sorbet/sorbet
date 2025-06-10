@@ -662,6 +662,7 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
             // One day, we may want to build something like overridable(allow_incompatible: true)
             // and mark certain methods in the standard library as possible to be overridden incompatibly,
             // without needing to write `override(allow_incompatible: true)`.
+            // Further context: https://blog.jez.io/constructor-override-checking/
             validateCompatibleOverride(ctx, tree, overriddenMethod, methodDef);
         }
     }
