@@ -505,6 +505,42 @@ module Opus::Types::Test
         end
         assert_includes(e.message, "You can't call .returns after calling .void.")
       end
+
+      it 'disallows override(allow_incompatible: ...) except true/false' do
+        parent = Class.new do
+          extend T::Sig
+          sig { overridable.returns(Integer) }
+          def self.foo; 0; end
+          foo
+        end
+
+        e = assert_raises(ArgumentError) do
+          Class.new(parent) do
+            sig { override(allow_incompatible: nil).returns(Integer) }
+            def self.foo; 0; end
+            foo
+          end
+        end
+        assert_includes(e.message, "only accepts `true` or `false`")
+
+        e = assert_raises(ArgumentError) do
+          Class.new(parent) do
+            sig { override(allow_incompatible: 0).returns(Integer) }
+            def self.foo; 0; end
+            foo
+          end
+        end
+        assert_includes(e.message, "only accepts `true` or `false`")
+
+        e = assert_raises(ArgumentError) do
+          Class.new(parent) do
+            sig { override(allow_incompatible: :bad).returns(Integer) }
+            def self.foo; 0; end
+            foo
+          end
+        end
+        assert_includes(e.message, "only accepts `true` or `false`")
+      end
     end
 
     describe 'type_parameters' do
