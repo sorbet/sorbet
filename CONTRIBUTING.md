@@ -159,7 +159,7 @@ Before making large changes, we should be able to answer these questions:
 
 - How do other projects (type checkers, compilers, IDEs, language runtimes, etc.) solve this problem?
 
-  To prove you've done your research, list prior art. For example, is there a similar feature in TypeScript or some other widely-used gradual type system? Does another IDE have a comparable editor feature? Thorough, compelling background and prior art is one of the best ways to argue in favor of your proposal. It shows that you've invested time and effort to come up with a feature that improves on existing work, rather than invents something entirely without precedent.
+  Research and summarize prior art. For example, is there a similar feature in TypeScript or some other widely-used gradual type system? Does another IDE have a comparable editor feature? How do other language servers implement this LSP feature? Etc. Thorough, compelling background and prior art is one of the best ways to argue in favor of your proposal. It shows that you've invested time and effort to come up with a feature that improves on existing work, rather than invents something entirely without precedent.
 
 - How does this feature interact or overlap with other Sorbet features?
 
