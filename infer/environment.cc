@@ -1205,7 +1205,15 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::Ident &i) {
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what);
                 tp.type = typeAndOrigin.type;
-                tp.origins = typeAndOrigin.origins;
+
+                // If we're assigning to a temporary that's introduced during CFG construction, propagate the origin
+                // locs. Otherwise, keep the loc as the binding loc, as that will avoid eliding definitions for
+                // expressions like `x = y`.
+                if (bind.bind.variable.isSyntheticTemporary(inWhat)) {
+                    tp.origins = typeAndOrigin.origins;
+                } else {
+                    tp.origins.emplace_back(ctx.locAt(bind.loc));
+                }
 
                 if (lspQueryMatch && !bind.value.isSynthetic()) {
                     core::lsp::QueryResponse::pushQueryResponse(
