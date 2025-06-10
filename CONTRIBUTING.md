@@ -50,7 +50,7 @@ We are **very particular** about changes to Sorbet itself. Sorbet itself is some
 
 **Introducing yourself** and your intention to change Sorbet is the best way to get started. You can always find us in in the [#internals](https://sorbet-ruby.slack.com/archives/CFT8Y4909) channel of the [Sorbet Slack](https://sorbet.org/slack).
 
-It puts us in an awkward position when the first time we hear from you is after you've opened a PR with a few hundred or few thousand lines of new code written in a vacuum, and but the PR stems from a fundamental misunderstanding that requires going back to the drawing board!
+It puts us in an awkward position when the first time we hear from you is after you've opened a PR with a few hundred or few thousand lines of new code written in a vacuum, and the PR stems from a fundamental misunderstanding that requires going back to the drawing board!
 
 We love getting to chat with people looking to change Sorbet, because your enthusiasm for making Sorbet better energizes us as well! Successful contributions happen tend to come when we've helped start people down the right direction. Usually, this means that we chat briefly, with a goal of:
 
