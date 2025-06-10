@@ -154,7 +154,12 @@ module T::Private::Methods
       case decl.mode
       when Modes.standard
         decl.mode = Modes.override
-        decl.override_allow_incompatible = allow_incompatible
+        case allow_incompatible
+        when true, false
+          decl.override_allow_incompatible = allow_incompatible
+        else
+          raise BuilderError.new(".override(allow_incompatible: ...) only accepts `true` or `false`, got: #{allow_incompatible.inspect}")
+        end
       when Modes.override, Modes.overridable_override
         raise BuilderError.new(".override cannot be repeated in a single signature")
       when Modes.overridable
