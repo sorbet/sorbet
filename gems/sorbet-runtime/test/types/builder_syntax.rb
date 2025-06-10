@@ -506,7 +506,7 @@ module Opus::Types::Test
         assert_includes(e.message, "You can't call .returns after calling .void.")
       end
 
-      it 'disallows override(allow_incompatible: ...) except true/false' do
+      it 'disallows override(allow_incompatible: ...) except true/false/:visibility' do
         parent = Class.new do
           extend T::Sig
           sig { overridable.returns(Integer) }
@@ -540,6 +540,12 @@ module Opus::Types::Test
           end
         end
         assert_includes(e.message, "only accepts `true` or `false`")
+
+        Class.new(parent) do
+          sig { override(allow_incompatible: :visibility).returns(Integer) }
+          def self.foo; 0; end
+          raise unless foo == 0
+        end
       end
     end
 

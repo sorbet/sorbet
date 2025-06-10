@@ -155,7 +155,7 @@ module T::Private::Methods
       when Modes.standard
         decl.mode = Modes.override
         case allow_incompatible
-        when true, false
+        when true, false, :visibility
           decl.override_allow_incompatible = allow_incompatible
         else
           raise BuilderError.new(".override(allow_incompatible: ...) only accepts `true` or `false`, got: #{allow_incompatible.inspect}")
