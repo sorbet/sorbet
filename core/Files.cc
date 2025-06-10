@@ -144,32 +144,32 @@ const shared_ptr<const FileHash> &File::getFileHash() const {
 FileRef::FileRef(unsigned int id) : _id(id) {}
 
 const File &FileRef::data(const GlobalState &gs) const {
-    ENFORCE(gs.files[_id]);
-    ENFORCE(gs.files[_id]->sourceType != File::Type::TombStone);
-    ENFORCE(gs.files[_id]->sourceType != File::Type::NotYetRead);
+    ENFORCE(gs->files[_id]);
+    ENFORCE(gs->files[_id]->sourceType != File::Type::TombStone);
+    ENFORCE(gs->files[_id]->sourceType != File::Type::NotYetRead);
     return dataAllowingUnsafe(gs);
 }
 
 File &FileRef::data(GlobalState &gs) const {
-    ENFORCE(gs.files[_id]);
-    ENFORCE(gs.files[_id]->sourceType != File::Type::TombStone);
-    ENFORCE(gs.files[_id]->sourceType != File::Type::NotYetRead);
+    ENFORCE(gs->files[_id]);
+    ENFORCE(gs->files[_id]->sourceType != File::Type::TombStone);
+    ENFORCE(gs->files[_id]->sourceType != File::Type::NotYetRead);
     return dataAllowingUnsafe(gs);
 }
 
 const File &FileRef::dataAllowingUnsafe(const GlobalState &gs) const {
     ENFORCE(_id < gs.filesUsed());
-    return *(gs.files[_id]);
+    return *(gs->files[_id]);
 }
 
 File &FileRef::dataAllowingUnsafe(GlobalState &gs) const {
     ENFORCE(_id < gs.filesUsed());
-    return *(gs.files[_id]);
+    return *(gs->files[_id]);
 }
 
 bool FileRef::isPackage(const GlobalState &gs) const {
-    ENFORCE(gs.files[_id]);
-    ENFORCE(gs.files[_id]->sourceType != File::Type::TombStone);
+    ENFORCE(gs->files[_id]);
+    ENFORCE(gs->files[_id]->sourceType != File::Type::TombStone);
     return dataAllowingUnsafe(gs).isPackage(gs);
 }
 

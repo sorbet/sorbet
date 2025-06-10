@@ -18,6 +18,9 @@ public:
     StableStringStorage(const StableStringStorage &rhs);
     StableStringStorage &operator=(const StableStringStorage &rhs);
 
+    StableStringStorage(StableStringStorage &&rhs) = default;
+    StableStringStorage &operator=(StableStringStorage &&rhs) = default;
+
     bool empty() const {
         return strings.empty();
     }

@@ -40,6 +40,89 @@ class SerializerImpl;
 } // namespace serialize
 
 class GlobalState final {
+    static constexpr int STRINGS_PAGE_SIZE = 4096;
+
+public:
+    class Storage;
+
+    class Snapshot {
+        friend class GlobalState::Storage;
+
+        size_t numFiles;
+        size_t numClassesAndModules;
+        size_t numMethods;
+        size_t numFields;
+        size_t numTypeMembers;
+        size_t numTypeArguments;
+
+    public:
+        Snapshot()
+            : numFiles{0}, numClassesAndModules{0}, numMethods{0}, numFields{0}, numTypeMembers{0},
+              numTypeArguments{0} {}
+
+        Snapshot(const Snapshot &other) = delete;
+        Snapshot(Snapshot &&other) = default;
+
+        Snapshot &operator=(const Snapshot &other) = delete;
+        Snapshot &operator=(Snapshot &&other) = default;
+    };
+
+    class Storage {
+        friend class GlobalState;
+        friend NameRef;
+        friend ClassOrModule;
+        friend Method;
+        friend Field;
+        friend TypeParameter;
+        friend SymbolRef;
+        friend ClassOrModuleRef;
+        friend MethodRef;
+        friend TypeMemberRef;
+        friend TypeArgumentRef;
+        friend FieldRef;
+        friend File;
+        friend FileRef;
+        friend NameSubstitution;
+        friend ErrorBuilder;
+        friend serialize::Serializer;
+        friend serialize::SerializerImpl;
+
+        StableStringStorage<STRINGS_PAGE_SIZE> strings;
+        std::vector<UTF8Name> utf8Names;
+        std::vector<ConstantName> constantNames;
+        std::vector<UniqueName> uniqueNames;
+        UnorderedMap<std::string, FileRef> fileRefByPath;
+        std::vector<ClassOrModule> classAndModules;
+        std::vector<Method> methods;
+        std::vector<Field> fields;
+        std::vector<TypeParameter> typeMembers;
+        std::vector<TypeParameter> typeArguments;
+        struct Bucket {
+            unsigned int hash;
+            uint32_t rawId;
+        };
+        std::vector<Bucket> namesByHash;
+        std::vector<std::shared_ptr<File>> files;
+
+        Storage deepCopy(const core::GlobalState &to, bool keepId = false) const;
+
+    public:
+        Storage() = default;
+
+        Storage(const Storage &other) = delete;
+        Storage(Storage &&other) = default;
+
+        Storage &operator=(const Storage &other) = delete;
+        Storage &operator=(Storage &&other) = default;
+
+        // Reset the storage state, optionally up to the given snapshot.
+        void reset(Snapshot snapshot = Snapshot());
+
+        // Compute a snapshot of the storage as it is now.
+        Snapshot snapshot() const;
+    };
+
+private:
     friend NameRef;
     friend ClassOrModule;
     friend Method;
@@ -74,6 +157,9 @@ public:
     // Creates an empty global state for hashing. Bypasses important sanity checks that are used for other types of
     // global states.
     static std::unique_ptr<GlobalState> makeEmptyGlobalStateForHashing(spdlog::logger &logger);
+
+    // Clean up this global state, and release its storage back for further use.
+    static Storage releaseStorage(std::unique_ptr<GlobalState> gs);
 
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload. Enforced in payload.cc.
@@ -365,24 +451,17 @@ private:
     };
     std::vector<DeepCloneHistoryEntry> deepCloneHistory;
 
-    static constexpr int STRINGS_PAGE_SIZE = 4096;
-    StableStringStorage<STRINGS_PAGE_SIZE> strings;
+    Storage storage;
+
+    Storage *operator->() {
+        return &this->storage;
+    }
+    const Storage *operator->() const {
+        return &this->storage;
+    }
+
     std::string_view enterString(std::string_view nm);
-    std::vector<UTF8Name> utf8Names;
-    std::vector<ConstantName> constantNames;
-    std::vector<UniqueName> uniqueNames;
-    UnorderedMap<std::string, FileRef> fileRefByPath;
-    std::vector<ClassOrModule> classAndModules;
-    std::vector<Method> methods;
-    std::vector<Field> fields;
-    std::vector<TypeParameter> typeMembers;
-    std::vector<TypeParameter> typeArguments;
-    struct Bucket {
-        unsigned int hash;
-        uint32_t rawId;
-    };
-    std::vector<Bucket> namesByHash;
-    std::vector<std::shared_ptr<File>> files;
+
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
@@ -405,7 +484,7 @@ private:
     void copyOptions(const GlobalState &other);
 
     void expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize);
-    void moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned int szTo);
+    void moveNames(Storage::Bucket *from, Storage::Bucket *to, unsigned int szFrom, unsigned int szTo);
 
     ClassOrModuleRef synthesizeClass(NameRef nameID, uint32_t superclass = Symbols::todo().id(), bool isModule = false);
 

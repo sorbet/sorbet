@@ -186,27 +186,27 @@ bool ClassOrModule::derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) con
 }
 
 ClassOrModuleRef ClassOrModule::ref(const GlobalState &gs) const {
-    uint32_t distance = this - gs.classAndModules.data();
+    uint32_t distance = this - gs->classAndModules.data();
     return ClassOrModuleRef(gs, distance);
 }
 
 FieldRef Field::ref(const GlobalState &gs) const {
-    uint32_t distance = this - gs.fields.data();
+    uint32_t distance = this - gs->fields.data();
     return FieldRef(gs, distance);
 }
 
 MethodRef Method::ref(const GlobalState &gs) const {
-    uint32_t distance = this - gs.methods.data();
+    uint32_t distance = this - gs->methods.data();
     return MethodRef(gs, distance);
 }
 
 SymbolRef TypeParameter::ref(const GlobalState &gs) const {
     if (flags.isTypeArgument) {
-        uint32_t distance = this - gs.typeArguments.data();
+        uint32_t distance = this - gs->typeArguments.data();
         return TypeArgumentRef(gs, distance);
     } else {
         ENFORCE_NO_TIMER(flags.isTypeMember);
-        uint32_t distance = this - gs.typeMembers.data();
+        uint32_t distance = this - gs->typeMembers.data();
         return TypeMemberRef(gs, distance);
     }
 }
@@ -238,7 +238,7 @@ bool SymbolRef::isClassAlias(const GlobalState &gs) const {
 
 ClassOrModuleData ClassOrModuleRef::dataAllowingNone(GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
-    return ClassOrModuleData(gs.classAndModules[_id], gs);
+    return ClassOrModuleData(gs->classAndModules[_id], gs);
 }
 
 ClassOrModuleData ClassOrModuleRef::data(GlobalState &gs) const {
@@ -253,35 +253,35 @@ ConstClassOrModuleData ClassOrModuleRef::data(const GlobalState &gs) const {
 
 ConstClassOrModuleData ClassOrModuleRef::dataAllowingNone(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
-    return ConstClassOrModuleData(gs.classAndModules[_id], gs);
+    return ConstClassOrModuleData(gs->classAndModules[_id], gs);
 }
 
 MethodData MethodRef::data(GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(_id < gs.methodsUsed());
-    return MethodData(gs.methods[_id], gs);
+    return MethodData(gs->methods[_id], gs);
 }
 
 ConstMethodData MethodRef::data(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(_id < gs.methodsUsed());
-    return ConstMethodData(gs.methods[_id], gs);
+    return ConstMethodData(gs->methods[_id], gs);
 }
 
 MethodData MethodRef::dataAllowingNone(GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.methodsUsed());
-    return MethodData(gs.methods[_id], gs);
+    return MethodData(gs->methods[_id], gs);
 }
 
 FieldData FieldRef::data(GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(_id < gs.fieldsUsed());
-    return FieldData(gs.fields[_id], gs);
+    return FieldData(gs->fields[_id], gs);
 }
 
 ConstFieldData FieldRef::dataAllowingNone(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.fieldsUsed());
-    return ConstFieldData(gs.fields[_id], gs);
+    return ConstFieldData(gs->fields[_id], gs);
 }
 
 ConstFieldData FieldRef::data(const GlobalState &gs) const {
@@ -291,41 +291,41 @@ ConstFieldData FieldRef::data(const GlobalState &gs) const {
 
 FieldData FieldRef::dataAllowingNone(GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.fieldsUsed());
-    return FieldData(gs.fields[_id], gs);
+    return FieldData(gs->fields[_id], gs);
 }
 
 TypeParameterData TypeMemberRef::data(GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(_id < gs.typeMembersUsed());
-    return TypeParameterData(gs.typeMembers[_id], gs);
+    return TypeParameterData(gs->typeMembers[_id], gs);
 }
 
 ConstTypeParameterData TypeMemberRef::data(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(_id < gs.typeMembersUsed());
-    return ConstTypeParameterData(gs.typeMembers[_id], gs);
+    return ConstTypeParameterData(gs->typeMembers[_id], gs);
 }
 
 TypeParameterData TypeMemberRef::dataAllowingNone(GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.typeMembersUsed());
-    return TypeParameterData(gs.typeMembers[_id], gs);
+    return TypeParameterData(gs->typeMembers[_id], gs);
 }
 
 TypeParameterData TypeArgumentRef::data(GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(_id < gs.typeArgumentsUsed());
-    return TypeParameterData(gs.typeArguments[_id], gs);
+    return TypeParameterData(gs->typeArguments[_id], gs);
 }
 
 ConstTypeParameterData TypeArgumentRef::data(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(_id < gs.typeArgumentsUsed());
-    return ConstTypeParameterData(gs.typeArguments[_id], gs);
+    return ConstTypeParameterData(gs->typeArguments[_id], gs);
 }
 
 TypeParameterData TypeArgumentRef::dataAllowingNone(GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.typeArgumentsUsed());
-    return TypeParameterData(gs.typeArguments[_id], gs);
+    return TypeParameterData(gs->typeArguments[_id], gs);
 }
 
 bool SymbolRef::isSynthetic() const {

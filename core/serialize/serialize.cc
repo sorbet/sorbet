@@ -850,9 +850,9 @@ Pickler SerializerImpl::pickleFileTable(const GlobalState &gs, bool payloadOnly)
 }
 
 void SerializerImpl::pickleFileTable(Pickler &p, const GlobalState &gs, bool payloadOnly) {
-    p.putU4(gs.files.size());
+    p.putU4(gs.storage.files.size());
     int i = -1;
-    for (const auto &f : gs.files) {
+    for (const auto &f : gs.storage.files) {
         ++i;
         if (i != 0) {
             pickle(p, *f);
@@ -861,27 +861,27 @@ void SerializerImpl::pickleFileTable(Pickler &p, const GlobalState &gs, bool pay
 }
 
 void SerializerImpl::unpickleFileTable(UnPickler &p, GlobalState &result) {
-    result.files.clear();
-    result.fileRefByPath.clear();
+    result->files.clear();
+    result->fileRefByPath.clear();
 
     {
         Timer timeit(result.tracer(), "readFiles");
 
         int filesSize = p.getU4();
-        result.files.reserve(filesSize);
+        result->files.reserve(filesSize);
         for (int i = 0; i < filesSize; i++) {
             if (i == 0) {
-                result.files.emplace_back();
+                result->files.emplace_back();
             } else {
-                result.files.emplace_back(unpickleFile(p));
+                result->files.emplace_back(unpickleFile(p));
             }
         }
     }
 
     int i = 0;
-    for (auto &f : result.files) {
+    for (auto &f : result->files) {
         if (f && !f->path().empty()) {
-            result.fileRefByPath[string(f->path())] = FileRef(i);
+            result->fileRefByPath[string(f->path())] = FileRef(i);
         }
         i++;
     }
@@ -894,75 +894,75 @@ Pickler SerializerImpl::pickleSymbolTable(const GlobalState &gs) {
 }
 
 void SerializerImpl::pickleSymbolTable(Pickler &p, const GlobalState &gs) {
-    p.putU4(gs.classAndModules.size());
-    for (const ClassOrModule &s : gs.classAndModules) {
+    p.putU4(gs->classAndModules.size());
+    for (const ClassOrModule &s : gs->classAndModules) {
         pickle(p, s);
     }
 
-    p.putU4(gs.methods.size());
-    for (const Method &s : gs.methods) {
+    p.putU4(gs->methods.size());
+    for (const Method &s : gs->methods) {
         pickle(p, s);
     }
 
-    p.putU4(gs.fields.size());
-    for (const Field &s : gs.fields) {
+    p.putU4(gs->fields.size());
+    for (const Field &s : gs->fields) {
         pickle(p, s);
     }
 
-    p.putU4(gs.typeArguments.size());
-    for (const TypeParameter &s : gs.typeArguments) {
+    p.putU4(gs->typeArguments.size());
+    for (const TypeParameter &s : gs->typeArguments) {
         pickle(p, s);
     }
 
-    p.putU4(gs.typeMembers.size());
-    for (const TypeParameter &s : gs.typeMembers) {
+    p.putU4(gs->typeMembers.size());
+    for (const TypeParameter &s : gs->typeMembers) {
         pickle(p, s);
     }
 }
 
 void SerializerImpl::unpickleSymbolTable(UnPickler &p, GlobalState &result) {
-    result.classAndModules.clear();
-    result.methods.clear();
-    result.fields.clear();
-    result.typeArguments.clear();
-    result.typeMembers.clear();
+    result->classAndModules.clear();
+    result->methods.clear();
+    result->fields.clear();
+    result->typeArguments.clear();
+    result->typeMembers.clear();
 
     {
         Timer timeit(result.tracer(), "readSymbols");
 
         int classAndModuleSize = p.getU4();
         ENFORCE_NO_TIMER(classAndModuleSize > 0);
-        result.classAndModules.reserve(nextPowerOfTwo(classAndModuleSize));
+        result->classAndModules.reserve(nextPowerOfTwo(classAndModuleSize));
         for (int i = 0; i < classAndModuleSize; i++) {
-            result.classAndModules.emplace_back(unpickleClassOrModule(p, &result));
+            result->classAndModules.emplace_back(unpickleClassOrModule(p, &result));
         }
 
         int methodSize = p.getU4();
         ENFORCE_NO_TIMER(methodSize > 0);
-        result.methods.reserve(nextPowerOfTwo(methodSize));
+        result->methods.reserve(nextPowerOfTwo(methodSize));
         for (int i = 0; i < methodSize; i++) {
-            result.methods.emplace_back(unpickleMethod(p, &result));
+            result->methods.emplace_back(unpickleMethod(p, &result));
         }
 
         int fieldSize = p.getU4();
         ENFORCE_NO_TIMER(fieldSize > 0);
-        result.fields.reserve(nextPowerOfTwo(fieldSize));
+        result->fields.reserve(nextPowerOfTwo(fieldSize));
         for (int i = 0; i < fieldSize; i++) {
-            result.fields.emplace_back(unpickleField(p, &result));
+            result->fields.emplace_back(unpickleField(p, &result));
         }
 
         int typeArgumentSize = p.getU4();
         ENFORCE_NO_TIMER(typeArgumentSize > 0);
-        result.typeArguments.reserve(nextPowerOfTwo(typeArgumentSize));
+        result->typeArguments.reserve(nextPowerOfTwo(typeArgumentSize));
         for (int i = 0; i < typeArgumentSize; i++) {
-            result.typeArguments.emplace_back(unpickleTypeParameter(p, &result));
+            result->typeArguments.emplace_back(unpickleTypeParameter(p, &result));
         }
 
         int typeMemberSize = p.getU4();
         ENFORCE_NO_TIMER(typeMemberSize > 0);
-        result.typeMembers.reserve(nextPowerOfTwo(typeMemberSize));
+        result->typeMembers.reserve(nextPowerOfTwo(typeMemberSize));
         for (int i = 0; i < typeMemberSize; i++) {
-            result.typeMembers.emplace_back(unpickleTypeParameter(p, &result));
+            result->typeMembers.emplace_back(unpickleTypeParameter(p, &result));
         }
     }
 }
@@ -974,63 +974,63 @@ Pickler SerializerImpl::pickleNameTable(const GlobalState &gs) {
 }
 
 void SerializerImpl::pickleNameTable(Pickler &p, const GlobalState &gs) {
-    p.putU4(gs.utf8Names.size());
-    for (const auto &n : gs.utf8Names) {
+    p.putU4(gs->utf8Names.size());
+    for (const auto &n : gs->utf8Names) {
         pickle(p, n);
     }
-    p.putU4(gs.constantNames.size());
-    for (const auto &n : gs.constantNames) {
+    p.putU4(gs->constantNames.size());
+    for (const auto &n : gs->constantNames) {
         pickle(p, n);
     }
-    p.putU4(gs.uniqueNames.size());
-    for (const auto &n : gs.uniqueNames) {
+    p.putU4(gs->uniqueNames.size());
+    for (const auto &n : gs->uniqueNames) {
         pickle(p, n);
     }
 
-    p.putU4(gs.namesByHash.size());
-    for (const auto &s : gs.namesByHash) {
+    p.putU4(gs->namesByHash.size());
+    for (const auto &s : gs->namesByHash) {
         p.putU4(s.hash);
         p.putU4(s.rawId);
     }
 }
 
 void SerializerImpl::unpickleNameTable(UnPickler &p, GlobalState &result) {
-    result.utf8Names.clear();
-    result.constantNames.clear();
-    result.uniqueNames.clear();
-    result.namesByHash.clear();
+    result->utf8Names.clear();
+    result->constantNames.clear();
+    result->uniqueNames.clear();
+    result->namesByHash.clear();
 
     {
         Timer timeit(result.tracer(), "readNames");
 
         int namesSize = p.getU4();
         ENFORCE_NO_TIMER(namesSize > 0);
-        result.utf8Names.reserve(nextPowerOfTwo(namesSize));
+        result->utf8Names.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
-            result.utf8Names.emplace_back(unpickleUTF8Name(p, result));
+            result->utf8Names.emplace_back(unpickleUTF8Name(p, result));
         }
         namesSize = p.getU4();
         ENFORCE_NO_TIMER(namesSize > 0);
-        result.constantNames.reserve(nextPowerOfTwo(namesSize));
+        result->constantNames.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
-            result.constantNames.emplace_back(unpickleConstantName(p, result));
+            result->constantNames.emplace_back(unpickleConstantName(p, result));
         }
         namesSize = p.getU4();
         ENFORCE_NO_TIMER(namesSize > 0);
-        result.uniqueNames.reserve(nextPowerOfTwo(namesSize));
+        result->uniqueNames.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
-            result.uniqueNames.emplace_back(unpickleUniqueName(p, result));
+            result->uniqueNames.emplace_back(unpickleUniqueName(p, result));
         }
     }
 
     {
         Timer timeit(result.tracer(), "readNameTable");
         int namesByHashSize = p.getU4();
-        result.namesByHash.reserve(namesByHashSize);
+        result->namesByHash.reserve(namesByHashSize);
         for (int i = 0; i < namesByHashSize; i++) {
             auto hash = p.getU4();
             auto value = p.getU4();
-            result.namesByHash.emplace_back(GlobalState::Bucket{hash, value});
+            result->namesByHash.emplace_back(GlobalState::Storage::Bucket{hash, value});
         }
     }
 }
@@ -1109,7 +1109,7 @@ void Serializer::loadAndOverwriteNameTable(GlobalState &gs, const uint8_t *const
 
 void Serializer::loadGlobalState(GlobalState &gs, const uint8_t *const symbolTableData,
                                  const uint8_t *const nameTableData, const uint8_t *const fileTableData) {
-    ENFORCE_NO_TIMER(gs.files.empty() && gs.namesUsedTotal() == 0 && gs.symbolsUsedTotal() == 0,
+    ENFORCE_NO_TIMER(gs->files.empty() && gs.namesUsedTotal() == 0 && gs.symbolsUsedTotal() == 0,
                      "Can't load into a non-empty state");
     {
         UnPickler p(symbolTableData, gs.tracer());

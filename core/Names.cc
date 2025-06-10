@@ -383,23 +383,23 @@ void NameRef::sanityCheckSubstitution(const NameSubstitution &subst) const {
 
 const UniqueNameData NameRef::dataUnique(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(kind() == NameKind::UNIQUE);
-    ENFORCE_NO_TIMER(uniqueIndex() < gs.uniqueNames.size(), "unique name {} id out of bounds {}", uniqueIndex(),
-                     gs.uniqueNames.size());
-    return UniqueNameData(gs.uniqueNames[uniqueIndex()], gs);
+    ENFORCE_NO_TIMER(uniqueIndex() < gs->uniqueNames.size(), "unique name {} id out of bounds {}", uniqueIndex(),
+                     gs->uniqueNames.size());
+    return UniqueNameData(gs->uniqueNames[uniqueIndex()], gs);
 }
 
 const UTF8NameData NameRef::dataUtf8(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(kind() == NameKind::UTF8);
-    ENFORCE_NO_TIMER(utf8Index() < gs.utf8Names.size(), "utf8 name {} id out of bounds {}", utf8Index(),
-                     gs.utf8Names.size());
-    return UTF8NameData(gs.utf8Names[utf8Index()], gs);
+    ENFORCE_NO_TIMER(utf8Index() < gs->utf8Names.size(), "utf8 name {} id out of bounds {}", utf8Index(),
+                     gs->utf8Names.size());
+    return UTF8NameData(gs->utf8Names[utf8Index()], gs);
 }
 
 const ConstantNameData NameRef::dataCnst(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(kind() == NameKind::CONSTANT);
-    ENFORCE_NO_TIMER(constantIndex() < gs.constantNames.size(), "constant name {} id out of bounds {}", constantIndex(),
-                     gs.constantNames.size());
-    return ConstantNameData(gs.constantNames[constantIndex()], gs);
+    ENFORCE_NO_TIMER(constantIndex() < gs->constantNames.size(), "constant name {} id out of bounds {}",
+                     constantIndex(), gs->constantNames.size());
+    return ConstantNameData(gs->constantNames[constantIndex()], gs);
 }
 
 NameRef NameRef::addEq(GlobalState &gs) const {

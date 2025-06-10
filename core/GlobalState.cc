@@ -256,8 +256,8 @@ InlinedVector<core::ClassOrModuleRef, 4> ParentLinearizationInformation::fullLin
 ClassOrModuleRef GlobalState::synthesizeClass(NameRef name, uint32_t superclass, bool isModule) {
     // This can't use enterClass since there is a chicken and egg problem.
     // These will be added to Symbols::root().members later.
-    ClassOrModuleRef symRef = ClassOrModuleRef(*this, classAndModules.size());
-    classAndModules.emplace_back();
+    ClassOrModuleRef symRef = ClassOrModuleRef(*this, this->storage.classAndModules.size());
+    this->storage.classAndModules.emplace_back();
     ClassOrModuleData data =
         symRef.dataAllowingNone(*this); // allowing noSymbol is needed because this enters noSymbol.
     data->name = name;
@@ -285,18 +285,18 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::Type
     : globalStateId(globalStateId), errorQueue(std::move(errorQueue)), lspQuery(lsp::Query::noQuery()),
       epochManager(move(epochManager)) {
     // Reserve memory in internal vectors for the contents of payload.
-    utf8Names.reserve(PAYLOAD_MAX_UTF8_NAME_COUNT);
-    constantNames.reserve(PAYLOAD_MAX_CONSTANT_NAME_COUNT);
-    uniqueNames.reserve(PAYLOAD_MAX_UNIQUE_NAME_COUNT);
-    classAndModules.reserve(PAYLOAD_MAX_CLASS_AND_MODULE_COUNT);
-    methods.reserve(PAYLOAD_MAX_METHOD_COUNT);
-    fields.reserve(PAYLOAD_MAX_FIELD_COUNT);
-    typeArguments.reserve(PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
-    typeMembers.reserve(PAYLOAD_MAX_TYPE_MEMBER_COUNT);
+    this->storage.utf8Names.reserve(PAYLOAD_MAX_UTF8_NAME_COUNT);
+    this->storage.constantNames.reserve(PAYLOAD_MAX_CONSTANT_NAME_COUNT);
+    this->storage.uniqueNames.reserve(PAYLOAD_MAX_UNIQUE_NAME_COUNT);
+    this->storage.classAndModules.reserve(PAYLOAD_MAX_CLASS_AND_MODULE_COUNT);
+    this->storage.methods.reserve(PAYLOAD_MAX_METHOD_COUNT);
+    this->storage.fields.reserve(PAYLOAD_MAX_FIELD_COUNT);
+    this->storage.typeArguments.reserve(PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
+    this->storage.typeMembers.reserve(PAYLOAD_MAX_TYPE_MEMBER_COUNT);
 
     int namesByHashSize = nextPowerOfTwo(
         2 * (PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT + PAYLOAD_MAX_UNIQUE_NAME_COUNT));
-    namesByHash.resize(namesByHashSize);
+    this->storage.namesByHash.resize(namesByHashSize);
     ENFORCE_NO_TIMER((namesByHashSize & (namesByHashSize - 1)) == 0, "namesByHashSize is not a power of 2");
 }
 
@@ -946,17 +946,17 @@ void GlobalState::initEmpty() {
 
     // Set the correct resultTypes for all synthesized classes
     // Collect size prior to loop since singletons will cause vector to grow.
-    size_t classAndModulesSize = classAndModules.size();
+    size_t classAndModulesSize = this->storage.classAndModules.size();
     for (uint32_t i = 1; i < classAndModulesSize; i++) {
-        if (!classAndModules[i].isClassModuleSet()) {
-            classAndModules[i].setIsModule(true);
+        if (!this->storage.classAndModules[i].isClassModuleSet()) {
+            this->storage.classAndModules[i].setIsModule(true);
         }
-        classAndModules[i].singletonClass(*this);
+        this->storage.classAndModules[i].singletonClass(*this);
     }
 
     // This fills in all the way up to MAX_SYNTHETIC_CLASS_SYMBOLS
-    ENFORCE_NO_TIMER(classAndModules.size() < Symbols::Proc0().id());
-    while (classAndModules.size() < Symbols::Proc0().id()) {
+    ENFORCE_NO_TIMER(this->storage.classAndModules.size() < Symbols::Proc0().id());
+    while (this->storage.classAndModules.size() < Symbols::Proc0().id()) {
         string name = absl::StrCat("<RESERVED_", reservedCount, ">");
         synthesizeClass(enterNameConstant(name));
         reservedCount++;
@@ -970,22 +970,22 @@ void GlobalState::initEmpty() {
         id.data(*this)->singletonClass(*this);
     }
 
-    ENFORCE_NO_TIMER(classAndModules.size() == Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS,
-                     "Too many synthetic class symbols? have: {} expected: {}", classAndModules.size(),
+    ENFORCE_NO_TIMER(this->storage.classAndModules.size() == Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS,
+                     "Too many synthetic class symbols? have: {} expected: {}", this->storage.classAndModules.size(),
                      Symbols::last_synthetic_class_sym().id() + 1);
 
-    ENFORCE_NO_TIMER(methods.size() == Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS,
-                     "Too many synthetic method symbols? have: {} expected: {}", methods.size(),
+    ENFORCE_NO_TIMER(this->storage.methods.size() == Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS,
+                     "Too many synthetic method symbols? have: {} expected: {}", this->storage.methods.size(),
                      Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS);
-    ENFORCE_NO_TIMER(fields.size() == Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS,
-                     "Too many synthetic field symbols? have: {} expected: {}", fields.size(),
+    ENFORCE_NO_TIMER(this->storage.fields.size() == Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS,
+                     "Too many synthetic field symbols? have: {} expected: {}", this->storage.fields.size(),
                      Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS);
-    ENFORCE_NO_TIMER(typeMembers.size() == Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS,
-                     "Too many synthetic typeMember symbols? have: {} expected: {}", typeMembers.size(),
+    ENFORCE_NO_TIMER(this->storage.typeMembers.size() == Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS,
+                     "Too many synthetic typeMember symbols? have: {} expected: {}", this->storage.typeMembers.size(),
                      Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS);
-    ENFORCE_NO_TIMER(typeArguments.size() == Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS,
-                     "Too many synthetic typeArgument symbols? have: {} expected: {}", typeArguments.size(),
-                     Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS);
+    ENFORCE_NO_TIMER(this->storage.typeArguments.size() == Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS,
+                     "Too many synthetic typeArgument symbols? have: {} expected: {}",
+                     this->storage.typeArguments.size(), Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS);
 
     installIntrinsics();
     computeLinearization();
@@ -1003,7 +1003,7 @@ void GlobalState::initEmpty() {
     Symbols::Object().data(*this)->resultType = Types::Object();
 
     // First file is used to indicate absence of a file
-    files.emplace_back();
+    this->storage.files.emplace_back();
     freezeNameTable();
     freezeSymbolTable();
     freezeFileTable();
@@ -1062,18 +1062,20 @@ void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t metho
     // back the symbol tables when the global state is copied in each thread.
 
     // Note: reserve is a no-op if size is < current capacity.
-    classAndModules.reserve(classAndModulesSizeScaled);
-    methods.reserve(methodsSizeScaled);
-    fields.reserve(fieldsSizeScaled);
-    typeArguments.reserve(typeArgumentsSizeScaled);
-    typeMembers.reserve(typeMembersSizeScaled);
+    this->storage.classAndModules.reserve(classAndModulesSizeScaled);
+    this->storage.methods.reserve(methodsSizeScaled);
+    this->storage.fields.reserve(fieldsSizeScaled);
+    this->storage.typeArguments.reserve(typeArgumentsSizeScaled);
+    this->storage.typeMembers.reserve(typeMembersSizeScaled);
     expandNames(utf8NameSizeScaled, constantNameSizeScaled, uniqueNameSizeScaled);
     sanityCheck();
 
     trace(fmt::format("Preallocated symbol and name tables. classAndModules={} methods={} fields={} typeArguments={} "
                       "typeMembers={} utf8Names={} constantNames={} uniqueNames={}",
-                      classAndModules.capacity(), methods.capacity(), fields.capacity(), typeArguments.capacity(),
-                      typeMembers.capacity(), utf8Names.capacity(), constantNames.capacity(), uniqueNames.capacity()));
+                      this->storage.classAndModules.capacity(), this->storage.methods.capacity(),
+                      this->storage.fields.capacity(), this->storage.typeArguments.capacity(),
+                      this->storage.typeMembers.capacity(), this->storage.utf8Names.capacity(),
+                      this->storage.constantNames.capacity(), this->storage.uniqueNames.capacity()));
 }
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
@@ -1205,9 +1207,9 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
-    auto ret = ClassOrModuleRef(*this, classAndModules.size());
+    auto ret = ClassOrModuleRef(*this, this->storage.classAndModules.size());
     store = ret; // DO NOT MOVE this assignment down. emplace_back on classAndModules invalidates `store`
-    classAndModules.emplace_back();
+    this->storage.classAndModules.emplace_back();
     ClassOrModuleData data = ret.data(*this);
     data->name = name;
     data->owner = owner;
@@ -1243,9 +1245,9 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
-    auto result = TypeMemberRef(*this, typeMembers.size());
+    auto result = TypeMemberRef(*this, this->storage.typeMembers.size());
     store = result; // DO NOT MOVE this assignment down. emplace_back on typeMembers invalidates `store`
-    typeMembers.emplace_back();
+    this->storage.typeMembers.emplace_back();
 
     TypeParameterData data = result.dataAllowingNone(*this);
     data->name = name;
@@ -1295,8 +1297,8 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
-    auto result = TypeArgumentRef(*this, this->typeArguments.size());
-    this->typeArguments.emplace_back();
+    auto result = TypeArgumentRef(*this, this->storage.typeArguments.size());
+    this->storage.typeArguments.emplace_back();
 
     TypeParameterData data = result.dataAllowingNone(*this);
     data->name = name;
@@ -1321,9 +1323,9 @@ MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRe
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
 
-    auto result = MethodRef(*this, methods.size());
+    auto result = MethodRef(*this, this->storage.methods.size());
     store = result; // DO NOT MOVE this assignment down. emplace_back on methods invalidates `store`
-    methods.emplace_back();
+    this->storage.methods.emplace_back();
 
     MethodData data = result.dataAllowingNone(*this);
     data->name = name;
@@ -1386,9 +1388,9 @@ FieldRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef 
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
 
-    auto result = FieldRef(*this, fields.size());
+    auto result = FieldRef(*this, this->storage.fields.size());
     store = result; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
-    fields.emplace_back();
+    this->storage.fields.emplace_back();
 
     FieldData data = result.dataAllowingNone(*this);
     data->name = name;
@@ -1425,9 +1427,9 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
 
-    auto ret = FieldRef(*this, fields.size());
+    auto ret = FieldRef(*this, this->storage.fields.size());
     store = ret; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
-    fields.emplace_back();
+    this->storage.fields.emplace_back();
 
     FieldData data = ret.dataAllowingNone(*this);
     data->name = name;
@@ -1470,19 +1472,19 @@ string_view GlobalState::enterString(string_view nm) {
             ENFORCE(nm.find(">") == string::npos);
         }
     });
-    auto ret = strings.enterString(nm);
+    auto ret = this->storage.strings.enterString(nm);
     return ret;
 }
 
 NameRef GlobalState::lookupNameUTF8(string_view nm) const {
     const auto hs = _hash(nm);
-    unsigned int hashTableSize = namesByHash.size();
+    unsigned int hashTableSize = this->storage.namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
     unsigned int probeCount = 1;
 
-    while (namesByHash[bucketId].rawId != 0u) {
-        auto &bucket = namesByHash[bucketId];
+    while (this->storage.namesByHash[bucketId].rawId != 0u) {
+        auto &bucket = this->storage.namesByHash[bucketId];
         if (bucket.hash == hs) {
             auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::UTF8 && name.dataUtf8(*this)->utf8 == nm) {
@@ -1498,13 +1500,13 @@ NameRef GlobalState::lookupNameUTF8(string_view nm) const {
 
 NameRef GlobalState::enterNameUTF8(string_view nm) {
     const auto hs = _hash(nm);
-    unsigned int hashTableSize = namesByHash.size();
+    unsigned int hashTableSize = this->storage.namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
     unsigned int probeCount = 1;
 
-    while (namesByHash[bucketId].rawId != 0u) {
-        auto &bucket = namesByHash[bucketId];
+    while (this->storage.namesByHash[bucketId].rawId != 0u) {
+        auto &bucket = this->storage.namesByHash[bucketId];
         if (bucket.hash == hs) {
             auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::UTF8 && name.dataUtf8(*this)->utf8 == nm) {
@@ -1518,23 +1520,24 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
 
     ENFORCE_NO_TIMER(probeCount != hashTableSize, "Full table?");
 
-    if (utf8Names.size() == utf8Names.capacity()) {
-        expandNames(utf8Names.capacity() * 2, constantNames.capacity(), uniqueNames.capacity());
-        hashTableSize = namesByHash.size();
+    if (this->storage.utf8Names.size() == this->storage.utf8Names.capacity()) {
+        expandNames(this->storage.utf8Names.capacity() * 2, this->storage.constantNames.capacity(),
+                    this->storage.uniqueNames.capacity());
+        hashTableSize = this->storage.namesByHash.size();
         mask = hashTableSize - 1;
         bucketId = hs & mask; // look for place in the new size
         probeCount = 1;
-        while (namesByHash[bucketId].rawId != 0) {
+        while (this->storage.namesByHash[bucketId].rawId != 0) {
             bucketId = (bucketId + probeCount) & mask;
             probeCount++;
         }
     }
 
-    auto name = NameRef(*this, NameKind::UTF8, utf8Names.size());
-    auto &bucket = namesByHash[bucketId];
+    auto name = NameRef(*this, NameKind::UTF8, this->storage.utf8Names.size());
+    auto &bucket = this->storage.namesByHash[bucketId];
     bucket.hash = hs;
     bucket.rawId = name.rawId();
-    utf8Names.emplace_back(UTF8Name{enterString(nm)});
+    this->storage.utf8Names.emplace_back(UTF8Name{enterString(nm)});
 
     ENFORCE(hashNameRef(*this, name) == hs);
     categoryCounterInc("names", "utf8");
@@ -1548,13 +1551,13 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE_NO_TIMER(original.isValidConstantName(*this), "making a constant name over wrong name kind");
 
     const auto hs = hashMixConstant(original.rawId());
-    unsigned int hashTableSize = namesByHash.size();
+    unsigned int hashTableSize = this->storage.namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
     unsigned int probeCount = 1;
 
-    while (namesByHash[bucketId].rawId != 0 && probeCount < hashTableSize) {
-        auto &bucket = namesByHash[bucketId];
+    while (this->storage.namesByHash[bucketId].rawId != 0 && probeCount < hashTableSize) {
+        auto &bucket = this->storage.namesByHash[bucketId];
         if (bucket.hash == hs) {
             auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::CONSTANT && name.dataCnst(*this)->original == original) {
@@ -1569,25 +1572,26 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     }
     ENFORCE_NO_TIMER(!nameTableFrozen);
 
-    if (constantNames.size() == constantNames.capacity()) {
-        expandNames(utf8Names.capacity(), constantNames.capacity() * 2, uniqueNames.capacity());
-        hashTableSize = namesByHash.size();
+    if (this->storage.constantNames.size() == this->storage.constantNames.capacity()) {
+        expandNames(this->storage.utf8Names.capacity(), this->storage.constantNames.capacity() * 2,
+                    this->storage.uniqueNames.capacity());
+        hashTableSize = this->storage.namesByHash.size();
         mask = hashTableSize - 1;
 
         bucketId = hs & mask; // look for place in the new size
         probeCount = 1;
-        while (namesByHash[bucketId].rawId != 0) {
+        while (this->storage.namesByHash[bucketId].rawId != 0) {
             bucketId = (bucketId + probeCount) & mask;
             probeCount++;
         }
     }
 
-    auto name = NameRef(*this, NameKind::CONSTANT, constantNames.size());
-    auto &bucket = namesByHash[bucketId];
+    auto name = NameRef(*this, NameKind::CONSTANT, this->storage.constantNames.size());
+    auto &bucket = this->storage.namesByHash[bucketId];
     bucket.hash = hs;
     bucket.rawId = name.rawId();
 
-    constantNames.emplace_back(ConstantName{original});
+    this->storage.constantNames.emplace_back(ConstantName{original});
     ENFORCE(hashNameRef(*this, name) == hs);
     wasModified_ = true;
     categoryCounterInc("names", "constant");
@@ -1605,13 +1609,13 @@ NameRef GlobalState::lookupNameConstant(NameRef original) const {
     ENFORCE(original.isValidConstantName(*this), "looking up a constant name over wrong name kind");
 
     const auto hs = hashMixConstant(original.rawId());
-    unsigned int hashTableSize = namesByHash.size();
+    unsigned int hashTableSize = this->storage.namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
     unsigned int probeCount = 1;
 
-    while (namesByHash[bucketId].rawId != 0 && probeCount < hashTableSize) {
-        auto &bucket = namesByHash[bucketId];
+    while (this->storage.namesByHash[bucketId].rawId != 0 && probeCount < hashTableSize) {
+        auto &bucket = this->storage.namesByHash[bucketId];
         if (bucket.hash == hs) {
             auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::CONSTANT && name.dataCnst(*this)->original == original) {
@@ -1633,7 +1637,7 @@ NameRef GlobalState::lookupNameConstant(string_view original) const {
     return lookupNameConstant(utf8);
 }
 
-void GlobalState::moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned int szTo) {
+void GlobalState::moveNames(Storage::Bucket *from, Storage::Bucket *to, unsigned int szFrom, unsigned int szTo) {
     // printf("\nResizing name hash table from %u to %u\n", szFrom, szTo);
     ENFORCE_NO_TIMER((szTo & (szTo - 1)) == 0, "name hash table size corruption");
     ENFORCE_NO_TIMER((szFrom & (szFrom - 1)) == 0, "name hash table size corruption");
@@ -1654,29 +1658,30 @@ void GlobalState::moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsig
 
 void GlobalState::expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize) {
     sanityCheck();
-    utf8Names.reserve(utf8NameSize);
-    constantNames.reserve(constantNameSize);
-    uniqueNames.reserve(uniqueNameSize);
+    this->storage.utf8Names.reserve(utf8NameSize);
+    this->storage.constantNames.reserve(constantNameSize);
+    this->storage.uniqueNames.reserve(uniqueNameSize);
 
     uint32_t hashTableSize = 2 * nextPowerOfTwo(utf8NameSize + constantNameSize + uniqueNameSize);
 
-    if (hashTableSize > namesByHash.size()) {
-        vector<Bucket> new_namesByHash(hashTableSize);
-        moveNames(namesByHash.data(), new_namesByHash.data(), namesByHash.size(), new_namesByHash.capacity());
-        namesByHash.swap(new_namesByHash);
+    if (hashTableSize > this->storage.namesByHash.size()) {
+        vector<Storage::Bucket> new_namesByHash(hashTableSize);
+        moveNames(this->storage.namesByHash.data(), new_namesByHash.data(), this->storage.namesByHash.size(),
+                  new_namesByHash.capacity());
+        this->storage.namesByHash.swap(new_namesByHash);
     }
 }
 
 NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, uint32_t num) const {
     ENFORCE_NO_TIMER(num > 0, "num == 0, name overflow");
     const auto hs = hashMixUnique(uniqueNameKind, num, original.rawId());
-    unsigned int hashTableSize = namesByHash.size();
+    unsigned int hashTableSize = this->storage.namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
     unsigned int probeCount = 1;
 
-    while (namesByHash[bucketId].rawId != 0 && probeCount < hashTableSize) {
-        auto &bucket = namesByHash[bucketId];
+    while (this->storage.namesByHash[bucketId].rawId != 0 && probeCount < hashTableSize) {
+        auto &bucket = this->storage.namesByHash[bucketId];
         if (bucket.hash == hs) {
             auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::UNIQUE && name.dataUnique(*this)->uniqueNameKind == uniqueNameKind &&
@@ -1693,13 +1698,13 @@ NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef ori
 NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, uint32_t num) {
     ENFORCE_NO_TIMER(num > 0, "num == 0, name overflow");
     const auto hs = hashMixUnique(uniqueNameKind, num, original.rawId());
-    unsigned int hashTableSize = namesByHash.size();
+    unsigned int hashTableSize = this->storage.namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
     unsigned int probeCount = 1;
 
-    while (namesByHash[bucketId].rawId != 0 && probeCount < hashTableSize) {
-        auto &bucket = namesByHash[bucketId];
+    while (this->storage.namesByHash[bucketId].rawId != 0 && probeCount < hashTableSize) {
+        auto &bucket = this->storage.namesByHash[bucketId];
         if (bucket.hash == hs) {
             auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::UNIQUE && name.dataUnique(*this)->uniqueNameKind == uniqueNameKind &&
@@ -1715,25 +1720,26 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     }
     ENFORCE_NO_TIMER(!nameTableFrozen);
 
-    if (uniqueNames.size() == uniqueNames.capacity()) {
-        expandNames(utf8Names.capacity(), constantNames.capacity(), uniqueNames.capacity() * 2);
-        hashTableSize = namesByHash.size();
+    if (this->storage.uniqueNames.size() == this->storage.uniqueNames.capacity()) {
+        expandNames(this->storage.utf8Names.capacity(), this->storage.constantNames.capacity(),
+                    this->storage.uniqueNames.capacity() * 2);
+        hashTableSize = this->storage.namesByHash.size();
         mask = hashTableSize - 1;
 
         bucketId = hs & mask; // look for place in the new size
         probeCount = 1;
-        while (namesByHash[bucketId].rawId != 0) {
+        while (this->storage.namesByHash[bucketId].rawId != 0) {
             bucketId = (bucketId + probeCount) & mask;
             probeCount++;
         }
     }
 
-    auto name = NameRef(*this, NameKind::UNIQUE, uniqueNames.size());
-    auto &bucket = namesByHash[bucketId];
+    auto name = NameRef(*this, NameKind::UNIQUE, this->storage.uniqueNames.size());
+    auto &bucket = this->storage.namesByHash[bucketId];
     bucket.hash = hs;
     bucket.rawId = name.rawId();
 
-    uniqueNames.emplace_back(UniqueName{original, num, uniqueNameKind});
+    this->storage.uniqueNames.emplace_back(UniqueName{original, num, uniqueNameKind});
     ENFORCE(hashNameRef(*this, name) == hs);
     wasModified_ = true;
     categoryCounterInc("names", "unique");
@@ -1744,7 +1750,7 @@ FileRef GlobalState::enterFile(shared_ptr<File> file) {
     ENFORCE_NO_TIMER(!fileTableFrozen);
 
     SLOW_DEBUG_ONLY(for (auto &f
-                         : this->files) {
+                         : this->storage.files) {
         if (f) {
             if (f->path() == file->path()) {
                 Exception::raise("Request to `enterFile` for already-entered file path?");
@@ -1753,9 +1759,9 @@ FileRef GlobalState::enterFile(shared_ptr<File> file) {
     })
 
     auto path = file->path();
-    files.emplace_back(std::move(file));
+    this->storage.files.emplace_back(std::move(file));
     auto ret = FileRef(filesUsed() - 1);
-    fileRefByPath[path] = ret;
+    this->storage.fileRefByPath[path] = ret;
     return ret;
 }
 
@@ -1766,12 +1772,12 @@ FileRef GlobalState::enterFile(string_view path, string_view source) {
 
 FileRef GlobalState::enterNewFileAt(shared_ptr<File> file, FileRef id) {
     ENFORCE_NO_TIMER(!fileTableFrozen);
-    ENFORCE_NO_TIMER(id.id() < this->files.size());
-    ENFORCE_NO_TIMER(this->files[id.id()]->sourceType == File::Type::NotYetRead);
-    ENFORCE_NO_TIMER(this->files[id.id()]->path() == file->path());
+    ENFORCE_NO_TIMER(id.id() < this->storage.files.size());
+    ENFORCE_NO_TIMER(this->storage.files[id.id()]->sourceType == File::Type::NotYetRead);
+    ENFORCE_NO_TIMER(this->storage.files[id.id()]->path() == file->path());
 
     // was a tombstone before.
-    this->files[id.id()] = std::move(file);
+    this->storage.files[id.id()] = std::move(file);
     return id;
 }
 
@@ -1843,10 +1849,10 @@ void GlobalState::deleteMethodSymbol(MethodRef what) {
     ENFORCE_NO_TIMER(fnd->second == what);
     ownerMembers.erase(fnd);
     for (const auto typeArgument : whatData->typeArguments()) {
-        this->typeArguments[typeArgument.id()] = this->typeArguments[0].deepCopy(*this);
+        this->storage.typeArguments[typeArgument.id()] = this->storage.typeArguments[0].deepCopy(*this);
     }
     // This drops the existing core::Method, which drops the `ArgInfo`s the method owned.
-    this->methods[what.id()] = this->methods[0].deepCopy(*this);
+    this->storage.methods[what.id()] = this->storage.methods[0].deepCopy(*this);
 }
 
 // Before using this method, double check the disclaimer on GlobalState::deleteMethodSymbol above.
@@ -1862,7 +1868,7 @@ void GlobalState::deleteFieldSymbol(FieldRef what) {
     ENFORCE_NO_TIMER(fnd != ownerMembers.end());
     ENFORCE_NO_TIMER(fnd->second == what);
     ownerMembers.erase(fnd);
-    this->fields[what.id()] = this->fields[0].deepCopy(*this);
+    this->storage.fields[what.id()] = this->storage.fields[0].deepCopy(*this);
 }
 
 // Before using this method, double check the disclaimer on GlobalState::deleteMethodSymbol above.
@@ -1885,47 +1891,47 @@ void GlobalState::deleteTypeMemberSymbol(TypeMemberRef what) {
     ENFORCE_NO_TIMER(fndTypeMember != ownerTypeMembers.end());
     ownerTypeMembers.erase(fndTypeMember);
 
-    this->typeMembers[what.id()] = this->typeMembers[0].deepCopy(*this);
+    this->storage.typeMembers[what.id()] = this->storage.typeMembers[0].deepCopy(*this);
 }
 
 unsigned int GlobalState::classAndModulesUsed() const {
-    return classAndModules.size();
+    return this->storage.classAndModules.size();
 }
 
 unsigned int GlobalState::methodsUsed() const {
-    return methods.size();
+    return this->storage.methods.size();
 }
 
 unsigned int GlobalState::fieldsUsed() const {
-    return fields.size();
+    return this->storage.fields.size();
 }
 
 unsigned int GlobalState::typeArgumentsUsed() const {
-    return typeArguments.size();
+    return this->storage.typeArguments.size();
 }
 
 unsigned int GlobalState::typeMembersUsed() const {
-    return typeMembers.size();
+    return this->storage.typeMembers.size();
 }
 
 unsigned int GlobalState::filesUsed() const {
-    return files.size();
+    return this->storage.files.size();
 }
 
 unsigned int GlobalState::namesUsedTotal() const {
-    return utf8Names.size() + constantNames.size() + uniqueNames.size();
+    return this->storage.utf8Names.size() + this->storage.constantNames.size() + this->storage.uniqueNames.size();
 }
 
 unsigned int GlobalState::utf8NamesUsed() const {
-    return utf8Names.size();
+    return this->storage.utf8Names.size();
 }
 
 unsigned int GlobalState::constantNamesUsed() const {
-    return constantNames.size();
+    return this->storage.constantNames.size();
 }
 
 unsigned int GlobalState::uniqueNamesUsed() const {
-    return uniqueNames.size();
+    return this->storage.uniqueNames.size();
 }
 
 unsigned int GlobalState::symbolsUsedTotal() const {
@@ -1947,15 +1953,18 @@ void GlobalState::sanityCheckTableSizes() const {
 
     Timer timeit(tracer(), "GlobalState::sanityCheckTableSizes");
     ENFORCE_NO_TIMER(namesUsedTotal() > 0, "empty name table size");
-    ENFORCE_NO_TIMER(!strings.empty(), "empty string table size");
-    ENFORCE_NO_TIMER(!namesByHash.empty(), "empty name hash table size");
-    ENFORCE_NO_TIMER((namesByHash.size() & (namesByHash.size() - 1)) == 0,
+    ENFORCE_NO_TIMER(!this->storage.strings.empty(), "empty string table size");
+    ENFORCE_NO_TIMER(!this->storage.namesByHash.empty(), "empty name hash table size");
+    ENFORCE_NO_TIMER((this->storage.namesByHash.size() & (this->storage.namesByHash.size() - 1)) == 0,
                      "name hash table size is not a power of two");
-    ENFORCE_NO_TIMER(nextPowerOfTwo(utf8Names.capacity() + constantNames.capacity() + uniqueNames.capacity()) * 2 ==
-                         namesByHash.capacity(),
+    ENFORCE_NO_TIMER(nextPowerOfTwo(this->storage.utf8Names.capacity() + this->storage.constantNames.capacity() +
+                                    this->storage.uniqueNames.capacity()) *
+                             2 ==
+                         this->storage.namesByHash.capacity(),
                      "name table and hash name table sizes out of sync names.capacity={} namesByHash.capacity={}",
-                     namesUsedTotal(), namesByHash.capacity());
-    ENFORCE_NO_TIMER(namesByHash.size() == namesByHash.capacity(), "hash name table not at full capacity");
+                     namesUsedTotal(), this->storage.namesByHash.capacity());
+    ENFORCE_NO_TIMER(this->storage.namesByHash.size() == this->storage.namesByHash.capacity(),
+                     "hash name table not at full capacity");
 }
 
 void GlobalState::sanityCheckNames() const {
@@ -1970,15 +1979,15 @@ void GlobalState::sanityCheckNames() const {
 
     Timer timeit(tracer(), "GlobalState::sanityCheck (names)");
 
-    for (uint32_t i = 0; i < utf8Names.size(); i++) {
+    for (uint32_t i = 0; i < this->storage.utf8Names.size(); i++) {
         NameRef(*this, NameKind::UTF8, i).sanityCheck(*this);
     }
 
-    for (uint32_t i = 0; i < constantNames.size(); i++) {
+    for (uint32_t i = 0; i < this->storage.constantNames.size(); i++) {
         NameRef(*this, NameKind::CONSTANT, i).sanityCheck(*this);
     }
 
-    for (uint32_t i = 0; i < uniqueNames.size(); i++) {
+    for (uint32_t i = 0; i < this->storage.uniqueNames.size(); i++) {
         NameRef(*this, NameKind::UNIQUE, i).sanityCheck(*this);
     }
 }
@@ -2000,7 +2009,7 @@ void GlobalState::sanityCheck() const {
     {
         Timer timeit(tracer(), "GlobalState::sanityCheck (symbols)");
         int i = -1;
-        for (auto &sym : classAndModules) {
+        for (auto &sym : this->storage.classAndModules) {
             i++;
             if (i != 0) {
                 sym.sanityCheck(*this);
@@ -2008,7 +2017,7 @@ void GlobalState::sanityCheck() const {
         }
 
         i = -1;
-        for (auto &sym : methods) {
+        for (auto &sym : this->storage.methods) {
             i++;
             if (i != 0) {
                 sym.sanityCheck(*this);
@@ -2016,7 +2025,7 @@ void GlobalState::sanityCheck() const {
         }
 
         i = -1;
-        for (auto &sym : fields) {
+        for (auto &sym : this->storage.fields) {
             i++;
             if (i != 0) {
                 sym.sanityCheck(*this);
@@ -2024,7 +2033,7 @@ void GlobalState::sanityCheck() const {
         }
 
         i = -1;
-        for (auto &sym : typeArguments) {
+        for (auto &sym : this->storage.typeArguments) {
             i++;
             if (i != 0) {
                 sym.sanityCheck(*this);
@@ -2032,13 +2041,13 @@ void GlobalState::sanityCheck() const {
         }
 
         i = -1;
-        for (auto &sym : typeMembers) {
+        for (auto &sym : this->storage.typeMembers) {
             i++;
             if (i != 0) {
                 sym.sanityCheck(*this);
             }
         }
-        for (auto &ent : namesByHash) {
+        for (auto &ent : this->storage.namesByHash) {
             if (ent.rawId == 0) {
                 continue;
             }
@@ -2119,58 +2128,11 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     result->deepCloneHistory.emplace_back(
         DeepCloneHistoryEntry{this->globalStateId, utf8NamesUsed(), constantNamesUsed(), uniqueNamesUsed()});
 
-    result->strings = this->strings;
-    result->files = this->files;
-    result->fileRefByPath = this->fileRefByPath;
     result->lspQuery = this->lspQuery;
     result->kvstoreUuid = this->kvstoreUuid;
     result->lspTypecheckCount = this->lspTypecheckCount;
-    result->utf8Names.reserve(this->utf8Names.capacity());
-    result->constantNames.reserve(this->constantNames.capacity());
-    result->uniqueNames.reserve(this->uniqueNames.capacity());
-    if (keepId) {
-        result->utf8Names.resize(this->utf8Names.size());
-        ::memcpy(result->utf8Names.data(), this->utf8Names.data(), this->utf8Names.size() * sizeof(UTF8Name));
-        result->constantNames.resize(this->constantNames.size());
-        ::memcpy(result->constantNames.data(), this->constantNames.data(),
-                 this->constantNames.size() * sizeof(ConstantName));
-        result->uniqueNames.resize(this->uniqueNames.size());
-        ::memcpy(result->uniqueNames.data(), this->uniqueNames.data(), this->uniqueNames.size() * sizeof(UniqueName));
-    } else {
-        for (auto &utf8Name : this->utf8Names) {
-            result->utf8Names.emplace_back(utf8Name.deepCopy(*result));
-        }
-        for (auto &constantName : this->constantNames) {
-            result->constantNames.emplace_back(constantName.deepCopy(*result));
-        }
-        for (auto &uniqueName : this->uniqueNames) {
-            result->uniqueNames.emplace_back(uniqueName.deepCopy(*result));
-        }
-    }
+    result->storage = this->storage.deepCopy(*result, keepId);
 
-    result->namesByHash.reserve(this->namesByHash.size());
-    result->namesByHash = this->namesByHash;
-
-    result->classAndModules.reserve(this->classAndModules.capacity());
-    for (auto &sym : this->classAndModules) {
-        result->classAndModules.emplace_back(sym.deepCopy(*result, keepId));
-    }
-    result->methods.reserve(this->methods.capacity());
-    for (auto &sym : this->methods) {
-        result->methods.emplace_back(sym.deepCopy(*result));
-    }
-    result->fields.reserve(this->fields.capacity());
-    for (auto &sym : this->fields) {
-        result->fields.emplace_back(sym.deepCopy(*result));
-    }
-    result->typeArguments.reserve(this->typeArguments.capacity());
-    for (auto &sym : this->typeArguments) {
-        result->typeArguments.emplace_back(sym.deepCopy(*result));
-    }
-    result->typeMembers.reserve(this->typeMembers.capacity());
-    for (auto &sym : this->typeMembers) {
-        result->typeMembers.emplace_back(sym.deepCopy(*result));
-    }
     for (auto &semanticExtension : this->semanticExtensions) {
         result->semanticExtensions.emplace_back(semanticExtension->deepCopy(*this, *result));
     }
@@ -2196,8 +2158,8 @@ GlobalState::copyForIndex(const vector<string> &extraPackageFilesDirectoryUnders
     result->copyOptions(*this);
 
     // Additional options that might be used during indexing are manually copied over here
-    result->files = this->files;
-    result->fileRefByPath = this->fileRefByPath;
+    result->storage.files = this->storage.files;
+    result->storage.fileRefByPath = this->storage.fileRefByPath;
     result->kvstoreUuid = this->kvstoreUuid;
 
     {
@@ -2228,22 +2190,22 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
 
     // We share the file table entries with the original GlobalState, and then copy the content of the name table,
     // string storage, and uuid to ensure that we remain compatible with the session cache.
-    result->files = this->files;
-    result->fileRefByPath = this->fileRefByPath;
+    result->storage.files = this->storage.files;
+    result->storage.fileRefByPath = this->storage.fileRefByPath;
     result->kvstoreUuid = this->kvstoreUuid;
-    result->strings = this->strings;
-    result->utf8Names = this->utf8Names;
-    result->constantNames = this->constantNames;
-    result->uniqueNames = this->uniqueNames;
-    result->namesByHash = this->namesByHash;
+    result->storage.strings = this->storage.strings;
+    result->storage.utf8Names = this->storage.utf8Names;
+    result->storage.constantNames = this->storage.constantNames;
+    result->storage.uniqueNames = this->storage.uniqueNames;
+    result->storage.namesByHash = this->storage.namesByHash;
 
     // Reserve space for the symbol tables, under the assumption that we'll probably grow to a similar size on the slow
     // path.
-    result->classAndModules.reserve(this->classAndModules.capacity());
-    result->methods.reserve(this->methods.capacity());
-    result->fields.reserve(this->fields.capacity());
-    result->typeArguments.reserve(this->typeArguments.capacity());
-    result->typeMembers.reserve(this->typeMembers.capacity());
+    result->storage.classAndModules.reserve(this->storage.classAndModules.capacity());
+    result->storage.methods.reserve(this->storage.methods.capacity());
+    result->storage.fields.reserve(this->storage.fields.capacity());
+    result->storage.typeArguments.reserve(this->storage.typeArguments.capacity());
+    result->storage.typeMembers.reserve(this->storage.typeMembers.capacity());
 
     {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
@@ -2261,14 +2223,15 @@ void GlobalState::mergeFileTable(const core::GlobalState &from) {
     UnfreezeFileTable unfreezeFiles(*this);
     // id 0 is for non-existing FileRef
     for (int fileIdx = 1; fileIdx < from.filesUsed(); fileIdx++) {
-        if (from.files[fileIdx]->sourceType == File::Type::NotYetRead) {
+        if (from.storage.files[fileIdx]->sourceType == File::Type::NotYetRead) {
             continue;
         }
-        if (fileIdx < this->filesUsed() && from.files[fileIdx].get() == this->files[fileIdx].get()) {
+        if (fileIdx < this->filesUsed() && from.storage.files[fileIdx].get() == this->storage.files[fileIdx].get()) {
             continue;
         }
-        ENFORCE_NO_TIMER(fileIdx >= this->filesUsed() || this->files[fileIdx]->sourceType == File::Type::NotYetRead);
-        this->enterNewFileAt(from.files[fileIdx], fileIdx);
+        ENFORCE_NO_TIMER(fileIdx >= this->filesUsed() ||
+                         this->storage.files[fileIdx]->sourceType == File::Type::NotYetRead);
+        this->enterNewFileAt(from.storage.files[fileIdx], fileIdx);
     }
 }
 
@@ -2380,7 +2343,7 @@ void GlobalState::trace(string_view msg) const {
 
 void GlobalState::markAsPayload() {
     bool seenEmpty = false;
-    for (auto &f : files) {
+    for (auto &f : this->storage.files) {
         if (!seenEmpty) {
             ENFORCE_NO_TIMER(!f);
             seenEmpty = true;
@@ -2393,12 +2356,12 @@ void GlobalState::markAsPayload() {
 std::shared_ptr<File> GlobalState::replaceFile(FileRef whatFile, shared_ptr<File> withWhat) {
     ENFORCE_NO_TIMER(whatFile.id() < filesUsed());
     ENFORCE_NO_TIMER(whatFile.dataAllowingUnsafe(*this).path() == withWhat->path());
-    return std::exchange(files[whatFile.id()], std::move(withWhat));
+    return std::exchange(this->storage.files[whatFile.id()], std::move(withWhat));
 }
 
 FileRef GlobalState::findFileByPath(string_view path) const {
-    auto fnd = fileRefByPath.find(path);
-    if (fnd != fileRefByPath.end()) {
+    auto fnd = this->storage.fileRefByPath.find(path);
+    if (fnd != this->storage.fileRefByPath.end()) {
         return fnd->second;
     }
     return FileRef();
@@ -2437,7 +2400,7 @@ packages::UnfreezePackages GlobalState::unfreezePackages() {
 
 unique_ptr<GlobalState> GlobalState::markFileAsTombStone(unique_ptr<GlobalState> what, FileRef fref) {
     ENFORCE_NO_TIMER(fref.id() < what->filesUsed());
-    what->files[fref.id()]->sourceType = File::Type::TombStone;
+    what->storage.files[fref.id()]->sourceType = File::Type::TombStone;
     return what;
 }
 
@@ -2453,7 +2416,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     UnorderedMap<WithoutUniqueNameHash, uint32_t> retypecheckableSymbolHashesMap;
     int counter = 0;
 
-    for (const auto &sym : this->classAndModules) {
+    for (const auto &sym : this->storage.classAndModules) {
         if (!sym.ignoreInHashing(*this)) {
             auto &target = retypecheckableSymbolHashesMap[WithoutUniqueNameHash(*this, sym.name)];
             auto skipTypeMemberNames = false;
@@ -2465,7 +2428,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
             classModuleHash = mix(classModuleHash, classOrModuleShapeHash);
 
             counter++;
-            if (DEBUG_HASHING_TAIL && counter > this->classAndModules.size() - 15) {
+            if (DEBUG_HASHING_TAIL && counter > this->storage.classAndModules.size() - 15) {
                 errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
             }
         }
@@ -2476,19 +2439,19 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     // delete the method and all its arguments
 
     counter = 0;
-    for (const auto &typeMember : this->typeMembers) {
+    for (const auto &typeMember : this->storage.typeMembers) {
         counter++;
         // No type members are ignored in hashing.
         uint32_t symhash = typeMember.hash(*this);
         auto &target = retypecheckableSymbolHashesMap[WithoutUniqueNameHash(*this, typeMember.name)];
         target = mix(target, symhash);
-        if (DEBUG_HASHING_TAIL && counter > this->typeMembers.size() - 15) {
+        if (DEBUG_HASHING_TAIL && counter > this->storage.typeMembers.size() - 15) {
             errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, typeMember.name.show(*this));
         }
     }
 
     counter = 0;
-    for (const auto &field : this->fields) {
+    for (const auto &field : this->storage.fields) {
         counter++;
         // No fields are ignored in hashing.
         uint32_t symhash = field.hash(*this);
@@ -2514,13 +2477,13 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
             target = mix(target, symhash);
         }
 
-        if (DEBUG_HASHING_TAIL && counter > this->fields.size() - 15) {
+        if (DEBUG_HASHING_TAIL && counter > this->storage.fields.size() - 15) {
             errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, field.name.show(*this));
         }
     }
 
     counter = 0;
-    for (const auto &sym : this->methods) {
+    for (const auto &sym : this->storage.methods) {
         if (!sym.ignoreInHashing(*this)) {
             auto &target = retypecheckableSymbolHashesMap[WithoutUniqueNameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
@@ -2536,7 +2499,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
             }
 
             counter++;
-            if (DEBUG_HASHING_TAIL && counter > this->methods.size() - 15) {
+            if (DEBUG_HASHING_TAIL && counter > this->storage.methods.size() - 15) {
                 errorQueue->logger.info("Hashing method symbols: {}, {}", hierarchyHash, sym.name.show(*this));
             }
         }
@@ -2561,7 +2524,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
 }
 
 absl::Span<const shared_ptr<File>> GlobalState::getFiles() const {
-    return absl::MakeSpan(files);
+    return absl::MakeSpan(this->storage.files);
 }
 
 MethodRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
@@ -2610,6 +2573,102 @@ MethodRef GlobalState::lookupStaticInitForFile(FileRef file) const {
 
 spdlog::logger &GlobalState::tracer() const {
     return errorQueue->tracer;
+}
+
+GlobalState::Storage GlobalState::Storage::deepCopy(const core::GlobalState &to, bool keepId) const {
+    Storage result;
+
+    result.strings = this->strings;
+    result.files = this->files;
+    result.fileRefByPath = this->fileRefByPath;
+    result.utf8Names.reserve(this->utf8Names.capacity());
+    result.constantNames.reserve(this->constantNames.capacity());
+    result.uniqueNames.reserve(this->uniqueNames.capacity());
+
+    if (keepId) {
+        result.utf8Names.resize(this->utf8Names.size());
+        ::memcpy(result.utf8Names.data(), this->utf8Names.data(), this->utf8Names.size() * sizeof(UTF8Name));
+        result.constantNames.resize(this->constantNames.size());
+        ::memcpy(result.constantNames.data(), this->constantNames.data(),
+                 this->constantNames.size() * sizeof(ConstantName));
+        result.uniqueNames.resize(this->uniqueNames.size());
+        ::memcpy(result.uniqueNames.data(), this->uniqueNames.data(), this->uniqueNames.size() * sizeof(UniqueName));
+    } else {
+        for (auto &utf8Name : this->utf8Names) {
+            result.utf8Names.emplace_back(utf8Name.deepCopy(to));
+        }
+        for (auto &constantName : this->constantNames) {
+            result.constantNames.emplace_back(constantName.deepCopy(to));
+        }
+        for (auto &uniqueName : this->uniqueNames) {
+            result.uniqueNames.emplace_back(uniqueName.deepCopy(to));
+        }
+    }
+
+    result.namesByHash.reserve(this->namesByHash.size());
+    result.namesByHash = this->namesByHash;
+
+    result.classAndModules.reserve(this->classAndModules.capacity());
+    for (auto &sym : this->classAndModules) {
+        result.classAndModules.emplace_back(sym.deepCopy(to, keepId));
+    }
+    result.methods.reserve(this->methods.capacity());
+    for (auto &sym : this->methods) {
+        result.methods.emplace_back(sym.deepCopy(to));
+    }
+    result.fields.reserve(this->fields.capacity());
+    for (auto &sym : this->fields) {
+        result.fields.emplace_back(sym.deepCopy(to));
+    }
+    result.typeArguments.reserve(this->typeArguments.capacity());
+    for (auto &sym : this->typeArguments) {
+        result.typeArguments.emplace_back(sym.deepCopy(to));
+    }
+    result.typeMembers.reserve(this->typeMembers.capacity());
+    for (auto &sym : this->typeMembers) {
+        result.typeMembers.emplace_back(sym.deepCopy(to));
+    }
+
+    return result;
+}
+
+void GlobalState::Storage::reset(Snapshot snapshot) {
+    ENFORCE(snapshot.numFiles <= this->files.size());
+    this->files.resize(snapshot.numFiles);
+    this->fileRefByPath.clear();
+    auto id = 0;
+    for (auto &file : absl::MakeSpan(this->files).subspan(1)) {
+        ++id;
+        this->fileRefByPath[file->path()] = core::FileRef(id);
+    }
+
+    ENFORCE(snapshot.numClassesAndModules <= this->classAndModules.size());
+    this->classAndModules.resize(snapshot.numClassesAndModules);
+
+    ENFORCE(snapshot.numMethods <= this->methods.size());
+    this->methods.resize(snapshot.numMethods);
+
+    ENFORCE(snapshot.numFields <= this->fields.size());
+    this->fields.resize(snapshot.numFields);
+
+    ENFORCE(snapshot.numTypeMembers <= this->typeMembers.size());
+    this->typeMembers.resize(snapshot.numTypeMembers);
+
+    ENFORCE(snapshot.numTypeArguments <= this->typeArguments.size());
+    this->typeArguments.resize(snapshot.numTypeArguments);
+}
+
+GlobalState::Snapshot GlobalState::Storage::snapshot() const {
+    Snapshot result;
+
+    result.numFiles = this->files.size();
+    result.numClassesAndModules = this->classAndModules.size();
+    result.numMethods = this->methods.size();
+    result.numFields = this->fields.size();
+    result.numTypeMembers = this->typeMembers.size();
+    result.numTypeArguments = this->typeArguments.size();
+
+    return result;
 }
 
 } // namespace sorbet::core
