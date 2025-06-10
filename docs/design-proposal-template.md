@@ -20,6 +20,9 @@ sections.
 
 For more writing tips, see <https://blog.jez.io/dont-bury-the-lede/>
 
+**Note**: Most of the writing prompts in this template are commented out—you may
+want to consider the "Raw" view when reading on GitHub.
+
 - - - - -
 
 - **Author(s)**: TODO
