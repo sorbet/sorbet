@@ -101,7 +101,7 @@ extend T::Sig
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span> &lt; Grandparent;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent;</span> <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">x:</span> T.class_of(Parent)).void}
+sig { params(<span class="hljs-symbol">x:</span> T.class_of(Parent)).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 
 example(Grandparent)   <span class="hljs-comment"># error</span>
@@ -138,7 +138,7 @@ Child.singleton_class.ancestors
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">some_class_method</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">x:</span> T.class_of(MyClass)).void}
+sig { params(<span class="hljs-symbol">x:</span> T.class_of(MyClass)).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example1</span><span class="hljs-params">(x)</span></span>
   x.new.some_instance_method  <span class="hljs-comment"># ok</span>
   x.some_class_method         <span class="hljs-comment"># ok</span>
@@ -164,7 +164,7 @@ example1(MyClass)             <span class="hljs-comment"># ok</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>This will make <code>some_instance_method</code> and <code>some_class_method</code> available on <code>MyClass</code>, just like before. But if we try to replace <code>T.class_of(MyClass)</code> with <code>T.class_of(MyInterface)</code>, it doesn’t work:</p>
-<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">x:</span> T.class_of(MyInterface)).void}  <span class="hljs-comment"># ← sig has changed</span>
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">x:</span> T.class_of(MyInterface)).void }  <span class="hljs-comment"># ← sig has changed</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example2</span><span class="hljs-params">(x)</span></span>
   x.new.some_instance_method  <span class="hljs-comment"># error: `new` does not exist</span>
   x.some_class_method         <span class="hljs-comment"># error: `some_class_method` does not exist</span>
@@ -195,7 +195,7 @@ example2(MyClass)             <span class="hljs-comment"># error: Expected `T.cl
 <li><p>Use <code>T.all(T::Class[MyInterface], MyInterface::ClassMethods)</code>.</p></li>
 </ol>
 <p>Specifically, option (2) looks like this:</p>
-<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">x:</span> T.all(T::Class[MyInterface], MyInterface::ClassMethods)).void}
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">x:</span> T.all(T::Class[MyInterface], MyInterface::ClassMethods)).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example3</span><span class="hljs-params">(x)</span></span>
   x.new.some_instance_method  <span class="hljs-comment"># ok</span>
   x.some_class_method         <span class="hljs-comment"># ok</span>
@@ -244,18 +244,18 @@ b = instantiate_class(B)
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">AbstractCommand</span></span>
   extend T::Helpers
   interface!
-  sig {abstract.void}
+  sig { abstract.void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyCommand</span></span>
   <span class="hljs-keyword">include</span> AbstractCommand
 
-  sig {override.void}
+  sig { override.void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span>;</span> puts(<span class="hljs-string">"Hello, world!"</span>); <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">command_klass:</span> T::Class[AbstractCommand]).void}
+sig { params(<span class="hljs-symbol">command_klass:</span> T::Class[AbstractCommand]).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run_command</span><span class="hljs-params">(command_klass)</span></span>
   <span class="hljs-comment"># (1) Instantiate some command class</span>
   command = command_klass.new

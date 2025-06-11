@@ -94,11 +94,11 @@
   Elem = type_member <span class="hljs-comment"># Makes the `Box` class generic</span>
 
   <span class="hljs-comment"># References the class-level generic `Elem`</span>
-  sig {params(<span class="hljs-symbol">val:</span> Elem).void}
+  sig { params(<span class="hljs-symbol">val:</span> Elem).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(<span class="hljs-symbol">val:</span>)</span></span>; @val = val; <span class="hljs-keyword">end</span>
-  sig {returns(Elem)}
+  sig { returns(Elem) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">val</span>;</span> @val; <span class="hljs-keyword">end</span>
-  sig {params(<span class="hljs-symbol">val:</span> Elem).returns(Elem)}
+  sig { params(<span class="hljs-symbol">val:</span> Elem).returns(Elem) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">val=</span><span class="hljs-params">(val)</span></span>; @val = val; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
@@ -158,7 +158,7 @@ T.reveal_type(res) <span class="hljs-comment"># `Integer`</span>
 </code></pre>
 <p>Sorbet will not check that <code>x</code> and <code>y</code> are the same class at runtime.</p>
 <p>Since generics are only checked statically, this removes using tests as a way to guard against misuses of <a href="/docs/untyped"><code>T.untyped</code></a>. For example, Sorbet will neither report a static error nor a runtime error on this example:</p>
-<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">xs:</span> Box[Integer]).void}
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">xs:</span> Box[Integer]).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(xs)</span></span>; <span class="hljs-keyword">end</span>
 
 untyped_box = Box[T.untyped].new(<span class="hljs-symbol">val:</span> <span class="hljs-string">'not an int'</span>)
@@ -193,7 +193,7 @@ foo(untyped_box)
 
   InstanceType = type_template
 
-  sig {returns(InstanceType)}
+  sig { returns(InstanceType) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">make_bad</span></span>
     InstanceType.new
     <span class="hljs-comment"># ^ this is not valid, because `InstanceType`</span>
@@ -213,7 +213,7 @@ foo(untyped_box)
   sig { abstract.returns(T::Class[InstanceType]) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">instance_type</span>;</span> <span class="hljs-keyword">end</span>
 
-  sig {returns(InstanceType)}
+  sig { returns(InstanceType) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">make</span></span>
     <span class="hljs-comment"># (2) Call `self.instance_type.new` instead of `InstanceType.new`</span>
     <span class="hljs-keyword">self</span>.instance_type.new
@@ -319,7 +319,7 @@ T.let(int_box, Box[Numeric])
   Elem = type_member(<span class="hljs-symbol">:out</span>)
 <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">int_box:</span> IBox[Integer]).void}
+sig { params(<span class="hljs-symbol">int_box:</span> IBox[Integer]).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(int_box)</span></span>
   T.let(int_box, IBox[Numeric]) <span class="hljs-comment"># OK</span>
 <span class="hljs-keyword">end</span>
@@ -336,7 +336,7 @@ sig {params(<span class="hljs-symbol">int_box:</span> IBox[Integer]).void}
   Elem = type_member(<span class="hljs-symbol">:out</span>)
 
   <span class="hljs-comment"># Elem can only be used in output position</span>
-  sig {abstract.returns(Elem)}
+  sig { abstract.returns(Elem) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">value</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
@@ -351,16 +351,16 @@ sig {params(<span class="hljs-symbol">int_box:</span> IBox[Integer]).void}
   Elem = type_member
 
   <span class="hljs-comment"># Within this class, `Elem` is invariant, so it can also be used in the input position</span>
-  sig {params(<span class="hljs-symbol">value:</span> Elem).void}
+  sig { params(<span class="hljs-symbol">value:</span> Elem).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(<span class="hljs-symbol">value:</span>)</span></span>; @value = value; <span class="hljs-keyword">end</span>
 
   <span class="hljs-comment"># Implement the `value` method from `IBox`</span>
-  sig {override.returns(Elem)}
+  sig { override.returns(Elem) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">value</span>;</span> @value; <span class="hljs-keyword">end</span>
 
   <span class="hljs-comment"># Add the ability to update the value</span>
   <span class="hljs-comment"># (allowed because `Elem` is invariant within this class)</span>
-  sig {params(<span class="hljs-symbol">value:</span> Elem).returns(Elem)}
+  sig { params(<span class="hljs-symbol">value:</span> Elem).returns(Elem) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">value=</span><span class="hljs-params">(value)</span></span>; @value = value; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
@@ -414,10 +414,10 @@ takes_func(wants_at_least_grandchild) <span class="hljs-comment"># error!</span>
 
   ParamType = type_member(<span class="hljs-symbol">:in</span>)
 
-  sig {abstract.params(<span class="hljs-symbol">input:</span> ParamType).returns(T::Boolean)}
+  sig { abstract.params(<span class="hljs-symbol">input:</span> ParamType).returns(T::Boolean) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">do_task</span><span class="hljs-params">(input)</span></span>; <span class="hljs-keyword">end</span>
 
-  sig {params(<span class="hljs-symbol">input:</span> T.all(ParamType, BasicObject)).returns(T::Boolean)}
+  sig { params(<span class="hljs-symbol">input:</span> T.all(ParamType, BasicObject)).returns(T::Boolean) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">do_task_with_logging</span><span class="hljs-params">(input)</span></span>
     Kernel.puts(input)
     res = do_task(input)
@@ -434,16 +434,16 @@ takes_func(wants_at_least_grandchild) <span class="hljs-comment"># error!</span>
 
   ParamType = type_member
 
-  sig {params(<span class="hljs-symbol">fn:</span> T.proc.params(<span class="hljs-symbol">param:</span> ParamType).returns(T::Boolean)).void}
+  sig { params(<span class="hljs-symbol">fn:</span> T.proc.params(<span class="hljs-symbol">param:</span> ParamType).returns(T::Boolean)).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(&amp;fn)</span></span>
     @fn = fn
   <span class="hljs-keyword">end</span>
 
-  sig {override.params(<span class="hljs-symbol">input:</span> ParamType).returns(T::Boolean)}
+  sig { override.params(<span class="hljs-symbol">input:</span> ParamType).returns(T::Boolean) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">do_task</span><span class="hljs-params">(input)</span></span>; @fn.call(input); <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">task:</span> ITask[Integer]).void}
+sig { params(<span class="hljs-symbol">task:</span> ITask[Integer]).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(task)</span></span>
   i = <span class="hljs-number">0</span>
   <span class="hljs-keyword">while</span> task.do_task_with_logging(i)
@@ -466,8 +466,8 @@ example(takes_int_task)
 
   Elem = type_member(<span class="hljs-symbol">:out</span>)
 
-  sig {abstract.returns(Elem)}
-  <span class="hljs-comment">#                     ^^^^ output position</span>
+  sig { abstract.returns(Elem) }
+  <span class="hljs-comment">#                      ^^^^ output position</span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">value</span>;</span> <span class="hljs-keyword">end</span>
 
   sig <span class="hljs-keyword">do</span>
@@ -495,7 +495,7 @@ example(takes_int_task)
   Input = type_member(<span class="hljs-symbol">:in</span>)
   Output = type_member(<span class="hljs-symbol">:out</span>)
 
-  sig {abstract.params(<span class="hljs-symbol">input:</span> Input).returns(Output)}
+  sig { abstract.params(<span class="hljs-symbol">input:</span> Input).returns(Output) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">call</span><span class="hljs-params">(input)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
@@ -566,7 +566,7 @@ T.reveal_type(int_box.value)
   RPCInput = type_member
   RPCOutput = type_member
 
-  sig {abstract.params(<span class="hljs-symbol">input:</span> RPCInput).returns(RPCOutput)}
+  sig { abstract.params(<span class="hljs-symbol">input:</span> RPCInput).returns(RPCOutput) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span><span class="hljs-params">(input)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
@@ -582,7 +582,7 @@ T.reveal_type(int_box.value)
   RPCInput = type_template {{<span class="hljs-symbol">fixed:</span> TextDocumentPositionParams}}
   RPCOutput = type_template {{<span class="hljs-symbol">fixed:</span> HoverResponse}}
 
-  sig {override.params(<span class="hljs-symbol">input:</span> RPCInput).returns(RPCOutput)}
+  sig { override.params(<span class="hljs-symbol">input:</span> RPCInput).returns(RPCOutput) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">run</span><span class="hljs-params">(input)</span></span>
     puts <span class="hljs-string">"Computing hover request at <span class="hljs-subst">#{input.position}</span>"</span>
     <span class="hljs-comment"># ...</span>
@@ -687,7 +687,7 @@ puts(x) <span class="hljs-comment"># error: This code is unreachable</span>
 <p>Sorbet does not have a way to place a bound on a generic method, but it’s usually possible to approximate it with <a href="/docs/intersection-types">intersection types (<code>T.all</code>)</a>:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
   extend T::Sig
-  sig {returns(Integer)}
+  sig { returns(Integer) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-number">0</span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 

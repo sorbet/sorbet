@@ -88,7 +88,7 @@
 <h3><a class="anchor" aria-hidden="true" id="exhaustiveness-checking"></a><a href="#exhaustiveness-checking" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Exhaustiveness checking</h3>
 <p>Sorbet has always supported <a href="https://sorbet.org/docs/union-types">union types</a>, which declare that a value can be one of a finite set of types:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) T.any(Integer, String) is a union type</span>
-sig {params(<span class="hljs-symbol">x:</span> T.any(Integer, String)).void}
+sig { params(<span class="hljs-symbol">x:</span> T.any(Integer, String)).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
   <span class="hljs-keyword">case</span> x
   <span class="hljs-keyword">when</span> Integer <span class="hljs-keyword">then</span> <span class="hljs-comment"># (2) x must be an Integer here</span>
@@ -98,7 +98,7 @@ sig {params(<span class="hljs-symbol">x:</span> T.any(Integer, String)).void}
 </code></pre>
 <p>Union types are a must-have for type checking real-world Ruby code bases. Sorbet supports union types by tracking the way control flows through a program to update its knowledge of what type each variable has at different points. In the <code>case</code> statement above, Sorbet knows that within each <code>when</code> branch, the variable <code>x</code> has a more specific type than it does outside the <code>case</code> statement.</p>
 <p>In the last six months, Sorbet gained the ability to guarantee that <strong>all cases must be handled</strong> (exhaustively). For example:</p>
-<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">x:</span> T.any(Integer, String)).void}
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">x:</span> T.any(Integer, String)).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
   <span class="hljs-keyword">case</span> x
   <span class="hljs-keyword">when</span> Integer <span class="hljs-keyword">then</span> <span class="hljs-comment"># x ...</span>
@@ -124,7 +124,7 @@ sig {params(<span class="hljs-symbol">x:</span> T.any(Integer, String)).void}
 </code></pre>
 <p>This declares an enum representing the suits of a standard deck of playing cards. As seen in the snippet, enums in Sorbet are normal Ruby classes: they’re created by subclassing <code>T::Enum</code>, and individual values are instances of that class, created by calling <code>new</code>. Because of this, <strong>enums in Sorbet are naturally type-safe</strong>: one enum value cannot be used where some other enum is expected, and vice versa. (By comparison, existing Ruby code often uses symbols like <code>:spades</code> or <code>:hearts</code> for enums, but all symbols are interchangeable at the type-level, so they provide no type safety.)</p>
 <p>Enums work hand-in-hand with exhaustiveness checks by design:</p>
-<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">suit:</span> Suit).void}
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">suit:</span> Suit).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">color_of_suit</span><span class="hljs-params">(suit)</span></span>
   <span class="hljs-keyword">case</span> suit
   <span class="hljs-keyword">when</span> Suit::Spades, Suit::Clubs <span class="hljs-keyword">then</span> puts <span class="hljs-string">'Black!'</span>
@@ -151,7 +151,7 @@ sig {params(<span class="hljs-symbol">x:</span> T.any(Integer, String)).void}
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>Sealing a class prevents it from being subclassed in other files. (Sealed modules are the same, but with <code>include</code> / <code>extend</code> instead of subclassing.) By restricting where inheritance happens, Sorbet can treat sealed classes and modules <strong>as if they were union types</strong> for the sake of exhaustiveness. For example:</p>
-<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">result:</span> Result).void}
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">result:</span> Result).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">handle_result</span><span class="hljs-params">(result)</span></span>
   <span class="hljs-keyword">case</span> result
   <span class="hljs-keyword">when</span> Found <span class="hljs-keyword">then</span> puts <span class="hljs-string">"Found object with ID <span class="hljs-subst">#{result.id}</span>"</span>
@@ -190,7 +190,7 @@ A = T.let([<span class="hljs-number">1</span>, <span class="hljs-number">2</span
 <h3><a class="anchor" aria-hidden="true" id="trivial-instance-variable-declarations"></a><a href="#trivial-instance-variable-declarations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Trivial instance variable declarations</h3>
 <p>Second, Sorbet relaxed the need for certain instance variable declarations. Like constants, instance variables required type annotations at <code>typed: strict</code> or else were treated as untyped. To understand which annotations aren’t required anymore, let’s first recap how things used to work:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
-sig {params(<span class="hljs-symbol">x:</span> Integer, <span class="hljs-symbol">y:</span> String).void}
+sig { params(<span class="hljs-symbol">x:</span> Integer, <span class="hljs-symbol">y:</span> String).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(x, y)</span></span>
   @x = T.let(x, Integer) <span class="hljs-comment"># ok</span>
   @y = y <span class="hljs-comment"># error: Use of undeclared variable `<span class="hljs-doctag">@y</span>`</span>
@@ -199,7 +199,7 @@ sig {params(<span class="hljs-symbol">x:</span> Integer, <span class="hljs-symbo
 </code></pre>
 <p>In this example, only <code>@x</code> has been declared with a type annotation (the <code>T.let</code>). Both <code>@y</code> and <code>@z</code> are undeclared to Sorbet, and thus both reported errors in <code>typed: strict</code>. Many people didn’t like this. They wanted Sorbet to treat <code>@y = y</code> as declaring the instance variable <code>@y</code>, and that’s exactly how it works now:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
-sig {params(<span class="hljs-symbol">x:</span> Integer, <span class="hljs-symbol">y:</span> String).void}
+sig { params(<span class="hljs-symbol">x:</span> Integer, <span class="hljs-symbol">y:</span> String).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(x, y)</span></span>
   @x = T.let(x, Integer) <span class="hljs-comment"># still ok</span>
   @y = y <span class="hljs-comment"># ok (new!)</span>
@@ -231,7 +231,7 @@ A.new.x_plus_1  <span class="hljs-comment"># undefined method `+` for NilClass</
 <p>By requiring instance variables to be declared in <code>initialize</code>, Sorbet ensures they actually have the type they’re annotated with. Sadly this ruled out using <code>typed: strict</code> to type common Ruby idioms. For example, this module doesn’t have an <code>initialize</code> method (nor should it!) but still uses an instance variable:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">B</span></span>
-  sig {returns(String)}
+  sig { returns(String) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">current_user</span></span>
     <span class="hljs-comment"># error: Use of undeclared variable `<span class="hljs-doctag">@current</span>_user`</span>
     @current_user <span class="hljs-params">||</span>= ENV.fetch(<span class="hljs-string">'USER'</span>)
@@ -242,7 +242,7 @@ A.new.x_plus_1  <span class="hljs-comment"># undefined method `+` for NilClass</
 <p>Using <code>typed: strict</code> with our <code>current_user</code> example from before now involves just a single line to declare the type of the <code>@current_user</code> variable:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">B</span></span>
-  sig {returns(String)}
+  sig { returns(String) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">current_user</span></span>
     <span class="hljs-comment"># Declare <span class="hljs-doctag">@current</span>_user as either String or nil:</span>
     @current_user = T.let(@current_user, T.nilable(String))
@@ -270,7 +270,7 @@ Charge.load_one(<span class="hljs-string">'ch_some_id'</span>) <span class="hljs
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AbstractModel</span></span>
   <span class="hljs-comment"># Returns `T.attached_class`, or "an instance of</span>
   <span class="hljs-comment"># whatever the current singleton class is"</span>
-  sig {params(<span class="hljs-symbol">id:</span> String).returns(T.attached_class)}
+  sig { params(<span class="hljs-symbol">id:</span> String).returns(T.attached_class) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">load_one</span><span class="hljs-params">(id)</span></span>
     <span class="hljs-comment"># ... calls self.new somewhere ...</span>
   <span class="hljs-keyword">end</span>

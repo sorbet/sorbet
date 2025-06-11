@@ -98,7 +98,7 @@ T.reveal_type(z) <span class="hljs-comment"># =&gt; String</span>
 
 <span class="hljs-comment"># --- File we're currently typing ---</span>
 
-sig {params(<span class="hljs-symbol">person:</span> Person).returns(Integer)}
+sig { params(<span class="hljs-symbol">person:</span> Person).returns(Integer) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">name_length</span><span class="hljs-params">(person)</span></span>
   name = person.name <span class="hljs-comment"># (*)</span>
   T.reveal_type(name) <span class="hljs-comment"># =&gt; T.untyped</span>
@@ -125,7 +125,7 @@ sig {params(<span class="hljs-symbol">person:</span> Person).returns(Integer)}
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-comment"># The annotation for .returns is wrong!</span>
-sig {params(<span class="hljs-symbol">person:</span> Person).returns(String)}
+sig { params(<span class="hljs-symbol">person:</span> Person).returns(String) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">name_length</span><span class="hljs-params">(person)</span></span>
   person.name.length
 <span class="hljs-keyword">end</span>

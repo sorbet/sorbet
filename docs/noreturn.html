@@ -62,12 +62,12 @@
         </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/noreturn.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">T.noreturn</h1></header><article><div><span><p>The type <code>T.noreturn</code> is an “impossible” type: zero values in the language have this type. This type has a number of key use cases.</p>
 <h2><a class="anchor" aria-hidden="true" id="declaring-that-a-method-always-raises"></a><a href="#declaring-that-a-method-always-raises" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Declaring that a method always raises</h2>
 <p><code>T.noreturn</code> can declare that a method never returns (for example, because it unconditionally raises).</p>
-<pre><code class="hljs css language-ruby">sig {returns(T.noreturn)}
+<pre><code class="hljs css language-ruby">sig { returns(T.noreturn) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">raise_always</span></span>
   raise RuntimeError
 <span class="hljs-keyword">end</span>
 
-sig {returns(T.noreturn)}
+sig { returns(T.noreturn) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">exit_program</span></span>
   exit
 <span class="hljs-keyword">end</span>
@@ -75,7 +75,7 @@ sig {returns(T.noreturn)}
 <p>In fact, neither <code>raise</code> nor <code>exit</code> are keywords in Ruby but are in fact methods (defined on the <code>Kernel</code> module in the standard library). Sorbet uses an <a href="/docs/rbi">RBI file</a> to declare that <a href="https://github.com/sorbet/sorbet/blob/a11ae1b427def972a6b6eb203c0d676f0f77ddae/rbi/core/kernel.rbi#L3104-L3127"><code>raise</code> and <code>exit</code> never returns</a>, among others.</p>
 <h2><a class="anchor" aria-hidden="true" id="detecting-unreachable-code"></a><a href="#detecting-unreachable-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Detecting unreachable code</h2>
 <p><code>T.noreturn</code> powers Sorbet’s unreachable (dead) code analysis, because it is impossible to have a value of type <code>T.noreturn</code>. For example:</p>
-<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">x:</span> T.nilable(Integer)).void}
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">x:</span> T.nilable(Integer)).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(x)</span></span>
   <span class="hljs-keyword">if</span> x.<span class="hljs-literal">nil</span>?
     raise <span class="hljs-string">""</span>
@@ -87,14 +87,14 @@ sig {returns(T.noreturn)}
 <p>Note that it can be useful to assert that a given branch of control flow <strong>must</strong> be unreachable. For these cases, Sorbet provides <a href="/docs/exhaustiveness#using-tabsurd-to-assert-a-dead-condition"><code>T.absurd</code></a>, which also handles exhaustiveness checking (a special case of asserting that a branch of code is unreachable).</p>
 <h2><a class="anchor" aria-hidden="true" id="writing-infinite-loops"></a><a href="#writing-infinite-loops" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Writing infinite loops</h2>
 <p>Another way a method can never return is if it infinitely loops, either by using <code>loop {...}</code> or by using a <code>while</code> loop with an unconditionally <code>true</code> condition, neither of which ever <code>break</code> out of the loop:</p>
-<pre><code class="hljs css language-ruby">sig {returns(T.noreturn)}
+<pre><code class="hljs css language-ruby">sig { returns(T.noreturn) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">loop_forever</span></span>
   loop <span class="hljs-keyword">do</span>
     <span class="hljs-comment"># ...</span>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
-sig {returns(T.noreturn)}
+sig { returns(T.noreturn) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">while_forever</span></span>
   <span class="hljs-keyword">while</span> <span class="hljs-literal">true</span>
     <span class="hljs-comment"># ...</span>
@@ -108,7 +108,7 @@ sig {returns(T.noreturn)}
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">B</span>;</span> <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">x:</span> T.all(A, B)).void}
+sig { params(<span class="hljs-symbol">x:</span> T.all(A, B)).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(x)</span></span>
   puts(x) <span class="hljs-comment"># error: This code is unreachable</span>
 <span class="hljs-keyword">end</span>
@@ -124,7 +124,7 @@ puts(x) <span class="hljs-comment"># error: This code is unreachable</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="tnoreturn-and-tuntyped"></a><a href="#tnoreturn-and-tuntyped" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T.noreturn</code> and <code>T.untyped</code></h2>
 <p>Despite what we’ve claimed throughout this page, technically it <strong>is</strong> possible to have a value of type <code>T.noreturn</code> by way of <code>T.untyped</code>:</p>
-<pre><code class="hljs css language-ruby">sig {returns(T.noreturn)}
+<pre><code class="hljs css language-ruby">sig { returns(T.noreturn) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">always_raises</span></span>
   T.unsafe(<span class="hljs-string">"Just kidding, it actually does return"</span>)
 <span class="hljs-keyword">end</span>

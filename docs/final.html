@@ -185,9 +185,9 @@ T::Configuration.enable_final_checks_on_hooks
 </blockquote>
 <p>The syntax for final methods is different from the syntax for things like abstract methods:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># These attributes are inside the block:</span>
-sig {overridable.void}
-sig {override.void}
-sig {abstract.void}
+sig { overridable.void }
+sig { override.void }
+sig { abstract.void }
 
 <span class="hljs-comment"># But this one is outside the block:</span>
 sig(<span class="hljs-symbol">:final</span>) {void}

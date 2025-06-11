@@ -96,7 +96,7 @@
   raise TypeError.new(opts[<span class="hljs-symbol">:pretty_message</span>])
 <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">x:</span> Integer).void.on_failure(<span class="hljs-symbol">:hello</span>, <span class="hljs-symbol">:world</span>)}
+sig { params(<span class="hljs-symbol">x:</span> Integer).void.on_failure(<span class="hljs-symbol">:hello</span>, <span class="hljs-symbol">:world</span>) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 </code></pre>
 <p>When the <code>call_validation_error_handler</code> is called this time, it will be passed all the args that were given to <code>on_failure</code> for the specific sig that failed.</p>

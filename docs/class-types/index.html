@@ -77,12 +77,12 @@
 </table>
 <p>To reiterate: a class type means &quot;any value which is an instance of this class&quot;. If <code>x.is_a?(SomeClass)</code> would return <code>true</code> when run, then <code>x</code> has type <code>SomeClass</code>.</p>
 <p>We can mention class types directly in a <a href="/docs/sigs">method signature</a>:</p>
-<pre><code class="hljs css language-ruby">sig {returns(Integer)}
+<pre><code class="hljs css language-ruby">sig { returns(Integer) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">age</span></span>
   <span class="hljs-number">25</span>
 <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">x:</span> Float).returns(String)}
+sig { params(<span class="hljs-symbol">x:</span> Float).returns(String) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">float_to_string</span><span class="hljs-params">(x)</span></span>
   x.to_s
 <span class="hljs-keyword">end</span>
@@ -91,7 +91,7 @@ sig {params(<span class="hljs-symbol">x:</span> Float).returns(String)}
 <p>One gotcha is that <code>false</code> is an instance of <code>FalseClass</code>, and <code>true</code> is an instance of <code>TrueClass</code>—there is no <code>Boolean</code> class in Ruby. So to represent the type of booleans in Sorbet, the <code>sorbet-runtime</code> uses <a href="/docs/type-aliases">type aliases</a> and <a href="/docs/union-types">union types</a> to define a convenient name for &quot;either <code>true</code> or <code>false</code>&quot;: <code>T::Boolean</code>.</p>
 <pre><code class="hljs css language-ruby">extend T::Sig
 
-sig {params(<span class="hljs-symbol">new_value:</span> T::Boolean).void}
+sig { params(<span class="hljs-symbol">new_value:</span> T::Boolean).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">set_flag</span><span class="hljs-params">(new_value)</span></span>
   @flag = new_value
   puts <span class="hljs-string">"Set value to <span class="hljs-subst">#{new_value}</span>"</span>
@@ -109,7 +109,7 @@ set_flag(<span class="hljs-literal">false</span>)
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span>;</span> <span class="hljs-keyword">end</span>
 
-sig {returns(MyClass)}
+sig { returns(MyClass) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>
   MyClass.new
 <span class="hljs-keyword">end</span>
@@ -125,7 +125,7 @@ sig {returns(MyClass)}
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChildClass</span> &lt; ParentClass;</span> <span class="hljs-keyword">end</span>
 
 <span class="hljs-comment"># Takes ParentClass or lower, not GrandParentClass</span>
-sig {params(<span class="hljs-symbol">x:</span> ParentClass).void}
+sig { params(<span class="hljs-symbol">x:</span> ParentClass).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 
 foo(GrandParentClass.new)  <span class="hljs-comment"># error</span>
@@ -135,9 +135,9 @@ foo(ChildClass.new)        <span class="hljs-comment"># ok</span>
 <h2><a class="anchor" aria-hidden="true" id="object-vs-basicobject"></a><a href="#object-vs-basicobject" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Object</code> vs <code>BasicObject</code></h2>
 <p>Another note about inheritance in Ruby concerns the distinction between <code>Object</code> and <code>BasicObject</code>. <code>Object</code> is what classes subclass by default, unless they explicitly subclass from <code>BasicObject</code>. <code>Object</code> subclasses from <code>BasicObject</code>. Again, let’s make this clear with an example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># Some helper methods to play with</span>
-sig {params(<span class="hljs-symbol">x:</span> Object).void}
+sig { params(<span class="hljs-symbol">x:</span> Object).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">takes_object</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
-sig {params(<span class="hljs-symbol">x:</span> BasicObject).void}
+sig { params(<span class="hljs-symbol">x:</span> BasicObject).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">takes_basic_object</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 
 <span class="hljs-comment"># The one error is because an instance of BasicObject is not an instance of Object</span>
@@ -169,7 +169,7 @@ takes_object(BasicObjectChild.new)         <span class="hljs-comment"># error</s
   <span class="hljs-keyword">include</span> MyModule
 <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">x:</span> MyModule).void}
+sig { params(<span class="hljs-symbol">x:</span> MyModule).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
   x.some_method
 <span class="hljs-keyword">end</span>

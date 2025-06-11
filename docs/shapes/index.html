@@ -81,7 +81,7 @@
 
 extend T::Sig
 
-sig {params(<span class="hljs-symbol">x:</span> {<span class="hljs-symbol">a:</span> Integer, <span class="hljs-symbol">b:</span> String}).void}
+sig { params(<span class="hljs-symbol">x:</span> {<span class="hljs-symbol">a:</span> Integer, <span class="hljs-symbol">b:</span> String}).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
   <span class="hljs-comment"># Limitation! returns T.untyped!</span>
   T.reveal_type(x[<span class="hljs-symbol">:a</span>]) <span class="hljs-comment"># Revealed type: `T.untyped`</span>

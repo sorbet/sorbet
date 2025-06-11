@@ -71,7 +71,7 @@
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child1</span>;</span> <span class="hljs-keyword">include</span> Parent; <span class="hljs-keyword">end</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child2</span>;</span> <span class="hljs-keyword">include</span> Parent; <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">x:</span> Parent).void}
+sig { params(<span class="hljs-symbol">x:</span> Parent).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
   <span class="hljs-keyword">case</span> x
   <span class="hljs-keyword">when</span> Child1 <span class="hljs-keyword">then</span> <span class="hljs-comment"># ...</span>
@@ -172,7 +172,7 @@ ChargeAttemptResult = T.type_alias {T.any(NotNeeded, Paid, Failed)}
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">invoice_state:</span> InvoiceState).void}
+sig { params(<span class="hljs-symbol">invoice_state:</span> InvoiceState).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">process_invoice</span><span class="hljs-params">(invoice_state)</span></span>
   <span class="hljs-keyword">case</span> invoice_state
   <span class="hljs-keyword">when</span> InvoiceState::Drafted

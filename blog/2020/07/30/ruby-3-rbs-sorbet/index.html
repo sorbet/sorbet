@@ -108,7 +108,7 @@ xs &lt;&lt; <span class="hljs-literal">nil</span>
 <p>For the time being, Matz and the Ruby core team want to experiment with type annotations without changing Ruby syntax, because that would require everyone to upgrade to a specific Ruby version to benefit. Because Sorbet values inline type annotations, we embedded a type annotation language in Ruby with no syntax changes needed:</p>
 <pre><code class="hljs css language-ruby">extend T::Sig
 
-sig {params(<span class="hljs-symbol">strings:</span> T::Array[String]).returns(Integer)}
+sig { params(<span class="hljs-symbol">strings:</span> T::Array[String]).returns(Integer) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">count_letters</span><span class="hljs-params">(strings)</span></span>
   strings.map(&amp;<span class="hljs-symbol">:length</span>).sum
 <span class="hljs-keyword">end</span>

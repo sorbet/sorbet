@@ -75,7 +75,7 @@
 
 extend T::Sig
 
-sig {params(<span class="hljs-symbol">x:</span> [Integer, String]).returns(Integer)}
+sig { params(<span class="hljs-symbol">x:</span> [Integer, String]).returns(Integer) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
   T.reveal_type(x[<span class="hljs-number">0</span>]) <span class="hljs-comment"># Revealed type: `Integer`</span>
 <span class="hljs-keyword">end</span>

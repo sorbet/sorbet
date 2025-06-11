@@ -78,13 +78,13 @@
   extend T::Sig
 
   <span class="hljs-comment"># (3) Add a `sig` annotation above your method:</span>
-  sig {params(<span class="hljs-symbol">x:</span> String).returns(Integer)}
+  sig { params(<span class="hljs-symbol">x:</span> String).returns(Integer) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">main</span><span class="hljs-params">(x)</span></span>
     x.length
   <span class="hljs-keyword">end</span>
 
   <span class="hljs-comment"># alternatively, for a method with no parameters:</span>
-  sig {returns(Integer)}
+  sig { returns(Integer) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">no_params</span></span>
     <span class="hljs-number">42</span>
   <span class="hljs-keyword">end</span>
@@ -129,7 +129,7 @@
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Main</span></span>
   extend T::Sig
 
-  sig {void}
+  sig { void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">main</span></span>
     puts <span class="hljs-string">'Hello, world!'</span>
   <span class="hljs-keyword">end</span>

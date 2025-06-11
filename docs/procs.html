@@ -68,7 +68,7 @@
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 
 <span class="hljs-comment"># (1) Declare the type of a block arg with `T.proc`:</span>
-sig {params(<span class="hljs-symbol">blk:</span> T.proc.params(<span class="hljs-symbol">arg0:</span> Integer).void).void}
+sig { params(<span class="hljs-symbol">blk:</span> T.proc.params(<span class="hljs-symbol">arg0:</span> Integer).void).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(&amp;blk)</span></span>
   x = T.let(<span class="hljs-string">'not an int'</span>, T.untyped)
 
@@ -89,7 +89,7 @@ foo <span class="hljs-keyword">do</span> <span class="hljs-params">|x|</span>
 extend T::Sig
 
 <span class="hljs-comment"># (1) Declare optional block with `T.nilable(...)`:</span>
-sig {params(<span class="hljs-symbol">blk:</span> T.nilable(T.proc.void)).void}
+sig { params(<span class="hljs-symbol">blk:</span> T.nilable(T.proc.void)).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(&amp;blk)</span></span>
   T.reveal_type(blk)   <span class="hljs-comment"># Revealed type: `T.nilable(T.proc.void)`</span>
 
@@ -117,7 +117,7 @@ sig {params(<span class="hljs-symbol">blk:</span> T.nilable(T.proc.void)).void}
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>And once it has a name, the method can be given a sig:</p>
-<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">blk:</span> T.proc.returns(Integer)).returns(Integer)}
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">blk:</span> T.proc.returns(Integer)).returns(Integer) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(&amp;blk)</span></span> <span class="hljs-comment"># &lt;-</span>
   <span class="hljs-keyword">yield</span>
 <span class="hljs-keyword">end</span>
@@ -215,7 +215,7 @@ sig <span class="hljs-keyword">do</span>
 <span class="hljs-comment">#     but the general ideas apply.</span>
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">T::Sig</span></span>
   <span class="hljs-comment"># (1) Use `T.proc.bind` to annotate the context in which the block will run</span>
-  sig {params(<span class="hljs-symbol">blk:</span> T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
+  sig { params(<span class="hljs-symbol">blk:</span> T.proc.bind(T::Private::Methods::DeclBuilder).void).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">sig</span><span class="hljs-params">(&amp;blk)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
@@ -231,7 +231,7 @@ sig <span class="hljs-keyword">do</span>
 extend T::Sig
 
 <span class="hljs-comment"># (1) Use `.bind(String)` to say "will be run in the context of a String":</span>
-sig {params(<span class="hljs-symbol">blk:</span> T.proc.bind(String).returns(String)).returns(String)}
+sig { params(<span class="hljs-symbol">blk:</span> T.proc.bind(String).returns(String)).returns(String) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(&amp;blk)</span></span>
   <span class="hljs-string">"hello"</span>.instance_eval(&amp;blk)
 <span class="hljs-keyword">end</span>
@@ -285,14 +285,14 @@ puts(upcased) <span class="hljs-comment"># =&gt; "HELLO"</span>
 <p>In Ruby there’s several ways to create a Proc: <code>proc</code> and <code>Proc.new</code>. Sorbet handles them differently because of how parameter arity works internally. Basically, you can use <code>T.proc</code> as the type for a <code>proc</code> (or <code>lambda {}</code> or <code>-&gt; {}</code>), but if you create your Proc using <code>Proc.new</code>, then the type is a <code>Proc</code>.</p>
 <p>The main downside of the <code>Proc.new</code> approach is that you can’t set argument types on it.</p>
 <p>Here’s an example:</p>
-<pre><code class="hljs css language-ruby">sig {returns(T.proc.params(<span class="hljs-symbol">a1:</span> Integer).returns(Integer))}
+<pre><code class="hljs css language-ruby">sig { returns(T.proc.params(<span class="hljs-symbol">a1:</span> Integer).returns(Integer)) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">lowercase_proc</span></span>
   <span class="hljs-comment"># if you are using `proc`, use `T.proc` in your sig</span>
   <span class="hljs-comment"># this is the preferred approach</span>
   proc {<span class="hljs-params">|n|</span> n * <span class="hljs-number">2</span> }
 <span class="hljs-keyword">end</span>
 
-sig {returns(Proc)}
+sig { returns(Proc) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">proc_dot_new</span></span>
   <span class="hljs-comment"># if you are using `Proc.new`, use `Proc` in your sig</span>
   <span class="hljs-comment"># note that you won't be able to define arguments/return types in your sig</span>

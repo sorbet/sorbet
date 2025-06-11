@@ -82,7 +82,7 @@
   extend T::Helpers                                    <span class="hljs-comment"># (1)</span>
   interface!                                           <span class="hljs-comment"># (2)</span>
 
-  sig {abstract.params(<span class="hljs-symbol">args:</span> T::Array[String]).void}   <span class="hljs-comment"># (3)</span>
+  sig { abstract.params(<span class="hljs-symbol">args:</span> T::Array[String]).void }   <span class="hljs-comment"># (3)</span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">main</span><span class="hljs-params">(args)</span></span>; <span class="hljs-keyword">end</span>                                  <span class="hljs-comment"># (4)</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
@@ -93,7 +93,7 @@
   <span class="hljs-keyword">include</span> Runnable
 
   <span class="hljs-comment"># This implements the abstract `main` method from our Runnable module:</span>
-  sig {override.params(<span class="hljs-symbol">args:</span> T::Array[String]).void}
+  sig { override.params(<span class="hljs-symbol">args:</span> T::Array[String]).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">main</span><span class="hljs-params">(args)</span></span>
     puts <span class="hljs-string">'Hello, world!'</span>
   <span class="hljs-keyword">end</span>
@@ -232,7 +232,7 @@ C.new(<span class="hljs-symbol">name:</span> <span class="hljs-string">"Some::Lo
 
   abstract!
 
-  sig {abstract.void}
+  sig { abstract.void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
@@ -302,12 +302,12 @@ A.bar
     extend T::Helpers
     abstract!
 
-    sig {void}
+    sig { void }
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>
       bar
     <span class="hljs-keyword">end</span>
 
-    sig {abstract.void}
+    sig { abstract.void }
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span>;</span> <span class="hljs-keyword">end</span>
   <span class="hljs-keyword">end</span>
 
@@ -319,7 +319,7 @@ A.bar
 
   extend T::Sig
 
-  sig {override.void}
+  sig { override.void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">bar</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
@@ -332,7 +332,7 @@ A.foo
 <h2><a class="anchor" aria-hidden="true" id="runtime-reflection-on-abstract-classes"></a><a href="#runtime-reflection-on-abstract-classes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Runtime reflection on abstract classes</h2>
 <p>From time to time, it’s useful to be able to ask whether a class or module object is abstract at runtime.</p>
 <p>This can be done with</p>
-<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">mod:</span> Module).void}
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">mod:</span> Module).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(mod)</span></span>
   <span class="hljs-keyword">if</span> T::AbstractUtils.abstract_module?(mod)
     puts <span class="hljs-string">"<span class="hljs-subst">#{mod}</span> is abstract"</span>
@@ -354,18 +354,18 @@ extend T::Sig
   extend T::Helpers
   abstract!
 
-  sig {abstract.void}
+  sig { abstract.void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">example</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span> &lt; AbstractFoo</span>
-  sig {override.void}
+  sig { override.void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">example</span></span>
     puts <span class="hljs-string">'Foo#example'</span>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">mod:</span> T.class_of(AbstractFoo)).void}
+sig { params(<span class="hljs-symbol">mod:</span> T.class_of(AbstractFoo)).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">calls_example_bad</span><span class="hljs-params">(mod)</span></span>
   <span class="hljs-comment"># even though there are no errors,</span>
   <span class="hljs-comment"># the call to mod.example is NOT always safe!</span>
@@ -373,7 +373,7 @@ sig {params(<span class="hljs-symbol">mod:</span> T.class_of(AbstractFoo)).void}
   mod.example
 <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">mod:</span> T.class_of(AbstractFoo)).void}
+sig { params(<span class="hljs-symbol">mod:</span> T.class_of(AbstractFoo)).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">calls_example_okay</span><span class="hljs-params">(mod)</span></span>
   <span class="hljs-keyword">if</span> !T::AbstractUtils.abstract_module?(mod)
     mod.example
@@ -399,20 +399,20 @@ extend T::Sig
   extend T::Helpers
   abstract!
 
-  sig {abstract.void}
+  sig { abstract.void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span></span>
   extend T::Sig
   extend IFoo
-  sig {override.void}
+  sig { override.void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">example</span></span>
     puts <span class="hljs-string">'Foo#example'</span>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">mod:</span> IFoo).void}
+sig { params(<span class="hljs-symbol">mod:</span> IFoo).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">calls_example_good</span><span class="hljs-params">(mod)</span></span>
   <span class="hljs-comment"># call to mod.example is always safe</span>
   mod.example

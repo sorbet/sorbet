@@ -97,17 +97,17 @@
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
   extend T::Sig
 
-  sig {overridable.params(<span class="hljs-symbol">x:</span> T.any(Integer, String)).void}
+  sig { overridable.params(<span class="hljs-symbol">x:</span> T.any(Integer, String)).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">takes_integer_or_string</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
-  sig {override.params(<span class="hljs-symbol">x:</span> Integer).void}
+  sig { override.params(<span class="hljs-symbol">x:</span> Integer).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">takes_integer_or_string</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span> <span class="hljs-comment"># error</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>This code has an error because the child class overrides <code>takes_integer_or_string</code> but narrows the input type. It’s important to reject overrides like this, because otherwise Sorbet would not be able to catch errors like this:</p>
-<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">parent:</span> Parent).void}
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">parent:</span> Parent).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(parent)</span></span>
   parent.takes_integer_or_string(<span class="hljs-string">'some string'</span>)
 <span class="hljs-keyword">end</span>
@@ -120,12 +120,12 @@ example(Child.new) <span class="hljs-comment"># throws at runtime!</span>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
   extend T::Sig
 
-  sig {overridable.returns(Numeric)}
+  sig { overridable.returns(Numeric) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">returns_at_most_numeric</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
-  sig {override.returns(T.any(Numeric, String))}
+  sig { override.returns(T.any(Numeric, String)) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">returns_at_most_numeric</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># error</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
@@ -136,12 +136,12 @@ example(Child.new) <span class="hljs-comment"># throws at runtime!</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CatFood</span>;</span> <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Dog</span></span>
-  sig {params(<span class="hljs-symbol">food:</span> DogFood).void}
+  sig { params(<span class="hljs-symbol">food:</span> DogFood).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Cat</span></span>
-  sig {params(<span class="hljs-symbol">food:</span> CatFood).void}
+  sig { params(<span class="hljs-symbol">food:</span> CatFood).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
@@ -153,19 +153,19 @@ example(Child.new) <span class="hljs-comment"># throws at runtime!</span>
   extend T::Helpers
   interface!
   <span class="hljs-comment"># Warning: this `T.any` is faulty, and leads to override checking errors</span>
-  sig {abstract.params(<span class="hljs-symbol">food:</span> T.any(DogFood, CatFood)).void}
+  sig { abstract.params(<span class="hljs-symbol">food:</span> T.any(DogFood, CatFood)).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Dog</span></span>
   <span class="hljs-keyword">include</span> Pet
-  sig {override.params(<span class="hljs-symbol">food:</span> DogFood).void}
+  sig { override.params(<span class="hljs-symbol">food:</span> DogFood).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span> <span class="hljs-comment"># error: DogFood is not a supertype of T.any(DogFood, CatFood)</span>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Cat</span></span>
   <span class="hljs-keyword">include</span> Pet
-  sig {override.params(<span class="hljs-symbol">food:</span> CatFood).void}
+  sig { override.params(<span class="hljs-symbol">food:</span> CatFood).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span> <span class="hljs-comment"># error: CatFood is not a supertype of T.any(DogFood, CatFood)</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
@@ -182,7 +182,7 @@ example(Child.new) <span class="hljs-comment"># throws at runtime!</span>
   FoodType = type_member
 
   <span class="hljs-comment"># (3) Use the `FoodType` generic type variable here</span>
-  sig {abstract.params(<span class="hljs-symbol">food:</span> FoodType).void}
+  sig { abstract.params(<span class="hljs-symbol">food:</span> FoodType).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
@@ -196,7 +196,7 @@ example(Child.new) <span class="hljs-comment"># throws at runtime!</span>
   <span class="hljs-comment"># (5) Use FoodType generic variable in the method.</span>
   <span class="hljs-comment">#     Because it's the same generic variable as in the abstract method,</span>
   <span class="hljs-comment">#     `feed` is now a valid override.</span>
-  sig {override.params(<span class="hljs-symbol">food:</span> FoodType).void}
+  sig { override.params(<span class="hljs-symbol">food:</span> FoodType).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
@@ -206,7 +206,7 @@ example(Child.new) <span class="hljs-comment"># throws at runtime!</span>
   extend T::Generic
   FoodType = type_member {{<span class="hljs-symbol">fixed:</span> CatFood}}
 
-  sig {override.params(<span class="hljs-symbol">food:</span> FoodType).void}
+  sig { override.params(<span class="hljs-symbol">food:</span> FoodType).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
@@ -259,12 +259,12 @@ give_food_to_pet(CatFood.new, Dog.new) <span class="hljs-comment"># error!</span
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
   extend T::Sig
 
-  sig {overridable.returns(Numeric)}
+  sig { overridable.returns(Numeric) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">returns_at_most_numeric</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
-  sig {override.returns(T.untyped)}
+  sig { override.returns(T.untyped) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">returns_at_most_numeric</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># no error, because of T.untyped</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
@@ -274,12 +274,12 @@ give_food_to_pet(CatFood.new, Dog.new) <span class="hljs-comment"># error!</span
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
   extend T::Sig
 
-  sig {overridable.returns(Numeric)}
+  sig { overridable.returns(Numeric) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">returns_at_most_numeric</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
-  sig {override(<span class="hljs-symbol">allow_incompatible:</span> <span class="hljs-literal">true</span>).returns(T.any(Numeric, String))}
+  sig { override(<span class="hljs-symbol">allow_incompatible:</span> <span class="hljs-literal">true</span>).returns(T.any(Numeric, String)) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">returns_at_most_numeric</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># no error, explicitly silenced</span>
 <span class="hljs-keyword">end</span>
 </code></pre>

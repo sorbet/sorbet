@@ -94,7 +94,7 @@ y = T.let(<span class="hljs-number">10</span>, String) <span class="hljs-comment
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span>;</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>; <span class="hljs-keyword">end</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">B</span>;</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span>;</span> <span class="hljs-keyword">end</span>; <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">label:</span> String, <span class="hljs-symbol">a_or_b:</span> T.any(A, B)).void}
+sig { params(<span class="hljs-symbol">label:</span> String, <span class="hljs-symbol">a_or_b:</span> T.any(A, B)).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(label, a_or_b)</span></span>
   <span class="hljs-keyword">case</span> label
   <span class="hljs-keyword">when</span> <span class="hljs-string">'a'</span>
@@ -131,14 +131,14 @@ sig {params(<span class="hljs-symbol">label:</span> String, <span class="hljs-sy
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
   extend T::Sig
 
-  sig {void}
+  sig { void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>
     x = T.let(<span class="hljs-literal">nil</span>, T.nilable(String))
     y = T.must(<span class="hljs-literal">nil</span>)
     puts y <span class="hljs-comment"># error: This code is unreachable</span>
   <span class="hljs-keyword">end</span>
 
-  sig {void}
+  sig { void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span></span>
     vals = T.let([], T::Array[Integer])
     x = vals.find {<span class="hljs-params">|a|</span> a &gt; <span class="hljs-number">0</span>}
@@ -156,13 +156,13 @@ sig {params(<span class="hljs-symbol">label:</span> String, <span class="hljs-sy
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
   extend T::Sig
 
-  sig {void}
+  sig { void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>
     y = T.must_because(<span class="hljs-literal">nil</span>) {<span class="hljs-string">'reason'</span>}
     puts y <span class="hljs-comment"># error: This code is unreachable</span>
   <span class="hljs-keyword">end</span>
 
-  sig {void}
+  sig { void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span></span>
     vals = T.let([], T::Array[Integer])
     x = vals.find {<span class="hljs-params">|a|</span> a &gt; <span class="hljs-number">0</span>}
@@ -180,7 +180,7 @@ sig {params(<span class="hljs-symbol">label:</span> String, <span class="hljs-sy
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
   extend T::Sig
 
-  sig {params(<span class="hljs-symbol">x:</span> T.untyped).void}
+  sig { params(<span class="hljs-symbol">x:</span> T.untyped).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
     T.assert_type!(x, String) <span class="hljs-comment"># error here</span>
   <span class="hljs-keyword">end</span>
@@ -262,13 +262,13 @@ this.method_on_my_class
 <p>It’s often possible to avoid using a type assertion at all, without loss of type safety, with a slight refactoring.</p>
 <p>For example, one common use for a type assertion is defining the type of an instance variable. One can frequently move this type definition to the signature of the constructor, taking advantage of Sorbet’s ability to infer instance variable types when variables are set directly from constructor arguments.</p>
 <p>Instead of:</p>
-<pre><code class="hljs css language-ruby">sig {void.checked(<span class="hljs-symbol">:tests</span>)}
+<pre><code class="hljs css language-ruby">sig { void.checked(<span class="hljs-symbol">:tests</span>) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span></span>
   @foo = T.let(MyObject.new, MyInterface)
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>Write:</p>
-<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">foo:</span> MyInterface).void.checked(<span class="hljs-symbol">:tests</span>)}
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">foo:</span> MyInterface).void.checked(<span class="hljs-symbol">:tests</span>) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(<span class="hljs-symbol">foo:</span> MyObject.new)</span></span>
   @foo = foo
 <span class="hljs-keyword">end</span>
@@ -288,7 +288,7 @@ this.method_on_my_class
   <span class="hljs-comment"># ...</span>
 <span class="hljs-keyword">end</span>
 
-sig {returns(FooType).checked(<span class="hljs-symbol">:tests</span>)}
+sig { returns(FooType).checked(<span class="hljs-symbol">:tests</span>) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">make_foo</span></span>
   polymorphic_factory(foo_please)
 <span class="hljs-keyword">end</span>
@@ -314,14 +314,14 @@ sig {returns(FooType).checked(<span class="hljs-symbol">:tests</span>)}
 <h3><a class="anchor" aria-hidden="true" id="put-type-assertions-behind-memoization"></a><a href="#put-type-assertions-behind-memoization" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Put type assertions behind memoization</h3>
 <p>Performance-sensitive methods are often memoized. In this case, it’s usually possible to memoize the runtime type check as well.</p>
 <p>For example, rather than:</p>
-<pre><code class="hljs css language-ruby">sig {returns(Foo).checked(<span class="hljs-symbol">:tests</span>)}
+<pre><code class="hljs css language-ruby">sig { returns(Foo).checked(<span class="hljs-symbol">:tests</span>) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>
   @foo = T.let(@foo, T.nilable(Foo))
   @foo <span class="hljs-params">||</span>= something_expensive
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>Write:</p>
-<pre><code class="hljs css language-ruby">sig {returns(Foo).checked(<span class="hljs-symbol">:tests</span>)}
+<pre><code class="hljs css language-ruby">sig { returns(Foo).checked(<span class="hljs-symbol">:tests</span>) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>
   @foo <span class="hljs-params">||</span>= T.let(something_expensive, T.nilable(Foo))
 <span class="hljs-keyword">end</span>
@@ -329,7 +329,7 @@ sig {returns(FooType).checked(<span class="hljs-symbol">:tests</span>)}
 <p>Note that for class methods, there’s a better option:</p>
 <pre><code class="hljs css language-ruby">@foo = T.let(<span class="hljs-literal">nil</span>, T.nilable(Foo))
 
-sig {returns(Foo).checked(<span class="hljs-symbol">:tests</span>)}
+sig { returns(Foo).checked(<span class="hljs-symbol">:tests</span>) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">foo</span></span>
   @foo <span class="hljs-params">||</span>= something_expensive
 <span class="hljs-keyword">end</span>

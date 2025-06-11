@@ -73,7 +73,7 @@
 </code></pre>
 <p>Note how each enum value is created by calling <code>new</code>: each enum value is an instance of the enumeration class itself. This means that <code>Suit::Spades.is_a?(Suit)</code>, and the same for all the other enum values. This guarantees that one enum value cannot be used where some other type is expected, and vice versa.</p>
 <p>This also means that once an enum has been defined as a subclass of <code>T::Enum</code>, it behaves like any other <a href="/docs/class-types">Class Type</a> and can be used in method signatures, type aliases, <code>T.let</code> annotations, and any other place a class type can be used:</p>
-<pre><code class="hljs css language-ruby">sig {returns(Suit)}
+<pre><code class="hljs css language-ruby">sig { returns(Suit) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">random_suit</span></span>
   T.cast(Suit.values.sample, Suit)
 <span class="hljs-keyword">end</span>
@@ -83,7 +83,7 @@
 </blockquote>
 <h2><a class="anchor" aria-hidden="true" id="exhaustiveness"></a><a href="#exhaustiveness" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Exhaustiveness</h2>
 <p>Sorbet knows about the values in an enumeration statically, and so it can use <a href="/docs/exhaustiveness">exhaustiveness checking</a> to check whether all enum values have been considered. The easiest way is to use a <code>case</code> statement:</p>
-<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">suit:</span> Suit).void}
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">suit:</span> Suit).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">describe_suit_color</span><span class="hljs-params">(suit)</span></span>
   <span class="hljs-keyword">case</span> suit
   <span class="hljs-keyword">when</span> Suit::Spades   <span class="hljs-keyword">then</span> puts <span class="hljs-string">"Spades are black!"</span>
@@ -162,7 +162,7 @@ sig { params(<span class="hljs-symbol">suit:</span> Suit).void }
     <span class="hljs-comment"># ...</span>
   <span class="hljs-keyword">end</span>
 
-  sig {returns(Integer)}
+  sig { returns(Integer) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">rank</span></span>
     <span class="hljs-comment"># (1) Case on self (because this is an instance method)</span>
     <span class="hljs-keyword">case</span> <span class="hljs-keyword">self</span>
@@ -250,7 +250,7 @@ Suit.has_serialized?(<span class="hljs-string">'bad value'</span>)
     Diamonds = new
   <span class="hljs-keyword">end</span>
 
-  sig {returns(Integer)}
+  sig { returns(Integer) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">rank</span></span>
     <span class="hljs-keyword">case</span> <span class="hljs-keyword">self</span>
     <span class="hljs-keyword">when</span> Spades <span class="hljs-keyword">then</span> <span class="hljs-number">1</span>

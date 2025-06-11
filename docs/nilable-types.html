@@ -65,7 +65,7 @@
 <p>Valid values for this type are either <code>nil</code> or any Ruby string. Once we have something of a nilable type, we can use it like this:</p>
 <pre><code class="hljs css language-ruby">extend T::Sig
 
-sig {params(<span class="hljs-symbol">x:</span> T.nilable(String)).void}
+sig { params(<span class="hljs-symbol">x:</span> T.nilable(String)).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
   <span class="hljs-keyword">if</span> x
     puts <span class="hljs-string">"x was not nil! Got: <span class="hljs-subst">#{x}</span>"</span>
@@ -78,12 +78,12 @@ sig {params(<span class="hljs-symbol">x:</span> T.nilable(String)).void}
 <p>Sorbet is smart enough to follow the control flow of a program to update its knowledge about what types each variable has within each branch. For example, if we have a method that declares it can only be given something that’s not <code>nil</code>, Sorbet will force us to first check whether our variable is <code>nil</code>:</p>
 <pre><code class="hljs css language-ruby">extend T::Sig
 
-sig {params(<span class="hljs-symbol">x:</span> String).void}
+sig { params(<span class="hljs-symbol">x:</span> String).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">must_be_given_string</span><span class="hljs-params">(x)</span></span>
   puts <span class="hljs-string">"Got string: <span class="hljs-subst">#{x}</span>"</span>
 <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">x:</span> T.nilable(String)).void}
+sig { params(<span class="hljs-symbol">x:</span> T.nilable(String)).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
   must_be_given_string(x) <span class="hljs-comment"># error: Expected `String` but found `T.nilable(String)` for argument `x`</span>
   <span class="hljs-keyword">if</span> x
@@ -106,10 +106,10 @@ sig {params(<span class="hljs-symbol">x:</span> T.nilable(String)).void}
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 extend T::Sig
 
-sig {params(<span class="hljs-symbol">x:</span> Integer).void}
+sig { params(<span class="hljs-symbol">x:</span> Integer).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">doesnt_take_nil</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">key:</span> Symbol, <span class="hljs-symbol">options:</span> T::Hash[Symbol, Integer]).void}
+sig { params(<span class="hljs-symbol">key:</span> Symbol, <span class="hljs-symbol">options:</span> T::Hash[Symbol, Integer]).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(key, options)</span></span>
   val = options[key]
   doesnt_take_nil(val) <span class="hljs-comment"># error: Expected `Integer` but found `T.nilable(Integer)` for argument `x`</span>
@@ -126,10 +126,10 @@ sig {params(<span class="hljs-symbol">key:</span> Symbol, <span class="hljs-symb
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 extend T::Sig
 
-sig {params(<span class="hljs-symbol">x:</span> Integer).void}
+sig { params(<span class="hljs-symbol">x:</span> Integer).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">doesnt_take_nil</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">key:</span> Symbol, <span class="hljs-symbol">options:</span> T::Hash[Symbol, Integer]).void}
+sig { params(<span class="hljs-symbol">key:</span> Symbol, <span class="hljs-symbol">options:</span> T::Hash[Symbol, Integer]).void }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(key, options)</span></span>
   val = T.must(options[key])
   doesnt_take_nil(val) <span class="hljs-comment"># ok</span>
@@ -166,13 +166,13 @@ val = x&amp;.foo
 <p>In (1), if <code>x</code> is nil the code will raise an exception, and <code>val</code> will never be <code>nil</code>. But in (2), the code will not raise an exception, but <code>val</code> might be <code>nil</code>. Here’s a longer example:</p>
 <pre><code class="hljs css language-ruby">extend T::Sig
 
-sig {params(<span class="hljs-symbol">x:</span> T.nilable(Integer)).returns(Integer)}
+sig { params(<span class="hljs-symbol">x:</span> T.nilable(Integer)).returns(Integer) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
   y = T.must(x).abs
   T.reveal_type(y)
 <span class="hljs-keyword">end</span>
 
-sig {params(<span class="hljs-symbol">x:</span> T.nilable(Integer)).returns(T.nilable(Integer))}
+sig { params(<span class="hljs-symbol">x:</span> T.nilable(Integer)).returns(T.nilable(Integer)) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span><span class="hljs-params">(x)</span></span>
   y = x&amp;.abs
   T.reveal_type(y)

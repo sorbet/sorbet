@@ -69,7 +69,7 @@ extend T::Sig
 Int = T.type_alias {Integer}
 Str = T.type_alias {String}
 
-sig {params(<span class="hljs-symbol">x:</span> Int).returns(Str)}
+sig { params(<span class="hljs-symbol">x:</span> Int).returns(Str) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>
   T.reveal_type(x) <span class="hljs-comment"># Revealed type: Integer</span>
   x.to_s
@@ -92,11 +92,11 @@ B = T.type_alias {A}
 extend T::Sig
 
 A = T.type_alias {Integer}
-sig {returns(A)}
+sig { returns(A) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-number">3</span>; <span class="hljs-keyword">end</span>
 
 B = Integer
-sig {returns(B)}
+sig { returns(B) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span>;</span> <span class="hljs-number">3</span>; <span class="hljs-keyword">end</span>
 </code></pre>
 <p>However, when the type is more complex, you must use type aliases:</p>
@@ -104,11 +104,11 @@ sig {returns(B)}
 extend T::Sig
 
 A = T.type_alias {T.any(Integer, String)}
-sig {returns(A)}
+sig { returns(A) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-number">3</span>; <span class="hljs-keyword">end</span>
 
 B = T.any(Integer, String)
-sig {returns(B)} <span class="hljs-comment"># error: Constant B is not a class or type alias</span>
+sig { returns(B) } <span class="hljs-comment"># error: Constant B is not a class or type alias</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span>;</span> <span class="hljs-number">3</span>; <span class="hljs-keyword">end</span>
 </code></pre>
 <p>Note that because type aliases are a Sorbet construct, they cannot be used in certain runtime contexts. For instance, it is not possible to match an expression against a type alias in a <code>case</code> expression.</p>
@@ -120,7 +120,7 @@ extend T::Sig
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C</span>;</span> <span class="hljs-keyword">end</span>
 
 AB = T.type_alias {T.any(A, B)}
-sig {params(<span class="hljs-symbol">x:</span> T.any(AB, C)).returns(Integer)}
+sig { params(<span class="hljs-symbol">x:</span> T.any(AB, C)).returns(Integer) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">invalid</span><span class="hljs-params">(x)</span></span> <span class="hljs-comment"># error: Returning value that does not conform to method result type</span>
   <span class="hljs-keyword">case</span> x
   <span class="hljs-keyword">when</span> AB <span class="hljs-keyword">then</span> <span class="hljs-number">1</span> <span class="hljs-comment"># &lt;- this line is problematic</span>
@@ -129,7 +129,7 @@ sig {params(<span class="hljs-symbol">x:</span> T.any(AB, C)).returns(Integer)}
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>We could refactor this example to use <code>A, B</code> in the <code>when</code> and <code>AB</code> in the <code>sig</code>. However, this introduces coupling between the definition of <code>AB</code> and our method. If we ever updated the definition of <code>AB</code>, we would need to update the definition of our method as well.</p>
-<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">x:</span> T.any(AB, C)).returns(Integer)}
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">x:</span> T.any(AB, C)).returns(Integer) }
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">valid</span><span class="hljs-params">(x)</span></span>
   <span class="hljs-keyword">case</span> x
   <span class="hljs-keyword">when</span> A, B <span class="hljs-keyword">then</span> <span class="hljs-number">1</span>
@@ -154,10 +154,10 @@ sig {params(<span class="hljs-symbol">x:</span> T.any(AB, C)).returns(Integer)}
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SelfReferential</span></span>
   extend T::Sig
 
-  sig {returns(T.nilable(SelfReferential))}
+  sig { returns(T.nilable(SelfReferential)) }
   <span class="hljs-keyword">attr_reader</span> <span class="hljs-symbol">:val</span>
 
-  sig {params(<span class="hljs-symbol">val:</span> T.nilable(SelfReferential)).void}
+  sig { params(<span class="hljs-symbol">val:</span> T.nilable(SelfReferential)).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(val)</span></span>; @val = val; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>

@@ -73,7 +73,7 @@
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
   extend T::Sig
 
-  sig {returns(T.self_type)}
+  sig { returns(T.self_type) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>
     <span class="hljs-keyword">self</span>
   <span class="hljs-keyword">end</span>
@@ -87,7 +87,7 @@ T.reveal_type(Child.new.foo) <span class="hljs-comment"># Revealed type: Child</
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Mixin</span></span>
   extend T::Sig
 
-  sig {returns(T.self_type)}
+  sig { returns(T.self_type) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span></span>
     <span class="hljs-keyword">self</span>
   <span class="hljs-keyword">end</span>
@@ -104,7 +104,7 @@ T.reveal_type(UsesMixin.bar) <span class="hljs-comment"># Revealed type: T.class
   extend T::Generic
   TM = type_member
 
-  sig {returns(Generic[T.self_type])} <span class="hljs-comment"># error: Only top-level T.self_type is supported</span>
+  sig { returns(Generic[T.self_type]) } <span class="hljs-comment"># error: Only top-level T.self_type is supported</span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bad</span></span>
     Generic[T.untyped].new
   <span class="hljs-keyword">end</span>
@@ -112,8 +112,8 @@ T.reveal_type(UsesMixin.bar) <span class="hljs-comment"># Revealed type: T.class
 </code></pre>
 <p>Note that <code>T.self_type</code> declares that the type should be <strong>exactly</strong> what the receiver of the method is. It is <strong>not</strong> useful for declaring the type of factory methods. For these types of methods, use <a href="/docs/attached-class"><code>T.attached_class</code></a> instead:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
-  <span class="hljs-comment"># sig {returns(T.self_type)} # WRONG</span>
-  sig {returns(T.attached_class)}
+  <span class="hljs-comment"># sig { returns(T.self_type) } # WRONG</span>
+  sig { returns(T.attached_class) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">make</span></span>
     new
   <span class="hljs-keyword">end</span>

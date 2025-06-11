@@ -63,7 +63,7 @@
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LoadableData</span></span>
   extend T::Sig
 
-  sig {params(<span class="hljs-symbol">id:</span> Integer).returns(T.attached_class)}
+  sig { params(<span class="hljs-symbol">id:</span> Integer).returns(T.attached_class) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">load_by_id</span><span class="hljs-params">(id)</span></span>
     new
   <span class="hljs-keyword">end</span>
@@ -83,14 +83,14 @@ T.reveal_type(Administrator.load_by_id(<span class="hljs-number">20</span>)) <sp
   extend T::Sig
 
   <span class="hljs-comment"># Correct, but not ideal return type</span>
-  sig {returns(Parent)}
+  sig { returns(Parent) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">make</span></span>
     new
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
-  sig {void}
+  sig { void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">say_hi</span></span>
     puts <span class="hljs-string">"hi"</span>
   <span class="hljs-keyword">end</span>
@@ -106,14 +106,14 @@ Child.make.say_hi <span class="hljs-comment"># Error: say_hi doesn't exist on Pa
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
   extend T::Sig
 
-  sig {returns(T.attached_class)}
+  sig { returns(T.attached_class) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">make</span></span>
     new
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
-  sig {void}
+  sig { void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">say_hi</span></span>
     puts <span class="hljs-string">"hi"</span>
   <span class="hljs-keyword">end</span>
@@ -129,12 +129,12 @@ Child.make.say_hi <span class="hljs-comment"># No error now, as Child.make has t
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
   extend T::Sig
 
-  sig {returns(T.attached_class)}
+  sig { returns(T.attached_class) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">make</span></span>
     new
   <span class="hljs-keyword">end</span>
 
-  sig {params(<span class="hljs-symbol">x:</span> T.attached_class).void} <span class="hljs-comment"># A bad type definition for `x`</span>
+  sig { params(<span class="hljs-symbol">x:</span> T.attached_class).void } <span class="hljs-comment"># A bad type definition for `x`</span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">consume</span><span class="hljs-params">(x)</span></span>
     puts <span class="hljs-string">"consumed"</span>
   <span class="hljs-keyword">end</span>
@@ -143,12 +143,12 @@ Child.make.say_hi <span class="hljs-comment"># No error now, as Child.make has t
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
   extend T::Sig
 
-  sig {void}
+  sig { void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">say_hi</span></span>
     puts <span class="hljs-string">"hi"</span>
   <span class="hljs-keyword">end</span>
 
-  sig {params(<span class="hljs-symbol">x:</span> T.attached_class).void} <span class="hljs-comment"># A bad type definition for `x`</span>
+  sig { params(<span class="hljs-symbol">x:</span> T.attached_class).void } <span class="hljs-comment"># A bad type definition for `x`</span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">consume</span><span class="hljs-params">(x)</span></span>
     x.say_hi
   <span class="hljs-keyword">end</span>
@@ -161,7 +161,7 @@ Child.consume(Parent.new) <span class="hljs-comment"># We would like this to be 
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
   extend T::Sig
 
-  sig {params(<span class="hljs-symbol">cls:</span> T.class_of(Parent)).void}
+  sig { params(<span class="hljs-symbol">cls:</span> T.class_of(Parent)).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">consume_parent</span><span class="hljs-params">(cls)</span></span>
     cls.consume(Parent.make)
   <span class="hljs-keyword">end</span>
@@ -184,8 +184,8 @@ Child.consume(Parent.new) <span class="hljs-comment"># We would like this to be 
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
   extend T::Sig
 
-  sig {params(<span class="hljs-symbol">x:</span> T.attached_class).void}
-            <span class="hljs-comment"># ^: T.attached_class may only be used in an :out context, like returns</span>
+  sig { params(<span class="hljs-symbol">x:</span> T.attached_class).void }
+  <span class="hljs-comment">#            ^: T.attached_class may only be used in an :out context, like returns</span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">problem</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
@@ -202,7 +202,7 @@ Child.consume(Parent.new) <span class="hljs-comment"># We would like this to be 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
   extend T::Sig
 
-  sig {returns(T.attached_class)}
+  sig { returns(T.attached_class) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">make</span></span>
     Parent.new <span class="hljs-comment"># (1) Sorbet reports an error here</span>
   <span class="hljs-keyword">end</span>
@@ -227,10 +227,10 @@ T.reveal_type(Child.make) <span class="hljs-comment"># Revealed type: `Child`</s
 
   has_attached_class!
 
-  sig {abstract.returns(T.attached_class)}
+  sig { abstract.returns(T.attached_class) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">new</span>;</span> <span class="hljs-keyword">end</span>
 
-  sig {params(<span class="hljs-symbol">id:</span> String).returns(T.attached_class)}
+  sig { params(<span class="hljs-symbol">id:</span> String).returns(T.attached_class) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">find</span><span class="hljs-params">(id)</span></span>
     <span class="hljs-keyword">self</span>.new
   <span class="hljs-keyword">end</span>
