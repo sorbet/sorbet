@@ -30,7 +30,7 @@ class T::ImmutableStruct < T::InexactStruct
   end
 
   # Matches the one in WeakConstructor, but freezes the object
-  sig {params(hash: T::Hash[Symbol, T.untyped]).void.checked(:never)}
+  sig { params(hash: T::Hash[Symbol, T.untyped]).void.checked(:never) }
   def initialize(hash={})
     super
 
@@ -38,7 +38,7 @@ class T::ImmutableStruct < T::InexactStruct
   end
 
   # Matches the signature in Props, but raises since this is an immutable struct and only const is allowed
-  sig {params(name: Symbol, cls: T.untyped, rules: T.untyped).void}
+  sig { params(name: Symbol, cls: T.untyped, rules: T.untyped).void }
   def self.prop(name, cls, **rules)
     return super if (cls.is_a?(Hash) && cls[:immutable]) || rules[:immutable]
 

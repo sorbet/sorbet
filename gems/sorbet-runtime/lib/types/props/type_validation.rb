@@ -11,7 +11,7 @@ module T::Props::TypeValidation
   module DecoratorMethods
     extend T::Sig
 
-    sig {params(key: Symbol).returns(T::Boolean).checked(:never)}
+    sig { params(key: Symbol).returns(T::Boolean).checked(:never) }
     def valid_rule_key?(key)
       super || key == :DEPRECATED_underspecified_type
     end
@@ -58,19 +58,19 @@ module T::Props::TypeValidation
     # If the type is fully valid, returns nil.
     #
     # checked(:never) - called potentially many times recursively
-    sig {params(type: T::Types::Base).returns(T.nilable(T::Types::Base)).checked(:never)}
+    sig { params(type: T::Types::Base).returns(T.nilable(T::Types::Base)).checked(:never) }
     private def find_invalid_subtype(type)
       case type
       when T::Types::TypedEnumerable
         find_invalid_subtype(type.type)
       when T::Types::FixedHash
-        type.types.values.map {|subtype| find_invalid_subtype(subtype)}.compact.first
+        type.types.values.map {|subtype| find_invalid_subtype(subtype) }.compact.first
       when T::Types::Union, T::Types::FixedArray
         # `T.any` is valid if all of the members are valid
-        type.types.map {|subtype| find_invalid_subtype(subtype)}.compact.first
+        type.types.map {|subtype| find_invalid_subtype(subtype) }.compact.first
       when T::Types::Intersection
         # `T.all` is valid if at least one of the members is valid
-        invalid = type.types.map {|subtype| find_invalid_subtype(subtype)}.compact
+        invalid = type.types.map {|subtype| find_invalid_subtype(subtype) }.compact
         if invalid.length == type.types.length
           invalid.first
         else

@@ -6,7 +6,7 @@ module T::Props::WeakConstructor
   extend T::Sig
 
   # checked(:never) - O(runtime object construction)
-  sig {params(hash: T::Hash[Symbol, T.untyped]).void.checked(:never)}
+  sig { params(hash: T::Hash[Symbol, T.untyped]).void.checked(:never) }
   def initialize(hash={})
     decorator = self.class.decorator
 
@@ -28,7 +28,7 @@ module T::Props::WeakConstructor::DecoratorMethods
   # we'll use to check for any unrecognized input.)
   #
   # checked(:never) - O(runtime object construction)
-  sig {params(instance: T::Props::WeakConstructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never)}
+  sig { params(instance: T::Props::WeakConstructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never) }
   def construct_props_without_defaults(instance, hash)
     # Use `each_pair` rather than `count` because, as of Ruby 2.6, the latter delegates to Enumerator
     # and therefore allocates for each entry.
@@ -49,7 +49,7 @@ module T::Props::WeakConstructor::DecoratorMethods
   # we'll use to check for any unrecognized input.)
   #
   # checked(:never) - O(runtime object construction)
-  sig {params(instance: T::Props::WeakConstructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never)}
+  sig { params(instance: T::Props::WeakConstructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never) }
   def construct_props_with_defaults(instance, hash)
     # Use `each_pair` rather than `count` because, as of Ruby 2.6, the latter delegates to Enumerator
     # and therefore allocates for each entry.

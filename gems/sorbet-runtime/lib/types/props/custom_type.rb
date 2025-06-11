@@ -39,7 +39,7 @@ module T::Props
     #
     # @param [Object] instance
     # @return An instance of one of T::Configuration.scalar_types
-    sig {abstract.params(instance: T.untyped).returns(T.untyped).checked(:never)}
+    sig { abstract.params(instance: T.untyped).returns(T.untyped).checked(:never) }
     def serialize(instance); end
 
     # Given the serialized form of your type, this returns an instance
@@ -47,17 +47,17 @@ module T::Props
     #
     # @param scalar One of T::Configuration.scalar_types
     # @return Object
-    sig {abstract.params(scalar: T.untyped).returns(T.untyped).checked(:never)}
+    sig { abstract.params(scalar: T.untyped).returns(T.untyped).checked(:never) }
     def deserialize(scalar); end
 
-    sig {override.params(_base: Module).void}
+    sig { override.params(_base: Module).void }
     def self.included(_base)
       super
 
       raise 'Please use "extend", not "include" to attach this module'
     end
 
-    sig(:final) {params(val: T.untyped).returns(T::Boolean).checked(:never)}
+    sig(:final) { params(val: T.untyped).returns(T::Boolean).checked(:never) }
     def self.scalar_type?(val)
       # We don't need to check for val's included modules in
       # T::Configuration.scalar_types, because T::Configuration.scalar_types
@@ -74,7 +74,7 @@ module T::Props
     # implement set-like fields that store a unique-array, but forbid
     # hashes; Custom hash types should be implemented via an emebdded
     # T::Struct (or a subclass like Chalk::ODM::Document) or via T.
-    sig(:final) {params(val: Object).returns(T::Boolean).checked(:never)}
+    sig(:final) { params(val: Object).returns(T::Boolean).checked(:never) }
     def self.valid_serialization?(val)
       case val
       when Array

@@ -30,12 +30,12 @@ module T::Props
     #
     # Note it does _not_ prevent explicit calls to `eagerly_define_lazy_methods!`
     # from working.
-    sig {void}
+    sig { void }
     def self.disable_lazy_evaluation!
       @lazy_evaluation_disabled ||= true
     end
 
-    sig {returns(T::Boolean)}
+    sig { returns(T::Boolean) }
     def self.lazy_evaluation_enabled?
       !defined?(@lazy_evaluation_disabled) || !@lazy_evaluation_disabled
     end
@@ -43,17 +43,17 @@ module T::Props
     module DecoratorMethods
       extend T::Sig
 
-      sig {returns(T::Hash[Symbol, T.proc.returns(String)]).checked(:never)}
+      sig { returns(T::Hash[Symbol, T.proc.returns(String)]).checked(:never) }
       private def lazily_defined_methods
         @lazily_defined_methods ||= {}
       end
 
-      sig {returns(T::Hash[Symbol, T.untyped]).checked(:never)}
+      sig { returns(T::Hash[Symbol, T.untyped]).checked(:never) }
       private def lazily_defined_vm_methods
         @lazily_defined_vm_methods ||= {}
       end
 
-      sig {params(name: Symbol).void}
+      sig { params(name: Symbol).void }
       private def eval_lazily_defined_method!(name)
         if !HasLazilySpecializedMethods.lazy_evaluation_enabled?
           raise SourceEvaluationDisabled.new
@@ -68,7 +68,7 @@ module T::Props
         cls.send(:private, name)
       end
 
-      sig {params(name: Symbol).void}
+      sig { params(name: Symbol).void }
       private def eval_lazily_defined_vm_method!(name)
         if !HasLazilySpecializedMethods.lazy_evaluation_enabled?
           raise SourceEvaluationDisabled.new
@@ -80,7 +80,7 @@ module T::Props
         cls.send(:private, name)
       end
 
-      sig {params(name: Symbol, blk: T.proc.returns(String)).void}
+      sig { params(name: Symbol, blk: T.proc.returns(String)).void }
       private def enqueue_lazy_method_definition!(name, &blk)
         lazily_defined_methods[name] = blk
 
@@ -100,7 +100,7 @@ module T::Props
         cls.send(:private, name)
       end
 
-      sig {params(name: Symbol, blk: T.untyped).void}
+      sig { params(name: Symbol, blk: T.untyped).void }
       private def enqueue_lazy_vm_method_definition!(name, &blk)
         lazily_defined_vm_methods[name] = blk
 
@@ -115,7 +115,7 @@ module T::Props
         cls.send(:private, name)
       end
 
-      sig {void}
+      sig { void }
       def eagerly_define_lazy_methods!
         return if lazily_defined_methods.empty?
 
@@ -125,18 +125,18 @@ module T::Props
 
         cls = decorated_class
         cls.class_eval(source)
-        lazily_defined_methods.each_key {|name| cls.send(:private, name)}
+        lazily_defined_methods.each_key {|name| cls.send(:private, name) }
         lazily_defined_methods.clear
       end
 
-      sig {void}
+      sig { void }
       def eagerly_define_lazy_vm_methods!
         return if lazily_defined_vm_methods.empty?
 
         lazily_defined_vm_methods.values.map(&:call)
 
         cls = decorated_class
-        lazily_defined_vm_methods.each_key {|name| cls.send(:private, name)}
+        lazily_defined_vm_methods.each_key {|name| cls.send(:private, name) }
         lazily_defined_vm_methods.clear
       end
     end

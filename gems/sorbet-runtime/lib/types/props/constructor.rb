@@ -15,7 +15,7 @@ module T::Props::Constructor::DecoratorMethods
   # we'll use to check for any unrecognized input.)
   #
   # checked(:never) - O(runtime object construction)
-  sig {params(instance: T::Props::Constructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never)}
+  sig { params(instance: T::Props::Constructor, hash: T::Hash[Symbol, T.untyped]).returns(Integer).checked(:never) }
   def construct_props_without_defaults(instance, hash)
     # Use `each_pair` rather than `count` because, as of Ruby 2.6, the latter delegates to Enumerator
     # and therefore allocates for each entry.

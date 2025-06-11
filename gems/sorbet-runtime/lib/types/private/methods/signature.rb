@@ -68,14 +68,14 @@ class T::Private::Methods::Signature
     writer_method = !(raw_arg_types.size == 1 && raw_arg_types.key?(nil)) && parameters == UNNAMED_REQUIRED_PARAMETERS && method_name[-1] == "="
     # For writer methods, map the single parameter to the method name without the "=" at the end
     parameters = [[:req, method_name[0...-1].to_sym]] if writer_method
-    is_name_missing = parameters.any? {|_, name| !raw_arg_types.key?(name)}
+    is_name_missing = parameters.any? {|_, name| !raw_arg_types.key?(name) }
     if is_name_missing
-      param_names = parameters.map {|_, name| name}
+      param_names = parameters.map {|_, name| name }
       missing_names = param_names - raw_arg_types.keys
       raise "The declaration for `#{method.name}` is missing parameter(s): #{missing_names.join(', ')}"
     elsif parameters.length != raw_arg_types.size
-      param_names = parameters.map {|_, name| name}
-      has_extra_names = parameters.count {|_, name| raw_arg_types.key?(name)} < raw_arg_types.size
+      param_names = parameters.map {|_, name| name }
+      has_extra_names = parameters.count {|_, name| raw_arg_types.key?(name) } < raw_arg_types.size
       if has_extra_names
         extra_names = raw_arg_types.keys - param_names
         raise "The declaration for `#{method.name}` has extra parameter(s): #{extra_names.join(', ')}"
@@ -95,7 +95,7 @@ class T::Private::Methods::Signature
         # always precede optional keyword arguments. We can't tell
         # whether the culprit is the Ruby reordering or user error, so
         # we error but include a note
-        if param_kind == :keyreq && parameters.any? {|k, _| k == :key}
+        if param_kind == :keyreq && parameters.any? {|k, _| k == :key }
           hint = "\n\nNote: Any required keyword arguments must precede any optional keyword " \
                  "arguments. If your method declaration matches your `def`, try reordering any " \
                  "optional keyword parameters to the end of the method list."
@@ -103,7 +103,7 @@ class T::Private::Methods::Signature
 
         raise "Parameter `#{type_name}` is declared out of order (declared as arg number " \
               "#{i + 1}, defined in the method as arg number " \
-              "#{parameters.index {|_, name| name == type_name} + 1}).#{hint}\nMethod: #{method_desc}"
+              "#{parameters.index {|_, name| name == type_name } + 1}).#{hint}\nMethod: #{method_desc}"
       end
 
       type = T::Utils.coerce(raw_type)
@@ -245,8 +245,8 @@ class T::Private::Methods::Signature
   end
 
   def force_type_init
-    @arg_types.each {|_, type| type.build_type}
-    @kwarg_types.each {|_, type| type.build_type}
+    @arg_types.each {|_, type| type.build_type }
+    @kwarg_types.each {|_, type| type.build_type }
     @block_type&.build_type
     @rest_type&.build_type
     @keyrest_type&.build_type

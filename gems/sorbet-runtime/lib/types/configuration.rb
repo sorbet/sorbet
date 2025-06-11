@@ -419,12 +419,12 @@ module T::Configuration
     if values.nil?
       @scalar_types = values
     else
-      bad_values = values.reject {|v| v.class == String}
+      bad_values = values.reject {|v| v.class == String }
       unless bad_values.empty?
         raise ArgumentError.new("Provided values must all be class name strings.")
       end
 
-      @scalar_types = values.each_with_object({}) {|x, acc| acc[x] = true}.freeze
+      @scalar_types = values.each_with_object({}) {|x, acc| acc[x] = true }.freeze
     end
   end
 
@@ -449,9 +449,9 @@ module T::Configuration
   private_constant :MODULE_NAME
 
   @default_module_name_mangler = if T::Configuration::AT_LEAST_RUBY_2_7
-    ->(type) {MODULE_NAME.bind_call(type)}
+    ->(type) { MODULE_NAME.bind_call(type) }
   else
-    ->(type) {MODULE_NAME.bind(type).call} # rubocop:disable Performance/BindCall
+    ->(type) { MODULE_NAME.bind(type).call } # rubocop:disable Performance/BindCall
   end
 
   @module_name_mangler = nil
