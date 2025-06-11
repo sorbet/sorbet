@@ -449,7 +449,7 @@ constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &
         return nullopt;
     }
 
-    ast::Block *block = parsedSig->origSend->block();
+    auto *block = parsedSig->origSend->block();
     if (!block) {
         return nullopt;
     }
