@@ -165,9 +165,9 @@ module Common
   extend T::Helpers
   extend T::Sig
   interface!
-  sig {abstract.returns(Integer)}
+  sig { abstract.returns(Integer) }
   def foo; end
-  sig {abstract.params(foo: Integer).returns(Integer)}
+  sig { abstract.params(foo: Integer).returns(Integer) }
   def foo=(foo); end
 end
 

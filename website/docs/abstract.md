@@ -29,7 +29,7 @@ module Runnable
   extend T::Helpers                                    # (1)
   interface!                                           # (2)
 
-  sig {abstract.params(args: T::Array[String]).void}   # (3)
+  sig { abstract.params(args: T::Array[String]).void }   # (3)
   def main(args); end                                  # (4)
 end
 ```
@@ -44,7 +44,7 @@ class HelloWorld
   include Runnable
 
   # This implements the abstract `main` method from our Runnable module:
-  sig {override.params(args: T::Array[String]).void}
+  sig { override.params(args: T::Array[String]).void }
   def main(args)
     puts 'Hello, world!'
   end
@@ -229,7 +229,7 @@ module M
 
   abstract!
 
-  sig {abstract.void}
+  sig { abstract.void }
   def self.foo; end
 end
 
@@ -315,12 +315,12 @@ module M
     extend T::Helpers
     abstract!
 
-    sig {void}
+    sig { void }
     def foo
       bar
     end
 
-    sig {abstract.void}
+    sig { abstract.void }
     def bar; end
   end
 
@@ -332,7 +332,7 @@ class A # error: Missing definition for abstract method
 
   extend T::Sig
 
-  sig {override.void}
+  sig { override.void }
   def self.bar; end
 end
 
@@ -353,7 +353,7 @@ From time to time, it's useful to be able to ask whether a class or module objec
 This can be done with
 
 ```ruby
-sig {params(mod: Module).void}
+sig { params(mod: Module).void }
 def example(mod)
   if T::AbstractUtils.abstract_module?(mod)
     puts "#{mod} is abstract"
@@ -379,18 +379,18 @@ class AbstractFoo
   extend T::Helpers
   abstract!
 
-  sig {abstract.void}
+  sig { abstract.void }
   def self.example; end
 end
 
 class Foo < AbstractFoo
-  sig {override.void}
+  sig { override.void }
   def self.example
     puts 'Foo#example'
   end
 end
 
-sig {params(mod: T.class_of(AbstractFoo)).void}
+sig { params(mod: T.class_of(AbstractFoo)).void }
 def calls_example_bad(mod)
   # even though there are no errors,
   # the call to mod.example is NOT always safe!
@@ -398,7 +398,7 @@ def calls_example_bad(mod)
   mod.example
 end
 
-sig {params(mod: T.class_of(AbstractFoo)).void}
+sig { params(mod: T.class_of(AbstractFoo)).void }
 def calls_example_okay(mod)
   if !T::AbstractUtils.abstract_module?(mod)
     mod.example
@@ -431,20 +431,20 @@ module IFoo
   extend T::Helpers
   abstract!
 
-  sig {abstract.void}
+  sig { abstract.void }
   def example; end
 end
 
 class Foo
   extend T::Sig
   extend IFoo
-  sig {override.void}
+  sig { override.void }
   def self.example
     puts 'Foo#example'
   end
 end
 
-sig {params(mod: IFoo).void}
+sig { params(mod: IFoo).void }
 def calls_example_good(mod)
   # call to mod.example is always safe
   mod.example

@@ -96,7 +96,7 @@ For the time being, Matz and the Ruby core team want to experiment with type ann
 ```ruby
 extend T::Sig
 
-sig {params(strings: T::Array[String]).returns(Integer)}
+sig { params(strings: T::Array[String]).returns(Integer) }
 def count_letters(strings)
   strings.map(&:length).sum
 end

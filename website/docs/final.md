@@ -154,9 +154,9 @@ The syntax for final methods is different from the syntax for things like abstra
 
 ```ruby
 # These attributes are inside the block:
-sig {overridable.void}
-sig {override.void}
-sig {abstract.void}
+sig { overridable.void }
+sig { override.void }
+sig { abstract.void }
 
 # But this one is outside the block:
 sig(:final) {void}

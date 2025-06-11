@@ -84,7 +84,7 @@ class Parent
   end
 
   # Declares a method with input and output types
-  sig {params(x: Integer).returns(String)}
+  sig { params(x: Integer).returns(String) }
   def bar(x)
   end
 end

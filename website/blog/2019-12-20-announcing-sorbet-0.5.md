@@ -58,7 +58,7 @@ Sorbet has always supported [union types][union-types], which declare that a val
 
 ```ruby
 # (1) T.any(Integer, String) is a union type
-sig {params(x: T.any(Integer, String)).void}
+sig { params(x: T.any(Integer, String)).void }
 def foo(x)
   case x
   when Integer then # (2) x must be an Integer here
@@ -72,7 +72,7 @@ Union types are a must-have for type checking real-world Ruby code bases. Sorbet
 In the last six months, Sorbet gained the ability to guarantee that **all cases must be handled** (exhaustively). For example:
 
 ```ruby
-sig {params(x: T.any(Integer, String)).void}
+sig { params(x: T.any(Integer, String)).void }
 def foo(x)
   case x
   when Integer then # x ...
@@ -108,7 +108,7 @@ This declares an enum representing the suits of a standard deck of playing cards
 Enums work hand-in-hand with exhaustiveness checks by design:
 
 ```ruby
-sig {params(suit: Suit).void}
+sig { params(suit: Suit).void }
 def color_of_suit(suit)
   case suit
   when Suit::Spades, Suit::Clubs then puts 'Black!'
@@ -143,7 +143,7 @@ end
 Sealing a class prevents it from being subclassed in other files. (Sealed modules are the same, but with `include` / `extend` instead of subclassing.) By restricting where inheritance happens, Sorbet can treat sealed classes and modules **as if they were union types** for the sake of exhaustiveness. For example:
 
 ```ruby
-sig {params(result: Result).void}
+sig { params(result: Result).void }
 def handle_result(result)
   case result
   when Found then puts "Found object with ID #{result.id}"
@@ -203,7 +203,7 @@ Second, Sorbet relaxed the need for certain instance variable declarations. Like
 
 ```ruby
 # typed: strict
-sig {params(x: Integer, y: String).void}
+sig { params(x: Integer, y: String).void }
 def initialize(x, y)
   @x = T.let(x, Integer) # ok
   @y = y # error: Use of undeclared variable `@y`
@@ -215,7 +215,7 @@ In this example, only `@x` has been declared with a type annotation (the `T.let`
 
 ```ruby
 # typed: strict
-sig {params(x: Integer, y: String).void}
+sig { params(x: Integer, y: String).void }
 def initialize(x, y)
   @x = T.let(x, Integer) # still ok
   @y = y # ok (new!)
@@ -259,7 +259,7 @@ By requiring instance variables to be declared in `initialize`, Sorbet ensures t
 ```ruby
 # typed: strict
 module B
-  sig {returns(String)}
+  sig { returns(String) }
   def current_user
     # error: Use of undeclared variable `@current_user`
     @current_user ||= ENV.fetch('USER')
@@ -274,7 +274,7 @@ Using `typed: strict` with our `current_user` example from before now involves j
 ```ruby
 # typed: strict
 module B
-  sig {returns(String)}
+  sig { returns(String) }
   def current_user
     # Declare @current_user as either String or nil:
     @current_user = T.let(@current_user, T.nilable(String))
@@ -313,7 +313,7 @@ It wasn't previously possible to write a return type for these methods, but it's
 class AbstractModel
   # Returns `T.attached_class`, or "an instance of
   # whatever the current singleton class is"
-  sig {params(id: String).returns(T.attached_class)}
+  sig { params(id: String).returns(T.attached_class) }
   def self.load_one(id)
     # ... calls self.new somewhere ...
   end

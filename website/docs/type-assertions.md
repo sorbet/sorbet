@@ -49,7 +49,7 @@ extend T::Sig
 class A; def foo; end; end
 class B; def bar; end; end
 
-sig {params(label: String, a_or_b: T.any(A, B)).void}
+sig { params(label: String, a_or_b: T.any(A, B)).void }
 def foo(label, a_or_b)
   case label
   when 'a'
@@ -102,14 +102,14 @@ The following example illustrates two cases:
 class A
   extend T::Sig
 
-  sig {void}
+  sig { void }
   def foo
     x = T.let(nil, T.nilable(String))
     y = T.must(nil)
     puts y # error: This code is unreachable
   end
 
-  sig {void}
+  sig { void }
   def bar
     vals = T.let([], T::Array[Integer])
     x = vals.find {|a| a > 0}
@@ -131,13 +131,13 @@ Here's the same example with `T.must_because`, showing the user of custom reason
 class A
   extend T::Sig
 
-  sig {void}
+  sig { void }
   def foo
     y = T.must_because(nil) {'reason'}
     puts y # error: This code is unreachable
   end
 
-  sig {void}
+  sig { void }
   def bar
     vals = T.let([], T::Array[Integer])
     x = vals.find {|a| a > 0}
@@ -160,7 +160,7 @@ end
 class A
   extend T::Sig
 
-  sig {params(x: T.untyped).void}
+  sig { params(x: T.untyped).void }
   def foo(x)
     T.assert_type!(x, String) # error here
   end
@@ -291,7 +291,7 @@ For example, one common use for a type assertion is defining the type of an inst
 Instead of:
 
 ```ruby
-sig {void.checked(:tests)}
+sig { void.checked(:tests) }
 def initialize
   @foo = T.let(MyObject.new, MyInterface)
 end
@@ -300,7 +300,7 @@ end
 Write:
 
 ```ruby
-sig {params(foo: MyInterface).void.checked(:tests)}
+sig { params(foo: MyInterface).void.checked(:tests) }
 def initialize(foo: MyObject.new)
   @foo = foo
 end
@@ -327,7 +327,7 @@ def hot_method(..)
   # ...
 end
 
-sig {returns(FooType).checked(:tests)}
+sig { returns(FooType).checked(:tests) }
 def make_foo
   polymorphic_factory(foo_please)
 end
@@ -366,7 +366,7 @@ Performance-sensitive methods are often memoized. In this case, it's usually pos
 For example, rather than:
 
 ```ruby
-sig {returns(Foo).checked(:tests)}
+sig { returns(Foo).checked(:tests) }
 def foo
   @foo = T.let(@foo, T.nilable(Foo))
   @foo ||= something_expensive
@@ -376,7 +376,7 @@ end
 Write:
 
 ```ruby
-sig {returns(Foo).checked(:tests)}
+sig { returns(Foo).checked(:tests) }
 def foo
   @foo ||= T.let(something_expensive, T.nilable(Foo))
 end
@@ -387,7 +387,7 @@ Note that for class methods, there's a better option:
 ```ruby
 @foo = T.let(nil, T.nilable(Foo))
 
-sig {returns(Foo).checked(:tests)}
+sig { returns(Foo).checked(:tests) }
 def self.foo
   @foo ||= something_expensive
 end

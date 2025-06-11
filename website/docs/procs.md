@@ -20,7 +20,7 @@ Here's a larger example:
 # typed: true
 
 # (1) Declare the type of a block arg with `T.proc`:
-sig {params(blk: T.proc.params(arg0: Integer).void).void}
+sig { params(blk: T.proc.params(arg0: Integer).void).void }
 def foo(&blk)
   x = T.let('not an int', T.untyped)
 
@@ -45,7 +45,7 @@ Use `T.nilable` to declare that a method can take an optional block:
 extend T::Sig
 
 # (1) Declare optional block with `T.nilable(...)`:
-sig {params(blk: T.nilable(T.proc.void)).void}
+sig { params(blk: T.nilable(T.proc.void)).void }
 def foo(&blk)
   T.reveal_type(blk)   # Revealed type: `T.nilable(T.proc.void)`
 
@@ -84,7 +84,7 @@ end
 And once it has a name, the method can be given a sig:
 
 ```ruby
-sig {params(blk: T.proc.returns(Integer)).returns(Integer)}
+sig { params(blk: T.proc.returns(Integer)).returns(Integer) }
 def foo(&blk) # <-
   yield
 end
@@ -225,7 +225,7 @@ This also happens a lot with certain Rails APIs, etc. Sorbet has direct support 
 #     but the general ideas apply.
 module T::Sig
   # (1) Use `T.proc.bind` to annotate the context in which the block will run
-  sig {params(blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
+  sig { params(blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void }
   def sig(&blk); end
 end
 
@@ -244,7 +244,7 @@ Here's another example that's a little more contrived but which shows both the m
 extend T::Sig
 
 # (1) Use `.bind(String)` to say "will be run in the context of a String":
-sig {params(blk: T.proc.bind(String).returns(String)).returns(String)}
+sig { params(blk: T.proc.bind(String).returns(String)).returns(String) }
 def foo(&blk)
   "hello".instance_eval(&blk)
 end
@@ -318,14 +318,14 @@ The main downside of the `Proc.new` approach is that you can't set argument type
 Here's an example:
 
 ```ruby
-sig {returns(T.proc.params(a1: Integer).returns(Integer))}
+sig { returns(T.proc.params(a1: Integer).returns(Integer)) }
 def lowercase_proc
   # if you are using `proc`, use `T.proc` in your sig
   # this is the preferred approach
   proc {|n| n * 2 }
 end
 
-sig {returns(Proc)}
+sig { returns(Proc) }
 def proc_dot_new
   # if you are using `Proc.new`, use `Proc` in your sig
   # note that you won't be able to define arguments/return types in your sig

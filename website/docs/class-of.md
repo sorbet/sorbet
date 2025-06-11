@@ -55,7 +55,7 @@ class Grandparent; end
 class Parent < Grandparent; end
 class Child < Parent; end
 
-sig {params(x: T.class_of(Parent)).void}
+sig { params(x: T.class_of(Parent)).void }
 def example(x); end
 
 example(Grandparent)   # error
@@ -103,7 +103,7 @@ class MyClass
   def self.some_class_method; end
 end
 
-sig {params(x: T.class_of(MyClass)).void}
+sig { params(x: T.class_of(MyClass)).void }
 def example1(x)
   x.new.some_instance_method  # ok
   x.some_class_method         # ok
@@ -136,7 +136,7 @@ end
 This will make `some_instance_method` and `some_class_method` available on `MyClass`, just like before. But if we try to replace `T.class_of(MyClass)` with `T.class_of(MyInterface)`, it doesn't work:
 
 ```ruby
-sig {params(x: T.class_of(MyInterface)).void}  # ← sig has changed
+sig { params(x: T.class_of(MyInterface)).void }  # ← sig has changed
 def example2(x)
   x.new.some_instance_method  # error: `new` does not exist
   x.some_class_method         # error: `some_class_method` does not exist
@@ -181,7 +181,7 @@ While these errors are technically correct, we want to be able to type this code
 Specifically, option (2) looks like this:
 
 ```ruby
-sig {params(x: T.all(T::Class[MyInterface], MyInterface::ClassMethods)).void}
+sig { params(x: T.all(T::Class[MyInterface], MyInterface::ClassMethods)).void }
 def example3(x)
   x.new.some_instance_method  # ok
   x.some_class_method         # ok
@@ -243,18 +243,18 @@ Another example:
 module AbstractCommand
   extend T::Helpers
   interface!
-  sig {abstract.void}
+  sig { abstract.void }
   def run; end
 end
 
 class MyCommand
   include AbstractCommand
 
-  sig {override.void}
+  sig { override.void }
   def run; puts("Hello, world!"); end
 end
 
-sig {params(command_klass: T::Class[AbstractCommand]).void}
+sig { params(command_klass: T::Class[AbstractCommand]).void }
 def run_command(command_klass)
   # (1) Instantiate some command class
   command = command_klass.new

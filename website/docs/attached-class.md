@@ -9,7 +9,7 @@ title: T.attached_class
 class LoadableData
   extend T::Sig
 
-  sig {params(id: Integer).returns(T.attached_class)}
+  sig { params(id: Integer).returns(T.attached_class) }
   def self.load_by_id(id)
     new
   end
@@ -33,14 +33,14 @@ class Parent
   extend T::Sig
 
   # Correct, but not ideal return type
-  sig {returns(Parent)}
+  sig { returns(Parent) }
   def self.make
     new
   end
 end
 
 class Child < Parent
-  sig {void}
+  sig { void }
   def say_hi
     puts "hi"
   end
@@ -60,14 +60,14 @@ This is where `T.attached_class` comes in: changing the return type of `Parent.m
 class Parent
   extend T::Sig
 
-  sig {returns(T.attached_class)}
+  sig { returns(T.attached_class) }
   def self.make
     new
   end
 end
 
 class Child < Parent
-  sig {void}
+  sig { void }
   def say_hi
     puts "hi"
   end
@@ -87,12 +87,12 @@ Using `T.attached_class` as the type of parameters is an error in sorbet, and al
 class Parent
   extend T::Sig
 
-  sig {returns(T.attached_class)}
+  sig { returns(T.attached_class) }
   def self.make
     new
   end
 
-  sig {params(x: T.attached_class).void} # A bad type definition for `x`
+  sig { params(x: T.attached_class).void } # A bad type definition for `x`
   def self.consume(x)
     puts "consumed"
   end
@@ -101,12 +101,12 @@ end
 class Child < Parent
   extend T::Sig
 
-  sig {void}
+  sig { void }
   def say_hi
     puts "hi"
   end
 
-  sig {params(x: T.attached_class).void} # A bad type definition for `x`
+  sig { params(x: T.attached_class).void } # A bad type definition for `x`
   def self.consume(x)
     x.say_hi
   end
@@ -122,7 +122,7 @@ Problems arise when you begin passing around singleton classes. Imagine that you
 class A
   extend T::Sig
 
-  sig {params(cls: T.class_of(Parent)).void}
+  sig { params(cls: T.class_of(Parent)).void }
   def self.consume_parent(cls)
     cls.consume(Parent.make)
   end
@@ -144,7 +144,7 @@ As these two cases show, Sorbet can't know whether the body of `A.consume_parent
 class Parent
   extend T::Sig
 
-  sig {params(x: T.attached_class).void}
+  sig { params(x: T.attached_class).void }
             # ^: T.attached_class may only be used in an :out context, like returns
   def self.problem(x); end
 end
@@ -167,7 +167,7 @@ One common problem people encounter when using `T.attached_class` looks somethin
 class Parent
   extend T::Sig
 
-  sig {returns(T.attached_class)}
+  sig { returns(T.attached_class) }
   def self.make
     Parent.new # (1) Sorbet reports an error here
   end
@@ -202,10 +202,10 @@ module FinderMethods
 
   has_attached_class!
 
-  sig {abstract.returns(T.attached_class)}
+  sig { abstract.returns(T.attached_class) }
   def new; end
 
-  sig {params(id: String).returns(T.attached_class)}
+  sig { params(id: String).returns(T.attached_class) }
   def find(id)
     self.new
   end

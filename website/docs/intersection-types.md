@@ -45,7 +45,7 @@ class ExampleClass2
   include Type1
 end
 
-sig {params(x: T.all(Type1, Type2)).void}
+sig { params(x: T.all(Type1, Type2)).void }
 def requires_both(x)
   x.method1 # ok
   x.method2 # also ok
@@ -92,7 +92,7 @@ In an attempt to both make error messages simpler and make Sorbet type check a c
 class Parent; end
 class Child < Parent; end
 
-sig {params(x: T.all(Parent, Child)).void}
+sig { params(x: T.all(Parent, Child)).void }
 def example(x)
   T.reveal_type(x) # => `Child`
 end
@@ -119,7 +119,7 @@ class FooParent; end
 class FooChild < FooParent; end
 class Bar; end
 
-sig {params(xs: T::Array[T.all(A, B)]).void}
+sig { params(xs: T::Array[T.all(A, B)]).void }
 def example1(xs)
   # Since A and B are unrelated classes, Sorbet notices that
   # there are no values that satisfy `T.all(A, B)`, and thus
@@ -127,7 +127,7 @@ def example1(xs)
   T.reveal_type(xs) # => T::Array[T.noreturn]
 end
 
-sig {params(x: T.all(A, M)).void}
+sig { params(x: T.all(A, M)).void }
 def example2(x)
   # Even though A and M are unrelated, because M is a module
   # (not a class) the type does not collapse. Why? There might
@@ -139,7 +139,7 @@ def example2(x)
   T.reveal_type(x) # => T.all(A, M)
 end
 
-sig {params(x: T.all(FooParent, T.any(FooChild, Bar))).void}
+sig { params(x: T.all(FooParent, T.any(FooChild, Bar))).void }
 def example3(x)
   # Sorbet is smart enough to distribute over union types:
   #    T.all(FooParent, T.any(FooChild, Bar))
@@ -163,7 +163,7 @@ class A; end
 class B; end
 
 # Note: `T.any` (either A or B)
-sig {params(x: T.any(A, B)).void}
+sig { params(x: T.any(A, B)).void }
 def example(x)
   case x
   when A
@@ -190,7 +190,7 @@ class A; end
 
 module M; end
 
-sig {params(x: A).void}
+sig { params(x: A).void }
 def example(x)
   case x
   when M

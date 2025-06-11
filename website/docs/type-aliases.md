@@ -19,7 +19,7 @@ extend T::Sig
 Int = T.type_alias {Integer}
 Str = T.type_alias {String}
 
-sig {params(x: Int).returns(Str)}
+sig { params(x: Int).returns(Str) }
 def foo(x)
   T.reveal_type(x) # Revealed type: Integer
   x.to_s
@@ -48,11 +48,11 @@ For simple use cases, type aliases are nearly identical to just making a new con
 extend T::Sig
 
 A = T.type_alias {Integer}
-sig {returns(A)}
+sig { returns(A) }
 def foo; 3; end
 
 B = Integer
-sig {returns(B)}
+sig { returns(B) }
 def bar; 3; end
 ```
 
@@ -63,11 +63,11 @@ However, when the type is more complex, you must use type aliases:
 extend T::Sig
 
 A = T.type_alias {T.any(Integer, String)}
-sig {returns(A)}
+sig { returns(A) }
 def foo; 3; end
 
 B = T.any(Integer, String)
-sig {returns(B)} # error: Constant B is not a class or type alias
+sig { returns(B) } # error: Constant B is not a class or type alias
 def bar; 3; end
 ```
 
@@ -82,7 +82,7 @@ class B; end
 class C; end
 
 AB = T.type_alias {T.any(A, B)}
-sig {params(x: T.any(AB, C)).returns(Integer)}
+sig { params(x: T.any(AB, C)).returns(Integer) }
 def invalid(x) # error: Returning value that does not conform to method result type
   case x
   when AB then 1 # <- this line is problematic
@@ -94,7 +94,7 @@ end
 We could refactor this example to use `A, B` in the `when` and `AB` in the `sig`. However, this introduces coupling between the definition of `AB` and our method. If we ever updated the definition of `AB`, we would need to update the definition of our method as well.
 
 ```ruby
-sig {params(x: T.any(AB, C)).returns(Integer)}
+sig { params(x: T.any(AB, C)).returns(Integer) }
 def valid(x)
   case x
   when A, B then 1
@@ -130,10 +130,10 @@ Sorbet does not support recursive type aliases. To have types that reference the
 class SelfReferential
   extend T::Sig
 
-  sig {returns(T.nilable(SelfReferential))}
+  sig { returns(T.nilable(SelfReferential)) }
   attr_reader :val
 
-  sig {params(val: T.nilable(SelfReferential)).void}
+  sig { params(val: T.nilable(SelfReferential)).void }
   def initialize(val); @val = val; end
 end
 ```

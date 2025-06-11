@@ -56,7 +56,7 @@ T::Configuration.call_validation_error_handler = lambda do |signature, opts|
   raise TypeError.new(opts[:pretty_message])
 end
 
-sig {params(x: Integer).void.on_failure(:hello, :world)}
+sig { params(x: Integer).void.on_failure(:hello, :world) }
 def foo(x); end
 ```
 

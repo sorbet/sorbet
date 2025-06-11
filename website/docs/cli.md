@@ -82,7 +82,7 @@ This will ignore input files that contain the given pattern in their paths (rela
 For certain errors, Sorbet suggests autocorrects that can be accepted to automatically fix those errors. For example:
 
 ```ruby
-sig {params(xs: T::Array[Integer]).void}
+sig { params(xs: T::Array[Integer]).void }
 def example(xs)
   xs[0] + 1 # error: Method `+` does not exist on `NilClass` component
 end
@@ -144,7 +144,7 @@ However, there are cases where silencing errors in bulk can be useful (e.g., whe
 Use the `--suggest-unsafe` flag to have Sorbet additionally produce autocorrect suggestions that will unconditionally silence certain errors. Use `--suggest-unsafe --autocorrect` to accept these suggestions. For example, here is a program that Sorbet would not usually suggest an autocorrect for:
 
 ```ruby
-sig {params(x: T.any(Integer, String)).void}
+sig { params(x: T.any(Integer, String)).void }
 def example(x)
   1 + x # error: Expected `Integer` but found `T.any(Integer, String)`
 end

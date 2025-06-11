@@ -20,7 +20,7 @@ flows between variables in a program.)
 ```ruby
 extend T::Sig
 
-sig {params(x: T.nilable(String), default: String).returns(String)}
+sig { params(x: T.nilable(String), default: String).returns(String) }
 def maybe(x, default)
   # (1) Outside the if, x is either nil or a String
   T.reveal_type(x) # => Revealed type: `T.nilable(String)`
@@ -53,7 +53,7 @@ Sorbet bakes in knowledge of a bunch of Ruby constructs out of the box:
 # typed: true
 extend T::Sig
 
-sig {params(x: Object).void}
+sig { params(x: Object).void }
 def flow_sensitivity(x)
   # (1) is_a?
   if x.is_a?(Integer)
@@ -96,7 +96,7 @@ Sorbet cannot support flow sensitivity for `respond_to?` in the way that most pe
 For example:
 
 ```ruby
-sig {params(x: Object).void}
+sig { params(x: Object).void }
 def flow_sensitivity(x)
   # Does not work:
   if x.respond_to?(:foo)
@@ -120,7 +120,7 @@ Code making the most of Sorbet is best written to avoid needing to use `respond_
 If using `respond_to?` is absolutely necessary, use [`T.unsafe`](troubleshooting.md#escape-hatches) to call the method after checking for its existence:
 
 ```ruby
-sig {params(x: Object).void}
+sig { params(x: Object).void }
 def flow_sensitivity(x)
   if x.respond_to?(:foo)
     # T.unsafe silences all errors from this call site
@@ -144,7 +144,7 @@ class Unset
   final!
 end
 
-sig {params(x: T.nilable(T.any(Unset, Integer))).void}
+sig { params(x: T.nilable(T.any(Unset, Integer))).void }
 def example1(x: Unset.instance)
   T.reveal_type(x) # => `T.nilable(T.any(Unset, Integer))
 
@@ -158,7 +158,7 @@ def example1(x: Unset.instance)
   end
 end
 
-sig {params(x: T.nilable(Integer)).void}
+sig { params(x: T.nilable(Integer)).void }
 def example2(x: nil)
   T.reveal_type(x) # => `T.nilable(Integer)
   if x == 0

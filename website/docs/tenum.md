@@ -24,7 +24,7 @@ Note how each enum value is created by calling `new`: each enum value is an inst
 This also means that once an enum has been defined as a subclass of `T::Enum`, it behaves like any other [Class Type](class-types.md) and can be used in method signatures, type aliases, `T.let` annotations, and any other place a class type can be used:
 
 ```ruby
-sig {returns(Suit)}
+sig { returns(Suit) }
 def random_suit
   T.cast(Suit.values.sample, Suit)
 end
@@ -37,7 +37,7 @@ end
 Sorbet knows about the values in an enumeration statically, and so it can use [exhaustiveness checking](exhaustiveness.md) to check whether all enum values have been considered. The easiest way is to use a `case` statement:
 
 ```ruby
-sig {params(suit: Suit).void}
+sig { params(suit: Suit).void }
 def describe_suit_color(suit)
   case suit
   when Suit::Spades   then puts "Spades are black!"
@@ -142,7 +142,7 @@ class Suit < T::Enum
     # ...
   end
 
-  sig {returns(Integer)}
+  sig { returns(Integer) }
   def rank
     # (1) Case on self (because this is an instance method)
     case self
@@ -265,7 +265,7 @@ class Suit < T::Enum
     Diamonds = new
   end
 
-  sig {returns(Integer)}
+  sig { returns(Integer) }
   def rank
     case self
     when Spades then 1

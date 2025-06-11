@@ -23,7 +23,7 @@ const mainExample = `
 # typed: true
 extend T::Sig
 
-sig {params(name: String).returns(Integer)}
+sig { params(name: String).returns(Integer) }
 def main(name)
   puts "Hello, #{name}!"
   name.length

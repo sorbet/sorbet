@@ -22,7 +22,7 @@ extend T::Sig
 The basic syntax looks like this:
 
 ```ruby
-sig {params(x: SomeType, y: SomeOtherType).returns(MyReturnType)}
+sig { params(x: SomeType, y: SomeOtherType).returns(MyReturnType) }
 def foo(x, y); ...; end
 ```
 
@@ -49,7 +49,7 @@ class Main
   # Bring the `sig` method into scope
   extend T::Sig
 
-  sig {params(x: String).returns(Integer)}
+  sig { params(x: String).returns(Integer) }
   def self.main(x)
     x.length
   end
@@ -150,7 +150,7 @@ See [Blocks, Procs and Lambda Types](procs.md) for more information on how to wr
 When a method has no parameters, omit the `params` from the `sig`:
 
 ```ruby
-sig {returns(Integer)}
+sig { returns(Integer) }
 def self.main
   42
 end
@@ -173,7 +173,7 @@ end
 We care more about what **effect** this method has (printing to the screen) than what this method **returns** (`5`). We _could_ write a `sig` like this:
 
 ```ruby
-sig {returns(Integer)}   # ← Problematic! Read why below...
+sig { returns(Integer) }   # ← Problematic! Read why below...
 ```
 
 This is annoying for a bunch of reasons:
@@ -185,7 +185,7 @@ This is annoying for a bunch of reasons:
 Instead, Sorbet has a special way to mark methods where we only care about the effect: `void`:
 
 ```ruby
-sig {void}
+sig { void }
 ```
 
 Using `void` instead of `returns(...)` does a number of things:
@@ -210,13 +210,13 @@ class Main
   extend T::Sig
 
   # (1) greet has a useless return:
-  sig {params(name: String).void}
+  sig { params(name: String).void }
   def self.greet(name)
     puts "Hello, #{name}!"
   end
 
   # (2) name_length must be given a string:
-  sig {params(name: String).returns(Integer)}
+  sig { params(name: String).returns(Integer) }
   def self.name_length(name)
     name.length
   end
@@ -237,7 +237,7 @@ There are many ways to define class (static) methods in Ruby. How a method is de
       # In this style, at the top level of the class
       extend T::Sig
 
-      sig {params(name: String).void}
+      sig { params(name: String).void }
       def self.greet(name)
         puts "Hello, #{name}!"
       end
@@ -252,7 +252,7 @@ There are many ways to define class (static) methods in Ruby. How a method is de
         # In this style, inside the `class << self`
         extend T::Sig
 
-        sig {params(name: String).void}
+        sig { params(name: String).void }
         def greet(name)
           # ...
         end

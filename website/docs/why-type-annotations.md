@@ -38,7 +38,7 @@ There is one exception, which is when an instance variable is declared in the bo
 
 ```ruby
 class A
-  sig {params(x: Integer).void}
+  sig { params(x: Integer).void }
   def initialize(x)
     @x = x
   end
@@ -68,10 +68,10 @@ By the time Sorbet typechecks the `x + 1` line, Sorbet thinks that `x` has type 
 Sorbet's type inference system is smart enough to track things like this:
 
 ```ruby
-sig {params(banking_account: String).returns(T::Boolean)}
+sig { params(banking_account: String).returns(T::Boolean) }
 def is_risky_merchant(banking_account); ...; end
 
-sig {params(banking_account: T.nilable(String)).void}
+sig { params(banking_account: T.nilable(String)).void }
 def example(banking_account)
   should_check_balance = false
 

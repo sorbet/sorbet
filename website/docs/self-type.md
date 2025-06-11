@@ -19,7 +19,7 @@ This type can be used in return types to indicate that calling this method on wi
 class Parent
   extend T::Sig
 
-  sig {returns(T.self_type)}
+  sig { returns(T.self_type) }
   def foo
     self
   end
@@ -33,7 +33,7 @@ T.reveal_type(Child.new.foo) # Revealed type: Child
 module Mixin
   extend T::Sig
 
-  sig {returns(T.self_type)}
+  sig { returns(T.self_type) }
   def bar
     self
   end
@@ -53,7 +53,7 @@ class Generic < Parent
   extend T::Generic
   TM = type_member
 
-  sig {returns(Generic[T.self_type])} # error: Only top-level T.self_type is supported
+  sig { returns(Generic[T.self_type]) } # error: Only top-level T.self_type is supported
   def bad
     Generic[T.untyped].new
   end
@@ -64,8 +64,8 @@ Note that `T.self_type` declares that the type should be **exactly** what the re
 
 ```ruby
 class Parent
-  # sig {returns(T.self_type)} # WRONG
-  sig {returns(T.attached_class)}
+  # sig { returns(T.self_type) } # WRONG
+  sig { returns(T.attached_class) }
   def self.make
     new
   end
