@@ -114,7 +114,7 @@ void SigFinder::preTransformSend(core::Context ctx, const ast::Send &send) {
             // Found a method defined before the query but later than previous result: overwrite previous result
             auto owner = getEffectiveOwner(ctx);
             auto parsedSig = resolver::TypeSyntax::parseSigTop(ctx.withOwner(owner), send, core::Symbols::untyped());
-            this->result_ = make_optional<resolver::ParsedSig>(move(parsedSig));
+            this->result_ = Result{move(parsedSig), &send};
         } else {
             // We've already found an earlier result, so the current is not the first
         }
@@ -123,12 +123,12 @@ void SigFinder::preTransformSend(core::Context ctx, const ast::Send &send) {
         auto owner = getEffectiveOwner(ctx);
         auto parsedSig = resolver::TypeSyntax::parseSigTop(ctx.withOwner(owner), send, core::Symbols::untyped());
 
-        this->result_ = make_optional<resolver::ParsedSig>(move(parsedSig));
+        this->result_ = Result{move(parsedSig), &send};
     }
 }
 
-optional<resolver::ParsedSig> SigFinder::findSignature(core::Context ctx, const ast::ExpressionPtr &tree,
-                                                       core::Loc queryLoc) {
+optional<SigFinder::Result> SigFinder::findSignature(core::Context ctx, const ast::ExpressionPtr &tree,
+                                                     core::Loc queryLoc) {
     SigFinder sigFinder(queryLoc);
     ast::ConstTreeWalk::apply(ctx, sigFinder, tree);
     return move(sigFinder.result_);
