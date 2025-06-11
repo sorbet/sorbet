@@ -419,12 +419,12 @@ module T::Configuration
     if values.nil?
       @scalar_types = values
     else
-      bad_values = values.reject {|v| v.class == String }
+      bad_values = values.reject { |v| v.class == String }
       unless bad_values.empty?
         raise ArgumentError.new("Provided values must all be class name strings.")
       end
 
-      @scalar_types = values.each_with_object({}) {|x, acc| acc[x] = true }.freeze
+      @scalar_types = values.each_with_object({}) { |x, acc| acc[x] = true }.freeze
     end
   end
 

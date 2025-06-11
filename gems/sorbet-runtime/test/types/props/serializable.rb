@@ -1549,7 +1549,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   # We can't test everything outside of this set, but we can make a pass over
   # non-letter ASCII and get some coverage.
   DISALLOWED_CHARS = '!@#$%^&*()[{}]\|;:\'",<.>/?`~'.chars
-  DISALLOWED_PREFIXES = DISALLOWED_CHARS + DISALLOWED_CHARS.map {|c| "a#{c}" }
+  DISALLOWED_PREFIXES = DISALLOWED_CHARS + DISALLOWED_CHARS.map { |c| "a#{c}" }
 
   describe 'prop name safety checks' do
     it "catches when a prop name doesn't pass safe name checks" do
@@ -1583,7 +1583,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it "catches when the accessor key doesn't begin with @" do
-      DISALLOWED_PREFIXES.reject {|c| c == "@" }.each do |c|
+      DISALLOWED_PREFIXES.reject { |c| c == "@" }.each do |c|
         ok_prop_name = :nilstring2
         bad_accessor_key = :"#{c}nilstring"
         props = MuckAboutWithPropInternals.decorator.instance_variable_get(:@props)

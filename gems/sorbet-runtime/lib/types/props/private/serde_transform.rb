@@ -63,7 +63,7 @@ module T::Props
           end
         when T::Types::Simple
           raw = type.raw_type
-          if NO_TRANSFORM_TYPES.any? {|cls| raw <= cls }
+          if NO_TRANSFORM_TYPES.any? { |cls| raw <= cls }
             nil
           elsif raw <= Float
             case mode
@@ -99,7 +99,7 @@ module T::Props
             else
               "#{varname}.nil? ? nil : #{inner}"
             end
-          elsif type.types.all? {|t| generate(t, mode, varname).nil? }
+          elsif type.types.all? { |t| generate(t, mode, varname).nil? }
             # Handle, e.g., T::Boolean
             nil
           else
@@ -122,8 +122,8 @@ module T::Props
           # NB: This deliberately does include `nil`, which means we know we
           # don't need to do any transforming.
           inner_known = type.types
-            .map {|t| generate(t, mode, varname) }
-            .reject {|t| t == dynamic_fallback }
+            .map { |t| generate(t, mode, varname) }
+            .reject { |t| t == dynamic_fallback }
             .uniq
 
           if inner_known.size != 1

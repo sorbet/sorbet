@@ -11,7 +11,7 @@ module T::Types
     end
 
     def types
-      @types ||= @inner_types.map {|type| T::Utils.coerce(type) }
+      @types ||= @inner_types.map { |type| T::Utils.coerce(type) }
     end
 
     def build_type

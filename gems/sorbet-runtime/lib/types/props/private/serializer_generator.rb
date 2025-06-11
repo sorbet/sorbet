@@ -24,7 +24,7 @@ module T::Props
         .checked(:never)
       end
       def self.generate(props)
-        stored_props = props.reject {|_, rules| rules[:dont_store] }
+        stored_props = props.reject { |_, rules| rules[:dont_store] }
         parts = stored_props.map do |prop, rules|
           # All of these strings should already be validated (directly or
           # indirectly) in `validate_prop_name`, so we don't bother with a nice

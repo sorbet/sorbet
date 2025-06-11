@@ -375,7 +375,7 @@ class T::Enum
 
     orphaned_instances = T.must(@values) - @mapping.values
     if !orphaned_instances.empty?
-      raise "Enum values must be assigned to constants: #{orphaned_instances.map {|v| v.instance_variable_get('@serialized_val') }}"
+      raise "Enum values must be assigned to constants: #{orphaned_instances.map { |v| v.instance_variable_get('@serialized_val') }}"
     end
 
     @fully_initialized = true

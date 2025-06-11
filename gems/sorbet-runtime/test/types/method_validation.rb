@@ -321,7 +321,7 @@ module Opus::Types::Test
           yield 4
         end
 
-        @mod.foo {|i| i**2 }
+        @mod.foo { |i| i**2 }
       end
 
       it "allows procs to bind" do

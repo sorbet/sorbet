@@ -80,7 +80,7 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
   class NestedStruct < T::Struct
     const :data, T::Hash[Symbol, String]
     const :sensitive, T.nilable(String), sensitivity: ['reason']
-    const :custom, T.nilable(String), inspect: proc {|value, opts| "\"Inspected '#{value}' (opts: #{opts})\"" unless value.nil? }
+    const :custom, T.nilable(String), inspect: proc { |value, opts| "\"Inspected '#{value}' (opts: #{opts})\"" unless value.nil? }
     const :nested, T.nilable(NestedStruct)
   end
 

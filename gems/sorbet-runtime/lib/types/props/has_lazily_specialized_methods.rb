@@ -125,7 +125,7 @@ module T::Props
 
         cls = decorated_class
         cls.class_eval(source)
-        lazily_defined_methods.each_key {|name| cls.send(:private, name) }
+        lazily_defined_methods.each_key { |name| cls.send(:private, name) }
         lazily_defined_methods.clear
       end
 
@@ -136,7 +136,7 @@ module T::Props
         lazily_defined_vm_methods.values.map(&:call)
 
         cls = decorated_class
-        lazily_defined_vm_methods.each_key {|name| cls.send(:private, name) }
+        lazily_defined_vm_methods.each_key { |name| cls.send(:private, name) }
         lazily_defined_vm_methods.clear
       end
     end

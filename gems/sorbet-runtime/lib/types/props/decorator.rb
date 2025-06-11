@@ -79,7 +79,7 @@ class T::Props::Decorator
     extra
     setter_validate
     _tnilable
-  ].to_h {|k| [k, true] }.freeze, T::Hash[Symbol, T::Boolean], checked: false)
+  ].to_h { |k| [k, true] }.freeze, T::Hash[Symbol, T::Boolean], checked: false)
   private_constant :VALID_RULE_KEYS
 
   sig { params(key: Symbol).returns(T::Boolean).checked(:never) }
@@ -202,7 +202,7 @@ class T::Props::Decorator
   end
 
   # TODO: we should really be checking all the methods on `cls`, not just Object
-  BANNED_METHOD_NAMES = T.let(Object.instance_methods.each_with_object({}) {|x, acc| acc[x] = true }.freeze, T::Hash[Symbol, TrueClass], checked: false)
+  BANNED_METHOD_NAMES = T.let(Object.instance_methods.each_with_object({}) { |x, acc| acc[x] = true }.freeze, T::Hash[Symbol, TrueClass], checked: false)
 
   # checked(:never) - Rules hash is expensive to check
   sig do
@@ -223,7 +223,7 @@ class T::Props::Decorator
         "to 'sensitivity:' (in prop #{@class.name}.#{name})")
     end
 
-    if rules.keys.any? {|k| !valid_rule_key?(k) }
+    if rules.keys.any? { |k| !valid_rule_key?(k) }
       raise ArgumentError.new("At least one invalid prop arg supplied in #{self}: #{rules.keys.inspect}")
     end
 

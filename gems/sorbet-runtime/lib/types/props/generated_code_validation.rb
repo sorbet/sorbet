@@ -159,7 +159,7 @@ module T::Props
         assert_equal(:resbody, rescue_body.type)
         exceptions, assignment, handler = rescue_body.children
         assert_equal(:array, exceptions.type)
-        exceptions.children.each {|c| assert_equal(:const, c.type) }
+        exceptions.children.each { |c| assert_equal(:const, c.type) }
         assert_equal(:lvasgn, assignment.type)
         assert_equal([:e], assignment.children)
 
@@ -169,7 +169,7 @@ module T::Props
         receiver, method, *args = deserialization_error.children
         assert_equal(nil, receiver)
         assert_equal(:raise_deserialization_error, method)
-        args.each {|a| validate_lack_of_side_effects(a, whitelisted_methods_for_deserialize) }
+        args.each { |a| validate_lack_of_side_effects(a, whitelisted_methods_for_deserialize) }
 
         validate_lack_of_side_effects(val_return, whitelisted_methods_for_deserialize)
       else
@@ -222,12 +222,12 @@ module T::Props
         # Primitives & self are ok
       when :lvar, :arg, :ivar
         # Reading local & instance variables & arguments is ok
-        unless node.children.all? {|c| c.is_a?(Symbol) }
+        unless node.children.all? { |c| c.is_a?(Symbol) }
           raise ValidationError.new("Unexpected child for #{node.type}: #{node.inspect}")
         end
       when :args, :mlhs, :block, :begin, :if
         # Blocks etc are read-only if their contents are read-only
-        node.children.each {|c| validate_lack_of_side_effects(c, whitelisted_methods_by_receiver_type) if c }
+        node.children.each { |c| validate_lack_of_side_effects(c, whitelisted_methods_by_receiver_type) if c }
       when :send
         # Sends are riskier so check a whitelist
         receiver, method, *args = node.children

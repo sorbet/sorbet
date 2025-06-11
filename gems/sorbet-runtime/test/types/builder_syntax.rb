@@ -159,7 +159,7 @@ module Opus::Types::Test
             # abstract/overridable/etc only work on instance-level methods
             sig do
               builder = void
-              seq.each {|method| builder.public_send(method) }
+              seq.each { |method| builder.public_send(method) }
               builder
             end
             def fn; end
@@ -522,7 +522,7 @@ module Opus::Types::Test
             [1].map(&blk)
           end
         end
-        assert_equal(["hi"], mod.map {|_x| "hi" })
+        assert_equal(["hi"], mod.map { |_x| "hi" })
       end
 
       it 'disallows non-symbols in type_parameter' do

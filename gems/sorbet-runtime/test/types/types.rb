@@ -660,7 +660,7 @@ module Opus::Types::Test
 
       it 'can have its metatype instantiated' do
         assert_equal({}, T::Hash[Symbol, Integer].new)
-        assert_equal([], T::Hash[Symbol, Integer].new {|h, k| h[k] = [] }[:missing])
+        assert_equal([], T::Hash[Symbol, Integer].new { |h, k| h[k] = [] }[:missing])
       end
 
       it 'is coerced from plain hash' do
@@ -1311,7 +1311,7 @@ module Opus::Types::Test
       end
 
       it 'allows procs' do
-        assert_nil(check_error_message_for_obj(@type, proc {|x, y| x + y }))
+        assert_nil(check_error_message_for_obj(@type, proc { |x, y| x + y }))
       end
 
       it 'allows lambdas' do

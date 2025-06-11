@@ -10,7 +10,7 @@ module T::Types
     end
 
     def types
-      @types ||= @inner_types.transform_values {|v| T::Utils.coerce(v) }
+      @types ||= @inner_types.transform_values { |v| T::Utils.coerce(v) }
     end
 
     def build_type
@@ -26,16 +26,16 @@ module T::Types
     # overrides Base
     def recursively_valid?(obj)
       return false unless obj.is_a?(Hash)
-      return false if types.any? {|key, type| !type.recursively_valid?(obj[key]) }
-      return false if obj.any? {|key, _| !types[key] }
+      return false if types.any? { |key, type| !type.recursively_valid?(obj[key]) }
+      return false if obj.any? { |key, _| !types[key] }
       true
     end
 
     # overrides Base
     def valid?(obj)
       return false unless obj.is_a?(Hash)
-      return false if types.any? {|key, type| !type.valid?(obj[key]) }
-      return false if obj.any? {|key, _| !types[key] }
+      return false if types.any? { |key, type| !type.valid?(obj[key]) }
+      return false if obj.any? { |key, _| !types[key] }
       true
     end
 
@@ -48,7 +48,7 @@ module T::Types
       when TypedHash
         # warning: covariant hashes
 
-        key1, key2, *keys_rest = types.keys.map {|key| T::Utils.coerce(key.class) }
+        key1, key2, *keys_rest = types.keys.map { |key| T::Utils.coerce(key.class) }
         key_type = if !key2.nil?
           T::Types::Union::Private::Pool.union_of_types(key1, key2, keys_rest)
         elsif key1.nil?
