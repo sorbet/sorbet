@@ -57,11 +57,11 @@ class Box
   Elem = type_member # Makes the `Box` class generic
 
   # References the class-level generic `Elem`
-  sig {params(val: Elem).void}
+  sig { params(val: Elem).void }
   def initialize(val:); @val = val; end
-  sig {returns(Elem)}
+  sig { returns(Elem) }
   def val; @val; end
-  sig {params(val: Elem).returns(Elem)}
+  sig { params(val: Elem).returns(Elem) }
   def val=(val); @val = val; end
 end
 
@@ -135,7 +135,7 @@ Sorbet will not check that `x` and `y` are the same class at runtime.
 Since generics are only checked statically, this removes using tests as a way to guard against misuses of [`T.untyped`](untyped.md). For example, Sorbet will neither report a static error nor a runtime error on this example:
 
 ```ruby
-sig {params(xs: Box[Integer]).void}
+sig { params(xs: Box[Integer]).void }
 def foo(xs); end
 
 untyped_box = Box[T.untyped].new(val: 'not an int')
@@ -180,7 +180,7 @@ class Factory
 
   InstanceType = type_template
 
-  sig {returns(InstanceType)}
+  sig { returns(InstanceType) }
   def self.make_bad
     InstanceType.new
     # ^ this is not valid, because `InstanceType`
@@ -204,7 +204,7 @@ class Factory
   sig { abstract.returns(T::Class[InstanceType]) }
   def self.instance_type; end
 
-  sig {returns(InstanceType)}
+  sig { returns(InstanceType) }
   def self.make
     # (2) Call `self.instance_type.new` instead of `InstanceType.new`
     self.instance_type.new
@@ -341,7 +341,7 @@ module IBox
   Elem = type_member(:out)
 end
 
-sig {params(int_box: IBox[Integer]).void}
+sig { params(int_box: IBox[Integer]).void }
 def example(int_box)
   T.let(int_box, IBox[Numeric]) # OK
 end
@@ -363,7 +363,7 @@ module IBox
   Elem = type_member(:out)
 
   # Elem can only be used in output position
-  sig {abstract.returns(Elem)}
+  sig { abstract.returns(Elem) }
   def value; end
 end
 
@@ -378,16 +378,16 @@ class Box
   Elem = type_member
 
   # Within this class, `Elem` is invariant, so it can also be used in the input position
-  sig {params(value: Elem).void}
+  sig { params(value: Elem).void }
   def initialize(value:); @value = value; end
 
   # Implement the `value` method from `IBox`
-  sig {override.returns(Elem)}
+  sig { override.returns(Elem) }
   def value; @value; end
 
   # Add the ability to update the value
   # (allowed because `Elem` is invariant within this class)
-  sig {params(value: Elem).returns(Elem)}
+  sig { params(value: Elem).returns(Elem) }
   def value=(value); @value = value; end
 end
 ```
@@ -459,10 +459,10 @@ module ITask
 
   ParamType = type_member(:in)
 
-  sig {abstract.params(input: ParamType).returns(T::Boolean)}
+  sig { abstract.params(input: ParamType).returns(T::Boolean) }
   def do_task(input); end
 
-  sig {params(input: T.all(ParamType, BasicObject)).returns(T::Boolean)}
+  sig { params(input: T.all(ParamType, BasicObject)).returns(T::Boolean) }
   def do_task_with_logging(input)
     Kernel.puts(input)
     res = do_task(input)
@@ -479,16 +479,16 @@ class Task
 
   ParamType = type_member
 
-  sig {params(fn: T.proc.params(param: ParamType).returns(T::Boolean)).void}
+  sig { params(fn: T.proc.params(param: ParamType).returns(T::Boolean)).void }
   def initialize(&fn)
     @fn = fn
   end
 
-  sig {override.params(input: ParamType).returns(T::Boolean)}
+  sig { override.params(input: ParamType).returns(T::Boolean) }
   def do_task(input); @fn.call(input); end
 end
 
-sig {params(task: ITask[Integer]).void}
+sig { params(task: ITask[Integer]).void }
 def example(task)
   i = 0
   while task.do_task_with_logging(i)
@@ -517,8 +517,8 @@ module IBox
 
   Elem = type_member(:out)
 
-  sig {abstract.returns(Elem)}
-  #                     ^^^^ output position
+  sig { abstract.returns(Elem) }
+  #                      ^^^^ output position
   def value; end
 
   sig do
@@ -552,7 +552,7 @@ module Fn
   Input = type_member(:in)
   Output = type_member(:out)
 
-  sig {abstract.params(input: Input).returns(Output)}
+  sig { abstract.params(input: Input).returns(Output) }
   def call(input); end
 end
 
@@ -652,7 +652,7 @@ module AbstractRPCMethod
   RPCInput = type_member
   RPCOutput = type_member
 
-  sig {abstract.params(input: RPCInput).returns(RPCOutput)}
+  sig { abstract.params(input: RPCInput).returns(RPCOutput) }
   def run(input); end
 end
 
@@ -668,7 +668,7 @@ class TextDocumentHoverMethod
   RPCInput = type_template {{fixed: TextDocumentPositionParams}}
   RPCOutput = type_template {{fixed: HoverResponse}}
 
-  sig {override.params(input: RPCInput).returns(RPCOutput)}
+  sig { override.params(input: RPCInput).returns(RPCOutput) }
   def self.run(input)
     puts "Computing hover request at #{input.position}"
     # ...
@@ -803,7 +803,7 @@ Sorbet does not have a way to place a bound on a generic method, but it's usuall
 ```ruby
 class A
   extend T::Sig
-  sig {returns(Integer)}
+  sig { returns(Integer) }
   def foo; 0; end
 end
 

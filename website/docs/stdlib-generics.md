@@ -78,7 +78,7 @@ However, Sorbet completely erases _generic type arguments_ at runtime. When Sorb
 This also means that if the element type of an array has type [`T.untyped`](untyped.md), Sorbet will not report a static error, nor will Sorbet report a runtime error.
 
 ```ruby
-sig {params(xs: T::Array[Integer]).void}
+sig { params(xs: T::Array[Integer]).void }
 def foo(xs); end
 
 untyped_str_array = T::Array[T.untyped].new('first', 'second')
@@ -91,7 +91,7 @@ foo(untyped_str_array)
 Another consequence of having erased generics is that things like this will not work:
 
 ```ruby
-sig {params(xs: T.any(T::Array[Integer], T::Array[String])).void}
+sig { params(xs: T.any(T::Array[Integer], T::Array[String])).void }
 def example(xs)
   if xs.is_a?(T::Array[Integer]) # error!
     # ...
@@ -114,10 +114,10 @@ Note that all the classes in the Ruby standard library that Sorbet knows about a
 Implementing covariant classes in the Ruby standard library is a compromise. It means that things like this typecheck:
 
 ```ruby
-sig {returns(T::Array[Integer])}
+sig { returns(T::Array[Integer]) }
 def returns_ints; [1, 2, 3]; end
 
-sig {params(xs: T::Array[T.any(Integer, String)]).void}
+sig { params(xs: T::Array[T.any(Integer, String)]).void }
 def takes_ints_or_strings(xs); end
 
 xs = returns_ints

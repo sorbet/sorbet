@@ -6,7 +6,7 @@ title: T.anything
 The type `T.anything` is a type that is a supertype of all other types in Sorbet. In this sense, it is the "top" type of Sorbet's type system.
 
 ```ruby
-sig {params(x: T.anything).returns(T.anything)}
+sig { params(x: T.anything).returns(T.anything) }
 def example(x)
   x.nil? # error: `nil?` doesn't exist on `T.anything`
   x
@@ -23,7 +23,7 @@ In this `example` method the parameter `x` has type `T.anything`, Sorbet lets it
 `T.anything` requires being explicitly downcast before it's possible to do anything meaningful with a value of such a type:
 
 ```ruby
-sig {params(x: T.anything).void}
+sig { params(x: T.anything).void }
 def print_if_even(x)
   x.even? # error: Don't know whether `x` is an `Integer`
 
@@ -68,7 +68,7 @@ In simpler terms, Sorbet essentially assumes that a `T.untyped` value is being u
 To drive the difference home:
 
 ```ruby
-sig {params(x: Integer).void}
+sig { params(x: Integer).void }
 def takes_integer(x); end
 
 sig do
@@ -101,11 +101,11 @@ module IFoo
   extend T::Helpers
   abstract!
 
-  sig {abstract.void}
+  sig { abstract.void }
   def foo; end
 end
 
-sig {params(x: IFoo, y: IFoo).void}
+sig { params(x: IFoo, y: IFoo).void }
 def example(x, y)
   x.foo # obviously okay
 
@@ -126,7 +126,7 @@ This is why `T.anything` is useful: there is still _some_ type to write down in 
 Another common way to declare that a method "accepts anything" is to use a [generic method](generics.md):
 
 ```ruby
-sig {params(x: T.anything).void}
+sig { params(x: T.anything).void }
 def takes_anything(x)
   takes_anything_generic(x) # okay
 end
@@ -146,7 +146,7 @@ There are some subtle differences between these approaches, but overall they're 
 So how are they different? Whenever using `T.type_parameter(:U)` in a method signature, **all** occurrences of the type have to agree. In a method like the identify function, that means that the output has to be verbatim something that was provided as input:
 
 ```ruby
-sig {params(x: T.anything).returns(T.anything)}
+sig { params(x: T.anything).returns(T.anything) }
 def f(x)
   # ...
 end

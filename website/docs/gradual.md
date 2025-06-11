@@ -57,7 +57,7 @@ end
 
 # --- File we're currently typing ---
 
-sig {params(person: Person).returns(Integer)}
+sig { params(person: Person).returns(Integer) }
 def name_length(person)
   name = person.name # (*)
   T.reveal_type(name) # => T.untyped
@@ -91,7 +91,7 @@ class Person
 end
 
 # The annotation for .returns is wrong!
-sig {params(person: Person).returns(String)}
+sig { params(person: Person).returns(String) }
 def name_length(person)
   person.name.length
 end

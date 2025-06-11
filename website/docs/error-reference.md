@@ -258,14 +258,14 @@ There was a Hash literal with duplicated keys.
 This error can also be caused when trying to write a `sig` for a method with duplicated parameter names:
 
 ```ruby
-sig {params(_: String, _: Integer).void} # error: `_` is duplicated
+sig { params(_: String, _: Integer).void } # error: `_` is duplicated
 def foo(_, _); end
 ```
 
 To write a `sig` for this method, rename the method's parameters to have unique names:
 
 ```ruby
-sig {params(_a: String, _b: Integer).void} # ok
+sig { params(_a: String, _b: Integer).void } # ok
 def foo(_a, _b); end
 ```
 
@@ -476,7 +476,7 @@ While these errors exist, the first occurrence of the conflicting name will be u
 ```ruby
 class Info < T::struct
   ...
-  sig {params(name: String, age: Integer).void}
+  sig { params(name: String, age: Integer).void }
   def initialize(name:, age:)
     ...
   end
@@ -956,9 +956,9 @@ In cases like these, usually the solution is to remove the `foo` definition from
 **Note**: The arity of a method does not include types, only names and kinds of its parameters. For example:
 
 ```ruby
-sig {returns(Integer)}
+sig { returns(Integer) }
 def foo; end
-sig {returns(String)}
+sig { returns(String) }
 def foo; end
 ```
 
@@ -1558,7 +1558,7 @@ module IService
   extend T::Helpers
   interface!
 
-  sig {abstract.returns(String)}
+  sig { abstract.returns(String) }
   def port; end
 end
 
@@ -1584,7 +1584,7 @@ class AbstractService
   extend T::Sig
 
   # Default port of 8080, but can be overridden in the child class.
-  sig {overridable.returns(String)}
+  sig { overridable.returns(String) }
   def port; '8080'; end
 end
 ```
@@ -1673,7 +1673,7 @@ Array[Integer]
 To use these standard library classes in type annotations, prefix the generic class's name with `T::`, like this:
 
 ```ruby
-sig {returns(T::Array[Integer])}
+sig { returns(T::Array[Integer]) }
 def foo; [0]; end
 ```
 
@@ -1896,7 +1896,7 @@ To summarize:
 
 class A
   extend T::Sig
-  sig {params(x: Integer).returns(String)}
+  sig { params(x: Integer).returns(String) }
   def int_to_string(x)
     x # no static error!
       # (this file is `# typed: false`)
@@ -1934,8 +1934,8 @@ When attempting to define methods that would require overloading to properly typ
 ```ruby
 # BAD example, will not typecheck
 
-sig {params(idx: Integer, raise_if_not_found: TrueClass).returns(String)}
-sig {params(idx: Integer).returns(T.nilable(String))}
+sig { params(idx: Integer, raise_if_not_found: TrueClass).returns(String) }
+sig { params(idx: Integer).returns(T.nilable(String)) }
 def get_element(idx, raise_if_not_found)
   # ...
 end
@@ -1946,12 +1946,12 @@ This attempts to define a `get_element` method that normally returns `T.nilable(
 The idea is that these are conceptually two different methods, which is the suggestion for how to refactor the code:
 
 ```ruby
-sig {params(idx: Integer).returns(T.nilable(String))}
+sig { params(idx: Integer).returns(T.nilable(String)) }
 def get_element(idx)
   # ...
 end
 
-sig {params(idx).returns(String)}
+sig { params(idx).returns(String) }
 def get_element_or_raise(idx)
   elem = get_element(idx)
   case elem
@@ -2009,7 +2009,7 @@ module IBox
   Elem = type_member
 end
 
-sig {params(x: IBox[Integer]).void}
+sig { params(x: IBox[Integer]).void }
 def example(x)
   T.let(x, IBox[T.any(Integer, String)]) # error: Argument does not have asserted type
 end
@@ -2071,7 +2071,7 @@ class C
 
   extend T::Sig
 
-  sig {void}
+  sig { void }
   def non_final_sig; end # error
 
   sig(:final) {void}
@@ -2177,10 +2177,10 @@ Thus, a static, abstract method on a module is impossible to implement, and thus
 
 ```ruby
 module MyMixin
-  sig {abstract.void}
+  sig { abstract.void }
   def foo; end
 
-  sig {abstract.void}
+  sig { abstract.void }
   def self.bar; end # error: Static methods in a module cannot be abstract
 end
 ```
@@ -2432,7 +2432,7 @@ class Box
 
   Elem = type_member
 
-  sig {returns(Elem)} # error
+  sig { returns(Elem) } # error
   def self.example
     # ...
   end
@@ -2450,7 +2450,7 @@ class AbstractSerializable
   abstract!
   SerializeType = type_template
 
-  sig {abstract.returns(SerializeType)} # error
+  sig { abstract.returns(SerializeType) } # error
   def serialize; end
   sig do
     abstract
@@ -2573,7 +2573,7 @@ class Abstract
   extend T::Helpers
   abstract!
 
-  sig {abstract.void}
+  sig { abstract.void }
   def foo; end
 end
 
@@ -2750,7 +2750,7 @@ In order to statically check [exhaustiveness](exhaustiveness), Sorbet provides `
 ```ruby
 # -- bad example --
 
-sig {returns(T.any(Integer, String))}
+sig { returns(T.any(Integer, String)) }
 def returns_int_or_string; 0; end
 
 case returns_int_or_string
@@ -2764,7 +2764,7 @@ end
 While it looks like `returns_int_or_string` is the name of a variable, it's actually a method call (Ruby allows method calls to omit parentheses). To fix this error, store the result of calling `returns_int_or_string` in a variable, and use that variable with the `case` and `T.absurd`:
 
 ```ruby
-sig {returns(T.any(Integer, String))}
+sig { returns(T.any(Integer, String)) }
 def returns_int_or_string; 0; end
 
 # calls returns_int_or_string, stores result in x
@@ -2879,7 +2879,7 @@ This error indicates a call to a method we believe does not exist (a la Ruby's `
     ```ruby
     module MyModule; end
 
-    sig {params(x: MyModule).void}
+    sig { params(x: MyModule).void }
     def foo(x)
       x.nil? # error: Method `nil?` does not exist on `MyModule`
     end
@@ -3072,8 +3072,8 @@ More generally, Sorbet draws a distinction between places in a program where Rub
 # ----- Arbitrary type syntax allowed -----
 T.let(0, T.any(Integer, String))
 #        ^^^^^^^^^^^^^^^^^^^^^^
-sig {returns(T.any(Integer, String))}
-#            ^^^^^^^^^^^^^^^^^^^^^^
+sig { returns(T.any(Integer, String)) }
+#             ^^^^^^^^^^^^^^^^^^^^^^
 T::Array[T.any(Integer, String)].new
 #        ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -3227,7 +3227,7 @@ In general, when considering taking a variable number of arguments, consider ins
 
 ```ruby
 # ----- AVOID THIS ----------------------------
-sig {params(xs: Integer).void}
+sig { params(xs: Integer).void }
 def foo(*xs); end
 
 xs = Array.new(3) {|i| i}
@@ -3236,7 +3236,7 @@ foo(*xs)
 
 # ----- Do this instead -----------------------
 
-sig {params(ys: T::Array[Integer]).void}
+sig { params(ys: T::Array[Integer]).void }
 def bar(ys); end
 
 ys = Array.new(3) {|i| i}
@@ -3250,7 +3250,7 @@ If it is not possible to refactor the code, the current work around is to use `T
 # ----- WORST CASE ----------------------------
 # Prefer the solution described above
 
-sig {params(xs: Integer).void}
+sig { params(xs: Integer).void }
 def foo(*xs); end
 
 xs = Array.new(3) {|i| i}
@@ -3285,7 +3285,7 @@ One instance where this can happen is when using `method`, since the arity of me
 
 extend T::Sig
 
-sig {params(blk: T.proc.params(arg0: String).void).void}
+sig { params(blk: T.proc.params(arg0: String).void).void }
 def foo(&blk)
 end
 
@@ -3318,7 +3318,7 @@ end
 # ---------------------------------------------
 
 # ----- This will not error -------------------
-sig {params(blk: T.untyped).returns(T.untyped)}
+sig { params(blk: T.untyped).returns(T.untyped) }
 def bar(&blk)
     proc(&blk)
 end
@@ -3426,7 +3426,7 @@ T::Array[key: Integer].new
 # typed: true
 extend T::Sig
 
-sig {params(x: Integer, y:Integer).void}
+sig { params(x: Integer, y:Integer).void }
 def takes_kwargs(x, y:)
 end
 
@@ -3453,7 +3453,7 @@ Sorbet detected that the safe navigation operator (`&.`) was being used on a rec
 
 extend T::Sig
 
-sig {params(x: Integer, y: T.nilable(Integer)).void}
+sig { params(x: Integer, y: T.nilable(Integer)).void }
 def foo(x, y)
   puts x&.to_s  # error: x can never be nil
   puts x.to_s   # no error
@@ -3470,7 +3470,7 @@ Sorbet can sometimes detect when a method is passed a block despite not acceptin
 # typed: strict
 extend T::Sig
 
-sig {void}
+sig { void }
 def takes_no_block; end
 
 # BAD EXAMPLE
@@ -3565,7 +3565,7 @@ module IFoo
   extend T::Helpers
   interface!
 
-  sig {abstract.void}
+  sig { abstract.void }
   def foo; end
 end
 
@@ -3616,7 +3616,7 @@ class Box
   extend T::Generic
   Elem = type_member
 
-  sig {params(x: Elem).void}
+  sig { params(x: Elem).void }
   def initialize(x)
     x.only_on_a # error, see below for fix
   end
@@ -3659,7 +3659,7 @@ Or if it's imperative to continue using `is_a?`, change the type to `T.all(Kerne
 
 ```ruby
 class A
-  sig {returns(T.attached_class)}
+  sig { returns(T.attached_class) }
   def self.make
     x = T.let(new, T.attached_class)
   end
@@ -3670,7 +3670,7 @@ Meanwhile, this snippet doesn't make sense, because `foo` is already an instance
 
 ```ruby
 class A
-  sig {returns(T.attached_class)} # error!
+  sig { returns(T.attached_class) } # error!
   def foo
     x = T.let(new, T.attached_class) # error!
   end

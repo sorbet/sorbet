@@ -16,7 +16,7 @@ For example, `T.any(Integer, String)` describes a type whose values can be eithe
 class A
   extend T::Sig
 
-  sig {params(x: T.any(Integer,String)).void}
+  sig { params(x: T.any(Integer,String)).void }
   def self.foo(x); end
 end
 
@@ -37,7 +37,7 @@ A.foo(true)
 Given a value `x` with a type like `T.any(Integer, String)`, Sorbet will only allow calls to methods that both types have in common, like this:
 
 ```ruby
-sig {params(x: T.any(Integer, String)).void}
+sig { params(x: T.any(Integer, String)).void }
 def example(x)
   # both `Integer` and `String` have a `to_s` method, so this is okay
   puts(x.to_s)
@@ -47,7 +47,7 @@ end
 But sometimes we want to be able to call a method that only exists on one of those two types. For example, `Integer` has an `even?` method that doesn't exist on `String`. If we didn't do anything special, Sorbet would report an error:
 
 ```ruby
-sig {params(x: T.any(Integer, String)).void}
+sig { params(x: T.any(Integer, String)).void }
 def example(x)
   # ERROR: Method `even?` does not exist on `String` component of `T.any(Integer, String)`
   x.even?
@@ -57,7 +57,7 @@ end
 In situations like these, we have to first check whether `x` is an `Integer` or not, and only then call the method:
 
 ```ruby
-sig {params(x: T.any(Integer, String)).void}
+sig { params(x: T.any(Integer, String)).void }
 def example(x)
   if x.is_a?(Integer)
     x.even? # OK, because we checked with `is_a?`
@@ -77,14 +77,14 @@ class B; end
 class C;
   extend T::Sig
 
-  sig {void}
+  sig { void }
   def bar; end
 end
 
 class D
   extend T::Sig
 
-  sig {params(x: T.any(A, B, C)).void}
+  sig { params(x: T.any(A, B, C)).void }
   def foo(x)
     x.bar # error: method bar does not exist on A or B
 
@@ -134,7 +134,7 @@ An effect of this implementation choice is that the same information propagation
 class A
   extend T::Sig
 
-  sig {params(x: T.nilable(T::Boolean)).void}
+  sig { params(x: T.nilable(T::Boolean)).void }
   def foo(x)
     if x.nil?
       T.reveal_type(x) # Revealed type: NilClass

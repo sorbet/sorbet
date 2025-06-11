@@ -86,7 +86,7 @@ It would be nice to be warned about our call to `log_env`, because we passed a H
 extend T::Sig
 
 # (2) add a signature
-sig {params(env: T::Hash[Symbol, Integer], key: Symbol).void}
+sig { params(env: T::Hash[Symbol, Integer], key: Symbol).void }
 def log_env(env, key)
   puts "LOG: #{key} => #{env[key]}"
 end
@@ -94,7 +94,7 @@ end
 log_env({timeout_len: 2000}, 'timeout_len') # => Expected `Symbol` but found `String("timeout_len")`
 ```
 
-In this example, we add a line like `sig {...}` above the `def log_env` line. This is a Sorbet method signature---it declares the parameter and return types of a method. By adding the `sig` to `log_env`, we opted this method into additional checks. Now Sorbet reports this:
+In this example, we add a line like `sig { ... }` above the `def log_env` line. This is a Sorbet method signature---it declares the parameter and return types of a method. By adding the `sig` to `log_env`, we opted this method into additional checks. Now Sorbet reports this:
 
 ```plaintext
 Expected `Symbol` but found `String("timeout_len")` for argument `key`
@@ -115,7 +115,7 @@ For example, it's possible that we don't care about what's stored in the `env`, 
 # typed: true
 extend T::Sig
 
-sig {params(env: T::Hash[Symbol, T.untyped], key: Symbol).void}
+sig { params(env: T::Hash[Symbol, T.untyped], key: Symbol).void }
 def log_env(env, key)
   puts "LOG: #{key} => #{env[key]}"
 end

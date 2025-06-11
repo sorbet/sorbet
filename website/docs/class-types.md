@@ -21,12 +21,12 @@ To reiterate: a class type means "any value which is an instance of this class".
 We can mention class types directly in a [method signature](sigs.md):
 
 ```ruby
-sig {returns(Integer)}
+sig { returns(Integer) }
 def age
   25
 end
 
-sig {params(x: Float).returns(String)}
+sig { params(x: Float).returns(String) }
 def float_to_string(x)
   x.to_s
 end
@@ -39,7 +39,7 @@ One gotcha is that `false` is an instance of `FalseClass`, and `true` is an inst
 ```ruby
 extend T::Sig
 
-sig {params(new_value: T::Boolean).void}
+sig { params(new_value: T::Boolean).void }
 def set_flag(new_value)
   @flag = new_value
   puts "Set value to #{new_value}"
@@ -64,7 +64,7 @@ extend T::Sig
 
 class MyClass; end
 
-sig {returns(MyClass)}
+sig { returns(MyClass) }
 def foo
   MyClass.new
 end
@@ -85,7 +85,7 @@ class ParentClass < GrandParentClass; end
 class ChildClass < ParentClass; end
 
 # Takes ParentClass or lower, not GrandParentClass
-sig {params(x: ParentClass).void}
+sig { params(x: ParentClass).void }
 def foo(x); end
 
 foo(GrandParentClass.new)  # error
@@ -99,9 +99,9 @@ Another note about inheritance in Ruby concerns the distinction between `Object`
 
 ```ruby
 # Some helper methods to play with
-sig {params(x: Object).void}
+sig { params(x: Object).void }
 def takes_object(x); end
-sig {params(x: BasicObject).void}
+sig { params(x: BasicObject).void }
 def takes_basic_object(x); end
 
 # The one error is because an instance of BasicObject is not an instance of Object
@@ -137,7 +137,7 @@ class MyClass
   include MyModule
 end
 
-sig {params(x: MyModule).void}
+sig { params(x: MyModule).void }
 def foo(x)
   x.some_method
 end

@@ -118,7 +118,7 @@ Sorbet also supports `T.let` type annotations for instance variables that are la
 
 ```ruby
 module B
-  sig {returns(String)}
+  sig { returns(String) }
   def current_user
     @user ||= T.let(ENV.fetch('USER'), T.nilable(String))
   end
@@ -134,7 +134,7 @@ Note that using `||=` like this only works when `nil` is the same as "uninitiali
 
 ```ruby
 module B
-  sig {returns(T.nilable(String))}
+  sig { returns(T.nilable(String)) }
   def current_git_dir
     return @git_dir if defined?(@git_dir)
     @git_dir = T.let(ENV['GIT_DIR'], T.nilable(String))
@@ -148,13 +148,13 @@ A current shortcoming of Sorbet is that in many cases it cannot reuse static typ
 
 ```ruby
 class Foo
-  sig {params(x: Integer, y: Integer).void}
+  sig { params(x: Integer, y: Integer).void }
   def initialize(x, y)
     @x = x
     @y = y + 0
   end
 
-  sig {void}
+  sig { void }
   def example
     T.reveal_type(@x)  # Integer
     T.reveal_type(@y)  # T.untyped

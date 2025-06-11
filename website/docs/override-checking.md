@@ -42,12 +42,12 @@ This is very abstract so let's make it concrete with some examples:
 class Parent
   extend T::Sig
 
-  sig {overridable.params(x: T.any(Integer, String)).void}
+  sig { overridable.params(x: T.any(Integer, String)).void }
   def takes_integer_or_string(x); end
 end
 
 class Child < Parent
-  sig {override.params(x: Integer).void}
+  sig { override.params(x: Integer).void }
   def takes_integer_or_string(x); end # error
 end
 ```
@@ -55,7 +55,7 @@ end
 This code has an error because the child class overrides `takes_integer_or_string` but narrows the input type. It's important to reject overrides like this, because otherwise Sorbet would not be able to catch errors like this:
 
 ```ruby
-sig {params(parent: Parent).void}
+sig { params(parent: Parent).void }
 def example(parent)
   parent.takes_integer_or_string('some string')
 end
@@ -73,12 +73,12 @@ When considering that the return type is "at least as good" as the parent, the s
 class Parent
   extend T::Sig
 
-  sig {overridable.returns(Numeric)}
+  sig { overridable.returns(Numeric) }
   def returns_at_most_numeric; end
 end
 
 class Child < Parent
-  sig {override.returns(T.any(Numeric, String))}
+  sig { override.returns(T.any(Numeric, String)) }
   def returns_at_most_numeric; end # error
 end
 ```
@@ -94,12 +94,12 @@ class DogFood; end
 class CatFood; end
 
 class Dog
-  sig {params(food: DogFood).void}
+  sig { params(food: DogFood).void }
   def feed(food); end
 end
 
 class Cat
-  sig {params(food: CatFood).void}
+  sig { params(food: CatFood).void }
   def feed(food); end
 end
 ```
@@ -114,19 +114,19 @@ module Pet
   extend T::Helpers
   interface!
   # Warning: this `T.any` is faulty, and leads to override checking errors
-  sig {abstract.params(food: T.any(DogFood, CatFood)).void}
+  sig { abstract.params(food: T.any(DogFood, CatFood)).void }
   def feed(food); end
 end
 
 class Dog
   include Pet
-  sig {override.params(food: DogFood).void}
+  sig { override.params(food: DogFood).void }
   def feed(food); end # error: DogFood is not a supertype of T.any(DogFood, CatFood)
 end
 
 class Cat
   include Pet
-  sig {override.params(food: CatFood).void}
+  sig { override.params(food: CatFood).void }
   def feed(food); end # error: CatFood is not a supertype of T.any(DogFood, CatFood)
 end
 ```
@@ -146,7 +146,7 @@ module Pet
   FoodType = type_member
 
   # (3) Use the `FoodType` generic type variable here
-  sig {abstract.params(food: FoodType).void}
+  sig { abstract.params(food: FoodType).void }
   def feed(food); end
 end
 
@@ -160,7 +160,7 @@ class Dog
   # (5) Use FoodType generic variable in the method.
   #     Because it's the same generic variable as in the abstract method,
   #     `feed` is now a valid override.
-  sig {override.params(food: FoodType).void}
+  sig { override.params(food: FoodType).void }
   def feed(food); end
 end
 
@@ -170,7 +170,7 @@ class Cat
   extend T::Generic
   FoodType = type_member {{fixed: CatFood}}
 
-  sig {override.params(food: FoodType).void}
+  sig { override.params(food: FoodType).void }
   def feed(food); end
 end
 ```
@@ -242,12 +242,12 @@ If the `T.untyped` is placed on the child class, it will be limited in effect to
 class Parent
   extend T::Sig
 
-  sig {overridable.returns(Numeric)}
+  sig { overridable.returns(Numeric) }
   def returns_at_most_numeric; end
 end
 
 class Child < Parent
-  sig {override.returns(T.untyped)}
+  sig { override.returns(T.untyped) }
   def returns_at_most_numeric; end # no error, because of T.untyped
 end
 ```
@@ -262,12 +262,12 @@ An alternative to **only** silence the override checks while keeping the incompa
 class Parent
   extend T::Sig
 
-  sig {overridable.returns(Numeric)}
+  sig { overridable.returns(Numeric) }
   def returns_at_most_numeric; end
 end
 
 class Child < Parent
-  sig {override(allow_incompatible: true).returns(T.any(Numeric, String))}
+  sig { override(allow_incompatible: true).returns(T.any(Numeric, String)) }
   def returns_at_most_numeric; end # no error, explicitly silenced
 end
 ```

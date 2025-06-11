@@ -21,7 +21,7 @@ This creates a fixed array type (also referred to as a tuple), which is a fixed-
 
 extend T::Sig
 
-sig {params(x: [Integer, String]).returns(Integer)}
+sig { params(x: [Integer, String]).returns(Integer) }
 def foo(x)
   T.reveal_type(x[0]) # Revealed type: `Integer`
 end

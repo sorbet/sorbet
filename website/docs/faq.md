@@ -39,7 +39,7 @@ Be sure to also check out our [Versioning policy for standard library RBIs](rbi.
 ## What's the type signature for a method with no return?
 
 ```ruby
-sig {void}
+sig { void }
 ```
 
 [→ Method Signatures](sigs.md)
@@ -53,7 +53,7 @@ For methods using this multiple return shorthand, the return type should be eith
 - an [Array](stdlib-generics.md)
 
   ```ruby
-  sig {return(T::Array[Integer])}
+  sig { return(T::Array[Integer]) }
   def example
     return 1, 2
   end
@@ -62,7 +62,7 @@ For methods using this multiple return shorthand, the return type should be eith
 - a [Tuple](tuples.md) (experimental)
 
   ```ruby
-  sig {return([Integer, String])}
+  sig { return([Integer, String]) }
   def example
     return 1, ''
   end
@@ -79,18 +79,18 @@ Sorbet has special knowledge for `attr_reader`, `attr_writer`, and `attr_accesso
 class A
   extend T::Sig
 
-  sig {returns(Integer)}
+  sig { returns(Integer) }
   attr_reader :reader
 
-  sig {params(writer: Integer).returns(Integer)}
+  sig { params(writer: Integer).returns(Integer) }
   attr_writer :writer
 
   # For attr_accessor, write the sig for the reader portion.
   # (Sorbet will use that to write the sig for the writer portion.)
-  sig {returns(Integer)}
+  sig { returns(Integer) }
   attr_accessor :accessor
 
-  sig {void}
+  sig { void }
   def initialize
     @reader = T.let(0, Integer)
     @writer = T.let(0, Integer)

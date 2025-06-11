@@ -10,12 +10,12 @@ The type `T.noreturn` is an "impossible" type: zero values in the language have 
 `T.noreturn` can declare that a method never returns (for example, because it unconditionally raises).
 
 ```ruby
-sig {returns(T.noreturn)}
+sig { returns(T.noreturn) }
 def raise_always
   raise RuntimeError
 end
 
-sig {returns(T.noreturn)}
+sig { returns(T.noreturn) }
 def exit_program
   exit
 end
@@ -28,7 +28,7 @@ In fact, neither `raise` nor `exit` are keywords in Ruby but are in fact methods
 `T.noreturn` powers Sorbet's unreachable (dead) code analysis, because it is impossible to have a value of type `T.noreturn`. For example:
 
 ```ruby
-sig {params(x: T.nilable(Integer)).void}
+sig { params(x: T.nilable(Integer)).void }
 def example(x)
   if x.nil?
     raise ""
@@ -46,14 +46,14 @@ Note that it can be useful to assert that a given branch of control flow **must*
 Another way a method can never return is if it infinitely loops, either by using `loop {...}` or by using a `while` loop with an unconditionally `true` condition, neither of which ever `break` out of the loop:
 
 ```ruby
-sig {returns(T.noreturn)}
+sig { returns(T.noreturn) }
 def loop_forever
   loop do
     # ...
   end
 end
 
-sig {returns(T.noreturn)}
+sig { returns(T.noreturn) }
 def while_forever
   while true
     # ...
@@ -73,7 +73,7 @@ Because of [intersection types](intersection-types.md), it is possible to create
 class A; end
 class B; end
 
-sig {params(x: T.all(A, B)).void}
+sig { params(x: T.all(A, B)).void }
 def example(x)
   puts(x) # error: This code is unreachable
 end
@@ -100,7 +100,7 @@ puts(x) # error: This code is unreachable
 Despite what we've claimed throughout this page, technically it **is** possible to have a value of type `T.noreturn` by way of `T.untyped`:
 
 ```ruby
-sig {returns(T.noreturn)}
+sig { returns(T.noreturn) }
 def always_raises
   T.unsafe("Just kidding, it actually does return")
 end

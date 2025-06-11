@@ -22,7 +22,7 @@ class C; end
 # (1) Define a type alias as a union type of A, B, or C
 AorBorC = T.type_alias {T.any(A, B, C)}
 
-sig {params(x: AorBorC).void}
+sig { params(x: AorBorC).void }
 def foo(x)
   # (2) Use flow-sensitivity to cover each case separately
   case x
@@ -59,7 +59,7 @@ extend T::Sig
 class A; end
 class B; end
 
-sig {params(x: T.any(A, B)).void}
+sig { params(x: T.any(A, B)).void }
 def foo(x)
   # ...
 end
@@ -75,7 +75,7 @@ In the body of `foo`, we'd like to do something different when given an `A` vers
 def do_a(a); puts 'Got an A!'; end
 def do_b(b); puts 'Got a B!'; end
 
-sig {params(x: T.any(A, B)).void}
+sig { params(x: T.any(A, B)).void }
 def foo(x)
   # Problematic! We'll improve this shortly...
   case x
@@ -97,7 +97,7 @@ def do_c(c); puts 'Got a C!'; end
 
 # ...
 
-sig {params(x: T.any(A, B, C)).void}
+sig { params(x: T.any(A, B, C)).void }
 def foo(x)
   # Bug! We forgot to update the body to handle C...
   case x
@@ -116,7 +116,7 @@ In this case, there's a silent bug in our program. We've updated the signature o
 We can enable exhaustiveness checking in Sorbet using `T.absurd(...)`:
 
 ```ruby
-sig {params(x: T.any(A, B, C)).void}
+sig { params(x: T.any(A, B, C)).void }
 def foo(x)
   case x
   when A
@@ -137,7 +137,7 @@ And as one last tip, we can use [Type Aliases](type-aliases.md) to give a name t
 ```ruby
 AorBorC = T.type_alias {T.any(A, B, C)}
 
-sig {params(x: AorBorC).void}
+sig { params(x: AorBorC).void }
 def foo(x)
   # ...
 end
@@ -148,7 +148,7 @@ end
 Note that exhaustiveness checking via `T.absurd` is merely a mode of use of checking that a particular conditional branch is unreachable. Sorbet allows using `T.absurd` to assert that arbitrary conditions are unreachable:
 
 ```ruby
-sig {params(x: Integer).void}
+sig { params(x: Integer).void }
 def example(x)
   if x.nil?
     # `x` must never be `nil`

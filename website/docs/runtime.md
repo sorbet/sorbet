@@ -39,7 +39,7 @@ require 'sorbet-runtime'
 class Example
   extend T::Sig
 
-  sig {params(x: Integer).returns(String)}
+  sig { params(x: Integer).returns(String) }
   def self.main(x)
     "Passed: #{x.to_s}"
   end
@@ -87,7 +87,7 @@ class Example
     nil
   end
 
-  sig {params(x: Integer).returns(Integer)}
+  sig { params(x: Integer).returns(Integer) }
   def self.add_one(x)
     x + 1
   end
@@ -141,7 +141,7 @@ class Main
 
   # (2) Use .on_failure in the sig for a method
   #                                       ┌───────────────┐
-  sig {params(argv: T::Array[String]).void.on_failure(:log)}
+  sig { params(argv: T::Array[String]).void.on_failure(:log) }
   def self.main(argv)
     puts argv
   end
@@ -176,7 +176,7 @@ end
 # ...
 
 #                                       ┌─────────────────┐
-sig {params(argv: T::Array[String]).void.on_failure(:raise)}
+sig { params(argv: T::Array[String]).void.on_failure(:raise) }
 ```
 
 With this `T::Configuration` handler, the default is to log, and we can use `.on_failure` to opt specific sigs into raising on failure.
@@ -193,14 +193,14 @@ But in some cases, especially when calling certain methods in tight loops or oth
 
 ```ruby
 # (1) Runtime checks always run.
-sig {params(xs: T::Array[String]).void.checked(:always)}
+sig { params(xs: T::Array[String]).void.checked(:always) }
 
 # (2) Runtime checks only run in "tests" (see below).
 # In non-tests, this sig specifically has no runtime overhead.
-sig {params(xs: T::Array[String]).void.checked(:tests)}
+sig { params(xs: T::Array[String]).void.checked(:tests) }
 
 # (3) Never runs the runtime checks. Careful!
-sig {params(xs: T::Array[String]).void.checked(:never)}
+sig { params(xs: T::Array[String]).void.checked(:never) }
 ```
 
 If `.checked(...)` is omitted on a sig, the default is `.checked(:always)`. The default checked level can also be configured. For example:
@@ -225,7 +225,7 @@ For example, this should probably be placed as the first line of any `rake test`
 
 ## `T::Sig::WithoutRuntime.sig`
 
-Even with `.checked(:never)`, there is some slight runtime overhead. The block for a `sig {...}` above a method is not evaluated until the first time that method is called. But Sorbet can only know whether a sig is `.checked(:never)` or not until the block is evaluated. So even if a sig is marked `.checked(:never)`, Sorbet will still wrap the method. The first time the method is called, Sorbet will discover the `.checked(:never)` and put back the original method.
+Even with `.checked(:never)`, there is some slight runtime overhead. The block for a `sig { ... }` above a method is not evaluated until the first time that method is called. But Sorbet can only know whether a sig is `.checked(:never)` or not until the block is evaluated. So even if a sig is marked `.checked(:never)`, Sorbet will still wrap the method. The first time the method is called, Sorbet will discover the `.checked(:never)` and put back the original method.
 
 Sometimes even this tiny amount of runtime metaprogramming is unacceptable at runtime. To completely eliminate all runtime side effects when defining a signature, replace `sig` with `T::Sig::WithoutRuntime.sig` when annotating methods:
 

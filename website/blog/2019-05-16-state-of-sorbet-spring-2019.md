@@ -79,7 +79,7 @@ And 63% of call sites[^call-site] are calling methods with type signatures allow
 class Hello
   extend T::Sig
 
-  sig {params(name: String).void}
+  sig { params(name: String).void }
   def greeting(name)
     'Hello, #{name}'
   end
@@ -169,13 +169,13 @@ attribute my_id, :integer
 …can conceptually expand into something that Sorbet sees as a typed interface like:
 
 ```ruby
-sig {returns(T.nilable(Integer))}
+sig { returns(T.nilable(Integer)) }
 def my_id; end
 
-sig {returns(T::Boolean)}
+sig { returns(T::Boolean) }
 def my_id?; end
 
-sig {params(new_value: T.nilable(Integer)).void}
+sig { params(new_value: T.nilable(Integer)).void }
 def my_id=(new_value); end
 ```
 

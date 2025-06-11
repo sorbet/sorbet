@@ -32,7 +32,7 @@ Try making a hypothesis of what the problem is ("I think the problem is...") and
 # typed: true
 extend T::Sig
 
-sig {params(xs: T::Array[Integer]).returns(Integer)}
+sig { params(xs: T::Array[Integer]).returns(Integer) }
 def foo(xs)
   T.reveal_type(xs.first) # => Revealed type: `T.nilable(Integer)`
 end

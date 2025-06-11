@@ -15,7 +15,7 @@ Valid values for this type are either `nil` or any Ruby string. Once we have som
 ```ruby
 extend T::Sig
 
-sig {params(x: T.nilable(String)).void}
+sig { params(x: T.nilable(String)).void }
 def foo(x)
   if x
     puts "x was not nil! Got: #{x}"
@@ -32,12 +32,12 @@ Sorbet is smart enough to follow the control flow of a program to update its kno
 ```ruby
 extend T::Sig
 
-sig {params(x: String).void}
+sig { params(x: String).void }
 def must_be_given_string(x)
   puts "Got string: #{x}"
 end
 
-sig {params(x: T.nilable(String)).void}
+sig { params(x: T.nilable(String)).void }
 def foo(x)
   must_be_given_string(x) # error: Expected `String` but found `T.nilable(String)` for argument `x`
   if x
@@ -67,10 +67,10 @@ In cases like these, we can use `T.must` to silence the error. Let's walk throug
 # typed: true
 extend T::Sig
 
-sig {params(x: Integer).void}
+sig { params(x: Integer).void }
 def doesnt_take_nil(x); end
 
-sig {params(key: Symbol, options: T::Hash[Symbol, Integer]).void}
+sig { params(key: Symbol, options: T::Hash[Symbol, Integer]).void }
 def foo(key, options)
   val = options[key]
   doesnt_take_nil(val) # error: Expected `Integer` but found `T.nilable(Integer)` for argument `x`
@@ -91,10 +91,10 @@ When we're **sure** that `val` must never be `nil`, we can wrap it in `T.must(..
 # typed: true
 extend T::Sig
 
-sig {params(x: Integer).void}
+sig { params(x: Integer).void }
 def doesnt_take_nil(x); end
 
-sig {params(key: Symbol, options: T::Hash[Symbol, Integer]).void}
+sig { params(key: Symbol, options: T::Hash[Symbol, Integer]).void }
 def foo(key, options)
   val = T.must(options[key])
   doesnt_take_nil(val) # ok
@@ -149,13 +149,13 @@ In (1), if `x` is nil the code will raise an exception, and `val` will never be 
 ```ruby
 extend T::Sig
 
-sig {params(x: T.nilable(Integer)).returns(Integer)}
+sig { params(x: T.nilable(Integer)).returns(Integer) }
 def foo(x)
   y = T.must(x).abs
   T.reveal_type(y)
 end
 
-sig {params(x: T.nilable(Integer)).returns(T.nilable(Integer))}
+sig { params(x: T.nilable(Integer)).returns(T.nilable(Integer)) }
 def bar(x)
   y = x&.abs
   T.reveal_type(y)

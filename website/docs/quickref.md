@@ -28,13 +28,13 @@ class Main
   extend T::Sig
 
   # (3) Add a `sig` annotation above your method:
-  sig {params(x: String).returns(Integer)}
+  sig { params(x: String).returns(Integer) }
   def self.main(x)
     x.length
   end
 
   # alternatively, for a method with no parameters:
-  sig {returns(Integer)}
+  sig { returns(Integer) }
   def no_params
     42
   end
@@ -91,7 +91,7 @@ require 'sorbet-runtime'
 class Main
   extend T::Sig
 
-  sig {void}
+  sig { void }
   def self.main
     puts 'Hello, world!'
   end
