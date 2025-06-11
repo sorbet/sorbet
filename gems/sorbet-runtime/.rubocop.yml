@@ -19,7 +19,7 @@ Layout/SpaceAroundEqualsInParameterDefault:
 Layout/SpaceInsideHashLiteralBraces:
   EnforcedStyle: no_space
 Layout/SpaceInsideBlockBraces:
-  EnforcedStyle: no_space
+  EnforcedStyle: space
   SpaceBeforeBlockParameters: false
 Layout/EndAlignment:
   EnforcedStyleAlignWith: start_of_line
