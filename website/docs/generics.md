@@ -518,7 +518,7 @@ module IBox
   Elem = type_member(:out)
 
   sig { abstract.returns(Elem) }
-  #                     ^^^^ output position
+  #                      ^^^^ output position
   def value; end
 
   sig do

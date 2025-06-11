@@ -145,7 +145,7 @@ class Parent
   extend T::Sig
 
   sig { params(x: T.attached_class).void }
-            # ^: T.attached_class may only be used in an :out context, like returns
+  #            ^: T.attached_class may only be used in an :out context, like returns
   def self.problem(x); end
 end
 ```

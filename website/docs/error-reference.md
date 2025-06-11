@@ -3073,7 +3073,7 @@ More generally, Sorbet draws a distinction between places in a program where Rub
 T.let(0, T.any(Integer, String))
 #        ^^^^^^^^^^^^^^^^^^^^^^
 sig { returns(T.any(Integer, String)) }
-#            ^^^^^^^^^^^^^^^^^^^^^^
+#             ^^^^^^^^^^^^^^^^^^^^^^
 T::Array[T.any(Integer, String)].new
 #        ^^^^^^^^^^^^^^^^^^^^^^
 
