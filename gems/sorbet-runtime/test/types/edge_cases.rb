@@ -7,7 +7,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     klass = Class.new do
       extend T::Sig
       extend T::Helpers
-      sig {override.params(other: T.self_type).returns(T::Boolean)}
+      sig { override.params(other: T.self_type).returns(T::Boolean) }
       def ==(other)
         true
       end
@@ -19,9 +19,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     klass = Class.new do
       extend T::Sig
       extend T::Helpers
-      sig {params(foo: String).returns(String)}
+      sig { params(foo: String).returns(String) }
       attr_writer :foo
-      sig {params(bar: Integer).returns(Integer)}
+      sig { params(bar: Integer).returns(Integer) }
       attr_accessor :bar
     end
 
@@ -40,7 +40,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     mod = Module.new do
       extend T::Sig
       extend T::Helpers
-      sig {params(foo: String).returns(String)}
+      sig { params(foo: String).returns(String) }
       module_function def foo(foo)
         foo
       end
@@ -70,7 +70,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         klass = Class.new do
           extend T::Sig
           extend T::Helpers
-          sig {params(x: Symbol).returns(Symbol)}
+          sig { params(x: Symbol).returns(Symbol) }
           def foo(x=:foo)
             x
           end
@@ -86,7 +86,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Should use fast path
         obj = klass.new
-        allocs = counting_allocations {obj.bar}
+        allocs = counting_allocations { obj.bar }
         assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
@@ -94,7 +94,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         klass = Class.new do
           extend T::Sig
           extend T::Helpers
-          sig {params(x: Symbol).returns(Symbol).checked(:never)}
+          sig { params(x: Symbol).returns(Symbol).checked(:never) }
           def foo(x=:foo)
             x
           end
@@ -105,7 +105,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Shouldn't add overhead
         obj = klass.new
-        allocs = counting_allocations {obj.bar}
+        allocs = counting_allocations { obj.bar }
         assert_equal(0, allocs) if check_alloc_counts
       end
 
@@ -113,7 +113,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         klass = Class.new do
           extend T::Sig
           extend T::Helpers
-          sig {params(x: Symbol).returns(Symbol)}
+          sig { params(x: Symbol).returns(Symbol) }
           def foo(x=:foo)
             x
           end
@@ -129,7 +129,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Should use fast path
         obj = klass.new
-        allocs = counting_allocations {obj.bar}
+        allocs = counting_allocations { obj.bar }
         assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
@@ -137,7 +137,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         klass = Class.new do
           extend T::Sig
           extend T::Helpers
-          sig {params(x: Symbol).returns(Symbol).checked(:never)}
+          sig { params(x: Symbol).returns(Symbol).checked(:never) }
           def foo(x=:foo)
             x
           end
@@ -148,7 +148,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Shouldn't add overhead
         obj = klass.new
-        allocs = counting_allocations {obj.bar}
+        allocs = counting_allocations { obj.bar }
         assert_equal(0, allocs) if check_alloc_counts
       end
 
@@ -156,7 +156,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         superclass = Class.new do
           extend T::Sig
 
-          sig {params(x: Symbol).returns(Symbol)}
+          sig { params(x: Symbol).returns(Symbol) }
           def foo(x=:foo)
             x
           end
@@ -177,7 +177,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Should use fast path
         obj = subclass.new
-        allocs = counting_allocations {obj.bar}
+        allocs = counting_allocations { obj.bar }
         assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
@@ -185,7 +185,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         superclass = Class.new do
           extend T::Sig
 
-          sig {params(x: Symbol).returns(Symbol).checked(:never)}
+          sig { params(x: Symbol).returns(Symbol).checked(:never) }
           def foo(x=:foo)
             x
           end
@@ -201,7 +201,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Shouldn't add overhead
         obj = subclass.new
-        allocs = counting_allocations {obj.bar}
+        allocs = counting_allocations { obj.bar }
         assert_equal(0, allocs) if check_alloc_counts
       end
 
@@ -209,7 +209,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         mod = Module.new do
           extend T::Sig
 
-          sig {params(x: Symbol).returns(Symbol)}
+          sig { params(x: Symbol).returns(Symbol) }
           def foo(x=:foo)
             x
           end
@@ -230,7 +230,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Should use fast path
         obj = klass.new
-        allocs = counting_allocations {obj.bar}
+        allocs = counting_allocations { obj.bar }
         assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
@@ -238,7 +238,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         mod = Module.new do
           extend T::Sig
 
-          sig {params(x: Symbol).returns(Symbol).checked(:never)}
+          sig { params(x: Symbol).returns(Symbol).checked(:never) }
           def foo(x=:foo)
             x
           end
@@ -254,7 +254,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Shouldn't add overhead
         obj = klass.new
-        allocs = counting_allocations {obj.bar}
+        allocs = counting_allocations { obj.bar }
         assert_equal(0, allocs) if check_alloc_counts
       end
     end
@@ -264,7 +264,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         klass = Class.new do
           extend T::Sig
           extend T::Helpers
-          sig {params(x: Symbol).returns(Symbol)}
+          sig { params(x: Symbol).returns(Symbol) }
           def self.foo(x=:foo)
             x
           end
@@ -281,7 +281,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         end
 
         # Should use fast path
-        allocs = counting_allocations {klass.bar}
+        allocs = counting_allocations { klass.bar }
         assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
@@ -289,7 +289,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         klass = Class.new do
           extend T::Sig
           extend T::Helpers
-          sig {returns(Symbol).checked(:never)}
+          sig { returns(Symbol).checked(:never) }
           def self.foo
             :foo
           end
@@ -302,7 +302,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Shouldn't add overhead
         klass.bar # Need extra call since first one came before `foo` unwrap
-        allocs = counting_allocations {klass.bar}
+        allocs = counting_allocations { klass.bar }
         assert_equal(0, allocs) if check_alloc_counts
       end
 
@@ -310,7 +310,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         klass = Class.new do
           extend T::Sig
           extend T::Helpers
-          sig {params(x: Symbol).returns(Symbol)}
+          sig { params(x: Symbol).returns(Symbol) }
           def self.foo(x=:foo)
             x
           end
@@ -327,7 +327,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         end
 
         # Should use fast path
-        allocs = counting_allocations {klass.bar}
+        allocs = counting_allocations { klass.bar }
         assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
@@ -335,7 +335,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         klass = Class.new do
           extend T::Sig
           extend T::Helpers
-          sig {returns(Symbol).checked(:never)}
+          sig { returns(Symbol).checked(:never) }
           def self.foo
             :foo
           end
@@ -348,7 +348,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Shouldn't add overhead
         klass.bar # Need extra call since first one came before `foo` unwrap
-        allocs = counting_allocations {klass.bar}
+        allocs = counting_allocations { klass.bar }
         assert_equal(0, allocs) if check_alloc_counts
       end
 
@@ -356,7 +356,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         superclass = Class.new do
           extend T::Sig
 
-          sig {params(x: Symbol).returns(Symbol)}
+          sig { params(x: Symbol).returns(Symbol) }
           def self.foo(x=:foo)
             x
           end
@@ -378,7 +378,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         end
 
         # Should use fast path
-        allocs = counting_allocations {subclass.bar}
+        allocs = counting_allocations { subclass.bar }
         assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
@@ -386,7 +386,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         superclass = Class.new do
           extend T::Sig
 
-          sig {params(x: Symbol).returns(Symbol).checked(:never)}
+          sig { params(x: Symbol).returns(Symbol).checked(:never) }
           def self.foo(x=:foo)
             x
           end
@@ -403,7 +403,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_equal(:foo, superclass.foo)
 
         # Shouldn't add overhead
-        allocs = counting_allocations {subclass.bar}
+        allocs = counting_allocations { subclass.bar }
         assert_equal(0, allocs) if check_alloc_counts
       end
 
@@ -411,7 +411,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         mod = Module.new do
           extend T::Sig
 
-          sig {params(x: Symbol).returns(Symbol)}
+          sig { params(x: Symbol).returns(Symbol) }
           def foo(x=:foo)
             x
           end
@@ -434,7 +434,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         end
 
         # Should use fast path
-        allocs = counting_allocations {klass.bar}
+        allocs = counting_allocations { klass.bar }
         assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
@@ -442,7 +442,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         mod = Module.new do
           extend T::Sig
 
-          sig {params(x: Symbol).returns(Symbol).checked(:never)}
+          sig { params(x: Symbol).returns(Symbol).checked(:never) }
           def foo(x=:foo)
             x
           end
@@ -460,7 +460,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_equal(:foo, klass.bar)
 
         # Shouldn't add overhead
-        allocs = counting_allocations {klass.bar}
+        allocs = counting_allocations { klass.bar }
         assert_equal(0, allocs) if check_alloc_counts
       end
 
@@ -486,7 +486,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
             arr.map(&method(:bar))
           end
 
-          sig {params(x: Integer).returns(Integer)}
+          sig { params(x: Integer).returns(Integer) }
           def self.bar(x)
             -x
           end
@@ -505,7 +505,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
             arr.map(&method(:bar))
           end
 
-          sig {params(x: Integer).returns(Integer).checked(:never)}
+          sig { params(x: Integer).returns(Integer).checked(:never) }
           def self.bar(x)
             -x
           end
@@ -524,7 +524,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         raise "bad"
       end
 
-      sig {returns(Symbol)}
+      sig { returns(Symbol) }
       def bar
         raise "bad"
       end
@@ -541,7 +541,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     klass = Class.new do
       extend T::Sig
       extend T::Helpers
-      sig {returns(Symbol)}
+      sig { returns(Symbol) }
       def self.foo
         :foo
       end
@@ -555,7 +555,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     parent = Class.new do
       extend T::Sig
       extend T::Helpers
-      sig {overridable.returns(Symbol)}
+      sig { overridable.returns(Symbol) }
       def self.foo
         :parent
       end
@@ -563,7 +563,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     child = Class.new(parent) do
       extend T::Sig
       extend T::Helpers
-      sig {override.returns(Symbol)}
+      sig { override.returns(Symbol) }
       def self.foo
         :child
       end
@@ -582,7 +582,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     child = Class.new(parent) do
       extend T::Sig
       extend T::Helpers
-      sig {override.returns(Symbol)}
+      sig { override.returns(Symbol) }
       def self.foo
         :child
       end
@@ -598,7 +598,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       extend T::Helpers
       abstract!
 
-      sig {abstract.void}
+      sig { abstract.void }
       private def foo; end
     end
     T::Private::Abstract::Validate.validate_abstract_module(klass)
@@ -654,7 +654,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     klass = Class.new do
       extend T::Sig
       extend T::Helpers
-      sig {returns(Symbol)}
+      sig { returns(Symbol) }
       def foo
         :foo
       end
@@ -662,7 +662,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       class << self
         extend T::Sig
         extend T::Helpers
-        sig {returns(Symbol)}
+        sig { returns(Symbol) }
         def foo
           :foo
         end
@@ -677,14 +677,14 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       class << self
         extend T::Sig
 
-        sig {returns(Symbol)}
+        sig { returns(Symbol) }
         def foo
           :foo
         end
       end
 
       extend T::Sig
-      sig {returns(Symbol)}
+      sig { returns(Symbol) }
       def bar
         :bar
       end
@@ -698,7 +698,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       class << self
         extend T::Sig
 
-        sig {returns(Symbol)}
+        sig { returns(Symbol) }
         def bad_return
           1
         end
@@ -715,7 +715,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       class << self
         extend T::Sig
 
-        sig {returns(Symbol)}
+        sig { returns(Symbol) }
         def self.bad_return
           1
         end
@@ -741,7 +741,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       end
 
       extend T::Sig
-      sig {returns(Symbol)}
+      sig { returns(Symbol) }
       def foo; end
 
       def self.post_hook; end
@@ -768,11 +768,11 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     end
     Class.new(parent) do
       extend T::Sig
-      sig {void}
+      sig { void }
       def a; end
-      sig {void}
+      sig { void }
       def b; end
-      sig {void}
+      sig { void }
       def c; end
     end
   end
@@ -780,7 +780,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
   it "still calls our hooks if the user supers up" do
     c1 = Class.new do
       extend T::Sig
-      sig {returns(Integer)}
+      sig { returns(Integer) }
       def foo
         1
       end
@@ -790,20 +790,20 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       def self.singleton_method_added(method)
         super(method)
       end
-      sig {returns(Integer)}
+      sig { returns(Integer) }
       def bar
         "bad"
       end
     end
     assert_equal(1, c1.new.foo)
-    assert_raises(TypeError) {c1.new.bar}
+    assert_raises(TypeError) { c1.new.bar }
   end
 
   it "forbids adding a sig to method_added" do
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
-        sig {params(method: Symbol).void}
+        sig { params(method: Symbol).void }
         def self.method_added(method)
           super(method)
         end
@@ -816,7 +816,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
-        sig {params(method: Symbol).void}
+        sig { params(method: Symbol).void }
         def self.singleton_method_added(method)
           super(method)
         end
@@ -830,11 +830,11 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       Class.new do
         class << self
           extend T::Sig
-          sig {void}
+          sig { void }
           def jojo; end
         end
 
-        sig {void} # this shouldn't work since sig is not available
+        sig { void } # this shouldn't work since sig is not available
         def self.post; end
       end
     end
@@ -844,13 +844,13 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     klass = Class.new do
       extend T::Sig
       extend T::Helpers
-      sig {raise "foo"}
+      sig { raise "foo" }
       def foo; end
     end
     instance = klass.new
 
     2.times do
-      e = assert_raises {instance.foo}
+      e = assert_raises { instance.foo }
       assert_equal("foo", e.message)
     end
   end
@@ -869,9 +869,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     end
     instance = klass.new
 
-    e = assert_raises {instance.foo}
+    e = assert_raises { instance.foo }
     assert_equal("foo", e.message)
-    e = assert_raises {instance.foo}
+    e = assert_raises { instance.foo }
     assert_match(/A previous invocation of #<UnboundMethod: /, e.message)
   end
 
@@ -881,16 +881,16 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       mutex = Mutex.new
       replaced = T::Private::ClassUtils.replace_method(T::Private::Methods.singleton_class, :run_sig_block_for_method) do |*args|
         barrier.wait
-        mutex.synchronize {replaced.bind_call(T::Private::Methods, *args)}
+        mutex.synchronize { replaced.bind_call(T::Private::Methods, *args) }
       end
 
       klass = Class.new do
         extend T::Sig
-        sig {void}
+        sig { void }
         def self.hello; end
       end
 
-      thread = Thread.new {klass.hello}
+      thread = Thread.new { klass.hello }
       klass.hello
     ensure
       thread&.join
@@ -913,21 +913,21 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
       extend T::Sig
 
-      sig {returns(String)}
+      sig { returns(String) }
       def a_public_method
         "public"
       end
 
       protected
 
-      sig {returns(String)}
+      sig { returns(String) }
       def a_protected_method
         "protected"
       end
 
       private
 
-      sig {returns(String)}
+      sig { returns(String) }
       def a_private_method
         "private"
       end

@@ -35,7 +35,7 @@ module Opus::Types::Test
       ex = assert_raises do
         Class.new do
           extend T::Sig
-          sig {params(Integer, s: String).void}
+          sig { params(Integer, s: String).void }
           def self.foo(s); end; foo
         end
       end
@@ -49,7 +49,7 @@ module Opus::Types::Test
       ex = assert_raises do
         Class.new do
           extend T::Sig
-          sig {params(Integer).void}
+          sig { params(Integer).void }
           def self.foo; end; foo
         end
       end
@@ -63,7 +63,7 @@ module Opus::Types::Test
       ex = assert_raises do
         Class.new do
           extend T::Sig
-          sig {params.void}
+          sig { params.void }
           def self.foo; end; foo
         end
       end
@@ -159,7 +159,7 @@ module Opus::Types::Test
             # abstract/overridable/etc only work on instance-level methods
             sig do
               builder = void
-              seq.each {|method| builder.public_send(method)}
+              seq.each { |method| builder.public_send(method) }
               builder
             end
             def fn; end
@@ -179,7 +179,7 @@ module Opus::Types::Test
           err = assert_raises(ArgumentError) do
             mod = Module.new do
               extend T::Sig
-              sig {void.checked(true)}
+              sig { void.checked(true) }
               def self.test_method; end
             end
             mod.test_method
@@ -189,7 +189,7 @@ module Opus::Types::Test
           assert_raises(ArgumentError) do
             mod = Module.new do
               extend T::Sig
-              sig {void.checked(false)}
+              sig { void.checked(false) }
               def self.test_method; end
             end
             mod.test_method
@@ -198,7 +198,7 @@ module Opus::Types::Test
           assert_raises(ArgumentError) do
             mod = Module.new do
               extend T::Sig
-              sig {void.checked(:foo)}
+              sig { void.checked(:foo) }
               def self.test_method; end
             end
             mod.test_method
@@ -297,7 +297,7 @@ module Opus::Types::Test
 
             a = Module.new do
               extend T::Sig
-              sig {params(x: Integer).void}
+              sig { params(x: Integer).void }
               def self.foo(x); end
             end
 
@@ -312,7 +312,7 @@ module Opus::Types::Test
 
             a = Module.new do
               extend T::Sig
-              sig {params(x: Integer).void}
+              sig { params(x: Integer).void }
               def self.foo(x); end
             end
 
@@ -328,7 +328,7 @@ module Opus::Types::Test
 
             a = Module.new do
               extend T::Sig
-              sig {params(x: Integer).void}
+              sig { params(x: Integer).void }
               def self.foo(x); end
             end
 
@@ -342,7 +342,7 @@ module Opus::Types::Test
 
             a = Module.new do
               extend T::Sig
-              sig {params(x: Integer).void.checked(:always)}
+              sig { params(x: Integer).void.checked(:always) }
               def self.foo(x); end
             end
 
@@ -354,7 +354,7 @@ module Opus::Types::Test
           it 'setting the default checked level raises if set too late' do
             Module.new do
               extend T::Sig
-              sig {void}
+              sig { void }
               def self.foo; end
               foo
             end
@@ -371,7 +371,7 @@ module Opus::Types::Test
             ex = assert_raises do
               Class.new do
                 extend T::Sig
-                sig {void.on_failure(:soft, notify: 'me')}
+                sig { void.on_failure(:soft, notify: 'me') }
                 def self.foo; end; foo
               end
             end
@@ -384,7 +384,7 @@ module Opus::Types::Test
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).returns(Integer)}
+            sig { returns(Integer).returns(Integer) }
             def self.foo; end; foo
           end
         end
@@ -395,7 +395,7 @@ module Opus::Types::Test
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).checked(:always).checked(:always)}
+            sig { returns(Integer).checked(:always).checked(:always) }
             def self.foo; end; foo
           end
         end
@@ -406,7 +406,7 @@ module Opus::Types::Test
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).on_failure(:soft, notify: 'me').on_failure(:soft, notify: 'you')}
+            sig { returns(Integer).on_failure(:soft, notify: 'me').on_failure(:soft, notify: 'you') }
             def self.foo; end; foo
           end
         end
@@ -417,7 +417,7 @@ module Opus::Types::Test
         ex = assert_raises do
           Class.new do
             extend T::Sig
-            sig {returns(NilClass).on_failure(:soft, notify: 'me').checked(:never)}
+            sig { returns(NilClass).on_failure(:soft, notify: 'me').checked(:never) }
             def self.foo; end; foo
           end
         end
@@ -427,7 +427,7 @@ module Opus::Types::Test
       it 'allows .on_failure and then .checked(:tests)' do
         Class.new do
           extend T::Sig
-          sig {returns(NilClass).on_failure(:soft, notify: 'me').checked(:tests)}
+          sig { returns(NilClass).on_failure(:soft, notify: 'me').checked(:tests) }
           def self.foo; end; foo
         end
         pass
@@ -436,7 +436,7 @@ module Opus::Types::Test
       it 'allows .on_failure and then .checked(:always)' do
         Class.new do
           extend T::Sig
-          sig {returns(NilClass).on_failure(:soft, notify: 'me').checked(:always)}
+          sig { returns(NilClass).on_failure(:soft, notify: 'me').checked(:always) }
           def self.foo; end; foo
         end
         pass
@@ -447,7 +447,7 @@ module Opus::Types::Test
           Class.new do
             extend T::Sig
             # We explicitly need to test that this ordering raises a certain error
-            sig {returns(NilClass).checked(:never).on_failure(:soft, notify: 'me')}
+            sig { returns(NilClass).checked(:never).on_failure(:soft, notify: 'me') }
             def self.foo; end; foo
           end
         end
@@ -458,7 +458,7 @@ module Opus::Types::Test
         Class.new do
           extend T::Sig
           # We explicitly need to test that this ordering does not raise an error
-          sig {returns(NilClass).checked(:tests).on_failure(:soft, notify: 'me')}
+          sig { returns(NilClass).checked(:tests).on_failure(:soft, notify: 'me') }
           def self.foo; end; foo
         end
       end
@@ -467,7 +467,7 @@ module Opus::Types::Test
         Class.new do
           extend T::Sig
           # We explicitly need to test that this ordering does not raise an error
-          sig {returns(NilClass).checked(:always).on_failure(:soft, notify: 'me')}
+          sig { returns(NilClass).checked(:always).on_failure(:soft, notify: 'me') }
           def self.foo; end; foo
         end
       end
@@ -476,7 +476,7 @@ module Opus::Types::Test
         e = assert_raises(NameError) do
           Class.new do
             extend T::Sig
-            sig {void.generated}
+            sig { void.generated }
             def self.foo; end
             foo
           end
@@ -488,7 +488,7 @@ module Opus::Types::Test
         e = assert_raises(ArgumentError) do
           Class.new do
             extend T::Sig
-            sig {returns(Integer).void}
+            sig { returns(Integer).void }
             def self.foo; end; foo
           end
         end
@@ -499,7 +499,7 @@ module Opus::Types::Test
         e = assert_raises(ArgumentError) do
           Class.new do
             extend T::Sig
-            sig {void.returns(Integer)}
+            sig { void.returns(Integer) }
             def self.foo; end; foo
           end
         end
@@ -522,7 +522,7 @@ module Opus::Types::Test
             [1].map(&blk)
           end
         end
-        assert_equal(["hi"], mod.map {|_x| "hi"})
+        assert_equal(["hi"], mod.map { |_x| "hi" })
       end
 
       it 'disallows non-symbols in type_parameter' do
@@ -536,7 +536,7 @@ module Opus::Types::Test
         e = assert_raises(ArgumentError) do
           Class.new do
             extend T::Sig
-            sig {type_parameters(3)}
+            sig { type_parameters(3) }
             def self.foo; end; foo
           end
         end
@@ -548,7 +548,7 @@ module Opus::Types::Test
       line = nil
       klass = Class.new do
         extend T::Sig
-        line = __LINE__; sig {params(x: Integer)}
+        line = __LINE__; sig { params(x: Integer) }
         def f(x); end
       end
 

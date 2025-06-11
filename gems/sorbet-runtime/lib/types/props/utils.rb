@@ -13,7 +13,7 @@ module T::Props::Utils
     when Symbol, NilClass, Numeric
       what
     when Array
-      what.map {|v| deep_clone_object(v, freeze: freeze)}
+      what.map { |v| deep_clone_object(v, freeze: freeze) }
     when Hash
       h = what.class.new
       what.each do |k, v|

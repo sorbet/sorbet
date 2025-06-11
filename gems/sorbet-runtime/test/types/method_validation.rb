@@ -18,7 +18,7 @@ module Opus::Types::Test
     describe "declaration" do
 
       it "succeeds with untyped" do
-        @mod.sig {params(bar: T.untyped).returns(T.untyped)}
+        @mod.sig { params(bar: T.untyped).returns(T.untyped) }
         def @mod.foo(bar)
           :foo
         end
@@ -26,7 +26,7 @@ module Opus::Types::Test
       end
 
       it "raises an error when noreturn method returns" do
-        @mod.sig {params(bar: String).returns(T.noreturn)}
+        @mod.sig { params(bar: String).returns(T.noreturn) }
         def @mod.foo(bar)
           :foo
         end
@@ -36,7 +36,7 @@ module Opus::Types::Test
       end
 
       it "raises an error when method with noreturn argument method is called" do
-        @mod.sig {params(bar: T.noreturn).returns(String)}
+        @mod.sig { params(bar: T.noreturn).returns(String) }
         def @mod.foo(bar)
           :foo
         end
@@ -46,7 +46,7 @@ module Opus::Types::Test
       end
 
       it "raises an error if there are invalid parameter names in the declaration" do
-        @mod.sig {params(bar: String).returns(Symbol)}
+        @mod.sig { params(bar: String).returns(Symbol) }
         def @mod.foo
           :foo
         end
@@ -57,7 +57,7 @@ module Opus::Types::Test
       end
 
       it "raises an error if parameters are missing from the declaration" do
-        @mod.sig {returns(Symbol)}
+        @mod.sig { returns(Symbol) }
         def @mod.foo(bar)
           :foo
         end
@@ -68,7 +68,7 @@ module Opus::Types::Test
       end
 
       it "raises an error if parameters are declared in the wrong order" do
-        @mod.sig {params(bar: String, foo: String).returns(Symbol)}
+        @mod.sig { params(bar: String, foo: String).returns(Symbol) }
         def @mod.foo(foo, bar)
           :foo
         end
@@ -84,9 +84,9 @@ module Opus::Types::Test
       end
 
       it "raises an error when calling sig twice in a row" do
-        @mod.sig {returns(Symbol)}
+        @mod.sig { returns(Symbol) }
         err = assert_raises(RuntimeError) do
-          @mod.sig {returns(Symbol)}
+          @mod.sig { returns(Symbol) }
         end
         assert_equal(
           "You called sig twice without declaring a method in between",
@@ -97,11 +97,11 @@ module Opus::Types::Test
       it "raises an error when adding a method to a different module than the last declaration" do
         mod2 = Module.new do
           extend T::Sig
-          sig {returns(String)}
+          sig { returns(String) }
           def foo; end
         end
 
-        @mod.sig {returns(Symbol)}
+        @mod.sig { returns(Symbol) }
         def mod2.bar; end
         err = assert_raises(RuntimeError) do
           mod2.bar
@@ -119,7 +119,7 @@ module Opus::Types::Test
         ex = assert_raises(RuntimeError) do
           mod = Module.new do
             extend T::Sig
-            sig {params(a: Integer, b: Integer).returns(Integer)}
+            sig { params(a: Integer, b: Integer).returns(Integer) }
             def self.foo(a: 1, b:) # rubocop:disable Style/KeywordParametersOrder
               a + b
             end
@@ -234,7 +234,7 @@ module Opus::Types::Test
       it "accepts built-in method overrides" do
         klass = Class.new do
           extend T::Sig
-          sig {params(m: Symbol, include_private: T::Boolean).returns(T::Boolean)}
+          sig { params(m: Symbol, include_private: T::Boolean).returns(T::Boolean) }
           def respond_to_missing?(m, include_private=false)
             true
           end
@@ -244,7 +244,7 @@ module Opus::Types::Test
       end
 
       it "raises an error when the return value is the wrong type" do
-        @mod.sig {returns(String)}
+        @mod.sig { returns(String) }
         def @mod.foo
           :foo
         end
@@ -262,7 +262,7 @@ module Opus::Types::Test
       end
 
       it "raises an error when a param is the wrong type" do
-        @mod.sig {params(bar: Integer).returns(String)}
+        @mod.sig { params(bar: Integer).returns(String) }
         def @mod.foo(bar)
           :foo
         end
@@ -280,7 +280,7 @@ module Opus::Types::Test
       end
 
       it "raises an error when the block is the wrong type" do
-        @mod.sig {params(blk: Proc).returns(String)}
+        @mod.sig { params(blk: Proc).returns(String) }
         def @mod.foo(&blk)
           :foo
         end
@@ -298,7 +298,7 @@ module Opus::Types::Test
       end
 
       it "raises an error when the bind is the wrong type" do
-        @mod.sig {bind(Integer).returns(Integer)}
+        @mod.sig { bind(Integer).returns(Integer) }
         def @mod.foo
           self + 2
         end
@@ -316,25 +316,25 @@ module Opus::Types::Test
       end
 
       it "accepts T.proc" do
-        @mod.sig {params(blk: T.proc.params(i: Integer).returns(Integer)).returns(Integer)}
+        @mod.sig { params(blk: T.proc.params(i: Integer).returns(Integer)).returns(Integer) }
         def @mod.foo(&blk)
           yield 4
         end
 
-        @mod.foo {|i| i**2}
+        @mod.foo { |i| i**2 }
       end
 
       it "allows procs to bind" do
-        @mod.sig {params(blk: T.proc.bind(Integer).returns(Integer)).returns(Integer)}
+        @mod.sig { params(blk: T.proc.bind(Integer).returns(Integer)).returns(Integer) }
         def @mod.foo(&blk)
           3.instance_eval(&blk)
         end
 
-        assert_equal(7, @mod.foo {self + 4})
+        assert_equal(7, @mod.foo { self + 4 })
       end
 
       it "gets the locations right with the second call" do
-        @mod.sig {returns(String)}
+        @mod.sig { returns(String) }
         def @mod.foo
           :foo
         end
@@ -361,7 +361,7 @@ module Opus::Types::Test
       end
 
       it "raises a sensible error for custom enumerable validation errors" do
-        @mod.sig {returns(T::Array[String])}
+        @mod.sig { returns(T::Array[String]) }
         def @mod.foo
           TestEnumerable.new
         end
@@ -377,7 +377,7 @@ module Opus::Types::Test
       describe 'ranges' do
         describe 'return type is non-nilable integer' do
           it 'permits a range that has integers on start and end' do
-            @mod.sig {returns(T::Range[Integer])}
+            @mod.sig { returns(T::Range[Integer]) }
             def @mod.foo
               (1...10)
             end
@@ -386,7 +386,7 @@ module Opus::Types::Test
           end
 
           it 'permits a range that has an integer start and no end' do
-            @mod.sig {returns(T::Range[Integer])}
+            @mod.sig { returns(T::Range[Integer]) }
             def @mod.foo
               (1...nil)
             end
@@ -397,7 +397,7 @@ module Opus::Types::Test
           # Ruby 2.6 does not support ranges with boundless starts
           if RUBY_VERSION >= '2.7'
             it 'permits a range that has an integer start and no end' do
-              @mod.sig {returns(T::Range[Integer])}
+              @mod.sig { returns(T::Range[Integer]) }
               def @mod.foo
                 (nil...10)
               end
@@ -407,7 +407,7 @@ module Opus::Types::Test
           end
 
           it 'permits a range with no beginning or end' do
-            @mod.sig {returns(T::Range[Integer])}
+            @mod.sig { returns(T::Range[Integer]) }
             def @mod.foo
               (nil...nil)
             end
@@ -421,7 +421,7 @@ module Opus::Types::Test
         it "raises an error when the return value is the wrong type " do
           klass = Class.new do
             extend T::Sig
-            sig {returns(String)}
+            sig { returns(String) }
             def foo
               :foo
             end
@@ -491,7 +491,7 @@ module Opus::Types::Test
             end
           end
 
-          @mod.sig {returns(Symbol).on_failure(:soft, notify: 'hello')}
+          @mod.sig { returns(Symbol).on_failure(:soft, notify: 'hello') }
           def @mod.foo
             1
           end
@@ -507,7 +507,7 @@ module Opus::Types::Test
       end
 
       it 'handles splats' do
-        @mod.sig {params(args: Integer).void}
+        @mod.sig { params(args: Integer).void }
         def @mod.foo(*args); end
 
         @mod.foo(2, 3, 4)
@@ -519,7 +519,7 @@ module Opus::Types::Test
       end
 
       it 'handles splats with real params' do
-        @mod.sig {params(bar: String, args: Integer).void}
+        @mod.sig { params(bar: String, args: Integer).void }
         def @mod.foo(bar, *args); end
 
         @mod.foo('hi', 2)
@@ -531,7 +531,7 @@ module Opus::Types::Test
       end
 
       it 'handles splats with optional params' do
-        @mod.sig {params(bar: String, args: Integer).void}
+        @mod.sig { params(bar: String, args: Integer).void }
         def @mod.foo(bar='', *args); end
 
         @mod.foo('hello')
@@ -545,7 +545,7 @@ module Opus::Types::Test
       end
 
       it 'handles keyrest' do
-        @mod.sig {params(opts: Integer).void}
+        @mod.sig { params(opts: Integer).void }
         def @mod.foo(**opts); end
 
         @mod.foo(a: 2, b: 3, c: 4)
@@ -557,7 +557,7 @@ module Opus::Types::Test
       end
 
       it 'handles keyrest with other params' do
-        @mod.sig {params(bar: String, opts: Integer).void}
+        @mod.sig { params(bar: String, opts: Integer).void }
         def @mod.foo(bar:, **opts); end
 
         @mod.foo(a: 2, b: 3, bar: 'hi', c: 4)
@@ -570,7 +570,7 @@ module Opus::Types::Test
 
       it 'raises an error when two parameters have the same name' do
 
-        @mod.sig {params(_: Integer, _: Integer).returns(String)} # rubocop:disable Lint/DuplicateHashKey
+        @mod.sig { params(_: Integer, _: Integer).returns(String) } # rubocop:disable Lint/DuplicateHashKey
         def @mod.bar(_, _)
           ""
         end

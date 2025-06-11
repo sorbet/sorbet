@@ -10,7 +10,7 @@ module T::Props
       private_constant :Serialize
       class Deserialize; end
       private_constant :Deserialize
-      ModeType = T.type_alias {T.any(Serialize, Deserialize)}
+      ModeType = T.type_alias { T.any(Serialize, Deserialize) }
       private_constant :ModeType
 
       module Mode
@@ -63,7 +63,7 @@ module T::Props
           end
         when T::Types::Simple
           raw = type.raw_type
-          if NO_TRANSFORM_TYPES.any? {|cls| raw <= cls}
+          if NO_TRANSFORM_TYPES.any? { |cls| raw <= cls }
             nil
           elsif raw <= Float
             case mode
@@ -99,7 +99,7 @@ module T::Props
             else
               "#{varname}.nil? ? nil : #{inner}"
             end
-          elsif type.types.all? {|t| generate(t, mode, varname).nil?}
+          elsif type.types.all? { |t| generate(t, mode, varname).nil? }
             # Handle, e.g., T::Boolean
             nil
           else
@@ -122,8 +122,8 @@ module T::Props
           # NB: This deliberately does include `nil`, which means we know we
           # don't need to do any transforming.
           inner_known = type.types
-            .map {|t| generate(t, mode, varname)}
-            .reject {|t| t == dynamic_fallback}
+            .map { |t| generate(t, mode, varname) }
+            .reject { |t| t == dynamic_fallback }
             .uniq
 
           if inner_known.size != 1
@@ -151,7 +151,7 @@ module T::Props
         end
       end
 
-      sig {params(varname: String, type: Module, mode: ModeType).returns(String).checked(:never)}
+      sig { params(varname: String, type: Module, mode: ModeType).returns(String).checked(:never) }
       private_class_method def self.handle_serializable_subtype(varname, type, mode)
         case mode
         when Serialize
@@ -164,7 +164,7 @@ module T::Props
         end
       end
 
-      sig {params(varname: String, type: Module, mode: ModeType).returns(String).checked(:never)}
+      sig { params(varname: String, type: Module, mode: ModeType).returns(String).checked(:never) }
       private_class_method def self.handle_custom_type(varname, type, mode)
         case mode
         when Serialize
@@ -177,7 +177,7 @@ module T::Props
         end
       end
 
-      sig {params(type: Module).returns(T.nilable(String)).checked(:never)}
+      sig { params(type: Module).returns(T.nilable(String)).checked(:never) }
       private_class_method def self.module_name(type)
         T::Configuration.module_name_mangler.call(type)
       end

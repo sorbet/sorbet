@@ -325,10 +325,10 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
 
   class DefaultsStruct < T::Struct
     prop :prop1, T.nilable(String), default: "this is prop 1"
-    prop :prop2, T.nilable(Integer), factory: -> {123}
+    prop :prop2, T.nilable(Integer), factory: -> { 123 }
     prop :trueprop, T::Boolean, default: true
     prop :falseprop, T::Boolean, default: false
-    prop :factoryprop, T::Boolean, factory: -> {true}
+    prop :factoryprop, T::Boolean, factory: -> { true }
 
     prop :untyped_prop1, T.untyped, default: nil
     const :untyped_const1, T.untyped, default: nil
@@ -337,8 +337,8 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
   class InvalidDefaultsStruct < T::Struct
     prop :default_nilable, T.nilable(T::Boolean), default: 1
     prop :default_non_nilable, T::Boolean, default: 1
-    prop :factory_nilable, T.nilable(T::Boolean), factory: -> {1}
-    prop :factory_non_nilable, T::Boolean, factory: -> {1}
+    prop :factory_nilable, T.nilable(T::Boolean), factory: -> { 1 }
+    prop :factory_non_nilable, T::Boolean, factory: -> { 1 }
   end
 
   class NilDefaultRequired < T::Struct
@@ -519,16 +519,16 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
   end
 
   class SetterValidate < T::Struct
-    prop :nilable_validated, T.nilable(Integer), setter_validate: ->(_prop, _value) {raise Error.new 'nilable_validated invalid'}
-    prop :default_validated, Integer, default: 1, setter_validate: ->(_prop, _value) {raise Error.new 'default_validated invalid'}
+    prop :nilable_validated, T.nilable(Integer), setter_validate: ->(_prop, _value) { raise Error.new 'nilable_validated invalid' }
+    prop :default_validated, Integer, default: 1, setter_validate: ->(_prop, _value) { raise Error.new 'default_validated invalid' }
   end
 
   class SetterValidateUntyped < T::Struct
-    prop :untyped, T.untyped, setter_validate: ->(_prop, _value) {raise Error.new 'untyped invalid'}
+    prop :untyped, T.untyped, setter_validate: ->(_prop, _value) { raise Error.new 'untyped invalid' }
   end
 
   class SetterValidateRaiseOnNilWrite < T::Struct
-    prop :raise_on_nil_write, T.nilable(Integer), setter_validate: ->(_prop, _value) {raise Error.new 'raise_on_nil_write invalid'}, raise_on_nil_write: true
+    prop :raise_on_nil_write, T.nilable(Integer), setter_validate: ->(_prop, _value) { raise Error.new 'raise_on_nil_write invalid' }, raise_on_nil_write: true
   end
 
   describe 'setter_validate' do
@@ -538,18 +538,18 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
     end
 
     it 'runs when a nilable is non-nil' do
-      err = assert_raises {SetterValidate.new(nilable_validated: 5)}
+      err = assert_raises { SetterValidate.new(nilable_validated: 5) }
       assert_equal('nilable_validated invalid', err.message)
     end
 
     it 'runs on T.untyped' do
-      err = assert_raises {SetterValidateUntyped.new}
+      err = assert_raises { SetterValidateUntyped.new }
       assert_equal('untyped invalid', err.message)
 
-      err = assert_raises {SetterValidateUntyped.new(untyped: nil)}
+      err = assert_raises { SetterValidateUntyped.new(untyped: nil) }
       assert_equal('untyped invalid', err.message)
 
-      err = assert_raises {SetterValidateUntyped.new(untyped: 123)}
+      err = assert_raises { SetterValidateUntyped.new(untyped: 123) }
       assert_equal('untyped invalid', err.message)
     end
 
@@ -559,10 +559,10 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
       end
       assert_equal("Missing required prop `raise_on_nil_write` for class `Opus::Types::Test::Props::ConstructorTest::SetterValidateRaiseOnNilWrite`", err.message)
 
-      err = assert_raises {SetterValidateRaiseOnNilWrite.new(raise_on_nil_write: 5)}
+      err = assert_raises { SetterValidateRaiseOnNilWrite.new(raise_on_nil_write: 5) }
       assert_equal('raise_on_nil_write invalid', err.message)
 
-      err = assert_raises {SetterValidateRaiseOnNilWrite.new(raise_on_nil_write: nil)}
+      err = assert_raises { SetterValidateRaiseOnNilWrite.new(raise_on_nil_write: nil) }
       assert_includes(err.message, "Can't set Opus::Types::Test::Props::ConstructorTest::SetterValidateRaiseOnNilWrite.raise_on_nil_write to nil (instance of NilClass) - need a Integer")
     end
   end
@@ -585,7 +585,7 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
     prop :nilable_on_read, T.nilable(Integer), raise_on_nil_write: true
     prop :primitive_default, Integer, default: 0
     prop :primitive_nilable_default, T.nilable(Integer), default: 0
-    prop :factory, Integer, factory: -> {0}
+    prop :factory, Integer, factory: -> { 0 }
     prop :primitive_array, T::Array[Integer]
     prop :array_default, T::Array[Integer], default: []
     prop :primitive_hash, T::Hash[String, Integer]

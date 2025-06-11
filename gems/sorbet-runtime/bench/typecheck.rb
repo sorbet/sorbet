@@ -214,34 +214,34 @@ module SorbetBenchmarks
       end
     end
 
-    sig {params(x: Integer).void.checked(:never)}
+    sig { params(x: Integer).void.checked(:never) }
     def self.unchecked_param(x); end
 
-    sig {params(x: Integer).void}
+    sig { params(x: Integer).void }
     def self.integer_param(x); end
 
-    sig {params(x: Integer, blk: T.proc.void).void}
+    sig { params(x: Integer, blk: T.proc.void).void }
     def self.integer_param_and_block(x, &blk); end
 
-    sig {params(x: Integer, blk: T.nilable(T.proc.void)).void}
+    sig { params(x: Integer, blk: T.nilable(T.proc.void)).void }
     def self.integer_param_and_nilable_block(x, &blk); end
 
-    sig {params(x: T.nilable(Integer)).void}
+    sig { params(x: T.nilable(Integer)).void }
     def self.nilable_integer_param(x); end
 
-    sig {params(x: Example).void}
+    sig { params(x: Example).void }
     def self.application_class_param(x); end
 
-    sig {params(x: Example).returns(T.anything)}
+    sig { params(x: Example).returns(T.anything) }
     def self.application_class_param_returns_anything(x); end
 
-    sig {params(x: T.nilable(Example)).void}
+    sig { params(x: T.nilable(Example)).void }
     def self.nilable_application_class_param(x); end
 
-    sig {params(x: T.nilable(Example)).returns(T.anything)}
+    sig { params(x: T.nilable(Example)).returns(T.anything) }
     def self.nilable_application_class_param_returns_anything(x); end
 
-    sig {params(s: Symbol, x: Integer, y: Integer).void}
+    sig { params(s: Symbol, x: Integer, y: Integer).void }
     def self.arg_plus_kwargs(s, x:, y: 0); end
   end
 end

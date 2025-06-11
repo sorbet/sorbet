@@ -5,7 +5,7 @@ module T::Private::Sealed
   module NoInherit
     def inherited(child)
       super
-      caller_loc = T::Private::CallerUtils.find_caller {|loc| loc.base_label != 'inherited'}
+      caller_loc = T::Private::CallerUtils.find_caller { |loc| loc.base_label != 'inherited' }
       T::Private::Sealed.validate_inheritance(caller_loc, self, child, 'inherited')
       @sorbet_sealed_module_all_subclasses << child
     end
@@ -22,14 +22,14 @@ module T::Private::Sealed
   module NoIncludeExtend
     def included(child)
       super
-      caller_loc = T::Private::CallerUtils.find_caller {|loc| loc.base_label != 'included'}
+      caller_loc = T::Private::CallerUtils.find_caller { |loc| loc.base_label != 'included' }
       T::Private::Sealed.validate_inheritance(caller_loc, self, child, 'included')
       @sorbet_sealed_module_all_subclasses << child
     end
 
     def extended(child)
       super
-      caller_loc = T::Private::CallerUtils.find_caller {|loc| loc.base_label != 'extended'}
+      caller_loc = T::Private::CallerUtils.find_caller { |loc| loc.base_label != 'extended' }
       T::Private::Sealed.validate_inheritance(caller_loc, self, child, 'extended')
       @sorbet_sealed_module_all_subclasses << child
     end
@@ -81,7 +81,7 @@ module T::Private::Sealed
 
     if !this_file.start_with?(decl_file)
       whitelist = T::Configuration.sealed_violation_whitelist
-      if !whitelist.nil? && whitelist.any? {|pattern| this_file =~ pattern}
+      if !whitelist.nil? && whitelist.any? { |pattern| this_file =~ pattern }
         return
       end
 

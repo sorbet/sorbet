@@ -67,7 +67,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       extend T::Helpers
       final!
       extend T::Sig
-      sig(:final) {void}
+      sig(:final) { void }
       def foo; end
     end
   end
@@ -77,7 +77,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       extend T::Helpers
       final!
       extend T::Sig
-      sig(:final) {void}
+      sig(:final) { void }
       def self.foo; end
     end
   end
@@ -185,7 +185,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       inner = Class.new
     end
     Class.new(inner)
-    err = assert_raises(RuntimeError) {Class.new(outer)}
+    err = assert_raises(RuntimeError) { Class.new(outer) }
     assert_match(/^#<Class:0x[0-9a-f]+> was declared as final and cannot be inherited$/, err.message)
   end
 
@@ -197,7 +197,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       inner = Class.new
     end
     Class.new(inner)
-    err = assert_raises(RuntimeError) {Class.new.include(outer)}
+    err = assert_raises(RuntimeError) { Class.new.include(outer) }
     assert_match(/^#<Module:0x[0-9a-f]+> was declared as final and cannot be included$/, err.message)
   end
 
@@ -209,7 +209,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       inner = Module.new
     end
     Class.new.include(inner)
-    err = assert_raises(RuntimeError) {Class.new(outer)}
+    err = assert_raises(RuntimeError) { Class.new(outer) }
     assert_match(/^#<Class:0x[0-9a-f]+> was declared as final and cannot be inherited$/, err.message)
   end
 
@@ -221,14 +221,14 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       inner = Module.new
     end
     Class.new.include(inner)
-    err = assert_raises(RuntimeError) {Class.new.include(outer)}
+    err = assert_raises(RuntimeError) { Class.new.include(outer) }
     assert_match(/^#<Module:0x[0-9a-f]+> was declared as final and cannot be included$/, err.message)
   end
 
   it "allows inheriting a class with hooks" do
     parent = Class.new do
       extend T::Sig
-      sig {void}
+      sig { void }
       def foo; end
     end
     Class.new(parent) do

@@ -4,7 +4,7 @@
 module T::NonForcingConstants
   # NOTE: This method is documented on the RBI in Sorbet's payload, so that it
   # shows up in the hover/completion documentation via LSP.
-  T::Sig::WithoutRuntime.sig {params(val: BasicObject, klass: String).returns(T::Boolean)}
+  T::Sig::WithoutRuntime.sig { params(val: BasicObject, klass: String).returns(T::Boolean) }
   def self.non_forcing_is_a?(val, klass)
     method_name = "T::NonForcingConstants.non_forcing_is_a?"
     if klass.empty?

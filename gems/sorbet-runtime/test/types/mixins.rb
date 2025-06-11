@@ -56,7 +56,7 @@ module Opus::Types::Test
                                end)
       end
 
-      klass = Class.new {include mixin}
+      klass = Class.new { include mixin }
       result = klass.mixin_class_method
       assert_equal(2, result)
     end
@@ -86,7 +86,7 @@ module Opus::Types::Test
                                end)
       end
 
-      klass = Class.new {include mixin}
+      klass = Class.new { include mixin }
       result = klass.mixin_class_method
       assert_equal(4, result)
     end

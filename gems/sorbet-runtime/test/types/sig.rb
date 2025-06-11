@@ -5,7 +5,7 @@ class Opus::Types::Test::SigTest < Critic::Unit::UnitTest
   it 'works on a class' do
     klass = Class.new do
       extend T::Sig
-      sig {returns(Symbol)}
+      sig { returns(Symbol) }
       def foo
         :foo
       end
@@ -16,7 +16,7 @@ class Opus::Types::Test::SigTest < Critic::Unit::UnitTest
   it 'works on a module' do
     mod = Module.new do
       extend T::Sig
-      sig {returns(Symbol)}
+      sig { returns(Symbol) }
       def self.foo
         :foo
       end
@@ -28,7 +28,7 @@ class Opus::Types::Test::SigTest < Critic::Unit::UnitTest
     klass = Class.new do
       extend T::Sig
       def foo
-        sig {void}
+        sig { void }
       end
     end
     e = assert_raises do
@@ -55,7 +55,7 @@ class Opus::Types::Test::SigTest < Critic::Unit::UnitTest
     output = fake_stderr_with_warnings do
       Class.new do
         extend T::Sig
-        sig {void}
+        sig { void }
         def foo; end
       end
     end

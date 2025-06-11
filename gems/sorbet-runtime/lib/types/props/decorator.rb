@@ -10,17 +10,17 @@
 class T::Props::Decorator
   extend T::Sig
 
-  Rules = T.type_alias {T::Hash[Symbol, T.untyped]}
-  DecoratedInstance = T.type_alias {Object} # Would be T::Props, but that produces circular reference errors in some circumstances
-  PropType = T.type_alias {T::Types::Base}
-  PropTypeOrClass = T.type_alias {T.any(PropType, Module)}
+  Rules = T.type_alias { T::Hash[Symbol, T.untyped] }
+  DecoratedInstance = T.type_alias { Object } # Would be T::Props, but that produces circular reference errors in some circumstances
+  PropType = T.type_alias { T::Types::Base }
+  PropTypeOrClass = T.type_alias { T.any(PropType, Module) }
 
   class NoRulesError < StandardError; end
 
   EMPTY_PROPS = T.let({}.freeze, T::Hash[Symbol, Rules], checked: false)
   private_constant :EMPTY_PROPS
 
-  sig {params(klass: T.untyped).void.checked(:never)}
+  sig { params(klass: T.untyped).void.checked(:never) }
   def initialize(klass)
     @class = T.let(klass, T.all(Module, T::Props::ClassMethods))
     @class.plugins.each do |mod|
@@ -30,22 +30,22 @@ class T::Props::Decorator
   end
 
   # checked(:never) - O(prop accesses)
-  sig {returns(T::Hash[Symbol, Rules]).checked(:never)}
+  sig { returns(T::Hash[Symbol, Rules]).checked(:never) }
   attr_reader :props
 
-  sig {returns(T::Array[Symbol])}
+  sig { returns(T::Array[Symbol]) }
   def all_props
     props.keys
   end
 
   # checked(:never) - O(prop accesses)
-  sig {params(prop: T.any(Symbol, String)).returns(Rules).checked(:never)}
+  sig { params(prop: T.any(Symbol, String)).returns(Rules).checked(:never) }
   def prop_rules(prop)
     props[prop.to_sym] || raise("No such prop: #{prop.inspect}")
   end
 
   # checked(:never) - Rules hash is expensive to check
-  sig {params(prop: Symbol, rules: Rules).void.checked(:never)}
+  sig { params(prop: Symbol, rules: Rules).void.checked(:never) }
   def add_prop_definition(prop, rules)
     override = rules.delete(:override)
 
@@ -79,16 +79,16 @@ class T::Props::Decorator
     extra
     setter_validate
     _tnilable
-  ].to_h {|k| [k, true]}.freeze, T::Hash[Symbol, T::Boolean], checked: false)
+  ].to_h { |k| [k, true] }.freeze, T::Hash[Symbol, T::Boolean], checked: false)
   private_constant :VALID_RULE_KEYS
 
-  sig {params(key: Symbol).returns(T::Boolean).checked(:never)}
+  sig { params(key: Symbol).returns(T::Boolean).checked(:never) }
   def valid_rule_key?(key)
     !!VALID_RULE_KEYS[key]
   end
 
   # checked(:never) - O(prop accesses)
-  sig {returns(T.all(Module, T::Props::ClassMethods)).checked(:never)}
+  sig { returns(T.all(Module, T::Props::ClassMethods)).checked(:never) }
   def decorated_class
     @class
   end
@@ -98,7 +98,7 @@ class T::Props::Decorator
   # Use this to validate that a value will validate for a given prop. Useful for knowing whether a value can be set on a model without setting it.
   #
   # checked(:never) - potentially O(prop accesses) depending on usage pattern
-  sig {params(prop: Symbol, val: T.untyped).void.checked(:never)}
+  sig { params(prop: Symbol, val: T.untyped).void.checked(:never) }
   def validate_prop_value(prop, val)
     prop_rules(prop).fetch(:value_validate_proc).call(val)
   end
@@ -202,7 +202,7 @@ class T::Props::Decorator
   end
 
   # TODO: we should really be checking all the methods on `cls`, not just Object
-  BANNED_METHOD_NAMES = T.let(Object.instance_methods.each_with_object({}) {|x, acc| acc[x] = true}.freeze, T::Hash[Symbol, TrueClass], checked: false)
+  BANNED_METHOD_NAMES = T.let(Object.instance_methods.each_with_object({}) { |x, acc| acc[x] = true }.freeze, T::Hash[Symbol, TrueClass], checked: false)
 
   # checked(:never) - Rules hash is expensive to check
   sig do
@@ -223,7 +223,7 @@ class T::Props::Decorator
         "to 'sensitivity:' (in prop #{@class.name}.#{name})")
     end
 
-    if rules.keys.any? {|k| !valid_rule_key?(k)}
+    if rules.keys.any? { |k| !valid_rule_key?(k) }
       raise ArgumentError.new("At least one invalid prop arg supplied in #{self}: #{rules.keys.inspect}")
     end
 
@@ -247,7 +247,7 @@ class T::Props::Decorator
   SAFE_NAME = T.let(/\A[A-Za-z_][A-Za-z0-9_-]*\z/.freeze, Regexp, checked: false)
 
   # Used to validate both prop names and serialized forms
-  sig {params(name: T.any(Symbol, String)).void.checked(:never)}
+  sig { params(name: T.any(Symbol, String)).void.checked(:never) }
   private def validate_prop_name(name)
     if !name.match?(SAFE_NAME)
       raise ArgumentError.new("Invalid prop name in #{@class.name}: #{name}")
@@ -255,7 +255,7 @@ class T::Props::Decorator
   end
 
   # This converts the type from a T::Type to a regular old ruby class.
-  sig {params(type: T::Types::Base).returns(Module).checked(:never)}
+  sig { params(type: T::Types::Base).returns(Module).checked(:never) }
   private def convert_type_to_class(type)
     case type
     when T::Types::TypedArray, T::Types::FixedArray
@@ -392,7 +392,7 @@ class T::Props::Decorator
   end
 
   # checked(:never) - Rules hash is expensive to check
-  sig {params(name: Symbol, rules: Rules).void.checked(:never)}
+  sig { params(name: Symbol, rules: Rules).void.checked(:never) }
   private def define_getter_and_setter(name, rules)
     T::Configuration.without_ruby_warnings do
       if !rules[:immutable]
@@ -440,7 +440,7 @@ class T::Props::Decorator
   end
 
   # checked(:never) - Rules hash is expensive to check
-  sig {params(prop_name: Symbol, rules: Rules).void.checked(:never)}
+  sig { params(prop_name: Symbol, rules: Rules).void.checked(:never) }
   private def validate_not_missing_sensitivity(prop_name, rules)
     if rules[:sensitivity].nil?
       if rules[:redaction]
@@ -612,7 +612,7 @@ class T::Props::Decorator
   #
   # This gets called when a module or class that extends T::Props gets included, extended,
   # prepended, or inherited.
-  sig {params(child: Module).void.checked(:never)}
+  sig { params(child: Module).void.checked(:never) }
   def model_inherited(child)
     child.extend(T::Props::ClassMethods)
     child = T.cast(child, T.all(Module, T::Props::ClassMethods))
@@ -656,19 +656,19 @@ class T::Props::Decorator
     end
   end
 
-  sig {params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never)}
+  sig { params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never) }
   private def clobber_getter?(child, prop)
     !!(child.decorator.method(:prop_get).owner != method(:prop_get).owner &&
        child.instance_method(prop).source_location&.first == __FILE__)
   end
 
-  sig {params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never)}
+  sig { params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never) }
   private def clobber_setter?(child, prop)
     !!(child.decorator.method(:prop_set).owner != method(:prop_set).owner &&
        child.instance_method("#{prop}=").source_location&.first == __FILE__)
   end
 
-  sig {params(mod: Module).void.checked(:never)}
+  sig { params(mod: Module).void.checked(:never) }
   def plugin(mod)
     decorated_class.plugins << mod
     T::Props::Plugin::Private.apply_class_methods(mod, decorated_class)

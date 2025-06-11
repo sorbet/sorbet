@@ -38,7 +38,7 @@ module SorbetBenchmarks
       end
     end
 
-    sig {params(s: Symbol, rest: String, x: Integer, y: Integer).void}
+    sig { params(s: Symbol, rest: String, x: Integer, y: Integer).void }
     def self.arg_plus_kwargs(s, *rest, x:, y: 0); end
   end
 end

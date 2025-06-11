@@ -72,7 +72,7 @@ module T::Private::Methods::SignatureValidation
 
       # If the super_method has any kwargs we can't build a
       # Signature for it, so we'll just skip validation in that case.
-      if !super_signature && !super_method.parameters.select {|kind, _| kind == :rest || kind == :kwrest}.empty?
+      if !super_signature && !super_method.parameters.select { |kind, _| kind == :rest || kind == :kwrest }.empty?
         nil
       else
         # super_signature can be nil when we're overriding a method (perhaps a builtin) that didn't use

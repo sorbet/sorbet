@@ -8,7 +8,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       extend T::Helpers
       interface!
 
-      sig {abstract.returns(Object)}
+      sig { abstract.returns(Object) }
       def foo; end
     end
 
@@ -18,7 +18,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       interface!
       include base
 
-      sig {abstract.returns(Object)}
+      sig { abstract.returns(Object) }
       def bar; end
     end
 
@@ -31,7 +31,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       extend T::Helpers
       interface!
 
-      sig {abstract.returns(Object)}
+      sig { abstract.returns(Object) }
       def good; end
 
       def bad; end
@@ -50,10 +50,10 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       extend T::Helpers
       interface!
 
-      sig {abstract.returns(Object)}
+      sig { abstract.returns(Object) }
       def good; end
 
-      sig {returns(Object)}
+      sig { returns(Object) }
       def bad; end
     end
 
@@ -74,7 +74,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       interface!
       include mixin
 
-      sig {abstract.returns(Object)}
+      sig { abstract.returns(Object) }
       def good; end
     end
 
@@ -91,10 +91,10 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       extend T::Helpers
       interface!
 
-      sig {abstract.returns(Object)}
+      sig { abstract.returns(Object) }
       def good; end
 
-      sig {abstract.returns(Object)}
+      sig { abstract.returns(Object) }
       private def bad; end
     end
 
@@ -111,7 +111,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       extend T::Helpers
       interface!
 
-      sig {abstract.returns(Object)}
+      sig { abstract.returns(Object) }
       protected def bad; end
     end
 
@@ -128,7 +128,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       extend T::Helpers
       interface!
 
-      sig {abstract.void}
+      sig { abstract.void }
       def foo; end
     end
 
@@ -137,7 +137,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       extend T::Helpers
       include base
 
-      sig {override.void}
+      sig { override.void }
       def foo; end
     end
 
@@ -150,7 +150,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       extend T::Helpers
       interface!
 
-      sig {abstract.void}
+      sig { abstract.void }
       def foo; end
     end
 
@@ -159,7 +159,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       extend T::Helpers
       include base
 
-      sig {override.returns(Integer)}
+      sig { override.returns(Integer) }
       def foo
         1
       end

@@ -19,8 +19,8 @@ Layout/SpaceAroundEqualsInParameterDefault:
 Layout/SpaceInsideHashLiteralBraces:
   EnforcedStyle: no_space
 Layout/SpaceInsideBlockBraces:
-  EnforcedStyle: no_space
-  SpaceBeforeBlockParameters: false
+  EnforcedStyle: space
+  SpaceBeforeBlockParameters: true
 Layout/EndAlignment:
   EnforcedStyleAlignWith: start_of_line
 Style/TrailingCommaInHashLiteral:
