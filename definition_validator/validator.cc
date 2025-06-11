@@ -1000,7 +1000,21 @@ public:
     ValidateWalk(const ast::ExpressionPtr &tree) : tree(tree) {}
 
 private:
+    // NOTE: A better representation for our AST might be to store a method's signature(s) within
+    // the MethodDef itself, so that it's trivial to access a method's signature in the
+    // preTransformMethodDef.
+    //
+    // definition_validator runs after class_flatten, which means that the signatures and the live in the
+    // `<static-init>` method of a class, while the MethodDef nodes live at the top level of a class
+    // body. Changing the representation would be tricky because signtures themselves are type
+    // checked (powering things like hover/go-to-def inside signatures).
+    //
+    // Instead, we have to keep a reference to the whole `tree` in this walk, and use `SigFinder` to
+    // find the signature for a given method (incurring a full walk of the tree) every time we want
+    // to find a single method. That means instead of ValidateWalk only doing one walk of the tree,
+    // it does `num_errors + 1` walks, which can be slow in the case of many errors.
     const ast::ExpressionPtr &tree;
+
     UnorderedMap<core::ClassOrModuleRef, vector<core::MethodRef>> abstractCache;
 
     const vector<core::MethodRef> &getAbstractMethods(const core::GlobalState &gs, core::ClassOrModuleRef klass) {
