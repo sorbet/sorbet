@@ -241,8 +241,8 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
   class TestForeignProps
     include T::Props
 
-    prop :foreign1, String, foreign: -> {MyTestModel}
-    prop :foreign2, T.nilable(String), foreign: -> {MyTestModel}
+    prop :foreign1, String, foreign: -> { MyTestModel }
+    prop :foreign2, T.nilable(String), foreign: -> { MyTestModel }
   end
 
   describe 'foreign props' do

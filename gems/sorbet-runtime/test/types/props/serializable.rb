@@ -23,7 +23,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     module DecoratorMethods
       extend T::Sig
 
-      sig {params(instance: T::Props::PrettyPrintable, pp: T.any(PrettyPrint, PP::SingleLine)).void}
+      sig { params(instance: T::Props::PrettyPrintable, pp: T.any(PrettyPrint, PP::SingleLine)).void }
       def pretty_print_extra(instance, pp)
         super(instance, pp)
         pp.breakable
@@ -52,10 +52,10 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     include T::Props::WeakConstructor
 
     prop :prop1, T.nilable(String), default: "this is prop 1"
-    prop :prop2, T.nilable(Integer), factory: -> {raise "don't call me"}
+    prop :prop2, T.nilable(Integer), factory: -> { raise "don't call me" }
     prop :trueprop, T::Boolean, default: true
     prop :falseprop, T::Boolean, default: false
-    prop :factoryprop, T::Boolean, factory: -> {true}
+    prop :factoryprop, T::Boolean, factory: -> { true }
 
     prop :untyped_prop1, T.untyped, default: nil
     const :untyped_const1, T.untyped, default: nil
@@ -1250,7 +1250,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :nilable_on_read, T.nilable(Integer), raise_on_nil_write: true
     prop :primitive_default, Integer, default: 0
     prop :primitive_nilable_default, T.nilable(Integer), default: 0
-    prop :factory, Integer, factory: -> {0}
+    prop :factory, Integer, factory: -> { 0 }
     prop :primitive_array, T::Array[Integer]
     prop :array_default, T::Array[Integer], default: []
     prop :primitive_hash, T::Hash[String, Integer]
@@ -1424,7 +1424,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
       describe 'with custom module_name_mangler' do
         before do
-          T::Configuration.module_name_mangler = ->(type) {"MANGLED::#{type}"}
+          T::Configuration.module_name_mangler = ->(type) { "MANGLED::#{type}" }
         end
 
         after do
@@ -1549,7 +1549,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   # We can't test everything outside of this set, but we can make a pass over
   # non-letter ASCII and get some coverage.
   DISALLOWED_CHARS = '!@#$%^&*()[{}]\|;:\'",<.>/?`~'.chars
-  DISALLOWED_PREFIXES = DISALLOWED_CHARS + DISALLOWED_CHARS.map {|c| "a#{c}"}
+  DISALLOWED_PREFIXES = DISALLOWED_CHARS + DISALLOWED_CHARS.map {|c| "a#{c}" }
 
   describe 'prop name safety checks' do
     it "catches when a prop name doesn't pass safe name checks" do
@@ -1583,7 +1583,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it "catches when the accessor key doesn't begin with @" do
-      DISALLOWED_PREFIXES.reject {|c| c == "@"}.each do |c|
+      DISALLOWED_PREFIXES.reject {|c| c == "@" }.each do |c|
         ok_prop_name = :nilstring2
         bad_accessor_key = :"#{c}nilstring"
         props = MuckAboutWithPropInternals.decorator.instance_variable_get(:@props)

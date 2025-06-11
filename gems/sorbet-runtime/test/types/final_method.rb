@@ -36,7 +36,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "allows declaring an instance method as final" do
     Class.new do
       extend T::Sig
-      sig(:final) {void}
+      sig(:final) { void }
       def foo; end
     end
   end
@@ -44,7 +44,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "allows declaring a class method as final" do
     Class.new do
       extend T::Sig
-      sig(:final) {void}
+      sig(:final) { void }
       def self.foo; end
     end
   end
@@ -53,9 +53,9 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
-        sig(:final) {void}
+        sig(:final) { void }
         def foo; end
-        sig(:final) {void}
+        sig(:final) { void }
         def foo; end
       end
     end
@@ -66,9 +66,9 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
-        sig(:final) {void}
+        sig(:final) { void }
         def self.foo; end
-        sig(:final) {void}
+        sig(:final) { void }
         def self.foo; end
       end
     end
@@ -79,9 +79,9 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
-        sig(:final) {void}
+        sig(:final) { void }
         def foo; end
-        sig {void}
+        sig { void }
         def foo; end
       end
     end
@@ -92,9 +92,9 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
-        sig(:final) {void}
+        sig(:final) { void }
         def self.foo; end
-        sig {void}
+        sig { void }
         def self.foo; end
       end
     end
@@ -105,7 +105,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
-        sig(:final) {void}
+        sig(:final) { void }
         def foo; end
         def foo; end
       end
@@ -117,7 +117,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
-        sig(:final) {void}
+        sig(:final) { void }
         def self.foo; end
         def self.foo; end
       end
@@ -139,7 +139,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
           def i_am_secretly_final; end
         end
 
-        sig(:final) {void}
+        sig(:final) { void }
         def i_am_secretly_final; end
       end
     end
@@ -160,7 +160,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
           def i_am_secretly_final; end
         end
 
-        sig {void}
+        sig { void }
         def i_am_secretly_final; end
       end
     end
@@ -275,7 +275,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
           def self.i_am_secretly_final2; end
         end
 
-        sig(:final) {void}
+        sig(:final) { void }
         def self.i_am_secretly_final2; end
       end
     end
@@ -296,7 +296,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
           def self.i_am_secretly_final2; end
         end
 
-        sig {void}
+        sig { void }
         def self.i_am_secretly_final2; end
       end
     end
@@ -401,14 +401,14 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     assert_raises(RuntimeError) do
       c = Class.new do
         extend T::Sig
-        sig(:final) {void.checked(:never)}
+        sig(:final) { void.checked(:never) }
         def self.foo; end
       end
 
       c.foo
 
       Class.new(c) do
-        sig {returns(Integer)}
+        sig { returns(Integer) }
         def self.foo
           10
         end
@@ -420,7 +420,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     Class.new do
       extend T::Sig
       def foo; end
-      sig(:final) {void}
+      sig(:final) { void }
       def foo; end
     end
   end
@@ -429,7 +429,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     Class.new do
       extend T::Sig
       def self.foo; end
-      sig(:final) {void}
+      sig(:final) { void }
       def self.foo; end
     end
   end
@@ -437,7 +437,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "forbids overriding a final instance method" do
     c = Class.new do
       extend T::Sig
-      sig(:final) {void}
+      sig(:final) { void }
       def foo; end
     end
     err = assert_raises(RuntimeError) do
@@ -451,7 +451,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "forbids overriding a final class method" do
     c = Class.new do
       extend T::Sig
-      sig(:final) {void}
+      sig(:final) { void }
       def self.foo; end
     end
     err = assert_raises(RuntimeError) do
@@ -465,10 +465,10 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "allows toggling a final method's visibility in the same class" do
     Class.new do
       extend T::Sig
-      sig(:final) {void}
+      sig(:final) { void }
       private def foo; end
 
-      sig(:final) {void}
+      sig(:final) { void }
       def bar; end
       private :bar
       public :bar
@@ -478,12 +478,12 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "allows declaring a final instance method and a final class method with the same name" do
     c = Class.new do
       extend T::Sig
-      sig(:final) {returns(Symbol)}
+      sig(:final) { returns(Symbol) }
       def foo
         :instance
       end
 
-      sig(:final) {returns(Symbol)}
+      sig(:final) { returns(Symbol) }
       def self.foo
         :class
       end
@@ -496,12 +496,12 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "allows declaring a final class method and a non-final instance method with the same name" do
     c = Class.new do
       extend T::Sig
-      sig(:final) {returns(Symbol)}
+      sig(:final) { returns(Symbol) }
       def self.foo
         :class
       end
 
-      sig {returns(Symbol)}
+      sig { returns(Symbol) }
       def foo
         :instance
       end
@@ -514,12 +514,12 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "allows declaring a final instance method and a non-final class method with the same name" do
     c = Class.new do
       extend T::Sig
-      sig(:final) {returns(Symbol)}
+      sig(:final) { returns(Symbol) }
       def foo
         :instance
       end
 
-      sig {returns(Symbol)}
+      sig { returns(Symbol) }
       def self.foo
         :class
       end
@@ -533,13 +533,13 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     c = Class.new do
       extend T::Sig
 
-      sig(:final) {void}
+      sig(:final) { void }
       private def becomes_public; end
 
-      sig(:final) {void}
+      sig(:final) { void }
       def becomes_private; end
 
-      sig(:final) {void}
+      sig(:final) { void }
       protected def protected_becomes_private; end
     end
     err = assert_raises(RuntimeError) do
@@ -565,7 +565,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "forbids overriding a final method from an included module" do
     m = Module.new do
       extend T::Sig
-      sig(:final) {void}
+      sig(:final) { void }
       def foo; end
     end
     err = assert_raises(RuntimeError) do
@@ -580,7 +580,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "forbids overriding a final method from an extended module" do
     m = Module.new do
       extend T::Sig
-      sig(:final) {void}
+      sig(:final) { void }
       def foo; end
     end
     err = assert_raises(RuntimeError) do
@@ -595,7 +595,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "forbids overriding a final method by including two modules" do
     m1 = Module.new do
       extend T::Sig
-      sig(:final) {void}
+      sig(:final) { void }
       def foo; end
     end
     m2 = Module.new do
@@ -612,7 +612,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "forbids overriding a final method by extending two modules" do
     m1 = Module.new do
       extend T::Sig
-      sig(:final) {void}
+      sig(:final) { void }
       def foo; end
     end
     m2 = Module.new do
@@ -629,13 +629,13 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "allows calling final methods" do
     m = Module.new do
       extend T::Sig
-      sig(:final) {void}
+      sig(:final) { void }
       def self.n0; end
-      sig(:final) {params(x: Integer).void}
+      sig(:final) { params(x: Integer).void }
       def self.n1(x); end
-      sig(:final) {params(x: Integer, y: Integer).void}
+      sig(:final) { params(x: Integer, y: Integer).void }
       def self.n2(x, y); end
-      sig(:final) {params(x: Integer, y: Integer, z: Integer).void}
+      sig(:final) { params(x: Integer, y: Integer, z: Integer).void }
       def self.n3(x, y, z); end
     end
     m.n0
@@ -648,7 +648,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     m = Module.new do
       @calls = 0
       extend T::Sig
-      sig(:final) {returns(Integer)}
+      sig(:final) { returns(Integer) }
       def self.calls
         @calls
       end
@@ -670,7 +670,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     m = Module.new do
       @calls = 0
       extend T::Sig
-      sig(:final) {returns(Integer)}
+      sig(:final) { returns(Integer) }
       def self.calls
         @calls
       end
@@ -693,7 +693,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
       def self.included(arg)
         arg.include(Module.new do
           extend T::Sig
-          sig(:final) {void}
+          sig(:final) { void }
           def foo; end
         end)
       end
@@ -710,7 +710,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "forbids overriding through many levels of include" do
     m1 = Module.new do
       extend T::Sig
-      sig(:final) {void}
+      sig(:final) { void }
       def foo; end
     end
     m2 = Module.new do
@@ -731,7 +731,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "allows including modules again" do
     m1 = Module.new do
       extend T::Sig
-      sig(:final) {void}
+      sig(:final) { void }
       def foo; end
     end
     Module.new do
@@ -742,7 +742,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it "allows extending modules again" do
     m1 = Module.new do
       extend T::Sig
-      sig(:final) {void}
+      sig(:final) { void }
       def foo; end
     end
     Module.new do
@@ -754,7 +754,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     err = assert_raises(ArgumentError) do
       m = Module.new do
         extend T::Sig
-        sig {final.void}
+        sig { final.void }
         def self.foo; end
       end
       m.foo

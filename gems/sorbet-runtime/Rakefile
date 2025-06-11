@@ -11,8 +11,8 @@ task default: %i[test rubocop]
 def require_tests
   Dir
     .glob('./test/**/*.rb')
-    .reject {|path| path.match(%r{^./test/types/fixtures/})}
-    .reject {|path| path.match(%r{^./test/wholesome/})}
+    .reject {|path| path.match(%r{^./test/types/fixtures/}) }
+    .reject {|path| path.match(%r{^./test/wholesome/}) }
     .each(&method(:require))
 end
 

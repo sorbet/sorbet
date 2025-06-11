@@ -72,10 +72,10 @@ module Opus::Types::Test
 
       it 'valid? does not allocate' do
         skip unless check_alloc_counts
-        allocs_when_valid = counting_allocations {@type.valid?(0)}
+        allocs_when_valid = counting_allocations { @type.valid?(0) }
         assert_equal(0, allocs_when_valid)
 
-        allocs_when_invalid = counting_allocations {@type.valid?(0.1)}
+        allocs_when_invalid = counting_allocations { @type.valid?(0.1) }
         assert_equal(0, allocs_when_invalid)
       end
 
@@ -199,10 +199,10 @@ module Opus::Types::Test
 
         it 'valid? does not allocate' do
           skip unless check_alloc_counts
-          allocs_when_valid = counting_allocations {@type.valid?(0)}
+          allocs_when_valid = counting_allocations { @type.valid?(0) }
           assert_equal(0, allocs_when_valid)
 
-          allocs_when_invalid = counting_allocations {@type.valid?(0.1)}
+          allocs_when_invalid = counting_allocations { @type.valid?(0.1) }
           assert_equal(0, allocs_when_invalid)
         end
 
@@ -238,10 +238,10 @@ module Opus::Types::Test
           # Call a method on the type to trigger the lazy initialization
           assert_equal("T.nilable(T.any(Integer, T::Boolean))", @type.name)
 
-          allocs_when_valid = counting_allocations {@type.valid?(0)}
+          allocs_when_valid = counting_allocations { @type.valid?(0) }
           assert_equal(0, allocs_when_valid)
 
-          allocs_when_invalid = counting_allocations {@type.valid?(0.1)}
+          allocs_when_invalid = counting_allocations { @type.valid?(0.1) }
           assert_equal(0, allocs_when_invalid)
         end
 
@@ -267,7 +267,7 @@ module Opus::Types::Test
       end
 
       it "unwraps aliased types" do
-        type = T.any(String, Integer, T::Private::Types::TypeAlias.new(-> {Integer}))
+        type = T.any(String, Integer, T::Private::Types::TypeAlias.new(-> { Integer }))
         assert_equal("T.any(Integer, String)", type.name)
       end
 
@@ -367,7 +367,7 @@ module Opus::Types::Test
       end
 
       it "unwraps aliased types" do
-        type_alias = T::Private::Types::TypeAlias.new(-> {Mixin1})
+        type_alias = T::Private::Types::TypeAlias.new(-> { Mixin1 })
         type = T.all(@type, type_alias)
         assert_equal("T.all(Opus::Types::Test::TypesTest::Mixin1, Opus::Types::Test::TypesTest::Mixin2)", type.name)
       end
@@ -380,10 +380,10 @@ module Opus::Types::Test
         # Call a method on the type to trigger the lazy initialization
         assert_equal("T.all(Opus::Types::Test::TypesTest::Mixin1, Opus::Types::Test::TypesTest::Mixin2)", @type.name)
 
-        allocs_when_valid = counting_allocations {@type.valid?(@klass)}
+        allocs_when_valid = counting_allocations { @type.valid?(@klass) }
         assert_equal(0, allocs_when_valid)
 
-        allocs_when_invalid = counting_allocations {@type.valid?(Mixin1)}
+        allocs_when_invalid = counting_allocations { @type.valid?(Mixin1) }
         assert_equal(0, allocs_when_invalid)
       end
     end
@@ -420,11 +420,11 @@ module Opus::Types::Test
         assert_equal("[String, T::Boolean]", @type.name)
 
         arr = ["foo", false]
-        allocs_when_valid = counting_allocations {@type.valid?(arr)}
+        allocs_when_valid = counting_allocations { @type.valid?(arr) }
         assert_equal(0, allocs_when_valid)
 
         arr = [1, 2]
-        allocs_when_invalid = counting_allocations {@type.valid?(arr)}
+        allocs_when_invalid = counting_allocations { @type.valid?(arr) }
         assert_equal(0, allocs_when_invalid)
       end
     end
@@ -476,15 +476,15 @@ module Opus::Types::Test
         assert_equal("{a: String, b: T::Boolean, c: T.nilable(Numeric)}", @type.name)
 
         h = {a: 'foo', b: false, c: nil}
-        allocs_when_valid = counting_allocations {@type.valid?(h)}
+        allocs_when_valid = counting_allocations { @type.valid?(h) }
         assert_equal(0, allocs_when_valid)
 
         h = {a: 'foo', b: 1, c: nil}
-        allocs_when_invalid_type = counting_allocations {@type.valid?(h)}
+        allocs_when_invalid_type = counting_allocations { @type.valid?(h) }
         assert_equal(0, allocs_when_invalid_type)
 
         h = {a: 'foo', b: false, c: nil, d: 'nope'}
-        allocs_when_invalid_key = counting_allocations {@type.valid?(h)}
+        allocs_when_invalid_key = counting_allocations { @type.valid?(h) }
         assert_equal(0, allocs_when_invalid_key)
       end
     end
@@ -626,10 +626,10 @@ module Opus::Types::Test
         valid = [1]
         invalid = {}
 
-        allocs_when_valid = counting_allocations {type.valid?(valid)}
+        allocs_when_valid = counting_allocations { type.valid?(valid) }
         assert_equal(0, allocs_when_valid)
 
-        allocs_when_invalid = counting_allocations {type.valid?(invalid)}
+        allocs_when_invalid = counting_allocations { type.valid?(invalid) }
         assert_equal(0, allocs_when_invalid)
       end
 
@@ -660,7 +660,7 @@ module Opus::Types::Test
 
       it 'can have its metatype instantiated' do
         assert_equal({}, T::Hash[Symbol, Integer].new)
-        assert_equal([], T::Hash[Symbol, Integer].new {|h, k| h[k] = []}[:missing])
+        assert_equal([], T::Hash[Symbol, Integer].new {|h, k| h[k] = [] }[:missing])
       end
 
       it 'is coerced from plain hash' do
@@ -709,10 +709,10 @@ module Opus::Types::Test
         valid = {'one' => 1}
         invalid = []
 
-        allocs_when_valid = counting_allocations {type.valid?(valid)}
+        allocs_when_valid = counting_allocations { type.valid?(valid) }
         assert_equal(0, allocs_when_valid)
 
-        allocs_when_invalid = counting_allocations {type.valid?(invalid)}
+        allocs_when_invalid = counting_allocations { type.valid?(invalid) }
         assert_equal(0, allocs_when_invalid)
       end
     end
@@ -1124,40 +1124,40 @@ module Opus::Types::Test
 
     describe 'TypeAlias' do
       it 'builds properly' do
-        type = T.type_alias {String}
+        type = T.type_alias { String }
         type.build_type
         assert_equal('String', type.name)
       end
 
       it 'delegates name' do
-        type = T.type_alias {T.any(Integer, String)}
+        type = T.type_alias { T.any(Integer, String) }
         assert_equal('T.any(Integer, String)', type.name)
       end
 
       it 'delegates equality' do
         # rubocop:disable Lint/BinaryOperatorWithIdenticalOperands
-        assert(T.any(Integer, String) == T.type_alias {T.any(Integer, String)})
-        assert(T.type_alias {T.any(Integer, String)} == T.any(Integer, String))
-        assert(T.type_alias {T.any(Integer, String)} == T.type_alias {T.any(Integer, String)})
+        assert(T.any(Integer, String) == T.type_alias { T.any(Integer, String) })
+        assert(T.type_alias { T.any(Integer, String) } == T.any(Integer, String))
+        assert(T.type_alias { T.any(Integer, String) } == T.type_alias { T.any(Integer, String) })
 
-        refute(T.type_alias {T.any(Integer, Float)} == T.type_alias {T.any(Integer, String)})
+        refute(T.type_alias { T.any(Integer, Float) } == T.type_alias { T.any(Integer, String) })
         # rubocop:enable Lint/BinaryOperatorWithIdenticalOperands
       end
 
       it 'passes a validation' do
-        type = T.type_alias {T.any(Integer, String)}
+        type = T.type_alias { T.any(Integer, String) }
         msg = check_error_message_for_obj(type, 1)
         assert_nil(msg)
       end
 
       it 'provides errors on failed validation' do
-        type = T.type_alias {T.any(Integer, String)}
+        type = T.type_alias { T.any(Integer, String) }
         msg = check_error_message_for_obj(type, true)
         assert_equal('Expected type T.any(Integer, String), got type TrueClass', msg)
       end
 
       it 'defers block evaluation' do
-        crash_type = T.type_alias {raise 'crash'}
+        crash_type = T.type_alias { raise 'crash' }
         assert_raises(RuntimeError) do
           check_error_message_for_obj(crash_type, 1)
         end
@@ -1169,7 +1169,7 @@ module Opus::Types::Test
       extend T::Helpers
       interface!
 
-      sig {abstract.returns(T.untyped)}; def hello; end
+      sig { abstract.returns(T.untyped) }; def hello; end
     end
 
     module TestInterface2
@@ -1177,7 +1177,7 @@ module Opus::Types::Test
       extend T::Helpers
       interface!
 
-      sig {abstract.returns(T.untyped)}; def goodbye; end
+      sig { abstract.returns(T.untyped) }; def goodbye; end
     end
 
     class InterfaceImplementor1
@@ -1253,7 +1253,7 @@ module Opus::Types::Test
       it 'allows T::Enum values in a sig params' do
         c = Class.new do
           extend T::Sig
-          sig {params(x: MyEnum::A).void}
+          sig { params(x: MyEnum::A).void }
           def self.foo(x); end
         end
 
@@ -1269,12 +1269,12 @@ module Opus::Types::Test
       it 'allows T::Enum values in a sig returns' do
         c = Class.new do
           extend T::Sig
-          sig {returns(MyEnum::A)}
+          sig { returns(MyEnum::A) }
           def self.good_return;
             MyEnum::A;
           end
 
-          sig {returns(MyEnum::B)}
+          sig { returns(MyEnum::B) }
           def self.bad_return;
             MyEnum::C;
           end
@@ -1290,7 +1290,7 @@ module Opus::Types::Test
       it 'allows T::Enum values in a union' do
         c = Class.new do
           extend T::Sig
-          sig {params(x: T.any(MyEnum::A, MyEnum::B)).void}
+          sig { params(x: T.any(MyEnum::A, MyEnum::B)).void }
           def self.foo(x); end
         end
 
@@ -1311,11 +1311,11 @@ module Opus::Types::Test
       end
 
       it 'allows procs' do
-        assert_nil(check_error_message_for_obj(@type, proc {|x, y| x + y}))
+        assert_nil(check_error_message_for_obj(@type, proc {|x, y| x + y }))
       end
 
       it 'allows lambdas' do
-        assert_nil(check_error_message_for_obj(@type, ->(x, y) {x + y}))
+        assert_nil(check_error_message_for_obj(@type, ->(x, y) { x + y }))
       end
 
       it 'disallows custom callables' do
@@ -1819,7 +1819,7 @@ module Opus::Types::Test
       extend T::Generic
 
       Elem = type_member
-      sig {params(bar: Elem).returns(Elem)}
+      sig { params(bar: Elem).returns(Elem) }
       def self.foo(bar)
         bar
       end
@@ -1831,7 +1831,7 @@ module Opus::Types::Test
 
       Elem1 = type_member
       Elem2 = type_member
-      sig {params(bar: Elem1, baz: Elem2).returns([Elem1, Elem2])}
+      sig { params(bar: Elem1, baz: Elem2).returns([Elem1, Elem2]) }
       def foo(bar, baz)
         [bar, baz]
       end
@@ -1841,8 +1841,8 @@ module Opus::Types::Test
       extend T::Sig
       extend T::Generic
 
-      Elem = type_member {{fixed: Integer}}
-      sig {params(x: Elem).void}
+      Elem = type_member { {fixed: Integer} }
+      sig { params(x: Elem).void }
       def foo(x); end
     end
 
@@ -1851,14 +1851,14 @@ module Opus::Types::Test
       extend T::Generic
 
       SingletonTP = type_template
-      sig {params(arg: SingletonTP).returns(SingletonTP)}
+      sig { params(arg: SingletonTP).returns(SingletonTP) }
       def self.foo(arg)
         arg
       end
     end
 
     class GenericSingletonChild < GenericSingleton
-      SingletonTP = type_template {{fixed: String}}
+      SingletonTP = type_template { {fixed: String} }
     end
 
     describe "generics" do

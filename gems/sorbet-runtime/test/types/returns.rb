@@ -7,22 +7,22 @@ module Opus::Types::Test
       extend T::Sig
       extend T::Generic
 
-      sig {returns(T.noreturn)}
+      sig { returns(T.noreturn) }
       def self.thrower
         raise "thrower"
       end
 
-      sig {returns(T.noreturn)}
+      sig { returns(T.noreturn) }
       def self.notthrower
         5
       end
 
-      sig {void}
+      sig { void }
       def self.voider
         "voider"
       end
 
-      sig {void}
+      sig { void }
       def initialize; end
     end
 

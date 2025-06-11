@@ -12,20 +12,20 @@ module Opus::Types::Test
 
     class SuccessBase
       extend T::Sig
-      sig {overridable.params(pos: SubFoo1, kw: SubFoo2).returns(BaseFoo3)}
+      sig { overridable.params(pos: SubFoo1, kw: SubFoo2).returns(BaseFoo3) }
       def foo(pos, kw:); end
     end
 
     class FailureBase
       extend T::Sig
-      sig {overridable.params(pos: BaseFoo1, kw: BaseFoo2).returns(SubFoo3)}
+      sig { overridable.params(pos: BaseFoo1, kw: BaseFoo2).returns(SubFoo3) }
       def foo(pos, kw:); end
     end
 
     it "succeeds if the override types match" do
       klass = Class.new(SuccessBase) do
         extend T::Sig
-        sig {override.params(pos: SubFoo1, kw: SubFoo2).returns(BaseFoo3)}
+        sig { override.params(pos: SubFoo1, kw: SubFoo2).returns(BaseFoo3) }
         def foo(pos, kw:)
           BaseFoo3.new
         end
@@ -36,7 +36,7 @@ module Opus::Types::Test
     it "succeeds if a positional param type is contravariant" do
       klass = Class.new(SuccessBase) do
         extend T::Sig
-        sig {override.params(pos: BaseFoo1, kw: SubFoo2).returns(BaseFoo3)}
+        sig { override.params(pos: BaseFoo1, kw: SubFoo2).returns(BaseFoo3) }
         def foo(pos, kw:)
           BaseFoo3.new
         end
@@ -47,7 +47,7 @@ module Opus::Types::Test
     it "succeeds if a keyword param type is contravariant" do
       klass = Class.new(SuccessBase) do
         extend T::Sig
-        sig {override.params(pos: SubFoo1, kw: BaseFoo2).returns(BaseFoo3)}
+        sig { override.params(pos: SubFoo1, kw: BaseFoo2).returns(BaseFoo3) }
         def foo(pos, kw:)
           BaseFoo3.new
         end
@@ -58,7 +58,7 @@ module Opus::Types::Test
     it "succeeds if the return type is covariant" do
       klass = Class.new(SuccessBase) do
         extend T::Sig
-        sig {override.params(pos: SubFoo1, kw: SubFoo2).returns(SubFoo3)}
+        sig { override.params(pos: SubFoo1, kw: SubFoo2).returns(SubFoo3) }
         def foo(pos, kw:)
           SubFoo3.new
         end
@@ -69,7 +69,7 @@ module Opus::Types::Test
     it "raises if a positional param type is covariant" do
       klass = Class.new(FailureBase) do
         extend T::Sig
-        sig {override.params(pos: SubFoo1, kw: BaseFoo2).returns(SubFoo3)}
+        sig { override.params(pos: SubFoo1, kw: BaseFoo2).returns(SubFoo3) }
         def foo(pos, kw:); end
       end
 
@@ -83,7 +83,7 @@ module Opus::Types::Test
     it "raises if a keyword param type is covariant" do
       klass = Class.new(FailureBase) do
         extend T::Sig
-        sig {override.params(pos: BaseFoo1, kw: SubFoo2).returns(SubFoo3)}
+        sig { override.params(pos: BaseFoo1, kw: SubFoo2).returns(SubFoo3) }
         def foo(pos, kw:); end
       end
 
@@ -97,7 +97,7 @@ module Opus::Types::Test
     it "raises if the return type is contravariant" do
       klass = Class.new(FailureBase) do
         extend T::Sig
-        sig {override.params(pos: BaseFoo1, kw: BaseFoo2).returns(BaseFoo3)}
+        sig { override.params(pos: BaseFoo1, kw: BaseFoo2).returns(BaseFoo3) }
         def foo(pos, kw:); end
       end
 
@@ -111,13 +111,13 @@ module Opus::Types::Test
     it "allows T::Class to be compatible with itself" do
       parent = Class.new do
         extend T::Sig
-        sig {overridable.returns(T::Class[T.anything])}
+        sig { overridable.returns(T::Class[T.anything]) }
         def example; Object; end
       end
 
       child = Class.new(parent) do
         extend T::Sig
-        sig {override.returns(T::Class[T.anything])}
+        sig { override.returns(T::Class[T.anything]) }
         def example; Object; end
       end
 
@@ -127,13 +127,13 @@ module Opus::Types::Test
     it "allows T::Class to be compatible with Class" do
       parent = Class.new do
         extend T::Sig
-        sig {overridable.returns(T::Class[T.anything])}
+        sig { overridable.returns(T::Class[T.anything]) }
         def example; Object; end
       end
 
       child = Class.new(parent) do
         extend T::Sig
-        sig {override.returns(Class)}
+        sig { override.returns(Class) }
         def example; Object; end
       end
 
@@ -143,13 +143,13 @@ module Opus::Types::Test
     it "allows T::Class to be compatible with T.class_of in child" do
       parent = Class.new do
         extend T::Sig
-        sig {overridable.returns(T::Class[T.anything])}
+        sig { overridable.returns(T::Class[T.anything]) }
         def example; Object; end
       end
 
       child = Class.new(parent) do
         extend T::Sig
-        sig {override.returns(T.class_of(Object))}
+        sig { override.returns(T.class_of(Object)) }
         def example; Object; end
       end
 
@@ -159,13 +159,13 @@ module Opus::Types::Test
     it "allows Object to be compatible with T::Hash in child" do
       parent = Class.new do
         extend T::Sig
-        sig {overridable.returns(Object)}
+        sig { overridable.returns(Object) }
         def example; nil; end
       end
 
       child = Class.new(parent) do
         extend T::Sig
-        sig {override.returns(T::Hash[Symbol, T.untyped])}
+        sig { override.returns(T::Hash[Symbol, T.untyped]) }
         def example; {}; end
       end
 
@@ -175,13 +175,13 @@ module Opus::Types::Test
     it "allows returns(T.anything) to be compatible with .void" do
       parent = Class.new do
         extend T::Sig
-        sig {overridable.void}
+        sig { overridable.void }
         def example; end
       end
 
       child = Class.new(parent) do
         extend T::Sig
-        sig {override.returns(T.anything)}
+        sig { override.returns(T.anything) }
         def example; end
       end
 

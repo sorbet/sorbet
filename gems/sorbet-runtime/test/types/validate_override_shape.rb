@@ -9,7 +9,7 @@ module Opus::Types::Test
 
       abstract!
 
-      sig {abstract.returns(Integer)}
+      sig { abstract.returns(Integer) }
       def foo; end
     end
 
@@ -25,7 +25,7 @@ module Opus::Types::Test
 
     class AbstractBase
       extend T::Sig
-      sig {abstract.void}
+      sig { abstract.void }
       def initialize; end
     end
 
@@ -48,13 +48,13 @@ module Opus::Types::Test
         extend T::Helpers
         abstract!
 
-        sig {abstract.returns(Integer)}
+        sig { abstract.returns(Integer) }
         def foo; end
       end
       another = Class.new(klass) do
         extend T::Sig
 
-        sig {override.returns(Integer)}
+        sig { override.returns(Integer) }
         def foo
           0
         end
@@ -218,7 +218,7 @@ module Opus::Types::Test
     it "does opt-in override checking on initialize" do
       klass = Class.new(AbstractBase) do
         extend T::Sig
-        sig {override.void}
+        sig { override.void }
         def initialize; super; end
 
         def foo

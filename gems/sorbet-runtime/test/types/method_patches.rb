@@ -29,7 +29,7 @@ module Opus::Types::Test
         :foo
       end
 
-      @mod.sig {params(bar: T.untyped).returns(T.untyped)}
+      @mod.sig { params(bar: T.untyped).returns(T.untyped) }
       def @mod.with_sig(bar)
         :foo
       end
@@ -50,7 +50,7 @@ module Opus::Types::Test
         :foo
       end
 
-      @mod.sig {params(bar: T.untyped).returns(T.untyped)}
+      @mod.sig { params(bar: T.untyped).returns(T.untyped) }
       def @mod.with_sig(*bar)
         :foo
       end
@@ -71,7 +71,7 @@ module Opus::Types::Test
         :foo
       end
 
-      @mod.sig {params(a: T.untyped, b: T.untyped, c: T.untyped, d: T.untyped, e: T.untyped, f: T.untyped, blk: T.untyped).void}
+      @mod.sig { params(a: T.untyped, b: T.untyped, c: T.untyped, d: T.untyped, e: T.untyped, f: T.untyped, blk: T.untyped).void }
       def @mod.with_sig(a, b=nil, *c, d:, e: nil, **f, &blk)
         :foo
       end
