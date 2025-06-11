@@ -1826,7 +1826,7 @@ class ComputePackageSCCs {
                 auto &poppedPkgInfo = PackageInfoImpl::from(*(packageDB.getPackageInfoNonConst(poppedPkgName)));
                 if constexpr (EdgeType == core::packages::ImportType::Normal) {
                     poppedPkgInfo.sccID_ = sccId;
-                } else if constexpr (EdgeType == core::packages::ImportType::Test) {
+                } else if constexpr (EdgeType != core::packages::ImportType::Normal) {
                     poppedPkgInfo.testSccID_ = sccId;
 
                     // Tests have an implicit dependency on their package's application code. Those scc ids must
@@ -1891,7 +1891,7 @@ public:
         // First, compute the SCCs for application code, and then for test code. This allows us to have more granular
         // SCCs, as test_import edges aren't subject to the same restrictions that import edges are.
         scc.tarjan<core::packages::ImportType::Normal>();
-        scc.tarjan<core::packages::ImportType::Test>();
+        scc.tarjan<core::packages::ImportType::TestHelper>();
 
         gs.packageDB().setCondensation(move(scc.condensation));
     }
