@@ -544,7 +544,7 @@ module Opus::Types::Test
         Class.new(parent) do
           sig { override(allow_incompatible: :visibility).returns(Integer) }
           def self.foo; 0; end
-          raise unless foo == 0
+          raise unless foo.zero?
         end
       end
     end
