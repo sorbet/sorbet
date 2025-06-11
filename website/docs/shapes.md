@@ -27,7 +27,7 @@ This creates a fixed hash type (also referred to as a record), which is a hash w
 
 extend T::Sig
 
-sig {params(x: {a: Integer, b: String}).void}
+sig { params(x: {a: Integer, b: String}).void }
 def foo(x)
   # Limitation! returns T.untyped!
   T.reveal_type(x[:a]) # Revealed type: `T.untyped`
