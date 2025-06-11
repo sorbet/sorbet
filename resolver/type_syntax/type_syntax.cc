@@ -196,7 +196,6 @@ void checkTypeFunArity(core::Context ctx, const ast::Send &send, size_t minArity
 optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
                                                TypeSyntaxArgs args) {
     ParsedSig sig;
-    sig.origSend = const_cast<ast::Send *>(&sigSend);
 
     const ast::Send *send = nullptr;
     bool isProc = false;
