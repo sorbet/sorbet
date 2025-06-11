@@ -579,6 +579,17 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
             // without needing to write `override(allow_incompatible: true)`.
             validateCompatibleOverride(ctx, overriddenMethod, method);
         }
+        
+        // Check if overriding a deprecated method without marking override as deprecated
+        if (overriddenMethod.data(ctx)->flags.isDeprecated && !method.data(ctx)->flags.isDeprecated && 
+            method.data(ctx)->flags.isOverride && !isRBI && !method.data(ctx)->flags.isRewriterSynthesized) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverrideMustBeDeprecated)) {
+                e.setHeader("Method `{}` overrides deprecated method but is not marked deprecated", method.show(ctx));
+                e.addErrorLine(overriddenMethod.data(ctx)->loc(), "Deprecated method `{}` defined here", 
+                              overriddenMethod.show(ctx));
+                e.addErrorNote("Add `deprecated` to the signature or remove `override` if providing a non-deprecated replacement");
+            }
+        }
     }
 }
 
