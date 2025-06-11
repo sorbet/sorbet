@@ -277,13 +277,9 @@ FooProc.new do |foo|
 end
 
 module Annotations
-  # @abstract
-  #: -> Integer
-  def method1; end # error: Before declaring an abstract method, you must mark your class/module as abstract using `abstract!` or `interface!`
-
   # @override
   #: -> Integer
-  def method2; T.unsafe(nil); end # error: Method `Annotations#method2` is marked `override` but does not override anything
+  def method1; T.unsafe(nil); end # error: Method `Annotations#method1` is marked `override` but does not override anything
 
   class Parent
     #: (Integer) -> void
@@ -306,6 +302,81 @@ module Annotations
     def method(x)
       T.reveal_type(x) # error: Revealed type: `String`
     end
+  end
+
+  # @abstract
+  class Abstract
+    # @abstract
+    #: -> Integer
+    def method_abstract1; end # error: Methods declared @abstract with an RBS comment must always raise
+
+    # @abstract
+    #: -> Integer
+    def method_abstract2
+      raise
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract3
+      raise "foo"
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract4
+      Kernel.raise "foo"
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract5 # error: Methods declared @abstract with an RBS comment must always raise
+      puts "foo" # error: Abstract methods must not contain any code in their body
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract6 # error: Methods declared @abstract with an RBS comment must always raise
+      puts "foo" # error: Abstract methods must not contain any code in their body
+      raise "foo"
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract7
+      raise StandardError
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract8
+      raise StandardError, "error"
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract8
+      raise ::Abstract::Error, "error"
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract9 # error: Methods declared @abstract with an RBS comment must always raise
+      Abstract.raise # error: Abstract methods must not contain any code in their body
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract10
+      self.raise
+    end
+
+    #: -> bot
+    def self.raise
+      raise
+    end
+
+    class Error < StandardError; end
   end
 
   class Final
