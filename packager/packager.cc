@@ -1766,7 +1766,6 @@ class ComputePackageSCCs {
         infoAtEntry.onStack = true;
 
         for (auto &i : pkgInfo.importedPackageNames) {
-
             // We want to consider all imports from test code, but only normal imports for application code.
             if constexpr (EdgeType == core::packages::ImportType::Normal) {
                 if (i.type != core::packages::ImportType::Normal) {
