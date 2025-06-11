@@ -3354,6 +3354,14 @@ private:
         bool seenOptional = false;
 
         methodInfo->resultType = sig.returns;
+        methodInfo->narrowsTo = sig.narrowsTo;
+        
+        if (sig.narrowsTo != nullptr && core::Types::equiv(ctx, sig.returns, core::Types::falseClass())) {
+            if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
+                e.setHeader("Malformed `{}`: `narrows_to({})` cannot be used with `returns(FalseClass)` as type narrowing only occurs when the method returns a truthy value", "sig", sig.narrowsTo.show(ctx));
+                e.addErrorNote("Consider using `returns(T::Boolean)` or `returns(TrueClass)` instead, or remove the `narrows_to` clause");
+            }
+        }
         int i = -1;
         for (auto &arg : methodInfo->arguments) {
             ++i;
