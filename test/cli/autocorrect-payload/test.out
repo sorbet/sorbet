@@ -1,6 +1,6 @@
 # typed: true
 
-FOO = 10 # TODO Also fix this autocorrect
+FOO = 10
 
 a = T.let(FOO, T.nilable(Integer))
 [].each { |i| a = nil }
