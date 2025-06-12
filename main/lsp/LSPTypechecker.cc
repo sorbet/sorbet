@@ -656,7 +656,10 @@ void tryApplyLocalVarSaver(const core::GlobalState &gs, vector<ast::ParsedFile> 
             // For a VAR query, gs.lspQuery.loc is the enclosing MethodDef's loc, which we can use
             // to find the signature before that MethodDef.
             auto queryLoc = gs.lspQuery.loc.copyWithZeroLength();
-            signature = sig_finder::SigFinder::findSignature(ctx, t.tree, queryLoc);
+            auto result = sig_finder::SigFinder::findSignature(ctx, t.tree, queryLoc);
+            if (result.has_value()) {
+                signature = move(result->sig);
+            }
         }
         LocalVarSaver localVarSaver(ctx.locAt(t.tree.loc()), move(signature));
         ast::ConstTreeWalk::apply(ctx, localVarSaver, t.tree);

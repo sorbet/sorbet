@@ -449,7 +449,7 @@ constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &
         return nullopt;
     }
 
-    ast::Block *block = parsedSig->origSend->block();
+    auto *block = parsedSig->origSend.block();
     if (!block) {
         return nullopt;
     }
@@ -638,8 +638,8 @@ void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef k
             auto queryLoc = defLoc.copyWithZeroLength();
             auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, queryLoc);
 
-            if (parsedSig.has_value() && parsedSig->origSend->funLoc.exists()) {
-                auto funLoc = ctx.locAt(parsedSig->origSend->funLoc);
+            if (parsedSig.has_value() && parsedSig->origSend.funLoc.exists()) {
+                auto funLoc = ctx.locAt(parsedSig->origSend.funLoc);
                 e.replaceWith("Mark it as `sig(:final)`", funLoc, "sig(:final)");
             }
         }
