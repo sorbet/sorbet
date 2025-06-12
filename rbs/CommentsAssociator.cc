@@ -239,6 +239,8 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
             if (!nestingAllowsTypeAlias()) {
                 if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
                     e.setHeader("Unexpected RBS type alias comment");
+                    e.addErrorLine(ctx.locAt(nesting.back()->loc),
+                                   "RBS type aliases are only allowed in class and module bodies. Found in:");
                 }
 
                 it = commentByLine.erase(it);
