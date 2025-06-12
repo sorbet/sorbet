@@ -245,7 +245,7 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
                 continue;
             }
 
-            auto nameStr = "<RBS alias>::" + matches[1].str();
+            auto nameStr = "type " + matches[1].str();
             auto nameConstant = ctx.state.enterNameConstant(nameStr);
             auto placeholder =
                 make_unique<parser::RBSPlaceholder>(it->second.loc, core::Names::Constants::RBSTypeAlias());

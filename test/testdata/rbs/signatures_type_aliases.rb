@@ -27,7 +27,7 @@ module Errors
   end
 
   #: -> foo
-  #     ^^^ error: Unable to resolve constant `<RBS alias>::foo`
+  #     ^^^ error: Unable to resolve constant `type foo`
   def baz; end
 
   #: [Elem]
