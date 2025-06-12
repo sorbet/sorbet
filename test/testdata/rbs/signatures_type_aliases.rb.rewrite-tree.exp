@@ -166,4 +166,48 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of foo>
   end
+
+  module <emptyTree>::<C TypeAliasMultiline><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:x, <emptyTree>::<C <RBS alias>::a>).void()
+    end
+
+    def method1<<todo method>>(x, &<blk>)
+      <emptyTree>::<C T>.reveal_type(x)
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:x, <emptyTree>::<C <RBS alias>::b>).void()
+    end
+
+    def method2<<todo method>>(x, &<blk>)
+      <emptyTree>::<C T>.reveal_type(x)
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:x, <emptyTree>::<C <RBS alias>::c>).void()
+    end
+
+    def method3<<todo method>>(x, &<blk>)
+      <emptyTree>::<C T>.reveal_type(x)
+    end
+
+    <emptyTree>::<C <RBS alias>::a> = ::<root>::<C T>.type_alias() do ||
+      ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)
+    end
+
+    <runtime method definition of method1>
+
+    <emptyTree>::<C <RBS alias>::b> = ::<root>::<C T>.type_alias() do ||
+      ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)
+    end
+
+    <runtime method definition of method2>
+
+    <emptyTree>::<C <RBS alias>::c> = ::<root>::<C T>.type_alias() do ||
+      ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)
+    end
+
+    <runtime method definition of method3>
+  end
 end

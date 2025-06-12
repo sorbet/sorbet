@@ -39,6 +39,13 @@ module Errors
       # behaves as untyped
     end
   end
+
+  #: type e_multiline1
+# ^^^^^^^^^^^^^^^^^^^^ error: Unexpected RBS assertion comment found in `module`
+  #|   = Integer
+# ^^^^^^^^^^^^^^ error: Unexpected RBS assertion comment found in `module`
+  #|   | String
+# ^^^^^^^^^^^^^ error: Unexpected RBS assertion comment found in `module`
 end
 
 module TypeAliasSimple
@@ -99,5 +106,32 @@ module TypeAliasSelf
   #: -> a
   def foo
     self
+  end
+end
+
+module TypeAliasMultiline
+  #: type a = Integer
+  #|   | String
+
+  #: (a) -> void
+  def method1(x)
+    T.reveal_type(x) # error: Revealed type: `T.any(Integer, String)`
+  end
+
+  #: type b = Integer
+  #|        | String
+
+  #: (b) -> void
+  def method2(x)
+    T.reveal_type(x) # error: Revealed type: `T.any(Integer, String)`
+  end
+
+  #: type c =
+  #|          Integer
+  #|        | String
+
+  #: (c) -> void
+  def method3(x)
+    T.reveal_type(x) # error: Revealed type: `T.any(Integer, String)`
   end
 end
