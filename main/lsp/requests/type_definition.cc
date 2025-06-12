@@ -101,7 +101,7 @@ unique_ptr<ResponseMessage> TypeDefinitionTask::runRequest(LSPTypecheckerDelegat
         return response;
     }
 
-    auto uri = params->textDocument->uri;
+    const auto &uri = params->textDocument->uri;
     auto fref = config.uri2FileRef(gs, uri);
     // LSPQuery::byLoc reports an error if the file or loc don't exist
     auto queryLoc = params->position->toLoc(gs, fref).value();

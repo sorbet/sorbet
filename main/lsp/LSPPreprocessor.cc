@@ -432,7 +432,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidChangeTextDocumentP
     edit->epoch = v;
     edit->sorbetCancellationExpected = changeParams->sorbetCancellationExpected.value_or(false);
     edit->sorbetPreemptionsExpected = changeParams->sorbetPreemptionsExpected.value_or(0);
-    string_view uri = changeParams->textDocument->uri;
+    const auto &uri = changeParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath)) {
@@ -452,7 +452,7 @@ unique_ptr<SorbetWorkspaceEditParams>
 LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidOpenTextDocumentParams> openParams) {
     auto edit = make_unique<SorbetWorkspaceEditParams>();
     edit->epoch = v;
-    string_view uri = openParams->textDocument->uri;
+    const auto &uri = openParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath)) {
@@ -471,7 +471,7 @@ unique_ptr<SorbetWorkspaceEditParams>
 LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidCloseTextDocumentParams> closeParams) {
     auto edit = make_unique<SorbetWorkspaceEditParams>();
     edit->epoch = v;
-    string_view uri = closeParams->textDocument->uri;
+    const auto &uri = closeParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath)) {

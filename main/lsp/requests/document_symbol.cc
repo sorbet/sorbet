@@ -193,7 +193,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
 
     const core::GlobalState &gs = typechecker.state();
     vector<unique_ptr<DocumentSymbol>> result;
-    string_view uri = params->textDocument->uri;
+    const auto &uri = params->textDocument->uri;
     auto fref = config.uri2FileRef(gs, uri);
     if (!fref.exists()) {
         response->result = move(result);
