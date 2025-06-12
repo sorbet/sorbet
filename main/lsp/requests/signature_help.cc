@@ -73,8 +73,7 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate
 
     const core::GlobalState &gs = typechecker.state();
     const auto &uri = params->textDocument->uri;
-    auto result = LSPQuery::byLoc(config, typechecker, uri, *params->position,
-                                  LSPMethod::TextDocumentSignatureHelp);
+    auto result = LSPQuery::byLoc(config, typechecker, uri, *params->position, LSPMethod::TextDocumentSignatureHelp);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -98,8 +97,8 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate
 
             auto fref = config.uri2FileRef(gs, uri);
             if (!fref.exists()) {
-                response->error = make_unique<ResponseError>(
-                    (int)LSPErrorCodes::InvalidRequest, fmt::format("Unknown file: `{}`", uri));
+                response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                             fmt::format("Unknown file: `{}`", uri));
                 return response;
             }
             auto src = fref.data(gs).source();

@@ -52,8 +52,8 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDefinition);
     const core::GlobalState &gs = typechecker.state();
     const auto &uri = params->textDocument->uri;
-    auto result = LSPQuery::byLoc(config, typechecker, uri, *params->position,
-                                  LSPMethod::TextDocumentDefinition, false);
+    auto result =
+        LSPQuery::byLoc(config, typechecker, uri, *params->position, LSPMethod::TextDocumentDefinition, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
