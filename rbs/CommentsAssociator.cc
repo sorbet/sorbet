@@ -179,16 +179,6 @@ void CommentsAssociator::associateSignatureCommentsToNode(parser::Node *node) {
     commentsByNode[node] = move(comments);
 }
 
-bool CommentsAssociator::nestingAllowsTypeAlias() {
-    if (nesting.empty()) {
-        return true;
-    }
-
-    auto last = (parser::Node *)nesting.back();
-    return parser::isa_node<parser::Class>(last) || parser::isa_node<parser::Module>(last) ||
-           parser::isa_node<parser::SClass>(last);
-}
-
 int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes, int index, int lastLine,
                                                           int currentLine) {
     if (lastLine == currentLine) {
@@ -236,15 +226,17 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
         std::smatch matches;
         auto str = string(it->second.string);
         if (std::regex_match(str, matches, TYPE_ALIAS_PATTERN)) {
-            if (!nestingAllowsTypeAlias()) {
-                if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
-                    e.setHeader("Unexpected RBS type alias comment");
-                    e.addErrorLine(ctx.locAt(nesting.back()->loc),
-                                   "RBS type aliases are only allowed in class and module bodies. Found in:");
-                }
+            if (!contextAllowingTypeAlias.empty()) {
+                if (auto [allow, loc] = contextAllowingTypeAlias.back(); !allow) {
+                    if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
+                        e.setHeader("Unexpected RBS type alias comment");
+                        e.addErrorLine(ctx.locAt(loc),
+                                       "RBS type aliases are only allowed in class and module bodies. Found in:");
+                    }
 
-                it = commentByLine.erase(it);
-                continue;
+                    it = commentByLine.erase(it);
+                    continue;
+                }
             }
 
             auto nameStr = "type " + matches[1].str();
@@ -439,14 +431,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "case");
         },
         [&](parser::Class *cls) {
-            nesting.push_back(node);
+            contextAllowingTypeAlias.push_back(make_pair(true, cls->declLoc));
             associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
             cls->body = walkBody(cls, move(cls->body));
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "class");
-            nesting.pop_back();
+            contextAllowingTypeAlias.pop_back();
         },
         [&](parser::CSend *csend) {
             if (csend->method.isSetter(ctx.state) && csend->args.size() == 1) {
@@ -460,18 +452,18 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "csend");
         },
         [&](parser::DefMethod *def) {
-            nesting.push_back(node);
+            contextAllowingTypeAlias.push_back(make_pair(false, def->declLoc));
             associateSignatureCommentsToNode(node);
             def->body = walkBody(def, move(def->body));
             consumeCommentsInsideNode(node, "method");
-            nesting.pop_back();
+            contextAllowingTypeAlias.pop_back();
         },
         [&](parser::DefS *def) {
-            nesting.push_back(node);
+            contextAllowingTypeAlias.push_back(make_pair(false, def->declLoc));
             associateSignatureCommentsToNode(node);
             def->body = walkBody(def, move(def->body));
             consumeCommentsInsideNode(node, "method");
-            nesting.pop_back();
+            contextAllowingTypeAlias.pop_back();
         },
         [&](parser::Ensure *ensure) {
             walkNode(ensure->body.get());
@@ -538,14 +530,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "masgn");
         },
         [&](parser::Module *mod) {
-            nesting.push_back(node);
+            contextAllowingTypeAlias.push_back(make_pair(true, mod->declLoc));
             associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
             mod->body = walkBody(mod, move(mod->body));
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "module");
-            nesting.pop_back();
+            contextAllowingTypeAlias.pop_back();
         },
         [&](parser::Next *next) {
             // Only associate comments if the last expression is on the same line as the next
@@ -616,14 +608,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "return");
         },
         [&](parser::SClass *sclass) {
-            nesting.push_back(node);
+            contextAllowingTypeAlias.push_back(make_pair(true, sclass->declLoc));
             associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
             sclass->body = walkBody(sclass, move(sclass->body));
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "sclass");
-            nesting.pop_back();
+            contextAllowingTypeAlias.pop_back();
         },
         [&](parser::Send *send) {
             if (parser::MK::isVisibilitySend(send)) {
