@@ -350,17 +350,17 @@ unique_ptr<parser::Node> SigsRewriter::replaceSyntheticTypeAlias(unique_ptr<pars
     // Consume the comments
     commentsByNode.erase(commentsByNode.find(node.get()));
 
-    auto alias_declaration = comments.signatures[0];
-    auto type_begin_loc = (uint32_t)alias_declaration.string.find("=");
+    auto aliasDeclaration = comments.signatures[0];
+    auto typeBeginLoc = (uint32_t)aliasDeclaration.string.find("=");
 
-    auto type_declaration = RBSDeclaration{vector<Comment>{Comment{
-        .commentLoc = alias_declaration.commentLoc(),
-        .typeLoc = core::LocOffsets{alias_declaration.fullTypeLoc().beginPos() + type_begin_loc + 1,
-                                    alias_declaration.fullTypeLoc().endPos()},
-        .string = alias_declaration.string.substr(type_begin_loc + 1),
+    auto typeDeclaration = RBSDeclaration{vector<Comment>{Comment{
+        .commentLoc = aliasDeclaration.commentLoc(),
+        .typeLoc = core::LocOffsets{aliasDeclaration.fullTypeLoc().beginPos() + typeBeginLoc + 1,
+                                    aliasDeclaration.fullTypeLoc().endPos()},
+        .string = aliasDeclaration.string.substr(typeBeginLoc + 1),
     }}};
 
-    auto type = SignatureTranslator(ctx).translateType(type_declaration);
+    auto type = SignatureTranslator(ctx).translateType(typeDeclaration);
 
     if (type == nullptr) {
         type = parser::MK::TUntyped(node->loc);
