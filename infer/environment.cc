@@ -1207,11 +1207,21 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.type = typeAndOrigin.type;
 
                 // If we're assigning to a temporary, inherit the origins of the RHS, otherwise the origin will be this
-                // declaration. As an additional exception, inherit the RHS origins when the value is the temporary
-                // introduced for exception handling, as we rely on those locations later for detecting when a variable
-                // is bound in multiple separate `rescue` clauses.
+                // declaration. There are some additional exceptions listed below where we inherit the RHS despite
+                // having a non-synthetic LHS:
+                auto exceptions = array{
+                    // When the temporary is introduced to name the value of an exception, we want to ensure that the
+                    // RHS origins are used so that we can check for the existence of `rescue` later on for giving more
+                    // targeted advice in dealing with pinning errors below.
+                    core::Names::exceptionValue(),
+
+                    // When the temporary is introduced from a `<selfRestore>`, this is a rebind of `self` inside of a
+                    // block and including this location in its binding would only cloud errors by associating all block
+                    // usages together.
+                    core::Names::selfRestore(),
+                };
                 if (bind.bind.variable.isSyntheticTemporary(inWhat) ||
-                    i.what.data(inWhat)._name == core::Names::exceptionValue()) {
+                    absl::c_contains(exceptions, i.what.data(inWhat)._name)) {
                     tp.origins = typeAndOrigin.origins;
                 } else {
                     tp.origins.emplace_back(ctx.locAt(bind.loc));
