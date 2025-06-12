@@ -337,7 +337,7 @@ public:
     }
 
     /*
-     * Create a `T.type_alias(:name)` send node.
+     * Create a `T.type_alias { type }` send node.
      */
     static std::unique_ptr<parser::Node> TTypeAlias(core::LocOffsets loc, std::unique_ptr<parser::Node> type) {
         auto send = Send0(loc, T(loc), core::Names::typeAlias(), loc);
