@@ -89,9 +89,7 @@ unique_ptr<parser::Node> TypeToParserNode::typeNameType(const rbs_type_name_t *t
 
 unique_ptr<parser::Node> TypeToParserNode::aliasType(const rbs_types_alias_t *node, core::LocOffsets loc,
                                                      const RBSDeclaration &declaration) {
-    // auto parent = parser::MK::Const(loc, parser::MK::Cbase(loc), core::Names::Constants::RBSTypeAlias());
     auto parent = nullptr;
-
     auto nameView = parser.resolveConstant(node->name->name);
     auto nameStr = "<RBS alias>::" + string(nameView);
     auto nameUTF8 = ctx.state.enterNameUTF8(nameStr);
