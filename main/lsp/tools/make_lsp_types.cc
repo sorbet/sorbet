@@ -1055,16 +1055,16 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                         },
                                         classTypes);
 
-    auto SendInformation = makeObject("SendInformation",
-                                      {
-                                          makeField("enclosingMethod", JSONString),
-                                          makeField("calledMethod", JSONString),
-                                          // Basically, inside a block or not, with some differentiation
-                                          // between blocks.
-                                          makeField("regionId", JSONInt),
-                                          // TOOD: maybe want a hasBlock field here?
-                                      },
-                                      classTypes);
+    auto SendInformation =
+        makeObject("SendInformation",
+                   {
+                       makeField("enclosingMethod", JSONString), makeField("calledMethod", JSONString),
+                       // Basically, inside a block or not, with some differentiation
+                       // between blocks.
+                       makeField("regionId", JSONInt),
+                       // TOOD: maybe want a hasBlock field here?
+                   },
+                   classTypes);
 
     auto CodeActionContext =
         makeObject("CodeActionContext",
