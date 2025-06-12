@@ -1350,7 +1350,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
     auto emptyResult = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});
 
     const auto &gs = typechecker.state();
-    auto uri = params->textDocument->uri;
+    const auto &uri = params->textDocument->uri;
     auto fref = config.uri2FileRef(gs, uri);
     if (!fref.exists()) {
         response->result = std::move(emptyResult);

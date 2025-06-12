@@ -51,15 +51,15 @@ DefinitionTask::DefinitionTask(const LSPConfiguration &config, MessageId id,
 unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDefinition);
     const core::GlobalState &gs = typechecker.state();
-    auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
-                                  LSPMethod::TextDocumentDefinition, false);
+    const auto &uri = params->textDocument->uri;
+    auto result =
+        LSPQuery::byLoc(config, typechecker, uri, *params->position, LSPMethod::TextDocumentDefinition, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
         return response;
     }
 
-    auto uri = params->textDocument->uri;
     auto fref = config.uri2FileRef(gs, uri);
     // LSPQuery::byLoc reports an error if the file or loc don't exist
     auto queryLoc = params->position->toLoc(gs, fref).value();
