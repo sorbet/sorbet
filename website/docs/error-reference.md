@@ -560,6 +560,20 @@ class A
 end
 ```
 
+## 3558
+
+> This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
+
+Methods annotated with `@abstract` must always raise an error:
+
+```ruby
+# @abstract
+#: -> void
+def baz
+  raise "not implemented"
+end
+```
+
 ## 3702
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
