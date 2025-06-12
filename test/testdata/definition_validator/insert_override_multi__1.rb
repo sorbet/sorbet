@@ -7,7 +7,7 @@ end
 
 class Child < Parent
   sig { void }
-  def example; end
+  def example; end # error: Method `Child#example` overrides an overridable method `Parent#example` but is not declared with `override.`
 end
 
 class Module

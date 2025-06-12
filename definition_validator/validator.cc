@@ -443,8 +443,13 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
 optional<core::AutocorrectSuggestion>
 constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &tree, core::MethodRef method) {
-    auto methodLoc = method.data(ctx)->loc();
-    auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, methodLoc.copyWithZeroLength());
+    auto methodLocs = method.data(ctx)->locs();
+    auto methodLoc = absl::c_find_if(methodLocs, [&](auto &loc) { return loc.file() == ctx.file; });
+    if (methodLoc == methodLocs.end() || !methodLoc->exists()) {
+        return nullopt;
+    }
+
+    auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, methodLoc->copyWithZeroLength());
     if (!parsedSig.has_value()) {
         return nullopt;
     }
