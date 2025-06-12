@@ -12,7 +12,7 @@ class T::Private::Methods::DeclBuilder
   sig {returns(T::Private::Methods::DeclBuilder)}
   def implementation; end
 
-  sig {params(allow_incompatible: T::Boolean).returns(T::Private::Methods::DeclBuilder)}
+  sig {params(allow_incompatible: T.any(T::Boolean, Symbol)).returns(T::Private::Methods::DeclBuilder)}
   def override(allow_incompatible: false); end
 
   sig {returns(T::Private::Methods::DeclBuilder)}

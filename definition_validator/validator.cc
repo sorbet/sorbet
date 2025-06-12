@@ -519,7 +519,7 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
     }
 
     if (overriddenMethods.size() == 0 && method.data(ctx)->flags.isOverride &&
-        !method.data(ctx)->flags.isIncompatibleOverride) {
+        !method.data(ctx)->flags.allowIncompatibleOverrideAll) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("Method `{}` is marked `{}` but does not override anything", method.show(ctx), "override");
         }
@@ -570,13 +570,14 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
         }
         if ((overriddenMethod.data(ctx)->flags.isAbstract || overriddenMethod.data(ctx)->flags.isOverridable ||
              (overriddenMethod.data(ctx)->hasSig() && method.data(ctx)->flags.isOverride)) &&
-            !method.data(ctx)->flags.isIncompatibleOverride && !isRBI &&
+            !method.data(ctx)->flags.allowIncompatibleOverrideAll && !isRBI &&
             !method.data(ctx)->flags.isRewriterSynthesized &&
             overriddenMethod != core::Symbols::BasicObject_initialize()) {
             // We only ignore BasicObject#initialize for backwards compatibility.
             // One day, we may want to build something like overridable(allow_incompatible: true)
             // and mark certain methods in the standard library as possible to be overridden incompatibly,
             // without needing to write `override(allow_incompatible: true)`.
+            // Further context: https://blog.jez.io/constructor-override-checking/
             validateCompatibleOverride(ctx, overriddenMethod, method);
         }
     }

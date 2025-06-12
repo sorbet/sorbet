@@ -274,6 +274,31 @@ end
 
 **Again**, reach for this escape hatch sparingly. Every location where override checking has been silenced is a place where Sorbet could fail to catch an error that it might otherwise have been able to catch.
 
+### Use `override(allow_incompatible: :visibility)`
+
+To silence errors about incompatible overrides _specifically_ for mismatches of visibility (for example: a method is `public` in a parent class or interface, but `private` in a child class or implementation), there is a more precise alternative:
+
+```ruby
+class Parent
+  extend T::Sig
+
+  sig { overridable.returns(Integer) }
+  def some_public_api; 0; end
+end
+
+class ChildBad < Parent
+  sig { override.returns(Integer) }
+  private def some_public_api; 1; end # error: `some_public_api` must be public
+end
+
+class ChildOkay < Parent
+  sig { override(allow_incompatible: :visibility).returns(Integer) }
+  private def some_public_api; 1; end # error is silenced (underlying problem remains!)
+end
+```
+
+Compared to `override(allow_incompatible: true)`, this version will still check things like when the parent and child methods have mismatched arities or types—it only silences visibility-related mismatches.
+
 ## What's next?
 
 - [Final Methods, Classes, and Modules](final.md)
