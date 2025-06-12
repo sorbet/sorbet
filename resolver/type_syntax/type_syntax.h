@@ -29,18 +29,18 @@ struct ParsedSig {
     std::vector<TypeArgSpec> typeArgs;
 
     struct {
-        bool sig = false;
-        bool proc = false;
-        bool bind = false;
-        bool params = false;
-        bool abstract = false;
-        bool override_ = false;
-        bool overridable = false;
-        bool returns = false;
-        bool void_ = false;
-        bool checked = false;
-        bool final = false;
-        bool incompatibleOverride = false;
+        core::LocOffsets sig = core::LocOffsets::none();
+        core::LocOffsets proc = core::LocOffsets::none();
+        core::LocOffsets bind = core::LocOffsets::none();
+        core::LocOffsets params = core::LocOffsets::none();
+        core::LocOffsets abstract = core::LocOffsets::none();
+        core::LocOffsets override_ = core::LocOffsets::none();
+        core::LocOffsets overridable = core::LocOffsets::none();
+        core::LocOffsets returns = core::LocOffsets::none();
+        core::LocOffsets void_ = core::LocOffsets::none();
+        core::LocOffsets checked = core::LocOffsets::none();
+        core::LocOffsets final = core::LocOffsets::none();
+        core::LocOffsets incompatibleOverride = core::LocOffsets::none();
     } seen;
 
     TypeArgSpec &enterTypeArgByName(core::NameRef name);

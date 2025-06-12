@@ -3289,21 +3289,21 @@ private:
         ENFORCE(isOverloaded || mdef.symbol == method);
         ENFORCE(isOverloaded || method.data(ctx)->arguments.size() == mdef.args.size());
 
-        if (!sig.seen.returns && !sig.seen.void_) {
+        if (!sig.seen.returns.exists() && !sig.seen.void_.exists()) {
             if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Malformed `{}`: No return type specified. Specify one with .returns()", "sig");
             }
         }
-        if (sig.seen.returns && sig.seen.void_) {
+        if (sig.seen.returns.exists() && sig.seen.void_.exists()) {
             if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Malformed `{}`: Don't use both .returns() and .void", "sig");
             }
         }
 
-        if (sig.seen.abstract) {
+        if (sig.seen.abstract.exists()) {
             method.data(ctx)->flags.isAbstract = true;
         }
-        if (sig.seen.incompatibleOverride) {
+        if (sig.seen.incompatibleOverride.exists()) {
             method.data(ctx)->flags.isIncompatibleOverride = true;
         }
         if (!sig.typeArgs.empty()) {
@@ -3320,16 +3320,16 @@ private:
                 }
             }
         }
-        if (sig.seen.overridable) {
+        if (sig.seen.overridable.exists()) {
             method.data(ctx)->flags.isOverridable = true;
         }
-        if (sig.seen.override_) {
+        if (sig.seen.override_.exists()) {
             method.data(ctx)->flags.isOverride = true;
         }
-        if (sig.seen.final) {
+        if (sig.seen.final.exists()) {
             method.data(ctx)->flags.isFinal = true;
         }
-        if (sig.seen.bind) {
+        if (sig.seen.bind.exists()) {
             if (sig.bind == core::Symbols::MagicBindToAttachedClass()) {
                 if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::BindNonBlockParameter)) {
                     e.setHeader("Using `{}` is not permitted here", "bind");
@@ -3440,7 +3440,8 @@ private:
                 }
 
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
-                if (!isOverloaded && !isSyntheticBlkArg && (sig.seen.params || sig.seen.returns || sig.seen.void_)) {
+                if (!isOverloaded && !isSyntheticBlkArg &&
+                    (sig.seen.params.exists() || sig.seen.returns.exists() || sig.seen.void_.exists())) {
                     // Only error if we have any types
                     if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
