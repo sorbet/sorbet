@@ -962,6 +962,53 @@ TEST_CASE("Convert test unit import to test helper import") {
     }
 }
 
+TEST_CASE("Convert test unit import to normal import") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs, LAYERS_LIB_APP);
+
+    string myPackage = "class MyPackage < PackageSpec\n"
+                       "  strict_dependencies 'layered'\n"
+                       "  layer 'app'\n"
+                       "  import FalsePackageA\n"
+                       "  import DagPackageA\n"
+                       "\n"
+                       "  test_import LayeredPackageA, only: \"test_rb\"\n"
+                       "end";
+    string myPackagePath = "my_package/__package.rb";
+
+    auto parsedFiles = enterPackages(gs, {{myPackagePath, myPackage},
+                                          {falsePackageAPath, falsePackageA},
+                                          {layeredPackageAPath, layeredPackageA},
+                                          {dagPackageAPath, dagPackageA}});
+
+    {
+        auto &myPkg = packageInfoFor(gs, parsedFiles[0].file);
+        ENFORCE(myPkg.exists());
+        auto &layeredPkgA = packageInfoFor(gs, parsedFiles[2].file);
+        ENFORCE(layeredPkgA.exists());
+
+        gs.tracer().error("before");
+        auto addImport = myPkg.addImport(gs, layeredPkgA, core::packages::ImportType::Normal);
+        gs.tracer().error("after");
+        string expected = "class MyPackage < PackageSpec\n"
+                          "  strict_dependencies 'layered'\n"
+                          "  layer 'app'\n"
+                          "  import FalsePackageA\n"
+                          "  import DagPackageA\n"
+                          "  test_import LayeredPackageA\n"
+                          // This extra line is not great, but if we change the autocorrect to delete the '\n'
+                          // after the test_import, the autocorrect show the next line in the preview, which would
+                          // make the user think that entire next line will be deleted, which is incorrect.
+                          // TODO(neil): look into ways to modify the preview so we don't have this problem and we can
+                          // delete the '\n' too
+                          "\n\n"
+                          "end";
+        ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+        auto replaced = applySuggestion(gs, *addImport);
+        CHECK_EQ(expected, replaced);
+    }
+}
+
 TEST_CASE("Ordering by alphabetical") {
     core::GlobalState gs(errorQueue);
     makeDefaultPackagerGlobalState(gs, LAYERS_UTIL_LIB_APP);

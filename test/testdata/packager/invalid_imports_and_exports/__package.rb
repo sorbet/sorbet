@@ -32,5 +32,6 @@ class A < PackageSpec
   test_import C, only: :A_MYSTERIOUS_PURPOSE # error: Invalid expression in package
   test_import C, only: "something else" # error: Invalid expression in package
   test_import C, only: -> { "naught" } # error: Invalid expression in package
+  test_import C, only: "test_rb", only: "test_rb" # error: Hash key `only` is duplicated
   test_import C, with: "cheese" # error: Unrecognized keyword argument
 end

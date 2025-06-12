@@ -37,6 +37,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         "naught"
       end)
 
+    <self>.test_import(::<PackageSpecRegistry>::<C C>, :only, "test_rb", :only, "test_rb")
+
     <self>.test_import(::<PackageSpecRegistry>::<C C>, :with, "cheese")
   end
 end
