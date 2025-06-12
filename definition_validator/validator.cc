@@ -441,6 +441,10 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
     }
 }
 
+optional<core::AutocorrectSuggestion> constructUnsafeOverrideAutocorrect(const core::Context ctx) {
+    // TODO(jez)
+}
+
 optional<core::AutocorrectSuggestion>
 constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &tree, core::MethodRef method) {
     auto methodLoc = method.data(ctx)->loc();

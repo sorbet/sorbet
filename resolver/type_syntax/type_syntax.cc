@@ -441,7 +441,11 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                         e.setHeader("`{}` cannot be combined with `{}`", "override", "abstract");
                     }
                 }
-                sig.seen.override_ = send->funLoc;
+                // TODO(jez) Might want to commit to the new version here (and elsewhere):
+                // sig.seen.override_ = send->funLoc;
+                sig.seen.override_ = send->funLoc.join(send->loc.copyEndWithZeroLength());
+                // TODO(jez) Will this include the trailing paren? I think so, but not the receiver
+                // (which is what we want)
 
                 if (send->hasPosArgs()) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
