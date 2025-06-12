@@ -1,0 +1,25 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:x, <emptyTree>::<C Integer>, :y, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foo<<todo method>>(x, y, &<blk>)
+      y.*(x)
+    end
+
+    <runtime method definition of foo>
+  end
+
+  class <emptyTree>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C Foo>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.override().params(:x, <emptyTree>::<C Integer>, :y, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foo<<todo method>>(x, y, &<blk>)
+      <cast:cast>(<self>.<super>(<cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>), <cast:cast>(<emptyTree>::<C ARGV>.last(), <todo sym>, <emptyTree>::<C Integer>)), <todo sym>, <emptyTree>::<C Integer>)
+    end
+
+    <runtime method definition of foo>
+  end
+end
