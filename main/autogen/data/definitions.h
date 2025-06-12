@@ -126,10 +126,12 @@ struct Reference {
     // In which class or module was this reference used?
     DefinitionRef scope;
 
-    // its full qualified name
-    QualifiedName name;
     // the nesting ID of this constant
     uint32_t nestingId;
+
+    // its full qualified name
+    QualifiedName name;
+
     // the resolved name iff we have it from Sorbet
     QualifiedName resolved;
 
@@ -137,16 +139,16 @@ struct Reference {
     core::LocOffsets loc;
     core::LocOffsets definitionLoc;
 
+    // If this is a ref used in an `include` or `extend`, then this will point to the definition of the class in which
+    // this is being `include`d or `extend`ed
+    DefinitionRef parent_of;
+
     // `true` if this is the appearance of the constant name associated with a definition: i.e. the name of a class or
     // module or the LHS of a casgn
     bool is_defining_ref;
 
     // Iff this is a class, then this will be `ClassKind::Class`, otherwise `ClassKind::Module`
     ClassKind parentKind = ClassKind::Module;
-
-    // If this is a ref used in an `include` or `extend`, then this will point to the definition of the class in which
-    // this is being `include`d or `extend`ed
-    DefinitionRef parent_of;
 };
 
 struct AutogenConfig {
