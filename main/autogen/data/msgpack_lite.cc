@@ -139,7 +139,7 @@ string MsgpackWriterLite::pack(core::Context ctx, ParsedFile &pf, const AutogenC
         MsgpackArray attributes(&writer, pfAttrs.size());
 
         if (version >= 7) {
-            uint32_t value = strictLevelToInt(pf.tree.file.data(ctx).strictLevel);
+            uint32_t value = strictLevelToInt(pf.file.data(ctx).strictLevel);
             mpack_write_u32(&writer, value);
         }
 

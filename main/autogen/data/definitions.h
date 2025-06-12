@@ -158,8 +158,8 @@ struct AutogenConfig {
 struct ParsedFile {
     friend class MsgpackWriter;
 
-    // the original file AST from Sorbet
-    ast::ParsedFile tree;
+    // the file that was parsed
+    core::FileRef file;
     // the checksum of this file
     uint32_t cksum;
     // the path on disk to this file

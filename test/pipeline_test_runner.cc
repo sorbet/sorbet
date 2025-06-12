@@ -421,7 +421,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 for (auto &tree : trees) {
                     core::Context ctx(*gs, core::Symbols::root(), tree.file);
                     auto pf = autogen::Autogen::generate(ctx, move(tree), autogen::AutogenConfig{{}}, *crcBuilder);
-                    tree = move(pf.tree);
                     payload << pf.toString(ctx, autogen::AutogenVersion::MAX_VERSION);
                 }
                 return payload.str();
