@@ -18,6 +18,7 @@
 #include "main/lsp/requests/shutdown.h"
 #include "main/lsp/requests/signature_help.h"
 #include "main/lsp/requests/sorbet_error.h"
+#include "main/lsp/requests/sorbet_query_sends.h"
 #include "main/lsp/requests/sorbet_read_file.h"
 #include "main/lsp/requests/sorbet_show_symbol.h"
 #include "main/lsp/requests/type_definition.h"
