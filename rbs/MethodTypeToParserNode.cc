@@ -80,17 +80,47 @@ bool isRaise(parser::Node *node) {
 }
 
 void ensureAbstractMethodRaises(core::MutableContext ctx, const parser::Node *node) {
+    core::LocOffsets editLoc;
+    bool semicolon = false;
+    bool newline = false;
+
     if (auto method = parser::cast_node<parser::DefMethod>((parser::Node *)node)) {
         if (isRaise(method->body.get())) {
             // If the method raises properly, we remove the body the body to not error later (see error 5019)
             method->body = nullptr;
             return;
         }
+
+        auto lineStart = core::Loc::pos2Detail(ctx.file.data(ctx), method->declLoc.endPos()).line;
+        auto lineEnd = core::Loc::pos2Detail(ctx.file.data(ctx), method->loc.endPos()).line;
+
+        if (method->body) {
+            editLoc = method->body->loc;
+        } else if (lineStart == lineEnd) {
+            editLoc = method->declLoc.copyEndWithZeroLength();
+            semicolon = true;
+        } else {
+            editLoc = method->declLoc.copyEndWithZeroLength();
+            newline = true;
+        }
     } else if (auto method = parser::cast_node<parser::DefS>((parser::Node *)node)) {
         if (isRaise(method->body.get())) {
             // If the method raises properly, we remove the body the body to not error later (see error 5019)
             method->body = nullptr;
             return;
+        }
+
+        auto lineStart = core::Loc::pos2Detail(ctx.file.data(ctx), method->declLoc.endPos()).line;
+        auto lineEnd = core::Loc::pos2Detail(ctx.file.data(ctx), method->loc.endPos()).line;
+
+        if (method->body) {
+            editLoc = method->body->loc;
+        } else if (lineStart == lineEnd) {
+            editLoc = method->declLoc.copyEndWithZeroLength();
+            semicolon = true;
+        } else {
+            editLoc = method->declLoc.copyEndWithZeroLength();
+            newline = true;
         }
     } else {
         // Not a case we care about right now, will error later down the pipeline
@@ -99,6 +129,19 @@ void ensureAbstractMethodRaises(core::MutableContext ctx, const parser::Node *no
 
     if (auto e = ctx.beginIndexerError(node->loc, core::errors::Rewriter::RBSAbstractMethodNoRaises)) {
         e.setHeader("Methods declared @abstract with an RBS comment must always raise");
+
+        string autocorrect = "raise \"abstract method called\"";
+        if (semicolon) {
+            autocorrect = "; " + autocorrect;
+        } else if (newline) {
+            auto [_endLoc, indentLength] = ctx.locAt(node->loc).findStartOfIndentation(ctx);
+            string indent(indentLength + 2, ' ');
+            autocorrect = "\n" + indent + autocorrect;
+        }
+
+        e.addAutocorrect(
+            core::AutocorrectSuggestion{fmt::format("Add `raise` to the method body"),
+                                        {core::AutocorrectSuggestion::Edit{ctx.locAt(editLoc), autocorrect}}});
     }
 }
 
