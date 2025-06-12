@@ -471,7 +471,8 @@ constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &
     };
 }
 
-void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree, core::MethodRef method) {
+void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree, const ast::MethodDef &methodDef) {
+    auto method = methodDef.symbol;
     auto klass = method.data(ctx)->owner;
     auto name = method.data(ctx)->name;
     auto klassData = klass.data(ctx);
@@ -1186,7 +1187,7 @@ public:
         // See the comment in `VarianceValidator::validateMethod` for an explanation of why we don't
         // need to check types on instance variables.
 
-        validateOverriding(ctx, this->tree, methodDef.symbol);
+        validateOverriding(ctx, this->tree, methodDef);
     }
 
     void postTransformSend(core::Context ctx, const ast::ExpressionPtr &tree) {
