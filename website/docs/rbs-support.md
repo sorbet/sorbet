@@ -796,6 +796,31 @@ Multiline syntax is also supported:
 #|   String
 ```
 
+RBS type aliases are scoped to the class or module where they are declared:
+
+```ruby
+class Foo
+  #: type int_or_string =
+  #|   Integer |
+  #|   String
+
+  # ok
+  #: (int_or_string) -> void
+  def foo(x); end
+
+  class Bar
+    # ok
+    #: (int_or_string) -> void
+    def bar(x); end
+  end
+end
+
+
+#: (int_or_string) -> void
+#   ^^^^^^^^^^^^^ error: Unable to resolve constant `type int_or_string`
+def baz(x); end
+```
+
 ## Special behaviors
 
 The `#:` comment must come **immediately** before the following method definition. If there is a blank line between the comment and method definition, the comment will be ignored.
