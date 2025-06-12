@@ -53,7 +53,7 @@ core::LocOffsets adjustNameLoc(const RBSDeclaration &declaration, rbs_node_t *no
 }
 
 bool isSelfOrKernel(parser::Node *node) {
-    if (auto self = parser::cast_node<parser::Self>(node)) {
+    if (parser::isa_node<parser::Self>(node)) {
         return true;
     }
 
