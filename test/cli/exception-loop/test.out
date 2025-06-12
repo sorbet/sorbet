@@ -4,7 +4,10 @@ test/cli/exception-loop/test.rb:23: Revealed type: `T.nilable(A)` https://srb.he
   Got `T.nilable(A)` originating from:
     test/cli/exception-loop/test.rb:17:
     17 |  rescue A => e
-                      ^
+          ^^^^^^
+    test/cli/exception-loop/test.rb:17:
+    17 |  rescue A => e
+                 ^
     test/cli/exception-loop/test.rb:14: Possibly uninitialized (`NilClass`) in:
     14 |def example1
         ^^^^^^^^^^^^
@@ -18,10 +21,18 @@ test/cli/exception-loop/test.rb:25: Changing the type of a variable is not permi
   Original type from:
     test/cli/exception-loop/test.rb:17:
     17 |  rescue A => e
-                      ^
+          ^^^^^^
+    test/cli/exception-loop/test.rb:17:
+    17 |  rescue A => e
+                 ^
     test/cli/exception-loop/test.rb:14: Possibly uninitialized (`NilClass`) in:
     14 |def example1
         ^^^^^^^^^^^^
+  Note:
+    The exception variables of two `rescue` blocks conflict with each other because
+    the second is inside a loop. Either use `T.let` to initialize the exception
+    variable before the first `rescue`, or pick unique variable names.
+
 
 test/cli/exception-loop/test.rb:43: Revealed type: `T.nilable(T.any(A, B))` https://srb.help/7014
     43 |      T.reveal_type(e) # error: `T.nilable(T.any(A, B))`
@@ -32,5 +43,8 @@ test/cli/exception-loop/test.rb:43: Revealed type: `T.nilable(T.any(A, B))` http
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     test/cli/exception-loop/test.rb:37:
     37 |  rescue A => e
-                      ^
+          ^^^^^^
+    test/cli/exception-loop/test.rb:37:
+    37 |  rescue A => e
+                 ^
 Errors: 3

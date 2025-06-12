@@ -1206,10 +1206,12 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what);
                 tp.type = typeAndOrigin.type;
 
-                // If we're assigning to a temporary that's introduced during CFG construction, propagate the origin
-                // locs. Otherwise, keep the loc as the binding loc, as that will avoid eliding definitions for
-                // expressions like `x = y`.
-                if (bind.bind.variable.isSyntheticTemporary(inWhat)) {
+                // If we're assigning to a temporary, inherit the origins of the RHS, otherwise the origin will be this
+                // declaration. As an additional exception, inherit the RHS origins when the value is the temporary
+                // introduced for exception handling, as we rely on those locations later for detecting when a variable
+                // is bound in multiple separate `rescue` clauses.
+                if (bind.bind.variable.isSyntheticTemporary(inWhat) ||
+                    i.what.data(inWhat)._name == core::Names::exceptionValue()) {
                     tp.origins = typeAndOrigin.origins;
                 } else {
                     tp.origins.emplace_back(ctx.locAt(bind.loc));
