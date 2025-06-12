@@ -70,7 +70,8 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
     ShowOperation op(config, ShowOperation::Kind::References);
 
     const core::GlobalState &gs = typechecker.state();
-    auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
+    const auto &uri = params->textDocument->uri;
+    auto result = LSPQuery::byLoc(config, typechecker, uri, *params->position,
                                   LSPMethod::TextDocumentReferences, false);
     if (result.error) {
         // An error happened while setting up the query.
@@ -83,7 +84,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
     response->result = variant<JSONNullObject, vector<unique_ptr<Location>>>(JSONNullObject());
     auto &queryResponses = result.responses;
     bool notifyAboutUntypedFile = false;
-    core::FileRef fref = config.uri2FileRef(gs, params->textDocument->uri);
+    core::FileRef fref = config.uri2FileRef(gs, uri);
     bool fileIsTyped = false;
     if (fref.exists()) {
         fileIsTyped = fref.data(gs).strictLevel >= core::StrictLevel::True;

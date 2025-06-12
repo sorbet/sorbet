@@ -18,7 +18,8 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
     // To match the behavior of Go To Definition, we don't error in an untyped file, but instead
     // be okay with returning an empty result for certain queries.
     auto emptyResultIfFileIsUntyped = false;
-    auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
+    const auto &uri = params->textDocument->uri;
+    auto result = LSPQuery::byLoc(config, typechecker, uri, *params->position,
                                   LSPMethod::SorbetShowSymbol, emptyResultIfFileIsUntyped);
     if (result.error) {
         // An error happened while setting up the query.
@@ -26,7 +27,6 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
         return response;
     }
 
-    const auto &uri = params->textDocument->uri;
     auto fref = config.uri2FileRef(gs, uri);
     // LSPQuery::byLoc reports an error if the file or loc don't exist
     auto queryLoc = params->position->toLoc(gs, fref).value();
