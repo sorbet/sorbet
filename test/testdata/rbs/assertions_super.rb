@@ -18,3 +18,16 @@ class Bar < Foo
     ) #: as Integer # error: Expected `String` but found `Integer` for method result type
   end
 end
+
+class Baz < Foo
+  # @override
+  #: (Integer, String) -> String
+  def foo(x, y)
+    super(
+      *[
+        ARGV.first, #: as Integer
+        ARGV.last #: as String
+      ]
+    )
+  end
+end

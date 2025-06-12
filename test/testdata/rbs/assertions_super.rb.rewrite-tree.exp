@@ -22,4 +22,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of foo>
   end
+
+  class <emptyTree>::<C Baz><<C <todo sym>>> < (<emptyTree>::<C Foo>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.override().params(:x, <emptyTree>::<C Integer>, :y, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foo<<todo method>>(x, y, &<blk>)
+      ::<Magic>.<call-with-splat>(<self>, :<super>, ::<Magic>.<splat>([<cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C Integer>), <cast:cast>(<emptyTree>::<C ARGV>.last(), <todo sym>, <emptyTree>::<C String>)]), nil)
+    end
+
+    <runtime method definition of foo>
+  end
 end
