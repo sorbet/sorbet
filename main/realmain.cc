@@ -260,7 +260,7 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
 
                     core::Context ctx(gs, core::Symbols::root(), tree.file);
                     auto pf = autogen::Autogen::generate(ctx, move(tree), autogenCfg, *crcBuilder);
-                    tree = move(pf.tree);
+                    auto file = pf.file;
 
                     AutogenResult::Serialized serialized;
 
@@ -273,7 +273,7 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
                         serialized.msgpack = pf.toMsgpack(ctx, autogenVersion, autogenCfg);
                     }
 
-                    if (!tree.file.data(gs).isRBI()) {
+                    if (!file.data(gs).isRBI()) {
                         // Exclude RBI files because they are not loadable and should not appear in
                         // auto-loader related output.
                         if (opts.print.AutogenSubclasses.enabled) {

@@ -422,7 +422,7 @@ ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const Auto
     pf.path = string(tree.file.data(ctx).path());
     auto src = tree.file.data(ctx).source();
     pf.cksum = crcBuilder.crc32(src);
-    pf.tree = move(tree);
+    pf.file = tree.file;
     return pf;
 }
 
