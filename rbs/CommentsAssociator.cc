@@ -183,7 +183,7 @@ bool CommentsAssociator::nestingAllowsTypeAlias() {
         return true;
     }
 
-    auto last = nesting.back();
+    auto last = (parser::Node *)nesting.back();
     return parser::isa_node<parser::Class>(last) || parser::isa_node<parser::Module>(last) ||
            parser::isa_node<parser::SClass>(last);
 }

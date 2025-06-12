@@ -31,7 +31,7 @@ private:
     std::vector<core::LocOffsets> commentLocations;
     std::map<int, CommentNode> commentByLine;
     std::map<parser::Node *, std::vector<CommentNode>> commentsByNode;
-    std::vector<parser::Node *> nesting;
+    std::vector<const parser::Node *> nesting;
     int lastLine;
 
     void walkNode(parser::Node *node);
