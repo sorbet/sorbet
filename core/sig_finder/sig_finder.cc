@@ -41,7 +41,7 @@ void SigFinder::preTransformClassDef(core::Context ctx, const ast::ClassDef &tre
         // `loc` is contained in the current narrowestClassDefRange, and still contains `queryLoc`
         this->narrowestClassDefRange = loc;
 
-        if (this->result_.has_value() && !loc.contains(ctx.locAt(this->result_->origSend->loc))) {
+        if (this->result_.has_value() && !loc.contains(ctx.locAt(this->result_->origSend.loc))) {
             // If there's a result and it's not contained in the new narrowest range, we have to toss it out
             // (Method defs and class defs are not necessarily sorted by their locs)
             this->result_ = nullopt;
@@ -58,7 +58,7 @@ void SigFinder::postTransformClassDef(core::Context ctx, const ast::ClassDef &tr
 
 void SigFinder::preTransformMethodDef(core::Context ctx, const ast::MethodDef &tree) {
     if (this->result_.has_value()) {
-        if (this->result_->origSend->loc.endPos() <= tree.loc.beginPos() && tree.loc.endPos() <= queryLoc.beginPos()) {
+        if (this->result_->origSend.loc.endPos() <= tree.loc.beginPos() && tree.loc.endPos() <= queryLoc.beginPos()) {
             // There is a method definition between the current result sig and the queryLoc,
             // so the sig we found is not for the right method.
             this->result_ = nullopt;
@@ -68,7 +68,7 @@ void SigFinder::preTransformMethodDef(core::Context ctx, const ast::MethodDef &t
 
 void SigFinder::postTransformRuntimeMethodDefinition(core::Context ctx, const ast::RuntimeMethodDefinition &tree) {
     if (this->result_.has_value()) {
-        if (this->result_->origSend->loc.endPos() <= tree.loc.beginPos() && tree.loc.endPos() <= queryLoc.beginPos()) {
+        if (this->result_->origSend.loc.endPos() <= tree.loc.beginPos() && tree.loc.endPos() <= queryLoc.beginPos()) {
             // There is a method definition between the current result sig and the queryLoc,
             // so the sig we found is not for the right method.
             this->result_ = nullopt;
@@ -109,12 +109,12 @@ void SigFinder::preTransformSend(core::Context ctx, const ast::Send &send) {
 
     if (this->result_.has_value()) {
         // Method defs are not guaranteed to be sorted in order by their declLocs
-        auto resultLoc = this->result_->origSend->loc;
+        auto resultLoc = this->result_->origSend.loc;
         if (resultLoc.beginPos() < currentLoc.beginPos()) {
             // Found a method defined before the query but later than previous result: overwrite previous result
             auto owner = getEffectiveOwner(ctx);
             auto parsedSig = resolver::TypeSyntax::parseSigTop(ctx.withOwner(owner), send, core::Symbols::untyped());
-            this->result_ = Result{move(parsedSig), &send};
+            this->result_.emplace(move(parsedSig), send);
         } else {
             // We've already found an earlier result, so the current is not the first
         }
@@ -123,7 +123,7 @@ void SigFinder::preTransformSend(core::Context ctx, const ast::Send &send) {
         auto owner = getEffectiveOwner(ctx);
         auto parsedSig = resolver::TypeSyntax::parseSigTop(ctx.withOwner(owner), send, core::Symbols::untyped());
 
-        this->result_ = Result{move(parsedSig), &send};
+        this->result_.emplace(move(parsedSig), send);
     }
 }
 

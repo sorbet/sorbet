@@ -52,7 +52,7 @@ optional<pair<optional<core::LocOffsets>, core::LocOffsets>> methodLocs(const co
     if (!parsedSig.has_value()) {
         return make_pair(nullopt, methodLoc);
     }
-    return make_pair(parsedSig->origSend->loc, methodLoc);
+    return make_pair(parsedSig->origSend.loc, methodLoc);
 }
 
 // Turns ruby_function_name__ to RubyFunctionName,

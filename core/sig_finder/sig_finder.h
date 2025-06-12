@@ -9,7 +9,8 @@ class SigFinder {
 public:
     struct Result {
         resolver::ParsedSig sig;
-        const ast::Send *origSend;
+        const ast::Send &origSend;
+        Result(resolver::ParsedSig &&sig, const ast::Send &origSend) : sig(std::move(sig)), origSend(origSend) {}
     };
 
 private:
