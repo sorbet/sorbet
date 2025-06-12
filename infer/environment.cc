@@ -1205,7 +1205,21 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::Ident &i) {
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what);
                 tp.type = typeAndOrigin.type;
-                tp.origins = typeAndOrigin.origins;
+
+                // If we're assigning to a temporary, inherit the origins of the RHS, otherwise the origin will be this
+                // declaration. There are some additional exceptions listed below where we inherit the RHS despite
+                // having a non-synthetic LHS:
+                // * if we're assigning to `self` we inherit the RHS to avoid introducing an additional definition site
+                //   of `self`
+                // * if the RHS is `<exceptionValue>` we inherit the RHS to propagate locations that include `rescue`
+                //   and enables more targeted advice when reporting pinning errors below.
+                if (bind.bind.variable.isSyntheticTemporary(inWhat) ||
+                    bind.bind.variable == cfg::LocalRef::selfVariable() ||
+                    i.what.data(inWhat)._name == core::Names::exceptionValue()) {
+                    tp.origins = typeAndOrigin.origins;
+                } else {
+                    tp.origins.emplace_back(ctx.locAt(bind.loc));
+                }
 
                 if (lspQueryMatch && !bind.value.isSynthetic()) {
                     core::lsp::QueryResponse::pushQueryResponse(

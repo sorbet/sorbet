@@ -3,7 +3,7 @@
 
 StaticField1 = T.let(0, Integer)
 def example1
-  x = StaticField1
+  x = T.let(StaticField1, T.any(FalseClass, Integer))
   1.times do
     x = false # error: Changing the type of a variable is not permitted in loops and blocks
   end
