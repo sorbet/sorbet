@@ -442,14 +442,10 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 }
 
 optional<core::AutocorrectSuggestion>
-constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &tree, core::MethodRef method) {
-    auto methodLocs = method.data(ctx)->locs();
-    auto methodLoc = absl::c_find_if(methodLocs, [&](auto &loc) { return loc.file() == ctx.file; });
-    if (methodLoc == methodLocs.end() || !methodLoc->exists()) {
-        return nullopt;
-    }
+constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &tree, const ast::MethodDef &methodDef) {
+    auto methodLoc = ctx.locAt(methodDef.declLoc);
 
-    auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, methodLoc->copyWithZeroLength());
+    auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, methodLoc.copyWithZeroLength());
     if (!parsedSig.has_value()) {
         return nullopt;
     }
@@ -466,7 +462,7 @@ constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &
     vector<core::AutocorrectSuggestion::Edit> edits;
     edits.emplace_back(core::AutocorrectSuggestion::Edit{insertLoc, "override."});
     return core::AutocorrectSuggestion{
-        fmt::format("Add `{}` to `{}` sig", "override", method.data(ctx)->name.show(ctx)),
+        fmt::format("Add `{}` to `{}` sig", "override", methodDef.symbol.data(ctx)->name.show(ctx)),
         std::move(edits),
     };
 }
@@ -554,7 +550,7 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
                             method.show(ctx), overriddenMethod.show(ctx), "override.");
                 e.addErrorLine(overriddenMethod.data(ctx)->loc(), "defined here");
 
-                auto potentialAutocorrect = constructOverrideAutocorrect(ctx, tree, method);
+                auto potentialAutocorrect = constructOverrideAutocorrect(ctx, tree, methodDef);
                 if (potentialAutocorrect.has_value()) {
                     e.addAutocorrect(std::move(*potentialAutocorrect));
                 }
@@ -568,7 +564,7 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
                             method.show(ctx), overriddenMethod.show(ctx), "override.");
                 e.addErrorLine(overriddenMethod.data(ctx)->loc(), "defined here");
 
-                auto potentialAutocorrect = constructOverrideAutocorrect(ctx, tree, method);
+                auto potentialAutocorrect = constructOverrideAutocorrect(ctx, tree, methodDef);
                 if (potentialAutocorrect.has_value()) {
                     e.addAutocorrect(std::move(*potentialAutocorrect));
                 }
