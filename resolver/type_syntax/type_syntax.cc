@@ -3,7 +3,6 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/TypeErrorDiagnostics.h"
-#include "core/core.h"
 #include "core/errors/resolver.h"
 
 using namespace std;
@@ -262,7 +261,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                     }
                 }
                 typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todoTypeArgument());
-                typeArgSpec.loc = ctx.locAt(arg.loc());
+                typeArgSpec.loc = arg.loc();
             }
 
             for (auto [key, _value] : tsend->kwArgPairs()) {
@@ -414,8 +413,8 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                         }
                         auto resultAndBind = move(maybeResultAndBind.value());
 
-                        sig.argTypes.emplace_back(ParsedSig::ArgSpec{ctx.locAt(key.loc()), name, ctx.locAt(value.loc()),
-                                                                     resultAndBind.rebind, resultAndBind.type});
+                        sig.argTypes.emplace_back(
+                            ParsedSig::ArgSpec{key.loc(), name, value.loc(), resultAndBind.rebind, resultAndBind.type});
                     }
                 }
                 break;
@@ -514,7 +513,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                     return nullopt;
                 }
                 sig.returns = move(maybeReturns.value());
-                sig.returnsLoc = ctx.locAt(send->loc);
+                sig.returnsLoc = send->loc;
 
                 break;
             }
@@ -522,7 +521,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 checkTypeFunArity(ctx, *send, 0, 0);
                 sig.seen.void_ = true;
                 sig.returns = core::Types::void_();
-                sig.returnsLoc = ctx.locAt(send->loc);
+                sig.returnsLoc = send->loc;
                 break;
             }
             case core::Names::checked().rawId(): {

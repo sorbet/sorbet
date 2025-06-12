@@ -10,19 +10,19 @@ namespace sorbet::resolver {
 
 struct ParsedSig {
     struct ArgSpec {
-        core::Loc nameLoc;
+        core::LocOffsets nameLoc;
         core::NameRef name;
-        core::Loc typeLoc;
+        core::LocOffsets typeLoc;
         core::ClassOrModuleRef rebind;
         core::TypePtr type;
     };
     core::ClassOrModuleRef bind;
     std::vector<ArgSpec> argTypes;
     core::TypePtr returns;
-    core::Loc returnsLoc;
+    core::LocOffsets returnsLoc;
 
     struct TypeArgSpec {
-        core::Loc loc;
+        core::LocOffsets loc;
         core::NameRef name;
         core::TypePtr type;
     };
