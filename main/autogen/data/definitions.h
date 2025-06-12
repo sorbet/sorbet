@@ -2,6 +2,7 @@
 #define AUTOGEN_DEFINITIONS_H
 
 #include "ast/ast.h"
+#include "common/common.h"
 
 namespace sorbet::autogen {
 
@@ -111,6 +112,7 @@ struct Definition {
     // once `AutogenWalk` has completed; please update this comment if that ever turns out to be false
     ReferenceRef defining_ref;
 };
+CheckSize(Definition, 24, 4);
 
 // A `Reference` corresponds to a simple use of a constant name in a file. After a `ParsedFile` has been created, every
 // constant use should have a `Reference` corresponding to it
@@ -150,6 +152,7 @@ struct Reference {
     // Iff this is a class, then this will be `ClassKind::Class`, otherwise `ClassKind::Module`
     ClassKind parentKind = ClassKind::Module;
 };
+CheckSize(Reference, 96, 8);
 
 struct AutogenConfig {
     const std::vector<std::string> behaviorAllowedInRBIsPaths;
