@@ -25,7 +25,6 @@ private:
     static const std::string_view ANNOTATION_PREFIX;
     static const std::string_view MULTILINE_RBS_PREFIX;
     static const std::string_view BIND_PREFIX;
-    static const std::regex TYPE_ALIAS_PATTERN;
 
     core::MutableContext ctx;
     std::vector<core::LocOffsets> commentLocations;
