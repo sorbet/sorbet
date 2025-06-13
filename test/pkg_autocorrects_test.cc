@@ -994,8 +994,8 @@ TEST_CASE("Convert test unit import to normal import") {
                           "  strict_dependencies 'layered'\n"
                           "  layer 'app'\n"
                           "  import FalsePackageA\n"
+                          "  import LayeredPackageA\n"
                           "  import DagPackageA\n"
-                          "  test_import LayeredPackageA\n"
                           // This extra line is not great, but if we change the autocorrect to delete the '\n'
                           // after the test_import, the autocorrect show the next line in the preview, which would
                           // make the user think that entire next line will be deleted, which is incorrect.
