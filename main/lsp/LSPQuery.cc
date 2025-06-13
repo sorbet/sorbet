@@ -52,21 +52,20 @@ LSPQuery::filterAndDedup(const core::GlobalState &gs,
     return responses;
 }
 
-LSPQueryResult LSPQuery::findSends(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker, string_view uri) {
+LSPQueryResult LSPQuery::findSends(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
+                                   string_view uri) {
     const core::GlobalState &gs = typechecker.state();
     auto fref = config.uri2FileRef(gs, uri);
 
     if (!fref.exists() && config.isFileIgnored(config.remoteName2Local(uri))) {
-        auto error = make_unique<ResponseError>(
-            (int)LSPErrorCodes::InvalidParams,
-            fmt::format("Ignored file at uri {}", uri));
+        auto error =
+            make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams, fmt::format("Ignored file at uri {}", uri));
         return LSPQueryResult{{}, move(error)};
     }
 
     if (!fref.exists()) {
-        auto error = make_unique<ResponseError>(
-            (int)LSPErrorCodes::InvalidParams,
-            fmt::format("Did not find file at uri {}", uri));
+        auto error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams,
+                                                fmt::format("Did not find file at uri {}", uri));
         return LSPQueryResult{{}, move(error)};
     }
 
@@ -79,7 +78,6 @@ LSPQueryResult LSPQuery::findSends(const LSPConfiguration &config, LSPTypechecke
 
     return typechecker.query(core::lsp::Query::createSendsQuery(), {fref});
 }
-
 
 LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker, string_view uri,
                                const Position &pos, LSPMethod forMethod, bool emptyResultIfFileIsUntyped) {

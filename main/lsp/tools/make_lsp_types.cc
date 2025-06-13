@@ -1056,10 +1056,10 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                         classTypes);
 
     auto QuerySendsParams = makeObject("QuerySendsParams",
-                                           {
-                                               makeField("textDocument", TextDocumentIdentifier),
-                                           },
-                                           classTypes);
+                                       {
+                                           makeField("textDocument", TextDocumentIdentifier),
+                                       },
+                                       classTypes);
 
     auto SendInformation =
         makeObject("SendInformation",
