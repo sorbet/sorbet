@@ -437,12 +437,12 @@ public:
         if (!wasImported || testImportInProd || testUnitImportInHelper || !isExported) {
             auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
-            core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
+            optional<core::packages::ImportType> testImportType = {};
             if (isTestImport) {
                 if (this->fileType == FileType::TestHelperFile) {
-                    autocorrectedImportType = core::packages::ImportType::TestHelper;
+                    testImportType = {core::packages::ImportType::TestHelper};
                 } else {
-                    autocorrectedImportType = core::packages::ImportType::TestUnit;
+                    testImportType = {core::packages::ImportType::TestUnit};
                 }
             }
             auto strictDepsLevel = this->package.strictDependenciesLevel();
@@ -497,7 +497,7 @@ public:
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                         e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                        if (auto exp = this->package.addImport(ctx, pkg, autocorrectedImportType)) {
+                        if (auto exp = this->package.addImport(ctx, pkg, *testImportType)) {
                             e.addAutocorrect(std::move(exp.value()));
                             if (!db.errorHint().empty()) {
                                 e.addErrorNote("{}", db.errorHint());
