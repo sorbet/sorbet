@@ -139,19 +139,18 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
     auto maxLen = min(superArgs.size(), methodArgs.size());
 
     while (idx < maxLen) {
-        auto &superArgType = superArgs[idx].get().type;
-        auto &methodArgType = methodArgs[idx].get().type;
+        auto &superArg = superArgs[idx].get();
+        auto &methodArg = methodArgs[idx].get();
 
         core::ErrorSection::Collector errorDetailsCollector;
-        if (!checkSubtype(ctx, constr, methodArgType, method, superArgType, superMethod, core::Polarity::Negative,
+        if (!checkSubtype(ctx, constr, methodArg.type, method, superArg.type, superMethod, core::Polarity::Negative,
                           errorDetailsCollector)) {
-            if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
+            if (auto e = ctx.state.beginError(methodArg.loc, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter `{}` of type `{}` not compatible with type of {} method `{}`",
-                            methodArgs[idx].get().show(ctx), methodArgType.show(ctx), superMethodKind(ctx, superMethod),
-                            superMethod.show(ctx));
-                e.addErrorLine(superMethod.data(ctx)->loc(),
-                               "The super method parameter `{}` was declared here with type `{}`",
-                               superArgs[idx].get().show(ctx), superArgType.show(ctx));
+                            methodArgs[idx].get().show(ctx), methodArg.type.show(ctx),
+                            superMethodKind(ctx, superMethod), superMethod.show(ctx));
+                e.addErrorLine(superArg.loc, "The super method parameter `{}` was declared here with type `{}`",
+                               superArgs[idx].get().show(ctx), superArg.type.show(ctx));
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
                 e.addErrorSections(move(errorDetailsCollector));
@@ -287,11 +286,12 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 core::ErrorSection::Collector errorDetailsCollector;
                 if (!checkSubtype(ctx, *constr, corresponding->get().type, method, req.get().type, superMethod,
                                   core::Polarity::Negative, errorDetailsCollector)) {
-                    if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
+                    if (auto e =
+                            ctx.state.beginError(corresponding->get().loc, core::errors::Resolver::BadMethodOverride)) {
                         e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
                                     corresponding->get().show(ctx), corresponding->get().type.show(ctx),
                                     superMethodKind(ctx, superMethod), superMethod.show(ctx));
-                        e.addErrorLine(superMethod.data(ctx)->loc(),
+                        e.addErrorLine(req.get().loc,
                                        "The corresponding parameter `{}` was declared here with type `{}`",
                                        req.get().show(ctx), req.get().type.show(ctx));
                         e.addErrorNote(
@@ -318,11 +318,12 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 core::ErrorSection::Collector errorDetailsCollector;
                 if (!checkSubtype(ctx, *constr, corresponding->get().type, method, opt.get().type, superMethod,
                                   core::Polarity::Negative, errorDetailsCollector)) {
-                    if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
+                    if (auto e =
+                            ctx.state.beginError(corresponding->get().loc, core::errors::Resolver::BadMethodOverride)) {
                         e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
                                     corresponding->get().show(ctx), corresponding->get().type.show(ctx),
                                     superMethodKind(ctx, superMethod), superMethod.show(ctx));
-                        e.addErrorLine(superMethod.data(ctx)->loc(),
+                        e.addErrorLine(opt.get().loc,
                                        "The super method parameter `{}` was declared here with type `{}`",
                                        opt.get().show(ctx), opt.get().type.show(ctx));
                         e.addErrorNote(
