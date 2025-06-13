@@ -107,9 +107,9 @@ class AnonymousSplatParent
 end
 
 class AnonymousSplatChild < AnonymousSplatParent
-  def foo(); end # error: Implementation of abstract method `AnonymousSplatParent#foo` must accept *`*`
+  def foo(); end # error: Implementation of abstract method `AnonymousSplatParent#foo` must accept *
 
-  def bar(); end # error: Implementation of abstract method `AnonymousSplatParent#bar` must accept **`**`
+  def bar(); end # error: Implementation of abstract method `AnonymousSplatParent#bar` must accept **
 end
 
 module NoSigInInterface

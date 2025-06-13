@@ -1686,6 +1686,12 @@ string ArgInfo::toString(const GlobalState &gs) const {
     return to_string(buf);
 }
 
+// cwong: This is a hack; properly we should add an entry to `ArgFlags` and set it at parse-time.
+bool ArgInfo::isAnonymous(const GlobalState &gs) const {
+    auto argName = this->argumentName(gs);
+    return argName == "*" || argName == "**";
+}
+
 string_view ArgInfo::argumentName(const GlobalState &gs) const {
     if (flags.isKeyword && !flags.isRepeated) {
         return name.shortName(gs);

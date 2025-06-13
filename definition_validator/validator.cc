@@ -247,8 +247,10 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
     if (auto leftRest = left.pos.rest) {
         if (!right.pos.rest) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("{} method `{}` must accept *`{}`", implementationOf(ctx, superMethod),
-                            superMethod.show(ctx), leftRest->get().show(ctx));
+                auto missingSplatName =
+                    leftRest->get().isAnonymous(ctx) ? "*" : fmt::format("*`{}`", leftRest->get().show(ctx));
+                e.setHeader("{} method `{}` must accept {}", implementationOf(ctx, superMethod), superMethod.show(ctx),
+                            missingSplatName);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
         }
@@ -357,8 +359,10 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         core::ErrorSection::Collector errorDetailsCollector;
         if (!right.kw.rest) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("{} method `{}` must accept **`{}`", implementationOf(ctx, superMethod),
-                            superMethod.show(ctx), leftRest->get().show(ctx));
+                auto missingSplatName =
+                    leftRest->get().isAnonymous(ctx) ? "**" : fmt::format("**`{}`", leftRest->get().show(ctx));
+                e.setHeader("{} method `{}` must accept {}", implementationOf(ctx, superMethod), superMethod.show(ctx),
+                            missingSplatName);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
         } else if (!checkSubtype(ctx, *constr, right.kw.rest->get().type, method, leftRest->get().type, superMethod,
