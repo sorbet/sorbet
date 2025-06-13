@@ -76,8 +76,8 @@ void LocalVarSaver::postTransformMethodDef(core::Context ctx, const ast::MethodD
                     });
                     if (it != this->signature->argTypes.end()) {
                         core::lsp::QueryResponse::pushQueryResponse(
-                            ctx, core::lsp::IdentResponse(it->nameLoc, localExp->localVariable, tp, methodDef.symbol,
-                                                          methodDefLoc));
+                            ctx, core::lsp::IdentResponse(ctx.locAt(it->nameLoc), localExp->localVariable, tp,
+                                                          methodDef.symbol, methodDefLoc));
                     }
                 }
             }

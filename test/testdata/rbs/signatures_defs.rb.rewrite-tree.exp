@@ -543,24 +543,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   module <emptyTree>::<C Annotations><<C <todo sym>>> < ()
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.abstract().returns(<emptyTree>::<C Integer>)
-    end
-
-    def method1<<todo method>>(&<blk>)
-      <emptyTree>
-    end
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.override().returns(<emptyTree>::<C Integer>)
     end
 
-    def method2<<todo method>>(&<blk>)
+    def method1<<todo method>>(&<blk>)
       <emptyTree>::<C T>.unsafe(nil)
     end
 
     <runtime method definition of method1>
-
-    <runtime method definition of method2>
 
     class <emptyTree>::<C Parent><<C <todo sym>>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -596,6 +586,138 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       <runtime method definition of method>
+    end
+
+    class <emptyTree>::<C Abstract><<C <todo sym>>> < (::<todo sym>)
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract1<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract2<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract3<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract4<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract5<<todo method>>(&<blk>)
+        <self>.puts("foo")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract6<<todo method>>(&<blk>)
+        begin
+          <self>.puts("foo")
+          <self>.raise("foo")
+        end
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract7<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract8<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract8<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract9<<todo method>>(&<blk>)
+        <emptyTree>::<C Abstract>.raise()
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract10<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.returns(::<root>::<C T>.noreturn())
+      end
+
+      def self.raise<<todo method>>(&<blk>)
+        <self>.raise()
+      end
+
+      <runtime method definition of method_abstract1>
+
+      <runtime method definition of method_abstract2>
+
+      <runtime method definition of method_abstract3>
+
+      <runtime method definition of method_abstract4>
+
+      <runtime method definition of method_abstract5>
+
+      <runtime method definition of method_abstract6>
+
+      <runtime method definition of method_abstract7>
+
+      <runtime method definition of method_abstract8>
+
+      <runtime method definition of method_abstract8>
+
+      <runtime method definition of method_abstract9>
+
+      <runtime method definition of method_abstract10>
+
+      <runtime method definition of self.raise>
+
+      class <emptyTree>::<C Error><<C <todo sym>>> < (<emptyTree>::<C StandardError>)
+      end
+
+      <self>.extend(::<root>::<C T>::<C Helpers>)
+
+      <self>.abstract!()
     end
 
     class <emptyTree>::<C Final><<C <todo sym>>> < (::<todo sym>)

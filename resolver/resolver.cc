@@ -1897,7 +1897,12 @@ class ResolveTypeMembersAndFieldsWalk {
             for (const auto &typeArg : job.owner.asMethodRef().data(gs)->typeArguments()) {
                 const auto &data = typeArg.data(gs);
                 auto name = data->name.dataUnique(gs)->original; // unwrap UniqueNameKind::TypeVarName
-                emptySig.typeArgs.emplace_back(ParsedSig::TypeArgSpec{data->loc(), name, data->resultType});
+                auto typeArgLoc = data->loc();
+                // TypeParameter might be defined in an RBI file, and thus not be in the same file
+                // as the `T.cast` is listed in.
+                auto typeArgLocOffsets = typeArgLoc.file() == job.file ? typeArgLoc.offsets()
+                                                                       : job.cast->typeExpr.loc().copyWithZeroLength();
+                emptySig.typeArgs.emplace_back(ParsedSig::TypeArgSpec{typeArgLocOffsets, name, data->resultType});
             }
         }
         auto allowSelfType = true;
@@ -3284,21 +3289,21 @@ private:
         ENFORCE(isOverloaded || mdef.symbol == method);
         ENFORCE(isOverloaded || method.data(ctx)->arguments.size() == mdef.args.size());
 
-        if (!sig.seen.returns && !sig.seen.void_) {
+        if (!sig.seen.returns.exists() && !sig.seen.void_.exists()) {
             if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Malformed `{}`: No return type specified. Specify one with .returns()", "sig");
             }
         }
-        if (sig.seen.returns && sig.seen.void_) {
+        if (sig.seen.returns.exists() && sig.seen.void_.exists()) {
             if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Malformed `{}`: Don't use both .returns() and .void", "sig");
             }
         }
 
-        if (sig.seen.abstract) {
+        if (sig.seen.abstract.exists()) {
             method.data(ctx)->flags.isAbstract = true;
         }
-        if (sig.seen.incompatibleOverride) {
+        if (sig.seen.incompatibleOverride.exists()) {
             method.data(ctx)->flags.isIncompatibleOverride = true;
         }
         if (!sig.typeArgs.empty()) {
@@ -3306,7 +3311,8 @@ private:
             for (auto &typeSpec : sig.typeArgs) {
                 if (typeSpec.type) {
                     auto name = ctx.state.freshNameUnique(core::UniqueNameKind::TypeVarName, typeSpec.name, 1);
-                    auto sym = ctx.state.enterTypeArgument(typeSpec.loc, method, name, core::Variance::CoVariant);
+                    auto sym =
+                        ctx.state.enterTypeArgument(ctx.locAt(typeSpec.loc), method, name, core::Variance::CoVariant);
                     auto asTypeVar = core::cast_type<core::TypeVar>(typeSpec.type);
                     ENFORCE(asTypeVar != nullptr);
                     asTypeVar->sym = sym;
@@ -3314,16 +3320,16 @@ private:
                 }
             }
         }
-        if (sig.seen.overridable) {
+        if (sig.seen.overridable.exists()) {
             method.data(ctx)->flags.isOverridable = true;
         }
-        if (sig.seen.override_) {
+        if (sig.seen.override_.exists()) {
             method.data(ctx)->flags.isOverride = true;
         }
-        if (sig.seen.final) {
+        if (sig.seen.final.exists()) {
             method.data(ctx)->flags.isFinal = true;
         }
-        if (sig.seen.bind) {
+        if (sig.seen.bind.exists()) {
             if (sig.bind == core::Symbols::MagicBindToAttachedClass()) {
                 if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::BindNonBlockParameter)) {
                     e.setHeader("Using `{}` is not permitted here", "bind");
@@ -3388,7 +3394,7 @@ private:
                 ENFORCE(spec->type != nullptr);
 
                 if (!isBlkArg && spec->rebind.exists()) {
-                    if (auto e = ctx.state.beginError(spec->nameLoc, core::errors::Resolver::BindNonBlockParameter)) {
+                    if (auto e = ctx.beginError(spec->nameLoc, core::errors::Resolver::BindNonBlockParameter)) {
                         e.setHeader("Using `{}` is not permitted here", "bind");
                         e.addErrorNote("Only block arguments can use `{}`", "bind");
                     }
@@ -3398,7 +3404,7 @@ private:
                 // Passing in a noOp collector even though this call is used for error reporting,
                 // because it's unlikely we'll add more details to a subtype check for T.nilable(Proc)
                 if (isBlkArg && !core::Types::isSubType(ctx, arg.type, core::Types::nilableProcClass())) {
-                    if (auto e = ctx.state.beginError(spec->nameLoc, core::errors::Resolver::InvalidMethodSignature)) {
+                    if (auto e = ctx.beginError(spec->nameLoc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Block argument type must be either `{}` or a `{}` type (and possibly nilable)",
                                     "Proc", "T.proc");
                         e.addErrorNote(
@@ -3406,11 +3412,12 @@ private:
                             "    `{}` objects, but even those methods must return `{}` objects.",
                             "to_proc", "&blk", "Proc", "Proc");
 
-                        e.replaceWith("Change block type to `T.nilable(Proc)`", spec->typeLoc, "T.nilable(Proc)");
+                        e.replaceWith("Change block type to `T.nilable(Proc)`", ctx.locAt(spec->typeLoc),
+                                      "T.nilable(Proc)");
                     }
                     arg.type = core::Types::untypedUntracked();
                 }
-                arg.loc = spec->nameLoc;
+                arg.loc = ctx.locAt(spec->nameLoc);
                 arg.rebind = spec->rebind;
                 sig.argTypes.erase(spec);
                 // Since methods always have (synthesized if necessary) block arguments,
@@ -3433,7 +3440,8 @@ private:
                 }
 
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
-                if (!isOverloaded && !isSyntheticBlkArg && (sig.seen.params || sig.seen.returns || sig.seen.void_)) {
+                if (!isOverloaded && !isSyntheticBlkArg &&
+                    (sig.seen.params.exists() || sig.seen.returns.exists() || sig.seen.void_.exists())) {
                     // Only error if we have any types
                     if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
@@ -3457,7 +3465,7 @@ private:
 
         for (const auto &spec : sig.argTypes) {
             info.allArgsMatched = false;
-            if (auto e = ctx.state.beginError(spec.nameLoc, core::errors::Resolver::InvalidMethodSignature)) {
+            if (auto e = ctx.beginError(spec.nameLoc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Unknown argument name `{}`", spec.name.show(ctx));
             }
         }
@@ -3475,7 +3483,7 @@ private:
                     if (auto e = ctx.beginError(param->loc, core::errors::Resolver::BadParameterOrdering)) {
                         e.setHeader("Bad parameter ordering for `{}`, expected `{}` instead", dname.show(ctx),
                                     sname.show(ctx));
-                        e.addErrorLine(spec.nameLoc, "Expected index in signature:");
+                        e.addErrorLine(ctx.locAt(spec.nameLoc), "Expected index in signature:");
                     }
                 }
                 j++;

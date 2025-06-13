@@ -52,13 +52,109 @@ core::LocOffsets adjustNameLoc(const RBSDeclaration &declaration, rbs_node_t *no
     return declaration.typeLocFromRange(range);
 }
 
-unique_ptr<parser::Node> handleAnnotations(unique_ptr<parser::Node> sigBuilder, const vector<Comment> &annotations) {
+bool isSelfOrKernel(parser::Node *node) {
+    if (parser::isa_node<parser::Self>(node)) {
+        return true;
+    }
+
+    if (auto constant = parser::cast_node<parser::Const>(node)) {
+        return constant->name == core::Names::Constants::Kernel() &&
+               (constant->scope == nullptr || parser::isa_node<parser::Cbase>(constant->scope.get()));
+    }
+
+    return false;
+}
+
+bool isRaise(parser::Node *node) {
+    auto raise = parser::cast_node<parser::Send>(node);
+
+    if (!raise) {
+        return false;
+    }
+
+    if (raise->method != core::Names::raise()) {
+        return false;
+    }
+
+    return raise->receiver == nullptr || isSelfOrKernel(raise->receiver.get());
+}
+
+void ensureAbstractMethodRaises(core::MutableContext ctx, const parser::Node *node) {
+    core::LocOffsets editLoc;
+    bool semicolon = false;
+    bool newline = false;
+
+    if (auto method = parser::cast_node<parser::DefMethod>((parser::Node *)node)) {
+        if (isRaise(method->body.get())) {
+            // If the method raises properly, we remove the body the body to not error later (see error 5019)
+            method->body = nullptr;
+            return;
+        }
+
+        auto lineStart = core::Loc::pos2Detail(ctx.file.data(ctx), method->declLoc.endPos()).line;
+        auto lineEnd = core::Loc::pos2Detail(ctx.file.data(ctx), method->loc.endPos()).line;
+
+        if (method->body) {
+            editLoc = method->body->loc;
+        } else if (lineStart == lineEnd) {
+            editLoc = method->declLoc.copyEndWithZeroLength();
+            semicolon = true;
+        } else {
+            editLoc = method->declLoc.copyEndWithZeroLength();
+            newline = true;
+        }
+    } else if (auto method = parser::cast_node<parser::DefS>((parser::Node *)node)) {
+        if (isRaise(method->body.get())) {
+            // If the method raises properly, we remove the body the body to not error later (see error 5019)
+            method->body = nullptr;
+            return;
+        }
+
+        auto lineStart = core::Loc::pos2Detail(ctx.file.data(ctx), method->declLoc.endPos()).line;
+        auto lineEnd = core::Loc::pos2Detail(ctx.file.data(ctx), method->loc.endPos()).line;
+
+        if (method->body) {
+            editLoc = method->body->loc;
+        } else if (lineStart == lineEnd) {
+            editLoc = method->declLoc.copyEndWithZeroLength();
+            semicolon = true;
+        } else {
+            editLoc = method->declLoc.copyEndWithZeroLength();
+            newline = true;
+        }
+    } else {
+        // Not a case we care about right now, will error later down the pipeline
+        return;
+    }
+
+    if (auto e = ctx.beginIndexerError(node->loc, core::errors::Rewriter::RBSAbstractMethodNoRaises)) {
+        e.setHeader("Methods declared @abstract with an RBS comment must always raise");
+
+        string autocorrect = "raise \"abstract method called\"";
+        if (semicolon) {
+            autocorrect = "; " + autocorrect;
+        } else if (newline) {
+            auto [_endLoc, indentLength] = ctx.locAt(node->loc).findStartOfIndentation(ctx);
+            string indent(indentLength + 2, ' ');
+            autocorrect = "\n" + indent + autocorrect;
+        }
+
+        e.addAutocorrect(
+            core::AutocorrectSuggestion{fmt::format("Add `raise` to the method body"),
+                                        {core::AutocorrectSuggestion::Edit{ctx.locAt(editLoc), autocorrect}}});
+    }
+}
+
+unique_ptr<parser::Node> handleAnnotations(core::MutableContext ctx, const parser::Node *node,
+                                           unique_ptr<parser::Node> sigBuilder, const vector<Comment> &annotations) {
     for (auto &annotation : annotations) {
         if (annotation.string == "final") {
             // no-op, `final` is handled in the `sig()` call later
         } else if (annotation.string == "abstract") {
             sigBuilder =
                 parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::abstract(), annotation.typeLoc);
+
+            ensureAbstractMethodRaises(ctx, node);
         } else if (annotation.string == "overridable") {
             sigBuilder =
                 parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::overridable(), annotation.typeLoc);
@@ -428,7 +524,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
     // Build the sig
 
     auto sigBuilder = parser::MK::Self(fullTypeLoc);
-    sigBuilder = handleAnnotations(move(sigBuilder), annotations);
+    sigBuilder = handleAnnotations(ctx, methodDef, move(sigBuilder), annotations);
 
     if (typeParams.size() > 0) {
         auto typeParamsVector = parser::NodeVec();
@@ -483,7 +579,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
     auto commentLoc = declaration.commentLoc();
 
     auto sigBuilder = parser::MK::Self(fullTypeLoc.copyWithZeroLength());
-    sigBuilder = handleAnnotations(move(sigBuilder), annotations);
+    sigBuilder = handleAnnotations(ctx, send, move(sigBuilder), annotations);
 
     if (send->args.size() == 0) {
         if (auto e = ctx.beginIndexerError(send->loc, core::errors::Rewriter::RBSUnsupported)) {

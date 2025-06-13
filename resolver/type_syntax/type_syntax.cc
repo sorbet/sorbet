@@ -3,7 +3,6 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/TypeErrorDiagnostics.h"
-#include "core/core.h"
 #include "core/errors/resolver.h"
 
 using namespace std;
@@ -203,7 +202,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
         send = &sigSend;
         isProc = true;
     } else {
-        sig.seen.sig = true;
+        sig.seen.sig = sigSend.loc;
         ENFORCE(sigSend.fun == core::Names::sig());
         auto *block = sigSend.block();
         ENFORCE(block);
@@ -224,7 +223,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
     if (sigSend.numPosArgs() == 2) {
         auto lit = ast::cast_tree<ast::Literal>(sigSend.getPosArg(1));
         if (lit != nullptr && lit->isSymbol() && lit->asSymbol() == core::Names::final_()) {
-            sig.seen.final = true;
+            sig.seen.final = lit->loc;
         }
     }
 
@@ -262,7 +261,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                     }
                 }
                 typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todoTypeArgument());
-                typeArgSpec.loc = ctx.locAt(arg.loc());
+                typeArgSpec.loc = arg.loc();
             }
 
             for (auto [key, _value] : tsend->kwArgPairs()) {
@@ -289,17 +288,17 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
         switch (send->fun.rawId()) {
             case core::Names::proc().rawId(): {
                 checkTypeFunArity(ctx, *send, 0, 0);
-                sig.seen.proc = true;
+                sig.seen.proc = send->funLoc;
                 break;
             }
             case core::Names::bind().rawId(): {
-                if (sig.seen.bind) {
+                if (sig.seen.bind.exists()) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`: Multiple calls to `.bind`", send->fun.show(ctx));
                     }
                     sig.bind = core::Symbols::noClassOrModule();
                 }
-                sig.seen.bind = true;
+                sig.seen.bind = send->funLoc;
 
                 if (send->numPosArgs() != 1) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -350,13 +349,13 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 break;
             }
             case core::Names::params().rawId(): {
-                if (sig.seen.params) {
+                if (sig.seen.params.exists()) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`: Multiple calls to `.params`", send->fun.show(ctx));
                     }
                     sig.argTypes.clear();
                 }
-                sig.seen.params = true;
+                sig.seen.params = send->funLoc;
 
                 if (!send->hasKwArgs() && !send->hasPosArgs()) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -414,8 +413,8 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                         }
                         auto resultAndBind = move(maybeResultAndBind.value());
 
-                        sig.argTypes.emplace_back(ParsedSig::ArgSpec{ctx.locAt(key.loc()), name, ctx.locAt(value.loc()),
-                                                                     resultAndBind.rebind, resultAndBind.type});
+                        sig.argTypes.emplace_back(
+                            ParsedSig::ArgSpec{key.loc(), name, value.loc(), resultAndBind.rebind, resultAndBind.type});
                     }
                 }
                 break;
@@ -424,25 +423,25 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 // was handled above
                 break;
             case core::Names::abstract().rawId():
-                if (sig.seen.final) {
+                if (sig.seen.final.exists()) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Method that is both `{}` and `{}` cannot be implemented", "final", "abstract");
                     }
                 }
-                if (sig.seen.override_) {
+                if (sig.seen.override_.exists()) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("`{}` cannot be combined with `{}`", "abstract", "override");
                     }
                 }
-                sig.seen.abstract = true;
+                sig.seen.abstract = send->funLoc;
                 break;
             case core::Names::override_().rawId(): {
-                if (sig.seen.abstract) {
+                if (sig.seen.abstract.exists()) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("`{}` cannot be combined with `{}`", "override", "abstract");
                     }
                 }
-                sig.seen.override_ = true;
+                sig.seen.override_ = send->funLoc;
 
                 if (send->hasPosArgs()) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -458,7 +457,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                             if (lit->asSymbol() == core::Names::allowIncompatible()) {
                                 auto val = ast::cast_tree<ast::Literal>(value);
                                 if (val && val->isTrue(ctx)) {
-                                    sig.seen.incompatibleOverride = true;
+                                    sig.seen.incompatibleOverride = key.loc().join(value.loc());
                                 }
                             }
                         }
@@ -475,15 +474,15 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 }
                 break;
             case core::Names::overridable().rawId():
-                if (sig.seen.final) {
+                if (sig.seen.final.exists()) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Method that is both `{}` and `{}` cannot be implemented", "final", "overridable");
                     }
                 }
-                sig.seen.overridable = true;
+                sig.seen.overridable = send->funLoc;
                 break;
             case core::Names::returns().rawId(): {
-                sig.seen.returns = true;
+                sig.seen.returns = send->funLoc;
                 if (send->hasKwArgs()) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("`{}` does not accept keyword arguments", send->fun.show(ctx));
@@ -514,20 +513,20 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                     return nullopt;
                 }
                 sig.returns = move(maybeReturns.value());
-                sig.returnsLoc = ctx.locAt(send->loc);
+                sig.returnsLoc = send->loc;
 
                 break;
             }
             case core::Names::void_().rawId(): {
                 checkTypeFunArity(ctx, *send, 0, 0);
-                sig.seen.void_ = true;
+                sig.seen.void_ = send->funLoc;
                 sig.returns = core::Types::void_();
-                sig.returnsLoc = ctx.locAt(send->loc);
+                sig.returnsLoc = send->loc;
                 break;
             }
             case core::Names::checked().rawId(): {
                 checkTypeFunArity(ctx, *send, 1, 1);
-                sig.seen.checked = true;
+                sig.seen.checked = send->funLoc;
                 break;
             }
             case core::Names::onFailure().rawId():
@@ -551,7 +550,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
         // we only report this error if we haven't reported another unknown method error
         if (!recv && !reportedInvalidMethod) {
             if (!send->recv.isSelfReference()) {
-                if (!sig.seen.proc) {
+                if (!sig.seen.proc.exists()) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`: `{}` being invoked on an invalid receiver", "sig",
                                     send->fun.show(ctx));
@@ -563,7 +562,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
 
         send = recv;
     }
-    ENFORCE(sig.seen.sig || sig.seen.proc);
+    ENFORCE(sig.seen.sig.exists() || sig.seen.proc.exists());
 
     return sig;
 }

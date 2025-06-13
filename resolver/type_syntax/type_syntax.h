@@ -10,37 +10,37 @@ namespace sorbet::resolver {
 
 struct ParsedSig {
     struct ArgSpec {
-        core::Loc nameLoc;
+        core::LocOffsets nameLoc;
         core::NameRef name;
-        core::Loc typeLoc;
+        core::LocOffsets typeLoc;
         core::ClassOrModuleRef rebind;
         core::TypePtr type;
     };
     core::ClassOrModuleRef bind;
     std::vector<ArgSpec> argTypes;
     core::TypePtr returns;
-    core::Loc returnsLoc;
+    core::LocOffsets returnsLoc;
 
     struct TypeArgSpec {
-        core::Loc loc;
+        core::LocOffsets loc;
         core::NameRef name;
         core::TypePtr type;
     };
     std::vector<TypeArgSpec> typeArgs;
 
     struct {
-        bool sig = false;
-        bool proc = false;
-        bool bind = false;
-        bool params = false;
-        bool abstract = false;
-        bool override_ = false;
-        bool overridable = false;
-        bool returns = false;
-        bool void_ = false;
-        bool checked = false;
-        bool final = false;
-        bool incompatibleOverride = false;
+        core::LocOffsets sig = core::LocOffsets::none();
+        core::LocOffsets proc = core::LocOffsets::none();
+        core::LocOffsets bind = core::LocOffsets::none();
+        core::LocOffsets params = core::LocOffsets::none();
+        core::LocOffsets abstract = core::LocOffsets::none();
+        core::LocOffsets override_ = core::LocOffsets::none();
+        core::LocOffsets overridable = core::LocOffsets::none();
+        core::LocOffsets returns = core::LocOffsets::none();
+        core::LocOffsets void_ = core::LocOffsets::none();
+        core::LocOffsets checked = core::LocOffsets::none();
+        core::LocOffsets final = core::LocOffsets::none();
+        core::LocOffsets incompatibleOverride = core::LocOffsets::none();
     } seen;
 
     TypeArgSpec &enterTypeArgByName(core::NameRef name);

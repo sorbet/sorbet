@@ -268,7 +268,7 @@ string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenC
     {
         MsgpackArray headerArray(&writer, pfAttrs.size());
 
-        uint32_t value = strictLevelToInt(pf.tree.file.data(ctx).strictLevel);
+        uint32_t value = strictLevelToInt(pf.file.data(ctx).strictLevel);
         mpack_write_u32(&writer, value);
 
         mpack_write_u32(&writer, pf.refs.size());

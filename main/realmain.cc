@@ -260,7 +260,7 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
 
                     core::Context ctx(gs, core::Symbols::root(), tree.file);
                     auto pf = autogen::Autogen::generate(ctx, move(tree), autogenCfg, *crcBuilder);
-                    tree = move(pf.tree);
+                    auto file = pf.file;
 
                     AutogenResult::Serialized serialized;
 
@@ -273,7 +273,7 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
                         serialized.msgpack = pf.toMsgpack(ctx, autogenVersion, autogenCfg);
                     }
 
-                    if (!tree.file.data(gs).isRBI()) {
+                    if (!file.data(gs).isRBI()) {
                         // Exclude RBI files because they are not loadable and should not appear in
                         // auto-loader related output.
                         if (opts.print.AutogenSubclasses.enabled) {
@@ -541,6 +541,10 @@ int realmain(int argc, char *argv[]) {
 
         inputFiles = pipeline::reserveFiles(*gs, opts.inputFileNames);
 
+        // We explicitly free the input names here, as we won't use them for the remainder of execution, and on large
+        // codebases they take up a non-trivial amount of memory.
+        opts.inputFileNames = vector<string>();
+
         {
             core::UnfreezeFileTable fileTableAccess(*gs);
             if (!opts.inlineInput.empty()) {
@@ -671,30 +675,31 @@ int realmain(int argc, char *argv[]) {
             logger->warn("Signature suggestion is disabled in sorbet-orig for faster builds");
             return 1;
 #else
-            for (auto &filename : opts.inputFileNames) {
-                core::FileRef file = gs->findFileByPath(filename);
-                if (!file.exists()) {
+            auto id = 0;
+            for (auto &file : gs->getFiles().subspan(1)) {
+                id++;
+                if (file->isPayload()) {
                     continue;
                 }
-
-                if (file.data(*gs).minErrorLevel() <= core::StrictLevel::Ignore) {
+                if (file->minErrorLevel() <= core::StrictLevel::Ignore) {
                     continue;
                 }
-                if (file.data(*gs).originalSigil > core::StrictLevel::Max) {
+                if (file->originalSigil > core::StrictLevel::Max) {
                     // don't change the sigil on "special" files
                     continue;
                 }
-                auto minErrorLevel = levelMinusOne(file.data(*gs).minErrorLevel());
-                if (file.data(*gs).originalSigil == minErrorLevel) {
+                auto minErrorLevel = levelMinusOne(file->minErrorLevel());
+                if (file->originalSigil == minErrorLevel) {
                     continue;
                 }
                 minErrorLevel = levelToRecommendation(minErrorLevel);
-                if (file.data(*gs).originalSigil == minErrorLevel) {
+                if (file->originalSigil == minErrorLevel) {
                     // if the file could be strong, but is only marked strict, ensure that we don't recommend that it be
                     // marked strict.
                     continue;
                 }
-                auto loc = findTyped(*gs, file);
+                auto fref = core::FileRef(id);
+                auto loc = findTyped(*gs, fref);
                 if (auto e = gs->beginError(loc, core::errors::Infer::SuggestTyped)) {
                     auto sigil = levelToSigil(minErrorLevel);
                     e.setHeader("You could add `# typed: {}`", sigil);

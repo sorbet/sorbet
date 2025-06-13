@@ -71,11 +71,12 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
         if (parsedSig.has_value()) {
             if (!parsedSig->sig.argTypes.empty()) {
                 auto firstArgLoc = parsedSig->sig.argTypes[0].nameLoc;
-                auto insertSigParamRange = Range::fromLoc(gs, firstArgLoc.adjustLen(gs, 0, 0));
+                auto insertSigParamRange = Range::fromLoc(gs, ctx.locAt(firstArgLoc).adjustLen(gs, 0, 0));
                 auto sigParamText = fmt::format("this: {}, ", definition.symbol.data(gs)->owner.show(gs));
                 edits.emplace_back(make_unique<TextEdit>(move(insertSigParamRange), move(sigParamText)));
             } else if (parsedSig->sig.returnsLoc.exists()) {
-                auto insertSigParamsRange = Range::fromLoc(gs, parsedSig->sig.returnsLoc.adjustLen(gs, 0, 0));
+                auto insertSigParamsRange =
+                    Range::fromLoc(gs, ctx.locAt(parsedSig->sig.returnsLoc).adjustLen(gs, 0, 0));
                 auto sigParamText = fmt::format("params(this: {}).", definition.symbol.data(gs)->owner.show(gs));
                 edits.emplace_back(make_unique<TextEdit>(move(insertSigParamsRange), move(sigParamText)));
             }
