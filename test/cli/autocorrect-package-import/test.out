@@ -1,0 +1,20 @@
+a/foo.rb:4: `B::Foo` resolves but its package is not imported https://srb.help/3718
+     4 |  B::Foo.new
+          ^^^^^^
+    b/__package.rb:3: Exported from package here
+     3 |class B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    a/__package.rb:4: Inserted `import B`
+     4 |class A < PackageSpec
+                             ^
+Errors: 1
+
+--------------------------------------------------------------------------
+
+# typed: strict
+# enable-packager: true
+
+class A < PackageSpec
+  import B
+end
