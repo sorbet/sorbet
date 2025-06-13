@@ -24,7 +24,7 @@ void InitializedTask::index(LSPIndexer &indexer) {
 
 void InitializedTask::run(LSPTypecheckerDelegate &typechecker) {
     ENFORCE(this->gs != nullptr);
-    typechecker.initialize(*this, std::move(this->gs), std::move(this->kvstore), config);
+    typechecker.initialize(*this, move(this->gs), move(this->kvstore), config, move(this->inputFileNames));
     typechecker.resumeTaskQueue(*this);
 }
 
@@ -38,6 +38,10 @@ void InitializedTask::setGlobalState(unique_ptr<core::GlobalState> gs) {
 
 void InitializedTask::setKeyValueStore(unique_ptr<KeyValueStore> kvstore) {
     this->kvstore = std::move(kvstore);
+}
+
+void InitializedTask::setInputFileNames(vector<string> &&inputFileNames) {
+    this->inputFileNames = std::move(inputFileNames);
 }
 
 } // namespace sorbet::realmain::lsp
