@@ -541,6 +541,10 @@ int realmain(int argc, char *argv[]) {
 
         inputFiles = pipeline::reserveFiles(*gs, opts.inputFileNames);
 
+        // We explicitly free the input names here, as we won't use them for the remainder of execution, and on large
+        // codebases they take up a non-trivial amount of memory.
+        opts.inputFileNames = vector<string>();
+
         {
             core::UnfreezeFileTable fileTableAccess(*gs);
             if (!opts.inlineInput.empty()) {
@@ -674,7 +678,7 @@ int realmain(int argc, char *argv[]) {
             auto id = 0;
             for (auto &file : gs->getFiles().subspan(1)) {
                 id++;
-                if (file->isStdlib()) {
+                if (file->isPayload()) {
                     continue;
                 }
                 if (file->minErrorLevel() <= core::StrictLevel::Ignore) {
