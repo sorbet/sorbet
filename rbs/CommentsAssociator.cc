@@ -6,7 +6,6 @@
 #include "core/errors/rewriter.h"
 #include "parser/helper.h"
 #include "rbs/SignatureTranslator.h"
-#include <regex>
 
 using namespace std;
 
@@ -16,6 +15,8 @@ const string_view CommentsAssociator::RBS_PREFIX = "#:";
 const string_view CommentsAssociator::ANNOTATION_PREFIX = "# @";
 const string_view CommentsAssociator::MULTILINE_RBS_PREFIX = "#|";
 const string_view CommentsAssociator::BIND_PREFIX = "#: self as ";
+
+const regex TYPE_ALIAS_PATTERN("^#: type\\s*([a-z][A-Za-z0-9_]*)\\s*=\\s*([^\\n]*)$");
 
 // Static regex pattern to avoid recompilation
 static const regex HEREDOC_PATTERN("\\s*=?\\s*<<(-|~)[^,\\s\\n#]+(,\\s*<<(-|~)[^,\\s\\n#]+)*");
@@ -185,6 +186,7 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
     }
 
     auto inserted = 0;
+    parser::Node *continuationFor = nullptr;
 
     // We look for all comments between lastLine and currentLine
     for (auto it = commentByLine.begin(); it != commentByLine.end();) {
@@ -197,7 +199,16 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
             break;
         }
 
+        if (continuationFor && absl::StartsWith(it->second.string, MULTILINE_RBS_PREFIX)) {
+            commentsByNode[continuationFor].emplace_back(move(it->second));
+            continuationFor->loc = continuationFor->loc.join(it->second.loc);
+            it = commentByLine.erase(it);
+            continue;
+        }
+
         if (absl::StartsWith(it->second.string, BIND_PREFIX)) {
+            continuationFor = nullptr;
+
             auto placeholder = make_unique<parser::RBSPlaceholder>(it->second.loc, core::Names::Constants::RBSBind());
 
             vector<CommentNode> comments;
@@ -208,8 +219,48 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
             nodes.insert(nodes.begin() + index, move(placeholder));
 
             inserted++;
+
             continue;
         }
+
+        std::smatch matches;
+        auto str = string(it->second.string);
+        if (std::regex_match(str, matches, TYPE_ALIAS_PATTERN)) {
+            if (!contextAllowingTypeAlias.empty()) {
+                if (auto [allow, loc] = contextAllowingTypeAlias.back(); !allow) {
+                    if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
+                        e.setHeader("Unexpected RBS type alias comment");
+                        e.addErrorLine(ctx.locAt(loc),
+                                       "RBS type aliases are only allowed in class and module bodies. Found in:");
+                    }
+
+                    it = commentByLine.erase(it);
+                    continue;
+                }
+            }
+
+            auto nameStr = "type " + matches[1].str();
+            auto nameConstant = ctx.state.enterNameConstant(nameStr);
+            auto placeholder =
+                make_unique<parser::RBSPlaceholder>(it->second.loc, core::Names::Constants::RBSTypeAlias());
+
+            vector<CommentNode> comments;
+            comments.emplace_back(it->second);
+            commentsByNode[placeholder.get()] = move(comments);
+
+            continuationFor = placeholder.get();
+
+            auto constantNode = make_unique<parser::Const>(it->second.loc, nullptr, nameConstant);
+            auto assignNode = make_unique<parser::Assign>(it->second.loc, move(constantNode), move(placeholder));
+            nodes.insert(nodes.begin() + index, move(assignNode));
+
+            it = commentByLine.erase(it);
+
+            inserted++;
+            continue;
+        }
+
+        continuationFor = nullptr;
 
         it++;
     }
@@ -380,12 +431,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "case");
         },
         [&](parser::Class *cls) {
+            contextAllowingTypeAlias.push_back(make_pair(true, cls->declLoc));
             associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
             cls->body = walkBody(cls, move(cls->body));
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "class");
+            contextAllowingTypeAlias.pop_back();
         },
         [&](parser::CSend *csend) {
             if (csend->method.isSetter(ctx.state) && csend->args.size() == 1) {
@@ -399,14 +452,18 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "csend");
         },
         [&](parser::DefMethod *def) {
+            contextAllowingTypeAlias.push_back(make_pair(false, def->declLoc));
             associateSignatureCommentsToNode(node);
             def->body = walkBody(def, move(def->body));
             consumeCommentsInsideNode(node, "method");
+            contextAllowingTypeAlias.pop_back();
         },
         [&](parser::DefS *def) {
+            contextAllowingTypeAlias.push_back(make_pair(false, def->declLoc));
             associateSignatureCommentsToNode(node);
             def->body = walkBody(def, move(def->body));
             consumeCommentsInsideNode(node, "method");
+            contextAllowingTypeAlias.pop_back();
         },
         [&](parser::Ensure *ensure) {
             walkNode(ensure->body.get());
@@ -473,12 +530,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "masgn");
         },
         [&](parser::Module *mod) {
+            contextAllowingTypeAlias.push_back(make_pair(true, mod->declLoc));
             associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
             mod->body = walkBody(mod, move(mod->body));
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "module");
+            contextAllowingTypeAlias.pop_back();
         },
         [&](parser::Next *next) {
             // Only associate comments if the last expression is on the same line as the next
@@ -549,12 +608,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "return");
         },
         [&](parser::SClass *sclass) {
+            contextAllowingTypeAlias.push_back(make_pair(true, sclass->declLoc));
             associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
             sclass->body = walkBody(sclass, move(sclass->body));
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "sclass");
+            contextAllowingTypeAlias.pop_back();
         },
         [&](parser::Send *send) {
             if (parser::MK::isVisibilitySend(send)) {

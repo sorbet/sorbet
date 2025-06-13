@@ -337,6 +337,16 @@ public:
     }
 
     /*
+     * Create a `T.type_alias { type }` send node.
+     */
+    static std::unique_ptr<parser::Node> TTypeAlias(core::LocOffsets loc, std::unique_ptr<parser::Node> type) {
+        auto send = Send0(loc, T(loc), core::Names::typeAlias(), loc);
+        auto body = std::make_unique<parser::Begin>(loc, parser::NodeVec());
+        body->stmts.push_back(move(type));
+        return std::make_unique<parser::Block>(loc, move(send), nullptr, move(body));
+    }
+
+    /*
      * Create a `T.type_parameter(:name)` send node.
      */
     static std::unique_ptr<parser::Node> TTypeParameter(core::LocOffsets loc, std::unique_ptr<parser::Node> name) {

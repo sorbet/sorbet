@@ -1,0 +1,213 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C Errors><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def bar<<todo method>>(&<blk>)
+      <self>.foo()
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C type foo>)
+    end
+
+    def baz<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <emptyTree>::<C type e3> = ::<root>::<C T>.type_alias() do ||
+      ::<root>::<C T>.untyped()
+    end
+
+    <emptyTree>::<C type e2> = ::<root>::<C T>.type_alias() do ||
+      ::<root>::<C T>.untyped()
+    end
+
+    <emptyTree>::<C type e1> = ::<root>::<C T>.type_alias() do ||
+      ::<root>::<C T>.untyped()
+    end
+
+    <runtime method definition of foo>
+
+    <runtime method definition of bar>
+
+    <runtime method definition of baz>
+
+    module <emptyTree>::<C Generic><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.returns(<emptyTree>::<C type elem>)
+      end
+
+      def foo<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      <emptyTree>::<C type elem> = ::<root>::<C T>.type_alias() do ||
+        <emptyTree>::<C Elem>
+      end
+
+      <runtime method definition of foo>
+
+      <emptyTree>::<C Elem> = ::Sorbet::Private::Static.type_member()
+    end
+  end
+
+  module <emptyTree>::<C TypeAliasSimple><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:a, <emptyTree>::<C type a>).returns(<emptyTree>::<C Integer>)
+    end
+
+    def bar<<todo method>>(a, &<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(a)
+        a
+      end
+    end
+
+    <emptyTree>::<C type a> = ::<root>::<C T>.type_alias() do ||
+      <emptyTree>::<C Integer>
+    end
+
+    <runtime method definition of bar>
+  end
+
+  module <emptyTree>::<C TypeAliasUnion><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:x, <emptyTree>::<C type int_or_string>).void()
+    end
+
+    def self.foo<<todo method>>(x, &<blk>)
+      <emptyTree>
+    end
+
+    <emptyTree>::<C type int_or_string> = ::<root>::<C T>.type_alias() do ||
+      ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)
+    end
+
+    <runtime method definition of self.foo>
+
+    <self>.foo(1)
+
+    <self>.foo("foo")
+
+    <self>.foo(nil)
+  end
+
+  module <emptyTree>::<C TypeAliasOfTypeAlias><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:a, <emptyTree>::<C type a>, :b, <emptyTree>::<C type b>).void()
+    end
+
+    def bar<<todo method>>(a, b, &<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(a)
+        <emptyTree>::<C T>.reveal_type(b)
+      end
+    end
+
+    <emptyTree>::<C type b> = ::<root>::<C T>.type_alias() do ||
+      <emptyTree>::<C type a>
+    end
+
+    <emptyTree>::<C type a> = ::<root>::<C T>.type_alias() do ||
+      <emptyTree>::<C Integer>
+    end
+
+    <runtime method definition of bar>
+  end
+
+  module <emptyTree>::<C TypeAliasTuple><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C type tuple>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      [1, "foo", 3.140000]
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C type tuple>)
+    end
+
+    def bar<<todo method>>(&<blk>)
+      []
+    end
+
+    <emptyTree>::<C type tuple> = ::<root>::<C T>.type_alias() do ||
+      [<emptyTree>::<C Integer>, <emptyTree>::<C String>, <emptyTree>::<C Float>]
+    end
+
+    <runtime method definition of foo>
+
+    <runtime method definition of bar>
+  end
+
+  module <emptyTree>::<C TypeAliasSelf><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C type a>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <self>
+    end
+
+    <emptyTree>::<C type a> = ::<root>::<C T>.type_alias() do ||
+      ::<root>::<C T>.self_type()
+    end
+
+    <runtime method definition of foo>
+  end
+
+  module <emptyTree>::<C TypeAliasMultiline><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:x, <emptyTree>::<C type a>).void()
+    end
+
+    def method1<<todo method>>(x, &<blk>)
+      <emptyTree>::<C T>.reveal_type(x)
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:x, <emptyTree>::<C type b>).void()
+    end
+
+    def method2<<todo method>>(x, &<blk>)
+      <emptyTree>::<C T>.reveal_type(x)
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:x, <emptyTree>::<C type c>).void()
+    end
+
+    def method3<<todo method>>(x, &<blk>)
+      <emptyTree>::<C T>.reveal_type(x)
+    end
+
+    <emptyTree>::<C type a> = ::<root>::<C T>.type_alias() do ||
+      ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)
+    end
+
+    <runtime method definition of method1>
+
+    <emptyTree>::<C type b> = ::<root>::<C T>.type_alias() do ||
+      ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)
+    end
+
+    <runtime method definition of method2>
+
+    <emptyTree>::<C type c> = ::<root>::<C T>.type_alias() do ||
+      ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)
+    end
+
+    <runtime method definition of method3>
+  end
+end

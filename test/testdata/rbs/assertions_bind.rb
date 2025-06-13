@@ -113,9 +113,15 @@ begin
   T.reveal_type(self) # error: Revealed type: `Bar`
 end while ARGV.first == "foo"
 
-module Errors
+module TypeAlias
+  #: type foo = String
   #: self as foo
-  #          ^^^ error: RBS aliases are not supported
+  T.reveal_type(self) # error: Revealed type: `String`
+end
+
+module Errors
+  #: self as 12
+  #          ^^ error: RBS literal types are not supported
 
   #: self as (
   #          ^ error: Failed to parse RBS type (unexpected token for simple type)

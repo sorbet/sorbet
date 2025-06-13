@@ -279,7 +279,7 @@ T.reveal_type(base_type_last) # error: This code is unreachable
 # Alias types (not yet supported)
 
 #: -> foo
-#     ^^^ error: RBS aliases are not supported
+#     ^^^ error: Unable to resolve constant `type foo`
 def alias_type1; T.unsafe(nil); end
 
 # TODO: unsupported

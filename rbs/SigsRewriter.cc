@@ -331,6 +331,44 @@ unique_ptr<parser::NodeVec> SigsRewriter::signaturesForNode(parser::Node *node) 
     return signatures;
 }
 
+/**
+ * Replace the synthetic node with a `T.type_alias` call.
+ */
+unique_ptr<parser::Node> SigsRewriter::replaceSyntheticTypeAlias(unique_ptr<parser::Node> node) {
+    auto comments = commentsForNode(node.get());
+
+    if (comments.signatures.empty()) {
+        // This should never happen
+        Exception::raise("No inline comment found for synthetic type alias");
+    }
+
+    if (comments.signatures.size() > 1) {
+        // This should never happen
+        Exception::raise("Multiple signatures found for synthetic type alias");
+    }
+
+    // Consume the comments
+    commentsByNode.erase(commentsByNode.find(node.get()));
+
+    auto aliasDeclaration = comments.signatures[0];
+    auto typeBeginLoc = (uint32_t)aliasDeclaration.string.find("=");
+
+    auto typeDeclaration = RBSDeclaration{vector<Comment>{Comment{
+        .commentLoc = aliasDeclaration.commentLoc(),
+        .typeLoc = core::LocOffsets{aliasDeclaration.fullTypeLoc().beginPos() + typeBeginLoc + 1,
+                                    aliasDeclaration.fullTypeLoc().endPos()},
+        .string = aliasDeclaration.string.substr(typeBeginLoc + 1),
+    }}};
+
+    auto type = SignatureTranslator(ctx).translateType(typeDeclaration);
+
+    if (type == nullptr) {
+        type = parser::MK::TUntyped(node->loc);
+    }
+
+    return parser::MK::TTypeAlias(type->loc, move(type));
+}
+
 parser::NodeVec SigsRewriter::rewriteNodes(parser::NodeVec nodes) {
     parser::NodeVec result;
 
@@ -527,6 +565,13 @@ unique_ptr<parser::Node> SigsRewriter::rewriteNode(unique_ptr<parser::Node> node
         [&](parser::When *when) {
             when->body = rewriteBody(move(when->body));
             result = move(node);
+        },
+        [&](parser::RBSPlaceholder *placeholder) {
+            if (placeholder->kind == core::Names::Constants::RBSTypeAlias()) {
+                result = replaceSyntheticTypeAlias(move(node));
+            } else {
+                result = move(node);
+            }
         },
         [&](parser::Node *other) { result = move(node); });
 
