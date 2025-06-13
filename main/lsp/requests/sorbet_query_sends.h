@@ -9,8 +9,7 @@ class SorbetQuerySendsTask final : public LSPRequestTask {
     std::unique_ptr<QuerySendsParams> params;
 
 public:
-    SorbetQuerySendsTask(const LSPConfiguration &config, MessageId id,
-                         std::unique_ptr<QuerySendsParams> params);
+    SorbetQuerySendsTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<QuerySendsParams> params);
 
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
 };
