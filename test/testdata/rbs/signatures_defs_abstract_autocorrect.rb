@@ -25,7 +25,7 @@ class Abstract
     puts
   end
 
-    # @abstract
+  # @abstract
   #: -> void
   def self.foo; end # error: Methods declared @abstract with an RBS comment must always raise
 

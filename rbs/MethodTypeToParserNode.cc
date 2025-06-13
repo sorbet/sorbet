@@ -77,21 +77,22 @@ bool isRaise(parser::Node *node) {
 core::AutocorrectSuggestion autocorrectAbstractBody(core::MutableContext ctx, parser::Node *method,
                                                     core::LocOffsets method_declLoc, parser::Node *method_body) {
     core::LocOffsets editLoc;
-    string corrected = "raise \"Abstract method called\"";
+    string corrected;
 
     auto lineStart = core::Loc::pos2Detail(ctx.file.data(ctx), method_declLoc.endPos()).line;
     auto lineEnd = core::Loc::pos2Detail(ctx.file.data(ctx), method->loc.endPos()).line;
 
     if (method_body) {
         editLoc = method_body->loc;
+        corrected = "raise \"Abstract method called\"";
     } else if (lineStart == lineEnd) {
-        editLoc = method_declLoc.copyEndWithZeroLength();
-        corrected = "; " + corrected;
+        editLoc = method_declLoc.copyEndWithZeroLength().join(method->loc.copyEndWithZeroLength());
+        corrected = " = raise(\"Abstract method called\")";
     } else {
         editLoc = method_declLoc.copyEndWithZeroLength();
         auto [_endLoc, indentLength] = ctx.locAt(method->loc).findStartOfIndentation(ctx);
         string indent(indentLength + 2, ' ');
-        corrected = "\n" + indent + corrected;
+        corrected = "\n" + indent + "raise \"Abstract method called\"";
     }
 
     return core::AutocorrectSuggestion{fmt::format("Add `raise` to the method body"),
