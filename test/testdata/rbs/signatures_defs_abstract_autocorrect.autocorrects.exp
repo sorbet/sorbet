@@ -6,46 +6,46 @@
 class Abstract
   # @abstract
   #: -> void
-  def foo; raise "abstract method called"; end # error: Methods declared @abstract with an RBS comment must always raise
+  def foo; raise "Abstract method called"; end # error: Methods declared @abstract with an RBS comment must always raise
 
   # @abstract
   #: -> void
   def bar
-    raise "abstract method called" # error: Methods declared @abstract with an RBS comment must always raise
+    raise "Abstract method called" # error: Methods declared @abstract with an RBS comment must always raise
   end
 
   # @abstract
   #: -> void
   def baz # error: Methods declared @abstract with an RBS comment must always raise
-    raise "abstract method called" # error: Abstract methods must not contain any code in their body
+    raise "Abstract method called" # error: Abstract methods must not contain any code in their body
   end
 
   # @abstract
   #: -> void
   def qux # error: Methods declared @abstract with an RBS comment must always raise
-    raise "abstract method called"
+    raise "Abstract method called"
   end
 
     # @abstract
   #: -> void
-  def self.foo; raise "abstract method called"; end # error: Methods declared @abstract with an RBS comment must always raise
+  def self.foo; raise "Abstract method called"; end # error: Methods declared @abstract with an RBS comment must always raise
 
   # @abstract
   #: -> void
   def self.bar
-    raise "abstract method called" # error: Methods declared @abstract with an RBS comment must always raise
+    raise "Abstract method called" # error: Methods declared @abstract with an RBS comment must always raise
   end
 
   # @abstract
   #: -> void
   def self.baz # error: Methods declared @abstract with an RBS comment must always raise
-    raise "abstract method called" # error: Abstract methods must not contain any code in their body
+    raise "Abstract method called" # error: Abstract methods must not contain any code in their body
   end
 
   # @abstract
   #: -> void
   def self.qux # error: Methods declared @abstract with an RBS comment must always raise
-    raise "abstract method called"
+    raise "Abstract method called"
   end
 end
 # ------------------------------

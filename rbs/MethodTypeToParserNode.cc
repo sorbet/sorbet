@@ -77,7 +77,7 @@ bool isRaise(parser::Node *node) {
 core::AutocorrectSuggestion autocorrectAbstractBody(core::MutableContext ctx, parser::Node *method,
                                                     core::LocOffsets method_declLoc, parser::Node *method_body) {
     core::LocOffsets editLoc;
-    string corrected = "raise \"abstract method called\"";
+    string corrected = "raise \"Abstract method called\"";
 
     auto lineStart = core::Loc::pos2Detail(ctx.file.data(ctx), method_declLoc.endPos()).line;
     auto lineEnd = core::Loc::pos2Detail(ctx.file.data(ctx), method->loc.endPos()).line;
