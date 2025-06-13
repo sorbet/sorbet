@@ -35,11 +35,6 @@ struct RBSArg {
     Kind kind;
 };
 
-struct Autocorrect {
-    core::Loc loc;
-    string source;
-};
-
 core::LocOffsets adjustNameLoc(const RBSDeclaration &declaration, rbs_node_t *node) {
     auto range = node->location->rg;
 
@@ -232,8 +227,8 @@ string nodeKindToString(const parser::Node *node) {
     return kind;
 }
 
-optional<Autocorrect> autocorrectArg(core::MutableContext ctx, const parser::Node *methodArg, RBSArg arg,
-                                     unique_ptr<parser::Node> type) {
+optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, const parser::Node *methodArg,
+                                                     RBSArg arg, unique_ptr<parser::Node> type) {
     if (arg.kind == RBSArg::Kind::Block || parser::isa_node<parser::Blockarg>((parser::Node *)methodArg)) {
         // Block arguments are not autocorrected
         return nullopt;
@@ -304,7 +299,8 @@ optional<Autocorrect> autocorrectArg(core::MutableContext ctx, const parser::Nod
         loc.beginLoc -= 2;
     }
 
-    return Autocorrect{ctx.locAt(loc), corrected};
+    return core::AutocorrectSuggestion{fmt::format("Replace with `{}`", argKindToString(arg.kind)),
+                                       {core::AutocorrectSuggestion::Edit{ctx.locAt(loc), corrected}}};
 }
 
 bool checkParameterKindMatch(const RBSArg &arg, const parser::Node *methodArg) {
@@ -500,9 +496,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
                             argKindToString(arg.kind));
 
                 if (auto autocorrect = autocorrectArg(ctx, methodArg, arg, type->deepCopy())) {
-                    e.addAutocorrect(core::AutocorrectSuggestion{
-                        fmt::format("Replace with `{}`", argKindToString(arg.kind)),
-                        {core::AutocorrectSuggestion::Edit{autocorrect->loc, autocorrect->source}}});
+                    e.addAutocorrect(move(autocorrect.value()));
                 }
             }
         }
