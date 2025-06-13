@@ -732,6 +732,12 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
             splat->var = rewriteNode(move(splat->var));
             result = move(node);
         },
+        [&](parser::Super *super_) {
+            for (auto &expr : super_->args) {
+                expr = rewriteNode(move(expr));
+            }
+            result = maybeInsertCast(move(node));
+        },
         [&](parser::Kwsplat *splat) {
             splat->expr = rewriteNode(move(splat->expr));
             result = move(node);
