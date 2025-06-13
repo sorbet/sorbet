@@ -671,30 +671,31 @@ int realmain(int argc, char *argv[]) {
             logger->warn("Signature suggestion is disabled in sorbet-orig for faster builds");
             return 1;
 #else
-            for (auto &filename : opts.inputFileNames) {
-                core::FileRef file = gs->findFileByPath(filename);
-                if (!file.exists()) {
+            auto id = 0;
+            for (auto &file : gs->getFiles().subspan(1)) {
+                id++;
+                if (file->isStdlib()) {
                     continue;
                 }
-
-                if (file.data(*gs).minErrorLevel() <= core::StrictLevel::Ignore) {
+                if (file->minErrorLevel() <= core::StrictLevel::Ignore) {
                     continue;
                 }
-                if (file.data(*gs).originalSigil > core::StrictLevel::Max) {
+                if (file->originalSigil > core::StrictLevel::Max) {
                     // don't change the sigil on "special" files
                     continue;
                 }
-                auto minErrorLevel = levelMinusOne(file.data(*gs).minErrorLevel());
-                if (file.data(*gs).originalSigil == minErrorLevel) {
+                auto minErrorLevel = levelMinusOne(file->minErrorLevel());
+                if (file->originalSigil == minErrorLevel) {
                     continue;
                 }
                 minErrorLevel = levelToRecommendation(minErrorLevel);
-                if (file.data(*gs).originalSigil == minErrorLevel) {
+                if (file->originalSigil == minErrorLevel) {
                     // if the file could be strong, but is only marked strict, ensure that we don't recommend that it be
                     // marked strict.
                     continue;
                 }
-                auto loc = findTyped(*gs, file);
+                auto fref = core::FileRef(id);
+                auto loc = findTyped(*gs, fref);
                 if (auto e = gs->beginError(loc, core::errors::Infer::SuggestTyped)) {
                     auto sigil = levelToSigil(minErrorLevel);
                     e.setHeader("You could add `# typed: {}`", sigil);
