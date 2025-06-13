@@ -64,10 +64,10 @@ class ChildBad < Parent
     override
       .type_parameters(:W)
       .params(x: T.all(T.type_parameter(:W), IFoo))
+  #           ^ error: Parameter `x` of type `T.all(IFoo, T.type_parameter(:W))` not compatible with type of overridable method `Parent#id`
       .returns(T.nilable(T.type_parameter(:W)))
   end
   def id(x); x; end
-# ^^^^^^^^^ error: Parameter `x` of type `T.all(IFoo, T.type_parameter(:W))` not compatible with type of overridable method `Parent#id`
 # ^^^^^^^^^ error: Return type `T.nilable(T.type_parameter(:W))` does not match return type of overridable method `Parent#id`
 
   sig do
@@ -75,13 +75,13 @@ class ChildBad < Parent
       .type_parameters(:W)
       .params(
         x: T.all(T.type_parameter(:W), IFoo),
+  #     ^ error: Parameter `x` of type `T.all(IFoo, T.type_parameter(:W))` not compatible with type of overridable method `Parent#apply_f`
         f: T.proc.params(x: T.nilable(T.type_parameter(:W))).void
+  #     ^ error: Parameter `f` of type `T.proc.params(arg0: T.nilable(T.type_parameter(:W))).void` not compatible with type of overridable method `Parent#apply_f`
       )
       .void
   end
   def apply_f(x, f)
-# ^^^^^^^^^^^^^^^^^ error: Parameter `x` of type `T.all(IFoo, T.type_parameter(:W))` not compatible with type of overridable method `Parent#apply_f`
-# ^^^^^^^^^^^^^^^^^ error: Parameter `f` of type `T.proc.params(arg0: T.nilable(T.type_parameter(:W))).void` not compatible with type of overridable method `Parent#apply_f`
     f.call(x)
   end
 end
@@ -115,12 +115,12 @@ class ChildApplyFWrongOrder < ParentApplyFWrongOrder
       .type_parameters(:U, :V)
       .params(
         x: T.type_parameter(:V),
+  #     ^ error: Parameter `x` of type `T.type_parameter(:V)` not compatible with type of overridable method `ParentApplyFWrongOrder#apply_f`
         f: T.proc.params(x: T.type_parameter(:V)).returns(T.type_parameter(:U)),
+  #     ^ error: Parameter `f` of type `T.proc.params(arg0: T.type_parameter(:V)).returns(T.type_parameter(:U))` not compatible with type of overridable method `ParentApplyFWrongOrder#apply_f`
       )
       .returns(T.type_parameter(:U))
   end
   def apply_f(x, f); f.call(x); end
-# ^^^^^^^^^^^^^^^^^ error: Parameter `x` of type `T.type_parameter(:V)` not compatible with type of overridable method `ParentApplyFWrongOrder#apply_f`
-# ^^^^^^^^^^^^^^^^^ error: Parameter `f` of type `T.proc.params(arg0: T.type_parameter(:V)).returns(T.type_parameter(:U))` not compatible with type of overridable method `ParentApplyFWrongOrder#apply_f`
 # ^^^^^^^^^^^^^^^^^ error: Return type `T.type_parameter(:U)` does not match return type of overridable method `ParentApplyFWrongOrder#apply_f`
 end

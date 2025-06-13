@@ -17,22 +17,26 @@ module NonMatchingTests
 
   class BadPos < Abstract
     sig { override.params(req: String, opt: Integer, kwreq: Integer, kwopt: Integer).returns(Integer) }
-    def foo(req, opt=1, kwreq:, kwopt: 2); 55; end # error: Parameter `req` of type `String` not compatible with type of abstract method `Abstract#foo`
+    #                     ^^^ error: Parameter `req` of type `String` not compatible with type of abstract method `Abstract#foo`
+    def foo(req, opt=1, kwreq:, kwopt: 2); 55; end
   end
 
   class BadOptPos < Abstract
     sig { override.params(req: Integer, opt: String, kwreq: Integer, kwopt: Integer).returns(Integer) }
-    def foo(req, opt='foo', kwreq:, kwopt: 2); 55; end # error: Parameter `opt` of type `String` not compatible with type of abstract method `Abstract#foo`
+    #                                   ^^^ error: Parameter `opt` of type `String` not compatible with type of abstract method `Abstract#foo`
+    def foo(req, opt='foo', kwreq:, kwopt: 2); 55; end
   end
 
   class BadKw < Abstract
     sig { override.params(req: Integer, opt: Integer, kwreq: String, kwopt: Integer).returns(Integer) }
-    def foo(req, opt=1, kwreq:, kwopt: 2); 55; end # error: Keyword parameter `kwreq` of type `String` not compatible with type of abstract method `Abstract#foo`
+    #                                                 ^^^^^ error: Keyword parameter `kwreq` of type `String` not compatible with type of abstract method `Abstract#foo`
+    def foo(req, opt=1, kwreq:, kwopt: 2); 55; end
   end
 
   class BadKwOpt < Abstract
     sig { override.params(req: Integer, opt: Integer, kwreq: Integer, kwopt: String).returns(Integer) }
-    def foo(req, opt=1, kwreq:, kwopt: 'bar'); 55; end # error: Keyword parameter `kwopt` of type `String` not compatible with type of abstract method `Abstract#foo`
+    #                                                                 ^^^^^ error: Keyword parameter `kwopt` of type `String` not compatible with type of abstract method `Abstract#foo`
+    def foo(req, opt=1, kwreq:, kwopt: 'bar'); 55; end
   end
 
   class BadReturn < Abstract
@@ -71,7 +75,8 @@ module OverrideVarianceTests
   # but an implementation cannot reasonably accept a subtype
   class ArgNarrowing < Abstract
     sig { override.params(arg: C).returns(B) }
-    def bar(arg); B.new; end # error: Parameter `arg` of type `OverrideVarianceTests::C` not compatible with type of overridable method `OverrideVarianceTests::Abstract#bar`
+    #                     ^^^ error: Parameter `arg` of type `OverrideVarianceTests::C` not compatible with type of overridable method `OverrideVarianceTests::Abstract#bar`
+    def bar(arg); B.new; end
   end
 
   # methods are covariant in their return types, so an implementation
@@ -131,7 +136,8 @@ module AbstractVarianceTests
     include IFace
     extend T::Sig
     sig { override.params(arg: C).returns(B) }
-    def bar(arg); B.new; end # error: Parameter `arg` of type `AbstractVarianceTests::C` not compatible with type of abstract method `AbstractVarianceTests::IFace#bar`
+    #                     ^^^ error: Parameter `arg` of type `AbstractVarianceTests::C` not compatible with type of abstract method `AbstractVarianceTests::IFace#bar`
+    def bar(arg); B.new; end
   end
 
   # methods are covariant in their return types, so an implementation
