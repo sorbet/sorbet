@@ -95,7 +95,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         payload::createInitialGlobalState(*gs, *opts, kvstore);
 
         // If caching fails, gs gets modified during payload creation.
-        CHECK_FALSE(gs->wasModified());
+        CHECK_FALSE(gs->wasNameTableModified());
 
         core::File file{string(filePath), string(fileContents), core::File::Type::Normal};
         auto tree = core::serialize::Serializer::loadTree(*gs, file, contents.data);
@@ -195,7 +195,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
         payload::createInitialGlobalState(*gs, *opts, kvstore);
 
         // If caching fails, gs gets modified during payload creation.
-        CHECK_FALSE(gs->wasModified());
+        CHECK_FALSE(gs->wasNameTableModified());
 
         core::File file{string(filePath), string(fileContents), core::File::Type::Normal};
         auto tree = core::serialize::Serializer::loadTree(*gs, file, contents.data);
@@ -306,7 +306,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReindexingUsesTheCache") {
     payload::createInitialGlobalState(*gs, *opts, kvstore);
 
     // If caching fails, gs gets modified during payload creation.
-    CHECK_FALSE(gs->wasModified());
+    CHECK_FALSE(gs->wasNameTableModified());
 
     core::FileRef fref;
     {

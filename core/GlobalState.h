@@ -234,7 +234,7 @@ public:
     ErrorBuilder beginIndexerError(Loc loc, ErrorClass what);
 
     int totalErrors() const;
-    bool wasModified() const;
+    bool wasNameTableModified() const;
 
     int globalStateId;
     bool silenceErrors = false;
@@ -386,7 +386,7 @@ private:
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
-    bool wasModified_ = false;
+    bool wasNameTableModified_ = false;
 
     core::packages::PackageDB packageDB_;
 

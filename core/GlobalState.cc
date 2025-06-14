@@ -1213,7 +1213,6 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     data->owner = owner;
     data->addLoc(*this, loc);
     DEBUG_ONLY(categoryCounterInc("symbols", "class"));
-    wasModified_ = true;
 
     return ret;
 }
@@ -1253,7 +1252,6 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     data->owner = owner;
     data->addLoc(*this, loc);
     DEBUG_ONLY(categoryCounterInc("symbols", "type_member"));
-    wasModified_ = true;
 
     auto &members = owner.dataAllowingNone(*this)->getOrCreateTypeMembers();
     if (!absl::c_linear_search(members, result)) {
@@ -1304,7 +1302,6 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     data->owner = owner;
     data->addLoc(*this, loc);
     DEBUG_ONLY(categoryCounterInc("symbols", "type_argument"));
-    wasModified_ = true;
 
     owner.dataAllowingNone(*this)->getOrCreateTypeArguments().emplace_back(result);
     return result;
@@ -1330,7 +1327,6 @@ MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRe
     data->owner = owner;
     data->addLoc(*this, loc);
     DEBUG_ONLY(categoryCounterInc("symbols", "method"));
-    wasModified_ = true;
 
     return result;
 }
@@ -1397,7 +1393,6 @@ FieldRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef 
     data->addLoc(*this, loc);
 
     DEBUG_ONLY(categoryCounterInc("symbols", "field"));
-    wasModified_ = true;
 
     return result;
 }
@@ -1436,7 +1431,6 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
     data->addLoc(*this, loc);
 
     DEBUG_ONLY(categoryCounterInc("symbols", "static_field"));
-    wasModified_ = true;
 
     return ret;
 }
@@ -1459,7 +1453,6 @@ ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRe
     store.loc = loc;
     DEBUG_ONLY(categoryCounterInc("symbols", "argument"););
 
-    wasModified_ = true;
     return store;
 }
 
@@ -1539,7 +1532,7 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
     ENFORCE(hashNameRef(*this, name) == hs);
     categoryCounterInc("names", "utf8");
 
-    wasModified_ = true;
+    wasNameTableModified_ = true;
     return name;
 }
 
@@ -1589,7 +1582,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
 
     constantNames.emplace_back(ConstantName{original});
     ENFORCE(hashNameRef(*this, name) == hs);
-    wasModified_ = true;
+    wasNameTableModified_ = true;
     categoryCounterInc("names", "constant");
     return name;
 }
@@ -1735,7 +1728,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 
     uniqueNames.emplace_back(UniqueName{original, num, uniqueNameKind});
     ENFORCE(hashNameRef(*this, name) == hs);
-    wasModified_ = true;
+    wasNameTableModified_ = true;
     categoryCounterInc("names", "unique");
     return name;
 }
@@ -2370,8 +2363,8 @@ bool GlobalState::shouldReportErrorOn(FileRef file, ErrorClass what) const {
     return level >= what.minLevel;
 }
 
-bool GlobalState::wasModified() const {
-    return wasModified_;
+bool GlobalState::wasNameTableModified() const {
+    return wasNameTableModified_;
 }
 
 void GlobalState::trace(string_view msg) const {
