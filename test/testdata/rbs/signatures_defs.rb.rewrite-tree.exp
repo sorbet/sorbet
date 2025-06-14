@@ -327,6 +327,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(x)
   end
 
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.params(:x, <emptyTree>::<C Integer>).void()
+  end
+
+  def bar<<todo method>>(x, &<blk>)
+    <emptyTree>::<C T>.reveal_type(x)
+  end
+
   <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
   class <emptyTree>::<C P1><<C <todo sym>>> < (::<todo sym>)
@@ -484,6 +492,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <runtime method definition of method23>
 
   <runtime method definition of method24>
+
+  <emptyTree>::<C Integer>.prepend(<emptyTree>::<C Module>.new() do ||
+      <runtime method definition of bar>
+    end)
 
   class <emptyTree>::<C UnusedTypeAnnotation><<C <todo sym>>> < (::<todo sym>)
     def foo<<todo method>>(&<blk>)

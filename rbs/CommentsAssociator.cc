@@ -558,7 +558,7 @@ void CommentsAssociator::walkNode(parser::Node *node) {
         },
         [&](parser::Send *send) {
             if (parser::MK::isVisibilitySend(send)) {
-                associateSignatureCommentsToNode(send->args[0].get());
+                associateSignatureCommentsToNode(send);
                 auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
                 auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
                 consumeCommentsBetweenLines(beginLine, endLine, "send");
