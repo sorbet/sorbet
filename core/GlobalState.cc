@@ -1497,6 +1497,12 @@ NameRef GlobalState::lookupNameUTF8(string_view nm) const {
 }
 
 NameRef GlobalState::enterNameUTF8(string_view nm) {
+    if (NameRef::isSetterLabel(nm)) {
+        // Optimization: make it easier to convert between foo and foo= names
+        nm.remove_suffix(1);
+        return freshNameUnique(UniqueNameKind::Setter, enterNameUTF8(nm), 1);
+    }
+
     const auto hs = _hash(nm);
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
