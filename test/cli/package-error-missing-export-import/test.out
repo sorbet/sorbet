@@ -1,0 +1,35 @@
+missing_import/foo_class.rb:5: `Other::OtherClass` resolves but is not exported from `Other` and `Other` is not imported https://srb.help/3718
+     5 |    Other::OtherClass
+            ^^^^^^^^^^^^^^^^^
+    other/other_class.rb:4: Defined here
+     4 |  class OtherClass
+          ^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    missing_import/__package.rb:3: Insert `import Other`
+     3 |class Foo::MissingImport < PackageSpec
+                                              ^
+    other/__package.rb:3: Insert `export Other::OtherClass`
+     3 |class Other < PackageSpec
+                                 ^
+  Note:
+    Try running generate-packages.sh
+Errors: 1
+imported_as_test/foo_class.rb:5: `Other::OtherClass` resolves but is not exported from `Other` and `Other` is `test_import`ed https://srb.help/3720
+     5 |    Other::OtherClass
+            ^^^^^^^^^^^^^^^^^
+    other/other_class.rb:4: Defined here
+     4 |  class OtherClass
+          ^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    imported_as_test/__package.rb:3: Insert `import Other`
+     3 |class Foo::MissingImport < PackageSpec
+                                              ^
+    imported_as_test/__package.rb:4: Delete
+     4 |  test_import Other
+        ^^^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Insert `export Other::OtherClass`
+     3 |class Other < PackageSpec
+                                 ^
+  Note:
+    Try running generate-packages.sh
+Errors: 1
