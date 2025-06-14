@@ -622,8 +622,6 @@ void GlobalState::initEmpty() {
 
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::export_()).arg(Names::arg0()).build();
     ENFORCE_NO_TIMER(method == Symbols::PackageSpec_export());
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::restrictToService()).arg(Names::arg0()).build();
-    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_restrict_to_service());
 
     klass = synthesizeClass(core::Names::Constants::Encoding());
     ENFORCE_NO_TIMER(klass == Symbols::Encoding());
