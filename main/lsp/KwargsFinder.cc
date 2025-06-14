@@ -17,9 +17,9 @@ struct SendTraversal {
 
     SendTraversal(core::LocOffsets funLoc) : funLoc{funLoc} {}
 
-    void preTransformSend(core::Context ctx, const ast::Send &send) {
+    ast::QueryControl preTransformSend(core::Context ctx, const ast::Send &send) {
         if (!send.funLoc.contains(this->funLoc)) {
-            return;
+            return send.loc.contains(this->funLoc) ? ast::QueryControl::Continue : ast::QueryControl::Skip;
         }
 
         for (const auto &pair : send.kwArgPairs()) {
@@ -29,6 +29,17 @@ struct SendTraversal {
                 }
             }
         }
+
+        // We've traversed everything necessary.
+        return ast::QueryControl::Done;
+    }
+
+    ast::QueryControl preTransformMethodDef(core::Context ctx, const ast::MethodDef &method) {
+        if (!method.loc.contains(this->funLoc)) {
+            return ast::QueryControl::Skip;
+        }
+
+        return ast::QueryControl::Continue;
     }
 };
 
@@ -38,7 +49,7 @@ vector<core::NameRef> KwargsFinder::findKwargs(const core::GlobalState &gs, cons
                                                core::LocOffsets funLoc) {
     core::Context ctx{gs, core::Symbols::root(), ast.file};
     SendTraversal traversal{funLoc};
-    ast::ConstTreeWalk::apply(ctx, traversal, ast.tree);
+    ast::TreeQuery::apply(ctx, traversal, ast.tree);
     return move(traversal.kwargs);
 }
 
