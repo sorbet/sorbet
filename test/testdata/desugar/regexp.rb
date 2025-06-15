@@ -14,5 +14,5 @@ def foo
     /#{a}b#{c}/
     Regexp.new(a + 'b' + c)
 
-    /abc/a # error: unknown regexp options: a
+    /abc/a # parser-error: unknown regexp options: a
 end

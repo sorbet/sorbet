@@ -1,6 +1,6 @@
 # typed: true
 foo = a(b
-if @c && foo # error: unexpected token "if"
+if @c && foo # parser-error: unexpected token "if"
   d
 end
 
