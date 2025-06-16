@@ -491,19 +491,7 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
             }
 
             node = maybeInsertCast(move(node));
-
-            for (auto &arg : send->args) {
-                arg = rewriteNode(move(arg));
-
-                if (auto splat = parser::cast_node<parser::Splat>(arg.get())) {
-                    splat->var = maybeInsertCast(move(splat->var));
-                } else if (auto kwsplat = parser::cast_node<parser::Kwsplat>(arg.get())) {
-                    kwsplat->expr = maybeInsertCast(move(kwsplat->expr));
-                } else {
-                    arg = maybeInsertCast(move(arg));
-                }
-            }
-
+            rewriteNodes(&send->args);
             result = move(node);
         },
         [&](parser::CSend *csend) {
@@ -511,19 +499,7 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
             csend->receiver = rewriteNode(move(csend->receiver));
 
             node = maybeInsertCast(move(node));
-
-            for (auto &arg : csend->args) {
-                arg = rewriteNode(move(arg));
-
-                if (auto splat = parser::cast_node<parser::Splat>(arg.get())) {
-                    splat->var = maybeInsertCast(move(splat->var));
-                } else if (auto kwsplat = parser::cast_node<parser::Kwsplat>(arg.get())) {
-                    kwsplat->expr = maybeInsertCast(move(kwsplat->expr));
-                } else {
-                    arg = maybeInsertCast(move(arg));
-                }
-            }
-
+            rewriteNodes(&csend->args);
             result = move(node);
         },
         [&](parser::Block *block) {
@@ -681,21 +657,7 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
 
         [&](parser::Hash *hash) {
             node = maybeInsertCast(move(node));
-
-            for (auto &elem : hash->pairs) {
-                elem = rewriteNode(move(elem));
-
-                if (auto pair = parser::cast_node<parser::Pair>(elem.get())) {
-                    pair->value = maybeInsertCast(move(pair->value));
-                } else if (auto splat = parser::cast_node<parser::Splat>(elem.get())) {
-                    splat->var = maybeInsertCast(move(splat->var));
-                } else if (auto kwsplat = parser::cast_node<parser::Kwsplat>(elem.get())) {
-                    kwsplat->expr = maybeInsertCast(move(kwsplat->expr));
-                } else {
-                    continue;
-                }
-            }
-
+            rewriteNodes(&hash->pairs);
             result = move(node);
         },
         [&](parser::Pair *pair) {
@@ -706,19 +668,7 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
 
         [&](parser::Array *arr) {
             node = maybeInsertCast(move(node));
-
-            for (auto &elem : arr->elts) {
-                elem = rewriteNode(move(elem));
-
-                if (auto splat = parser::cast_node<parser::Splat>(elem.get())) {
-                    splat->var = maybeInsertCast(move(splat->var));
-                } else if (auto kwsplat = parser::cast_node<parser::Kwsplat>(elem.get())) {
-                    kwsplat->expr = maybeInsertCast(move(kwsplat->expr));
-                } else {
-                    elem = maybeInsertCast(move(elem));
-                }
-            }
-
+            rewriteNodes(&arr->elts);
             result = move(node);
         },
 
