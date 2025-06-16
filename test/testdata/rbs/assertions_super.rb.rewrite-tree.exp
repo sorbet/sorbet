@@ -34,4 +34,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of foo>
   end
+
+  class <emptyTree>::<C Qux><<C <todo sym>>> < (<emptyTree>::<C Foo>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.override().params(:x, <emptyTree>::<C Integer>, :y, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foo<<todo method>>(x, y, &<blk>)
+      <cast:cast>(<self>.<super>(<emptyTree>::<C ARGV>.first(), <emptyTree>::<C ARGV>.last()), <todo sym>, <emptyTree>::<C Integer>)
+    end
+
+    <runtime method definition of foo>
+  end
 end

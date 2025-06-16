@@ -31,3 +31,12 @@ class Baz < Foo
     )
   end
 end
+
+class Qux < Foo
+  # @override
+  #: (Integer, String) -> String
+  def foo(x, y)
+    super(ARGV.first, ARGV.last) #: as Integer
+    #                                  ^^^^^^^ error: Expected `String` but found `Integer` for method result type
+  end
+end
