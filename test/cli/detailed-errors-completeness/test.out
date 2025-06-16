@@ -43,34 +43,34 @@ test.rb:99: The `lower` type bound `[Upper]` is not a subtype of the `upper` typ
   Detailed explanation:
     `Upper` is not a subtype of `Lower` for index `0` of `1`-tuple
 
-test.rb:68: Parameter `x` of type `[String]` not compatible with type of overridable method `A#foo` https://srb.help/5035
-    68 |  def foo(x, y:, z: [''], &blk)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    test.rb:50: The super method parameter `x` was declared here with type `[Integer]`
-    50 |  def foo(x, y:, z: [1], &blk)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test.rb:67: Parameter `x` of type `[String]` not compatible with type of overridable method `A#foo` https://srb.help/5035
+    67 |  sig { override.params(x: [String], y: [String], z: [String], blk: T.proc.returns([String])).returns([String]) }
+                                ^
+    test.rb:49: The super method parameter `x` was declared here with type `[Integer]`
+    49 |  sig { overridable.params(x: [Integer], y: [Integer], z: [Integer], blk: T.proc.returns([Integer])).returns([Integer]) }
+                                   ^
   Note:
     A parameter's type must be a supertype of the same parameter's type on the super method.
   Detailed explanation:
     `Integer` is not a subtype of `String` for index `0` of `1`-tuple
 
-test.rb:68: Keyword parameter `y` of type `[String]` not compatible with type of overridable method `A#foo` https://srb.help/5035
-    68 |  def foo(x, y:, z: [''], &blk)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    test.rb:50: The corresponding parameter `y` was declared here with type `[Integer]`
-    50 |  def foo(x, y:, z: [1], &blk)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test.rb:67: Keyword parameter `y` of type `[String]` not compatible with type of overridable method `A#foo` https://srb.help/5035
+    67 |  sig { override.params(x: [String], y: [String], z: [String], blk: T.proc.returns([String])).returns([String]) }
+                                             ^
+    test.rb:49: The corresponding parameter `y` was declared here with type `[Integer]`
+    49 |  sig { overridable.params(x: [Integer], y: [Integer], z: [Integer], blk: T.proc.returns([Integer])).returns([Integer]) }
+                                                 ^
   Note:
     A parameter's type must be a supertype of the same parameter's type on the super method.
   Detailed explanation:
     `Integer` is not a subtype of `String` for index `0` of `1`-tuple
 
-test.rb:68: Keyword parameter `z` of type `[String]` not compatible with type of overridable method `A#foo` https://srb.help/5035
-    68 |  def foo(x, y:, z: [''], &blk)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    test.rb:50: The super method parameter `z` was declared here with type `[Integer]`
-    50 |  def foo(x, y:, z: [1], &blk)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test.rb:67: Keyword parameter `z` of type `[String]` not compatible with type of overridable method `A#foo` https://srb.help/5035
+    67 |  sig { override.params(x: [String], y: [String], z: [String], blk: T.proc.returns([String])).returns([String]) }
+                                                          ^
+    test.rb:49: The super method parameter `z` was declared here with type `[Integer]`
+    49 |  sig { overridable.params(x: [Integer], y: [Integer], z: [Integer], blk: T.proc.returns([Integer])).returns([Integer]) }
+                                                               ^
   Note:
     A parameter's type must be a supertype of the same parameter's type on the super method.
   Detailed explanation:
