@@ -484,14 +484,8 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
             send->receiver = maybeInsertCast(move(send->receiver));
             send->receiver = rewriteNode(move(send->receiver));
 
-            if (send->method == core::Names::squareBracketsEq()) {
-                // This is a `foo[key]=(y)` method, walk y for chained method calls
+            if (send->method == core::Names::squareBracketsEq() || send->method.isSetter(ctx.state)) {
                 send->args.back() = rewriteNode(move(send->args.back()));
-                result = move(node);
-                return;
-            } else if (send->method.isSetter(ctx.state) && send->args.size() == 1) {
-                // This is a `foo.x=(y)` method, we treat it as a `x = y` assignment
-                send->args[0] = maybeInsertCast(move(send->args[0]));
                 result = move(node);
                 return;
             }

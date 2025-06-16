@@ -39,6 +39,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <emptyTree>::<C T>.reveal_type(let3.foo())
 
+  let4 = <emptyTree>::<C Let>.new()
+
+  let4.foo=(<self>.puts(<cast:let>([], <todo sym>, ::<root>::<C T>.untyped())))
+
+  <emptyTree>::<C T>.reveal_type(let4.foo())
+
+  let5 = <emptyTree>::<C Let>.new()
+
+  let5.foo=(::<Magic>.<call-with-splat>(<self>, :puts, ::<Magic>.<splat>(<cast:let>([], <todo sym>, ::<root>::<C T>.untyped())), nil))
+
+  <emptyTree>::<C T>.reveal_type(let5.foo())
+
   class <emptyTree>::<C BracketsAssign><<C <todo sym>>> < (::<todo sym>)
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:args, ::<root>::<C T>.untyped()).void()
@@ -60,6 +72,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   brackets_assign.[]=(:a, :b, ::<root>::<C T>.unsafe("baz").unexisting_method())
 
   brackets_assign.[]=(:a, :b, :c, ::<root>::<C T>.unsafe("qux").unexisting_method())
+
+  brackets_assign.[]=(:a, :b, ::<root>::<C T>.unsafe(["bar", "foo"]))
+
+  brackets_assign.[]=(:a, :b, ["bar", ::<root>::<C T>.unsafe("foo").unexisting_method()])
 
   ::<root>::<C T>.unsafe(<self>).unexisting_method=(42)
 end
