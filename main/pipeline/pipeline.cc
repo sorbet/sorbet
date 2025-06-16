@@ -776,17 +776,18 @@ void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const opti
 }
 
 // packager intentionally runs outside of rewriter so that its output does not get cached.
-void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
-                    WorkerPool &workers) {
+void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> packageFiles,
+                    absl::Span<core::FileRef> sourceFiles, const options::Options &opts, WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
     if (!opts.cacheSensitiveOptions.stripePackages) {
         return;
     }
 
     try {
-        packager::Packager::buildPackageDB(gs, workers, what);
+        packager::Packager::buildPackageDB(gs, workers, packageFiles);
+        packager::Packager::setPackageNameOnFiles(gs, sourceFiles);
         if (opts.print.Packager.enabled) {
-            for (auto &f : what) {
+            for (auto &f : packageFiles) {
                 opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());
                 opts.print.Packager.fmt("{}\n", f.tree.toStringWithTabs(gs, 0));
             }
@@ -801,7 +802,7 @@ void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, con
 }
 
 // packager intentionally runs outside of rewriter so that its output does not get cached.
-void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
+void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> sourceFiles, const options::Options &opts,
                            WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
     if (!opts.cacheSensitiveOptions.stripePackages) {
@@ -809,9 +810,9 @@ void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> wh
     }
 
     try {
-        packager::Packager::validatePackagedFiles(gs, workers, what);
+        packager::Packager::validatePackagedFiles(gs, workers, sourceFiles);
         if (opts.print.Packager.enabled) {
-            for (auto &f : what) {
+            for (auto &f : sourceFiles) {
                 opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());
                 opts.print.Packager.fmt("{}\n", f.tree.toStringWithTabs(gs, 0));
             }
