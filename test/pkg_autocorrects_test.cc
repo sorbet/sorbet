@@ -1123,25 +1123,28 @@ TEST_CASE("Adding a test unit import with existing imports and test imports") {
     CHECK_EQ(expected, replaced);
 }
 
-TEST_CASE("Adding a test unit import with existing imports and test imports") {
+TEST_CASE("Adding a test unit import with existing imports, test imports, and test unit imports") {
     core::GlobalState gs(errorQueue);
     makeDefaultPackagerGlobalState(gs);
 
     string pkg_source = "class MyPackage < PackageSpec\n"
                         "  import A\n"
                         "  test_import B\n"
+                        "  test_import C, only: \"test_rb\"\n"
                         "end\n";
 
     string expected = "class MyPackage < PackageSpec\n"
                       "  import A\n"
                       "  test_import B\n"
+                      "  test_import C, only: \"test_rb\"\n"
                       "  test_import ExamplePackage, only: \"test_rb\"\n"
                       "end\n";
 
     auto parsedFiles = enterPackages(gs, {{examplePackagePath, examplePackage},
                                           {"my_package/__package.rb", pkg_source},
                                           {"a/__package.rb", "class A < PackageSpec\nend\n"},
-                                          {"b/__package.rb", "class B < PackageSpec\nend\n"}});
+                                          {"b/__package.rb", "class B < PackageSpec\nend\n"},
+                                          {"c/__package.rb", "class C < PackageSpec\nend\n"}});
     auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
     auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
     ENFORCE(examplePkg.exists());

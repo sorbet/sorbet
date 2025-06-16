@@ -453,6 +453,9 @@ public:
                         // as a special-case: if we're converting a `test_import` to remove `only:`, then we want to
                         // re-insert it at this exact same point (since we sort those together.) Let's find the previous
                         // import!
+                        // TODO: we should find and delete just the `, only: ...` in this case, but that's slightly
+                        // tricky
+
                         if (importType == core::packages::ImportType::TestHelper) {
                             insertionLoc = {importLoc.file(), beginPos - 1, beginPos - 1};
                             break;
@@ -465,14 +468,14 @@ public:
 
                 auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
                 if (!importInfo.exists()) {
-                    importToInsertAfter = import.name.fullName.loc;
+                    importToInsertAfter = import.loc;
                     continue;
                 }
 
                 auto compareResult = orderImports(gs, info, importType != core::packages::ImportType::Normal,
                                                   importInfo, import.isTestImport());
                 if (compareResult == 1 || compareResult == 0) {
-                    importToInsertAfter = import.name.fullName.loc;
+                    importToInsertAfter = import.loc;
                 }
             }
             if (!importToInsertAfter.exists()) {
