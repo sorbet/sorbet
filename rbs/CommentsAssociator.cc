@@ -648,6 +648,11 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             walkNode(splat->var.get());
             consumeCommentsInsideNode(node, "splat");
         },
+        [&](parser::Super *super_) {
+            walkNodes(super_->args);
+            associateAssertionCommentsToNode(node);
+            consumeCommentsInsideNode(node, "super");
+        },
         [&](parser::Until *until) {
             associateAssertionCommentsToNode(node);
             walkNode(until->cond.get());
