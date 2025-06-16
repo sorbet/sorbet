@@ -129,8 +129,8 @@ string implementationOf(const core::Context ctx, core::MethodRef method) {
 
 enum class SplatKind { ARG, KWARG };
 
-std::pair<std::string, std::string> formatSplat(const core::ArgInfo *arg, SplatKind kd, const core::GlobalState &gs) {
-    auto rendered = arg->show(gs);
+pair<std::string, std::string> formatSplat(const core::ArgInfo &arg, SplatKind kd, const core::GlobalState &gs) {
+    auto rendered = arg.show(gs);
 
     std::string left;
 
@@ -151,7 +151,7 @@ std::pair<std::string, std::string> formatSplat(const core::ArgInfo *arg, SplatK
     // `core::Names::starStar`, which sounds complicated an error-prone. Since we have to render
     // the argument name anyway (so we can display the error message), we may as well do the stupid
     // check.
-    return rendered == left ? std::pair("", rendered) : std::pair(left, rendered);
+    return rendered == left ? pair("", rendered) : pair(left, rendered);
 }
 
 // This walks two positional argument lists to ensure that they're compatibly typed (i.e. that every argument in the
@@ -276,9 +276,9 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
     if (auto leftRest = left.pos.rest) {
         if (!right.pos.rest) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
-                auto splatParts = formatSplat(&leftRest->get(), SplatKind::ARG, ctx);
+                auto [prefix, argName] = formatSplat(leftRest->get(), SplatKind::ARG, ctx);
                 e.setHeader("{} method `{}` must accept {}`{}`", implementationOf(ctx, superMethod),
-                            superMethod.show(ctx), splatParts.first, splatParts.second);
+                            superMethod.show(ctx), prefix, argName);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
         }
@@ -385,9 +385,9 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         core::ErrorSection::Collector errorDetailsCollector;
         if (!right.kw.rest) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
-                auto splatParts = formatSplat(&leftRest->get(), SplatKind::KWARG, ctx);
+                auto [prefix, argName] = formatSplat(leftRest->get(), SplatKind::KWARG, ctx);
                 e.setHeader("{} method `{}` must accept {}`{}`", implementationOf(ctx, superMethod),
-                            superMethod.show(ctx), splatParts.first, splatParts.second);
+                            superMethod.show(ctx), prefix, argName);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
         } else if (!checkSubtype(ctx, *constr, right.kw.rest->get().type, method, leftRest->get().type, superMethod,
