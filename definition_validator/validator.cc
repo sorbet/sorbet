@@ -127,6 +127,33 @@ string implementationOf(const core::Context ctx, core::MethodRef method) {
     }
 }
 
+enum class SplatKind { ARG, KWARG };
+
+pair<std::string, std::string> formatSplat(const core::ArgInfo &arg, SplatKind kd, const core::GlobalState &gs) {
+    auto rendered = arg.show(gs);
+
+    std::string left;
+
+    switch (kd) {
+        case SplatKind::ARG:
+            left = "*";
+            break;
+        case SplatKind::KWARG:
+            left = "**";
+            break;
+    }
+
+    // We have no choice but to perform string comparison here because argument name normalization
+    // drops the information that a given splat arg may be anonymous.
+    //
+    // XXX cwong: This feels a little icky, but the alternative is to change name normalization to
+    // preserve the fact that a given arg was initially a `core::Names::star` or
+    // `core::Names::starStar`, which sounds complicated an error-prone. Since we have to render
+    // the argument name anyway (so we can display the error message), we may as well do the stupid
+    // check.
+    return rendered == left ? pair("", rendered) : pair(left, rendered);
+}
+
 // This walks two positional argument lists to ensure that they're compatibly typed (i.e. that every argument in the
 // implementing method is either the same or a supertype of the abstract or overridable definition)
 void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
@@ -249,8 +276,9 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
     if (auto leftRest = left.pos.rest) {
         if (!right.pos.rest) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("{} method `{}` must accept *`{}`", implementationOf(ctx, superMethod),
-                            superMethod.show(ctx), leftRest->get().show(ctx));
+                auto [prefix, argName] = formatSplat(leftRest->get(), SplatKind::ARG, ctx);
+                e.setHeader("{} method `{}` must accept {}`{}`", implementationOf(ctx, superMethod),
+                            superMethod.show(ctx), prefix, argName);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
         }
@@ -357,8 +385,9 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         core::ErrorSection::Collector errorDetailsCollector;
         if (!right.kw.rest) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("{} method `{}` must accept **`{}`", implementationOf(ctx, superMethod),
-                            superMethod.show(ctx), leftRest->get().show(ctx));
+                auto [prefix, argName] = formatSplat(leftRest->get(), SplatKind::KWARG, ctx);
+                e.setHeader("{} method `{}` must accept {}`{}`", implementationOf(ctx, superMethod),
+                            superMethod.show(ctx), prefix, argName);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
         } else if (!checkSubtype(ctx, *constr, right.kw.rest->get().type, method, leftRest->get().type, superMethod,
