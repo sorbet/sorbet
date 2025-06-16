@@ -1574,6 +1574,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::FileLiteral *fileLiteral) {
+                TRANSLATED_BY_PRISM(dctx, fileLiteral);
+
                 ExpressionPtr res = MK::String(loc, core::Names::currentFile());
                 result = std::move(res);
             },
@@ -2228,6 +2230,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::True *t) {
+                TRANSLATED_BY_PRISM(dctx, t);
+
                 auto res = MK::True(loc);
                 result = std::move(res);
             },
@@ -2453,6 +2457,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::EncodingLiteral *encodingLiteral) {
+                TRANSLATED_BY_PRISM(dctx, encodingLiteral);
+
                 auto recv = MK::Magic(loc);
                 result = MK::Send0(loc, std::move(recv), core::Names::getEncoding(), locZeroLen);
             },
