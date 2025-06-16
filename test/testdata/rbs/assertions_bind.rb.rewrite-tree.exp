@@ -182,6 +182,16 @@ ensure
     end
   end
 
+  module <emptyTree>::<C TypeAlias><<C <todo sym>>> < ()
+    <cast:bind>(<self>, <todo sym>, <emptyTree>::<C type foo>)
+
+    <emptyTree>::<C type foo> = ::<root>::<C T>.type_alias() do ||
+      <emptyTree>::<C String>
+    end
+
+    <emptyTree>::<C T>.reveal_type(<self>)
+  end
+
   module <emptyTree>::<C Errors><<C <todo sym>>> < ()
     <cast:bind>(<self>, <todo sym>, ::<root>::<C T>.untyped())
 

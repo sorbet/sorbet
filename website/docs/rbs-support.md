@@ -785,6 +785,54 @@ Fixed bounds can be specified using `=`:
 class Box; end
 ```
 
+## Type aliases
+
+Type aliases can be declared using a standalone comment:
+
+```ruby
+#: type int_or_string = Integer | String
+
+#: (int_or_string) -> void
+def foo(x); end
+
+foo(1) # no error
+foo("foo") # no error
+foo(nil) # error: Expected `T.any(Integer, String)` but found `NilClass` for argument `x`
+```
+
+Multiline syntax is also supported:
+
+```ruby
+#: type int_or_string =
+#|   Integer |
+#|   String
+```
+
+RBS type aliases are scoped to the class or module where they are declared:
+
+```ruby
+class Foo
+  #: type int_or_string =
+  #|   Integer |
+  #|   String
+
+  # ok
+  #: (int_or_string) -> void
+  def foo(x); end
+
+  class Bar
+    # ok
+    #: (int_or_string) -> void
+    def bar(x); end
+  end
+end
+
+
+#: (int_or_string) -> void
+#   ^^^^^^^^^^^^^ error: Unable to resolve constant `type int_or_string`
+def baz(x); end
+```
+
 ## Special behaviors
 
 The `#:` comment must come **immediately** before the following method definition. If there is a blank line between the comment and method definition, the comment will be ignored.
@@ -827,17 +875,6 @@ end
 
 #: (Foo) -> void
 def takes_foo(x); end
-```
-
-### Alias types
-
-Alias types are not supported, use the equivalent Sorbet syntax instead:
-
-```ruby
-Bool = T.type_alias { T::Boolean }
-
-sig { params(x: Bool).void }
-def foo(x); end
 ```
 
 ### Literal types

@@ -87,6 +87,17 @@ unique_ptr<parser::Node> TypeToParserNode::typeNameType(const rbs_type_name_t *t
     return parser::MK::Const(loc, move(parent), nameConstant);
 }
 
+unique_ptr<parser::Node> TypeToParserNode::aliasType(const rbs_types_alias_t *node, core::LocOffsets loc,
+                                                     const RBSDeclaration &declaration) {
+    auto parent = nullptr;
+    auto nameView = parser.resolveConstant(node->name->name);
+    auto nameStr = "type " + string(nameView);
+    auto nameUTF8 = ctx.state.enterNameUTF8(nameStr);
+    auto nameConstant = ctx.state.enterNameConstant(nameUTF8);
+
+    return parser::MK::Const(loc, move(parent), nameConstant);
+}
+
 unique_ptr<parser::Node> TypeToParserNode::classInstanceType(const rbs_types_class_instance_t *node,
                                                              core::LocOffsets loc, const RBSDeclaration &declaration) {
     auto argsValue = node->args;
@@ -329,10 +340,7 @@ unique_ptr<parser::Node> TypeToParserNode::toParserNode(const rbs_node_t *node, 
     auto nodeLoc = declaration.typeLocFromRange(((rbs_node_t *)node)->location->rg);
     switch (node->type) {
         case RBS_TYPES_ALIAS: {
-            if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
-                e.setHeader("RBS aliases are not supported");
-            }
-            return parser::MK::TUntyped(nodeLoc);
+            return aliasType((rbs_types_alias_t *)node, nodeLoc, declaration);
         }
         case RBS_TYPES_BASES_ANY:
             return parser::MK::TUntyped(nodeLoc);

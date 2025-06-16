@@ -424,7 +424,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-    <self>.returns(::<root>::<C T>.untyped())
+    <self>.returns(<emptyTree>::<C type foo>)
   end
 
   def alias_type1<<todo method>>(&<blk>)

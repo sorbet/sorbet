@@ -583,6 +583,7 @@ NameDef names[] = {
 
     // RBS
     {"RBSBind", "<RBSBind>", true},
+    {"RBSTypeAlias", "<RBSTypeAlias>", true},
 
     // RBS synthetic generics
     {"syntheticSquareBrackets", "<syntheticSquareBrackets>"},
