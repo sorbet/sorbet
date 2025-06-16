@@ -1824,11 +1824,15 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
         return make_unique<LVarLhs>(location, core::Names::dynamicConstAssign());
     }
 
+    auto constantName = gs.enterNameConstant(name);
+
     auto constexpr isConstantPath = is_same_v<PrismLhsNode, pm_constant_path_target_node> ||
                                     is_same_v<PrismLhsNode, pm_constant_path_write_node> ||
                                     is_same_v<PrismLhsNode, pm_constant_path_node>;
 
     unique_ptr<parser::Node> parent;
+    ast::ExpressionPtr parentExpr = nullptr;
+
     if constexpr (isConstantPath) { // Handle constant paths, has a parent node that needs translation.
         if (auto prismParentNode = node->parent; prismParentNode != nullptr) {
             // This constant reference is chained onto another constant reference.
@@ -1839,9 +1843,11 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
             //  /  \
             // A   ::B
             parent = translate(prismParentNode);
+            parentExpr = parent ? parent->takeDesugaredExpr() : nullptr;
         } else { // This is the root of a fully qualified constant reference, like `::A`.
             auto delimiterLoc = translateLoc(node->delimiter_loc); // The location of the `::`
             parent = make_unique<parser::Cbase>(delimiterLoc);
+            parentExpr = MK::Constant(delimiterLoc, core::Symbols::root());
         }
     } else { // Handle plain constants like `A`, that aren't part of a constant path.
         static_assert(
@@ -1858,9 +1864,15 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
             location = translateLoc(node->name_loc);
         }
         parent = nullptr;
+        parentExpr = MK::EmptyTree();
     }
 
-    return make_unique<SorbetLHSNode>(location, move(parent), gs.enterNameConstant(name));
+    if (parentExpr != nullptr) {
+        ast::ExpressionPtr desugaredExpr = MK::UnresolvedConstant(location, move(parentExpr), constantName);
+        return make_node_with_expr<SorbetLHSNode>(move(desugaredExpr), location, move(parent), constantName);
+    } else {
+        return make_unique<SorbetLHSNode>(location, move(parent), constantName);
+    }
 }
 
 core::NameRef Translator::translateConstantName(pm_constant_id_t constantId) {
