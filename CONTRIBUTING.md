@@ -46,22 +46,22 @@ Please refer to our [website style guide](website/style-guide.md).
 
 ## ... a bug fix, new feature, or refactor of Sorbet itself
 
-We are **very particular** about changes to Sorbet itself. Sorbet itself is something that tons of people use and love every day, so when we change it we want to make sure to preserve the good parts and play to Sorbet's strengths.
-
 **Introducing yourself** and your intention to change Sorbet is the best way to get started. You can always find us in in the [#internals](https://sorbet-ruby.slack.com/archives/CFT8Y4909) channel of the [Sorbet Slack](https://sorbet.org/slack).
 
-It puts us in an awkward position when the first time we hear from you is after you've opened a PR with a few hundred or few thousand lines of new code written in a vacuum, and the PR stems from a fundamental misunderstanding that requires going back to the drawing board!
+We'd love to have a brief conversation with you about the change you're considering making. We are **very particular** about changes to Sorbet itself, because Sorbet itself is something that tons of people use and love every day. We want to make sure that changes preserve the good parts and play to Sorbet's strengths. We love chatting with people looking to change Sorbet, because your enthusiasm for making Sorbet better energizes us as well! Successful contributions happen tend to come when we've helped start people down the right direction.
 
-We love getting to chat with people looking to change Sorbet, because your enthusiasm for making Sorbet better energizes us as well! Successful contributions happen tend to come when we've helped start people down the right direction. Usually, this means that we chat briefly, with a goal of:
+Starting a conversation on Slack is typically better than commenting on old issues—not all GitHub issue comments need a reply (many issue comments simply archive information for the next person who will read the issue). By contrast, Slack discussions carry a more direct need for a reply. You're welcome to try asking on the GitHub issue first, but consider switching to Slack if you don't get a response within a few days.
 
-- Agreeing on a definition of the problem (usually an issue) and motivation
-- Having a discussion about the solution space and potential alternatives
-- Double-checking implementation considerations that preclude otherwise-good solutions
-- Estimating difficulty and other nuance in the change itself
+Usually, we want to chat briefly so that we can:
+
+- Agree on a definition of the problem (usually an issue) and motivation
+- Have a discussion about the solution space and potential alternatives
+- Double-check implementation considerations that preclude otherwise-good solutions
+- Estimate difficulty and other nuance in the change itself
+
+It's fine to build a prototype of a change _before_ reaching out to us if you'd like, but it puts us in an awkward position when the first time we hear from you is after you've opened a PR with a few hundred or few thousand lines of new "ready for review" code written in a vacuum, but the PR stems from a fundamental misunderstanding about something that requires going back to the drawing board.
 
 Please, please, please **introduce yourself** before making large changes, so we can start these kinds of conversations!
-
-Asking on Slack is typically better than commenting on old issues, because it can be hard to keep up with discussions on GitHub issues (there are so many, and people sometimes get into lengthy back-and-forth's which drown out productive discussions). You're welcome to try asking on the GitHub issue first, but consider switching to Slack if you don't get a response within a few days.
 
 
 # Choosing what to work on
@@ -106,11 +106,11 @@ Changes to user-facing syntax **always** require a [design proposal](#design-pro
 
 ## Other kinds of changes
 
-Please [introduce yourself](#https://git.corp.stripe.com/gist/#-a-bug-fix-new-feature-or-refactor-of-sorbet-itself) and we'll be happy to help you figure out what the best next step would be.
+Please [introduce yourself](#https://git.corp.stripe.com/gist/#-a-bug-fix-new-feature-or-refactor-of-sorbet-itself) and we'll be happy to help you figure out what the best first step for making a change would be.
 
 There are many kinds of changes that Sorbet sees, from tiny bug fixes, error message improvements, and variable name changes, to large new features and backwards-incompatible type system improvements—it's hard to give advice for all of them. If the kind of change you want to make doesn't align with any of the previous sections, please reach out.
 
-Some common next steps might be
+Some common next steps might be:
 
 - The change is a change we definitely want, but it needs a [design proposal](#design-proposals-scoping-large-features) before work should begin.
 
