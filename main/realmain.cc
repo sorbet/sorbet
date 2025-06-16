@@ -587,7 +587,7 @@ int realmain(int argc, char *argv[]) {
                 auto foundHashes = nullptr;
                 auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
                 ENFORCE(!canceled, "There's no cancellation in batch mode");
-                pipeline::buildPackageDB(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
+                pipeline::buildPackageDB(*gs, absl::MakeSpan(indexed), inputFilesSpan, opts, *workers);
             }
 
             auto nonPackageIndexedResult =
