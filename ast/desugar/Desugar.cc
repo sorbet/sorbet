@@ -2462,6 +2462,11 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = make_expression<ConstantLit>(resolvedConst->loc, std::move(resolvedConst->symbol));
             },
 
+            [&](parser::NodeWithExpr *nodeWithExpr) {
+                result = nodeWithExpr->takeDesugaredExpr();
+                ENFORCE(result != nullptr, "NodeWithExpr has no cached desugared expr");
+            },
+
             [&](parser::BlockPass *blockPass) { Exception::raise("Send should have already handled the BlockPass"); },
             [&](parser::Node *node) { Exception::raise("Unimplemented Parser Node: {}", node->nodeName()); });
         ENFORCE(result.get() != nullptr, "desugar result unset");

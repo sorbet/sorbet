@@ -7,6 +7,26 @@ using namespace std;
 
 namespace sorbet::parser::Prism {
 
+using sorbet::ast::MK;
+
+// Base case, helper for the function below.
+bool hasExpr() {
+    return true;
+}
+
+// Returns true if all nodes have a desugared expr.
+// Call this with all of a node's children, to check if that node can be desugared.
+template <typename... Rest> bool hasExpr(const std::unique_ptr<parser::Node> &first, const Rest &...rest) {
+    return first->hasDesugaredExpr() && hasExpr(rest...);
+}
+
+// Allocates a new `NodeWithExpr` with a pre-computed `ExpressionPtr` AST.
+template <typename SorbetNode, typename... TArgs>
+unique_ptr<NodeWithExpr> make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) {
+    auto whiteQuarkNode = make_unique<SorbetNode>(std::forward<TArgs>(args)...);
+    return make_unique<NodeWithExpr>(move(whiteQuarkNode), move(desugaredExpr));
+}
+
 // Indicates that a particular code path should never be reached, with an explanation of why.
 // Throws a `sorbet::SorbetException` when triggered to help with debugging.
 template <typename... TArgs>
