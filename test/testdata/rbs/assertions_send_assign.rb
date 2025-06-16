@@ -23,6 +23,18 @@ let3 = Let.new
 let3.foo.foo = "foo", "bar" #: Array[String]
 T.reveal_type(let3.foo) # error: Revealed type: `T.untyped`
 
+let4 = Let.new
+let4.foo = puts(
+  [], #: untyped
+)
+T.reveal_type(let4.foo) # error: Revealed type: `T.untyped`
+
+let5 = Let.new
+let5.foo = puts(
+  *[], #: untyped
+)
+T.reveal_type(let5.foo) # error: Revealed type: `T.untyped`
+
 class BracketsAssign
   #: (*untyped) -> void
   def []=(*args); end
@@ -41,6 +53,15 @@ brackets_assign[:a, :b] = "baz" #: as untyped
 
 brackets_assign[:a, :b, :c] = "qux" #: as untyped
   .unexisting_method
+
+brackets_assign[:a, :b] =
+  "bar",
+  "foo" #: as untyped
+
+brackets_assign[:a, :b] =
+  "bar",
+  "foo" #: as untyped
+    .unexisting_method
 
 self #: as untyped
   .unexisting_method = 42

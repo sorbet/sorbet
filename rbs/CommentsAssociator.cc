@@ -629,15 +629,12 @@ void CommentsAssociator::walkNode(parser::Node *node) {
                 auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
                 consumeCommentsBetweenLines(beginLine, endLine, "send");
             } else {
-                if (send->method == core::Names::squareBracketsEq()) {
-                    // This is a `foo[key]=(y)` method, walk y for chained method calls
+                if (send->method == core::Names::squareBracketsEq() || send->method.isSetter(ctx.state)) {
+                    // This is an assign through a send, either: `foo[key]=(y)` or `foo.x=(y)`
+                    // Note: the parser transforms `foo.x = 1, 2` into `foo.x= [1, 2]` so we always have at most one arg
                     walkNode(send->args.back().get());
                     walkNode(send->receiver.get());
-                    return;
-                } else if (send->method.isSetter(ctx.state) && send->args.size() == 1) {
-                    // This is a `foo.x=(y)` method, we treat it as a `x = y` assignment
-                    associateAssertionCommentsToNode(send->args[0].get());
-                    walkNode(send->receiver.get());
+                    consumeCommentsInsideNode(node, "send");
                     return;
                 }
                 associateAssertionCommentsToNode(send);
