@@ -93,7 +93,7 @@ class SplatChild2 < SplatParent
 end
 
 # https://github.com/sorbet/sorbet/issues/1215
-class AnonymousSplatParent
+class AnonArgParent
   extend T::Sig
   extend T::Helpers
   abstract!
@@ -104,12 +104,18 @@ class AnonymousSplatParent
   sig { abstract.void }
   def bar(**); end
 #         ^^ error: Malformed `sig`. Type not specified for argument `**`
+
+  sig { abstract.void }
+  def baz(&); end
+#         ^ error: Malformed `sig`. Type not specified for argument `&`
 end
 
-class AnonymousSplatChild < AnonymousSplatParent
-  def foo(); end # error: Implementation of abstract method `AnonymousSplatParent#foo` must accept *
+class AnonArgChild < AnonArgParent
+  def foo(); end # error: Implementation of abstract method `AnonArgParent#foo` must accept `*`
 
-  def bar(); end # error: Implementation of abstract method `AnonymousSplatParent#bar` must accept **
+  def bar(); end # error: Implementation of abstract method `AnonArgParent#bar` must accept `**`
+
+  def baz(); end # error: Implementation of abstract method `AnonArgParent#baz` must explicitly name a block argument
 end
 
 module NoSigInInterface
