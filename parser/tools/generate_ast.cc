@@ -98,7 +98,10 @@ NodeDef nodes[] = {
     {
         "Block",
         "block",
-        vector<FieldDef>({{"send", FieldType::Node}, {"args", FieldType::Node}, {"body", FieldType::Node}}),
+        vector<FieldDef>({{"send", FieldType::Node},
+                          {"args", FieldType::Node},
+                          {"body", FieldType::Node},
+                          {"style", FieldType::Uint}}),
     },
     // Wraps a `&foo` argument in an argument list
     {
@@ -553,7 +556,10 @@ NodeDef nodes[] = {
     {
         "NumBlock",
         "numblock",
-        vector<FieldDef>({{"send", FieldType::Node}, {"args", FieldType::Node}, {"body", FieldType::Node}}),
+        vector<FieldDef>({{"send", FieldType::Node},
+                          {"args", FieldType::Node},
+                          {"body", FieldType::Node},
+                          {"style", FieldType::Uint}}),
     },
     // foo += 6 for += and other ops
     {
