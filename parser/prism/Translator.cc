@@ -16,6 +16,13 @@ namespace sorbet::parser::Prism {
 using namespace sorbet::ast;
 using sorbet::ast::MK;
 
+// Allocates a new `NodeWithExpr` with a pre-computed `ExpressionPtr` AST.
+template <typename SorbetNode, typename... TArgs>
+unique_ptr<NodeWithExpr> make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) {
+    auto whiteQuarkNode = make_unique<SorbetNode>(std::forward<TArgs>(args)...);
+    return make_unique<NodeWithExpr>(move(whiteQuarkNode), move(desugaredExpr));
+}
+
 // Indicates that a particular code path should never be reached, with an explanation of why.
 // Throws a `sorbet::SorbetException` when triggered to help with debugging.
 template <typename... TArgs>

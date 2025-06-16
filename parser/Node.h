@@ -22,16 +22,11 @@ public:
     virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0) = 0;
     virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0) = 0;
-    virtual std::string nodeName() const = 0;
+    virtual std::string nodeName() = 0;
     core::LocOffsets loc;
-    std::unique_ptr<Node> deepCopy() const;
 
-    virtual ast::ExpressionPtr takeDesugaredExpr() {
+    virtual ast::ExpressionPtr takeCachedDesugaredExpr() {
         return nullptr;
-    }
-
-    virtual bool hasDesugaredExpr() {
-        return false;
     }
 
 protected:
@@ -76,12 +71,12 @@ public:
         return wrappedNode->toWhitequark(gs, tabs);
     }
 
-    virtual std::string nodeName() const final {
+    virtual std::string nodeName() final {
         return wrappedNode->nodeName();
     }
 
-    virtual ast::ExpressionPtr takeDesugaredExpr() final {
-        // We know each `NodeAndExpr` object's `takeDesugaredExpr()` will be called at most once, either:
+    virtual ast::ExpressionPtr takeCachedDesugaredExpr() final {
+        // We know each `NodeAndExpr` object's `takeCachedDesugaredExpr()` will be called at most once, either:
         // 1. When its parent node is being translated below, and this value is used to create that parent's expr.
         // 2. When this node is visted by `node2TreeImpl` in `Runner.cc`, and this value is used in the fast-path.
         //
@@ -89,17 +84,18 @@ public:
         // and exclusive ownership to the caller.
         return std::move(this->desugaredExpr);
     }
-
-    virtual bool hasDesugaredExpr() final {
-        ENFORCE(this->desugaredExpr != nullptr, "NodeWithExpr has no cached desugared expr");
-        return true;
-    }
 };
 
 template <class To> To *cast_node(Node *what) {
-    static_assert(!std::is_pointer_v<To>, "To has to be a pointer");
-    static_assert(std::is_assignable_v<Node *&, To *>, "Ill Formed To, has to be a subclass of Expression");
-    static_assert(std::is_final_v<To>, "To is not final");
+    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
+    static_assert(std::is_assignable<Node *&, To *>::value, "Ill Formed To, has to be a subclass of Expression");
+#if __cplusplus >= 201402L
+    static_assert(std::is_final<To>::value, "To is not final");
+#elif __has_feature(is_final)
+    static_assert(__is_final(To), "To is not final");
+#else
+    static_assert(false);
+#endif
 
     if (auto casted = fast_cast<Node, To>(what)) {
         categoryCounterInc("cast_node", "correct");
@@ -107,10 +103,12 @@ template <class To> To *cast_node(Node *what) {
     }
 
     if (auto casted = fast_cast<Node, NodeWithExpr>(what)) {
-        categoryCounterInc("cast_node", "delegated");
+        categoryCounterInc("cast_node", "nullptr");
+        categoryCounterInc("cast_node_delegation", "delegated_to_wrapped_node");
         return cast_node<To>(casted->wrappedNode.get());
     } else {
-        categoryCounterInc("cast_node", "miss");
+        categoryCounterInc("cast_node", "nullptr");
+        categoryCounterInc("cast_node_delegation", "nullptr");
     }
 
     return nullptr;
