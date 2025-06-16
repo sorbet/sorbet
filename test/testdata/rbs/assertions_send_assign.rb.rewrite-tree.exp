@@ -77,5 +77,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   brackets_assign.[]=(:a, :b, ["bar", ::<root>::<C T>.unsafe("foo").unexisting_method()])
 
+  brackets_assign.[]=(<cast:cast>(:a, <todo sym>, <emptyTree>::<C String>), <cast:cast>(:b, <todo sym>, <emptyTree>::<C String>), ::<root>::<C T>.unsafe(["bar", "foo"]))
+
   ::<root>::<C T>.unsafe(<self>).unexisting_method=(42)
 end
