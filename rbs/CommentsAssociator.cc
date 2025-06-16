@@ -635,8 +635,10 @@ void CommentsAssociator::walkNode(parser::Node *node) {
                 //  * for `foo.x = 1, 2` the args are `[1, 2]`
                 //  * for `foo[k1, k2] = 1, 2` the args are `[k1, k2, [1, 2]]`
                 //
-                // So we always apply the cast on the last arg.
-                walkNode(send->args.back().get());
+                // We always apply the cast starting from the last arg.
+                for (auto it = send->args.rbegin(); it != send->args.rend(); ++it) {
+                    walkNode((*it).get());
+                }
                 walkNode(send->receiver.get());
                 consumeCommentsInsideNode(node, "send");
             } else {

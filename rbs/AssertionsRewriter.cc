@@ -484,7 +484,7 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
             send->receiver = rewriteNode(move(send->receiver));
 
             if (send->method == core::Names::squareBracketsEq() || send->method.isSetter(ctx.state)) {
-                send->args.back() = rewriteNode(move(send->args.back()));
+                rewriteNodes(&send->args);
                 result = move(node);
                 return;
             }

@@ -63,5 +63,10 @@ brackets_assign[:a, :b] =
   "foo" #: as untyped
     .unexisting_method
 
+brackets_assign[
+  :a, #: as String
+  :b, #: as String
+] = "bar", "foo" #: as untyped
+
 self #: as untyped
   .unexisting_method = 42
