@@ -103,4 +103,27 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     return result;
 }
 
+UnorderedMap<MangledName, Condensation::Traversal::LayerInfo>
+Condensation::Traversal::buildLayerMapping(const core::GlobalState &gs) const {
+    UnorderedMap<MangledName, LayerInfo> result;
+
+    int ix = -1;
+    for (auto layer : this->parallel) {
+        ++ix;
+        for (auto &scc : layer) {
+            if (scc.isTest) {
+                for (auto name : scc.members) {
+                    result[name].testLayer = ix;
+                }
+            } else {
+                for (auto name : scc.members) {
+                    result[name].applicationLayer = ix;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
 } // namespace sorbet::core::packages
