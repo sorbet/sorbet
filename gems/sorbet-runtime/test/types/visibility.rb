@@ -1,0 +1,56 @@
+# frozen_string_literal: true
+require_relative '../test_helper'
+
+class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
+  it "allows private/private overrides" do
+    parent = Class.new do
+      extend T::Sig, T::Helpers
+      abstract!
+      sig { abstract.returns(Integer) }
+      private def foo; end
+    end
+    child = Class.new(parent) do
+      extend T::Sig, T::Helpers
+      sig { override.returns(Integer) }
+      private def foo; 0; end
+    end
+
+    T::Private::Abstract::Validate.validate_subclass(child)
+  end
+
+  it "allows private/private overrides" do
+    parent = Class.new do
+      extend T::Sig, T::Helpers
+      abstract!
+      sig { abstract.returns(Integer) }
+      private def foo; end
+    end
+    child = Class.new(parent) do
+      extend T::Sig, T::Helpers
+      sig { override.returns(Integer) }
+      def foo; 0; end
+    end
+
+    T::Private::Abstract::Validate.validate_subclass(child)
+  end
+
+  it "errors if the override is less permissive than the base" do
+    parent = Class.new do
+      extend T::Sig, T::Helpers
+      abstract!
+      sig { abstract.returns(Integer) }
+      def foo; end
+    end
+    child = Class.new(parent) do
+      extend T::Sig, T::Helpers
+      sig { override.returns(Integer) }
+      private def foo; 0; end
+    end
+
+    err = assert_raises(RuntimeError) do
+      T::Private::Abstract::Validate.validate_subclass(child)
+    end
+    assert_includes(err.message, "Incompatible visibility")
+    assert_includes(err.message, "at least as permissive")
+  end
+end
