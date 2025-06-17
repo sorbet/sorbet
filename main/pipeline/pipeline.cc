@@ -749,6 +749,80 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
     }
 }
 
+vector<absl::Span<core::FileRef>> condensationLayers(const core::GlobalState &gs, absl::Span<core::FileRef> sourceFiles,
+                                                     const options::Options &opts) {
+    Timer timeit(gs.tracer(), "condensationLayers");
+
+    if (!opts.cacheSensitiveOptions.stripePackages) {
+        return {absl::MakeSpan(sourceFiles)};
+    }
+
+    auto &db = gs.packageDB();
+    auto traversal = db.condensation().computeTraversal(gs);
+
+    vector<uint32_t> fileToLayer(gs.filesUsed());
+    {
+        Timer timeit(gs.tracer(), "condensationLayers.layerMapping");
+
+        auto layerMapping = traversal.buildLayerMapping(gs);
+
+        int ix = 0;
+        for (auto &file : gs.getFiles().subspan(1)) {
+            core::FileRef fref(ix);
+            auto pkgName = db.getPackageNameForFile(fref);
+            if (!pkgName.exists()) {
+                // This is an unpackaged file, so we unconditionally put it first.
+                fileToLayer[ix] = 0;
+                continue;
+            }
+
+            // We add 1 to the layers here to ensure that un-packaged code is always first.
+            auto &info = layerMapping[pkgName];
+            if (file->isPackagedTest()) {
+                fileToLayer[ix] = info.testLayer + 1;
+            } else {
+                fileToLayer[ix] = info.applicationLayer + 1;
+            }
+        }
+    }
+
+    // Order by layer first, then file id.
+    fast_sort(sourceFiles, [&fileToLayer](auto l, auto r) -> bool {
+        auto lid = l.id();
+        auto rid = r.id();
+        auto lLayer = fileToLayer[lid];
+        auto rLayer = fileToLayer[rid];
+        return std::tie(lLayer, lid) < std::tie(rLayer, rid);
+    });
+
+    // Reserve enough space for all the layers of the condensation traversal, plus one more for unpackaged code.
+    auto maxLayers = traversal.parallel.size() + 1;
+    vector<absl::Span<core::FileRef>> result;
+    result.reserve(maxLayers);
+
+    auto currentLayer = 0;
+    int start = 0;
+    int length = 0;
+    for (auto f : sourceFiles) {
+        ++length;
+        auto layer = fileToLayer[f.id()];
+        if (layer != currentLayer) {
+            result.emplace_back(absl::MakeSpan(sourceFiles).subspan(start, length));
+            currentLayer = layer;
+            start += length;
+            length = 0;
+        }
+    }
+
+    if (length > 0) {
+        result.emplace_back(absl::MakeSpan(sourceFiles).subspan(start, length));
+    }
+
+    ENFORCE(result.size() <= maxLayers);
+
+    return result;
+}
+
 // packager intentionally runs outside of rewriter so that its output does not get cached.
 // TODO(jez) How much of this still needs to be outside of rewriter?
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
