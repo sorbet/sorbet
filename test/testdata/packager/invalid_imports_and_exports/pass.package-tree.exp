@@ -29,7 +29,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.test_import(::<PackageSpecRegistry>::<C C>)
 
-    <self>.test_import(::<PackageSpecRegistry>::<C C>)
+    <self>.test_import(::<PackageSpecRegistry>::<C C>, :only, :A_MYSTERIOUS_PURPOSE)
+
+    <self>.test_import(::<PackageSpecRegistry>::<C C>, :only, "something else")
+
+    <self>.test_import(::<PackageSpecRegistry>::<C C>, :only, <emptyTree>::<C Kernel>.lambda() do ||
+        "naught"
+      end)
+
+    <self>.test_import(::<PackageSpecRegistry>::<C C>, :only, "test_rb", :only, "test_rb")
+
+    <self>.test_import(::<PackageSpecRegistry>::<C C>, :with, "cheese")
   end
 end
 # -- test/testdata/packager/invalid_imports_and_exports/b/__package.rb --

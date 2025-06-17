@@ -166,13 +166,13 @@ TEST_CASE("Simple add import") {
     ENFORCE(examplePkg.exists());
     ENFORCE(myPkg.exists());
 
-    auto addImport = myPkg.addImport(gs, examplePkg, false);
+    auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::Normal);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
     auto replaced = applySuggestion(gs, *addImport);
     CHECK_EQ(expected, replaced);
 }
 
-TEST_CASE("Simple test import") {
+TEST_CASE("Simple test helper import") {
     core::GlobalState gs(errorQueue);
     makeDefaultPackagerGlobalState(gs);
 
@@ -192,7 +192,33 @@ TEST_CASE("Simple test import") {
     ENFORCE(examplePkg.exists());
     ENFORCE(myPkg.exists());
 
-    auto addImport = myPkg.addImport(gs, examplePkg, true);
+    auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::TestHelper);
+    ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = applySuggestion(gs, *addImport);
+    CHECK_EQ(expected, replaced);
+}
+
+TEST_CASE("Simple test unit import") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs);
+
+    string pkg_source = "class MyPackage < PackageSpec\n"
+                        "  import SomethingElse\n"
+                        "end\n";
+
+    string expected = "class MyPackage < PackageSpec\n"
+                      "  import SomethingElse\n"
+                      "  test_import ExamplePackage, only: \"test_rb\"\n"
+                      "end\n";
+
+    auto parsedFiles =
+        enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
+    ENFORCE(examplePkg.exists());
+    ENFORCE(myPkg.exists());
+
+    auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::TestUnit);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
     auto replaced = applySuggestion(gs, *addImport);
     CHECK_EQ(expected, replaced);
@@ -218,7 +244,7 @@ TEST_CASE("Add import with only existing exports") {
     ENFORCE(examplePkg.exists());
     ENFORCE(myPkg.exists());
 
-    auto addImport = myPkg.addImport(gs, examplePkg, false);
+    auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::Normal);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
     auto replaced = applySuggestion(gs, *addImport);
     CHECK_EQ(expected, replaced);
@@ -254,7 +280,7 @@ TEST_CASE("Add import and test_import to package with imports and test imports")
                           "  test_import C\n"
                           "  test_import D\n"
                           "end\n";
-        auto addImport = myPkg.addImport(gs, examplePkg, false);
+        auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::Normal);
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
         auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
@@ -268,7 +294,7 @@ TEST_CASE("Add import and test_import to package with imports and test imports")
                           "  test_import D\n"
                           "  test_import ExamplePackage\n"
                           "end\n";
-        auto addImport = myPkg.addImport(gs, examplePkg, true);
+        auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::TestHelper);
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
         auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
@@ -295,7 +321,7 @@ TEST_CASE("Add test import with only existing exports") {
     ENFORCE(examplePkg.exists());
     ENFORCE(myPkg.exists());
 
-    auto addImport = myPkg.addImport(gs, examplePkg, true);
+    auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::TestHelper);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
     auto replaced = applySuggestion(gs, *addImport);
     CHECK_EQ(expected, replaced);
@@ -319,7 +345,7 @@ TEST_CASE("Add import to package with neither imports nor exports") {
     ENFORCE(examplePkg.exists());
     ENFORCE(myPkg.exists());
 
-    auto addImport = myPkg.addImport(gs, examplePkg, false);
+    auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::Normal);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
     auto replaced = applySuggestion(gs, *addImport);
     CHECK_EQ(expected, replaced);
@@ -343,7 +369,31 @@ TEST_CASE("Add test import to package with neither imports nor exports") {
     ENFORCE(examplePkg.exists());
     ENFORCE(myPkg.exists());
 
-    auto addImport = myPkg.addImport(gs, examplePkg, true);
+    auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::TestHelper);
+    ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = applySuggestion(gs, *addImport);
+    CHECK_EQ(expected, replaced);
+}
+
+TEST_CASE("Add test unit import to package with neither imports nor exports") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs);
+
+    string pkg_source = "class MyPackage < PackageSpec\n"
+                        "end\n";
+
+    string expected = "class MyPackage < PackageSpec\n"
+                      "  test_import ExamplePackage, only: \"test_rb\"\n"
+                      "end\n";
+
+    auto parsedFiles =
+        enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
+    ENFORCE(examplePkg.exists());
+    ENFORCE(myPkg.exists());
+
+    auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::TestUnit);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
     auto replaced = applySuggestion(gs, *addImport);
     CHECK_EQ(expected, replaced);
@@ -464,7 +514,7 @@ TEST_CASE("Add imports to strict_dependencies 'false' package") {
     {
         auto &falsePkgB = packageInfoFor(gs, parsedFiles[5].file);
         ENFORCE(falsePkgB.exists());
-        auto addImport = myPkg.addImport(gs, falsePkgB, false);
+        auto addImport = myPkg.addImport(gs, falsePkgB, core::packages::ImportType::Normal);
         string expected =
             makePackageRB("MyPackage", "false", "app",
                           {"FalsePackageA", "FalsePackageB", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
@@ -476,7 +526,7 @@ TEST_CASE("Add imports to strict_dependencies 'false' package") {
     {
         auto &layeredPkgB = packageInfoFor(gs, parsedFiles[6].file);
         ENFORCE(layeredPkgB.exists());
-        auto addImport = myPkg.addImport(gs, layeredPkgB, false);
+        auto addImport = myPkg.addImport(gs, layeredPkgB, core::packages::ImportType::Normal);
         string expected =
             makePackageRB("MyPackage", "false", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA", "LayeredPackageB"});
@@ -488,7 +538,7 @@ TEST_CASE("Add imports to strict_dependencies 'false' package") {
     {
         auto &layeredDagPkgB = packageInfoFor(gs, parsedFiles[7].file);
         ENFORCE(layeredDagPkgB.exists());
-        auto addImport = myPkg.addImport(gs, layeredDagPkgB, false);
+        auto addImport = myPkg.addImport(gs, layeredDagPkgB, core::packages::ImportType::Normal);
         string expected = makePackageRB(
             "MyPackage", "false", "app",
             {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA", "LayeredDagPackageB"});
@@ -500,7 +550,7 @@ TEST_CASE("Add imports to strict_dependencies 'false' package") {
     {
         auto &dagPkgB = packageInfoFor(gs, parsedFiles[8].file);
         ENFORCE(dagPkgB.exists());
-        auto addImport = myPkg.addImport(gs, dagPkgB, false);
+        auto addImport = myPkg.addImport(gs, dagPkgB, core::packages::ImportType::Normal);
         string expected =
             makePackageRB("MyPackage", "false", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA", "DagPackageB"});
@@ -532,7 +582,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered' package") {
     {
         auto &falsePkgB = packageInfoFor(gs, parsedFiles[5].file);
         ENFORCE(falsePkgB.exists());
-        auto addImport = myPkg.addImport(gs, falsePkgB, false);
+        auto addImport = myPkg.addImport(gs, falsePkgB, core::packages::ImportType::Normal);
         string expected =
             makePackageRB("MyPackage", "layered", "app",
                           {"FalsePackageA", "FalsePackageB", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
@@ -544,7 +594,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered' package") {
     {
         auto &layeredPkgB = packageInfoFor(gs, parsedFiles[6].file);
         ENFORCE(layeredPkgB.exists());
-        auto addImport = myPkg.addImport(gs, layeredPkgB, false);
+        auto addImport = myPkg.addImport(gs, layeredPkgB, core::packages::ImportType::Normal);
         string expected =
             makePackageRB("MyPackage", "layered", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "LayeredPackageB", "DagPackageA"});
@@ -556,7 +606,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered' package") {
     {
         auto &layeredDagPkgB = packageInfoFor(gs, parsedFiles[7].file);
         ENFORCE(layeredDagPkgB.exists());
-        auto addImport = myPkg.addImport(gs, layeredDagPkgB, false);
+        auto addImport = myPkg.addImport(gs, layeredDagPkgB, core::packages::ImportType::Normal);
         string expected = makePackageRB(
             "MyPackage", "layered", "app",
             {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "LayeredDagPackageB", "DagPackageA"});
@@ -568,7 +618,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered' package") {
     {
         auto &dagPkgB = packageInfoFor(gs, parsedFiles[8].file);
         ENFORCE(dagPkgB.exists());
-        auto addImport = myPkg.addImport(gs, dagPkgB, false);
+        auto addImport = myPkg.addImport(gs, dagPkgB, core::packages::ImportType::Normal);
         string expected =
             makePackageRB("MyPackage", "layered", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA", "DagPackageB"});
@@ -600,7 +650,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered_dag' package") {
     {
         auto &falsePkgB = packageInfoFor(gs, parsedFiles[5].file);
         ENFORCE(falsePkgB.exists());
-        auto addImport = myPkg.addImport(gs, falsePkgB, false);
+        auto addImport = myPkg.addImport(gs, falsePkgB, core::packages::ImportType::Normal);
         string expected =
             makePackageRB("MyPackage", "layered_dag", "app",
                           {"FalsePackageA", "FalsePackageB", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
@@ -612,7 +662,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered_dag' package") {
     {
         auto &layeredPkgB = packageInfoFor(gs, parsedFiles[6].file);
         ENFORCE(layeredPkgB.exists());
-        auto addImport = myPkg.addImport(gs, layeredPkgB, false);
+        auto addImport = myPkg.addImport(gs, layeredPkgB, core::packages::ImportType::Normal);
         string expected =
             makePackageRB("MyPackage", "layered_dag", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "LayeredPackageB", "DagPackageA"});
@@ -624,7 +674,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered_dag' package") {
     {
         auto &layeredDagPkgB = packageInfoFor(gs, parsedFiles[7].file);
         ENFORCE(layeredDagPkgB.exists());
-        auto addImport = myPkg.addImport(gs, layeredDagPkgB, false);
+        auto addImport = myPkg.addImport(gs, layeredDagPkgB, core::packages::ImportType::Normal);
         string expected = makePackageRB(
             "MyPackage", "layered_dag", "app",
             {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "LayeredDagPackageB", "DagPackageA"});
@@ -636,7 +686,7 @@ TEST_CASE("Add imports to strict_dependencies 'layered_dag' package") {
     {
         auto &dagPkgB = packageInfoFor(gs, parsedFiles[8].file);
         ENFORCE(dagPkgB.exists());
-        auto addImport = myPkg.addImport(gs, dagPkgB, false);
+        auto addImport = myPkg.addImport(gs, dagPkgB, core::packages::ImportType::Normal);
         string expected =
             makePackageRB("MyPackage", "layered_dag", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA", "DagPackageB"});
@@ -668,7 +718,7 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
     {
         auto &falsePkgB = packageInfoFor(gs, parsedFiles[5].file);
         ENFORCE(falsePkgB.exists());
-        auto addImport = myPkg.addImport(gs, falsePkgB, false);
+        auto addImport = myPkg.addImport(gs, falsePkgB, core::packages::ImportType::Normal);
         string expected =
             makePackageRB("MyPackage", "dag", "app",
                           {"FalsePackageA", "FalsePackageB", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA"});
@@ -680,7 +730,7 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
     {
         auto &layeredPkgB = packageInfoFor(gs, parsedFiles[6].file);
         ENFORCE(layeredPkgB.exists());
-        auto addImport = myPkg.addImport(gs, layeredPkgB, false);
+        auto addImport = myPkg.addImport(gs, layeredPkgB, core::packages::ImportType::Normal);
         string expected =
             makePackageRB("MyPackage", "dag", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "LayeredPackageB", "DagPackageA"});
@@ -692,7 +742,7 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
     {
         auto &layeredDagPkgB = packageInfoFor(gs, parsedFiles[7].file);
         ENFORCE(layeredDagPkgB.exists());
-        auto addImport = myPkg.addImport(gs, layeredDagPkgB, false);
+        auto addImport = myPkg.addImport(gs, layeredDagPkgB, core::packages::ImportType::Normal);
         string expected = makePackageRB(
             "MyPackage", "dag", "app",
             {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "LayeredDagPackageB", "DagPackageA"});
@@ -704,7 +754,7 @@ TEST_CASE("Add imports to strict_dependencies 'dag' package") {
     {
         auto &dagPkgB = packageInfoFor(gs, parsedFiles[8].file);
         ENFORCE(dagPkgB.exists());
-        auto addImport = myPkg.addImport(gs, dagPkgB, false);
+        auto addImport = myPkg.addImport(gs, dagPkgB, core::packages::ImportType::Normal);
         string expected =
             makePackageRB("MyPackage", "dag", "app",
                           {"FalsePackageA", "LayeredPackageA", "LayeredDagPackageA", "DagPackageA", "DagPackageB"});
@@ -758,7 +808,7 @@ TEST_CASE("Edge cases") {
         auto &layeredPkgA = packageInfoFor(gs, parsedFiles[2].file);
         ENFORCE(layeredPkgA.exists());
 
-        auto addImport = fakeImportPkg.addImport(gs, layeredPkgA, false);
+        auto addImport = fakeImportPkg.addImport(gs, layeredPkgA, core::packages::ImportType::Normal);
         string expected = makePackageRB("HasFakeImport", "false", "app", {"FakeImport", "LayeredPackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
         auto replaced = applySuggestion(gs, *addImport);
@@ -772,7 +822,7 @@ TEST_CASE("Edge cases") {
         auto &appPkg = packageInfoFor(gs, parsedFiles[4].file);
         ENFORCE(appPkg.exists());
 
-        auto addImport = libPkg.addImport(gs, appPkg, false);
+        auto addImport = libPkg.addImport(gs, appPkg, core::packages::ImportType::Normal);
         string expected = makePackageRB("LibPackage", "false", "lib", {"AppPackage", "FalsePackageA"});
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
         auto replaced = applySuggestion(gs, *addImport);
@@ -786,7 +836,7 @@ TEST_CASE("Edge cases") {
         auto &layeredPkgA = packageInfoFor(gs, parsedFiles[2].file);
         ENFORCE(layeredPkgA.exists());
 
-        auto addImport = hasCommentsPkg.addImport(gs, layeredPkgA, false);
+        auto addImport = hasCommentsPkg.addImport(gs, layeredPkgA, core::packages::ImportType::Normal);
         string expected = "class HasComments < PackageSpec\n"
                           "  layer 'app'\n"
                           "  strict_dependencies 'false'\n"
@@ -805,7 +855,7 @@ TEST_CASE("Edge cases") {
         auto &dagPkgA = packageInfoFor(gs, parsedFiles[7].file);
         ENFORCE(dagPkgA.exists());
 
-        auto addImport = hasTestImportsPkg.addImport(gs, dagPkgA, false);
+        auto addImport = hasTestImportsPkg.addImport(gs, dagPkgA, core::packages::ImportType::Normal);
         string expected =
             makePackageRB("HasTestImports", "dag", "app", {"DagPackageA"}, {"FalsePackageA", "LayeredPackageA"});
         auto replaced = applySuggestion(gs, *addImport);
@@ -819,7 +869,7 @@ TEST_CASE("Edge cases") {
         auto &falsePkgA = packageInfoFor(gs, parsedFiles[1].file);
         ENFORCE(falsePkgA.exists());
 
-        auto addImport = hasLayeringViolationsPkg.addImport(gs, falsePkgA, false);
+        auto addImport = hasLayeringViolationsPkg.addImport(gs, falsePkgA, core::packages::ImportType::Normal);
         string expected = makePackageRB("HasLayeringViolations", "false", "lib", {"AppPackage", "FalsePackageA"});
         auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
@@ -845,7 +895,7 @@ TEST_CASE("Convert test_import to import") {
         auto &layeredPkgA = packageInfoFor(gs, parsedFiles[2].file);
         ENFORCE(layeredPkgA.exists());
 
-        auto addImport = myPkg.addImport(gs, layeredPkgA, false);
+        auto addImport = myPkg.addImport(gs, layeredPkgA, core::packages::ImportType::Normal);
         string expected = "class MyPackage < PackageSpec\n"
                           "  strict_dependencies 'layered'\n"
                           "  layer 'app'\n"
@@ -858,6 +908,100 @@ TEST_CASE("Convert test_import to import") {
                           // TODO(neil): look into ways to modify the preview so we don't have this problem and we can
                           // delete the '\n' too
                           "\n"
+                          "end";
+        ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+        auto replaced = applySuggestion(gs, *addImport);
+        CHECK_EQ(expected, replaced);
+    }
+}
+
+TEST_CASE("Convert test unit import to test helper import") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs, LAYERS_LIB_APP);
+
+    string myPackage = "class MyPackage < PackageSpec\n"
+                       "  strict_dependencies 'layered'\n"
+                       "  layer 'app'\n"
+                       "  import FalsePackageA\n"
+                       "  import DagPackageA\n"
+                       "\n"
+                       "  test_import LayeredPackageA, only: \"test_rb\"\n"
+                       "end";
+    string myPackagePath = "my_package/__package.rb";
+
+    auto parsedFiles = enterPackages(gs, {{myPackagePath, myPackage},
+                                          {falsePackageAPath, falsePackageA},
+                                          {layeredPackageAPath, layeredPackageA},
+                                          {dagPackageAPath, dagPackageA}});
+
+    {
+        auto &myPkg = packageInfoFor(gs, parsedFiles[0].file);
+        ENFORCE(myPkg.exists());
+        auto &layeredPkgA = packageInfoFor(gs, parsedFiles[2].file);
+        ENFORCE(layeredPkgA.exists());
+
+        gs.tracer().error("before");
+        auto addImport = myPkg.addImport(gs, layeredPkgA, core::packages::ImportType::TestHelper);
+        gs.tracer().error("after");
+        string expected = "class MyPackage < PackageSpec\n"
+                          "  strict_dependencies 'layered'\n"
+                          "  layer 'app'\n"
+                          "  import FalsePackageA\n"
+                          "  import DagPackageA\n"
+                          "  test_import LayeredPackageA\n"
+                          // This extra line is not great, but if we change the autocorrect to delete the '\n'
+                          // after the test_import, the autocorrect show the next line in the preview, which would
+                          // make the user think that entire next line will be deleted, which is incorrect.
+                          // TODO(neil): look into ways to modify the preview so we don't have this problem and we can
+                          // delete the '\n' too
+                          "\n\n"
+                          "end";
+        ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+        auto replaced = applySuggestion(gs, *addImport);
+        CHECK_EQ(expected, replaced);
+    }
+}
+
+TEST_CASE("Convert test unit import to normal import") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs, LAYERS_LIB_APP);
+
+    string myPackage = "class MyPackage < PackageSpec\n"
+                       "  strict_dependencies 'layered'\n"
+                       "  layer 'app'\n"
+                       "  import FalsePackageA\n"
+                       "  import DagPackageA\n"
+                       "\n"
+                       "  test_import LayeredPackageA, only: \"test_rb\"\n"
+                       "end";
+    string myPackagePath = "my_package/__package.rb";
+
+    auto parsedFiles = enterPackages(gs, {{myPackagePath, myPackage},
+                                          {falsePackageAPath, falsePackageA},
+                                          {layeredPackageAPath, layeredPackageA},
+                                          {dagPackageAPath, dagPackageA}});
+
+    {
+        auto &myPkg = packageInfoFor(gs, parsedFiles[0].file);
+        ENFORCE(myPkg.exists());
+        auto &layeredPkgA = packageInfoFor(gs, parsedFiles[2].file);
+        ENFORCE(layeredPkgA.exists());
+
+        gs.tracer().error("before");
+        auto addImport = myPkg.addImport(gs, layeredPkgA, core::packages::ImportType::Normal);
+        gs.tracer().error("after");
+        string expected = "class MyPackage < PackageSpec\n"
+                          "  strict_dependencies 'layered'\n"
+                          "  layer 'app'\n"
+                          "  import FalsePackageA\n"
+                          "  import LayeredPackageA\n"
+                          "  import DagPackageA\n"
+                          // This extra line is not great, but if we change the autocorrect to delete the '\n'
+                          // after the test_import, the autocorrect show the next line in the preview, which would
+                          // make the user think that entire next line will be deleted, which is incorrect.
+                          // TODO(neil): look into ways to modify the preview so we don't have this problem and we can
+                          // delete the '\n' too
+                          "\n\n"
                           "end";
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
         auto replaced = applySuggestion(gs, *addImport);
@@ -886,7 +1030,7 @@ TEST_CASE("Ordering by alphabetical") {
         ENFORCE(libFooB.exists());
 
         string expected = makePackageRB("MyPackage", "layered", "lib", {"Lib::Foo::B", "Lib::Foo::B::A"});
-        auto addImport = myPkg.addImport(gs, libFooB, false);
+        auto addImport = myPkg.addImport(gs, libFooB, core::packages::ImportType::Normal);
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
         auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
@@ -899,7 +1043,7 @@ TEST_CASE("Ordering by alphabetical") {
         ENFORCE(libFooC.exists());
 
         string expected = makePackageRB("MyPackage", "layered", "lib", {"Lib::Foo::B::A", "Lib::Foo::C"});
-        auto addImport = myPkg.addImport(gs, libFooC, false);
+        auto addImport = myPkg.addImport(gs, libFooC, core::packages::ImportType::Normal);
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
         auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
@@ -912,11 +1056,104 @@ TEST_CASE("Ordering by alphabetical") {
         ENFORCE(libFooD.exists());
 
         string expected = makePackageRB("MyPackage", "layered", "lib", {"Lib::Foo::D", "Lib::Foo::B::A"});
-        auto addImport = myPkg.addImport(gs, libFooD, false);
+        auto addImport = myPkg.addImport(gs, libFooD, core::packages::ImportType::Normal);
         ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
         auto replaced = applySuggestion(gs, *addImport);
         CHECK_EQ(expected, replaced);
     }
+}
+
+TEST_CASE("Adding a test unit import with existing imports") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs);
+
+    string pkg_source = "class MyPackage < PackageSpec\n"
+                        "  import A\n"
+                        "  import B\n"
+                        "end\n";
+
+    string expected = "class MyPackage < PackageSpec\n"
+                      "  import A\n"
+                      "  import B\n"
+                      "  test_import ExamplePackage, only: \"test_rb\"\n"
+                      "end\n";
+
+    auto parsedFiles = enterPackages(gs, {{examplePackagePath, examplePackage},
+                                          {"my_package/__package.rb", pkg_source},
+                                          {"a/__package.rb", "class A < PackageSpec\nend\n"},
+                                          {"b/__package.rb", "class B < PackageSpec\nend\n"}});
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
+    ENFORCE(examplePkg.exists());
+    ENFORCE(myPkg.exists());
+
+    auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::TestUnit);
+    ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = applySuggestion(gs, *addImport);
+    CHECK_EQ(expected, replaced);
+}
+
+TEST_CASE("Adding a test unit import with existing imports and test imports") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs);
+
+    string pkg_source = "class MyPackage < PackageSpec\n"
+                        "  import A\n"
+                        "  test_import B\n"
+                        "end\n";
+
+    string expected = "class MyPackage < PackageSpec\n"
+                      "  import A\n"
+                      "  test_import B\n"
+                      "  test_import ExamplePackage, only: \"test_rb\"\n"
+                      "end\n";
+
+    auto parsedFiles = enterPackages(gs, {{examplePackagePath, examplePackage},
+                                          {"my_package/__package.rb", pkg_source},
+                                          {"a/__package.rb", "class A < PackageSpec\nend\n"},
+                                          {"b/__package.rb", "class B < PackageSpec\nend\n"}});
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
+    ENFORCE(examplePkg.exists());
+    ENFORCE(myPkg.exists());
+
+    auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::TestUnit);
+    ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = applySuggestion(gs, *addImport);
+    CHECK_EQ(expected, replaced);
+}
+
+TEST_CASE("Adding a test unit import with existing imports, test imports, and test unit imports") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs);
+
+    string pkg_source = "class MyPackage < PackageSpec\n"
+                        "  import A\n"
+                        "  test_import B\n"
+                        "  test_import C, only: \"test_rb\"\n"
+                        "end\n";
+
+    string expected = "class MyPackage < PackageSpec\n"
+                      "  import A\n"
+                      "  test_import B\n"
+                      "  test_import C, only: \"test_rb\"\n"
+                      "  test_import ExamplePackage, only: \"test_rb\"\n"
+                      "end\n";
+
+    auto parsedFiles = enterPackages(gs, {{examplePackagePath, examplePackage},
+                                          {"my_package/__package.rb", pkg_source},
+                                          {"a/__package.rb", "class A < PackageSpec\nend\n"},
+                                          {"b/__package.rb", "class B < PackageSpec\nend\n"},
+                                          {"c/__package.rb", "class C < PackageSpec\nend\n"}});
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
+    ENFORCE(examplePkg.exists());
+    ENFORCE(myPkg.exists());
+
+    auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::TestUnit);
+    ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
+    auto replaced = applySuggestion(gs, *addImport);
+    CHECK_EQ(expected, replaced);
 }
 
 } // namespace sorbet

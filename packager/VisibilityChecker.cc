@@ -356,13 +356,33 @@ public:
     }
 };
 
+enum class FileType {
+    ProdFile,
+    TestHelperFile,
+    TestUnitFile,
+};
+
+const FileType fileTypeFromCtx(const core::Context ctx) {
+    if (ctx.file.data(ctx).isPackagedTestHelper()) {
+        return FileType::TestHelperFile;
+    } else if (ctx.file.data(ctx).isPackagedTest()) {
+        return FileType::TestUnitFile;
+    } else {
+        return FileType::ProdFile;
+    }
+}
+
 class VisibilityCheckerPass final {
 public:
     const core::packages::PackageInfo &package;
-    const bool insideTestFile;
+    const FileType fileType;
 
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
-        : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
+        : package{package}, fileType{fileTypeFromCtx(ctx)} {}
+
+    bool isAnyTestFile() const {
+        return fileType != FileType::ProdFile;
+    }
 
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
@@ -379,7 +399,8 @@ public:
         }
 
         // If the imported symbol comes from the test namespace, we must also be in the test namespace.
-        if (otherFile.data(ctx).isPackagedTest() && !this->insideTestFile) {
+        if ((otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
+            !this->isAnyTestFile()) {
             if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                 e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
                             litSymbol.show(ctx));
@@ -404,11 +425,26 @@ public:
         isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
         auto currentImportType = this->package.importsPackage(otherPackage);
         auto wasImported = currentImportType.has_value();
-        auto importedAsTest =
-            wasImported && currentImportType.value() == core::packages::ImportType::Test && !this->insideTestFile;
-        if (!wasImported || importedAsTest || !isExported) {
+
+        // Is this a test import (whether test helper or not) used in a production context?
+        auto testImportInProd = wasImported && currentImportType.value() != core::packages::ImportType::Normal &&
+                                this->fileType == FileType::ProdFile;
+        // Is this a test import not intended for use in helpers?
+        auto testUnitImportInHelper = wasImported &&
+                                      currentImportType.value() == core::packages::ImportType::TestUnit &&
+                                      this->fileType != FileType::TestUnitFile;
+
+        if (!wasImported || testImportInProd || testUnitImportInHelper || !isExported) {
             auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-            bool isTestImport = otherFile.data(ctx).isPackagedTest() || this->insideTestFile;
+            bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
+            core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
+            if (isTestImport) {
+                if (this->fileType == FileType::TestHelperFile) {
+                    autocorrectedImportType = core::packages::ImportType::TestHelper;
+                } else {
+                    autocorrectedImportType = core::packages::ImportType::TestUnit;
+                }
+            }
             auto strictDepsLevel = this->package.strictDependenciesLevel();
             auto importStrictDepsLevel = pkg.strictDependenciesLevel();
             bool layeringViolation = false;
@@ -461,7 +497,7 @@ public:
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                         e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                        if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
+                        if (auto exp = this->package.addImport(ctx, pkg, autocorrectedImportType)) {
                             e.addAutocorrect(std::move(exp.value()));
                             if (!db.errorHint().empty()) {
                                 e.addErrorNote("{}", db.errorHint());
@@ -474,13 +510,29 @@ public:
                                            "# packaged: false");
                         }
                     }
-                } else if (importedAsTest) {
+                } else if (testImportInProd) {
                     ENFORCE(!isTestImport);
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                         e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Defined here");
                         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                        if (auto exp = this->package.addImport(ctx, pkg, false)) {
+                        if (auto exp = this->package.addImport(ctx, pkg, core::packages::ImportType::Normal)) {
+                            e.addAutocorrect(std::move(exp.value()));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        }
+                    }
+                } else if (testUnitImportInHelper) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                        e.setHeader("The `{}` constant `{}` can only be used in `{}` files", "test_import",
+                                    litSymbol.show(ctx), ".test.rb");
+                        e.addErrorLine(pkg.declLoc(), "Defined here");
+                        e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
+                                       "only be used in `{}` files.",
+                                       "test_import", "only: 'test_rb'", ".test.rb");
+                        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+                        if (auto exp = this->package.addImport(ctx, pkg, core::packages::ImportType::TestHelper)) {
                             e.addAutocorrect(std::move(exp.value()));
                             if (!db.errorHint().empty()) {
                                 e.addErrorNote("{}", db.errorHint());
@@ -559,7 +611,7 @@ public:
                         e.addErrorNote("`{}` is not exported", lit.symbol().show(ctx));
                     } else if (!wasImported) {
                         e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
-                    } else if (importedAsTest) {
+                    } else if (testImportInProd || testUnitImportInHelper) {
                         e.addErrorNote("`{}`'s package is imported as `{}`", lit.symbol().show(ctx), "test_import");
                     } else {
                         ENFORCE(false);
