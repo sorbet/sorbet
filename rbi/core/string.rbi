@@ -1405,6 +1405,13 @@ class String < Object
   sig do
     params(
         arg0: T.any(Regexp, String),
+        arg1: T::Hash[T.untyped, T.untyped],
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
     .returns(T.nilable(String))
