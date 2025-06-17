@@ -8,7 +8,7 @@ end
 def bar
   path = Dir.getwd + '/'
 
-  Thread.current.backtrace.map do |line|
+  T.must(Thread.current.backtrace).map do |line|
     line
       .sub(path, '')
       .sub(%r{.*test/patch_require.rb:.*:}, 'test/patch_require.rb:<censored>:')
