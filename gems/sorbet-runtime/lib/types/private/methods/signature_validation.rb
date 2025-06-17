@@ -304,7 +304,7 @@ module T::Private::Methods::SignatureValidation
 
   # Higher = more restrictive.
   private_class_method def self.visibility_strength(vis)
-    return [:public, :protected, :private].find_index(vis)
+    [:public, :protected, :private].find_index(vis)
   end
 
   private_class_method def self.base_override_loc_str(signature, super_signature)
