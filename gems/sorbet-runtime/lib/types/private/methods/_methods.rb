@@ -589,6 +589,19 @@ module T::Private::Methods
     mod.extend(SingletonMethodHooks)
   end
 
+  # `name` must be an instance method (for class methods, pass in mod.singleton_class)
+  def self.visibility_method_name(mod, name)
+    if mod.public_method_defined?(name)
+      :public
+    elsif mod.protected_method_defined?(name)
+      :protected
+    elsif mod.private_method_defined?(name)
+      :private
+    else
+      mod.method(name) # Raises
+    end
+  end
+
   # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.
   private_class_method def self.method_owner_and_name_to_key(owner, name)
     "#{owner.object_id}##{name}"
