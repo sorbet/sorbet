@@ -696,6 +696,21 @@ Sorbet's errors, like [spoom].
 
 [spoom]: https://github.com/Shopify/spoom#errors-sorting-and-filtering
 
-## TODO: Contributing
+## How can I contribute to Sorbet?
 
-TODO(jez) Write this
+There are resources for what kinds of contributions we're looking for help with,
+how best to communicate with the Sorbet team, and how to get started working in
+the Sorbet codebase on GitHub:
+
+- [CONTRIBUTING.md](https://github.com/sorbet/sorbet/blob/master/CONTRIBUTING.md)
+
+  A high-level guide we expect people to follow when contributing to Sorbet.
+
+  The biggest point is that we prefer people reach out to us before embarking on
+  particularly large changes to Sorbet.
+
+- [README.md](https://github.com/sorbet/sorbet/blob/master/README.md)
+
+  Extensive technical docs for how to build Sorbet, run tests and write new
+  ones, learn about the architecture of Sorbet, and set up other aspects of
+  Sorbet development.
