@@ -590,6 +590,9 @@ int realmain(int argc, char *argv[]) {
                 pipeline::buildPackageDB(*gs, absl::MakeSpan(indexed), inputFilesSpan, opts, *workers);
             }
 
+            // Sort the files by the order we want to process their package in.
+            static_cast<void>(pipeline::condensationLayers(*gs, inputFilesSpan, opts));
+
             auto nonPackageIndexedResult =
                 (!opts.storeState.empty() || opts.forceHashing)
                     // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
