@@ -43,7 +43,7 @@ unique_ptr<ResponseMessage> SorbetQuerySendsTask::runRequest(LSPTypecheckerDeleg
         auto enclosingMethod = s->enclosingMethod.show(gs);
         // TODO: propagate regionId into the SendResponse.
         auto regionId = 0;
-        auto it = &(*s->dispatchResult);
+        auto it = s->dispatchResult.get();
         while (it != nullptr) {
             auto calledMethod = it->main.method;
             if (calledMethod.exists()) {
