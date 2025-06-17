@@ -89,6 +89,7 @@ module T::Private::Methods::SignatureValidation
         validate_override_mode(signature, super_signature)
         validate_override_shape(signature, super_signature)
         validate_override_types(signature, super_signature)
+        validate_override_visibility(signature, super_signature)
       end
     else
       validate_non_override_mode(signature)
@@ -274,6 +275,36 @@ module T::Private::Methods::SignatureValidation
             "* #{mode_noun.capitalize}: `#{signature.return_type}` (in #{method_loc_str(signature.method)})\n" \
             "(The types must be covariant.)"
     end
+  end
+
+  def self.validate_override_visibility(signature, super_signature)
+    method = signature.method
+    super_method = super_signature.method
+    mode_noun = super_signature.mode == Modes.abstract ? 'implementation' : 'override'
+    vis = method_visibility(method)
+    super_vis = method_visibility(super_method)
+
+    if visibility_strength(vis) > visibility_strength(super_vis)
+      raise "Incompatible visibility for #{mode_noun} of method #{method.name}\n" \
+            "* Base: #{super_vis} (in #{method_loc_str(super_method)})\n" \
+            "* #{mode_noun.capitalize}: #{vis} (in #{method_loc_str(method)})\n" \
+            "(The override must be at least as permissive as the supermethod)" \
+    end
+  end
+
+  private_class_method def self.method_visibility(method)
+    if method.owner.private_method_defined?(method.name, false)
+      return :private
+    elsif method.owner.public_method_defined?(method.name, false)
+      return :public
+    else
+      return :protected
+    end
+  end
+
+  # Higher = more restrictive.
+  private_class_method def self.visibility_strength(vis)
+    return [:public, :protected, :private].find_index(vis)
   end
 
   private_class_method def self.base_override_loc_str(signature, super_signature)
