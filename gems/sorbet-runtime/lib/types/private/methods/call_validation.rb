@@ -12,7 +12,7 @@ module T::Private::Methods::CallValidation
   # @param method_sig [T::Private::Methods::Signature]
   # @return [UnboundMethod] the new wrapper method (or the original one if we didn't wrap it)
   def self.wrap_method_if_needed(mod, method_sig, original_method)
-    original_visibility = T::Private::Methods::visibility_method_name(mod, method_sig.method_name)
+    original_visibility = T::Private::Methods.visibility_method_name(mod, method_sig.method_name)
     if method_sig.mode == T::Private::Methods::Modes.abstract
       create_abstract_wrapper(mod, method_sig, original_method, original_visibility)
     # Do nothing in this case; this method was not wrapped in _on_method_added.
