@@ -749,6 +749,116 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
     }
 }
 
+CondensationLayerInfo condensationLayers(const core::GlobalState &gs, absl::Span<ast::ParsedFile> packageFiles,
+                                         absl::Span<core::FileRef> sourceFiles, const options::Options &opts) {
+    Timer timeit(gs.tracer(), "condensationLayers");
+
+    if (!opts.cacheSensitiveOptions.stripePackages) {
+        return CondensationLayerInfo{{packageFiles}, {sourceFiles}};
+    }
+
+    auto &db = gs.packageDB();
+    auto traversal = db.condensation().computeTraversal(gs);
+
+    vector<uint32_t> fileToLayer(gs.filesUsed());
+    {
+        Timer timeit(gs.tracer(), "condensationLayers.layerMapping");
+
+        auto layerMapping = traversal.buildLayerMapping(gs);
+
+        int ix = 0;
+        for (auto &file : gs.getFiles().subspan(1)) {
+            core::FileRef fref(ix);
+            auto pkgName = db.getPackageNameForFile(fref);
+            if (!pkgName.exists()) {
+                // This is an unpackaged file, so we unconditionally put it first.
+                fileToLayer[ix] = 0;
+                continue;
+            }
+
+            // We add 1 to the layers here to ensure that un-packaged code is always first.
+            auto &info = layerMapping[pkgName];
+            if (file->isPackagedTest()) {
+                fileToLayer[ix] = info.testLayer + 1;
+            } else {
+                fileToLayer[ix] = info.applicationLayer + 1;
+            }
+        }
+    }
+
+    // Order by layer first, then file id.
+    fast_sort(packageFiles, [&fileToLayer](auto &l, auto &r) -> bool {
+        auto lid = l.file.id();
+        auto rid = r.file.id();
+        auto lLayer = fileToLayer[lid];
+        auto rLayer = fileToLayer[rid];
+        return std::tie(lLayer, lid) < std::tie(rLayer, rid);
+    });
+    fast_sort(sourceFiles, [&fileToLayer](auto l, auto r) -> bool {
+        auto lid = l.id();
+        auto rid = r.id();
+        auto lLayer = fileToLayer[lid];
+        auto rLayer = fileToLayer[rid];
+        return std::tie(lLayer, lid) < std::tie(rLayer, rid);
+    });
+
+    // Reserve enough space for all the layers of the condensation traversal, plus one more for unpackaged code.
+    auto maxLayers = traversal.parallel.size() + 1;
+
+    CondensationLayerInfo result;
+    result.packageFiles.reserve(maxLayers);
+    result.sourceFiles.reserve(maxLayers);
+
+    auto sourceSpan = sourceFiles;
+    auto packageSpan = packageFiles;
+
+    // Slightly awkward: if we have unpackaged source files, we need to add those to the result first, along with an
+    // empty span for package files to make sure that the lengths of the two vectors line up.
+    {
+        auto it = absl::c_find_if(sourceSpan, [&fileToLayer](auto f) { return fileToLayer[f.id()] > 0; });
+        if (it != sourceSpan.begin() && it != sourceSpan.end()) {
+            auto len = std::distance(sourceSpan.begin(), it);
+            result.sourceFiles.emplace_back(sourceSpan.subspan(0, len));
+            result.packageFiles.emplace_back(absl::Span<ast::ParsedFile>());
+            sourceSpan = sourceSpan.subspan(len);
+        }
+    }
+
+    while (!packageSpan.empty()) {
+        auto currentLayer = fileToLayer[packageSpan.front().file.id()];
+
+        {
+            auto it = absl::c_find_if(packageSpan, [&fileToLayer, currentLayer](const auto &f) {
+                return fileToLayer[f.file.id()] > currentLayer;
+            });
+            auto len = std::distance(packageSpan.begin(), it);
+            ENFORCE(len > 0);
+            result.packageFiles.emplace_back(packageSpan.subspan(0, len));
+            packageSpan = packageSpan.subspan(len);
+        }
+
+        {
+            auto it = absl::c_find_if(
+                sourceSpan, [&fileToLayer, currentLayer](auto f) { return fileToLayer[f.id()] > currentLayer; });
+            auto len = std::distance(sourceSpan.begin(), it);
+            // It's possible for there to be no source files associated with this layer, if all packages were empty, so
+            // we can't add the same ENFORCE as with the package span above.
+            result.sourceFiles.emplace_back(sourceSpan.subspan(0, len));
+            sourceSpan = sourceSpan.subspan(len);
+        }
+    }
+
+    // This should be true for two reasons:
+    // 1. All unpackaged source will be handled before the loop above
+    // 2. Any packaged source will require a package file to exist, which will be handled by the loop
+    ENFORCE(sourceSpan.empty());
+
+    ENFORCE(result.sourceFiles.size() <= maxLayers);
+    ENFORCE(result.sourceFiles.size() == result.packageFiles.size());
+
+    return result;
+}
+
 // packager intentionally runs outside of rewriter so that its output does not get cached.
 // TODO(jez) How much of this still needs to be outside of rewriter?
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
@@ -776,17 +886,18 @@ void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const opti
 }
 
 // packager intentionally runs outside of rewriter so that its output does not get cached.
-void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
-                    WorkerPool &workers) {
+void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> packageFiles,
+                    absl::Span<core::FileRef> sourceFiles, const options::Options &opts, WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
     if (!opts.cacheSensitiveOptions.stripePackages) {
         return;
     }
 
     try {
-        packager::Packager::buildPackageDB(gs, workers, what);
+        packager::Packager::buildPackageDB(gs, workers, packageFiles);
+        packager::Packager::setPackageNameOnFiles(gs, sourceFiles);
         if (opts.print.Packager.enabled) {
-            for (auto &f : what) {
+            for (auto &f : packageFiles) {
                 opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());
                 opts.print.Packager.fmt("{}\n", f.tree.toStringWithTabs(gs, 0));
             }
@@ -801,7 +912,7 @@ void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, con
 }
 
 // packager intentionally runs outside of rewriter so that its output does not get cached.
-void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
+void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> sourceFiles, const options::Options &opts,
                            WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
     if (!opts.cacheSensitiveOptions.stripePackages) {
@@ -809,9 +920,9 @@ void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> wh
     }
 
     try {
-        packager::Packager::validatePackagedFiles(gs, workers, what);
+        packager::Packager::validatePackagedFiles(gs, workers, sourceFiles);
         if (opts.print.Packager.enabled) {
-            for (auto &f : what) {
+            for (auto &f : sourceFiles) {
                 opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());
                 opts.print.Packager.fmt("{}\n", f.tree.toStringWithTabs(gs, 0));
             }

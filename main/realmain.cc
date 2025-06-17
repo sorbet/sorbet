@@ -587,8 +587,11 @@ int realmain(int argc, char *argv[]) {
                 auto foundHashes = nullptr;
                 auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
                 ENFORCE(!canceled, "There's no cancellation in batch mode");
-                pipeline::buildPackageDB(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
+                pipeline::buildPackageDB(*gs, absl::MakeSpan(indexed), inputFilesSpan, opts, *workers);
             }
+
+            // Sort the files by the order we want to process their package in.
+            static_cast<void>(pipeline::condensationLayers(*gs, absl::MakeSpan(indexed), inputFilesSpan, opts));
 
             auto nonPackageIndexedResult =
                 (!opts.storeState.empty() || opts.forceHashing)
