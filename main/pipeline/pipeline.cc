@@ -784,8 +784,7 @@ void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> packageFi
     }
 
     try {
-        packager::Packager::buildPackageDB(gs, workers, packageFiles);
-        packager::Packager::setPackageNameOnFiles(gs, sourceFiles);
+        packager::Packager::buildPackageDB(gs, workers, packageFiles, sourceFiles);
         if (opts.print.Packager.enabled) {
             for (auto &f : packageFiles) {
                 opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());

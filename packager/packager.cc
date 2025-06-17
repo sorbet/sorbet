@@ -2290,8 +2290,10 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
     return files;
 }
 
-void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
-    packageRunCore<PackagerMode::PackagesOnly>(gs, workers, files);
+void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> packageFiles,
+                              absl::Span<core::FileRef> sourceFiles) {
+    packageRunCore<PackagerMode::PackagesOnly>(gs, workers, packageFiles);
+    setPackageNameOnFiles(gs, sourceFiles);
 }
 
 void Packager::validatePackagedFiles(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
