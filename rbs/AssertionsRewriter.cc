@@ -475,20 +475,7 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
         // Sends
 
         [&](parser::Send *send) {
-            // Skip visibility sends and attr_accessor sends as their comments are not assertions
-            if (parser::MK::isVisibilitySend(send) || parser::MK::isAttrAccessorSend(send)) {
-                result = move(node);
-                return;
-            }
-
             send->receiver = rewriteNode(move(send->receiver));
-
-            if (send->method == core::Names::squareBracketsEq() || send->method.isSetter(ctx.state)) {
-                rewriteNodes(&send->args);
-                result = move(node);
-                return;
-            }
-
             node = maybeInsertCast(move(node));
             rewriteNodes(&send->args);
             result = move(node);
