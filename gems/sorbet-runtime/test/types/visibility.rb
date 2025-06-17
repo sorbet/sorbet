@@ -2,6 +2,22 @@
 require_relative '../test_helper'
 
 class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
+  it "allows public/public overrides" do
+    parent = Class.new do
+      extend T::Sig, T::Helpers
+      abstract!
+      sig { abstract.returns(Integer) }
+      def foo; end
+    end
+    child = Class.new(parent) do
+      extend T::Sig, T::Helpers
+      sig { override.returns(Integer) }
+      def foo; 0; end
+    end
+
+    T::Private::Abstract::Validate.validate_subclass(child)
+  end
+
   it "allows private/private overrides" do
     parent = Class.new do
       extend T::Sig, T::Helpers
@@ -18,12 +34,28 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
     T::Private::Abstract::Validate.validate_subclass(child)
   end
 
-  it "allows private/private overrides" do
+  it "allows a more permissive override" do
     parent = Class.new do
       extend T::Sig, T::Helpers
       abstract!
       sig { abstract.returns(Integer) }
       private def foo; end
+    end
+    child = Class.new(parent) do
+      extend T::Sig, T::Helpers
+      sig { override.returns(Integer) }
+      def foo; 0; end
+    end
+
+    T::Private::Abstract::Validate.validate_subclass(child)
+  end
+
+  it "handles protected overrides" do
+    parent = Class.new do
+      extend T::Sig, T::Helpers
+      abstract!
+      sig { abstract.returns(Integer) }
+      protected def foo; end
     end
     child = Class.new(parent) do
       extend T::Sig, T::Helpers
@@ -45,6 +77,26 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
       extend T::Sig, T::Helpers
       sig { override.returns(Integer) }
       private def foo; 0; end
+    end
+
+    err = assert_raises(RuntimeError) do
+      T::Private::Abstract::Validate.validate_subclass(child)
+    end
+    assert_includes(err.message, "Incompatible visibility")
+    assert_includes(err.message, "at least as permissive")
+  end
+
+  it "knows that public < protected < private" do
+    parent = Class.new do
+      extend T::Sig, T::Helpers
+      abstract!
+      sig { abstract.returns(Integer) }
+      def foo; end
+    end
+    child = Class.new(parent) do
+      extend T::Sig, T::Helpers
+      sig { override.returns(Integer) }
+      protected def foo; 0; end
     end
 
     err = assert_raises(RuntimeError) do
