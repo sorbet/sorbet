@@ -620,11 +620,12 @@ void CommentsAssociator::walkNode(parser::Node *node) {
         [&](parser::Send *send) {
             if (parser::MK::isVisibilitySend(send)) {
                 associateSignatureCommentsToNode(send->args[0].get());
-                auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
-                auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-                consumeCommentsBetweenLines(beginLine, endLine, "send");
+                consumeCommentsInsideNode(node, "send");
             } else if (parser::MK::isAttrAccessorSend(send)) {
                 associateSignatureCommentsToNode(send);
+                associateAssertionCommentsToNode(send);
+                walkNode(send->receiver.get());
+                walkNodes(send->args);
                 auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
                 auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
                 consumeCommentsBetweenLines(beginLine, endLine, "send");
