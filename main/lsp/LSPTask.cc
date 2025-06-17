@@ -105,7 +105,7 @@ ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
                     // sorbet/showSymbol
                     return holds_alternative<JSONNullObject>(res) ? ResponseMessageStatus::EmptyResult
                                                                   : ResponseMessageStatus::Succeeded;
-                } else if constexpr (is_same_v<T, variant<JSONNullObject, vector<unique_ptr<SendInformation>>>>) {
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, unique_ptr<QuerySendsResponse>>>) {
                     // sorbet/querySends
                     return holds_alternative<JSONNullObject>(res) ? ResponseMessageStatus::EmptyResult
                                                                   : ResponseMessageStatus::Succeeded;

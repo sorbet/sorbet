@@ -1061,16 +1061,23 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                        },
                                        classTypes);
 
-    auto SendInformation =
-        makeObject("SendInformation",
-                   {
-                       makeField("enclosingMethod", JSONString), makeField("calledMethod", JSONString),
-                       // Basically, inside a block or not, with some differentiation
-                       // between blocks.
-                       makeField("regionId", JSONInt),
-                       // TOOD: maybe want a hasBlock field here?
-                   },
-                   classTypes);
+    auto SendInformation = makeObject("SendInformation",
+                                      {
+                                          makeField("methodIndex", JSONInt), makeField("callee", JSONInt),
+                                          // Basically, inside a block or not, with some differentiation
+                                          // between blocks.
+                                          makeField("regionId", JSONInt),
+                                          // TOOD: maybe want a hasBlock field here?
+                                      },
+                                      classTypes);
+
+    auto QuerySendsResponse = makeObject("QuerySendsResponse",
+                                         {
+                                             makeField("defs", makeArray(JSONString)),
+                                             makeField("callees", makeArray(JSONString)),
+                                             makeField("calls", makeArray(SendInformation)),
+                                         },
+                                         classTypes);
 
     auto CodeActionContext =
         makeObject("CodeActionContext",
@@ -1509,7 +1516,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             {"sorbet/error", SorbetErrorParams},
             {"sorbet/readFile", TextDocumentItem},
             {"sorbet/showSymbol", makeVariant({JSONNull, SymbolInformation})},
-            {"sorbet/querySends", makeVariant({JSONNull, makeArray(SendInformation)})},
+            {"sorbet/querySends", makeVariant({JSONNull, QuerySendsResponse})},
         });
     // N.B.: ResponseMessage.params must be optional, as it is not present when an error occurs.
     // N.B.: We add a 'requestMethod' field to response messages to make the discriminated union work.
