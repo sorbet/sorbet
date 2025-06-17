@@ -8,6 +8,16 @@ class TextDocumentPositionParams;
 class SorbetQuerySendsTask final : public LSPRequestTask {
     std::unique_ptr<QuerySendsParams> params;
 
+    struct MethodMap {
+        UnorderedMap<core::MethodRef, size_t> table;
+        std::vector<std::string> names;
+
+        size_t indexForMethod(const core::GlobalState &gs, core::MethodRef method);
+    };
+
+    MethodMap callerMap;
+    MethodMap calleeMap;
+
 public:
     SorbetQuerySendsTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<QuerySendsParams> params);
 
