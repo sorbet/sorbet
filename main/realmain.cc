@@ -592,7 +592,7 @@ int realmain(int argc, char *argv[]) {
             }
 
             // Sort the files by the order we want to process their package in.
-            static_cast<void>(pipeline::condensationLayers(*gs, inputFilesSpan, opts));
+            static_cast<void>(pipeline::condensationLayers(*gs, absl::MakeSpan(indexed), inputFilesSpan, opts));
 
             auto nonPackageIndexedResult =
                 (!opts.storeState.empty() || opts.forceHashing)
