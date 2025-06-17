@@ -86,7 +86,7 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
     assert_includes(err.message, "at least as permissive")
   end
 
-  it "knows that public < protected < private" do
+  it "knows that public < protected" do
     parent = Class.new do
       extend T::Sig, T::Helpers
       abstract!
@@ -97,6 +97,26 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
       extend T::Sig, T::Helpers
       sig { override.returns(Integer) }
       protected def foo; 0; end
+    end
+
+    err = assert_raises(RuntimeError) do
+      T::Private::Abstract::Validate.validate_subclass(child)
+    end
+    assert_includes(err.message, "Incompatible visibility")
+    assert_includes(err.message, "at least as permissive")
+  end
+
+  it "knows that protected < private" do
+    parent = Class.new do
+      extend T::Sig, T::Helpers
+      abstract!
+      sig { abstract.returns(Integer) }
+      protected def foo; end
+    end
+    child = Class.new(parent) do
+      extend T::Sig, T::Helpers
+      sig { override.returns(Integer) }
+      private def foo; 0; end
     end
 
     err = assert_raises(RuntimeError) do
