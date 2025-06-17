@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "hello, world prec"
+
 set -euo pipefail
 if [ "HEAD" == "${BUILDKITE_COMMIT}" ]; then
   echo "not using commit marks as this is HEAD build"
