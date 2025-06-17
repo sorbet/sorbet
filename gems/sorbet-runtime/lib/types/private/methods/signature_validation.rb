@@ -293,13 +293,7 @@ module T::Private::Methods::SignatureValidation
   end
 
   private_class_method def self.method_visibility(method)
-    if method.owner.private_method_defined?(method.name, false)
-      return :private
-    elsif method.owner.public_method_defined?(method.name, false)
-      return :public
-    else
-      return :protected
-    end
+    T::Private::Methods::visibility_method_name(method.owner, method.name)
   end
 
   # Higher = more restrictive.
