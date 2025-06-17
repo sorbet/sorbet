@@ -28,4 +28,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <cast:cast>(<cast:cast>(<emptyTree>::<C ARGV>, <todo sym>, <emptyTree>::<C Integer>).first(), <todo sym>, <emptyTree>::<C Integer>)
 
   <cast:cast>(<cast:cast>(<emptyTree>::<C ARGV>, <todo sym>, <emptyTree>::<C Integer>).first(), <todo sym>, <emptyTree>::<C String>).last()
+
+  ::<root>::<C T>.unsafe(<self>).attr_writer(<cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>), <cast:cast>(<emptyTree>::<C ARGV>.last(), <todo sym>, <emptyTree>::<C Integer>))
+
+  <cast:cast>(::<root>::<C T>.unsafe(<self>).attr_writer(), <todo sym>, <emptyTree>::<C String>)
 end

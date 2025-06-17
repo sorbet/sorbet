@@ -46,3 +46,12 @@ ARGV. #: as Integer
 ARGV #: as Integer
  .first #: as String # error: Method `first` does not exist on `Integer`
  .last # error: Method `last` does not exist on `String`
+
+self. #: as untyped
+ attr_writer(
+   ARGV.first, #: as String # error: Argument to `attr_writer` must be a Symbol or String
+   ARGV.last, #: as Integer
+ )
+
+self #: as untyped
+  .attr_writer #: as String
