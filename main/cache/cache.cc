@@ -87,7 +87,8 @@ bool retainGlobalState(core::GlobalState &gs, const unique_ptr<OwnedKeyValueStor
     //
     // It would be valid to always generate a new UUID and write it to the cache, but as an
     // optimization we can skip that when nothing has been modified.
-    if (gs.wasModified()) {
+    if (gs.wasNameTableModified()) {
+        Timer timeit(gs.tracer(), "retainGlobalState.writeNameTable");
         gs.kvstoreUuid = Random::uniformU4();
         kvstore->write(core::serialize::Serializer::NAME_TABLE_KEY, core::serialize::Serializer::storeNameTable(gs));
     }
