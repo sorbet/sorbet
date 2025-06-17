@@ -149,7 +149,7 @@ void CommentsAssociator::associateAssertionCommentsToNode(parser::Node *node, bo
         comments.emplace_back(it->second);
         commentByLine.erase(it);
 
-        commentsByNode[node] = move(comments);
+        assertionsForNode[node] = move(comments);
     }
 }
 
@@ -176,7 +176,7 @@ void CommentsAssociator::associateSignatureCommentsToNode(parser::Node *node) {
         it++;
     }
 
-    commentsByNode[node] = move(comments);
+    signaturesForNode[node] = move(comments);
 }
 
 int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes, int index, int lastLine,
@@ -200,7 +200,7 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
         }
 
         if (continuationFor && absl::StartsWith(it->second.string, MULTILINE_RBS_PREFIX)) {
-            commentsByNode[continuationFor].emplace_back(move(it->second));
+            signaturesForNode[continuationFor].emplace_back(move(it->second));
             continuationFor->loc = continuationFor->loc.join(it->second.loc);
             it = commentByLine.erase(it);
             continue;
@@ -214,7 +214,7 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
             vector<CommentNode> comments;
             comments.emplace_back(it->second);
             it = commentByLine.erase(it);
-            commentsByNode[placeholder.get()] = move(comments);
+            assertionsForNode[placeholder.get()] = move(comments);
 
             nodes.insert(nodes.begin() + index, move(placeholder));
 
@@ -246,7 +246,7 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
 
             vector<CommentNode> comments;
             comments.emplace_back(it->second);
-            commentsByNode[placeholder.get()] = move(comments);
+            signaturesForNode[placeholder.get()] = move(comments);
 
             continuationFor = placeholder.get();
 
@@ -693,7 +693,7 @@ void CommentsAssociator::walkNode(parser::Node *node) {
         });
 }
 
-map<parser::Node *, vector<CommentNode>> CommentsAssociator::run(unique_ptr<parser::Node> &node) {
+CommentMap CommentsAssociator::run(unique_ptr<parser::Node> &node) {
     // Remove any comments that don't start with RBS prefixes
     for (auto it = commentByLine.begin(); it != commentByLine.end();) {
         if (!absl::StartsWith(it->second.string, RBS_PREFIX) &&
@@ -717,7 +717,7 @@ map<parser::Node *, vector<CommentNode>> CommentsAssociator::run(unique_ptr<pars
         }
     }
 
-    return move(commentsByNode);
+    return CommentMap{signaturesForNode, assertionsForNode};
 }
 
 CommentsAssociator::CommentsAssociator(core::MutableContext ctx, vector<core::LocOffsets> commentLocations)
