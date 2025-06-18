@@ -158,12 +158,14 @@ optional<core::AutocorrectSuggestion> constructAllowIncompatibleAutocorrect(cons
                                                                             const ast::ExpressionPtr &tree,
                                                                             const ast::MethodDef &methodDef,
                                                                             bool &didReport) {
-    // XXX (cwong): From a UX perspective, this isn't great: with this design, we will suggest
-    // the autocorrection on the *first* error for a given override, whereas we'd ideally want to
-    // attach the autocorrect to the *last* error (where it's most likely to end up on the user's
-    // screen). I'm not super fussed about it in this case; `suggestUnsafe` is meant to be used
-    // with `-a` anyway, but if we decide to build out further support for "at most once"-type
-    // suggestions, it's something to keep in mind.
+    // With this design, we will report the autocorrect on the *first* reported error. There is a
+    // case to be made that, from a UX perspective, the message should be attached to the *last*
+    // error (the one that is most likely to be on the user's screen at the end). Due to how
+    // sorbet propagates type information, however, there's also a good chance that later errors
+    // are spurious, so attaching to the first (likely the most relevant) is fine too.
+    //
+    // In this particular case, it is entirely inconsequential, since `--sugest-unsafe` is already
+    // meant to be the "shut up" cudgel anyway.
     if (!ctx.state.suggestUnsafe || didReport) {
         return nullopt;
     }
