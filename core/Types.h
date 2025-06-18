@@ -1100,6 +1100,49 @@ struct DispatchResult {
         : returnType(std::move(returnType)), main(std::move(comp)), secondary(std::move(secondary)),
           secondaryKind(secondaryKind){};
 
+    template <typename PtrT> struct Iterator {
+        PtrT *it;
+
+        explicit Iterator(PtrT *it) : it(it) {}
+
+        Iterator begin() const {
+            return *this;
+        }
+
+        Iterator end() const {
+            return Iterator(nullptr);
+        }
+
+        PtrT *operator*() const {
+            return it;
+        }
+
+        Iterator &operator++() {
+            it = it->secondary.get();
+            return *this;
+        }
+
+        Iterator operator++(int) {
+            return Iterator(it->secondary.get());
+        }
+
+        bool operator==(const Iterator &other) const {
+            return this->it == other.it;
+        }
+
+        bool operator!=(const Iterator &other) const {
+            return this->it != other.it;
+        }
+    };
+
+    Iterator<DispatchResult> iterator() {
+        return Iterator(this);
+    }
+
+    Iterator<const DispatchResult> iterator() const {
+        return Iterator(this);
+    }
+
     // Combine two dispatch results, preferring the left as the `main`.
     static DispatchResult merge(const GlobalState &gs, Combinator kind, DispatchResult &&left, DispatchResult &&right);
 };
