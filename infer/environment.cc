@@ -1053,8 +1053,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                 suppressErrors,  inWhat.symbol.data(ctx)->name};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
-                auto it = &dispatched;
-                while (it != nullptr) {
+                for (auto it : dispatched.iterator()) {
                     for (auto &err : it->main.errors) {
                         if (err->what != core::errors::Infer::UnknownMethod ||
                             !parentUpdateKnowledgeReceiver.has_value()) {
@@ -1140,7 +1139,6 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     }
 
                     lspQueryMatch = lspQueryMatch || lspQuery.matchesSymbol(it->main.method);
-                    it = it->secondary.get();
                 }
                 shared_ptr<core::DispatchResult> retainedResult;
                 if (send.link) {
@@ -1360,8 +1358,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 auto &procType = insn.link->result->main.blockPreType;
                 auto params = procType.getCallArguments(ctx, core::Names::call());
-                auto it = insn.link->result->secondary.get();
-                while (it != nullptr) {
+                for (auto it : insn.link->result->secondary->iterator()) {
                     auto &secondaryProcType = it->main.blockPreType;
                     if (secondaryProcType != nullptr) {
                         auto secondaryParams = secondaryProcType.getCallArguments(ctx, core::Names::call());
@@ -1382,8 +1379,6 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         // nicer to let it be whatever it would have been. This way they'll get
                         // completion results as if the previous type error was fixed. So do nothing.
                     }
-
-                    it = it->secondary.get();
                 }
 
                 // A multi-arg proc, if provided a single arg which is an array,
@@ -1594,8 +1589,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::LoadSelf &l) {
                 ENFORCE(l.link);
                 auto tpo = getTypeFromRebind(ctx, l.link->result->main, l.fallback);
-                auto it = l.link->result->secondary.get();
-                while (it != nullptr) {
+                for (auto it : l.link->result->secondary->iterator()) {
                     auto secondaryTpo = getTypeFromRebind(ctx, it->main, l.fallback);
                     switch (l.link->result->secondaryKind) {
                         case core::DispatchResult::Combinator::OR:
@@ -1607,8 +1601,6 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     }
                     tpo.origins.insert(tpo.origins.begin(), make_move_iterator(secondaryTpo.origins.begin()),
                                        make_move_iterator(secondaryTpo.origins.end()));
-
-                    it = it->secondary.get();
                 }
 
                 tp = tpo;
