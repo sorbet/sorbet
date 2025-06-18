@@ -633,10 +633,7 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
                             method.show(ctx), overriddenMethod.show(ctx), "override.");
                 e.addErrorLine(overriddenMethod.data(ctx)->loc(), "defined here");
 
-                auto potentialAutocorrect = constructOverrideAutocorrect(ctx, tree, methodDef);
-                if (potentialAutocorrect.has_value()) {
-                    e.addAutocorrect(std::move(*potentialAutocorrect));
-                }
+                e.maybeAddAutocorrect(constructOverrideAutocorrect(ctx, tree, methodDef));
             }
         }
         if (!method.data(ctx)->flags.isOverride && !method.data(ctx)->flags.isAbstract && method.data(ctx)->hasSig() &&
@@ -647,10 +644,7 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
                             method.show(ctx), overriddenMethod.show(ctx), "override.");
                 e.addErrorLine(overriddenMethod.data(ctx)->loc(), "defined here");
 
-                auto potentialAutocorrect = constructOverrideAutocorrect(ctx, tree, methodDef);
-                if (potentialAutocorrect.has_value()) {
-                    e.addAutocorrect(std::move(*potentialAutocorrect));
-                }
+                e.maybeAddAutocorrect(constructOverrideAutocorrect(ctx, tree, methodDef));
             }
         }
         if ((overriddenMethod.data(ctx)->flags.isAbstract || overriddenMethod.data(ctx)->flags.isOverridable ||
