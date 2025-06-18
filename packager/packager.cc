@@ -2227,9 +2227,6 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
 
     if constexpr (buildPackageDB) {
         Packager::findPackages(gs, files);
-    } else {
-        // findPackages already called this
-        Packager::setPackageNameOnFiles(gs, files);
     }
 
     {
