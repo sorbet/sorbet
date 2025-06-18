@@ -475,20 +475,7 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
         // Sends
 
         [&](parser::Send *send) {
-            // Skip visibility sends and attr_accessor sends as their comments are not assertions
-            if (parser::MK::isVisibilitySend(send) || parser::MK::isAttrAccessorSend(send)) {
-                result = move(node);
-                return;
-            }
-
             send->receiver = rewriteNode(move(send->receiver));
-
-            if (send->method == core::Names::squareBracketsEq() || send->method.isSetter(ctx.state)) {
-                rewriteNodes(&send->args);
-                result = move(node);
-                return;
-            }
-
             node = maybeInsertCast(move(node));
             rewriteNodes(&send->args);
             result = move(node);
@@ -553,10 +540,7 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
                 return;
             }
 
-            for (auto &expr : break_->exprs) {
-                expr = rewriteNode(move(expr));
-            }
-
+            rewriteNodes(&break_->exprs);
             break_->exprs = rewriteNodesAsArray(node, move(break_->exprs));
             result = move(node);
         },
@@ -566,10 +550,7 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
                 return;
             }
 
-            for (auto &expr : next->exprs) {
-                expr = rewriteNode(move(expr));
-            }
-
+            rewriteNodes(&next->exprs);
             next->exprs = rewriteNodesAsArray(node, move(next->exprs));
             result = move(node);
         },
@@ -579,10 +560,7 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
                 return;
             }
 
-            for (auto &expr : ret->exprs) {
-                expr = rewriteNode(move(expr));
-            }
-
+            rewriteNodes(&ret->exprs);
             ret->exprs = rewriteNodesAsArray(node, move(ret->exprs));
             result = move(node);
         },
@@ -676,9 +654,7 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
             result = move(node);
         },
         [&](parser::Super *super_) {
-            for (auto &expr : super_->args) {
-                expr = rewriteNode(move(expr));
-            }
+            rewriteNodes(&super_->args);
             result = maybeInsertCast(move(node));
         },
         [&](parser::Kwsplat *splat) {

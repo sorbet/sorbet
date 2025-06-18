@@ -14,12 +14,17 @@ struct CommentNode {
     std::string_view string;
 };
 
+struct CommentMap {
+    std::map<parser::Node *, std::vector<CommentNode>> signaturesForNode;
+    std::map<parser::Node *, std::vector<CommentNode>> assertionsForNode;
+};
+
 class CommentsAssociator {
 public:
     static const std::string_view RBS_PREFIX;
 
     CommentsAssociator(core::MutableContext ctx, std::vector<core::LocOffsets> commentLocations);
-    std::map<parser::Node *, std::vector<CommentNode>> run(std::unique_ptr<parser::Node> &tree);
+    CommentMap run(std::unique_ptr<parser::Node> &tree);
 
 private:
     static const std::string_view ANNOTATION_PREFIX;
@@ -29,7 +34,8 @@ private:
     core::MutableContext ctx;
     std::vector<core::LocOffsets> commentLocations;
     std::map<int, CommentNode> commentByLine;
-    std::map<parser::Node *, std::vector<CommentNode>> commentsByNode;
+    std::map<parser::Node *, std::vector<CommentNode>> signaturesForNode;
+    std::map<parser::Node *, std::vector<CommentNode>> assertionsForNode;
     std::vector<std::pair<bool, core::LocOffsets>> contextAllowingTypeAlias;
     int lastLine;
 

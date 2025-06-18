@@ -17,6 +17,11 @@ const users = [
   },
   // End Sorbet early adopters. Please alphabetize below this comment.
   {
+    caption: 'Apollo',
+    image: 'img/apollo-logo.png',
+    infoLink: 'https://www.apollo.io/',
+  },
+  {
     caption: 'Census',
     image: 'img/census-logo.png',
     infoLink: 'https://getcensus.com/',
