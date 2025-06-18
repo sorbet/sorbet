@@ -158,6 +158,12 @@ optional<core::AutocorrectSuggestion> constructAllowIncompatibleAutocorrect(cons
                                                                             const ast::ExpressionPtr &tree,
                                                                             const ast::MethodDef &methodDef,
                                                                             bool &didReport) {
+    // XXX (cwong): From a UX perspective, this isn't great: with this design, we will suggest
+    // the autocorrection on the *first* error for a given override, whereas we'd ideally want to
+    // attach the autocorrect to the *last* error (where it's most likely to end up on the user's
+    // screen). I'm not super fussed about it in this case; `suggestUnsafe` is meant to be used
+    // with `-a` anyway, but if we decide to build out further support for "at most once"-type
+    // suggestions, it's something to keep in mind.
     if (!ctx.state.suggestUnsafe || didReport) {
         return nullopt;
     }
