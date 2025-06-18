@@ -176,10 +176,10 @@ optional<core::AutocorrectSuggestion> constructAllowIncompatibleAutocorrect(cons
     auto blockBody = ast::cast_tree<ast::Send>(block->body);
     ENFORCE(blockBody != nullptr);
 
-    auto insertLoc = ctx.locAt(parsedSig->sig.seen.override_);
+    auto replaceLoc = ctx.locAt(parsedSig->sig.seen.override_);
 
     vector<core::AutocorrectSuggestion::Edit> edits;
-    edits.emplace_back(core::AutocorrectSuggestion::Edit{insertLoc, "override(allow_incompatible: true)"});
+    edits.emplace_back(core::AutocorrectSuggestion::Edit{replaceLoc, "override(allow_incompatible: true)"});
     return core::AutocorrectSuggestion{
         fmt::format("Add `{}` to `{}` in `{}` sig", "allow_incompatible: true", "override",
                     methodDef.symbol.data(ctx)->name.show(ctx)),
