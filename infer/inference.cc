@@ -206,38 +206,41 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             //   4. Otherwise, we want to issue a DeadBranchInferencer error, taking the first
             //      (non-synthetic, non-"T.absurd") instruction in the block as the loc of the
             //      error.
+
+            if (!absl::c_any_of(bb->backEdges, [&](const auto &bb) { return !outEnvironments[bb->id].isDead; })) {
+                continue;
+            }
+
             cfg::InstructionPtr *unreachableInstruction = nullptr;
             core::Loc locForUnreachable;
             bool dueToSafeNavigation = false;
 
-            if (absl::c_any_of(bb->backEdges, [&](const auto &bb) { return !outEnvironments[bb->id].isDead; })) {
-                for (auto &expr : bb->exprs) {
-                    if (silenceDeadCodeError(expr.value)) {
-                        continue;
-                    }
+            for (auto &expr : bb->exprs) {
+                if (silenceDeadCodeError(expr.value)) {
+                    continue;
+                }
 
-                    auto send = cfg::cast_instruction<cfg::Send>(expr.value);
-                    if (send != nullptr && send->fun == core::Names::nilForSafeNavigation()) {
-                        ENFORCE(send->args.size() == 1, "Broken invariant from desugar");
-                        unreachableInstruction = &expr.value;
-                        locForUnreachable = core::Loc(ctx.file, send->argLocs[0]);
+                auto send = cfg::cast_instruction<cfg::Send>(expr.value);
+                if (send != nullptr && send->fun == core::Names::nilForSafeNavigation()) {
+                    ENFORCE(send->args.size() == 1, "Broken invariant from desugar");
+                    unreachableInstruction = &expr.value;
+                    locForUnreachable = core::Loc(ctx.file, send->argLocs[0]);
 
-                        // The arg loc for the synthetic variable created for the purpose of this safe navigation
-                        // check is a bit of a hack. It's intentionally one character too short so that for
-                        // completion requests it doesn't match `x&.|` (which would defeat completion requests.)
-                        auto maybeExpand = locForUnreachable.adjust(ctx, 0, 1);
-                        if (maybeExpand.source(ctx) == "&.") {
-                            locForUnreachable = maybeExpand;
-                        }
-                        dueToSafeNavigation = true;
-                        break;
-                    } else if (unreachableInstruction == nullptr) {
-                        unreachableInstruction = &expr.value;
-                        locForUnreachable = ctx.locAt(expr.loc);
-                    } else {
-                        // Expand the loc to cover the entire dead basic block
-                        locForUnreachable = locForUnreachable.join(ctx.locAt(expr.loc));
+                    // The arg loc for the synthetic variable created for the purpose of this safe navigation
+                    // check is a bit of a hack. It's intentionally one character too short so that for
+                    // completion requests it doesn't match `x&.|` (which would defeat completion requests.)
+                    auto maybeExpand = locForUnreachable.adjust(ctx, 0, 1);
+                    if (maybeExpand.source(ctx) == "&.") {
+                        locForUnreachable = maybeExpand;
                     }
+                    dueToSafeNavigation = true;
+                    break;
+                } else if (unreachableInstruction == nullptr) {
+                    unreachableInstruction = &expr.value;
+                    locForUnreachable = ctx.locAt(expr.loc);
+                } else {
+                    // Expand the loc to cover the entire dead basic block
+                    locForUnreachable = locForUnreachable.join(ctx.locAt(expr.loc));
                 }
             }
 
