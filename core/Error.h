@@ -192,6 +192,7 @@ public:
     void addErrorSections(const ErrorSection::Collector &&errorDetailsCollector);
 
     void addAutocorrect(AutocorrectSuggestion &&autocorrect);
+    void maybeAddAutocorrect(std::optional<AutocorrectSuggestion> &&autocorrect);
     template <typename... Args>
     void replaceWith(const std::string &title, Loc loc, fmt::format_string<Args...> replacement, Args &&...args) {
         std::string formatted = fmt::format(replacement, std::forward<Args>(args)...);
