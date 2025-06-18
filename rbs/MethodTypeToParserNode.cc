@@ -482,9 +482,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
                             nodeName(methodArg).show(ctx.state), nodeKindToString(methodArg),
                             argKindToString(arg.kind));
 
-                if (auto autocorrect = autocorrectArg(ctx, methodArg, arg, type->deepCopy())) {
-                    e.addAutocorrect(move(autocorrect.value()));
-                }
+                e.maybeAddAutocorrect(autocorrectArg(ctx, methodArg, arg, type->deepCopy()));
             }
         }
 
