@@ -257,12 +257,12 @@ unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file
         core::UnfreezeNameTable nameTableAccess(gs);
 
         auto associator = rbs::CommentsAssociator(ctx, commentLocations);
-        auto commentsByNode = associator.run(node);
+        auto commentMap = associator.run(node);
 
-        auto sigsRewriter = rbs::SigsRewriter(ctx, commentsByNode);
+        auto sigsRewriter = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
         node = sigsRewriter.run(move(node));
 
-        auto assertionsRewriter = rbs::AssertionsRewriter(ctx, commentsByNode);
+        auto assertionsRewriter = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
         node = assertionsRewriter.run(move(node));
 
         if (print.RBSRewriteTree.enabled) {

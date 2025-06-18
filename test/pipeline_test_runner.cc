@@ -242,12 +242,12 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
                 core::MutableContext ctx(gs, core::Symbols::root(), file);
                 auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
-                auto commentsByNode = associator.run(nodes);
+                auto commentMap = associator.run(nodes);
 
-                auto rbsSignatures = rbs::SigsRewriter(ctx, commentsByNode);
+                auto rbsSignatures = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
                 nodes = rbsSignatures.run(std::move(nodes));
 
-                auto rbsAssertions = rbs::AssertionsRewriter(ctx, commentsByNode);
+                auto rbsAssertions = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
                 nodes = rbsAssertions.run(std::move(nodes));
             }
 
@@ -685,12 +685,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         if (gs->cacheSensitiveOptions.rbsEnabled) {
             auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
-            auto commentsByNode = associator.run(parseResult.tree);
+            auto commentMap = associator.run(parseResult.tree);
 
-            auto rbsSignatures = rbs::SigsRewriter(ctx, commentsByNode);
+            auto rbsSignatures = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
             parseResult.tree = rbsSignatures.run(std::move(parseResult.tree));
 
-            auto rbsAssertions = rbs::AssertionsRewriter(ctx, commentsByNode);
+            auto rbsAssertions = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
             parseResult.tree = rbsAssertions.run(std::move(parseResult.tree));
         }
         auto nodes = move(parseResult.tree);

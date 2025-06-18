@@ -154,9 +154,42 @@ pair<std::string, std::string> formatSplat(const core::ArgInfo &arg, SplatKind k
     return rendered == left ? pair("", rendered) : pair(left, rendered);
 }
 
+optional<core::AutocorrectSuggestion> constructAllowIncompatibleAutocorrect(const core::Context ctx,
+                                                                            const ast::ExpressionPtr &tree,
+                                                                            const ast::MethodDef &methodDef) {
+    if (!ctx.state.suggestUnsafe) {
+        return nullopt;
+    }
+
+    auto methodLoc = ctx.locAt(methodDef.declLoc);
+
+    auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, methodLoc.copyWithZeroLength());
+    if (!parsedSig.has_value()) {
+        return nullopt;
+    }
+
+    auto *block = parsedSig->origSend.block();
+    if (!block) {
+        return nullopt;
+    }
+
+    auto blockBody = ast::cast_tree<ast::Send>(block->body);
+    ENFORCE(blockBody != nullptr);
+
+    auto replaceLoc = ctx.locAt(parsedSig->sig.seen.override_);
+
+    vector<core::AutocorrectSuggestion::Edit> edits;
+    edits.emplace_back(core::AutocorrectSuggestion::Edit{replaceLoc, "override(allow_incompatible: true)"});
+    return core::AutocorrectSuggestion{
+        fmt::format("Add `{}` to `{}` in `{}` sig", "allow_incompatible: true", "override",
+                    methodDef.symbol.data(ctx)->name.show(ctx)),
+        std::move(edits),
+    };
+}
+
 // This walks two positional argument lists to ensure that they're compatibly typed (i.e. that every argument in the
 // implementing method is either the same or a supertype of the abstract or overridable definition)
-void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
+void matchPositional(const core::Context ctx, core::TypeConstraint &constr, const ast::ExpressionPtr &tree,
                      absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &superArgs,
                      core::MethodRef superMethod,
                      absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &methodArgs,
@@ -181,6 +214,7 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
                 e.addErrorSections(move(errorDetailsCollector));
+                e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
             }
         }
         idx++;
@@ -188,7 +222,8 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
 }
 
 // Ensure that two argument lists are compatible in shape and type
-void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMethod, const ast::MethodDef &methodDef) {
+void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPtr &tree, core::MethodRef superMethod,
+                                const ast::MethodDef &methodDef) {
     auto method = methodDef.symbol;
     if (method.data(ctx)->flags.isOverloaded) {
         // Don't try to check overloaded methods; It's not immediately clear how
@@ -208,6 +243,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                             superMethod.show(ctx));
             }
             e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+            e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
         }
         return;
     }
@@ -223,6 +259,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 e.setHeader("{} method `{}` must declare the same number of type parameters as the base method",
                             implementationOf(ctx, superMethod), superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+
+                e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
             }
             return;
         }
@@ -268,6 +306,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 e.setHeader("{} method `{}` must accept at least `{}` positional arguments",
                             implementationOf(ctx, superMethod), superMethod.show(ctx), leftPos);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+                e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
             }
         }
     }
@@ -279,6 +318,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 e.setHeader("{} method `{}` must accept {}`{}`", implementationOf(ctx, superMethod),
                             superMethod.show(ctx), prefix, argName);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+
+                e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
             }
         }
     }
@@ -288,13 +329,14 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
             e.setHeader("{} method `{}` must accept no more than `{}` required argument(s)",
                         implementationOf(ctx, superMethod), superMethod.show(ctx), left.pos.required.size());
             e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+            e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
         }
     }
 
     // match types of required positional arguments
-    matchPositional(ctx, *constr, left.pos.required, superMethod, right.pos.required, methodDef);
+    matchPositional(ctx, *constr, tree, left.pos.required, superMethod, right.pos.required, methodDef);
     // match types of optional positional arguments
-    matchPositional(ctx, *constr, left.pos.optional, superMethod, right.pos.optional, methodDef);
+    matchPositional(ctx, *constr, tree, left.pos.optional, superMethod, right.pos.optional, methodDef);
 
     if (!right.kw.rest) {
         for (auto req : left.kw.required) {
@@ -324,6 +366,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                                        req.get().show(ctx), req.get().type.show(ctx));
                         e.addErrorNote(
                             "A parameter's type must be a supertype of the same parameter's type on the super method.");
+
+                        e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
                         e.addErrorSections(move(errorDetailsCollector));
                     }
                 }
@@ -332,6 +376,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                     e.setHeader("{} method `{}` is missing required keyword argument `{}`",
                                 implementationOf(ctx, superMethod), superMethod.show(ctx), req.get().name.show(ctx));
                     e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+                    e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
                 }
             }
         }
@@ -356,6 +401,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                                        opt.get().show(ctx), opt.get().type.show(ctx));
                         e.addErrorNote(
                             "A parameter's type must be a supertype of the same parameter's type on the super method.");
+                        e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
                         e.addErrorSections(move(errorDetailsCollector));
                     }
                 }
@@ -368,6 +414,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                     e.addErrorLine(superMethod.data(ctx)->loc(),
                                    "The optional super method parameter `{}` was declared here",
                                    opt.get().name.show(ctx));
+                    e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
                 }
             } else {
                 if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
@@ -377,6 +424,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                     e.addErrorLine(superMethod.data(ctx)->loc(),
                                    "The optional super method parameter `{}` was declared here",
                                    opt.get().name.show(ctx));
+
+                    e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
                 }
             }
         }
@@ -390,6 +439,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 e.setHeader("{} method `{}` must accept {}`{}`", implementationOf(ctx, superMethod),
                             superMethod.show(ctx), prefix, argName);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+                e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
             }
         } else if (!checkSubtype(ctx, *constr, right.kw.rest->get().type, method, leftRest->get().type, superMethod,
                                  core::Polarity::Negative, errorDetailsCollector)) {
@@ -403,6 +453,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
                 e.addErrorSections(move(errorDetailsCollector));
+                e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
             }
         }
     }
@@ -419,6 +470,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
             e.setHeader("{} method `{}` contains extra required keyword argument `{}`",
                         implementationOf(ctx, superMethod), superMethod.show(ctx), extra.get().name.toString(ctx));
             e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+            e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
         }
     }
 
@@ -427,6 +479,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
             e.setHeader("{} method `{}` must explicitly name a block argument", implementationOf(ctx, superMethod),
                         superMethod.show(ctx));
             e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+            e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
         }
     } else {
         const auto &methodBlkArg = method.data(ctx)->arguments.back();
@@ -444,6 +497,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                                superMethodBlkArg.show(ctx), superMethodBlkArg.type.show(ctx));
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
+                e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
                 e.addErrorSections(move(errorDetailsCollector));
             }
         }
@@ -466,6 +520,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                                superReturn.show(ctx));
                 e.addErrorNote("A method's return type must be a subtype of the return type on the super method.");
                 e.addErrorSections(move(errorDetailsCollector));
+                e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
             }
         }
     }
@@ -553,6 +608,7 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
         !method.data(ctx)->flags.isIncompatibleOverride) {
         if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("Method `{}` is marked `{}` but does not override anything", method.show(ctx), "override");
+            e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef));
         }
     }
 
@@ -606,7 +662,7 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
             // One day, we may want to build something like overridable(allow_incompatible: true)
             // and mark certain methods in the standard library as possible to be overridden incompatibly,
             // without needing to write `override(allow_incompatible: true)`.
-            validateCompatibleOverride(ctx, overriddenMethod, methodDef);
+            validateCompatibleOverride(ctx, tree, overriddenMethod, methodDef);
         }
     }
 }

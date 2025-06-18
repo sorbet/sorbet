@@ -347,9 +347,6 @@ unique_ptr<parser::Node> SigsRewriter::replaceSyntheticTypeAlias(unique_ptr<pars
         Exception::raise("Multiple signatures found for synthetic type alias");
     }
 
-    // Consume the comments
-    commentsByNode.erase(commentsByNode.find(node.get()));
-
     auto aliasDeclaration = comments.signatures[0];
     auto typeBeginLoc = (uint32_t)aliasDeclaration.string.find("=");
 

@@ -238,6 +238,14 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     this->autocorrects.emplace_back(move(autocorrect));
 }
 
+void ErrorBuilder::maybeAddAutocorrect(std::optional<AutocorrectSuggestion> &&ma) {
+    if (!ma.has_value()) {
+        return;
+    }
+
+    addAutocorrect(std::move(ma.value()));
+}
+
 void ErrorBuilder::didYouMean(const string &replacement, Loc loc) {
     if (!gs.didYouMean) {
         return;
