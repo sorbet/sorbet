@@ -187,8 +187,42 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
     }
 }
 
+optional<core::AutocorrectSuggestion> constructAllowIncompatibleAutocorrect(const core::Context ctx,
+                                                                            const ast::ExpressionPtr &tree,
+                                                                            const ast::MethodDef &methodDef) {
+    if (!ctx.state.suggestUnsafe) {
+        return nullopt;
+    }
+
+    auto methodLoc = ctx.locAt(methodDef.declLoc);
+
+    auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, methodLoc.copyWithZeroLength());
+    if (!parsedSig.has_value()) {
+        return nullopt;
+    }
+
+    auto *block = parsedSig->origSend.block();
+    if (!block) {
+        return nullopt;
+    }
+
+    auto blockBody = ast::cast_tree<ast::Send>(block->body);
+    ENFORCE(blockBody != nullptr);
+
+    auto insertLoc = ctx.locAt(parsedSig->sig.seen.override_);
+
+    vector<core::AutocorrectSuggestion::Edit> edits;
+    edits.emplace_back(core::AutocorrectSuggestion::Edit{insertLoc, "override(allow_incompatible: true)"});
+    return core::AutocorrectSuggestion{
+        fmt::format("Add `{}` to `{}` in `{}` sig", "allow_incompatible: true", "override",
+                    methodDef.symbol.data(ctx)->name.show(ctx)),
+        std::move(edits),
+    };
+}
+
 // Ensure that two argument lists are compatible in shape and type
-void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMethod, const ast::MethodDef &methodDef) {
+void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPtr &tree, core::MethodRef superMethod,
+                                const ast::MethodDef &methodDef) {
     auto method = methodDef.symbol;
     if (method.data(ctx)->flags.isOverloaded) {
         // Don't try to check overloaded methods; It's not immediately clear how
@@ -268,6 +302,10 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 e.setHeader("{} method `{}` must accept at least `{}` positional arguments",
                             implementationOf(ctx, superMethod), superMethod.show(ctx), leftPos);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+                auto potentialAutocorrect = constructAllowIncompatibleAutocorrect(ctx, tree, methodDef);
+                if (potentialAutocorrect.has_value()) {
+                    e.addAutocorrect(std::move(*potentialAutocorrect));
+                }
             }
         }
     }
@@ -606,7 +644,7 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
             // One day, we may want to build something like overridable(allow_incompatible: true)
             // and mark certain methods in the standard library as possible to be overridden incompatibly,
             // without needing to write `override(allow_incompatible: true)`.
-            validateCompatibleOverride(ctx, overriddenMethod, methodDef);
+            validateCompatibleOverride(ctx, tree, overriddenMethod, methodDef);
         }
     }
 }
