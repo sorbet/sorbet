@@ -807,19 +807,19 @@ string UnresolvedIdent::showRaw(const core::GlobalState &gs, int tabs) const {
 }
 
 string Return::showRaw(const core::GlobalState &gs, int tabs) const {
-    return nodeName() + "{ expr = " + this->expr.showRaw(gs, tabs + 1) + " }";
+    return fmt::format("{}{{ expr = {} }}", nodeName(), this->expr.showRaw(gs, tabs + 1));
 }
 
 string Next::showRaw(const core::GlobalState &gs, int tabs) const {
-    return nodeName() + "{ expr = " + this->expr.showRaw(gs, tabs + 1) + " }";
+    return fmt::format("{}{{ expr = {} }}", nodeName(), this->expr.showRaw(gs, tabs + 1));
 }
 
 string Break::showRaw(const core::GlobalState &gs, int tabs) const {
-    return nodeName() + "{ expr = " + this->expr.showRaw(gs, tabs + 1) + " }";
+    return fmt::format("{}{{ expr = {} }}", nodeName(), this->expr.showRaw(gs, tabs + 1));
 }
 
 string Retry::showRaw(const core::GlobalState &gs, int tabs) const {
-    return nodeName() + "{}";
+    return fmt::format("{}{{}}", nodeName());
 }
 
 string Return::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
@@ -839,7 +839,7 @@ string Retry::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
 }
 
 string Literal::showRaw(const core::GlobalState &gs, int tabs) const {
-    return nodeName() + "{ value = " + this->toStringWithTabs(gs, 0) + " }";
+    return fmt::format("{}{{ value = {} }}", nodeName(), this->toStringWithTabs(gs, 0));
 }
 
 string Literal::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
@@ -1169,7 +1169,7 @@ string Cast::showRaw(const core::GlobalState &gs, int tabs) const {
 }
 
 string ZSuperArgs::showRaw(const core::GlobalState &gs, int tabs) const {
-    return nodeName() + "{ }";
+    return fmt::format("{}{{ }}", nodeName());
 }
 
 string Hash::showRaw(const core::GlobalState &gs, int tabs) const {
@@ -1432,11 +1432,11 @@ string_view EmptyTree::nodeName() const {
 }
 
 string EmptyTree::showRaw(const core::GlobalState &gs, int tabs) const {
-    return nodeName();
+    return string(nodeName());
 }
 
 string RestArg::showRaw(const core::GlobalState &gs, int tabs) const {
-    return nodeName() + "{ expr = " + expr.showRaw(gs, tabs) + " }";
+    return fmt::format("{}{{ expr = {} }}", nodeName(), expr.showRaw(gs, tabs));
 }
 
 string_view RestArg::nodeName() const {
@@ -1444,7 +1444,7 @@ string_view RestArg::nodeName() const {
 }
 
 string KeywordArg::showRaw(const core::GlobalState &gs, int tabs) const {
-    return nodeName() + "{ expr = " + expr.showRaw(gs, tabs) + " }";
+    return fmt::format("{}{{ expr = {} }}", nodeName(), expr.showRaw(gs, tabs));
 }
 
 string_view KeywordArg::nodeName() const {
@@ -1471,11 +1471,11 @@ string_view OptionalArg::nodeName() const {
 }
 
 string ShadowArg::showRaw(const core::GlobalState &gs, int tabs) const {
-    return nodeName() + "{ expr = " + expr.showRaw(gs, tabs) + " }";
+    return fmt::format("{}{{ expr = {} }}", nodeName(), expr.showRaw(gs, tabs));
 }
 
 string BlockArg::showRaw(const core::GlobalState &gs, int tabs) const {
-    return nodeName() + "{ expr = " + expr.showRaw(gs, tabs) + " }";
+    return fmt::format("{}{{ expr = {} }}", nodeName(), expr.showRaw(gs, tabs));
 }
 
 string_view ShadowArg::nodeName() const {
