@@ -655,8 +655,8 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "splat");
         },
         [&](parser::Super *super_) {
-            walkNodes(super_->args);
             associateAssertionCommentsToNode(node);
+            walkNodes(super_->args);
             consumeCommentsInsideNode(node, "super");
         },
         [&](parser::Until *until) {
