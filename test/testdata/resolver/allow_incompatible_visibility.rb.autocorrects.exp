@@ -1,3 +1,4 @@
+# -- test/testdata/resolver/allow_incompatible_visibility.rb --
 # typed: true
 
 class Parent
@@ -30,16 +31,17 @@ class ChildBadSymbol < Parent
 end
 
 class ChildBoth1 < Parent
-  sig { override(allow_incompatible: true).override(allow_incompatible: :visibility).returns(Integer) }
+  sig { override(allow_incompatible: :visibility).returns(Integer) }
   private def some_public_api; 0; end
 end
 
 class ChildBoth2 < Parent
-  sig { override(allow_incompatible: :visibility).override(allow_incompatible: true).returns(Integer) }
+  sig { override(allow_incompatible: true).returns(Integer) }
   private def some_public_api; 0; end
 end
 
 class ChildBoth3 < Parent
-  sig { returns(Integer).override(allow_incompatible: :visibility).override(allow_incompatible: true) }
+  sig { override(allow_incompatible: true) }
   private def some_public_api; 0; end
 end
+# ------------------------------
