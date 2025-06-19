@@ -64,7 +64,7 @@ void ExpressionPtr::deleteTagged(Tag tag, void *ptr) noexcept {
 #undef DELETE_TYPE
 }
 
-string ExpressionPtr::nodeName() const {
+string_view ExpressionPtr::nodeName() const {
     auto *ptr = get();
 
     ENFORCE(ptr != nullptr);
@@ -760,7 +760,7 @@ string Local::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return this->localVariable.toString(gs);
 }
 
-string Local::nodeName() const {
+string_view Local::nodeName() const {
     return "Local";
 }
 
@@ -1303,66 +1303,66 @@ string BlockArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return "&" + this->expr.toStringWithTabs(gs, tabs);
 }
 
-string RescueCase::nodeName() const {
+string_view RescueCase::nodeName() const {
     return "RescueCase";
 }
-string Rescue::nodeName() const {
+string_view Rescue::nodeName() const {
     return "Rescue";
 }
-string Next::nodeName() const {
+string_view Next::nodeName() const {
     return "Next";
 }
-string ClassDef::nodeName() const {
+string_view ClassDef::nodeName() const {
     return "ClassDef";
 }
 
-string MethodDef::nodeName() const {
+string_view MethodDef::nodeName() const {
     return "MethodDef";
 }
-string If::nodeName() const {
+string_view If::nodeName() const {
     return "If";
 }
-string While::nodeName() const {
+string_view While::nodeName() const {
     return "While";
 }
-string UnresolvedIdent::nodeName() const {
+string_view UnresolvedIdent::nodeName() const {
     return "UnresolvedIdent";
 }
-string Return::nodeName() const {
+string_view Return::nodeName() const {
     return "Return";
 }
-string Break::nodeName() const {
+string_view Break::nodeName() const {
     return "Break";
 }
-string Retry::nodeName() const {
+string_view Retry::nodeName() const {
     return "Retry";
 }
 
-string Assign::nodeName() const {
+string_view Assign::nodeName() const {
     return "Assign";
 }
 
-string Send::nodeName() const {
+string_view Send::nodeName() const {
     return "Send";
 }
 
-string Cast::nodeName() const {
+string_view Cast::nodeName() const {
     return "Cast";
 }
 
-string ZSuperArgs::nodeName() const {
+string_view ZSuperArgs::nodeName() const {
     return "ZSuperArgs";
 }
 
-string Hash::nodeName() const {
+string_view Hash::nodeName() const {
     return "Hash";
 }
 
-string Array::nodeName() const {
+string_view Array::nodeName() const {
     return "Array";
 }
 
-string Literal::nodeName() const {
+string_view Literal::nodeName() const {
     return "Literal";
 }
 
@@ -1411,23 +1411,23 @@ bool Literal::isFalse(const core::GlobalState &gs) const {
     return value.derivesFrom(gs, core::Symbols::FalseClass());
 }
 
-string UnresolvedConstantLit::nodeName() const {
+string_view UnresolvedConstantLit::nodeName() const {
     return "UnresolvedConstantLit";
 }
 
-string ConstantLit::nodeName() const {
+string_view ConstantLit::nodeName() const {
     return "ConstantLit";
 }
 
-string Block::nodeName() const {
+string_view Block::nodeName() const {
     return "Block";
 }
 
-string InsSeq::nodeName() const {
+string_view InsSeq::nodeName() const {
     return "InsSeq";
 }
 
-string EmptyTree::nodeName() const {
+string_view EmptyTree::nodeName() const {
     return "EmptyTree";
 }
 
@@ -1439,7 +1439,7 @@ string RestArg::showRaw(const core::GlobalState &gs, int tabs) const {
     return nodeName() + "{ expr = " + expr.showRaw(gs, tabs) + " }";
 }
 
-string RestArg::nodeName() const {
+string_view RestArg::nodeName() const {
     return "RestArg";
 }
 
@@ -1447,7 +1447,7 @@ string KeywordArg::showRaw(const core::GlobalState &gs, int tabs) const {
     return nodeName() + "{ expr = " + expr.showRaw(gs, tabs) + " }";
 }
 
-string KeywordArg::nodeName() const {
+string_view KeywordArg::nodeName() const {
     return "KeywordArg";
 }
 
@@ -1466,7 +1466,7 @@ string OptionalArg::showRaw(const core::GlobalState &gs, int tabs) const {
     return fmt::to_string(buf);
 }
 
-string OptionalArg::nodeName() const {
+string_view OptionalArg::nodeName() const {
     return "OptionalArg";
 }
 
@@ -1478,19 +1478,19 @@ string BlockArg::showRaw(const core::GlobalState &gs, int tabs) const {
     return nodeName() + "{ expr = " + expr.showRaw(gs, tabs) + " }";
 }
 
-string ShadowArg::nodeName() const {
+string_view ShadowArg::nodeName() const {
     return "ShadowArg";
 }
 
-string BlockArg::nodeName() const {
+string_view BlockArg::nodeName() const {
     return "BlockArg";
 }
 
-string RuntimeMethodDefinition::nodeName() const {
+string_view RuntimeMethodDefinition::nodeName() const {
     return "RuntimeMethodDefinition";
 }
 
-string Self::nodeName() const {
+string_view Self::nodeName() const {
     return "Self";
 }
 
