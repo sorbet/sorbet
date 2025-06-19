@@ -122,7 +122,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
         }
 
         core::TypePtr thisType;
-        for (auto iter : dispatchInfo.iterator()) {
+        for (auto iter : dispatchInfo) {
             if (iter->main.method.exists()) {
                 auto argType = extractArgType(ctx, *snd, iter->main, keyword, argIdx);
                 if (argType && !argType.isUntyped()) {

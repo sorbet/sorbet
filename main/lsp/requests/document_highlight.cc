@@ -95,7 +95,7 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
         } else if (fileIsTyped && resp->isSend()) {
             auto sendResp = resp->isSend();
             vector<unique_ptr<core::lsp::QueryResponse>> references;
-            for (auto start : sendResp->dispatchResult->iterator()) {
+            for (auto start : sendResp->dispatchResult) {
                 if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
                     // This could be a `prop` or `attr_*`, which have multiple associated symbols.
                     references = getReferencesToAccessorInFile(typechecker, fref,

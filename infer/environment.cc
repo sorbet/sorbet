@@ -1053,7 +1053,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                 suppressErrors,  inWhat.symbol.data(ctx)->name};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
-                for (auto it : dispatched.iterator()) {
+                for (auto it : dispatched) {
                     for (auto &err : it->main.errors) {
                         if (err->what != core::errors::Infer::UnknownMethod ||
                             !parentUpdateKnowledgeReceiver.has_value()) {
@@ -1358,7 +1358,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 auto &procType = insn.link->result->main.blockPreType;
                 auto params = procType.getCallArguments(ctx, core::Names::call());
-                for (auto it : insn.link->result->secondary->iterator()) {
+                for (auto it : insn.link->result->secondary) {
                     auto &secondaryProcType = it->main.blockPreType;
                     if (secondaryProcType != nullptr) {
                         auto secondaryParams = secondaryProcType.getCallArguments(ctx, core::Names::call());
@@ -1589,7 +1589,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::LoadSelf &l) {
                 ENFORCE(l.link);
                 auto tpo = getTypeFromRebind(ctx, l.link->result->main, l.fallback);
-                for (auto it : l.link->result->secondary->iterator()) {
+                for (auto it : l.link->result->secondary) {
                     auto secondaryTpo = getTypeFromRebind(ctx, it->main, l.fallback);
                     switch (l.link->result->secondaryKind) {
                         case core::DispatchResult::Combinator::OR:

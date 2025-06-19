@@ -15,7 +15,7 @@ namespace sorbet::realmain::lsp {
 string methodInfoString(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
                         const core::ShowOptions options) {
     string contents;
-    for (auto start : dispatchResult.iterator()) {
+    for (auto start : dispatchResult) {
         auto &component = start->main;
         if (component.method.exists()) {
             if (!contents.empty()) {
@@ -86,7 +86,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
     if (auto s = resp->isSend()) {
         // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
         if (s->funLoc().exists() && s->funLoc().contains(queryLoc)) {
-            for (auto start : s->dispatchResult->iterator()) {
+            for (auto start : s->dispatchResult) {
                 if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
                     auto loc = start->main.method.data(gs)->loc();
                     if (loc.exists()) {

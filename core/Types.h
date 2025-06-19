@@ -1105,14 +1105,6 @@ struct DispatchResult {
 
         explicit Iterator(PtrT *it) : it(it) {}
 
-        Iterator begin() const {
-            return *this;
-        }
-
-        Iterator end() const {
-            return Iterator(nullptr);
-        }
-
         PtrT *operator*() const {
             return it;
         }
@@ -1135,17 +1127,57 @@ struct DispatchResult {
         }
     };
 
-    Iterator<DispatchResult> iterator() {
-        return Iterator(this);
-    }
-
-    Iterator<const DispatchResult> iterator() const {
-        return Iterator(this);
-    }
-
     // Combine two dispatch results, preferring the left as the `main`.
     static DispatchResult merge(const GlobalState &gs, Combinator kind, DispatchResult &&left, DispatchResult &&right);
 };
+
+inline DispatchResult::Iterator<DispatchResult> begin(DispatchResult *dr) {
+    return DispatchResult::Iterator<DispatchResult>(dr);
+}
+
+inline DispatchResult::Iterator<DispatchResult> end(DispatchResult *dr) {
+    return DispatchResult::Iterator<DispatchResult>(nullptr);
+}
+
+inline DispatchResult::Iterator<DispatchResult> begin(DispatchResult &dr) {
+    return DispatchResult::Iterator<DispatchResult>(&dr);
+}
+
+inline DispatchResult::Iterator<DispatchResult> end(DispatchResult &dr) {
+    return DispatchResult::Iterator<DispatchResult>(nullptr);
+}
+
+inline DispatchResult::Iterator<DispatchResult> begin(const std::shared_ptr<DispatchResult> &dr) {
+    return DispatchResult::Iterator<DispatchResult>(dr.get());
+}
+
+inline DispatchResult::Iterator<DispatchResult> end(const std::shared_ptr<DispatchResult> &dr) {
+    return DispatchResult::Iterator<DispatchResult>(nullptr);
+}
+
+inline DispatchResult::Iterator<DispatchResult> begin(const std::unique_ptr<DispatchResult> &dr) {
+    return DispatchResult::Iterator<DispatchResult>(dr.get());
+}
+
+inline DispatchResult::Iterator<DispatchResult> end(const std::unique_ptr<DispatchResult> &dr) {
+    return DispatchResult::Iterator<DispatchResult>(nullptr);
+}
+
+inline DispatchResult::Iterator<const DispatchResult> begin(const DispatchResult *dr) {
+    return DispatchResult::Iterator<const DispatchResult>(dr);
+}
+
+inline DispatchResult::Iterator<const DispatchResult> end(const DispatchResult *dr) {
+    return DispatchResult::Iterator<const DispatchResult>(nullptr);
+}
+
+inline DispatchResult::Iterator<const DispatchResult> begin(const DispatchResult &dr) {
+    return DispatchResult::Iterator<const DispatchResult>(&dr);
+}
+
+inline DispatchResult::Iterator<const DispatchResult> end(const DispatchResult &dr) {
+    return DispatchResult::Iterator<const DispatchResult>(nullptr);
+}
 
 TYPE_INLINED(BlamedUntyped) final : public ClassType {
 public:
