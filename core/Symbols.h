@@ -78,8 +78,8 @@ public:
         bool isFinal : 1;
         bool isOverride : 1;
         // It might have been nice to be able to separate out the kinds of incompatible overrides.
-        // This boolean silences all override-related errors, which includes arity mismatch, type
-        // param arity mismatch, and param/return type mismatch.
+        // This boolean silences all override-related errors, which includes arity mismatch,
+        // type_parameters arity mismatch, param/return type mismatch, etc.
         bool allowIncompatibleOverrideAll : 1;
         bool allowIncompatibleOverrideVisibility : 1;
         bool isPackagePrivate : 1;

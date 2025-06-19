@@ -28,3 +28,13 @@ class ChildBadSymbol < Parent
   #                                 ^^^^ error: `override(allow_incompatible: ...)` expects one of `true`, `false`, or `:visibility
   private def some_public_api; 0; end
 end
+
+class ChildBoth1 < Parent
+  sig { override(allow_incompatible: true).override(allow_incompatible: :visibility).returns(Integer) }
+  private def some_public_api; 0; end
+end
+
+class ChildBoth2 < Parent
+  sig { override(allow_incompatible: :visibility).override(allow_incompatible: true).returns(Integer) }
+  private def some_public_api; 0; end
+end

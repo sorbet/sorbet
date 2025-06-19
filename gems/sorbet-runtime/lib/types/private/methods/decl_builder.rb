@@ -158,7 +158,7 @@ module T::Private::Methods
         when true, false, :visibility
           decl.override_allow_incompatible = allow_incompatible
         else
-          raise BuilderError.new(".override(allow_incompatible: ...) only accepts `true` or `false`, got: #{allow_incompatible.inspect}")
+          raise BuilderError.new(".override(allow_incompatible: ...) only accepts `true`, `false`, or `:visibility`, got: #{allow_incompatible.inspect}")
         end
       when Modes.override, Modes.overridable_override
         raise BuilderError.new(".override cannot be repeated in a single signature")

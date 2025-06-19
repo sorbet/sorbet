@@ -521,7 +521,7 @@ module Opus::Types::Test
             foo
           end
         end
-        assert_includes(e.message, "only accepts `true` or `false`")
+        assert_includes(e.message, "only accepts `true`, `false`, or `:visibility`")
 
         e = assert_raises(ArgumentError) do
           Class.new(parent) do
@@ -530,7 +530,7 @@ module Opus::Types::Test
             foo
           end
         end
-        assert_includes(e.message, "only accepts `true` or `false`")
+        assert_includes(e.message, "only accepts `true`, `false`, or `:visibility`")
 
         e = assert_raises(ArgumentError) do
           Class.new(parent) do
@@ -539,7 +539,7 @@ module Opus::Types::Test
             foo
           end
         end
-        assert_includes(e.message, "only accepts `true` or `false`")
+        assert_includes(e.message, "only accepts `true`, `false`, or `:visibility`")
 
         Class.new(parent) do
           sig { override(allow_incompatible: :visibility).returns(Integer) }
