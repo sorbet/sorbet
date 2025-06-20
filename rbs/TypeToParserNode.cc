@@ -14,17 +14,27 @@ bool hasTypeParam(absl::Span<const pair<core::LocOffsets, core::NameRef>> typePa
     return absl::c_any_of(typeParams, [&](const auto &param) { return param.second == name; });
 }
 
+bool isEnumerator(const unique_ptr<parser::Node> &node) {
+    auto constNode = parser::cast_node<parser::Const>(node.get());
+
+    if (!constNode) {
+        return false;
+    }
+
+    return constNode->name == core::Names::Constants::Enumerator() &&
+           (constNode->scope == nullptr || parser::isa_node<parser::Cbase>(constNode->scope.get()));
+}
+
 } // namespace
 
-unique_ptr<parser::Node> TypeToParserNode::typeNameType(const rbs_type_name_t *typeName, bool isGeneric,
-                                                        const RBSDeclaration &declaration) {
-    auto loc = declaration.typeLocFromRange(((rbs_node_t *)typeName)->location->rg);
-    rbs_node_list *typePath = typeName->rbs_namespace->path;
+unique_ptr<parser::Node> TypeToParserNode::namespaceConst(const rbs_namespace_t *rbsNamespace,
+                                                          const RBSDeclaration &declaration) {
+    auto loc = declaration.typeLocFromRange(((rbs_node_t *)rbsNamespace)->location->rg);
+    rbs_node_list *typePath = rbsNamespace->path;
 
     unique_ptr<parser::Node> parent;
-    vector<core::NameRef> pathNames;
 
-    if (typeName->rbs_namespace->absolute) {
+    if (rbsNamespace->absolute) {
         parent = parser::MK::Cbase(loc);
     } else {
         parent = nullptr;
@@ -40,19 +50,25 @@ unique_ptr<parser::Node> TypeToParserNode::typeNameType(const rbs_type_name_t *t
             rbs_ast_symbol_t *symbol = (rbs_ast_symbol_t *)node;
             auto nameStr = parser.resolveConstant(symbol);
             auto pathNameConst = ctx.state.enterNameConstant(nameStr);
-            pathNames.emplace_back(pathNameConst);
             parent = parser::MK::Const(loc, move(parent), pathNameConst);
         }
     }
+
+    return parent;
+}
+
+unique_ptr<parser::Node> TypeToParserNode::typeNameType(const rbs_type_name_t *typeName, bool isGeneric,
+                                                        const RBSDeclaration &declaration) {
+    auto loc = declaration.typeLocFromRange(((rbs_node_t *)typeName)->location->rg);
+
+    auto parent = namespaceConst(typeName->rbs_namespace, declaration);
 
     auto nameStr = parser.resolveConstant(typeName->name);
     auto nameUTF8 = ctx.state.enterNameUTF8(nameStr);
     auto nameConstant = ctx.state.enterNameConstant(nameUTF8);
 
-    pathNames.emplace_back(nameConstant);
-
-    if (pathNames.size() == 1) {
-        if (isGeneric) {
+    if (isGeneric) {
+        if (parent == nullptr || parser::isa_node<parser::Cbase>(parent.get())) {
             if (nameConstant == core::Names::Constants::Array()) {
                 return parser::MK::T_Array(loc);
             } else if (nameConstant == core::Names::Constants::Class()) {
@@ -68,19 +84,15 @@ unique_ptr<parser::Node> TypeToParserNode::typeNameType(const rbs_type_name_t *t
             } else if (nameConstant == core::Names::Constants::Range()) {
                 return parser::MK::T_Range(loc);
             }
-        } else {
-            // The type may refer to a type parameter, so we need to check if it exists as a NameKind::UTF8
-            if (hasTypeParam(typeParams, nameUTF8)) {
-                return parser::MK::TTypeParameter(loc, parser::MK::Symbol(loc, nameUTF8));
-            }
+        } else if (nameConstant == core::Names::Constants::Lazy() && isEnumerator(parent)) {
+            return parser::MK::T_Enumerator_Lazy(loc);
+        } else if (nameConstant == core::Names::Constants::Chain() && isEnumerator(parent)) {
+            return parser::MK::T_Enumerator_Chain(loc);
         }
-    } else if (pathNames.size() == 2 && isGeneric) {
-        if (pathNames[0] == core::Names::Constants::Enumerator()) {
-            if (pathNames[1] == core::Names::Constants::Lazy()) {
-                return parser::MK::T_Enumerator_Lazy(loc);
-            } else if (pathNames[1] == core::Names::Constants::Chain()) {
-                return parser::MK::T_Enumerator_Chain(loc);
-            }
+    } else {
+        // The type may refer to a type parameter, so we need to check if it exists as a NameKind::UTF8
+        if (hasTypeParam(typeParams, nameUTF8)) {
+            return parser::MK::TTypeParameter(loc, parser::MK::Symbol(loc, nameUTF8));
         }
     }
 
@@ -89,7 +101,8 @@ unique_ptr<parser::Node> TypeToParserNode::typeNameType(const rbs_type_name_t *t
 
 unique_ptr<parser::Node> TypeToParserNode::aliasType(const rbs_types_alias_t *node, core::LocOffsets loc,
                                                      const RBSDeclaration &declaration) {
-    auto parent = nullptr;
+    vector<core::NameRef> pathNames;
+    auto parent = namespaceConst(node->name->rbs_namespace, declaration);
     auto nameView = parser.resolveConstant(node->name->name);
     auto nameStr = "type " + string(nameView);
     auto nameUTF8 = ctx.state.enterNameUTF8(nameStr);
