@@ -25,7 +25,7 @@ end
 
 class ChildBadSymbol < Parent
   sig {override(allow_incompatible: :bad).returns(Integer)}
-  #                                 ^^^^ error: `override(allow_incompatible: ...)` expects one of `true`, `false`, or `:visibility
+  #                                 ^^^^ error: `override(allow_incompatible: ...)` expects either `true` or `:visibility
   private def some_public_api; 0; end
 end
 
@@ -46,3 +46,17 @@ class ChildBoth3 < Parent
   #                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Malformed `sig`: Don't use both `override(allow_incompatible: true)` and `override(allow_incompatible: :visibility)
   private def some_public_api; 0; end
 end
+
+class ChildBoth4 < Parent
+  sig { override(allow_incompatible: false).override(allow_incompatible: :visibility).returns(Integer) }
+  #                                  ^^^^^  error: `override(allow_incompatible: ...)` expects either `true` or `:visibility`
+  private def some_public_api; 0; end
+end
+
+class ChildBoth5 < Parent
+  # TODO(jez) Probably want to ban this, but that's probably something to leave until
+  # https://github.com/sorbet/sorbet/issues/9012
+  sig { override.override(allow_incompatible: :visibility).returns(Integer) }
+  private def some_public_api; 0; end
+end
+
