@@ -9,7 +9,7 @@ end
 
 class ChildBad < Parent
   sig {override.returns(Integer)}
-  private def some_public_api; 1; end
+  private def some_public_api; 1; end # error: Method `some_public_api` is private in `ChildBad` but not in `Parent`
 end
 
 class ChildOkay < Parent

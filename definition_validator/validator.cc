@@ -251,9 +251,10 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
         return;
     }
 
-    if ((method.data(ctx)->flags.isPrivate &&
-         (superMethod.data(ctx)->flags.isProtected || superMethod.data(ctx)->isMethodPublic())) ||
-        (method.data(ctx)->flags.isProtected && superMethod.data(ctx)->isMethodPublic())) {
+    if (!method.data(ctx)->flags.allowIncompatibleOverrideVisibility &&
+        ((method.data(ctx)->flags.isPrivate &&
+          (superMethod.data(ctx)->flags.isProtected || superMethod.data(ctx)->isMethodPublic())) ||
+         (method.data(ctx)->flags.isProtected && superMethod.data(ctx)->isMethodPublic()))) {
         if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
             auto modifier = method.data(ctx)->flags.isPrivate ? "private" : "protected";
             e.setHeader("Method `{}` is {} in `{}` but not in `{}`", method.data(ctx)->name.show(ctx), modifier,
