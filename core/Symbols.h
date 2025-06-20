@@ -77,15 +77,20 @@ public:
         bool isOverridable : 1;
         bool isFinal : 1;
         bool isOverride : 1;
-        bool isIncompatibleOverride : 1;
+        // It might have been nice to be able to separate out the kinds of incompatible overrides.
+        // This boolean silences all override-related errors, which includes arity mismatch,
+        // type_parameters arity mismatch, param/return type mismatch, etc.
+        bool allowIncompatibleOverrideAll : 1;
+        bool allowIncompatibleOverrideVisibility : 1;
         bool isPackagePrivate : 1;
 
-        constexpr static uint16_t NUMBER_OF_FLAGS = 11;
+        constexpr static uint16_t NUMBER_OF_FLAGS = 12;
         constexpr static uint16_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
         Flags() noexcept
             : isRewriterSynthesized(false), isProtected(false), isPrivate(false), isOverloaded(false),
               isAbstract(false), isGenericMethod(false), isOverridable(false), isFinal(false), isOverride(false),
-              isIncompatibleOverride(false), isPackagePrivate(false) {}
+              allowIncompatibleOverrideAll(false), allowIncompatibleOverrideVisibility(false), isPackagePrivate(false) {
+        }
 
         uint16_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint16_t));

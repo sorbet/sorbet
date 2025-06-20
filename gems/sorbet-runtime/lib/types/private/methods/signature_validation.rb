@@ -175,7 +175,7 @@ module T::Private::Methods::SignatureValidation
   end
 
   def self.validate_override_shape(signature, super_signature)
-    return if signature.override_allow_incompatible
+    return if signature.override_allow_incompatible == true
     return if super_signature.mode == Modes.untyped
 
     method_name = signature.method_name
@@ -231,7 +231,7 @@ module T::Private::Methods::SignatureValidation
   end
 
   def self.validate_override_types(signature, super_signature)
-    return if signature.override_allow_incompatible
+    return if signature.override_allow_incompatible == true
     return if super_signature.mode == Modes.untyped
     return unless [signature, super_signature].all? do |sig|
       sig.check_level == :always || (sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)

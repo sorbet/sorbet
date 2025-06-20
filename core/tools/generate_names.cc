@@ -115,6 +115,7 @@ NameDef names[] = {
     {"override_", "override"},
     {"overridable"},
     {"allowIncompatible", "allow_incompatible"},
+    {"visibility"},
     {"sigForMethod"},
 
     // Sig builders

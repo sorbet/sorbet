@@ -41,6 +41,7 @@ struct ParsedSig {
         core::LocOffsets checked = core::LocOffsets::none();
         core::LocOffsets final = core::LocOffsets::none();
         core::LocOffsets incompatibleOverride = core::LocOffsets::none();
+        core::LocOffsets incompatibleOverrideVisibility = core::LocOffsets::none();
     } seen;
 
     TypeArgSpec &enterTypeArgByName(core::NameRef name);

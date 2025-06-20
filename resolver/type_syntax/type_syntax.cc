@@ -441,7 +441,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                         e.setHeader("`{}` cannot be combined with `{}`", "override", "abstract");
                     }
                 }
-                sig.seen.override_ = send->funLoc.join(send->loc);
+                sig.seen.override_ = send->funLoc.join(send->loc.copyEndWithZeroLength());
 
                 if (send->hasPosArgs()) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -459,6 +459,20 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                                 if (val && val->isTrue(ctx)) {
                                     sig.seen.incompatibleOverride = key.loc().join(value.loc());
                                 }
+                                if (val && val->isSymbol()) {
+                                    if (val->asSymbol() == core::Names::visibility()) {
+                                        sig.seen.incompatibleOverrideVisibility = key.loc().join(value.loc());
+                                    } else {
+                                        if (auto e = ctx.beginError(val->loc,
+                                                                    core::errors::Resolver::InvalidMethodSignature)) {
+                                            e.setHeader("`{}` expects one of `{}`, `{}`, or `{}`",
+                                                        "override(allow_incompatible: ...)", "true", "false",
+                                                        ":visibility");
+                                        }
+                                    }
+                                }
+                                // Other errors are caught with type checking, but since the sig says
+                                // `T.any(Symbol, ...)` we have to explicitly check the allowed symbol literals.
                             }
                         }
                     }

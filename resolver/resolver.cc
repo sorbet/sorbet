@@ -3303,8 +3303,23 @@ private:
         if (sig.seen.abstract.exists()) {
             method.data(ctx)->flags.isAbstract = true;
         }
-        if (sig.seen.incompatibleOverride.exists()) {
-            method.data(ctx)->flags.isIncompatibleOverride = true;
+        if (sig.seen.incompatibleOverride.exists() && sig.seen.incompatibleOverrideVisibility.exists()) {
+            ENFORCE(sig.seen.override_.exists());
+            if (auto e = ctx.beginError(sig.seen.override_, core::errors::Resolver::InvalidMethodSignature)) {
+                e.setHeader("Malformed `{}`: Don't use both `{}` and `{}", "sig", "override(allow_incompatible: true)",
+                            "override(allow_incompatible: :visibility)");
+                auto deleteLoc = ctx.locAt(sig.seen.override_);
+                auto dotAfterLoc = deleteLoc.copyEndWithZeroLength().adjust(ctx, 0, 1);
+                if (dotAfterLoc.source(ctx) == ".") {
+                    deleteLoc = deleteLoc.join(dotAfterLoc);
+                }
+                e.replaceWith("Remove this override", deleteLoc, "");
+            }
+            method.data(ctx)->flags.allowIncompatibleOverrideAll = true;
+        } else if (sig.seen.incompatibleOverride.exists()) {
+            method.data(ctx)->flags.allowIncompatibleOverrideAll = true;
+        } else if (sig.seen.incompatibleOverrideVisibility.exists()) {
+            method.data(ctx)->flags.allowIncompatibleOverrideVisibility = true;
         }
         if (!sig.typeArgs.empty()) {
             method.data(ctx)->flags.isGenericMethod = true;
