@@ -19,6 +19,8 @@ public:
     static LSPQueryResult bySymbol(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                    core::SymbolRef symbol,
                                    core::packages::MangledName pkgName = core::packages::MangledName());
+    static LSPQueryResult findSends(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
+                                    std::string_view uri);
 };
 
 } // namespace sorbet::realmain::lsp
