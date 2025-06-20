@@ -441,7 +441,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                         e.setHeader("`{}` cannot be combined with `{}`", "override", "abstract");
                     }
                 }
-                sig.seen.override_ = send->funLoc.join(send->loc);
+                sig.seen.override_ = send->funLoc.join(send->loc.copyEndWithZeroLength());
 
                 if (send->hasPosArgs()) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {

@@ -31,15 +31,18 @@ end
 
 class ChildBoth1 < Parent
   sig { override(allow_incompatible: true).override(allow_incompatible: :visibility).returns(Integer) }
+  #     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Malformed `sig`: Don't use both `override(allow_incompatible: true)` and `override(allow_incompatible: :visibility)
   private def some_public_api; 0; end
 end
 
 class ChildBoth2 < Parent
   sig { override(allow_incompatible: :visibility).override(allow_incompatible: true).returns(Integer) }
+  #     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Malformed `sig`: Don't use both `override(allow_incompatible: true)` and `override(allow_incompatible: :visibility)
   private def some_public_api; 0; end
 end
 
 class ChildBoth3 < Parent
   sig { returns(Integer).override(allow_incompatible: :visibility).override(allow_incompatible: true) }
+  #                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Malformed `sig`: Don't use both `override(allow_incompatible: true)` and `override(allow_incompatible: :visibility)
   private def some_public_api; 0; end
 end
