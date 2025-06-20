@@ -26,7 +26,7 @@ struct Signature {
         std::optional<reference_wrapper<const core::ArgInfo>> rest;
     } pos, kw;
     bool syntheticBlk;
-} left, right;
+};
 
 Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method) {
     Signature sig;
@@ -208,9 +208,9 @@ optional<core::AutocorrectSuggestion> constructAllowIncompatibleAutocorrect(cons
 // This walks two positional argument lists to ensure that they're compatibly typed (i.e. that every argument in the
 // implementing method is either the same or a supertype of the abstract or overridable definition)
 void matchPositional(const core::Context ctx, core::TypeConstraint &constr, const ast::ExpressionPtr &tree,
-                     absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &superArgs,
+                     const absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &superArgs,
                      core::MethodRef superMethod,
-                     absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &methodArgs,
+                     const absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &methodArgs,
                      const ast::MethodDef &methodDef, bool &reportedAutocorrect) {
     auto method = methodDef.symbol;
     auto idx = 0;
@@ -237,6 +237,81 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr, cons
         }
         idx++;
     }
+}
+
+void validatePositionalParams(const core::Context ctx, const ast::ExpressionPtr &tree, core::TypeConstraint &constr,
+                              core::MethodRef superMethod, const ast::MethodDef &methodDef, const Signature &superSig,
+                              const Signature &sig, bool &reportedAutocorrect) {
+    // Positional list checking:
+    //
+    // THEORY:
+    //
+    // Liskov compatibility states that the property we want is that, if `Parent.foo(x1, x2, x3)` is
+    // well-typed, so too should the expression `Child.foo(x1, x2, x3)`. If neither `parent` nor
+    // `child` have splatted args, this is straightforward. Otherwise, submethod signatures should
+    // obey the following:
+    //
+    // For a method `foo` with signature `params(x1: t1, x2: t2, xsplat: t)` where `xsplat` is
+    // splatted, let `S(foo)` be the set of sequences `<t1, t2, t, ... n times ..., t>` for all `n`
+    // (if there is no splat, then `S(foo)` is the singleton set `{<t1, t2, ...>}`). A child
+    // signature is override-compatible with its parent if for _every_ element `sp` of `S(parent)`,
+    // there is a corresponding element `sc` of `S(child)` such that:
+    //
+    // - |sp| == |sc|
+    // - sc_i <= sp_i for each index `i`
+    //
+    // IMPLEMENTATION:
+    //
+    // In practice, we can check the above by:
+    //   1. If the parent has a splat but the child doesn't, reject immediately.
+    //   2. If the child has a splat of type `t`, pad the child's optional arguments with a
+    //      synthetic argument of type `t` until it has the same number of optional args as the
+    //      parent
+    //   3. Check that the splats are compatible.
+
+    // (1)
+    if (auto superSigRest = superSig.pos.rest) {
+        if (!sig.pos.rest) {
+            if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
+                auto [prefix, argName] = formatSplat(superSigRest->get(), SplatKind::ARG, ctx);
+                e.setHeader("{} method `{}` must accept {}`{}`", implementationOf(ctx, superMethod),
+                            superMethod.show(ctx), prefix, argName);
+                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+
+                e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, reportedAutocorrect));
+            }
+        }
+    }
+
+    // (2)
+    if (!sig.pos.rest) {
+        auto superSigPos = superSig.pos.required.size() + superSig.pos.optional.size();
+        auto sigPos = sig.pos.required.size() + sig.pos.optional.size();
+        if (superSigPos > sigPos) {
+            if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("{} method `{}` must accept at least `{}` positional arguments",
+                            implementationOf(ctx, superMethod), superMethod.show(ctx), superSigPos);
+                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+                e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, reportedAutocorrect));
+            }
+        }
+    }
+
+    if (sig.pos.required.size() > superSig.pos.required.size()) {
+        if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("{} method `{}` must accept no more than `{}` required argument(s)",
+                        implementationOf(ctx, superMethod), superMethod.show(ctx), superSig.pos.required.size());
+            e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+            e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, reportedAutocorrect));
+        }
+    }
+
+    // match types of required positional arguments
+    matchPositional(ctx, constr, tree, superSig.pos.required, superMethod, sig.pos.required, methodDef,
+                    reportedAutocorrect);
+    // match types of optional positional arguments
+    matchPositional(ctx, constr, tree, superSig.pos.optional, superMethod, sig.pos.optional, methodDef,
+                    reportedAutocorrect);
 }
 
 // Ensure that two argument lists are compatible in shape and type
@@ -317,47 +392,7 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
     auto superSig = decomposeSignature(ctx, superMethod);
     auto sig = decomposeSignature(ctx, method);
 
-    if (!sig.pos.rest) {
-        auto superSigPos = superSig.pos.required.size() + superSig.pos.optional.size();
-        auto sigPos = sig.pos.required.size() + sig.pos.optional.size();
-        if (superSigPos > sigPos) {
-            if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("{} method `{}` must accept at least `{}` positional arguments",
-                            implementationOf(ctx, superMethod), superMethod.show(ctx), superSigPos);
-                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
-                e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, reportedAutocorrect));
-            }
-        }
-    }
-
-    if (auto superSigRest = superSig.pos.rest) {
-        if (!sig.pos.rest) {
-            if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
-                auto [prefix, argName] = formatSplat(superSigRest->get(), SplatKind::ARG, ctx);
-                e.setHeader("{} method `{}` must accept {}`{}`", implementationOf(ctx, superMethod),
-                            superMethod.show(ctx), prefix, argName);
-                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
-
-                e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, reportedAutocorrect));
-            }
-        }
-    }
-
-    if (sig.pos.required.size() > superSig.pos.required.size()) {
-        if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("{} method `{}` must accept no more than `{}` required argument(s)",
-                        implementationOf(ctx, superMethod), superMethod.show(ctx), superSig.pos.required.size());
-            e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
-            e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, reportedAutocorrect));
-        }
-    }
-
-    // match types of required positional arguments
-    matchPositional(ctx, *constr, tree, superSig.pos.required, superMethod, sig.pos.required, methodDef,
-                    reportedAutocorrect);
-    // match types of optional positional arguments
-    matchPositional(ctx, *constr, tree, superSig.pos.optional, superMethod, sig.pos.optional, methodDef,
-                    reportedAutocorrect);
+    validatePositionalParams(ctx, tree, *constr, superMethod, methodDef, superSig, sig, reportedAutocorrect);
 
     if (!sig.kw.rest) {
         for (auto req : superSig.kw.required) {
