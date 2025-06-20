@@ -314,26 +314,26 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
         }
     }
 
-    auto left = decomposeSignature(ctx, superMethod);
-    auto right = decomposeSignature(ctx, method);
+    auto superSig = decomposeSignature(ctx, superMethod);
+    auto sig = decomposeSignature(ctx, method);
 
-    if (!right.pos.rest) {
-        auto leftPos = left.pos.required.size() + left.pos.optional.size();
-        auto rightPos = right.pos.required.size() + right.pos.optional.size();
-        if (leftPos > rightPos) {
+    if (!sig.pos.rest) {
+        auto superSigPos = superSig.pos.required.size() + superSig.pos.optional.size();
+        auto sigPos = sig.pos.required.size() + sig.pos.optional.size();
+        if (superSigPos > sigPos) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("{} method `{}` must accept at least `{}` positional arguments",
-                            implementationOf(ctx, superMethod), superMethod.show(ctx), leftPos);
+                            implementationOf(ctx, superMethod), superMethod.show(ctx), superSigPos);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
                 e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, reportedAutocorrect));
             }
         }
     }
 
-    if (auto leftRest = left.pos.rest) {
-        if (!right.pos.rest) {
+    if (auto superSigRest = superSig.pos.rest) {
+        if (!sig.pos.rest) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
-                auto [prefix, argName] = formatSplat(leftRest->get(), SplatKind::ARG, ctx);
+                auto [prefix, argName] = formatSplat(superSigRest->get(), SplatKind::ARG, ctx);
                 e.setHeader("{} method `{}` must accept {}`{}`", implementationOf(ctx, superMethod),
                             superMethod.show(ctx), prefix, argName);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
@@ -343,34 +343,34 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
         }
     }
 
-    if (right.pos.required.size() > left.pos.required.size()) {
+    if (sig.pos.required.size() > superSig.pos.required.size()) {
         if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("{} method `{}` must accept no more than `{}` required argument(s)",
-                        implementationOf(ctx, superMethod), superMethod.show(ctx), left.pos.required.size());
+                        implementationOf(ctx, superMethod), superMethod.show(ctx), superSig.pos.required.size());
             e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, reportedAutocorrect));
         }
     }
 
     // match types of required positional arguments
-    matchPositional(ctx, *constr, tree, left.pos.required, superMethod, right.pos.required, methodDef,
+    matchPositional(ctx, *constr, tree, superSig.pos.required, superMethod, sig.pos.required, methodDef,
                     reportedAutocorrect);
     // match types of optional positional arguments
-    matchPositional(ctx, *constr, tree, left.pos.optional, superMethod, right.pos.optional, methodDef,
+    matchPositional(ctx, *constr, tree, superSig.pos.optional, superMethod, sig.pos.optional, methodDef,
                     reportedAutocorrect);
 
-    if (!right.kw.rest) {
-        for (auto req : left.kw.required) {
+    if (!sig.kw.rest) {
+        for (auto req : superSig.kw.required) {
             auto corresponding =
-                absl::c_find_if(right.kw.required, [&](const auto &r) { return r.get().name == req.get().name; });
+                absl::c_find_if(sig.kw.required, [&](const auto &r) { return r.get().name == req.get().name; });
 
-            auto hasCorrespondingRequired = corresponding != right.kw.required.end();
+            auto hasCorrespondingRequired = corresponding != sig.kw.required.end();
             if (!hasCorrespondingRequired) {
                 corresponding =
-                    absl::c_find_if(right.kw.optional, [&](const auto &r) { return r.get().name == req.get().name; });
+                    absl::c_find_if(sig.kw.optional, [&](const auto &r) { return r.get().name == req.get().name; });
             }
 
-            auto hasCorrespondingOptional = corresponding != right.kw.optional.end();
+            auto hasCorrespondingOptional = corresponding != sig.kw.optional.end();
 
             // if there is a corresponding parameter, make sure it has the right type
             if (hasCorrespondingRequired || hasCorrespondingOptional) {
@@ -405,12 +405,12 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
         }
 
         // make sure that optional parameters expect a compatible type, as well
-        for (auto opt : left.kw.optional) {
+        for (auto opt : superSig.kw.optional) {
             auto corresponding =
-                absl::c_find_if(right.kw.optional, [&](const auto &r) { return r.get().name == opt.get().name; });
+                absl::c_find_if(sig.kw.optional, [&](const auto &r) { return r.get().name == opt.get().name; });
 
-            // if there is a corresponding parameter, make sure it has the right type
-            if (corresponding != right.kw.optional.end()) {
+            // if there is a corresponding parameter, make sure it has the sig type
+            if (corresponding != sig.kw.optional.end()) {
                 core::ErrorSection::Collector errorDetailsCollector;
                 if (!checkSubtype(ctx, *constr, corresponding->get().type, method, opt.get().type, superMethod,
                                   core::Polarity::Negative, errorDetailsCollector)) {
@@ -429,8 +429,7 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
                         e.addErrorSections(move(errorDetailsCollector));
                     }
                 }
-            } else if (absl::c_any_of(right.kw.required,
-                                      [&](const auto &r) { return r.get().name == opt.get().name; })) {
+            } else if (absl::c_any_of(sig.kw.required, [&](const auto &r) { return r.get().name == opt.get().name; })) {
                 if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
                     e.setHeader("{} method `{}` must redeclare keyword parameter `{}` as optional",
                                 implementationOf(ctx, superMethod), superMethod.show(ctx), opt.get().name.show(ctx));
@@ -457,25 +456,25 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
         }
     }
 
-    if (auto leftRest = left.kw.rest) {
+    if (auto superSigRest = superSig.kw.rest) {
         core::ErrorSection::Collector errorDetailsCollector;
-        if (!right.kw.rest) {
+        if (!sig.kw.rest) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
-                auto [prefix, argName] = formatSplat(leftRest->get(), SplatKind::KWARG, ctx);
+                auto [prefix, argName] = formatSplat(superSigRest->get(), SplatKind::KWARG, ctx);
                 e.setHeader("{} method `{}` must accept {}`{}`", implementationOf(ctx, superMethod),
                             superMethod.show(ctx), prefix, argName);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
                 e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, reportedAutocorrect));
             }
-        } else if (!checkSubtype(ctx, *constr, right.kw.rest->get().type, method, leftRest->get().type, superMethod,
+        } else if (!checkSubtype(ctx, *constr, sig.kw.rest->get().type, method, superSigRest->get().type, superMethod,
                                  core::Polarity::Negative, errorDetailsCollector)) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter **`{}` of type `{}` not compatible with type of {} method `{}`",
-                            right.kw.rest->get().show(ctx), right.kw.rest->get().type.show(ctx),
+                            sig.kw.rest->get().show(ctx), sig.kw.rest->get().type.show(ctx),
                             superMethodKind(ctx, superMethod), superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(),
                                "The super method parameter **`{}` was declared here with type `{}`",
-                               left.kw.rest->get().show(ctx), left.kw.rest->get().type.show(ctx));
+                               superSig.kw.rest->get().show(ctx), superSig.kw.rest->get().type.show(ctx));
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
                 e.addErrorSections(move(errorDetailsCollector));
@@ -484,11 +483,11 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
         }
     }
 
-    for (auto extra : right.kw.required) {
-        if (absl::c_any_of(left.kw.required, [&](const auto &l) { return l.get().name == extra.get().name; })) {
+    for (auto extra : sig.kw.required) {
+        if (absl::c_any_of(superSig.kw.required, [&](const auto &l) { return l.get().name == extra.get().name; })) {
             continue;
         }
-        if (absl::c_any_of(left.kw.optional, [&](const auto &l) { return l.get().name == extra.get().name; })) {
+        if (absl::c_any_of(superSig.kw.optional, [&](const auto &l) { return l.get().name == extra.get().name; })) {
             // We would have already reported a more informative error above.
             continue;
         }
@@ -500,7 +499,7 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
         }
     }
 
-    if (!left.syntheticBlk && right.syntheticBlk) {
+    if (!superSig.syntheticBlk && sig.syntheticBlk) {
         if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("{} method `{}` must explicitly name a block argument", implementationOf(ctx, superMethod),
                         superMethod.show(ctx));
