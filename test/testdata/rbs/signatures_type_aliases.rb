@@ -135,3 +135,19 @@ module TypeAliasMultiline
     T.reveal_type(x) # error: Revealed type: `T.any(Integer, String)`
   end
 end
+
+module TypeAliasWithNamespace
+  module Foo
+    #: type a = Integer | String
+
+    #: (a) -> void
+    def foo(x)
+      T.reveal_type(x) # error: Revealed type: `T.any(Integer, String)`
+    end
+  end
+
+  #: (Foo::a) -> void
+  def bar(x)
+    T.reveal_type(x) # error: Revealed type: `T.any(Integer, String)`
+  end
+end
