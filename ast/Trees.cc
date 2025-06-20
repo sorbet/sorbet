@@ -418,7 +418,7 @@ void printTabs(fmt::memory_buffer &to, int count) {
     }
 }
 
-template <class T> void printElems(const core::GlobalState &gs, fmt::memory_buffer &buf, T &args, int tabs) {
+void printElems(const core::GlobalState &gs, fmt::memory_buffer &buf, absl::Span<const ExpressionPtr> args, int tabs) {
     bool first = true;
     bool didshadow = false;
     for (auto &a : args) {
@@ -438,7 +438,7 @@ template <class T> void printElems(const core::GlobalState &gs, fmt::memory_buff
     }
 };
 
-template <class T> void printArgs(const core::GlobalState &gs, fmt::memory_buffer &buf, T &args, int tabs) {
+void printArgs(const core::GlobalState &gs, fmt::memory_buffer &buf, absl::Span<const ExpressionPtr> args, int tabs) {
     fmt::format_to(std::back_inserter(buf), "(");
     printElems(gs, buf, args, tabs);
     fmt::format_to(std::back_inserter(buf), ")");
