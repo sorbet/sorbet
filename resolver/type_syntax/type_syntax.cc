@@ -458,16 +458,22 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                                 auto val = ast::cast_tree<ast::Literal>(value);
                                 if (val && val->isTrue(ctx)) {
                                     sig.seen.incompatibleOverride = key.loc().join(value.loc());
-                                }
-                                if (val && val->isSymbol()) {
+                                } else if (val && val->isFalse(ctx)) {
+                                    if (auto e =
+                                            ctx.beginError(val->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                                        e.setHeader("`{}` expects either `{}` or `{}`",
+                                                    "override(allow_incompatible: ...)", "true", ":visibility");
+                                        e.replaceWith("Remove allow_incompatible",
+                                                      ctx.locAt(key.loc().join(value.loc())), "");
+                                    }
+                                } else if (val && val->isSymbol()) {
                                     if (val->asSymbol() == core::Names::visibility()) {
                                         sig.seen.incompatibleOverrideVisibility = key.loc().join(value.loc());
                                     } else {
                                         if (auto e = ctx.beginError(val->loc,
                                                                     core::errors::Resolver::InvalidMethodSignature)) {
-                                            e.setHeader("`{}` expects one of `{}`, `{}`, or `{}`",
-                                                        "override(allow_incompatible: ...)", "true", "false",
-                                                        ":visibility");
+                                            e.setHeader("`{}` expects either `{}` or `{}`",
+                                                        "override(allow_incompatible: ...)", "true", ":visibility");
                                         }
                                     }
                                 }
