@@ -480,6 +480,22 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                             cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
                                                                  this->config->opts, *this->gs, workers, indexed));
                     }
+                    this->cacheUpdatedFiles(indexed, openFiles);
+
+                    // Only need to compute FoundDefHashes when running to compute a FileHash
+                    auto foundHashes = nullptr;
+
+                    // First namer run: only the __package.rb files. This populates the packageDB
+                    auto cancelled =
+                        pipeline::name(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers, foundHashes);
+                    if (cancelled) {
+                        ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
+                        ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
+                        return;
+                    }
+
+                    pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), workspaceFilesSpan, this->config->opts,
+                                             workers);
                 }
 
                 {
@@ -491,6 +507,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                         return;
                     }
                     nonPackagedIndexed = std::move(result.result());
+                    this->cacheUpdatedFiles(nonPackagedIndexed, openFiles);
                 }
 
                 // Only write the cache during initialization to avoid unbounded growth.
@@ -511,37 +528,24 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                     // We don't write in the cancelable slow path, and all our read operations have completed.
                     OwnedKeyValueStore::abort(std::move(ownedKvstore));
                 }
+
+                // Second namer run: all the other files (the packageDB shouldn't change)
+                auto foundHashes = nullptr;
+                auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackagedIndexed), config->opts,
+                                               workers, foundHashes);
+                if (canceled) {
+                    ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
+                    ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
+                    return;
+                }
+                pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts,
+                                                workers);
             }
-        } // Indexing is done at this point
+        } // Indexing+namer is done at this point
 
         if (epochManager.wasTypecheckingCanceled()) {
             return;
         }
-
-        this->cacheUpdatedFiles(indexed, openFiles);
-        this->cacheUpdatedFiles(nonPackagedIndexed, openFiles);
-
-        // Only need to compute FoundDefHashes when running to compute a FileHash
-        auto foundHashes = nullptr;
-
-        // First run: only the __package.rb files. This populates the packageDB
-        auto cancelled = pipeline::name(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers, foundHashes);
-        if (cancelled) {
-            ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
-            ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
-            return;
-        }
-        pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers);
-
-        // Second run: all the other files (the packageDB shouldn't change)
-        auto canceled =
-            pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackagedIndexed), config->opts, workers, foundHashes);
-        if (canceled) {
-            ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
-            ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
-            return;
-        }
-        pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts, workers);
 
         pipeline::unpartitionPackageFiles(indexed, std::move(nonPackagedIndexed));
         // TODO(jez) At this point, it's not correct to call it `indexed` anymore: we've run namer too
