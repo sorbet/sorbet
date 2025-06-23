@@ -1770,37 +1770,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     MK::Send0Block(loc, node2TreeImpl(dctx, for_->expr), core::Names::each(), locZeroLen, move(block));
                 result = move(res);
             },
-            [&](parser::Integer *integer) {
-                int64_t val;
-
-                // complemented literals
-                bool hasTilde = absl::StartsWith(integer->val, "~");
-                const string_view withoutTilde = hasTilde ? string_view(integer->val).substr(1) : integer->val;
-
-                bool hasUnderscores = withoutTilde.find("_") != string::npos;
-                bool wasInt;
-                if (hasUnderscores) {
-                    const string withoutUnderscores = absl::StrReplaceAll(withoutTilde, {{"_", ""}});
-                    wasInt = absl::SimpleAtoi(withoutUnderscores, &val);
-                } else {
-                    wasInt = absl::SimpleAtoi(withoutTilde, &val);
-                }
-
-                if (!wasInt) {
-                    val = 0;
-                    if (auto e = dctx.ctx.beginIndexerError(loc, core::errors::Desugar::IntegerOutOfRange)) {
-                        e.setHeader("Unsupported integer literal: `{}`", integer->val);
-                    }
-                }
-
-                if (hasTilde) {
-                    core::LocOffsets adjustedLoc = dctx.ctx.locAt(loc).adjust(dctx.ctx, 1, 0).offsets();
-                    result = MK::Int(adjustedLoc, val);
-                    result = MK::Send0(loc, move(result), core::Names::tilde(), loc.copyEndWithZeroLength());
-                } else {
-                    result = MK::Int(loc, val);
-                }
-            },
+            [&](parser::Integer *integer) { desugaredByPrismTranslator(integer); },
             [&](parser::DString *dstring) {
                 ExpressionPtr res = desugarDString(dctx, loc, move(dstring->nodes));
                 result = move(res);
