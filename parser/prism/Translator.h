@@ -74,7 +74,7 @@ private:
     std::unique_ptr<parser::Node> translateRescue(pm_rescue_node *prismRescueNode,
                                                   std::unique_ptr<parser::Node> beginNode,
                                                   std::unique_ptr<parser::Node> elseNode);
-    std::unique_ptr<parser::Node> translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle);
+    std::unique_ptr<parser::Node> translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle = true);
 
     std::unique_ptr<parser::Regopt> translateRegexpOptions(pm_location_t closingLoc);
     std::unique_ptr<parser::Regexp> translateRegexp(pm_string_t unescaped, core::LocOffsets location,
