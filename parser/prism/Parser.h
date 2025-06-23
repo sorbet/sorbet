@@ -10,6 +10,7 @@ extern "C" {
 }
 
 #include "core/LocOffsets.h"
+#include "parser/Node.h" // To clarify: these are Sorbet Parser nodes, not Prism ones.
 
 namespace sorbet::parser::Prism {
 
@@ -61,6 +62,8 @@ public:
 
     Parser(const Parser &) = default;
     Parser &operator=(const Parser &) = default;
+
+    static std::unique_ptr<parser::Node> run(core::GlobalState &gs, core::FileRef file);
 
     ParseResult parse_root();
     core::LocOffsets translateLocation(pm_location_t location);

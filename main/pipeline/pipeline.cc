@@ -131,20 +131,14 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
     return nodes;
 }
 
-unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file, bool stopAfterParser,
-                                        const options::Printers &print) {
-    auto source = file.data(gs).source();
+unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print) {
+    Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
 
-    core::UnfreezeNameTable nameTableAccess(gs);
-
-    Prism::Parser parser{source};
-    Prism::ParseResult parseResult = parser.parse_root();
-
-    if (stopAfterParser) {
-        return std::unique_ptr<parser::Node>();
+    unique_ptr<parser::Node> nodes;
+    {
+        core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
+        nodes = parser::Prism::Parser::run(gs, file);
     }
-
-    auto nodes = Prism::Translator(parser, gs, file).translate(std::move(parseResult));
 
     if (print.ParseTree.enabled) {
         print.ParseTree.fmt("{}\n", nodes->toStringWithTabs(gs, 0));
@@ -242,7 +236,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                     parseTree = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
                     break;
                 case options::Parser::PRISM:
-                    parseTree = runPrismParser(lgs, file, stopAfterParser, print);
+                    parseTree = runPrismParser(lgs, file, print);
                     break;
             }
 

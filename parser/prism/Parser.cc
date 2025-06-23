@@ -1,8 +1,17 @@
 #include "parser/prism/Parser.h"
+#include "parser/prism/Translator.h"
 
 using namespace std;
 
 namespace sorbet::parser::Prism {
+
+unique_ptr<parser::Node> Parser::run(core::GlobalState &gs, core::FileRef file) {
+    auto source = file.data(gs).source();
+    Prism::Parser parser{source};
+    Prism::ParseResult parseResult = parser.parse_root();
+
+    return Prism::Translator(parser, gs, file).translate(move(parseResult));
+}
 
 pm_parser_t *Parser::getRawParserPointer() {
     return &storage->parser;

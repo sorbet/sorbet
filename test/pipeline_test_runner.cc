@@ -38,6 +38,7 @@
 #include "packager/packager.h"
 #include "packager/rbi_gen.h"
 #include "parser/parser.h"
+#include "parser/prism/Parser.h"
 #include "payload/binary/binary.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
@@ -233,7 +234,9 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
             }
             case realmain::options::Parser::PRISM:
                 std::cout << "Parsing with prism" << std::endl;
-                nodes = realmain::pipeline::runPrismParser(*gs, file, false, {});
+                core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
+
+                nodes = parser::Prism::Parser::run(*gs, file);
                 break;
         }
 
@@ -813,7 +816,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             auto settings = parser::Parser::Settings{};
             nodes = parser::Parser::run(*gs, f.file, settings);
         } else if (parser == realmain::options::Parser::PRISM) {
-            nodes = realmain::pipeline::runPrismParser(*gs, f.file, false, {});
+            nodes = parser::Prism::Parser::run(*gs, f.file);
         }
 
         handler.addObserved(*gs, "parse-tree", [&]() { return nodes->toString(*gs); });
