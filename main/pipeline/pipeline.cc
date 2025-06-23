@@ -133,6 +133,8 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
 
 unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file, bool stopAfterParser,
                                         const options::Printers &print) {
+    core::MutableContext ctx(gs, core::Symbols::root(), file);
+
     auto source = file.data(gs).source();
 
     core::UnfreezeNameTable nameTableAccess(gs);
@@ -144,7 +146,7 @@ unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef fil
         return std::unique_ptr<parser::Node>();
     }
 
-    auto nodes = Prism::Translator(move(parser), gs, file).translate(move(parseResult));
+    auto nodes = Prism::Translator(move(parser), ctx, file).translate(move(parseResult));
 
     if (print.ParseTree.enabled) {
         print.ParseTree.fmt("{}\n", nodes->toStringWithTabs(gs, 0));

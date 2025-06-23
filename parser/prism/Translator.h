@@ -13,7 +13,7 @@ extern "C" {
 namespace sorbet::parser::Prism {
 
 class Translator final {
-    const Parser &parser;
+    Parser parser;
 
     // The functions in Pipeline.cc pass around a reference to the context as a parameter,
     // but don't have explicit ownership over it. We take a temporary reference to it, but we can't
@@ -40,8 +40,9 @@ class Translator final {
     Translator &operator=(Translator &&) = delete;      // Move assignment
     Translator &operator=(const Translator &) = delete; // Copy assignment
 public:
-    Translator(const Parser &parser, core::MutableContext &ctx, core::FileRef file)
-        : parser(parser), ctx(ctx), file(file), uniqueCounterStorage(1), uniqueCounter(&this->uniqueCounterStorage) {}
+    Translator(Parser parser, core::MutableContext &ctx, core::FileRef file)
+        : parser(std::move(parser)), ctx(ctx), file(file), uniqueCounterStorage(1),
+          uniqueCounter(&this->uniqueCounterStorage) {}
 
     int nextUniqueID() {
         return *uniqueCounter += 1;
@@ -54,7 +55,7 @@ public:
 private:
     // Private constructor used only for creating child translators
     // uniqueCounterStorage is passed as the minimum integer value and is never used
-    Translator(const Parser &parser, core::MutableContext &ctx, core::FileRef file, std::vector<ParseError> parseErrors,
+    Translator(Parser parser, core::MutableContext &ctx, core::FileRef file, std::vector<ParseError> parseErrors,
                bool isInMethodDef, int *uniqueCounter)
         : parser(parser), ctx(ctx), file(file), parseErrors(parseErrors), isInMethodDef(isInMethodDef),
           uniqueCounterStorage(std::numeric_limits<int>::min()), uniqueCounter(uniqueCounter) {}
@@ -73,7 +74,7 @@ private:
     std::unique_ptr<parser::Node> translateRescue(pm_rescue_node *prismRescueNode,
                                                   std::unique_ptr<parser::Node> beginNode,
                                                   std::unique_ptr<parser::Node> elseNode);
-    std::unique_ptr<parser::Node> translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle = true);
+    std::unique_ptr<parser::Node> translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle);
 
     std::unique_ptr<parser::Regopt> translateRegexpOptions(pm_location_t closingLoc);
     std::unique_ptr<parser::Regexp> translateRegexp(pm_string_t unescaped, core::LocOffsets location,
@@ -89,7 +90,7 @@ private:
 
     template <typename PrismLhsNode, typename SorbetLHSNode>
     std::unique_ptr<parser::Node> translateConst(PrismLhsNode *node, bool replaceWithDynamicConstAssign = false);
-    core::NameRef translateConstantName(pm_constant_id_t constantId);
+    core::NameRef translateConstantName(pm_constant_id_t constant_id);
 
     // Pattern-matching
     // ... variations of the main translation functions for pattern-matching related nodes.
