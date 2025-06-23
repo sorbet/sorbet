@@ -506,7 +506,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 sig.seen.overridable = send->funLoc;
                 break;
             case core::Names::deprecated().rawId():
-                sig.seen.deprecated_ = true;
+                sig.seen.deprecated_ = send->funLoc;
                 break;
             case core::Names::returns().rawId(): {
                 sig.seen.returns = send->funLoc;
