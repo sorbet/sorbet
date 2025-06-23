@@ -154,10 +154,9 @@ pair<std::string, std::string> formatSplat(const core::ArgInfo &arg, SplatKind k
     return rendered == left ? pair("", rendered) : pair(left, rendered);
 }
 
-optional<core::AutocorrectSuggestion> constructAllowIncompatibleAutocorrect(const core::Context ctx,
-                                                                            const ast::ExpressionPtr &tree,
-                                                                            const ast::MethodDef &methodDef,
-                                                                            const char what[], bool &didReport) {
+optional<core::AutocorrectSuggestion>
+constructAllowIncompatibleAutocorrect(const core::Context ctx, const ast::ExpressionPtr &tree,
+                                      const ast::MethodDef &methodDef, const std::string_view what, bool &didReport) {
     // With this design, we will report the autocorrect on the *first* reported error. There is a
     // case to be made that, from a UX perspective, the message should be attached to the *last*
     // error (the one that is most likely to be on the user's screen at the end). Due to how
@@ -206,7 +205,7 @@ optional<core::AutocorrectSuggestion> constructAllowIncompatibleAutocorrect(cons
 optional<core::AutocorrectSuggestion> constructAllowIncompatibleAutocorrect(const core::Context ctx,
                                                                             const ast::ExpressionPtr &tree,
                                                                             const ast::MethodDef &methodDef,
-                                                                            const char what[]) {
+                                                                            const std::string_view what) {
     bool _;
     return constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, what, _);
 }
@@ -583,9 +582,8 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
             auto len = method.data(ctx)->flags.isPrivate ? 7 : 9;
             auto loc = ctx.locAt(methodDef.declLoc).adjustLen(ctx, -(len + 1), len);
             if (ctx.state.suggestUnsafe) {
-                // We don't want to pass `repeatedAutocorrect` here, because we want to overwrite
-                // with `allow_incompatible: true` if there are multiple errors.
-                e.maybeAddAutocorrect(constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, ":visibility"));
+                e.maybeAddAutocorrect(
+                    constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, ":visibility", reportedAutocorrect));
             } else if (loc.source(ctx) == modifier) {
                 e.replaceWith("Replace with public", loc, "public");
             }
