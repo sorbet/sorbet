@@ -107,8 +107,8 @@ public:
 class HintAssertion final : public RangeAssertion {
 public:
     static std::shared_ptr<HintAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
-                                                int assertionLine, std::string_view assertionContents,
-                                                std::string_view assertionType);
+                                               int assertionLine, std::string_view assertionContents,
+                                               std::string_view assertionType);
 
     /**
      * Given a set of position-based assertions and Sorbet-generated diagnostics, check that the assertions pass.
@@ -119,11 +119,11 @@ public:
                          std::string warningPrefix = "");
 
     const std::string message;
-    const bool matchesDuplicateErrors;  // Template compatibility - same as matchesDuplicateWarnings
+    const bool matchesDuplicateErrors; // Template compatibility - same as matchesDuplicateWarnings
     static constexpr DiagnosticSeverity severity = DiagnosticSeverity::Warning;
 
-    HintAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
-                   std::string_view message, bool matchesDuplicateWarnings);
+    HintAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, std::string_view message,
+                  bool matchesDuplicateWarnings);
 
     std::string toString() const override;
 

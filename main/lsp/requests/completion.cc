@@ -1153,7 +1153,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     if (documentation != nullopt && documentation->find("@deprecated") != documentation->npos) {
         item->deprecated = true;
     }
-    
+
     if (what.data(gs)->flags.isDeprecated) {
         item->deprecated = true;
     }
