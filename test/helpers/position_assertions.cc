@@ -504,9 +504,9 @@ shared_ptr<ErrorAssertion> ErrorAssertion::make(string_view filename, unique_ptr
 }
 
 shared_ptr<HintAssertion> HintAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                                    string_view assertionContents, string_view assertionType) {
+                                              string_view assertionContents, string_view assertionType) {
     return make_shared<HintAssertion>(filename, range, assertionLine, assertionContents,
-                                         assertionType == "hint-with-dupes");
+                                      assertionType == "hint-with-dupes");
 }
 
 string ErrorAssertion::toString() const {
@@ -530,10 +530,9 @@ bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine,
     return true;
 }
 
-HintAssertion::HintAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                   string_view message, bool matchesDuplicateHints)
-    : RangeAssertion(filename, range, assertionLine), message(message),
-      matchesDuplicateErrors(matchesDuplicateHints) {}
+HintAssertion::HintAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view message,
+                             bool matchesDuplicateHints)
+    : RangeAssertion(filename, range, assertionLine), message(message), matchesDuplicateErrors(matchesDuplicateHints) {}
 
 string HintAssertion::toString() const {
     return fmt::format("{}: {}", (matchesDuplicateErrors ? "hint-with-dupes" : "hint"), message);
@@ -553,9 +552,8 @@ bool HintAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, 
 }
 
 bool HintAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>> &files,
-                                vector<shared_ptr<HintAssertion>> hintAssertions,
-                                map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
-                                string hintPrefix) {
+                             vector<shared_ptr<HintAssertion>> hintAssertions,
+                             map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics, string hintPrefix) {
     return checkAllInner<HintAssertion>(files, hintAssertions, filenamesAndDiagnostics, hintPrefix);
 }
 
@@ -1290,7 +1288,7 @@ optional<bool> BooleanPropertyAssertion::getValue(string_view type,
 
 BooleanPropertyAssertion::BooleanPropertyAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                    bool value, string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value) {};
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value){};
 
 string BooleanPropertyAssertion::toString() const {
     return fmt::format("{}: {}", assertionType, value);
@@ -1321,7 +1319,7 @@ optional<string> StringPropertyAssertion::getValue(string_view type,
 
 StringPropertyAssertion::StringPropertyAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                  string value, string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value) {};
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value){};
 
 string StringPropertyAssertion::toString() const {
     return fmt::format("{}: {}", assertionType, value);
@@ -2450,7 +2448,7 @@ shared_ptr<StringPropertyAssertions> StringPropertyAssertions::make(string_view 
 
 StringPropertyAssertions::StringPropertyAssertions(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                    vector<string> values, string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values) {};
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values){};
 
 optional<vector<string>> StringPropertyAssertions::getValues(string_view type,
                                                              const vector<shared_ptr<RangeAssertion>> &assertions) {
