@@ -280,8 +280,9 @@ unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef fil
 
     unique_ptr<parser::Node> nodes;
     {
+        core::MutableContext ctx(gs, core::Symbols::root(), file);
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
-        nodes = Prism::Parser::run(gs, file);
+        nodes = Prism::Parser::run(ctx, file);
     }
 
     if (print.ParseTree.enabled) {

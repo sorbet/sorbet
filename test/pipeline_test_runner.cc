@@ -234,8 +234,9 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             }
             case realmain::options::Parser::PRISM: {
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+                core::MutableContext ctx(gs, core::Symbols::root(), file);
 
-                auto nodes = parser::Prism::Parser::run(gs, file);
+                auto nodes = parser::Prism::Parser::run(ctx, file);
                 parseResult = parser::Parser::ParseResult{move(nodes), {}};
                 break;
             }

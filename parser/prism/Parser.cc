@@ -6,12 +6,12 @@ using namespace std;
 
 namespace sorbet::parser::Prism {
 
-unique_ptr<parser::Node> Parser::run(core::GlobalState &gs, core::FileRef file) {
-    auto source = file.data(gs).source();
+unique_ptr<parser::Node> Parser::run(core::MutableContext &ctx, core::FileRef file) {
+    auto source = file.data(ctx).source();
     Prism::Parser parser{source};
     Prism::ParseResult parseResult = parser.parse();
 
-    return Prism::Translator(parser, gs, file).translate(move(parseResult));
+    return Prism::Translator(parser, ctx, file).translate(move(parseResult));
 }
 
 pm_parser_t *Parser::getRawParserPointer() {
