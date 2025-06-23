@@ -1,5 +1,5 @@
-# -- test/testdata/resolver/allow_incompatible_visibility.rb --
 # typed: true
+# enable-suggest-unsafe: true
 
 class Parent
   extend T::Sig
@@ -10,7 +10,7 @@ end
 
 class ChildBad < Parent
   sig {override.returns(Integer)}
-  public def some_public_api; 1; end # error: Method `some_public_api` is private in `ChildBad` but not in `Parent`
+  private def some_public_api; 1; end # error: Method `some_public_api` is private in `ChildBad` but not in `Parent`
 end
 
 class ChildOkay < Parent
@@ -18,48 +18,41 @@ class ChildOkay < Parent
   private def some_public_api; 1; end
 end
 
+# We want this to overwrite with `allow_incompatible: true` anyway.
 class ChildBadTypes < Parent
   sig {override(allow_incompatible: :visibility).returns(String)}
   private def some_public_api; ''; end
   #       ^^^^^^^^^^^^^^^^^^^ error: Return type `String` does not match return type of overridable method `Parent#some_public_api`
 end
 
+# This one will overwrite to `allow_incompatible: :visibility`, but w/e
 class ChildBadSymbol < Parent
   sig {override(allow_incompatible: :bad).returns(Integer)}
-  #                                 ^^^^ error: `override(allow_incompatible: ...)` expects either `true` or `:visibility
-  public def some_public_api; 0; end
+  #                                 ^^^^ error-with-dupes: `override(allow_incompatible: ...)` expects one of `true`, `false`, or `:visibility
+  private def some_public_api; 0; end
   #       ^^^^^^^^^^^^^^^^^^^ error: Method `some_public_api` is private in `ChildBadSymbol` but not in `Parent`
 end
 
 class ChildBoth1 < Parent
-  sig { override(allow_incompatible: :visibility).returns(Integer) }
+  sig { override(allow_incompatible: true).override(allow_incompatible: :visibility).returns(Integer) }
   #     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Malformed `sig`: Don't use both `override(allow_incompatible: true)` and `override(allow_incompatible: :visibility)
   private def some_public_api; 0; end
 end
 
 class ChildBoth2 < Parent
-  sig { override(allow_incompatible: true).returns(Integer) }
+  sig { override(allow_incompatible: :visibility).override(allow_incompatible: true).returns(Integer) }
   #     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Malformed `sig`: Don't use both `override(allow_incompatible: true)` and `override(allow_incompatible: :visibility)
   private def some_public_api; 0; end
 end
 
 class ChildBoth3 < Parent
-  sig { returns(Integer).override(allow_incompatible: true) }
+  sig { returns(Integer).override(allow_incompatible: :visibility).override(allow_incompatible: true) }
   #                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Malformed `sig`: Don't use both `override(allow_incompatible: true)` and `override(allow_incompatible: :visibility)
   private def some_public_api; 0; end
 end
 
-class ChildBoth4 < Parent
-  sig { override().override(allow_incompatible: :visibility).returns(Integer) }
-  #                                  ^^^^^  error: `override(allow_incompatible: ...)` expects either `true` or `:visibility`
-  private def some_public_api; 0; end
+# This should be rewritten to `allow_incompatible: true`
+class ChildBothErrors < Parent
+  sig { override.returns(String) }
+  private def some_public_api; ''; end
 end
-
-class ChildBoth5 < Parent
-  # TODO(jez) Probably want to ban this, but that's probably something to leave until
-  # https://github.com/sorbet/sorbet/issues/9012
-  sig { override.override(allow_incompatible: :visibility).returns(Integer) }
-  private def some_public_api; 0; end
-end
-
-# ------------------------------
