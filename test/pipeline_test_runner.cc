@@ -667,7 +667,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             auto path = error->loc.file().data(*gs).path();
             diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
         }
+		// FIXME - pipeline test runner does not support severities and returns everything as untyped, leading to an error below
         ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
+        HintAssertion::checkAll(test.sourceFileContents, RangeAssertion::getHintAssertions(assertions), diagnostics);
     }
 
     // Allow later phases to have errors that we didn't test for

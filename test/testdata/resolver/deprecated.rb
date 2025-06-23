@@ -15,7 +15,7 @@ class BasicDeprecated
   end
 end
 
-BasicDeprecated.new.old_method # error: Method `BasicDeprecated#old_method` is deprecated
+BasicDeprecated.new.old_method # hint: Method `BasicDeprecated#old_method` is deprecated
 BasicDeprecated.new.new_method
 
 class DeprecatedVoid
@@ -26,7 +26,7 @@ class DeprecatedVoid
   end
 end
 
-DeprecatedVoid.new.old_method # error: Method `DeprecatedVoid#old_method` is deprecated
+DeprecatedVoid.new.old_method # hint: Method `DeprecatedVoid#old_method` is deprecated
 
 # Deprecated with parameters
 class DeprecatedWithParams
@@ -38,7 +38,7 @@ class DeprecatedWithParams
   end
 end
 
-DeprecatedWithParams.new.old_method("test", 42) # error: Method `DeprecatedWithParams#old_method` is deprecated
+DeprecatedWithParams.new.old_method("test", 42) # hint: Method `DeprecatedWithParams#old_method` is deprecated
 
 # Deprecated class method
 class DeprecatedClassMethod
@@ -50,7 +50,7 @@ class DeprecatedClassMethod
   end
 end
 
-DeprecatedClassMethod.old_method # error: Method `DeprecatedClassMethod.old_method` is deprecated
+DeprecatedClassMethod.old_method # hint: Method `DeprecatedClassMethod.old_method` is deprecated
 
 # Deprecated with inheritance - deprecated method in parent
 class ParentWithDeprecated
@@ -77,8 +77,8 @@ class ChildInheritsDeprecated < ParentWithDeprecated
   end
 end
 
-ChildInheritsDeprecated.new.inherited_deprecated # error: Method `ParentWithDeprecated#inherited_deprecated` is deprecated
-ChildInheritsDeprecated.new.overridable_deprecated # error: Method `ChildInheritsDeprecated#overridable_deprecated` is deprecated
+ChildInheritsDeprecated.new.inherited_deprecated # hint: Method `ParentWithDeprecated#inherited_deprecated` is deprecated
+ChildInheritsDeprecated.new.overridable_deprecated # hint: Method `ChildInheritsDeprecated#overridable_deprecated` is deprecated
 
 class ChildMissingInheritedDeprecated < ParentWithDeprecated
   extend T::Sig
@@ -90,7 +90,7 @@ class ChildMissingInheritedDeprecated < ParentWithDeprecated
   end
 end
 
-ChildMissingInheritedDeprecated.new.inherited_deprecated # error: Method `ParentWithDeprecated#inherited_deprecated` is deprecated
+ChildMissingInheritedDeprecated.new.inherited_deprecated # hint: Method `ParentWithDeprecated#inherited_deprecated` is deprecated
 ChildMissingInheritedDeprecated.new.overridable_deprecated
 
 # Deprecated with other annotations
@@ -122,9 +122,9 @@ class ConcreteDeprecatedCombinations < DeprecatedCombinations
   end
 end
 
-ConcreteDeprecatedCombinations.new.deprecated_and_overridable # error: Method `DeprecatedCombinations#deprecated_and_overridable` is deprecated
+ConcreteDeprecatedCombinations.new.deprecated_and_overridable # hint: Method `DeprecatedCombinations#deprecated_and_overridable` is deprecated
 ConcreteDeprecatedCombinations.new.deprecated_abstract
-ConcreteDeprecatedCombinations.new.deprecated_final # error: Method `DeprecatedCombinations#deprecated_final` is deprecated
+ConcreteDeprecatedCombinations.new.deprecated_final # hint: Method `DeprecatedCombinations#deprecated_final` is deprecated
 
 # Test deprecated with attr_accessor-style methods
 class DeprecatedAccessors
@@ -140,9 +140,9 @@ class DeprecatedAccessors
   attr_accessor :accessor_attr
 end
 accessor_instance = DeprecatedAccessors.new
-accessor_instance.old_attr # error: Method `DeprecatedAccessors#old_attr` is deprecated
-accessor_instance.old_attr = "test" # error: Method `DeprecatedAccessors#old_attr=` is deprecated
+accessor_instance.old_attr # hint: Method `DeprecatedAccessors#old_attr` is deprecated
+accessor_instance.old_attr = "test" # hint: Method `DeprecatedAccessors#old_attr=` is deprecated
 
-accessor_instance.accessor_attr # error: Method `DeprecatedAccessors#accessor_attr` is deprecated
-accessor_instance.accessor_attr = "test" # error: Method `DeprecatedAccessors#accessor_attr=` is deprecated
+accessor_instance.accessor_attr # hint: Method `DeprecatedAccessors#accessor_attr` is deprecated
+accessor_instance.accessor_attr = "test" # hint: Method `DeprecatedAccessors#accessor_attr=` is deprecated
 

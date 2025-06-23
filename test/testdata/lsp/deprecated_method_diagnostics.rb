@@ -17,7 +17,7 @@ end
 # This should generate a diagnostic with deprecated tag
 obj = TestClass.new
 result = obj.old_method
-#            ^^^^^^^^^^ error: Method `TestClass#old_method` is deprecated
+#            ^^^^^^^^^^ hint: Method `TestClass#old_method` is deprecated
 puts result
 
 # This should not generate any diagnostic

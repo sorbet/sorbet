@@ -618,6 +618,17 @@ RangeAssertion::getUntypedAssertions(const vector<shared_ptr<RangeAssertion>> &a
     return rv;
 }
 
+vector<shared_ptr<HintAssertion>>
+RangeAssertion::getHintAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
+    vector<shared_ptr<HintAssertion>> rv;
+    for (auto assertion : assertions) {
+        if (auto assertionOfType = dynamic_pointer_cast<HintAssertion>(assertion)) {
+            rv.push_back(assertionOfType);
+        }
+    }
+    return rv;
+}
+
 vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core::File> &file) {
     vector<shared_ptr<RangeAssertion>> assertions;
 
