@@ -28,6 +28,7 @@ class ChildBadSymbol < Parent
   sig {override(allow_incompatible: :bad).returns(Integer)}
   #                                 ^^^^ error: `override(allow_incompatible: ...)` expects either `true` or `:visibility
   public def some_public_api; 0; end
+  #       ^^^^^^^^^^^^^^^^^^^ error: Method `some_public_api` is private in `ChildBadSymbol` but not in `Parent`
 end
 
 class ChildBoth1 < Parent
