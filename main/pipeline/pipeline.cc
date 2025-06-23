@@ -228,9 +228,6 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             }
 
             unique_ptr<parser::Node> parseTree;
-
-            bool stopAfterParser = opts.stopAfterPhase == options::Phase::PARSER;
-
             switch (parser) {
                 case options::Parser::SORBET:
                     parseTree = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
@@ -240,13 +237,15 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                     break;
             }
 
-            if (stopAfterParser) {
+            if (opts.stopAfterPhase == options::Phase::PARSER) {
                 return emptyParsedFile(file);
             }
+
             tree = runDesugar(lgs, file, move(parseTree), print);
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyParsedFile(file);
             }
+
             tree = runRewriter(lgs, file, move(tree));
             if (print.RewriterTree.enabled) {
                 print.RewriterTree.fmt("{}\n", tree.toStringWithTabs(lgs, 0));
@@ -254,6 +253,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (print.RewriterTreeRaw.enabled) {
                 print.RewriterTreeRaw.fmt("{}\n", tree.showRaw(lgs));
             }
+
             tree = runLocalVars(lgs, ast::ParsedFile{move(tree), file}).tree;
             if (opts.stopAfterPhase == options::Phase::LOCAL_VARS) {
                 return emptyParsedFile(file);
