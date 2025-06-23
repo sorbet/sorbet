@@ -236,7 +236,8 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             case realmain::options::Parser::PRISM: {
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-                auto nodes = parser::Prism::Parser::run(gs, file);
+                core::MutableContext ctx(gs, core::Symbols::root(), file);
+                auto nodes = parser::Prism::Parser::run(ctx);
                 parseResult = parser::Parser::ParseResult{move(nodes), {}};
                 break;
             }
@@ -712,8 +713,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 break;
             }
             case realmain::options::Parser::PRISM: {
-                parseResult = parser::Parser::ParseResult{parser::Prism::Parser::run(ctx, f.file, false), {}};
-                directlyDesugaredTree = parser::Prism::Parser::run(ctx, f.file, true);
+                parseResult = parser::Parser::ParseResult{parser::Prism::Parser::run(ctx, false), {}};
+                directlyDesugaredTree = parser::Prism::Parser::run(ctx, true);
                 break;
             }
         }
