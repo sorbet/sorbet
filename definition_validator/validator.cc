@@ -172,6 +172,10 @@ optional<core::AutocorrectSuggestion> constructAllowIncompatibleAutocorrect(cons
 
     auto methodLoc = ctx.locAt(methodDef.declLoc);
 
+    // XXX cwong: This causes a duplicate error to be reported if the signature is syntactically
+    // malformed (e.g. `allow_incompatible: :bad`). There are a few ways to resolve this (e.g.
+    // have `findSignature` return an error vector and make it the caller's responsibility to
+    // display them).
     auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, methodLoc.copyWithZeroLength());
     if (!parsedSig.has_value()) {
         return nullopt;
