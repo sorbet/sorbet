@@ -51,7 +51,12 @@ ConstantPath::TARGET1, ConstantPath::TARGET2 = 31, 32
 # Dynamic constant assignments
 
 def method1
-  DynamicConstant = "These should all raise SyntaxErrors at runtime"
+  # * Sorbet's previous parser would treat all of these as dynamic constant assignments.
+  # * `ruby -c --parser=parse.y` will report dynamic constant assignments for all of these.
+  # * `ruby -c --parser=prism`   will only report the first one.
+  # * At runtime, Ruby will issue warnings for all of these.
+
+  DynamicConstant = 1
 
   DynamicConstantBitwiseAnd &= 2
   DynamicConstantBitwiseXor ^= 4
@@ -73,9 +78,13 @@ def method1
 end
 
 def method2
-  ConstantPath::DynamicConstant2 = "This should raise a SyntaxError at runtime"
+  # * `ruby -c --parser=parse.y` reports dynamic constant assignments for all of them.
+  # * `ruby -c --parser=prism`   only reports the first one.
+  # * At runtime, Ruby will issue warnings for all of these.
 
-  # These should *NOT* raise a SyntaxError at runtime
+  ConstantPath::DynamicConstant2 = 1
+
+  # Sorbet's previous parser would treat all of these as dynamic constant assignments.
   ConstantPath::DynamicConstantBitwiseAnd &= 2
   ConstantPath::DynamicConstantBitwiseXor ^= 4
   ConstantPath::DynamicConstantShiftRight >>= 5
