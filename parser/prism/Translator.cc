@@ -10,6 +10,7 @@ using namespace std;
 
 namespace sorbet::parser::Prism {
 
+using namespace sorbet::ast;
 using sorbet::ast::MK;
 
 // Base case, helper for the function below.
@@ -55,7 +56,23 @@ unique_ptr<parser::Assign> Translator::translateAssignment(pm_node_t *untypedNod
     } else {
         // Handle regular assignment to any other kind of LHS.
         auto name = translateConstantName(node->name);
-        lhs = make_unique<SorbetLHSNode>(translateLoc(node->name_loc), name);
+        auto loc = translateLoc(node->name_loc);
+        UnresolvedIdent::Kind kind;
+
+        if constexpr (is_same_v<SorbetLHSNode, parser::IVarLhs>) {
+            kind = UnresolvedIdent::Kind::Instance;
+        } else if constexpr (is_same_v<SorbetLHSNode, parser::GVarLhs>) {
+            kind = UnresolvedIdent::Kind::Global;
+        } else if constexpr (is_same_v<SorbetLHSNode, parser::CVarLhs>) {
+            kind = UnresolvedIdent::Kind::Class;
+        } else if constexpr (is_same_v<SorbetLHSNode, parser::LVarLhs>) {
+            kind = UnresolvedIdent::Kind::Local;
+        } else {
+            unreachable("Unhandled LHS type: {}", typeid(SorbetLHSNode).name());
+        }
+
+        auto expr = make_expression<UnresolvedIdent>(loc, kind, name);
+        lhs = make_node_with_expr<SorbetLHSNode>(move(expr), loc, name);
     }
 
     return make_unique<parser::Assign>(location, move(lhs), move(rhs));
@@ -430,8 +447,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CLASS_VARIABLE_READ_NODE: { // A class variable, like `@@a`
             auto classVarNode = down_cast<pm_class_variable_read_node>(node);
             auto name = translateConstantName(classVarNode->name);
+            auto expr = make_expression<UnresolvedIdent>(location, UnresolvedIdent::Kind::Class, name);
 
-            return make_unique<parser::CVar>(location, name);
+            return make_node_with_expr<parser::CVar>(move(expr), location, name);
         }
         case PM_CLASS_VARIABLE_TARGET_NODE: { // Target of an indirect write to a class variable
             // ... like `@@target1, @@target2 = 1, 2`, `rescue => @@target`, etc.
@@ -635,8 +653,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_GLOBAL_VARIABLE_READ_NODE: { // A global variable, like `$g`
             auto globalVarReadNode = down_cast<pm_global_variable_read_node>(node);
             auto name = translateConstantName(globalVarReadNode->name);
+            auto expr = make_expression<UnresolvedIdent>(location, UnresolvedIdent::Kind::Global, name);
 
-            return make_unique<parser::GVar>(location, name);
+            return make_node_with_expr<parser::GVar>(move(expr), location, name);
         }
         case PM_GLOBAL_VARIABLE_TARGET_NODE: { // Target of an indirect write to a global variable
             // ... like `$target1, $target2 = 1, 2`, `rescue => $target`, etc.
@@ -728,8 +747,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_INSTANCE_VARIABLE_READ_NODE: { // An instance variable, like `@iv`
             auto instanceVarNode = down_cast<pm_instance_variable_read_node>(node);
             auto name = translateConstantName(instanceVarNode->name);
+            auto expr = make_expression<UnresolvedIdent>(location, ast::UnresolvedIdent::Kind::Instance, name);
 
-            return make_unique<parser::IVar>(location, name);
+            return make_node_with_expr<parser::IVar>(move(expr), location, name);
         }
         case PM_INSTANCE_VARIABLE_TARGET_NODE: { // Target of an indirect write to an instance variable
             // ... like `@target1, @target2 = 1, 2`, `rescue => @target`, etc.
@@ -874,8 +894,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_LOCAL_VARIABLE_READ_NODE: { // A local variable, like `lv`
             auto localVarReadNode = down_cast<pm_local_variable_read_node>(node);
             auto name = translateConstantName(localVarReadNode->name);
+            ExpressionPtr expr = MK::Local(location, name);
 
-            return make_unique<parser::LVar>(location, name);
+            return make_node_with_expr<parser::LVar>(move(expr), location, name);
         }
         case PM_LOCAL_VARIABLE_TARGET_NODE: { // Target of an indirect write to a local variable
             // ... like `target1, target2 = 1, 2`, `rescue => target`, etc.

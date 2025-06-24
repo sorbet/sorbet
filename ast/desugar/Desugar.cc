@@ -1737,14 +1737,20 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = std::move(res);
             },
             [&](parser::IVar *var) {
+                TRANSLATED_BY_PRISM(dctx, var);
+
                 ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, var->name);
                 result = std::move(res);
             },
             [&](parser::GVar *var) {
+                TRANSLATED_BY_PRISM(dctx, var);
+
                 ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Global, var->name);
                 result = std::move(res);
             },
             [&](parser::CVar *var) {
+                TRANSLATED_BY_PRISM(dctx, var);
+
                 ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Class, var->name);
                 result = std::move(res);
             },
