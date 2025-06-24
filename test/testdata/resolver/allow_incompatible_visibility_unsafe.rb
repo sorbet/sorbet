@@ -28,7 +28,7 @@ end
 # This one will overwrite to `allow_incompatible: :visibility`, but w/e
 class ChildBadSymbol < Parent
   sig {override(allow_incompatible: :bad).returns(Integer)}
-  #                                 ^^^^ error-with-dupes: `override(allow_incompatible: ...)` expects one of `true`, `false`, or `:visibility
+  #                                 ^^^^ error-with-dupes: `override(allow_incompatible: ...)` expects either `true` or `:visibility
   private def some_public_api; 0; end
   #       ^^^^^^^^^^^^^^^^^^^ error: Method `some_public_api` is private in `ChildBadSymbol` but not in `Parent`
 end
@@ -55,18 +55,24 @@ end
 class ChildBothErrors < Parent
   sig { override.returns(String) }
   private def some_public_api; ''; end
+#         ^^^^^^^^^^^^^^^^^^^ error: Return type `String` does not match return type of overridable method `Parent#some_public_api`
+#         ^^^^^^^^^^^^^^^^^^^ error: Method `some_public_api` is private in `ChildBothErrors` but not in `Parent`
 end
 
 # This previously crashed due to attempting to replace a non-existent `override`
 class AbstractChild < Parent
-  sig { abstract.returns(Int) }
+  extend T::Helpers
+  abstract!
+  sig { abstract.returns(Integer) }
   private def some_public_api; end
   #       ^^^^^^^^^^^^^^^^^^^ error: Method `some_public_api` is private in `AbstractChild` but not in `Parent`
+  #       ^^^^^^^^^^^^^^^^^^^ error: Method `AbstractChild#some_public_api` overrides an overridable method `Parent#some_public_api` but is not declared with `override.`
 end
 
 # This previously crashed due to attempting to replace a non-existent `override`
 class NonExplicitOverrideChild < Parent
-  sig { returns(Int) }
-  private def some_public_api; end
+  sig { returns(Integer) }
+  private def some_public_api; 0; end
   #       ^^^^^^^^^^^^^^^^^^^ error: Method `some_public_api` is private in `NonExplicitOverrideChild` but not in `Parent`
+  #       ^^^^^^^^^^^^^^^^^^^ error: Method `NonExplicitOverrideChild#some_public_api` overrides an overridable method `Parent#some_public_api` but is not declared with `override.`
 end
