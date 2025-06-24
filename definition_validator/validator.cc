@@ -192,6 +192,10 @@ constructAllowIncompatibleAutocorrect(const core::Context ctx, const ast::Expres
 
     auto replaceLoc = ctx.locAt(parsedSig->sig.seen.override_);
 
+    if (!replaceLoc.exists()) {
+        return nullopt;
+    }
+
     vector<core::AutocorrectSuggestion::Edit> edits;
     edits.emplace_back(
         core::AutocorrectSuggestion::Edit{replaceLoc, fmt::format("override(allow_incompatible: {})", what)});

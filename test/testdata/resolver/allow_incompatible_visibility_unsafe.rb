@@ -56,3 +56,17 @@ class ChildBothErrors < Parent
   sig { override.returns(String) }
   private def some_public_api; ''; end
 end
+
+# This previously crashed due to attempting to replace a non-existent `override`
+class AbstractChild < Parent
+  sig { abstract.returns(Int) }
+  private def some_public_api; end
+  #       ^^^^^^^^^^^^^^^^^^^ error: Method `some_public_api` is private in `AbstractChild` but not in `Parent`
+end
+
+# This previously crashed due to attempting to replace a non-existent `override`
+class NonExplicitOverrideChild < Parent
+  sig { returns(Int) }
+  private def some_public_api; end
+  #       ^^^^^^^^^^^^^^^^^^^ error: Method `some_public_api` is private in `NonExplicitOverrideChild` but not in `Parent`
+end
