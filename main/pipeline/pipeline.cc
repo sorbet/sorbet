@@ -318,6 +318,9 @@ ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_
     if (print.DesugarTreeRaw.enabled) {
         print.DesugarTreeRaw.fmt("{}\n", ast.showRaw(gs));
     }
+    if (print.DesugarTreeRawWithLocs.enabled) {
+        print.DesugarTreeRawWithLocs.fmt("{}\n", ast.showRawWithLocs(gs, file));
+    }
     return ast;
 }
 
