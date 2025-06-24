@@ -1,10 +1,8 @@
 name: CI
 
 on:
-  push:
-    branches: [prism, prism-squashed]
-  pull_request:
-    branches: [prism, prism-squashed]
+  [push, pull_request]
+
 jobs:
   tests:
     runs-on: ubuntu-latest
