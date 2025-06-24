@@ -48,6 +48,8 @@ struct Printers {
     PrinterConfig RBSRewriteTree;
     PrinterConfig DesugarTree;
     PrinterConfig DesugarTreeRaw;
+    PrinterConfig DesugarTreeRawWithLocs; // TODO: remove this option after Prism migration
+                                          // (https://github.com/sorbet/sorbet/issues/9065)
     PrinterConfig RewriterTree;
     PrinterConfig RewriterTreeRaw;
     PrinterConfig IndexTree;

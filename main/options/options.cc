@@ -109,6 +109,7 @@ const vector<PrintOptions> print_options({
     {"rbs-rewrite-tree", &Printers::RBSRewriteTree, false},
     {"desugar-tree", &Printers::DesugarTree, false},
     {"desugar-tree-raw", &Printers::DesugarTreeRaw, false},
+    {"desugar-tree-raw-with-locs", &Printers::DesugarTreeRawWithLocs, false},
     {"rewrite-tree", &Printers::RewriterTree, false},
     {"rewrite-tree-raw", &Printers::RewriterTreeRaw, false},
     {"index-tree", &Printers::IndexTree},
@@ -196,6 +197,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         RBSRewriteTree,
         DesugarTree,
         DesugarTreeRaw,
+        DesugarTreeRawWithLocs,
         RewriterTree,
         RewriterTreeRaw,
         IndexTree,
@@ -774,6 +776,10 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
                 cfg.enabled = true;
                 cfg.outputPath = outPath;
                 cfg.supportsFlush = known.supportsFlush;
+                if (known.option == "desugar-tree-raw-with-locs") {
+                    logger->warn("Option `--print=desugar-tree-raw-with-locs` is a temporary option and will be "
+                                 "removed in a future version of Sorbet.");
+                }
                 if (!known.supportsCaching) {
                     if (!opts.cacheDir.empty()) {
                         logger->error("--print={} is incompatible with --cache-dir. Ignoring cache", opt);
