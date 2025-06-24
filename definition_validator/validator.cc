@@ -675,7 +675,6 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
         if ((overriddenMethod.data(ctx)->flags.isAbstract || overriddenMethod.data(ctx)->flags.isOverridable ||
              (overriddenMethod.data(ctx)->hasSig() && method.data(ctx)->flags.isOverride)) &&
             !method.data(ctx)->flags.allowIncompatibleOverrideAll && !isRBI &&
-            !method.data(ctx)->flags.isRewriterSynthesized &&
             overriddenMethod != core::Symbols::BasicObject_initialize()) {
             // We only ignore BasicObject#initialize for backwards compatibility.
             // One day, we may want to build something like overridable(allow_incompatible: true)

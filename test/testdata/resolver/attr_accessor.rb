@@ -15,13 +15,14 @@ class Foo
   def a; end
 end
 
-# Covariance rule for attr readers return types is not checked:
+# Covariance rule for attr readers return types should be checked:
 
 class Error1 < Foo
   extend T::Sig
 
-  sig { override.returns(Unrelated)} # WRONG: Should error, as Unrelated is not a subtype of A
+  sig { override.returns(Unrelated)}
   attr_reader :a
+# ^^^^^^^^^^^^^^ error: Return type `Unrelated` does not match return type of abstract method `Foo#a`
 
   sig { params(a: Unrelated).void }
   def initialize(a)
@@ -32,8 +33,9 @@ end
 class Error2 < Foo
   extend T::Sig
 
-  sig { override.returns(T.nilable(Object))} # WRONG: Should error, as nilable Object is not covariant with A
+  sig { override.returns(T.nilable(Object))}
   attr_reader :a
+# ^^^^^^^^^^^^^^ error: Return type `Object` does not match return type of abstract method `Foo#a`
 
   sig { void }
   def initialize
@@ -44,8 +46,9 @@ end
 class Error3 < Foo
   extend T::Sig
 
-  sig { override.returns(T.nilable(B))} # WRONG: Should error, as nilable B is not covariant with A
+  sig { override.returns(T.nilable(B))}
   attr_reader :a
+# ^^^^^^^^^^^^^^ error: Return type `T.nilable(B)` does not match return type of abstract method `Foo#a`
 
   sig { void }
   def initialize
@@ -53,7 +56,7 @@ class Error3 < Foo
   end
 end
 
-# The following tests should still work once fixed:
+# The following should still pass
 
 class Ok1 < Foo
   extend T::Sig
@@ -73,34 +76,5 @@ class Ok2 < Foo
   sig { override.returns(B)} # Ok
   def a
     B.new
-  end
-end
-
-# This already work well with concrete methods:
-
-class Ok3 < Foo
-  extend T::Sig
-
-  sig { override.returns(T.nilable(B))} # Ok: errors as it should
-  def a
-    B.new
-  end
-end
-
-class Ok4 < Foo
-  extend T::Sig
-
-  sig { override.returns(Object)} # Ok: errors as it should
-  def a
-    B.new
-  end
-end
-
-class Ok5 < Foo
-  extend T::Sig
-
-  sig { override.returns(Unrelated)} # Ok: errors as it should
-  def a
-    Unrelated.new
   end
 end
