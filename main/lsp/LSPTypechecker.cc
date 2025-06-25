@@ -490,12 +490,11 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                         pipeline::name(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers, foundHashes);
                     if (cancelled) {
                         ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
-                        ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
                         return;
                     }
 
-                    pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), workspaceFilesSpan, this->config->opts,
-                                             workers);
+                    pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers);
+                    pipeline::setPackageForSourceFiles(*this->gs, workspaceFilesSpan, this->config->opts);
                 }
 
                 {

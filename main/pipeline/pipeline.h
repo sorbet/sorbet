@@ -51,10 +51,14 @@ void unpartitionPackageFiles(std::vector<ast::ParsedFile> &packageFiles,
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
              WorkerPool &workers);
 
-void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, absl::Span<core::FileRef> sourceFiles,
-                    const options::Options &opts, WorkerPool &workers);
+void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
+                    WorkerPool &workers);
 
-void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> sourceFiles, const options::Options &opts,
+// Associates source files with their package in the package DB. This can only be called after `buildPackageDB`.
+void setPackageForSourceFiles(core::GlobalState &gs, absl::Span<core::FileRef> sourceFiles,
+                              const options::Options &opts);
+
+void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                            WorkerPool &workers);
 
 // ----- namer + resolver -----------------------------------------------------

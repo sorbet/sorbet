@@ -776,17 +776,17 @@ void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const opti
 }
 
 // packager intentionally runs outside of rewriter so that its output does not get cached.
-void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> packageFiles,
-                    absl::Span<core::FileRef> sourceFiles, const options::Options &opts, WorkerPool &workers) {
+void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
+                    WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
     if (!opts.cacheSensitiveOptions.stripePackages) {
         return;
     }
 
     try {
-        packager::Packager::buildPackageDB(gs, workers, packageFiles, sourceFiles);
+        packager::Packager::buildPackageDB(gs, workers, what);
         if (opts.print.Packager.enabled) {
-            for (auto &f : packageFiles) {
+            for (auto &f : what) {
                 opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());
                 opts.print.Packager.fmt("{}\n", f.tree.toStringWithTabs(gs, 0));
             }
@@ -801,7 +801,26 @@ void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> packageFi
 }
 
 // packager intentionally runs outside of rewriter so that its output does not get cached.
-void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> sourceFiles, const options::Options &opts,
+void setPackageForSourceFiles(core::GlobalState &gs, absl::Span<core::FileRef> packageFiles,
+                              const options::Options &opts) {
+#ifndef SORBET_REALMAIN_MIN
+    if (!opts.cacheSensitiveOptions.stripePackages) {
+        return;
+    }
+
+    try {
+        packager::Packager::setPackageNameOnFiles(gs, packageFiles);
+    } catch (SorbetException &) {
+        Exception::failInFuzzer();
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception packaging (backtrace is above)");
+        }
+    }
+#endif
+}
+
+// packager intentionally runs outside of rewriter so that its output does not get cached.
+void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                            WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
     if (!opts.cacheSensitiveOptions.stripePackages) {
@@ -809,9 +828,9 @@ void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> so
     }
 
     try {
-        packager::Packager::validatePackagedFiles(gs, workers, sourceFiles);
+        packager::Packager::validatePackagedFiles(gs, workers, what);
         if (opts.print.Packager.enabled) {
-            for (auto &f : sourceFiles) {
+            for (auto &f : what) {
                 opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());
                 opts.print.Packager.fmt("{}\n", f.tree.toStringWithTabs(gs, 0));
             }
