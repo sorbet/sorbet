@@ -8,6 +8,7 @@
 #include "core/TrackUntyped.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "spdlog/spdlog.h"
+#include <cxxopts.hpp>
 #include <optional>
 
 namespace sorbet::realmain::options {
@@ -107,8 +108,8 @@ enum class Phase {
 };
 
 enum class Parser {
+    ORIGINAL,
     PRISM,
-    SORBET,
 };
 
 struct ParserOptions {
@@ -117,7 +118,7 @@ struct ParserOptions {
 };
 
 const std::vector<ParserOptions> parser_options({
-    {"sorbet", Parser::SORBET},
+    {"original", Parser::ORIGINAL},
     {"prism", Parser::PRISM},
 });
 
@@ -135,7 +136,7 @@ constexpr size_t MAX_CACHE_SIZE_BYTES = 1L * 1024 * 1024 * 1024; // 1 GiB
 struct Options {
     Printers print;
     Phase stopAfterPhase = Phase::INFERENCER;
-    Parser parser = Parser::SORBET;
+    Parser parser = Parser::ORIGINAL;
     bool noStdlib = false;
 
     // Should we monitor STDOUT for HUP and exit if it hangs up. This is a
@@ -309,6 +310,8 @@ void readOptions(
     int argc, char *argv[],
     const std::vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
     std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
+
+Parser extractParser(cxxopts::ParseResult &raw, std::shared_ptr<spdlog::logger> logger);
 
 void flushPrinters(Options &);
 } // namespace sorbet::realmain::options

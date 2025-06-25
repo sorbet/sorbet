@@ -50,7 +50,7 @@ run_benchmark() {
   output_file="prism_benchmarks/time/data/$output_dir/${output_file_name}"
 
   hyperfine \
-    --warmup=10 --export-json="$output_file" --parameter-list parser sorbet,prism \
+    --warmup=10 --export-json="$output_file" --parameter-list parser original,prism \
     "bazel-bin/main/sorbet --parser={parser} $command" --ignore-failure
 }
 
