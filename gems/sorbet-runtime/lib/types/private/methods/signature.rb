@@ -54,6 +54,8 @@ class T::Private::Methods::Signature
     @has_keyrest = false
     @parameters = parameters
     @on_failure = on_failure
+    # `is_explicit_override` here is pretty much only required so we can opt out of visibility
+    # runtime checking. Once we land static checking for implicit overrides, we can get rid of it.
     @is_explicit_override = is_explicit_override
     @override_allow_incompatible = override_allow_incompatible
     @defined_raw = defined_raw
