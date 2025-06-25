@@ -1,5 +1,6 @@
 #include <algorithm>
 
+#include "absl/strings/match.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_replace.h"
 #include "ast/Helpers.h"
@@ -1822,22 +1823,32 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 int64_t val;
 
                 // complemented literals
-                bool hasTilde = integer->val.find("~") != string::npos;
-                const string &withoutTilde = !hasTilde ? integer->val : absl::StrReplaceAll(integer->val, {{"~", ""}});
+                bool hasTilde = absl::StartsWith(integer->val, "~");
+                const string_view withoutTilde = hasTilde ? string_view(integer->val).substr(1) : integer->val;
 
-                auto underscorePos = withoutTilde.find("_");
-                const string &withoutUnderscores =
-                    (underscorePos == string::npos) ? withoutTilde : absl::StrReplaceAll(withoutTilde, {{"_", ""}});
+                bool hasUnderscores = withoutTilde.find("_") != string::npos;
+                bool wasInt;
+                if (hasUnderscores) {
+                    const string withoutUnderscores = absl::StrReplaceAll(withoutTilde, {{"_", ""}});
+                    wasInt = absl::SimpleAtoi(withoutUnderscores, &val);
+                } else {
+                    wasInt = absl::SimpleAtoi(withoutTilde, &val);
+                }
 
-                if (!absl::SimpleAtoi(withoutUnderscores, &val)) {
+                if (!wasInt) {
                     val = 0;
                     if (auto e = dctx.ctx.beginIndexerError(loc, core::errors::Desugar::IntegerOutOfRange)) {
                         e.setHeader("Unsupported integer literal: `{}`", integer->val);
                     }
                 }
 
-                ExpressionPtr res = MK::Int(loc, hasTilde ? ~val : val);
-                result = std::move(res);
+                if (hasTilde) {
+                    core::LocOffsets adjustedLoc = dctx.ctx.locAt(loc).adjust(dctx.ctx, 1, 1).offsets();
+                    result = MK::Int(adjustedLoc, val);
+                    result = MK::Send0(loc, move(result), core::Names::tilde(), loc.copyEndWithZeroLength());
+                } else {
+                    result = MK::Int(loc, val);
+                }
             },
             [&](parser::DString *dstring) {
                 ExpressionPtr res = desugarDString(dctx, loc, std::move(dstring->nodes));
