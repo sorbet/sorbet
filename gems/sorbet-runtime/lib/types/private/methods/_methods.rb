@@ -385,7 +385,6 @@ module T::Private::Methods
         mode: current_declaration.mode,
         check_level: current_declaration.checked,
         on_failure: current_declaration.on_failure,
-        is_explicit_override: current_declaration.is_explicit_override,
         override_allow_incompatible: current_declaration.override_allow_incompatible,
         defined_raw: current_declaration.raw,
       )
