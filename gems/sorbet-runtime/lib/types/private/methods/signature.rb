@@ -5,7 +5,8 @@ class T::Private::Methods::Signature
   attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type, :block_name,
               :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind,
               :return_type, :mode, :req_arg_count, :req_kwarg_names, :has_rest, :has_keyrest,
-              :check_level, :parameters, :on_failure, :override_allow_incompatible,
+              :check_level, :parameters, :on_failure,
+              :is_explicit_override, :override_allow_incompatible,
               :defined_raw
 
   UNNAMED_REQUIRED_PARAMETERS = [[:req]].freeze
@@ -36,7 +37,7 @@ class T::Private::Methods::Signature
     )
   end
 
-  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: method.parameters, override_allow_incompatible: false, defined_raw: false)
+  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: method.parameters, is_explicit_override: false, override_allow_incompatible: false, defined_raw: false)
     @method = method
     @method_name = method_name
     @block_type = nil
@@ -53,6 +54,7 @@ class T::Private::Methods::Signature
     @has_keyrest = false
     @parameters = parameters
     @on_failure = on_failure
+    @is_explicit_override = is_explicit_override
     @override_allow_incompatible = override_allow_incompatible
     @defined_raw = defined_raw
 

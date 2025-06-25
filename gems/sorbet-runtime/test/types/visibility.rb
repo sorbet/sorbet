@@ -157,4 +157,20 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
 
     T::Private::Abstract::Validate.validate_subclass(child)
   end
+
+  it "doesn't check visibility overrides unless `override` is explicit" do
+    parent = Class.new do
+      extend T::Sig, T::Helpers
+      abstract!
+      sig { returns(Integer) }
+      def foo; end
+    end
+    child = Class.new(parent) do
+      extend T::Sig, T::Helpers
+      sig { returns(Integer) }
+      private def foo; 0; end
+    end
+
+    T::Private::Abstract::Validate.validate_subclass(child)
+  end
 end
