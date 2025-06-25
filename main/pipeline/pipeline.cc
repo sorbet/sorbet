@@ -824,36 +824,33 @@ CondensationLayerInfo condensationLayers(const core::GlobalState &gs, absl::Span
             core::FileRef fref(ix);
             auto pkgName = db.getPackageNameForFile(fref);
             if (!pkgName.exists()) {
-                // This is an unpackaged file, so we unconditionally put it first.
+                // This is an unpackaged file, so we unconditionally put it in the first layer. This means that it'll be
+                // checked at the same time as the first layer of packaged code.
                 fileToLayer[ix] = 0;
                 continue;
             }
 
-            // We add 1 to the layers here to ensure that un-packaged code is always first.
             auto &info = layerMapping[pkgName];
             if (file->isPackagedTest()) {
-                fileToLayer[ix] = info.testLayer + 1;
+                fileToLayer[ix] = info.testLayer;
             } else {
-                fileToLayer[ix] = info.applicationLayer + 1;
+                fileToLayer[ix] = info.applicationLayer;
             }
         }
     }
 
-    // Order by layer first, then file id.
-    fast_sort(packageFiles, [&fileToLayer](auto &l, auto &r) -> bool {
-        auto lid = l.file.id();
-        auto rid = r.file.id();
-        auto lLayer = fileToLayer[lid];
-        auto rLayer = fileToLayer[rid];
-        return std::tie(lLayer, lid) < std::tie(rLayer, rid);
-    });
-    fast_sort(sourceFiles, [&fileToLayer](auto l, auto r) -> bool {
+    auto compareLayerThenFile = [&fileToLayer](core::FileRef l, core::FileRef r) -> bool {
         auto lid = l.id();
         auto rid = r.id();
         auto lLayer = fileToLayer[lid];
         auto rLayer = fileToLayer[rid];
         return std::tie(lLayer, lid) < std::tie(rLayer, rid);
-    });
+    };
+
+    // Order by layer first, then file id.
+    fast_sort(packageFiles,
+              [compareLayerThenFile](auto &l, auto &r) -> bool { return compareLayerThenFile(l.file, r.file); });
+    fast_sort(sourceFiles, compareLayerThenFile);
 
     // Reserve enough space for all the layers of the condensation traversal, plus one more for unpackaged code.
     auto maxLayers = traversal.parallel.size() + 1;
