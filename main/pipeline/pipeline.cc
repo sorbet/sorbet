@@ -801,6 +801,25 @@ void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, con
 }
 
 // packager intentionally runs outside of rewriter so that its output does not get cached.
+void setPackageForSourceFiles(core::GlobalState &gs, absl::Span<core::FileRef> packageFiles,
+                              const options::Options &opts) {
+#ifndef SORBET_REALMAIN_MIN
+    if (!opts.cacheSensitiveOptions.stripePackages) {
+        return;
+    }
+
+    try {
+        packager::Packager::setPackageNameOnFiles(gs, packageFiles);
+    } catch (SorbetException &) {
+        Exception::failInFuzzer();
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception packaging (backtrace is above)");
+        }
+    }
+#endif
+}
+
+// packager intentionally runs outside of rewriter so that its output does not get cached.
 void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                            WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
