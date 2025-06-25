@@ -2,7 +2,7 @@
 # typed: true
 
 module T::Private::Methods
-  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :raw)
+  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :is_explicit_override, :override_allow_incompatible, :type_parameters, :raw)
 
   class DeclBuilder
     attr_reader :decl
@@ -25,6 +25,7 @@ module T::Private::Methods
         ARG_NOT_PROVIDED, # checked
         false, # finalized
         ARG_NOT_PROVIDED, # on_failure
+        false, # is_explicit_override
         nil, # override_allow_incompatible
         ARG_NOT_PROVIDED, # type_parameters
         raw
@@ -167,6 +168,8 @@ module T::Private::Methods
       else
         raise BuilderError.new("`.override` cannot be combined with `.abstract`.")
       end
+
+      decl.is_explicit_override = true
 
       self
     end
