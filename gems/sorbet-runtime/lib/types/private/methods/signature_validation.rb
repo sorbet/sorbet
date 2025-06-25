@@ -278,7 +278,7 @@ module T::Private::Methods::SignatureValidation
   end
 
   def self.validate_override_visibility(signature, super_signature)
-    return unless signature.is_explicit_override
+    return unless [Modes.override, Modes.overridable_override].include?(signature.mode)
     return if [:visibility, true].include?(signature.override_allow_incompatible)
     method = signature.method
     super_method = super_signature.method
