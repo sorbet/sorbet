@@ -96,6 +96,8 @@ class ParseResult final {
 
     ParseResult(const ParseResult &) = delete;            // Copy constructor
     ParseResult &operator=(const ParseResult &) = delete; // Copy assignment
+    ParseResult(ParseResult &&) = default;                // Move constructor
+    ParseResult &operator=(ParseResult &&) = default;     // Move assignment
 
     pm_node_t *getRawNodePointer() const {
         return node.get();
