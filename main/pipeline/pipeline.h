@@ -49,14 +49,18 @@ void unpartitionPackageFiles(std::vector<ast::ParsedFile> &packageFiles,
                              std::vector<ast::ParsedFile> &&nonPackageFiles);
 
 struct CondensationLayerInfo {
-    std::vector<absl::Span<ast::ParsedFile>> packageFiles;
-    std::vector<absl::Span<core::FileRef>> sourceFiles;
+    // The `__package.rb` sources in this layer of the condensation graph.
+    absl::Span<ast::ParsedFile> packageFiles;
+
+    // The ruby sources in this layer of the condensation graph.
+    absl::Span<core::FileRef> sourceFiles;
 };
 
 // Using the condensation graph, sort the package and source files according to the layer they would show up in the
 // parallel traversal of the condensation graph.
-CondensationLayerInfo condensationLayers(const core::GlobalState &gs, absl::Span<ast::ParsedFile> packageFiles,
-                                         absl::Span<core::FileRef> files, const options::Options &opts);
+std::vector<CondensationLayerInfo> condensationLayers(const core::GlobalState &gs,
+                                                      absl::Span<ast::ParsedFile> packageFiles,
+                                                      absl::Span<core::FileRef> files, const options::Options &opts);
 
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
              WorkerPool &workers);

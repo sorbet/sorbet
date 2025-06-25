@@ -749,12 +749,12 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
     }
 }
 
-CondensationLayerInfo condensationLayers(const core::GlobalState &gs, absl::Span<ast::ParsedFile> packageFiles,
-                                         absl::Span<core::FileRef> sourceFiles, const options::Options &opts) {
+vector<CondensationLayerInfo> condensationLayers(const core::GlobalState &gs, absl::Span<ast::ParsedFile> packageFiles,
+                                                 absl::Span<core::FileRef> sourceFiles, const options::Options &opts) {
     Timer timeit(gs.tracer(), "condensationLayers");
 
     if (!opts.cacheSensitiveOptions.stripePackages) {
-        return CondensationLayerInfo{{packageFiles}, {sourceFiles}};
+        return vector{CondensationLayerInfo{packageFiles, sourceFiles}};
     }
 
     auto &db = gs.packageDB();
@@ -768,6 +768,7 @@ CondensationLayerInfo condensationLayers(const core::GlobalState &gs, absl::Span
 
         int ix = 0;
         for (auto &file : gs.getFiles().subspan(1)) {
+            ++ix;
             core::FileRef fref(ix);
             auto pkgName = db.getPackageNameForFile(fref);
             if (!pkgName.exists()) {
@@ -802,27 +803,15 @@ CondensationLayerInfo condensationLayers(const core::GlobalState &gs, absl::Span
     // Reserve enough space for all the layers of the condensation traversal, plus one more for unpackaged code.
     auto maxLayers = traversal.parallel.size() + 1;
 
-    CondensationLayerInfo result;
-    result.packageFiles.reserve(maxLayers);
-    result.sourceFiles.reserve(maxLayers);
+    vector<CondensationLayerInfo> result;
+    result.reserve(maxLayers);
 
     auto sourceSpan = sourceFiles;
     auto packageSpan = packageFiles;
 
-    // Slightly awkward: if we have unpackaged source files, we need to add those to the result first, along with an
-    // empty span for package files to make sure that the lengths of the two vectors line up.
-    {
-        auto it = absl::c_find_if(sourceSpan, [&fileToLayer](auto f) { return fileToLayer[f.id()] > 0; });
-        if (it != sourceSpan.begin() && it != sourceSpan.end()) {
-            auto len = std::distance(sourceSpan.begin(), it);
-            result.sourceFiles.emplace_back(sourceSpan.subspan(0, len));
-            result.packageFiles.emplace_back(absl::Span<ast::ParsedFile>());
-            sourceSpan = sourceSpan.subspan(len);
-        }
-    }
-
-    while (!packageSpan.empty()) {
+    do {
         auto currentLayer = fileToLayer[packageSpan.front().file.id()];
+        auto &resultLayer = result.emplace_back();
 
         {
             auto it = absl::c_find_if(packageSpan, [&fileToLayer, currentLayer](const auto &f) {
@@ -830,7 +819,7 @@ CondensationLayerInfo condensationLayers(const core::GlobalState &gs, absl::Span
             });
             auto len = std::distance(packageSpan.begin(), it);
             ENFORCE(len > 0);
-            result.packageFiles.emplace_back(packageSpan.subspan(0, len));
+            resultLayer.packageFiles = packageSpan.subspan(0, len);
             packageSpan = packageSpan.subspan(len);
         }
 
@@ -840,18 +829,13 @@ CondensationLayerInfo condensationLayers(const core::GlobalState &gs, absl::Span
             auto len = std::distance(sourceSpan.begin(), it);
             // It's possible for there to be no source files associated with this layer, if all packages were empty, so
             // we can't add the same ENFORCE as with the package span above.
-            result.sourceFiles.emplace_back(sourceSpan.subspan(0, len));
+            resultLayer.sourceFiles = sourceSpan.subspan(0, len);
             sourceSpan = sourceSpan.subspan(len);
         }
-    }
+    } while (!packageSpan.empty());
 
-    // This should be true for two reasons:
-    // 1. All unpackaged source will be handled before the loop above
-    // 2. Any packaged source will require a package file to exist, which will be handled by the loop
     ENFORCE(sourceSpan.empty());
-
-    ENFORCE(result.sourceFiles.size() <= maxLayers);
-    ENFORCE(result.sourceFiles.size() == result.packageFiles.size());
+    ENFORCE(result.size() <= maxLayers);
 
     return result;
 }
