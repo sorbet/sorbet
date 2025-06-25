@@ -195,7 +195,7 @@ template <typename PrismNode> pm_node_t *up_cast(PrismNode *node) {
 // Take a pointer to a type-erased `pm_node_t` and down-cast it to a pointer of a specific Prism node "subclass".
 // In debug builds, this helper checks the node's type before casting, to ensure it's casted correctly.
 template <typename PrismNode> PrismNode *down_cast(pm_node_t *anyNode) {
-    static_assert(std::is_same_v<decltype(PrismNode::base), pm_node_t>,
+    static_assert(is_same_v<decltype(PrismNode::base), pm_node_t>,
                   "The `down_cast` function should only be called on Prism node pointers.");
     ENFORCE(anyNode == nullptr || PM_NODE_TYPE_P(anyNode, PrismNodeTypeHelper<PrismNode>::TypeID),
             "Failed to cast a Prism AST Node. Expected {} (#{}), but got {} (#{}).",

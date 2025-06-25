@@ -3,10 +3,7 @@
 
 template class std::unique_ptr<sorbet::parser::Node>;
 
-using std::is_same_v;
-using std::make_unique;
-using std::move;
-using std::unique_ptr;
+using namespace std;
 
 namespace sorbet::parser::Prism {
 
@@ -14,7 +11,7 @@ namespace sorbet::parser::Prism {
 // Throws a `sorbet::SorbetException` when triggered to help with debugging.
 template <typename... TArgs>
 [[noreturn]] void unreachable(fmt::format_string<TArgs...> reason_format_str, TArgs &&...args) {
-    Exception::raise(reason_format_str, std::forward<TArgs>(args)...);
+    Exception::raise(reason_format_str, forward<TArgs>(args)...);
 }
 
 template <typename PrismAssignmentNode, typename SorbetLHSNode>
@@ -251,8 +248,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto argsNode = parser::cast_node<parser::Args>(sorbetArgsNode.get());
             auto sorbetShadowArgs = translateMulti(paramsNode->locals);
             // Sorbet's legacy parser inserts locals (Shadowargs) at the end of the the block's Args node
-            argsNode->args.insert(argsNode->args.end(), std::make_move_iterator(sorbetShadowArgs.begin()),
-                                  std::make_move_iterator(sorbetShadowArgs.end()));
+            argsNode->args.insert(argsNode->args.end(), make_move_iterator(sorbetShadowArgs.begin()),
+                                  make_move_iterator(sorbetShadowArgs.end()));
 
             return sorbetArgsNode;
         }
@@ -293,9 +290,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // Unlike `-[Integer]`, Prism treats `~[Integer]` as a method call
             // But Sorbet's legacy parser treats both `~[Integer]` and `-[Integer]` as integer literals
             if (constantNameString == "~" && parser::cast_node<parser::Integer>(receiver.get())) {
-                std::string valueString(sliceLocation(callNode->base.location));
+                string valueString(sliceLocation(callNode->base.location));
 
-                return std::make_unique<parser::Integer>(location, std::move(valueString));
+                return make_unique<parser::Integer>(location, move(valueString));
             }
 
             pm_node_t *prismBlock = callNode->block;
@@ -568,7 +565,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_FLOAT_NODE: { // A floating point number literal, e.g. `1.23`
             auto floatNode = down_cast<pm_float_node>(node);
-            std::string valueString(sliceLocation(floatNode->base.location));
+            string valueString(sliceLocation(floatNode->base.location));
 
             return make_unique<parser::Float>(location, move(valueString));
         }
@@ -665,7 +662,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 value.remove_prefix(1);
 
                 // Create the Complex node with the unsigned value
-                auto receiver = make_unique<parser::Complex>(location, std::string(value));
+                auto receiver = make_unique<parser::Complex>(location, string(value));
 
                 // Return the appropriate unary operation
                 core::NameRef unaryOp = (sign == '-') ? core::Names::unaryMinus() : core::Names::unaryPlus();
@@ -674,7 +671,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             // No leading sign; return the Complex node directly
-            return make_unique<parser::Complex>(location, std::string(value));
+            return make_unique<parser::Complex>(location, string(value));
         }
         case PM_IMPLICIT_NODE: { // A hash key without explicit value, like the `k4` in `{ k4: }`
             auto implicitNode = down_cast<pm_implicit_node>(node);
@@ -734,7 +731,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_INTEGER_NODE: { // An integer literal, e.g., `123`, `0xcafe`, `0b1010`, etc.
             auto intNode = down_cast<pm_integer_node>(node);
             // For normal integers, retain the original valueString including any sign
-            std::string valueString(sliceLocation(intNode->base.location));
+            string valueString(sliceLocation(intNode->base.location));
 
             ENFORCE(!valueString.empty());
 
@@ -759,12 +756,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     // literals with underscores as invalid, so we just use `0`
                     // Example: `0xca_fe` is invalid, should be translated to `0`
                     // Note: Prism actually parses these literals correctly
-                } else if (valueString.find('_') != std::string::npos) {
+                } else if (valueString.find('_') != string::npos) {
                     valueString = "0";
                 } else {
                     // Handle prefixed integer literals (e.g., 0x, 0b, 0o, 0d) without underscores
                     // Prism has already parsed their values so we use the precomputed value directly
-                    valueString = std::to_string(intNode->value.value);
+                    valueString = to_string(intNode->value.value);
                 }
 
                 // Add the optional sign back if it was present
@@ -773,7 +770,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 }
             }
 
-            return make_unique<parser::Integer>(location, std::move(valueString));
+            return make_unique<parser::Integer>(location, move(valueString));
         }
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE: { // An interpolated regex literal in a conditional...
             // ...that implicitly checks against the last read line by an IO object, e.g. `if /wat #{123}/`
@@ -958,7 +955,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             for (auto i = 1; i <= paramCount; i++) {
                 // The location is arbitrary and not really used, since these aren't explicitly written in the source.
-                auto paramNode = make_unique<parser::LVar>(location, gs.enterNameUTF8("_" + std::to_string(i)));
+                auto paramNode = make_unique<parser::LVar>(location, gs.enterNameUTF8("_" + to_string(i)));
                 params.emplace_back(move(paramNode));
             }
 
@@ -1662,7 +1659,7 @@ parser::NodeVec Translator::translateKeyValuePairs(pm_node_list_t elements) {
             auto splatLoc = translateLoc(prismSplatNode->base.location);
             auto value = translate(prismSplatNode->value);
 
-            std::unique_ptr<parser::Node> sorbetSplatNode;
+            unique_ptr<parser::Node> sorbetSplatNode;
             if (value == nullptr) { // An anonymous splat like `f(**)`
                 sorbetSplatNode = make_unique<parser::ForwardedKwrestArg>(splatLoc);
             } else { // Splatting an expression like `f(**h)`
@@ -1705,7 +1702,7 @@ bool Translator::isKeywordHashElement(sorbet::parser::Node *node) {
 // This function translates between the two, creating a `Block` or `NumBlock` node for the given `pm_block_node *`
 // or `pm_lambda_node *`, and wrapping it around the given `Send` node.
 unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,
-                                                            std::unique_ptr<parser::Node> sendNode) {
+                                                            unique_ptr<parser::Node> sendNode) {
     unique_ptr<parser::Node> parametersNode;
     unique_ptr<parser::Node> body;
 
@@ -1826,7 +1823,7 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
                                     is_same_v<PrismLhsNode, pm_constant_path_write_node> ||
                                     is_same_v<PrismLhsNode, pm_constant_path_node>;
 
-    std::unique_ptr<parser::Node> parent;
+    unique_ptr<parser::Node> parent;
     if constexpr (isConstantPath) { // Handle constant paths, has a parent node that needs translation.
         if (auto prismParentNode = node->parent; prismParentNode != nullptr) {
             // This constant reference is chained onto another constant reference.
@@ -1869,12 +1866,12 @@ core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
 unique_ptr<parser::Regopt> Translator::translateRegexpOptions(pm_location_t closingLoc) {
     auto length = closingLoc.end - closingLoc.start;
 
-    std::string_view options;
+    string_view options;
 
     if (length > 0) {
         options = sliceLocation(closingLoc).substr(1); // one character after the closing `/`
     } else {
-        options = std::string_view();
+        options = string_view();
     }
 
     return make_unique<parser::Regopt>(translateLoc(closingLoc), options);
@@ -1897,12 +1894,12 @@ unique_ptr<parser::Regexp> Translator::translateRegexp(pm_string_t unescaped, co
     return make_unique<parser::Regexp>(location, move(parts), move(options));
 }
 
-std::string_view Translator::sliceLocation(pm_location_t loc) {
-    return std::string_view(reinterpret_cast<const char *>(loc.start), loc.end - loc.start);
+string_view Translator::sliceLocation(pm_location_t loc) {
+    return string_view(reinterpret_cast<const char *>(loc.start), loc.end - loc.start);
 }
 
 // Creates a `parser::Mlhs` for either a `PM_MULTI_WRITE_NODE` or `PM_MULTI_TARGET_NODE`.
-template <typename PrismNode> std::unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode *node) {
+template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode *node) {
     static_assert(
         is_same_v<PrismNode, pm_multi_target_node> || is_same_v<PrismNode, pm_multi_write_node>,
         "Translator::translateMultiTarget can only be used for PM_MULTI_TARGET_NODE and PM_MULTI_WRITE_NODE.");
@@ -1958,7 +1955,7 @@ Translator Translator::enterMethodDef() {
     return Translator(parser, gs, file, parseErrors, isInMethodDef, uniqueCounter);
 }
 
-void Translator::reportError(core::LocOffsets loc, const std::string &message) {
+void Translator::reportError(core::LocOffsets loc, const string &message) {
     auto errorLoc = core::Loc(file, loc);
     if (auto e = gs.beginError(errorLoc, core::errors::Parser::ParserError)) {
         e.setHeader("{}", message);
