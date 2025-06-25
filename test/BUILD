@@ -294,7 +294,7 @@ pipeline_tests(
             "testdata/desugar/pattern_matching_hash.rb", # See https://github.com/Shopify/sorbet/issues/362
         ],
     ),
-    "PosTests",
+    "PrismPosTests",
     parser = "prism",
 )
 
@@ -326,7 +326,7 @@ pipeline_tests(
         "prism_regression/**/*.rb",
         "prism_regression/**/*.exp",
     ]),
-    "PosTests",
+    "PrismPosTests",
     parser = "prism",
 )
 
