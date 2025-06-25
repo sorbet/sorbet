@@ -228,7 +228,7 @@ public:
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
 
@@ -419,7 +419,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -449,7 +449,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -470,7 +470,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -490,7 +490,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -509,7 +509,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -526,7 +526,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -545,7 +545,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -564,7 +564,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -591,7 +591,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -617,7 +617,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -636,7 +636,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -662,7 +662,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -681,7 +681,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -700,7 +700,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -720,7 +720,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -739,7 +739,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -758,7 +758,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -778,7 +778,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -870,7 +870,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     // Add the given positional argument as the last positional argument.
     void addPosArg(ExpressionPtr ptr);
@@ -1047,7 +1047,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -1070,7 +1070,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -1092,7 +1092,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -1111,7 +1111,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
     bool isString() const;
     bool isSymbol() const;
     bool isName() const;
@@ -1140,7 +1140,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -1358,7 +1358,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
     std::optional<std::pair<core::SymbolRef, std::vector<core::NameRef>>> fullUnresolvedPath(core::Context ctx) const;
 
     core::LocOffsets loc() const {
@@ -1410,7 +1410,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -1430,7 +1430,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
     void _sanityCheck();
 };
 CheckSize(Block, 40, 8);
@@ -1454,7 +1454,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -1475,7 +1475,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -1492,7 +1492,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -1509,7 +1509,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
