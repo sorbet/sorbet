@@ -1,4 +1,5 @@
 # typed: true
+# enable-deprecated: true
 # The docs for BigFoo
 class BigFoo; extend T::Sig
     # ^ hover: T.class_of(BigFoo)

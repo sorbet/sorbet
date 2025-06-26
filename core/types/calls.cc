@@ -938,7 +938,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
     }
 
-    if (methodData->flags.isDeprecated && !args.suppressErrors) {
+    if (methodData->flags.isDeprecated && !args.suppressErrors && gs.enableDeprecated) {
         if (auto e = gs.beginError(args.errLoc(), core::errors::Infer::DeprecatedMethodUsage)) {
             e.setHeader("Method `{}` is deprecated", method.show(gs));
             e.addErrorLine(methodData->loc(), "Defined in `{}` here", methodData->owner.show(gs));

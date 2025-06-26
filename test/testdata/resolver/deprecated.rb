@@ -1,4 +1,5 @@
 # typed: true
+# enable-deprecated: true
 
 # Basic deprecated method
 class BasicDeprecated

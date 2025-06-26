@@ -15,3 +15,5 @@ class BasicDeprecated
   end
 end
 
+BasicDeprecated.new.old_method # error: Method `BasicDeprecated#old_method` is deprecated
+BasicDeprecated.new.new_method

@@ -472,6 +472,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Enable experimental support for RBS signatures and assertions as inline comments");
     options.add_options(section)("enable-experimental-requires-ancestor",
                                  "Enable experimental `requires_ancestor` annotation");
+    options.add_options(section)("enable-deprecated",
+                                 "Enable reporting of errors around deprecated features.");
     options.add_options(section)("uniquely-defined-behavior",
                                  "Ensure that every class and module only defines 'behavior' in one file. Ensures "
                                  "that every class or module can be autoloaded by loading exactly one file.",
@@ -987,6 +989,7 @@ void readOptions(Options &opts,
             }
         }
         opts.outOfOrderReferenceChecksEnabled = raw["check-out-of-order-constant-references"].as<bool>();
+        opts.enableDeprecated = raw["enable-deprecated"].as<bool>();
         if (raw.count("track-untyped") > 0) {
             opts.trackUntyped = text2TrackUntyped(raw["track-untyped"].as<string>(), *logger);
         }

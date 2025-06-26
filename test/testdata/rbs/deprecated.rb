@@ -1,5 +1,6 @@
 # typed: true
 # enable-experimental-rbs-comments: true
+# enable-deprecated: true
 
 # Basic deprecated method
 class BasicDeprecated
