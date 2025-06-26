@@ -50,6 +50,9 @@ public:
     static std::vector<std::shared_ptr<ErrorAssertion>>
     getErrorAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
 
+    static std::vector<std::shared_ptr<ErrorAssertion>>
+    allAsErrorAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
+
     static std::vector<std::shared_ptr<UntypedAssertion>>
     getUntypedAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
 

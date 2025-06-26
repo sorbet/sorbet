@@ -279,6 +279,7 @@ const UnorderedMap<
         {"uniquely-defined-behavior", BooleanPropertyAssertion::make},
         {"check-out-of-order-constant-references", BooleanPropertyAssertion::make},
         {"enable-packager", BooleanPropertyAssertion::make},
+        {"enable-deprecated", BooleanPropertyAssertion::make},
         {"enable-experimental-rbs-comments", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
         {"experimental-ruby3-keyword-args", BooleanPropertyAssertion::make},
@@ -607,6 +608,34 @@ RangeAssertion::getErrorAssertions(const vector<shared_ptr<RangeAssertion>> &ass
     return rv;
 }
 
+vector<shared_ptr<ErrorAssertion>>
+RangeAssertion::allAsErrorAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
+    vector<shared_ptr<ErrorAssertion>> rv;
+    for (auto assertion : assertions) {
+        if (auto errorAssertion = dynamic_pointer_cast<ErrorAssertion>(assertion)) {
+            rv.push_back(errorAssertion);
+            continue;
+        }
+        
+        string message;
+        bool matchesDuplicateErrors = false;
+        if (auto hintAssertion = dynamic_pointer_cast<HintAssertion>(assertion)) {
+            message = hintAssertion->message;
+            matchesDuplicateErrors = hintAssertion->matchesDuplicateErrors;
+        } else if (auto untypedAssertion = dynamic_pointer_cast<UntypedAssertion>(assertion)) {
+            message = untypedAssertion->message;
+            matchesDuplicateErrors = untypedAssertion->matchesDuplicateErrors;
+        } else {
+            continue;
+        }
+        
+        auto rangeCopy = assertion->range->copy();
+        rv.push_back(make_shared<ErrorAssertion>(assertion->filename, rangeCopy,
+                                                  assertion->assertionLine, message, matchesDuplicateErrors));
+    }
+    return rv;
+}
+
 vector<shared_ptr<UntypedAssertion>>
 RangeAssertion::getUntypedAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
     vector<shared_ptr<UntypedAssertion>> rv;
@@ -762,6 +791,8 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
 
     opts.outOfOrderReferenceChecksEnabled =
         BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false);
+
+    opts.enableDeprecated = BooleanPropertyAssertion::getValue("enable-deprecated", assertions).value_or(false);
 
     if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
         opts.suggestUnsafe = "T.unsafe";
