@@ -198,7 +198,9 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
 
             ast::MethodDef::Flags flags;
             flags.isAttrBestEffortUIOnly = true;
-            auto reader = ast::MK::SyntheticMethod0(loc, loc, name, ast::MK::Instance(argLoc, varName), flags);
+            // CR cwong: Investigate whether lying about this being synthesized causes other
+            // problems
+            auto reader = ast::MK::Method0(loc, loc, name, ast::MK::Instance(argLoc, varName), flags);
             stats.emplace_back(std::move(reader));
         }
     }
