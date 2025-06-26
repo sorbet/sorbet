@@ -29,8 +29,8 @@ core::LocOffsets Parser::translateLocation(pm_location_t location) {
     return core::LocOffsets{start, end};
 }
 
-string_view Parser::resolveConstant(pm_constant_id_t constant_id) {
-    pm_constant_t *constant = pm_constant_pool_id_to_constant(&storage->parser.constant_pool, constant_id);
+string_view Parser::resolveConstant(pm_constant_id_t constantId) {
+    pm_constant_t *constant = pm_constant_pool_id_to_constant(&storage->parser.constant_pool, constantId);
 
     return string_view(reinterpret_cast<const char *>(constant->start), constant->length);
 }
@@ -43,9 +43,9 @@ vector<ParseError> Parser::collectErrors() {
     vector<ParseError> parseErrors;
     parseErrors.reserve(storage->parser.error_list.size);
 
-    auto error_list = storage->parser.error_list;
+    auto errorList = storage->parser.error_list;
 
-    for (auto *node = error_list.head; node != nullptr; node = node->next) {
+    for (auto *node = errorList.head; node != nullptr; node = node->next) {
         auto *error = reinterpret_cast<pm_diagnostic_t *>(node);
         auto level = static_cast<pm_error_level_t>(error->level);
 

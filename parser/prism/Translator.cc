@@ -10,8 +10,8 @@ namespace sorbet::parser::Prism {
 // Indicates that a particular code path should never be reached, with an explanation of why.
 // Throws a `sorbet::SorbetException` when triggered to help with debugging.
 template <typename... TArgs>
-[[noreturn]] void unreachable(fmt::format_string<TArgs...> reason_format_str, TArgs &&...args) {
-    Exception::raise(reason_format_str, forward<TArgs>(args)...);
+[[noreturn]] void unreachable(fmt::format_string<TArgs...> reasonFormatStr, TArgs &&...args) {
+    Exception::raise(reasonFormatStr, forward<TArgs>(args)...);
 }
 
 template <typename PrismAssignmentNode, typename SorbetLHSNode>
@@ -1858,8 +1858,8 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
     return make_unique<SorbetLHSNode>(location, move(parent), gs.enterNameConstant(name));
 }
 
-core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
-    return gs.enterNameUTF8(parser.resolveConstant(constant_id));
+core::NameRef Translator::translateConstantName(pm_constant_id_t constantId) {
+    return gs.enterNameUTF8(parser.resolveConstant(constantId));
 }
 
 // Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`

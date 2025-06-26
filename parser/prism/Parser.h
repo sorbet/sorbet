@@ -34,10 +34,10 @@ struct ParserStorage {
     pm_parser_t parser;
     pm_options_t options;
 
-    ParserStorage(std::string_view source_code) : parser{}, options{} {
+    ParserStorage(std::string_view sourceCode) : parser{}, options{} {
         pm_options_version_set(&options, ParsedRubyVersion.data(), ParsedRubyVersion.size());
 
-        pm_parser_init(&parser, reinterpret_cast<const uint8_t *>(source_code.data()), source_code.size(), &options);
+        pm_parser_init(&parser, reinterpret_cast<const uint8_t *>(sourceCode.data()), sourceCode.size(), &options);
     }
 
     ~ParserStorage() {
@@ -58,7 +58,7 @@ class Parser final {
     std::shared_ptr<ParserStorage> storage;
 
 public:
-    Parser(std::string_view source_code) : storage(std::make_shared<ParserStorage>(source_code)) {}
+    Parser(std::string_view sourceCode) : storage(std::make_shared<ParserStorage>(sourceCode)) {}
 
     Parser(const Parser &) = default;
     Parser &operator=(const Parser &) = default;
@@ -67,7 +67,7 @@ public:
 
     ParseResult parse_root();
     core::LocOffsets translateLocation(pm_location_t location);
-    std::string_view resolveConstant(pm_constant_id_t constant_id);
+    std::string_view resolveConstant(pm_constant_id_t constantId);
     std::string_view extractString(pm_string_t *string);
 
 private:
