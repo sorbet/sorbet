@@ -1,4 +1,5 @@
 # typed: true
+# enable-deprecated: true
 
 class TestClass
   extend T::Sig
