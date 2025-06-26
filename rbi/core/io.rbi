@@ -3646,3 +3646,9 @@ end
 # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select).
 module IO::WaitWritable
 end
+
+# [`IO::TimeoutError`](https://docs.ruby-lang.org/en/3.2/IO/TimeoutError.html)
+# can be raised by [`IO`](https://docs.ruby-lang.org/en/3.2/IO.html) operations
+# when [`IO#timeout=`](https://docs.ruby-lang.org/en/3.2/IO.html#method-i-timeout-3D) is set.
+class IO::TimeoutError < IOError
+end
