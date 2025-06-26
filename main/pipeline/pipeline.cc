@@ -888,6 +888,7 @@ vector<CondensationLayerInfo> condensationLayers(const core::GlobalState &gs, ab
     } while (!packageSpan.empty());
 
     ENFORCE(sourceSpan.empty());
+    ENFORCE(!result.empty());
     ENFORCE(result.size() <= maxLayers);
 
     return result;
