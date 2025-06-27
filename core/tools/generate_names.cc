@@ -42,6 +42,7 @@ NameDef names[] = {
     {"intern"},
     {"call"},
     {"bang", "!"},
+    {"tilde", "~"},
     {"squareBrackets", "[]"},
     {"squareBracketsEq", "[]="},
     {"unaryPlus", "+@"},
