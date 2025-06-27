@@ -20,11 +20,12 @@ namespace sorbet::definition_validator {
 
 namespace {
 struct Signature {
+    absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> pos;
     struct {
         absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> required;
         absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> optional;
         std::optional<reference_wrapper<const core::ArgInfo>> rest;
-    } pos, kw;
+    } kw;
     bool syntheticBlk;
 } left, right;
 
@@ -36,13 +37,16 @@ Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method
             continue;
         }
 
-        auto &dst = arg.flags.isKeyword ? sig.kw : sig.pos;
-        if (arg.flags.isRepeated) {
-            dst.rest = optional<reference_wrapper<const core::ArgInfo>>{arg};
-        } else if (arg.flags.isDefault) {
-            dst.optional.push_back(arg);
+        if (arg.flags.isKeyword) {
+            if (arg.flags.isRepeated) {
+                sig.kw.rest = optional<reference_wrapper<const core::ArgInfo>>{arg};
+            } else if (arg.flags.isDefault) {
+                sig.kw.optional.push_back(arg);
+            } else {
+                sig.kw.required.push_back(arg);
+            }
         } else {
-            dst.required.push_back(arg);
+            sig.pos.push_back(arg);
         }
     }
     return sig;
@@ -154,6 +158,10 @@ pair<std::string, std::string> formatSplat(const core::ArgInfo &arg, SplatKind k
     return rendered == left ? pair("", rendered) : pair(left, rendered);
 }
 
+// XXX cwong: Many of the functions in this file take a _ton_ of arguments that are only really
+// there for error reporting. For code clarity sake, it may be useful to package them up into some
+// struct that is passed around instead.
+
 optional<core::AutocorrectSuggestion>
 constructAllowIncompatibleAutocorrect(const core::Context ctx, const ast::ExpressionPtr &tree,
                                       const ast::MethodDef &methodDef, const std::string_view what, bool &didReport) {
@@ -214,38 +222,97 @@ optional<core::AutocorrectSuggestion> constructAllowIncompatibleAutocorrect(cons
     return constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, what, _);
 }
 
-// This walks two positional argument lists to ensure that they're compatibly typed (i.e. that every argument in the
-// implementing method is either the same or a supertype of the abstract or overridable definition)
-void matchPositional(const core::Context ctx, core::TypeConstraint &constr, const ast::ExpressionPtr &tree,
-                     absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &superArgs,
-                     core::MethodRef superMethod,
-                     absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &methodArgs,
-                     const ast::MethodDef &methodDef, bool &reportedAutocorrect) {
+bool isOptional(const core::ArgInfo &arg) {
+    return arg.flags.isDefault || arg.flags.isRepeated;
+}
+
+void validateSubtype(const core::Context ctx, const ast::ExpressionPtr &tree, core::MethodRef superMethod,
+                     const ast::MethodDef &methodDef, core::MethodRef method, const core::ArgInfo &superArg,
+                     const core::ArgInfo &arg, core::TypeConstraint &constr, bool &reportedAutocorrect) {
+    core::ErrorSection::Collector errorDetailsCollector;
+    if (!checkSubtype(ctx, constr, arg.type, method, superArg.type, superMethod, core::Polarity::Negative,
+                      errorDetailsCollector)) {
+        if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Parameter `{}` of type `{}` not compatible with type of {} method `{}`", arg.show(ctx),
+                        arg.type.show(ctx), superMethodKind(ctx, superMethod), superMethod.show(ctx));
+            e.addErrorLine(superArg.loc, "The super method parameter `{}` was declared here with type `{}`",
+                           superArg.show(ctx), superArg.type.show(ctx));
+            e.addErrorNote("A parameter's type must be a supertype of the same parameter's type on the super method.");
+            e.addErrorSections(move(errorDetailsCollector));
+            e.maybeAddAutocorrect(
+                constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
+        }
+    }
+}
+
+// Positional argument checking is extremely messy, due to the possibility of having optional and
+// splat args in the middle.
+void validateOverridePositionalParams(const core::Context ctx, const ast::ExpressionPtr &tree,
+                                      core::MethodRef superMethod, const ast::MethodDef &methodDef,
+                                      const Signature superSig, const Signature sig, core::TypeConstraint &constr,
+                                      bool &reportedAutocorrect) {
+    auto &superArgs = superSig.pos;
+    auto &methodArgs = sig.pos;
     auto method = methodDef.symbol;
-    auto idx = 0;
-    auto maxLen = min(superArgs.size(), methodArgs.size());
 
-    while (idx < maxLen) {
-        auto &superArg = superArgs[idx].get();
-        auto &methodArg = methodArgs[idx].get();
+    // First, match required arguments from the left (the longest prefix of definitely-there args
+    // in both parent and child)
 
-        core::ErrorSection::Collector errorDetailsCollector;
-        if (!checkSubtype(ctx, constr, methodArg.type, method, superArg.type, superMethod, core::Polarity::Negative,
-                          errorDetailsCollector)) {
-            if (auto e = ctx.state.beginError(methodArg.loc, core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("Parameter `{}` of type `{}` not compatible with type of {} method `{}`",
-                            methodArgs[idx].get().show(ctx), methodArg.type.show(ctx),
-                            superMethodKind(ctx, superMethod), superMethod.show(ctx));
-                e.addErrorLine(superArg.loc, "The super method parameter `{}` was declared here with type `{}`",
-                               superArgs[idx].get().show(ctx), superArg.type.show(ctx));
-                e.addErrorNote(
-                    "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                e.addErrorSections(move(errorDetailsCollector));
+    size_t leftIdx;
+    for (leftIdx = 0; leftIdx < min(methodArgs.size(), superArgs.size()); leftIdx += 1) {
+        auto &superArg = superArgs[leftIdx].get();
+        auto &methodArg = methodArgs[leftIdx].get();
+
+        if (isOptional(methodArg) || isOptional(superArg)) {
+            break;
+        }
+
+        validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, methodArg, constr, reportedAutocorrect);
+    }
+
+    // Do the same from the right
+
+    size_t rightIdx, superRightIdx, count;
+    for (rightIdx = methodArgs.size() - 1, superRightIdx = superArgs.size() - 1, count = 0;
+         // We intentionally only ever check `superRightIdx` here - if `rightIdx` ever dips below
+         // `leftIdx`, we've run out of positional arguments in the child method.
+         superRightIdx >= leftIdx; rightIdx -= 1, superRightIdx -= 1, count += 1) {
+        if (rightIdx < leftIdx) {
+            if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("{} method `{}` does not accept enough arguments", implementationOf(ctx, superMethod),
+                            superMethod.show(ctx));
+                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+                e.addErrorNote("`{}` requires `{}` positional arguments, but `{}` accepts at most `{}`",
+                               superMethod.show(ctx), leftIdx + count, method.show(ctx), methodArgs.size());
                 e.maybeAddAutocorrect(
                     constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
+                return;
             }
         }
-        idx++;
+
+        auto &superArg = superArgs[superRightIdx].get();
+        auto &methodArg = methodArgs[rightIdx].get();
+
+        if (isOptional(methodArg) || isOptional(superArg)) {
+            break;
+        }
+
+        validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, methodArg, constr, reportedAutocorrect);
+    }
+
+    // The following logic is easier if the right bounds are always exclusive
+    rightIdx += 1;
+    superRightIdx += 1;
+
+    // Now, attempt to apply any remaining arguments from left-to-right.
+
+    // XXX cwong: The error messages should have more details about why a given child parameter is
+    // being checked against a given parent.
+
+    auto i = leftIdx;
+    auto superi = leftIdx;
+
+    while (true) {
     }
 }
 
@@ -329,20 +396,9 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
     auto superSig = decomposeSignature(ctx, superMethod);
     auto sig = decomposeSignature(ctx, method);
 
-    if (!sig.pos.rest) {
-        auto superSigPos = superSig.pos.required.size() + superSig.pos.optional.size();
-        auto sigPos = sig.pos.required.size() + sig.pos.optional.size();
-        if (superSigPos > sigPos) {
-            if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("{} method `{}` must accept at least `{}` positional arguments",
-                            implementationOf(ctx, superMethod), superMethod.show(ctx), superSigPos);
-                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
-                e.maybeAddAutocorrect(
-                    constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
-            }
-        }
-    }
+    validateOverridePositionalParams(ctx, tree, superMethod, methodDef, superSig, sig, *constr, reportedAutocorrect);
 
+    /*
     if (auto superSigRest = superSig.pos.rest) {
         if (!sig.pos.rest) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
@@ -356,23 +412,7 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
             }
         }
     }
-
-    if (sig.pos.required.size() > superSig.pos.required.size()) {
-        if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("{} method `{}` must accept no more than `{}` required argument(s)",
-                        implementationOf(ctx, superMethod), superMethod.show(ctx), superSig.pos.required.size());
-            e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
-            e.maybeAddAutocorrect(
-                constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
-        }
-    }
-
-    // match types of required positional arguments
-    matchPositional(ctx, *constr, tree, superSig.pos.required, superMethod, sig.pos.required, methodDef,
-                    reportedAutocorrect);
-    // match types of optional positional arguments
-    matchPositional(ctx, *constr, tree, superSig.pos.optional, superMethod, sig.pos.optional, methodDef,
-                    reportedAutocorrect);
+                    */
 
     if (!sig.kw.rest) {
         for (auto req : superSig.kw.required) {
@@ -400,8 +440,8 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
                         e.addErrorLine(req.get().loc,
                                        "The corresponding parameter `{}` was declared here with type `{}`",
                                        req.get().show(ctx), req.get().type.show(ctx));
-                        e.addErrorNote(
-                            "A parameter's type must be a supertype of the same parameter's type on the super method.");
+                        e.addErrorNote("A parameter's type must be a supertype of the same parameter's type on the "
+                                       "super method.");
 
                         e.maybeAddAutocorrect(
                             constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
@@ -437,8 +477,8 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
                         e.addErrorLine(opt.get().loc,
                                        "The super method parameter `{}` was declared here with type `{}`",
                                        opt.get().show(ctx), opt.get().type.show(ctx));
-                        e.addErrorNote(
-                            "A parameter's type must be a supertype of the same parameter's type on the super method.");
+                        e.addErrorNote("A parameter's type must be a supertype of the same parameter's type on the "
+                                       "super method.");
                         e.maybeAddAutocorrect(
                             constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
                         e.addErrorSections(move(errorDetailsCollector));
