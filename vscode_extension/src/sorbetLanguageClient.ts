@@ -263,6 +263,7 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
     }
     return {
       action: ErrorAction.Shutdown,
+      handled: true,
     };
   }
 
@@ -300,6 +301,7 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
 
     return {
       action: CloseAction.DoNotRestart,
+      handled: true,
     };
   }
 }
