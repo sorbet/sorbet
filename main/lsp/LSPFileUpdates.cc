@@ -206,7 +206,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             continue;
         }
 
-        result.extraFiles.emplace_back(ref.data(gs).path());
+        result.extraFiles.emplace_back(oldFile->path());
         result.totalChanged += 1;
 
         if (result.totalChanged > (2 * config.opts.lspMaxFilesOnFastPath)) {
