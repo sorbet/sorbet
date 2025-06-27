@@ -210,4 +210,32 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of method3>
   end
+
+  module <emptyTree>::<C TypeAliasWithNamespace><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:x, <emptyTree>::<C Foo>::<C type a>).void()
+    end
+
+    def bar<<todo method>>(x, &<blk>)
+      <emptyTree>::<C T>.reveal_type(x)
+    end
+
+    module <emptyTree>::<C Foo><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params(:x, <emptyTree>::<C type a>).void()
+      end
+
+      def foo<<todo method>>(x, &<blk>)
+        <emptyTree>::<C T>.reveal_type(x)
+      end
+
+      <emptyTree>::<C type a> = ::<root>::<C T>.type_alias() do ||
+        ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)
+      end
+
+      <runtime method definition of foo>
+    end
+
+    <runtime method definition of bar>
+  end
 end

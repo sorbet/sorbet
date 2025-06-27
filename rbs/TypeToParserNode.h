@@ -26,6 +26,8 @@ public:
     std::unique_ptr<parser::Node> toParserNode(const rbs_node_t *node, const RBSDeclaration &declaration);
 
 private:
+    std::unique_ptr<parser::Node> namespaceConst(const rbs_namespace_t *rbsNamespace,
+                                                 const RBSDeclaration &declaration);
     std::unique_ptr<parser::Node> typeNameType(const rbs_type_name_t *typeName, bool isGeneric,
                                                const RBSDeclaration &declaration);
     std::unique_ptr<parser::Node> aliasType(const rbs_types_alias_t *node, core::LocOffsets loc,
