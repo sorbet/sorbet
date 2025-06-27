@@ -109,6 +109,10 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
     for (auto &file : typechecker.state().getFiles().subspan(1)) {
         i++;
 
+        if (file->sourceType != core::File::Type::Normal) {
+            continue;
+        }
+
         auto ref = core::FileRef(i);
         if (pkgName.exists() && gs.packageDB().getPackageNameForFile(ref) != pkgName) {
             continue;
@@ -118,8 +122,7 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
         const auto &hash = *file->getFileHash();
         const auto &usedSymbolNameHashes = hash.usages.nameHashes;
 
-        const bool fileIsValid = ref.exists() && ref.data(gs).sourceType == core::File::Type::Normal;
-        if (fileIsValid && absl::c_contains(usedSymbolNameHashes, symShortNameHash)) {
+        if (absl::c_contains(usedSymbolNameHashes, symShortNameHash)) {
             frefs.emplace_back(ref);
         }
     }
