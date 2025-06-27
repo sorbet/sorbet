@@ -22,6 +22,18 @@
                     "ignoreFailures": false
                 }
             ]
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Sorbet with test.rb (RBS enabled)",
+            "program": "${workspaceFolder}/bazel-bin/main/sorbet",
+            "args": ["--enable-experimental-rbs-comments", "test.rb"],
+            "preLaunchTask": "Build",
+            "stopOnEntry": false,
+            "sourceMap": {
+                "": "${workspaceFolder}",
+            },
         }
     ]
 }
