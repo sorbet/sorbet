@@ -48,7 +48,6 @@ docs about Stripe-specific development workflows and historical Stripe context.
 - [Writing docs](#writing-docs)
 - [Editor and environment](#editor-and-environment)
   - [Bazel](#bazel)
-  - [Multiple git worktrees](#multiple-git-worktrees)
   - [Shell](#shell)
   - [Formatting files](#formatting-files)
   - [Editor setup for C++](#editor-setup-for-c)
@@ -944,18 +943,6 @@ script to create a `./.bazelrc.local` and cache folder:
 ```shell
 tools/create_local_bazelrc.sh
 ```
-
-### Multiple git worktrees
-
-Sometimes it can be nice to have [multiple working trees] in Git. This allows
-you to have multiple active checkouts Sorbet, sharing the same `.git/` folder.
-To set up a new worktree with Sorbet:
-
-```shell
-tools/scripts/make_worktree.sh <worktree_name>
-```
-
-[multiple working trees]: https://git-scm.com/docs/git-worktree
 
 ### Shell
 
