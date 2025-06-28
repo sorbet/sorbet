@@ -385,6 +385,7 @@ module T::Private::Methods
         mode: current_declaration.mode,
         check_level: current_declaration.checked,
         on_failure: current_declaration.on_failure,
+        is_explicit_override: current_declaration.is_explicit_override,
         override_allow_incompatible: current_declaration.override_allow_incompatible,
         defined_raw: current_declaration.raw,
       )
@@ -587,6 +588,19 @@ module T::Private::Methods
       mod.extend(MethodHooks)
     end
     mod.extend(SingletonMethodHooks)
+  end
+
+  # `name` must be an instance method (for class methods, pass in mod.singleton_class)
+  def self.visibility_method_name(mod, name)
+    if mod.public_method_defined?(name)
+      :public
+    elsif mod.protected_method_defined?(name)
+      :protected
+    elsif mod.private_method_defined?(name)
+      :private
+    else
+      mod.method(name) # Raises
+    end
   end
 
   # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.
