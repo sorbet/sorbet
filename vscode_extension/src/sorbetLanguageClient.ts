@@ -15,6 +15,8 @@ import { createClient } from "./languageClient";
 import { instrumentLanguageClient } from "./languageClient.metrics";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { ServerStatus, RestartReason } from "./types";
+import { join } from "path";
+import { existsSync } from "fs";
 
 const VALID_STATE_TRANSITIONS: ReadonlyMap<
   ServerStatus,
@@ -220,9 +222,62 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
       return Promise.reject(new Error(msg));
     }
 
-    this.context.log.debug(">", command, ...args);
+    const configuredGemfileDir = this.context.configuration.gemfileDirectory;
+    // Ensure workspace.rootPath is valid and workspace.workspaceFolders exists for multi-root safety
+    // VSCode typically provides workspace.workspaceFolders[0].uri.fsPath as a more robust root path
+    let workspaceRoot = "";
+    if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
+      workspaceRoot = workspace.workspaceFolders[0].uri.fsPath;
+    } else if (workspace.rootPath) { // Fallback for single-root or older VSCode versions
+      workspaceRoot = workspace.rootPath;
+    }
+
+    let effectiveCwd = workspaceRoot; // Default to workspace root
+
+    if (workspaceRoot) {
+      if (configuredGemfileDir) {
+        const potentialCwd = join(workspaceRoot, configuredGemfileDir);
+        // Check if the configured directory and Gemfile exist
+        if (existsSync(potentialCwd) && existsSync(join(potentialCwd, "Gemfile"))) {
+          effectiveCwd = potentialCwd;
+          this.context.log.info(`Using configured Gemfile directory for CWD: ${effectiveCwd}`);
+        } else {
+          this.context.log.warn(`Configured gemfileDirectory '${configuredGemfileDir}' (resolved to '${potentialCwd}') or its Gemfile does not exist. Falling back to workspace root or auto-detection.`);
+          // Fall through to auto-detection or use workspaceRoot if auto-detection also fails
+        }
+      }
+
+      // If not configured, or configured path was invalid, try auto-detection
+      // This check ensures we only auto-detect if not already set by a valid configuration
+      if (effectiveCwd === workspaceRoot || (configuredGemfileDir && effectiveCwd !== join(workspaceRoot, configuredGemfileDir))) {
+        const commonDirs = ["", "backend", "app", "service", "api"];
+        let foundGemfile = false;
+        for (const dir of commonDirs) {
+          const searchPath = dir === "" ? workspaceRoot : join(workspaceRoot, dir);
+          const gemfilePath = join(searchPath, "Gemfile");
+          if (existsSync(gemfilePath)) {
+            // Ensure the directory itself also exists, though path.join/existsSync(gemfilePath) implies it
+            if (existsSync(searchPath)) {
+              effectiveCwd = searchPath;
+              this.context.log.info(`Auto-detected Gemfile, using CWD: ${effectiveCwd}`);
+              foundGemfile = true;
+              break;
+            }
+          }
+        }
+        if (!foundGemfile && !configuredGemfileDir) { // Only warn if not configured and not found
+          this.context.log.warn(`Could not auto-detect Gemfile in common locations. Using workspace root as CWD: ${workspaceRoot}. Consider setting 'sorbet.gemfileDirectory'.`);
+        }
+      }
+    } else {
+      this.context.log.error("No workspace root path available. Cannot determine CWD for Sorbet. Sorbet may not start correctly.");
+      // effectiveCwd remains empty or undefined, spawn might fail, which is intended here.
+    }
+
+    this.context.log.debug("Effective CWD for Sorbet LSP:", effectiveCwd ? effectiveCwd : "[undefined/unknown]");
+    this.context.log.debug("Executing Sorbet with command:", command, ...args);
     this.sorbetProcess = spawn(command, args, {
-      cwd: workspace.rootPath,
+      cwd: effectiveCwd || undefined,
       env: { ...process.env, ...activeConfig?.env },
     });
     // N.B.: 'exit' is sometimes not invoked if the process exits with an error/fails to start, as per the Node.js docs.
@@ -243,9 +298,8 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
         // We failed to start the process. The path to Sorbet is likely incorrect.
         this.wrappedLastError = `Could not start Sorbet with command: '${command} ${args.join(
           " ",
-        )}'. Encountered error '${
-          err.message
-        }'. Is the path to Sorbet correct?`;
+        )}'. Encountered error '${err.message
+          }'. Is the path to Sorbet correct?`;
         this.status = ServerStatus.ERROR;
       }
       this.sorbetProcess = undefined;
