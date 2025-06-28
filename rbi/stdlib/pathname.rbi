@@ -1060,11 +1060,17 @@ class Pathname < Object
     params(
         length: Integer,
         offset: Integer,
-        open_args: Integer,
+        external_encoding: T.any(String, Encoding),
+        internal_encoding: T.any(String, Encoding),
+        encoding: T.any(String, Encoding),
+        textmode: BasicObject,
+        binmode: BasicObject,
+        autoclose: BasicObject,
+        mode: String,
     )
     .returns(String)
   end
-  def read(length=T.unsafe(nil), offset=T.unsafe(nil), open_args=T.unsafe(nil)); end
+  def read(length=T.unsafe(nil), offset=T.unsafe(nil), external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil), textmode: T.unsafe(nil), binmode: T.unsafe(nil), autoclose: T.unsafe(nil), mode: T.unsafe(nil)); end
 
   # See
   # [`FileTest.readable?`](https://docs.ruby-lang.org/en/2.7.0/FileTest.html#method-i-readable-3F).
