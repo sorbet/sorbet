@@ -2743,6 +2743,40 @@ This error is functionally equivalent to error [7032](#7032). It is reported dur
 
 For detailed information and examples, please refer to the documentation for error [7032](#7032).
 
+## 5080
+
+When overriding a deprecated method, the override must also be marked as deprecated to maintain consistency in the deprecation contract.
+
+```ruby
+# -- bad example --
+class Parent
+  sig { overridable.deprecated.returns(String) }
+  def old_method
+    "parent implementation"
+  end
+end
+
+class Child < Parent
+  sig { override.returns(String) }  # error!
+  def old_method
+    "child implementation"
+  end
+end
+```
+
+To fix this error, mark the override as deprecated:
+
+```ruby
+class Child < Parent
+  extend T::Sig
+  
+  sig { override.deprecated.returns(String) }
+  def old_method
+    "child implementation"
+  end
+end
+```
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside a Ruby block.
