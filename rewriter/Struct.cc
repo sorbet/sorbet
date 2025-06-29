@@ -27,7 +27,8 @@ ast::ExpressionPtr elemFixedUntyped(core::LocOffsets loc) {
     auto typeMember = ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::typeMember(), loc.copyWithZeroLength());
     ast::cast_tree_nonnull<ast::Send>(typeMember)
         .setBlock(ast::MK::Block0(
-            loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc))));
+                      loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc))),
+                  ast::Send::BlockType::Present);
     return ast::MK::Assign(loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),
                            std::move(typeMember));
 }
