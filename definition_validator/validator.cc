@@ -255,15 +255,19 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
     auto &methodArgs = sig.pos;
     auto method = methodDef.symbol;
 
-    // First, match required arguments from the left (the longest prefix of definitely-there args
-    // in both parent and child)
+    // First, match required arguments in the parent from the left.
+
+    // These are only kept around for error reporting purposes; we might be able to derive these from
+    // e.g. `leftIdx` and `rightIdx`, but it's clearer to track them explicitly.
+    size_t requiredParentArgs = 0;
+    size_t requiredChildArgs = 0;
 
     size_t leftIdx;
     for (leftIdx = 0; leftIdx < min(methodArgs.size(), superArgs.size()); leftIdx += 1) {
         auto &superArg = superArgs[leftIdx].get();
         auto &methodArg = methodArgs[leftIdx].get();
 
-        if (isOptional(methodArg) || isOptional(superArg)) {
+        if (isOptional(superArg) || methodArg.flags.isRepeated) {
             break;
         }
 
@@ -272,18 +276,18 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
 
     // Do the same from the right
 
-    size_t rightIdx, superRightIdx, count;
-    for (rightIdx = methodArgs.size() - 1, superRightIdx = superArgs.size() - 1, count = 0;
+    size_t rightIdx, superRightIdx;
+    for (rightIdx = methodArgs.size() - 1, superRightIdx = superArgs.size() - 1;
          // We intentionally only ever check `superRightIdx` here - if `rightIdx` ever dips below
          // `leftIdx`, we've run out of positional arguments in the child method.
-         superRightIdx >= leftIdx; rightIdx -= 1, superRightIdx -= 1, count += 1) {
+         superRightIdx >= leftIdx; rightIdx -= 1, superRightIdx -= 1) {
         if (rightIdx < leftIdx) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("{} method `{}` does not accept enough arguments", implementationOf(ctx, superMethod),
                             superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
                 e.addErrorNote("`{}` requires `{}` positional arguments, but `{}` accepts at most `{}`",
-                               superMethod.show(ctx), leftIdx + count, method.show(ctx), methodArgs.size());
+                               superMethod.show(ctx), , method.show(ctx), methodArgs.size());
                 e.maybeAddAutocorrect(
                     constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
                 return;
@@ -292,6 +296,22 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
 
         auto &superArg = superArgs[superRightIdx].get();
         auto &methodArg = methodArgs[rightIdx].get();
+
+        if (isOptional(superArg)) {
+            // If we run out of mandatory args in the parent before the child, the child takes too
+            // many mandatory arguments
+            if (!isOptional(methodArg)) {
+                if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
+                    e.setHeader("{} method `{}` requires too many arguments", implementationOf(ctx, superMethod),
+                                superMethod.show(ctx));
+                    e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+                    e.addErrorNote("`{}` requires `{}` positional arguments, but `{}` only requires `{}`",
+                                   method.show(ctx), , superMethod.show(ctx));
+                    return;
+                }
+            }
+        } else {
+        }
 
         if (isOptional(methodArg) || isOptional(superArg)) {
             break;
@@ -304,15 +324,16 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
     rightIdx += 1;
     superRightIdx += 1;
 
-    // Now, attempt to apply any remaining arguments from left-to-right.
+    // Now, attempt to apply any remaining arguments.
 
     // XXX cwong: The error messages should have more details about why a given child parameter is
     // being checked against a given parent.
 
-    auto i = leftIdx;
+    auto methodi = leftIdx;
     auto superi = leftIdx;
 
-    while (true) {
+    while (superi < superRightIdx) {
+        auto &superArg = superArgs[superi].get();
     }
 }
 
