@@ -1,10 +1,13 @@
-consumer_auth/data/identifier_struct.rb:6: `Project::ConsumerAuth::IdentifierType` resolves but is not exported from `Project::ConsumerAuth` https://srb.help/3717
+consumer_auth/data/identifier_struct.rb:6: `Project::ConsumerAuth::IdentifierType` resolves but is not exported from `Project::ConsumerAuth` and `Project::ConsumerAuth` is not imported https://srb.help/3718
      6 |    puts(Project::ConsumerAuth::IdentifierType)
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     consumer_auth/identity_type.rb:5: Defined here
      5 |  class IdentifierType
           ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
+    consumer_auth/data/__package.rb:4: Insert `import Project::ConsumerAuth`
+     4 |class Project::ConsumerAuth::Data < PackageSpec
+                                                       ^
     consumer_auth/__package.rb:6: Insert `export Project::ConsumerAuth::IdentifierType`
      6 |  import Project::ConsumerAuth::Data
                                             ^

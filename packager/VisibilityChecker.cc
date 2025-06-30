@@ -373,6 +373,37 @@ const FileType fileTypeFromCtx(const core::Context ctx) {
 }
 
 class VisibilityCheckerPass final {
+    void addPackagedFalseNote(core::Context ctx, core::ErrorBuilder &e) {
+        if (!ctx.file.data(ctx).isPackaged()) {
+            e.addErrorNote("A `{}` file is allowed to define constants outside of the package's "
+                           "namespace,\n    "
+                           "but must still respect its enclosing package's imports.",
+                           "# packaged: false");
+        }
+    }
+
+    void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol) {
+        auto definedHereLoc = litSymbol.loc(ctx);
+        if (definedHereLoc.file().data(ctx).isRBI()) {
+            e.addErrorSection(
+                core::ErrorSection(core::ErrorColors::format("Consider marking this RBI file `{}` if it is meant to "
+                                                             "declare unpackaged constants",
+                                                             "# packaged: false"),
+                                   {core::ErrorLine(definedHereLoc, "")}));
+        } else {
+            e.addErrorLine(definedHereLoc, "Defined here");
+        }
+    }
+
+    core::AutocorrectSuggestion combineImportExportAutocorrect(core::AutocorrectSuggestion &importAutocorrect,
+                                                               core::AutocorrectSuggestion &exportAutocorrect) {
+        auto combinedTitle = fmt::format("{} and {}", importAutocorrect.title, exportAutocorrect.title);
+        importAutocorrect.edits.insert(importAutocorrect.edits.end(), exportAutocorrect.edits.begin(),
+                                       exportAutocorrect.edits.end());
+        core::AutocorrectSuggestion combinedAutocorrect(combinedTitle, importAutocorrect.edits);
+        return importAutocorrect;
+    }
+
 public:
     const core::packages::PackageInfo &package;
     const FileType fileType;
@@ -466,58 +497,107 @@ public:
                               path.has_value();
             }
             if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
+                std::optional<core::AutocorrectSuggestion> importAutocorrect;
+                if (!wasImported || testImportInProd || testUnitImportInHelper) {
+                    if (auto exp = this->package.addImport(ctx, pkg, autocorrectedImportType)) {
+                        importAutocorrect.emplace(exp.value());
+                    }
+                }
+                std::optional<core::AutocorrectSuggestion> exportAutocorrect;
                 if (!isExported) {
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
-                        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                        e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
-                        auto definedHereLoc = litSymbol.loc(ctx);
-                        if (definedHereLoc.file().data(ctx).isRBI()) {
-                            e.addErrorSection(core::ErrorSection(
-                                core::ErrorColors::format("Consider marking this RBI file `{}` if it is meant to "
-                                                          "declare unpackaged constants",
-                                                          "# packaged: false"),
-                                {core::ErrorLine(definedHereLoc, "")}));
-                        } else {
-                            e.addErrorLine(definedHereLoc, "Defined here");
-                        }
+                    auto symToExport = litSymbol;
+                    auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
+                    if (enumClass.exists()) {
+                        symToExport = enumClass;
+                    }
+                    if (auto exp = pkg.addExport(ctx, symToExport)) {
+                        exportAutocorrect.emplace(exp.value());
+                    }
+                }
 
-                        auto symToExport = litSymbol;
-                        auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
-                        if (enumClass.exists()) {
-                            symToExport = enumClass;
+                if (!isExported && !wasImported) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
+                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is not imported",
+                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx));
+                        addExportInfo(ctx, e, litSymbol);
+                        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
+                            core::AutocorrectSuggestion combinedAutocorrect =
+                                combineImportExportAutocorrect(importAutocorrect.value(), exportAutocorrect.value());
+                            e.addAutocorrect(std::move(combinedAutocorrect));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        } else {
+                            ENFORCE(false);
                         }
-                        if (auto exp = pkg.addExport(ctx, symToExport)) {
-                            e.addAutocorrect(std::move(exp.value()));
+                        addPackagedFalseNote(ctx, e);
+                    }
+                } else if (!isExported && testImportInProd) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed",
+                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import");
+                        addExportInfo(ctx, e, litSymbol);
+                        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
+                            core::AutocorrectSuggestion combinedAutocorrect =
+                                combineImportExportAutocorrect(importAutocorrect.value(), exportAutocorrect.value());
+                            e.addAutocorrect(std::move(combinedAutocorrect));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        } else {
+                            ENFORCE(false);
                         }
-                        if (!db.errorHint().empty()) {
-                            e.addErrorNote("{}", db.errorHint());
+                    }
+                } else if (!isExported && testUnitImportInHelper) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed for only {} files",
+                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import", ".test.rb");
+                        e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
+                                       "only be used in `{}` files.",
+                                       "test_import", "only: 'test_rb'", ".test.rb");
+                        addExportInfo(ctx, e, litSymbol);
+                        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
+                            core::AutocorrectSuggestion combinedAutocorrect =
+                                combineImportExportAutocorrect(importAutocorrect.value(), exportAutocorrect.value());
+                            e.addAutocorrect(std::move(combinedAutocorrect));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        } else {
+                            ENFORCE(false);
+                        }
+                    }
+                } else if (!isExported) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
+                        e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
+                        addExportInfo(ctx, e, litSymbol);
+
+                        if (exportAutocorrect.has_value()) {
+                            e.addAutocorrect(std::move(exportAutocorrect.value()));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
                         }
                     }
                 } else if (!wasImported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                         e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                        if (auto exp = this->package.addImport(ctx, pkg, autocorrectedImportType)) {
-                            e.addAutocorrect(std::move(exp.value()));
+                        if (importAutocorrect.has_value()) {
+                            e.addAutocorrect(std::move(importAutocorrect.value()));
                             if (!db.errorHint().empty()) {
                                 e.addErrorNote("{}", db.errorHint());
                             }
                         }
-                        if (!ctx.file.data(ctx).isPackaged()) {
-                            e.addErrorNote("A `{}` file is allowed to define constants outside of the package's "
-                                           "namespace,\n    "
-                                           "but must still respect its enclosing package's imports.",
-                                           "# packaged: false");
-                        }
+                        addPackagedFalseNote(ctx, e);
                     }
                 } else if (testImportInProd) {
                     ENFORCE(!isTestImport);
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                         e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Defined here");
-                        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                        if (auto exp = this->package.addImport(ctx, pkg, core::packages::ImportType::Normal)) {
-                            e.addAutocorrect(std::move(exp.value()));
+                        if (importAutocorrect.has_value()) {
+                            e.addAutocorrect(std::move(importAutocorrect.value()));
                             if (!db.errorHint().empty()) {
                                 e.addErrorNote("{}", db.errorHint());
                             }
@@ -531,9 +611,8 @@ public:
                         e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
                                        "only be used in `{}` files.",
                                        "test_import", "only: 'test_rb'", ".test.rb");
-                        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                        if (auto exp = this->package.addImport(ctx, pkg, core::packages::ImportType::TestHelper)) {
-                            e.addAutocorrect(std::move(exp.value()));
+                        if (importAutocorrect.has_value()) {
+                            e.addAutocorrect(std::move(importAutocorrect.value()));
                             if (!db.errorHint().empty()) {
                                 e.addErrorNote("{}", db.errorHint());
                             }
