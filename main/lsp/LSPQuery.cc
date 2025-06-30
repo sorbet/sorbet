@@ -117,7 +117,8 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
     } else {
         auto homePackage = gs.packageDB().getPackageNameForFile(symbol.loc(gs).file());
         if (homePackage.exists()) {
-            packageFilter.emplace(gs.packageDB().allPackagesImporting(homePackage));
+            auto f = packageFilter.emplace(gs.packageDB().allPackagesImporting(homePackage));
+            f.insert(homePackage);
         }
     }
 
