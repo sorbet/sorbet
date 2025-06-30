@@ -1,3 +1,3 @@
 # typed: true
 
-{ foo?: } # error: identifier foo? is not valid to get
+{ foo?: } # parser-error: identifier foo? is not valid to get
