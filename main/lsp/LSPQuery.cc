@@ -112,12 +112,12 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
     // is only `import`'d, test files if the home package is `test_import`'d, etc.
     optional<UnorderedSet<const core::packages::MangledName>> packageFilter;
     if (pkgName.exists()) {
-        auto f = packageFilter.emplace();
+        auto &f = packageFilter.emplace();
         f.insert(pkgName);
     } else {
         auto homePackage = gs.packageDB().getPackageNameForFile(symbol.loc(gs).file());
         if (homePackage.exists()) {
-            auto f = packageFilter.emplace(gs.packageDB().allPackagesImporting(homePackage));
+            auto &f = packageFilter.emplace(gs.packageDB().allPackagesImporting(homePackage));
             f.insert(homePackage);
         }
     }
