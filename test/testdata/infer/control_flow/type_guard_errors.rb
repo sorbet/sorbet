@@ -20,6 +20,6 @@ end
 class Document
   extend T::Sig
 
-  sig { returns(T::Boolean).narrows_to(String) } # This might be questionable but not necessarily an error
+  sig { returns(T::Boolean).narrows_to(String) } # error: Malformed `sig`: `narrows_to(String)` must be a type that is related to the receiver type `Document`
   def string_like?; false; end
 end

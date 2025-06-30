@@ -3358,10 +3358,45 @@ private:
         methodInfo->resultType = sig.returns;
         methodInfo->narrowsTo = sig.narrowsTo;
         
-        if (sig.narrowsTo != nullptr && core::Types::equiv(ctx, sig.returns, core::Types::falseClass())) {
-            if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
-                e.setHeader("Malformed `{}`: `narrows_to({})` cannot be used with `returns(FalseClass)` as type narrowing only occurs when the method returns a truthy value", "sig", sig.narrowsTo.show(ctx));
-                e.addErrorNote("Consider using `returns(T::Boolean)` or `returns(TrueClass)` instead, or remove the `narrows_to` clause");
+        if (sig.narrowsTo != nullptr) {
+            // Check if narrows_to is used with FalseClass
+            if (core::Types::equiv(ctx, sig.returns, core::Types::falseClass())) {
+                if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
+                    e.setHeader("Malformed `{}`: `narrows_to({})` cannot be used with `returns(FalseClass)` as type narrowing only occurs when the method returns a truthy value", "sig", sig.narrowsTo.show(ctx));
+                    e.addErrorNote("Consider using `returns(T::Boolean)` or `returns(TrueClass)` instead, or remove the `narrows_to` clause");
+                }
+            }
+            
+            // Validate that narrows_to type is related to the method owner type
+            // Get the method owner (the class/module where this method is defined)
+            auto methodOwner = method.data(ctx)->owner;
+            if (methodOwner.exists()) {
+                // Build the type of 'self' for this method
+                core::TypePtr selfType;
+                if (methodOwner.data(ctx)->isClass()) {
+                    if (methodOwner.data(ctx)->isSingletonClass(ctx)) {
+                        // For singleton methods, self is the singleton class
+                        selfType = methodOwner.data(ctx)->externalType();
+                    } else {
+                        // For instance methods, self is an instance of the class
+                        selfType = methodOwner.data(ctx)->externalType();
+                    }
+                } else {
+                    // For modules, self is the module itself
+                    selfType = methodOwner.data(ctx)->externalType();
+                }
+                
+                // Check if narrowsTo type is a subtype of self type
+                if (selfType != nullptr && !core::Types::isSubType(ctx, sig.narrowsTo, selfType)) {
+                    // Also check if self type is a subtype of narrowsTo (for cases where narrowsTo is a parent type)
+                    if (!core::Types::isSubType(ctx, selfType, sig.narrowsTo)) {
+                        if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Malformed `{}`: `narrows_to({})` must be a type that is related to the receiver type `{}`", 
+                                       "sig", sig.narrowsTo.show(ctx), selfType.show(ctx));
+                            e.addErrorNote("The type specified in `narrows_to` must be either a subtype or supertype of the receiver's type");
+                        }
+                    }
+                }
             }
         }
         int i = -1;
