@@ -75,3 +75,11 @@ class ConcreteCommand < Opus::Command
   sig { override.params(z: Integer).returns(Integer) }
   def foo(z); z; end # error: Method `foo` is private in `ConcreteCommand` but not in `AbstractMixin`
 end
+
+# This isn't a command and should still work
+class NotACommand
+  include AbstractMixin
+
+  sig { override.params(z: Integer).returns(Integer) }
+  def foo(z); 0; end
+end
