@@ -35,6 +35,7 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
     int i = 0;
     ast::MethodDef *call = nullptr;
     ast::ExpressionPtr *callptr = nullptr;
+    auto instanceMethods = InlinedVector<pair<core::NameRef, core::LocOffsets>, 4>();
 
     for (auto &stat : klass->rhs) {
         auto mdef = ast::cast_tree<ast::MethodDef>(stat);
@@ -42,6 +43,9 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
             continue;
         }
         if (mdef->name != core::Names::call()) {
+            if (!mdef->flags.isSelfMethod) {
+                instanceMethods.push_back(pair(mdef->name, mdef->loc.copyWithZeroLength()));
+            }
             continue;
         }
 
@@ -96,6 +100,19 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
 
     klass->rhs.insert(klass->rhs.begin() + i + 1, sig->deepCopy());
     klass->rhs.insert(klass->rhs.begin() + i + 2, std::move(selfCall));
+
+    if (!instanceMethods.empty()) {
+        ast::Send::ARGS_store args = InlinedVector<ast::ExpressionPtr, ast::Send::EXPECTED_ARGS_COUNT>();
+        for (auto [name, loc] : instanceMethods) {
+            args.push_back(ast::MK::Symbol(loc, name));
+        }
+
+        auto hiddenPrivate =
+            ast::MK::Send(klass->loc.copyWithZeroLength(), ast::MK::Self(klass->loc), core::Names::private_(),
+                          klass->loc.copyWithZeroLength(), 0, std::move(args));
+
+        klass->rhs.insert(klass->rhs.begin() + i + 3, std::move(hiddenPrivate));
+    }
 }
 
 }; // namespace sorbet::rewriter
