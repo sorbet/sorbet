@@ -57,6 +57,19 @@ module SorbetBenchmarks
         false.is_a?(Integer)
       end
 
+      time_block("Example.new", iterations_in_block: 10) do
+        Example.new
+        Example.new
+        Example.new
+        Example.new
+        Example.new
+        Example.new
+        Example.new
+        Example.new
+        Example.new
+        Example.new
+      end
+
       time_block("T.unsafe", iterations_in_block: 10) do
         T.unsafe(0)
         T.unsafe(1)
@@ -69,6 +82,172 @@ module SorbetBenchmarks
         T.unsafe(3)
         T.unsafe(nil)
       end
+
+      time_block("{}", iterations_in_block: 10) do
+        {}
+        {}
+        {}
+        {}
+        {}
+        {}
+        {}
+        {}
+        {}
+        {}
+      end
+
+      time_block("{x: 1}", iterations_in_block: 10) do
+        {x: 1}
+        {x: 1}
+        {x: 1}
+        {x: 1}
+        {x: 1}
+        {x: 1}
+        {x: 1}
+        {x: 1}
+        {x: 1}
+        {x: 1}
+      end
+
+      x = 1
+      time_block("{x: x}", iterations_in_block: 10) do
+        {x: x}
+        {x: x}
+        {x: x}
+        {x: x}
+        {x: x}
+        {x: x}
+        {x: x}
+        {x: x}
+        {x: x}
+        {x: x}
+      end
+
+      time_block("{}.to_h", iterations_in_block: 10) do
+        {}.to_h
+        {}.to_h
+        {}.to_h
+        {}.to_h
+        {}.to_h
+        {}.to_h
+        {}.to_h
+        {}.to_h
+        {}.to_h
+        {}.to_h
+      end
+
+      time_block("{x: 1}.to_h", iterations_in_block: 10) do
+        {x: 1}.to_h
+        {x: 1}.to_h
+        {x: 1}.to_h
+        {x: 1}.to_h
+        {x: 1}.to_h
+        {x: 1}.to_h
+        {x: 1}.to_h
+        {x: 1}.to_h
+        {x: 1}.to_h
+        {x: 1}.to_h
+      end
+
+      x = 1
+      time_block("{x: x}.to_h", iterations_in_block: 10) do
+        {x: x}.to_h
+        {x: x}.to_h
+        {x: x}.to_h
+        {x: x}.to_h
+        {x: x}.to_h
+        {x: x}.to_h
+        {x: x}.to_h
+        {x: x}.to_h
+        {x: x}.to_h
+        {x: x}.to_h
+      end
+
+      def self.fast_hash(**kwargs)
+        kwargs
+      end
+
+      time_block("fast_hash()", iterations_in_block: 10) do
+        fast_hash()
+        fast_hash()
+        fast_hash()
+        fast_hash()
+        fast_hash()
+        fast_hash()
+        fast_hash()
+        fast_hash()
+        fast_hash()
+        fast_hash()
+      end
+
+      time_block("fast_hash(x: 1)", iterations_in_block: 10) do
+        fast_hash(x: 1)
+        fast_hash(x: 1)
+        fast_hash(x: 1)
+        fast_hash(x: 1)
+        fast_hash(x: 1)
+        fast_hash(x: 1)
+        fast_hash(x: 1)
+        fast_hash(x: 1)
+        fast_hash(x: 1)
+        fast_hash(x: 1)
+      end
+
+      x = 1
+      time_block("fast_hash(x: x)", iterations_in_block: 10) do
+        fast_hash(x: x)
+        fast_hash(x: x)
+        fast_hash(x: x)
+        fast_hash(x: x)
+        fast_hash(x: x)
+        fast_hash(x: x)
+        fast_hash(x: x)
+        fast_hash(x: x)
+        fast_hash(x: x)
+        fast_hash(x: x)
+      end
+
+      time_block("Hash[]", iterations_in_block: 10) do
+        Hash[]
+        Hash[]
+        Hash[]
+        Hash[]
+        Hash[]
+        Hash[]
+        Hash[]
+        Hash[]
+        Hash[]
+        Hash[]
+      end
+
+      time_block("Hash[x: 1]", iterations_in_block: 10) do
+        Hash[x: 1]
+        Hash[x: 1]
+        Hash[x: 1]
+        Hash[x: 1]
+        Hash[x: 1]
+        Hash[x: 1]
+        Hash[x: 1]
+        Hash[x: 1]
+        Hash[x: 1]
+        Hash[x: 1]
+      end
+
+
+      x = 1
+      time_block("Hash[x: x]", iterations_in_block: 10) do
+        Hash[x: x]
+        Hash[x: x]
+        Hash[x: x]
+        Hash[x: x]
+        Hash[x: x]
+        Hash[x: x]
+        Hash[x: x]
+        Hash[x: x]
+        Hash[x: x]
+        Hash[x: x]
+      end
+
 
       time_block("T.must on non-nil", iterations_in_block: 10) do
         T.must(0)
