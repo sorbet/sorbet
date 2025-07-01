@@ -72,4 +72,86 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   <emptyTree>::<C CallNoSig>.call()
+
+  module <emptyTree>::<C AbstractMixin><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.abstract().params(:z, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<todo method>>(z, &<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.abstract!()
+
+    <runtime method definition of foo>
+  end
+
+  class <emptyTree>::<C ConcreteCommand><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Command>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.override().params(:z, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<todo method>>(z, &<blk>)
+      z
+    end
+
+    <self>.include(<emptyTree>::<C AbstractMixin>)
+
+    <runtime method definition of foo>
+
+    <self>.private(:foo)
+  end
+
+  module <emptyTree>::<C AbstractMixin><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.abstract().params(:z, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<todo method>>(z, &<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.abstract!()
+
+    <runtime method definition of foo>
+  end
+
+  class <emptyTree>::<C ConcreteCommand><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Command>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.override().params(:z, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<todo method>>(z, &<blk>)
+      z
+    end
+
+    <self>.include(<emptyTree>::<C AbstractMixin>)
+
+    <runtime method definition of foo>
+
+    <self>.private(:foo)
+  end
+
+  class <emptyTree>::<C NotACommand><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.override().params(:z, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<todo method>>(z, &<blk>)
+      0
+    end
+
+    <self>.include(<emptyTree>::<C AbstractMixin>)
+
+    <runtime method definition of foo>
+  end
 end
