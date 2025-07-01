@@ -39,3 +39,39 @@ class CallNoSig < Opus::Command
 end
 
 CallNoSig.call # error: Method `call` does not exist
+
+module AbstractMixin
+  extend T::Sig
+  extend T::Helpers
+
+  abstract!
+
+  sig { abstract.params(z: Integer).returns(Integer) }
+  def foo(z); end
+end
+
+class ConcreteCommand < Opus::Command
+  include AbstractMixin
+
+  # This secretly becomes a private method and so should error.
+  sig { override.params(z: Integer).returns(Integer) }
+  def foo(z); z; end # error: Method `foo` is private in `ConcreteCommand` but not in `AbstractMixin`
+end
+
+module AbstractMixin
+  extend T::Sig
+  extend T::Helpers
+
+  abstract!
+
+  sig { abstract.params(z: Integer).returns(Integer) }
+  def foo(z); end
+end
+
+class ConcreteCommand < Opus::Command
+  include AbstractMixin
+
+  # This secretly becomes a private method and so should error.
+  sig { override.params(z: Integer).returns(Integer) }
+  def foo(z); z; end # error: Method `foo` is private in `ConcreteCommand` but not in `AbstractMixin`
+end
