@@ -289,6 +289,9 @@ build:webasm --compilation_mode=opt
 build:webasm --features=exceptions --cxxopt=-fwasm-exceptions --linkopt=-fwasm-exceptions
 # Blocked on https://github.com/emscripten-core/emscripten/issues/9780
 build:webasm --copt=-fno-stack-protector
+# We put the stack first, so that an argument stack overflow doesn't clobber
+# global data, and traps instead.
+build:webasm --linkopt=--stack-first
 
 ##
 ## Stripe's ci passes --config=ci, we need it to exist
