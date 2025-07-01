@@ -5,6 +5,10 @@ require 'benchmark'
 
 require_relative '../lib/sorbet-runtime'
 
+class ::Hash
+  def to_h_no_block = self
+end
+
 module SorbetBenchmarks
   module Typecheck
     extend T::Sig
@@ -161,6 +165,46 @@ module SorbetBenchmarks
         {x: x}.to_h
         {x: x}.to_h
         {x: x}.to_h
+      end
+
+      time_block("{}.to_h_no_block", iterations_in_block: 10) do
+        {}.to_h_no_block
+        {}.to_h_no_block
+        {}.to_h_no_block
+        {}.to_h_no_block
+        {}.to_h_no_block
+        {}.to_h_no_block
+        {}.to_h_no_block
+        {}.to_h_no_block
+        {}.to_h_no_block
+        {}.to_h_no_block
+      end
+
+      time_block("{x: 1}.to_h_no_block", iterations_in_block: 10) do
+        {x: 1}.to_h_no_block
+        {x: 1}.to_h_no_block
+        {x: 1}.to_h_no_block
+        {x: 1}.to_h_no_block
+        {x: 1}.to_h_no_block
+        {x: 1}.to_h_no_block
+        {x: 1}.to_h_no_block
+        {x: 1}.to_h_no_block
+        {x: 1}.to_h_no_block
+        {x: 1}.to_h_no_block
+      end
+
+      x = 1
+      time_block("{x: x}.to_h_no_block", iterations_in_block: 10) do
+        {x: x}.to_h_no_block
+        {x: x}.to_h_no_block
+        {x: x}.to_h_no_block
+        {x: x}.to_h_no_block
+        {x: x}.to_h_no_block
+        {x: x}.to_h_no_block
+        {x: x}.to_h_no_block
+        {x: x}.to_h_no_block
+        {x: x}.to_h_no_block
+        {x: x}.to_h_no_block
       end
 
       def self.fast_hash(**kwargs)
