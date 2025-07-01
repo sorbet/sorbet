@@ -20,7 +20,13 @@ namespace sorbet::definition_validator {
 
 namespace {
 struct Signature {
-    absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> pos;
+    struct {
+        absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> requiredPrefix;
+        absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> optional;
+        std::optional<reference_wrapper<const core::ArgInfo>> splat;
+        absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> requiredSuffix;
+    } pos;
+    // absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> pos;
     struct {
         absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> required;
         absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> optional;
@@ -31,6 +37,7 @@ struct Signature {
 
 Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method) {
     Signature sig;
+
     for (auto &arg : method.data(gs)->arguments) {
         if (arg.flags.isBlock) {
             sig.syntheticBlk = arg.isSyntheticBlockArgument();
@@ -46,7 +53,14 @@ Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method
                 sig.kw.required.push_back(arg);
             }
         } else {
-            sig.pos.push_back(arg);
+            if (arg.flags.isDefault) {
+                sig.pos.optional.push_back(arg);
+            } else if (arg.flags.isRepeated) {
+                sig.pos.splat = optional<reference_wrapper<const core::ArgInfo>>{arg};
+            } else {
+                auto &dst = sig.pos.optional.empty() ? sig.pos.requiredPrefix : sig.pos.requiredSuffix;
+                dst.push_back(arg);
+            }
         }
     }
     return sig;
@@ -222,10 +236,6 @@ optional<core::AutocorrectSuggestion> constructAllowIncompatibleAutocorrect(cons
     return constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, what, _);
 }
 
-bool isOptional(const core::ArgInfo &arg) {
-    return arg.flags.isDefault || arg.flags.isRepeated;
-}
-
 void validateSubtype(const core::Context ctx, const ast::ExpressionPtr &tree, core::MethodRef superMethod,
                      const ast::MethodDef &methodDef, core::MethodRef method, const core::ArgInfo &superArg,
                      const core::ArgInfo &arg, core::TypeConstraint &constr, bool &reportedAutocorrect) {
@@ -245,95 +255,109 @@ void validateSubtype(const core::Context ctx, const ast::ExpressionPtr &tree, co
     }
 }
 
+std::optional<reference_wrapper<const core::ArgInfo>>
+read_back(const absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &vec, size_t i) {
+    return vec[vec.size() - 1 - i];
+}
+
 // Positional argument checking is extremely messy, due to the possibility of having optional and
 // splat args in the middle.
+//
+// The strategy to ensure that an override is compatible is to "simulate" what would happen if
+// `Parent.foo` gets transformed into `Child.foo`. The naive way to do this would be to take
+// 2^[#optional] possible parent calls and make sure that they still typecheck as child calls, but
+// we can reduce this to ~n^2 by observing that there are only [#child_args] * [#parent_args]
+// possible ways to bind `Parent.foo` arguments to arguments in a `Child.foo` call.
 void validateOverridePositionalParams(const core::Context ctx, const ast::ExpressionPtr &tree,
                                       core::MethodRef superMethod, const ast::MethodDef &methodDef,
                                       const Signature superSig, const Signature sig, core::TypeConstraint &constr,
                                       bool &reportedAutocorrect) {
     auto &superArgs = superSig.pos;
-    auto &methodArgs = sig.pos;
+    auto &childArgs = sig.pos;
     auto method = methodDef.symbol;
 
-    // First, match required arguments in the parent from the left.
+    auto childMax = childArgs.requiredPrefix.size() + childArgs.optional.size() + childArgs.requiredSuffix.size();
+    auto parentMax = superArgs.requiredPrefix.size() + superArgs.optional.size() + superArgs.requiredSuffix.size();
+    auto childMin = childArgs.requiredPrefix.size() + childArgs.requiredSuffix.size();
+    auto parentMin = superArgs.requiredPrefix.size() + superArgs.requiredSuffix.size();
 
-    // These are only kept around for error reporting purposes; we might be able to derive these from
-    // e.g. `leftIdx` and `rightIdx`, but it's clearer to track them explicitly.
-    size_t requiredParentArgs = 0;
-    size_t requiredChildArgs = 0;
+    // If the shape of the override is wrong (e.g. the child doesn't accept enough args to handle all
+    // contortions of the parent), any check that tries to match trailing args is very likely to be
+    // spurious, so don't bother.
+    auto checkBackArgs = true;
 
-    size_t leftIdx;
-    for (leftIdx = 0; leftIdx < min(methodArgs.size(), superArgs.size()); leftIdx += 1) {
-        auto &superArg = superArgs[leftIdx].get();
-        auto &methodArg = methodArgs[leftIdx].get();
-
-        if (isOptional(superArg) || methodArg.flags.isRepeated) {
-            break;
-        }
-
-        validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, methodArg, constr, reportedAutocorrect);
-    }
-
-    // Do the same from the right
-
-    size_t rightIdx, superRightIdx;
-    for (rightIdx = methodArgs.size() - 1, superRightIdx = superArgs.size() - 1;
-         // We intentionally only ever check `superRightIdx` here - if `rightIdx` ever dips below
-         // `leftIdx`, we've run out of positional arguments in the child method.
-         superRightIdx >= leftIdx; rightIdx -= 1, superRightIdx -= 1) {
-        if (rightIdx < leftIdx) {
+    if (superArgs.splat) {
+        if (!childArgs.splat) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("{} method `{}` does not accept enough arguments", implementationOf(ctx, superMethod),
-                            superMethod.show(ctx));
+                auto [prefix, argName] = formatSplat(superArgs.splat->get(), SplatKind::ARG, ctx);
+                e.setHeader("{} method `{}` must accept {}`{}`", implementationOf(ctx, superMethod),
+                            superMethod.show(ctx), prefix, argName);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
-                e.addErrorNote("`{}` requires `{}` positional arguments, but `{}` accepts at most `{}`",
-                               superMethod.show(ctx), , method.show(ctx), methodArgs.size());
+
                 e.maybeAddAutocorrect(
                     constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
-                return;
+                checkBackArgs = false;
+            }
+        }
+    } else {
+        if (childMax < parentMax && !childArgs.splat) {
+            if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("{} method `{}` does not accept enough arguments", implementationOf(ctx, superMethod),
+                            method.show(ctx));
+                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+                e.addErrorNote("`{}` may pass up to `{}` positional arguments, but `{}` accepts at most `{}`",
+                               superMethod.show(ctx), parentMax, method.show(ctx), childMax);
+                e.maybeAddAutocorrect(
+                    constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
+                checkBackArgs = false;
             }
         }
 
-        auto &superArg = superArgs[superRightIdx].get();
-        auto &methodArg = methodArgs[rightIdx].get();
-
-        if (isOptional(superArg)) {
-            // If we run out of mandatory args in the parent before the child, the child takes too
-            // many mandatory arguments
-            if (!isOptional(methodArg)) {
-                if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
-                    e.setHeader("{} method `{}` requires too many arguments", implementationOf(ctx, superMethod),
-                                superMethod.show(ctx));
-                    e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
-                    e.addErrorNote("`{}` requires `{}` positional arguments, but `{}` only requires `{}`",
-                                   method.show(ctx), , superMethod.show(ctx));
-                    return;
-                }
+        if (parentMin < childMin) {
+            if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("{} method `{}` requires too many arguments", implementationOf(ctx, superMethod),
+                            method.show(ctx));
+                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+                e.addErrorNote("`{}` requires at most `{}` positional arguments, but `{}` requires at least `{}`",
+                               superMethod.show(ctx), parentMin, method.show(ctx), childMin);
+                e.maybeAddAutocorrect(
+                    constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
+                checkBackArgs = false;
             }
-        } else {
         }
-
-        if (isOptional(methodArg) || isOptional(superArg)) {
-            break;
-        }
-
-        validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, methodArg, constr, reportedAutocorrect);
     }
 
-    // The following logic is easier if the right bounds are always exclusive
-    rightIdx += 1;
-    superRightIdx += 1;
+    auto prefixLen = min(childArgs.requiredPrefix.size(), superArgs.requiredPrefix.size());
+    auto suffixLen = min(childArgs.requiredSuffix.size(), superArgs.requiredSuffix.size());
 
-    // Now, attempt to apply any remaining arguments.
+    for (size_t i = 0; i < prefixLen; i += 1) {
+        auto &superArg = superArgs.requiredPrefix[i].get();
+        auto &childArg = childArgs.requiredPrefix[i].get();
 
-    // XXX cwong: The error messages should have more details about why a given child parameter is
-    // being checked against a given parent.
+        validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr, reportedAutocorrect);
+    }
 
-    auto methodi = leftIdx;
-    auto superi = leftIdx;
+    // Trailing required args need to be matched backwards
+    for (size_t i = 0; i < suffixLen && checkBackArgs; i += 1) {
+        auto &superArg = read_back(superArgs.requiredSuffix, i)->get();
+        auto &childArg = read_back(childArgs.requiredSuffix, i)->get();
 
-    while (superi < superRightIdx) {
-        auto &superArg = superArgs[superi].get();
+        validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr, reportedAutocorrect);
+    }
+
+    // Now, for each remaining parent argument, we check against every possible child argument it
+    // could be bound to.
+
+    for (size_t i = 0; prefixLen + i < superArgs.requiredPrefix.size(); i += 1) {
+        ENFORCE(prefixLen + i >= childArgs.requiredPrefix.size());
+        auto &superArg = superArgs.requiredPrefix[prefixLen + i].get();
+
+        // If the
+    }
+
+    for (size_t i = suffixLen; i < superArgs.requiredSuffix.size(); i += 1) {
+        ENFORCE(i >= childArgs.requiredSuffix.size());
+        auto &superArg = read_back(superArgs.requiredSuffix, i)->get();
     }
 }
 
