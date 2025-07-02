@@ -326,6 +326,12 @@ TypePtr Types::dropLiteral(const GlobalState &gs, const TypePtr &tp) {
 TypePtr Types::lubAll(const GlobalState &gs, const vector<TypePtr> &elements) {
     TypePtr acc = Types::bottom();
     for (auto &el : elements) {
+        // The only time that `Types::lub` produces a proxy_type is if the two proxy types are
+        // equivalent: `:foo | :foo`. If they're not equivalent, we widen. There are no
+        // `:foo | :bar` types produced by `lub`, so `widen` is unnecessary.
+        //
+        // Which means that to remove all literals, it's sufficient to do a single `dropLiteral`
+        // at the call `lubAll` call site.
         acc = Types::lub(gs, acc, el);
     }
     return acc;
@@ -344,6 +350,12 @@ TypePtr Types::rangeOf(const GlobalState &gs, const TypePtr &elem) {
 TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &elem) {
     vector<TypePtr> tupleArgs{Types::Symbol(), elem};
     vector<TypePtr> targs{Types::Symbol(), elem, make_type<TupleType>(move(tupleArgs))};
+    return make_type<AppliedType>(Symbols::Hash(), move(targs));
+}
+
+TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &key, const TypePtr &val) {
+    vector<TypePtr> tupleArgs{key, val};
+    vector<TypePtr> targs{key, val, make_type<TupleType>(move(tupleArgs))};
     return make_type<AppliedType>(Symbols::Hash(), move(targs));
 }
 

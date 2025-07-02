@@ -3588,6 +3588,21 @@ class Shape_to_hash : public IntrinsicMethod {
     }
 } Shape_to_hash;
 
+class Shape_to_h : public IntrinsicMethod {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto shape = cast_type<ShapeType>(args.thisType);
+
+        if (shape->keys.empty() || shape->values.empty() || args.block != nullptr) {
+            // Use return type from sig
+            return;
+        }
+
+        auto keyType = Types::dropLiteral(gs, Types::lubAll(gs, shape->keys));
+        auto valType = Types::dropLiteral(gs, Types::lubAll(gs, shape->values));
+        res.returnType = Types::hashOf(gs, keyType, valType);
+    }
+} Shape_to_h;
+
 // `<Magic>.<to-hash-dup>(x)` and `<Magic>.<to-hash-nodup>(x) both behave like `x.to_hash`
 class Magic_toHash : public IntrinsicMethod {
 public:
@@ -4585,6 +4600,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::squareBracketsEq(), &Shape_squareBracketsEq},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::toHash(), &Shape_to_hash},
+    {Symbols::Shape(), Intrinsic::Kind::Instance, Names::toH(), &Shape_to_h},
 
     {Symbols::Hash(), Intrinsic::Kind::Instance, Names::dig(), &Hash_dig},
 
