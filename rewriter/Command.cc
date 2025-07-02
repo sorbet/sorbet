@@ -46,7 +46,9 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
             i = &stat - &klass->rhs.front();
             call = mdef;
             callptr = &stat;
-        } else if (!mdef->flags.isSelfMethod) {
+        }
+
+        if (!mdef->flags.isSelfMethod) {
             instanceMethods.push_back(pair(mdef->name, mdef->loc.copyWithZeroLength()));
         }
     }
