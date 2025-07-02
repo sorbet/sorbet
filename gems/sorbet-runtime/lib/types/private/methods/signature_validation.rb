@@ -89,6 +89,7 @@ module T::Private::Methods::SignatureValidation
         validate_override_mode(signature, super_signature)
         validate_override_shape(signature, super_signature)
         validate_override_types(signature, super_signature)
+        validate_override_visibility(signature, super_signature)
       end
     else
       validate_non_override_mode(signature)
@@ -274,6 +275,38 @@ module T::Private::Methods::SignatureValidation
             "* #{mode_noun.capitalize}: `#{signature.return_type}` (in #{method_loc_str(signature.method)})\n" \
             "(The types must be covariant.)"
     end
+  end
+
+  def self.validate_override_visibility(signature, super_signature)
+    return if super_signature.mode == Modes.untyped
+    # This departs from the behavior of other `validate_override_whatever` functions in that it
+    # only comes into effect when the child signature explicitly says the word `override`. This was
+    # done because the primary method for silencing these errors (`allow_incompatible: :visibility`)
+    # requires an `override` node to attach to. Once we have static override checking for implicitly
+    # overridden methods, we can remove this.
+    return unless [Modes.override, Modes.overridable_override].include?(signature.mode)
+    return if [:visibility, true].include?(signature.override_allow_incompatible)
+    method = signature.method
+    super_method = super_signature.method
+    mode_noun = super_signature.mode == Modes.abstract ? 'implementation' : 'override'
+    vis = method_visibility(method)
+    super_vis = method_visibility(super_method)
+
+    if visibility_strength(vis) > visibility_strength(super_vis)
+      raise "Incompatible visibility for #{mode_noun} of method #{method.name}\n" \
+            "* Base: #{super_vis} (in #{method_loc_str(super_method)})\n" \
+            "* #{mode_noun.capitalize}: #{vis} (in #{method_loc_str(method)})\n" \
+            "(The override must be at least as permissive as the supermethod)" \
+    end
+  end
+
+  private_class_method def self.method_visibility(method)
+    T::Private::Methods.visibility_method_name(method.owner, method.name)
+  end
+
+  # Higher = more restrictive.
+  private_class_method def self.visibility_strength(vis)
+    %i[public protected private].find_index(vis)
   end
 
   private_class_method def self.base_override_loc_str(signature, super_signature)
