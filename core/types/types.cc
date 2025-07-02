@@ -326,6 +326,12 @@ TypePtr Types::dropLiteral(const GlobalState &gs, const TypePtr &tp) {
 TypePtr Types::lubAll(const GlobalState &gs, const vector<TypePtr> &elements) {
     TypePtr acc = Types::bottom();
     for (auto &el : elements) {
+        // The only time that `Types::lub` produces a proxy_type is if the two proxy types are
+        // equivalent: `:foo | :foo`. If they're not equivalent, we widen. There are no
+        // `:foo | :bar` types produced by `lub`, so `widen` is unnecessary.
+        //
+        // Which means that to remove all literals, it's sufficient to do a single `dropLiteral`
+        // at the call `lubAll` call site.
         acc = Types::lub(gs, acc, el);
     }
     return acc;

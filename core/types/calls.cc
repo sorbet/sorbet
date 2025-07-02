@@ -3597,17 +3597,8 @@ class Shape_to_h : public IntrinsicMethod {
             return;
         }
 
-        // TODO(jez) Could we use Types::lubAll here? Do we want widen/dropLiteral/something else?
-        auto keyType = Types::bottom();
-        for (const auto &key : shape->keys) {
-            keyType = Types::any(gs, keyType, Types::widen(gs, key));
-        }
-
-        auto valType = Types::bottom();
-        for (const auto &val : shape->values) {
-            valType = Types::any(gs, valType, Types::widen(gs, val));
-        }
-
+        auto keyType = Types::dropLiteral(gs, Types::lubAll(gs, shape->keys));
+        auto valType = Types::dropLiteral(gs, Types::lubAll(gs, shape->values));
         res.returnType = Types::hashOf(gs, keyType, valType);
     }
 } Shape_to_h;
