@@ -8,7 +8,8 @@ import {
   Memento,
   workspace,
 } from "vscode";
-import * as fs from "fs";
+import { existsSync } from "fs";
+import { join } from "path";
 import { Log } from "./log";
 import { SorbetLspConfig, SorbetLspConfigData } from "./sorbetLspConfig";
 import { deepEqual } from "./utils";
@@ -122,7 +123,7 @@ export class DefaultSorbetWorkspaceContext implements ISorbetWorkspaceContext {
 
     this.disposables = [
       this.onDidChangeConfigurationEmitter,
-      workspace.onDidChangeConfiguration((e) => {
+      workspace.onDidChangeConfiguration((e: ConfigurationChangeEvent) => {
         if (e.affectsConfiguration("sorbet")) {
           // update the cached configuration before firing
           this.cachedSorbetConfiguration = workspace.getConfiguration("sorbet");
@@ -218,6 +219,7 @@ export class SorbetExtensionConfig implements Disposable {
   private wrappedHighlightUntyped: TrackUntyped;
   private wrappedTypedFalseCompletionNudges: boolean;
   private wrappedRevealOutputOnError: boolean;
+  private wrappedGemfileDirectory: string | null;
 
   constructor(sorbetWorkspaceContext: ISorbetWorkspaceContext) {
     this.configFilePatterns = [];
@@ -231,14 +233,44 @@ export class SorbetExtensionConfig implements Disposable {
     this.wrappedHighlightUntyped = "nowhere";
     this.wrappedTypedFalseCompletionNudges = true;
     this.wrappedRevealOutputOnError = false;
+    this.wrappedGemfileDirectory = null;
 
     // Any workspace with a `…/sorbet/config` file is considered Sorbet-enabled
     // by default. This implementation does not work in the general case with
     // multi-root workspaces.
     const { workspaceFolders } = workspace;
-    this.wrappedEnabled =
-      !!workspaceFolders?.length &&
-      fs.existsSync(`${workspaceFolders[0].uri.fsPath}/sorbet/config`);
+    let sorbetConfigFound = false;
+    if (workspaceFolders?.length && workspaceFolders[0]) {
+      const rootPath = workspaceFolders[0].uri.fsPath;
+      // Read gemfileDirectory setting using a temporary context or a pre-fetch if ISorbetWorkspaceContext allows.
+      // For now, we will read it again in refresh(), this is primarily for initial enablement.
+      const configuredGemfileDirSetting = sorbetWorkspaceContext.get<string>("gemfileDirectory", "");
+
+      const pathsToSearchForSorbetConfig = new Set<string>();
+      pathsToSearchForSorbetConfig.add(rootPath); // Always check root
+
+      if (configuredGemfileDirSetting && configuredGemfileDirSetting.trim() !== "") {
+        pathsToSearchForSorbetConfig.add(join(rootPath, configuredGemfileDirSetting));
+      }
+
+      const commonSubDirs = ["", "backend", "app", "service", "api"]; // Consistent backend-focused list
+      for (const subDir of commonSubDirs) {
+        pathsToSearchForSorbetConfig.add(join(rootPath, subDir));
+      }
+
+      for (const searchDir of pathsToSearchForSorbetConfig) {
+        const sorbetConfigPath = join(searchDir, "sorbet", "config");
+        try {
+          if (existsSync(sorbetConfigPath)) {
+            sorbetConfigFound = true;
+            break;
+          }
+        } catch (err) {
+          // console.error(`Error checking for sorbet/config at ${sorbetConfigPath}:`, err);
+        }
+      }
+    }
+    this.wrappedEnabled = sorbetConfigFound;
 
     this.disposables = [
       this.onLspConfigChangeEmitter,
@@ -292,6 +324,8 @@ export class SorbetExtensionConfig implements Disposable {
       "typedFalseCompletionNudges",
       this.typedFalseCompletionNudges,
     );
+    const gemfileDirSetting = this.sorbetWorkspaceContext.get<string>("gemfileDirectory", "");
+    this.wrappedGemfileDirectory = (gemfileDirSetting && gemfileDirSetting.trim() !== "") ? gemfileDirSetting : null;
 
     Disposable.from(...this.configFileWatchers).dispose();
     this.configFileWatchers = this.configFilePatterns.map((pattern) => {
@@ -398,13 +432,17 @@ export class SorbetExtensionConfig implements Disposable {
     return this.wrappedTypedFalseCompletionNudges;
   }
 
+  public get gemfileDirectory(): string | null {
+    return this.wrappedGemfileDirectory;
+  }
+
   /**
    * Set active {@link SorbetLspConfig LSP config}.
    *
    * If {@link enabled} is `false`, this will change it to `true`.
    */
   public async setActiveLspConfigId(id: string): Promise<void> {
-    const updates: Array<Thenable<void>> = [];
+    const updates: Array<Promise<void>> = [];
 
     if (this.activeLspConfig?.id !== id) {
       updates.push(
