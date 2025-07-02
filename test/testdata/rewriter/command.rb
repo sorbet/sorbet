@@ -12,6 +12,8 @@ end
 
 T.assert_type!(MyCommand.call(7), String)
 
+MyCommand.new.call(12) # error: Non-private call to private method `call` on `MyCommand`
+
 class OtherCommand < ::Opus::Command
   sig {params(x: String).returns(Integer)}
   def call(x)
@@ -82,4 +84,14 @@ class NotACommand
 
   sig { override.params(z: Integer).returns(Integer) }
   def foo(z); 0; end
+end
+
+class CommandWithCallAndMixin < Opus::Command
+  include AbstractMixin
+
+  sig {params(x: String).returns(Integer)}
+  def call(x); Integer(x); end
+
+  sig { override.params(z: Integer).returns(Integer) }
+  def foo(z); 0; end # error: Method `foo` is private in `CommandWithCallAndMixin` but not in `AbstractMixin`
 end
