@@ -279,6 +279,11 @@ module T::Private::Methods::SignatureValidation
 
   def self.validate_override_visibility(signature, super_signature)
     return if super_signature.mode == Modes.untyped
+    # This departs from the behavior of other `validate_override_whatever` functions in that it
+    # only comes into effect when the child signature explicitly says the word `override`. This was
+    # done because the primary method for silencing these errors (`allow_incompatible: :visibility`)
+    # requires an `override` node to attach to. Once we have static override checking for implicitly
+    # overridden methods, we can remove this.
     return unless [Modes.override, Modes.overridable_override].include?(signature.mode)
     return if [:visibility, true].include?(signature.override_allow_incompatible)
     method = signature.method
