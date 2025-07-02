@@ -598,7 +598,10 @@ module T::Private::Methods
     elsif mod.private_method_defined?(name)
       :private
     else
-      mod.method(name) # Raises
+      # Raises a NameError formatted like the Ruby VM would (the exact text formatting
+      # of these errors changed across Ruby VM versions, in ways that would sometimes
+      # cause tests to fail if they were dependent on hard coding errors).
+      mod.method(name)
     end
   end
 
