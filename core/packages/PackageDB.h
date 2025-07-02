@@ -60,6 +60,11 @@ public:
         return this->enabled_;
     }
 
+    // Whether the --gen-packages mode is active.
+    bool genPackages() const {
+        return this->genPackages_;
+    }
+
     absl::Span<const std::string> extraPackageFilesDirectoryUnderscorePrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashPrefixes() const;
@@ -92,6 +97,7 @@ public:
 
 private:
     bool enabled_ = false;
+    bool genPackages_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;

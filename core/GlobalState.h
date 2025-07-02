@@ -169,7 +169,7 @@ public:
                             const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                             const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                             const std::vector<std::string> &skipImportVisibilityCheckFor,
-                            const std::vector<std::string> &packagerLayers, std::string errorHint);
+                            const std::vector<std::string> &packagerLayers, std::string errorHint, bool genPackages);
     packages::UnfreezePackages unfreezePackages();
 
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
@@ -286,7 +286,7 @@ public:
                  const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                  const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                  const std::vector<std::string> &allowRelaxedPackagerChecksFor,
-                 const std::vector<std::string> &packagerLayers, std::string errorHint) const;
+                 const std::vector<std::string> &packagerLayers, std::string errorHint, bool genPackages) const;
 
     // Copy the name table, file table and other parts of GlobalState that are required to start the slow path.
     // NOTE: this very intentionally will not copy the symbol table, and the expectation is that the symbol table will
@@ -297,7 +297,7 @@ public:
                     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                     const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
-                    const std::vector<std::string> &packagerLayers, std::string errorHint) const;
+                    const std::vector<std::string> &packagerLayers, std::string errorHint, bool genPackages) const;
 
     // Merge the contents of one file table into this GlobalState. This is used during the index pass to make sure that
     // changes made to the file table in worker threads are propagated back to the main GlobalState.
