@@ -1,5 +1,8 @@
 # Version history
 
+## 0.3.43
+- Remove use of SIGINT when terminating Sorbet.
+
 ## 0.3.42
 - Use VS Code's standard `$(sync)` icon on status bar.
 
