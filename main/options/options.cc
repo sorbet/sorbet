@@ -425,6 +425,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Remove the provided <prefix> from all printed paths. Defaults to the input "
                                  "directory passed to Sorbet, if any.",
                                  cxxopts::value<string>()->default_value(empty.pathPrefix), "<prefix>");
+    options.add_options(section)("gen-packages", "Generate package information", cxxopts::value<bool>());
     // }}}
 
     // ----- AUTOCORRECTS ------------------------------------------------- {{{
@@ -1273,6 +1274,11 @@ void readOptions(Options &opts,
             }
         }
 
+        opts.genPackages = raw["gen-packages"].as<bool>();
+        if (opts.genPackages && !opts.cacheSensitiveOptions.sorbetPackages) {
+            logger->error("--gen-packages can only be used when --stripe-packages is also enabled");
+            throw EarlyReturnWithCode(1);
+        }
         if (raw.count("allow-relaxed-packager-checks-for")) {
             if (!opts.cacheSensitiveOptions.sorbetPackages) {
                 logger->error("--allow-relaxed-packager-checks-for can only be specified in --sorbet-packages mode");
