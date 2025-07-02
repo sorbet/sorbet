@@ -2250,7 +2250,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndex(
     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
     const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
-    const vector<string> &packagerLayers, string errorHint) const {
+    const vector<string> &packagerLayers, string errorHint, bool genPackages) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     result->initEmpty();
@@ -2267,7 +2267,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndex(
         result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
                                    extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                    extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint);
+                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint, genPackages);
     }
 
     return result;
@@ -2279,7 +2279,7 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
                              const vector<string> &extraPackageFilesDirectorySlashPrefixes,
                              const vector<string> &packageSkipRBIExportEnforcementDirs,
                              const vector<string> &allowRelaxedPackagerChecksFor, const vector<string> &packagerLayers,
-                             string errorHint) const {
+                             string errorHint, bool genPackages) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     // We omit a call to `initEmpty` here, as the only intended use of this function is to have its symbol table
@@ -2312,7 +2312,7 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
         result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
                                    extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                    extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint);
+                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint, genPackages);
     }
 
     return result;
@@ -2478,10 +2478,11 @@ void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDire
                                      const vector<string> &extraPackageFilesDirectorySlashPrefixes,
                                      const vector<string> &packageSkipRBIExportEnforcementDirs,
                                      const vector<string> &allowRelaxedPackagerChecksFor,
-                                     const vector<string> &packagerLayers, string errorHint) {
+                                     const vector<string> &packagerLayers, string errorHint, bool genPackages) {
     ENFORCE_NO_TIMER(!packageDB_.frozen);
 
     packageDB_.enabled_ = true;
+    packageDB_.genPackages_ = genPackages;
     packageDB_.extraPackageFilesDirectoryUnderscorePrefixes_ = extraPackageFilesDirectoryUnderscorePrefixes;
     packageDB_.extraPackageFilesDirectorySlashDeprecatedPrefixes_ = extraPackageFilesDirectorySlashDeprecatedPrefixes;
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;
