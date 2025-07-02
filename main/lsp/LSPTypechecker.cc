@@ -74,7 +74,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> 
     this->gs = std::move(initialGS);
 
     // Initialize settings that come through from the client.
-    this->gs->trackUntyped = currentConfig.getClientConfig().enableHighlightUntyped;
+    this->gs->trackUntyped = currentConfig.getClientConfig().initialEnableHighlightUntyped;
 
     // Initialization typecheck is not cancelable.
     // TODO(jvilk): Make it preemptible.
