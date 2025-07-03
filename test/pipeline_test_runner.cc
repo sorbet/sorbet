@@ -230,11 +230,12 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
                 nodes = parser::Parser::run(*gs, file, parser::Parser::Settings{});
                 break;
             }
-            case realmain::options::Parser::PRISM:
+            case realmain::options::Parser::PRISM: {
                 core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
                 nodes = parser::Prism::Parser::run(*gs, file);
                 break;
+            }
         }
 
         handler.drainErrors(*gs);
@@ -808,12 +809,15 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         // this replicates the logic of pipeline::indexOne
         unique_ptr<parser::Node> nodes;
-
-        if (parser == realmain::options::Parser::SORBET) {
-            auto settings = parser::Parser::Settings{};
-            nodes = parser::Parser::run(*gs, f.file, settings);
-        } else if (parser == realmain::options::Parser::PRISM) {
-            nodes = parser::Prism::Parser::run(*gs, f.file);
+        switch (parser) {
+            case realmain::options::Parser::SORBET: {
+                nodes = parser::Parser::run(*gs, f.file, parser::Parser::Settings{});
+                break;
+            }
+            case realmain::options::Parser::PRISM: {
+                nodes = parser::Prism::Parser::run(*gs, f.file);
+                break;
+            }
         }
 
         handler.addObserved(*gs, "parse-tree", [&]() { return nodes->toString(*gs); });
