@@ -1566,10 +1566,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 ExpressionPtr res = MK::RestArg(loc, MK::KeywordArg(loc, arg->name));
                 result = move(res);
             },
-            [&](parser::Kwarg *arg) {
-                ExpressionPtr res = MK::KeywordArg(loc, arg->name);
-                result = move(res);
-            },
+            [&](parser::Kwarg *arg) { desugaredByPrismTranslator(arg); },
             [&](parser::Blockarg *arg) {
                 ExpressionPtr res = MK::BlockArg(loc, MK::Local(loc, arg->name));
                 result = move(res);
@@ -1584,10 +1581,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     MK::OptionalArg(loc, MK::Local(arg->nameLoc, arg->name), node2TreeImpl(dctx, arg->default_));
                 result = move(res);
             },
-            [&](parser::Shadowarg *arg) {
-                ExpressionPtr res = MK::ShadowArg(loc, MK::Local(loc, arg->name));
-                result = move(res);
-            },
+            [&](parser::Shadowarg *arg) { desugaredByPrismTranslator(arg); },
             [&](parser::DefMethod *method) {
                 bool isSelf = false;
                 ExpressionPtr res = buildMethod(dctx, method->loc, method->declLoc, method->name, method->args.get(),
