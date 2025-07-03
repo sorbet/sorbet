@@ -2089,6 +2089,7 @@ void GlobalState::copyOptions(const core::GlobalState &other) {
     this->ruby3KeywordArgs = other.ruby3KeywordArgs;
     this->suppressPayloadSuperclassRedefinitionFor = other.suppressPayloadSuperclassRedefinitionFor;
     this->trackUntyped = other.trackUntyped;
+    this->highlightUntypedDiagnosticSeverity = other.highlightUntypedDiagnosticSeverity;
     this->printingFileTable = other.printingFileTable;
     this->errorUrlBase = other.errorUrlBase;
     this->includeErrorSections = other.includeErrorSections;

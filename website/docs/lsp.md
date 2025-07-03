@@ -179,6 +179,8 @@ export interface SorbetInitializationOptions {
   enableTypedFalseCompletionNudges?: boolean;
   supportsOperationNotifications?: boolean;
   supportsSorbetURIs?: boolean;
+  supportsSorbetURIs?: boolean;
+  highlightUntypedDiagnosticSeverity?: DiagnosticSeverity;
 }
 ```
 
@@ -199,6 +201,12 @@ export interface SorbetInitializationOptions {
 - `supportsSorbetURIs`
 
   See [Working with Synthetic or Missing Files](sorbet-uris.md)
+
+- `highlightUntypedDiagnosticSeverity`
+
+  What "severity" to report usages of untyped in the client. This is to workaround limitations in the LSP specification and VS Code. See [the relevant section](highlight-untyped.md#customizing-the-presentation-of-untyped-highlights) for more information.
+
+  **Note** that [`DiagnosticSeverity`] is an `integer`-valued enum, as per the LSP specification.
 
 ### `workspace/didChangeConfiguration` notification
 
@@ -360,3 +368,4 @@ Thus, to use Sorbet with watchman in a project that does not use Git, create an 
 [`SymbolInformation`]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#symbolInformation
 [`TextDocumentIdentifier`]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentIdentifier
 [`TextDocumentItem`]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
+[`DiagnosticSeverity`]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#diagnosticSeverity

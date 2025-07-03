@@ -45,6 +45,13 @@ public:
     bool enableTypedFalseCompletionNudges = true;
 
     /**
+     * Initial value for which DiagnosticSeverity level to use when reporting untyped values.
+     *
+     * See `GlobalState::highlightUntypedDiagnosticSeverity` for more.
+     */
+    DiagnosticSeverity initialHighlightUntypedDiagnosticSeverity = DiagnosticSeverity::Information;
+
+    /**
      * Whether or not the active client has support for snippets in CompletionItems.
      * Note: There is a generated ClientCapabilities class, but it is cumbersome to work with as most fields are
      * optional.

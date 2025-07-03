@@ -126,6 +126,8 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
         enableSorbetURIs = initOptions->supportsSorbetURIs.value_or(false);
         initialEnableHighlightUntyped = parseEnableHighlightUntyped(*initOptions, core::TrackUntyped::Nowhere);
         enableTypedFalseCompletionNudges = initOptions->enableTypedFalseCompletionNudges.value_or(true);
+        initialHighlightUntypedDiagnosticSeverity =
+            initOptions->highlightUntypedDiagnosticSeverity.value_or(DiagnosticSeverity::Information);
     }
 }
 
