@@ -234,7 +234,7 @@ core::NameRef maybeTypedSuper(DesugarContext dctx) {
                                                                              : core::Names::untypedSuper();
 }
 
-bool isStringLit(DesugarContext dctx, ExpressionPtr &expr) {
+bool isStringLit(ExpressionPtr &expr) {
     if (auto lit = cast_tree<Literal>(expr)) {
         return lit->isString();
     }
@@ -270,7 +270,7 @@ ExpressionPtr desugarDString(DesugarContext dctx, core::LocOffsets loc, parser::
     Send::ARGS_store interpArgs;
 
     bool allStringsSoFar;
-    if (isStringLit(dctx, first) || isa_tree<EmptyTree>(first)) {
+    if (isStringLit(first) || isa_tree<EmptyTree>(first)) {
         stringsAccumulated.emplace_back(std::move(first));
         allStringsSoFar = true;
     } else {
@@ -282,7 +282,7 @@ ExpressionPtr desugarDString(DesugarContext dctx, core::LocOffsets loc, parser::
     for (; it != end; ++it) {
         auto &stat = *it;
         ExpressionPtr narg = node2TreeImpl(dctx, std::move(stat));
-        if (allStringsSoFar && isStringLit(dctx, narg)) {
+        if (allStringsSoFar && isStringLit(narg)) {
             stringsAccumulated.emplace_back(std::move(narg));
         } else if (isa_tree<EmptyTree>(narg)) {
             // no op

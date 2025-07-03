@@ -1,8 +1,13 @@
 #include "Translator.h"
 #include "Helpers.h"
 
+#include "absl/container/inlined_vector.h"
 #include "ast/Helpers.h"
 #include "ast/Trees.h"
+#include "common/common.h"
+#include "spdlog/fmt/fmt.h"
+#include <string>
+#include <string_view>
 
 template class std::unique_ptr<sorbet::parser::Node>;
 
@@ -25,9 +30,115 @@ unique_ptr<NodeWithExpr> make_node_with_expr(ast::ExpressionPtr desugaredExpr, T
 
 // Indicates that a particular code path should never be reached, with an explanation of why.
 // Throws a `sorbet::SorbetException` when triggered to help with debugging.
-template <typename... TArgs>
-[[noreturn]] void unreachable(fmt::format_string<TArgs...> reason_format_str, TArgs &&...args) {
+template <typename... TArgs> [[noreturn]] void unreachable(const std::string &reason_format_str, TArgs &&...args) {
     Exception::raise(reason_format_str, std::forward<TArgs>(args)...);
+}
+
+// Helper function to check if an AST expression is a string literal
+bool isStringLit(ast::ExpressionPtr &expr) {
+    if (auto lit = ast::cast_tree<ast::Literal>(expr)) {
+        return lit->isString();
+    }
+    return false;
+}
+
+// Helper function to merge multiple string literals into one
+ast::ExpressionPtr mergeStrings(core::MutableContext &ctx, core::LocOffsets loc,
+                                absl::InlinedVector<ast::ExpressionPtr, 4> stringsAccumulated) {
+    if (stringsAccumulated.size() == 1) {
+        return std::move(stringsAccumulated[0]);
+    } else {
+        std::string result;
+        for (const auto &expr : stringsAccumulated) {
+            if (isa_tree<EmptyTree>(expr)) {
+                // empty string - skip
+            } else {
+                result += ast::cast_tree<ast::Literal>(expr)->asString().shortName(ctx);
+            }
+        }
+        return MK::String(loc, ctx.state.enterNameUTF8(result));
+    }
+}
+
+// Helper function to convert a parser node to an AST expression
+ast::ExpressionPtr nodeToExpr(unique_ptr<parser::Node> &node) {
+    if (auto nodeWithExpr = parser::cast_node<parser::NodeWithExpr>(node.get())) {
+        return nodeWithExpr->takeCachedDesugaredExpr();
+    }
+
+    // For simple cases, convert parser nodes to expressions directly
+    if (auto str = parser::cast_node<parser::String>(node.get())) {
+        return MK::String(str->loc, str->val);
+    } else if (auto begin = parser::cast_node<parser::Begin>(node.get())) {
+        // Handle interpolated expressions within strings
+        if (begin->stmts.size() == 1) {
+            return nodeToExpr(begin->stmts[0]);
+        } else {
+            // Multiple statements - convert to a sequence
+            ast::InsSeq::STATS_store stats;
+            stats.reserve(begin->stmts.size() - 1);
+            auto end = begin->stmts.end();
+            --end;
+            for (auto it = begin->stmts.begin(); it != end; ++it) {
+                stats.emplace_back(nodeToExpr(*it));
+            }
+            auto expr = nodeToExpr(begin->stmts.back());
+            return MK::InsSeq(begin->loc, std::move(stats), std::move(expr));
+        }
+    } else {
+        // For other node types, we might need to fall back to a placeholder
+        // or implement more conversion logic as needed
+        return MK::EmptyTree();
+    }
+}
+
+// Adapted desugarDString function for Translator context
+ast::ExpressionPtr desugarDString(core::MutableContext &ctx, core::LocOffsets loc, NodeVec &nodes) {
+    if (nodes.empty()) {
+        return MK::String(loc, core::Names::empty());
+    }
+
+    auto it = nodes.begin();
+    auto end = nodes.end();
+    ast::ExpressionPtr first = nodeToExpr(*it);
+    absl::InlinedVector<ast::ExpressionPtr, 4> stringsAccumulated;
+
+    ast::Send::ARGS_store interpArgs;
+
+    bool allStringsSoFar;
+    if (isStringLit(first) || isa_tree<EmptyTree>(first)) {
+        stringsAccumulated.emplace_back(std::move(first));
+        allStringsSoFar = true;
+    } else {
+        interpArgs.emplace_back(std::move(first));
+        allStringsSoFar = false;
+    }
+    ++it;
+
+    for (; it != end; ++it) {
+        auto &stat = *it;
+        ast::ExpressionPtr narg = nodeToExpr(stat);
+        if (allStringsSoFar && isStringLit(narg)) {
+            stringsAccumulated.emplace_back(std::move(narg));
+        } else if (isa_tree<EmptyTree>(narg)) {
+            // no op
+        } else {
+            if (allStringsSoFar) {
+                allStringsSoFar = false;
+                auto mergedStrings = mergeStrings(ctx, loc, std::move(stringsAccumulated));
+                interpArgs.emplace_back(std::move(mergedStrings));
+            }
+            interpArgs.emplace_back(std::move(narg));
+        }
+    }
+
+    if (allStringsSoFar) {
+        return mergeStrings(ctx, loc, std::move(stringsAccumulated));
+    } else {
+        auto recv = MK::Magic(loc);
+        return MK::Send(loc, std::move(recv), core::Names::stringInterpolate(), loc.copyWithZeroLength(),
+                        static_cast<uint16_t>(interpArgs.size()), std::move(interpArgs));
+    }
 }
 
 template <typename PrismAssignmentNode, typename SorbetLHSNode>
@@ -833,21 +944,24 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto sorbetParts = translateMulti(interpolatedStringNode->parts);
 
-            return make_unique<parser::DString>(location, move(sorbetParts));
+            auto expr = desugarDString(ctx, location, sorbetParts);
+            return make_node_with_expr<parser::DString>(std::move(expr), location, std::move(sorbetParts));
         }
         case PM_INTERPOLATED_SYMBOL_NODE: { // A symbol like `:"a #{b} c"`
             auto interpolatedSymbolNode = down_cast<pm_interpolated_symbol_node>(node);
 
             auto sorbetParts = translateMulti(interpolatedSymbolNode->parts);
+            auto expr = desugarDString(ctx, location, sorbetParts);
 
-            return make_unique<parser::DSymbol>(location, move(sorbetParts));
+            return make_node_with_expr<parser::DSymbol>(std::move(expr), location, std::move(sorbetParts));
         }
         case PM_INTERPOLATED_X_STRING_NODE: { // An executable string with backticks, like `echo "Hello, world!"`
             auto interpolatedXStringNode = down_cast<pm_interpolated_x_string_node>(node);
 
             auto sorbetParts = translateMulti(interpolatedXStringNode->parts);
+            auto expr = desugarDString(ctx, location, sorbetParts);
 
-            return make_unique<parser::XString>(location, move(sorbetParts));
+            return make_node_with_expr<parser::XString>(std::move(expr), location, std::move(sorbetParts));
         }
         case PM_IT_LOCAL_VARIABLE_READ_NODE: { // The `it` implicit parameter added in Ruby 3.4, e.g. `a.map { it + 1 }`
             [[fallthrough]];
