@@ -477,8 +477,18 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             for (auto file : files) {
                 core::UnfreezeNameTable nameTableAccess(*rbiGenGs); // enters original strings
 
-                auto settings = parser::Parser::Settings{};
-                auto nodes = parser::Parser::run(*rbiGenGs, file, settings);
+                unique_ptr<parser::Node> nodes;
+                switch (parser) {
+                    case realmain::options::Parser::SORBET: {
+                        nodes = parser::Parser::run(*rbiGenGs, file, parser::Parser::Settings{});
+                        break;
+                    }
+                    case realmain::options::Parser::PRISM: {
+                        nodes = parser::Prism::Parser::run(*rbiGenGs, file);
+                        break;
+                    }
+                }
+
                 core::MutableContext ctx(*rbiGenGs, core::Symbols::root(), file);
                 auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file};
                 tree = ast::ParsedFile{rewriter::Rewriter::run(ctx, move(tree.tree)), tree.file};
