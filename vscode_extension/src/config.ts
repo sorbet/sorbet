@@ -1,6 +1,7 @@
 import {
   ConfigurationChangeEvent,
   Disposable,
+  DiagnosticSeverity,
   Event,
   EventEmitter,
   ExtensionContext,
@@ -19,6 +20,19 @@ export const ALL_TRACK_UNTYPED: TrackUntyped[] = [
   "nowhere",
   "everywhere-but-tests",
   "everywhere",
+];
+
+export type DiagnosticSeverityStr =
+  | "Error"
+  | "Warning"
+  | "Information"
+  | "Hint";
+
+export const ALL_DIAGNOSTIC_SEVERITY: DiagnosticSeverityStr[] = [
+  "Error",
+  "Warning",
+  "Information",
+  "Hint",
 ];
 
 function coerceTrackUntypedSetting(value: boolean | string): TrackUntyped {
@@ -216,6 +230,7 @@ export class SorbetExtensionConfig implements Disposable {
   private userLspConfigs: ReadonlyArray<SorbetLspConfig>;
   private wrappedEnabled: boolean;
   private wrappedHighlightUntyped: TrackUntyped;
+  private wrappedHighlightUntypedDiagnosticSeverity: DiagnosticSeverity;
   private wrappedTypedFalseCompletionNudges: boolean;
   private wrappedRevealOutputOnError: boolean;
 
@@ -229,6 +244,8 @@ export class SorbetExtensionConfig implements Disposable {
     this.standardLspConfigs = [];
     this.userLspConfigs = [];
     this.wrappedHighlightUntyped = "nowhere";
+    this.wrappedHighlightUntypedDiagnosticSeverity =
+      DiagnosticSeverity.Information;
     this.wrappedTypedFalseCompletionNudges = true;
     this.wrappedRevealOutputOnError = false;
 
@@ -291,6 +308,10 @@ export class SorbetExtensionConfig implements Disposable {
     this.wrappedTypedFalseCompletionNudges = this.sorbetWorkspaceContext.get(
       "typedFalseCompletionNudges",
       this.typedFalseCompletionNudges,
+    );
+    this.wrappedHighlightUntypedDiagnosticSeverity = this.sorbetWorkspaceContext.get(
+      "highlightUntypedDiagnosticSeverity",
+      this.highlightUntypedDiagnosticSeverity,
     );
 
     Disposable.from(...this.configFileWatchers).dispose();
@@ -363,6 +384,10 @@ export class SorbetExtensionConfig implements Disposable {
     return this.wrappedHighlightUntyped;
   }
 
+  public get highlightUntypedDiagnosticSeverity(): DiagnosticSeverity {
+    return this.wrappedHighlightUntypedDiagnosticSeverity;
+  }
+
   public oldHighlightUntyped: TrackUntyped | undefined = undefined;
 
   /**
@@ -428,6 +453,16 @@ export class SorbetExtensionConfig implements Disposable {
 
   public async setHighlightUntyped(trackWhere: TrackUntyped): Promise<void> {
     await this.sorbetWorkspaceContext.update("highlightUntyped", trackWhere);
+    this.refresh();
+  }
+
+  public async setHighlightUntypedDiagnosticSeverity(
+    severity: DiagnosticSeverity,
+  ): Promise<void> {
+    await this.sorbetWorkspaceContext.update(
+      "highlightUntypedDiagnosticSeverity",
+      severity,
+    );
     this.refresh();
   }
 

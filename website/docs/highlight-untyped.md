@@ -90,6 +90,60 @@ For example, in Neovim, this `highlightUntyped` setting can be provided via the 
 
 [`init_options` argument]: https://neovim.io/doc/user/lsp.html#:~:text=initializationOptions
 
+## Customizing the presentation of untyped highlights
+
+Due to limitations in the LSP spec, Sorbet reports untyped highlights as diagnostics. By default Sorbet reports untyped highlights using a [`DiagnosticSeverity`] of `Information`, which does not specify how it should be visualized.
+
+[`DiagnosticSeverity`]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#diagnosticSeverity
+
+Instead, presentation is the responsibility of the client. For example, Neovim's uses highlight groups (`:help diagnostic-highlights`) to specify how diagnostics look, and VS Code allows customizing diagnostics with [various settings](https://code.visualstudio.com/api/references/theme-color#:~:text=editorInfo.foreground) like `editorInfo.foreground`.
+
+Because certain language clients like VS Code make it hard to customize how diagnostics are presented in the editor, Sorbet allows specifying which diagnostic severity to report untyped highlights with.
+
+### In VS Code
+
+There are two methods:
+
+- Open a Ruby file, and run the `Sorbet: Configure highlight untyped diagnostic severity` command from the command palette (accessed via ⇧⌘P on macOS, or ⌃⇧P on Windows and Linux).
+
+  You will be able to choose the severity
+
+  - 1 – `Error` (red squiggles)
+
+  - 2 – `Warning` (yellow squiggles)
+
+  - 3 – `Information` (blue squiggles)
+
+  - 4 – `Hint` (gray `...`, no squiggles)
+
+- Set the `"sorbet.highlightUntypedDiagnosticSeverity": ...` setting in the VS Code preferences. This changes the _default_ setting--values chosen with the Configure command above will not change this value.
+
+  For example, to have a workspace default to reporting untyped code as warnings, add this to the project's `.vscode/settings.json` file:
+
+  ```json
+    "sorbet.highlightUntypedDiagnosticSeverity": 2
+  ```
+
+### In other LSP clients
+
+This feature relies on two LSP features:
+
+- The `initializationOptions` parameter in the `initialize` request that starts [every language server protocol session](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#initialize).
+
+- The `settings` parameter in the `workspace/didChangeConfiguration` notification.
+
+For both the `initializationOptions` and `settings` parameters, Sorbet allows passing a JSON object containing
+
+```json
+  "highlightUntypedDiagnosticSeverity": ...,
+```
+
+Where `...` is one of the [`DiagnosticSeverity`] integers from the LSP spec (1, 2, 3, 4).
+
+For example, in Neovim, this `highlightUntypedDiagnosticSeverity` setting can be provided via the [`init_options` argument] to the `vim.lsp.start_client()` function, which then passes it to the underlying `initialize` request.
+
+[`init_options` argument]: https://neovim.io/doc/user/lsp.html#:~:text=initializationOptions
+
 ## Notes
 
 - This feature is not enabled in `# typed: false` files. A `# typed: false` file is essentially a file where the entire contents would need to be underlined. Sorbet does not actually underline the entire content of such a file, as it would be too noisy.

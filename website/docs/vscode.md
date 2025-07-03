@@ -314,6 +314,12 @@ Whether to highlight untyped, and where. Defaults to `"nowhere"`.
 
 See [Highlighting untyped code](highlight-untyped.md)
 
+### `sorbet.highlightUntypedDiagnosticSeverity`
+
+What diagnostic severity to use when reporting usages of untyped.
+
+See [Highlighting untyped code](highlight-untyped.md)
+
 ### `sorbet.typedFalseCompletionNudges`
 
 Whether to enable `# typed: false` completion nudges. Defaults to `true`.

@@ -8,6 +8,7 @@
 #include "core/lsp/TypecheckEpochManager.h"
 #include "hashing/hashing.h"
 #include "main/cache/cache.h"
+#include "main/lsp/DiagnosticSeverity.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
@@ -440,8 +441,15 @@ const core::File &LSPIndexer::getFile(core::FileRef fref) const {
     return fref.data(*gs);
 }
 
-void LSPIndexer::updateGsFromOptions(const DidChangeConfigurationParams &options) const {
+void LSPIndexer::updateConfigAndGsFromOptions(const DidChangeConfigurationParams &options) const {
     gs->trackUntyped = LSPClientConfiguration::parseEnableHighlightUntyped(*options.settings, gs->trackUntyped);
+
+    // Errors are flushed from the typechecker thread, so this should not matter, but we may as well
+    // set it just in case.
+    if (options.settings->highlightUntypedDiagnosticSeverity.has_value()) {
+        gs->highlightUntypedDiagnosticSeverity =
+            convertDiagnosticSeverity(options.settings->highlightUntypedDiagnosticSeverity.value());
+    }
 }
 
 } // namespace sorbet::realmain::lsp

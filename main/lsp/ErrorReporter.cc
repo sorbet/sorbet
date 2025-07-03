@@ -2,6 +2,7 @@
 #include "core/errors/infer.h"
 #include "core/errors/internal.h"
 #include "core/lsp/TypecheckEpochManager.h"
+#include "main/lsp/DiagnosticSeverity.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"
@@ -158,7 +159,7 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
 
         diagnostic->severity = DiagnosticSeverity::Error;
         if (error->what == sorbet::core::errors::Infer::UntypedValueInformation) {
-            diagnostic->severity = DiagnosticSeverity::Information;
+            diagnostic->severity = convertDiagnosticSeverity(gs.highlightUntypedDiagnosticSeverity);
         }
 
         if (!error->autocorrects.empty()) {

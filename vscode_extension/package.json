@@ -4,7 +4,7 @@
   "description": "Ruby IDE features, powered by Sorbet.",
   "author": "Stripe Inc.",
   "license": "Apache-2.0",
-  "version": "0.3.43",
+  "version": "0.3.44",
   "publisher": "sorbet",
   "icon": "icon.png",
   "repository": {
@@ -25,6 +25,7 @@
   "activationEvents": [
     "onCommand:sorbet.configure",
     "onCommand:sorbet.configureHighlightUntyped",
+    "onCommand:sorbet.configureHighlightUntypedDiagnosticSeverity",
     "onCommand:sorbet.disable",
     "onCommand:sorbet.enable",
     "onCommand:sorbet.restart",
@@ -59,6 +60,12 @@
       {
         "command": "sorbet.configureHighlightUntyped",
         "title": "Configure untyped code highlighting",
+        "category": "Sorbet",
+        "enablement": "workbenchState != empty"
+      },
+      {
+        "command": "sorbet.configureHighlightUntypedDiagnosticSeverity",
+        "title": "Configure untyped code highlighting diagnostic severity",
         "category": "Sorbet",
         "enablement": "workbenchState != empty"
       },
@@ -279,6 +286,28 @@
           ],
           "description": "Shows warning for untyped values.",
           "default": "nowhere"
+        },
+        "sorbet.highlightUntypedDiagnosticSeverity": {
+          "enum": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "enumItemLabels": [
+            "Error",
+            "Warning",
+            "Information",
+            "Hint"
+          ],
+          "markdownEnumDescriptions": [
+            "Error",
+            "Warning",
+            "Information",
+            "Hint"
+          ],
+          "description": "Which severity to use to highlight untyped usages with (controls the squiggle colors)",
+          "default": 3
         },
         "sorbet.typedFalseCompletionNudges": {
           "type": "boolean",

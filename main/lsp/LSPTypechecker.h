@@ -196,7 +196,7 @@ public:
      * Exposes very limited mutability to typechecker's global state in order to support the client changing
      * options (such as highlighting untyped code) without doing a full restart of Sorbet.
      */
-    void updateGsFromOptions(const DidChangeConfigurationParams &options) const;
+    void updateConfigAndGsFromOptions(const DidChangeConfigurationParams &options) const;
 
     /**
      * Get an LSPFileUpdates containing the latest versions of the given files. It's a "no-op" file update because it
@@ -246,7 +246,7 @@ public:
 
     const core::GlobalState &state() const;
 
-    void updateGsFromOptions(const DidChangeConfigurationParams &options) const;
+    void updateConfigAndGsFromOptions(const DidChangeConfigurationParams &options) const;
     std::unique_ptr<LSPFileUpdates> getNoopUpdate(absl::Span<const core::FileRef> frefs) const;
 };
 } // namespace sorbet::realmain::lsp
