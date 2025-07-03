@@ -227,8 +227,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
             case realmain::options::Parser::SORBET: {
                 core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
-                auto settings = parser::Parser::Settings{};
-                nodes = parser::Parser::run(*gs, file, settings);
+                nodes = parser::Parser::run(*gs, file, parser::Parser::Settings{});
                 break;
             }
             case realmain::options::Parser::PRISM:
