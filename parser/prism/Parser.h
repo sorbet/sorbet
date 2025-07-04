@@ -66,9 +66,9 @@ public:
     static std::unique_ptr<parser::Node> run(core::GlobalState &gs, core::FileRef file);
 
     ParseResult parse();
-    core::LocOffsets translateLocation(pm_location_t location);
-    std::string_view resolveConstant(pm_constant_id_t constantId);
-    std::string_view extractString(pm_string_t *string);
+    core::LocOffsets translateLocation(pm_location_t location) const;
+    std::string_view resolveConstant(pm_constant_id_t constantId) const;
+    std::string_view extractString(pm_string_t *string) const;
 
 private:
     std::vector<ParseError> collectErrors();

@@ -22,20 +22,20 @@ ParseResult Parser::parse() {
     return ParseResult{*this, root, collectErrors()};
 };
 
-core::LocOffsets Parser::translateLocation(pm_location_t location) {
+core::LocOffsets Parser::translateLocation(pm_location_t location) const {
     uint32_t start = static_cast<uint32_t>(location.start - storage->parser.start);
     uint32_t end = static_cast<uint32_t>(location.end - storage->parser.start);
 
     return core::LocOffsets{start, end};
 }
 
-string_view Parser::resolveConstant(pm_constant_id_t constantId) {
+string_view Parser::resolveConstant(pm_constant_id_t constantId) const {
     pm_constant_t *constant = pm_constant_pool_id_to_constant(&storage->parser.constant_pool, constantId);
 
     return string_view(reinterpret_cast<const char *>(constant->start), constant->length);
 }
 
-string_view Parser::extractString(pm_string_t *string) {
+string_view Parser::extractString(pm_string_t *string) const {
     return string_view(reinterpret_cast<const char *>(pm_string_source(string)), pm_string_length(string));
 }
 
