@@ -318,8 +318,9 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
                 e.setHeader("{} method `{}` requires too many arguments", implementationOf(ctx, superMethod),
                             method.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
-                e.addErrorNote("`{}` requires at most `{}` positional arguments, but `{}` requires at least `{}`",
-                               superMethod.show(ctx), parentMin, method.show(ctx), childMin);
+                e.addErrorNote(
+                    "`{}` requires at most `{}` positional arguments, but `{}` can be called with as few as `{}`",
+                    superMethod.show(ctx), parentMin, method.show(ctx), childMin);
                 e.maybeAddAutocorrect(
                     constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
                 checkBackArgs = false;
@@ -330,7 +331,7 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
     auto prefixLen = min(childArgs.requiredPrefix.size(), superArgs.requiredPrefix.size());
     auto suffixLen = min(childArgs.requiredSuffix.size(), superArgs.requiredSuffix.size());
 
-    for (size_t i = 0; i < prefixLen; i += 1) {
+    for (auto i = 0; i < prefixLen; i += 1) {
         auto &superArg = superArgs.requiredPrefix[i].get();
         auto &childArg = childArgs.requiredPrefix[i].get();
 
@@ -338,26 +339,217 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
     }
 
     // Trailing required args need to be matched backwards
-    for (size_t i = 0; i < suffixLen && checkBackArgs; i += 1) {
+    for (auto i = 0; i < suffixLen && checkBackArgs; i += 1) {
         auto &superArg = read_back(superArgs.requiredSuffix, i)->get();
         auto &childArg = read_back(childArgs.requiredSuffix, i)->get();
 
         validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr, reportedAutocorrect);
     }
 
-    // Now, for each remaining parent argument, we check against every possible child argument it
-    // could be bound to.
-
-    for (size_t i = 0; prefixLen + i < superArgs.requiredPrefix.size(); i += 1) {
-        ENFORCE(prefixLen + i >= childArgs.requiredPrefix.size());
-        auto &superArg = superArgs.requiredPrefix[prefixLen + i].get();
-
-        // If the
+    // If there are any trailing positional args and the shapes are incompatible, we're done.
+    // Don't even try to match the remaining args.
+    if (childArgs.requiredSuffix.size() != superArgs.requiredSuffix.size() && !checkBackArgs) {
+        return;
     }
 
-    for (size_t i = suffixLen; i < superArgs.requiredSuffix.size(); i += 1) {
-        ENFORCE(i >= childArgs.requiredSuffix.size());
-        auto &superArg = read_back(superArgs.requiredSuffix, i)->get();
+    // Now, for each remaining parent argument, we check against every possible child argument it
+    // could be bound to.
+    //
+    // At this point, we are in one of two situations:
+    //
+    // parent: a, b, [some optional args]
+    // child:  [some optional args], x, y
+    //
+    // or flipped, where "optional" also encompasses the splat.
+    //
+    // Note that the following must hold:
+    // - There are at least as many unmatched required args in the parent as unmatched required
+    //   args in the child (follows from [child cannot have more required args than parent] and
+    //   the fact that we've removed args in lockstep thus far)
+    // - The remaining required args are on "opposite" sides (e.g., if the remaining args are in
+    //   parent's prefix, they're in the child's suffix).
+
+    if (prefixLen < superArgs.requiredPrefix.size()) {
+        // Suppose the remaining argument lists are (using ? to denote an optional argument):
+        //
+        //   parent: a  b  c  d? e? f?
+        //   child:  u? v? w? x? y  z
+        //
+        // We first assume that no required args are present (using [brackets] to indicate unbound args):
+        //
+        //   a              b  c  [d] [e] [f]
+        //   u? [v] [w] [x] y  z
+        //
+        // giving us that a <= u, b <= y and c <= z. Note that `a` matches to `u` instead of `w` because
+        // the VM fills in optional arguments from left to right.
+
+        auto remainingParent = superArgs.requiredPrefix.size() - prefixLen;
+        auto remainingChild = childArgs.requiredSuffix.size() - suffixLen;
+        ENFORCE(remainingParent >= remainingChild);
+
+        auto bumps = superArgs.splat ? remainingChild : superArgs.optional.size();
+
+        for (auto i = 0; i < remainingParent; i += 1) {
+            auto &superArg = superArgs.requiredPrefix[i + prefixLen].get();
+
+            // The bounds on this loop are somewhat complex.
+            //
+            // If we think about lining up the args like so (where param 5 is optional):
+            //
+            // parent: 0 1 2 3 4 (5)
+            // child:      0 1 2
+            //
+            // We can think of every optional arg as potentially "pushing" the bottom row to the
+            // right, as in:
+            //
+            // parent: 0 1 2 3 4  5
+            // child:        0 1  2
+            //
+            // Proceeding in this way, every match corresponds to a possible mapping from parent
+            // args to child args (and thus a subtype relationship to enforce).
+            //
+            // We can do this as many times as there are optional arguments. If there's a splat,
+            // there are potentially infinitely many optional args on the right, which we simulate
+            // by bumping `remainingChild` times.
+
+            int offset = min(i - (remainingParent - remainingChild), superArgs.requiredSuffix.size() - 1);
+
+            for (auto j = 0; j < bumps && offset - j >= 0; j += 1) {
+                auto &childArg = childArgs.requiredSuffix[offset - j].get();
+                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                reportedAutocorrect);
+            }
+
+            if (i < childArgs.optional.size()) {
+                auto &childArg = childArgs.optional[i].get();
+                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                reportedAutocorrect);
+            } else if (superArgs.splat) {
+                ENFORCE(childArgs.splat);
+                auto &childArg = childArgs.splat.value();
+                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                reportedAutocorrect);
+            }
+        }
+
+        // We do the same thing to check all optional arguments. This one is a bit easier, because
+        // we're guaranteed that optional arguments come left-to-right.
+
+        for (auto i = 0; i < superArgs.optional.size(); i += 1) {
+            auto &superArg = superArgs.optional[i].get();
+            for (auto j = 0; j < bumps; j += 1) {
+                auto &childArg = childArgs.requiredSuffix[superArgs.optional.size() - j - 1].get();
+                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                reportedAutocorrect);
+            }
+
+            if (i + prefixLen < childArgs.optional.size()) {
+                auto &childArg = childArgs.optional[i + prefixLen].get();
+                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                reportedAutocorrect);
+            } else if (superArgs.splat) {
+                ENFORCE(childArgs.splat);
+                auto &childArg = childArgs.splat.value();
+                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                reportedAutocorrect);
+            }
+        }
+
+        // Finally, the splat.
+        //
+        // Any elements in the splat must come to the right of every required and optional param in
+        // the parent, meaning any splatted arg might be bound to the mandatory suffix of the child
+        // args. Likewise, once the child optional args are filled in from left-to-right, any
+        // unbound optional args may also be bound by the splat. Finally, the child splat (it must
+        // have one) should obviously accept anything the parent splat accepts.
+
+        if (superArgs.splat) {
+            auto &superArg = superArgs.splat.value();
+            for (auto i = 0; i < remainingChild; i += 1) {
+                auto &childArg = childArgs.requiredSuffix[i];
+                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                reportedAutocorrect);
+            }
+
+            for (auto i = remainingParent + superArgs.optional.size(); i < childArgs.optional.size(); i += 1) {
+                auto &childArg = childArgs.requiredSuffix[i];
+                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                reportedAutocorrect);
+            }
+
+            auto &childArg = childArgs.splat.value();
+            validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr, reportedAutocorrect);
+        }
+    } else {
+        // In this case, we use basically the same logic, but flipped. The indexing logic is a bit
+        // simpler because each optional arg in the parent comes to the *left* of the mandatory
+        // suffix, which is the same order that arguments are filled in by the child.
+
+        auto remainingParent = superArgs.requiredSuffix.size() - suffixLen;
+        auto remainingChild = childArgs.requiredPrefix.size() - prefixLen;
+        ENFORCE(remainingParent >= remainingChild);
+
+        ENFORCE(superArgs.splat || childArgs.optional.size() >= superArgs.optional.size());
+        auto bumps = superArgs.splat ? childArgs.optional.size() : superArgs.optional.size();
+
+        // This time, we are pushing the parent's mandatory suffix over all possible optional
+        // params it could run into.
+        for (auto i = 0; i < remainingParent; i += 1) {
+            auto &superArg = superArgs.requiredSuffix[i].get();
+
+            for (auto j = i; j < remainingChild; j += 1) {
+                auto &childArg = childArgs.requiredPrefix[j].get();
+                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                reportedAutocorrect);
+            }
+
+            for (auto j = 0; j < bumps; j += 1) {
+                auto &childArg = childArgs.optional[j].get();
+                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                reportedAutocorrect);
+            }
+
+            if (superArgs.splat) {
+                ENFORCE(childArgs.splat);
+                auto &childArg = childArgs.splat.value();
+                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                reportedAutocorrect);
+            }
+        }
+
+        // In this case, the `i`th optional argument is always the `i`th parent argument and so
+        // will always be bound to the `i`th (nominal) argument in the child.
+        for (auto i = 0; i < superArgs.optional.size(); i += 1) {
+            auto &superArg = superArgs.requiredSuffix[i].get();
+
+            if (prefixLen + i < childArgs.requiredPrefix.size()) {
+                auto &childArg = childArgs.requiredPrefix[prefixLen + i].get();
+                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                reportedAutocorrect);
+            } else if (i - prefixLen < childArgs.optional.size()) {
+                auto &childArg = childArgs.optional[i - prefixLen].get();
+                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                reportedAutocorrect);
+            } else {
+                auto &childArg = childArgs.splat.value();
+                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                reportedAutocorrect);
+            }
+        }
+
+        if (superArgs.splat) {
+            auto &superArg = superArgs.splat.value();
+            ENFORCE(childArgs.splat);
+
+            for (auto i = superArgs.optional.size() - remainingChild; i < childArgs.optional.size(); i += 1) {
+                auto &childArg = childArgs.splat.value();
+                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                reportedAutocorrect);
+            }
+
+            auto &childArg = childArgs.splat.value();
+            validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr, reportedAutocorrect);
+        }
     }
 }
 
@@ -442,22 +634,6 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
     auto sig = decomposeSignature(ctx, method);
 
     validateOverridePositionalParams(ctx, tree, superMethod, methodDef, superSig, sig, *constr, reportedAutocorrect);
-
-    /*
-    if (auto superSigRest = superSig.pos.rest) {
-        if (!sig.pos.rest) {
-            if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
-                auto [prefix, argName] = formatSplat(superSigRest->get(), SplatKind::ARG, ctx);
-                e.setHeader("{} method `{}` must accept {}`{}`", implementationOf(ctx, superMethod),
-                            superMethod.show(ctx), prefix, argName);
-                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
-
-                e.maybeAddAutocorrect(
-                    constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
-            }
-        }
-    }
-                    */
 
     if (!sig.kw.rest) {
         for (auto req : superSig.kw.required) {
