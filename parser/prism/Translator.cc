@@ -1153,7 +1153,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Self>(location);
         }
         case PM_SHAREABLE_CONSTANT_NODE: {
-            // Sorbet doesn't handle `shareable_constant_value` yet.
+            // Sorbet doesn't handle `shareable_constant_value` yet (https://bugs.ruby-lang.org/issues/17273).
             // We'll just handle the inner constant assignment as normal.
             auto shareableConstantNode = down_cast<pm_shareable_constant_node>(node);
             return translate(shareableConstantNode->write);
