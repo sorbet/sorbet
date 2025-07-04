@@ -284,7 +284,7 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
     // If the shape of the override is wrong (e.g. the child doesn't accept enough args to handle all
     // contortions of the parent), any check that tries to match trailing args is very likely to be
     // spurious, so don't bother.
-    auto checkBackArgs = true;
+    auto shapesCompatible = true;
 
     if (superArgs.splat) {
         if (!childArgs.splat) {
@@ -296,7 +296,7 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
 
                 e.maybeAddAutocorrect(
                     constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
-                checkBackArgs = false;
+                shapesCompatible = false;
             }
         }
     } else {
@@ -305,11 +305,11 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
                 e.setHeader("{} method `{}` does not accept enough arguments", implementationOf(ctx, superMethod),
                             method.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
-                e.addErrorNote("`{}` may pass up to `{}` positional arguments, but `{}` accepts at most `{}`",
-                               superMethod.show(ctx), parentMax, method.show(ctx), childMax);
+                e.addErrorNote("`{}` may pass up to `{}` positional argument{}, but `{}` accepts at most `{}`",
+                               superMethod.show(ctx), parentMax, parentMax == 1 ? "" : "s", method.show(ctx), childMax);
                 e.maybeAddAutocorrect(
                     constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
-                checkBackArgs = false;
+                shapesCompatible = false;
             }
         }
 
@@ -319,11 +319,11 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
                             method.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
                 e.addErrorNote(
-                    "`{}` requires at most `{}` positional arguments, but `{}` can be called with as few as `{}`",
-                    superMethod.show(ctx), parentMin, method.show(ctx), childMin);
+                    "`{}` has `{}` required positional argument{}, but `{}` can be called with as few as `{}`",
+                    method.show(ctx), childMin, childMin == 1 ? "" : "s", superMethod.show(ctx), parentMin);
                 e.maybeAddAutocorrect(
                     constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
-                checkBackArgs = false;
+                shapesCompatible = false;
             }
         }
     }
@@ -339,16 +339,31 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
     }
 
     // Trailing required args need to be matched backwards
-    for (auto i = 0; i < suffixLen && checkBackArgs; i += 1) {
+    for (auto i = 0; i < suffixLen && shapesCompatible; i += 1) {
         auto &superArg = read_back(superArgs.requiredSuffix, i)->get();
         auto &childArg = read_back(childArgs.requiredSuffix, i)->get();
 
         validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr, reportedAutocorrect);
     }
 
-    // If there are any trailing positional args and the shapes are incompatible, we're done.
-    // Don't even try to match the remaining args.
-    if (childArgs.requiredSuffix.size() != superArgs.requiredSuffix.size() && !checkBackArgs) {
+    // If the shapes are incompatible, any errors from running the full algorithm are liable to
+    // be wrong. Instead, do a best-effort and match optional args against each other from
+    // left-to-right.
+    if (!shapesCompatible) {
+        for (auto i = 0; i < min(superArgs.optional.size(), childArgs.optional.size()); i += 1) {
+            auto &superArg = superArgs.optional[i].get();
+            auto &childArg = childArgs.optional[i].get();
+
+            validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr, reportedAutocorrect);
+        }
+
+        if (superArgs.splat && childArgs.splat) {
+            auto &superArg = superArgs.splat.value();
+            auto &childArg = childArgs.splat.value();
+
+            validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr, reportedAutocorrect);
+        }
+
         return;
     }
 

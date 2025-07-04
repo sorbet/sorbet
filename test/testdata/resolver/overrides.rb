@@ -74,7 +74,7 @@ class B6 < A6
   extend T::Sig
   sig {override.params(x: String).void}
   def foo(x); end
-# ^^^^^^^^^^ error: Override of method `A6#foo` must accept no more than `0` required argument(s)
+# ^^^^^^^^^^ error: Override of method `A6#foo` requires too many arguments
 end
 
 class A7
@@ -87,4 +87,17 @@ class B7 < A7
   extend T::Sig
   sig {override.returns(String)}
   def foo; 'foo' end
+end
+
+class A8
+  extend T::Sig
+  sig {params(x: Integer, y: String).void}
+  def foo(x, y); end
+end
+
+class B8 < A8
+  extend T::Sig
+  sig {override.params(x: Integer, y: Integer).void}
+#                                  ^ error: Parameter `y` of type `Integer` not compatible with type of overridden method `A8#foo`
+  def foo(x, y=0); end
 end
