@@ -8,7 +8,7 @@ class A
   sig {params(x: Integer, y: T.nilable(String)).void}
   #                       ^ error: Unknown argument name `y`
   def initialize(x, y=nil, )
-                # ^ error: unexpected token ","
+                # ^ parser-error: unexpected token ","
     @x = x
     @y = y
   # ^^ error: The instance variable `@y` must be declared
