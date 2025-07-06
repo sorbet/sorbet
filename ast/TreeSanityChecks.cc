@@ -115,6 +115,7 @@ void Literal::_sanityCheck() {
         case core::TypePtr::Tag::FloatLiteralType:
         case core::TypePtr::Tag::NamedLiteralType:
         case core::TypePtr::Tag::ClassType:
+            // If you add a new valid tag here, make sure to also update the code in TreeEquality.cc to handle that tag
             break;
         default:
             ENFORCE(false, "unexpected TypePtr::Tag: {}", fmt::underlying(tag));
