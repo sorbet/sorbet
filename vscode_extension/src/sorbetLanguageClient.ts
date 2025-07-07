@@ -1,4 +1,10 @@
-import { Disposable, Event, EventEmitter, workspace } from "vscode";
+import {
+  Disposable,
+  Event,
+  EventEmitter,
+  workspace,
+  WorkspaceFolder,
+} from "vscode";
 import {
   CloseAction,
   CloseHandlerResult,
@@ -61,13 +67,22 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
   ) {
     this.context = context;
     this.languageClient = instrumentLanguageClient(
-      createClient(context, () => this.startSorbetProcess(), this),
+      createClient(
+        context,
+        this.workspaceFolder,
+        () => this.startSorbetProcess(),
+        this,
+      ),
       this.context.metrics,
     );
 
     this.onStatusChangeEmitter = new EventEmitter<ServerStatus>();
     this.restart = restart;
     this.wrappedStatus = ServerStatus.INITIALIZING;
+  }
+
+  private get workspaceFolder(): WorkspaceFolder | undefined {
+    return workspace.workspaceFolders?.[0];
   }
 
   /**
@@ -222,7 +237,7 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
 
     this.context.log.debug(">", command, ...args);
     this.sorbetProcess = spawn(command, args, {
-      cwd: workspace.rootPath,
+      cwd: this.workspaceFolder?.uri.fsPath,
       env: { ...process.env, ...activeConfig?.env },
     });
     // N.B.: 'exit' is sometimes not invoked if the process exits with an error/fails to start, as per the Node.js docs.
