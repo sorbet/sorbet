@@ -259,7 +259,13 @@ public:
     static ExpressionPtr Method0(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name, ExpressionPtr rhs,
                                  MethodDef::Flags flags = MethodDef::Flags()) {
         MethodDef::ARGS_store args;
-        flags.isRewriterSynthesized = false;
+        return Method(loc, declLoc, name, std::move(args), std::move(rhs), flags);
+    }
+
+    static ExpressionPtr Method1(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name, ExpressionPtr arg0,
+                                 ExpressionPtr rhs, MethodDef::Flags flags = MethodDef::Flags()) {
+        MethodDef::ARGS_store args;
+        args.emplace_back(std::move(arg0));
         return Method(loc, declLoc, name, std::move(args), std::move(rhs), flags);
     }
 

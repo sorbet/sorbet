@@ -236,8 +236,7 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
             }
             ast::MethodDef::Flags flags;
             flags.isAttrBestEffortUIOnly = true;
-            stats.emplace_back(
-                ast::MK::SyntheticMethod1(loc, loc, setName, ast::MK::Local(argLoc, name), move(body), flags));
+            stats.emplace_back(ast::MK::Method1(loc, loc, setName, ast::MK::Local(argLoc, name), move(body), flags));
         }
     }
 
