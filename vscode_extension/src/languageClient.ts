@@ -1,3 +1,4 @@
+import { WorkspaceFolder } from "vscode";
 import { ErrorHandler, RevealOutputChannelOn } from "vscode-languageclient";
 import { LanguageClient, ServerOptions } from "vscode-languageclient/node";
 import { backwardsCompatibleTrackUntyped } from "./config";
@@ -8,6 +9,7 @@ import { SorbetExtensionContext } from "./sorbetExtensionContext";
  */
 export function createClient(
   context: SorbetExtensionContext,
+  workspaceFolder: WorkspaceFolder | undefined,
   serverOptions: ServerOptions,
   errorHandler: ErrorHandler,
 ): LanguageClient {
@@ -45,6 +47,7 @@ export function createClient(
       return false;
     },
     outputChannel: context.logOutputChannel,
+    workspaceFolder,
     revealOutputChannelOn: context.configuration.revealOutputOnError
       ? RevealOutputChannelOn.Error
       : RevealOutputChannelOn.Never,
