@@ -63,3 +63,8 @@ end
 def defReturn5(x)
   return x, 42 #: as [String, Integer]
 end
+
+#: -> void
+public def defModifier
+  nil #: Integer?
+end
