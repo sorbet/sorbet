@@ -246,6 +246,14 @@ public:
     // Returns a string representing the path to the given package from this package, if it exists. Note: this only
     // looks at non-test imports.
     std::optional<std::string> pathTo(const core::GlobalState &gs, const MangledName dest) const;
+
+    bool isPreludePackage_ = false;
+
+    // True when the package is marked with a `prelude_package` annotation. This requires that the package only import
+    // other prelude packages and markes it as an implicit dependency of all non-prelude packages.
+    bool isPreludePackage() const {
+        return this->isPreludePackage_;
+    }
 };
 
 } // namespace sorbet::core::packages
