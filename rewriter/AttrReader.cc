@@ -198,7 +198,7 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
 
             ast::MethodDef::Flags flags;
             flags.isAttrBestEffortUIOnly = true;
-            auto reader = ast::MK::SyntheticMethod0(loc, loc, name, ast::MK::Instance(argLoc, varName), flags);
+            auto reader = ast::MK::Method0(loc, loc, name, ast::MK::Instance(argLoc, varName), flags);
             stats.emplace_back(std::move(reader));
         }
     }
@@ -234,8 +234,7 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
             }
             ast::MethodDef::Flags flags;
             flags.isAttrBestEffortUIOnly = true;
-            stats.emplace_back(
-                ast::MK::SyntheticMethod1(loc, loc, setName, ast::MK::Local(argLoc, name), move(body), flags));
+            stats.emplace_back(ast::MK::Method1(loc, loc, setName, ast::MK::Local(argLoc, name), move(body), flags));
         }
     }
 
