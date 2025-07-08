@@ -447,6 +447,9 @@ public:
             return;
         }
 
+        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+        ENFORCE(pkg.exists());
+
         bool isExported = false;
         if (litSymbol.isClassOrModule()) {
             isExported = litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
@@ -454,8 +457,18 @@ public:
             isExported = litSymbol.asFieldRef().data(ctx)->flags.isExported;
         }
         isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
+
         auto currentImportType = this->package.importsPackage(otherPackage);
-        auto wasImported = currentImportType.has_value();
+        bool wasImported = currentImportType.has_value();
+
+        // Prelude packages are always imported (but not from other preluded packages). An implicit import is modeled as
+        // a normal import, but an explicit import of a prelude package can be treated as a test import.
+        if (!this->package.isPreludePackage() && pkg.isPreludePackage()) {
+            wasImported = true;
+            if (!currentImportType.has_value()) {
+                currentImportType.emplace(core::packages::ImportType::Normal);
+            }
+        }
 
         // Is this a test import (whether test helper or not) used in a production context?
         auto testImportInProd = wasImported && currentImportType.value() != core::packages::ImportType::Normal &&
@@ -466,7 +479,6 @@ public:
                                       this->fileType != FileType::TestUnitFile;
 
         if (!wasImported || testImportInProd || testUnitImportInHelper || !isExported) {
-            auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
             core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
             if (isTestImport) {
