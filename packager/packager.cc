@@ -213,6 +213,10 @@ public:
         return visibleToTests_;
     }
 
+    bool isPreludePackage() const {
+        return isPreludePackage_;
+    }
+
     PackageName name;
 
     // loc for the package definition. Full loc, from class to end keyword. Used for autocorrects.
@@ -242,6 +246,9 @@ public:
 
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
+
+    // True when this package is marked with `prelude_package`.
+    bool isPreludePackage_ = false;
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_ = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer_ = nullopt;
@@ -1331,6 +1338,10 @@ struct PackageSpecBodyWalk {
             info.exportAll_ = true;
         }
 
+        if (send.fun == core::Names::preludePackage() && send.numPosArgs() == 0) {
+            info.isPreludePackage_ = true;
+        }
+
         if (send.fun == core::Names::visibleTo() && send.numPosArgs() == 1) {
             if (auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
                 // the only valid literal here is `visible_to "tests"`; others should be rejected
@@ -1524,6 +1535,7 @@ struct PackageSpecBodyWalk {
             case core::Names::export_().rawId():
             case core::Names::visibleTo().rawId():
             case core::Names::exportAll().rawId():
+            case core::Names::preludePackage().rawId():
                 return true;
             default:
                 return false;
