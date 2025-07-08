@@ -962,7 +962,6 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::preludePackage()).build();
     ENFORCE_NO_TIMER(method == Symbols::PackageSpec_preludePackage());
 
-
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes
