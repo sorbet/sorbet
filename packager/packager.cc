@@ -641,6 +641,8 @@ struct PackageSpecBodyWalk {
             if (send.numPosArgs() == 0) {
                 info.exportAll_ = true;
             }
+        } else if (send.fun == core::Names::preludePackage() && send.numPosArgs() == 0) {
+            info.isPreludePackage_ = true;
         } else if (send.fun == core::Names::visibleTo()) {
             if (send.numPosArgs() == 1) {
                 if (auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
@@ -876,6 +878,7 @@ struct PackageSpecBodyWalk {
             case core::Names::export_().rawId():
             case core::Names::visibleTo().rawId():
             case core::Names::exportAll().rawId():
+            case core::Names::preludePackage().rawId():
                 return true;
             default:
                 return false;
