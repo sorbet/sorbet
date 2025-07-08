@@ -67,6 +67,11 @@ public:
         return false;
     }
 
+    bool isPreludePackage() const {
+        notImplemented();
+        return false;
+    }
+
     vector<VisibleTo> visibleTo() const {
         return {};
     }
