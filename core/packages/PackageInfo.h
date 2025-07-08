@@ -120,6 +120,10 @@ public:
     virtual bool exportAll() const = 0;
     virtual bool visibleToTests() const = 0;
 
+    // True when the package is marked with a `prelude_package` annotation. This requires that the package only import
+    // other prelude packages and markes it as an implicit dependency of all non-prelude packages.
+    virtual bool isPreludePackage() const = 0;
+
     // Utilities:
 
     static bool lexCmp(absl::Span<const core::NameRef> lhs, absl::Span<const core::NameRef> rhs);

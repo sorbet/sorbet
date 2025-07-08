@@ -473,6 +473,7 @@ NameDef names[] = {
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
     {"only"},
     {"testRb", "test_rb"},
+    {"preludePackage", "prelude_package"},
 
     // GlobalState initEmpty()
     {"Top", "T.anything", true},
