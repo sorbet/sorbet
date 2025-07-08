@@ -58,7 +58,8 @@ Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method
             } else if (arg.flags.isRepeated) {
                 sig.pos.splat = optional<reference_wrapper<const core::ArgInfo>>{arg};
             } else {
-                auto &dst = sig.pos.optional.empty() ? sig.pos.requiredPrefix : sig.pos.requiredSuffix;
+                auto &dst =
+                    (sig.pos.optional.empty() && !sig.pos.splat) ? sig.pos.requiredPrefix : sig.pos.requiredSuffix;
                 dst.push_back(arg);
             }
         }
@@ -316,7 +317,7 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
         if (parentMin < childMin) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("{} method `{}` requires too many arguments", implementationOf(ctx, superMethod),
-                            method.show(ctx));
+                            superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
                 e.addErrorNote(
                     "`{}` has `{}` required positional argument{}, but `{}` can be called with as few as `{}`",
@@ -401,6 +402,8 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
         auto remainingParent = superArgs.requiredPrefix.size() - prefixLen;
         auto remainingChild = childArgs.requiredSuffix.size() - suffixLen;
         ENFORCE(remainingParent >= remainingChild);
+        ENFORCE(superArgs.requiredSuffix.size() - suffixLen == 0);
+        ENFORCE(childArgs.requiredPrefix.size() - prefixLen == 0);
 
         auto bumps = superArgs.splat ? remainingChild : superArgs.optional.size();
 
@@ -414,7 +417,7 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
             // parent: 0 1 2 3 4 (5)
             // child:      0 1 2
             //
-            // We can think of every optional arg as potentially "pushing" the bottom row to the
+            // We can think of every additional optional arg as "bumping" the bottom row to the
             // right, as in:
             //
             // parent: 0 1 2 3 4  5
@@ -427,23 +430,35 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
             // there are potentially infinitely many optional args on the right, which we simulate
             // by bumping `remainingChild` times.
 
-            int offset = min(i - (remainingParent - remainingChild), superArgs.requiredSuffix.size() - 1);
+            // This quantity represents the number of required parent arguments that will never be
+            // matched against a required child argument.
+            //
+            //   0 1 2 3 4
+            //   _ _ 0 1 2
+            int offset = remainingParent - remainingChild;
 
-            for (auto j = 0; j < bumps && offset - j >= 0; j += 1) {
-                auto &childArg = childArgs.requiredSuffix[offset - j].get();
+            // This is an inclusive bound because we must check the configuration with no optional
+            // parameters set.
+            for (int j = 0; j <= bumps && i - offset - j >= 0; j += 1) {
+                int idx = i - offset - j;
+                ENFORCE(idx >= 0 && idx < childArgs.requiredSuffix.size());
+                auto &childArg = childArgs.requiredSuffix[idx].get();
                 validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
                                 reportedAutocorrect);
             }
 
-            if (i < childArgs.optional.size()) {
-                auto &childArg = childArgs.optional[i].get();
-                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
-                                reportedAutocorrect);
-            } else if (superArgs.splat) {
-                ENFORCE(childArgs.splat);
-                auto &childArg = childArgs.splat.value();
-                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
-                                reportedAutocorrect);
+            // The first condition here checks if we bump enough times for an argument to be matched
+            // against an optional argument at all.
+            if (bumps + (remainingParent - remainingChild) > i || superArgs.splat) {
+                if (i < childArgs.optional.size()) {
+                    auto &childArg = childArgs.optional[i].get();
+                    validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                    reportedAutocorrect);
+                } else if (childArgs.splat) {
+                    auto &childArg = childArgs.splat.value();
+                    validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                    reportedAutocorrect);
+                }
             }
         }
 
@@ -452,28 +467,32 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
 
         for (auto i = 0; i < superArgs.optional.size(); i += 1) {
             auto &superArg = superArgs.optional[i].get();
+            // The last optional argument provided is always bound to the last argument of the child
+            // function. This bound is exclusive because, by definition, if an optional argument is
+            // present, we're not in the "no bumps" configuration.
             for (auto j = 0; j < bumps; j += 1) {
                 auto &childArg = childArgs.requiredSuffix[superArgs.optional.size() - j - 1].get();
                 validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
                                 reportedAutocorrect);
             }
 
-            if (i + prefixLen < childArgs.optional.size()) {
-                auto &childArg = childArgs.optional[i + prefixLen].get();
-                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
-                                reportedAutocorrect);
-            } else if (superArgs.splat) {
-                ENFORCE(childArgs.splat);
-                auto &childArg = childArgs.splat.value();
-                validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
-                                reportedAutocorrect);
+            if (bumps + i > remainingChild && superArgs.splat) {
+                if (i + prefixLen < childArgs.optional.size()) {
+                    auto &childArg = childArgs.optional[i + prefixLen].get();
+                    validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                    reportedAutocorrect);
+                } else if (childArgs.splat) {
+                    auto &childArg = childArgs.splat.value();
+                    validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
+                                    reportedAutocorrect);
+                }
             }
         }
 
         // Finally, the splat.
         //
-        // Any elements in the splat must come to the right of every required and optional param in
-        // the parent, meaning any splatted arg might be bound to the mandatory suffix of the child
+        // Any elements in the splat must come to the right of every optional param in the parent,
+        // meaning any splatted arg might be bound to the remaining mandatory suffix of the child
         // args. Likewise, once the child optional args are filled in from left-to-right, any
         // unbound optional args may also be bound by the splat. Finally, the child splat (it must
         // have one) should obviously accept anything the parent splat accepts.
@@ -518,7 +537,7 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
                                 reportedAutocorrect);
             }
 
-            for (auto j = 0; j < bumps; j += 1) {
+            for (auto j = 0; j <= bumps; j += 1) {
                 auto &childArg = childArgs.optional[j].get();
                 validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
                                 reportedAutocorrect);

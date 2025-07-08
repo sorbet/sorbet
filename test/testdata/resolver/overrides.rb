@@ -89,6 +89,8 @@ class B7 < A7
   def foo; 'foo' end
 end
 
+class Unrelated; end
+
 class A8
   extend T::Sig
   sig {params(x: Integer, y: String).void}
@@ -100,4 +102,73 @@ class B8 < A8
   sig {override.params(x: Integer, y: Integer).void}
 #                                  ^ error: Parameter `y` of type `Integer` not compatible with type of overridden method `A8#foo`
   def foo(x, y=0); end
+end
+
+class C8 < A8
+  extend T::Sig
+  sig {override.params(x: String, y: String).void}
+#                      ^ error: Parameter `x` of type `String` not compatible with type of overridden method `A8#foo`
+  def foo(x="", y); end
+end
+
+# should be fine, `z` remains unbound
+class D8 < A8
+  extend T::Sig
+  sig {override.params(x: Integer, y: String, z: Integer).void}
+  def foo(x, y="", z=0); end
+end
+
+# should be fine, `y` is the tail argument of `A8#foo`
+class E8 < A8
+  extend T::Sig
+  sig {override.params(x: Integer, y: Integer, z: String).void}
+  def foo(x, y=0, z); end
+end
+
+# should be fine, no arguments added to splat
+class F8 < A8
+  extend T::Sig
+  sig {override.params(x: Integer, y: Unrelated, z: String).void}
+  def foo(x, *y, z); end
+end
+
+# https://github.com/sorbet/sorbet/issues/8343
+class A9
+  extend T::Sig
+
+  sig {params(x: Integer).void}
+  def foo(x); end
+end
+
+class B9 < A9
+  sig {override.params(args: String).void}
+  #                    ^^^^ error: Parameter `args` of type `String` not compatible with type of overridden method `A9#foo`
+  def foo(*args); end
+end
+
+class A10
+  extend T::Sig
+  sig {params(x: Integer, y: String, z: Integer).void}
+  def foo(x, y, z); end
+end
+
+class B10 < A10
+  extend T::Sig
+  sig {override.params(x: Integer, y: Integer, z: Integer).void}
+  #                                ^ error: Parameter `y` of type `Integer` not compatible with type of overridden method `A10#foo`
+  def foo(x, y=0, z); end
+end
+
+class C10 < A10
+  extend T::Sig
+  sig {override.params(x: Integer, y: Integer, z: Integer).void}
+  #                                ^ error: Parameter `y` of type `Integer` not compatible with type of overridden method `A10#foo`
+  def foo(x, *y, z); end
+end
+
+class D10 < A10
+  extend T::Sig
+  sig {override.params(x: Integer, y: String, z: String).void}
+  #                                           ^ error: Parameter `z` of type `String` not compatible with type of overridden method `A10#foo`
+  def foo(x, *y, z); end
 end
