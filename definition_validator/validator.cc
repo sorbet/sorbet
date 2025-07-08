@@ -264,11 +264,10 @@ read_back(const absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &
 // Positional argument checking is extremely messy, due to the possibility of having optional and
 // splat args in the middle.
 //
-// The strategy to ensure that an override is compatible is to "simulate" what would happen if
-// `Parent.foo` gets transformed into `Child.foo`. The naive way to do this would be to take
-// 2^[#optional] possible parent calls and make sure that they still typecheck as child calls, but
-// we can reduce this to ~n^2 by observing that there are only [#child_args] * [#parent_args]
-// possible ways to bind `Parent.foo` arguments to arguments in a `Child.foo` call.
+// The core idea is that, given the parent and child signatures, it is possible to know which parent
+// parameter may be bound to which child parameter when subsituting `Parent.foo` with `Child.foo`.
+// The algorithm, then, amounts to asserting that every possible binding from parent to child is
+// valid.
 void validateOverridePositionalParams(const core::Context ctx, const ast::ExpressionPtr &tree,
                                       core::MethodRef superMethod, const ast::MethodDef &methodDef,
                                       const Signature superSig, const Signature sig, core::TypeConstraint &constr,
@@ -521,9 +520,9 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
 
         auto remainingParent = superArgs.requiredSuffix.size() - suffixLen;
         auto remainingChild = childArgs.requiredPrefix.size() - prefixLen;
+        ENFORCE(childArgs.splat || childArgs.optional.size() >= superArgs.optional.size());
         ENFORCE(remainingParent >= remainingChild);
 
-        ENFORCE(superArgs.splat || childArgs.optional.size() >= superArgs.optional.size());
         auto bumps = superArgs.splat ? childArgs.optional.size() : superArgs.optional.size();
 
         // This time, we are pushing the parent's mandatory suffix over all possible optional
@@ -531,13 +530,13 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
         for (auto i = 0; i < remainingParent; i += 1) {
             auto &superArg = superArgs.requiredSuffix[i].get();
 
-            for (auto j = i; j < remainingChild; j += 1) {
-                auto &childArg = childArgs.requiredPrefix[j].get();
+            for (auto j = 0; j <= bumps && i + j + prefixLen < childArgs.requiredPrefix.size(); j += 1) {
+                auto &childArg = childArgs.requiredPrefix[i + j + prefixLen].get();
                 validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
                                 reportedAutocorrect);
             }
 
-            for (auto j = 0; j <= bumps; j += 1) {
+            for (auto j = 0; j < bumps && j < childArgs.optional.size(); j += 1) {
                 auto &childArg = childArgs.optional[j].get();
                 validateSubtype(ctx, tree, superMethod, methodDef, method, superArg, childArg, constr,
                                 reportedAutocorrect);
@@ -554,7 +553,7 @@ void validateOverridePositionalParams(const core::Context ctx, const ast::Expres
         // In this case, the `i`th optional argument is always the `i`th parent argument and so
         // will always be bound to the `i`th (nominal) argument in the child.
         for (auto i = 0; i < superArgs.optional.size(); i += 1) {
-            auto &superArg = superArgs.requiredSuffix[i].get();
+            auto &superArg = superArgs.optional[i].get();
 
             if (prefixLen + i < childArgs.requiredPrefix.size()) {
                 auto &childArg = childArgs.requiredPrefix[prefixLen + i].get();

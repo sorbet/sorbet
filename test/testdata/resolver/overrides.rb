@@ -172,3 +172,31 @@ class D10 < A10
   #                                           ^ error: Parameter `z` of type `String` not compatible with type of overridden method `A10#foo`
   def foo(x, *y, z); end
 end
+
+class A11
+  extend T::Sig
+  sig {params(x: Integer, y: Integer).void}
+  def foo(x=0, y); end
+end
+
+class B11 < A11
+  extend T::Sig
+  sig {override.params(x: Integer, y: Integer).void}
+  def foo(x, y=0); end
+end
+
+class C11 < A11
+  extend T::Sig
+  # This duplicate error is actually intentional; consider `foo(1)` and `foo(1,1)`.
+  sig {override.params(x: String, y: Integer).void}
+#                      ^ error: Parameter `x` of type `String` not compatible with type of overridden method `A11#foo`
+#                      ^ error: Parameter `x` of type `String` not compatible with type of overridden method `A11#foo`
+  def foo(x, y=0); end
+end
+
+class D11 < A11
+  extend T::Sig
+  sig {override.params(x: Integer, y: String).void}
+#                                  ^ error: Parameter `y` of type `String` not compatible with type of overridden method `A11#foo`
+  def foo(x, *y); end
+end
