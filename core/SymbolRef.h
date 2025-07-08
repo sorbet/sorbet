@@ -1140,6 +1140,10 @@ public:
         return MethodRef::fromRaw(58);
     }
 
+    static MethodRef PackageSpec_preludePackage() {
+        return MethodRef::fromRaw(59);
+    }
+
     static FieldRef Magic_UntypedSource_super() {
         return FieldRef::fromRaw(4);
     }
