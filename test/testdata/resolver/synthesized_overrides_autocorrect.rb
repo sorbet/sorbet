@@ -13,4 +13,5 @@ class Child < OverridableParent
 
   sig { returns(Integer) }
   attr_reader :foo
+# ^^^^^^^^^^^^^^^^ error: Method `Child#foo` overrides an overridable method `OverridableParent#foo` but is not declared with `override.`
 end
