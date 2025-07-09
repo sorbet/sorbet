@@ -275,6 +275,7 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
     // indexer and typechecker's file tables will almost immediately diverge, but that's not an issue as we don't share
     // `core::FileRef` values between the two.
     ENFORCE(!this->config->opts.genPackages);
+    ENFORCE(!this->config->opts.genPackagesStrict);
     auto typecheckerGS = std::exchange(
         this->gs,
         this->gs->copyForIndex(this->config->opts.cacheSensitiveOptions.sorbetPackages,
@@ -283,7 +284,7 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
                                this->config->opts.extraPackageFilesDirectorySlashPrefixes,
                                this->config->opts.packageSkipRBIExportEnforcementDirs,
                                this->config->opts.allowRelaxedPackagerChecksFor, this->config->opts.packagerLayers,
-                               this->config->opts.sorbetPackagesHint, false));
+                               this->config->opts.sorbetPackagesHint, false, false));
 
     task.setGlobalState(std::move(typecheckerGS));
     task.setKeyValueStore(std::move(this->kvstore));
