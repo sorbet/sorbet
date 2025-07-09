@@ -404,8 +404,8 @@ Begin {
             lhs = LVarLhs {
               name = <U <dynamic-const-assign>>
             }
-            rhs = String {
-              val = <U These should all raise SyntaxErrors at runtime>
+            rhs = Integer {
+              val = "1"
             }
           }
           OpAsgn {
@@ -526,8 +526,8 @@ Begin {
             lhs = LVarLhs {
               name = <U <dynamic-const-assign>>
             }
-            rhs = String {
-              val = <U This should raise a SyntaxError at runtime>
+            rhs = Integer {
+              val = "1"
             }
           }
           OpAsgn {
