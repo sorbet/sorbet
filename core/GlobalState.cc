@@ -2076,7 +2076,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
     const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
-    const vector<string> &packagerLayers, string errorHint, bool genPackages) const {
+    const vector<string> &packagerLayers, string errorHint, bool genPackages, bool genPackagesStrict) const {
     ENFORCE(fileTableFrozen);
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
@@ -2094,10 +2094,10 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     if (packagerEnabled) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint, genPackages);
+        result->setPackagerOptions(
+            extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
+            extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs, allowRelaxedPackagerChecksFor,
+            packagerLayers, errorHint, genPackages, genPackagesStrict);
     }
 
     return result;
@@ -2108,7 +2108,7 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
     const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
-    const vector<string> &packagerLayers, string errorHint, bool genPackages) const {
+    const vector<string> &packagerLayers, string errorHint, bool genPackages, bool genPackagesStrict) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     result->initEmpty();
@@ -2123,10 +2123,10 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
     if (packagerEnabled) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint, genPackages);
+        result->setPackagerOptions(
+            extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
+            extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs, allowRelaxedPackagerChecksFor,
+            packagerLayers, errorHint, genPackages, genPackagesStrict);
     }
 
     return result;
@@ -2137,7 +2137,7 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
                              const vector<string> &extraPackageFilesDirectorySlashPrefixes,
                              const vector<string> &packageSkipRBIExportEnforcementDirs,
                              const vector<string> &allowRelaxedPackagerChecksFor, const vector<string> &packagerLayers,
-                             string errorHint, bool genPackages) const {
+                             string errorHint, bool genPackages, bool genPackagesStrict) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     // We omit a call to `initEmpty` here, as the only intended use of this function is to have its symbol table
@@ -2168,10 +2168,10 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
     if (packageDB().enabled()) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint, genPackages);
+        result->setPackagerOptions(
+            extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
+            extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs, allowRelaxedPackagerChecksFor,
+            packagerLayers, errorHint, genPackages, genPackagesStrict);
     }
 
     return result;
@@ -2322,11 +2322,13 @@ void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDire
                                      const vector<string> &extraPackageFilesDirectorySlashPrefixes,
                                      const vector<string> &packageSkipRBIExportEnforcementDirs,
                                      const vector<string> &allowRelaxedPackagerChecksFor,
-                                     const vector<string> &packagerLayers, string errorHint, bool genPackages) {
+                                     const vector<string> &packagerLayers, string errorHint, bool genPackages,
+                                     bool genPackagesStrict) {
     ENFORCE_NO_TIMER(!packageDB_.frozen);
 
     packageDB_.enabled_ = true;
     packageDB_.genPackages_ = genPackages;
+    packageDB_.genPackagesStrict_ = genPackagesStrict;
     packageDB_.extraPackageFilesDirectoryUnderscorePrefixes_ = extraPackageFilesDirectoryUnderscorePrefixes;
     packageDB_.extraPackageFilesDirectorySlashDeprecatedPrefixes_ = extraPackageFilesDirectorySlashDeprecatedPrefixes;
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;

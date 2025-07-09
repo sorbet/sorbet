@@ -65,6 +65,11 @@ public:
         return this->genPackages_;
     }
 
+    // Whether the --gen-packages-strict mode is active.
+    bool genPackagesStrict() const {
+        return this->genPackagesStrict_;
+    }
+
     absl::Span<const std::string> extraPackageFilesDirectoryUnderscorePrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashPrefixes() const;
@@ -98,6 +103,7 @@ public:
 private:
     bool enabled_ = false;
     bool genPackages_ = false;
+    bool genPackagesStrict_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;

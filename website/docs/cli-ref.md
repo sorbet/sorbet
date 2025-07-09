@@ -98,6 +98,7 @@ Usage:
                                 Defaults to the input directory passed to Sorbet, if any.
                                 (default: "")
       --gen-packages            Generate package information
+      --gen-packages-strict     Generate strict package information
 
 ```
 

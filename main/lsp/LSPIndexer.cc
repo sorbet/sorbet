@@ -283,7 +283,7 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
                                     this->config->opts.extraPackageFilesDirectorySlashPrefixes,
                                     this->config->opts.packageSkipRBIExportEnforcementDirs,
                                     this->config->opts.allowRelaxedPackagerChecksFor, this->config->opts.packagerLayers,
-                                    this->config->opts.sorbetPackagesHint, false));
+                                    this->config->opts.sorbetPackagesHint, false, false));
 
     task.setGlobalState(std::move(typecheckerGS));
     task.setKeyValueStore(std::move(this->kvstore));

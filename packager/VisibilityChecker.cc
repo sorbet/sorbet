@@ -582,7 +582,7 @@ public:
                     strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
             }
             if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
-                if (db.genPackages()) {
+                if (db.genPackages() || db.genPackagesStrict()) {
                     return;
                 }
 
@@ -798,7 +798,7 @@ public:
             barrier.DecrementCount();
         });
 
-        if (gs.packageDB().genPackages()) {
+        if (gs.packageDB().genPackages() || gs.packageDB().genPackagesStrict()) {
             std::optional<std::tuple<core::FileRef,
                                      UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>,
                                      UnorderedSet<core::SymbolRef>>>
