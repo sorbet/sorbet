@@ -123,6 +123,9 @@ public:
 
     virtual core::AutocorrectSuggestion aggregateMissingImports() const = 0;
 
+    virtual UnorderedSet<std::pair<core::packages::MangledName, core::packages::ImportType>>
+    packageReferencesToImportList(const core::GlobalState &gs) const = 0;
+
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                                  ImportType importType) const = 0;

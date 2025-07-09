@@ -784,6 +784,33 @@ public:
         mergeAdjacentEdits(allEdits);
         return core::AutocorrectSuggestion{"Add missing imports", std::move(allEdits)};
     }
+
+    core::packages::ImportType fileToImportType(const core::GlobalState &gs, core::FileRef file) const {
+        if (file.data(gs).isPackagedTestHelper()) {
+            return core::packages::ImportType::TestUnit;
+        } else if (file.data(gs).isPackagedTest()) {
+            return core::packages::ImportType::TestUnit;
+        } else {
+            return core::packages::ImportType::Normal;
+        }
+    }
+
+    UnorderedSet<std::pair<core::packages::MangledName, core::packages::ImportType>>
+    packageReferencesToImportList(const core::GlobalState &gs) const {
+        UnorderedSet<std::pair<core::packages::MangledName, core::packages::ImportType>> result;
+        for (auto [pkgName, v] : referencedPackages) {
+            auto files = v.first;
+            auto broadestImport = core::packages::ImportType::TestUnit;
+            for (auto f : files) {
+                auto importType = fileToImportType(gs, f);
+                if (importType < broadestImport) {
+                    broadestImport = importType;
+                }
+            }
+            result.insert({pkgName, broadestImport});
+        }
+        return result;
+    }
 };
 
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.

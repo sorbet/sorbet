@@ -123,6 +123,11 @@ public:
         notImplemented();
         return core::AutocorrectSuggestion{"notImplemented", {}};
     }
+    UnorderedSet<std::pair<core::packages::MangledName, core::packages::ImportType>>
+    packageReferencesToImportList(const core::GlobalState &gs) const {
+        notImplemented();
+        return {};
+    }
 
     optional<ImportType> importsPackage(MangledName mangledName) const {
         notImplemented();
