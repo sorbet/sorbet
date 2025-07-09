@@ -1751,16 +1751,33 @@ class ComputePackageSCCs {
 
     core::packages::Condensation condensation;
 
+    vector<core::packages::MangledName> preludePackages;
+    vector<core::packages::MangledName> normalPackages;
+
     ComputePackageSCCs(core::GlobalState &gs) : gs{gs} {
         auto numPackages = gs.packageDB().packages().size();
         this->stack.reserve(numPackages);
         this->nodeMap.reserve(numPackages);
+
+        auto &db = gs.packageDB();
+        auto packages = db.packages();
+
+        vector<core::packages::MangledName> allPackages;
+
+        allPackages.insert(allPackages.end(), packages.begin(), packages.end());
+        auto it = absl::c_partition(allPackages, [&db](auto n) { return db.getPackageInfo(n).isPreludePackage(); });
+        auto numPreludePackages = std::distance(allPackages.begin(), it);
+        auto preludePackages = absl::MakeSpan(allPackages).subspan(0, numPreludePackages);
+        this->preludePackages.insert(this->preludePackages.begin(), preludePackages.begin(), preludePackages.end());
+        auto normalPackages = absl::MakeSpan(allPackages).subspan(numPreludePackages);
+        this->normalPackages.insert(this->normalPackages.begin(), normalPackages.begin(), normalPackages.end());
     }
 
     // DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
     // detecting SCCs.
     template <core::packages::ImportType EdgeType>
-    void strongConnect(core::packages::MangledName pkgName, NodeInfo &infoAtEntry) {
+    void strongConnect(core::packages::MangledName pkgName, NodeInfo &infoAtEntry,
+                       absl::Span<const int> implicitImports) {
         auto &packageDB = gs.packageDB();
         auto *pkgInfoPtr = packageDB.getPackageInfoNonConst(pkgName);
         if (!pkgInfoPtr) {
@@ -1787,7 +1804,7 @@ class ComputePackageSCCs {
             auto &importInfo = this->nodeMap[i.name.mangledName];
             if (importInfo.index == NodeInfo::UNVISITED) {
                 // This is a tree edge (ie. a forward edge that we haven't visited yet).
-                this->strongConnect<EdgeType>(i.name.mangledName, importInfo);
+                this->strongConnect<EdgeType>(i.name.mangledName, importInfo, implicitImports);
 
                 // Need to re-lookup for the reason above.
                 auto &importInfo = this->nodeMap[i.name.mangledName];
@@ -1846,6 +1863,11 @@ class ComputePackageSCCs {
                 }
             } while (poppedPkgName != pkgName);
 
+            // Seed the imports with the set prelude SCCs.
+            for (auto sccId : implicitImports) {
+                condensationNode.imports.insert(sccId);
+            }
+
             // Iterate the imports of each member, building the edges of the condensation. This step is performed after
             // we've visited all members of the SCC once, to ensure that their ids have all been populated.
             for (auto name : condensationNode.members) {
@@ -1879,13 +1901,14 @@ class ComputePackageSCCs {
     }
 
     // Tarjan's algorithm for finding strongly connected components
-    template <core::packages::ImportType EdgeType> void tarjan() {
+    template <core::packages::ImportType EdgeType>
+    void tarjan(absl::Span<const core::packages::MangledName> packages, absl::Span<const int> implicitImports) {
         this->nodeMap.clear();
         ENFORCE(this->stack.empty());
-        for (auto package : gs.packageDB().packages()) {
+        for (auto package : packages) {
             auto &info = this->nodeMap[package];
             if (info.index == NodeInfo::UNVISITED) {
-                this->strongConnect<EdgeType>(package, info);
+                this->strongConnect<EdgeType>(package, info, implicitImports);
             }
         }
     }
@@ -1897,25 +1920,48 @@ public:
         Timer timeit(gs.tracer(), "packager::computeSCCs");
         ComputePackageSCCs scc(gs);
 
-        // First, compute the SCCs for application code, and then for test code. This allows us to have more granular
-        // SCCs, as test_import edges aren't subject to the same restrictions that import edges are.
-        scc.tarjan<core::packages::ImportType::Normal>();
-        scc.tarjan<core::packages::ImportType::TestHelper>();
+        // We compute two groups of SCCs here for the normal and test imports of each package. This ensures that we take
+        // advantage of a detangled package graph, and limit the effects of a more tangled test graph.
+
+        // First, we compute the application and test SCCs for the prelude packages.
+        {
+            Timer timeit(gs.tracer(), "packager::computeSCCs.prelude");
+            scc.tarjan<core::packages::ImportType::Normal>(scc.preludePackages, {});
+            scc.tarjan<core::packages::ImportType::TestHelper>(scc.preludePackages, {});
+        }
+
+        // Then, we compute all the implicit SCC imports that we'll need to add when processing normal packages
+        vector<int> implicitImports;
+        size_t numNormalImports = 0;
+        {
+            auto nodes = scc.condensation.nodes();
+            implicitImports.reserve(nodes.size());
+
+            absl::c_transform(nodes, back_inserter(implicitImports), [](auto &node) { return node.id; });
+            auto it = absl::c_partition(implicitImports, [nodes](auto id) { return !nodes[id].isTest; });
+            numNormalImports = std::distance(implicitImports.begin(), it);
+        }
+
+        // Second, we compute the application and test SCCs for all the normal packages.
+        {
+            Timer timeit(gs.tracer(), "packager::computeSCCs.normal");
+            scc.tarjan<core::packages::ImportType::Normal>(
+                scc.normalPackages, absl::MakeSpan(implicitImports).subspan(0, numNormalImports));
+            scc.tarjan<core::packages::ImportType::TestHelper>(scc.normalPackages, implicitImports);
+        }
 
         gs.packageDB().setCondensation(move(scc.condensation));
+        gs.packageDB().setPreludePackages(move(scc.preludePackages));
     }
 };
 
-void validateLayering(const core::Context &ctx, const Import &i) {
-    if (i.isTestImport()) {
-        return;
-    }
-
+void validateLayering(const core::Context &ctx, core::LocOffsets importNameLoc,
+                      core::packages::MangledName mangledName) {
     const auto &packageDB = ctx.state.packageDB();
-    ENFORCE(packageDB.getPackageInfo(i.name.mangledName).exists())
+    ENFORCE(packageDB.getPackageInfo(mangledName).exists())
     ENFORCE(packageDB.getPackageNameForFile(ctx.file).exists())
     auto &thisPkg = PackageInfoImpl::from(ctx, packageDB.getPackageNameForFile(ctx.file));
-    auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name.mangledName));
+    auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(mangledName));
     ENFORCE(thisPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
     ENFORCE(otherPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
 
@@ -1932,7 +1978,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     auto otherPkgLayer = otherPkg.layer().value().first;
 
     if (thisPkg.causesLayeringViolation(packageDB, otherPkgLayer)) {
-        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::LayeringViolation)) {
+        if (auto e = ctx.beginError(importNameLoc, core::errors::Packager::LayeringViolation)) {
             e.setHeader("Layering violation: cannot import `{}` (in layer `{}`) from `{}` (in layer `{}`)",
                         otherPkg.show(ctx), otherPkgLayer.show(ctx), thisPkg.show(ctx), pkgLayer.show(ctx));
             e.addErrorLine(core::Loc(thisPkg.loc.file(), thisPkg.layer().value().second), "`{}`'s `{}` declared here",
@@ -1947,7 +1993,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     core::packages::StrictDependenciesLevel otherPkgExpectedLevel = thisPkg.minimumStrictDependenciesLevel();
 
     if (otherPkg.strictDependenciesLevel().value().first < otherPkgExpectedLevel) {
-        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::StrictDependenciesViolation)) {
+        if (auto e = ctx.beginError(importNameLoc, core::errors::Packager::StrictDependenciesViolation)) {
             e.setHeader("Strict dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
                         "import", core::packages::strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel().value().second),
@@ -1961,7 +2007,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
 
     if (thisPkg.strictDependenciesLevel().value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
         if (thisPkg.sccID() == otherPkg.sccID()) {
-            if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::StrictDependenciesViolation)) {
+            if (auto e = ctx.beginError(importNameLoc, core::errors::Packager::StrictDependenciesViolation)) {
                 auto level = fmt::format(
                     "strict_dependencies '{}'",
                     core::packages::strictDependenciesLevelToString(thisPkg.strictDependenciesLevel().value().first));
@@ -2031,6 +2077,15 @@ void validatePackage(core::Context ctx) {
         return;
     }
 
+    // We only check implicit prelude imports for non-prelude packages.
+    if (!pkgInfo.isPreludePackage()) {
+        for (auto name : packageDB.preludePackages()) {
+            if (enforceLayering) {
+                validateLayering(ctx, pkgInfo.declLoc().offsets(), name);
+            }
+        }
+    }
+
     for (auto &i : pkgInfo.importedPackageNames) {
         auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
 
@@ -2039,8 +2094,8 @@ void validatePackage(core::Context ctx) {
             continue;
         }
 
-        if (enforceLayering) {
-            validateLayering(ctx, i);
+        if (enforceLayering && !i.isTestImport()) {
+            validateLayering(ctx, i.name.fullName.loc, i.name.mangledName);
         }
 
         if (!skipImportVisibilityCheck) {
