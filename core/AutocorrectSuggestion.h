@@ -13,7 +13,7 @@ struct AutocorrectSuggestion {
         std::string replacement;
     };
 
-    const std::string title;
+    std::string title;
     std::vector<Edit> edits;
 
     bool isDidYouMean;
