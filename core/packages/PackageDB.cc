@@ -106,6 +106,24 @@ public:
         return nullopt;
     }
 
+    void trackPackageReference(const core::FileRef file, const core::packages::MangledName package) {
+        notImplemented();
+    }
+
+    void untrackPackageReferencesFor(const core::FileRef file) {
+        notImplemented();
+    }
+
+    void trackAutocorrect(const core::packages::MangledName package, const core::AutocorrectSuggestion autocorrect,
+                          const core::packages::ImportType) {
+        notImplemented();
+    }
+
+    core::AutocorrectSuggestion aggregateMissingImports() const {
+        notImplemented();
+        return core::AutocorrectSuggestion{"notImplemented", {}};
+    }
+
     optional<ImportType> importsPackage(MangledName mangledName) const {
         notImplemented();
         return nullopt;
