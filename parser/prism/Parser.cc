@@ -1,6 +1,17 @@
 #include "parser/prism/Parser.h"
+#include "parser/prism/Translator.h"
+
+using namespace std;
 
 namespace sorbet::parser::Prism {
+
+unique_ptr<parser::Node> Parser::run(core::GlobalState &gs, core::FileRef file) {
+    auto source = file.data(gs).source();
+    Prism::Parser parser{source};
+    Prism::ParseResult parseResult = parser.parse_root();
+
+    return Prism::Translator(parser, gs, file).translate(move(parseResult));
+}
 
 pm_parser_t *Parser::getRawParserPointer() {
     return &storage->parser;
@@ -18,18 +29,18 @@ core::LocOffsets Parser::translateLocation(pm_location_t location) {
     return core::LocOffsets{start, end};
 }
 
-std::string_view Parser::resolveConstant(pm_constant_id_t constant_id) {
+string_view Parser::resolveConstant(pm_constant_id_t constant_id) {
     pm_constant_t *constant = pm_constant_pool_id_to_constant(&storage->parser.constant_pool, constant_id);
 
-    return std::string_view(reinterpret_cast<const char *>(constant->start), constant->length);
+    return string_view(reinterpret_cast<const char *>(constant->start), constant->length);
 }
 
-std::string_view Parser::extractString(pm_string_t *string) {
-    return std::string_view(reinterpret_cast<const char *>(pm_string_source(string)), pm_string_length(string));
+string_view Parser::extractString(pm_string_t *string) {
+    return string_view(reinterpret_cast<const char *>(pm_string_source(string)), pm_string_length(string));
 }
 
-std::vector<ParseError> Parser::collectErrors() {
-    std::vector<ParseError> parseErrors;
+vector<ParseError> Parser::collectErrors() {
+    vector<ParseError> parseErrors;
     parseErrors.reserve(storage->parser.error_list.size);
 
     auto error_list = storage->parser.error_list;
@@ -38,8 +49,8 @@ std::vector<ParseError> Parser::collectErrors() {
         auto *error = reinterpret_cast<pm_diagnostic_t *>(node);
         auto level = static_cast<pm_error_level_t>(error->level);
 
-        ParseError parseError(error->diag_id, std::string(reinterpret_cast<const char *>(error->message)),
-                              error->location, level);
+        ParseError parseError(error->diag_id, string(reinterpret_cast<const char *>(error->message)), error->location,
+                              level);
 
         parseErrors.push_back(parseError);
     }
