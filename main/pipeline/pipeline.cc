@@ -117,7 +117,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
         gs.setPackagerOptions(
             opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
             opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-            opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint, opts.genPackages);
+            opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint, opts.genPackages, opts.genPackagesStrict);
     }
 #endif
 }
@@ -132,7 +132,7 @@ unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, con
     auto result = from.copyForSlowPath(
         opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
         opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-        opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint, opts.genPackages);
+        opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint, opts.genPackages, opts.genPackagesStrict);
 
     core::serialize::Serializer::loadSymbolTable(*result, PAYLOAD_SYMBOL_TABLE);
 
@@ -698,7 +698,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
     shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex(
         opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
         opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-        opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint, opts.genPackages);
+        opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint, opts.genPackages, opts.genPackagesStrict);
 
     workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore, cancelable]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");

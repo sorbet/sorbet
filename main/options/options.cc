@@ -423,6 +423,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "directory passed to Sorbet, if any.",
                                  cxxopts::value<string>()->default_value(empty.pathPrefix), "<prefix>");
     options.add_options(section)("gen-packages", "Generate package information", cxxopts::value<bool>());
+    options.add_options(section)("gen-packages-strict", "Generate strict package information", cxxopts::value<bool>());
     // }}}
 
     // ----- AUTOCORRECTS ------------------------------------------------- {{{
@@ -1252,6 +1253,11 @@ void readOptions(Options &opts,
         opts.genPackages = raw["gen-packages"].as<bool>();
         if (opts.genPackages && !opts.cacheSensitiveOptions.stripePackages) {
             logger->error("--gen-packages can only be used when --stripe-packages is also enabled");
+            throw EarlyReturnWithCode(1);
+        }
+        opts.genPackagesStrict = raw["gen-packages-strict"].as<bool>();
+        if (opts.genPackagesStrict && !opts.cacheSensitiveOptions.stripePackages) {
+            logger->error("--gen-packages-strict can only be used when --stripe-packages is also enabled");
             throw EarlyReturnWithCode(1);
         }
         if (raw.count("allow-relaxed-packager-checks-for")) {
