@@ -36,10 +36,25 @@ class ComputePackageSCCs {
 
     core::packages::Condensation condensation;
 
+    std::vector<core::packages::MangledName> allPackages;
+    absl::Span<core::packages::MangledName> preludePackages;
+    absl::Span<core::packages::MangledName> normalPackages;
+
+    // The SCC ids from the prelude layer, which are implicitly imported by all normal package SCCs.
+    UnorderedSet<int> implicitImports;
+
     ComputePackageSCCs(core::GlobalState &gs) : gs{gs} {
-        auto numPackages = gs.packageDB().packages().size();
-        this->stack.reserve(numPackages);
-        this->nodeMap.reserve(numPackages);
+        auto packages = gs.packageDB().packages();
+        this->stack.reserve(packages.size());
+        this->nodeMap.reserve(packages.size());
+
+        this->allPackages.insert(this->allPackages.end(), packages.begin(), packages.end());
+        auto preludeEnd = absl::c_partition(
+            this->allPackages, [&db = gs.packageDB()](auto pkg) { return db.getPackageInfo(pkg).isPreludePackage(); });
+
+        auto numPreludePackages = std::distance(this->allPackages.begin(), preludeEnd);
+        this->preludePackages = absl::MakeSpan(this->allPackages).subspan(0, numPreludePackages);
+        this->normalPackages = absl::MakeSpan(this->allPackages).subspan(numPreludePackages);
     }
 
     // DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
@@ -108,6 +123,9 @@ class ComputePackageSCCs {
             auto &condensationNode = this->condensation.pushNode(EdgeType);
             auto sccId = condensationNode.id;
 
+            // Seed the imports with the set of prelude SCCs.
+            condensationNode.imports = this->implicitImports;
+
             // Set the SCC ids for all of the members of the SCC
             do {
                 poppedPkgName = this->stack.back();
@@ -158,10 +176,11 @@ class ComputePackageSCCs {
     }
 
     // Tarjan's algorithm for finding strongly connected components
-    template <core::packages::ImportType EdgeType, typename P> void tarjan(P &packageGraph) {
+    template <core::packages::ImportType EdgeType, typename P>
+    void tarjan(absl::Span<core::packages::MangledName> packages, P &packageGraph) {
         this->nodeMap.clear();
         ENFORCE(this->stack.empty());
-        for (auto package : gs.packageDB().packages()) {
+        for (auto package : packages) {
             auto &info = this->nodeMap[package];
             if (info.index == NodeInfo::UNVISITED) {
                 this->strongConnect<EdgeType>(package, info, packageGraph);
@@ -176,10 +195,24 @@ public:
         Timer timeit(gs.tracer(), "packager::computeSCCs");
         ComputePackageSCCs scc(gs);
 
-        // First, compute the SCCs for application code, and then for test code. This allows us to have more granular
-        // SCCs, as test_import edges aren't subject to the same restrictions that import edges are.
-        scc.tarjan<core::packages::ImportType::Normal>(packageGraph);
-        scc.tarjan<core::packages::ImportType::TestHelper>(packageGraph);
+        // NOTE: We compute the SCCs for application code first, and then for test code. This allows us to have more
+        // granular SCCs, as test_import edges aren't subject to the same restrictions that import edges are; test SCCs
+        // and tend to form balls of mud that the application graph would inherit without this split.
+
+        // First, we compute application and test SCCs for the prelude set.
+        scc.tarjan<core::packages::ImportType::Normal>(scc.preludePackages, packageGraph);
+        scc.tarjan<core::packages::ImportType::TestHelper>(scc.preludePackages, packageGraph);
+
+        // Next, we populate the implicit imports for the SCCs produced by the prelude set.
+        {
+            for (auto &node : scc.condensation.nodes()) {
+                scc.implicitImports.insert(node.id);
+            }
+        }
+
+        // Finally, we compute SCCs for the rest of the graph, with implicit imports into the prelude layer.
+        scc.tarjan<core::packages::ImportType::Normal>(scc.normalPackages, packageGraph);
+        scc.tarjan<core::packages::ImportType::TestHelper>(scc.normalPackages, packageGraph);
 
         return std::move(scc.condensation);
     }

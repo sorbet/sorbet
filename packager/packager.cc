@@ -1214,6 +1214,16 @@ void validatePackage(core::Context ctx) {
         return;
     }
 
+    // We only check implicit prelude imports for non-prelude packages.
+    if (!pkgInfo.isPreludePackage()) {
+        auto declLoc = pkgInfo.declLoc().offsets();
+        for (auto name : packageDB.preludePackages()) {
+            if (enforceLayering) {
+                validateLayering(ctx, Import{name, ImportType::Normal, declLoc});
+            }
+        }
+    }
+
     for (auto &i : pkgInfo.importedPackageNames) {
         auto &otherPkg = packageDB.getPackageInfo(i.mangledName);
 
