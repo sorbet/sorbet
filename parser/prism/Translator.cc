@@ -171,26 +171,25 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_BEGIN_NODE: { // A `begin ... end` block
             auto beginNode = down_cast<pm_begin_node>(node);
 
-            NodeVec statements;
             unique_ptr<parser::Node> translatedRescue;
-
             if (beginNode->rescue_clause != nullptr) {
                 // Extract rescue and else nodes from the begin node
-                auto bodyNode = translateStatements(beginNode->statements, true);
+                auto bodyNode = translateStatements(beginNode->statements);
                 auto elseNode = translate(up_cast(beginNode->else_clause));
                 // We need to pass the rescue node to the Ensure node if it exists instead of adding it to the
                 // statements
                 translatedRescue = translateRescue(beginNode->rescue_clause, move(bodyNode), move(elseNode));
             }
 
+            NodeVec statements;
             if (auto ensureNode = beginNode->ensure_clause; ensureNode != nullptr) {
                 // Handle `begin ... ensure ... end`
                 // When both ensure and rescue are present, Sorbet's legacy parser puts the Rescue node inside the
                 // Ensure node.
-                auto bodyNode = translateStatements(beginNode->statements, true);
-                auto ensureBody = translateStatements(ensureNode->statements, true);
-                unique_ptr<parser::Ensure> translatedEnsure;
+                auto bodyNode = translateStatements(beginNode->statements);
+                auto ensureBody = translateStatements(ensureNode->statements);
 
+                unique_ptr<parser::Ensure> translatedEnsure;
                 if (translatedRescue != nullptr) {
                     translatedEnsure = make_unique<parser::Ensure>(location, move(translatedRescue), move(ensureBody));
                 } else {
@@ -592,8 +591,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto variable = translate(forNode->index);
             auto collection = translate(forNode->collection);
-            auto inlineIfSingle = true;
-            auto body = translateStatements(forNode->statements, inlineIfSingle);
+            auto body = translateStatements(forNode->statements);
 
             return make_unique<parser::For>(location, move(variable), move(collection), move(body));
         }
@@ -1058,8 +1056,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_PRE_EXECUTION_NODE: {
             auto preExecutionNode = down_cast<pm_pre_execution_node>(node);
-            auto inlineIfSingle = true;
-            auto body = translateStatements(preExecutionNode->statements, inlineIfSingle);
+            auto body = translateStatements(preExecutionNode->statements);
             return make_unique<parser::Preexe>(location, move(body));
         }
         case PM_PROGRAM_NODE: { // The root node of the parse tree, representing the entire program
@@ -1069,8 +1066,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_POST_EXECUTION_NODE: {
             auto postExecutionNode = down_cast<pm_post_execution_node>(node);
-            auto inlineIfSingle = true;
-            auto body = translateStatements(postExecutionNode->statements, inlineIfSingle);
+            auto body = translateStatements(postExecutionNode->statements);
             return make_unique<parser::Postexe>(location, move(body));
         }
         case PM_RANGE_NODE: { // A Range literal, e.g. `a..b`, `a..`, `..b`, `a...b`, `a...`, `...b`
@@ -1194,8 +1190,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
         }
         case PM_STATEMENTS_NODE: { // A sequence of statements, such a in a `begin` block, `()`, etc.
-            auto inlineIfSingle = true;
-            return translateStatements(down_cast<pm_statements_node>(node), inlineIfSingle);
+            return translateStatements(down_cast<pm_statements_node>(node));
         }
         case PM_STRING_NODE: { // A string literal, e.g. `"foo"`
             auto strNode = down_cast<pm_string_node>(node);
@@ -1276,19 +1271,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto whenNode = down_cast<pm_when_node>(node);
 
             auto sorbetConditions = translateMulti(whenNode->conditions);
-
-            auto inlineIfSingle = true;
-            auto statements = translateStatements(whenNode->statements, inlineIfSingle);
+            auto statements = translateStatements(whenNode->statements);
 
             return make_unique<parser::When>(location, move(sorbetConditions), move(statements));
         }
         case PM_WHILE_NODE: { // A `while` loop, like `while condition; ...; end`
             auto whileNode = down_cast<pm_while_node>(node);
 
-            auto inlineIfSingle = true;
             auto predicate = translate(whileNode->predicate);
-
-            auto statements = translateStatements(whileNode->statements, inlineIfSingle);
+            auto statements = translateStatements(whileNode->statements);
 
             auto flags = whileNode->base.flags;
 
@@ -1542,8 +1533,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             auto prismPattern = inNode->pattern;
             unique_ptr<parser::Node> sorbetPattern;
             unique_ptr<parser::Node> sorbetGuard;
-            auto inlineIfSingle = true;
-            auto statements = translateStatements(inNode->statements, inlineIfSingle);
+            auto statements = translateStatements(inNode->statements);
 
             if (prismPattern != nullptr &&
                 (PM_NODE_TYPE_P(prismPattern, PM_IF_NODE) || PM_NODE_TYPE_P(prismPattern, PM_UNLESS_NODE))) {
@@ -1767,7 +1757,7 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescue
         auto var = translate(currentRescueNode->reference);
 
         // Translate the body of the rescue clause
-        auto rescueBody = translateStatements(currentRescueNode->statements, true);
+        auto rescueBody = translateStatements(currentRescueNode->statements);
 
         // Translate the exceptions being rescued (e.g., `RuntimeError` in `rescue RuntimeError`)
         auto exceptions = translateMulti(currentRescueNode->exceptions);
