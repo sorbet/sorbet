@@ -2,7 +2,7 @@
 
 class A
   def test1
-# ^^^ error: Hint: this "def" token might not be properly closed
+# ^^^ parser-error: Hint: this "def" token might not be properly closed
     if x.f
     end
 
@@ -10,4 +10,4 @@ class A
     if x.f
     end
   end
-end # error: unexpected token "end of file"
+end # parser-error: unexpected token "end of file"

@@ -6,13 +6,13 @@ end
 
 def test_1
   A.new.
-end # error: unexpected token
+end # parser-error: unexpected token
 
 def test_2
   x = 1
   x =
-end # error: unexpected token
+end # parser-error: unexpected token
 
 def test_3
-  A:: # error: expected constant name
+  A:: # parser-error: expected constant name
 end
