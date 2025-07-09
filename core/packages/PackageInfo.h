@@ -110,6 +110,19 @@ public:
     virtual std::optional<std::string> pathTo(const core::GlobalState &gs,
                                               const core::packages::MangledName dest) const = 0;
 
+    // Track that this package references `package` in `file`
+    virtual void trackPackageReference(const core::FileRef file, const core::packages::MangledName package) = 0;
+
+    // Remove knowledge of what this package is in `file`.
+    // We do this so that when VisibilityChecker is re-run over `file`, we can delete stale information.
+    virtual void untrackPackageReferencesFor(const core::FileRef file) = 0;
+
+    virtual void trackAutocorrect(const core::packages::MangledName package,
+                                  const core::AutocorrectSuggestion autocorrect,
+                                  const core::packages::ImportType importType) = 0;
+
+    virtual core::AutocorrectSuggestion aggregateMissingImports() const = 0;
+
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                                  ImportType importType) const = 0;

@@ -235,6 +235,11 @@ public:
         std::pair<std::pair<core::StrictLevel, core::LocOffsets>, std::pair<core::StrictLevel, core::LocOffsets>>>
         min_typed_level_ = nullopt;
 
+    UnorderedMap<
+        core::packages::MangledName,
+        pair<UnorderedSet<core::FileRef>, optional<pair<core::AutocorrectSuggestion, core::packages::ImportType>>>>
+        referencedPackages = {};
+
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
         return strictDependenciesLevel_;
     }
@@ -705,6 +710,79 @@ public:
 
         // No path found
         return nullopt;
+    }
+
+    void trackPackageReference(const core::FileRef file, const core::packages::MangledName package) {
+        auto r = referencedPackages.find(package);
+        if (r != referencedPackages.end()) {
+            r->second.first.insert(file);
+        } else {
+            referencedPackages[package] = {{file}, nullopt};
+        }
+    }
+
+    void untrackPackageReferencesFor(const core::FileRef file) {
+        for (auto &[_, v] : referencedPackages) {
+            auto files = v.first;
+            auto it = files.find(file);
+            if (it == files.end()) {
+                continue;
+            }
+            files.erase(it);
+        }
+        erase_if(referencedPackages, [](const auto &x) { return x.second.first.empty(); });
+    }
+
+    void trackAutocorrect(const core::packages::MangledName package, const core::AutocorrectSuggestion autocorrect,
+                          const core::packages::ImportType importType) {
+        auto r = referencedPackages.find(package);
+        if (r != referencedPackages.end()) {
+            if (r->second.second.has_value()) {
+                if (importType < r->second.second.value().second) {
+                    r->second.second = {autocorrect, importType};
+                }
+            } else {
+                r->second.second = {autocorrect, importType};
+            }
+        } else {
+            ENFORCE(false);
+        }
+    }
+
+    void mergeAdjacentEdits(std::vector<core::AutocorrectSuggestion::Edit> &edits) const {
+        fast_sort(edits, [](const auto &lhs, const auto &rhs) {
+            if (lhs.loc == rhs.loc) {
+                return lhs.replacement < rhs.replacement;
+            }
+            return lhs.loc.beginPos() < rhs.loc.beginPos();
+        });
+        auto i = 0;
+        while (edits.size() > 0 && i < edits.size() - 1) {
+            if (edits[i].loc.beginPos() == edits[i + 1].loc.beginPos() && edits[i].loc.empty() &&
+                edits[i + 1].loc.empty()) {
+                // If we're inserting 2 imports at the same location, combine them into a single edit.
+                // TODO(neil): maybe this logic should be moved/added to AutocorrectSuggestion::apply, to handle other
+                // cases where 2 autocorrects add at the same loc?
+                edits[i].replacement += edits[i + 1].replacement;
+                edits.erase(edits.begin() + i + 1);
+            } else {
+                i++;
+            }
+        }
+    }
+
+    core::AutocorrectSuggestion aggregateMissingImports() const {
+        std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+        for (auto &[_, value] : referencedPackages) {
+            auto autocorrectPair = value.second;
+            if (autocorrectPair.has_value()) {
+                auto autocorrect = autocorrectPair.value().first;
+                // TODO: These autocorrect.edits should probably be move iterators?
+                allEdits.insert(allEdits.end(), autocorrect.edits.begin(), autocorrect.edits.end());
+            }
+        }
+        mergeAdjacentEdits(allEdits);
+        return core::AutocorrectSuggestion{"Add missing imports", std::move(allEdits)};
     }
 };
 

@@ -425,6 +425,8 @@ class VisibilityCheckerPass final {
 public:
     const core::packages::PackageInfo &package;
     const FileType fileType;
+    UnorderedMap<core::packages::MangledName, optional<pair<core::AutocorrectSuggestion, core::packages::ImportType>>>
+        packageReferences;
 
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
         : package{package}, fileType{fileTypeFromCtx(ctx)} {}
@@ -482,8 +484,10 @@ public:
         auto testUnitImportInHelper = wasImported &&
                                       currentImportType.value() == core::packages::ImportType::TestUnit &&
                                       this->fileType != FileType::TestUnitFile;
+        bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
+        packageReferences[otherPackage] = nullopt;
 
-        if (!wasImported || testImportInProd || testUnitImportInHelper || !isExported) {
+        if (importNeeded || !isExported) {
             auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
             core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
@@ -520,6 +524,9 @@ public:
                     if (auto exp = this->package.addImport(ctx, pkg, autocorrectedImportType)) {
                         importAutocorrect.emplace(exp.value());
                     }
+                    if (importAutocorrect.has_value()) {
+                        packageReferences[otherPackage] = {{importAutocorrect.value(), autocorrectedImportType}};
+                    }
                 }
                 std::optional<core::AutocorrectSuggestion> exportAutocorrect;
                 if (!isExported) {
@@ -531,6 +538,10 @@ public:
                     if (auto exp = pkg.addExport(ctx, symToExport)) {
                         exportAutocorrect.emplace(exp.value());
                     }
+                }
+
+                if (db.genPackages()) {
+                    return;
                 }
 
                 if (!isExported && !wasImported) {
@@ -679,19 +690,52 @@ public:
         }
     }
 
-    static vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
+    static vector<ast::ParsedFile> run(core::GlobalState &nonConstGs, WorkerPool &workers,
                                        vector<ast::ParsedFile> files) {
+        const core::GlobalState &gs = nonConstGs;
+        auto resultq = std::make_shared<BlockingBoundedQueue<std::pair<
+            core::FileRef, UnorderedMap<core::packages::MangledName,
+                                        optional<pair<core::AutocorrectSuggestion, core::packages::ImportType>>>>>>(
+            files.size());
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
-        Parallel::iterate(workers, "VisibilityChecker", absl::MakeSpan(files), [&gs](ast::ParsedFile &f) {
+        Parallel::iterate(workers, "VisibilityChecker", absl::MakeSpan(files), [&gs, resultq](ast::ParsedFile &f) {
             if (!f.file.data(gs).isPackage(gs)) {
                 auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                 if (pkgName.exists()) {
                     core::Context ctx{gs, core::Symbols::root(), f.file};
-                    VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
+                    auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
+                    VisibilityCheckerPass pass{ctx, pkgInfo};
                     ast::TreeWalk::apply(ctx, pass, f.tree);
+                    resultq->push({f.file, std::move(pass.packageReferences)}, 1);
                 }
             }
         });
+        // TODO: do this in a worker pool too
+        std::pair<core::FileRef, UnorderedMap<core::packages::MangledName,
+                                              optional<pair<core::AutocorrectSuggestion, core::packages::ImportType>>>>
+            threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (result.gotItem()) {
+                auto file = threadResult.first;
+                auto pkgName = gs.packageDB().getPackageNameForFile(file);
+                if (!pkgName.exists()) {
+                    continue;
+                }
+                auto nonConstPackageInfo = nonConstGs.packageDB().getPackageInfoNonConst(pkgName);
+                nonConstPackageInfo->untrackPackageReferencesFor(file);
+                for (auto [p, autocorrect] : threadResult.second) {
+                    nonConstPackageInfo->trackPackageReference(file, p);
+                    if (autocorrect.has_value()) {
+                        nonConstPackageInfo->trackAutocorrect(p, autocorrect.value().first, autocorrect.value().second);
+                    }
+                }
+            } else {
+                // TODO: shouldn't be needed
+                break;
+            }
+        }
 
         return files;
     }
@@ -709,7 +753,21 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
         }
     }
 
-    return VisibilityCheckerPass::run(gs, workers, std::move(files));
+    auto result = VisibilityCheckerPass::run(gs, workers, std::move(files));
+    if (gs.packageDB().genPackages()) {
+        for (auto package : gs.packageDB().packages()) {
+            auto &pkgInfo = gs.packageDB().getPackageInfo(package);
+            ENFORCE(pkgInfo.exists());
+            auto autocorrect = pkgInfo.aggregateMissingImports();
+            if (autocorrect.edits.size() > 0) {
+                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
+                    e.setHeader("{}'s imports are incorrect", pkgInfo.show(gs));
+                    e.addAutocorrect(move(autocorrect));
+                }
+            }
+        }
+    }
+    return result;
 }
 
 } // namespace sorbet::packager
