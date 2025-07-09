@@ -1214,8 +1214,18 @@ void validatePackage(core::Context ctx) {
         return;
     }
 
-    // We only check implicit prelude imports for non-prelude packages.
-    if (!pkgInfo.isPreludePackage()) {
+    if (pkgInfo.isPreludePackage()) {
+        // We disallow `visible_to` annotations in prelude pakcages, as they're implicitly imported by all non-prelude
+        // packages.
+        for (auto &v : pkgInfo.visibleTo_) {
+            if (auto e = ctx.beginError(v.loc, core::errors::Packager::NoPreludeVisibleTo)) {
+                // TODO: an autocorrect to remove the `visible_to` declarations would be nice, but we would need to
+                // start tracking the decl loc.
+                e.setHeader("Prelude package `{}` may not include `{}` annotations", pkgInfo.show(ctx), "visible_to");
+            }
+        }
+    } else {
+        // We only check implicit prelude imports for non-prelude packages.
         auto declLoc = pkgInfo.declLoc().offsets();
         for (auto name : packageDB.preludePackages()) {
             if (enforceLayering) {
