@@ -213,6 +213,10 @@ public:
         return visibleToTests_;
     }
 
+    bool isPreludePackage() const {
+        return isPreludePackage_;
+    }
+
     PackageName name;
 
     // loc for the package definition. Full loc, from class to end keyword. Used for autocorrects.
@@ -242,6 +246,9 @@ public:
 
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
+
+    // True when this package is marked with `prelude_package`.
+    bool isPreludePackage_ = false;
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_ = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer_ = nullopt;
@@ -1335,6 +1342,10 @@ struct PackageSpecBodyWalk {
             info.exportAll_ = true;
         }
 
+        if (send.fun == core::Names::preludePackage() && send.numPosArgs() == 0) {
+            info.isPreludePackage_ = true;
+        }
+
         if (send.fun == core::Names::visibleTo() && send.numPosArgs() == 1) {
             if (auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
                 // the only valid literal here is `visible_to "tests"`; others should be rejected
@@ -1529,6 +1540,7 @@ struct PackageSpecBodyWalk {
             case core::Names::restrictToService().rawId():
             case core::Names::visibleTo().rawId():
             case core::Names::exportAll().rawId():
+            case core::Names::preludePackage().rawId():
                 return true;
             default:
                 return false;
@@ -1753,7 +1765,8 @@ class ComputePackageSCCs {
     // DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
     // detecting SCCs.
     template <core::packages::ImportType EdgeType>
-    void strongConnect(core::packages::MangledName pkgName, NodeInfo &infoAtEntry) {
+    void strongConnect(core::packages::MangledName pkgName, NodeInfo &infoAtEntry,
+                       absl::Span<const int> implicitImports) {
         auto &packageDB = gs.packageDB();
         auto *pkgInfoPtr = packageDB.getPackageInfoNonConst(pkgName);
         if (!pkgInfoPtr) {
@@ -1780,7 +1793,7 @@ class ComputePackageSCCs {
             auto &importInfo = this->nodeMap[i.name.mangledName];
             if (importInfo.index == NodeInfo::UNVISITED) {
                 // This is a tree edge (ie. a forward edge that we haven't visited yet).
-                this->strongConnect<EdgeType>(i.name.mangledName, importInfo);
+                this->strongConnect<EdgeType>(i.name.mangledName, importInfo, implicitImports);
 
                 // Need to re-lookup for the reason above.
                 auto &importInfo = this->nodeMap[i.name.mangledName];
@@ -1839,6 +1852,11 @@ class ComputePackageSCCs {
                 }
             } while (poppedPkgName != pkgName);
 
+            // Seed the imports with the set prelude SCCs.
+            for (auto sccId : implicitImports) {
+                condensationNode.imports.insert(sccId);
+            }
+
             // Iterate the imports of each member, building the edges of the condensation. This step is performed after
             // we've visited all members of the SCC once, to ensure that their ids have all been populated.
             for (auto name : condensationNode.members) {
@@ -1872,13 +1890,14 @@ class ComputePackageSCCs {
     }
 
     // Tarjan's algorithm for finding strongly connected components
-    template <core::packages::ImportType EdgeType> void tarjan() {
+    template <core::packages::ImportType EdgeType>
+    void tarjan(absl::Span<const core::packages::MangledName> packages, absl::Span<const int> implicitImports) {
         this->nodeMap.clear();
         ENFORCE(this->stack.empty());
-        for (auto package : gs.packageDB().packages()) {
+        for (auto package : packages) {
             auto &info = this->nodeMap[package];
             if (info.index == NodeInfo::UNVISITED) {
-                this->strongConnect<EdgeType>(package, info);
+                this->strongConnect<EdgeType>(package, info, implicitImports);
             }
         }
     }
@@ -1889,26 +1908,65 @@ public:
     static void run(core::GlobalState &gs) {
         Timer timeit(gs.tracer(), "packager::computeSCCs");
         ComputePackageSCCs scc(gs);
+        auto &db = gs.packageDB();
 
-        // First, compute the SCCs for application code, and then for test code. This allows us to have more granular
-        // SCCs, as test_import edges aren't subject to the same restrictions that import edges are.
-        scc.tarjan<core::packages::ImportType::Normal>();
-        scc.tarjan<core::packages::ImportType::TestHelper>();
+        vector<core::packages::MangledName> allPackages;
+        absl::Span<const core::packages::MangledName> preludePackages;
+        absl::Span<const core::packages::MangledName> normalPackages;
+
+        {
+            auto packages = db.packages();
+            allPackages.insert(allPackages.end(), packages.begin(), packages.end());
+
+            auto it = absl::c_stable_partition(allPackages,
+                                               [&db](auto n) { return db.getPackageInfo(n).isPreludePackage(); });
+            auto numPreludePackages = std::distance(allPackages.begin(), it);
+            preludePackages = absl::MakeSpan(allPackages).subspan(0, numPreludePackages);
+            normalPackages = absl::MakeSpan(allPackages).subspan(numPreludePackages);
+        }
+
+        // We compute two groups of SCCs here for the normal and test imports of each package. This ensures that we take
+        // advantage of a detangled package graph, and limit the effects of a more tangled test graph.
+
+        // First, we compute the application and test SCCs for the prelude packages.
+        {
+            Timer timeit(gs.tracer(), "packager::computeSCCs.prelude");
+            scc.tarjan<core::packages::ImportType::Normal>(preludePackages, {});
+            scc.tarjan<core::packages::ImportType::TestHelper>(preludePackages, {});
+        }
+
+        // We use the partially constructed condensation graph to determine the scc ids that we'll need to depend on
+        // implicitly from application and test code.
+        vector<int> allPreludeImports;
+        absl::Span<const int> preludeApplicationImports;
+        {
+            auto nodes = scc.condensation.nodes();
+            allPreludeImports.reserve(nodes.size());
+
+            absl::c_transform(nodes, back_inserter(allPreludeImports), [](auto &node) { return node.id; });
+            auto it = absl::c_partition(allPreludeImports, [nodes](auto id) { return !nodes[id].isTest; });
+            auto numApplicationImports = std::distance(allPreludeImports.begin(), it);
+            preludeApplicationImports = absl::MakeSpan(allPreludeImports).subspan(0, numApplicationImports);
+        }
+
+        // Second, we compute the application and test SCCs for all the normal packages.
+        {
+            Timer timeit(gs.tracer(), "packager::computeSCCs.normal");
+            scc.tarjan<core::packages::ImportType::Normal>(normalPackages, preludeApplicationImports);
+            scc.tarjan<core::packages::ImportType::TestHelper>(normalPackages, allPreludeImports);
+        }
 
         gs.packageDB().setCondensation(move(scc.condensation));
     }
 };
 
-void validateLayering(const core::Context &ctx, const Import &i) {
-    if (i.isTestImport()) {
-        return;
-    }
-
+void validateLayering(const core::Context &ctx, core::LocOffsets importNameLoc,
+                      core::packages::MangledName mangledName) {
     const auto &packageDB = ctx.state.packageDB();
-    ENFORCE(packageDB.getPackageInfo(i.name.mangledName).exists())
+    ENFORCE(packageDB.getPackageInfo(mangledName).exists())
     ENFORCE(packageDB.getPackageNameForFile(ctx.file).exists())
     auto &thisPkg = PackageInfoImpl::from(ctx, packageDB.getPackageNameForFile(ctx.file));
-    auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name.mangledName));
+    auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(mangledName));
     ENFORCE(thisPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
     ENFORCE(otherPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
 
@@ -1925,7 +1983,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     auto otherPkgLayer = otherPkg.layer().value().first;
 
     if (thisPkg.causesLayeringViolation(packageDB, otherPkgLayer)) {
-        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::LayeringViolation)) {
+        if (auto e = ctx.beginError(importNameLoc, core::errors::Packager::LayeringViolation)) {
             e.setHeader("Layering violation: cannot import `{}` (in layer `{}`) from `{}` (in layer `{}`)",
                         otherPkg.show(ctx), otherPkgLayer.show(ctx), thisPkg.show(ctx), pkgLayer.show(ctx));
             e.addErrorLine(core::Loc(thisPkg.loc.file(), thisPkg.layer().value().second), "`{}`'s `{}` declared here",
@@ -1940,7 +1998,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     core::packages::StrictDependenciesLevel otherPkgExpectedLevel = thisPkg.minimumStrictDependenciesLevel();
 
     if (otherPkg.strictDependenciesLevel().value().first < otherPkgExpectedLevel) {
-        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::StrictDependenciesViolation)) {
+        if (auto e = ctx.beginError(importNameLoc, core::errors::Packager::StrictDependenciesViolation)) {
             e.setHeader("Strict dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
                         "import", core::packages::strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel().value().second),
@@ -1954,7 +2012,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
 
     if (thisPkg.strictDependenciesLevel().value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
         if (thisPkg.sccID() == otherPkg.sccID()) {
-            if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::StrictDependenciesViolation)) {
+            if (auto e = ctx.beginError(importNameLoc, core::errors::Packager::StrictDependenciesViolation)) {
                 auto level = fmt::format(
                     "strict_dependencies '{}'",
                     core::packages::strictDependenciesLevelToString(thisPkg.strictDependenciesLevel().value().first));
@@ -2024,6 +2082,46 @@ void validatePackage(core::Context ctx) {
         return;
     }
 
+    if (pkgInfo.isPreludePackage()) {
+        // We disallow `visible_to` annotations in prelude pakcages, as they're implicitly imported by all non-prelude
+        // packages.
+        for (auto &v : pkgInfo.visibleTo_) {
+            if (auto e = ctx.beginError(v.name.fullName.loc, core::errors::Packager::NoPreludeVisibleTo)) {
+                // TODO: an autocorrect to remove the `visible_to` declarations would be nice, but we would need to
+                // start tracking the decl loc.
+                e.setHeader("Prelude package `{}` may not include `{}` annotations", pkgInfo.name.toString(ctx),
+                            "visible_to");
+            }
+        }
+
+        for (auto &i : pkgInfo.importedPackageNames) {
+            auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+            if (!otherPkg.isPreludePackage()) {
+                if (auto e = ctx.beginError(i.loc, core::errors::Packager::PreludePackageImport)) {
+                    string_view import_;
+                    switch (i.type) {
+                        case core::packages::ImportType::Normal:
+                            import_ = "import";
+                            break;
+                        case core::packages::ImportType::TestUnit:
+                        case core::packages::ImportType::TestHelper:
+                            import_ = "test_import";
+                            break;
+                    }
+                    e.setHeader("Prelude package `{}` may not `{}` non-prelude package `{}`",
+                                pkgInfo.name.toString(ctx), import_, otherPkg.show(ctx));
+                }
+            }
+        }
+    } else {
+        // We only check implicit prelude imports for non-prelude packages.
+        for (auto name : packageDB.preludePackages()) {
+            if (enforceLayering) {
+                validateLayering(ctx, pkgInfo.declLoc().offsets(), name);
+            }
+        }
+    }
+
     for (auto &i : pkgInfo.importedPackageNames) {
         auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
 
@@ -2032,8 +2130,8 @@ void validatePackage(core::Context ctx) {
             continue;
         }
 
-        if (enforceLayering) {
-            validateLayering(ctx, i);
+        if (enforceLayering && !i.isTestImport()) {
+            validateLayering(ctx, i.name.fullName.loc, i.name.mangledName);
         }
 
         if (!skipImportVisibilityCheck) {
@@ -2092,7 +2190,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 
 } // namespace
 
-void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
+vector<core::packages::MangledName> Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
     // Ensure files are in canonical order.
     // TODO(jez) Is this sort redundant? Should we move this sort to callers?
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
@@ -2134,6 +2232,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 
     setPackageNameOnFiles(gs, files);
 
+    vector<core::packages::MangledName> preludePackages;
     {
         core::UnfreezeNameTable unfreeze(gs);
         auto packages = gs.unfreezePackages();
@@ -2149,8 +2248,15 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             }
             auto &info = PackageInfoImpl::from(gs, pkgName);
             rewritePackageSpec(gs, file, info);
+
+            if (info.isPreludePackage()) {
+                preludePackages.emplace_back(pkgName);
+            }
         }
     }
+
+    preludePackages.shrink_to_fit();
+    return preludePackages;
 }
 
 namespace {
@@ -2226,7 +2332,10 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
     constexpr bool validatePackagedFiles = Mode == PackagerMode::PackagedFilesOnly || Mode == PackagerMode::AllFiles;
 
     if constexpr (buildPackageDB) {
-        Packager::findPackages(gs, files);
+        auto preludePackages = Packager::findPackages(gs, files);
+
+        // We cache this set here so that it's available in validatePackage.
+        gs.packageDB().setPreludePackages(move(preludePackages));
     }
 
     {
