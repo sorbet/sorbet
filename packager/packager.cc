@@ -1751,26 +1751,10 @@ class ComputePackageSCCs {
 
     core::packages::Condensation condensation;
 
-    vector<core::packages::MangledName> preludePackages;
-    vector<core::packages::MangledName> normalPackages;
-
     ComputePackageSCCs(core::GlobalState &gs) : gs{gs} {
         auto numPackages = gs.packageDB().packages().size();
         this->stack.reserve(numPackages);
         this->nodeMap.reserve(numPackages);
-
-        auto &db = gs.packageDB();
-        auto packages = db.packages();
-
-        vector<core::packages::MangledName> allPackages;
-
-        allPackages.insert(allPackages.end(), packages.begin(), packages.end());
-        auto it = absl::c_partition(allPackages, [&db](auto n) { return db.getPackageInfo(n).isPreludePackage(); });
-        auto numPreludePackages = std::distance(allPackages.begin(), it);
-        auto preludePackages = absl::MakeSpan(allPackages).subspan(0, numPreludePackages);
-        this->preludePackages.insert(this->preludePackages.begin(), preludePackages.begin(), preludePackages.end());
-        auto normalPackages = absl::MakeSpan(allPackages).subspan(numPreludePackages);
-        this->normalPackages.insert(this->normalPackages.begin(), normalPackages.begin(), normalPackages.end());
     }
 
     // DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
@@ -1919,6 +1903,22 @@ public:
     static void run(core::GlobalState &gs) {
         Timer timeit(gs.tracer(), "packager::computeSCCs");
         ComputePackageSCCs scc(gs);
+        auto &db = gs.packageDB();
+
+        vector<core::packages::MangledName> allPackages;
+        absl::Span<const core::packages::MangledName> preludePackages;
+        absl::Span<const core::packages::MangledName> normalPackages;
+
+        {
+            auto packages = db.packages();
+            allPackages.insert(allPackages.end(), packages.begin(), packages.end());
+
+            auto it = absl::c_stable_partition(allPackages,
+                                               [&db](auto n) { return db.getPackageInfo(n).isPreludePackage(); });
+            auto numPreludePackages = std::distance(allPackages.begin(), it);
+            preludePackages = absl::MakeSpan(allPackages).subspan(0, numPreludePackages);
+            normalPackages = absl::MakeSpan(allPackages).subspan(numPreludePackages);
+        }
 
         // We compute two groups of SCCs here for the normal and test imports of each package. This ensures that we take
         // advantage of a detangled package graph, and limit the effects of a more tangled test graph.
@@ -1926,32 +1926,32 @@ public:
         // First, we compute the application and test SCCs for the prelude packages.
         {
             Timer timeit(gs.tracer(), "packager::computeSCCs.prelude");
-            scc.tarjan<core::packages::ImportType::Normal>(scc.preludePackages, {});
-            scc.tarjan<core::packages::ImportType::TestHelper>(scc.preludePackages, {});
+            scc.tarjan<core::packages::ImportType::Normal>(preludePackages, {});
+            scc.tarjan<core::packages::ImportType::TestHelper>(preludePackages, {});
         }
 
-        // Then, we compute all the implicit SCC imports that we'll need to add when processing normal packages
-        vector<int> implicitImports;
-        size_t numNormalImports = 0;
+        // We use the partially constructed condensation graph to determine the scc ids that we'll need to depend on
+        // implicitly from application and test code.
+        vector<int> allPreludeImports;
+        absl::Span<const int> preludeApplicationImports;
         {
             auto nodes = scc.condensation.nodes();
-            implicitImports.reserve(nodes.size());
+            allPreludeImports.reserve(nodes.size());
 
-            absl::c_transform(nodes, back_inserter(implicitImports), [](auto &node) { return node.id; });
-            auto it = absl::c_partition(implicitImports, [nodes](auto id) { return !nodes[id].isTest; });
-            numNormalImports = std::distance(implicitImports.begin(), it);
+            absl::c_transform(nodes, back_inserter(allPreludeImports), [](auto &node) { return node.id; });
+            auto it = absl::c_partition(allPreludeImports, [nodes](auto id) { return !nodes[id].isTest; });
+            auto numApplicationImports = std::distance(allPreludeImports.begin(), it);
+            preludeApplicationImports = absl::MakeSpan(allPreludeImports).subspan(0, numApplicationImports);
         }
 
         // Second, we compute the application and test SCCs for all the normal packages.
         {
             Timer timeit(gs.tracer(), "packager::computeSCCs.normal");
-            scc.tarjan<core::packages::ImportType::Normal>(
-                scc.normalPackages, absl::MakeSpan(implicitImports).subspan(0, numNormalImports));
-            scc.tarjan<core::packages::ImportType::TestHelper>(scc.normalPackages, implicitImports);
+            scc.tarjan<core::packages::ImportType::Normal>(normalPackages, preludeApplicationImports);
+            scc.tarjan<core::packages::ImportType::TestHelper>(normalPackages, allPreludeImports);
         }
 
         gs.packageDB().setCondensation(move(scc.condensation));
-        gs.packageDB().setPreludePackages(move(scc.preludePackages));
     }
 };
 
@@ -2185,7 +2185,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 
 } // namespace
 
-void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
+vector<core::packages::MangledName> Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
     // Ensure files are in canonical order.
     // TODO(jez) Is this sort redundant? Should we move this sort to callers?
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
@@ -2227,6 +2227,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 
     setPackageNameOnFiles(gs, files);
 
+    vector<core::packages::MangledName> preludePackages;
     {
         core::UnfreezeNameTable unfreeze(gs);
         auto packages = gs.unfreezePackages();
@@ -2242,8 +2243,15 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             }
             auto &info = PackageInfoImpl::from(gs, pkgName);
             rewritePackageSpec(gs, file, info);
+
+            if (info.isPreludePackage()) {
+                preludePackages.emplace_back(pkgName);
+            }
         }
     }
+
+    preludePackages.shrink_to_fit();
+    return preludePackages;
 }
 
 namespace {
@@ -2319,7 +2327,10 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
     constexpr bool validatePackagedFiles = Mode == PackagerMode::PackagedFilesOnly || Mode == PackagerMode::AllFiles;
 
     if constexpr (buildPackageDB) {
-        Packager::findPackages(gs, files);
+        auto preludePackages = Packager::findPackages(gs, files);
+
+        // We cache this set here so that it's available in validatePackage.
+        gs.packageDB().setPreludePackages(move(preludePackages));
     }
 
     {
