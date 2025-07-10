@@ -109,6 +109,7 @@ def single_package_rbi_test(name, rb_files):
 
 _TEST_RUNNERS = {
     "PosTests": ":pipeline_test_runner",
+    "PrismPosTests": ":pipeline_test_runner",
     "LSPTests": ":lsp_test_runner",
     "WhitequarkParserTests": ":parser_test_runner",
     "PackagerTests": ":pipeline_test_runner",
