@@ -110,7 +110,7 @@ public:
      */
     void transferInitializeState(InitializedTask &task);
 
-    void updateGsFromOptions(const DidChangeConfigurationParams &options) const;
+    void updateConfigAndGsFromOptions(const DidChangeConfigurationParams &options) const;
 };
 
 } // namespace sorbet::realmain::lsp

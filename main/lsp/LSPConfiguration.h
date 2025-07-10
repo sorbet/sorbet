@@ -35,11 +35,21 @@ public:
     /** If true, then LSP sends metadata to the client every time it typechecks files. Used in tests. */
     bool enableTypecheckInfo = false;
 
-    /** Where LSP should output an information diagnostic for untyped values */
-    core::TrackUntyped enableHighlightUntyped = core::TrackUntyped::Nowhere;
+    /**
+     * Initial value for where LSP should output an information diagnostic for untyped values
+     * (current value is tracked in GlobalState)
+     */
+    core::TrackUntyped initialEnableHighlightUntyped = core::TrackUntyped::Nowhere;
 
     /** If false, nudges in `typed: false` files are disabled */
     bool enableTypedFalseCompletionNudges = true;
+
+    /**
+     * Initial value for which DiagnosticSeverity level to use when reporting untyped values.
+     *
+     * See `GlobalState::highlightUntypedDiagnosticSeverity` for more.
+     */
+    DiagnosticSeverity initialHighlightUntypedDiagnosticSeverity = DiagnosticSeverity::Information;
 
     /**
      * Whether or not the active client has support for snippets in CompletionItems.

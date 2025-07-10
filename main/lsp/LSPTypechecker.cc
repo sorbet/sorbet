@@ -13,6 +13,7 @@
 #include "local_vars/local_vars.h"
 #include "main/cache/cache.h"
 #include "main/lsp/DefLocSaver.h"
+#include "main/lsp/DiagnosticSeverity.h"
 #include "main/lsp/ErrorFlusherLSP.h"
 #include "main/lsp/ErrorReporter.h"
 #include "main/lsp/LSPMessage.h"
@@ -74,7 +75,10 @@ void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> 
     this->gs = std::move(initialGS);
 
     // Initialize settings that come through from the client.
-    this->gs->trackUntyped = currentConfig.getClientConfig().enableHighlightUntyped;
+    this->gs->trackUntyped = currentConfig.getClientConfig().initialEnableHighlightUntyped;
+
+    this->gs->highlightUntypedDiagnosticSeverity =
+        convertDiagnosticSeverity(currentConfig.getClientConfig().initialHighlightUntypedDiagnosticSeverity);
 
     // Initialization typecheck is not cancelable.
     // TODO(jvilk): Make it preemptible.
@@ -833,9 +837,14 @@ void LSPTypechecker::setSlowPathBlocked(bool blocked) {
     slowPathBlocked = blocked;
 }
 
-void LSPTypechecker::updateGsFromOptions(const DidChangeConfigurationParams &options) const {
+void LSPTypechecker::updateConfigAndGsFromOptions(const DidChangeConfigurationParams &options) const {
     this->gs->trackUntyped =
         LSPClientConfiguration::parseEnableHighlightUntyped(*options.settings, this->gs->trackUntyped);
+
+    if (options.settings->highlightUntypedDiagnosticSeverity.has_value()) {
+        this->gs->highlightUntypedDiagnosticSeverity =
+            convertDiagnosticSeverity(options.settings->highlightUntypedDiagnosticSeverity.value());
+    }
 
     if (options.settings->enableTypecheckInfo.has_value() ||
         options.settings->enableTypedFalseCompletionNudges.has_value() ||
@@ -898,8 +907,8 @@ ast::ExpressionPtr LSPTypecheckerDelegate::getLocalVarTrees(core::FileRef fref) 
 const core::GlobalState &LSPTypecheckerDelegate::state() const {
     return typechecker.state();
 }
-void LSPTypecheckerDelegate::updateGsFromOptions(const DidChangeConfigurationParams &options) const {
-    typechecker.updateGsFromOptions(options);
+void LSPTypecheckerDelegate::updateConfigAndGsFromOptions(const DidChangeConfigurationParams &options) const {
+    typechecker.updateConfigAndGsFromOptions(options);
 }
 
 unique_ptr<LSPFileUpdates> LSPTypecheckerDelegate::getNoopUpdate(absl::Span<const core::FileRef> frefs) const {

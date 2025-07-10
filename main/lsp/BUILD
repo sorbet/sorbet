@@ -32,6 +32,7 @@ cc_library(
     ],
     hdrs = [
         "ConvertToSingletonClassMethod.h",
+        "DiagnosticSeverity.h",
         "ExtractVariable.h",
         "LSPConfiguration.h",
         "LSPInput.h",

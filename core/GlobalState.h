@@ -9,6 +9,7 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/TrackUntyped.h"
+#include "core/lsp/DiagnosticSeverity.h"
 #include "core/lsp/Query.h"
 #include "core/packages/PackageDB.h"
 #include "core/packages/PackageInfo.h"
@@ -241,6 +242,25 @@ public:
     bool autocorrect = false;
     bool didYouMean = true;
     TrackUntyped trackUntyped = TrackUntyped::Nowhere;
+
+    /**
+     * The severity to use when reporting untyped highlights.
+     *
+     * Must be stored on GlobalState (vs LSPClientConfiguration) because LSPClientConfiguration is
+     * immutable after initialization.
+     *
+     * The fact that we report untyped code as "diagnostic" is mostly a limitation of the LSP spec.
+     * There's no real way to communicate passive information about individual regions of code
+     * except by either defining "semantic tokens" (for syntax highlighting) or diagnostics.
+     *
+     * VS Code is special (like it always is) and makes it hard to customize how diagnostics are
+     * presented. In particular, marking a diagnostic as "Information" will make it show up in the
+     * Problems view, while "Hint" diagnostics will not show up there. (Hint diagnostics have their
+     * own problems: it's hard to customize the style of them in the editor). But in any case, we
+     * can let users choose which side of these tradeoffs they want to come down on.
+     */
+    lsp::DiagnosticSeverity highlightUntypedDiagnosticSeverity = lsp::DiagnosticSeverity::Information;
+
     bool printingFileTable = false;
 
     // We have a lot of internal names of form `<something>` that's chosen with `<` and `>` as you can't make

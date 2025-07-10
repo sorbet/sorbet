@@ -18,11 +18,11 @@ LSPTask::Phase DidChangeConfigurationTask::finalPhase() const {
 }
 
 void DidChangeConfigurationTask::index(LSPIndexer &indexer) {
-    indexer.updateGsFromOptions(*params);
+    indexer.updateConfigAndGsFromOptions(*params);
 }
 
 void DidChangeConfigurationTask::run(LSPTypecheckerDelegate &tc) {
-    tc.updateGsFromOptions(*params);
+    tc.updateConfigAndGsFromOptions(*params);
     vector<core::FileRef> openFileRefs;
     for (auto const &path : openFilePaths) {
         openFileRefs.push_back(tc.state().findFileByPath(path));
