@@ -27,48 +27,39 @@ public:
     pm_error_level_t level;
 };
 
-// A backing implemenation detail of `Parser`, which stores a Prism parser and its options in a single allocation.
-struct ParserStorage {
+class Parser final {
     // The version of Ruby syntax that we're parsing with Prism. This determines what syntax is supported or not.
     static constexpr std::string_view ParsedRubyVersion = "3.3.0";
+
     pm_parser_t parser;
     pm_options_t options;
 
-    ParserStorage(std::string_view sourceCode) : parser{}, options{} {
+    friend class ParseResult;
+    friend struct NodeDeleter;
+
+public:
+    Parser(std::string_view sourceCode) : parser{}, options{} {
         pm_options_version_set(&options, ParsedRubyVersion.data(), ParsedRubyVersion.size());
 
         pm_parser_init(&parser, reinterpret_cast<const uint8_t *>(sourceCode.data()), sourceCode.size(), &options);
     }
 
-    ~ParserStorage() {
+    ~Parser() {
         pm_parser_free(&parser);
         pm_options_free(&options);
     }
 
-    ParserStorage(const ParserStorage &) = delete;
-    ParserStorage &operator=(const ParserStorage &) = delete;
-    ParserStorage(ParserStorage &&) = delete;
-    ParserStorage &operator=(ParserStorage &&) = delete;
-};
-
-class Parser final {
-    friend class ParseResult;
-    friend struct NodeDeleter;
-
-    std::shared_ptr<ParserStorage> storage;
-
-public:
-    Parser(std::string_view sourceCode) : storage(std::make_shared<ParserStorage>(sourceCode)) {}
-
-    Parser(const Parser &) = default;
-    Parser &operator=(const Parser &) = default;
+    Parser(const Parser &) = delete;
+    Parser &operator=(const Parser &) = delete;
+    Parser(Parser &&) = delete;
+    Parser &operator=(Parser &&) = delete;
 
     static std::unique_ptr<parser::Node> run(core::GlobalState &gs, core::FileRef file);
 
     ParseResult parse();
-    core::LocOffsets translateLocation(pm_location_t location);
-    std::string_view resolveConstant(pm_constant_id_t constantId);
-    std::string_view extractString(pm_string_t *string);
+    core::LocOffsets translateLocation(pm_location_t location) const;
+    std::string_view resolveConstant(pm_constant_id_t constantId) const;
+    std::string_view extractString(pm_string_t *string) const;
 
 private:
     std::vector<ParseError> collectErrors();
@@ -77,7 +68,7 @@ private:
 
 class ParseResult final {
     struct NodeDeleter {
-        Parser parser;
+        Parser &parser;
 
         void operator()(pm_node_t *node) {
             pm_node_destroy(parser.getRawParserPointer(), node);
@@ -87,17 +78,17 @@ class ParseResult final {
     friend class Parser;
     friend class Translator;
 
-    Parser parser;
+    Parser &parser;
     std::unique_ptr<pm_node_t, NodeDeleter> node;
     std::vector<ParseError> parseErrors;
 
-    ParseResult(Parser parser, pm_node_t *node, std::vector<ParseError> parseErrors)
+    ParseResult(Parser &parser, pm_node_t *node, std::vector<ParseError> parseErrors)
         : parser{parser}, node{node, NodeDeleter{parser}}, parseErrors{parseErrors} {}
 
     ParseResult(const ParseResult &) = delete;            // Copy constructor
     ParseResult &operator=(const ParseResult &) = delete; // Copy assignment
     ParseResult(ParseResult &&) = default;                // Move constructor
-    ParseResult &operator=(ParseResult &&) = default;     // Move assignment
+    ParseResult &operator=(ParseResult &&) = delete;      // Move assignment
 
     pm_node_t *getRawNodePointer() const {
         return node.get();

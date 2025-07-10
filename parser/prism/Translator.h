@@ -13,7 +13,7 @@ extern "C" {
 namespace sorbet::parser::Prism {
 
 class Translator final {
-    Parser parser;
+    const Parser &parser;
 
     // The functions in Pipeline.cc pass around a reference to the global state as a parameter,
     // but don't have explicit ownership over it. We take a temporary reference to it, but we can't
@@ -40,9 +40,8 @@ class Translator final {
     Translator &operator=(Translator &&) = delete;      // Move assignment
     Translator &operator=(const Translator &) = delete; // Copy assignment
 public:
-    Translator(Parser parser, core::GlobalState &gs, core::FileRef file)
-        : parser(std::move(parser)), gs(gs), file(file), uniqueCounterStorage(1),
-          uniqueCounter(&this->uniqueCounterStorage) {}
+    Translator(const Parser &parser, core::GlobalState &gs, core::FileRef file)
+        : parser(parser), gs(gs), file(file), uniqueCounterStorage(1), uniqueCounter(&this->uniqueCounterStorage) {}
 
     int nextUniqueID() {
         return *uniqueCounter += 1;
@@ -55,7 +54,7 @@ public:
 private:
     // Private constructor used only for creating child translators
     // uniqueCounterStorage is passed as the minimum integer value and is never used
-    Translator(Parser parser, core::GlobalState &gs, core::FileRef file, std::vector<ParseError> parseErrors,
+    Translator(const Parser &parser, core::GlobalState &gs, core::FileRef file, std::vector<ParseError> parseErrors,
                bool isInMethodDef, int *uniqueCounter)
         : parser(parser), gs(gs), file(file), parseErrors(parseErrors), isInMethodDef(isInMethodDef),
           uniqueCounterStorage(std::numeric_limits<int>::min()), uniqueCounter(uniqueCounter) {}
