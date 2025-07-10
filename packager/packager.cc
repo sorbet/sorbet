@@ -1226,7 +1226,7 @@ void validatePackage(core::Context ctx) {
         }
 
         for (auto &i : pkgInfo.importedPackageNames) {
-            auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+            auto &otherPkg = packageDB.getPackageInfo(i.mangledName);
             if (!otherPkg.isPreludePackage()) {
                 if (auto e = ctx.beginError(i.loc, core::errors::Packager::PreludePackageImport)) {
                     string_view import_;
@@ -1239,8 +1239,8 @@ void validatePackage(core::Context ctx) {
                             import_ = "test_import";
                             break;
                     }
-                    e.setHeader("Prelude package `{}` may not `{}` non-prelude package `{}`",
-                                pkgInfo.name.toString(ctx), import_, otherPkg.show(ctx));
+                    e.setHeader("Prelude package `{}` may not `{}` non-prelude package `{}`", pkgInfo.show(ctx),
+                                import_, otherPkg.show(ctx));
                 }
             }
         }
@@ -1322,7 +1322,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 
 } // namespace
 
-void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
+vector<core::packages::MangledName> Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
     // Ensure files are in canonical order.
     // TODO(jez) Is this sort redundant? Should we move this sort to callers?
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
@@ -1364,6 +1364,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 
     setPackageNameOnFiles(gs, files);
 
+    vector<core::packages::MangledName> preludePackages;
     {
         core::UnfreezeNameTable unfreeze(gs);
         auto packages = gs.unfreezePackages();
@@ -1379,8 +1380,15 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             }
             auto &info = PackageInfo::from(gs, pkgName);
             rewritePackageSpec(gs, file, info);
+
+            if (info.isPreludePackage()) {
+                preludePackages.emplace_back(pkgName);
+            }
         }
     }
+
+    preludePackages.shrink_to_fit();
+    return preludePackages;
 }
 
 namespace {
@@ -1490,7 +1498,10 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
     constexpr bool validatePackagedFiles = Mode == PackagerMode::PackagedFilesOnly || Mode == PackagerMode::AllFiles;
 
     if constexpr (buildPackageDB) {
-        Packager::findPackages(gs, files);
+        auto preludePackages = Packager::findPackages(gs, files);
+
+        // We cache this set here so that it's available in validatePackage.
+        gs.packageDB().setPreludePackages(move(preludePackages));
     }
 
     {
