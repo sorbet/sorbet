@@ -457,7 +457,6 @@ NameDef names[] = {
     {"import"},
     {"testImport", "test_import"},
     {"export_", "export"},
-    {"restrictToService", "restrict_to_service"},
     {"legacy"},
     {"strict"},
     {"visibleTo", "visible_to"},
