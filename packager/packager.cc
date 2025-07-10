@@ -2093,6 +2093,26 @@ void validatePackage(core::Context ctx) {
                             "visible_to");
             }
         }
+
+        for (auto &i : pkgInfo.importedPackageNames) {
+            auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+            if (!otherPkg.isPreludePackage()) {
+                if (auto e = ctx.beginError(i.loc, core::errors::Packager::PreludePackageImport)) {
+                    string_view import_;
+                    switch (i.type) {
+                        case core::packages::ImportType::Normal:
+                            import_ = "import";
+                            break;
+                        case core::packages::ImportType::TestUnit:
+                        case core::packages::ImportType::TestHelper:
+                            import_ = "test_import";
+                            break;
+                    }
+                    e.setHeader("Prelude package `{}` may not `{}` non-prelude package `{}`",
+                                pkgInfo.name.toString(ctx), import_, otherPkg.show(ctx));
+                }
+            }
+        }
     } else {
         // We only check implicit prelude imports for non-prelude packages.
         for (auto name : packageDB.preludePackages()) {
