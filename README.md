@@ -1085,3 +1085,40 @@ Here are some sample config setups:
   - [rtags (vim-rtags)](https://github.com/jez/dotfiles/blob/dafe23c95fd908719bf477f189335bd1451bd8a7/vim/plug-settings.vim#L649-L676)
   - [clangd + clang-format (ALE)](https://github.com/jez/dotfiles/blob/dafe23c95fd908719bf477f189335bd1451bd8a7/vim/plug-settings.vim#L288-L303)
   - [clangd + clang-format (coc.nvim)](https://github.com/elliottt/vim-config/blob/35f328765528f6b322fb7d5a03fb3edd81067805/coc-settings.json#L3-L15)
+
+### Editor setup for test/testdata
+
+Sorbet developers will want to set up their editor to run Sorbet slightly
+differently from normal Sorbet users. The two main goals of a Sorbet developer's
+setup:
+
+1.  Use `bazel-bin/main/sorbet` to see Sorbet changes in your editor as you
+    rebuild
+1.  Get `test/testdata/` and other files to typecheck
+
+Since there are so few Sorbet developers, every setup is custom.
+
+#### @jez setup
+
+1.  Create a `sorbet` symlink in `$PATH` somewhere, and have it point at
+    `/path/to/sorbet/bazel-bin/main/sorbet`.
+
+1.  Configure LSP to invoke the Sorbet LSP server like this:
+
+    - If there is a `Gemfile` in the current folder, use `srb tc`. Otherwise,
+      use `sorbet` (from the `$PATH` setup, see above).
+    - If there is a `sorbet/config` file in the repo, invoke with no extra args.
+      Otherwise, invoke with these args:
+
+      ```
+      -e 0 /Users/jez/.local/share/sorbet/.empty --debug-log-file=/tmp/sorbet-nvim.log
+      ```
+
+      This should mean that opening any Ruby file in `test/testdata/` should
+      have Sorbet start automatically and only typecheck that file in isolation,
+      instead of attempting to typecheck all of `test/testdata/` as if it were
+      one project.
+
+#### others
+
+_Feel free to add yours if you think it would be useful!_
