@@ -51,7 +51,7 @@ exp_test = rule(
         "_llvm_symbolizer": attr.label(
             default = "//test:llvm-symbolizer",
         ),
-        "parser": attr.string(default="sorbet"),
+        "parser": attr.string(default="original"),
     },
 )
 
@@ -114,7 +114,7 @@ _TEST_RUNNERS = {
     "PackagerTests": ":pipeline_test_runner",
 }
 
-def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], tags = [], parser = "sorbet"):
+def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], tags = [], parser = "original"):
     tests = {}  # test_name-> {"path": String, "prefix": String, "sentinel": String, "isPackage": bool}
 
     # The packager step needs folder-based steps since folder structure dictates package membership.

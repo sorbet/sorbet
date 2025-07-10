@@ -224,7 +224,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
 
         unique_ptr<parser::Node> nodes;
         switch (parser) {
-            case realmain::options::Parser::SORBET: {
+            case realmain::options::Parser::ORIGINAL: {
                 core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
                 nodes = parser::Parser::run(*gs, file, parser::Parser::Settings{});
@@ -479,7 +479,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
                 unique_ptr<parser::Node> nodes;
                 switch (parser) {
-                    case realmain::options::Parser::SORBET: {
+                    case realmain::options::Parser::ORIGINAL: {
                         nodes = parser::Parser::run(*rbiGenGs, file, parser::Parser::Settings{});
                         break;
                     }
@@ -601,6 +601,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     if (!test.minimizeRBI.empty()) {
         auto gsForMinimize = emptyGs->deepCopy();
         auto opts = realmain::options::Options{};
+        opts.parser = parser;
         auto minimizeRBI = test.folder + test.minimizeRBI;
         realmain::Minimize::indexAndResolveForMinimize(gs, gsForMinimize, opts, *workers, minimizeRBI);
         auto printerConfig = realmain::options::PrinterConfig{};
@@ -614,7 +615,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             *gs, "minimized-rbi", [&]() { return printerConfig.flushToString(); }, addNewline);
     }
 
-    // Simulate what pipeline.cc does: We want to start typeckecking big files first because it helps with better work
+    // Simulate what pipeline.cc does: We want to start typechecking big files first because it helps with better work
     // distribution
     fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
         return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
@@ -820,7 +821,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         // this replicates the logic of pipeline::indexOne
         unique_ptr<parser::Node> nodes;
         switch (parser) {
-            case realmain::options::Parser::SORBET: {
+            case realmain::options::Parser::ORIGINAL: {
                 nodes = parser::Parser::run(*gs, f.file, parser::Parser::Settings{});
                 break;
             }
@@ -921,8 +922,8 @@ int main(int argc, char *argv[]) {
     options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
                                                        cxxopts::value<std::string>()->default_value(""), "testpath");
     options.allow_unrecognised_options().add_options()("parser", "The parser to use while testing.",
-                                                       cxxopts::value<std::string>()->default_value("sorbet"),
-                                                       "{prism, sorbet}");
+                                                       cxxopts::value<std::string>()->default_value("original"),
+                                                       "{original, prism}");
     auto res = options.parse(argc, argv);
 
     if (res.count("single_test") != 1) {
@@ -932,12 +933,21 @@ int main(int argc, char *argv[]) {
 
     sorbet::test::singleTest = res["single_test"].as<std::string>();
 
+    auto logger = spdlog::stderr_color_mt("test_runner");
+
+    sorbet::test::parser = sorbet::realmain::options::extractParser(res, logger);
+
     std::string parserOpt = res["parser"].as<std::string>();
+    bool foundParser = false;
     for (auto &known : sorbet::realmain::options::parser_options) {
         if (known.option == parserOpt) {
-            sorbet::test::parser = known.flag;
+            foundParser = true;
             break;
         }
+    }
+
+    if (!foundParser) {
+        return 1;
     }
 
     doctest::Context context(argc, argv);

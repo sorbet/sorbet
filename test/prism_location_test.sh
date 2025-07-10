@@ -23,7 +23,7 @@ sorbet_output_sorbet=$(mktemp)
 
 set +e  # Temporarily disable exit on error
 # Run Sorbet with default parser
-"$SORBET_BIN" --print=parse-tree-json-with-locs --parser=sorbet "$TEST_DIR/$TEST_FILE" > "$sorbet_output_sorbet" 2>/dev/null
+"$SORBET_BIN" --print=parse-tree-json-with-locs --parser=original "$TEST_DIR/$TEST_FILE" > "$sorbet_output_sorbet" 2>/dev/null
 # Run Sorbet with Prism parser
 "$SORBET_BIN" --print=parse-tree-json-with-locs --parser=prism "$TEST_DIR/$TEST_FILE" > "$sorbet_output_prism" 2>/dev/null
 set -e  # Re-enable exit on error

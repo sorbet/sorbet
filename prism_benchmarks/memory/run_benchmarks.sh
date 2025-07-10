@@ -34,7 +34,7 @@ if ! command -v gtime &> /dev/null; then
 fi
 
 output_file_name="$(date '+%Y-%m-%d')-$(git rev-parse --short HEAD).txt"
-parsers=("prism" "sorbet")
+parsers=("prism" "original")
 
 # ----- Run Benchmarks -----
 

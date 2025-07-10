@@ -229,7 +229,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
 
             unique_ptr<parser::Node> parseTree;
             switch (parser) {
-                case options::Parser::SORBET:
+                case options::Parser::ORIGINAL:
                     parseTree = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
                     break;
                 case options::Parser::PRISM:

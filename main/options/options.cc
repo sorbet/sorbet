@@ -723,10 +723,13 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Show help. Can pass an optional SECTION to show help for only one section instead of "
                                  "the default of all sections",
                                  cxxopts::value<vector<string>>()->implicit_value("all"), "SECTION");
-    // }}}
+    options.add_options(section)("parser",
+                                 "Which parser to use. Prism support is experimental and still under active "
+                                 "development. Correct code should still parse correctly, but error diagnostics "
+                                 "and auto-corrections are a work-in-progress.",
+                                 cxxopts::value<string>()->default_value("original"), "{[original], prism}");
 
-    options.add_options("dev")("parser", "Which parser to use", cxxopts::value<string>()->default_value("sorbet"),
-                               "{sorbet, prism}");
+    // }}}
 
     for (auto &provider : semanticExtensionProviders) {
         provider->injectOptions(options);
@@ -809,7 +812,7 @@ Parser extractParser(cxxopts::ParseResult &raw, shared_ptr<spdlog::logger> logge
     }
 
     logger->error("Unknown --parser option: {}\nValid values: {}", opt, fmt::join(allOptions, ", "));
-    return Parser::SORBET;
+    return Parser::ORIGINAL;
 }
 
 // Given a path, strips any trailing forward slashes (/) at the end of the path.
