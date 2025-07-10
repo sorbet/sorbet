@@ -873,6 +873,43 @@ Additionally, if a package is at `strict_dependencies 'dag'`, all packages it im
 
 Note: `test_import`s are not checked for strict dependency violations.
 
+## 3728
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) and [go/strict-dependencies](http://go/strict-dependencies) for more.
+
+If a package is marked with `prelude_package`, it is not allowed to use `visible_to` annotations, as it is implicitly imported by all other non-prelude packages.
+
+```ruby
+class A < PackageSpec
+end
+
+class B < PackageSpec
+end
+
+class C < PackageSpec
+  prelude_package
+
+  visible_to B # error: The implicit import in `A` would automatically violate the visibility restrictions
+end
+```
+
+## 3729
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) and [go/strict-dependencies](http://go/strict-dependencies) for more.
+
+If a package is marked with `prelude_package`, it is restricted to only importing other packages marked as `prelude_package`. This error indicates that a `prelude_package` is importing a non-prelude package.
+
+```ruby
+class A < PackageSpec
+end
+
+class B < PackageSpec
+  prelude_package
+
+  import A # error: Importing A, which is not marked as `prelude_package`
+end
+```
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in `# typed: false` files. Recall from the [strictness levels](static.md#file-level-granularity-strictness-levels) docs that all constants in a Sorbet codebase must resolve, even at `# typed: false`. Parsing `include` blocks is required for this, so incorrect usages of `include` are reported when encountered.
