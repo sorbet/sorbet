@@ -109,6 +109,7 @@ public:
 
     virtual core::AutocorrectSuggestion aggregateMissingImports() const = 0;
 
+    // TODO: can this just return a vector
     virtual UnorderedSet<std::pair<core::packages::MangledName, core::packages::ImportType>>
     packageReferencesToImportList(const core::GlobalState &gs) const = 0;
 

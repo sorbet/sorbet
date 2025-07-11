@@ -1822,7 +1822,6 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     }
 }
 
-
 void validateLayering(const core::Context &ctx, const Import &i) {
     if (i.isTestImport()) {
         return;

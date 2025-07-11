@@ -5,6 +5,7 @@
 #include "common/concurrency/Parallel.h"
 #include "core/Context.h"
 #include "core/errors/packager.h"
+#include "packager/ComputePackageSCCs.h"
 
 using namespace std;
 
@@ -771,6 +772,41 @@ public:
 };
 } // namespace
 
+class TemporaryProvider : public Provider {
+    core::packages::PackageDB &packageDB;
+    const core::GlobalState &gs;
+
+public:
+    struct SCCInfo {
+        int sccId;
+        int testSccId;
+    };
+    UnorderedMap<core::packages::MangledName, SCCInfo> nodeMap;
+
+    TemporaryProvider(const core::GlobalState &gs, core::packages::PackageDB &packageDB)
+        : packageDB(packageDB), gs(gs) {}
+
+    vector<pair<core::packages::MangledName, core::packages::ImportType>>
+    getImports(core::packages::MangledName packageName) {
+        auto &pkgInfo = packageDB.getPackageInfo(packageName);
+        ENFORCE(pkgInfo.exists());
+        auto set = pkgInfo.packageReferencesToImportList(gs);
+        vector<pair<core::packages::MangledName, core::packages::ImportType>> result(set.begin(), set.end());
+        return result;
+    }
+
+    void setSCCId(core::packages::MangledName packageName, int sccId) {
+        nodeMap[packageName].sccId = sccId;
+    }
+
+    int getSCCId(core::packages::MangledName packageName) {
+        return nodeMap[packageName].sccId;
+    }
+
+    void setTestSCCId(core::packages::MangledName packageName, int sccId) {
+        nodeMap[packageName].testSccId = sccId;
+    }
+};
 vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
                                                vector<ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "visibility_checker.run");
@@ -784,14 +820,26 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
 
     auto result = VisibilityCheckerPass::run(gs, workers, std::move(files));
     if (gs.packageDB().genPackages()) {
-        for (auto package : gs.packageDB().packages()) {
-            auto &pkgInfo = gs.packageDB().getPackageInfo(package);
-            ENFORCE(pkgInfo.exists());
-            auto autocorrect = pkgInfo.aggregateMissingImports();
-            if (autocorrect.edits.size() > 0) {
-                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
-                    e.setHeader("{}'s imports are incorrect", pkgInfo.show(gs));
-                    e.addAutocorrect(move(autocorrect));
+        if (gs.packageDB().genPackagesStrict()) {
+            // TODO: delete all unused imports (not needed?)
+            // TODO: recompute the SCCs
+            TemporaryProvider temporaryProvider{gs, gs.packageDB()};
+            ComputePackageSCCs::run(gs, temporaryProvider);
+            // TODO: raise strictness
+            // auto highestPossibleStrictness = core::packages::StrictDependenciesLevel::False;
+            // TODO: sort imports
+            // TODO: serialize import list
+        } else {
+            // TODO: delete unused imports that cause an error
+            for (auto package : gs.packageDB().packages()) {
+                auto &pkgInfo = gs.packageDB().getPackageInfo(package);
+                ENFORCE(pkgInfo.exists());
+                auto autocorrect = pkgInfo.aggregateMissingImports();
+                if (autocorrect.edits.size() > 0) {
+                    if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
+                        e.setHeader("{}'s imports are incorrect", pkgInfo.show(gs));
+                        e.addAutocorrect(move(autocorrect));
+                    }
                 }
             }
         }
