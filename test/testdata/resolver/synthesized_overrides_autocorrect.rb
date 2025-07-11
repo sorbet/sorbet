@@ -1,0 +1,17 @@
+# typed: strict
+
+class OverridableParent
+  extend T::Sig
+
+  sig { overridable.returns(Integer) }
+  def foo; 0; end
+end
+
+class Child < OverridableParent
+  sig { void }
+  def initialize(); @foo = T.let(0, Integer); end
+
+  sig { returns(Integer) }
+  attr_reader :foo
+# ^^^^^^^^^^^^^^^^ error: Method `Child#foo` overrides an overridable method `OverridableParent#foo` but is not declared with `override.`
+end

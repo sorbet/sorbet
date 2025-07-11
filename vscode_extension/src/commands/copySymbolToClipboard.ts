@@ -16,12 +16,12 @@ export async function copySymbolToClipboard(
   const { activeLanguageClient: client } = context.statusProvider;
 
   if (!client) {
-    context.log.warning("CopySymbol: No active Sorbet LSP.");
+    context.log.warn("CopySymbol: No active Sorbet LSP.");
     return;
   }
 
   if (!client.capabilities?.sorbetShowSymbolProvider) {
-    context.log.warning(
+    context.log.warn(
       "CopySymbol: Sorbet LSP does not support 'showSymbol' capability.",
     );
     return;
@@ -41,7 +41,7 @@ export async function copySymbolToClipboard(
   }
 
   if (client.status !== ServerStatus.RUNNING) {
-    context.log.warning("CopySymbol: Sorbet LSP is not ready.");
+    context.log.warn("CopySymbol: Sorbet LSP is not ready.");
     return;
   }
 

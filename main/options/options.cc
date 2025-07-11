@@ -26,6 +26,8 @@ using namespace std;
 
 namespace sorbet::realmain::options {
 
+namespace {
+
 enum class Group {
     INPUT,
     OUTPUT,
@@ -104,6 +106,7 @@ const vector<PrintOptions> print_options({
     {"parse-tree-json", &Printers::ParseTreeJson, false},
     {"parse-tree-json-with-locs", &Printers::ParseTreeJsonWithLocs, false},
     {"parse-tree-whitequark", &Printers::ParseTreeWhitequark, false},
+    {"rbs-rewrite-tree", &Printers::RBSRewriteTree, false},
     {"desugar-tree", &Printers::DesugarTree, false},
     {"desugar-tree-raw", &Printers::DesugarTreeRaw, false},
     {"rewrite-tree", &Printers::RewriterTree, false},
@@ -147,6 +150,8 @@ const vector<PrintOptions> print_options({
     {"untyped-blame", &Printers::UntypedBlame, true, true, true},
 });
 
+} // namespace
+
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
 
 void PrinterConfig::print(const string_view &contents) const {
@@ -178,6 +183,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         ParseTreeJson,
         ParseTreeJsonWithLocs,
         ParseTreeWhitequark,
+        RBSRewriteTree,
         DesugarTree,
         DesugarTreeRaw,
         RewriterTree,
@@ -219,9 +225,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
     });
 }
 
-bool Printers::isAutogen() const {
-    return Autogen.enabled || AutogenMsgPack.enabled || AutogenSubclasses.enabled;
-}
+namespace {
 
 struct StopAfterOptions {
     string option;
@@ -418,7 +422,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "Include 'unsafe' autocorrects, e.g. those which can be fixed by wrapping code in `T.unsafe` or using "
         "`T.untyped`. Provide a custom <method> to wrap with `<method>(...)` instead of `T.unsafe(...)`. This "
         "supersedes certain autocorrects, especially T.must.",
-        cxxopts::value<std::string>()->implicit_value("T.unsafe"), "<method>");
+        cxxopts::value<string>()->implicit_value("T.unsafe"), "<method>");
     options.add_options(section)("did-you-mean",
                                  "Whether to include 'Did you mean' suggestions in autocorrects. For large codemods, "
                                  "it's usually better to avoid spurious changes by setting this to false",
@@ -450,6 +454,12 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("experimental-ruby3-keyword-args",
                                  "Enforce use of new (Ruby 3.0-style) keyword arguments. (incomplete and experimental)",
                                  cxxopts::value<bool>());
+    options.add_options(section)("enable-experimental-rbs-signatures",
+                                 "Enable experimental support for RBS signatures as inline comments");
+    options.add_options(section)("enable-experimental-rbs-assertions",
+                                 "Enable experimental support for RBS assertions as inline comments");
+    options.add_options(section)("enable-experimental-rbs-comments",
+                                 "Enable experimental support for RBS signatures and assertions as inline comments");
     options.add_options(section)("enable-experimental-requires-ancestor",
                                  "Enable experimental `requires_ancestor` annotation");
     options.add_options(section)("uniquely-defined-behavior",
@@ -667,8 +677,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Force Sorbet to calculate file hashes, even from the CLI. Useful for profiling.");
     options.add_options(section)("trace-lexer", "Emit the lexer's token stream in a debug format");
     options.add_options(section)("trace-parser", "Enable bison's parser trace functionality");
-    options.add_options(section)("dump-package-info", "Dump package info in JSON form to the given file.",
-                                 cxxopts::value<string>()->default_value(""));
     auto partitioned_print_options = print_options;
     auto stableEnd = absl::c_stable_partition(partitioned_print_options, [](const auto &po) { return po.stable; });
     fmt::memory_buffer print_help;
@@ -696,8 +704,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Exit 0 unless there was a critical error (i.e., an uncaught exception)");
     options.add_options(section)("no-stdlib",
                                  "Do not load Sorbet's payload which defines RBI files for the Ruby standard library");
-    options.add_options(section)("store-state", "Store state into file",
-                                 cxxopts::value<string>()->default_value(empty.storeState), "file");
+    options.add_options(section)(
+        "store-state", "Store state into three files, separated by commas: <symbol-table>,<name-table>,<file-table>",
+        cxxopts::value<string>()->default_value(""), "file");
     options.add_options(section)("silence-dev-message", "Silence \"You are running a development build\" message");
     options.add_options(section)("censor-for-snapshot-tests",
                                  "When printing raw location information, don't show line numbers");
@@ -712,13 +721,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("minimize-to-rbi",
                                  "[experimental] Output a minimal RBI containing the diff between Sorbet's view of a "
                                  "codebase and the definitions present in this file",
-                                 cxxopts::value<std::string>()->default_value(""), "<file.rbi>");
-    options.add_options(section)("single-package", "Run in single-package mode",
-                                 cxxopts::value<string>()->default_value(""));
-    options.add_options(section)("package-rbi-generation", "Enable rbi generation for stripe packages",
-                                 cxxopts::value<bool>());
-    options.add_options(section)("package-rbi-dir", "The location of generated package rbis",
-                                 cxxopts::value<string>()->default_value(""));
+                                 cxxopts::value<string>()->default_value(""), "<file.rbi>");
     options.add_options(section)("h,help",
                                  "Show help. Can pass an optional SECTION to show help for only one section instead of "
                                  "the default of all sections",
@@ -799,7 +802,17 @@ Phase extractStopAfter(cxxopts::ParseResult &raw, shared_ptr<spdlog::logger> log
     return Phase::INIT;
 }
 
-Parser extractParser(cxxopts::ParseResult &raw, shared_ptr<spdlog::logger> logger) {
+// Given a path, strips any trailing forward slashes (/) at the end of the path.
+string_view stripTrailingSlashes(string_view path) {
+    while (path.back() == '/') {
+        path = path.substr(0, path.length() - 1);
+    }
+    return path;
+}
+
+} // namespace
+
+Parser extractParser(cxxopts::ParseResult &raw, std::shared_ptr<spdlog::logger> logger) {
     string opt = raw["parser"].as<string>();
     for (auto &known : parser_options) {
         if (known.option == opt) {
@@ -815,19 +828,13 @@ Parser extractParser(cxxopts::ParseResult &raw, shared_ptr<spdlog::logger> logge
     return Parser::ORIGINAL;
 }
 
-// Given a path, strips any trailing forward slashes (/) at the end of the path.
-string_view stripTrailingSlashes(string_view path) {
-    while (path.back() == '/') {
-        path = path.substr(0, path.length() - 1);
-    }
-    return path;
-}
-
 void Options::flushPrinters() {
     for (PrinterConfig &cfg : print.printers()) {
         cfg.flush();
     }
 }
+
+namespace {
 
 void parseIgnorePatterns(const vector<string> &rawIgnorePatterns, vector<string> &absoluteIgnorePatterns,
                          vector<string> &relativeIgnorePatterns) {
@@ -865,6 +872,8 @@ void addFilesFromDir(Options &opts, string_view dir, WorkerPool &workerPool, sha
     }
 }
 
+} // namespace
+
 void readOptions(Options &opts,
                  vector<unique_ptr<pipeline::semantic_extension::SemanticExtension>> &configuredExtensions, int argc,
                  char *argv[],
@@ -883,11 +892,11 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("allowed-extension") > 0) {
+            // Any use of `--allowed-extension` overrides the default.
+            opts.allowedExtensions.clear();
+
             const auto &exts = raw["allowed-extension"].as<vector<string>>();
             opts.allowedExtensions.insert(exts.begin(), exts.end());
-        } else {
-            opts.allowedExtensions.emplace(".rb");
-            opts.allowedExtensions.emplace(".rbi");
         }
 
         if (raw.count("ignore") > 0) {
@@ -895,34 +904,36 @@ void readOptions(Options &opts,
             parseIgnorePatterns(rawIgnorePatterns, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
         }
 
-        int maxInputFileThreads = raw["max-threads"].as<int>();
-        auto workerPool = WorkerPool::create(maxInputFileThreads, *logger);
+        {
+            int maxInputFileThreads = raw["max-threads"].as<int>();
+            auto workerPool = WorkerPool::create(maxInputFileThreads, *logger);
 
-        opts.pathPrefix = raw["remove-path-prefix"].as<string>();
-        if (raw.count("files") > 0) {
-            const auto &rawFiles = raw["files"].as<vector<string>>();
-            struct stat s;
-            for (auto &file : rawFiles) {
-                if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
-                    addFilesFromDir(opts, file, *workerPool, logger);
-                } else {
-                    opts.rawInputFileNames.push_back(file);
-                    opts.inputFileNames.push_back(file);
+            opts.pathPrefix = raw["remove-path-prefix"].as<string>();
+            if (raw.count("files") > 0) {
+                const auto &rawFiles = raw["files"].as<vector<string>>();
+                struct stat s;
+                for (auto &file : rawFiles) {
+                    if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
+                        addFilesFromDir(opts, file, *workerPool, logger);
+                    } else {
+                        opts.rawInputFileNames.push_back(file);
+                        opts.inputFileNames.push_back(file);
+                    }
                 }
             }
-        }
 
-        if (raw.count("file") > 0) {
-            const auto &files = raw["file"].as<vector<string>>();
-            opts.rawInputFileNames.insert(opts.rawInputFileNames.end(), files.begin(), files.end());
-            opts.inputFileNames.insert(opts.inputFileNames.end(), files.begin(), files.end());
-        }
+            if (raw.count("file") > 0) {
+                const auto &files = raw["file"].as<vector<string>>();
+                opts.rawInputFileNames.insert(opts.rawInputFileNames.end(), files.begin(), files.end());
+                opts.inputFileNames.insert(opts.inputFileNames.end(), files.begin(), files.end());
+            }
 
-        if (raw.count("dir") > 0) {
-            const auto &rawDirs = raw["dir"].as<vector<string>>();
-            for (auto &dir : rawDirs) {
-                // Since we don't stat here, we're unsure if the directory exists / is a directory.
-                addFilesFromDir(opts, dir, *workerPool, logger);
+            if (raw.count("dir") > 0) {
+                const auto &rawDirs = raw["dir"].as<vector<string>>();
+                for (auto &dir : rawDirs) {
+                    // Since we don't stat here, we're unsure if the directory exists / is a directory.
+                    addFilesFromDir(opts, dir, *workerPool, logger);
+                }
             }
         }
 
@@ -935,7 +946,20 @@ void readOptions(Options &opts,
         opts.inputFileNames.erase(unique(opts.inputFileNames.begin(), opts.inputFileNames.end()),
                                   opts.inputFileNames.end());
 
-        opts.requiresAncestorEnabled = raw["enable-experimental-requires-ancestor"].as<bool>();
+        opts.cacheDir = raw["cache-dir"].as<string>();
+
+        // Enable experimental support for RBS signatures
+        opts.cacheSensitiveOptions.rbsEnabled = raw["enable-experimental-rbs-comments"].as<bool>();
+        if (raw["enable-experimental-rbs-signatures"].as<bool>() ||
+            raw["enable-experimental-rbs-assertions"].as<bool>()) {
+            logger->warn(
+                "Options `--enable-experimental-rbs-signatures` and `--enable-experimental-rbs-assertions` have "
+                "been combined into the `--enable-experimental-rbs-comments` option. Please update your Sorbet config "
+                "to use `--enable-experimental-rbs-comments` instead.");
+            opts.cacheSensitiveOptions.rbsEnabled = true;
+        }
+
+        opts.cacheSensitiveOptions.requiresAncestorEnabled = raw["enable-experimental-requires-ancestor"].as<bool>();
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
@@ -972,7 +996,6 @@ void readOptions(Options &opts,
 
         opts.lspErrorCap = raw["lsp-error-cap"].as<int>();
 
-        opts.cacheDir = raw["cache-dir"].as<string>();
         opts.maxCacheSizeBytes = raw["max-cache-size-bytes"].as<size_t>();
         if (!extractPrinters(raw, opts, logger)) {
             throw EarlyReturnWithCode(1);
@@ -1004,9 +1027,15 @@ void readOptions(Options &opts,
         }
 
         // Certain features only need certain passes
-        if (opts.print.isAutogen() && (opts.stopAfterPhase != Phase::NAMER)) {
-            logger->error("-p autogen{-msgpack,-classlist,-subclasses} must also include --stop-after=namer");
-            throw EarlyReturnWithCode(1);
+        auto isAutogen =
+            opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled || opts.print.AutogenSubclasses.enabled;
+        if (isAutogen) {
+            if (opts.stopAfterPhase != Phase::NAMER) {
+                logger->error("-p autogen{-msgpack,-classlist,-subclasses} must also include --stop-after=namer");
+                throw EarlyReturnWithCode(1);
+            }
+
+            opts.cacheSensitiveOptions.runningUnderAutogen = isAutogen;
         }
 
         if (raw.count("autogen-version") > 0) {
@@ -1040,7 +1069,7 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("autogen-behavior-allowed-in-rbi-files-paths") > 0) {
-            if (!opts.print.isAutogen()) {
+            if (!opts.cacheSensitiveOptions.runningUnderAutogen) {
                 logger->error("autogen-behavior-allowed-in-rbi-files-paths can only be used with -p autogen or -p "
                               "autogen-msgpack");
                 throw EarlyReturnWithCode(1);
@@ -1070,11 +1099,7 @@ void readOptions(Options &opts,
 
         opts.noErrorCount = raw["no-error-count"].as<bool>();
 
-        opts.noStdlib = raw["no-stdlib"].as<bool>();
-        if (opts.noStdlib && !opts.cacheDir.empty()) {
-            logger->error("--no-stdlib is incompatible with --cache-dir. Ignoring cache");
-            opts.cacheDir = "";
-        }
+        opts.cacheSensitiveOptions.noStdlib = raw["no-stdlib"].as<bool>();
 
         opts.minimizeRBI = raw["minimize-to-rbi"].as<string>();
         if (!opts.minimizeRBI.empty() && !opts.print.MinimizeRBI.enabled) {
@@ -1086,7 +1111,15 @@ void readOptions(Options &opts,
             throw EarlyReturnWithCode(1);
         }
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();
-        opts.storeState = raw["store-state"].as<string>();
+        auto storeStateRaw = raw["store-state"].as<string>();
+        if (!storeStateRaw.empty()) {
+            opts.storeState = absl::StrSplit(storeStateRaw, ',');
+            if (!opts.storeState.empty() && opts.storeState.size() != 3) {
+                logger->error("--store-state must be given three paths, separated by commas");
+                throw EarlyReturnWithCode(1);
+            }
+        }
+
         opts.forceHashing = raw["force-hashing"].as<bool>();
 
         opts.threads = (opts.runLSP || !opts.storeState.empty())
@@ -1157,7 +1190,7 @@ void readOptions(Options &opts,
         opts.reserveTypeArgumentTableCapacity = raw["reserve-type-argument-table-capacity"].as<uint32_t>();
         opts.reserveTypeMemberTableCapacity = raw["reserve-type-member-table-capacity"].as<uint32_t>();
         opts.uniquelyDefinedBehavior = raw["uniquely-defined-behavior"].as<bool>();
-        opts.stripePackages = raw["stripe-packages"].as<bool>();
+        opts.cacheSensitiveOptions.stripePackages = raw["stripe-packages"].as<bool>();
 
         if (raw.count("extra-package-files-directory-prefix-underscore")) {
             for (const string &dirName : raw["extra-package-files-directory-prefix-underscore"].as<vector<string>>()) {
@@ -1195,7 +1228,7 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("allow-relaxed-packager-checks-for")) {
-            if (!opts.stripePackages) {
+            if (!opts.cacheSensitiveOptions.stripePackages) {
                 logger->error("--allow-relaxed-packager-checks-for can only be specified in --stripe-packages mode");
                 throw EarlyReturnWithCode(1);
             }
@@ -1211,7 +1244,7 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("packager-layers")) {
-            if (opts.stripePackages) {
+            if (opts.cacheSensitiveOptions.stripePackages) {
                 // TODO(neil): This regex was picked on a whim, so open to changing to be more or less restrictive based
                 // on feedback/usecases.
                 std::regex layerValid("[a-zA-Z0-9]+");
@@ -1229,25 +1262,15 @@ void readOptions(Options &opts,
         }
 
         opts.stripePackagesHint = raw["stripe-packages-hint-message"].as<string>();
-        if (!opts.stripePackagesHint.empty() && !opts.stripePackages) {
-            if (!opts.stripePackages) {
+        if (!opts.stripePackagesHint.empty() && !opts.cacheSensitiveOptions.stripePackages) {
+            if (!opts.cacheSensitiveOptions.stripePackages) {
                 logger->error("--stripe-packages-hint-message can only be specified in --stripe-packages mode");
                 throw EarlyReturnWithCode(1);
             }
         }
 
-        opts.packageRBIGeneration = raw["package-rbi-generation"].as<bool>();
-
-        opts.packageRBIDir = raw["package-rbi-dir"].as<string>();
-        if (!opts.packageRBIDir.empty()) {
-            if (opts.stripePackages) {
-                logger->error("--package-rbi-dir must not be specified in --stripe-packages mode");
-                throw EarlyReturnWithCode(1);
-            }
-        }
-
         if (raw.count("package-skip-rbi-export-enforcement")) {
-            if (!opts.stripePackages) {
+            if (!opts.cacheSensitiveOptions.stripePackages) {
                 logger->error("--package-skip-rbi-export-enforcement can only be specified in --stripe-packages mode");
                 throw EarlyReturnWithCode(1);
             }
@@ -1256,36 +1279,10 @@ void readOptions(Options &opts,
             }
         }
 
-        opts.singlePackage = raw["single-package"].as<string>();
-        if (!opts.singlePackage.empty()) {
-            if (opts.stripePackages) {
-                logger->error("--single-package must not be specified in --stripe-packages mode");
-                throw EarlyReturnWithCode(1);
-            }
-
-            if (opts.packageRBIDir.empty()) {
-                logger->error("--single-package requires --package-rbi-dir also be provided");
-                throw EarlyReturnWithCode(1);
-            }
-
-            if (!opts.packageRBIGeneration) {
-                logger->error("--single-package can only be specified in --package-rbi-generation mode");
-                throw EarlyReturnWithCode(1);
-            }
-        }
-
-        opts.dumpPackageInfo = raw["dump-package-info"].as<string>();
-        if (!opts.dumpPackageInfo.empty()) {
-            if (!opts.stripePackages) {
-                logger->error("--dump-package-info can only be specified in --stripe-packages mode");
-                throw EarlyReturnWithCode(1);
-            }
-        }
-
         opts.errorUrlBase = raw["error-url-base"].as<string>();
         opts.noErrorSections = raw["no-error-sections"].as<bool>();
         opts.ruby3KeywordArgs = raw["experimental-ruby3-keyword-args"].as<bool>();
-        opts.typedSuper = raw["typed-super"].as<bool>();
+        opts.cacheSensitiveOptions.typedSuper = raw["typed-super"].as<bool>();
 
         if (raw.count("suppress-payload-superclass-redefinition-for") > 0) {
             for (const auto &childClassName :
@@ -1317,7 +1314,7 @@ void readOptions(Options &opts,
         }
 
         if (opts.print.PayloadSources.enabled) {
-            if (opts.noStdlib) {
+            if (opts.cacheSensitiveOptions.noStdlib) {
                 logger->error("You can't pass both `{}` and `{}`.", "--print=payload-sources", "--no-stdlib");
                 throw EarlyReturnWithCode(1);
             } else if (raw.count("e") > 0) {
@@ -1372,6 +1369,11 @@ void readOptions(Options &opts,
             if (maybeExtension) {
                 configuredExtensions.emplace_back(move(maybeExtension));
             }
+        }
+
+        if (opts.print.RBSRewriteTree.enabled && !opts.cacheSensitiveOptions.rbsEnabled) {
+            logger->error("--print=rbs-rewrite-tree must also include `{}`", "--enable-experimental-rbs-comments");
+            throw EarlyReturnWithCode(1);
         }
 
         // Allow semanticExtensionProviders to print something when --version is given before we throw.

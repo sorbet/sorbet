@@ -1,16 +1,12 @@
 #include "packager/VisibilityChecker.h"
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
-#include "absl/synchronization/blocking_counter.h"
 #include "ast/treemap/treemap.h"
-#include "common/concurrency/ConcurrentQueue.h"
-#include "common/sort/sort.h"
-#include "common/strings/formatting.h"
+#include "common/concurrency/Parallel.h"
 #include "core/Context.h"
 #include "core/errors/packager.h"
-#include "core/errors/resolver.h"
-#include <algorithm>
-#include <iterator>
+
+using namespace std;
 
 using namespace std::literals::string_view_literals;
 
@@ -121,7 +117,7 @@ class PropagateVisibility final {
     // determine the package that owns a symbol. So, to avoid this case we ensure that the symbols that correspond to
     // the package name are always owned by the package that defines them.
     void setPackageLocs(core::MutableContext ctx, core::LocOffsets loc, core::ClassOrModuleRef sym) {
-        std::vector<core::NameRef> names;
+        vector<core::NameRef> names;
 
         while (sym.exists() && sym != core::Symbols::PackageSpecRegistry()) {
             // The symbol isn't a package name if it's defined outside of the package registry.
@@ -188,7 +184,7 @@ class PropagateVisibility final {
         const auto path = file.data(ctx).path();
 
         return absl::c_any_of(ctx.state.packageDB().skipRBIExportEnforcementDirs(),
-                              [&](const std::string &dir) { return absl::StartsWith(path, dir); });
+                              [&](const string &dir) { return absl::StartsWith(path, dir); });
     }
 
     // Checks that the package that a symbol is defined in can be exported from the package we're currently checking.
@@ -229,7 +225,7 @@ class PropagateVisibility final {
         auto enumClass = getEnumClassForEnumValue(ctx.state, sym);
         if (enumClass.exists()) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
-                std::string enumClassName = enumClass.show(ctx);
+                string enumClassName = enumClass.show(ctx);
                 e.setHeader("Cannot export enum value `{}`. Instead, export the entire enum `{}`", sym.show(ctx),
                             enumClassName);
                 e.addErrorLine(sym.loc(ctx), "Defined here");
@@ -257,7 +253,7 @@ public:
         }
 
         auto lit = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
-        if (lit == nullptr || lit->symbol == core::Symbols::StubModule()) {
+        if (lit == nullptr || lit->symbol() == core::Symbols::StubModule()) {
             // We don't raise an explicit error here, as this is one of two cases:
             //   1. Export is given a non-constant argument
             //   2. The argument failed to resolve
@@ -265,25 +261,26 @@ public:
             return;
         }
 
-        if (lit->symbol.isClassOrModule()) {
-            auto sym = lit->symbol.asClassOrModuleRef();
-            checkExportPackage(ctx, send.loc, lit->symbol);
+        auto litSymbol = lit->symbol();
+        if (litSymbol.isClassOrModule()) {
+            auto sym = litSymbol.asClassOrModuleRef();
+            checkExportPackage(ctx, send.loc, litSymbol);
             recursiveExportSymbol(ctx, true, sym);
 
             // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would be
             // great to remove this, but this was the behavior of the previous packager implementation.
             exportParentNamespace(ctx, sym.data(ctx)->owner);
-        } else if (lit->symbol.isFieldOrStaticField()) {
-            auto sym = lit->symbol.asFieldRef();
-            checkExportPackage(ctx, send.loc, lit->symbol);
+        } else if (litSymbol.isFieldOrStaticField()) {
+            auto sym = litSymbol.asFieldRef();
+            checkExportPackage(ctx, send.loc, litSymbol);
             sym.data(ctx)->flags.isExported = true;
 
             // When exporting a field, we also export its parent namespace. This is a bit of a hack, and it would be
             // great to remove this, but this was the behavior of the previous packager implementation.
             exportParentNamespace(ctx, sym.data(ctx)->owner);
         } else {
-            std::string_view kind = ""sv;
-            switch (lit->symbol.kind()) {
+            string_view kind = ""sv;
+            switch (litSymbol.kind()) {
                 case core::SymbolRef::Kind::ClassOrModule:
                 case core::SymbolRef::Kind::FieldOrStaticField:
                     ENFORCE(false, "ClassOrModule and FieldOrStaticField marked not exportable");
@@ -304,8 +301,8 @@ public:
 
             if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Only classes, modules, or constants may be exported");
-                e.addErrorLine(lit->symbol.loc(ctx), "Defined here");
-                e.addErrorNote("`{}` is a `{}`", lit->symbol.show(ctx), kind);
+                e.addErrorLine(litSymbol.loc(ctx), "Defined here");
+                e.addErrorNote("`{}` is a `{}`", litSymbol.show(ctx), kind);
             }
         }
     }
@@ -320,7 +317,7 @@ public:
     }
 
     static void run(core::GlobalState &gs, ast::ParsedFile &f) {
-        if (!f.file.data(gs).isPackage()) {
+        if (!f.file.data(gs).isPackage(gs)) {
             return;
         }
 
@@ -359,21 +356,73 @@ public:
     }
 };
 
+enum class FileType {
+    ProdFile,
+    TestHelperFile,
+    TestUnitFile,
+};
+
+const FileType fileTypeFromCtx(const core::Context ctx) {
+    if (ctx.file.data(ctx).isPackagedTestHelper()) {
+        return FileType::TestHelperFile;
+    } else if (ctx.file.data(ctx).isPackagedTest()) {
+        return FileType::TestUnitFile;
+    } else {
+        return FileType::ProdFile;
+    }
+}
+
 class VisibilityCheckerPass final {
+    void addPackagedFalseNote(core::Context ctx, core::ErrorBuilder &e) {
+        if (!ctx.file.data(ctx).isPackaged()) {
+            e.addErrorNote("A `{}` file is allowed to define constants outside of the package's "
+                           "namespace,\n    "
+                           "but must still respect its enclosing package's imports.",
+                           "# packaged: false");
+        }
+    }
+
+    void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol) {
+        auto definedHereLoc = litSymbol.loc(ctx);
+        if (definedHereLoc.file().data(ctx).isRBI()) {
+            e.addErrorSection(
+                core::ErrorSection(core::ErrorColors::format("Consider marking this RBI file `{}` if it is meant to "
+                                                             "declare unpackaged constants",
+                                                             "# packaged: false"),
+                                   {core::ErrorLine(definedHereLoc, "")}));
+        } else {
+            e.addErrorLine(definedHereLoc, "Defined here");
+        }
+    }
+
+    core::AutocorrectSuggestion combineImportExportAutocorrect(core::AutocorrectSuggestion &importAutocorrect,
+                                                               core::AutocorrectSuggestion &exportAutocorrect) {
+        auto combinedTitle = fmt::format("{} and {}", importAutocorrect.title, exportAutocorrect.title);
+        importAutocorrect.edits.insert(importAutocorrect.edits.end(), exportAutocorrect.edits.begin(),
+                                       exportAutocorrect.edits.end());
+        core::AutocorrectSuggestion combinedAutocorrect(combinedTitle, importAutocorrect.edits);
+        return importAutocorrect;
+    }
+
 public:
     const core::packages::PackageInfo &package;
-    const bool insideTestFile;
+    const FileType fileType;
 
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
-        : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
+        : package{package}, fileType{fileTypeFromCtx(ctx)} {}
+
+    bool isAnyTestFile() const {
+        return fileType != FileType::ProdFile;
+    }
 
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
-        if (!lit.symbol.isClassOrModule() && !lit.symbol.isFieldOrStaticField()) {
+        auto litSymbol = lit.symbol();
+        if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
             return;
         }
 
-        auto loc = lit.symbol.loc(ctx);
+        auto loc = litSymbol.loc(ctx);
 
         auto otherFile = loc.file();
         if (!otherFile.exists() || !otherFile.data(ctx).isPackaged()) {
@@ -381,10 +430,11 @@ public:
         }
 
         // If the imported symbol comes from the test namespace, we must also be in the test namespace.
-        if (otherFile.data(ctx).isPackagedTest() && !this->insideTestFile) {
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedTestOnlyName)) {
+        if ((otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
+            !this->isAnyTestFile()) {
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                 e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
-                            lit.symbol.show(ctx));
+                            litSymbol.show(ctx));
             }
             return;
         }
@@ -398,88 +448,254 @@ public:
         }
 
         bool isExported = false;
-        if (lit.symbol.isClassOrModule()) {
-            isExported = lit.symbol.asClassOrModuleRef().data(ctx)->flags.isExported;
-        } else if (lit.symbol.isFieldOrStaticField()) {
-            isExported = lit.symbol.asFieldRef().data(ctx)->flags.isExported;
+        if (litSymbol.isClassOrModule()) {
+            isExported = litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
+        } else if (litSymbol.isFieldOrStaticField()) {
+            isExported = litSymbol.asFieldRef().data(ctx)->flags.isExported;
         }
+        isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
+        auto currentImportType = this->package.importsPackage(otherPackage);
+        auto wasImported = currentImportType.has_value();
 
-        // Did we use a constant that wasn't exported?
-        if (!isExported && !db.allowRelaxedPackagerChecksFor(this->package.mangledName())) {
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedPackagePrivateName)) {
-                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                e.setHeader("`{}` resolves but is not exported from `{}`", lit.symbol.show(ctx), pkg.show(ctx));
-                auto definedHereLoc = lit.symbol.loc(ctx);
-                if (definedHereLoc.file().data(ctx).isRBI()) {
-                    e.addErrorSection(core::ErrorSection(
-                        core::ErrorColors::format(
-                            "Consider marking this RBI file `{}` if it is meant to declare unpackaged constants",
-                            "# packaged: false"),
-                        {core::ErrorLine(definedHereLoc, "")}));
+        // Is this a test import (whether test helper or not) used in a production context?
+        auto testImportInProd = wasImported && currentImportType.value() != core::packages::ImportType::Normal &&
+                                this->fileType == FileType::ProdFile;
+        // Is this a test import not intended for use in helpers?
+        auto testUnitImportInHelper = wasImported &&
+                                      currentImportType.value() == core::packages::ImportType::TestUnit &&
+                                      this->fileType != FileType::TestUnitFile;
+
+        if (!wasImported || testImportInProd || testUnitImportInHelper || !isExported) {
+            auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+            bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
+            core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
+            if (isTestImport) {
+                if (this->fileType == FileType::TestHelperFile) {
+                    autocorrectedImportType = core::packages::ImportType::TestHelper;
                 } else {
-                    e.addErrorLine(definedHereLoc, "Defined here");
-                }
-
-                auto symToExport = lit.symbol;
-                auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
-                if (enumClass.exists()) {
-                    symToExport = enumClass;
-                }
-                if (auto exp = pkg.addExport(ctx, symToExport)) {
-                    e.addAutocorrect(std::move(exp.value()));
-                }
-                if (!db.errorHint().empty()) {
-                    e.addErrorNote("{}", db.errorHint());
+                    autocorrectedImportType = core::packages::ImportType::TestUnit;
                 }
             }
-
-            return;
-        }
-
-        auto importType = this->package.importsPackage(otherPackage);
-        if (!importType.has_value()) {
-            // We failed to import the package that defines the symbol
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::MissingImport)) {
-                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
-                auto strictDepsLevel = this->package.strictDependenciesLevel();
-                bool layeringViolation =
-                    !isTestImport && db.enforceLayering() && strictDepsLevel.has_value() &&
-                    strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&
-                    this->package.causesLayeringViolation(db, pkg);
-                if (layeringViolation) {
-                    e.setHeader("`{}` resolves but its package cannot be imported because "
-                                "importing it would cause a layering violation",
-                                lit.symbol.show(ctx));
-                    e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                } else {
-                    e.setHeader("`{}` resolves but its package is not imported", lit.symbol.show(ctx));
-                    e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                    if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
-                        e.addAutocorrect(std::move(exp.value()));
+            auto strictDepsLevel = this->package.strictDependenciesLevel();
+            auto importStrictDepsLevel = pkg.strictDependenciesLevel();
+            bool layeringViolation = false;
+            bool strictDependenciesTooLow = false;
+            bool causesCycle = false;
+            optional<string> path;
+            if (!isTestImport && db.enforceLayering()) {
+                layeringViolation = strictDepsLevel.has_value() &&
+                                    strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&
+                                    this->package.causesLayeringViolation(db, pkg);
+                strictDependenciesTooLow =
+                    importStrictDepsLevel.has_value() &&
+                    importStrictDepsLevel.value().first < this->package.minimumStrictDependenciesLevel();
+                // If there's a path from the imported packaged to this package, then adding the import will close
+                // the loop and cause a cycle.
+                path = pkg.pathTo(ctx, this->package.mangledName());
+                causesCycle = strictDepsLevel.has_value() &&
+                              strictDepsLevel.value().first >= core::packages::StrictDependenciesLevel::LayeredDag &&
+                              path.has_value();
+            }
+            if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
+                std::optional<core::AutocorrectSuggestion> importAutocorrect;
+                if (!wasImported || testImportInProd || testUnitImportInHelper) {
+                    if (auto exp = this->package.addImport(ctx, pkg, autocorrectedImportType)) {
+                        importAutocorrect.emplace(exp.value());
+                    }
+                }
+                std::optional<core::AutocorrectSuggestion> exportAutocorrect;
+                if (!isExported) {
+                    auto symToExport = litSymbol;
+                    auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
+                    if (enumClass.exists()) {
+                        symToExport = enumClass;
+                    }
+                    if (auto exp = pkg.addExport(ctx, symToExport)) {
+                        exportAutocorrect.emplace(exp.value());
                     }
                 }
 
-                if (!ctx.file.data(ctx).isPackaged()) {
-                    e.addErrorNote(
-                        "A `{}` file is allowed to define constants outside of the package's namespace,\n    "
-                        "but must still respect its enclosing package's imports.",
-                        "# packaged: false");
-                }
+                if (!isExported && !wasImported) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
+                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is not imported",
+                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx));
+                        addExportInfo(ctx, e, litSymbol);
+                        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
+                            core::AutocorrectSuggestion combinedAutocorrect =
+                                combineImportExportAutocorrect(importAutocorrect.value(), exportAutocorrect.value());
+                            e.addAutocorrect(std::move(combinedAutocorrect));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        } else {
+                            ENFORCE(false);
+                        }
+                        addPackagedFalseNote(ctx, e);
+                    }
+                } else if (!isExported && testImportInProd) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed",
+                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import");
+                        addExportInfo(ctx, e, litSymbol);
+                        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
+                            core::AutocorrectSuggestion combinedAutocorrect =
+                                combineImportExportAutocorrect(importAutocorrect.value(), exportAutocorrect.value());
+                            e.addAutocorrect(std::move(combinedAutocorrect));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        } else {
+                            ENFORCE(false);
+                        }
+                    }
+                } else if (!isExported && testUnitImportInHelper) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed for only {} files",
+                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import", ".test.rb");
+                        e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
+                                       "only be used in `{}` files.",
+                                       "test_import", "only: 'test_rb'", ".test.rb");
+                        addExportInfo(ctx, e, litSymbol);
+                        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
+                            core::AutocorrectSuggestion combinedAutocorrect =
+                                combineImportExportAutocorrect(importAutocorrect.value(), exportAutocorrect.value());
+                            e.addAutocorrect(std::move(combinedAutocorrect));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        } else {
+                            ENFORCE(false);
+                        }
+                    }
+                } else if (!isExported) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
+                        e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
+                        addExportInfo(ctx, e, litSymbol);
 
-                if (!db.errorHint().empty()) {
-                    e.addErrorNote("{}", db.errorHint());
+                        if (exportAutocorrect.has_value()) {
+                            e.addAutocorrect(std::move(exportAutocorrect.value()));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        }
+                    }
+                } else if (!wasImported) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
+                        e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
+                        e.addErrorLine(pkg.declLoc(), "Exported from package here");
+                        if (importAutocorrect.has_value()) {
+                            e.addAutocorrect(std::move(importAutocorrect.value()));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        }
+                        addPackagedFalseNote(ctx, e);
+                    }
+                } else if (testImportInProd) {
+                    ENFORCE(!isTestImport);
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                        e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
+                        e.addErrorLine(pkg.declLoc(), "Defined here");
+                        if (importAutocorrect.has_value()) {
+                            e.addAutocorrect(std::move(importAutocorrect.value()));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        }
+                    }
+                } else if (testUnitImportInHelper) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                        e.setHeader("The `{}` constant `{}` can only be used in `{}` files", "test_import",
+                                    litSymbol.show(ctx), ".test.rb");
+                        e.addErrorLine(pkg.declLoc(), "Defined here");
+                        e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
+                                       "only be used in `{}` files.",
+                                       "test_import", "only: 'test_rb'", ".test.rb");
+                        if (importAutocorrect.has_value()) {
+                            e.addAutocorrect(std::move(importAutocorrect.value()));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        }
+                    }
+                } else {
+                    ENFORCE(false);
                 }
-            }
-        } else if (*importType == core::packages::ImportType::Test && !this->insideTestFile) {
-            // We used a symbol from a `test_import` in a non-test context
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedTestOnlyName)) {
-                e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", lit.symbol.show(ctx));
-                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                if (auto exp = this->package.addImport(ctx, pkg, false)) {
-                    e.addAutocorrect(std::move(exp.value()));
+            } else {
+                // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
+                // layering/strict_dependencies issues.
+                core::ErrorClass error =
+                    causesCycle ? core::errors::Packager::StrictDependenciesViolation
+                                : (layeringViolation ? core::errors::Packager::LayeringViolation
+                                                     : core::errors::Packager::StrictDependenciesViolation);
+                if (auto e = ctx.beginError(lit.loc(), error)) {
+                    vector<string> reasons;
+                    if (causesCycle) {
+                        reasons.emplace_back(core::ErrorColors::format(
+                            "importing its package would put `{}` into a cycle", this->package.show(ctx)));
+                        auto currentStrictDepsLevel =
+                            fmt::format("strict_dependencies '{}'",
+                                        core::packages::strictDependenciesLevelToString(strictDepsLevel.value().first));
+                        e.addErrorLine(core::Loc(this->package.declLoc().file(), strictDepsLevel.value().second),
+                                       "`{}` is `{}`, which disallows cycles", this->package.show(ctx),
+                                       currentStrictDepsLevel);
+                        ENFORCE(path.has_value(),
+                                "Path from pkg to this->package should always exist if causesCycle is true");
+                        e.addErrorNote("Path from `{}` to `{}`:\n{}", pkg.show(ctx), this->package.show(ctx),
+                                       path.value());
+                    }
+
+                    if (layeringViolation) {
+                        reasons.emplace_back("importing its package would cause a layering violation");
+                        ENFORCE(pkg.layer().has_value(),
+                                "causesLayeringViolation should return false if layer is not set");
+                        ENFORCE(this->package.layer().has_value(),
+                                "causesLayeringViolation should return false if layer is not set");
+                        e.addErrorLine(core::Loc(pkg.declLoc().file(), pkg.layer().value().second),
+                                       "Package `{}` must be at most layer `{}` (to match package `{}`) but is "
+                                       "currently layer `{}`",
+                                       pkg.show(ctx), this->package.layer().value().first.show(ctx),
+                                       this->package.show(ctx), pkg.layer().value().first.show(ctx));
+                    }
+
+                    if (strictDependenciesTooLow) {
+                        reasons.emplace_back(
+                            core::ErrorColors::format("its `{}` is not strict enough", "strict_dependencies"));
+                        ENFORCE(importStrictDepsLevel.has_value(),
+                                "strictDependenciesTooLow should be false if strict_dependencies level is not set");
+                        auto requiredStrictDepsLevel = fmt::format("strict_dependencies '{}'",
+                                                                   core::packages::strictDependenciesLevelToString(
+                                                                       this->package.minimumStrictDependenciesLevel()));
+                        auto currentStrictDepsLevel = fmt::format(
+                            "strict_dependencies '{}'",
+                            core::packages::strictDependenciesLevelToString(importStrictDepsLevel.value().first));
+                        e.addErrorLine(core::Loc(pkg.declLoc().file(), importStrictDepsLevel.value().second),
+                                       "`{}` must be at least `{}` but is currently `{}`", pkg.show(ctx),
+                                       requiredStrictDepsLevel, currentStrictDepsLevel);
+                    }
+
+                    ENFORCE(!reasons.empty(), "At least one reason should be present");
+                    string reason;
+                    if (reasons.size() == 1) {
+                        reason = reasons[0];
+                    } else if (reasons.size() == 2) {
+                        reason = fmt::format("{}, and {}", reasons[0], reasons[1]);
+                    } else if (reasons.size() == 3) {
+                        reason = fmt::format("{}, {}, and {}", reasons[0], reasons[1], reasons[2]);
+                    } else {
+                        ENFORCE(false, "At most three reasons should be present");
+                    }
+                    e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
+                    if (!isExported) {
+                        e.addErrorNote("`{}` is not exported", lit.symbol().show(ctx));
+                    } else if (!wasImported) {
+                        e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
+                    } else if (testImportInProd || testUnitImportInHelper) {
+                        e.addErrorNote("`{}`'s package is imported as `{}`", lit.symbol().show(ctx), "test_import");
+                    } else {
+                        ENFORCE(false);
+                    }
                 }
-                e.addErrorLine(pkg.declLoc(), "Defined here");
             }
         }
     }
@@ -492,155 +708,27 @@ public:
         }
     }
 
-    static std::vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
-                                            std::vector<ast::ParsedFile> files) {
+    static vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
+                                       vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
-        auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
-        absl::BlockingCounter barrier(std::max(workers.size(), 1));
-
-        for (size_t i = 0; i < files.size(); ++i) {
-            taskq->push(i, 1);
-        }
-
-        workers.multiplexJob("VisibilityChecker", [&gs, &files, &barrier, taskq]() {
-            size_t idx;
-            for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
-                ast::ParsedFile &f = files[idx];
-                if (!f.file.data(gs).isPackage()) {
-                    auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
-                    if (pkgName.exists()) {
-                        core::Context ctx{gs, core::Symbols::root(), f.file};
-                        VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
-                        ast::TreeWalk::apply(ctx, pass, f.tree);
-                    }
+        Parallel::iterate(workers, "VisibilityChecker", absl::MakeSpan(files), [&gs](ast::ParsedFile &f) {
+            if (!f.file.data(gs).isPackage(gs)) {
+                auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
+                if (pkgName.exists()) {
+                    core::Context ctx{gs, core::Symbols::root(), f.file};
+                    VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
+                    ast::TreeWalk::apply(ctx, pass, f.tree);
                 }
             }
-
-            barrier.DecrementCount();
         });
-
-        barrier.Wait();
 
         return files;
     }
 };
-
-class ImportCheckerPass final {
-    struct Import {
-        core::SymbolRef package;
-        core::LocOffsets importLoc;
-
-        Import(core::SymbolRef package, core::LocOffsets importLoc) : package{package}, importLoc{importLoc} {}
-
-        // Lexicographic ordering, grouping like packages together and ordering them by position in the file.
-        bool operator<(const Import &other) const {
-            if (this->package == other.package) {
-                return this->importLoc.beginPos() < other.importLoc.beginPos();
-            }
-
-            return this->package.rawId() < other.package.rawId();
-        }
-    };
-
-    std::vector<Import> imports;
-
-public:
-    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (send.fun != core::Names::import() && send.fun != core::Names::testImport()) {
-            return;
-        }
-
-        if (send.numPosArgs() != 1) {
-            // an error will have been raised in the packager pass
-            return;
-        }
-
-        auto lit = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
-        if (lit == nullptr) {
-            // We don't raise an explicit error here, for the same reasons as in PropagateVisibility::postTransformSend.
-            return;
-        }
-
-        if (lit->symbol == core::Symbols::StubModule()) {
-            // An error was already reported in resolver when the StubModule was created.
-            return;
-        }
-
-        this->imports.emplace_back(lit->symbol, send.loc);
-    }
-
-    void checkImports(core::Context ctx) {
-        fast_sort(this->imports);
-
-        auto it = this->imports.begin();
-        while (true) {
-            it = std::adjacent_find(it, this->imports.end(), [](auto &l, auto &r) { return l.package == r.package; });
-            if (it == this->imports.end()) {
-                break;
-            }
-
-            // find the end of the region of duplicated imports
-            auto end =
-                std::find_if_not(it, this->imports.end(), [sym = it->package](auto &e) { return sym == e.package; });
-
-            auto first = it;
-
-            // Treat the first import as the authoritative one, and report errors for the rest.
-            std::advance(it, 1);
-
-            for (; it != end; ++it) {
-                if (auto e = ctx.beginError(it->importLoc, core::errors::Packager::InvalidConfiguration)) {
-                    e.setHeader("Duplicate package import `{}`", it->package.show(ctx));
-                    e.addErrorLine(ctx.locAt(first->importLoc), "Previous package import found here");
-                    e.replaceWith("Remove import", ctx.locAt(it->importLoc), "");
-                }
-            }
-        }
-
-        this->imports.clear();
-    }
-
-    static std::vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
-                                            std::vector<ast::ParsedFile> files) {
-        Timer timeit(gs.tracer(), "visibility_checker.check_imports");
-        auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
-        absl::BlockingCounter barrier(std::max(workers.size(), 1));
-
-        for (size_t i = 0; i < files.size(); ++i) {
-            taskq->push(i, 1);
-        }
-
-        workers.multiplexJob("ImportChecker", [&gs, &files, &barrier, taskq]() {
-            Timer timeit(gs.tracer(), "ImportCheckerWorker");
-            size_t idx;
-            ImportCheckerPass pass;
-
-            for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
-                ast::ParsedFile &f = files[idx];
-                if (f.file.data(gs).isPackage()) {
-                    auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
-                    if (pkgName.exists()) {
-                        core::Context ctx{gs, core::Symbols::root(), f.file};
-                        ast::TreeWalk::apply(ctx, pass, f.tree);
-                        pass.checkImports(ctx);
-                    }
-                }
-            }
-
-            barrier.DecrementCount();
-        });
-
-        barrier.Wait();
-
-        return files;
-    }
-};
-
 } // namespace
 
-std::vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
-                                                    std::vector<ast::ParsedFile> files) {
+vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
+                                               vector<ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "visibility_checker.run");
 
     {
@@ -649,10 +737,6 @@ std::vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, Worke
             PropagateVisibility::run(gs, f);
         }
     }
-
-    // We could dispatch to this pass while running the `VisibilityCheckerPass` when we encounter a package file, but
-    // the separation of the two is nice for simplifying `runIncremental`.
-    files = ImportCheckerPass::run(gs, workers, std::move(files));
 
     return VisibilityCheckerPass::run(gs, workers, std::move(files));
 }

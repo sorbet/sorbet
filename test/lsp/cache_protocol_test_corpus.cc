@@ -6,6 +6,7 @@
 #include "common/common.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/ErrorQueue.h"
+#include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
 #include "main/cache/cache.h"
 #include "main/pipeline/pipeline.h"
@@ -19,8 +20,9 @@
 
 #include <iostream> // for cerr
 
-namespace sorbet::test::lsp {
 using namespace std;
+
+namespace sorbet::test::lsp {
 using namespace sorbet::realmain::lsp;
 
 namespace {
@@ -81,8 +83,8 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         // Release cache lock.
         lspWrapper = nullptr;
 
-        auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
-        auto logger = std::make_shared<spdlog::logger>("null", sink);
+        auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+        auto logger = make_shared<spdlog::logger>("null", sink);
         unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
         CHECK_EQ(kvstore->read(updatedKey).data, nullptr);
 
@@ -90,16 +92,15 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         REQUIRE_NE(contents.data, nullptr);
 
         auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*logger, *logger));
-        payload::createInitialGlobalState(gs, *opts, kvstore);
+        payload::createInitialGlobalState(*gs, *opts, kvstore);
 
         // If caching fails, gs gets modified during payload creation.
-        CHECK_FALSE(gs->wasModified());
+        CHECK_FALSE(gs->wasNameTableModified());
 
         core::File file{string(filePath), string(fileContents), core::File::Type::Normal};
         auto tree = core::serialize::Serializer::loadTree(*gs, file, contents.data);
-        CHECK(file.cached());
-        CHECK_NE(file.getFileHash(), nullptr);
         CHECK_NE(tree, nullptr);
+        CHECK_NE(file.getFileHash(), nullptr);
 
         // Loading should fail if file is too small
         core::File smallFile{"", "", core::File::Type::Normal};
@@ -138,20 +139,19 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
 
         // Release cache lock.
         lspWrapper = nullptr;
-        auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
-        auto logger = std::make_shared<spdlog::logger>("null", sink);
+        auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+        auto logger = make_shared<spdlog::logger>("null", sink);
         unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
         auto updatedFileData = kvstore->read(updatedKey);
         REQUIRE_NE(updatedFileData.data, nullptr);
 
         auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*logger, *logger));
-        payload::createInitialGlobalState(gs, *opts, kvstore);
+        payload::createInitialGlobalState(*gs, *opts, kvstore);
 
         core::File file{string(filePath), string(updatedFileContents), core::File::Type::Normal};
         auto cachedFile = core::serialize::Serializer::loadTree(*gs, file, updatedFileData.data);
-        CHECK(file.cached());
-        CHECK_NE(file.getFileHash(), nullptr);
         CHECK_NE(cachedFile, nullptr);
+        CHECK_NE(file.getFileHash(), nullptr);
     }
 }
 
@@ -177,8 +177,8 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
             {{relativeFilepath, 4, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
     }
 
-    auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
-    auto nullLogger = std::make_shared<spdlog::logger>("null", sink);
+    auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+    auto nullLogger = make_shared<spdlog::logger>("null", sink);
 
     // LSP should have written cache to disk with file hashes from initialization.
     {
@@ -192,16 +192,15 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
         REQUIRE_NE(contents.data, nullptr);
 
         auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*nullLogger, *nullLogger));
-        payload::createInitialGlobalState(gs, *opts, kvstore);
+        payload::createInitialGlobalState(*gs, *opts, kvstore);
 
         // If caching fails, gs gets modified during payload creation.
-        CHECK_FALSE(gs->wasModified());
+        CHECK_FALSE(gs->wasNameTableModified());
 
         core::File file{string(filePath), string(fileContents), core::File::Type::Normal};
         auto tree = core::serialize::Serializer::loadTree(*gs, file, contents.data);
-        CHECK(file.cached());
-        CHECK_NE(file.getFileHash(), nullptr);
         CHECK_NE(tree, nullptr);
+        CHECK_NE(file.getFileHash(), nullptr);
     }
 
     // LSP should read from disk when the cache gets updated by a different process mid-process.
@@ -259,6 +258,270 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
             CHECK_EQ(counters.getCounter("types.input.files.kvstore.hit"), 0);
             CHECK_EQ(counters.getCounter("cache.committed"), 0);
         }
+    }
+}
+
+TEST_CASE_FIXTURE(CacheProtocolTest, "ReindexingUsesTheCache") {
+    // Write a file to disk.
+    auto relativeFilepath = "test.rb";
+    auto filePath = fmt::format("{}/{}", rootPath, relativeFilepath);
+    // This file has an error to indirectly assert that LSP is actually typechecking the file during initialization.
+    auto fileContents = "# typed: true\n"
+                        "class Foo\n"
+                        "  extend T::Sig\n"
+                        "  sig {returns(Integer)}\n"
+                        "  def bar\n"
+                        "    'hello'\n"
+                        "  end\n"
+                        "end\n";
+    auto key = core::serialize::Serializer::fileKey(
+        core::File(string(filePath), string(fileContents), core::File::Type::Normal, 0));
+
+    // LSP should write a cache to disk corresponding to initialization state.
+    {
+        writeFilesToFS({{relativeFilepath, fileContents}});
+
+        lspWrapper->opts->inputFileNames.push_back(filePath);
+        assertErrorDiagnostics(
+            initializeLSP(),
+            {{relativeFilepath, 5, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
+    }
+
+    // LSP should have written cache to disk with file hashes from initialization.
+    // It should not include data from file updates made during the editor session.
+    auto opts = lspWrapper->opts;
+
+    // Release cache lock by dropping the entire LSP wrapper which holds onto a kvstore.
+    lspWrapper = nullptr;
+
+    auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = make_shared<spdlog::logger>("null", sink);
+    unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+
+    // The key should exist in the kvstore
+    auto contents = kvstore->read(key);
+    REQUIRE_NE(contents.data, nullptr);
+
+    auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*logger, *logger));
+    payload::createInitialGlobalState(*gs, *opts, kvstore);
+
+    // If caching fails, gs gets modified during payload creation.
+    CHECK_FALSE(gs->wasNameTableModified());
+
+    core::FileRef fref;
+    {
+        core::UnfreezeFileTable fileTableAccess(*gs);
+        fref = gs->enterFile(filePath, fileContents);
+    }
+
+    // The file should now be present in the file table with its contents loaded, meaning that its type is `Normal`
+    REQUIRE(fref.exists());
+    REQUIRE_EQ(fref.data(*gs).sourceType, core::File::Type::Normal);
+
+    auto workers = WorkerPool::create(0, *logger);
+    vector<core::FileRef> frefs{fref};
+
+    // We should be able to reindex the file multiple times, getting a cache hit for each one.
+    for (auto i = 0; i < 2; ++i) {
+        auto result = realmain::pipeline::index(*gs, absl::MakeSpan(frefs), *opts, *workers, kvstore);
+        REQUIRE(result.hasResult());
+
+        auto &asts = result.result();
+        REQUIRE_EQ(asts.size(), 1);
+        REQUIRE(asts.front().cached());
+    }
+}
+
+TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
+    // Write a file to disk.
+    auto relativeFilepath = "test.rb";
+    auto filePath = fmt::format("{}/{}", rootPath, relativeFilepath);
+    // This file has an error to indirectly assert that LSP is actually typechecking the file during initialization.
+    auto fileContents = "# typed: true\n"
+                        "class Foo\n"
+                        "  extend T::Sig\n"
+                        "  sig {returns(Integer)}\n"
+                        "  def bar\n"
+                        "    'hello'\n"
+                        "  end\n"
+                        "end\n";
+    auto key = core::serialize::Serializer::fileKey(
+        core::File(string(filePath), string(fileContents), core::File::Type::Normal, 0));
+
+    // LSP should write a cache to disk corresponding to initialization state.
+    {
+        writeFilesToFS({{relativeFilepath, fileContents}});
+
+        lspWrapper->opts->inputFileNames.push_back(filePath);
+        assertErrorDiagnostics(
+            initializeLSP(),
+            {{relativeFilepath, 5, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
+    }
+
+    // LSP should have written cache to disk with file hashes from initialization.
+    // It should not include data from file updates made during the editor session.
+    auto opts = lspWrapper->opts;
+
+    // Release cache lock by dropping the entire LSP wrapper which holds onto a kvstore.
+    lspWrapper = nullptr;
+
+    auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = make_shared<spdlog::logger>("null", sink);
+    unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+
+    // The key should exist in the kvstore
+    vector<uint8_t> origContent;
+    {
+        auto contents = kvstore->read(key);
+        REQUIRE_NE(contents.data, nullptr);
+        origContent.insert(origContent.begin(), contents.data, contents.data + contents.len);
+    }
+
+    // Create a session copy of the cache, consuming the original
+    auto sessionCache = realmain::cache::SessionCache::make(std::move(kvstore), *logger, *opts);
+    auto copy = make_unique<OwnedKeyValueStore>(sessionCache->open(logger, *opts));
+
+    // Make sure that the same key exists
+    vector<uint8_t> copyContent;
+
+    {
+        auto contents = copy->read(key);
+        REQUIRE_NE(contents.data, nullptr);
+        copyContent.insert(copyContent.begin(), contents.data, contents.data + contents.len);
+    }
+
+    REQUIRE_EQ(origContent, copyContent);
+
+    // Add a new key, and close out the copy.
+    vector<uint8_t> value{0, 1, 2, 3, 4, 5, 6, 7};
+    copy->write("new key", value);
+
+    {
+        auto contents = copy->read("new key");
+        REQUIRE_NE(contents.data, nullptr);
+        vector<uint8_t> readValue(contents.data, contents.data + contents.len);
+        REQUIRE_EQ(value, readValue);
+    }
+
+    OwnedKeyValueStore::bestEffortCommit(*logger, std::move(copy));
+
+    // Make sure the copy doesn't exist in the original
+    kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+    {
+        auto contents = kvstore->read("new key");
+        REQUIRE_EQ(contents.data, nullptr);
+    }
+
+    OwnedKeyValueStore::abort(std::move(kvstore));
+
+    // Reopen the copy, and make sure it still has our new value
+    copy = make_unique<OwnedKeyValueStore>(sessionCache->open(logger, *opts));
+
+    {
+        auto contents = copy->read("new key");
+        REQUIRE_NE(contents.data, nullptr);
+        vector<uint8_t> readValue(contents.data, contents.data + contents.len);
+        REQUIRE_EQ(value, readValue);
+    }
+
+    OwnedKeyValueStore::abort(std::move(copy));
+
+    // Close the session cache, and make sure that it removes the directory.
+    string sessionPath(sessionCache->kvstorePath());
+    REQUIRE(FileOps::exists(sessionPath));
+    sessionCache.reset();
+    REQUIRE(!FileOps::exists(sessionPath));
+}
+
+TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
+    // Write a file to disk.
+    auto relativeFilepath = "test.rb";
+    auto filePath = fmt::format("{}/{}", rootPath, relativeFilepath);
+    // This file has an error to indirectly assert that LSP is actually typechecking the file during initialization.
+    auto fileContents = "# typed: true\n"
+                        "class Foo\n"
+                        "  extend T::Sig\n"
+                        "  sig {returns(Integer)}\n"
+                        "  def bar\n"
+                        "    'hello'\n"
+                        "  end\n"
+                        "end\n";
+    auto key = core::serialize::Serializer::fileKey(
+        core::File(string(filePath), string(fileContents), core::File::Type::Normal, 0));
+
+    // LSP should write a cache to disk corresponding to initialization state.
+    {
+        writeFilesToFS({{relativeFilepath, fileContents}});
+
+        lspWrapper->opts->inputFileNames.push_back(filePath);
+        assertErrorDiagnostics(
+            initializeLSP(),
+            {{relativeFilepath, 5, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
+    }
+
+    // LSP should have written cache to disk with file hashes from initialization.
+    // It should not include data from file updates made during the editor session.
+    auto opts = lspWrapper->opts;
+
+    // Release cache lock by dropping the entire LSP wrapper which holds onto a kvstore.
+    lspWrapper = nullptr;
+
+    auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = make_shared<spdlog::logger>("null", sink);
+    unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+
+    // The key should exist in the kvstore
+    vector<uint8_t> origContent;
+    {
+        auto contents = kvstore->read(key);
+        REQUIRE_NE(contents.data, nullptr);
+        origContent.insert(origContent.begin(), contents.data, contents.data + contents.len);
+    }
+
+    // Create a session copy of the cache, consuming the original
+    auto sessionCache = realmain::cache::SessionCache::make(std::move(kvstore), *logger, *opts);
+
+    // Verify that we can get a handle to the kvstore
+    {
+        auto copy = sessionCache->open(logger, *opts);
+        REQUIRE_NE(copy, nullptr);
+    }
+
+    auto workers = WorkerPool::create(0, *logger);
+    vector<string> toRemove;
+    for (auto &path : FileOps::listFilesInDir(opts->cacheDir, {".mdb"}, *workers, true, {}, {})) {
+        fmt::println(stderr, "path = {}", path);
+        if (path.find("/session-") != string::npos) {
+            toRemove.emplace_back(std::move(path));
+        }
+    }
+
+    // We'll find at least `data.mdb`, and `lock.mdb` as well if the copy has ever been opened
+    REQUIRE(!toRemove.empty());
+
+    auto start = toRemove.front().rfind('/');
+    string sessionCacheDir = toRemove.front().substr(0, start);
+
+    // Verify that we can't open when the database files have been removed
+    for (auto &file : toRemove) {
+        FileOps::removeFile(file);
+    }
+
+    {
+        auto copy = sessionCache->open(logger, *opts);
+        REQUIRE_EQ(copy, nullptr);
+    }
+
+    // Verify that we can't open when the database directory has been removed (the previous open attempt will create an
+    // empty db, so we have to remove the files again again)
+    for (auto &file : toRemove) {
+        FileOps::removeFile(file);
+    }
+    REQUIRE(FileOps::removeEmptyDir(sessionCacheDir));
+
+    {
+        auto copy = sessionCache->open(logger, *opts);
+        REQUIRE_EQ(copy, nullptr);
     }
 }
 } // namespace sorbet::test::lsp

@@ -2,14 +2,12 @@
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
-#include "absl/synchronization/blocking_counter.h"
 #include "ast/ArgParsing.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
-#include "ast/desugar/Desugar.h"
 #include "ast/treemap/treemap.h"
-#include "class_flatten/class_flatten.h"
 #include "common/concurrency/ConcurrentQueue.h"
+#include "common/concurrency/Parallel.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/sort/sort.h"
 #include "common/timers/Timer.h"
@@ -148,7 +146,7 @@ class SymbolFinder {
     core::FoundDefinitionRef defineScope(core::FoundDefinitionRef owner, const ast::ExpressionPtr &node) {
         if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
-            auto sym = id->symbol;
+            auto sym = id->symbol();
             ENFORCE(sym.exists());
             return foundDefs->addSymbol(sym.asClassOrModuleRef());
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
@@ -580,7 +578,7 @@ public:
 
         typecase(
             s.recv, [&](const ast::UnresolvedConstantLit &c) { result = c.cnst == core::Names::Constants::T(); },
-            [&](const ast::ConstantLit &c) { result = c.symbol == core::Symbols::T(); },
+            [&](const ast::ConstantLit &c) { result = c.symbol() == core::Symbols::T(); },
             [&](const ast::ExpressionPtr &_default) { result = false; });
 
         return result;
@@ -649,7 +647,7 @@ public:
         auto send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send == nullptr) {
             fillAssign(ctx, asgn);
-        } else if (!send->recv.isSelfReference()) {
+        } else if (!send->recv.isSelfReference() && !ast::MK::isSorbetPrivateStatic(send->recv)) {
             handleAssignment(ctx, asgn);
         } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope)) {
             handleAssignment(ctx, asgn);
@@ -694,7 +692,8 @@ public:
 
 private:
     const core::FoundDefinitions &foundDefs;
-    const optional<core::FoundDefHashes> oldFoundHashes;
+
+    vector<core::ClassOrModuleRef> &symbolsToRecompute;
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
     core::ClassOrModuleRef getOwnerSymbol(const SymbolDefiner::State &state, core::FoundDefinitionRef ref) {
@@ -1161,6 +1160,9 @@ private:
                     // re-entered in resolver.
                     symbol.data(ctx)->resultType = nullptr;
                     singletonClass.data(ctx)->resultType = nullptr;
+
+                    this->symbolsToRecompute.emplace_back(symbol);
+                    this->symbolsToRecompute.emplace_back(singletonClass);
                     // TODO(jez) This is a gross hack. We are basically re-implementing the logic in
                     // singletonClass to reset the <AttachedClass> type template to what it used to be.
                     // Is there a better way to accomplish this? (This is largely the same as the bad locs problem
@@ -1218,7 +1220,7 @@ private:
             symbolData->flags.isInterface = true;
             if (!symbolData->isModule()) {
                 if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InterfaceClass)) {
-                    e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
+                    e.setHeader("Classes can't be interfaces. Use `{}` instead of `{}`", "abstract!", "interface!");
                     e.replaceWith("Change `interface!` to `abstract!`", ctx.locAt(mod.loc), "abstract!");
                 }
             }
@@ -1522,65 +1524,62 @@ private:
     }
 
 public:
-    void deleteOldDefinitions(core::MutableContext ctx, const SymbolDefiner::State &state) {
+    void deleteOldDefinitions(core::MutableContext ctx, const SymbolDefiner::State &state,
+                              const core::FoundDefHashes &oldFoundHashes) {
         Timer timeit(ctx.state.tracer(), "deleteOldDefinitions");
-        if (oldFoundHashes.has_value()) {
-            const auto &oldFoundHashesVal = oldFoundHashes.value();
+        for (const auto &oldStaticFieldHash : oldFoundHashes.staticFieldHashes) {
+            deleteStaticFieldViaFullNameHash(ctx, state, oldStaticFieldHash);
+        }
 
-            for (const auto &oldStaticFieldHash : oldFoundHashesVal.staticFieldHashes) {
-                deleteStaticFieldViaFullNameHash(ctx, state, oldStaticFieldHash);
-            }
+        for (const auto &oldTypeMemberHash : oldFoundHashes.typeMemberHashes) {
+            deleteTypeMemberViaFullNameHash(ctx, state, oldTypeMemberHash);
+        }
 
-            for (const auto &oldTypeMemberHash : oldFoundHashesVal.typeMemberHashes) {
-                deleteTypeMemberViaFullNameHash(ctx, state, oldTypeMemberHash);
-            }
-
-            for (auto klass : state.definedClasses) {
-                // In the process of recovering from "parent type member must be re-declared in child" errors,
-                // GlobalPass will create type members even if there isn't a `type_member` in the child class' body.
-                // There won't be an entry in the old typeMemberHashes for these type members, so we have to
-                // delete them manually.
-                auto currentClass = klass;
-                vector<core::TypeMemberRef> toDelete;
-                do {
-                    const auto &typeMembers = currentClass.data(ctx)->typeMembers();
-                    toDelete.reserve(typeMembers.size());
-                    for (const auto &typeMember : typeMembers) {
-                        if (typeMember.data(ctx)->name == core::Names::Constants::AttachedClass()) {
-                            // <AttachedClass> type templates are created when the singleton class was created.
-                            // Since we don't delete and re-add classes on the fast path, we both can and must leave
-                            // these `<AttachedClass>` type templates alone
-                            continue;
-                        }
-                        toDelete.emplace_back(typeMember);
+        for (auto klass : state.definedClasses) {
+            // In the process of recovering from "parent type member must be re-declared in child" errors,
+            // GlobalPass will create type members even if there isn't a `type_member` in the child class' body.
+            // There won't be an entry in the old typeMemberHashes for these type members, so we have to
+            // delete them manually.
+            auto currentClass = klass;
+            vector<core::TypeMemberRef> toDelete;
+            do {
+                const auto &typeMembers = currentClass.data(ctx)->typeMembers();
+                toDelete.reserve(typeMembers.size());
+                for (const auto &typeMember : typeMembers) {
+                    if (typeMember.data(ctx)->name == core::Names::Constants::AttachedClass()) {
+                        // <AttachedClass> type templates are created when the singleton class was created.
+                        // Since we don't delete and re-add classes on the fast path, we both can and must leave
+                        // these `<AttachedClass>` type templates alone
+                        continue;
                     }
+                    toDelete.emplace_back(typeMember);
+                }
 
-                    currentClass = currentClass.data(ctx)->lookupSingletonClass(ctx);
-                } while (currentClass.exists());
+                currentClass = currentClass.data(ctx)->lookupSingletonClass(ctx);
+            } while (currentClass.exists());
 
-                for (auto oldTypeMember : toDelete) {
-                    oldTypeMember.data(ctx)->removeLocsForFile(ctx.file);
-                    if (oldTypeMember.data(ctx)->locs().empty()) {
-                        ctx.state.deleteTypeMemberSymbol(oldTypeMember);
-                    }
+            for (auto oldTypeMember : toDelete) {
+                oldTypeMember.data(ctx)->removeLocsForFile(ctx.file);
+                if (oldTypeMember.data(ctx)->locs().empty()) {
+                    ctx.state.deleteTypeMemberSymbol(oldTypeMember);
                 }
             }
+        }
 
-            for (const auto &oldFieldHash : oldFoundHashesVal.fieldHashes) {
-                deleteFieldViaFullNameHash(ctx, state, oldFieldHash);
-            }
+        for (const auto &oldFieldHash : oldFoundHashes.fieldHashes) {
+            deleteFieldViaFullNameHash(ctx, state, oldFieldHash);
+        }
 
-            for (const auto &oldMethodHash : oldFoundHashesVal.methodHashes) {
-                // Since we've already processed all the non-method symbols (which includes classes), we now
-                // guarantee that deleteViaFullNameHash can use getOwnerSymbol to lookup an old owner
-                // ref in the new definedClasses vector.
-                deleteMethodViaFullNameHash(ctx, state, oldMethodHash);
-            }
+        for (const auto &oldMethodHash : oldFoundHashes.methodHashes) {
+            // Since we've already processed all the non-method symbols (which includes classes), we now
+            // guarantee that deleteViaFullNameHash can use getOwnerSymbol to lookup an old owner
+            // ref in the new definedClasses vector.
+            deleteMethodViaFullNameHash(ctx, state, oldMethodHash);
         }
     }
 
-    SymbolDefiner(const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> &&oldFoundHashes)
-        : foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
+    SymbolDefiner(const core::FoundDefinitions &foundDefs, vector<core::ClassOrModuleRef> &symbolsToRecompute)
+        : foundDefs(foundDefs), symbolsToRecompute{symbolsToRecompute} {}
 
     SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs,
                                                ClassBehaviorLocsMap &classBehaviorLocs) {
@@ -1665,7 +1664,7 @@ class TreeSymbolizer {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
         if (constLit == nullptr) {
             if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
-                return id->symbol.dealias(ctx);
+                return id->symbol().dealias(ctx);
             }
             if (auto uid = ast::cast_tree<ast::UnresolvedIdent>(node)) {
                 if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
@@ -1702,8 +1701,7 @@ class TreeSymbolizer {
         // NameInserter should have created this symbol
         ENFORCE(existing.exists());
 
-        node = ast::make_expression<ast::ConstantLit>(constLit->loc, existing,
-                                                      node.toUnique<ast::UnresolvedConstantLit>());
+        node = ast::make_expression<ast::ConstantLit>(existing, node.toUnique<ast::UnresolvedConstantLit>());
         return existing;
     }
 
@@ -1823,8 +1821,7 @@ public:
 
         core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
         ENFORCE(cnst.exists());
-        auto loc = lhs.loc;
-        asgn.lhs = ast::make_expression<ast::ConstantLit>(loc, cnst, asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
+        asgn.lhs = ast::make_expression<ast::ConstantLit>(cnst, asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
 
         return tree;
     }
@@ -1851,12 +1848,12 @@ public:
         auto multiline = false;
         auto indent = ""s;
         auto sendLoc = ctx.locAt(send->loc);
-        auto [beginDetail, endDetail] = sendLoc.position(ctx);
+        auto [beginDetail, endDetail] = sendLoc.toDetails(ctx);
         if (endDetail.line > beginDetail.line && send->funLoc.exists() && !send->funLoc.empty() &&
             send->numPosArgs() == 0) {
             deleteLoc = core::Loc(ctx.file, send->funLoc.endPos(), send->loc.endPos());
             multiline = true;
-            auto [_, indentLen] = sendLoc.copyEndWithZeroLength().findStartOfLine(ctx);
+            auto [_, indentLen] = sendLoc.copyEndWithZeroLength().findStartOfIndentation(ctx);
             indent = string(indentLen, ' ');
         }
 
@@ -1865,7 +1862,7 @@ public:
         auto insertLoc = ctx.locAt(send->loc).copyEndWithZeroLength();
         auto kwArgsSource = kwArgsLoc.source(ctx).value();
         if (multiline) {
-            auto [kwBeginDetail, kwEndDetail] = kwArgsLoc.position(ctx);
+            auto [kwBeginDetail, kwEndDetail] = kwArgsLoc.toDetails(ctx);
             if (kwEndDetail.line > kwBeginDetail.line) {
                 auto reindentedSource = absl::StrReplaceAll(kwArgsSource, {{"\n", "\n  "}});
                 if (kwBeginDetail.line == beginDetail.line) {
@@ -1964,8 +1961,7 @@ public:
         // Simulates how squashNames in handleAssignment also creates a ConstantLit
         // (simpler than squashNames, because type members are not allowed to use any sort of
         // `A::B = type_member` syntax)
-        asgn.lhs = ast::make_expression<ast::ConstantLit>(asgn.lhs.loc(), sym,
-                                                          asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
+        asgn.lhs = ast::make_expression<ast::ConstantLit>(sym, asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
 
         if (send->hasKwArgs()) {
             const auto numKwArgs = send->numKwArgs();
@@ -2062,7 +2058,7 @@ public:
         auto send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send == nullptr) {
             tree = handleAssignment(ctx, std::move(tree));
-        } else if (!send->recv.isSelfReference()) {
+        } else if (!send->recv.isSelfReference() && !ast::MK::isSorbetPrivateStatic(send->recv)) {
             tree = handleAssignment(ctx, std::move(tree));
         } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope)) {
             tree = handleAssignment(ctx, std::move(tree));
@@ -2085,14 +2081,13 @@ public:
 AllFoundDefinitions findSymbols(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.findSymbols");
     auto taskq = make_shared<ConcurrentBoundedQueue<size_t>>(trees.size());
-    absl::BlockingCounter barrier(max(workers.size(), 1));
     AllFoundDefinitions allFoundDefinitions(trees.size());
 
     for (size_t i = 0, size = trees.size(); i < size; ++i) {
         taskq->push(i, 1);
     }
 
-    workers.multiplexJob("findSymbols", [&gs, &barrier, &allFoundDefinitions, trees, taskq]() {
+    workers.multiplexJobWait("findSymbols", [&gs, &allFoundDefinitions, trees, taskq]() {
         Timer timeit(gs.tracer(), "naming.findSymbolsWorker");
         SymbolFinder finder;
         size_t idx;
@@ -2105,11 +2100,7 @@ AllFoundDefinitions findSymbols(const core::GlobalState &gs, absl::Span<ast::Par
                 allFoundDefinitions[idx] = make_pair(parsedFile.file, finder.getAndClearFoundDefinitions());
             }
         }
-
-        barrier.DecrementCount();
     });
-
-    barrier.Wait();
 
     return allFoundDefinitions;
 }
@@ -2199,8 +2190,8 @@ void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap 
 }
 
 void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinitions, WorkerPool &workers,
-                   UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles,
-                   core::FoundDefHashes *foundHashesOut) {
+                   UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
+                   core::FoundDefHashes *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     const auto &epochManager = *gs.epochManager;
     uint32_t count = 0;
@@ -2217,13 +2208,13 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
         }
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
-        auto frefIt = oldFoundHashesForFiles.find(fref);
-        auto oldFoundHashes =
-            frefIt == oldFoundHashesForFiles.end() ? optional<core::FoundDefHashes>() : std::move(frefIt->second);
-        SymbolDefiner symbolDefiner(*fileFoundDefinitions, move(oldFoundHashes));
+        SymbolDefiner symbolDefiner(*fileFoundDefinitions, updatedSymbols);
         auto state = symbolDefiner.enterClassDefinitions(ctx, willDeleteOldDefs, classBehaviorLocs);
         if (willDeleteOldDefs) {
-            symbolDefiner.deleteOldDefinitions(ctx, state);
+            auto frefIt = oldFoundHashesForFiles.find(fref);
+            if (frefIt != oldFoundHashesForFiles.end()) {
+                symbolDefiner.deleteOldDefinitions(ctx, state, frefIt->second->foundHashes);
+            }
         }
         incrementalDefinitions[fref] = move(state);
         if (foundHashesOut != nullptr) {
@@ -2241,14 +2232,9 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
             return;
         }
 
-        // The contents of this don't matter for incremental definition.  The
-        // old definitions should only matter when deleting old symbols (which
-        // happened in the previous phase of incremental namer), not here when
-        // entering symbols.
-        optional<core::FoundDefHashes> oldFoundHashes;
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
-        SymbolDefiner symbolDefiner(*fileFoundDefinitions, move(oldFoundHashes));
+        SymbolDefiner symbolDefiner(*fileFoundDefinitions, updatedSymbols);
         symbolDefiner.enterNewDefinitions(ctx, move(incrementalDefinitions[fref]));
     }
     return;
@@ -2256,39 +2242,20 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
 
 void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
-    auto taskq = make_shared<ConcurrentBoundedQueue<size_t>>(trees.size());
-    absl::BlockingCounter barrier(max(workers.size(), 1));
-
-    for (size_t i = 0, size = trees.size(); i < size; ++i) {
-        taskq->push(i, 1);
-    }
-
-    workers.multiplexJob("symbolizeTrees", [&gs, &barrier, trees, taskq]() {
-        Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
-        TreeSymbolizer inserter;
-        size_t idx;
-        for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
-            if (result.gotItem()) {
-                auto &parsedFile = trees[idx];
-                Timer timeit(gs.tracer(), "naming.symbolizeTreesOne",
-                             {{"file", string(parsedFile.file.data(gs).path())}});
-                core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
-                ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
-            }
-        }
-
-        barrier.DecrementCount();
+    Parallel::iterate(workers, "symbolizeTrees", trees, [&gs, inserter = TreeSymbolizer()](auto &parsedFile) mutable {
+        Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(parsedFile.file.data(gs).path())}});
+        core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
+        ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
     });
-
-    barrier.Wait();
 }
 
 } // namespace
 
 // Returns whether typechecking was cancelled
-[[nodiscard]] bool Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
-                                      UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles,
-                                      core::FoundDefHashes *foundHashesOut) {
+[[nodiscard]] bool
+Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
+                   UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
+                   core::FoundDefHashes *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
     auto foundDefs = findSymbols(gs, trees, workers);
     if (gs.epochManager->wasTypecheckingCanceled()) {
         return true;
@@ -2297,7 +2264,7 @@ void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> tre
         ENFORCE(foundDefs.size() == 1,
                 "Producing foundMethodHashes is meant to only happen when hashing a single file");
     }
-    defineSymbols(gs, move(foundDefs), workers, std::move(oldFoundHashesForFiles), foundHashesOut);
+    defineSymbols(gs, move(foundDefs), workers, std::move(oldFoundHashesForFiles), foundHashesOut, updatedSymbols);
     if (gs.epochManager->wasTypecheckingCanceled()) {
         return true;
     }
@@ -2309,17 +2276,19 @@ void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> tre
 [[nodiscard]] bool Namer::run(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
                               core::FoundDefHashes *foundHashesOut) {
     // In non-incremental namer, there are no old FoundDefHashes; just defineSymbols like normal.
-    auto oldFoundHashesForFiles = UnorderedMap<core::FileRef, core::FoundDefHashes>{};
-    return runInternal(gs, trees, workers, std::move(oldFoundHashesForFiles), foundHashesOut);
+    vector<core::ClassOrModuleRef> updatedSymbols;
+    return runInternal(gs, trees, workers, {}, foundHashesOut, updatedSymbols);
+    ENFORCE(updatedSymbols.empty());
 }
 
-[[nodiscard]] bool Namer::runIncremental(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees,
-                                         UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles,
-                                         WorkerPool &workers) {
+[[nodiscard]] bool
+Namer::runIncremental(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees,
+                      UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
+                      WorkerPool &workers, vector<core::ClassOrModuleRef> &updatedSymbols) {
     // foundHashesOut is only used when namer is run via hashing.cc to compute a FileHash for each file
     // The incremental namer mode should never be used for hashing.
     auto foundHashesOut = nullptr;
-    return runInternal(gs, trees, workers, std::move(oldFoundHashesForFiles), foundHashesOut);
+    return runInternal(gs, trees, workers, std::move(oldFoundHashesForFiles), foundHashesOut, updatedSymbols);
 }
 
 }; // namespace sorbet::namer

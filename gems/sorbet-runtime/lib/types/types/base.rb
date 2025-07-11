@@ -83,27 +83,27 @@ module T::Types
       # Note: order of cases here matters!
       if t1.is_a?(T::Types::Union) # 7, 8, 9
         # this will be incorrect if/when we have Type members
-        return t1.types.all? {|t1_member| t1_member.subtype_of?(t2)}
+        return t1.types.all? { |t1_member| t1_member.subtype_of?(t2) }
       end
 
       if t2.is_a?(T::Types::Intersection) # 2, 5
         # this will be incorrect if/when we have Type members
-        return t2.types.all? {|t2_member| t1.subtype_of?(t2_member)}
+        return t2.types.all? { |t2_member| t1.subtype_of?(t2_member) }
       end
 
       if t2.is_a?(T::Types::Union)
         if t1.is_a?(T::Types::Intersection) # 6
           # dropping either of parts eagerly make subtype test be too strict.
           # we have to try both cases, when we normally try only one
-          return t2.types.any? {|t2_member| t1.subtype_of?(t2_member)} ||
-              t1.types.any? {|t1_member| t1_member.subtype_of?(t2)}
+          return t2.types.any? { |t2_member| t1.subtype_of?(t2_member) } ||
+              t1.types.any? { |t1_member| t1_member.subtype_of?(t2) }
         end
-        return t2.types.any? {|t2_member| t1.subtype_of?(t2_member)} # 3
+        return t2.types.any? { |t2_member| t1.subtype_of?(t2_member) } # 3
       end
 
       if t1.is_a?(T::Types::Intersection) # 4
         # this will be incorrect if/when we have Type members
-        return t1.types.any? {|t1_member| t1_member.subtype_of?(t2)}
+        return t1.types.any? { |t1_member| t1_member.subtype_of?(t2) }
       end
 
       # 1; Start with some special cases

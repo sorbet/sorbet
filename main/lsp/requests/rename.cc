@@ -41,7 +41,7 @@ bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalStat
 class LocalRenamer : public AbstractRewriter {
 public:
     LocalRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string newName,
-                 std::vector<core::Loc> localUsages)
+                 vector<core::Loc> localUsages)
         : AbstractRewriter(gs, config), newName(newName), localUsages(localUsages) {
         // If the name is the same as before or empty, return an error. VS Code already prevents this on its own, but
         // other IDEs might not
@@ -70,7 +70,7 @@ public:
 
 private:
     string newName;
-    std::vector<core::Loc> localUsages;
+    vector<core::Loc> localUsages;
 };
 
 class MethodRenamer : public AbstractRewriter {
@@ -146,7 +146,7 @@ private:
             if (methodNameLoc->file().exists()) {
                 auto path = methodNameLoc->file().data(gs).path();
                 error = fmt::format("Failed to rename `{}` method call at {}:{}", oldName, path,
-                                    methodNameLoc->position(gs).first.line);
+                                    methodNameLoc->toDetails(gs).first.line);
             }
             return "";
         }
@@ -266,9 +266,22 @@ void enrichResponse(unique_ptr<ResponseMessage> &responseMsg, shared_ptr<Abstrac
 
 shared_ptr<AbstractRewriter> makeRenamer(const core::GlobalState &gs,
                                          const sorbet::realmain::lsp::LSPConfiguration &config, core::SymbolRef symbol,
-                                         const std::string newName) {
+                                         const string newName) {
+    auto loc = symbol.loc(gs);
+    if (!loc.exists() || loc.file().data(gs).isStdlib()) {
+        return nullptr;
+    }
+
     if (symbol.isMethod()) {
-        auto originalName = symbol.name(gs).show(gs);
+        auto method = symbol.asMethodRef();
+        auto name = method.data(gs)->name;
+
+        // TODO: support renaming of overloaded symbols by finding all the overload signatures.
+        if (method.data(gs)->flags.isOverloaded || name.isOverloadName(gs)) {
+            return nullptr;
+        }
+
+        auto originalName = name.show(gs);
         return make_shared<MethodRenamer>(gs, config, originalName, newName);
     } else if (symbol.isField(gs)) {
         return make_shared<FieldRenamer>(gs, config, newName);
@@ -313,7 +326,6 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
     }
 
     auto resp = skipLiteralIfMethodDef(gs, queryResponses);
-    shared_ptr<AbstractRewriter> renamer;
     if (auto constResp = resp->isConstant()) {
         // Sanity check the text.
         if (islower(params->newName[0])) {
@@ -322,29 +334,32 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
             return response;
         }
         if (isValidRenameLocation(constResp->symbolBeforeDealias, gs, response)) {
-            renamer = makeRenamer(gs, config, constResp->symbolBeforeDealias, params->newName);
-            renamer->getEdits(typechecker, constResp->symbolBeforeDealias);
-            enrichResponse(response, renamer);
+            if (auto renamer = makeRenamer(gs, config, constResp->symbolBeforeDealias, params->newName)) {
+                renamer->getEdits(typechecker, constResp->symbolBeforeDealias);
+                enrichResponse(response, renamer);
+            }
         }
     } else if (auto defResp = resp->isMethodDef()) {
         if (isValidRenameLocation(defResp->symbol, gs, response)) {
-            renamer = makeRenamer(gs, config, defResp->symbol, params->newName);
-            renamer->getEdits(typechecker, defResp->symbol);
-            enrichResponse(response, renamer);
+            if (auto renamer = makeRenamer(gs, config, defResp->symbol, params->newName)) {
+                renamer->getEdits(typechecker, defResp->symbol);
+                enrichResponse(response, renamer);
+            }
         }
     } else if (auto sendResp = resp->isSend()) {
         // We don't need to handle dispatchResult->secondary here, because it will be checked in getEdits.
         auto method = sendResp->dispatchResult->main.method;
-        renamer = makeRenamer(gs, config, method, params->newName);
-        renamer->getEdits(typechecker, method);
-        enrichResponse(response, renamer);
+        if (auto renamer = makeRenamer(gs, config, method, params->newName)) {
+            renamer->getEdits(typechecker, method);
+            enrichResponse(response, renamer);
+        }
     } else if (auto identResp = resp->isIdent()) {
         if (identResp->enclosingMethod.exists()) {
             auto references =
                 typechecker.query(core::lsp::Query::createVarQuery(identResp->enclosingMethod,
                                                                    identResp->enclosingMethodLoc, identResp->variable),
                                   {identResp->termLoc.file()});
-            std::vector<core::Loc> locations;
+            vector<core::Loc> locations;
 
             for (auto &reference : references.responses) {
                 locations.emplace_back(reference->getLoc());
@@ -355,9 +370,10 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
             enrichResponse(response, renamer);
         }
     } else if (auto fieldResp = resp->isField()) {
-        renamer = makeRenamer(gs, config, fieldResp->symbol, params->newName);
-        renamer->getEdits(typechecker, fieldResp->symbol);
-        enrichResponse(response, renamer);
+        if (auto renamer = makeRenamer(gs, config, fieldResp->symbol, params->newName)) {
+            renamer->getEdits(typechecker, fieldResp->symbol);
+            enrichResponse(response, renamer);
+        }
     }
 
     return response;

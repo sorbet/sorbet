@@ -57,44 +57,50 @@ export interface Log {
   /**
    * Appends a new debug message to the log.
    * @param message Log message.
+   * @param args Additional values to log.
    */
-  debug(message: string): void;
+  debug(message: string, ...args: any[]): void;
 
   /**
    * Appends a new error message to the log.
    * @param message Log message.
    * @param error Error.
+   * @param args Additional values to log.
    */
-  error(message: string, error?: Error): void;
+  error(message: string, error: Error, ...args: any[]): void;
 
   /**
    * Appends a new error message to the log.
    * @param errorOrMessage Error or log message.
+   * @param args Additional values to log.
    */
-  error(errorOrMessage: string | Error): void;
+  error(errorOrMessage: string | Error, ...args: any[]): void;
 
   /**
    * Appends a new information message to the log.
    * @param message Log message.
+   * @param args Additional values to log.
    */
-  info(message: string): void;
+  info(message: string, ...args: any[]): void;
 
   /**
    * Log level.
    */
-  level: LogLevel;
+  logLevel: LogLevel;
 
   /**
    * Appends a new trace message to the log.
    * @param message Log message.
+   * @param args Additional values to log.
    */
-  trace(message: string): void;
+  trace(message: string, ...args: any[]): void;
 
   /**
    * Appends a new warning message to the log.
    * @param message Log message.
+   * @param args Additional values to log.
    */
-  warning(message: string): void;
+  warn(message: string, ...args: any[]): void;
 }
 
 /**
@@ -112,18 +118,24 @@ export class OutputChannelLog implements Log, Disposable {
     this.outputChannel = window.createOutputChannel(name);
   }
 
-  private appendLine(level: string, message: string): void {
-    const formattedMessage = `${new Date().toISOString()} [${level.toLowerCase()}] ${message}`.trim();
+  private appendLine(level: string, message: string, args: any[]): void {
+    const formattedMessage = [
+      new Date().toISOString(),
+      `[${level.toLowerCase()}]`,
+      message,
+      ...args,
+    ].join(" ");
     this.outputChannel.appendLine(formattedMessage);
   }
 
   /**
    * Appends a new debug message to the log.
    * @param message Log message.
+   * @param args Additional values to log.
    */
-  public debug(message: string): void {
-    if (this.level <= LogLevel.Debug) {
-      this.appendLine("Debug", message);
+  public debug(message: string, ...args: any[]): void {
+    if (this.logLevel <= LogLevel.Debug) {
+      this.appendLine("Debug", message, args);
     }
   }
 
@@ -138,19 +150,27 @@ export class OutputChannelLog implements Log, Disposable {
    * Appends a new error message to the log.
    * @param errorOrMessage Error or log message.
    * @param error Error (only used when `errorOrMessage` is not a `string`).
+   * @param args Additional values to log.
    */
-  public error(errorOrMessage: string | Error, error?: Error): void {
-    if (this.level <= LogLevel.Error) {
+  public error(
+    errorOrMessage: string | Error,
+    error?: Error,
+    ...args: any[]
+  ): void {
+    if (this.logLevel <= LogLevel.Error) {
       let message: string;
       if (typeof errorOrMessage === "string") {
         message = errorOrMessage;
-        if (error) {
-          message += ` Error: ${err2Str(error)}`;
+        if (typeof error === "string") {
+          args.unshift(error);
+        } else if (error) {
+          args.unshift(err2Str(error));
+          args.unshift("Error:");
         }
       } else {
         message = err2Str(errorOrMessage);
       }
-      this.appendLine("Error", message);
+      this.appendLine("Error", message, args);
     }
 
     function err2Str(err: Error) {
@@ -161,21 +181,22 @@ export class OutputChannelLog implements Log, Disposable {
   /**
    * Appends a new information message to the log.
    * @param message Log message.
+   * @param args Additional values to log.
    */
-  public info(message: string): void {
-    if (this.level <= LogLevel.Info) {
-      this.appendLine("Info", message);
+  public info(message: string, ...args: any[]): void {
+    if (this.logLevel <= LogLevel.Info) {
+      this.appendLine("Info", message, args);
     }
   }
 
   /**
    * Log level.
    */
-  public get level(): LogLevel {
+  public get logLevel(): LogLevel {
     return this.wrappedLevel;
   }
 
-  public set level(level: LogLevel) {
+  public set logLevel(level: LogLevel) {
     if (this.wrappedLevel !== level) {
       this.wrappedLevel = level;
       this.outputChannel.appendLine(`Log level changed to: ${LogLevel[level]}`);
@@ -185,20 +206,22 @@ export class OutputChannelLog implements Log, Disposable {
   /**
    * Appends a new trace message to the log.
    * @param message Log message.
+   * @param args Additional values to log.
    */
-  public trace(message: string): void {
-    if (this.level <= LogLevel.Trace) {
-      this.appendLine("Trace", message);
+  public trace(message: string, ...args: any[]): void {
+    if (this.logLevel <= LogLevel.Trace) {
+      this.appendLine("Trace", message, args);
     }
   }
 
   /**
    * Appends a new warning message to the log.
    * @param message Log message.
+   * @param args Additional values to log.
    */
-  public warning(message: string): void {
-    if (this.level <= LogLevel.Warning) {
-      this.appendLine("Warning", message);
+  public warn(message: string, ...args: any[]): void {
+    if (this.logLevel <= LogLevel.Warning) {
+      this.appendLine("Warning", message, args);
     }
   }
 }

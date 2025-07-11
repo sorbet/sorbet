@@ -1,5 +1,5 @@
 #include "core/packages/PackageDB.h"
-#include "absl/strings/match.h"
+#include "absl/strings/str_split.h"
 #include "absl/types/span.h"
 #include "common/sort/sort.h"
 #include "core/AutocorrectSuggestion.h"
@@ -42,14 +42,13 @@ public:
         return Loc::none();
     }
 
-    std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
-                                                         bool isTestImport) const {
+    optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
+                                                    ImportType importType) const {
         notImplemented();
         return nullopt;
     }
 
-    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
-                                                         const core::SymbolRef name) const {
+    optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const core::SymbolRef name) const {
         return {};
     }
 
@@ -68,17 +67,8 @@ public:
         return false;
     }
 
-    std::vector<std::vector<core::NameRef>> exports() const {
-        return vector<vector<core::NameRef>>();
-    }
-    std::vector<std::vector<core::NameRef>> imports() const {
-        return vector<vector<core::NameRef>>();
-    }
-    std::vector<std::vector<core::NameRef>> testImports() const {
-        return vector<vector<core::NameRef>>();
-    }
-    std::vector<VisibleTo> visibleTo() const {
-        return vector<VisibleTo>();
+    vector<VisibleTo> visibleTo() const {
+        return {};
     }
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
@@ -91,12 +81,32 @@ public:
         return nullopt;
     }
 
+    optional<int> sccID() const {
+        notImplemented();
+        return nullopt;
+    }
+
+    optional<int> testSccID() const {
+        notImplemented();
+        return nullopt;
+    }
+
     bool causesLayeringViolation(const core::packages::PackageDB &packageDB, const PackageInfo &otherPkg) const {
         notImplemented();
         return false;
     }
 
-    std::optional<ImportType> importsPackage(MangledName mangledName) const {
+    core::packages::StrictDependenciesLevel minimumStrictDependenciesLevel() const {
+        notImplemented();
+        return core::packages::StrictDependenciesLevel::False;
+    }
+
+    optional<string> pathTo(const core::GlobalState &gs, const MangledName dest) const {
+        notImplemented();
+        return nullopt;
+    }
+
+    optional<ImportType> importsPackage(MangledName mangledName) const {
         notImplemented();
         return nullopt;
     }
@@ -166,15 +176,8 @@ void PackageDB::setPackageNameForFile(FileRef file, MangledName mangledName) {
     this->packageForFile_[file.id()] = mangledName;
 }
 
-const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, core::FileRef file) const {
-    ENFORCE(frozen);
-
-    // If we already have the package name cached, we can skip the slow path below. As this function is const, we cannot
-    // update the vector if we fall back on the slow path.
-    auto name = this->getPackageNameForFile(file);
-    if (name.exists()) {
-        return this->getPackageInfo(name);
-    }
+MangledName PackageDB::findPackageByPath(const core::GlobalState &gs, core::FileRef file) const {
+    ENFORCE(enabled_);
 
     // Note about safety: we're only using the file data for two pieces of information: the file path and the
     // sourceType. The path is present even on unloaded files, and the sourceType we're interested in is `Package`,
@@ -188,26 +191,16 @@ const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, cor
     while (curPrefixPos > 0) {
         const auto &it = packagesByPathPrefix.find(path.substr(0, curPrefixPos + 1));
         if (it != packagesByPathPrefix.end()) {
-            const auto &pkg = getPackageInfo(it->second);
-            ENFORCE(pkg.exists());
-            return pkg;
+            return it->second;
         }
 
-        if (fileData.isPackage()) {
+        if (fileData.isPackage(gs)) {
             // When looking up a `__package.rb` file do not search parent directories
             break;
         }
         curPrefixPos = path.find_last_of('/', curPrefixPos - 1);
     }
-    return NONE_PKG;
-}
-
-const PackageInfo &PackageDB::getPackageInfo(const core::GlobalState &gs, std::string_view nameStr) const {
-    auto cnst = core::packages::MangledName::mangledNameFromHuman(gs, nameStr);
-    if (!cnst.exists()) {
-        return NONE_PKG;
-    }
-    return getPackageInfo(cnst);
+    return MangledName();
 }
 
 const PackageInfo &PackageDB::getPackageInfo(MangledName mangledName) const {
@@ -230,7 +223,7 @@ absl::Span<const MangledName> PackageDB::packages() const {
     return absl::MakeSpan(mangledNames);
 }
 
-absl::Span<const std::string> PackageDB::skipRBIExportEnforcementDirs() const {
+absl::Span<const string> PackageDB::skipRBIExportEnforcementDirs() const {
     return absl::MakeSpan(skipRBIExportEnforcementDirs_);
 }
 
@@ -248,46 +241,79 @@ const bool PackageDB::enforceLayering() const {
     return !layers_.empty();
 }
 
-absl::Span<const std::string> PackageDB::extraPackageFilesDirectoryUnderscorePrefixes() const {
+absl::Span<const string> PackageDB::extraPackageFilesDirectoryUnderscorePrefixes() const {
     return absl::MakeSpan(extraPackageFilesDirectoryUnderscorePrefixes_);
 }
 
-absl::Span<const std::string> PackageDB::extraPackageFilesDirectorySlashDeprecatedPrefixes() const {
+absl::Span<const string> PackageDB::extraPackageFilesDirectorySlashDeprecatedPrefixes() const {
     return absl::MakeSpan(extraPackageFilesDirectorySlashDeprecatedPrefixes_);
 }
 
-absl::Span<const std::string> PackageDB::extraPackageFilesDirectorySlashPrefixes() const {
+absl::Span<const string> PackageDB::extraPackageFilesDirectorySlashPrefixes() const {
     return absl::MakeSpan(extraPackageFilesDirectorySlashPrefixes_);
 }
 
-const std::string_view PackageDB::errorHint() const {
+const string_view PackageDB::errorHint() const {
     return errorHint_;
 }
 
+void PackageDB::resolvePackagesWithRelaxedChecks(GlobalState &gs) {
+    UnorderedSet<MangledName> packagesWithRelaxedChecks;
+    for (const auto &pkgName : allowRelaxedPackagerChecksFor_) {
+        auto pkgNameParts = absl::StrSplit(pkgName, "::");
+        auto mangledName = MangledName::lookupMangledName(gs, pkgNameParts);
+        packagesWithRelaxedChecks.emplace(mangledName);
+    }
+    this->packagesWithRelaxedChecks_ = move(packagesWithRelaxedChecks);
+}
+
 bool PackageDB::allowRelaxedPackagerChecksFor(MangledName mangledName) const {
-    return absl::c_contains(allowRelaxedPackagerChecksFor_, mangledName);
+    return this->packagesWithRelaxedChecks_.contains(mangledName);
 }
 
 PackageDB PackageDB::deepCopy() const {
     ENFORCE(frozen);
     PackageDB result;
+
+    // --- data ---
     result.packages_.reserve(this->packages_.size());
     for (auto const &[nr, pkgInfo] : this->packages_) {
         result.packages_[nr] = pkgInfo->deepCopy();
     }
+    result.packagesByPathPrefix = this->packagesByPathPrefix;
+    // This assumes that the GlobalState this PackageDB is getting copied into also has these
+    // interned mangledName NameRefs at the same IDs as the current PackageDB.
+    result.mangledNames = this->mangledNames;
+
+    // --- options ---
     result.enabled_ = this->enabled_;
     result.extraPackageFilesDirectoryUnderscorePrefixes_ = this->extraPackageFilesDirectoryUnderscorePrefixes_;
     result.extraPackageFilesDirectorySlashDeprecatedPrefixes_ =
         this->extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     result.extraPackageFilesDirectorySlashPrefixes_ = this->extraPackageFilesDirectorySlashPrefixes_;
-    result.packagesByPathPrefix = this->packagesByPathPrefix;
-    result.mangledNames = this->mangledNames;
+    result.skipRBIExportEnforcementDirs_ = this->skipRBIExportEnforcementDirs_;
+    // This assumes that the GlobalState this PackageDB is getting copied into also has these
+    // interned layer NameRefs at the same IDs as the current PackageDB.
+    result.layers_ = this->layers_;
+    result.allowRelaxedPackagerChecksFor_ = this->allowRelaxedPackagerChecksFor_;
+    // Likewise, this assumes that we've entered MangledNames in the target GlobalState, but ALSO
+    // that we've copied symbols, because MangledNames store ClassOrModuleRef's now
+    result.packagesWithRelaxedChecks_ = this->packagesWithRelaxedChecks_;
     result.errorHint_ = this->errorHint_;
+
     return result;
 }
 
 UnfreezePackages PackageDB::unfreeze() {
     return UnfreezePackages(*this);
+}
+
+void PackageDB::setCondensation(Condensation &&condensation) {
+    this->condensation_ = std::move(condensation);
+}
+
+const Condensation &PackageDB::condensation() const {
+    return this->condensation_;
 }
 
 } // namespace sorbet::core::packages

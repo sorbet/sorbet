@@ -171,7 +171,7 @@ module JSON
       obj: ::T.untyped,
       opts: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .returns(String)
   end
   def self.fast_generate(obj, opts=T.unsafe(nil)); end
 
@@ -189,7 +189,7 @@ module JSON
       obj: ::T.untyped,
       opts: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .returns(String)
   end
   def self.generate(obj, opts=T.unsafe(nil)); end
 
@@ -328,7 +328,7 @@ module JSON
       obj: ::T.untyped,
       opts: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .returns(::String)
   end
   def self.pretty_generate(obj, opts=T.unsafe(nil)); end
 
@@ -1007,6 +1007,8 @@ class JSON::Ext::Parser
   def source; end
 end
 
+class JSON::Ext::ParserConfig
+end
 
 # The base exception for [`JSON`](https://docs.ruby-lang.org/en/2.7.0/JSON.html)
 # errors.

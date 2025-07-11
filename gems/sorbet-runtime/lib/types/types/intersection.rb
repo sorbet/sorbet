@@ -32,12 +32,12 @@ module T::Types
 
     # overrides Base
     def recursively_valid?(obj)
-      types.all? {|type| type.recursively_valid?(obj)}
+      types.all? { |type| type.recursively_valid?(obj) }
     end
 
     # overrides Base
     def valid?(obj)
-      types.all? {|type| type.valid?(obj)}
+      types.all? { |type| type.valid?(obj) }
     end
 
     # overrides Base

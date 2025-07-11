@@ -44,6 +44,7 @@ void ExpressionPtr::_sanityCheck() const {
         SANITY_CHECK(Block)
         SANITY_CHECK(InsSeq)
         SANITY_CHECK(RuntimeMethodDefinition)
+        SANITY_CHECK(Self)
     }
 #undef SANITY_CHECK
 }
@@ -100,7 +101,7 @@ void UnresolvedConstantLit::_sanityCheck() {
 }
 
 void ConstantLit::_sanityCheck() {
-    ENFORCE(resolutionScopes == nullptr || !resolutionScopes->empty());
+    ENFORCE(resolutionScopes() == nullptr || !resolutionScopes()->empty());
 }
 
 void EmptyTree::_sanityCheck() {}
@@ -245,5 +246,7 @@ void ZSuperArgs::_sanityCheck() {}
 void RuntimeMethodDefinition::_sanityCheck() {
     ENFORCE(name.exists());
 }
+
+void Self::_sanityCheck() {}
 
 } // namespace sorbet::ast

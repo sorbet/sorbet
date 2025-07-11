@@ -1,5 +1,5 @@
+#include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
-#include "absl/strings/str_split.h"
 #include "common/common.h"
 #include "common/sort/sort.h"
 #include "common/typecase.h"
@@ -11,7 +11,6 @@
 #include "core/TypeErrorDiagnostics.h"
 #include "core/Types.h"
 #include "core/errors/infer.h"
-#include "core/errors/resolver.h"
 #include <algorithm> // find_if, sort
 
 #include "absl/strings/str_cat.h"
@@ -324,7 +323,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
         }
         e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
-        core::TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector, expectedType, argTpe.type);
+        e.addErrorSections(move(errorDetailsCollector));
         TypeErrorDiagnostics::maybeAutocorrect(gs, e, argLoc, constr, expectedType, argTpe.type);
         return e.build();
     }
@@ -369,7 +368,7 @@ struct GuessOverloadCandidate {
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
-    vector<std::pair<MethodRef, size_t>> allCandidates;
+    vector<pair<MethodRef, size_t>> allCandidates;
 
     { // create candidates and sort them by number of arguments(stable by symbol id)
         size_t i = 0;
@@ -381,7 +380,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             if (!overload.exists()) {
                 Exception::raise("Corruption of overloads?");
             } else {
-                allCandidates.emplace_back(std::make_pair(overload, getArity(gs, overload)));
+                allCandidates.emplace_back(make_pair(overload, getArity(gs, overload)));
                 current = overload;
             }
         }
@@ -589,7 +588,7 @@ void maybeSuggestUnsafeKwsplat(const core::GlobalState &gs, core::ErrorBuilder &
 
 // Ensure that a ShapeType used as a keyword args splat in a send has only symbol keys present.
 const ShapeType *fromKwargsHash(const GlobalState &gs, const TypePtr &ty) {
-    auto *hash = cast_type<ShapeType>(ty);
+    auto hash = cast_type<ShapeType>(ty);
     if (hash == nullptr) {
         return nullptr;
     }
@@ -695,7 +694,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         mayBeOverloaded = symbol.data(gs)->findMethodTransitive(gs, targetName);
     }
 
-    if (!mayBeOverloaded.exists() && gs.requiresAncestorEnabled) {
+    if (!mayBeOverloaded.exists() && gs.cacheSensitiveOptions.requiresAncestorEnabled) {
         // Before raising any error, we look if the method exists in all required ancestors by this symbol
         auto ancestors = symbol.data(gs)->requiredAncestorsTransitive(gs);
         for (auto ancst : ancestors) {
@@ -743,7 +742,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
                 args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed() ||
                 args.name == core::Names::mixesInClassMethods() ||
-                (args.name == core::Names::requiresAncestor() && gs.requiresAncestorEnabled)) {
+                (args.name == core::Names::requiresAncestor() && gs.cacheSensitiveOptions.requiresAncestorEnabled)) {
                 auto attachedClass = symbol.data(gs)->attachedClass(gs);
                 TypeErrorDiagnostics::maybeInsertDSLMethod(gs, e, args.locs.file, args.callLoc(), attachedClass,
                                                            Symbols::T_Helpers(), "");
@@ -792,11 +791,18 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     if (objMeth.exists() && objMeth.data(gs)->owner.data(gs)->isModule()) {
                         auto objData = objMeth.data(gs);
                         auto ownerName = objData->owner.data(gs)->name.show(gs);
+
+                        // Only want to suggest for things like `Kernel.raise`, not things like Kernel.is_a?
+                        // (crude heuristic for figuring that out).
+                        auto suggestKernelDot =
+                            args.isPrivateOk ? ErrorColors::format(", or\n    call the method using `{}` instead.",
+                                                                   fmt::format("{}.{}", ownerName, args.name.show(gs)))
+                                             : ".";
+
                         e.addErrorNote("`{}` is actually defined as a method on `{}`. To call it, either\n"
-                                       "    `{}` in this module to ensure the method is always there, or\n"
-                                       "    call the method using `{}` instead.",
+                                       "    `{}` in this module to ensure the method is always there{}",
                                        args.name.show(gs), ownerName, fmt::format("include {}", ownerName),
-                                       fmt::format("{}.{}", ownerName, args.name.show(gs)));
+                                       suggestKernelDot);
                         if (args.receiverLoc().exists() && args.receiverLoc().empty()) {
                             e.replaceWith("Prefix with `Kernel.`", args.receiverLoc(), "Kernel.");
                         }
@@ -950,7 +956,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         constr->defineDomain(gs, methodData->typeArguments());
     }
     auto posArgs = args.numPosArgs;
-    bool hasKwargs = absl::c_any_of(methodData->arguments, [](const auto &arg) { return arg.flags.isKeyword; });
+    bool hasKwparams = absl::c_any_of(methodData->arguments, [](const auto &arg) { return arg.flags.isKeyword; });
     auto nonPosArgs = (args.args.size() - args.numPosArgs);
     bool hasKwsplat = nonPosArgs & 0x1;
     auto numKwargs = hasKwsplat ? nonPosArgs - 1 : nonPosArgs;
@@ -970,23 +976,23 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     auto aPosEnd = args.args.begin() + args.numPosArgs;
 
     while (pit != pend && ait != aPosEnd) {
-        const ArgInfo &spec = *pit;
+        const ArgInfo &param = *pit;
         auto &arg = *ait;
-        if (spec.flags.isKeyword) {
+        if (param.flags.isKeyword) {
             break;
         }
-        if (ait + 1 == aend && hasKwargs && (spec.flags.isDefault || spec.flags.isRepeated) &&
+        if (ait + 1 == aend && hasKwparams && (param.flags.isDefault || param.flags.isRepeated) &&
             Types::approximate(gs, arg->type, *constr).derivesFrom(gs, Symbols::Hash())) {
             break;
         }
 
         auto offset = ait - args.args.begin();
-        if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, *arg, spec, args.selfType, targs,
+        if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, *arg, param, args.selfType, targs,
                                   args.argLoc(offset), args.originForUninitialized, args.args.size() == 1)) {
             result.main.errors.emplace_back(std::move(e));
         }
 
-        if (!spec.flags.isRepeated) {
+        if (!param.flags.isRepeated) {
             ++pit;
         }
         ++ait;
@@ -995,8 +1001,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     // If positional arguments remain, the method accepts keyword arguments, and no keyword arguments were provided in
     // the send, assume that the last argument is an implicit keyword args hash.
     bool implicitKwsplat = false;
-    if (ait != aPosEnd && hasKwargs && args.args.size() == args.numPosArgs) {
+    if (ait != aPosEnd && hasKwparams && args.args.size() == args.numPosArgs) {
         auto splatLoc = args.argLoc(args.args.size() - 1);
+        if ((*ait)->type.isUntyped() && !gs.ruby3KeywordArgs) {
+            auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file, (*ait)->type);
+            if (auto e = gs.beginError(splatLoc, what)) {
+                e.setHeader("Positional argument being interpreted as keyword argument is `{}`", "T.untyped");
+            }
+        }
 
         // If --experimental-ruby3-keyword-args is set, we will treat "**-less" keyword hash argument as an error.
         if (gs.ruby3KeywordArgs) {
@@ -1066,23 +1078,23 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // arguments in the call when determining whether keyword args are properly
         // typed, below.
         bool kwSplatIsHash = false;
-        TypePtr kwSplatType;
+        TypePtr kwSplatArgType;
         if (hasKwsplat) {
             auto &kwSplatArg = *(aend - 1);
-            kwSplatType = Types::approximate(gs, kwSplatArg->type, *constr);
+            kwSplatArgType = Types::approximate(gs, kwSplatArg->type, *constr);
 
-            if (hasKwargs) {
-                if (auto *hash = fromKwargsHash(gs, kwSplatType)) {
+            if (hasKwparams) {
+                if (auto *hash = fromKwargsHash(gs, kwSplatArgType)) {
                     absl::c_copy(hash->keys, back_inserter(keys));
                     absl::c_copy(hash->values, back_inserter(values));
                     kwargs = make_type<ShapeType>(move(keys), move(values));
                     --aend;
                 } else {
-                    if (kwSplatType.isUntyped()) {
+                    if (kwSplatArgType.isUntyped()) {
                         // Allow an untyped arg to satisfy all kwargs
                         --aend;
-                        kwargs = Types::untypedUntracked();
-                    } else if (kwSplatType.derivesFrom(gs, Symbols::Hash())) {
+                        kwargs = kwSplatArgType;
+                    } else if (kwSplatArgType.derivesFrom(gs, Symbols::Hash())) {
                         // This will be an error if the kwsplat hash ends up being used to supply keyword arguments,
                         // however it may also be consumed as a positional arg. Defer raising an error until we're
                         // certain that it would be used as a keyword args hash below.
@@ -1100,7 +1112,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
             } else {
                 // This function doesn't take keyword arguments, so consume the kwsplat and use the approximated type.
-                kwargs = kwSplatType;
+                kwargs = kwSplatArgType;
                 --aend;
             }
         } else {
@@ -1110,8 +1122,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // Detect the case where not all positional arguments were supplied, causing the keyword args to be consumed as
         // a positional hash.
         if (kwargs != nullptr && pit != pend && !pit->flags.isBlock &&
-            (!hasKwargs || (!pit->flags.isRepeated && !pit->flags.isKeyword && !pit->flags.isDefault))) {
-            // TODO(trevor) if `hasKwargs` is true at this point but not keyword args were provided, we could add an
+            (!hasKwparams || (!pit->flags.isRepeated && !pit->flags.isKeyword && !pit->flags.isDefault))) {
+            // TODO(trevor) if `hasKwparams` is true at this point but not keyword args were provided, we could add an
             // autocorrect to turn this into `**kwargs`
 
             // If there are positional arguments left to be filled, but there were keyword arguments present,
@@ -1130,7 +1142,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // the keyword args as consumed when this method does not accept keyword arguments.
             kwargs = nullptr;
             posArgs++;
-            if (!hasKwargs) {
+            if (!hasKwparams) {
                 ait += numKwargs;
             }
         } else if (kwSplatIsHash) {
@@ -1151,7 +1163,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto hasKwParam = !kwParams.empty();
 
             auto &kwSplatArg = *aend;
-            auto kwSplatTPO = TypeAndOrigins{kwSplatType, kwSplatArg->origins};
+            auto kwSplatTPO = TypeAndOrigins{kwSplatArgType, kwSplatArg->origins};
             auto kwSplatArgLoc = args.argLoc(args.args.size() - 1);
 
             if (hasKwSplatParam && !hasKwParam) {
@@ -1161,7 +1173,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     result.main.errors.emplace_back(std::move(e));
                 }
             } else if (hasKwParam) {
-                auto hashType = isa_type<ShapeType>(kwSplatType) ? kwSplatType.underlying(gs) : kwSplatType;
+                auto hashType = isa_type<ShapeType>(kwSplatArgType) ? kwSplatArgType.underlying(gs) : kwSplatArgType;
                 auto &appliedType = cast_type_nonnull<AppliedType>(hashType);
                 auto kwSplatKeyType = appliedType.targs[0];
                 auto kwSplatValueType = appliedType.targs[1];
@@ -1224,8 +1236,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                                             method.show(gs));
                             e.addErrorSection(TypeAndOrigins::explainExpected(gs, kwParamType, kwParam->loc, for_));
                             e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
-                            core::TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector, kwParamType,
-                                                                            kwSplatValueType);
+                            e.addErrorSections(move(errorDetailsCollector));
                             e.addErrorNote(
                                 "A `{}` passed as a keyword splat must match the type of all keyword parameters\n"
                                 "    because Sorbet cannot see what specific keys exist in the `{}`.",
@@ -1269,13 +1280,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     // keep this around so we know which keyword arguments have been supplied
     UnorderedSet<NameRef> consumed;
-    if (hasKwargs) {
+    if (hasKwparams) {
         // Remember where the kwargs started
         auto kwait = aPosEnd;
         // Mark the keyword args as consumed
         ait += numKwargs;
 
-        if (auto *hash = cast_type<ShapeType>(kwargs)) {
+        if (auto hash = cast_type<ShapeType>(kwargs)) {
             // find keyword arguments and advance `pend` before them; We'll walk
             // `kwit` ahead below
             auto kwit = pit;
@@ -1286,10 +1297,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
             bool sawKwSplat = false;
             while (kwit != methodData->arguments.end()) {
-                const ArgInfo &spec = *kwit;
-                if (spec.flags.isBlock) {
+                const ArgInfo &kwParam = *kwit;
+                if (kwParam.flags.isBlock) {
                     break;
-                } else if (spec.flags.isRepeated) {
+                } else if (kwParam.flags.isRepeated) {
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
                         auto key = cast_type_nonnull<NamedLiteralType>(*it);
                         auto underlying = key.underlying(gs);
@@ -1308,7 +1319,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         // keyword arguments separately from the ones that come from the kwsplat
                         auto offset = it - hash->keys.begin();
                         TypeAndOrigins tpe{hash->values[offset], kwargsLoc};
-                        if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, spec,
+                        if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, kwParam,
                                                   args.selfType, targs, kwargsLoc, args.originForUninitialized)) {
                             result.main.errors.emplace_back(std::move(e));
                         }
@@ -1325,17 +1336,18 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     auto lit = cast_type_nonnull<NamedLiteralType>(litType);
                     auto underlying = lit.underlying(gs);
                     return cast_type_nonnull<ClassType>(underlying).symbol == Symbols::Symbol() &&
-                           lit.asName() == spec.name;
+                           lit.asName() == kwParam.name;
                 });
                 if (arg == hash->keys.end()) {
-                    if (!spec.flags.isDefault) {
-                        if (auto e = missingArg(gs, args.argsLoc(), args.receiverLoc(), method, spec, symbol, targs)) {
+                    if (!kwParam.flags.isDefault) {
+                        if (auto e =
+                                missingArg(gs, args.argsLoc(), args.receiverLoc(), method, kwParam, symbol, targs)) {
                             result.main.errors.emplace_back(std::move(e));
                         }
                     }
                     continue;
                 }
-                consumed.insert(spec.name);
+                consumed.insert(kwParam.name);
                 // We want the precise location of the kwarg that we are processing.
                 // To do that, we rely on hash->{keys,values} being added in the order
                 // that the kwargs appear in the the call.  We also rely on args from
@@ -1367,7 +1379,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto originLoc = argInBounds ? args.argLoc(kwargOffset) : kwargsLoc;
                 auto argLoc = argInBounds ? args.argLoc(kwargOffset) : args.callLoc();
                 TypeAndOrigins tpe{hash->values[offset], originLoc};
-                if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, spec, args.selfType,
+                if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, kwParam, args.selfType,
                                           targs, argLoc, args.originForUninitialized)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
@@ -1400,11 +1412,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         } else if (kwargs == nullptr) {
             // The method has keyword arguments, but none were provided. Report an error for each missing argument.
-            for (auto &spec : methodData->arguments) {
-                if (!spec.flags.isKeyword || spec.flags.isDefault || spec.flags.isRepeated) {
+            for (auto &param : methodData->arguments) {
+                if (!param.flags.isKeyword || param.flags.isDefault || param.flags.isRepeated) {
                     continue;
                 }
-                if (auto e = missingArg(gs, args.argsLoc(), args.receiverLoc(), method, spec, symbol, targs)) {
+                if (auto e = missingArg(gs, args.argsLoc(), args.receiverLoc(), method, param, symbol, targs)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
             }
@@ -1443,7 +1455,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0, numArgsGiven);
                 e.addErrorLine(methodData->loc(), "`{}` defined here", targetName.show(gs));
                 e.replaceWith("Delete extra args", deleteLoc, "");
-            } else if (!hasKwargs) {
+            } else if (!hasKwparams) {
                 e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", method.show(gs),
                             prettyArity(gs, method), numArgsGiven);
                 e.addErrorLine(methodData->loc(), "`{}` defined here", targetName.show(gs));
@@ -1484,8 +1496,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     if (args.block != nullptr) {
         ENFORCE(!methodData->arguments.empty(), "Every symbol must at least have a block arg: {}", method.show(gs));
-        const auto &bspec = methodData->arguments.back();
-        ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg: {}", method.show(gs));
+        const auto &blockParam = methodData->arguments.back();
+        ENFORCE(blockParam.flags.isBlock, "The last symbol must be the block arg: {}", method.show(gs));
 
         // Only report "does not expect a block" error if the method is defined in a `typed: strict`
         // file or higher and has a sig, which would force the "uses `yield` but does not mention a
@@ -1499,7 +1511,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto file = methodData->loc().file();
             auto blockLoc = args.blockLoc(gs);
             if (file.exists() && file.data(gs).strictLevel >= core::StrictLevel::Strict &&
-                bspec.isSyntheticBlockArgument() && blockLoc.exists() && !blockLoc.empty()) {
+                blockParam.isSyntheticBlockArgument() && blockLoc.exists() && !blockLoc.empty()) {
                 if (auto e = gs.beginError(blockLoc, core::errors::Infer::TakesNoBlock)) {
                     e.setHeader("Method `{}` does not take a block", method.show(gs));
                     for (const auto loc : methodData->locs()) {
@@ -1513,10 +1525,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         }
 
-        TypePtr blockType = Types::resultTypeAsSeenFrom(gs, bspec.type, methodData->owner, symbol, targs);
+        TypePtr blockType = Types::resultTypeAsSeenFrom(gs, blockParam.type, methodData->owner, symbol, targs);
         handleBlockType(gs, component, blockType);
-        component.rebind = bspec.rebind;
-        component.rebindLoc = bspec.loc;
+        component.rebind = blockParam.rebind;
+        component.rebindLoc = blockParam.loc;
     }
 
     TypePtr &resultType = result.returnType;
@@ -1657,7 +1669,7 @@ bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
         }
     }
 
-    if (auto *appliedType = cast_type<AppliedType>(wrapped)) {
+    if (auto appliedType = cast_type<AppliedType>(wrapped)) {
         if (appliedType->klass == core::Symbols::Class()) {
             // T::Class[...].new is not implemented--users should just use Class.new(super_class)
             return false;
@@ -1697,7 +1709,7 @@ DispatchResult badMetaTypeCall(const GlobalState &gs, const DispatchArgs &args, 
                                "which doesn't work at runtime");
                 e.replaceWith("Replace with class name", args.callLoc(), "{}", appliedType->klass.show(gs));
             }
-        } else if (auto *appliedType = cast_type<AppliedType>(wrapped)) {
+        } else if (auto appliedType = cast_type<AppliedType>(wrapped)) {
             // For T.class_of(Foo), we'll suggest replacing it with the attached class (Foo).
             if (appliedType->klass.data(gs)->isSingletonClass(gs)) {
                 auto receiverLoc = core::Loc(args.locs.file, args.locs.receiver);
@@ -1750,7 +1762,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
             return original;
         }
         case Names::squareBrackets().rawId(): {
-            auto *applied = cast_type<AppliedType>(this->wrapped);
+            auto applied = cast_type<AppliedType>(this->wrapped);
             if (applied == nullptr) {
                 return badMetaTypeCall(gs, args, errLoc, this->wrapped);
             }
@@ -1763,7 +1775,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
         case Names::bind().rawId():
         case Names::returns().rawId():
         case Names::void_().rawId(): {
-            auto *applied = cast_type<AppliedType>(this->wrapped);
+            auto applied = cast_type<AppliedType>(this->wrapped);
             if (applied == nullptr) {
                 return badMetaTypeCall(gs, args, errLoc, this->wrapped);
             }
@@ -2120,7 +2132,8 @@ public:
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
         auto tClassSelfType = Types::tClass(Types::widen(gs, args.selfType));
         if (self.data(gs)->isModule()) {
-            ENFORCE(gs.requiresAncestorEnabled, "Congrats, you've found a test case. Please add it, then delete this.");
+            ENFORCE(gs.cacheSensitiveOptions.requiresAncestorEnabled,
+                    "Congrats, you've found a test case. Please add it, then delete this.");
             // This normally can't happen, because `Object` is not an ancestor of any module
             // instance by default. But Sorbet supports requires ancestor in a really weird way (by
             // simply dispatching to a completely unrelated method) which means that sometimes we
@@ -2160,7 +2173,7 @@ public:
     }
 
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *selfApp = cast_type<AppliedType>(args.thisType);
+        auto selfApp = cast_type<AppliedType>(args.thisType);
         if (selfApp == nullptr) {
             return;
         }
@@ -2359,11 +2372,11 @@ public:
 
 class Magic_expandSplat : public IntrinsicMethod {
     static TypePtr expandArray(const GlobalState &gs, const TypePtr &type, int expandTo) {
-        if (auto *ot = cast_type<OrType>(type)) {
+        if (auto ot = cast_type<OrType>(type)) {
             return Types::any(gs, expandArray(gs, ot->left, expandTo), expandArray(gs, ot->right, expandTo));
         }
 
-        auto *tuple = cast_type<TupleType>(type);
+        auto tuple = cast_type<TupleType>(type);
         if (tuple == nullptr && core::Types::approximate(gs, type, core::TypeConstraint::EmptyFrozenConstraint)
                                     .derivesFrom(gs, Symbols::Array())) {
             // If this is an array and not a tuple, just pass it through. We
@@ -2483,7 +2496,7 @@ public:
             res.returnType = args.args[2]->type;
             return;
         }
-        auto *posTuple = cast_type<TupleType>(args.args[2]->type);
+        auto posTuple = cast_type<TupleType>(args.args[2]->type);
         if (posTuple == nullptr) {
             if (auto e = gs.beginError(args.argLoc(2), core::errors::Infer::UntypedSplat)) {
                 e.setHeader("Splats are only supported where the size of the array is known statically");
@@ -2492,7 +2505,7 @@ public:
         }
 
         auto kwArgsType = args.args[3]->type;
-        auto *kwTuple = cast_type<TupleType>(kwArgsType);
+        auto kwTuple = cast_type<TupleType>(kwArgsType);
         if (kwTuple == nullptr && !kwArgsType.isNilClass()) {
             if (auto e = gs.beginError(args.argLoc(2), core::errors::Infer::UntypedSplat)) {
                 e.setHeader(
@@ -2577,16 +2590,16 @@ private:
         }
     }
 
-    static std::optional<int> getArityForBlock(const TypePtr &blockType) {
-        if (auto *appliedType = cast_type<AppliedType>(blockType)) {
+    static optional<int> getArityForBlock(const TypePtr &blockType) {
+        if (auto appliedType = cast_type<AppliedType>(blockType)) {
             return Types::getProcArity(*appliedType);
         }
 
-        return std::nullopt;
+        return nullopt;
     }
 
-    static std::vector<ArgInfo::ArgFlags> argInfoByArity(std::optional<int> fixedArity) {
-        std::vector<ArgInfo::ArgFlags> res;
+    static vector<ArgInfo::ArgFlags> argInfoByArity(optional<int> fixedArity) {
+        vector<ArgInfo::ArgFlags> res;
         if (fixedArity) {
             for (int i = 0; i < *fixedArity; i++) {
                 res.emplace_back();
@@ -2605,11 +2618,11 @@ private:
 
         const auto &methodArgs = dispatchComp.method.data(gs)->arguments;
         ENFORCE(!methodArgs.empty());
-        const auto &bspec = methodArgs.back();
-        ENFORCE(bspec.flags.isBlock);
-        auto for_ = ErrorColors::format("block argument `{}` of method `{}`", bspec.argumentName(gs),
+        const auto &blockParam = methodArgs.back();
+        ENFORCE(blockParam.flags.isBlock);
+        auto for_ = ErrorColors::format("block argument `{}` of method `{}`", blockParam.argumentName(gs),
                                         dispatchComp.method.show(gs));
-        e.addErrorSection(TypeAndOrigins::explainExpected(gs, blockType, bspec.loc, for_));
+        e.addErrorSection(TypeAndOrigins::explainExpected(gs, blockType, blockParam.loc, for_));
     }
 
     static void simulateCall(const GlobalState &gs, const TypeAndOrigins *receiver, const DispatchArgs &innerArgs,
@@ -2641,7 +2654,7 @@ private:
                 // Create a new proc of correct arity, with everything as untyped,
                 // and then use this type instead of passedInBlockType in later subtype checks.
                 // This allows the generic parameters to be instantiated with untyped rather than bottom.
-                if (std::optional<int> procArity = Magic_callWithBlock::getArityForBlock(nonNilableBlockType)) {
+                if (optional<int> procArity = Magic_callWithBlock::getArityForBlock(nonNilableBlockType)) {
                     vector<core::TypePtr> targs(*procArity + 1, core::Types::untypedUntracked());
                     auto procWithCorrectArity = core::Symbols::Proc(*procArity);
                     passedInBlockType = make_type<core::AppliedType>(procWithCorrectArity, move(targs));
@@ -2652,8 +2665,7 @@ private:
                 if (!dispatched.secondary) {
                     Magic_callWithBlock::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
                 }
-                core::TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector, blockPreType,
-                                                                passedInBlockType);
+                e.addErrorSections(move(errorDetailsCollector));
             }
         }
 
@@ -2759,7 +2771,7 @@ public:
         TypePtr finalBlockType =
             Magic_callWithBlock::typeToProc(gs, *args.args[2], args.locs.file, args.locs.call, args.locs.args[2],
                                             args.locs.fun, args.originForUninitialized, args.suppressErrors);
-        std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
+        optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         core::SendAndBlockLink link{fn, Magic_callWithBlock::argInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
@@ -2837,7 +2849,7 @@ public:
             res.returnType = args.args[2]->type;
             return;
         }
-        auto *posTuple = cast_type<TupleType>(args.args[2]->type);
+        auto posTuple = cast_type<TupleType>(args.args[2]->type);
         if (posTuple == nullptr) {
             if (auto e = gs.beginError(args.argLoc(2), core::errors::Infer::UntypedSplat)) {
                 e.setHeader("Splats are only supported where the size of the array is known statically");
@@ -2848,7 +2860,7 @@ public:
         uint16_t numPosArgs = posTuple->elems.size();
 
         auto kwType = args.args[3]->type;
-        auto *kwTuple = cast_type<TupleType>(kwType);
+        auto kwTuple = cast_type<TupleType>(kwType);
         if (kwTuple == nullptr && !kwType.isNilClass()) {
             if (auto e = gs.beginError(args.argLoc(2), core::errors::Infer::UntypedSplat)) {
                 e.setHeader(
@@ -2873,7 +2885,7 @@ public:
         TypePtr finalBlockType =
             Magic_callWithBlock::typeToProc(gs, *args.args[4], args.locs.file, args.locs.call, args.locs.args[4],
                                             args.locs.fun, args.originForUninitialized, args.suppressErrors);
-        std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
+        optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         core::SendAndBlockLink link{fn, Magic_callWithBlock::argInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
@@ -2944,6 +2956,12 @@ public:
                 definingMethodName != core::Names::beforeAngles()) {
                 suggestType = core::Types::any(gs, Types::nilClass(), suggestType);
             }
+
+            // For boolean types, suggest T::Boolean instead of TrueClass/FalseClass
+            if (suggestType == core::Types::falseClass() || suggestType == core::Types::trueClass()) {
+                suggestType = core::Types::Boolean();
+            }
+
             e.setHeader("The {} variable `{}` must be declared using `{}` when specifying `{}`", fieldKind, fieldName,
                         "T.let", "# typed: strict");
             auto replaceLoc = args.argLoc(0);
@@ -3203,7 +3221,7 @@ public:
             return;
         }
 
-        auto *tuple = cast_type<TupleType>(args.thisType);
+        auto tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
         auto tupleSize = tuple->elems.size();
 
@@ -3265,7 +3283,7 @@ public:
 class Tuple_last : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.thisType);
+        auto tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
@@ -3282,7 +3300,7 @@ public:
 class Tuple_first : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.thisType);
+        auto tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
@@ -3299,7 +3317,7 @@ public:
 class Tuple_minMax : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.thisType);
+        auto tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
@@ -3316,7 +3334,7 @@ public:
 class Tuple_sum : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.thisType);
+        auto tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
@@ -3336,7 +3354,7 @@ public:
 class Tuple_sample : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.thisType);
+        auto tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (args.args.size() > 1) {
@@ -3372,11 +3390,11 @@ class Tuple_concat : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         vector<TypePtr> elems;
-        auto *tuple = cast_type<TupleType>(args.thisType);
+        auto tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
         elems = tuple->elems;
         for (auto elem : args.args) {
-            if (auto *tuple = cast_type<TupleType>(elem->type)) {
+            if (auto tuple = cast_type<TupleType>(elem->type)) {
                 elems.insert(elems.end(), tuple->elems.begin(), tuple->elems.end());
             } else {
                 return;
@@ -3465,8 +3483,7 @@ public:
                         ErrorSection("Shape originates from here:",
                                      args.fullType.origins2Explanations(gs, args.originForUninitialized)));
                     e.addErrorSection(actualType.explainGot(gs, args.originForUninitialized));
-                    core::TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector, expectedType,
-                                                                    actualType.type);
+                    e.addErrorSections(move(errorDetailsCollector));
 
                     if (args.fullType.origins.size() == 1 && isa_type<NamedLiteralType>(arg)) {
                         auto argLit = cast_type_nonnull<NamedLiteralType>(arg);
@@ -3503,7 +3520,7 @@ public:
 class Shape_merge : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *shape = cast_type<ShapeType>(args.thisType);
+        auto shape = cast_type<ShapeType>(args.thisType);
         ENFORCE(shape);
 
         if (args.args.empty() || args.block != nullptr) {
@@ -3524,7 +3541,7 @@ public:
 
         // Deliberately copy the keys and values, since we may be adding entries.
         auto copyTypePtr = make_type<ShapeType>(shape->keys, shape->values);
-        auto *copy = cast_type<ShapeType>(copyTypePtr);
+        auto copy = cast_type<ShapeType>(copyTypePtr);
         ENFORCE(copy != nullptr);
         auto addShapeEntry = [&copy](const TypePtr &keyType, const TypePtr &value) {
             if (auto optind = copy->indexForKey(keyType)) {
@@ -3570,6 +3587,21 @@ class Shape_to_hash : public IntrinsicMethod {
         res.returnType = args.selfType;
     }
 } Shape_to_hash;
+
+class Shape_to_h : public IntrinsicMethod {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto shape = cast_type<ShapeType>(args.thisType);
+
+        if (shape->keys.empty() || shape->values.empty() || args.block != nullptr) {
+            // Use return type from sig
+            return;
+        }
+
+        auto keyType = Types::dropLiteral(gs, Types::lubAll(gs, shape->keys));
+        auto valType = Types::dropLiteral(gs, Types::lubAll(gs, shape->values));
+        res.returnType = Types::hashOf(gs, keyType, valType);
+    }
+} Shape_to_h;
 
 // `<Magic>.<to-hash-dup>(x)` and `<Magic>.<to-hash-nodup>(x) both behave like `x.to_hash`
 class Magic_toHash : public IntrinsicMethod {
@@ -3759,7 +3791,7 @@ class Magic_checkMatchArray : public IntrinsicMethod {
         auto testedSym = Symbols::noClassOrModule();
         if (isa_type<ClassType>(testedType)) {
             testedSym = cast_type_nonnull<ClassType>(testedType).symbol;
-        } else if (auto *app = cast_type<AppliedType>(testedType)) {
+        } else if (auto app = cast_type<AppliedType>(testedType)) {
             testedSym = app->klass;
         }
         if (testedSym.exists() && testedSym.data(gs)->flags.isSealed) {
@@ -4006,7 +4038,7 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // Unwrap the array one time to get the element type (we'll rewrap it down at the bottom)
         TypePtr element;
-        auto *ap = cast_type<AppliedType>(args.thisType);
+        auto ap = cast_type<AppliedType>(args.thisType);
         ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
         ENFORCE(!ap->targs.empty());
         element = ap->targs.front();
@@ -4051,18 +4083,18 @@ public:
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(args.args.size() + 1);
 
-        auto *ap = cast_type<AppliedType>(args.thisType);
+        auto ap = cast_type<AppliedType>(args.thisType);
         ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
         ENFORCE(!ap->targs.empty());
         unwrappedElems.emplace_back(ap->targs.front());
 
         for (auto arg : args.args) {
             auto argTyp = arg->type;
-            if (auto *ap = cast_type<AppliedType>(argTyp)) {
+            if (auto ap = cast_type<AppliedType>(argTyp)) {
                 ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
                 ENFORCE(!ap->targs.empty());
                 unwrappedElems.emplace_back(ap->targs.front());
-            } else if (auto *tuple = cast_type<TupleType>(argTyp)) {
+            } else if (auto tuple = cast_type<TupleType>(argTyp)) {
                 unwrappedElems.emplace_back(tuple->elementType(gs));
             } else {
                 // Arg type didn't match; we already reported an error for the arg type; just return untyped to recover.
@@ -4080,7 +4112,7 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         TypePtr element;
 
-        auto *ap = cast_type<AppliedType>(args.thisType);
+        auto ap = cast_type<AppliedType>(args.thisType);
         ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
         ENFORCE(!ap->targs.empty());
         element = ap->targs.front();
@@ -4096,19 +4128,19 @@ public:
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(args.args.size() + 1);
 
-        auto *ap = cast_type<AppliedType>(args.thisType);
+        auto ap = cast_type<AppliedType>(args.thisType);
         ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
         ENFORCE(!ap->targs.empty());
         unwrappedElems.emplace_back(ap->targs.front());
 
         for (auto arg : args.args) {
             auto argTyp = arg->type;
-            if (auto *ap = cast_type<AppliedType>(argTyp)) {
+            if (auto ap = cast_type<AppliedType>(argTyp)) {
                 ENFORCE(ap->klass == Symbols::Enumerable() ||
                         ap->klass.data(gs)->derivesFrom(gs, Symbols::Enumerable()));
                 ENFORCE(!ap->targs.empty());
                 unwrappedElems.emplace_back(Types::any(gs, ap->targs.front(), Types::nilClass()));
-            } else if (auto *tuple = cast_type<TupleType>(argTyp)) {
+            } else if (auto tuple = cast_type<TupleType>(argTyp)) {
                 unwrappedElems.emplace_back(Types::any(gs, tuple->elementType(gs), Types::nilClass()));
             } else {
                 // Arg type didn't match; we already reported an error for the arg type; just return untyped to
@@ -4121,7 +4153,7 @@ public:
         if (args.block != nullptr) {
             res.returnType = Types::nilClass();
 
-            if (auto *blockAppliedType = cast_type<AppliedType>(res.main.blockPreType)) {
+            if (auto blockAppliedType = cast_type<AppliedType>(res.main.blockPreType)) {
                 ENFORCE(blockAppliedType->targs.size() == 2, "calls.cc out of date w.r.t. array.rbi");
                 blockAppliedType->targs[1] = make_type<TupleType>(move(unwrappedElems));
             }
@@ -4134,12 +4166,12 @@ public:
 class Array_transpose : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *ap = cast_type<AppliedType>(args.thisType);
+        auto ap = cast_type<AppliedType>(args.thisType);
         ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
         ENFORCE(!ap->targs.empty());
         auto &elementType = ap->targs.front();
 
-        auto *tuple = cast_type<TupleType>(elementType);
+        auto tuple = cast_type<TupleType>(elementType);
         if (tuple == nullptr) {
             return;
         }
@@ -4223,7 +4255,7 @@ public:
             return;
         }
 
-        std::optional<int> numberOfPositionalBlockParams = args.block->fixedArity();
+        optional<int> numberOfPositionalBlockParams = args.block->fixedArity();
         if (!numberOfPositionalBlockParams || *numberOfPositionalBlockParams > core::Symbols::MAX_PROC_ARITY) {
             res.returnType = core::Types::procClass();
             return;
@@ -4395,7 +4427,7 @@ public:
         auto rhsSym = Symbols::noClassOrModule();
         if (isa_type<ClassType>(rhs)) {
             rhsSym = cast_type_nonnull<ClassType>(rhs).symbol;
-        } else if (auto *app = cast_type<AppliedType>(rhs)) {
+        } else if (auto app = cast_type<AppliedType>(rhs)) {
             rhsSym = app->klass;
         }
 
@@ -4441,7 +4473,7 @@ public:
         auto rhsSym = Symbols::noClassOrModule();
         if (isa_type<ClassType>(rhs)) {
             rhsSym = cast_type_nonnull<ClassType>(rhs).symbol;
-        } else if (auto *app = cast_type<AppliedType>(rhs)) {
+        } else if (auto app = cast_type<AppliedType>(rhs)) {
             rhsSym = app->klass;
         }
 
@@ -4474,7 +4506,7 @@ class GenericForwarder_tripleEq : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto forwarderSingleton = Symbols::noClassOrModule();
-        if (auto *app = cast_type<AppliedType>(args.thisType)) {
+        if (auto app = cast_type<AppliedType>(args.thisType)) {
             forwarderSingleton = app->klass;
         } else {
             forwarderSingleton = cast_type_nonnull<ClassType>(args.thisType).symbol;
@@ -4516,6 +4548,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::bind(), &DeclBuilderForProcs_bind},
 
     {Symbols::T_Generic(), Intrinsic::Kind::Instance, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::Module(), Intrinsic::Kind::Instance, Names::syntheticSquareBrackets(), &T_Generic_squareBrackets},
 
     {Symbols::T_Array(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Hash(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
@@ -4567,6 +4600,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::squareBracketsEq(), &Shape_squareBracketsEq},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::toHash(), &Shape_to_hash},
+    {Symbols::Shape(), Intrinsic::Kind::Instance, Names::toH(), &Shape_to_h},
 
     {Symbols::Hash(), Intrinsic::Kind::Instance, Names::dig(), &Hash_dig},
 

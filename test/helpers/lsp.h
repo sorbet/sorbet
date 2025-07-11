@@ -22,6 +22,9 @@ makeInitializeParams(std::optional<std::variant<std::string, JSONNullObject>> ro
 /** Create an LSPMessage containing a textDocument/definition request. */
 std::unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int line, int character);
 
+/** Create an LSPMessage containing a textDocument/implementation request. */
+std::unique_ptr<LSPMessage> makeImplementationRequest(int id, std::string_view uri, int line, int character);
+
 /** Create an LSPMessage containing a textDocument/hover request. */
 std::unique_ptr<LSPMessage> makeHover(int id, std::string_view uri, int line, int character);
 
@@ -30,6 +33,9 @@ std::unique_ptr<LSPMessage> makeCodeAction(int id, std::string_view uri, int lin
 
 /** Create an LSPMessage containing a textDocument/completion request. */
 std::unique_ptr<LSPMessage> makeCompletion(int id, std::string_view uri, int line, int character);
+
+/** Create an LSPMessage containing a textDocument/completion request. */
+std::unique_ptr<LSPMessage> makeSignatureHelp(int id, std::string_view uri, int line, int character);
 
 /** Create an LSPMessage containing a WorkspaceSymbol request. */
 std::unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view query);
@@ -46,6 +52,10 @@ std::unique_ptr<LSPMessage> makeClose(std::string_view uri);
 
 /** Create an LSPMessage containing a workspace/didChangeConfiguration notification */
 std::unique_ptr<LSPMessage> makeConfigurationChange(std::unique_ptr<DidChangeConfigurationParams> params);
+
+/** Create an LSPMessage containing a textDocument/references notification */
+std::unique_ptr<LSPMessage> makeReferenceRequest(int id, std::string_view uri, int line, int character,
+                                                 bool includeDecl = true);
 
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const ServerCapabilities &capabilities);

@@ -7,12 +7,12 @@
 using namespace std;
 
 namespace sorbet::resolver {
-std::string getIndent(core::Context ctx, const core::Loc loc) {
-    auto [_, indentLen] = loc.findStartOfLine(ctx);
+string getIndent(core::Context ctx, const core::Loc loc) {
+    auto [_, indentLen] = loc.findStartOfIndentation(ctx);
     return string(indentLen, ' ');
 }
 
-std::string indented(const std::string &s) {
+string indented(const string &s) {
     vector<string_view> lines = absl::StrSplit(s, '\n');
     return fmt::format("{}", fmt::map_join(lines, "\n", [](auto line) -> string { return fmt::format("  {}", line); }));
 }
@@ -37,7 +37,7 @@ void CorrectTypeAlias::eagerToLazy(core::Context ctx, core::ErrorBuilder &e, ast
         return;
     }
 
-    auto [start, end] = ctx.locAt(send->loc).position(ctx);
+    auto [start, end] = ctx.locAt(send->loc).toDetails(ctx);
 
     if (start.line == end.line) {
         if (wrapHash) {
@@ -54,7 +54,7 @@ void CorrectTypeAlias::eagerToLazy(core::Context ctx, core::ErrorBuilder &e, ast
         if (wrapHash) {
             argSrc = fmt::format("{}{{\n{}\n{}}}", argIndent, indented(argSrc), argIndent);
         }
-        if (ctx.locAt(send->loc).position(ctx).second.line == endLoc.position(ctx).second.line) {
+        if (ctx.locAt(send->loc).toDetails(ctx).second.line == endLoc.toDetails(ctx).second.line) {
             argSrc = indented(argSrc);
         }
         e.replaceWith("Convert to lazy type alias", ctx.locAt(send->loc), "T.type_alias do\n{}\n{}end", argSrc,

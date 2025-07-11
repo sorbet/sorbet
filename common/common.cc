@@ -168,6 +168,16 @@ string_view sorbet::FileOps::getExtension(string_view path) {
     return path.substr(found + 1);
 }
 
+bool sorbet::FileOps::hasAllowedExtension(string_view path, const UnorderedSet<string> &extensions) {
+    auto dotLocation = path.rfind('.');
+    if (dotLocation == string_view::npos) {
+        return false;
+    }
+
+    string_view ext = path.substr(dotLocation);
+    return extensions.contains(ext);
+}
+
 int sorbet::FileOps::readFd(int fd, absl::Span<char> output, int timeoutMs) {
     // Prepare to use select()
     fd_set set;
@@ -291,8 +301,7 @@ using JobOutput = variant<std::monostate, sorbet::FileNotFoundException, sorbet:
 
 void appendFilesInDir(string_view basePath, const string &path, const sorbet::UnorderedSet<string> &extensions,
                       sorbet::WorkerPool &workers, bool recursive, vector<string> &allPaths,
-                      const std::vector<std::string> &absoluteIgnorePatterns,
-                      const std::vector<std::string> &relativeIgnorePatterns) {
+                      const vector<string> &absoluteIgnorePatterns, const vector<string> &relativeIgnorePatterns) {
     auto numWorkers = max(workers.size(), 1);
     auto jobq = make_shared<ConcurrentUnBoundedQueue<Job>>();
     auto resultq = make_shared<BlockingBoundedQueue<JobOutput>>(numWorkers);
@@ -353,13 +362,7 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                             continue;
                         }
                     } else {
-                        auto dotLocation = nameview.rfind('.');
-                        if (dotLocation == string_view::npos) {
-                            continue;
-                        }
-
-                        string_view ext = nameview.substr(dotLocation);
-                        if (!extensions.contains(ext)) {
+                        if (!sorbet::FileOps::hasAllowedExtension(nameview, extensions)) {
                             continue;
                         }
                     }
@@ -455,8 +458,8 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
 
 vector<string> sorbet::FileOps::listFilesInDir(string_view path, const UnorderedSet<string> &extensions,
                                                WorkerPool &workerPool, bool recursive,
-                                               const std::vector<std::string> &absoluteIgnorePatterns,
-                                               const std::vector<std::string> &relativeIgnorePatterns) {
+                                               const vector<string> &absoluteIgnorePatterns,
+                                               const vector<string> &relativeIgnorePatterns) {
     vector<string> result;
     // Mini-optimization: appendFilesInDir needs to grab a c_str from path, so we pass in a string reference to avoid
     // copying.
@@ -484,9 +487,8 @@ uint32_t sorbet::nextPowerOfTwo(uint32_t v) {
     return v;
 }
 
-vector<int> sorbet::findLineBreaks(string_view s) {
-    vector<int> res;
-    res.emplace_back(-1);
+vector<uint32_t> sorbet::findLineBreaks(string_view s) {
+    vector<uint32_t> res;
     size_t next_pos = 0;
     while (true) {
         auto pos = s.find_first_of('\n', next_pos);
@@ -513,8 +515,8 @@ public:
             } catch (const std::exception &e) {
                 sorbet::fatalLogger->error("Sorbet raised uncaught exception type=\"{}\" what=\"{}\"",
                                            demangle(typeid(e).name()), absl::CEscape(e.what()));
-            } catch (const std::string &s) {
-                sorbet::fatalLogger->error("Sorbet raised uncaught exception type=std::string what=\"{}\"",
+            } catch (const string &s) {
+                sorbet::fatalLogger->error("Sorbet raised uncaught exception type=string what=\"{}\"",
                                            absl::CEscape(s));
             } catch (const char *s) {
                 sorbet::fatalLogger->error("Sorbet raised uncaught exception type=\"char *\" what=\"{}\"",

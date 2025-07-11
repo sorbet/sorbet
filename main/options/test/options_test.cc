@@ -5,15 +5,17 @@
 #include "main/options/options.h"
 #include "spdlog/sinks/null_sink.h"
 
+using namespace std;
+
 // Default constructor of options should produce the same default option values as readOptions.
 TEST_CASE("DefaultConstructorMatchesReadOptions") {
-    std::vector<sorbet::pipeline::semantic_extension::SemanticExtensionProvider *> extensionProviders;
-    std::vector<std::unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
+    vector<sorbet::pipeline::semantic_extension::SemanticExtensionProvider *> extensionProviders;
+    vector<unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
     sorbet::realmain::options::Options empty;
     sorbet::realmain::options::Options opts;
     const char *argv[] = {"sorbet", "-e", ""};
-    auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
-    auto logger = std::make_shared<spdlog::logger>("null", sink);
+    auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = make_shared<spdlog::logger>("null", sink);
     sorbet::realmain::options::readOptions(opts, extensions, std::size(argv), const_cast<char **>(argv),
                                            extensionProviders, logger);
 
@@ -75,7 +77,6 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.debugLogFile, opts.debugLogFile);
     CHECK_EQ(empty.webTraceFile, opts.webTraceFile);
     CHECK_EQ(empty.uniquelyDefinedBehavior, opts.uniquelyDefinedBehavior);
-    CHECK_EQ(empty.stripePackages, opts.stripePackages);
     CHECK_EQ(empty.forceHashing, opts.forceHashing);
     CHECK_EQ(empty.lspErrorCap, opts.lspErrorCap);
     CHECK_EQ(empty.forciblySilenceLspMultipleDirError, opts.forciblySilenceLspMultipleDirError);

@@ -13,8 +13,8 @@
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
 
-namespace sorbet::test {
 using namespace std;
+namespace sorbet::test {
 
 string singleTest;
 string webTraceFile;
@@ -124,9 +124,9 @@ optional<unique_ptr<CodeAction>> resolveCodeAction(LSPWrapper &lspWrapper, int &
     return move(receivedResponse);
 }
 
-optional<vector<unique_ptr<CodeAction>>> requestCodeActions(LSPWrapper &lspWrapper, string fileUri,
-                                                            unique_ptr<Range> range, int &nextId,
-                                                            vector<CodeActionKind> &selectedCodeActionKinds) {
+optional<vector<unique_ptr<CodeAction>>>
+requestCodeActions(LSPWrapper &lspWrapper, string fileUri, unique_ptr<Range> range, int &nextId,
+                   vector<variant<CodeActionKind, string>> &selectedCodeActionKinds) {
     vector<unique_ptr<Diagnostic>> diagnostics;
 
     auto codeActionContext = make_unique<CodeActionContext>(move(diagnostics));
@@ -181,7 +181,7 @@ optional<vector<unique_ptr<CodeAction>>> requestCodeActions(LSPWrapper &lspWrapp
 }
 
 void validateCodeActionAbsence(LSPWrapper &lspWrapper, string fileUri, unique_ptr<Range> range, int &nextId,
-                               vector<CodeActionKind> &selectedCodeActionKinds,
+                               vector<variant<CodeActionKind, string>> &selectedCodeActionKinds,
                                vector<CodeActionKind> &ignoredCodeActionKinds) {
     auto maybeReceivedCodeActions =
         requestCodeActions(lspWrapper, fileUri, range->copy(), nextId, selectedCodeActionKinds);
@@ -211,12 +211,13 @@ void validateCodeActionAbsence(LSPWrapper &lspWrapper, string fileUri, unique_pt
 }
 
 void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string fileUri, unique_ptr<Range> range,
-                         int &nextId, vector<CodeActionKind> &selectedCodeActionKinds,
+                         int &nextId, vector<variant<CodeActionKind, string>> &selectedCodeActionKinds,
                          vector<CodeActionKind> &ignoredCodeActionKinds,
                          vector<shared_ptr<ApplyCodeActionAssertion>> &applyCodeActionAssertions,
                          string codeActionDescription, bool assertAllChanges) {
     auto isSelectedKind = [&selectedCodeActionKinds](CodeActionKind kind) {
-        return count(selectedCodeActionKinds.begin(), selectedCodeActionKinds.end(), kind) != 0;
+        return count(selectedCodeActionKinds.begin(), selectedCodeActionKinds.end(),
+                     variant<CodeActionKind, string>(kind)) != 0;
     };
 
     UnorderedMap<string, unique_ptr<CodeAction>> receivedCodeActionsByTitle;
@@ -341,7 +342,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
         CHECK(!selectedCodeActions.empty());
     }
 
-    vector<CodeActionKind> selectedCodeActionKinds;
+    vector<variant<CodeActionKind, string>> selectedCodeActionKinds;
     transform(selectedCodeActions.begin(), selectedCodeActions.end(), back_inserter(selectedCodeActionKinds),
               getCodeActionKind);
 
@@ -352,7 +353,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
               back_inserter(ignoredCodeActionKinds), getCodeActionKind);
 
     auto errors = RangeAssertion::getErrorAssertions(assertions);
-    UnorderedMap<string, std::vector<std::shared_ptr<RangeAssertion>>> errorsByFilename;
+    UnorderedMap<string, vector<shared_ptr<RangeAssertion>>> errorsByFilename;
     for (auto &error : errors) {
         errorsByFilename[error->filename].emplace_back(error);
     }
@@ -524,14 +525,14 @@ void verifyTypecheckRunInfo(const string &errorPrefix, vector<unique_ptr<LSPMess
 
 TEST_CASE("LSPTest") {
     /** The path to the test Ruby files on disk */
-    vector<std::string> filenames;
-    std::unique_ptr<LSPWrapper> lspWrapper;
+    vector<string> filenames;
+    unique_ptr<LSPWrapper> lspWrapper;
 
     /** Test expectations. */
     Expectations test = Expectations::getExpectations(singleTest);
 
     /** All test assertions ordered by (filename, range, message). */
-    std::vector<std::shared_ptr<RangeAssertion>> assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    vector<shared_ptr<RangeAssertion>> assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
 
     /** The next ID to use when sending an LSP message. */
     int nextId = 0;
@@ -542,56 +543,19 @@ TEST_CASE("LSPTest") {
 
     // Initialize lspWrapper.
     {
-        shared_ptr<realmain::options::Options> opts = make_shared<realmain::options::Options>();
-        opts->noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
-        opts->ruby3KeywordArgs =
-            BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
-        opts->typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
-        // TODO(jez) Allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
-        opts->uniquelyDefinedBehavior =
-            BooleanPropertyAssertion::getValue("uniquely-defined-behavior", assertions).value_or(false);
-        opts->outOfOrderReferenceChecksEnabled =
-            BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false);
-        opts->requiresAncestorEnabled =
-            BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
-        opts->lspExtractToVariableEnabled =
+        auto opts = RangeAssertion::parseOptions(assertions);
+
+        opts.lspExtractToVariableEnabled =
             BooleanPropertyAssertion::getValue("enable-experimental-lsp-extract-to-variable", assertions)
                 .value_or(false);
-        opts->stripePackages = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
-
-        if (opts->stripePackages) {
-            auto extraDirUnderscore =
-                StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
-            if (extraDirUnderscore.has_value()) {
-                opts->extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
-            }
-            auto extraDirSlashDeprecated =
-                StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash-deprecated", assertions);
-            if (extraDirSlashDeprecated.has_value()) {
-                opts->extraPackageFilesDirectorySlashDeprecatedPrefixes.emplace_back(extraDirSlashDeprecated.value());
-            }
-            auto extraDirSlash =
-                StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
-            if (extraDirSlash.has_value()) {
-                opts->extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
-            }
-            auto skipImportVisibility =
-                StringPropertyAssertion::getValue("allow-relaxed-packager-checks-for", assertions);
-            if (skipImportVisibility.has_value()) {
-                opts->allowRelaxedPackagerChecksFor.emplace_back(skipImportVisibility.value());
-            }
-            std::vector<std::string> defaultLayers = {};
-            opts->packagerLayers =
-                StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
-        }
-        opts->disableWatchman = true;
-        opts->rubyfmtPath = "test/testdata/lsp/rubyfmt-stub/rubyfmt";
+        opts.disableWatchman = true;
+        opts.rubyfmtPath = "test/testdata/lsp/rubyfmt-stub/rubyfmt";
 
         // Set to a number that is reasonable large for tests, but small enough that we can have a test to handle
         // this edge case. If you change this number, `fast_path/{too_many_files,not_enough_files,initialize}` will
         // need to be changed as well.
-        opts->lspMaxFilesOnFastPath = 10;
-        lspWrapper = SingleThreadedLSPWrapper::create("", move(opts));
+        opts.lspMaxFilesOnFastPath = 10;
+        lspWrapper = SingleThreadedLSPWrapper::create("", make_shared<realmain::options::Options>(move(opts)));
         lspWrapper->enableAllExperimentalFeatures();
     }
 
@@ -641,7 +605,7 @@ TEST_CASE("LSPTest") {
             auto responses = getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(make_unique<NotificationMessage>(
                                                                  "2.0", LSPMethod::TextDocumentDidOpen, move(params))));
             // Sorbet will complain about missing packages in packaging mode. Ignore them.
-            if (!lspWrapper->opts->stripePackages) {
+            if (!lspWrapper->opts->cacheSensitiveOptions.stripePackages) {
                 INFO("Should not receive any response to opening an empty file.");
                 CHECK_EQ(0, countNonTestMessages(responses));
             }
@@ -750,7 +714,7 @@ TEST_CASE("LSPTest") {
             CHECK_GE(entryAssertions.size(), 1);
 
             // Collect importUsageAssertions into a separate collection to handle them differently.
-            std::vector<shared_ptr<RangeAssertion>> importUsageAssertions;
+            vector<shared_ptr<RangeAssertion>> importUsageAssertions;
             entryAssertions.erase(std::remove_if(entryAssertions.begin(), entryAssertions.end(),
                                                  [&](auto &assertion) -> bool {
                                                      if (dynamic_pointer_cast<ImportUsageAssertion>(assertion)) {
@@ -884,7 +848,7 @@ TEST_CASE("LSPTest") {
             auto errorPrefix = fmt::format("[*.{}.rbupdate] ", version);
             const auto &updates = test.sourceLSPFileUpdates[version];
             vector<unique_ptr<LSPMessage>> lspUpdates;
-            UnorderedMap<std::string, std::shared_ptr<core::File>> updatesAndContents;
+            UnorderedMap<string, shared_ptr<core::File>> updatesAndContents;
 
             for (const auto &update : updates) {
                 auto originalFile = test.folder + update.first;
@@ -970,9 +934,9 @@ TEST_CASE("LSPTest") {
 int main(int argc, char *argv[]) {
     cxxopts::Options options("lsp_test_corpus", "Test corpus for Sorbet's language server");
     options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
-                                                       cxxopts::value<std::string>()->default_value(""), "testpath");
+                                                       cxxopts::value<string>()->default_value(""), "testpath");
     options.add_options("advanced")("web-trace-file", "Web trace file. For use with chrome about://tracing",
-                                    cxxopts::value<std::string>()->default_value(""), "file");
+                                    cxxopts::value<string>()->default_value(""), "file");
     auto res = options.parse(argc, argv);
 
     if (res.count("single_test") != 1) {
@@ -980,8 +944,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    sorbet::test::singleTest = res["single_test"].as<std::string>();
-    sorbet::test::webTraceFile = res["web-trace-file"].as<std::string>();
+    sorbet::test::singleTest = res["single_test"].as<string>();
+    sorbet::test::webTraceFile = res["web-trace-file"].as<string>();
 
     doctest::Context context(argc, argv);
     return context.run();

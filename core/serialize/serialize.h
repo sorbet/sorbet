@@ -14,14 +14,14 @@ public:
     // through the indexing, as they won't have any non-well-known symbols present.
     static std::vector<uint8_t> storeNameTable(const GlobalState &gs);
 
-    // Serialize a global state.
-    static std::vector<uint8_t> store(const GlobalState &gs);
+    struct SerializedGlobalState {
+        std::vector<uint8_t> symbolTableData;
+        std::vector<uint8_t> nameTableData;
+        std::vector<uint8_t> fileTableData;
+    };
 
-    // Stores a GlobalState, but only includes `File`s with Type == Payload.
-    // This can be used in conjunction with `storeFile` to store
-    // a global state containing a name table along side a large number of
-    // individual cached files, which can be loaded independently.
-    static std::vector<uint8_t> storePayloadAndNameTable(const GlobalState &gs);
+    // Serialize a global state.
+    static SerializedGlobalState store(const GlobalState &gs);
 
     static std::string fileKey(const core::File &file);
 
@@ -31,7 +31,13 @@ public:
     // Augment a global state with the name table stored in the cache.
     static void loadAndOverwriteNameTable(GlobalState &gs, const uint8_t *const data);
 
-    static void loadGlobalState(GlobalState &gs, const uint8_t *const data);
+    // Load the global state out of buffers that contain the symbol table, name table, and file table. This is only
+    // intended to be used for loading the payload out of buffers that are compiled in to the binary.
+    static void loadGlobalState(GlobalState &gs, const uint8_t *const symbolTableData,
+                                const uint8_t *const nameTableData, const uint8_t *const fileTableData);
+
+    // Initialize only the symbol table of `gs` by deserializing the payload.
+    static void loadSymbolTable(GlobalState &gs, const uint8_t *const symbolTableData);
 
     static uint32_t loadGlobalStateUUID(const GlobalState &gs, const uint8_t *const data);
 

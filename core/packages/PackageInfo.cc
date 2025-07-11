@@ -8,6 +8,19 @@
 using namespace std;
 
 namespace sorbet::core::packages {
+string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level) {
+    switch (level) {
+        case core::packages::StrictDependenciesLevel::False:
+            return "false";
+        case core::packages::StrictDependenciesLevel::Layered:
+            return "layered";
+        case core::packages::StrictDependenciesLevel::LayeredDag:
+            return "layered_dag";
+        case core::packages::StrictDependenciesLevel::Dag:
+            return "dag";
+    }
+}
+
 bool PackageInfo::exists() const {
     return mangledName().exists();
 }
@@ -23,33 +36,6 @@ PackageInfo::~PackageInfo() {
 bool PackageInfo::lexCmp(absl::Span<const core::NameRef> lhs, absl::Span<const core::NameRef> rhs) {
     return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
                                         [](NameRef a, NameRef b) -> bool { return a.rawId() < b.rawId(); });
-}
-
-ImportInfo ImportInfo::fromPackage(const core::GlobalState &gs, const PackageInfo &info) {
-    ImportInfo res;
-    res.package = info.mangledName();
-
-    auto thisName = info.fullName();
-
-    auto &db = gs.packageDB();
-
-    for (auto pkg : db.packages()) {
-        if (!info.importsPackage(pkg)) {
-            continue;
-        }
-
-        auto fullName = db.getPackageInfo(pkg).fullName();
-        if (thisName.size() >= fullName.size()) {
-            if (std::equal(fullName.begin(), fullName.end(), thisName.begin())) {
-                res.parentImports.emplace_back(pkg);
-                continue;
-            }
-        }
-
-        res.regularImports.emplace_back(pkg);
-    }
-
-    return res;
 }
 
 string PackageInfo::show(const core::GlobalState &gs) const {

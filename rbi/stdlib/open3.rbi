@@ -98,12 +98,13 @@ module Open3
   # [`Open3.capture3`](https://docs.ruby-lang.org/en/2.6.0/Open3.html#method-c-capture3).
   sig do
     params(
+      first_command_or_env: T.any(String, T::Hash[String, String]),
       cmd: T.any(String, T::Array[String]),
       opts: T.untyped,
       block: T.nilable(T.proc.params(stdin: IO, stdout: IO, stderr: IO, wait_thr: Process::Waiter).void)
     ).returns([IO, IO, IO, Process::Waiter])
   end
-  module_function def popen3(*cmd, **opts, &block); end
+  module_function def popen3(first_command_or_env, *cmd, **opts, &block); end
 
   # [`Open3.popen2`](https://docs.ruby-lang.org/en/2.6.0/Open3.html#method-c-popen2)
   # is similar to

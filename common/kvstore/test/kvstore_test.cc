@@ -20,7 +20,7 @@ TEST_CASE("kvstore") {
     const auto logger = make_shared<spdlog::logger>("test", sink);
     // Uncomment this for debugging (or copy it into the test case you care about)
     // logger->set_level(spdlog::level::trace);
-    auto maxSize = 4096 * 20;
+    auto maxSize = 4096 * 50;
 
     SUBCASE("CommitsChangesToDisk") {
         {

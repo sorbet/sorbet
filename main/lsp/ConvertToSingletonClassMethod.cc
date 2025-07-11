@@ -62,21 +62,21 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
     }
 
     if (definition.symbol.data(gs)->hasSig()) {
-        auto trees = typechecker.getResolved({file});
-        ENFORCE(!trees.empty());
-        auto &rootTree = trees[0].tree;
+        auto resolvedTree = typechecker.getResolved(file);
+        auto &rootTree = resolvedTree.tree;
 
         auto ctx = core::Context(gs, core::Symbols::root(), file);
         auto queryLoc = definition.termLoc.copyWithZeroLength();
         auto parsedSig = sig_finder::SigFinder::findSignature(ctx, rootTree, queryLoc);
         if (parsedSig.has_value()) {
-            if (!parsedSig->argTypes.empty()) {
-                auto firstArgLoc = parsedSig->argTypes[0].nameLoc;
-                auto insertSigParamRange = Range::fromLoc(gs, firstArgLoc.adjustLen(gs, 0, 0));
+            if (!parsedSig->sig.argTypes.empty()) {
+                auto firstArgLoc = parsedSig->sig.argTypes[0].nameLoc;
+                auto insertSigParamRange = Range::fromLoc(gs, ctx.locAt(firstArgLoc).adjustLen(gs, 0, 0));
                 auto sigParamText = fmt::format("this: {}, ", definition.symbol.data(gs)->owner.show(gs));
                 edits.emplace_back(make_unique<TextEdit>(move(insertSigParamRange), move(sigParamText)));
-            } else if (parsedSig->returnsLoc.exists()) {
-                auto insertSigParamsRange = Range::fromLoc(gs, parsedSig->returnsLoc.adjustLen(gs, 0, 0));
+            } else if (parsedSig->sig.returnsLoc.exists()) {
+                auto insertSigParamsRange =
+                    Range::fromLoc(gs, ctx.locAt(parsedSig->sig.returnsLoc).adjustLen(gs, 0, 0));
                 auto sigParamText = fmt::format("params(this: {}).", definition.symbol.data(gs)->owner.show(gs));
                 edits.emplace_back(make_unique<TextEdit>(move(insertSigParamsRange), move(sigParamText)));
             }
@@ -105,9 +105,9 @@ public:
             return;
         }
 
-        if (sendResp->callerSideName == core::Names::callWithSplat() ||
-            sendResp->callerSideName == core::Names::callWithBlock() ||
-            sendResp->callerSideName == core::Names::callWithSplatAndBlock()) {
+        if (sendResp->originalName == core::Names::callWithSplat() ||
+            sendResp->originalName == core::Names::callWithBlock() ||
+            sendResp->originalName == core::Names::callWithSplatAndBlock()) {
             // These are too hard... skipping for the time being.
             return;
         }

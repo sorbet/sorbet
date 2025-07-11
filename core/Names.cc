@@ -145,7 +145,7 @@ string NameRef::show(const GlobalState &gs) const {
     }
 }
 
-std::string NameRef::showAsSymbolLiteral(const GlobalState &gs) const {
+string NameRef::showAsSymbolLiteral(const GlobalState &gs) const {
     auto shown = this->show(gs);
     if (absl::StrContains(shown, " ")) {
         return fmt::format(":\"{}\"", absl::CEscape(shown));
@@ -290,6 +290,7 @@ bool NameRef::isUpdateKnowledgeName() const {
         case Names::equal_p().rawId():
         case Names::isA_p().rawId():
         case Names::kindOf_p().rawId():
+        case Names::instanceOf_p().rawId():
         case Names::leq().rawId():
         case Names::lessThan().rawId():
         case Names::neq().rawId():

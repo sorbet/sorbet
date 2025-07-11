@@ -1,0 +1,149 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Abstract1><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(::<root>::<C T>::<C Helpers>)
+
+    <self>.abstract!()
+  end
+
+  class <emptyTree>::<C Abstract2><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.abstract!()
+  end
+
+  class <emptyTree>::<C Abstract3><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(::<root>::<C T>::<C Helpers>)
+
+    <self>.abstract!()
+  end
+
+  class <emptyTree>::<C Abstract4><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(::<root>::<C T>::<C Helpers>)
+
+    <self>.abstract!()
+
+    <self>.abstract!()
+
+    <self>.abstract!()
+  end
+
+  module <emptyTree>::<C Abstract5><<C <todo sym>>> < ()
+    <self>.extend(::<root>::<C T>::<C Helpers>)
+
+    <self>.abstract!()
+  end
+
+  module <emptyTree>::<C Abstract6><<C <todo sym>>> < ()
+    class <singleton class><<C <todo sym>>> < ()
+      <self>.extend(::<root>::<C T>::<C Helpers>)
+
+      <self>.abstract!()
+    end
+  end
+
+  class <emptyTree>::<C Interface1><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(::<root>::<C T>::<C Helpers>)
+
+    <self>.interface!()
+  end
+
+  module <emptyTree>::<C Interface2><<C <todo sym>>> < ()
+    <self>.extend(::<root>::<C T>::<C Helpers>)
+
+    <self>.interface!()
+
+    <self>.interface!()
+  end
+
+  module <emptyTree>::<C Interface3><<C <todo sym>>> < ()
+    class <singleton class><<C <todo sym>>> < ()
+      <self>.extend(::<root>::<C T>::<C Helpers>)
+
+      <self>.interface!()
+    end
+  end
+
+  class <emptyTree>::<C Final1><<C <todo sym>>> < (::<todo sym>)
+    module <emptyTree>::<C Final2><<C <todo sym>>> < ()
+      class <singleton class><<C <todo sym>>> < ()
+        <self>.extend(::<root>::<C T>::<C Helpers>)
+
+        <self>.final!()
+      end
+
+      <self>.extend(::<root>::<C T>::<C Helpers>)
+
+      <self>.final!()
+    end
+
+    <self>.extend(::<root>::<C T>::<C Helpers>)
+
+    <self>.final!()
+  end
+
+  class <emptyTree>::<C Sealed1><<C <todo sym>>> < (::<todo sym>)
+    module <emptyTree>::<C Sealed2><<C <todo sym>>> < ()
+      class <singleton class><<C <todo sym>>> < ()
+        <self>.extend(::<root>::<C T>::<C Helpers>)
+
+        <self>.sealed!()
+      end
+
+      <self>.extend(::<root>::<C T>::<C Helpers>)
+
+      <self>.sealed!()
+    end
+
+    <self>.extend(::<root>::<C T>::<C Helpers>)
+
+    <self>.sealed!()
+  end
+
+  class <emptyTree>::<C Multiple1><<C <todo sym>>> < (::<todo sym>)
+    module <emptyTree>::<C Multiple2><<C <todo sym>>> < ()
+      class <singleton class><<C <todo sym>>> < ()
+        <self>.extend(::<root>::<C T>::<C Helpers>)
+
+        <self>.abstract!()
+
+        <self>.final!()
+      end
+
+      <self>.extend(::<root>::<C T>::<C Helpers>)
+
+      <self>.interface!()
+
+      <self>.final!()
+    end
+
+    <self>.extend(::<root>::<C T>::<C Helpers>)
+
+    <self>.abstract!()
+
+    <self>.final!()
+  end
+
+  module <emptyTree>::<C RequiresAncestor1><<C <todo sym>>> < ()
+    <self>.extend(::<root>::<C T>::<C Helpers>)
+
+    <self>.requires_ancestor() do ||
+      <emptyTree>::<C BasicObject>
+    end
+  end
+
+  module <emptyTree>::<C RequiresAncestor2><<C <todo sym>>> < ()
+    <self>.extend(::<root>::<C T>::<C Helpers>)
+
+    <self>.requires_ancestor() do ||
+      ::<root>::<C BasicObject>
+    end
+  end
+
+  module <emptyTree>::<C RequiresAncestor3><<C <todo sym>>> < ()
+    <self>.extend(::<root>::<C T>::<C Helpers>)
+
+    <self>.requires_ancestor() do ||
+      <emptyTree>::<C Multiple1>::<C Multiple2>
+    end
+  end
+end

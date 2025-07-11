@@ -47,7 +47,7 @@ module Opus::Types::Test
         end
 
         it 'T.bind raises an error if block is executing on the wrong type' do
-          block = -> {T.bind(self, String); upcase}
+          block = -> { T.bind(self, String); upcase }
 
           assert_raises(TypeError) do
             123.instance_exec(&block)
@@ -135,7 +135,7 @@ module Opus::Types::Test
     describe 'sig_builder_error_handler' do
       describe 'when in default state' do
         it 'raises an error' do
-          @mod.sig {returns(Symbol).void}
+          @mod.sig { returns(Symbol).void }
           def @mod.foo
             :bar
           end
@@ -166,7 +166,7 @@ module Opus::Types::Test
               error.is_a?(T::Private::Methods::DeclBuilder::BuilderError) &&
               location.is_a?(Thread::Backtrace::Location)
           end
-          @mod.sig {returns(Symbol).void}
+          @mod.sig { returns(Symbol).void }
           def @mod.foo
             :bar
           end
@@ -178,7 +178,7 @@ module Opus::Types::Test
     describe 'sig_validation_error_handler' do
       describe 'when in default state' do
         it 'raises an error' do
-          @mod.sig {override.returns(Symbol)}
+          @mod.sig { override.returns(Symbol) }
           def @mod.foo
             :bar
           end
@@ -213,7 +213,7 @@ module Opus::Types::Test
               opts[:signature].is_a?(T::Private::Methods::Signature)
           end
 
-          @mod.sig {override.returns(Symbol)}
+          @mod.sig { override.returns(Symbol) }
           def @mod.foo
             :bar
           end
@@ -225,12 +225,12 @@ module Opus::Types::Test
     describe 'final_checks_on_hooks' do
       describe 'when in default state' do
         it 'raises an error' do
-          @mod.sig(:final) {returns(Symbol)}
+          @mod.sig(:final) { returns(Symbol) }
           def @mod.final_method_redefined_ko
             :bar
           end
           ex = assert_raises(RuntimeError) do
-            @mod.sig(:final) {returns(Symbol)}
+            @mod.sig(:final) { returns(Symbol) }
             def @mod.final_method_redefined_ko
               :baz
             end
@@ -258,12 +258,12 @@ module Opus::Types::Test
               opts.empty?
           end
 
-          @mod.sig(:final) {returns(Symbol)}
+          @mod.sig(:final) { returns(Symbol) }
           def @mod.final_method_redefined_ok
             :bar
           end
           assert_equal(:bar, @mod.final_method_redefined_ok)
-          @mod.sig(:final) {returns(Symbol)}
+          @mod.sig(:final) { returns(Symbol) }
           def @mod.final_method_redefined_ok
             :baz
           end
@@ -275,7 +275,7 @@ module Opus::Types::Test
     describe 'call_validation_error_handler' do
       describe 'when in default state' do
         it 'raises an error' do
-          @mod.sig {params(a: String).returns(Symbol)}
+          @mod.sig { params(a: String).returns(Symbol) }
           def @mod.foo(a)
             :bar
           end
@@ -311,7 +311,7 @@ module Opus::Types::Test
               opts[:location].is_a?(Thread::Backtrace::Location) &&
               opts[:message].include?("Expected type String, got type Integer with value 1")
           end
-          @mod.sig {params(a: String).returns(Symbol)}
+          @mod.sig { params(a: String).returns(Symbol) }
           def @mod.foo(a)
             :bar
           end

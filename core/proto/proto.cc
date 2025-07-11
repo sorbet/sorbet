@@ -262,11 +262,11 @@ com::stripe::rubytyper::Loc Proto::toProto(const GlobalState &gs, Loc loc) {
         auto path = loc.file().data(gs).path();
         protoLoc.set_path(string(path));
 
-        auto pos = loc.position(gs);
-        start->set_line(pos.first.line);
-        start->set_column(pos.first.column);
-        end->set_line(pos.second.line);
-        end->set_column(pos.second.column);
+        auto details = loc.toDetails(gs);
+        start->set_line(details.first.line);
+        start->set_column(details.first.column);
+        end->set_line(details.second.line);
+        end->set_column(details.second.column);
     }
 
     return protoLoc;
@@ -409,9 +409,9 @@ com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs,
         }
 
         if (stripePackages) {
-            const auto &packageInfo = packageDB.getPackageForFile(gs, file);
-            if (packageInfo.exists()) {
-                entry->set_pkg(packageInfo.show(gs));
+            const auto &pkg = packageDB.getPackageNameForFile(file);
+            if (pkg.exists()) {
+                entry->set_pkg(packageDB.getPackageInfo(pkg).show(gs));
             }
         }
     }

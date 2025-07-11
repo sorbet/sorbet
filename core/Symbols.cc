@@ -23,7 +23,7 @@ namespace sorbet::core {
 using namespace std;
 
 const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 215;
-const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 57;
+const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 59;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 6;
 const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 71;
@@ -93,7 +93,7 @@ vector<TypePtr> ClassOrModule::selfTypeArgs(const GlobalState &gs) const {
     for (auto tm : typeMembers()) {
         auto tmData = tm.data(gs);
         if (tmData->flags.isFixed) {
-            auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
+            auto lambdaParam = cast_type<LambdaParam>(tmData->resultType);
             ENFORCE(lambdaParam != nullptr);
             targs.emplace_back(lambdaParam->upperBound);
         } else {
@@ -141,7 +141,7 @@ TypePtr ClassOrModule::unsafeComputeExternalType(GlobalState &gs) {
 
         for (auto &tm : typeMembers()) {
             auto tmData = tm.data(gs);
-            auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
+            auto lambdaParam = cast_type<LambdaParam>(tmData->resultType);
             ENFORCE(lambdaParam != nullptr);
 
             if (ref.isLegacyStdlibGeneric()) {
@@ -476,7 +476,7 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
     return Types::arrayOf(ctx, instantiated);
 }
 
-void ClassOrModule::addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> index) {
+void ClassOrModule::addMixinAt(ClassOrModuleRef sym, optional<uint16_t> index) {
     if (index.has_value()) {
         auto i = index.value();
         ENFORCE(mixins_.size() > i);
@@ -487,7 +487,7 @@ void ClassOrModule::addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> ind
     }
 }
 
-bool ClassOrModule::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::optional<uint16_t> index) {
+bool ClassOrModule::addMixin(const GlobalState &gs, ClassOrModuleRef sym, optional<uint16_t> index) {
     // Note: Symbols without an explicit declaration may not have class or module set. They default to modules in
     // GlobalPass.cc. We also do not complain if the mixin is BasicObject.
     bool isValidMixin =
@@ -827,7 +827,8 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
     }
 
     if (name.kind() == NameKind::UTF8) {
-        auto sym = findMemberFuzzyMatchUTF8(gs, name, betterThan);
+        Levenstein levenstein;
+        auto sym = findMemberFuzzyMatchUTF8(gs, name, levenstein, betterThan);
         if (sym.symbol.exists()) {
             res.emplace_back(sym);
         } else {
@@ -835,7 +836,7 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
             // singleton one
             auto singleton = lookupSingletonClass(gs);
             if (singleton.exists()) {
-                sym = singleton.data(gs)->findMemberFuzzyMatchUTF8(gs, name, betterThan);
+                sym = singleton.data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, betterThan);
                 if (sym.symbol.exists()) {
                     res.emplace_back(sym);
                 }
@@ -843,7 +844,7 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
                 // For the error when you use a singleton method but wanted the
                 // instance one
                 auto attached = attachedClass(gs);
-                sym = attached.data(gs)->findMemberFuzzyMatchUTF8(gs, name, betterThan);
+                sym = attached.data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, betterThan);
                 if (sym.symbol.exists()) {
                     res.emplace_back(sym);
                 }
@@ -885,12 +886,8 @@ bool SymbolRef::isUnderNamespace(const GlobalState &gs, ClassOrModuleRef otherCl
 
 vector<ClassOrModule::FuzzySearchResult>
 ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name, int betterThan) const {
-    // Performance of this method is bad, to say the least.
-    // It's written under assumption that it's called rarely
-    // and that it's worth spending a lot of time finding a good candidate in ALL scopes.
-    // It may return multiple candidates:
-    //   - best candidate per every outer scope if it's better than all the candidates in inner scope
-    //   - globally best candidate in ALL scopes.
+    // This function is somewhat expensive, as it will crawl all owners to determine if there's a reasonable match for
+    // `name`.
     vector<ClassOrModule::FuzzySearchResult> result;
 
     FuzzySearchResult best;
@@ -903,95 +900,44 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
     }
 
     bool onlySuggestPackageSpecs = ref(gs).isPackageSpecSymbol(gs);
+    Levenstein levenstein;
+    vector<ClassOrModuleRef> candidateScopes;
+    vector<ClassOrModule::FuzzySearchResult> scopeBest;
 
-    // Find the closest by following outer scopes
-    {
-        ClassOrModuleRef base = ref(gs);
-
-        do {
-            // follow outer scopes
-
-            // find scopes that would be considered for search
-            vector<ClassOrModuleRef> candidateScopes;
-            vector<ClassOrModule::FuzzySearchResult> scopeBest;
-            candidateScopes.emplace_back(base);
-            int i = 0;
-            // this is quadratic in number of scopes that we traverse, but YOLO, this should rarely run
-            while (i < candidateScopes.size()) {
-                const auto &sym = candidateScopes[i].data(gs);
-                if (sym->superClass().exists()) {
-                    if (!absl::c_linear_search(candidateScopes, sym->superClass())) {
-                        candidateScopes.emplace_back(sym->superClass());
-                    }
-                }
-                for (auto ancestor : sym->mixins()) {
-                    if (!absl::c_linear_search(candidateScopes, ancestor)) {
-                        candidateScopes.emplace_back(ancestor);
-                    }
-                }
-                i++;
-            }
-            for (const auto scope : candidateScopes) {
-                scopeBest.clear();
-                for (auto member : scope.data(gs)->members()) {
-                    if (member.first.kind() == NameKind::CONSTANT &&
-                        member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
-                        if (onlySuggestPackageSpecs) {
-                            if (!member.second.isClassOrModule() ||
-                                !member.second.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
-                                continue;
-                            }
-                        }
-
-                        auto thisDistance = Levenstein::distance(
-                            currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
-                        if (thisDistance <= best.distance) {
-                            if (thisDistance < best.distance) {
-                                scopeBest.clear();
-                            }
-                            best.distance = thisDistance;
-                            best.symbol = member.second;
-                            best.name = member.first;
-                            scopeBest.emplace_back(best);
-                        }
-                    }
-                }
-                if (!scopeBest.empty()) {
-                    // NOTE: Iteration order over members is nondeterministic, so we use SymbolId to deterministically
-                    // order the recommendations from this scope.
-                    // We order in decreasing symbol ID order because `result` is later reversed and we want earlier
-                    // ID'd symbols to be recommended first.
-                    fast_sort(scopeBest, [&](const auto &lhs, const auto &rhs) -> bool {
-                        return lhs.symbol._id > rhs.symbol._id;
-                    });
-                    for (auto &item : scopeBest) {
-                        result.emplace_back(item);
-                    }
-                }
-            }
-
-            base = base.data(gs)->owner;
-        } while (best.distance > 0 && base.data(gs)->owner.exists() && base != Symbols::root());
+    // Ensure that we start the search from the attached class -- we're interested in constants, which aren't present on
+    // the singleton.
+    ClassOrModuleRef base = ref(gs);
+    if (auto attachedClass = this->attachedClass(gs); attachedClass.exists()) {
+        base = attachedClass;
     }
 
-    // At this point, `result` is in a deterministic order, and is ordered with _decreasing_ edit distance
+    // Find the closest by following outer scopes
+    do {
+        // find scopes that would be considered for search
+        candidateScopes.clear();
+        candidateScopes.emplace_back(base);
+        int i = 0;
 
-    if (best.distance > 0) {
-        // find the closest by global dfs.
-        auto globalBestDistance = best.distance - 1;
-        vector<ClassOrModule::FuzzySearchResult> globalBest;
-        vector<ClassOrModuleRef> yetToGoDeeper;
-        yetToGoDeeper.emplace_back(Symbols::root());
-        while (!yetToGoDeeper.empty()) {
-            const ClassOrModuleRef thisIter = yetToGoDeeper.back();
-            yetToGoDeeper.pop_back();
-            for (auto member : thisIter.data(gs)->members()) {
-                if (member.second.exists() && member.first.exists() && member.first.kind() == NameKind::CONSTANT &&
-                    member.first.dataCnst(gs)->original.kind() == NameKind::UTF8) {
-                    if (member.second.isClassOrModule() &&
-                        member.second.asClassOrModuleRef().data(gs)->derivesFrom(gs, core::Symbols::StubModule())) {
-                        continue;
-                    }
+        // this is quadratic in number of scopes that we traverse, but YOLO, this should rarely run
+        while (i < candidateScopes.size()) {
+            const auto &sym = candidateScopes[i].data(gs);
+            if (sym->superClass().exists()) {
+                if (!absl::c_linear_search(candidateScopes, sym->superClass())) {
+                    candidateScopes.emplace_back(sym->superClass());
+                }
+            }
+            for (auto ancestor : sym->mixins()) {
+                if (!absl::c_linear_search(candidateScopes, ancestor)) {
+                    candidateScopes.emplace_back(ancestor);
+                }
+            }
+            i++;
+        }
+        for (const auto scope : candidateScopes) {
+            scopeBest.clear();
+            for (auto member : scope.data(gs)->members()) {
+                if (member.first.kind() == NameKind::CONSTANT &&
+                    member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
                     if (onlySuggestPackageSpecs) {
                         if (!member.second.isClassOrModule() ||
                             !member.second.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
@@ -999,35 +945,40 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                         }
                     }
 
-                    auto thisDistance = Levenstein::distance(
+                    auto thisDistance = levenstein.distance(
                         currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
-                    if (thisDistance <= globalBestDistance) {
-                        if (thisDistance < globalBestDistance) {
-                            globalBest.clear();
+                    if (thisDistance <= best.distance) {
+                        if (thisDistance < best.distance) {
+                            scopeBest.clear();
                         }
-                        globalBestDistance = thisDistance;
                         best.distance = thisDistance;
                         best.symbol = member.second;
                         best.name = member.first;
-                        globalBest.emplace_back(best);
-                    }
-                    if (member.second.isClassOrModule()) {
-                        yetToGoDeeper.emplace_back(member.second.asClassOrModuleRef());
+                        scopeBest.emplace_back(best);
                     }
                 }
             }
+            if (!scopeBest.empty()) {
+                // NOTE: Iteration order over members is nondeterministic, so we use SymbolId to deterministically
+                // order the recommendations from this scope.
+                // We order in decreasing symbol ID order because `result` is later reversed and we want earlier
+                // ID'd symbols to be recommended first.
+                fast_sort(scopeBest,
+                          [&](const auto &lhs, const auto &rhs) -> bool { return lhs.symbol._id > rhs.symbol._id; });
+                for (auto &item : scopeBest) {
+                    result.emplace_back(item);
+                }
+            }
         }
-        // globalBest is nondeterministically ordered since iteration over `members()` is non deterministic.
-        // Everything in globalBest has the same edit distance, so we just have to sort by symbol ID to get a
-        // deterministic order.
-        // We order in decreasing symbol ID order because `result` is later reversed and we want earlier
-        // ID'd symbols to be recommended first.
-        fast_sort(globalBest,
-                  [&](const auto &lhs, const auto &rhs) -> bool { return lhs.symbol._id > rhs.symbol._id; });
-        for (auto &e : globalBest) {
-            result.emplace_back(e);
+
+        // <root>'s owner is <root>, so we explicitly break that cycle here.
+        auto owner = base.data(gs)->owner;
+        if (!owner.exists() || base == owner) {
+            break;
         }
-    }
+
+        base = owner;
+    } while (best.distance > 0);
 
     // result is ordered in decreasing edit distance order. We want to flip the order so the items w/ the smallest edit
     // distance are first.
@@ -1036,7 +987,7 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
 }
 
 ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name,
-                                                                         int betterThan) const {
+                                                                         Levenstein &levenstein, int betterThan) const {
     FuzzySearchResult result;
     result.symbol = Symbols::noSymbol();
     result.name = NameRef::noName();
@@ -1053,7 +1004,7 @@ ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const G
             continue;
         }
         auto utf8 = thisName.dataUtf8(gs)->utf8;
-        int thisDistance = Levenstein::distance(currentName, utf8, result.distance);
+        int thisDistance = levenstein.distance(currentName, utf8, result.distance);
         if (thisDistance < result.distance ||
             (thisDistance == result.distance && result.symbol._id > pair.second._id)) {
             result.distance = thisDistance;
@@ -1065,7 +1016,7 @@ ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const G
     for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
         ENFORCE(it->exists());
 
-        auto subResult = it->data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
+        auto subResult = it->data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
             ENFORCE(subResult.name.kind() == NameKind::UTF8);
@@ -1073,7 +1024,7 @@ ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const G
         }
     }
     if (this->superClass().exists()) {
-        auto subResult = this->superClass().data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
+        auto subResult = this->superClass().data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
             ENFORCE(subResult.name.kind() == NameKind::UTF8);
@@ -1421,7 +1372,9 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
     if (sym->flags.isOverride) {
         methodFlags.emplace_back("override");
     }
-    if (sym->flags.isIncompatibleOverride) {
+    if (sym->flags.allowIncompatibleOverrideVisibility) {
+        methodFlags.emplace_back("allow_incompatible(:visibility)");
+    } else if (sym->flags.allowIncompatibleOverrideAll) {
         methodFlags.emplace_back("allow_incompatible");
     }
     if (sym->flags.isFinal) {
@@ -1868,7 +1821,7 @@ void ClassOrModule::recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subcl
     const OrType *orT = nullptr;
     while ((orT = cast_type<OrType>(*iter))) {
         core::ClassOrModuleRef subclass;
-        if (auto *right = cast_type<AppliedType>(orT->right)) {
+        if (auto right = cast_type<AppliedType>(orT->right)) {
             subclass = right->klass;
         } else if (isa_type<ClassType>(orT->right)) {
             auto right = cast_type_nonnull<ClassType>(orT->right);
@@ -1883,7 +1836,7 @@ void ClassOrModule::recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subcl
     }
 
     core::ClassOrModuleRef lastClass;
-    if (auto *lastType = cast_type<AppliedType>(*iter)) {
+    if (auto lastType = cast_type<AppliedType>(*iter)) {
         lastClass = lastType->klass.data(gs)->attachedClass(gs);
     } else if (isa_type<ClassType>(*iter)) {
         auto lastType = cast_type_nonnull<ClassType>(*iter);
@@ -1929,7 +1882,7 @@ TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
     auto result = Types::bottom();
     while (auto orType = cast_type<OrType>(currentClasses)) {
         core::ClassOrModuleRef subclass;
-        if (auto *right = cast_type<AppliedType>(orType->right)) {
+        if (auto right = cast_type<AppliedType>(orType->right)) {
             subclass = right->klass.data(gs)->attachedClass(gs);
         } else if (isa_type<ClassType>(orType->right)) {
             auto right = cast_type_nonnull<ClassType>(orType->right);
@@ -1944,7 +1897,7 @@ TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
     }
 
     core::ClassOrModuleRef subclass;
-    if (auto *lastType = cast_type<AppliedType>(currentClasses)) {
+    if (auto lastType = cast_type<AppliedType>(currentClasses)) {
         subclass = lastType->klass.data(gs)->attachedClass(gs);
     } else if (isa_type<ClassType>(currentClasses)) {
         auto lastType = cast_type_nonnull<ClassType>(currentClasses);
@@ -2067,8 +2020,8 @@ vector<ClassOrModule::RequiredAncestor> ClassOrModule::requiredAncestors(const G
 }
 
 // All required ancestors by this class or module
-std::vector<ClassOrModule::RequiredAncestor>
-ClassOrModule::requiredAncestorsTransitiveInternal(GlobalState &gs, std::vector<ClassOrModuleRef> &seen) {
+vector<ClassOrModule::RequiredAncestor>
+ClassOrModule::requiredAncestorsTransitiveInternal(GlobalState &gs, vector<ClassOrModuleRef> &seen) {
     if (absl::c_contains(seen, this->ref(gs))) {
         return requiredAncestors(gs); // Break recursive loops if we already visited this ancestor
     }
@@ -2105,13 +2058,13 @@ ClassOrModule::requiredAncestorsTransitiveInternal(GlobalState &gs, std::vector<
 
 // All required ancestors by this class or module
 vector<ClassOrModule::RequiredAncestor> ClassOrModule::requiredAncestorsTransitive(const GlobalState &gs) const {
-    ENFORCE(gs.requiresAncestorEnabled);
+    ENFORCE(gs.cacheSensitiveOptions.requiresAncestorEnabled);
     return readRequiredAncestorsInternal(gs, Names::requiredAncestorsLin());
 }
 
 void ClassOrModule::computeRequiredAncestorLinearization(GlobalState &gs) {
-    ENFORCE(gs.requiresAncestorEnabled);
-    std::vector<ClassOrModuleRef> seen;
+    ENFORCE(gs.cacheSensitiveOptions.requiresAncestorEnabled);
+    vector<ClassOrModuleRef> seen;
     requiredAncestorsTransitiveInternal(gs, seen);
 }
 
@@ -2204,7 +2157,7 @@ ClassOrModule ClassOrModule::deepCopy(const GlobalState &to, bool keepGsId) cons
     result.name = NameRef(to, this->name);
     result.locs_ = this->locs_;
     if (this->typeParams) {
-        result.typeParams = std::make_unique<InlinedVector<TypeMemberRef, 4>>(*this->typeParams);
+        result.typeParams = make_unique<InlinedVector<TypeMemberRef, 4>>(*this->typeParams);
     }
     if (keepGsId) {
         result.members_ = this->members_;
@@ -2227,7 +2180,7 @@ Method Method::deepCopy(const GlobalState &to) const {
     result.name = NameRef(to, this->name);
     result.locs_ = this->locs_;
     if (this->typeArgs) {
-        result.typeArgs = std::make_unique<InlinedVector<TypeArgumentRef, 4>>(*this->typeArgs);
+        result.typeArgs = make_unique<InlinedVector<TypeArgumentRef, 4>>(*this->typeArgs);
     }
     result.arguments.reserve(this->arguments.size());
     for (auto &mem : this->arguments) {
@@ -2711,13 +2664,12 @@ void ClassOrModule::removeLocsForFile(core::FileRef file) {
     removeLocsForFileImpl(this->locs_, file);
 }
 
-vector<std::pair<NameRef, SymbolRef>> ClassOrModule::membersStableOrderSlow(const GlobalState &gs) const {
-    vector<pair<NameRef, SymbolRef>> result;
-    result.reserve(members().size());
-    for (const auto &e : members()) {
-        result.emplace_back(e);
-    }
-    fast_sort(result, [&](auto const &lhs, auto const &rhs) -> bool {
+vector<pair<NameRef, SymbolRef>> ClassOrModule::membersStableOrderSlow(const GlobalState &gs) const {
+    return membersStableOrderSlowPredicate(gs, [](const auto _name, const auto _sym) -> bool { return true; });
+}
+
+void ClassOrModule::sortMembersStableOrder(const GlobalState &gs, std::vector<std::pair<NameRef, SymbolRef>> &out) {
+    fast_sort(out, [&](auto const &lhs, auto const &rhs) -> bool {
         auto lhsShort = lhs.first.shortName(gs);
         auto rhsShort = rhs.first.shortName(gs);
         auto compareShort = lhsShort.compare(rhsShort);
@@ -2751,7 +2703,6 @@ vector<std::pair<NameRef, SymbolRef>> ClassOrModule::membersStableOrderSlow(cons
         ENFORCE(false, "no stable sort");
         return false;
     });
-    return result;
 }
 
 ClassOrModuleData::ClassOrModuleData(ClassOrModule &ref, GlobalState &gs) : DebugOnlyCheck(gs), symbol(ref) {}

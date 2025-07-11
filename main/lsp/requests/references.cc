@@ -11,7 +11,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-ReferencesTask::ReferencesTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<ReferenceParams> params)
+ReferencesTask::ReferencesTask(const LSPConfiguration &config, MessageId id, unique_ptr<ReferenceParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentReferences), params(move(params)) {}
 
 bool ReferencesTask::needsMultithreading(const LSPIndexer &indexer) const {
@@ -21,7 +21,7 @@ bool ReferencesTask::needsMultithreading(const LSPIndexer &indexer) const {
 vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::GlobalState &gs,
                                                                     core::SymbolRef symInPackage,
                                                                     core::packages::MangledName packageName) {
-    std::vector<core::NameRef> fullName;
+    vector<core::NameRef> fullName;
 
     auto sym = symInPackage;
     while (sym.exists() && sym != core::Symbols::PackageSpecRegistry() && sym != core::Symbols::root()) {
@@ -70,8 +70,9 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
     ShowOperation op(config, ShowOperation::Kind::References);
 
     const core::GlobalState &gs = typechecker.state();
-    auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
-                                  LSPMethod::TextDocumentReferences, false);
+    const auto &uri = params->textDocument->uri;
+    auto result =
+        LSPQuery::byLoc(config, typechecker, uri, *params->position, LSPMethod::TextDocumentReferences, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -83,7 +84,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
     response->result = variant<JSONNullObject, vector<unique_ptr<Location>>>(JSONNullObject());
     auto &queryResponses = result.responses;
     bool notifyAboutUntypedFile = false;
-    core::FileRef fref = config.uri2FileRef(gs, params->textDocument->uri);
+    core::FileRef fref = config.uri2FileRef(gs, uri);
     bool fileIsTyped = false;
     if (fref.exists()) {
         fileIsTyped = fref.data(gs).strictLevel >= core::StrictLevel::True;
@@ -93,7 +94,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
 
         // If file is untyped, only supports find reference requests from constants and class definitions.
         if (auto constResp = resp->isConstant()) {
-            if (fref.data(gs).isPackage()) {
+            if (fref.data(gs).isPackage(gs)) {
                 // Special handling for package files.
                 //
                 // Case 1. get-refs on a package declaration
@@ -123,7 +124,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 auto symsToCheck = getSymsToCheckWithinPackage(gs, constResp->symbolBeforeDealias, packageName);
 
                 if (!symsToCheck.empty()) {
-                    std::vector<std::unique_ptr<Location>> locations;
+                    vector<unique_ptr<Location>> locations;
 
                     for (auto &symToCheck : symsToCheck) {
                         for (auto &location :

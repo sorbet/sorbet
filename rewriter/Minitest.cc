@@ -355,15 +355,13 @@ ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef e
         }
 
         for (auto &exp : bodySeq->stats) {
-            exp = runUnderEach(ctx, eachName, absl::MakeSpan(destructuringStmts), std::move(exp), args, iteratee,
-                               insideDescribe);
+            exp = runUnderEach(ctx, eachName, destructuringStmts, std::move(exp), args, iteratee, insideDescribe);
         }
 
-        bodySeq->expr = runUnderEach(ctx, eachName, absl::MakeSpan(destructuringStmts), std::move(bodySeq->expr), args,
-                                     iteratee, insideDescribe);
+        bodySeq->expr =
+            runUnderEach(ctx, eachName, destructuringStmts, std::move(bodySeq->expr), args, iteratee, insideDescribe);
     } else {
-        body = runUnderEach(ctx, eachName, absl::MakeSpan(destructuringStmts), std::move(body), args, iteratee,
-                            insideDescribe);
+        body = runUnderEach(ctx, eachName, destructuringStmts, std::move(body), args, iteratee, insideDescribe);
     }
 
     return body;
@@ -493,7 +491,7 @@ ast::ExpressionPtr recurse(core::MutableContext ctx, bool isClass, ast::Expressi
 
 vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass, ast::Send *send) {
     vector<ast::ExpressionPtr> stats;
-    if (ctx.state.runningUnderAutogen) {
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return stats;
     }
 

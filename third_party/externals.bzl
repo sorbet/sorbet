@@ -318,3 +318,15 @@ def register_sorbet_dependencies():
         sha256 = "47b61d25dd52bdaa1d571dab6705d076f05ba3d7a1bbbfed36145f8281c0403f",
         strip_prefix = "rules_foreign_cc-d74623f0ad47f4e375de81baa454eb106715a416",
     )
+
+    # The current implementation of the `ruby/rbs` parser requires a Ruby VM to run.
+    # Shopify is currently working on removing the Ruby dependency.
+    # In the meantime, we pull the RBS parser from the `shopify` fork of the `rbs` gem
+    # while we're upstreaming their changes.
+    http_archive(
+        name = "rbs_parser",
+        url = "https://github.com/ruby/rbs/archive/ee566f83bb11c1b6e4acc13f1910ccc54ad53af4.zip",
+        sha256 = "d0a2a4077f4849566b6a93d874fd13465deef26630024e9d928e9e23ef90b186",
+        strip_prefix = "rbs-ee566f83bb11c1b6e4acc13f1910ccc54ad53af4",
+        build_file = "@com_stripe_ruby_typer//third_party:rbs_parser.BUILD",
+    )

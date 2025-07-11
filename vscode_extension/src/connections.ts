@@ -2,33 +2,30 @@ import { ChildProcess } from "child_process";
 import { Log } from "./log";
 
 /**
- * Attempts to stop the given child process. Tries a SIGINT, then a SIGTERM, then a SIGKILL.
+ * Attempts to stop the given child process. Tries a SIGTERM, then a SIGKILL.
  */
 export async function stopProcess(p: ChildProcess, log: Log): Promise<void> {
-  return new Promise<void>((res) => {
+  return new Promise<void>((resolve) => {
     let hasExited = false;
-    log.debug(`Stopping process ${p.pid}`);
+    log.debug("Stopping process", p.pid);
     function onExit() {
       if (!hasExited) {
         hasExited = true;
-        res();
+        resolve();
       }
     }
     p.on("exit", onExit);
     p.on("error", onExit);
-    p.kill("SIGINT");
+    p.kill("SIGTERM");
     setTimeout(() => {
       if (!hasExited) {
-        log.debug("Process did not respond to SIGINT. Sending a SIGTERM.");
+        log.debug(
+          "Process did not respond to SIGTERM with 1s. Sending a SIGKILL.",
+          p.pid,
+        );
+        p.kill("SIGKILL");
+        setTimeout(resolve, 100);
       }
-      p.kill("SIGTERM");
-      setTimeout(() => {
-        if (!hasExited) {
-          log.debug("Process did not respond to SIGTERM. Sending a SIGKILL.");
-          p.kill("SIGKILL");
-          setTimeout(res, 100);
-        }
-      }, 1000);
     }, 1000);
   });
 }

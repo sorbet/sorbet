@@ -81,7 +81,7 @@ vector<core::ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::ARGS_store &
 }
 
 // This has to match the implementation of Method::methodArityHash
-core::ArityHash ArgParsing::hashArgs(core::Context ctx, const std::vector<core::ParsedArg> &args) {
+core::ArityHash ArgParsing::hashArgs(core::Context ctx, const vector<core::ParsedArg> &args) {
     uint32_t result = 0;
     result = core::mix(result, args.size());
     for (const auto &e : args) {

@@ -53,7 +53,7 @@ void selfScopeToEmptyTree(ast::UnresolvedConstantLit &cnst) {
 vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
     vector<ast::ExpressionPtr> empty;
 
-    if (ctx.state.runningUnderAutogen) {
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return empty;
     }
 
@@ -67,13 +67,11 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         return empty;
     }
 
-    auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv);
-    if (recv == nullptr) {
+    if (!ASTUtil::isRootScopedSyntacticConstant(send->recv, {core::Names::Constants::Struct()})) {
         return empty;
     }
 
-    if (!ast::MK::isRootScope(recv->scope) || recv->cnst != core::Symbols::Struct().data(ctx)->name ||
-        send->fun != core::Names::new_() || (!send->hasPosArgs() && !send->hasKwArgs())) {
+    if (send->fun != core::Names::new_() || (!send->hasPosArgs() && !send->hasKwArgs())) {
         return empty;
     }
 
@@ -110,6 +108,15 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         } else {
             return empty;
         }
+    }
+
+    if (auto dup = ASTUtil::findDuplicateArg(ctx, send)) {
+        if (auto e = ctx.beginIndexerError(dup->secondLoc, core::errors::Rewriter::InvalidStructMember)) {
+            e.setHeader("Duplicate member `{}` in Struct definition", dup->name.show(ctx));
+            e.addErrorLine(ctx.locAt(dup->firstLoc), "First occurrence of `{}` in Struct definition",
+                           dup->name.show(ctx));
+        }
+        return empty;
     }
 
     for (auto &arg : send->posArgs()) {

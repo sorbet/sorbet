@@ -401,11 +401,11 @@ void serializeClasses(const core::GlobalState &sourceGS, const core::GlobalState
 
 } // namespace
 
-void Minimize::indexAndResolveForMinimize(unique_ptr<core::GlobalState> &sourceGS, unique_ptr<core::GlobalState> &rbiGS,
-                                          options::Options &opts, WorkerPool &workers, std::string minimizeRBI) {
-    Timer timeit(sourceGS->tracer(), "Minimize::indexAndResolveForMinimize");
+void Minimize::indexAndResolveForMinimize(core::GlobalState &sourceGS, core::GlobalState &rbiGS, options::Options &opts,
+                                          WorkerPool &workers, string minimizeRBI) {
+    Timer timeit(sourceGS.tracer(), "Minimize::indexAndResolveForMinimize");
 
-    ENFORCE(!sourceGS->findFileByPath(minimizeRBI).exists(),
+    ENFORCE(!sourceGS.findFileByPath(minimizeRBI).exists(),
             "--minimize-to-rbi will yield empty file because {} was already processed by the main pipeline",
             minimizeRBI);
 
@@ -414,24 +414,26 @@ void Minimize::indexAndResolveForMinimize(unique_ptr<core::GlobalState> &sourceG
     // I'm ignoring everything relating to caching here, because missing methods is likely
     // to run on a new _unknown.rbi file every time and I didn't want to think about it.
     // If this phase gets slow, we can consider whether caching would speed things up.
-    auto rbiIndexed = pipeline::index(*rbiGS, absl::Span<core::FileRef>(rbiInputFiles), opts, workers, nullptr);
-    if (rbiGS->hadCriticalError()) {
-        rbiGS->errorQueue->flushAllErrors(*rbiGS);
+    auto rbiIndexed = pipeline::index(rbiGS, absl::Span<core::FileRef>(rbiInputFiles), opts, workers, nullptr);
+    ENFORCE(rbiIndexed.hasResult(), "Can only cancel in LSP mode");
+    if (rbiGS.hadCriticalError()) {
+        rbiGS.errorQueue->flushAllErrors(rbiGS);
     }
 
-    pipeline::setPackagerOptions(*rbiGS, opts);
-    pipeline::package(*rbiGS, absl::Span<ast::ParsedFile>(rbiIndexed), opts, workers);
     // Only need to compute FoundDefHashes when running to compute a FileHash
     auto foundHashes = nullptr;
-    auto canceled = pipeline::name(*rbiGS, absl::Span<ast::ParsedFile>(rbiIndexed), opts, workers, foundHashes);
+    auto canceled = pipeline::name(rbiGS, absl::MakeSpan(rbiIndexed.result()), opts, workers, foundHashes);
     ENFORCE(!canceled, "Can only cancel in LSP mode");
+    // We explicitly disable `stripePackages` in realmain for this call, which makes the packager call a no-op here.
+    pipeline::package(rbiGS, absl::MakeSpan(rbiIndexed.result()), opts, workers);
 
-    rbiIndexed = move(pipeline::resolve(rbiGS, move(rbiIndexed), opts, workers).result());
-    if (rbiGS->hadCriticalError()) {
-        rbiGS->errorQueue->flushAllErrors(*rbiGS);
+    auto resolved = pipeline::resolve(rbiGS, std::move(rbiIndexed.result()), opts, workers);
+    ENFORCE(resolved.hasResult(), "Can only cancel in LSP mode");
+    if (rbiGS.hadCriticalError()) {
+        rbiGS.errorQueue->flushAllErrors(rbiGS);
     }
 
-    rbiGS->errorQueue->flushAllErrors(*rbiGS);
+    rbiGS.errorQueue->flushAllErrors(rbiGS);
 
     // rbiIndexed goes out of scope here, and destructors run
     // If this becomes too slow, we can consider using intentionallyLeakMemory

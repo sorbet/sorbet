@@ -157,7 +157,7 @@ public:
     FileRef enterFile(std::shared_ptr<File> file);
     FileRef enterNewFileAt(std::shared_ptr<File> file, FileRef id);
     FileRef reserveFileRef(std::string path);
-    void replaceFile(FileRef whatFile, std::shared_ptr<File> withWhat);
+    std::shared_ptr<File> replaceFile(FileRef whatFile, std::shared_ptr<File> withWhat);
     static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, FileRef fref);
     FileRef findFileByPath(std::string_view path) const;
 
@@ -234,7 +234,7 @@ public:
     ErrorBuilder beginIndexerError(Loc loc, ErrorClass what);
 
     int totalErrors() const;
-    bool wasModified() const;
+    bool wasNameTableModified() const;
 
     int globalStateId;
     bool silenceErrors = false;
@@ -249,23 +249,34 @@ public:
     //
     // If this attribute is set to `true`, all strings will be checked for `<` and `>` characters in them.
     bool ensureCleanStrings = false;
-
-    // So we can know whether we're running in autogen mode.
-    // Right now this is only used to turn certain Rewriter passes on or off.
-    // Think very hard before looking at this value in namer / resolver!
-    // (hint: probably you want to find an alternate solution)
-    bool runningUnderAutogen = false;
     bool censorForSnapshotTests = false;
 
     std::optional<int> sleepInSlowPathSeconds = std::nullopt;
 
-    std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
+    std::unique_ptr<GlobalState> deepCopyGlobalState(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;
 
     // Copy the file table and other parts of GlobalState that are required for the indexing pass.
     // NOTE: this very intentionally will not copy the symbol or name tables. The symbol tables aren't used or populated
     // during indexing, and the name tables will only be written to.
-    std::unique_ptr<GlobalState> copyForIndex() const;
+    std::unique_ptr<GlobalState>
+    copyForIndex(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                 const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                 const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
+                 const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
+                 const std::vector<std::string> &allowRelaxedPackagerChecksFor,
+                 const std::vector<std::string> &packagerLayers, std::string errorHint) const;
+
+    // Copy the name table, file table and other parts of GlobalState that are required to start the slow path.
+    // NOTE: this very intentionally will not copy the symbol table, and the expectation is that the symbol table will
+    // be overwritten by immediately deserializaing the payload over it.
+    std::unique_ptr<GlobalState>
+    copyForSlowPath(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                    const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                    const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
+                    const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
+                    const std::vector<std::string> &allowRelaxedPackagerChecksFor,
+                    const std::vector<std::string> &packagerLayers, std::string errorHint) const;
 
     // Merge the contents of one file table into this GlobalState. This is used during the index pass to make sure that
     // changes made to the file table in worker threads are propagated back to the main GlobalState.
@@ -306,15 +317,34 @@ public:
     // If 'true', enforce use of Ruby 3.0-style keyword args.
     bool ruby3KeywordArgs = false;
 
-    // If 'true', attempt to typecheck calls to `super` as often as possible.
-    // Some calls to `super` are not type checked due to incomplete/imperfect information.
-    bool typedSuper = true;
+    // Some options change the behavior of things that might be cached, including ASTs, the file
+    // table, the name table, the symbol table, etc.
+    //
+    // If these options change, it's no longer safe to read things out of the cache.
+    // For example, `typedSuper` controls how Ruby's `super` keyword is desugared, and the
+    // result of desugar (where `typedSuper` is used) is cached.
+    struct CacheSensitiveOptions {
+        // If 'true', attempt to typecheck calls to `super` as often as possible.
+        // Some calls to `super` are not type checked due to incomplete/imperfect information.
+        bool typedSuper = true;
+
+        // Whether to parse RBS-style type annotations and assertions out of comments
+        bool rbsEnabled = false;
+
+        // Whether to allow `requires_ancestor`, which allows modeling certain kinds of indirect
+        // inheritance hierarchies, at the expense of implementation complexity and soundness
+        // problems.
+        bool requiresAncestorEnabled = false;
+
+        // So we can know whether we're running in autogen mode.
+        // Right now this is only used to turn certain Rewriter passes on or off.
+        // Think very hard before looking at this value in namer / resolver!
+        // (hint: probably you want to find an alternate solution)
+        bool runningUnderAutogen = false;
+    };
+    CacheSensitiveOptions cacheSensitiveOptions;
 
     std::vector<std::string> suppressPayloadSuperclassRedefinitionFor;
-
-    // When present, this indicates that single-package rbi generation is being performed, and contains metadata about
-    // the packages that are imported by the one whose interface is being generated.
-    std::optional<packages::ImportInfo> singlePackageImports;
 
     void ignoreErrorClassForSuggestTyped(int code);
     void suppressErrorClass(int code);
@@ -324,9 +354,7 @@ public:
 
     std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> semanticExtensions;
 
-    bool requiresAncestorEnabled = false;
-
-    bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
+    bool shouldReportErrorOn(FileRef file, ErrorClass what) const;
 
 private:
     struct DeepCloneHistoryEntry {
@@ -358,7 +386,7 @@ private:
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
-    bool wasModified_ = false;
+    bool wasNameTableModified_ = false;
 
     core::packages::PackageDB packageDB_;
 
@@ -371,6 +399,10 @@ private:
     bool nameTableFrozen = true;
     bool symbolTableFrozen = true;
     bool fileTableFrozen = true;
+
+    // Copy options over from another GlobalState. Private, as it's only meant to be used as a helper to implement other
+    // copying strategies.
+    void copyOptions(const GlobalState &other);
 
     void expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize);
     void moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned int szTo);

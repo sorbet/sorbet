@@ -81,7 +81,18 @@ else
         break;
     esac
   done
-  paths=("$@")
+  paths=()
+  for path in "${@}"; do
+    if [[ "$path" = *.exp ]]; then
+      # delete shortest match of pattern from back of path
+      path=${path%.*.exp}
+      if [[ "$path" = */pass ]]; then
+        path=${path%/pass}
+      fi
+    fi
+
+    paths+=("$path")
+  done
 fi
 
 if [ "$BUILD" != "" ]; then
@@ -111,9 +122,19 @@ for this_src in "${rb_src[@]}" DUMMY; do
   fi
 
   if [ -n "$basename" ]; then
+    needs_stripe_packages=false
+    if grep -q '^# enable-packager: true' "${srcs[@]}"; then
+      needs_stripe_packages=true
+    fi
+
     needs_requires_ancestor=false
     if grep -q '^# enable-experimental-requires-ancestor: true' "${srcs[@]}"; then
       needs_requires_ancestor=true
+    fi
+
+    needs_experimental_rbs=false
+    if grep -q '^# enable-experimental-rbs-comments: true' "${srcs[@]}"; then
+      needs_experimental_rbs=true
     fi
 
     if grep -q '^# typed-super: false' "${srcs[@]}"; then
@@ -177,6 +198,9 @@ for this_src in "${rb_src[@]}" DUMMY; do
       else
         args=()
       fi
+      if $needs_experimental_rbs; then
+        args+=("--enable-experimental-rbs-comments")
+      fi
       if $needs_typed_super_false; then
         args+=("--typed-super=false")
       else
@@ -191,8 +215,10 @@ for this_src in "${rb_src[@]}" DUMMY; do
         args=("--stop-after=namer")
       elif [ "$pass" = "minimized-rbi" ]; then
         args=("--minimize-to-rbi=$basename.minimize.rbi")
-      elif [ "$pass" = "package-tree" ]; then
-        args=("--stripe-packages")
+      fi
+
+      if $needs_stripe_packages; then
+        args+=("--stripe-packages")
 
         extra_underscore_prefixes=()
         while IFS='' read -r prefix; do
@@ -224,6 +250,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
           done
         fi
       fi
+
       case "$pass" in
         document-symbols)
           # See above for why this case is weird.
@@ -239,7 +266,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
           ;;
         autocorrects)
           echo tools/scripts/print_autocorrects_exp.sh \
-            "${srcs[@]}" \
+            "${args[@]}" "${srcs[@]}" \
             \> "$candidate" \
             2\> /dev/null \
             >>"$COMMAND_FILE"

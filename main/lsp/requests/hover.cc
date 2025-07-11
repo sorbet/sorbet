@@ -44,22 +44,21 @@ string methodInfoString(const core::GlobalState &gs, const core::DispatchResult 
     return contents;
 }
 
-HoverTask::HoverTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<TextDocumentPositionParams> params)
+HoverTask::HoverTask(const LSPConfiguration &config, MessageId id, unique_ptr<TextDocumentPositionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentHover), params(move(params)) {}
 
 unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
 
     const core::GlobalState &gs = typechecker.state();
-    auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
-                                  LSPMethod::TextDocumentHover, false);
+    const auto &uri = params->textDocument->uri;
+    auto result = LSPQuery::byLoc(config, typechecker, uri, *params->position, LSPMethod::TextDocumentHover, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
         return response;
     }
 
-    auto uri = params->textDocument->uri;
     auto fref = config.uri2FileRef(gs, uri);
     // LSPQuery::byLoc reports an error if the file or loc don't exist
     auto queryLoc = params->position->toLoc(gs, fref).value();
@@ -91,11 +90,14 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
         if (s->funLoc().exists() && s->funLoc().contains(queryLoc)) {
             auto start = s->dispatchResult.get();
-            if (start != nullptr && start->main.method.exists() && !start->main.receiver.isUntyped()) {
-                auto loc = start->main.method.data(gs)->loc();
-                if (loc.exists()) {
-                    documentationLocations.emplace_back(loc);
+            while (start != nullptr) {
+                if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
+                    auto loc = start->main.method.data(gs)->loc();
+                    if (loc.exists()) {
+                        documentationLocations.emplace_back(loc);
+                    }
                 }
+                start = start->secondary.get();
             }
 
             if (s->dispatchResult->main.method.exists() &&

@@ -96,9 +96,7 @@ InsSeq{
             ],
             expr = Send{
               flags = {privateOk}
-              recv = Local{
-                localVariable = <U <self>>
-              }
+              recv = Self
               fun = <U proc>
               block = Block {
                 args = [

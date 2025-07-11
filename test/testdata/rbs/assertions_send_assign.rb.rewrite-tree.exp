@@ -1,0 +1,83 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Let><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:args, ::<root>::<C T>.untyped()).void()
+    end
+
+    def foo=<<todo method>>(*args, &<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::<root>::<C T>.untyped())
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of foo=>
+
+    <runtime method definition of foo>
+  end
+
+  let1 = <emptyTree>::<C Let>.new()
+
+  let1.foo=(<cast:let>("foo", <todo sym>, <emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(let1.foo())
+
+  let2 = <emptyTree>::<C Let>.new()
+
+  let2.foo().foo=(<cast:let>("foo", <todo sym>, <emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(let2.foo())
+
+  let3 = <emptyTree>::<C Let>.new()
+
+  let3.foo().foo=(<cast:let>(["foo", "bar"], <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C String>)))
+
+  <emptyTree>::<C T>.reveal_type(let3.foo())
+
+  let4 = <emptyTree>::<C Let>.new()
+
+  let4.foo=(<self>.puts(<cast:let>([], <todo sym>, ::<root>::<C T>.untyped())))
+
+  <emptyTree>::<C T>.reveal_type(let4.foo())
+
+  let5 = <emptyTree>::<C Let>.new()
+
+  let5.foo=(::<Magic>.<call-with-splat>(<self>, :puts, ::<Magic>.<splat>(<cast:let>([], <todo sym>, ::<root>::<C T>.untyped())), nil))
+
+  <emptyTree>::<C T>.reveal_type(let5.foo())
+
+  class <emptyTree>::<C BracketsAssign><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:args, ::<root>::<C T>.untyped()).void()
+    end
+
+    def []=<<todo method>>(*args, &<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of []=>
+  end
+
+  brackets_assign = <emptyTree>::<C BracketsAssign>.new()
+
+  brackets_assign.[]=(::<root>::<C T>.unsafe("foo").unexisting_method())
+
+  brackets_assign.[]=(:a, ::<root>::<C T>.unsafe("bar").unexisting_method())
+
+  brackets_assign.[]=(:a, :b, ::<root>::<C T>.unsafe("baz").unexisting_method())
+
+  brackets_assign.[]=(:a, :b, :c, ::<root>::<C T>.unsafe("qux").unexisting_method())
+
+  brackets_assign.[]=(:a, :b, ::<root>::<C T>.unsafe(["bar", "foo"]))
+
+  brackets_assign.[]=(:a, :b, ["bar", ::<root>::<C T>.unsafe("foo").unexisting_method()])
+
+  brackets_assign.[]=(<cast:cast>(:a, <todo sym>, <emptyTree>::<C String>), <cast:cast>(:b, <todo sym>, <emptyTree>::<C String>), ::<root>::<C T>.unsafe(["bar", "foo"]))
+
+  ::<root>::<C T>.unsafe(<self>).unexisting_method=(42)
+end

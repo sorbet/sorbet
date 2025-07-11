@@ -2,6 +2,7 @@
 #define AUTOGEN_DEFINITIONS_H
 
 #include "ast/ast.h"
+#include "common/common.h"
 
 namespace sorbet::autogen {
 
@@ -111,6 +112,7 @@ struct Definition {
     // once `AutogenWalk` has completed; please update this comment if that ever turns out to be false
     ReferenceRef defining_ref;
 };
+CheckSize(Definition, 24, 4);
 
 // A `Reference` corresponds to a simple use of a constant name in a file. After a `ParsedFile` has been created, every
 // constant use should have a `Reference` corresponding to it
@@ -126,10 +128,12 @@ struct Reference {
     // In which class or module was this reference used?
     DefinitionRef scope;
 
-    // its full qualified name
-    QualifiedName name;
     // the nesting ID of this constant
     uint32_t nestingId;
+
+    // its full qualified name
+    QualifiedName name;
+
     // the resolved name iff we have it from Sorbet
     QualifiedName resolved;
 
@@ -137,17 +141,18 @@ struct Reference {
     core::LocOffsets loc;
     core::LocOffsets definitionLoc;
 
+    // If this is a ref used in an `include` or `extend`, then this will point to the definition of the class in which
+    // this is being `include`d or `extend`ed
+    DefinitionRef parent_of;
+
     // `true` if this is the appearance of the constant name associated with a definition: i.e. the name of a class or
     // module or the LHS of a casgn
     bool is_defining_ref;
 
     // Iff this is a class, then this will be `ClassKind::Class`, otherwise `ClassKind::Module`
     ClassKind parentKind = ClassKind::Module;
-
-    // If this is a ref used in an `include` or `extend`, then this will point to the definition of the class in which
-    // this is being `include`d or `extend`ed
-    DefinitionRef parent_of;
 };
+CheckSize(Reference, 96, 8);
 
 struct AutogenConfig {
     const std::vector<std::string> behaviorAllowedInRBIsPaths;
@@ -158,8 +163,8 @@ struct AutogenConfig {
 struct ParsedFile {
     friend class MsgpackWriter;
 
-    // the original file AST from Sorbet
-    ast::ParsedFile tree;
+    // the file that was parsed
+    core::FileRef file;
     // the checksum of this file
     uint32_t cksum;
     // the path on disk to this file
@@ -180,16 +185,6 @@ struct ParsedFile {
     std::vector<core::NameRef> showFullName(const core::GlobalState &gs, DefinitionRef id) const;
     QualifiedName showQualifiedName(const core::GlobalState &gs, DefinitionRef id) const;
     std::vector<std::string> listAllClasses(core::Context ctx);
-};
-
-// A `Package` represents Autogen's view of a package file
-struct Package {
-    // the original file AST from Sorbet
-    ast::ParsedFile tree;
-
-    std::vector<core::NameRef> package;
-    std::vector<QualifiedName> imports;
-    std::vector<QualifiedName> exports;
 };
 
 } // namespace sorbet::autogen

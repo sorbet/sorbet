@@ -1,0 +1,34 @@
+# -- test/testdata/definition_validator/insert_override_multi__1.rb --
+# typed: true
+
+class Parent
+  sig { overridable.void }
+  def example; end
+end
+
+class Child < Parent
+  sig { override.void }
+  def example; end # error: Method `Child#example` overrides an overridable method `Parent#example` but is not declared with `override.`
+end
+
+class Module
+  include T::Sig
+end
+# ------------------------------
+# -- test/testdata/definition_validator/insert_override_multi__2.rb --
+# typed: true
+
+class Parent
+  sig { overridable.void }
+  def example; end
+end
+
+class Child < Parent
+  sig { override.void }
+  def example; end # error: Method `Child#example` overrides an overridable method `Parent#example` but is not declared with `override.`
+end
+
+class Module
+  include T::Sig
+end
+# ------------------------------

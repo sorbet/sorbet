@@ -38,7 +38,7 @@ module Opus::Types::Test
       it 'returns things on methods with sigs' do
         c = Class.new do
           extend T::Sig
-          sig {returns(Integer)}
+          sig { returns(Integer) }
           def sigfun
             85
           end

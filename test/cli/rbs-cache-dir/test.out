@@ -1,0 +1,25 @@
+No errors! Great job.
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      0
+    end
+
+    <runtime method definition of foo>
+  end
+end
+--------------------------------------------------------------------------
+No errors! Great job.
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def foo<<todo method>>(&<blk>)
+      0
+    end
+
+    <runtime method definition of foo>
+  end
+end

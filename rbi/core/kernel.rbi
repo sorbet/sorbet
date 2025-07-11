@@ -1968,6 +1968,14 @@ module Kernel
   # [`pp`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-pp)
   def pp(obj, out = nil, width = nil); end
 
+  # Returns a pretty printed object as a string.
+  #
+  # See the PP module for more information.
+  sig do
+    returns(String)
+  end
+  def pretty_inspect; end
+
   # If called without an argument, or if `max.to_i.abs == 0`, rand returns a
   # pseudo-random floating point number between 0.0 and 1.0, including 0.0 and
   # excluding 1.0.
@@ -2895,11 +2903,13 @@ module Kernel
   # :   Used for experimental features that may change in future releases.
   sig do
     params(
-        msg: String,
+        msgs: String,
+        uplevel: T.nilable(Integer),
+        category: T.nilable(Symbol)
     )
     .returns(NilClass)
   end
-  def warn(*msg); end
+  def warn(*msgs, uplevel: nil, category: nil); end
 
   # With no arguments, raises the exception in `$!` or raises a
   # [`RuntimeError`](https://docs.ruby-lang.org/en/2.7.0/RuntimeError.html) if

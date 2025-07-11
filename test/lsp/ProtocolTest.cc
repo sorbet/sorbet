@@ -19,7 +19,7 @@ bool isTypecheckRun(const LSPMessage &msg) {
 }
 } // namespace
 
-void ProtocolTest::resetState(std::shared_ptr<realmain::options::Options> opts) {
+void ProtocolTest::resetState(shared_ptr<realmain::options::Options> opts) {
     fs = make_shared<MockFileSystem>(rootPath);
     diagnostics.clear();
     sourceFileContents.clear();
@@ -119,8 +119,20 @@ unique_ptr<LSPMessage> ProtocolTest::completion(string_view path, int line, int 
     return makeCompletion(nextId++, getUri(path), line, character);
 }
 
+unique_ptr<LSPMessage> ProtocolTest::signatureHelp(string_view path, int line, int character) {
+    return makeSignatureHelp(nextId++, getUri(path), line, character);
+}
+
 unique_ptr<LSPMessage> ProtocolTest::getDefinition(string_view path, int line, int character) {
     return makeDefinitionRequest(nextId++, getUri(path), line, character);
+}
+
+unique_ptr<LSPMessage> ProtocolTest::implementation(string_view path, int line, int character) {
+    return makeImplementationRequest(nextId++, getUri(path), line, character);
+}
+
+unique_ptr<LSPMessage> ProtocolTest::getReference(string_view path, int line, int character) {
+    return makeReferenceRequest(nextId++, getUri(path), line, character);
 }
 
 unique_ptr<LSPMessage> ProtocolTest::watchmanFileUpdate(vector<string> updatedFilePaths) {
@@ -159,7 +171,7 @@ vector<unique_ptr<LSPMessage>> verify(const vector<unique_ptr<LSPMessage>> &msgs
     return reparsedMessages;
 }
 
-std::vector<std::unique_ptr<LSPMessage>> ProtocolTest::sendRaw(const std::string &json) {
+vector<unique_ptr<LSPMessage>> ProtocolTest::sendRaw(const string &json) {
     auto responses = verify(getLSPResponsesFor(*lspWrapper, LSPMessage::fromClient(json)));
     updateDiagnostics(responses);
     return responses;
@@ -216,7 +228,7 @@ void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messa
     }
 }
 
-std::string ProtocolTest::readFile(std::string_view uri) {
+string ProtocolTest::readFile(string_view uri) {
     auto readFileResponses = send(LSPMessage(make_unique<RequestMessage>(
         "2.0", nextId++, LSPMethod::SorbetReadFile, make_unique<TextDocumentIdentifier>(string(uri)))));
     CHECK_EQ(readFileResponses.size(), 1);
@@ -229,13 +241,25 @@ std::string ProtocolTest::readFile(std::string_view uri) {
     return "";
 }
 
-vector<unique_ptr<Location>> ProtocolTest::getDefinitions(std::string_view uri, int line, int character) {
+vector<unique_ptr<Location>> ProtocolTest::getDefinitions(string_view uri, int line, int character) {
     auto defResponses = send(*getDefinition(uri, line, character));
     CHECK_EQ(defResponses.size(), 1);
     if (defResponses.size() == 1) {
         auto &defResponse = defResponses.at(0);
         CHECK(defResponse->isResponse());
         auto &defResult = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(*defResponse->asResponse().result);
+        return move(get<vector<unique_ptr<Location>>>(defResult));
+    }
+    return {};
+}
+
+vector<unique_ptr<Location>> ProtocolTest::getReferences(string_view uri, int line, int character) {
+    auto refResponses = send(*getReference(uri, line, character));
+    CHECK_EQ(refResponses.size(), 1);
+    if (refResponses.size() == 1) {
+        auto &refResponse = refResponses.at(0);
+        CHECK(refResponse->isResponse());
+        auto &defResult = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(*refResponse->asResponse().result);
         return move(get<vector<unique_ptr<Location>>>(defResult));
     }
     return {};

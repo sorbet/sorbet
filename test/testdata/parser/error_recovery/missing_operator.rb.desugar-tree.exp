@@ -363,7 +363,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  <self>.puts(-20)
+  <self>.puts(19.~())
 
   <self>.puts(<emptyTree>::<C <ErrorNode>>.~())
 

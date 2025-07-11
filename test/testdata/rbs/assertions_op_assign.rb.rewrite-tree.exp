@@ -1,0 +1,19 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  let1 = <cast:let>(42, <todo sym>, <emptyTree>::<C Integer>)
+
+  let1 = let1.+(<cast:let>("", <todo sym>, <emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(let1)
+
+  let2 = <cast:let>(42, <todo sym>, <emptyTree>::<C Integer>)
+
+  let2 = let2.+(<cast:let>("foo", <todo sym>, <emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(let2)
+
+  let3 = <cast:let>(42, <todo sym>, <emptyTree>::<C Integer>)
+
+  <cast:let>(let3 = let3.+("foo"), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(let3)
+end

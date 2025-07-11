@@ -1121,6 +1121,14 @@ public:
         return ClassOrModuleRef::fromRaw(96);
     }
 
+    static MethodRef Module_syntheticSquareBrackets() {
+        return MethodRef::fromRaw(57);
+    }
+
+    static MethodRef Sorbet_Private_Static_typeMember() {
+        return MethodRef::fromRaw(58);
+    }
+
     static FieldRef Magic_UntypedSource_super() {
         return FieldRef::fromRaw(4);
     }

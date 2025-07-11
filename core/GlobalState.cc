@@ -306,7 +306,6 @@ unique_ptr<GlobalState> GlobalState::makeEmptyGlobalStateForHashing(spdlog::logg
         new GlobalState(make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>()),
                         make_shared<lsp::TypecheckEpochManager>(), -1));
     rv->initEmpty();
-    rv->silenceErrors = true;
     return rv;
 }
 
@@ -604,7 +603,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::PackageSpecRegistry());
 
     // PackageSpec is a class that can be subclassed.
-    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpec());
+    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), Names::Constants::PackageSpec());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::PackageSpec());
 
@@ -618,6 +617,7 @@ void GlobalState::initEmpty() {
 
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::testImport())
                  .typedArg(Names::arg0(), make_type<ClassType>(Symbols::PackageSpecSingleton()))
+                 .defaultKeywordArg(Names::only())
                  .build();
     ENFORCE_NO_TIMER(method == Symbols::PackageSpec_test_import());
 
@@ -932,6 +932,17 @@ void GlobalState::initEmpty() {
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::LoadYieldParams());
     ENFORCE_NO_TIMER(field == Symbols::Magic_UntypedSource_LoadYieldParams());
 
+    method = enterMethod(*this, Symbols::Module(), Names::syntheticSquareBrackets())
+                 .repeatedUntypedArg(Names::arg())
+                 .build();
+    ENFORCE_NO_TIMER(method == Symbols::Module_syntheticSquareBrackets());
+
+    method =
+        enterMethod(*this, Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this), Names::typeMember())
+            .repeatedTopArg(Names::args())
+            .build();
+    ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_typeMember());
+
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes
@@ -1203,7 +1214,6 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     data->owner = owner;
     data->addLoc(*this, loc);
     DEBUG_ONLY(categoryCounterInc("symbols", "class"));
-    wasModified_ = true;
 
     return ret;
 }
@@ -1243,7 +1253,6 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     data->owner = owner;
     data->addLoc(*this, loc);
     DEBUG_ONLY(categoryCounterInc("symbols", "type_member"));
-    wasModified_ = true;
 
     auto &members = owner.dataAllowingNone(*this)->getOrCreateTypeMembers();
     if (!absl::c_linear_search(members, result)) {
@@ -1294,7 +1303,6 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     data->owner = owner;
     data->addLoc(*this, loc);
     DEBUG_ONLY(categoryCounterInc("symbols", "type_argument"));
-    wasModified_ = true;
 
     owner.dataAllowingNone(*this)->getOrCreateTypeArguments().emplace_back(result);
     return result;
@@ -1320,7 +1328,6 @@ MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRe
     data->owner = owner;
     data->addLoc(*this, loc);
     DEBUG_ONLY(categoryCounterInc("symbols", "method"));
-    wasModified_ = true;
 
     return result;
 }
@@ -1387,7 +1394,6 @@ FieldRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef 
     data->addLoc(*this, loc);
 
     DEBUG_ONLY(categoryCounterInc("symbols", "field"));
-    wasModified_ = true;
 
     return result;
 }
@@ -1426,7 +1432,6 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
     data->addLoc(*this, loc);
 
     DEBUG_ONLY(categoryCounterInc("symbols", "static_field"));
-    wasModified_ = true;
 
     return ret;
 }
@@ -1449,7 +1454,6 @@ ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRe
     store.loc = loc;
     DEBUG_ONLY(categoryCounterInc("symbols", "argument"););
 
-    wasModified_ = true;
     return store;
 }
 
@@ -1529,7 +1533,7 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
     ENFORCE(hashNameRef(*this, name) == hs);
     categoryCounterInc("names", "utf8");
 
-    wasModified_ = true;
+    wasNameTableModified_ = true;
     return name;
 }
 
@@ -1579,7 +1583,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
 
     constantNames.emplace_back(ConstantName{original});
     ENFORCE(hashNameRef(*this, name) == hs);
-    wasModified_ = true;
+    wasNameTableModified_ = true;
     categoryCounterInc("names", "constant");
     return name;
 }
@@ -1725,7 +1729,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 
     uniqueNames.emplace_back(UniqueName{original, num, uniqueNameKind});
     ENFORCE(hashNameRef(*this, name) == hs);
-    wasModified_ = true;
+    wasNameTableModified_ = true;
     categoryCounterInc("names", "unique");
     return name;
 }
@@ -2074,24 +2078,33 @@ bool GlobalState::unfreezeSymbolTable() {
     return old;
 }
 
-unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
+void GlobalState::copyOptions(const core::GlobalState &other) {
+    this->silenceErrors = other.silenceErrors;
+    this->autocorrect = other.autocorrect;
+    this->didYouMean = other.didYouMean;
+    this->ensureCleanStrings = other.ensureCleanStrings;
+    this->censorForSnapshotTests = other.censorForSnapshotTests;
+    this->sleepInSlowPathSeconds = other.sleepInSlowPathSeconds;
+    this->cacheSensitiveOptions = other.cacheSensitiveOptions;
+    this->ruby3KeywordArgs = other.ruby3KeywordArgs;
+    this->suppressPayloadSuperclassRedefinitionFor = other.suppressPayloadSuperclassRedefinitionFor;
+    this->trackUntyped = other.trackUntyped;
+    this->printingFileTable = other.printingFileTable;
+    this->errorUrlBase = other.errorUrlBase;
+    this->includeErrorSections = other.includeErrorSections;
+    this->ignoredForSuggestTypedErrorClasses = other.ignoredForSuggestTypedErrorClasses;
+    this->suppressedErrorClasses = other.suppressedErrorClasses;
+    this->onlyErrorClasses = other.onlyErrorClasses;
+    this->suggestUnsafe = other.suggestUnsafe;
+    this->pathPrefix = other.pathPrefix;
+}
+
+unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     Timer timeit(tracer(), "GlobalState::deepCopy", this->creation);
     this->sanityCheck();
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
-    result->silenceErrors = this->silenceErrors;
-    result->autocorrect = this->autocorrect;
-    result->didYouMean = this->didYouMean;
-    result->ensureCleanStrings = this->ensureCleanStrings;
-    result->runningUnderAutogen = this->runningUnderAutogen;
-    result->censorForSnapshotTests = this->censorForSnapshotTests;
-    result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
-    result->requiresAncestorEnabled = this->requiresAncestorEnabled;
-    result->ruby3KeywordArgs = this->ruby3KeywordArgs;
-    result->typedSuper = this->typedSuper;
-    result->suppressPayloadSuperclassRedefinitionFor = this->suppressPayloadSuperclassRedefinitionFor;
-    result->trackUntyped = this->trackUntyped;
-    result->printingFileTable = this->printingFileTable;
+    result->copyOptions(*this);
 
     if (keepId) {
         result->globalStateId = this->globalStateId;
@@ -2106,12 +2119,6 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->lspQuery = this->lspQuery;
     result->kvstoreUuid = this->kvstoreUuid;
     result->lspTypecheckCount = this->lspTypecheckCount;
-    result->errorUrlBase = this->errorUrlBase;
-    result->includeErrorSections = this->includeErrorSections;
-    result->ignoredForSuggestTypedErrorClasses = this->ignoredForSuggestTypedErrorClasses;
-    result->suppressedErrorClasses = this->suppressedErrorClasses;
-    result->onlyErrorClasses = this->onlyErrorClasses;
-    result->suggestUnsafe = this->suggestUnsafe;
     result->utf8Names.reserve(this->utf8Names.capacity());
     result->constantNames.reserve(this->constantNames.capacity());
     result->uniqueNames.reserve(this->uniqueNames.capacity());
@@ -2158,7 +2165,6 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     for (auto &sym : this->typeMembers) {
         result->typeMembers.emplace_back(sym.deepCopy(*result));
     }
-    result->pathPrefix = this->pathPrefix;
     for (auto &semanticExtension : this->semanticExtensions) {
         result->semanticExtensions.emplace_back(semanticExtension->deepCopy(*this, *result));
     }
@@ -2171,32 +2177,76 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     return result;
 }
 
-unique_ptr<GlobalState> GlobalState::copyForIndex() const {
+unique_ptr<GlobalState>
+GlobalState::copyForIndex(const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                          const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                          const vector<string> &extraPackageFilesDirectorySlashPrefixes,
+                          const vector<string> &packageSkipRBIExportEnforcementDirs,
+                          const vector<string> &allowRelaxedPackagerChecksFor, const vector<string> &packagerLayers,
+                          string errorHint) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     result->initEmpty();
+    result->copyOptions(*this);
 
-    // Options that might be used during indexing are manually copied over here
+    // Additional options that might be used during indexing are manually copied over here
     result->files = this->files;
     result->fileRefByPath = this->fileRefByPath;
-    result->silenceErrors = this->silenceErrors;
-    result->autocorrect = this->autocorrect;
-    result->didYouMean = this->didYouMean;
-    result->ensureCleanStrings = this->ensureCleanStrings;
-    result->runningUnderAutogen = this->runningUnderAutogen;
-    result->censorForSnapshotTests = this->censorForSnapshotTests;
-    result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
-    result->requiresAncestorEnabled = this->requiresAncestorEnabled;
-    result->ruby3KeywordArgs = this->ruby3KeywordArgs;
-    result->typedSuper = this->typedSuper;
-    result->suppressPayloadSuperclassRedefinitionFor = this->suppressPayloadSuperclassRedefinitionFor;
-    result->trackUntyped = this->trackUntyped;
     result->kvstoreUuid = this->kvstoreUuid;
-    result->errorUrlBase = this->errorUrlBase;
-    result->suppressedErrorClasses = this->suppressedErrorClasses;
-    result->onlyErrorClasses = this->onlyErrorClasses;
-    result->suggestUnsafe = this->suggestUnsafe;
-    result->pathPrefix = this->pathPrefix;
+
+    {
+        core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
+        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
+                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
+                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint);
+    }
+
+    return result;
+}
+
+unique_ptr<GlobalState>
+GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                             const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                             const vector<string> &extraPackageFilesDirectorySlashPrefixes,
+                             const vector<string> &packageSkipRBIExportEnforcementDirs,
+                             const vector<string> &allowRelaxedPackagerChecksFor, const vector<string> &packagerLayers,
+                             string errorHint) const {
+    auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
+
+    // We omit a call to `initEmpty` here, as the only intended use of this function is to have its symbol table
+    // immediately overwritten by deserializing the payload's symbol table.
+
+    result->copyOptions(*this);
+
+    // We share the file table entries with the original GlobalState, and then copy the content of the name table,
+    // string storage, and uuid to ensure that we remain compatible with the session cache.
+    result->files = this->files;
+    result->fileRefByPath = this->fileRefByPath;
+    result->kvstoreUuid = this->kvstoreUuid;
+    result->strings = this->strings;
+    result->utf8Names = this->utf8Names;
+    result->constantNames = this->constantNames;
+    result->uniqueNames = this->uniqueNames;
+    result->namesByHash = this->namesByHash;
+
+    // Reserve space for the symbol tables, under the assumption that we'll probably grow to a similar size on the slow
+    // path.
+    result->classAndModules.reserve(this->classAndModules.capacity());
+    result->methods.reserve(this->methods.capacity());
+    result->fields.reserve(this->fields.capacity());
+    result->typeArguments.reserve(this->typeArguments.capacity());
+    result->typeMembers.reserve(this->typeMembers.capacity());
+
+    {
+        core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
+        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
+                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
+                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint);
+    }
 
     return result;
 }
@@ -2248,7 +2298,7 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     if (what == errors::Internal::InternalError) {
         Exception::failInFuzzer();
     }
-    return ErrorBuilder(*this, shouldReportErrorOn(loc, what), loc, what);
+    return ErrorBuilder(*this, shouldReportErrorOn(loc.file(), what), loc, what);
 }
 
 ErrorBuilder GlobalState::beginIndexerError(Loc loc, ErrorClass what) {
@@ -2272,7 +2322,7 @@ void GlobalState::onlyShowErrorClass(int code) {
     onlyErrorClasses.insert(code);
 }
 
-bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
+bool GlobalState::shouldReportErrorOn(FileRef file, ErrorClass what) const {
     if (what.minLevel == StrictLevel::Internal) {
         return true;
     }
@@ -2292,8 +2342,8 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
     }
 
     StrictLevel level = StrictLevel::Strong;
-    if (loc.file().exists()) {
-        level = loc.file().data(*this).strictLevel;
+    if (file.exists()) {
+        level = file.data(*this).strictLevel;
     }
     if (level >= StrictLevel::Max) {
         // Custom rules
@@ -2314,8 +2364,8 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
     return level >= what.minLevel;
 }
 
-bool GlobalState::wasModified() const {
-    return wasModified_;
+bool GlobalState::wasNameTableModified() const {
+    return wasNameTableModified_;
 }
 
 void GlobalState::trace(string_view msg) const {
@@ -2334,10 +2384,10 @@ void GlobalState::markAsPayload() {
     }
 }
 
-void GlobalState::replaceFile(FileRef whatFile, shared_ptr<File> withWhat) {
+std::shared_ptr<File> GlobalState::replaceFile(FileRef whatFile, shared_ptr<File> withWhat) {
     ENFORCE_NO_TIMER(whatFile.id() < filesUsed());
     ENFORCE_NO_TIMER(whatFile.dataAllowingUnsafe(*this).path() == withWhat->path());
-    files[whatFile.id()] = std::move(withWhat);
+    return std::exchange(files[whatFile.id()], std::move(withWhat));
 }
 
 FileRef GlobalState::findFileByPath(string_view path) const {
@@ -2356,12 +2406,12 @@ packages::PackageDB &GlobalState::packageDB() {
     return packageDB_;
 }
 
-void GlobalState::setPackagerOptions(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                                     const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
-                                     const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
-                                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
-                                     const std::vector<std::string> &packagerLayers, std::string errorHint) {
+void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                                     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                                     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
+                                     const vector<string> &packageSkipRBIExportEnforcementDirs,
+                                     const vector<string> &allowRelaxedPackagerChecksFor,
+                                     const vector<string> &packagerLayers, string errorHint) {
     ENFORCE_NO_TIMER(!packageDB_.frozen);
 
     packageDB_.enabled_ = true;
@@ -2369,16 +2419,9 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &extraPackag
     packageDB_.extraPackageFilesDirectorySlashDeprecatedPrefixes_ = extraPackageFilesDirectorySlashDeprecatedPrefixes;
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;
     packageDB_.skipRBIExportEnforcementDirs_ = packageSkipRBIExportEnforcementDirs;
+    packageDB_.allowRelaxedPackagerChecksFor_ = allowRelaxedPackagerChecksFor;
     absl::c_transform(packagerLayers, std::back_inserter(packageDB_.layers_),
                       [this](const auto &layer) { return enterNameUTF8(layer); });
-
-    std::vector<core::packages::MangledName> allowRelaxedPackagerChecksFor_;
-    for (const string &pkgName : allowRelaxedPackagerChecksFor) {
-        std::vector<string_view> pkgNameParts = absl::StrSplit(pkgName, "::");
-        auto mangledName = core::packages::MangledName::mangledNameFromParts(*this, pkgNameParts);
-        allowRelaxedPackagerChecksFor_.emplace_back(mangledName);
-    }
-    packageDB_.allowRelaxedPackagerChecksFor_ = allowRelaxedPackagerChecksFor_;
     packageDB_.errorHint_ = errorHint;
 }
 

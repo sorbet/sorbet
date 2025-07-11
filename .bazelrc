@@ -282,13 +282,16 @@ build:fuzz --copt=-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 ##
 ## Webasm config. Please use either of those depending on your platform
 ##
-build:webasm --copt=-Oz --linkopt=-Oz --copt=-DMDB_USE_ROBUST=0
+build:webasm --copt=-DMDB_USE_ROBUST=0
 build:webasm --define release=true
 build:webasm --compilation_mode=opt
 # https://emscripten.org/docs/porting/exceptions.html#webassembly-exception-handling-based-support
 build:webasm --features=exceptions --cxxopt=-fwasm-exceptions --linkopt=-fwasm-exceptions
 # Blocked on https://github.com/emscripten-core/emscripten/issues/9780
 build:webasm --copt=-fno-stack-protector
+# We put the stack first, so that an argument stack overflow doesn't clobber
+# global data, and traps instead.
+build:webasm --linkopt=--stack-first
 
 ##
 ## Stripe's ci passes --config=ci, we need it to exist

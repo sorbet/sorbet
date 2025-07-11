@@ -89,6 +89,10 @@ bool isTestPath(string_view path) {
     return absl::EndsWith(path, ".test.rb") || absl::StrContains(path, "/test/");
 }
 
+bool isTestHelperPath(string_view path) {
+    return absl::StrContains(path, "/test/") && !absl::EndsWith(path, ".test.rb");
+}
+
 bool isPackageRBIPath(string_view path) {
     return absl::EndsWith(path, ".package.rbi");
 }
@@ -107,13 +111,17 @@ bool File::isPackagePath(string_view path) {
 }
 
 File::Flags::Flags(string_view path)
-    : cached(false), hasIndexErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)),
-      isPackage(isPackagePath(path)), isOpenInClient(false) {}
+    : hasIndexErrors(false), isPackagedTestHelper(isTestHelperPath(path)), isPackagedTest(isTestPath(path)),
+      hasPackageRBIPath(isPackageRBIPath(path)), hasPackageRbPath(isPackagePath(path)), isOpenInClient(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(path_), packagedLevel{File::filePackagedSigil(source_)},
       path_(move(path_)), source_(move(source_)), originalSigil(fileStrictSigil(this->source_)),
-      strictLevel(originalSigil) {}
+      strictLevel(originalSigil) {
+    if (this->source_.size() >= INVALID_POS_LOC) [[unlikely]] {
+        Exception::raise("File not less than {} bytes. Got: {}", UINT32_MAX, this->source_.size());
+    }
+}
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string sourceCopy = source_;
@@ -129,7 +137,6 @@ void File::setFileHash(unique_ptr<const FileHash> hash) {
     // If hash_ != nullptr, then the contents of hash_ and hash should be identical.
     // Avoid needlessly invalidating references to *hash_.
     if (hash_ == nullptr) {
-        flags.cached = false;
         hash_ = move(hash);
     }
 }
@@ -167,7 +174,7 @@ File &FileRef::dataAllowingUnsafe(GlobalState &gs) const {
 bool FileRef::isPackage(const GlobalState &gs) const {
     ENFORCE(gs.files[_id]);
     ENFORCE(gs.files[_id]->sourceType != File::Type::TombStone);
-    return dataAllowingUnsafe(gs).isPackage();
+    return dataAllowingUnsafe(gs).isPackage(gs);
 }
 
 string_view File::path() const {
@@ -206,10 +213,17 @@ bool File::permitOverloadDefinitions() const {
     return this->isRBI() || FileOps::getFileName(this->path()) == OVERLOADS_TEST_RB || this->isStdlib();
 }
 
-bool File::isPackage() const {
+bool File::hasPackageRbPath() const {
+    return flags.hasPackageRbPath && this->strictLevel != StrictLevel::Ignore;
+}
+
+bool File::isPackage(const GlobalState &gs) const {
     // If the `__package.rb` file is at `typed: ignore`, then we haven't even parsed it.
     // Any loop over "all package files" really only wants "all non-ignored package files."
-    return flags.isPackage && this->strictLevel != StrictLevel::Ignore;
+    //
+    // Checks `packageDB()` last because probably we have better locality on the `flags` for the
+    // common case of this not being a `__package.rb` file.
+    return hasPackageRbPath() && gs.packageDB().enabled();
 }
 
 bool File::isOpenInClient() const {
@@ -220,29 +234,30 @@ void File::setIsOpenInClient(bool isOpenInClient) {
     this->flags.isOpenInClient = isOpenInClient;
 }
 
-absl::Span<const int> File::lineBreaks() const {
+absl::Span<const uint32_t> File::lineBreaks() const {
     ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);
     auto ptr = atomic_load(&lineBreaks_);
     if (ptr != nullptr) {
         return absl::MakeSpan(*ptr);
     } else {
-        auto my = make_shared<vector<int>>(findLineBreaks(this->source_));
+        auto my = make_shared<vector<uint32_t>>(findLineBreaks(this->source_));
         atomic_compare_exchange_weak(&lineBreaks_, &ptr, my);
         return lineBreaks();
     }
 }
 
 int File::lineCount() const {
-    return lineBreaks().size() - 1;
+    return lineBreaks().size();
 }
 
+// 1-indexed line number
 string_view File::getLine(int i) const {
     auto lineBreaks = this->lineBreaks();
-    ENFORCE(i < lineBreaks.size());
+    ENFORCE(i <= lineBreaks.size());
     ENFORCE(i > 0);
-    auto start = lineBreaks[i - 1] + 1;
-    auto end = lineBreaks[i];
+    auto start = i == 1 ? 0 : lineBreaks[i - 2] + 1;
+    auto end = lineBreaks[i - 1];
     return source().substr(start, end - start);
 }
 
@@ -272,8 +287,12 @@ bool File::isPackagedTest() const {
     return flags.isPackagedTest;
 }
 
+bool File::isPackagedTestHelper() const {
+    return flags.isPackagedTestHelper;
+}
+
 bool File::isPackageRBI() const {
-    return flags.isPackageRBI;
+    return flags.hasPackageRBIPath;
 }
 
 bool File::hasIndexErrors() const {
@@ -282,14 +301,6 @@ bool File::hasIndexErrors() const {
 
 void File::setHasIndexErrors(bool value) {
     flags.hasIndexErrors = value;
-}
-
-bool File::cached() const {
-    return flags.cached;
-}
-
-void File::setCached(bool value) {
-    flags.cached = value;
 }
 
 bool File::isPackaged() const {

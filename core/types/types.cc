@@ -326,6 +326,12 @@ TypePtr Types::dropLiteral(const GlobalState &gs, const TypePtr &tp) {
 TypePtr Types::lubAll(const GlobalState &gs, const vector<TypePtr> &elements) {
     TypePtr acc = Types::bottom();
     for (auto &el : elements) {
+        // The only time that `Types::lub` produces a proxy_type is if the two proxy types are
+        // equivalent: `:foo | :foo`. If they're not equivalent, we widen. There are no
+        // `:foo | :bar` types produced by `lub`, so `widen` is unnecessary.
+        //
+        // Which means that to remove all literals, it's sufficient to do a single `dropLiteral`
+        // at the call `lubAll` call site.
         acc = Types::lub(gs, acc, el);
     }
     return acc;
@@ -347,6 +353,12 @@ TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &elem) {
     return make_type<AppliedType>(Symbols::Hash(), move(targs));
 }
 
+TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &key, const TypePtr &val) {
+    vector<TypePtr> tupleArgs{key, val};
+    vector<TypePtr> targs{key, val, make_type<TupleType>(move(tupleArgs))};
+    return make_type<AppliedType>(Symbols::Hash(), move(targs));
+}
+
 TypePtr Types::setOf(const TypePtr &elem) {
     vector<TypePtr> targs{elem};
     return make_type<AppliedType>(Symbols::Set(), move(targs));
@@ -364,13 +376,13 @@ TypePtr Types::dropNil(const GlobalState &gs, const TypePtr &from) {
     return Types::dropSubtypesOf(gs, from, toDrop);
 }
 
-std::optional<int> Types::getProcArity(const AppliedType &type) {
+optional<int> Types::getProcArity(const AppliedType &type) {
     for (int i = 0; i <= Symbols::MAX_PROC_ARITY; i++) {
         if (type.klass == Symbols::Proc(i)) {
             return i;
         }
     }
-    return std::nullopt;
+    return nullopt;
 }
 
 ClassType::ClassType(ClassOrModuleRef symbol) : symbol(symbol) {
@@ -477,7 +489,7 @@ OrType::OrType(const TypePtr &left, const TypePtr &right) : left(move(left)), ri
 void TupleType::_sanityCheck(const GlobalState &gs) const {
     sanityCheckProxyType(gs, underlying(gs));
     auto underlying = this->underlying(gs);
-    auto *applied = cast_type<AppliedType>(underlying);
+    auto applied = cast_type<AppliedType>(underlying);
     ENFORCE(applied);
     ENFORCE(applied->klass == Symbols::Array());
 }
@@ -495,7 +507,7 @@ TypePtr ShapeType::underlying(const GlobalState &gs) const {
     return Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeUnderlying());
 }
 
-std::optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
+optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
     if (isa_type<NamedLiteralType>(t)) {
         const auto &lit = cast_type_nonnull<NamedLiteralType>(t);
         return this->indexForKey(lit);
@@ -508,10 +520,10 @@ std::optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
         auto &lit = cast_type_nonnull<FloatLiteralType>(t);
         return this->indexForKey(lit);
     }
-    return std::nullopt;
+    return nullopt;
 }
 
-std::optional<size_t> ShapeType::indexForKey(const NamedLiteralType &lit) const {
+optional<size_t> ShapeType::indexForKey(const NamedLiteralType &lit) const {
     auto fnd = absl::c_find_if(this->keys, [&lit](const auto &candidate) -> bool {
         if (!isa_type<NamedLiteralType>(candidate)) {
             return false;
@@ -520,12 +532,12 @@ std::optional<size_t> ShapeType::indexForKey(const NamedLiteralType &lit) const 
         return candlit.equals(lit);
     });
     if (fnd == this->keys.end()) {
-        return std::nullopt;
+        return nullopt;
     }
     return std::distance(this->keys.begin(), fnd);
 }
 
-std::optional<size_t> ShapeType::indexForKey(const IntegerLiteralType &lit) const {
+optional<size_t> ShapeType::indexForKey(const IntegerLiteralType &lit) const {
     auto fnd = absl::c_find_if(keys, [&](auto &candidate) -> bool {
         if (!isa_type<IntegerLiteralType>(candidate)) {
             return false;
@@ -534,12 +546,12 @@ std::optional<size_t> ShapeType::indexForKey(const IntegerLiteralType &lit) cons
         return candlit.equals(lit);
     });
     if (fnd == this->keys.end()) {
-        return std::nullopt;
+        return nullopt;
     }
     return std::distance(this->keys.begin(), fnd);
 }
 
-std::optional<size_t> ShapeType::indexForKey(const FloatLiteralType &lit) const {
+optional<size_t> ShapeType::indexForKey(const FloatLiteralType &lit) const {
     auto fnd = absl::c_find_if(keys, [&](auto &candidate) -> bool {
         if (!isa_type<FloatLiteralType>(candidate)) {
             return false;
@@ -548,7 +560,7 @@ std::optional<size_t> ShapeType::indexForKey(const FloatLiteralType &lit) const 
         return candlit.equals(lit);
     });
     if (fnd == this->keys.end()) {
-        return std::nullopt;
+        return nullopt;
     }
     return std::distance(this->keys.begin(), fnd);
 }
@@ -691,7 +703,7 @@ TypePtr Types::getProcReturnType(const GlobalState &gs, const TypePtr &procType)
     if (!procType.derivesFrom(gs, Symbols::Proc())) {
         return Types::untypedUntracked();
     }
-    auto *applied = cast_type<AppliedType>(procType);
+    auto applied = cast_type<AppliedType>(procType);
     if (applied == nullptr || applied->targs.empty()) {
         return Types::untypedUntracked();
     }
@@ -728,10 +740,6 @@ MetaType::MetaType(const TypePtr &wrapped) : wrapped(move(wrapped)) {
 
 bool MetaType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     return false;
-}
-
-TypePtr MetaType::underlying(const GlobalState &gs) const {
-    return Types::Object();
 }
 
 TypeVar::TypeVar(TypeArgumentRef sym) : sym(sym) {
@@ -800,7 +808,7 @@ optional<int> SendAndBlockLink::fixedArity() const {
     optional<int> arity = 0;
     for (auto &arg : argFlags) {
         if (arg.isKeyword || arg.isDefault || arg.isRepeated) {
-            arity = std::nullopt;
+            arity = nullopt;
             break;
         }
         arity = *arity + 1;
@@ -810,7 +818,7 @@ optional<int> SendAndBlockLink::fixedArity() const {
 
 TypePtr TupleType::elementType(const GlobalState &gs) const {
     auto underlying = this->underlying(gs);
-    auto *ap = cast_type<AppliedType>(underlying);
+    auto ap = cast_type<AppliedType>(underlying);
     ENFORCE(ap);
     ENFORCE(ap->klass == Symbols::Array());
     ENFORCE(ap->targs.size() == 1);
@@ -858,7 +866,7 @@ TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
 
 namespace {
 vector<TypePtr> unwrapTypeVector(Context ctx, const vector<TypePtr> &elems) {
-    std::vector<TypePtr> unwrapped;
+    vector<TypePtr> unwrapped;
     unwrapped.reserve(elems.size());
     for (auto &e : elems) {
         unwrapped.emplace_back(Types::unwrapSelfTypeParam(ctx, e));
@@ -919,7 +927,7 @@ core::ClassOrModuleRef Types::getRepresentedClass(const GlobalState &gs, const T
         auto s = cast_type_nonnull<ClassType>(ty);
         singleton = s.symbol;
     } else {
-        auto *at = cast_type<AppliedType>(ty);
+        auto at = cast_type<AppliedType>(ty);
         if (at == nullptr) {
             return core::Symbols::noClassOrModule();
         }
@@ -930,7 +938,7 @@ core::ClassOrModuleRef Types::getRepresentedClass(const GlobalState &gs, const T
 }
 
 TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
-    if (auto *metaType = cast_type<MetaType>(tp)) {
+    if (auto metaType = cast_type<MetaType>(tp)) {
         return metaType->wrapped;
     }
 
@@ -966,7 +974,7 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
         return attachedClass.data(gs)->externalType();
     }
 
-    if (auto *appType = cast_type<AppliedType>(tp)) {
+    if (auto appType = cast_type<AppliedType>(tp)) {
         ClassOrModuleRef attachedClass = appType->klass.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
             if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
@@ -978,14 +986,14 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
         return attachedClass.data(gs)->externalType();
     }
 
-    if (auto *shapeType = cast_type<ShapeType>(tp)) {
+    if (auto shapeType = cast_type<ShapeType>(tp)) {
         vector<TypePtr> unwrappedValues;
         unwrappedValues.reserve(shapeType->values.size());
         for (auto &value : shapeType->values) {
             unwrappedValues.emplace_back(unwrapType(gs, loc, value));
         }
         return make_type<ShapeType>(shapeType->keys, move(unwrappedValues));
-    } else if (auto *tupleType = cast_type<TupleType>(tp)) {
+    } else if (auto tupleType = cast_type<TupleType>(tp)) {
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(tupleType->elems.size());
         for (auto &elem : tupleType->elems) {
@@ -1036,18 +1044,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
         }
     }
 
-    // This is a hack. In single package RBI generation mode we exclude all source files that are
-    // not in the package we're generating RBIs for, and just recover from the fact that certain
-    // things are missing. So it might look like the `A` in `A[...]` does not resolve, and single
-    // package RBI generation mode simply says "ok I'll make a fake stub constant." It then uses how
-    // UnresolvedAppliedType works (which was invented for a slightly related reason: correct fast path
-    // hashing) to take care of the applied type.
-    //
-    // Because of all of this, we don't actually want to report this error in single package RBI
-    // generation mode.
-    bool singlePackageRbiGeneration = gs.singlePackageImports.has_value();
-
-    if (!singlePackageRbiGeneration && (numPosArgs != arity || arity == 0)) {
+    if (numPosArgs != arity || arity == 0) {
         auto squareBracketsLoc = core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
         auto errLoc =
             !locs.args.empty() ? core::Loc(locs.file, locs.args.front().join(locs.args.back())) : squareBracketsLoc;
@@ -1080,7 +1077,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
 
         auto memData = mem.data(gs);
 
-        auto *memType = cast_type<LambdaParam>(memData->resultType);
+        auto memType = cast_type<LambdaParam>(memData->resultType);
         ENFORCE(memType != nullptr);
 
         if (memData->flags.isFixed) {
@@ -1102,8 +1099,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
                                 mem.showFullName(gs));
                     e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs), "upper",
                                    memType->upperBound.show(gs));
-                    TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector, memType->upperBound,
-                                                              argType);
+                    e.addErrorSections(move(errorDetailsCollector));
                 }
             }
 
@@ -1117,8 +1113,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
                                 mem.showFullName(gs));
                     e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs), "lower",
                                    memType->lowerBound.show(gs));
-                    TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector2, memType->lowerBound,
-                                                              argType);
+                    e.addErrorSections(move(errorDetailsCollector2));
                 }
             }
 

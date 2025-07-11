@@ -1,0 +1,69 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C HasPrivate><<C <todo sym>>> < (::<todo sym>)
+    <self>.private(def my_private<<todo method>>(&<blk>)
+        <emptyTree>
+      end)
+  end
+
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
+
+    def foo<<todo method>>(&<blk>)
+      nil
+    end
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C HasPrivate>))
+    end
+
+    def get_private<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def bar<<todo method>>(&<blk>)
+      begin
+        a = <emptyTree>::<C A>.new()
+        if begin
+            &&$2 = a.foo()
+            if &&$2
+              ::<Magic>.<check-and-and>(a.foo(), :even?, &&$2)
+            else
+              &&$2
+            end
+          end
+          <self>.puts(a.foo())
+        else
+          <emptyTree>
+        end
+        if begin
+            &&$3 = <self>.foo()
+            if &&$3
+              ::<Magic>.<check-and-and>(<self>.foo(), :even?, &&$3)
+            else
+              &&$3
+            end
+          end
+          <self>.puts(a.foo())
+        else
+          <emptyTree>
+        end
+        if begin
+            &&$4 = a.get_private()
+            if &&$4
+              ::<Magic>.<check-and-and>(a.get_private(), :my_private, &&$4)
+            else
+              &&$4
+            end
+          end
+          <self>.puts(a.foo())
+        else
+          <emptyTree>
+        end
+      end
+    end
+  end
+end

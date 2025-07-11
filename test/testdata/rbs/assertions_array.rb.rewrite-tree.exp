@@ -1,0 +1,35 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  arr1 = [<cast:cast>(1, <todo sym>, <emptyTree>::<C String>), <cast:cast>(2, <todo sym>, <emptyTree>::<C String>), <cast:cast>([<cast:cast>(3, <todo sym>, <emptyTree>::<C String>)], <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))]
+
+  <emptyTree>::<C T>.reveal_type(arr1)
+
+  <cast:let>([1, 2], <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+
+  arr2 = <cast:let>([], <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+
+  <emptyTree>::<C T>.reveal_type(arr2)
+
+  arr3 = <cast:let>(::<Magic>.<splat>(arr2), <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+
+  <emptyTree>::<C T>.reveal_type(arr3)
+
+  arr4 = ::<Magic>.<splat>(<cast:cast>(arr2, <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C String>)))
+
+  <emptyTree>::<C T>.reveal_type(arr4)
+
+  arr5 = <cast:let>([begin
+      <hashTemp>$2 = ::<Magic>.<to-hash-dup>({:a => 1})
+      <hashTemp>$2
+    end], <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C T>::<C Hash>.<syntheticSquareBrackets>(<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>)))
+
+  <emptyTree>::<C T>.reveal_type(arr5)
+
+  arr_nil = <cast:let>({}, <todo sym>, ::<root>::<C T>.nilable(::<root>::<C T>::<C Hash>.<syntheticSquareBrackets>(<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>)))
+
+  arr6 = [begin
+      <hashTemp>$5 = ::<Magic>.<to-hash-dup>(::<root>::<C T>.must(arr_nil))
+      <hashTemp>$5
+    end]
+
+  <emptyTree>::<C T>.reveal_type(arr6)
+end

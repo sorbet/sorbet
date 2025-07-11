@@ -6,7 +6,6 @@ test.rb:3: Revealed type: `T.class_of(Net::BufferedIO)` https://srb.help/7014
      3 |T.reveal_type(Net::BufferedIO)
                       ^^^^^^^^^^^^^^^
 Errors: 1
---no-stdlib is incompatible with --cache-dir. Ignoring cache
 test.rb:3: Unable to resolve constant `BufferedIO` https://srb.help/5002
      3 |T.reveal_type(Net::BufferedIO)
                       ^^^^^^^^^^^^^^^

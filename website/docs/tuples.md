@@ -9,14 +9,9 @@ title: Tuples
 [Type1, Type2, ...]
 ```
 
-This creates a fixed array type (also referred to as a tuple), which is a
-fixed-length array with known types for each element. For example,
-`[String, T.nilable(Float)]` validates that an object is an array of exactly
-length 2, with the first item being a `String` and the second item being a
-`Float` or `nil`.
+This creates a fixed array type (also referred to as a tuple), which is a fixed-length array with known types for each element. For example, `[String, T.nilable(Float)]` validates that an object is an array of exactly length 2, with the first item being a `String` and the second item being a `Float` or `nil`.
 
-> **Warning**: Tuples have many known limitations, and should be considered an
-> experimental feature. They may not work as expected or change without notice.
+> **Warning**: Tuples have many known limitations, and should be considered an experimental feature. They may not work as expected or change without notice.
 
 ```ruby
 ##
@@ -26,7 +21,7 @@ length 2, with the first item being a `String` and the second item being a
 
 extend T::Sig
 
-sig {params(x: [Integer, String]).returns(Integer)}
+sig { params(x: [Integer, String]).returns(Integer) }
 def foo(x)
   T.reveal_type(x[0]) # Revealed type: `Integer`
 end
@@ -55,5 +50,4 @@ end
   → View on sorbet.run
 </a>
 
-sorbet internals note: the underlying of a tuple is an Array of the union of
-each element type.
+sorbet internals note: the underlying of a tuple is an Array of the union of each element type.

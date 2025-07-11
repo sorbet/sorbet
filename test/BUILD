@@ -1,4 +1,5 @@
 load("//tools:clang.bzl", "clang_tool")  # todo: this should be decoupled and use the library toolchain, not the compiler one
+load(":pipeline_test.bzl", "pipeline_tests")
 
 clang_tool("llvm-symbolizer")
 
@@ -177,6 +178,31 @@ cc_test(
         "//local_vars",
         "//packager",
         "//parser",
+        "//test/helpers",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
+    ],
+)
+
+cc_test(
+    name = "pkg-condensation-test",
+    size = "small",
+    srcs = ["pkg_condensation_test.cc"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//ast",
+        "//ast/desugar",
+        "//common",
+        "//common/concurrency",
+        "//core",
+        "//local_vars",
+        "//packager",
+        "//parser",
+        "//test/helpers",
         "@doctest//doctest",
         "@doctest//doctest:main",
     ],
@@ -197,6 +223,27 @@ cc_test(
         "//common",
         "//core",
         "//parser",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
+    ],
+)
+
+cc_test(
+    name = "cancelable-indexer-test",
+    size = "small",
+    srcs = ["cancelable-indexer-test.cc"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//ast",
+        "//common",
+        "//core",
+        "//main/options",
+        "//main/pipeline",
+        "//payload",
         "@doctest//doctest",
         "@doctest//doctest:main",
     ],
@@ -230,18 +277,6 @@ cc_binary(
     }),
     visibility = ["//tools:__pkg__"],
     deps = ["//common"],
-)
-
-load(":pipeline_test.bzl", "pipeline_tests", "single_package_rbi_test")
-
-filegroup(
-    name = "rbi_gen_files",
-    srcs = glob(["testdata/packager/rbi_gen_files/**/*.rb"]),
-)
-
-single_package_rbi_test(
-    name = "end_to_end_rbi_test",
-    rb_files = ["//test:rbi_gen_files"],
 )
 
 pipeline_tests(
@@ -292,6 +327,9 @@ pipeline_tests(
 
             # Sorbets' parser incorrectly accepts invalid syntax
             "testdata/desugar/pattern_matching_hash.rb", # See https://github.com/Shopify/sorbet/issues/362
+
+            # RBS rewriting is not yet supported for Prism. https://github.com/Shopify/sorbet/issues/574
+            "testdata/rbs/**/*.rb",
         ],
     ),
     "PrismPosTests",

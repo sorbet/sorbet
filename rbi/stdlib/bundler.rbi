@@ -190,6 +190,9 @@ module Bundler
   sig {returns(T.untyped)}
   def self.original_env(); end
 
+  sig { params(args: T.untyped).returns(T.nilable(T::Boolean)) }
+  def self.original_system(*args); end
+
   sig do
     params(
       file: T.untyped,

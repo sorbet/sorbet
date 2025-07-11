@@ -4,8 +4,7 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-WatchmanStateEnterTask::WatchmanStateEnterTask(const LSPConfiguration &config,
-                                               std::unique_ptr<WatchmanStateEnter> params)
+WatchmanStateEnterTask::WatchmanStateEnterTask(const LSPConfiguration &config, unique_ptr<WatchmanStateEnter> params)
     : LSPTask(config, LSPMethod::SorbetWatchmanStateEnter), params(move(params)) {}
 
 LSPTask::Phase WatchmanStateEnterTask::finalPhase() const {

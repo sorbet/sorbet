@@ -1,0 +1,24 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <emptyTree>::<C ARGV>.each() do |x|
+    <cast:cast>(x, <todo sym>, <emptyTree>::<C String>)
+  end
+
+  <emptyTree>::<C ARGV>.each() do |x|
+    begin
+      <cast:cast>(x, <todo sym>, <emptyTree>::<C String>)
+      <self>.puts(x)
+    end
+  end
+
+  <cast:let>(<emptyTree>::<C ARGV>, <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C String>)).each() do |x|
+    <emptyTree>
+  end
+
+  <cast:cast>(<emptyTree>::<C ARGV>.each() do |x|
+    <emptyTree>
+  end, <todo sym>, <emptyTree>::<C String>)
+
+  y = <cast:cast>(<emptyTree>::<C ARGV>.each() do |x|
+    <emptyTree>
+  end, <todo sym>, <emptyTree>::<C String>)
+end

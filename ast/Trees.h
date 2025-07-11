@@ -66,6 +66,7 @@ enum class Tag {
     Block,
     InsSeq,
     RuntimeMethodDefinition,
+    Self,
 };
 
 // A mapping from tree type to its corresponding tag.
@@ -227,7 +228,7 @@ public:
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
 
@@ -274,10 +275,30 @@ struct ParsedFile {
     ExpressionPtr tree;
     core::FileRef file;
 
+    struct Flags {
+        // if 'true' file is completely cached in kvstore
+        bool cached : 1;
+
+        Flags() : cached{false} {}
+    };
+
+    Flags flags;
+
+    ParsedFile() = default;
+    ParsedFile(ast::ExpressionPtr tree, core::FileRef file) : tree{std::move(tree)}, file{file}, flags{} {}
+
     void swap(ParsedFile &other) noexcept {
         using std::swap;
         this->tree.swap(other.tree);
         swap(this->file, other.file);
+    }
+
+    bool cached() const {
+        return this->flags.cached;
+    }
+
+    void setCached(bool cached) {
+        this->flags.cached = cached;
     }
 };
 
@@ -398,7 +419,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -428,7 +449,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -449,7 +470,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -469,7 +490,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -488,7 +509,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -505,7 +526,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -524,7 +545,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -543,7 +564,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -570,7 +591,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -596,7 +617,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -615,7 +636,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -641,7 +662,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -660,7 +681,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -679,7 +700,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -699,7 +720,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -718,7 +739,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -737,7 +758,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -757,7 +778,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -849,7 +870,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     // Add the given positional argument as the last positional argument.
     void addPosArg(ExpressionPtr ptr);
@@ -1026,7 +1047,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -1049,7 +1070,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -1071,7 +1092,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -1090,7 +1111,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
     bool isString() const;
     bool isSymbol() const;
     bool isName() const;
@@ -1119,37 +1140,263 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
 CheckSize(UnresolvedConstantLit, 24, 8);
 
 EXPRESSION(ConstantLit) {
+private:
+    // This is a lot of complexity, but codebases can have a large number of resolved constants,
+    // so we put in some work to ensure that these take up the minimal amount of space possible.
+    //
+    // A ConstantLit can be in one of three states:
+    //
+    // 1. A known constant that we create ourselves (e.g. core::Symbols::root()).  This requires
+    //    12 bytes of storage:
+    //
+    //    struct KnownSymbol {
+    //        core::SymbolRef sym;
+    //        core::LocOffsets loc;
+    //    };
+    //
+    //    The loc is actually important to propagate information into later passes and to ensure
+    //    that various ENFORCEs around loc consistency hold.
+    //
+    // 2. A resolved constant.  We cheat a little bit here because this is actually encompassing
+    //    both a constant that we are attempting to resolve and a constant that we have finished
+    //    resolving.  This requires 16 bytes of storage due to alignment requirements:
+    //
+    //    struct ResolvedSymbol {
+    //        core::SymbolRef sym;
+    //        std::unique_ptr<UnresolvedConstantLit> original;
+    //    };
+    //
+    //    The loc for this constant is derivable from `original`.
+    //
+    // 3. A constant that we attempted to resolve, but resolution failed.  This requires 16
+    //    bytes of storage.
+    //
+    //    struct FailedResolutionSymbol {
+    //        std::unique_ptr<std::vector<core::SymbolRef>> resolutionScopes;
+    //        std::unique_ptr<UnresolvedConstantLit> original;
+    //    };
+    //
+    //    We transition the second case -- where the second case is representing a symbol that
+    //    is in the process of resolving -- to this case, and then we never transition out.
+    //
+    // We can represent all three of these in 16 bytes of space by doing a bunch of manual
+    // pointer tagging.
+    enum class Tag : uint8_t {
+        KnownSymbol = 1,
+        ResolvedSymbol,
+        FailedResolutionSymbol,
+    };
+
+    struct Storage {
+        using tagged_storage = uint64_t;
+
+        static constexpr tagged_storage TAG_MASK = 0xffff;
+        static constexpr tagged_storage PTR_MASK = ~TAG_MASK;
+
+        // This member is a tagged quantity; its upper 48 bits will be either a raw symbol
+        // ID or a pointer to a vector of SymbolRefs representing the resolution scopes
+        // for a constant that failed to resolve.
+        //
+        // The tag determines the value for both this member and ptr2.
+        tagged_storage ptr1;
+        // This member is either a LocOffsets (in the case of a known symbol) or a pointer
+        // to the associated UnresolvedConstantLit.
+        tagged_storage ptr2;
+
+        tagged_storage untaggedPtr1() const noexcept {
+            auto val = ptr1 & PTR_MASK;
+            return val >> 16;
+        }
+
+        Tag tag() const {
+            auto value = ptr1 & TAG_MASK;
+            return static_cast<Tag>(value);
+        }
+
+        static tagged_storage tagValue(Tag tag, tagged_storage value) {
+            auto tagval = static_cast<tagged_storage>(tag);
+            auto shifted = value << 16;
+
+            return shifted | tagval;
+        }
+
+        static tagged_storage tagSymbol(Tag tag, core::SymbolRef symbol) {
+            return tagValue(tag, static_cast<tagged_storage>(symbol.rawId()));
+        }
+
+        static tagged_storage tagPtr(Tag tag, void *ptr) {
+            return tagValue(tag, reinterpret_cast<tagged_storage>(ptr));
+        }
+
+        static tagged_storage allocateResolutionScopes() {
+            return tagPtr(Tag::FailedResolutionSymbol, new std::vector<core::SymbolRef>());
+        }
+
+        Storage(core::LocOffsets loc, core::SymbolRef symbol) : ptr1(tagSymbol(Tag::KnownSymbol, symbol)) {
+            static_assert(sizeof(loc) == sizeof(ptr2), "LocOffsets is too big to fit!");
+            new (&ptr2) core::LocOffsets(loc);
+        }
+
+        Storage(core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original)
+            : ptr1(tagSymbol(Tag::ResolvedSymbol, symbol)), ptr2(reinterpret_cast<tagged_storage>(original.release())) {
+        }
+
+        ~Storage() {
+            switch (tag()) {
+                case Tag::KnownSymbol: {
+                    // ptr1 just holds the raw ID for the symbol, so only delete LocOffsets.
+                    auto *p = reinterpret_cast<core::LocOffsets *>(&ptr2);
+                    p->~LocOffsets();
+                    break;
+                }
+                case Tag::ResolvedSymbol: {
+                    // ptr1 just holds the raw ID for the symbol.
+                    auto *ucl = original();
+                    delete ucl;
+                    break;
+                }
+                case Tag::FailedResolutionSymbol: {
+                    auto *scopes = resolutionScopes();
+                    delete scopes;
+                    auto *ucl = original();
+                    delete ucl;
+                    break;
+                }
+            }
+        }
+
+        UnresolvedConstantLit *original() {
+            switch (tag()) {
+                case Tag::KnownSymbol:
+                    return nullptr;
+                case Tag::ResolvedSymbol:
+                case Tag::FailedResolutionSymbol:
+                    return reinterpret_cast<UnresolvedConstantLit *>(ptr2);
+            }
+        }
+
+        const UnresolvedConstantLit *original() const {
+            switch (tag()) {
+                case Tag::KnownSymbol:
+                    return nullptr;
+                case Tag::ResolvedSymbol:
+                case Tag::FailedResolutionSymbol:
+                    return reinterpret_cast<const UnresolvedConstantLit *>(ptr2);
+            }
+        }
+
+        core::LocOffsets loc() const {
+            switch (tag()) {
+                case Tag::KnownSymbol:
+                    return *reinterpret_cast<const core::LocOffsets *>(&ptr2);
+                case Tag::ResolvedSymbol:
+                case Tag::FailedResolutionSymbol:
+                    return original()->loc;
+            }
+        }
+
+        core::SymbolRef symbol() const {
+            switch (tag()) {
+                case Tag::KnownSymbol:
+                case Tag::ResolvedSymbol:
+                    return core::SymbolRef::fromRaw(static_cast<uint32_t>(untaggedPtr1()));
+                case Tag::FailedResolutionSymbol:
+                    return core::Symbols::StubModule();
+            }
+        }
+
+        std::vector<core::SymbolRef> *resolutionScopes() {
+            switch (tag()) {
+                case Tag::KnownSymbol:
+                case Tag::ResolvedSymbol:
+                    return nullptr;
+                case Tag::FailedResolutionSymbol:
+                    return reinterpret_cast<std::vector<core::SymbolRef> *>(untaggedPtr1());
+            }
+        }
+
+        const std::vector<core::SymbolRef> *resolutionScopes() const {
+            switch (tag()) {
+                case Tag::KnownSymbol:
+                case Tag::ResolvedSymbol:
+                    return nullptr;
+                case Tag::FailedResolutionSymbol:
+                    return reinterpret_cast<const std::vector<core::SymbolRef> *>(untaggedPtr1());
+            }
+        }
+
+        void setSymbol(core::SymbolRef sym) {
+            ENFORCE(tag() == Tag::ResolvedSymbol);
+            ENFORCE(sym != core::Symbols::StubModule());
+            ptr1 = tagSymbol(Tag::ResolvedSymbol, sym);
+        }
+
+        void markUnresolved() {
+            ENFORCE(tag() == Tag::ResolvedSymbol);
+            if (tag() == Tag::ResolvedSymbol) {
+                ptr1 = allocateResolutionScopes();
+                ENFORCE(tag() == Tag::FailedResolutionSymbol);
+            }
+        }
+    };
+
+    Storage storage;
+
 public:
-    const core::LocOffsets loc;
-
-    core::SymbolRef symbol; // If this is a normal constant. This symbol may be already dealiased.
-    // For constants that failed resolution, symbol will be set to StubModule and resolutionScopes
-    // will be set to whatever nesting scope we estimate the constant could have been defined in.
-    // For resolved symbols, `resolutionScopes` is null.
-    using ResolutionScopes = InlinedVector<core::SymbolRef, 1>;
-    std::unique_ptr<ResolutionScopes> resolutionScopes;
-    std::unique_ptr<UnresolvedConstantLit> original;
-
-    ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
+    ConstantLit(core::LocOffsets loc, core::SymbolRef symbol);
+    ConstantLit(core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
 
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
     std::optional<std::pair<core::SymbolRef, std::vector<core::NameRef>>> fullUnresolvedPath(core::Context ctx) const;
+
+    core::LocOffsets loc() const {
+        return storage.loc();
+    }
+
+    core::SymbolRef symbol() const {
+        return storage.symbol();
+    }
+
+    void setSymbol(core::SymbolRef symbol) {
+        storage.setSymbol(symbol);
+    }
+
+    std::vector<core::SymbolRef> *resolutionScopes() {
+        return storage.resolutionScopes();
+    }
+
+    const std::vector<core::SymbolRef> *resolutionScopes() const {
+        return storage.resolutionScopes();
+    }
+
+    // Marks this constant as unresolved and allocates a vector for `resolutionScopes`.
+    void markUnresolved() {
+        storage.markUnresolved();
+    }
+
+    UnresolvedConstantLit *original() {
+        return storage.original();
+    }
+
+    const UnresolvedConstantLit *original() const {
+        return storage.original();
+    }
 
     void _sanityCheck();
 };
-CheckSize(ConstantLit, 32, 8);
+CheckSize(ConstantLit, 16, 8);
 
 EXPRESSION(ZSuperArgs) {
 public:
@@ -1163,7 +1410,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -1183,7 +1430,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
     void _sanityCheck();
 };
 CheckSize(Block, 40, 8);
@@ -1207,7 +1454,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
@@ -1228,11 +1475,28 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };
 CheckSize(RuntimeMethodDefinition, 16, 8);
+
+EXPRESSION(Self) {
+public:
+    const core::LocOffsets loc;
+
+    Self(core::LocOffsets loc);
+
+    ExpressionPtr deepCopy() const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
+
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string_view nodeName() const;
+
+    void _sanityCheck();
+};
+CheckSize(Self, 8, 8);
 
 EXPRESSION(EmptyTree) {
 public:
@@ -1245,7 +1509,7 @@ public:
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
-    std::string nodeName() const;
+    std::string_view nodeName() const;
 
     void _sanityCheck();
 };

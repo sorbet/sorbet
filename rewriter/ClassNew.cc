@@ -5,6 +5,7 @@
 #include "core/Names.h"
 #include "core/core.h"
 #include "rewriter/rewriter.h"
+#include "rewriter/util/Util.h"
 
 using namespace std;
 
@@ -23,7 +24,7 @@ bool isRewrittenBind(ast::ExpressionPtr &expr) {
 vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *asgn) {
     vector<ast::ExpressionPtr> empty;
 
-    if (ctx.state.runningUnderAutogen) {
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         // This is not safe to run under autogen, because we'd be outputting
         // autoloader files that predeclare the class and cause "warning:
         // already initialized constant" errors
@@ -40,13 +41,11 @@ vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *
         return empty;
     }
 
-    auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv);
-    if (recv == nullptr) {
+    if (!ASTUtil::isRootScopedSyntacticConstant(send->recv, {core::Names::Constants::Class()})) {
         return empty;
     }
 
-    if (!ast::isa_tree<ast::EmptyTree>(recv->scope) || recv->cnst != core::Names::Constants::Class() ||
-        send->fun != core::Names::new_()) {
+    if (send->fun != core::Names::new_()) {
         return empty;
     }
 
@@ -98,13 +97,11 @@ vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *
 }
 
 bool ClassNew::run(core::MutableContext ctx, ast::Send *send) {
-    auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv);
-    if (recv == nullptr) {
+    if (!ASTUtil::isRootScopedSyntacticConstant(send->recv, {core::Names::Constants::Class()})) {
         return false;
     }
 
-    if (!ast::isa_tree<ast::EmptyTree>(recv->scope) || recv->cnst != core::Names::Constants::Class() ||
-        send->fun != core::Names::new_()) {
+    if (send->fun != core::Names::new_()) {
         return false;
     }
 

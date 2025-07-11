@@ -1,0 +1,11 @@
+test/cli/not_stripe_packages/__package.rb:2: Unable to resolve constant `DoesNotExist` https://srb.help/5002
+     2 |DoesNotExist
+        ^^^^^^^^^^^^
+  Did you mean `SystemExit`? Use `-a` to autocorrect
+    test/cli/not_stripe_packages/__package.rb:2: Replace with `SystemExit`
+     2 |DoesNotExist
+        ^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/errors.rbi#LCENSORED: `SystemExit` defined here
+      NN |class SystemExit < Exception
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 1

@@ -1,0 +1,28 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    def returns_nilable<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+  end
+
+  if begin
+      &&$2 = <emptyTree>::<C A>.new().returns_nilable()
+      if &&$2
+        ::<Magic>.<check-and-and>(<emptyTree>::<C A>.new().returns_nilable(), :start_with?, &&$2, "prefix")
+      else
+        &&$2
+      end
+    end
+    <self>.puts("yup")
+  else
+    <self>.puts("nope")
+  end
+end

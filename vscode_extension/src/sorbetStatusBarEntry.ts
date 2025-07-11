@@ -1,4 +1,3 @@
-import * as Spinner from "elegant-spinner";
 import { Disposable, StatusBarAlignment, StatusBarItem, window } from "vscode";
 
 import { SHOW_ACTIONS_COMMAND_ID } from "./commandIds";
@@ -10,14 +9,11 @@ export class SorbetStatusBarEntry implements Disposable {
   private readonly context: SorbetExtensionContext;
   private readonly disposable: Disposable;
   private serverStatus: ServerStatus;
-  private readonly spinner: () => string;
-  private spinnerTimer?: NodeJS.Timer;
   private readonly statusBarItem: StatusBarItem;
 
   constructor(context: SorbetExtensionContext) {
     this.context = context;
     this.serverStatus = ServerStatus.DISABLED;
-    this.spinner = Spinner();
     this.statusBarItem = window.createStatusBarItem(
       StatusBarAlignment.Left,
       10,
@@ -56,15 +52,6 @@ export class SorbetStatusBarEntry implements Disposable {
     }
   }
 
-  private getSpinner() {
-    if (this.spinnerTimer) {
-      clearTimeout(this.spinnerTimer);
-    }
-    // Animate the spinner with setTimeout.
-    this.spinnerTimer = setTimeout(() => this.render(), 250);
-    return this.spinner();
-  }
-
   private render() {
     const { operations } = this.context.statusProvider;
     const { activeLspConfig } = this.context.configuration;
@@ -79,7 +66,7 @@ export class SorbetStatusBarEntry implements Disposable {
       operations.length > 0
     ) {
       const latestOp = operations[operations.length - 1];
-      text = `${sorbetName}: ${latestOp.description} ${this.getSpinner()}`;
+      text = `${sorbetName}: ${latestOp.description} $(sync~spin)`;
       tooltip = "The Sorbet server is currently running.";
     } else {
       switch (this.serverStatus) {
@@ -96,11 +83,11 @@ export class SorbetStatusBarEntry implements Disposable {
           }
           break;
         case ServerStatus.INITIALIZING:
-          text = `${sorbetName}: Initializing ${this.getSpinner()}`;
+          text = `${sorbetName}: Initializing $(sync~spin)`;
           tooltip = "The Sorbet server is initializing.";
           break;
         case ServerStatus.RESTARTING:
-          text = `${sorbetName}: Restarting ${this.getSpinner()}`;
+          text = `${sorbetName}: Restarting $(sync~spin)`;
           tooltip = "The Sorbet server is restarting.";
           break;
         case ServerStatus.RUNNING:
@@ -108,7 +95,7 @@ export class SorbetStatusBarEntry implements Disposable {
           tooltip = "The Sorbet server is currently running.";
           break;
         default:
-          this.context.log.error(`Invalid ServerStatus: ${this.serverStatus}`);
+          this.context.log.error("Invalid ServerStatus", this.serverStatus);
           text = "";
           tooltip = "";
           break;

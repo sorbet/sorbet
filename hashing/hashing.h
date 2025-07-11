@@ -10,7 +10,7 @@ class OwnedKeyValueStore;
 }
 
 namespace sorbet::ast {
-struct ParsedFile;
+class ParsedFilesOrCancelled;
 }
 
 namespace sorbet::realmain::options {
@@ -48,10 +48,10 @@ public:
      *
      * Note: ASTs are returned in `FileRef` order (not input order).
      */
-    static std::vector<ast::ParsedFile>
+    static ast::ParsedFilesOrCancelled
     indexAndComputeFileHashes(core::GlobalState &gs, const realmain::options::Options &opts, spdlog::logger &logger,
-                              absl::Span<core::FileRef> files, WorkerPool &workers,
-                              const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
+                              absl::Span<const core::FileRef> files, WorkerPool &workers,
+                              const std::unique_ptr<const OwnedKeyValueStore> &kvstore, bool cancelable = false);
 };
 } // namespace sorbet::hashing
 

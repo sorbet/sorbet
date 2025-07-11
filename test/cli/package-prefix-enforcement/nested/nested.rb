@@ -64,3 +64,8 @@ module ::TopLevel
     end
   end
 end
+
+Root::X = 1
+Root::Nested::X = 1
+Root = 1
+Root::Nested = 1

@@ -1,0 +1,91 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  if <emptyTree>::<C ARGV>.any?()
+    if1 = <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+  else
+    <emptyTree>
+  end
+
+  if <emptyTree>::<C ARGV>.any?()
+    begin
+      if2 = <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+      <self>.puts(if2)
+    end
+  else
+    <emptyTree>
+  end
+
+  if <emptyTree>::<C ARGV>.empty?()
+    <emptyTree>
+  else
+    if3 = <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+  end
+
+  if <emptyTree>::<C ARGV>.empty?()
+    begin
+      if4 = <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+      <self>.puts(if4)
+    end
+  else
+    <emptyTree>
+  end
+
+  if5 = if <emptyTree>::<C ARGV>.empty?()
+    <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+  else
+    <emptyTree>
+  end
+
+  <emptyTree>::<C T>.reveal_type(if5)
+
+  if6 = if <emptyTree>::<C ARGV>.empty?()
+    <emptyTree>
+  else
+    <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+  end
+
+  <emptyTree>::<C T>.reveal_type(if6)
+
+  if7 = if <emptyTree>::<C ARGV>.empty?()
+    <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C Integer>)
+  else
+    <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+  end
+
+  <emptyTree>::<C T>.reveal_type(if7)
+
+  if8 = <cast:cast>(if <emptyTree>::<C ARGV>.empty?()
+    <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C Integer>)
+  else
+    <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+  end, <todo sym>, <emptyTree>::<C Float>)
+
+  <emptyTree>::<C T>.reveal_type(if8)
+
+  if9 = if <cast:cast>(<emptyTree>::<C ARGV>.empty?(), <todo sym>, <emptyTree>::<C Integer>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if <emptyTree>::<C ARGV>.size().==(1)
+    <cast:let>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C Integer>)
+  else
+    if <emptyTree>::<C ARGV>.size().==(2)
+      <cast:let>([<emptyTree>::<C ARGV>.shift(), <emptyTree>::<C ARGV>.shift()], <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+    else
+      <cast:let>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C NilClass>)
+    end
+  end
+
+  <cast:let>(if <emptyTree>::<C ARGV>.any?()
+    42
+  else
+    <emptyTree>
+  end, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+
+  <cast:let>(if <emptyTree>::<C ARGV>.empty?()
+    <emptyTree>
+  else
+    42
+  end, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+end

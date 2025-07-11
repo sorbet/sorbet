@@ -66,8 +66,6 @@ struct NameRefDebugCheck {
     void check(const NameSubstitution &subst) const;
 };
 
-constexpr std::string_view PACKAGE_SUFFIX = "_Package";
-
 class NameRef final : private DebugOnlyCheck<NameRefDebugCheck> {
 private:
     // NameKind takes up this many bits in _id.

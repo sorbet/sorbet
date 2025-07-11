@@ -12,6 +12,7 @@ import {
 import { toggleTypedFalseCompletionNudges } from "./commands/toggleTypedFalseCompletionNudges";
 import { getLogLevelFromEnvironment, LogLevel } from "./log";
 import { SorbetContentProvider, SORBET_SCHEME } from "./sorbetContentProvider";
+import { SorbetExtensionApiImpl } from "./sorbetExtensionApi";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { SorbetStatusBarEntry } from "./sorbetStatusBarEntry";
 import { ServerStatus, RestartReason } from "./types";
@@ -19,9 +20,9 @@ import { ServerStatus, RestartReason } from "./types";
 /**
  * Extension entrypoint.
  */
-export function activate(context: ExtensionContext) {
+export async function activate(context: ExtensionContext) {
   const sorbetExtensionContext = new SorbetExtensionContext(context);
-  sorbetExtensionContext.log.level = getLogLevelFromEnvironment();
+  sorbetExtensionContext.log.logLevel = getLogLevelFromEnvironment();
 
   context.subscriptions.push(
     sorbetExtensionContext,
@@ -97,5 +98,10 @@ export function activate(context: ExtensionContext) {
   );
 
   // Start the extension.
-  return sorbetExtensionContext.statusProvider.startSorbet();
+  await sorbetExtensionContext.statusProvider.startSorbet();
+
+  // This exposes Sorbet Extension API.
+  const api = new SorbetExtensionApiImpl(sorbetExtensionContext);
+  context.subscriptions.push(api);
+  return api.toApi();
 }

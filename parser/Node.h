@@ -21,8 +21,9 @@ public:
     virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0) = 0;
     virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0) = 0;
-    virtual std::string nodeName() = 0;
+    virtual std::string nodeName() const = 0;
     core::LocOffsets loc;
+    std::unique_ptr<Node> deepCopy() const;
 
 protected:
     void printTabs(fmt::memory_buffer &to, int count) const;
@@ -37,15 +38,9 @@ protected:
 };
 
 template <class To> To *cast_node(Node *what) {
-    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
-    static_assert(std::is_assignable<Node *&, To *>::value, "Ill Formed To, has to be a subclass of Expression");
-#if __cplusplus >= 201402L
-    static_assert(std::is_final<To>::value, "To is not final");
-#elif __has_feature(is_final)
-    static_assert(__is_final(To), "To is not final");
-#else
-    static_assert(false);
-#endif
+    static_assert(!std::is_pointer_v<To>, "To has to be a pointer");
+    static_assert(std::is_assignable_v<Node *&, To *>, "Ill Formed To, has to be a subclass of Expression");
+    static_assert(std::is_final_v<To>, "To is not final");
     return fast_cast<Node, To>(what);
 }
 

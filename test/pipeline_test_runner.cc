@@ -36,10 +36,12 @@
 #include "main/pipeline/pipeline.h"
 #include "namer/namer.h"
 #include "packager/packager.h"
-#include "packager/rbi_gen.h"
 #include "parser/parser.h"
 #include "parser/prism/Parser.h"
 #include "payload/binary/binary.h"
+#include "payload/payload.h"
+#include "rbs/AssertionsRewriter.h"
+#include "rbs/SigsRewriter.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -56,8 +58,8 @@
 #include <sys/types.h>
 #include <vector>
 
-namespace sorbet::test {
 using namespace std;
+namespace sorbet::test {
 
 string singleTest;
 realmain::options::Parser parser;
@@ -90,6 +92,7 @@ UnorderedSet<string> knownExpectations = {"parse-tree",
                                           "parse-tree-json",
                                           "parse-tree-json-with-locs",
                                           "parse-tree-whitequark",
+                                          "rbs-rewrite-tree",
                                           "desugar-tree",
                                           "desugar-tree-raw",
                                           "rewrite-tree",
@@ -204,19 +207,19 @@ public:
     }
 };
 
-vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core::FileRef> files,
-                              ExpectationHandler &handler, Expectations &test) {
+vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> files, ExpectationHandler &handler,
+                              Expectations &test) {
     vector<ast::ParsedFile> trees;
     for (auto file : files) {
-        auto fileName = FileOps::getFileName(file.data(*gs).path());
-        if (fileName != whitelistedTypedNoneTest && (fileName != packageFileName || !file.data(*gs).source().empty()) &&
-            file.data(*gs).source().find("# typed:") == string::npos) {
-            ADD_FAIL_CHECK_AT(file.data(*gs).path().data(), 1, "Add a `# typed: strict` line to the top of this file");
+        auto fileName = FileOps::getFileName(file.data(gs).path());
+        if (fileName != whitelistedTypedNoneTest && (fileName != packageFileName || !file.data(gs).source().empty()) &&
+            file.data(gs).source().find("# typed:") == string::npos) {
+            ADD_FAIL_CHECK_AT(file.data(gs).path().data(), 1, "Add a `# typed: strict` line to the top of this file");
         }
 
         // if a file is typed: ignore, then we shouldn't try to parse
         // it or do anything with it at all
-        if (file.data(*gs).strictLevel == core::StrictLevel::Ignore) {
+        if (file.data(gs).strictLevel == core::StrictLevel::Ignore) {
             ast::ParsedFile pf{ast::make_expression<ast::EmptyTree>(), file};
             trees.emplace_back(move(pf));
             continue;
@@ -225,63 +228,64 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
         unique_ptr<parser::Node> nodes;
         switch (parser) {
             case realmain::options::Parser::ORIGINAL: {
-                core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
-
-                nodes = parser::Parser::run(*gs, file, parser::Parser::Settings{});
+                core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+                auto settings = parser::Parser::Settings{false, false, false, gs.cacheSensitiveOptions.rbsEnabled};
+                auto parseResult = parser::Parser::run(gs, file, settings);
+                nodes = move(parseResult.tree);
                 break;
             }
             case realmain::options::Parser::PRISM: {
-                core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
+                core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-                nodes = parser::Prism::Parser::run(*gs, file);
+                nodes = parser::Prism::Parser::run(gs, file);
+                // parseResult = parser::Parser::ParseResult{move(nodes), {}};
                 break;
             }
         }
 
-        handler.drainErrors(*gs);
-        handler.addObserved(*gs, "parse-tree", [&]() { return nodes->toString(*gs); });
-        handler.addObserved(*gs, "parse-tree-whitequark", [&]() { return nodes->toWhitequark(*gs); });
-        handler.addObserved(*gs, "parse-tree-json", [&]() { return nodes->toJSON(*gs); });
-        handler.addObserved(*gs, "parse-tree-json-with-locs", [&]() { return nodes->toJSONWithLocs(*gs, file); });
+        handler.drainErrors(gs);
+        handler.addObserved(gs, "parse-tree", [&]() { return nodes->toString(gs); });
+        handler.addObserved(gs, "parse-tree-whitequark", [&]() { return nodes->toWhitequark(gs); });
+        handler.addObserved(gs, "parse-tree-json", [&]() { return nodes->toJSON(gs); });
 
         // Desugarer
         ast::ParsedFile desugared;
         {
-            core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
+            core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            core::MutableContext ctx(*gs, core::Symbols::root(), file);
-            desugared = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
+            core::MutableContext ctx(gs, core::Symbols::root(), file);
+            desugared = testSerialize(gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
         }
 
-        handler.addObserved(*gs, "desugar-tree", [&]() { return desugared.tree.toString(*gs); });
-        handler.addObserved(*gs, "desugar-tree-raw", [&]() { return desugared.tree.showRaw(*gs); });
+        handler.addObserved(gs, "desugar-tree", [&]() { return desugared.tree.toString(gs); });
+        handler.addObserved(gs, "desugar-tree-raw", [&]() { return desugared.tree.showRaw(gs); });
 
         ast::ParsedFile localNamed;
 
         // Rewriter
         ast::ParsedFile rewritten;
         {
-            core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
+            core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
-            bool previous = gs->runningUnderAutogen;
-            gs->runningUnderAutogen = test.expectations.contains("autogen");
+            core::MutableContext ctx(gs, core::Symbols::root(), desugared.file);
+            bool previous = gs.cacheSensitiveOptions.runningUnderAutogen;
+            gs.cacheSensitiveOptions.runningUnderAutogen = test.expectations.contains("autogen");
             rewritten =
-                testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
-            gs->runningUnderAutogen = previous;
+                testSerialize(gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
+            gs.cacheSensitiveOptions.runningUnderAutogen = previous;
         }
 
-        handler.addObserved(*gs, "rewrite-tree", [&]() { return rewritten.tree.toString(*gs); });
-        handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return rewritten.tree.showRaw(*gs); });
+        handler.addObserved(gs, "rewrite-tree", [&]() { return rewritten.tree.toString(gs); });
+        handler.addObserved(gs, "rewrite-tree-raw", [&]() { return rewritten.tree.showRaw(gs); });
 
         {
-            core::UnfreezeNameTable nameTableAccess(*gs); // possibly enters mangled names
-            core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
-            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewritten)));
+            core::UnfreezeNameTable nameTableAccess(gs); // possibly enters mangled names
+            core::MutableContext ctx(gs, core::Symbols::root(), desugared.file);
+            localNamed = testSerialize(gs, local_vars::LocalVars::run(ctx, move(rewritten)));
         }
 
-        handler.addObserved(*gs, "index-tree", [&]() { return localNamed.tree.toString(*gs); });
-        handler.addObserved(*gs, "index-tree-raw", [&]() { return localNamed.tree.showRaw(*gs); });
+        handler.addObserved(gs, "index-tree", [&]() { return localNamed.tree.toString(gs); });
+        handler.addObserved(gs, "index-tree-raw", [&]() { return localNamed.tree.showRaw(gs); });
 
         trees.emplace_back(move(localNamed));
     }
@@ -289,61 +293,17 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
     return trees;
 }
 
-void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAssertion>> &assertions) {
-    vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
-    vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
-    vector<std::string> extraPackageFilesDirectorySlashPrefixes;
-    vector<std::string> skipRBIExportEnforcementDirs;
-    vector<std::string> allowRelaxedPackagerChecksFor;
-
-    auto extraDirUnderscore =
-        StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
-    if (extraDirUnderscore.has_value()) {
-        extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
-    }
-
-    auto extraDirSlashDeprecated =
-        StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash-deprecated", assertions);
-    if (extraDirSlashDeprecated.has_value()) {
-        extraPackageFilesDirectorySlashDeprecatedPrefixes.emplace_back(extraDirSlashDeprecated.value());
-    }
-
-    auto extraDirSlash = StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
-    if (extraDirSlash.has_value()) {
-        extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
-    }
-
-    auto allowRelaxedPackager = StringPropertyAssertion::getValue("allow-relaxed-packager-checks-for", assertions);
-    if (allowRelaxedPackager.has_value()) {
-        allowRelaxedPackagerChecksFor.emplace_back(allowRelaxedPackager.value());
-    }
-
-    std::vector<std::string> defaultLayers = {};
-    auto packagerLayers = StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
-
-    {
-        core::UnfreezeNameTable packageNS(*gs);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-        gs->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                               extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                               extraPackageFilesDirectorySlashPrefixes, {}, allowRelaxedPackagerChecksFor,
-                               packagerLayers, "PACKAGE_ERROR_HINT");
-    }
-}
-
-void package(unique_ptr<core::GlobalState> &gs, unique_ptr<WorkerPool> &workers, absl::Span<ast::ParsedFile> trees,
+void package(core::GlobalState &gs, unique_ptr<WorkerPool> &workers, absl::Span<ast::ParsedFile> trees,
              ExpectationHandler &handler, vector<shared_ptr<RangeAssertion>> &assertions) {
-    auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
-
-    if (!enablePackager) {
+    if (!gs.packageDB().enabled()) {
         return;
     }
 
     // Packager runs over all trees.
-    packager::Packager::run(*gs, *workers, trees);
+    packager::Packager::run(gs, *workers, trees);
     for (auto &tree : trees) {
-        handler.addObserved(*gs, "package-tree", [&]() {
-            return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
+        handler.addObserved(gs, "package-tree", [&]() {
+            return fmt::format("# -- {} --\n{}", tree.file.data(gs).path(), tree.tree.toString(gs));
         });
     }
 }
@@ -368,50 +328,30 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
     }
 
+    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    auto opts = RangeAssertion::parseOptions(assertions);
+    opts.censorForSnapshotTests = true;
+    opts.stripePackagesHint = "PACKAGE_ERROR_HINT";
+
     auto logger = spdlog::stderr_color_mt("fixtures: " + inputPath);
+    auto workers = WorkerPool::create(0, *logger);
     auto errorCollector = make_shared<core::ErrorCollector>();
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
     auto gs = make_unique<core::GlobalState>(errorQueue);
 
+    unique_ptr<const OwnedKeyValueStore> kvstore = nullptr;
+    payload::createInitialGlobalState(*gs, opts, kvstore);
+    realmain::pipeline::setGlobalStateOptions(*gs, opts);
+
     for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
         gs->semanticExtensions.emplace_back(provider->defaultInstance());
-    }
-
-    gs->censorForSnapshotTests = true;
-    auto workers = WorkerPool::create(0, gs->tracer());
-
-    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
-
-    gs->requiresAncestorEnabled =
-        BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
-    gs->ruby3KeywordArgs =
-        BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
-    gs->typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
-    // TODO(jez) Allow allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
-
-    if (!BooleanPropertyAssertion::getValue("uniquely-defined-behavior", assertions).value_or(false)) {
-        gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
-    }
-
-    if (!BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false)) {
-        gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
-    }
-
-    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
-        gs->initEmpty();
-    } else {
-        core::serialize::Serializer::loadGlobalState(*gs, GLOBAL_STATE_PAYLOAD);
-    }
-
-    if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
-        gs->suggestUnsafe = "T.unsafe";
     }
 
     unique_ptr<core::GlobalState> emptyGs;
     if (!test.minimizeRBI.empty() || test.expectations.contains("rbi-gen")) {
         // Copy GlobalState after initializing it, but before rest of pipeline, so that it
         // represents an "empty" GlobalState.
-        emptyGs = gs->deepCopy();
+        emptyGs = gs->deepCopyGlobalState();
     }
 
     // Read files
@@ -432,114 +372,23 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     ExpectationHandler handler(test, errorQueue, errorCollector);
-    auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
 
     vector<ast::ParsedFile> trees;
     auto filesSpan = absl::Span<core::FileRef>(files);
-    if (enablePackager) {
-        setupPackager(gs, assertions);
-
+    if (opts.cacheSensitiveOptions.stripePackages) {
         auto numPackageFiles = realmain::pipeline::partitionPackageFiles(*gs, filesSpan);
         auto inputPackageFiles = filesSpan.first(numPackageFiles);
         filesSpan = filesSpan.subspan(numPackageFiles);
 
-        trees = index(gs, inputPackageFiles, handler, test);
-
-        // First run: only the __package.rb files. This populates the packageDB
-        package(gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
-        name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
+        trees = index(*gs, inputPackageFiles, handler, test);
     }
 
-    auto nonPackageTrees = index(gs, filesSpan, handler, test);
-    package(gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
+    auto nonPackageTrees = index(*gs, filesSpan, handler, test);
+    name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
+    package(*gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
     name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
+    package(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
-
-    if (enablePackager) {
-        if (test.expectations.contains("rbi-gen")) {
-            auto rbiGenGs = emptyGs->deepCopy();
-            rbiGenGs->errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
-            // If there is a rbi-gen exp file, we need to retypecheck the files w/o packager mode and run RBI
-            // generation for every package.
-            vector<core::FileRef> files;
-            {
-                core::UnfreezeFileTable fileTableAccess(*rbiGenGs);
-
-                for (auto &sourceFile : test.sourceFiles) {
-                    auto fref = rbiGenGs->enterFile(test.sourceFileContents[test.folder + sourceFile]);
-                    files.emplace_back(fref);
-                }
-            }
-
-            vector<ast::ParsedFile> trees;
-            vector<ast::ParsedFile> packageTrees;
-            // Index
-            for (auto file : files) {
-                core::UnfreezeNameTable nameTableAccess(*rbiGenGs); // enters original strings
-
-                unique_ptr<parser::Node> nodes;
-                switch (parser) {
-                    case realmain::options::Parser::ORIGINAL: {
-                        nodes = parser::Parser::run(*rbiGenGs, file, parser::Parser::Settings{});
-                        break;
-                    }
-                    case realmain::options::Parser::PRISM: {
-                        nodes = parser::Prism::Parser::run(*rbiGenGs, file);
-                        break;
-                    }
-                }
-
-                core::MutableContext ctx(*rbiGenGs, core::Symbols::root(), file);
-                auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file};
-                tree = ast::ParsedFile{rewriter::Rewriter::run(ctx, move(tree.tree)), tree.file};
-                tree = testSerialize(*rbiGenGs, local_vars::LocalVars::run(ctx, move(tree)));
-
-                if (tree.file.data(*rbiGenGs).isPackage()) {
-                    packageTrees.emplace_back(move(tree));
-                } else {
-                    trees.emplace_back(move(tree));
-                }
-            }
-
-            // Initialize the package DB
-            packager::Packager::findPackages(*rbiGenGs, absl::Span<ast::ParsedFile>(packageTrees));
-            packager::Packager::setPackageNameOnFiles(*rbiGenGs, packageTrees);
-            packager::Packager::setPackageNameOnFiles(*rbiGenGs, trees);
-
-            // Namer
-            {
-                core::UnfreezeNameTable nameTableAccess(*rbiGenGs);     // creates singletons and class names
-                core::UnfreezeSymbolTable symbolTableAccess(*rbiGenGs); // enters symbols
-                auto foundHashes = nullptr;
-                auto canceled = namer::Namer::run(*rbiGenGs, absl::Span<ast::ParsedFile>(trees), *workers, foundHashes);
-                ENFORCE(!canceled);
-            }
-
-            // Resolver
-            {
-                core::UnfreezeNameTable nameTableAccess(*rbiGenGs);     // Resolver::defineAttr
-                core::UnfreezeSymbolTable symbolTableAccess(*rbiGenGs); // enters stubs
-                trees = move(resolver::Resolver::run(*rbiGenGs, move(trees), *workers).result());
-            }
-            // RBI generation
-            {
-                auto packageNamespaces = packager::RBIGenerator::buildPackageNamespace(*rbiGenGs, *workers);
-                for (auto &package : rbiGenGs->packageDB().packages()) {
-                    auto output = packager::RBIGenerator::runOnce(*rbiGenGs, package, packageNamespaces);
-                    if (!output.rbi.empty()) {
-                        handler.addObserved(*rbiGenGs, "rbi-gen", [&]() {
-                            return absl::StrCat("# ", test.folder, output.baseFilePath, ".rbi\n", output.rbi);
-                        });
-                    }
-                    if (!output.testRBI.empty()) {
-                        handler.addObserved(*rbiGenGs, "rbi-gen", [&]() {
-                            return absl::StrCat("# ", test.folder, output.baseFilePath, ".test.rbi\n", output.testRBI);
-                        });
-                    }
-                }
-            }
-        }
-    }
 
     for (auto &tree : trees) {
         // Namer
@@ -566,7 +415,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 for (auto &tree : trees) {
                     core::Context ctx(*gs, core::Symbols::root(), tree.file);
                     auto pf = autogen::Autogen::generate(ctx, move(tree), autogen::AutogenConfig{{}}, *crcBuilder);
-                    tree = move(pf.tree);
                     payload << pf.toString(ctx, autogen::AutogenVersion::MAX_VERSION);
                 }
                 return payload.str();
@@ -583,7 +431,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
         trees = move(resolver::Resolver::run(*gs, move(trees), *workers).result());
 
-        if (enablePackager) {
+        if (opts.cacheSensitiveOptions.stripePackages) {
             trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
         }
 
@@ -599,11 +447,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     if (!test.minimizeRBI.empty()) {
-        auto gsForMinimize = emptyGs->deepCopy();
+        auto gsForMinimize = emptyGs->deepCopyGlobalState();
         auto opts = realmain::options::Options{};
         opts.parser = parser;
         auto minimizeRBI = test.folder + test.minimizeRBI;
-        realmain::Minimize::indexAndResolveForMinimize(gs, gsForMinimize, opts, *workers, minimizeRBI);
+        realmain::Minimize::indexAndResolveForMinimize(*gs, *gsForMinimize, opts, *workers, minimizeRBI);
         auto printerConfig = realmain::options::PrinterConfig{};
         printerConfig.enabled = true;
         printerConfig.outputPath = "/dev/null"; // tricks PrinterConfig::print into buffering
@@ -745,7 +593,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             *gs, "autocorrects",
             [&]() {
                 fmt::memory_buffer buf;
-                for (const auto &file : files) {
+                auto sortedFiles = files; // copy
+                fast_sort(sortedFiles, [&](const auto &lhs, const auto &rhs) -> bool {
+                    return lhs.data(*gs).path() < rhs.data(*gs).path();
+                });
+                for (const auto &file : sortedFiles) {
                     string editedSource;
                     if (toWrite.contains(file)) {
                         editedSource = toWrite[file];
@@ -818,23 +670,37 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             make_shared<core::File>(string(f.file.data(*gs).path()), move(newSource), f.file.data(*gs).sourceType);
         gs->replaceFile(f.file, move(newFile));
 
+        core::MutableContext ctx(*gs, core::Symbols::root(), f.file);
+
         // this replicates the logic of pipeline::indexOne
         unique_ptr<parser::Node> nodes;
+        parser::Parser::ParseResult parseResult;
         switch (parser) {
             case realmain::options::Parser::ORIGINAL: {
-                nodes = parser::Parser::run(*gs, f.file, parser::Parser::Settings{});
+                auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsEnabled};
+                parseResult = parser::Parser::run(*gs, f.file, settings);
+                nodes = move(parseResult.tree);
                 break;
             }
             case realmain::options::Parser::PRISM: {
-                nodes = parser::Prism::Parser::run(*gs, f.file);
+                nodes = parser::Prism::Parser::run(ctx, f.file);
                 break;
             }
         }
 
-        handler.addObserved(*gs, "parse-tree", [&]() { return nodes->toString(*gs); });
-        handler.addObserved(*gs, "parse-tree-json", [&]() { return nodes->toJSON(*gs); });
+        if (gs->cacheSensitiveOptions.rbsEnabled) {
+            auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
+            auto commentMap = associator.run(parseResult.tree);
 
-        core::MutableContext ctx(*gs, core::Symbols::root(), f.file);
+            auto rbsSignatures = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
+            parseResult.tree = rbsSignatures.run(std::move(parseResult.tree));
+
+            auto rbsAssertions = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
+            parseResult.tree = rbsAssertions.run(std::move(parseResult.tree));
+        }
+
+        handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return nodes->toString(*gs); });
+
         ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
         handler.addObserved(*gs, "desguar-tree", [&]() { return file.tree.toString(*gs); });
         handler.addObserved(*gs, "desugar-tree-raw", [&]() { return file.tree.showRaw(*gs); });
@@ -853,16 +719,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
     trees = move(newTrees);
     fast_sort(trees, [](auto &lhs, auto &rhs) { return lhs.file < rhs.file; });
-
-    if (enablePackager) {
-        absl::c_stable_partition(trees, [&](const auto &pf) { return pf.file.isPackage(*gs); });
-        trees = packager::Packager::runIncremental(*gs, move(trees), *workers);
-        for (auto &tree : trees) {
-            handler.addObserved(*gs, "package-tree", [&]() {
-                return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
-            });
-        }
-    }
 
     bool ranIncrementalNamer = false;
     {
@@ -888,14 +744,27 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
     }
 
-    // resolver
-    {
-        core::UnfreezeNameTable nameTableAccess(*gs);
-        core::UnfreezeSymbolTable symbolTableAccess(*gs);
-        trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncrementalNamer, *workers).result());
+    if (opts.cacheSensitiveOptions.stripePackages) {
+        absl::c_stable_partition(trees, [&](const auto &pf) { return pf.file.isPackage(*gs); });
+        trees = packager::Packager::runIncremental(*gs, move(trees), *workers);
+        for (auto &tree : trees) {
+            handler.addObserved(*gs, "package-tree", [&]() {
+                return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
+            });
+        }
     }
 
-    if (enablePackager) {
+    // resolver
+    {
+        vector<core::ClassOrModuleRef> recomputeNoSymbols;
+        core::UnfreezeNameTable nameTableAccess(*gs);
+        core::UnfreezeSymbolTable symbolTableAccess(*gs);
+        trees =
+            move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncrementalNamer, *workers, recomputeNoSymbols)
+                     .result());
+    }
+
+    if (opts.cacheSensitiveOptions.stripePackages) {
         trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
     }
 
@@ -920,9 +789,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 int main(int argc, char *argv[]) {
     cxxopts::Options options("test_corpus", "Test corpus for Sorbet typechecker");
     options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
-                                                       cxxopts::value<std::string>()->default_value(""), "testpath");
+                                                       cxxopts::value<string>()->default_value(""), "testpath");
     options.allow_unrecognised_options().add_options()("parser", "The parser to use while testing.",
-                                                       cxxopts::value<std::string>()->default_value("original"),
+                                                       cxxopts::value<string>()->default_value("original"),
                                                        "{original, prism}");
     auto res = options.parse(argc, argv);
 
@@ -931,7 +800,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    sorbet::test::singleTest = res["single_test"].as<std::string>();
+    sorbet::test::singleTest = res["single_test"].as<string>();
 
     auto logger = spdlog::stderr_color_mt("test_runner");
 

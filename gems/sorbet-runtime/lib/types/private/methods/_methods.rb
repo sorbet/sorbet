@@ -25,7 +25,7 @@ module T::Private::Methods
   # twice is permitted).  we could do this with two tables, but it seems slightly
   # cleaner with a single table.
   # Effectively T::Hash[Module, T.nilable(Set))]
-  @modules_with_final = Hash.new {|hash, key| hash[key] = nil}.compare_by_identity
+  @modules_with_final = Hash.new { |hash, key| hash[key] = nil }.compare_by_identity
   # this stores the old [included, extended] hooks for Module and inherited hook for Class that we override when
   # enabling final checks for when those hooks are called. the 'hooks' here don't have anything to do with the 'hooks'
   # in installed_hooks.
@@ -168,7 +168,7 @@ module T::Private::Methods
 
         definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
         is_redefined = target == ancestor
-        caller_loc = T::Private::CallerUtils.find_caller {|loc| !loc.path.to_s.start_with?(SORBET_RUNTIME_LIB_PATH)}
+        caller_loc = T::Private::CallerUtils.find_caller { |loc| !loc.path.to_s.start_with?(SORBET_RUNTIME_LIB_PATH) }
         extra_info = "\n"
         if caller_loc
           extra_info = (is_redefined ? "Redefined" : "Overridden") + " here: #{caller_loc.path}:#{caller_loc.lineno}\n"
@@ -471,7 +471,7 @@ module T::Private::Methods
   end
 
   def self.all_checked_tests_sigs
-    @signatures_by_method.values.select {|sig| sig.check_level == :tests}
+    @signatures_by_method.values.select { |sig| sig.check_level == :tests }
   end
 
   # the module target is adding the methods from the module source to itself. we need to check that for all instance
@@ -587,6 +587,22 @@ module T::Private::Methods
       mod.extend(MethodHooks)
     end
     mod.extend(SingletonMethodHooks)
+  end
+
+  # `name` must be an instance method (for class methods, pass in mod.singleton_class)
+  def self.visibility_method_name(mod, name)
+    if mod.public_method_defined?(name)
+      :public
+    elsif mod.protected_method_defined?(name)
+      :protected
+    elsif mod.private_method_defined?(name)
+      :private
+    else
+      # Raises a NameError formatted like the Ruby VM would (the exact text formatting
+      # of these errors changed across Ruby VM versions, in ways that would sometimes
+      # cause tests to fail if they were dependent on hard coding errors).
+      mod.method(name)
+    end
   end
 
   # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.

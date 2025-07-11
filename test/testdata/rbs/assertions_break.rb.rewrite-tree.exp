@@ -1,0 +1,21 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  while <emptyTree>::<C ARGV>.any?()
+    break(<cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>))
+  end
+
+  while <emptyTree>::<C ARGV>.any?()
+    break(<cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>))
+  end
+
+  while <emptyTree>::<C ARGV>.any?()
+    break(<cast:let>([<emptyTree>::<C ARGV>.shift(), "foo"], <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C String>)))
+  end
+
+  while <emptyTree>::<C ARGV>.any?()
+    break([<cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>), <cast:let>("foo", <todo sym>, <emptyTree>::<C String>)])
+  end
+
+  while <emptyTree>::<C ARGV>.shift()
+    break(<emptyTree>)
+  end
+end

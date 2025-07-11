@@ -1,0 +1,74 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  begin
+    <assignTemp>$2 = <emptyTree>::<C ARGV>.shift()
+    if "foo".===(<assignTemp>$2)
+      <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+    else
+      if "bar".===(<assignTemp>$2)
+        <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+      else
+        <emptyTree>
+      end
+    end
+  end
+
+  begin
+    <assignTemp>$3 = <emptyTree>::<C ARGV>.shift()
+    if "foo".===(<assignTemp>$3)
+      begin
+        <self>.puts("foo")
+        <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+      end
+    else
+      if "bar".===(<assignTemp>$3)
+        begin
+          <self>.puts("bar")
+          <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+        end
+      else
+        <emptyTree>
+      end
+    end
+  end
+
+  begin
+    <assignTemp>$4 = <emptyTree>::<C ARGV>.shift()
+    if "foo".===(<assignTemp>$4)
+      <emptyTree>
+    else
+      begin
+        <self>.puts("else")
+        <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+      end
+    end
+  end
+
+  c1 = <cast:cast>(begin
+    <assignTemp>$5 = <emptyTree>::<C ARGV>.shift()
+    if "foo".===(<assignTemp>$5)
+      <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+    else
+      <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+    end
+  end, <todo sym>, <emptyTree>::<C Integer>)
+
+  <emptyTree>::<C T>.reveal_type(c1)
+
+  begin
+    <assignTemp>$6 = <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+    if "foo".===(<assignTemp>$6)
+      <emptyTree>
+    else
+      <emptyTree>
+    end
+  end
+
+  begin
+    <assignTemp>$7 = <emptyTree>::<C ARGV>.shift()
+    if "foo".===(<assignTemp>$7)
+      <emptyTree>
+    else
+      <cast:cast>(<emptyTree>::<C ARGV>.shift(), <todo sym>, <emptyTree>::<C String>)
+    end
+  end
+end

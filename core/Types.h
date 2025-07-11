@@ -71,14 +71,14 @@ public:
     /** Greater lower bound: the widest type that is subtype of both t1 and t2 */
     static TypePtr all(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
-    /** Lower upper bound: the narrowest type that is super type of both t1 and t2 */
+    /** Lower upper bound: the narrowest type that is supertype of both t1 and t2 */
     static TypePtr any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
     /**
      * is every instance of  t1 an  instance of t2?
      *
      * The parameter `mode` controls whether or not `T.untyped` is
-     * considered to be a super type or subtype of all other types */
+     * considered to be a supertype or subtype of all other types */
 
     /**
      * The `errorDetailsCollector` parameter is used to pass additional details out of isSubType
@@ -106,7 +106,7 @@ public:
     static bool equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                      const TypePtr &t2, T &errorDetailsCollector);
 
-    /** check that t1 <: t2, but do not consider `T.untyped` as super type or a subtype of all other types */
+    /** check that t1 <: t2, but do not consider `T.untyped` as supertype or a subtype of all other types */
     static bool isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     static bool equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
@@ -178,6 +178,7 @@ public:
     static TypePtr arrayOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr rangeOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr hashOf(const GlobalState &gs, const TypePtr &elem);
+    static TypePtr hashOf(const GlobalState &gs, const TypePtr &key, const TypePtr &val);
     static TypePtr setOf(const TypePtr &elem);
     static TypePtr tClass(const TypePtr &attachedClass);
     static TypePtr dropNil(const GlobalState &gs, const TypePtr &from);
@@ -237,20 +238,19 @@ using IntrinsicMethodsDispatchMap = UnorderedMap<NameRef, const std::vector<Name
 const IntrinsicMethodsDispatchMap &intrinsicMethodsDispatchMap();
 
 template <class To> bool isa_type(const TypePtr &what) {
-    return what != nullptr && what.tag() == TypePtr::TypeToTag<To>::value;
+    return bool(what.as_type<To>());
 }
 
 // Specializations to handle the class hierarchy.
 class ClassType;
 template <> inline bool isa_type<ClassType>(const TypePtr &what) {
-    if (what == nullptr) {
-        return false;
-    }
-    switch (what.tag()) {
-        case TypePtr::Tag::ClassType:
-        case TypePtr::Tag::BlamedUntyped:
-        case TypePtr::Tag::UnresolvedClassType:
-        case TypePtr::Tag::UnresolvedAppliedType:
+    auto tag = what.tagMaybeZero();
+
+    switch (tag) {
+        case int(TypePtr::Tag::ClassType):
+        case int(TypePtr::Tag::BlamedUntyped):
+        case int(TypePtr::Tag::UnresolvedClassType):
+        case int(TypePtr::Tag::UnresolvedAppliedType):
             return true;
         default:
             return false;
@@ -295,7 +295,6 @@ inline bool is_proxy_type(const TypePtr &what) {
         case TypePtr::Tag::FloatLiteralType:
         case TypePtr::Tag::ShapeType:
         case TypePtr::Tag::TupleType:
-        case TypePtr::Tag::MetaType:
             return true;
         case TypePtr::Tag::ClassType:
         case TypePtr::Tag::BlamedUntyped:
@@ -309,24 +308,23 @@ inline bool is_proxy_type(const TypePtr &what) {
         case TypePtr::Tag::AliasType:
         case TypePtr::Tag::AppliedType:
         case TypePtr::Tag::TypeVar:
+        case TypePtr::Tag::MetaType:
             return false;
     }
 }
 
-template <class To> To const *cast_type(const TypePtr &what) {
+template <class To> core::UntaggedPtr<const To> cast_type(const TypePtr &what) {
     static_assert(TypePtr::TypeToIsInlined<To>::value == false,
                   "Cast inlined type objects with `cast_type_nonnull`, and use `isa_type` to check if the TypePtr "
                   "contains the type you expect.");
-    if (isa_type<To>(what)) {
-        return reinterpret_cast<To const *>(what.get());
-    } else {
-        return nullptr;
-    }
+    return what.as_type<To>();
 }
 
-template <class To> To *cast_type(TypePtr &what) {
-    // const To* -> To* to avoid reimplementing the same logic twice.
-    return const_cast<To *>(cast_type<To>(static_cast<const TypePtr &>(what)));
+template <class To> core::UntaggedPtr<To> cast_type(TypePtr &what) {
+    static_assert(TypePtr::TypeToIsInlined<To>::value == false,
+                  "Cast inlined type objects with `cast_type_nonnull`, and use `isa_type` to check if the TypePtr "
+                  "contains the type you expect.");
+    return what.as_type<To>();
 }
 
 template <class To> To *cast_type(TypePtr &&what) = delete;
@@ -920,8 +918,6 @@ public:
 
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
-
-    TypePtr underlying(const GlobalState &gs) const;
 };
 CheckSize(MetaType, 16, 8);
 

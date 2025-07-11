@@ -69,6 +69,10 @@ module Warning
   sig {params(category: Symbol, setting: T::Boolean).returns(T::Boolean)}
   def self.[]=(category, setting); end
 
+  # Returns a list of the supported category symbols.
+  sig {returns(T::Array[Symbol])}
+  def self.categories; end
+
   # Writes warning message `msg` to $stderr. This method is called by Ruby for
   # all emitted warnings. A `category` may be included with the warning.
   #

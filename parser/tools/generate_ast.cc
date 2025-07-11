@@ -14,6 +14,7 @@ enum class FieldType {
     Uint,
     Loc,
     Bool,
+    Symbol,
 };
 
 struct FieldDef {
@@ -620,6 +621,12 @@ NodeDef nodes[] = {
         "rational",
         vector<FieldDef>({{"val", FieldType::String}}),
     },
+    // RBS placeholder for a bind comment
+    {
+        "RBSPlaceholder",
+        "rbs_placeholder",
+        vector<FieldDef>({{"kind", FieldType::Name}}),
+    },
     // `redo` keyword
     {
         "Redo",
@@ -649,6 +656,12 @@ NodeDef nodes[] = {
         "Rescue",
         "rescue",
         vector<FieldDef>({{"body", FieldType::Node}, {"rescue", FieldType::NodeVec}, {"else_", FieldType::Node}}),
+    },
+    // A synthetic constant node pre-resolved to a symbol
+    {
+        "ResolvedConst",
+        "resolved_const",
+        vector<FieldDef>({{"symbol", FieldType::Symbol}}),
     },
     // *arg argument inside an (args)
     {
@@ -787,6 +800,8 @@ string constructorArgType(FieldType arg) {
     switch (arg) {
         case FieldType::Name:
             return "core::NameRef";
+        case FieldType::Symbol:
+            return "core::SymbolRef";
         case FieldType::Node:
             return "std::unique_ptr<Node>";
         case FieldType::NodeVec:
@@ -806,6 +821,8 @@ string fieldType(FieldType arg) {
     switch (arg) {
         case FieldType::Name:
             return "core::NameRef";
+        case FieldType::Symbol:
+            return "core::SymbolRef";
         case FieldType::Node:
             return "std::unique_ptr<Node>";
         case FieldType::NodeVec:
@@ -859,14 +876,14 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
     out << "  virtual std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0);"
         << '\n';
     out << "  virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0);" << '\n';
-    out << "  virtual std::string nodeName();" << '\n';
+    out << "  virtual std::string nodeName() const;" << '\n';
 
     out << "};" << '\n';
     out << '\n';
 }
 
 void emitNodeClassfile(ostream &out, NodeDef &node) {
-    out << "  std::string " << node.name << "::nodeName() {" << '\n';
+    out << "  std::string " << node.name << "::nodeName() const {" << '\n';
     out << "    return \"" << node.name << "\";" << '\n';
     out << "  };" << '\n' << '\n';
 
@@ -881,6 +898,10 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
         out << "    printTabs(buf, tabs + 1);" << '\n';
         switch (arg.type) {
             case FieldType::Name:
+                out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = {}\\n\", " << arg.name
+                    << ".showRaw(gs));" << '\n';
+                break;
+            case FieldType::Symbol:
                 out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = {}\\n\", " << arg.name
                     << ".showRaw(gs));" << '\n';
                 break;
@@ -954,6 +975,10 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
                     << maybeComma << "\\n\", JSON::escape(" << arg.name << ".show(gs)));\n";
                 break;
+            case FieldType::Symbol:
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
+                    << maybeComma << "\\n\", JSON::escape(" << arg.name << ".show(gs)));\n";
+                break;
             case FieldType::Node:
                 out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \");\n";
                 out << "    printNodeJSON(buf, " << arg.name << ", gs, tabs + 1);\n";
@@ -1023,6 +1048,10 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
                     << maybeComma << "\\n\", JSON::escape(" << arg.name << ".show(gs)));\n";
                 break;
+            case FieldType::Symbol:
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
+                    << maybeComma << "\\n\", JSON::escape(" << arg.name << ".show(gs)));\n";
+                break;
             case FieldType::Node:
                 out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \");\n";
                 out << "    printNodeJSONWithLocs(buf, " << arg.name << ", gs, file, tabs + 1);\n";
@@ -1084,6 +1113,10 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                     out << "    fmt::format_to(std::back_inserter(buf), \", :{}\", JSON::escape(" << arg.name
                         << ".show(gs)));\n";
                 }
+                break;
+            case FieldType::Symbol:
+                out << "    fmt::format_to(std::back_inserter(buf), \", :{}\", JSON::escape(" << arg.name
+                    << ".show(gs)));\n";
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(std::back_inserter(buf), \",\");\n";

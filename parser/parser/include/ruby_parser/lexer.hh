@@ -59,7 +59,7 @@ private:
     ruby_version version;
     std::string_view source_buffer;
     sorbet::StableStringStorage<> &scratch;
-    const std::vector<int> lineBreaks;
+    const std::vector<uint32_t> lineBreaks;
 
     std::stack<environment> static_env;
     std::stack<literal> literal_stack;
@@ -191,6 +191,9 @@ public:
     state_stack cmdarg;
 
     Context context;
+
+    bool collect_comments = false;
+    std::vector<std::pair<size_t, size_t>> comment_locations;
 
     lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer,
           sorbet::StableStringStorage<> &scratch, bool traceLexer);

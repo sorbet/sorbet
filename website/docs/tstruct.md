@@ -4,9 +4,7 @@ title: Typed Structs via T::Struct
 sidebar_label: T::Struct
 ---
 
-Sorbet includes a way to define typed structs. They behave similarly to the
-[`Struct`] class built into Ruby, but work better with static and runtime type
-checking.
+Sorbet includes a way to define typed structs. They behave similarly to the [`Struct`] class built into Ruby, but work better with static and runtime type checking.
 
 [`struct`]: https://docs.ruby-lang.org/en/master/Struct.html
 
@@ -49,25 +47,19 @@ monetary.amount = 'not an int'
 
 ## Optional properties: `T.nilable`, `default:`, and `factory:`
 
-By default, all `T::Struct` properties are required on initialization. There are
-three ways to mark a property as optional:
+By default, all `T::Struct` properties are required on initialization. There are three ways to mark a property as optional:
 
 1.  Provide a `default: ...` keyword argument to the `prop` or `const`.
 
-    The provided value will be used if that property is omitted at
-    initialization time.
+    The provided value will be used if that property is omitted at initialization time.
 
-2.  Provide a proc or lambda via the `factory: ...` keyword argument on a `prop`
-    or `const`.
+2.  Provide a proc or lambda via the `factory: ...` keyword argument on a `prop` or `const`.
 
-    This is similar to `default:`, but the argument will be called (with no
-    arguments) to produce a default value when needed.
+    This is similar to `default:`, but the argument will be called (with no arguments) to produce a default value when needed.
 
 3.  Declare the prop's type as a `T.nilable(...)` type.
 
-    Not only will this allow the prop's value to include `nil`, but it also
-    implies `default: nil` if no explicit `default:` or `factory:` value is
-    provided.
+    Not only will this allow the prop's value to include `nil`, but it also implies `default: nil` if no explicit `default:` or `factory:` value is provided.
 
 ```ruby
 class OptionalExample < T::Struct
@@ -90,9 +82,7 @@ x.nilable      # => nil
 
 ### Default values and references
 
-To avoid having a default value be shared and mutated by **all** instances of a
-`T::Struct`, certain built-in types are deeply cloned at initialization time.
-Other types that are not built into Ruby have their `.clone` method called.
+To avoid having a default value be shared and mutated by **all** instances of a `T::Struct`, certain built-in types are deeply cloned at initialization time. Other types that are not built into Ruby have their `.clone` method called.
 
 Before we get ahead of ourselves, consider this code:
 
@@ -109,32 +99,16 @@ ex1.vals << 'elem'
 p(ex2.vals)
 ```
 
-It would be surprising if `p(ex2.vals)` printed `['elem']` in this example—it
-would mean that the default of `[]` was shared by reference across all `Example`
-instances, so that updating one instance's `vals` property simultaneously
-affected all of them.
+It would be surprising if `p(ex2.vals)` printed `['elem']` in this example—it would mean that the default of `[]` was shared by reference across all `Example` instances, so that updating one instance's `vals` property simultaneously affected all of them.
 
-To fix this, `T::Struct` takes measures to clone objects, so that they are not
-shared:
+To fix this, `T::Struct` takes measures to clone objects, so that they are not shared:
 
-- `true`, `false`, `nil`, any `Symbol`, any `Numeric`, and `T::Enum` values are
-  either value objects (not reference objects) or are known to be immutable, and
-  so are not cloned when being used as a default.
-- `String` instances that are frozen (according to `frozen?`) are not cloned,
-  for performance. All other `String`s have `.clone` called on them before being
-  used as a default value.
-- `Array` and `Hash` default values are deeply cloned (i.e., Sorbet recursively
-  calls `.clone` not only on the `Array` or `Hash` itself, but also on all their
-  elements).
-- All other default values are simply cloned by calling `.clone` on the provided
-  default.
+- `true`, `false`, `nil`, any `Symbol`, any `Numeric`, and `T::Enum` values are either value objects (not reference objects) or are known to be immutable, and so are not cloned when being used as a default.
+- `String` instances that are frozen (according to `frozen?`) are not cloned, for performance. All other `String`s have `.clone` called on them before being used as a default value.
+- `Array` and `Hash` default values are deeply cloned (i.e., Sorbet recursively calls `.clone` not only on the `Array` or `Hash` itself, but also on all their elements).
+- All other default values are simply cloned by calling `.clone` on the provided default.
 
-These rules prevent the most common misuses of accidentally mutating default
-values via references, but it is still possible to construct cases where the
-above rules are not strong enough. In such cases, use `factory:` to compute the
-default value in whatever way necessary. The value produced by `factory:` is
-used verbatim. (This means that `factory:` can be used when reference sharing
-across default values is actually the _desired_ outcome.)
+These rules prevent the most common misuses of accidentally mutating default values via references, but it is still possible to construct cases where the above rules are not strong enough. In such cases, use `factory:` to compute the default value in whatever way necessary. The value produced by `factory:` is used verbatim. (This means that `factory:` can be used when reference sharing across default values is actually the _desired_ outcome.)
 
 ## Structs and inheritance
 
@@ -148,16 +122,9 @@ end
 class Bad < S; end # error
 ```
 
-Sorbet imposes this limitation somewhat artificially, for performance. Sorbet
-generates a static signature for the `initialize` method of a `T::Struct`
-subclass. In order to do so, it needs to know all `prop`'s defined on the class.
-For performance in large codebases, Sorbet requires that it is possible to know
-which methods are defined on a `T::Struct` class purely based on syntax—Sorbet
-does not allow discovering a `T::Struct`'s properties via ancestor information,
-like the class's superclass or mixins.
+Sorbet imposes this limitation somewhat artificially, for performance. Sorbet generates a static signature for the `initialize` method of a `T::Struct` subclass. In order to do so, it needs to know all `prop`'s defined on the class. For performance in large codebases, Sorbet requires that it is possible to know which methods are defined on a `T::Struct` class purely based on syntax—Sorbet does not allow discovering a `T::Struct`'s properties via ancestor information, like the class's superclass or mixins.
 
-One common situation where inheritance may be desired is when a parent struct
-declares some common props, and child structs declare their own props:
+One common situation where inheritance may be desired is when a parent struct declares some common props, and child structs declare their own props:
 
 ```ruby
 class Parent < T::Struct
@@ -191,17 +158,16 @@ class ChildTwo < T::Struct
 end
 ```
 
-Another option is to define a common interface, and repeat the props in each
-child class:
+Another option is to define a common interface, and repeat the props in each child class:
 
 ```ruby
 module Common
   extend T::Helpers
   extend T::Sig
   interface!
-  sig {abstract.returns(Integer)}
+  sig { abstract.returns(Integer) }
   def foo; end
-  sig {abstract.params(foo: Integer).returns(Integer)}
+  sig { abstract.params(foo: Integer).returns(Integer) }
   def foo=(foo); end
 end
 
@@ -220,13 +186,9 @@ end
 
 If the code absolutely must use inheritance and cannot use composition, either:
 
-- Avoid using `T::Struct`, and instead define a normal class, with things like
-  `attr_reader` and an explicit `initialize` method.
+- Avoid using `T::Struct`, and instead define a normal class, with things like `attr_reader` and an explicit `initialize` method.
 
-- Change the superclass from `T::Struct` to `T::InexactStruct`. This causes
-  Sorbet to no longer statically check the types of any arguments passed to the
-  `initialize` method on the subclass, but does allow defining `T::Struct`
-  hierarchies. This should only be used as a last resort.
+- Change the superclass from `T::Struct` to `T::InexactStruct`. This causes Sorbet to no longer statically check the types of any arguments passed to the `initialize` method on the subclass, but does allow defining `T::Struct` hierarchies. This should only be used as a last resort.
 
 <br>
 
@@ -236,35 +198,17 @@ If the code absolutely must use inheritance and cannot use composition, either:
 
 ## Legacy code and historical context
 
-The `prop` DSL used by `T::Struct` predates Sorbet by about 5 years. It was
-originally conceived at Stripe in early 2013 to form the basis for Stripe's
-internal [object-document mapper][odm] (ODM). By the time Stripe began internal
-development on Sorbet in late 2017, Stripe's ODM was by far the most commonly
-used internal abstraction for associating types with methods. At a time when it
-was not clear that the as-yet-unnamed Ruby type checker project would succeed or
-not, we were eager to build on existing abstractions to bootstrap early type
-coverage.
+The `prop` DSL used by `T::Struct` predates Sorbet by about 5 years. It was originally conceived at Stripe in early 2013 to form the basis for Stripe's internal [object-document mapper][odm] (ODM). By the time Stripe began internal development on Sorbet in late 2017, Stripe's ODM was by far the most commonly used internal abstraction for associating types with methods. At a time when it was not clear that the as-yet-unnamed Ruby type checker project would succeed or not, we were eager to build on existing abstractions to bootstrap early type coverage.
 
-[odm]:
-  https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping#Object-oriented_databases
+[odm]: https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping#Object-oriented_databases
 
-A decision was made to factor the code for the `prop` DSL into a standalone
-library, to allow using it independently of the database-specific code in
-Stripe's ODM library. From this effort, `T::Struct` was born. A `T::Struct` is
-essentially a Stripe [database model] class without the database.
+A decision was made to factor the code for the `prop` DSL into a standalone library, to allow using it independently of the database-specific code in Stripe's ODM library. From this effort, `T::Struct` was born. A `T::Struct` is essentially a Stripe [database model] class without the database.
 
 [database model]: https://en.wikipedia.org/wiki/Database_model
 
-Unfortunately, this process left warts in the publicly-accessible `T::Struct`
-APIs that persist today. Certain parts of the `prop` DSL only make sense when
-used alongside Stripe-internal abstractions. The DSL also contains things that
-are technically publicly accessible that were never meant to be. This legacy
-makes it hard to evolve and improve the `T::Struct` APIs without breaking
-existing code.
+Unfortunately, this process left warts in the publicly-accessible `T::Struct` APIs that persist today. Certain parts of the `prop` DSL only make sense when used alongside Stripe-internal abstractions. The DSL also contains things that are technically publicly accessible that were never meant to be. This legacy makes it hard to evolve and improve the `T::Struct` APIs without breaking existing code.
 
-The remainder of this documentation is presented for completeness. Use the APIs
-below at your own discretion. Our goal here is simply to outline the potential
-pitfalls that arise when using them.
+The remainder of this documentation is presented for completeness. Use the APIs below at your own discretion. Our goal here is simply to outline the potential pitfalls that arise when using them.
 
 ## `serialize` and `from_hash`: Converting `T::Struct` to and from `Hash`
 
@@ -284,9 +228,7 @@ deserialized = A.from_hash(serialized)
 p(deserialized) # => <A foo=42>
 ```
 
-**However, `serialize` and especially `from_hash` are particularly fraught**
-(see the "gotchas" sections below). It's likely better to do manual conversion
-to and from `Hash` values:
+**However, `serialize` and especially `from_hash` are particularly fraught** (see the "gotchas" sections below). It's likely better to do manual conversion to and from `Hash` values:
 
 ```ruby
 # (1) Convert to hashes directly
@@ -305,8 +247,7 @@ A.new(**as_hash)
 
 ### Custom serializations with `name:`
 
-The `name:` option on the `prop` DSL controls the field name that will be used
-when converting to and from `Hash` values:
+The `name:` option on the `prop` DSL controls the field name that will be used when converting to and from `Hash` values:
 
 ```ruby
 class A < T::Struct
@@ -323,13 +264,9 @@ p(deserialized) # <A foo_bar=42>
 
 ### `serialize` gotchas
 
-As mentioned in the [previous section][legacy], the `serialize` behavior was
-inherited from Stripe's internal ODM library, and thus has some warts to be
-aware of:
+As mentioned in the [previous section][legacy], the `serialize` behavior was inherited from Stripe's internal ODM library, and thus has some warts to be aware of:
 
-- The `Hash` has `String`-valued keys, unlike Ruby's `Struct#to_h` method, which
-  produces `Symbol`-valued keys. Even custom names provided with `name:` must be
-  `String`s.
+- The `Hash` has `String`-valued keys, unlike Ruby's `Struct#to_h` method, which produces `Symbol`-valued keys. Even custom names provided with `name:` must be `String`s.
 
 - `nil` properties are omitted from the resulting `Hash`.
 
@@ -356,8 +293,7 @@ aware of:
   # => {"nested"=>{"bar"=>42}, "x_or_y"=>"x"}
   ```
 
-- **However**, [union-typed](union-types.md) properties containing `T::Struct`
-  instances are **not** serialized:
+- **However**, [union-typed](union-types.md) properties containing `T::Struct` instances are **not** serialized:
 
   ```ruby
   class Foo < T::Struct
@@ -377,32 +313,22 @@ aware of:
   p(foo_serialized) # => {"foo_or_bar"=><Foo foo=12>}
   ```
 
-- Same with [generic-typed](generics.md) properties containing `T::Struct`
-  instances: these are also not serialized.
+- Same with [generic-typed](generics.md) properties containing `T::Struct` instances: these are also not serialized.
 
 ### `from_hash` gotchas
 
-As mentioned in the [previous section][legacy], the `deserialize` behavior was
-inherited from Stripe's internal ODM library, and thus has some warts to be
-aware of.
+As mentioned in the [previous section][legacy], the `deserialize` behavior was inherited from Stripe's internal ODM library, and thus has some warts to be aware of.
 
-- The `Hash` given to `from_hash` must have `String`-valued keys, like the
-  result of calling `serialize`.
+- The `Hash` given to `from_hash` must have `String`-valued keys, like the result of calling `serialize`.
 
-- The `from_hash` method does not do the same static nor runtime type checking
-  that the `T::Struct`'s `new` method would do:
+- The `from_hash` method does not do the same static nor runtime type checking that the `T::Struct`'s `new` method would do:
 
   - There are no static type checks.
-  - Required properties missing in the `Hash` **do** raise exceptions at
-    runtime.
-  - Extra or unknown properties present in the `Hash` do not raise exceptions at
-    runtime unless the optional `strict` argument to `from_hash` is passed (or
-    the method is called via the `from_hash!` wrapper).
+  - Required properties missing in the `Hash` **do** raise exceptions at runtime.
+  - Extra or unknown properties present in the `Hash` do not raise exceptions at runtime unless the optional `strict` argument to `from_hash` is passed (or the method is called via the `from_hash!` wrapper).
   - The types provided via the `Hash` are **not** checked at runtime.
 
-- Because [union-typed](union-types.md) properties containing `T::Struct`
-  instances are not serialized, they must also not be still serialized when
-  given to `from_hash`:
+- Because [union-typed](union-types.md) properties containing `T::Struct` instances are not serialized, they must also not be still serialized when given to `from_hash`:
 
   ```ruby
   class Foo < T::Struct
@@ -423,32 +349,19 @@ aware of.
   # => <Top foo_or_bar={"foo"=>12}>
   ```
 
-  And since there are no runtime type checks, the serialized hash value is
-  directly set to the `foo_or_bar` field.
+  And since there are no runtime type checks, the serialized hash value is directly set to the `foo_or_bar` field.
 
 ## Structural vs reference equality
 
-By default, `T::Struct` values compare using reference equality ("Are these two
-instances literally the same object in memory?""), while classes created with
-Ruby's `Struct` class compare using structural equality ("Are these two
-possibly-different objects both instances of the same class, containing
-pairwise-equal fields?").
+By default, `T::Struct` values compare using reference equality ("Are these two instances literally the same object in memory?""), while classes created with Ruby's `Struct` class compare using structural equality ("Are these two possibly-different objects both instances of the same class, containing pairwise-equal fields?").
 
-While it would be nice if `T::Struct` had been built from the beginning with
-structural equality, it wasn't, and now quite a lot of code in the wild depends
-on this.
+While it would be nice if `T::Struct` had been built from the beginning with structural equality, it wasn't, and now quite a lot of code in the wild depends on this.
 
-For those cases where structural equality is preferred, we recommend defining a
-custom module that can be included into a `T::Struct` to override the equality
-methods, providing structural equality.
+For those cases where structural equality is preferred, we recommend defining a custom module that can be included into a `T::Struct` to override the equality methods, providing structural equality.
 
 ## Immutable property updates using `with`
 
-Properties defined with `const` do not have setter methods, making it impossible
-to update these properties after construction. A common pattern when working
-with such classes is to "immutably update" the instance by creating a copy of an
-object with identical fields except with a different value for the one `const`
-property.
+Properties defined with `const` do not have setter methods, making it impossible to update these properties after construction. A common pattern when working with such classes is to "immutably update" the instance by creating a copy of an object with identical fields except with a different value for the one `const` property.
 
 This is built into `T::Struct`, but has some limitations:
 
@@ -466,36 +379,21 @@ a2 = a1.with(foo: 2)
 p(a2) # => <A foo=2 another_required=42>
 ```
 
-Added in haste, the implementation of `with` uses `from_hash` to merge the new
-and old properties and create the new instance. This means it suffers from
-exactly the same gotchas mentioned in the
-[`from_hash` gotchas](#from_hash-gotchas) section above.
+Added in haste, the implementation of `with` uses `from_hash` to merge the new and old properties and create the new instance. This means it suffers from exactly the same gotchas mentioned in the [`from_hash` gotchas](#from_hash-gotchas) section above.
 
 ## Legacy and Stripe-specific options
 
-There are a number of other legacy or Stripe-internal options in the `prop` DSL.
-Those include `dont_store`, `enum`, `foreign`, `ifunset`, `immutable`,
-`raise_on_nil_write`, `redaction`, and `sensitivity`. Stripe employees can
-reference [these docs](http://go/chalk-odm-docs) to learn more.
+There are a number of other legacy or Stripe-internal options in the `prop` DSL. Those include `dont_store`, `enum`, `foreign`, `ifunset`, `immutable`, `raise_on_nil_write`, `redaction`, and `sensitivity`. Stripe employees can reference [these docs](http://go/chalk-odm-docs) to learn more.
 
 Other users of `sorbet-runtime` are not encouraged to use these options.
 
 ## Runtime type checking gotchas
 
-In addition to those mentioned in the [`from_hash` gotchas](#from_hash-gotchas)
-section, there are gaps in how runtime checking for `T::Struct` props works
-versus normal methods with `sig` annotations. These differences are due to
-[`T::Struct`'s historical context](#legacy-code-and-historical-context) and are
-hard to evolve short of making breaking changes.
+In addition to those mentioned in the [`from_hash` gotchas](#from_hash-gotchas) section, there are gaps in how runtime checking for `T::Struct` props works versus normal methods with `sig` annotations. These differences are due to [`T::Struct`'s historical context](#legacy-code-and-historical-context) and are hard to evolve short of making breaking changes.
 
-- For performance, `prop` and `const` getter methods do not do runtime checking.
-  Specifically, getter methods for `prop` and `const` are defined with
-  `attr_reader`, which creates methods whose performance is optimized by the
-  Ruby VM.
+- For performance, `prop` and `const` getter methods do not do runtime checking. Specifically, getter methods for `prop` and `const` are defined with `attr_reader`, which creates methods whose performance is optimized by the Ruby VM.
 
-  The assumption is that types are validated on initialization and via calls to
-  setter methods. Attempts to write directly into the instance variables backing
-  a prop are not validated:
+  The assumption is that types are validated on initialization and via calls to setter methods. Attempts to write directly into the instance variables backing a prop are not validated:
 
   ```ruby
   class A < T::Struct; prop :foo, Integer; end
@@ -504,39 +402,21 @@ hard to evolve short of making breaking changes.
   p(a.foo) # no runtime exception, evaluates to a String
   ```
 
-  (Do not directly set instance variables `T::Struct`. Always go through the
-  corresponding setter method.)
+  (Do not directly set instance variables `T::Struct`. Always go through the corresponding setter method.)
 
-- Methods defined via `prop` and `const` do not have runtime signature objects.
-  This means that methods like
-  [`call_validation_error_handler`](tconfiguration.md#errors-from-invalid-method-calls)
-  will not yield a `signature` for prop calls that fail to type check because
-  there isn't one.
+- Methods defined via `prop` and `const` do not have runtime signature objects. This means that methods like [`call_validation_error_handler`](tconfiguration.md#errors-from-invalid-method-calls) will not yield a `signature` for prop calls that fail to type check because there isn't one.
 
-- Because `prop`- and `const`-defined methods do not have signature objects,
-  changing the
-  [default `checked` level](runtime.md#checked-whether-to-check-in-the-first-place)
-  does not affect runtime checking for these methods. Constructors and setter
-  methods are always runtime checked.
+- Because `prop`- and `const`-defined methods do not have signature objects, changing the [default `checked` level](runtime.md#checked-whether-to-check-in-the-first-place) does not affect runtime checking for these methods. Constructors and setter methods are always runtime checked.
 
-- Constructors and setter methods check standard library generic container types
-  recursively:
+- Constructors and setter methods check standard library generic container types recursively:
 
   ```ruby
   class A < T::Struct; prop :foo, T::Array[Integer]; end
   A.new(foo: [0, 'not int']) # runtime exception: all elements must be Integer
   ```
 
-  This contrasts with other
-  [standard library generic classes](stdlib-generics.md#generics-and-runtime-checks),
-  where the generic types are erased. (For user-defined generic classes, the
-  generic types are always erased, even for `prop` methods.) This is not
-  configurable.
+  This contrasts with other [standard library generic classes](stdlib-generics.md#generics-and-runtime-checks), where the generic types are erased. (For user-defined generic classes, the generic types are always erased, even for `prop` methods.) This is not configurable.
 
-  The reasoning: partly historical (too many existing usages depended on being
-  able to validate types of third-party APIs by coercing it into `T::Struct` and
-  assuming it would raise a `TypeError`), partly design (it's worth being really
-  sure that data structures hold what they say they hold, especially if we want
-  to skip runtime checks on getter methods).
+  The reasoning: partly historical (too many existing usages depended on being able to validate types of third-party APIs by coercing it into `T::Struct` and assuming it would raise a `TypeError`), partly design (it's worth being really sure that data structures hold what they say they hold, especially if we want to skip runtime checks on getter methods).
 
 [legacy]: #legacy-code-and-historical-context

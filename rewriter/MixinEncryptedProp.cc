@@ -30,7 +30,7 @@ ast::ExpressionPtr mkNilableString(core::LocOffsets loc) {
 vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send *send) {
     vector<ast::ExpressionPtr> empty;
 
-    if (ctx.state.runningUnderAutogen) {
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return empty;
     }
 

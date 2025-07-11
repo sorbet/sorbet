@@ -6,7 +6,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 SorbetReadFileTask::SorbetReadFileTask(const LSPConfiguration &config, MessageId id,
-                                       std::unique_ptr<TextDocumentIdentifier> params)
+                                       unique_ptr<TextDocumentIdentifier> params)
     : LSPRequestTask(config, move(id), LSPMethod::SorbetReadFile), params(move(params)) {}
 
 unique_ptr<ResponseMessage> SorbetReadFileTask::runRequest(LSPTypecheckerDelegate &typechecker) {

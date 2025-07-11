@@ -12,21 +12,10 @@ namespace sorbet::rewriter {
 
 namespace {
 
-// these helpers work on a purely syntactic level. for instance, this function determines if an expression is `T`,
-// either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
-// users, but we don't know that information in the Rewriter passes.
-bool isT(const ast::ExpressionPtr &expr) {
-    auto t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    if (t == nullptr || t->cnst != core::Names::Constants::T()) {
-        return false;
-    }
-    return ast::MK::isRootScope(t->scope);
-}
-
 bool isTNilableOrUntyped(const ast::ExpressionPtr &expr) {
     auto send = ast::cast_tree<ast::Send>(expr);
     return send != nullptr && (send->fun == core::Names::nilable() || send->fun == core::Names::untyped()) &&
-           isT(send->recv);
+           ast::MK::isT(send->recv);
 }
 
 ast::Send *findSendReturns(ast::Send *sharedSig) {
@@ -108,7 +97,7 @@ ast::ExpressionPtr toWriterSigForName(ast::Send *sharedSig, const core::NameRef 
     ast::Send *cur = body;
     while (cur != nullptr) {
         auto recv = ast::cast_tree<ast::ConstantLit>(cur->recv);
-        if ((cur->recv.isSelfReference()) || (recv && recv->symbol == core::Symbols::Sorbet())) {
+        if ((cur->recv.isSelfReference()) || (recv && recv->symbol() == core::Symbols::Sorbet())) {
             auto loc = resultType.loc();
             auto params = ast::MK::Send0(loc, move(cur->recv), core::Names::params(), loc.copyWithZeroLength());
             ast::cast_tree_nonnull<ast::Send>(params).addKwArg(ast::MK::Symbol(nameLoc, name), move(resultType));
@@ -154,7 +143,7 @@ ast::ExpressionPtr toWriterSigForName(ast::Send *sharedSig, const core::NameRef 
 vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, ast::ExpressionPtr *prevStat) {
     vector<ast::ExpressionPtr> empty;
 
-    if (ctx.state.runningUnderAutogen) {
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return empty;
     }
 
@@ -209,7 +198,7 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
 
             ast::MethodDef::Flags flags;
             flags.isAttrBestEffortUIOnly = true;
-            auto reader = ast::MK::SyntheticMethod0(loc, loc, name, ast::MK::Instance(argLoc, varName), flags);
+            auto reader = ast::MK::Method0(loc, loc, name, ast::MK::Instance(argLoc, varName), flags);
             stats.emplace_back(std::move(reader));
         }
     }
@@ -245,8 +234,7 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
             }
             ast::MethodDef::Flags flags;
             flags.isAttrBestEffortUIOnly = true;
-            stats.emplace_back(
-                ast::MK::SyntheticMethod1(loc, loc, setName, ast::MK::Local(argLoc, name), move(body), flags));
+            stats.emplace_back(ast::MK::Method1(loc, loc, setName, ast::MK::Local(argLoc, name), move(body), flags));
         }
     }
 

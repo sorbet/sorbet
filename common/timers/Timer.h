@@ -61,7 +61,7 @@ public:
     static microseconds get_clock_threshold_coarse();
     static microseconds clock_gettime_coarse();
 
-    void setEndTime();
+    microseconds setEndTime();
 
 private:
     spdlog::logger &log;

@@ -82,11 +82,11 @@ bool AbstractRewriter::getInvalid() {
     return invalid;
 }
 
-std::string AbstractRewriter::getError() {
+string AbstractRewriter::getError() {
     return error;
 }
 
-std::shared_ptr<AbstractRewriter::UniqueSymbolQueue> AbstractRewriter::getQueue() {
+shared_ptr<AbstractRewriter::UniqueSymbolQueue> AbstractRewriter::getQueue() {
     return symbolQueue;
 }
 

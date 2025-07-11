@@ -14,6 +14,7 @@ cc_library(
         "ErrorFlusherLSP.h",
         "ErrorReporter.h",
         "FieldFinder.h",
+        "KwargsFinder.h",
         "LSPFileUpdates.h",
         "LSPIndexer.h",
         "LSPTask.h",

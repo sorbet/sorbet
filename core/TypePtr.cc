@@ -86,6 +86,12 @@ bool TypePtr::isTop() const {
 }
 
 int TypePtr::kind() const {
+    // This order is load bearing for the purpose of subtyping, because our type constraint
+    // algorithm is greedy.
+    //
+    // For `glb` and `lub`, we sort the arguments based on their `kind`, so the first argument to
+    // these functions effectively always has a lesser `kind`. This matters for the sake of ensuring
+    // that `T.type_parameter` types show up at the right spots during the subtyping checks.
     switch (tag()) {
         case Tag::AppliedType:
             return 1;
@@ -122,13 +128,13 @@ int TypePtr::kind() const {
     }
 }
 
-std::string TypePtr::tagToString(Tag tag) {
+string TypePtr::tagToString(Tag tag) {
 #define TYPE_TO_STRING(T) return #T;
     GENERATE_TAG_SWITCH(tag, TYPE_TO_STRING)
 #undef TYPE_TO_STRING
 }
 
-std::string TypePtr::typeName() const {
+string TypePtr::typeName() const {
     return TypePtr::tagToString(tag());
 }
 
@@ -334,7 +340,7 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, const TypeConstraint &tc) c
 }
 
 TypePtr TypePtr::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                              const std::vector<TypePtr> &targs) const {
+                              const vector<TypePtr> &targs) const {
     switch (tag()) {
         case Tag::BlamedUntyped:
         case Tag::UnresolvedAppliedType:
@@ -370,9 +376,9 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, absl::Span<const TypeMember
 void TypePtr::_sanityCheck(const GlobalState &gs) const {
     // Not really a dynamic check, but this is a convenient place to put this to
     // ensure that all relevant types get checked.
-#define SANITY_CHECK(T)                                                                        \
-    static_assert(TypePtr::TypeToIsInlined<T>::value || !std::is_copy_constructible<T>::value, \
-                  "non-inline types must not be copy-constructible");                          \
+#define SANITY_CHECK(T)                                                                   \
+    static_assert(TypePtr::TypeToIsInlined<T>::value || !std::is_copy_constructible_v<T>, \
+                  "non-inline types must not be copy-constructible");                     \
     break;
     GENERATE_TAG_SWITCH(tag(), SANITY_CHECK)
 #undef SANITY_CHECK
@@ -393,13 +399,13 @@ uint32_t TypePtr::hash(const GlobalState &gs) const {
 #undef HASH
 }
 
-std::string TypePtr::show(const GlobalState &gs, ShowOptions options) const {
+string TypePtr::show(const GlobalState &gs, ShowOptions options) const {
 #define SHOW(T) return cast_type_nonnull<T>(*this).show(gs, options);
     GENERATE_TAG_SWITCH(tag(), SHOW)
 #undef SHOW
 }
 
-std::string TypePtr::showWithMoreInfo(const GlobalState &gs) const {
+string TypePtr::showWithMoreInfo(const GlobalState &gs) const {
 #define SHOW_WITH_MORE_INFO(T) return CALL_MEMBER_showWithMoreInfo<const T>::call(cast_type_nonnull<T>(*this), gs);
     GENERATE_TAG_SWITCH(tag(), SHOW_WITH_MORE_INFO)
 #undef SHOW_WITH_MORE_INFO

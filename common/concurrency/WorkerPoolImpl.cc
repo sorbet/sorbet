@@ -1,5 +1,6 @@
 #include "common/concurrency/WorkerPoolImpl.h"
 #include "absl/strings/str_cat.h"
+#include "absl/synchronization/blocking_counter.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/enforce_no_timer/EnforceNoTimer.h"
 #include "common/os/os.h"
@@ -16,7 +17,7 @@ WorkerPool::~WorkerPool() {
 
 WorkerPoolImpl::WorkerPoolImpl(int size, spdlog::logger &logger) : _size(size), logger(logger) {
     logger.trace("Creating {} worker threads", _size);
-    if (sorbet::emscripten_build) {
+    if constexpr (sorbet::emscripten_build) {
         ENFORCE_NO_TIMER(size == 0);
         this->_size = 0;
     } else {
@@ -55,6 +56,22 @@ WorkerPoolImpl::~WorkerPoolImpl() {
         return false;
     });
     // join will be called when destructing joinable;
+}
+
+void WorkerPoolImpl::multiplexJobWait(string_view taskName, WorkerPool::Task t) {
+    if (_size > 0) {
+        absl::BlockingCounter barrier(_size);
+        multiplexJob_([&barrier, t{move(t)}, taskName] {
+            setCurrentThreadName(taskName);
+            t();
+            barrier.DecrementCount();
+            return true;
+        });
+        barrier.Wait();
+    } else {
+        // main thread is the worker.
+        t();
+    }
 }
 
 void WorkerPoolImpl::multiplexJob(string_view taskName, WorkerPool::Task t) {

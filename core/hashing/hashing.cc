@@ -4,8 +4,10 @@
 #include "core/hashing/hashing.h"
 #include "xxhash.h"
 
+using namespace std;
+
 namespace sorbet::core {
-unsigned int _hash(std::string_view utf8) {
+unsigned int _hash(string_view utf8) {
     return XXH32(utf8.data(), utf8.size(), /* seed */ 0);
 }
 

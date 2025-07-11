@@ -52,7 +52,7 @@ optional<pair<optional<core::LocOffsets>, core::LocOffsets>> methodLocs(const co
     if (!parsedSig.has_value()) {
         return make_pair(nullopt, methodLoc);
     }
-    return make_pair(parsedSig->origSend->loc, methodLoc);
+    return make_pair(parsedSig->origSend.loc, methodLoc);
 }
 
 // Turns ruby_function_name__ to RubyFunctionName,
@@ -167,9 +167,8 @@ vector<unique_ptr<TextEdit>> moveMethod(LSPTypecheckerDelegate &typechecker, con
 
     auto fref = definition.termLoc.file();
 
-    auto trees = typechecker.getResolved({fref});
-    ENFORCE(!trees.empty());
-    auto &rootTree = trees[0].tree;
+    auto resolvedTree = typechecker.getResolved({fref});
+    auto &rootTree = resolvedTree.tree;
 
     auto sigAndMethodLocs = methodLocs(gs, rootTree, definition.symbol, fref);
     if (!sigAndMethodLocs.has_value()) {
@@ -188,7 +187,7 @@ vector<unique_ptr<TextEdit>> moveMethod(LSPTypecheckerDelegate &typechecker, con
 
     // This manipulations with the positions are required to remove leading tabs and whitespaces at the original method
     // position
-    auto [oldMethodStart, oldMethodEnd] = methodSourceLoc.position(gs);
+    auto [oldMethodStart, oldMethodEnd] = methodSourceLoc.toDetails(gs);
     auto oldMethodLoc = core::Loc::fromDetails(gs, fref, {oldMethodStart.line, 0}, oldMethodEnd);
     ENFORCE(oldMethodLoc.has_value());
 

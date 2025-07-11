@@ -53,9 +53,6 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, const core::TypePtr &
                 result.emplace_back(loc);
             }
         },
-        [&](const core::NamedLiteralType &_) {
-            // nothing
-        },
         [&](const core::ShapeType &_) {
             // nothing
         },
@@ -78,6 +75,11 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, const core::TypePtr &
             ENFORCE(false, "Please add a test case for this test, and delete this enforce.");
         },
         [&](const core::TypePtr &t) {
+            if (core::is_proxy_type(type)) {
+                auto type = t.underlying(gs);
+                result = locsForType(gs, type);
+                return;
+            }
             Exception::raise("Unhandled case in textDocument/typeDefinition: {}", core::TypePtr::tagToString(t.tag()));
         });
     return result;
@@ -85,21 +87,21 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, const core::TypePtr &
 } // namespace
 
 TypeDefinitionTask::TypeDefinitionTask(const LSPConfiguration &config, MessageId id,
-                                       std::unique_ptr<TextDocumentPositionParams> params)
+                                       unique_ptr<TextDocumentPositionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentTypeDefinition), params(move(params)) {}
 
 unique_ptr<ResponseMessage> TypeDefinitionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentTypeDefinition);
     const core::GlobalState &gs = typechecker.state();
-    auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
-                                  LSPMethod::TextDocumentTypeDefinition, false);
+    const auto &uri = params->textDocument->uri;
+    auto result =
+        LSPQuery::byLoc(config, typechecker, uri, *params->position, LSPMethod::TextDocumentTypeDefinition, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
         return response;
     }
 
-    auto uri = params->textDocument->uri;
     auto fref = config.uri2FileRef(gs, uri);
     // LSPQuery::byLoc reports an error if the file or loc don't exist
     auto queryLoc = params->position->toLoc(gs, fref).value();

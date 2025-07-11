@@ -1,6 +1,20 @@
 test/cli/suggest-not-stub/suggest-not-stub.rb:3: Unable to resolve constant `B` https://srb.help/5002
      3 |  B
           ^
+  Did you mean `T`? Use `-a` to autocorrect
+    test/cli/suggest-not-stub/suggest-not-stub.rb:3: Replace with `T`
+     3 |  B
+          ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#LCENSORED: `T` defined here
+    NN |module T
+        ^^^^^^^^
+  Did you mean `A`? Use `-a` to autocorrect
+    test/cli/suggest-not-stub/suggest-not-stub.rb:3: Replace with `A`
+     3 |  B
+          ^
+    test/cli/suggest-not-stub/suggest-not-stub.rb:2: `A` defined here
+     2 |class A
+        ^^^^^^^
 
 test/cli/suggest-not-stub/suggest-not-stub.rb:6: Unable to resolve constant `B` https://srb.help/5002
      6 |B

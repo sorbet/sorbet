@@ -70,11 +70,11 @@ CounterState &TaskQueue::getCounters() {
     return this->counters;
 }
 
-const std::deque<std::unique_ptr<LSPTask>> &TaskQueue::tasks() const {
+const std::deque<unique_ptr<LSPTask>> &TaskQueue::tasks() const {
     return this->pendingTasks;
 }
 
-std::deque<std::unique_ptr<LSPTask>> &TaskQueue::tasks() {
+std::deque<unique_ptr<LSPTask>> &TaskQueue::tasks() {
     return this->pendingTasks;
 }
 
@@ -432,10 +432,10 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidChangeTextDocumentP
     edit->epoch = v;
     edit->sorbetCancellationExpected = changeParams->sorbetCancellationExpected.value_or(false);
     edit->sorbetPreemptionsExpected = changeParams->sorbetPreemptionsExpected.value_or(0);
-    string_view uri = changeParams->textDocument->uri;
+    const auto &uri = changeParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
-        if (!config->isFileIgnored(localPath)) {
+        if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath)) {
             string fileContents = changeParams->getSource(getFileContents(localPath));
             auto fileType = core::File::Type::Normal;
             auto &slot = openFiles[localPath];
@@ -452,10 +452,10 @@ unique_ptr<SorbetWorkspaceEditParams>
 LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidOpenTextDocumentParams> openParams) {
     auto edit = make_unique<SorbetWorkspaceEditParams>();
     edit->epoch = v;
-    string_view uri = openParams->textDocument->uri;
+    const auto &uri = openParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
-        if (!config->isFileIgnored(localPath)) {
+        if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath)) {
             auto fileType = core::File::Type::Normal;
             auto &slot = openFiles[localPath];
             auto file = make_shared<core::File>(move(localPath), move(openParams->textDocument->text), fileType, v);
@@ -471,10 +471,10 @@ unique_ptr<SorbetWorkspaceEditParams>
 LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidCloseTextDocumentParams> closeParams) {
     auto edit = make_unique<SorbetWorkspaceEditParams>();
     edit->epoch = v;
-    string_view uri = closeParams->textDocument->uri;
+    const auto &uri = closeParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
-        if (!config->isFileIgnored(localPath)) {
+        if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath)) {
             openFiles.erase(localPath);
             // Use contents of file on disk.
             auto fileType = core::File::Type::Normal;
@@ -493,7 +493,8 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse>
         // Don't append rootPath if it is empty.
         string localPath = !config->rootPath.empty() ? absl::StrCat(config->rootPath, "/", file) : file;
         // Editor contents supersede file system updates.
-        if (!config->isFileIgnored(localPath) && !openFiles.contains(localPath)) {
+        if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath) &&
+            !openFiles.contains(localPath)) {
             auto fileType = core::File::Type::Normal;
             auto fileContents = readFile(localPath, *config->opts.fs);
             edit->updates.push_back(make_shared<core::File>(move(localPath), move(fileContents), fileType, v));
@@ -501,8 +502,8 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse>
     }
     return edit;
 }
-std::vector<std::string_view> LSPPreprocessor::openFilePaths() const {
-    std::vector<std::string_view> paths;
+vector<string_view> LSPPreprocessor::openFilePaths() const {
+    vector<string_view> paths;
     paths.reserve(openFiles.size());
     for (auto const &[path, file] : openFiles) {
         paths.emplace_back(path);

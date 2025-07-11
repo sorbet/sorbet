@@ -102,7 +102,8 @@ struct builder {
     ForeignPtr (*ivar)(SelfPtr builder, const token *tok);
     ForeignPtr (*keywordBreak)(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
                                const token *rparen);
-    ForeignPtr (*keywordDefined)(SelfPtr builder, const token *keyword, ForeignPtr arg);
+    ForeignPtr (*keywordDefined)(SelfPtr builder, const token *keyword, const token *lparen, ForeignPtr arg,
+                                 const token *rparen);
     ForeignPtr (*keywordNext)(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
                               const token *rparen);
     ForeignPtr (*keywordRedo)(SelfPtr builder, const token *keyword);
@@ -196,7 +197,7 @@ struct builder {
     ForeignPtr (*xstring_compose)(SelfPtr builder, const token *begin, const node_list *parts, const token *end);
 };
 
-static_assert(std::is_pod<builder>::value, "`builder` must be a POD type");
+static_assert(std::is_pod_v<builder>, "`builder` must be a POD type");
 
 } // namespace ruby_parser
 

@@ -14,7 +14,7 @@ struct MethodImplementationResults {
     unique_ptr<ResponseError> error;
 };
 
-unique_ptr<ResponseError> makeInvalidParamsError(std::string error) {
+unique_ptr<ResponseError> makeInvalidParamsError(string error) {
     return make_unique<ResponseError>((int)LSPErrorCodes::InvalidParams, error);
 }
 
@@ -59,7 +59,7 @@ core::MethodRef findOverriddenMethod(const core::GlobalState &gs, const core::Me
 } // namespace
 
 ImplementationTask::ImplementationTask(const LSPConfiguration &config, MessageId id,
-                                       std::unique_ptr<ImplementationParams> params)
+                                       unique_ptr<ImplementationParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentImplementation), params(move(params)) {}
 
 unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegate &typechecker) {
@@ -75,11 +75,12 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
         return response;
     }
 
+    vector<unique_ptr<Location>> result;
     if (queryResult.responses.empty()) {
+        response->result = std::move(result);
         return response;
     }
 
-    vector<unique_ptr<Location>> result;
     auto queryResponse = move(queryResult.responses[0]);
     if (auto def = queryResponse->isMethodDef()) {
         // User called "Go to Implementation" from the abstract function definition

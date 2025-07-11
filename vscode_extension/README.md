@@ -38,3 +38,19 @@ See [docs/lsp-dev-guide.md] for information on how to get started with LSP and
 VS Code extension development.
 
 [docs/lsp-dev-guide.md]: https://github.com/sorbet/sorbet/blob/master/docs/lsp-dev-guide.md
+
+
+## Sorbet Extension API
+
+Starting from version 0.3.41, Sorbet exports a public API. You can access it using VS Code's `getExtension` API. To ensure backward and forward compatibility, all properties are nullable.
+
+- `status`: Represents the Sorbet status, or `undefined` if the state is unknown.
+- `onStatusChanged`: An event triggered whenever the status changes.
+
+### Available Status Values
+The following are string values:
+
+- `disabled`: Indicates that the Sorbet Language Server has been disabled.
+- `error`: Indicates that the Sorbet Language Server encountered an error. This status does not correlate to code typing errors.
+- `running`: Indicates that the Sorbet Language Server is running.
+- `start`: Indicates that the Sorbet Language Server is starting. This status may repeat in case of an error.

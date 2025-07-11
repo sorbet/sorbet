@@ -1,0 +1,106 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  begin
+    &&$2 = <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+    if &&$2
+      ::<Magic>.<check-and-and>(::<root>::<C T>, :cast, &&$2, <emptyTree>::<C ARGV>.first(), <emptyTree>::<C String>)
+    else
+      &&$2
+    end
+  end
+
+  begin
+    &&$3 = <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+    if &&$3
+      ::<Magic>.<check-and-and>(::<root>::<C T>, :cast, &&$3, <emptyTree>::<C ARGV>.first(), <emptyTree>::<C String>)
+    else
+      &&$3
+    end
+  end
+
+  begin
+    ||$4 = begin
+      <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+      <emptyTree>::<C ARGV>.empty?()
+    end
+    if ||$4
+      ||$4
+    else
+      <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+    end
+  end
+
+  begin
+    ||$5 = begin
+      <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+      <emptyTree>::<C ARGV>.empty?()
+    end
+    if ||$5
+      ||$5
+    else
+      <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+    end
+  end
+
+  x = <cast:cast>(begin
+    ||$6 = <emptyTree>::<C ARGV>.first()
+    if ||$6
+      ||$6
+    else
+      <emptyTree>::<C ARGV>.last()
+    end
+  end, <todo sym>, <emptyTree>::<C String>)
+
+  <cast:cast>(begin
+    ||$7 = <emptyTree>::<C ARGV>.first()
+    if ||$7
+      ||$7
+    else
+      <emptyTree>::<C ARGV>.last()
+    end
+  end, <todo sym>, <emptyTree>::<C String>)
+
+  y = <cast:cast>(begin
+    &&$8 = <emptyTree>::<C ARGV>.first()
+    if &&$8
+      <emptyTree>::<C ARGV>.last()
+    else
+      &&$8
+    end
+  end, <todo sym>, <emptyTree>::<C String>)
+
+  <cast:cast>(begin
+    &&$9 = <emptyTree>::<C ARGV>.first()
+    if &&$9
+      <emptyTree>::<C ARGV>.last()
+    else
+      &&$9
+    end
+  end, <todo sym>, <emptyTree>::<C String>)
+
+  begin
+    ||$10 = <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+    if ||$10
+      ||$10
+    else
+      <cast:cast>(<emptyTree>::<C ARGV>.last(), <todo sym>, <emptyTree>::<C String>)
+    end
+  end
+
+  begin
+    ||$11 = <emptyTree>::<C ARGV>.first()
+    if ||$11
+      ||$11
+    else
+      <cast:cast>(<emptyTree>::<C ARGV>.last(), <todo sym>, <emptyTree>::<C String>)
+    end
+  end
+
+  begin
+    &&$12 = <emptyTree>::<C ARGV>.first()
+    if &&$12
+      <cast:cast>(<emptyTree>::<C ARGV>.last(), <todo sym>, <emptyTree>::<C String>)
+    else
+      &&$12
+    end
+  end
+end

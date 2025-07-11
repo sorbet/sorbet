@@ -1,13 +1,6 @@
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr` https://srb.help/5002
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
-  Did you mean `Enumerator::Yielder`? Use `-a` to autocorrect
-    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Enumerator::Yielder`
-     3 |Yieldr.foo(Intege, Int)
-        ^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#LCENSORED: `Enumerator::Yielder` defined here
-      NN |class Enumerator::Yielder < Object
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Did you mean `File`? Use `-a` to autocorrect
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `File`
      3 |Yieldr.foo(Intege, Int)
@@ -22,6 +15,13 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
     https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
     NN |class Dir < Object
         ^^^^^^^^^^^^^^^^^^
+  Did you mean `Fiber`? Use `-a` to autocorrect
+    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Fiber`
+     3 |Yieldr.foo(Intege, Int)
+        ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/fiber.rbi#LCENSORED: `Fiber` defined here
+      NN |class Fiber < Object
+          ^^^^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` https://srb.help/5002
      3 |Yieldr.foo(Intege, Int)

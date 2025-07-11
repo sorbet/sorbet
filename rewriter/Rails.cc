@@ -6,6 +6,7 @@
 #include "core/core.h"
 #include "core/errors/rewriter.h"
 #include "rewriter/rewriter.h"
+#include "rewriter/util/Util.h"
 
 using namespace std;
 
@@ -22,18 +23,13 @@ void Rails::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     if (send->fun != core::Names::squareBrackets()) {
         return;
     }
-    auto name = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv);
-    if (!name) {
-        return;
-    }
-    if (name->cnst != core::Names::Constants::Migration()) {
-        return;
-    }
-    auto name2 = ast::cast_tree<ast::UnresolvedConstantLit>(name->scope);
-    if (!name2) {
-        return;
-    }
-    if (name2->cnst != core::Names::Constants::ActiveRecord()) {
+
+    static constexpr core::NameRef activeRecordMigration[] = {
+        core::Names::Constants::ActiveRecord(),
+        core::Names::Constants::Migration(),
+    };
+
+    if (!ASTUtil::isRootScopedSyntacticConstant(send->recv, activeRecordMigration)) {
         return;
     }
     if (send->numPosArgs() != 1 && !send->hasKwArgs()) {

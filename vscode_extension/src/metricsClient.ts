@@ -56,7 +56,7 @@ export class NoOpApi implements Api {
   static INSTANCE = new NoOpApi();
 }
 
-export class MetricClient {
+export class MetricsClient {
   private apiPromise: Promise<Api | undefined>;
   private readonly context: SorbetExtensionContext;
   private readonly sorbetExtensionVersion: string;
@@ -116,7 +116,8 @@ export class MetricClient {
           : (<any>reason).message;
 
       this.context.log.error(
-        `Metrics-gathering disabled (error): ${adjustedReason}`,
+        "Metrics-gathering disabled (error)",
+        adjustedReason,
       );
     }
     return sorbetMetricsApi;

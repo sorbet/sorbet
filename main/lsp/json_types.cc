@@ -78,7 +78,7 @@ InvalidTypeError::InvalidTypeError(string_view fieldName, string_view expectedTy
     : SerializationError(fmt::format("Expected field `{}` to have value of type `{}`, but had value `{}`.", fieldName,
                                      expectedType, stringify(*found))) {}
 
-const std::string JSONBaseType::defaultFieldName = "root";
+const string JSONBaseType::defaultFieldName = "root";
 
 string JSONBaseType::toJSON(bool prettyPrint) const {
     auto buffer = toJSONBuffer(prettyPrint);
@@ -106,13 +106,13 @@ unique_ptr<Range> Range::fromLoc(const core::GlobalState &gs, core::Loc loc) {
         // this will happen if e.g. we disable the stdlib (e.g. to speed up testing in fuzzers).
         return nullptr;
     }
-    auto pair = loc.position(gs);
+    auto pair = loc.toDetails(gs);
     // All LSP numbers are zero-based, ours are 1-based.
     return make_unique<Range>(make_unique<Position>(pair.first.line - 1, pair.first.column - 1),
                               make_unique<Position>(pair.second.line - 1, pair.second.column - 1));
 }
 
-std::optional<core::Loc> Range::toLoc(const core::GlobalState &gs, core::FileRef file) const {
+optional<core::Loc> Range::toLoc(const core::GlobalState &gs, core::FileRef file) const {
     ENFORCE(start->line >= 0);
     ENFORCE(start->character >= 0);
     ENFORCE(end->line >= 0);
@@ -189,7 +189,7 @@ string Position::showRaw() const {
 // Returns nullopt if the position does not represent a valid location.
 optional<core::Loc> Position::toLoc(const core::GlobalState &gs, const core::FileRef fref) const {
     core::Loc::Detail reqPos{static_cast<uint32_t>(this->line + 1), static_cast<uint32_t>(this->character + 1)};
-    if (auto maybeOffset = core::Loc::pos2Offset(fref.data(gs), reqPos)) {
+    if (auto maybeOffset = core::Loc::detail2Pos(fref.data(gs), reqPos)) {
         auto offset = maybeOffset.value();
         return core::Loc{fref, offset, offset};
     } else {
@@ -227,8 +227,8 @@ string TextDocumentContentChangeEvent::apply(string_view oldSource) const {
         end.column = r->end->character + 1;
         core::File old("./fake/path.rb", string(oldSource), core::File::Type::Normal);
         // These offsets are non-nullopt assuming the input range is a valid range.
-        auto startOffset = core::Loc::pos2Offset(old, start).value();
-        auto endOffset = core::Loc::pos2Offset(old, end).value();
+        auto startOffset = core::Loc::detail2Pos(old, start).value();
+        auto endOffset = core::Loc::detail2Pos(old, end).value();
         return string(oldSource).replace(startOffset, endOffset - startOffset, text);
     } else {
         return text;
@@ -247,7 +247,7 @@ void SorbetWorkspaceEditParams::merge(SorbetWorkspaceEditParams &newerParams) {
     // 'newerParams' has newer updates, so merge its contents into this object.
     epoch = newerParams.epoch;
 
-    UnorderedSet<std::string_view> encounteredFiles;
+    UnorderedSet<string_view> encounteredFiles;
     auto newUpdates = move(newerParams.updates);
 
     for (auto &f : newUpdates) {

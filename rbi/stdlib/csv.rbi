@@ -247,6 +247,8 @@ class CSV < Object
   DEFAULT_OPTIONS = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   # The version of the installed library.
   VERSION = T.let(T.unsafe(nil), String)
+  # A Hash containing the built-in CSV converters
+  Converters = T.let(T.unsafe(nil), T::Hash[Symbol, T.any(Proc, T::Array[Symbol])])
 
   # This method is intended as the primary interface for reading
   # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) files. You pass a

@@ -33,9 +33,7 @@ ClassDef{
               flags = {}
               recv = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U params>
                 block = nullptr
                 pos_args = 0
@@ -56,9 +54,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -72,9 +68,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U p>
             block = nullptr
             pos_args = 1
@@ -100,9 +94,7 @@ ClassDef{
               flags = {}
               recv = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U params>
                 block = nullptr
                 pos_args = 0
@@ -123,9 +115,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -139,9 +129,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U p>
             block = nullptr
             pos_args = 1
@@ -167,9 +155,7 @@ ClassDef{
               flags = {}
               recv = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U params>
                 block = nullptr
                 pos_args = 0
@@ -195,9 +181,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -215,9 +199,7 @@ ClassDef{
             stats = [
               Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U p>
                 block = nullptr
                 pos_args = 1
@@ -230,9 +212,7 @@ ClassDef{
             ],
             expr = Send{
               flags = {privateOk}
-              recv = Local{
-                localVariable = <U <self>>
-              }
+              recv = Self
               fun = <U p>
               block = nullptr
               pos_args = 1
@@ -259,9 +239,7 @@ ClassDef{
               flags = {}
               recv = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U params>
                 block = nullptr
                 pos_args = 0
@@ -287,9 +265,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -307,9 +283,7 @@ ClassDef{
             stats = [
               Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U p>
                 block = nullptr
                 pos_args = 1
@@ -322,9 +296,7 @@ ClassDef{
             ],
             expr = Send{
               flags = {privateOk}
-              recv = Local{
-                localVariable = <U <self>>
-              }
+              recv = Self
               fun = <U p>
               block = nullptr
               pos_args = 1
@@ -351,9 +323,7 @@ ClassDef{
               flags = {}
               recv = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U params>
                 block = nullptr
                 pos_args = 0
@@ -382,9 +352,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -398,9 +366,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U p>
             block = nullptr
             pos_args = 1
@@ -426,9 +392,7 @@ ClassDef{
               flags = {}
               recv = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U params>
                 block = nullptr
                 pos_args = 0
@@ -457,9 +421,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -473,9 +435,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U p>
             block = nullptr
             pos_args = 1
@@ -501,9 +461,7 @@ ClassDef{
               flags = {}
               recv = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U params>
                 block = nullptr
                 pos_args = 0
@@ -540,9 +498,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -554,9 +510,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U p>
             block = nullptr
             pos_args = 1
@@ -580,9 +534,7 @@ ClassDef{
             ]
             body = Send{
               flags = {privateOk}
-              recv = Local{
-                localVariable = <U <self>>
-              }
+              recv = Self
               fun = <U void>
               block = nullptr
               pos_args = 0
@@ -592,9 +544,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -609,9 +559,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = Local{
-            localVariable = <U <self>>
-          }
+          recv = Self
           fun = <U extend>
           block = nullptr
           pos_args = 1
@@ -670,9 +618,7 @@ ClassDef{
               flags = {}
               recv = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U params>
                 block = nullptr
                 pos_args = 0
@@ -693,9 +639,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -709,9 +653,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U <super>>
             block = nullptr
             pos_args = 1
@@ -737,9 +679,7 @@ ClassDef{
               flags = {}
               recv = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U params>
                 block = nullptr
                 pos_args = 0
@@ -760,9 +700,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -776,9 +714,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U <super>>
             block = nullptr
             pos_args = 0
@@ -805,9 +741,7 @@ ClassDef{
               flags = {}
               recv = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U params>
                 block = nullptr
                 pos_args = 0
@@ -833,9 +767,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -851,9 +783,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U <super>>
             block = nullptr
             pos_args = 0
@@ -884,9 +814,7 @@ ClassDef{
               flags = {}
               recv = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U params>
                 block = nullptr
                 pos_args = 0
@@ -912,9 +840,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -930,9 +856,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U <super>>
             block = nullptr
             pos_args = 1
@@ -962,9 +886,7 @@ ClassDef{
               flags = {}
               recv = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U params>
                 block = nullptr
                 pos_args = 0
@@ -993,9 +915,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -1027,9 +947,7 @@ ClassDef{
                 block = nullptr
                 pos_args = 1
                 args = [
-                  Local{
-                    localVariable = <U <self>>
-                  }
+                  Self
                 ]
               }
               Literal{ value = :<super> }
@@ -1067,9 +985,7 @@ ClassDef{
               flags = {}
               recv = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U params>
                 block = nullptr
                 pos_args = 0
@@ -1098,9 +1014,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -1114,9 +1028,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U <super>>
             block = nullptr
             pos_args = 0
@@ -1154,9 +1066,7 @@ ClassDef{
               flags = {}
               recv = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U params>
                 block = nullptr
                 pos_args = 0
@@ -1193,9 +1103,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -1215,9 +1123,7 @@ ClassDef{
             block = nullptr
             pos_args = 3
             args = [
-              Local{
-                localVariable = <U <self>>
-              }
+              Self
               Literal{ value = :<super> }
               Local{
                 localVariable = <U blk>
@@ -1238,9 +1144,7 @@ ClassDef{
             ]
             body = Send{
               flags = {privateOk}
-              recv = Local{
-                localVariable = <U <self>>
-              }
+              recv = Self
               fun = <U void>
               block = nullptr
               pos_args = 0
@@ -1250,9 +1154,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -1274,9 +1176,7 @@ ClassDef{
               ]
               body = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
-                }
+                recv = Self
                 fun = <U <untypedSuper>>
                 block = nullptr
                 pos_args = 0
@@ -1329,9 +1229,7 @@ ClassDef{
             ]
             body = Send{
               flags = {privateOk}
-              recv = Local{
-                localVariable = <U <self>>
-              }
+              recv = Self
               fun = <U void>
               block = nullptr
               pos_args = 0
@@ -1341,9 +1239,7 @@ ClassDef{
           }
           pos_args = 1
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
+            Self
           ]
         }
 
@@ -1355,9 +1251,7 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U <untypedSuper>>
             block = nullptr
             pos_args = 0
@@ -1368,9 +1262,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = Local{
-            localVariable = <U <self>>
-          }
+          recv = Self
           fun = <U extend>
           block = nullptr
           pos_args = 1

@@ -10,8 +10,9 @@
 #include "main/lsp/requests/initialize.h"
 #include "test/helpers/lsp.h"
 
-namespace sorbet::test {
 using namespace std;
+
+namespace sorbet::test {
 
 string filePathToUri(const LSPConfiguration &config, string_view filePath) {
     return fmt::format("{}/{}", config.getClientConfig().rootUri, filePath);
@@ -29,16 +30,16 @@ string uriToFilePath(const LSPConfiguration &config, string_view uri) {
 }
 
 template <typename T = DynamicRegistrationOption>
-std::unique_ptr<T> makeDynamicRegistrationOption(bool dynamicRegistration) {
-    auto option = std::make_unique<T>();
+unique_ptr<T> makeDynamicRegistrationOption(bool dynamicRegistration) {
+    auto option = make_unique<T>();
     option->dynamicRegistration = dynamicRegistration;
     return option;
 };
 
 /** Constructs a vector with all enum values from MIN to MAX. Assumes a contiguous enum and properly chosen min/max
  * values. Our serialization/deserialization code will throw if we pick an improper value. */
-template <typename T, T MAX, T MIN> std::vector<T> getAllEnumKinds() {
-    std::vector<T> symbols;
+template <typename T, T MAX, T MIN> vector<T> getAllEnumKinds() {
+    vector<T> symbols;
     for (int i = (int)MIN; i <= (int)MAX; i++) {
         symbols.push_back((T)i);
     }
@@ -142,10 +143,10 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities(bo
     return capabilities;
 }
 
-unique_ptr<InitializeParams>
-makeInitializeParams(std::optional<variant<string, JSONNullObject>> rootPath, variant<string, JSONNullObject> rootUri,
-                     bool supportsMarkdown, bool supportsCodeActionResolve,
-                     std::optional<std::unique_ptr<SorbetInitializationOptions>> initOptions) {
+unique_ptr<InitializeParams> makeInitializeParams(optional<variant<string, JSONNullObject>> rootPath,
+                                                  variant<string, JSONNullObject> rootUri, bool supportsMarkdown,
+                                                  bool supportsCodeActionResolve,
+                                                  optional<unique_ptr<SorbetInitializationOptions>> initOptions) {
     auto initializeParams = make_unique<InitializeParams>(rootUri, make_unique<ClientCapabilities>());
     if (rootPath) {
         initializeParams->rootPath = rootPath;
@@ -169,21 +170,36 @@ makeInitializeParams(std::optional<variant<string, JSONNullObject>> rootPath, va
     return initializeParams;
 }
 
-unique_ptr<LSPMessage> makeDefinitionRequest(int id, std::string_view uri, int line, int character) {
+unique_ptr<LSPMessage> makeDefinitionRequest(int id, string_view uri, int line, int character) {
     return make_unique<LSPMessage>(make_unique<RequestMessage>(
         "2.0", id, LSPMethod::TextDocumentDefinition,
         make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(uri)),
                                                 make_unique<Position>(line, character))));
 }
 
-unique_ptr<LSPMessage> makeHover(int id, std::string_view uri, int line, int character) {
+unique_ptr<LSPMessage> makeImplementationRequest(int id, string_view uri, int line, int character) {
+    return make_unique<LSPMessage>(
+        make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentImplementation,
+                                    make_unique<ImplementationParams>(make_unique<TextDocumentIdentifier>(string(uri)),
+                                                                      make_unique<Position>(line, character))));
+}
+
+unique_ptr<LSPMessage> makeReferenceRequest(int id, string_view uri, int line, int character, bool includeDecl) {
+    return make_unique<LSPMessage>(
+        make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentReferences,
+                                    make_unique<ReferenceParams>(make_unique<TextDocumentIdentifier>(string(uri)),
+                                                                 make_unique<Position>(line, character),
+                                                                 make_unique<ReferenceContext>(includeDecl))));
+}
+
+unique_ptr<LSPMessage> makeHover(int id, string_view uri, int line, int character) {
     return make_unique<LSPMessage>(make_unique<RequestMessage>(
         "2.0", id, LSPMethod::TextDocumentHover,
         make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(uri)),
                                                 make_unique<Position>(line, character))));
 }
 
-unique_ptr<LSPMessage> makeCodeAction(int id, std::string_view uri, int line, int character) {
+unique_ptr<LSPMessage> makeCodeAction(int id, string_view uri, int line, int character) {
     auto textDocument = make_unique<TextDocumentIdentifier>(string(uri));
     auto range = make_unique<Range>(make_unique<Position>(line, character), make_unique<Position>(line, character));
     auto context = make_unique<CodeActionContext>(vector<unique_ptr<Diagnostic>>{});
@@ -192,14 +208,21 @@ unique_ptr<LSPMessage> makeCodeAction(int id, std::string_view uri, int line, in
                                     make_unique<CodeActionParams>(move(textDocument), move(range), move(context))));
 }
 
-unique_ptr<LSPMessage> makeCompletion(int id, std::string_view uri, int line, int character) {
+unique_ptr<LSPMessage> makeCompletion(int id, string_view uri, int line, int character) {
     return make_unique<LSPMessage>(
         make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentCompletion,
                                     make_unique<CompletionParams>(make_unique<TextDocumentIdentifier>(string(uri)),
                                                                   make_unique<Position>(line, character))));
 }
 
-unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, std::string_view query) {
+unique_ptr<LSPMessage> makeSignatureHelp(int id, string_view uri, int line, int character) {
+    return make_unique<LSPMessage>(make_unique<RequestMessage>(
+        "2.0", id, LSPMethod::TextDocumentSignatureHelp,
+        make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(string(uri)),
+                                                make_unique<Position>(line, character))));
+}
+
+unique_ptr<LSPMessage> makeWorkspaceSymbolRequest(int id, string_view query) {
     return make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::WorkspaceSymbol,
                                                                make_unique<WorkspaceSymbolParams>(string(query))));
 }
@@ -480,7 +503,7 @@ unique_ptr<LSPMessage> makeClose(string_view uri) {
     return make_unique<LSPMessage>(move(didCloseNotif));
 }
 
-std::unique_ptr<LSPMessage> makeConfigurationChange(std::unique_ptr<DidChangeConfigurationParams> params) {
+unique_ptr<LSPMessage> makeConfigurationChange(unique_ptr<DidChangeConfigurationParams> params) {
     auto changeConfigNotification =
         make_unique<NotificationMessage>("2.0", LSPMethod::WorkspaceDidChangeConfiguration, move(params));
     return make_unique<LSPMessage>(move(changeConfigNotification));
@@ -549,13 +572,13 @@ namespace {
 string applyEdit(string_view source, const core::File &file, const Range &range, string_view newText, bool reindent) {
     auto beginLine = static_cast<uint32_t>(range.start->line + 1);
     auto beginCol = static_cast<uint32_t>(range.start->character + 1);
-    auto beginOffset = core::Loc::pos2Offset(file, {beginLine, beginCol}).value();
+    auto beginOffset = core::Loc::detail2Pos(file, {beginLine, beginCol}).value();
 
     auto endLine = static_cast<uint32_t>(range.end->line + 1);
     auto endCol = static_cast<uint32_t>(range.end->character + 1);
-    auto endOffset = core::Loc::pos2Offset(file, {endLine, endCol}).value();
+    auto endOffset = core::Loc::detail2Pos(file, {endLine, endCol}).value();
 
-    auto lineStartOffset = core::Loc::pos2Offset(file, {beginLine, 1}).value();
+    auto lineStartOffset = core::Loc::detail2Pos(file, {beginLine, 1}).value();
     auto lineStartView = source.substr(lineStartOffset);
     auto firstNonWhitespace = lineStartView.find_first_not_of(" \t\n");
     auto indentAfterNewline = absl::StrCat("\n", source.substr(lineStartOffset, firstNonWhitespace));

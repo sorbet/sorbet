@@ -62,7 +62,7 @@ module Coverage
         stop: T::Boolean,
         clear: T::Boolean
     )
-    .returns(T::Hash[String, T::Array[T.nilable(Integer)]])
+    .returns(T::Hash[String, T.untyped])
   end
   def self.result(stop: T.unsafe(nil), clear: T.unsafe(nil)); end
 
@@ -77,6 +77,7 @@ module Coverage
   # Enables coverage measurement.
   sig do
     params(
+        all: T.nilable(Symbol),
         lines: T::Boolean,
         branches: T::Boolean,
         methods: T::Boolean,
@@ -84,5 +85,5 @@ module Coverage
     )
     .returns(NilClass)
   end
-  def self.start(lines: T.unsafe(nil), branches: T.unsafe(nil), methods: T.unsafe(nil), oneshot_lines: T.unsafe(nil)); end
+  def self.start(all = T.unsafe(nil), lines: T.unsafe(nil), branches: T.unsafe(nil), methods: T.unsafe(nil), oneshot_lines: T.unsafe(nil)); end
 end

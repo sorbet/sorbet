@@ -203,7 +203,7 @@ int OwnedKeyValueStore::commit() {
     return rc;
 }
 
-std::string_view OwnedKeyValueStore::kvstorePath() const {
+string_view OwnedKeyValueStore::kvstorePath() const {
     ENFORCE(kvstore != nullptr);
     // This is used in error handling code, so we want to degrade gracefully if the ENFORCE is broken.
     if (kvstore == nullptr) {
@@ -217,7 +217,7 @@ OwnedKeyValueStore::~OwnedKeyValueStore() {
     abort();
 }
 
-void OwnedKeyValueStore::writeInternal(std::string_view key, void *value, size_t len) {
+void OwnedKeyValueStore::writeInternal(string_view key, void *value, size_t len) {
     if (writerId != this_thread::get_id()) {
         throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0, kvstorePath());
     }
@@ -480,6 +480,29 @@ unique_ptr<KeyValueStore> OwnedKeyValueStore::bestEffortCommit(spdlog::logger &l
     Timer timeit(logger, "kvstore.bestEffortCommit");
     ownedKvstore->commit();
     return move(ownedKvstore->kvstore);
+}
+
+void OwnedKeyValueStore::copyTo(const string &path) const {
+    this->abort();
+
+    auto rc = mdb_env_copy(this->kvstore->dbState->env, path.c_str());
+    if (rc != 0) {
+        if (rc == ENOENT) {
+        }
+        try {
+            filesystem::create_directories(string_view(path));
+        } catch (filesystem::filesystem_error &e) {
+            fmt::print(stderr,
+                       "'{}' does not exist and could not be created. "
+                       "When using --cache-dir, create the directory before hand.\n",
+                       path);
+            throw EarlyReturnWithCode(1);
+        }
+        rc = mdb_env_copy(this->kvstore->dbState->env, path.c_str());
+        if (rc != 0) {
+            throw_mdb_error("failed to copy kvstore"sv, rc, kvstorePath());
+        }
+    }
 }
 
 } // namespace sorbet

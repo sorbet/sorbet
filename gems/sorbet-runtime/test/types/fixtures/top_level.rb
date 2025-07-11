@@ -3,14 +3,14 @@ require_relative '../../../lib/sorbet-runtime'
 
 extend T::Sig
 
-sig {returns(Integer)}
+sig { returns(Integer) }
 def foo
   puts 'called main#foo'
 
   T.unsafe('nope')
 end
 
-sig {returns(Symbol)}
+sig { returns(Symbol) }
 def self.bar
   puts 'called main.bar'
 

@@ -83,7 +83,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
         }
 
         // Don't report definitions in __package.rb files, as they're references to symbols defined elsewhere.
-        if (this->config.opts.stripePackages && loc.file().data(gs).isPackage()) {
+        if (loc.file().data(gs).isPackage(gs)) {
             continue;
         }
 
@@ -242,9 +242,9 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     size_t ceilingScore = INT_MAX;
 
     const std::array<pair<core::SymbolRef::Kind, size_t>, 3> symbolKinds{
-        std::make_pair(core::SymbolRef::Kind::ClassOrModule, gs.classAndModulesUsed()),
-        std::make_pair(core::SymbolRef::Kind::FieldOrStaticField, gs.fieldsUsed()),
-        std::make_pair(core::SymbolRef::Kind::Method, gs.methodsUsed()),
+        make_pair(core::SymbolRef::Kind::ClassOrModule, gs.classAndModulesUsed()),
+        make_pair(core::SymbolRef::Kind::FieldOrStaticField, gs.fieldsUsed()),
+        make_pair(core::SymbolRef::Kind::Method, gs.methodsUsed()),
     };
 
     // First pass: prefix-only matches on namespace

@@ -29,9 +29,9 @@ class LSPIndexer final {
     bool initialized = false;
     /** Encapsulates the active configuration for the language server. */
     const std::shared_ptr<const LSPConfiguration> config;
-    /** Global state that we keep up-to-date with file edits. We do _not_ typecheck using this global state! We clone
-     * this global state every time we need to perform a slow path typechecking operation. */
-    std::unique_ptr<core::GlobalState> initialGS;
+    /** Global state that we keep up-to-date with file edits. We do _not_ typecheck using this global state, as it will
+     * never have a populated symbol table. */
+    std::unique_ptr<core::GlobalState> gs;
     /** Key-value store used during initialization. */
     std::unique_ptr<KeyValueStore> kvstore;
     /** Contains a copy of the last edit committed on the slow path. Used in slow path cancelation logic. */
@@ -48,7 +48,7 @@ class LSPIndexer final {
 
     /**
      * Determines if the given edit can take the fast path relative to the most recently committed edit.
-     * It compares the file hashes in the files in `edit` to those in `evictedFiles` and `initialGS` (in that order).
+     * It compares the file hashes in the files in `edit` to those in `evictedFiles` and `gs` (in that order).
      */
     TypecheckingPath
     getTypecheckingPath(LSPFileUpdates &edit,
@@ -67,7 +67,7 @@ class LSPIndexer final {
                                 const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
 
 public:
-    LSPIndexer(std::shared_ptr<const LSPConfiguration> config, std::unique_ptr<core::GlobalState> initialGS,
+    LSPIndexer(std::shared_ptr<const LSPConfiguration> config, std::unique_ptr<core::GlobalState> gs,
                std::unique_ptr<KeyValueStore> kvstore);
     ~LSPIndexer();
 
@@ -82,16 +82,16 @@ public:
     void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files) const;
 
     /**
-     * Initializes the indexer with the state produced on the typechecking thread.
+     * Finalizes indexer initialization.
      */
-    void initialize(IndexerInitializationTask &task, std::unique_ptr<core::GlobalState> initialGS);
+    void initialize(IndexerInitializationTask &task, std::vector<std::shared_ptr<core::File>> &&files);
 
     /**
-     * Commits the given edit to `initialGS`, and returns a canonical LSPFileUpdates object containing indexed trees
+     * Commits the given edit to `gs`, and returns a canonical LSPFileUpdates object containing indexed trees
      * and file hashes. Also handles canceling the running slow path.
      */
-    LSPFileUpdates commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers);
-    LSPFileUpdates commitEdit(SorbetWorkspaceEditParams &edit);
+    std::unique_ptr<LSPFileUpdates> commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers);
+    std::unique_ptr<LSPFileUpdates> commitEdit(SorbetWorkspaceEditParams &edit);
 
     /**
      * Retrieves the file ref for the given file, if exists.

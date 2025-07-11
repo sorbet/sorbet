@@ -1,3 +1,14 @@
+test/cli/suggest-kernel/suggest-kernel.rb:14: Method `is_a?` does not exist on `Foo` https://srb.help/7003
+    .. |  x.is_a?(Foo)
+            ^^^^^
+  Got `Foo` originating from:
+    test/cli/suggest-kernel/suggest-kernel.rb:13:
+    .. |def example(x)
+                    ^
+  Note:
+    `is_a?` is actually defined as a method on `Kernel`. To call it, either
+    `include Kernel` in this module to ensure the method is always there.
+
 test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `Foo` https://srb.help/7003
      .. |    raise "hi"
             ^^^^^
@@ -27,18 +38,6 @@ test/cli/suggest-kernel/suggest-kernel.rb:5: Method `Integer` does not exist on 
     test/cli/suggest-kernel/suggest-kernel.rb:5: Insert `.new`
      .. |    Integer(0)
                    ^
-  Note:
-    Ruby uses `.new` to invoke a class's constructor
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-kernel/suggest-kernel.rb:5: Insert `.new`
-     .. |    Integer(0)
-                   ^
-  Note:
-    Ruby uses `.new` to invoke a class's constructor
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-kernel/suggest-kernel.rb:5: Insert `.new`
-     .. |    Integer(0)
-                   ^
 
 test/cli/suggest-kernel/suggest-kernel.rb:6: Method `Array` does not exist on `Foo` https://srb.help/7003
      .. |    Array(0)
@@ -51,16 +50,4 @@ test/cli/suggest-kernel/suggest-kernel.rb:6: Method `Array` does not exist on `F
     test/cli/suggest-kernel/suggest-kernel.rb:6: Insert `Kernel.`
      .. |    Array(0)
             ^
-  Note:
-    Ruby uses `.new` to invoke a class's constructor
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-kernel/suggest-kernel.rb:6: Insert `.new`
-     .. |    Array(0)
-                 ^
-  Note:
-    Ruby uses `.new` to invoke a class's constructor
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-kernel/suggest-kernel.rb:6: Insert `.new`
-     .. |    Array(0)
-                 ^
-Errors: 3
+Errors: 4

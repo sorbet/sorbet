@@ -101,7 +101,7 @@ ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
                 } else if constexpr (is_same_v<T, unique_ptr<TextDocumentItem>>) {
                     // sorbet/readFile
                     return ResponseMessageStatus::Unknown;
-                } else if constexpr (is_same_v<T, variant<JSONNullObject, std::unique_ptr<SymbolInformation>>>) {
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, unique_ptr<SymbolInformation>>>) {
                     // sorbet/showSymbol
                     return holds_alternative<JSONNullObject>(res) ? ResponseMessageStatus::EmptyResult
                                                                   : ResponseMessageStatus::Succeeded;

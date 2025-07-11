@@ -230,7 +230,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     it "will try to alert the owner if possible" do
 
       found_team = nil
-      T::Configuration.class_owner_finder = ->(_klass) {:some_team}
+      T::Configuration.class_owner_finder = ->(_klass) { :some_team }
       # because `raise_nil_deserialize_error` has a final `ensure`
       # block, we're going to end up calling this twice, and only
       # once with the `project:` key set. Expressing that via

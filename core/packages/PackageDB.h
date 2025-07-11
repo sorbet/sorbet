@@ -6,6 +6,7 @@
 #include "common/common.h"
 #include "core/Files.h"
 #include "core/Names.h"
+#include "core/packages/Condensation.h"
 #include "core/packages/PackageInfo.h"
 
 namespace sorbet::core::packages {
@@ -35,12 +36,9 @@ public:
     // Set the associated package for the file.
     void setPackageNameForFile(FileRef file, MangledName mangledName);
 
-    const PackageInfo &getPackageForFile(const core::GlobalState &gs, core::FileRef file) const;
+    MangledName findPackageByPath(const core::GlobalState &gs, core::FileRef file) const;
     const PackageInfo &getPackageInfo(MangledName mangledName) const;
     PackageInfo *getPackageInfoNonConst(MangledName mangledName);
-
-    // Lookup `PackageInfo` from the string representation of the un-mangled package name.
-    const PackageInfo &getPackageInfo(const core::GlobalState &gs, std::string_view str) const;
 
     // Get mangled names for all packages.
     // Packages are ordered lexicographically with respect to the NameRef's that make up their
@@ -75,7 +73,22 @@ public:
     const bool enforceLayering() const;
 
     const std::string_view errorHint() const;
+
+    // Expects to be called after packages have been defined, so that string package names provided
+    // at the command line can be resolved to actual packages.
+    void resolvePackagesWithRelaxedChecks(GlobalState &gs);
+
     bool allowRelaxedPackagerChecksFor(const MangledName mangledName) const;
+
+    // Overwrite the condensation graph for the current package set. This method is only meant to be used from
+    // `ComputePackageSCCs::run`.
+    //
+    // WARNING: Modifying the contents of the package DB after this operation will cause the condensation to go out of
+    // date.
+    void setCondensation(Condensation &&condensation);
+
+    // Fetch the condensation graph for queries.
+    const Condensation &condensation() const;
 
 private:
     bool enabled_ = false;
@@ -84,7 +97,8 @@ private:
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;
     std::string errorHint_;
     std::vector<std::string> skipRBIExportEnforcementDirs_;
-    std::vector<MangledName> allowRelaxedPackagerChecksFor_;
+    std::vector<std::string> allowRelaxedPackagerChecksFor_;
+    UnorderedSet<MangledName> packagesWithRelaxedChecks_;
     std::vector<core::NameRef> layers_;
 
     // This vector is kept in sync with the size of the file table in the global state by
@@ -98,6 +112,8 @@ private:
 
     bool frozen = true;
     std::thread::id writerThread;
+
+    Condensation condensation_;
 
     friend class UnfreezePackages;
 };

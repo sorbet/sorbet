@@ -12,6 +12,10 @@
 #include <tuple>
 #include <vector>
 
+namespace sorbet {
+class Levenstein;
+}
+
 namespace sorbet::core {
 class ClassOrModule;
 class GlobalState;
@@ -73,18 +77,22 @@ public:
         bool isOverridable : 1;
         bool isFinal : 1;
         bool isOverride : 1;
-        bool isIncompatibleOverride : 1;
+        // It might have been nice to be able to separate out the kinds of incompatible overrides.
+        // This boolean silences all override-related errors.
+        bool allowIncompatibleOverrideAll : 1;
+        bool allowIncompatibleOverrideVisibility : 1;
         bool isPackagePrivate : 1;
 
-        constexpr static uint16_t NUMBER_OF_FLAGS = 11;
+        constexpr static uint16_t NUMBER_OF_FLAGS = 12;
         constexpr static uint16_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
         Flags() noexcept
             : isRewriterSynthesized(false), isProtected(false), isPrivate(false), isOverloaded(false),
               isAbstract(false), isGenericMethod(false), isOverridable(false), isFinal(false), isOverride(false),
-              isIncompatibleOverride(false), isPackagePrivate(false) {}
+              allowIncompatibleOverrideAll(false), allowIncompatibleOverrideVisibility(false), isPackagePrivate(false) {
+        }
 
         uint16_t serialize() const {
-            ENFORCE(sizeof(Flags) == sizeof(uint16_t));
+            static_assert(sizeof(Flags) == sizeof(uint16_t));
             // Can replace this with std::bit_cast in C++20
             auto rawBits = *reinterpret_cast<const uint16_t *>(this);
 
@@ -233,7 +241,7 @@ public:
               isExported(false) {}
 
         uint8_t serialize() const {
-            ENFORCE(sizeof(Flags) == sizeof(uint8_t));
+            static_assert(sizeof(Flags) == sizeof(uint8_t));
             // Can replace this with std::bit_cast in C++20
             auto rawBits = *reinterpret_cast<const uint8_t *>(this);
             // We need to mask the valid bits since uninitialized memory isn't zeroed in C++.
@@ -306,6 +314,7 @@ public:
               isContravariant(false), isFixed(false) {}
 
         uint8_t serialize() const {
+            static_assert(sizeof(Flags) == sizeof(uint8_t));
             // Can replace this with std::bit_cast in C++20
             auto rawBits = *reinterpret_cast<const uint8_t *>(this);
             // Mask the valid bits since uninitialized bits can be any value.
@@ -389,6 +398,7 @@ public:
               isBehaviorDefining(false) {}
 
         uint16_t serialize() const {
+            static_assert(sizeof(Flags) == sizeof(uint16_t));
             // Can replace this with std::bit_cast in C++20
             auto rawBits = *reinterpret_cast<const uint16_t *>(this);
             // Mask the valid bits since uninitialized bits can be any value.
@@ -611,16 +621,35 @@ public:
         return members_;
     };
 
+    template <typename P>
+    std::vector<std::pair<NameRef, SymbolRef>> membersStableOrderSlowPredicate(const GlobalState &gs,
+                                                                               P predicate) const {
+        std::vector<std::pair<NameRef, SymbolRef>> result;
+
+        for (const auto &e : this->members()) {
+            if (predicate(e.first, e.second)) {
+                result.emplace_back(e);
+            }
+        }
+
+        sortMembersStableOrder(gs, result);
+
+        return result;
+    }
+
     std::vector<std::pair<NameRef, SymbolRef>> membersStableOrderSlow(const GlobalState &gs) const;
 
     ClassOrModule deepCopy(const GlobalState &to, bool keepGsId = false) const;
     void sanityCheck(const GlobalState &gs) const;
 
 private:
+    static void sortMembersStableOrder(const GlobalState &gs, std::vector<std::pair<NameRef, SymbolRef>> &out);
+
     friend class serialize::SerializerImpl;
     friend class GlobalState;
 
-    FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, int betterThan = -1) const;
+    FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, Levenstein &levenstein,
+                                               int betterThan = -1) const;
     std::vector<FuzzySearchResult> findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                                                                 int betterThan = -1) const;
 

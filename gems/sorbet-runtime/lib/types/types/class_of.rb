@@ -21,14 +21,14 @@ module T::Types
 
     # overrides Base
     def valid?(obj)
-      obj.is_a?(Module) && (obj <= @type || false)
+      obj.is_a?(@type.singleton_class)
     end
 
     # overrides Base
     def subtype_of_single?(other)
       case other
       when ClassOf
-        @type <= other.type
+        @type.is_a?(other.type.singleton_class)
       when Simple
         @type.is_a?(other.raw_type)
       when TypedClass

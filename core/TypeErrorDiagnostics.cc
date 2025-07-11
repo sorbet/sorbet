@@ -7,61 +7,6 @@ using namespace std;
 
 namespace sorbet::core {
 
-namespace {
-
-[[nodiscard]] bool checkForAttachedClassHint(const GlobalState &gs, ErrorBuilder &e, const SelfTypeParam expected,
-                                             const ClassType got) {
-    if (expected.definition.name(gs) != Names::Constants::AttachedClass()) {
-        return false;
-    }
-
-    auto attachedClass = got.symbol.data(gs)->lookupSingletonClass(gs);
-    if (!attachedClass.exists()) {
-        return false;
-    }
-
-    if (attachedClass != expected.definition.owner(gs).asClassOrModuleRef()) {
-        return false;
-    }
-
-    auto gotStr = got.show(gs);
-    auto expectedStr = expected.show(gs);
-    e.addErrorNote(
-        "`{}` is incompatible with `{}` because when this method is called on a subclass `{}` will represent a more "
-        "specific subclass, meaning `{}` will not be specific enough. See https://sorbet.org/docs/attached-class for "
-        "more.",
-        gotStr, expectedStr, expectedStr, gotStr);
-    return true;
-}
-} // namespace
-
-void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e,
-                                               const ErrorSection::Collector &collector, const TypePtr &expected,
-                                               const TypePtr &got) {
-    e.addErrorSections(std::move(collector));
-    // TODO: the rest of this function should eventually be moved to isSubTypeUnderConstraint,
-    // as calls to collector.addErrorDetails
-    auto expectedSelfTypeParam = isa_type<SelfTypeParam>(expected);
-    auto gotClassType = isa_type<ClassType>(got);
-    if (expectedSelfTypeParam && gotClassType) {
-        if (checkForAttachedClassHint(gs, e, cast_type_nonnull<SelfTypeParam>(expected),
-                                      cast_type_nonnull<ClassType>(got))) {
-            return;
-        }
-    }
-
-    if (isa_type<MetaType>(got) && !isa_type<MetaType>(expected)) {
-        e.addErrorNote(
-            "It looks like you're using Sorbet type syntax in a runtime value position.\n"
-            "    If you really mean to use types as values, use `{}` to hide the type syntax from the type checker.\n"
-            "    Otherwise, you're likely using the type system in a way it wasn't meant to be used.",
-            "T::Utils.coerce");
-        return;
-    }
-
-    // TODO(jez) Add more cases
-}
-
 void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc,
                                             const TypeConstraint &constrOrig, const TypePtr &expectedType,
                                             const TypePtr &actualType) {
@@ -197,32 +142,25 @@ TypeErrorDiagnostics::editForDSLMethod(const GlobalState &gs, FileRef fileToEdit
             // If they're writing methods at the top level, it's probably a small script.
             // Just put the `extend` immediately above the sig.
 
-            auto [sigStart, _sigEnd] = defaultInsertLoc.position(gs);
-            auto thisLineStart = core::Loc::Detail{sigStart.line, 1};
-            auto thisLineLoc = core::Loc::fromDetails(gs, defaultInsertLoc.file(), thisLineStart, thisLineStart);
-            ENFORCE(thisLineLoc.has_value());
-            auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(gs);
-
+            auto [thisLineIndented, thisLinePadding] = defaultInsertLoc.findStartOfIndentation(gs);
+            auto thisLineStart = thisLineIndented.adjustLen(gs, -thisLinePadding, 0);
             string prefix(thisLinePadding, ' ');
-            return autocorrectEditForDSLMethod(gs, thisLineLoc.value(), prefix, dslOwner, dsl, needsDslOwner);
+            return autocorrectEditForDSLMethod(gs, thisLineStart, prefix, dslOwner, dsl, needsDslOwner);
         } else {
             return nullopt;
         }
     }
 
-    auto [classStart, classEnd] = classLoc->position(gs);
+    auto [classStart, classEnd] = classLoc->toDetails(gs);
 
-    core::Loc::Detail thisLineStart = {classStart.line, 1};
-    auto thisLineLoc = core::Loc::fromDetails(gs, classLoc->file(), thisLineStart, thisLineStart);
-    ENFORCE(thisLineLoc.has_value());
-    auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(gs);
+    auto [_, thisLinePadding] = classLoc->findStartOfIndentation(gs);
 
     core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
     auto nextLineLoc = core::Loc::fromDetails(gs, classLoc->file(), nextLineStart, nextLineStart);
     if (!nextLineLoc.has_value()) {
         return nullopt;
     }
-    auto [replacementLoc, nextLinePadding] = nextLineLoc.value().findStartOfLine(gs);
+    auto [replacementLoc, nextLinePadding] = nextLineLoc.value().findStartOfIndentation(gs);
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');

@@ -11,25 +11,18 @@ void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
     cancellationExpected = cancellationExpected || older.cancellationExpected;
     preemptionsExpected += older.preemptionsExpected;
 
-    ENFORCE(updatedFiles.size() == updatedFileIndexes.size());
-    ENFORCE(older.updatedFiles.size() == older.updatedFileIndexes.size());
-
     // For updates, we prioritize _newer_ updates.
     UnorderedSet<string> encountered;
     for (auto &f : updatedFiles) {
         encountered.emplace(f->path());
     }
 
-    int i = -1;
     for (auto &f : older.updatedFiles) {
-        i++;
         if (encountered.contains(f->path())) {
             continue;
         }
         encountered.emplace(f->path());
         updatedFiles.push_back(f);
-        auto &ast = older.updatedFileIndexes[i];
-        updatedFileIndexes.push_back(ast::ParsedFile{ast.tree.deepCopy(), ast.file});
     }
     typecheckingPath = TypecheckingPath::Slow;
 }
@@ -44,9 +37,6 @@ LSPFileUpdates LSPFileUpdates::copy() const {
     copy.updatedFiles = updatedFiles;
     copy.cancellationExpected = cancellationExpected;
     copy.preemptionsExpected = preemptionsExpected;
-    for (auto &ast : updatedFileIndexes) {
-        copy.updatedFileIndexes.push_back(ast::ParsedFile{ast.tree.deepCopy(), ast.file});
-    }
     return copy;
 }
 
@@ -59,8 +49,7 @@ namespace {
 // This is adapted from
 // https://github.com/llvm/llvm-project/blob/b89e774672678ef26baf8f94c616f43551d29428/libcxx/include/__algorithm/set_intersection.h#L47-L123
 // and modified to return early when any intersection is found.
-bool intersects(const std::vector<core::WithoutUniqueNameHash> &changed,
-                const std::vector<core::WithoutUniqueNameHash> &used) {
+bool intersects(const vector<core::WithoutUniqueNameHash> &changed, const vector<core::WithoutUniqueNameHash> &used) {
     auto changedIt = changed.begin();
     auto changedEnd = changed.end();
     auto usedIt = used.begin();
@@ -103,7 +92,7 @@ bool intersects(const std::vector<core::WithoutUniqueNameHash> &changed,
 // materializing a vector of `WithoutUniqueNameHash` when we're only interested in the `nameHash` components.
 class NameHashOutputIterator final {
 public:
-    using container_type = std::vector<core::WithoutUniqueNameHash>;
+    using container_type = vector<core::WithoutUniqueNameHash>;
 
     NameHashOutputIterator(container_type &container) : container{container} {}
 
@@ -131,7 +120,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
                                          const vector<shared_ptr<core::File>> &updatedFiles,
                                          const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) {
     UnorderedMap<core::FileRef, size_t> changedFiles;
-    std::vector<core::WithoutUniqueNameHash> changedSymbolNameHashes;
+    vector<core::WithoutUniqueNameHash> changedSymbolNameHashes;
 
     FastPathFilesToTypecheckResult result;
     Timer timeit(config.logger, "compute_fast_path_file_set");
@@ -143,7 +132,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         // path logic in LSPPreprocessor.
         ENFORCE(fref.exists());
         ENFORCE(updatedFile->getFileHash() != nullptr);
-        if (config.opts.stripePackages && updatedFile->isPackage()) {
+        if (config.opts.cacheSensitiveOptions.stripePackages && updatedFile->isPackage(gs)) {
             // Only relevant in --stripe-packages mode. Package declarations do not have method
             // hashes. Instead we rely on recomputing packages if any __package.rb source
             // changes.
@@ -154,11 +143,10 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             continue;
         }
 
-        // When run from the indexer, the old file will actually have been evicted from the initialGS
-        // so that the initialGS containing the new file can be given to the pipeline to be indexed
-        // (and thus have the new hashes computed), so that the `updatedFile` and
-        // `fref.data(gs)` actually are the same File object. For this case, we have to find the
-        // old File's hashes in `evictedFiles`.
+        // When run from the indexer, the old file will actually have been evicted from the GlobalState so that the new
+        // file can be given to the pipeline to be indexed (and thus have the new hashes computed), so that the
+        // `updatedFile` and `fref.data(gs)` actually are the same File object. For this case, we have to find the old
+        // File's hashes in `evictedFiles`.
         //
         // When run from the typechecker, the old file will not yet have been evicted before
         // fastPathFilesToTypecheck is called (it will be evicted later on that thread, right
@@ -193,19 +181,17 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
 
     core::WithoutUniqueNameHash::sortAndDedupe(changedSymbolNameHashes);
 
-    int i = -1;
-    for (auto &oldFile : gs.getFiles()) {
+    size_t i = 0;
+    // skip idx 0 (corresponds to File that does not exist, so it contains nullptr)
+    for (auto &oldFile : gs.getFiles().subspan(1)) {
         i++;
-        if (oldFile == nullptr) {
-            continue;
-        }
 
         auto ref = core::FileRef(i);
         if (changedFiles.contains(ref)) {
             continue;
         }
 
-        if (config.opts.stripePackages && oldFile->isPackage()) {
+        if (config.opts.cacheSensitiveOptions.stripePackages && oldFile->isPackage(gs)) {
             continue; // See note above about --stripe-packages.
         }
 
@@ -220,7 +206,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             continue;
         }
 
-        result.extraFiles.emplace_back(ref.data(gs).path());
+        result.extraFiles.emplace_back(oldFile->path());
         result.totalChanged += 1;
 
         if (result.totalChanged > (2 * config.opts.lspMaxFilesOnFastPath)) {

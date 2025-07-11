@@ -2931,6 +2931,68 @@ class Gem::Package::TarReader
   # Seeks through the tar file until it finds the `entry` with `name` and yields
   # it. Rewinds the tar file to the beginning when the block terminates.
   def seek(name); end
+
+  # Class for reading entries out of a tar file
+  class Entry
+    # Header for this tar entry
+    attr_reader :header
+
+    def initialize(header, io); end
+
+    # Creates a new tar entry for `header` that will be read from `io`
+    # If a block is given, the entry is yielded and then closed
+    def self.open(header, io, &block); end
+
+    # Number of bytes read out of the tar entry
+    def bytes_read; end
+
+    # Closes the tar entry
+    def close; end
+
+    # Is the tar entry closed?
+    def closed?; end
+
+    # Are we at the end of the tar entry?
+    def eof?; end
+
+    # Full name of the tar entry
+    def full_name; end
+
+    # Read one byte from the tar entry
+    def getc; end
+
+    # The position in the tar entry
+    def pos; end
+
+    # Seek to the position in the tar entry
+    def pos=(new_pos); end
+
+    # Reads `maxlen` bytes from the tar file entry, or the rest of the entry if nil
+    def read(maxlen = nil); end
+
+    # Reads `maxlen` bytes from the tar file entry
+    def readpartial(maxlen, outbuf = "".b); end
+
+    # Rewinds to the beginning of the tar file entry
+    def rewind; end
+
+    # Seeks to `offset` bytes into the tar file entry
+    # `whence` can be IO::SEEK_SET, IO::SEEK_CUR, or IO::SEEK_END
+    def seek(offset, whence = IO::SEEK_SET); end
+
+    # Size of the tar entry
+    def size; end
+    alias_method :length, :size
+
+    # Is this tar entry a directory?
+    def directory?; end
+
+    # Is this tar entry a file?
+    def file?; end
+
+    # Is this tar entry a symlink?
+    def symlink?; end
+  end
 end
 
 # Raised if the tar [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) is not

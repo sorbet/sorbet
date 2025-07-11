@@ -24,11 +24,9 @@ sidebar_label: CLI Reference
 
 This page shows the `srb tc --help` output for the latest version of Sorbet.
 
-- See [Command Line Quickstart](cli.md) for an overview of some of the more
-  common options and workflows.
+- See [Command Line Quickstart](cli.md) for an overview of some of the more common options and workflows.
 
-- See `srb tc --help` to see the help options for your version of Sorbet. (New
-  options are added and changed all the time.)
+- See `srb tc --help` to see the help options for your version of Sorbet. (New options are added and changed all the time.)
 
 ## Usage
 

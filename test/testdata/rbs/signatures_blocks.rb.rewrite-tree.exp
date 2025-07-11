@@ -1,0 +1,409 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def1<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def2<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def3<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def7<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def8<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def9<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def10<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def11<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def12<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def13<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def14<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def15<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def16<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def17<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def18<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C Symbol>)
+  end
+
+  def def19<<todo method>>(&<blk>)
+    <runtime method definition of def20>
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def20<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C Symbol>)
+  end
+
+  def self.def21<<todo method>>(&<blk>)
+    <runtime method definition of def22>
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def22<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def23<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def24<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def25<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def26<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def27<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def28<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def29<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def30<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def31<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C String>)
+  end
+
+  def def32<<todo method>>(&<blk>)
+    nil
+  end
+
+  <emptyTree>::<C Class>.new() do ||
+    begin
+      <cast:<synthetic bind>>(<self>, <todo sym>, ::T::Class.[](::Object))
+      <runtime method definition of def1>
+    end
+  end
+
+  <emptyTree>::<C Class>.new() do ||
+    begin
+      <cast:<synthetic bind>>(<self>, <todo sym>, ::T::Class.[](::Object))
+      <runtime method definition of def2>
+      <self>.puts("bar")
+      <runtime method definition of def3>
+      <self>.attr_reader(:attr1)
+      <self>.attr_reader(:attr2)
+    end
+  end
+
+  class <emptyTree>::<C Const1><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def def4<<todo method>>(&<blk>)
+      nil
+    end
+
+    <runtime method definition of def4>
+  end
+
+  class <emptyTree>::<C Const2><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def def5<<todo method>>(&<blk>)
+      nil
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def def6<<todo method>>(&<blk>)
+      nil
+    end
+
+    <runtime method definition of def5>
+
+    <runtime method definition of def6>
+  end
+
+  var1 = 42
+
+  if var1
+    var1 = <emptyTree>::<C Class>.new() do ||
+      begin
+        <cast:<synthetic bind>>(<self>, <todo sym>, ::T::Class.[](::Object))
+        <runtime method definition of def7>
+      end
+    end
+  else
+    var1
+  end
+
+  var2 = 42
+
+  if var2
+    var2 = <emptyTree>::<C Class>.new() do ||
+      begin
+        <cast:<synthetic bind>>(<self>, <todo sym>, ::T::Class.[](::Object))
+        <runtime method definition of def8>
+        <runtime method definition of def9>
+      end
+    end
+  else
+    var2
+  end
+
+  if var3
+    var3
+  else
+    var3 = <emptyTree>::<C Class>.new() do ||
+      begin
+        <cast:<synthetic bind>>(<self>, <todo sym>, ::T::Class.[](::Object))
+        <runtime method definition of def10>
+      end
+    end
+  end
+
+  if var4
+    var4
+  else
+    var4 = <emptyTree>::<C Class>.new() do ||
+      begin
+        <cast:<synthetic bind>>(<self>, <todo sym>, ::T::Class.[](::Object))
+        <runtime method definition of def11>
+        <runtime method definition of def12>
+      end
+    end
+  end
+
+  var3 = var3.+(<emptyTree>::<C Class>.new() do ||
+      begin
+        <cast:<synthetic bind>>(<self>, <todo sym>, ::T::Class.[](::Object))
+        <runtime method definition of def13>
+      end
+    end)
+
+  var4 = var4.+(<emptyTree>::<C Class>.new() do ||
+      begin
+        <cast:<synthetic bind>>(<self>, <todo sym>, ::T::Class.[](::Object))
+        <runtime method definition of def14>
+        <runtime method definition of def15>
+      end
+    end)
+
+  begin
+    <runtime method definition of def16>
+    <runtime method definition of def17>
+    <runtime method definition of def18>
+  end
+
+  <runtime method definition of def19>
+
+  <runtime method definition of self.def21>
+
+  ::<Magic>.<build-range>(1, 10, false).each() do |i|
+    <runtime method definition of def23>
+  end
+
+  [<runtime method definition of def24>]
+
+  <runtime method definition of def25>
+rescue => <rescueTemp>$2
+  <runtime method definition of def26>
+ensure
+  <runtime method definition of def27>
+
+  if true
+    <runtime method definition of def28>
+  else
+    <runtime method definition of def29>
+  end
+
+  begin
+    <assignTemp>$3 = <runtime method definition of def30>
+    <assignTemp>$4 = ::<Magic>.<expand-splat>(<assignTemp>$3, 2, 0)
+    var5 = <assignTemp>$4.[](0)
+    var6 = <assignTemp>$4.[](1)
+    <assignTemp>$3
+  end
+
+  begin
+    <assignTemp>$5 = <emptyTree>::<C ARGV>.first()
+    if "foo".===(<assignTemp>$5)
+      <runtime method definition of def31>
+    else
+      <runtime method definition of def32>
+    end
+  end
+
+  class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
+    class <singleton class><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.returns(<emptyTree>::<C String>)
+      end
+
+      def def33<<todo method>>(&<blk>)
+        nil
+      end
+
+      <runtime method definition of def33>
+    end
+  end
+end

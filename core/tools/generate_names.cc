@@ -42,6 +42,7 @@ NameDef names[] = {
     {"intern"},
     {"call"},
     {"bang", "!"},
+    {"tilde", "~"},
     {"squareBrackets", "[]"},
     {"squareBracketsEq", "[]="},
     {"unaryPlus", "+@"},
@@ -115,6 +116,7 @@ NameDef names[] = {
     {"override_", "override"},
     {"overridable"},
     {"allowIncompatible", "allow_incompatible"},
+    {"visibility"},
     {"sigForMethod"},
 
     // Sig builders
@@ -402,6 +404,7 @@ NameDef names[] = {
 
     {"isA_p", "is_a?"},
     {"kindOf_p", "kind_of?"},
+    {"instanceOf_p", "instance_of?"},
     {"lessThan", "<"},
     {"greaterThan", ">"},
     {"equal_p", "equal?"},
@@ -468,6 +471,8 @@ NameDef names[] = {
     {"dag"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
+    {"only"},
+    {"testRb", "test_rb"},
 
     // GlobalState initEmpty()
     {"Top", "T.anything", true},
@@ -580,6 +585,13 @@ NameDef names[] = {
     {"Account", "Account", true},
     {"Merchant", "Merchant", true},
 
+    // RBS
+    {"RBSBind", "<RBSBind>", true},
+    {"RBSTypeAlias", "<RBSTypeAlias>", true},
+
+    // RBS synthetic generics
+    {"syntheticSquareBrackets", "<syntheticSquareBrackets>"},
+
     // Typos
     {"Int", "Int", true},
     {"Timestamp", "Timestamp", true},
@@ -602,7 +614,7 @@ void emit_name_string(ostream &out, NameDef &name) {
     out << "const char *" << name.srcName << " = \"";
     out << absl::CEscape(name.val) << "\";" << '\n';
 
-    out << "std::string_view " << name.srcName << "_DESC{(char*)";
+    out << "string_view " << name.srcName << "_DESC{(char*)";
     out << name.srcName << "," << name.val.size() << "};" << '\n';
     out << '\n';
 }
@@ -689,6 +701,7 @@ int main(int argc, char **argv) {
         classfile << "#include \"core/GlobalState.h\"" << '\n' << '\n';
         classfile << "#include \"core/Names.h\"" << '\n' << '\n';
         classfile << "#include \"core/Names_gen.h\"" << '\n' << '\n';
+        classfile << "using namespace std;" << '\n';
         classfile << "namespace sorbet {" << '\n';
         classfile << "namespace core {" << '\n';
         classfile << "namespace Names {" << '\n';

@@ -4,13 +4,9 @@ title: Requiring Ancestors
 sidebar_label: Requiring Ancestors
 ---
 
-> This feature is experimental and might be changed or removed without notice.
-> To enable it pass the `--enable-experimental-requires-ancestor` option to
-> Sorbet or add it to your `sorbet/config`.
+> This feature is experimental and might be changed or removed without notice. To enable it pass the `--enable-experimental-requires-ancestor` option to Sorbet or add it to your `sorbet/config`.
 
-It's not uncommon in Ruby to define helper modules that depends on other
-modules. For example, let's take the following helper which provides `say_error`
-method:
+It's not uncommon in Ruby to define helper modules that depends on other modules. For example, let's take the following helper which provides `say_error` method:
 
 ```ruby
 # typed: true
@@ -31,11 +27,7 @@ class MyClass
 end
 ```
 
-If we run Sorbet on this example, we will get a type-checking error saying that
-the method `raise` does not exist on `MyHelper` since this method is defined on
-`Kernel`. Thanks to this error, Sorbet is protecting us against some edge-cases
-where we would try to include the `MyHelper` module in a class that does not
-include `Kernel`:
+If we run Sorbet on this example, we will get a type-checking error saying that the method `raise` does not exist on `MyHelper` since this method is defined on `Kernel`. Thanks to this error, Sorbet is protecting us against some edge-cases where we would try to include the `MyHelper` module in a class that does not include `Kernel`:
 
 ```ruby
 class MyBaseClass < BasicObject
@@ -50,13 +42,11 @@ end
 MyBaseClass.new.do_something(false) # runtime-error: in `say_error': undefined method `raise' for #<MyBaseClass> (NoMethodError)
 ```
 
-This example would raise an error at runtime because the method `raise` is
-undefined for instances of `MyBaseClass` as it doesn't include `Kernel`.
+This example would raise an error at runtime because the method `raise` is undefined for instances of `MyBaseClass` as it doesn't include `Kernel`.
 
 ## Requiring Ancestors
 
-Sorbet provides the `requires_ancestor` method as a way to ensure that classes
-or modules including `MyHelper` will also include `Kernel`.
+Sorbet provides the `requires_ancestor` method as a way to ensure that classes or modules including `MyHelper` will also include `Kernel`.
 
 Let's change our base example to use `requires_ancestor`:
 
@@ -72,8 +62,7 @@ module MyHelper
 end
 ```
 
-This way we specify that any module including `MyHelper` must also include
-`Kernel` and Sorbet will display an error if it's not the case:
+This way we specify that any module including `MyHelper` must also include `Kernel` and Sorbet will display an error if it's not the case:
 
 ```ruby
 class MyBaseClass < BasicObject # error: `MyBaseClass` must include `Kernel` (required by `MyHelper`)
@@ -81,8 +70,7 @@ class MyBaseClass < BasicObject # error: `MyBaseClass` must include `Kernel` (re
 end
 ```
 
-`requires_ancestor` also works to require that a specific class must be
-inherited:
+`requires_ancestor` also works to require that a specific class must be inherited:
 
 ```ruby
 module MyHelper
@@ -158,8 +146,7 @@ class MyBrokenTest < Test::TestBase # error: `MyBrokenTest` must include `Test::
 end
 ```
 
-`requires_ancestor` can also be used to require a singleton class as an
-ancestor:
+`requires_ancestor` can also be used to require a singleton class as an ancestor:
 
 ```ruby
 module MyHelper

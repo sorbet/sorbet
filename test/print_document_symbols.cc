@@ -9,8 +9,9 @@
 #include <iostream>
 #include <memory>
 
-namespace sorbet::realmain::lsp {
 using namespace std;
+
+namespace sorbet::realmain::lsp {
 
 namespace {
 constexpr string_view uriPrefix = "file:///"sv;
@@ -89,7 +90,7 @@ int printDocumentSymbols(string_view chosenFile, const vector<string> &files) {
             publishDiagnostics->relatedInformation = true;
             docCapabilities->publishDiagnostics = std::move(publishDiagnostics);
 
-            auto documentSymbol = std::make_unique<DocumentSymbolCapabilities>();
+            auto documentSymbol = make_unique<DocumentSymbolCapabilities>();
             documentSymbol->dynamicRegistration = true;
             auto symbolKind = make_unique<SymbolKindOptions>();
             auto supportedSymbols = vector<SymbolKind>();
@@ -173,7 +174,7 @@ int main(int argc, char *argv[]) {
 
     int numFiles = argc - 2;
     char **files = &argv[2];
-    std::vector<std::string> filenames;
+    vector<string> filenames;
     for (int i = 0; i < numFiles; ++i) {
         filenames.emplace_back(files[i]);
     }

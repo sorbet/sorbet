@@ -45,7 +45,7 @@ string UnresolvedAppliedType::toStringWithTabs(const GlobalState &gs, int tabs) 
 
 namespace {
 string argTypeForUnresolvedAppliedType(const GlobalState &gs, const TypePtr &t, ShowOptions options) {
-    if (auto *m = cast_type<MetaType>(t)) {
+    if (auto m = cast_type<MetaType>(t)) {
         return m->wrapped.show(gs, options);
     }
     return t.show(gs, options);
@@ -417,7 +417,7 @@ string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 
 string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
     fmt::memory_buffer buf;
-    if (std::optional<int> procArity = Types::getProcArity(*this)) {
+    if (optional<int> procArity = Types::getProcArity(*this)) {
         fmt::format_to(std::back_inserter(buf), "T.proc");
 
         // The first element in targs is the return type.
@@ -463,6 +463,8 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
     auto targs = this->targs;
     auto typeMembers = this->klass.data(gs)->typeMembers();
     if (typeMembers.size() < targs.size()) {
+        // We have too many arguments at the application site, let's truncate them to match the number of type members
+        // that are defined for this generic.
         targs.erase(targs.begin() + typeMembers.size());
     }
 
@@ -483,6 +485,12 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
 
     auto it = targs.begin();
     for (auto typeMember : typeMembers) {
+        // We can have fewer arguments than the generic has type members, which might cause our type args list to empty
+        // before we've iterated all the type members.
+        if (targs.empty()) {
+            break;
+        }
+
         auto tm = typeMember;
         if (tm.data(gs)->flags.isFixed) {
             it = targs.erase(it);

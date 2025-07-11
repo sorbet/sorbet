@@ -141,8 +141,9 @@ void Timer::setTag(ConstExprStr name, ConstExprStr value) {
     tags->push_back(make_pair(name, value));
 }
 
-void Timer::setEndTime() {
+microseconds Timer::setEndTime() {
     endTime = clock_gettime_coarse();
+    return microseconds{endTime.usec - start.usec};
 }
 
 Timer::~Timer() {

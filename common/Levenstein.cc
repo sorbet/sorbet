@@ -21,7 +21,7 @@ int sorbet::Levenstein::distance(string_view s1, string_view s2, int bound) noex
         return INT_MAX;
     }
 
-    vector<int> column(s1len + 1);
+    column.resize(s1len + 1);
     absl::c_iota(column, 0);
 
     for (int x = 1; x <= s2len; x++) {

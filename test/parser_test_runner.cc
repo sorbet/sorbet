@@ -46,8 +46,9 @@
 #include <sys/types.h>
 #include <vector>
 
-namespace sorbet::test {
 using namespace std;
+
+namespace sorbet::test {
 
 string singleTest;
 
@@ -95,7 +96,7 @@ TEST_CASE("WhitequarkParserTest") {
     if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
         gs.initEmpty();
     } else {
-        core::serialize::Serializer::loadGlobalState(gs, GLOBAL_STATE_PAYLOAD);
+        core::serialize::Serializer::loadGlobalState(gs, PAYLOAD_SYMBOL_TABLE, PAYLOAD_NAME_TABLE, PAYLOAD_FILE_TABLE);
     }
     // Parser
     vector<core::FileRef> files;
@@ -127,7 +128,7 @@ TEST_CASE("WhitequarkParserTest") {
             // simplify testing cases around local variables
             vector<string> initialLocals = {"foo", "bar", "baz"};
             auto settings = parser::Parser::Settings{};
-            nodes = parser::Parser::run(gs, file, settings, initialLocals);
+            nodes = parser::Parser::run(gs, file, settings, initialLocals).tree;
         }
         {
             errorQueue->flushAllErrors(gs);
@@ -186,7 +187,7 @@ TEST_CASE("WhitequarkParserTest") {
 int main(int argc, char *argv[]) {
     cxxopts::Options options("test_corpus", "Test corpus for Sorbet typechecker");
     options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
-                                                       cxxopts::value<std::string>()->default_value(""), "testpath");
+                                                       cxxopts::value<string>()->default_value(""), "testpath");
     auto res = options.parse(argc, argv);
 
     if (res.count("single_test") != 1) {
@@ -194,7 +195,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    sorbet::test::singleTest = res["single_test"].as<std::string>();
+    sorbet::test::singleTest = res["single_test"].as<string>();
 
     doctest::Context context(argc, argv);
     return context.run();

@@ -27,5 +27,8 @@ Begin {
       args = [
       ]
     }
+    Integer {
+      val = "~-10"
+    }
   ]
 }

@@ -58,7 +58,7 @@ private:
 // and returns the child's stdout and status code
 optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawn(string executable, vector<string> arguments,
                                                                optional<string_view> stdinContents) {
-    if (emscripten_build) {
+    if constexpr (emscripten_build) {
         return nullopt;
     }
     int stdinPipe[2];

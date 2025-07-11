@@ -13,11 +13,10 @@ using namespace std;
 
 namespace sorbet::realmain::lsp::watchman {
 
-WatchmanProcess::WatchmanProcess(std::shared_ptr<spdlog::logger> logger, std::string_view watchmanPath,
-                                 std::string_view workSpace, std::vector<std::string> extensions,
-                                 MessageQueueState &messageQueue, absl::Mutex &messageQueueMutex,
-                                 absl::Notification &initializedNotification,
-                                 std::shared_ptr<const LSPConfiguration> config)
+WatchmanProcess::WatchmanProcess(shared_ptr<spdlog::logger> logger, string_view watchmanPath, string_view workSpace,
+                                 vector<string> extensions, MessageQueueState &messageQueue,
+                                 absl::Mutex &messageQueueMutex, absl::Notification &initializedNotification,
+                                 shared_ptr<const LSPConfiguration> config)
     : logger(std::move(logger)), watchmanPath(string(watchmanPath)), workSpace(string(workSpace)),
       extensions(std::move(extensions)),
       thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))), messageQueue(messageQueue),
@@ -55,20 +54,20 @@ void WatchmanProcess::start() {
         // laptops have 4.9.0. Thus, we use [ "anyof", [ "suffix", "suffix1" ], [ "suffix", "suffix2" ], ... ].
         // Note 2: `empty_on_fresh_instance` prevents Watchman from sending entire contents of folder if this
         // subscription starts the daemon / causes the daemon to watch this folder for the first time.
-        string subscribeCommand = fmt::format(
-            "[\"subscribe\", \"{}\", \"{}\", {{"
-            "\"expression\": [\"allof\", "
-            "[\"type\", \"f\"], "
-            "[\"anyof\", {}], "
-            // Exclude rsync tmpfiles
-            "[\"not\", [\"match\", \"**/.~tmp~/**\", \"wholename\", {{\"includedotfiles\": true}}]]"
-            "], "
-            "\"fields\": [\"name\"], "
-            "\"empty_on_fresh_instance\": true"
-            "}}]",
-            workSpace, subscriptionName, fmt::map_join(extensions, ", ", [](const std::string &ext) -> string {
-                return fmt::format("[\"suffix\", \"{}\"]", ext);
-            }));
+        string subscribeCommand =
+            fmt::format("[\"subscribe\", \"{}\", \"{}\", {{"
+                        "\"expression\": [\"allof\", "
+                        "[\"type\", \"f\"], "
+                        "[\"anyof\", {}], "
+                        // Exclude rsync tmpfiles
+                        "[\"not\", [\"match\", \"**/.~tmp~/**\", \"wholename\", {{\"includedotfiles\": true}}]]"
+                        "], "
+                        "\"fields\": [\"name\"], "
+                        "\"empty_on_fresh_instance\": true"
+                        "}}]",
+                        workSpace, subscriptionName, fmt::map_join(extensions, ", ", [](const string &ext) -> string {
+                            return fmt::format("[\"suffix\", \"{}\"]", ext);
+                        }));
         p.send(subscribeCommand.c_str(), subscribeCommand.size());
         logger->debug(subscribeCommand);
 
@@ -154,7 +153,7 @@ bool WatchmanProcess::isStopped() {
     return stopped;
 }
 
-void WatchmanProcess::exitWithCode(int code, const std::optional<std::string> &msg) {
+void WatchmanProcess::exitWithCode(int code, const optional<string> &msg) {
     absl::MutexLock lck(&mutex);
     if (!stopped) {
         stopped = true;
@@ -162,7 +161,7 @@ void WatchmanProcess::exitWithCode(int code, const std::optional<std::string> &m
     }
 }
 
-void WatchmanProcess::enqueueNotification(std::unique_ptr<NotificationMessage> notification) {
+void WatchmanProcess::enqueueNotification(unique_ptr<NotificationMessage> notification) {
     auto msg = make_unique<LSPMessage>(move(notification));
     // Don't start enqueueing requests until LSP is initialized.
     initializedNotification.WaitForNotification();
@@ -174,22 +173,22 @@ void WatchmanProcess::enqueueNotification(std::unique_ptr<NotificationMessage> n
     }
 }
 
-void WatchmanProcess::processQueryResponse(std::unique_ptr<WatchmanQueryResponse> response) {
+void WatchmanProcess::processQueryResponse(unique_ptr<WatchmanQueryResponse> response) {
     auto notifMsg = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(response));
     enqueueNotification(move(notifMsg));
 }
 
-void WatchmanProcess::processStateEnter(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateEnter> stateEnter) {
+void WatchmanProcess::processStateEnter(unique_ptr<sorbet::realmain::lsp::WatchmanStateEnter> stateEnter) {
     auto notification = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanStateEnter, move(stateEnter));
     enqueueNotification(move(notification));
 }
 
-void WatchmanProcess::processStateLeave(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateLeave> stateLeave) {
+void WatchmanProcess::processStateLeave(unique_ptr<sorbet::realmain::lsp::WatchmanStateLeave> stateLeave) {
     auto notification = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanStateLeave, move(stateLeave));
     enqueueNotification(move(notification));
 }
 
-void WatchmanProcess::processExit(int watchmanExitCode, const std::optional<std::string> &msg) {
+void WatchmanProcess::processExit(int watchmanExitCode, const optional<string> &msg) {
     {
         absl::MutexLock lck(&messageQueueMutex);
         if (!messageQueue.terminate) {

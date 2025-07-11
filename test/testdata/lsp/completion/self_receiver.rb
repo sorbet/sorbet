@@ -10,6 +10,6 @@ end
 class A
   def foo
     self.y # error: does not exist
-    #     ^ completion: yield_self, ...
+    #     ^ completion: to_yaml, yield_self, Array, display, initialize_copy, pretty_inspect, syscall, system
   end
 end

@@ -104,10 +104,12 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
     const core::GlobalState &gs = typechecker.state();
     const core::WithoutUniqueNameHash symShortNameHash(gs, symbol.name(gs));
     // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
-    int i = -1;
-    for (auto &file : typechecker.state().getFiles()) {
+    size_t i = 0;
+    // skip idx 0 (corresponds to File that does not exist, so it contains nullptr)
+    for (auto &file : typechecker.state().getFiles().subspan(1)) {
         i++;
-        if (file == nullptr) {
+
+        if (file->sourceType != core::File::Type::Normal) {
             continue;
         }
 
@@ -120,8 +122,7 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
         const auto &hash = *file->getFileHash();
         const auto &usedSymbolNameHashes = hash.usages.nameHashes;
 
-        const bool fileIsValid = ref.exists() && ref.data(gs).sourceType == core::File::Type::Normal;
-        if (fileIsValid && absl::c_contains(usedSymbolNameHashes, symShortNameHash)) {
+        if (absl::c_contains(usedSymbolNameHashes, symShortNameHash)) {
             frefs.emplace_back(ref);
         }
     }

@@ -15,3 +15,4 @@
 #include "core/errors/packager.h"
 #include "core/errors/parser.h"
 #include "core/errors/resolver.h"
+#include "core/errors/rewriter.h"

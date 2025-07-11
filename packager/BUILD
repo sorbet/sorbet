@@ -11,7 +11,6 @@ cc_library(
     hdrs = [
         "VisibilityChecker.h",
         "packager.h",
-        "rbi_gen.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,
@@ -20,11 +19,10 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast",
+        "//ast/packager",
         "//ast/treemap",
-        "//ast/verifier",
         "//common",
         "//common/concurrency",
         "//core",
-        "@rapidjson",
     ],
 )

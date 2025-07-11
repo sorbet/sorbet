@@ -6,8 +6,9 @@
 #include "common/common.h"
 #include "test/helpers/lsp.h"
 
-namespace sorbet::test::lsp {
 using namespace std;
+
+namespace sorbet::test::lsp {
 using namespace sorbet::realmain::lsp;
 
 // Adds two new files that have errors, and asserts that Sorbet returns errors for both of them.
@@ -617,7 +618,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "RejectsUnrecognizedRequests") {
     REQUIRE_FALSE(r.result);
     REQUIRE(r.error);
     auto &error = *r.error;
-    REQUIRE_NE(error->message.find("Unsupported LSP method"), std::string::npos);
+    REQUIRE_NE(error->message.find("Unsupported LSP method"), string::npos);
     REQUIRE_EQ(error->code, (int)LSPErrorCodes::MethodNotFound);
 }
 
@@ -633,7 +634,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsThatDontTypecheck") {
     REQUIRE_FALSE(r.result);
     REQUIRE(r.error);
     auto &error = *r.error;
-    REQUIRE_NE(error->message.find("Unable to deserialize LSP request"), std::string::npos);
+    REQUIRE_NE(error->message.find("Unable to deserialize LSP request"), string::npos);
     REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidParams);
 }
 
@@ -788,7 +789,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "DoesNotCrashOnFormattingNonWorkspaceURIs") {
     // We don't support formatting ignored or unknown files, so the response must be an error.
     auto error = std::move(resp.front()->asResponse().error);
     REQUIRE(error.has_value());
-    REQUIRE_NE(error.value()->message.find("Unable to format ignored/unknown file"), std::string::npos);
+    REQUIRE_NE(error.value()->message.find("Unable to format ignored/unknown file"), string::npos);
 }
 
 // Tests that Sorbet reports metrics about the request's response status for certain requests
@@ -966,6 +967,164 @@ TEST_CASE_FIXTURE(ProtocolTest, "OverloadedStdlibSymbolWithMonkeyPatches") {
 
     // At this point we see a crash related to overload processing, prior to https://github.com/sorbet/sorbet/pull/8303
     assertErrorDiagnostics(send(*openFile(loc->uri, kernelRBIText)), {});
+}
+
+TEST_CASE_FIXTURE(ProtocolTest, "IgnoresFilesWithUnexpectedExtensions") {
+    const bool supportsMarkdown = false;
+    const bool supportsCodeActionResolve = true;
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->supportsSorbetURIs = true;
+    assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(initOptions)), {});
+
+    // Send a file with invalid ruby and an extension that we should ignore, and check that we don't see any diagnostics
+    // in response.
+    assertErrorDiagnostics(send(*openFile("not-ruby.txt", "module Kernel\n")), {});
+}
+
+TEST_CASE_FIXTURE(ProtocolTest, "FindAllReferencesWithoutCacheWorks") {
+    REQUIRE(!this->useCache);
+
+    // We need to ensure that these aren't loaded, so that we consult the filesystem rather than the cache of open trees
+    // in LSPTypechecker.
+    this->writeFilesToFS({
+        {"a.rb", "# typed: true\n"
+                 "class A\n"
+                 "end\n"},
+
+        {"b.rb", "# typed: true\n"
+                 "class B\n"
+                 "  def foo\n"
+                 "    A.new\n"
+                 "  end\n"
+                 "end\n"},
+    });
+
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/a.rb", this->rootPath));
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/b.rb", this->rootPath));
+
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    // We should be able to use `A` in a new file at this point
+    assertErrorDiagnostics(send(*openFile("test.rb", "# typed: true\n"
+                                                     "\n"
+                                                     "class Test\n"
+                                                     "  def test()\n"
+                                                     "    A.new\n"
+                                                     "  end\n"
+                                                     "end\n"
+                                                     "")),
+                           {});
+
+    auto references = this->getReferences("test.rb", 4, 4);
+    REQUIRE_EQ(3, references.size());
+}
+
+TEST_CASE_FIXTURE(ProtocolTest, "OpeningExistingFilesTakesTheFastPath") {
+    vector<pair<string, string>> files{
+        {"a.rb", "# typed: true\n"
+                 "class A\n"
+                 "end\n"},
+
+        {"b.rb", "# typed: true\n"
+                 "class B\n"
+                 "  def foo\n"
+                 "    A.new\n"
+                 "  end\n"
+                 "end\n"},
+    };
+
+    // We need to ensure that these aren't loaded, so that we consult the filesystem rather than the cache of open trees
+    // in LSPTypechecker.
+    this->writeFilesToFS(files);
+
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/a.rb", this->rootPath));
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/b.rb", this->rootPath));
+
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    auto typecheckCount = this->lspWrapper->getTypecheckCount();
+
+    for (auto &file : files) {
+        assertErrorDiagnostics(send(*openFile(file.first, file.second)), {});
+        typecheckCount++;
+
+        // Opening each file should cause one fast path to run, which will increment the typecheck count once.
+        REQUIRE_EQ(this->lspWrapper->getTypecheckCount(), typecheckCount);
+    }
+}
+
+TEST_CASE_FIXTURE(ProtocolTest, "ImplementationOnBrokenLambda") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "->... {}")), {{"foo.rb", 0, "unexpected token \"...\""}});
+
+    auto responses = send(*implementation("foo.rb", 0, 2));
+    const auto numResponses = absl::c_count_if(responses, [](const auto &m) { return m->isResponse(); });
+    REQUIRE_EQ(1, numResponses);
+}
+
+TEST_CASE_FIXTURE(ProtocolTest, "CompletionWithBadHierarchy") {
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class Enumerable\n"
+                                                    "  extend T::Generic\n"
+                                                    "  X = type_member\n"
+                                                    "end")),
+                           {{"foo.rb", 1, "`Enumerable` was previously defined as a `module`"}});
+
+    // Trigger completion at the first `:` of `T::Generic`
+    auto responses = send(*completion("foo.rb", 2, 10));
+
+    REQUIRE_EQ(1, responses.size());
+    REQUIRE(responses.front()->isResponse());
+    REQUIRE(responses.front()->asResponse().result.has_value());
+}
+
+TEST_CASE_FIXTURE(ProtocolTest, "SignatureHelpInMagicBuildHash") {
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "xs = {\n"
+                                                    "  :example => '', \n"
+                                                    "}\n"
+                                                    "f = T.let(->(){}, T.proc.params(x: Integer).void)\n"
+                                                    "f.()")),
+                           {{"foo.rb", 5, "Not enough arguments provided"}});
+
+    {
+        // Trigger signatureHelp right after the comma in the hash literal. This will resolve to <Magic>.<build-hash>,
+        // which we don't want to trigger any help for.
+        auto responses = send(*signatureHelp("foo.rb", 2, 17));
+
+        REQUIRE_EQ(1, responses.size());
+        REQUIRE(responses.front()->isResponse());
+        auto &response = responses.front()->asResponse();
+        REQUIRE(response.result.has_value());
+        REQUIRE_EQ(response.requestMethod, LSPMethod::TextDocumentSignatureHelp);
+        auto *help = std::get_if<variant<JSONNullObject, unique_ptr<SignatureHelp>>>(&response.result.value());
+        REQUIRE_NE(help, nullptr);
+        auto *sigHelp = std::get_if<unique_ptr<SignatureHelp>>(help);
+        REQUIRE_NE(sigHelp, nullptr);
+        REQUIRE_NE(*sigHelp, nullptr);
+        REQUIRE((*sigHelp)->signatures.empty());
+    }
+
+    {
+        // Trigger signatureHelp in the middle of the parens of `f.()` to ensure that we do get signature help.
+        auto responses = send(*signatureHelp("foo.rb", 5, 3));
+
+        REQUIRE_EQ(1, responses.size());
+        REQUIRE(responses.front()->isResponse());
+        auto &response = responses.front()->asResponse();
+        REQUIRE(response.result.has_value());
+        REQUIRE_EQ(response.requestMethod, LSPMethod::TextDocumentSignatureHelp);
+        auto *help = std::get_if<variant<JSONNullObject, unique_ptr<SignatureHelp>>>(&response.result.value());
+        REQUIRE_NE(help, nullptr);
+        auto *sigHelp = std::get_if<unique_ptr<SignatureHelp>>(help);
+        REQUIRE_NE(sigHelp, nullptr);
+        REQUIRE_NE(*sigHelp, nullptr);
+        REQUIRE_EQ(1, (*sigHelp)->signatures.size());
+    }
 }
 
 } // namespace sorbet::test::lsp

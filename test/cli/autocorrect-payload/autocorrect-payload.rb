@@ -1,6 +1,6 @@
 # typed: true
 
-FOO = 10 # TODO Also fix this autocorrect
+FOO = 10
 
 a = FOO
 [].each { |i| a = nil }

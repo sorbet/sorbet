@@ -46,9 +46,7 @@ InsSeq{
             cond = Literal{ value = 1 }
             body = Send{
               flags = {privateOk}
-              recv = Local{
-                localVariable = <U <self>>
-              }
+              recv = Self
               fun = <U has_while>
               block = nullptr
               pos_args = 0
@@ -106,9 +104,7 @@ InsSeq{
             }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U loop>
             block = Block {
               args = [
@@ -129,9 +125,7 @@ InsSeq{
             }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
-            }
+            recv = Self
             fun = <U loop>
             block = Block {
               args = [

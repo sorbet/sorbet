@@ -18,11 +18,9 @@ sidebar_label: CLI Reference
 
 This page shows the `srb tc --help` output for the latest version of Sorbet.
 
-- See [Command Line Quickstart](cli.md) for an overview of some of the more
-  common options and workflows.
+- See [Command Line Quickstart](cli.md) for an overview of some of the more common options and workflows.
 
-- See `srb tc --help` to see the help options for your version of Sorbet. (New
-  options are added and changed all the time.)
+- See `srb tc --help` to see the help options for your version of Sorbet. (New options are added and changed all the time.)
 
 ## Usage
 
@@ -148,6 +146,15 @@ Usage:
       --experimental-ruby3-keyword-args
                                 Enforce use of new (Ruby 3.0-style) keyword arguments.
                                 (incomplete and experimental)
+      --enable-experimental-rbs-signatures
+                                Enable experimental support for RBS signatures as inline
+                                comments
+      --enable-experimental-rbs-assertions
+                                Enable experimental support for RBS assertions as inline
+                                comments
+      --enable-experimental-rbs-comments
+                                Enable experimental support for RBS signatures and
+                                assertions as inline comments
       --enable-experimental-requires-ancestor
                                 Enable experimental `requires_ancestor` annotation
       --uniquely-defined-behavior
@@ -363,8 +370,6 @@ Usage:
                                 Useful for profiling.
       --trace-lexer             Emit the lexer's token stream in a debug format
       --trace-parser            Enable bison's parser trace functionality
-      --dump-package-info arg   Dump package info in JSON form to the given file.
-                                (default: "")
   -p, --print <format>          Print various internal data structures.
                                 By default, the output is to stdout. To send the data to
                                 a file, use
@@ -378,12 +383,12 @@ Usage:
 
                                 Unstable: [parse-tree, parse-tree-json,
                                 parse-tree-json-with-locs, parse-tree-whitequark,
-                                desugar-tree, desugar-tree-raw, rewrite-tree,
-                                rewrite-tree-raw, index-tree, index-tree-raw, name-tree,
-                                name-tree-raw, resolve-tree, resolve-tree-raw,
-                                flatten-tree, flatten-tree-raw, ast, ast-raw, cfg,
-                                cfg-raw, cfg-text, symbol-table, symbol-table-raw,
-                                symbol-table-json, symbol-table-proto,
+                                rbs-rewrite-tree, desugar-tree, desugar-tree-raw,
+                                rewrite-tree, rewrite-tree-raw, index-tree,
+                                index-tree-raw, name-tree, name-tree-raw, resolve-tree,
+                                resolve-tree-raw, flatten-tree, flatten-tree-raw, ast,
+                                ast-raw, cfg, cfg-raw, cfg-text, symbol-table,
+                                symbol-table-raw, symbol-table-json, symbol-table-proto,
                                 symbol-table-messagepack, symbol-table-full,
                                 symbol-table-full-raw, symbol-table-full-json,
                                 symbol-table-full-proto, symbol-table-full-messagepack,
@@ -399,7 +404,8 @@ Usage:
                                 uncaught exception)
       --no-stdlib               Do not load Sorbet's payload which defines RBI files for
                                 the Ruby standard library
-      --store-state file        Store state into file (default: "")
+      --store-state file        Store state into three files, separated by commas:
+                                <symbol-table>,<name-table>,<file-table> (default: "")
       --silence-dev-message     Silence "You are running a development build" message
       --censor-for-snapshot-tests
                                 When printing raw location information, don't show line
@@ -418,9 +424,6 @@ Usage:
                                 [experimental] Output a minimal RBI containing the diff
                                 between Sorbet's view of a codebase and the definitions
                                 present in this file (default: "")
-      --single-package arg      Run in single-package mode (default: "")
-      --package-rbi-generation  Enable rbi generation for stripe packages
-      --package-rbi-dir arg     The location of generated package rbis (default: "")
   -h, --help [=SECTION(=all)]   Show help. Can pass an optional SECTION to show help for
                                 only one section instead of the default of all sections
 

@@ -58,11 +58,21 @@ cc_binary(
 
 genrule(
     name = "generate-state-payload-cc",
-    srcs = ["state-payload-raw"],
+    srcs = [
+        "state-payload-raw-symbol-table",
+        "state-payload-raw-name-table",
+        "state-payload-raw-file-table",
+    ],
     outs = [
         "binary.cc",
     ],
-    cmd = "$(location :gen_state_payload) $(location state-payload-raw) $(location binary.cc)",
+    cmd = """
+    $(location :gen_state_payload) \
+        $(location state-payload-raw-symbol-table) \
+        $(location state-payload-raw-name-table) \
+        $(location state-payload-raw-file-table) \
+        $(location binary.cc)
+    """,
     tools = [
         ":gen_state_payload",
     ],
@@ -72,8 +82,15 @@ genrule(
     name = "generate-state-payload-raw",
     srcs = [],
     outs = [
-        "state-payload-raw",
+        "state-payload-raw-symbol-table",
+        "state-payload-raw-name-table",
+        "state-payload-raw-file-table",
     ],
-    cmd = "$(location //main:sorbet-orig) --silence-dev-message  --store-state $(location state-payload-raw) --no-error-count",
+    cmd = """
+    $(location //main:sorbet-orig) \
+        --silence-dev-message \
+        --no-error-count \
+        --store-state $(location state-payload-raw-symbol-table),$(location state-payload-raw-name-table),$(location state-payload-raw-file-table)
+    """,
     tools = ["//main:sorbet-orig"],
 )

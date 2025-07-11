@@ -33,6 +33,7 @@ end
 
 class ImplEnabling < AbstractClass
   sig {override(allow_incompatible: false).params(x: Integer).returns(Object)}
+  #                                 ^^^^^ error: `override(allow_incompatible: ...)` expects either `true` or `:visibility`
   def self.foo(x); end # error: `AbstractClass.foo` must accept no more than `0` required argument(s)
 
   sig {override(allow_incompatible: true).params(x: Integer).returns(Object)}
@@ -92,6 +93,31 @@ class SplatChild2 < SplatParent
   def foo(**opts); end # error: Implementation of abstract method `SplatParent#foo` must accept *`args`
 end
 
+# https://github.com/sorbet/sorbet/issues/1215
+class AnonArgParent
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+  sig { abstract.void }
+  def foo(*); end
+#         ^ error: Malformed `sig`. Type not specified for argument `*`
+
+  sig { abstract.void }
+  def bar(**); end
+#         ^^ error: Malformed `sig`. Type not specified for argument `**`
+
+  sig { abstract.void }
+  def baz(&); end
+#         ^ error: Malformed `sig`. Type not specified for argument `&`
+end
+
+class AnonArgChild < AnonArgParent
+  def foo(); end # error: Implementation of abstract method `AnonArgParent#foo` must accept `*`
+
+  def bar(); end # error: Implementation of abstract method `AnonArgParent#bar` must accept `**`
+
+  def baz(); end # error: Implementation of abstract method `AnonArgParent#baz` must explicitly name a block argument
+end
 
 module NoSigInInterface
   extend T::Sig

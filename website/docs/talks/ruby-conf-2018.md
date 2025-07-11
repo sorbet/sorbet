@@ -11,8 +11,6 @@ sidebar_label: RubyConf 2018
 
 ## Abstract
 
-Some slides for a talk we presented to the Ruby core team while attending
-RubyConf 2018.
+Some slides for a talk we presented to the Ruby core team while attending RubyConf 2018.
 
-Presents an update on the team and our work compared with the earlier RubyKaigi
-2018 presentation announcing Sorbet for the first time.
+Presents an update on the team and our work compared with the earlier RubyKaigi 2018 presentation announcing Sorbet for the first time.

@@ -69,11 +69,17 @@ protected:
 
     std::unique_ptr<LSPMessage> getDefinition(std::string_view path, int line, int character);
 
+    std::unique_ptr<LSPMessage> implementation(std::string_view path, int line, int character);
+
+    std::unique_ptr<LSPMessage> getReference(std::string_view path, int line, int character);
+
     std::unique_ptr<LSPMessage> hover(std::string_view path, int line, int character);
 
     std::unique_ptr<LSPMessage> codeAction(std::string_view path, int line, int character);
 
     std::unique_ptr<LSPMessage> completion(std::string_view path, int line, int character);
+
+    std::unique_ptr<LSPMessage> signatureHelp(std::string_view path, int line, int character);
 
     std::unique_ptr<LSPMessage> cancelRequest(int id);
 
@@ -104,6 +110,7 @@ protected:
     std::string readFile(std::string_view uri);
 
     std::vector<std::unique_ptr<Location>> getDefinitions(std::string_view uri, int line, int character);
+    std::vector<std::unique_ptr<Location>> getReferences(std::string_view uri, int line, int character);
 
     /**
      * ProtocolTest maintains the latest diagnostics for files received over a session, as LSP is not required to

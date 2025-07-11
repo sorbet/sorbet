@@ -54,32 +54,6 @@
                     },
                     "children": [
                         {
-                            "name": "it 'runs another test'",
-                            "detail": "",
-                            "kind": 6,
-                            "range": {
-                                "start": {
-                                    "line": 16,
-                                    "character": 4
-                                },
-                                "end": {
-                                    "line": 17,
-                                    "character": 7
-                                }
-                            },
-                            "selectionRange": {
-                                "start": {
-                                    "line": 16,
-                                    "character": 4
-                                },
-                                "end": {
-                                    "line": 16,
-                                    "character": 4
-                                }
-                            },
-                            "children": []
-                        },
-                        {
                             "name": "it 'runs one test'",
                             "detail": "",
                             "kind": 6,
@@ -100,6 +74,32 @@
                                 },
                                 "end": {
                                     "line": 13,
+                                    "character": 4
+                                }
+                            },
+                            "children": []
+                        },
+                        {
+                            "name": "it 'runs another test'",
+                            "detail": "",
+                            "kind": 6,
+                            "range": {
+                                "start": {
+                                    "line": 16,
+                                    "character": 4
+                                },
+                                "end": {
+                                    "line": 17,
+                                    "character": 7
+                                }
+                            },
+                            "selectionRange": {
+                                "start": {
+                                    "line": 16,
+                                    "character": 4
+                                },
+                                "end": {
+                                    "line": 16,
                                     "character": 4
                                 }
                             },

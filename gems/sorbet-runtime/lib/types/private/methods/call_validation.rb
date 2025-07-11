@@ -12,7 +12,7 @@ module T::Private::Methods::CallValidation
   # @param method_sig [T::Private::Methods::Signature]
   # @return [UnboundMethod] the new wrapper method (or the original one if we didn't wrap it)
   def self.wrap_method_if_needed(mod, method_sig, original_method)
-    original_visibility = visibility_method_name(mod, method_sig.method_name)
+    original_visibility = T::Private::Methods.visibility_method_name(mod, method_sig.method_name)
     if method_sig.mode == T::Private::Methods::Modes.abstract
       create_abstract_wrapper(mod, method_sig, original_method, original_visibility)
     # Do nothing in this case; this method was not wrapped in _on_method_added.
@@ -69,11 +69,11 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
     has_fixed_arity = method_sig.kwarg_types.empty? && !method_sig.has_rest && !method_sig.has_keyrest &&
-      original_method.parameters.all? {|(kind, _name)| kind == :req || kind == :block}
+      original_method.parameters.all? { |(kind, _name)| kind == :req || kind == :block }
     can_skip_block_type = method_sig.block_type.nil? || method_sig.block_type.valid?(nil)
     ok_for_fast_path = has_fixed_arity && can_skip_block_type && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
 
-    all_args_are_simple = ok_for_fast_path && method_sig.arg_types.all? {|_name, type| type.is_a?(T::Types::Simple)}
+    all_args_are_simple = ok_for_fast_path && method_sig.arg_types.all? { |_name, type| type.is_a?(T::Types::Simple) }
     simple_method = all_args_are_simple && method_sig.return_type.is_a?(T::Types::Simple)
     simple_procedure = all_args_are_simple && method_sig.return_type.is_a?(T::Private::Types::Void)
 
@@ -329,19 +329,6 @@ module T::Private::Methods::CallValidation
       value: value,
       location: caller_loc
     )
-  end
-
-  # `name` must be an instance method (for class methods, pass in mod.singleton_class)
-  private_class_method def self.visibility_method_name(mod, name)
-    if mod.public_method_defined?(name)
-      :public
-    elsif mod.protected_method_defined?(name)
-      :protected
-    elsif mod.private_method_defined?(name)
-      :private
-    else
-      mod.method(name) # Raises
-    end
   end
 end
 

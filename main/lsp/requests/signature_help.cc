@@ -8,6 +8,8 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
+
+namespace {
 void addSignatureHelpItem(const core::GlobalState &gs, core::MethodRef method,
                           vector<unique_ptr<SignatureInformation>> &sigs, const core::lsp::SendResponse &resp,
                           int activeParameter) {
@@ -51,8 +53,13 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::MethodRef method,
     sigs.push_back(move(sig));
 }
 
+bool hasAngleBrackets(string_view haystack) {
+    return absl::c_any_of(haystack, [](char c) { return c == '<' || c == '>'; });
+}
+} // namespace
+
 SignatureHelpTask::SignatureHelpTask(const LSPConfiguration &config, MessageId id,
-                                     std::unique_ptr<TextDocumentPositionParams> params)
+                                     unique_ptr<TextDocumentPositionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentSignatureHelp), params(move(params)) {}
 
 unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate &typechecker) {
@@ -65,8 +72,8 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate
     }
 
     const core::GlobalState &gs = typechecker.state();
-    auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
-                                  LSPMethod::TextDocumentSignatureHelp);
+    const auto &uri = params->textDocument->uri;
+    auto result = LSPQuery::byLoc(config, typechecker, uri, *params->position, LSPMethod::TextDocumentSignatureHelp);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -80,12 +87,18 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate
         auto resp = move(queryResponses[0]);
         // only triggers on sends. Some SignatureHelps are triggered when the variable is being typed.
         if (auto sendResp = resp->isSend()) {
+            if (hasAngleBrackets(sendResp->callerSideName.shortName(gs))) {
+                // The method location doesn't exist, which means that we're dealing with a synthesized send. Don't
+                // generate any help.
+                response->result = make_unique<SignatureHelp>(move(signatures));
+                return response;
+            }
             auto sendLocIndex = sendResp->termLoc().beginPos();
 
-            auto fref = config.uri2FileRef(gs, params->textDocument->uri);
+            auto fref = config.uri2FileRef(gs, uri);
             if (!fref.exists()) {
-                response->error = make_unique<ResponseError>(
-                    (int)LSPErrorCodes::InvalidRequest, fmt::format("Unknown file: `{}`", params->textDocument->uri));
+                response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                             fmt::format("Unknown file: `{}`", uri));
                 return response;
             }
             auto src = fref.data(gs).source();

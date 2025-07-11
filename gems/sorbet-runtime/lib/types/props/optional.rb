@@ -43,11 +43,11 @@ module T::Props::Optional::DecoratorMethods
   end
 
   # checked(:never) - O(runtime object construction)
-  sig {returns(T::Hash[Symbol, T::Props::Private::ApplyDefault]).checked(:never)}
+  sig { returns(T::Hash[Symbol, T::Props::Private::ApplyDefault]).checked(:never) }
   attr_reader :props_with_defaults
 
   # checked(:never) - O(runtime object construction)
-  sig {returns(T::Hash[Symbol, T::Props::Private::SetterFactory::SetterProc]).checked(:never)}
+  sig { returns(T::Hash[Symbol, T::Props::Private::SetterFactory::SetterProc]).checked(:never) }
   attr_reader :props_without_defaults
 
   def add_prop_definition(prop, rules)

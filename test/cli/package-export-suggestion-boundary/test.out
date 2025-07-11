@@ -34,4 +34,11 @@ example/__package.rb:6: Unable to resolve constant `Exmpl` https://srb.help/5002
 example/__package.rb:7: Unable to resolve constant `So` https://srb.help/5002
      7 |  export So
                  ^^
+  Did you mean `Some`? Use `-a` to autocorrect
+    example/__package.rb:7: Replace with `Some`
+     7 |  export So
+                 ^^
+    example/__package.rb:3: `Some` defined here
+     3 |class Some::Example < PackageSpec
+              ^^^^
 Errors: 4

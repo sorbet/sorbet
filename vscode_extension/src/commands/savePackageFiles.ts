@@ -16,13 +16,13 @@ export async function savePackageFiles(
       document.isDirty && basename(document.fileName) === "__package.rb",
   );
   if (!packageDocuments.length) {
-    context.log.trace("savePackageFiles: nothing to save");
+    context.log.trace("SavePackageFiles: nothing to save");
     return true;
   }
 
   const allSaved = await Promise.all(
     packageDocuments.map((document) => {
-      context.log.trace(`savePackageFiles: saving ${document.fileName}`);
+      context.log.trace("SavePackageFiles: Saving file", document.fileName);
       return document.save();
     }),
   );

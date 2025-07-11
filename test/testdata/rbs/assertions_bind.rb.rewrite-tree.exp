@@ -1,0 +1,208 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def foo<<todo method>>(&<blk>)
+    begin
+      <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+      <emptyTree>::<C T>.reveal_type(<self>)
+    end
+  end
+
+  def bar<<todo method>>(&<blk>)
+    begin
+      <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+      <emptyTree>::<C T>.reveal_type(<self>)
+      <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Bar>)
+      <emptyTree>::<C T>.reveal_type(<self>)
+    end
+  end
+
+  def self.baz<<todo method>>(&<blk>)
+    begin
+      <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+      <emptyTree>::<C T>.reveal_type(<self>)
+    end
+  end
+
+  <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+
+  <emptyTree>::<C T>.reveal_type(<self>)
+
+  class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
+    <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+
+    <emptyTree>::<C T>.reveal_type(<self>)
+  end
+
+  module <emptyTree>::<C Bar><<C <todo sym>>> < ()
+    <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+
+    <emptyTree>::<C T>.reveal_type(<self>)
+
+    <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Bar>)
+
+    <emptyTree>::<C T>.reveal_type(<self>)
+
+    class <singleton class><<C <todo sym>>> < ()
+      <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+
+      <emptyTree>::<C T>.reveal_type(<self>)
+    end
+  end
+
+  class <emptyTree>::<C Baz><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  <runtime method definition of foo>
+
+  <runtime method definition of bar>
+
+  <runtime method definition of self.baz>
+
+  [].each() do ||
+    begin
+      <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+      <emptyTree>::<C T>.reveal_type(<self>)
+    end
+  end
+
+  begin
+    <assignTemp>$2 = <emptyTree>::<C ARGV>.first()
+    if "foo".===(<assignTemp>$2)
+      begin
+        <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+        <emptyTree>::<C T>.reveal_type(<self>)
+      end
+    else
+      begin
+        <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Bar>)
+        <emptyTree>::<C T>.reveal_type(<self>)
+      end
+    end
+  end
+
+  begin
+    <assignTemp>$3 = <emptyTree>::<C ARGV>.first()
+    if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+        <emptyTree>::<C T>.reveal_type(<self>)
+      end
+    else
+      begin
+        <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Bar>)
+        <emptyTree>::<C T>.reveal_type(<self>)
+      end
+    end
+  end
+
+  ::<Magic>.<build-range>(0, 10, false).each() do |_i|
+    begin
+      <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+      <emptyTree>::<C T>.reveal_type(<self>)
+    end
+  end
+
+  if <emptyTree>::<C ARGV>.first().==("foo")
+    begin
+      <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+      <emptyTree>::<C T>.reveal_type(<self>)
+    end
+  else
+    if <emptyTree>::<C ARGV>.first().==("bar")
+      begin
+        <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Bar>)
+        <emptyTree>::<C T>.reveal_type(<self>)
+      end
+    else
+      begin
+        <cast:bind>(<self>, <todo sym>, ::<root>::<C T>.untyped())
+        <emptyTree>::<C T>.reveal_type(<self>)
+      end
+    end
+  end
+
+  begin
+    <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+    <emptyTree>::<C T>.reveal_type(<self>)
+  end
+rescue => <rescueTemp>$4
+  begin
+    <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Bar>)
+    <emptyTree>::<C T>.reveal_type(<self>)
+  end
+else
+  begin
+    <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Baz>)
+    <emptyTree>::<C T>.reveal_type(<self>)
+  end
+ensure
+  begin
+    <cast:bind>(<self>, <todo sym>, ::<root>::<C T>.untyped())
+    <emptyTree>::<C T>.reveal_type(<self>)
+  end
+
+  while <emptyTree>::<C ARGV>.first().==("foo").!()
+    begin
+      <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Bar>)
+      <emptyTree>::<C T>.reveal_type(<self>)
+    end
+  end
+
+  while true
+    begin
+      begin
+        <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Bar>)
+        <emptyTree>::<C T>.reveal_type(<self>)
+      end
+      if <emptyTree>::<C ARGV>.first().==("foo")
+        break(<emptyTree>)
+      else
+        <emptyTree>
+      end
+    end
+  end
+
+  while <emptyTree>::<C ARGV>.first().==("foo")
+    begin
+      <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Bar>)
+      <emptyTree>::<C T>.reveal_type(<self>)
+    end
+  end
+
+  while true
+    begin
+      begin
+        <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Bar>)
+        <emptyTree>::<C T>.reveal_type(<self>)
+      end
+      if <emptyTree>::<C ARGV>.first().==("foo").!()
+        break(<emptyTree>)
+      else
+        <emptyTree>
+      end
+    end
+  end
+
+  module <emptyTree>::<C TypeAlias><<C <todo sym>>> < ()
+    <cast:bind>(<self>, <todo sym>, <emptyTree>::<C type foo>)
+
+    <emptyTree>::<C type foo> = ::<root>::<C T>.type_alias() do ||
+      <emptyTree>::<C String>
+    end
+
+    <emptyTree>::<C T>.reveal_type(<self>)
+  end
+
+  module <emptyTree>::<C Errors><<C <todo sym>>> < ()
+    <cast:bind>(<self>, <todo sym>, ::<root>::<C T>.untyped())
+
+    <cast:bind>(<self>, <todo sym>, ::<root>::<C T>.untyped())
+
+    <emptyTree>::<C T>.reveal_type(<self>)
+
+    <self>
+  end
+
+  <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Bar>)
+
+  <emptyTree>::<C T>.reveal_type(<self>)
+end

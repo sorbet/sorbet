@@ -1,12 +1,10 @@
 #include "rewriter/Data.h"
-#include "absl/strings/match.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
 #include "core/errors/rewriter.h"
-#include "rewriter/rewriter.h"
 #include "rewriter/util/Util.h"
 
 using namespace std;
@@ -46,7 +44,7 @@ bool isMissingInitialize(const core::GlobalState &gs, const ast::Send *send) {
 vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn) {
     vector<ast::ExpressionPtr> empty;
 
-    if (ctx.state.runningUnderAutogen) {
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return empty;
     }
 
@@ -60,13 +58,11 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
         return empty;
     }
 
-    auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv);
-    if (recv == nullptr) {
+    if (!ASTUtil::isRootScopedSyntacticConstant(send->recv, {core::Names::Constants::Data()})) {
         return empty;
     }
 
-    if (!ast::MK::isRootScope(recv->scope) || recv->cnst != core::Names::Constants::Data() ||
-        send->fun != core::Names::define() || send->hasKwArgs() || send->hasKwSplat()) {
+    if (send->fun != core::Names::define() || send->hasKwArgs() || send->hasKwSplat()) {
         return empty;
     }
 
@@ -75,6 +71,15 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
     ast::MethodDef::ARGS_store newArgs;
     ast::Send::ARGS_store sigArgs;
     ast::ClassDef::RHS_store body;
+
+    if (auto dup = ASTUtil::findDuplicateArg(ctx, send)) {
+        if (auto e = ctx.beginIndexerError(dup->secondLoc, core::errors::Rewriter::InvalidStructMember)) {
+            e.setHeader("Duplicate member `{}` in Data definition", dup->name.show(ctx));
+            e.addErrorLine(ctx.locAt(dup->firstLoc), "First occurrence of `{}` in Data definition",
+                           dup->name.show(ctx));
+        }
+        return empty;
+    }
 
     for (auto &arg : send->posArgs()) {
         auto sym = ast::cast_tree<ast::Literal>(arg);

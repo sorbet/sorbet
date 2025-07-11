@@ -25,8 +25,12 @@ const uint32_t Serializer::VERSION;
 // class.
 class SerializerImpl {
 public:
-    static Pickler pickle(const GlobalState &gs, bool payloadOnly = false);
+    static Pickler pickleNameTable(const GlobalState &gs);
     static void pickleNameTable(Pickler &p, const GlobalState &gs);
+    static Pickler pickleSymbolTable(const GlobalState &gs);
+    static void pickleSymbolTable(Pickler &p, const GlobalState &gs);
+    static Pickler pickleFileTable(const GlobalState &gs, bool payloadOnly);
+    static void pickleFileTable(Pickler &p, const GlobalState &gs, bool payloadOnly);
     static void pickle(Pickler &p, const File &what);
     static void pickle(Pickler &p, const UTF8Name &what);
     static void pickle(Pickler &p, const ConstantName &what);
@@ -53,8 +57,9 @@ public:
     static Method unpickleMethod(UnPickler &p, const GlobalState *gs);
     static Field unpickleField(UnPickler &p, const GlobalState *gs);
     static TypeParameter unpickleTypeParameter(UnPickler &p, const GlobalState *gs);
-    static void unpickleGS(UnPickler &p, GlobalState &result);
+    static void unpickleSymbolTable(UnPickler &g, GlobalState &result);
     static void unpickleNameTable(UnPickler &g, GlobalState &result);
+    static void unpickleFileTable(UnPickler &g, GlobalState &result);
     static uint32_t unpickleGSUUID(UnPickler &p);
     static LocOffsets unpickleLocOffsets(UnPickler &p);
     static Loc unpickleLoc(UnPickler &p);
@@ -831,62 +836,6 @@ TypeParameter SerializerImpl::unpickleTypeParameter(UnPickler &p, const GlobalSt
     return result;
 }
 
-Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
-    Timer timeit(gs.tracer(), "pickleGlobalState");
-    Pickler result;
-    result.putU4(Serializer::VERSION);
-    result.putU4(gs.kvstoreUuid);
-
-    absl::Span<const shared_ptr<File>> wantFiles;
-    if (payloadOnly) {
-        auto lastPayload =
-            absl::c_find_if(gs.files, [](auto &file) { return file && file->sourceType != File::Type::Payload; });
-        ENFORCE(
-            none_of(lastPayload, gs.files.end(), [](auto &file) { return file->sourceType == File::Type::Payload; }));
-        wantFiles = absl::Span<const shared_ptr<File>>(gs.files.data(), lastPayload - gs.files.begin());
-    } else {
-        wantFiles = absl::Span<const shared_ptr<File>>(gs.files.data(), gs.files.size());
-    }
-
-    result.putU4(wantFiles.size());
-    int i = -1;
-    for (auto &f : wantFiles) {
-        ++i;
-        if (i != 0) {
-            pickle(result, *f);
-        }
-    }
-
-    SerializerImpl::pickleNameTable(result, gs);
-
-    result.putU4(gs.classAndModules.size());
-    for (const ClassOrModule &s : gs.classAndModules) {
-        pickle(result, s);
-    }
-
-    result.putU4(gs.methods.size());
-    for (const Method &s : gs.methods) {
-        pickle(result, s);
-    }
-
-    result.putU4(gs.fields.size());
-    for (const Field &s : gs.fields) {
-        pickle(result, s);
-    }
-
-    result.putU4(gs.typeArguments.size());
-    for (const TypeParameter &s : gs.typeArguments) {
-        pickle(result, s);
-    }
-
-    result.putU4(gs.typeMembers.size());
-    for (const TypeParameter &s : gs.typeMembers) {
-        pickle(result, s);
-    }
-
-    return result;
-}
-
 uint32_t SerializerImpl::unpickleGSUUID(UnPickler &p) {
     if (p.getU4() != Serializer::VERSION) {
         Exception::raise("Payload version mismatch");
@@ -894,22 +843,26 @@ uint32_t SerializerImpl::unpickleGSUUID(UnPickler &p) {
     return p.getU4();
 }
 
-void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
-    Timer timeit(result.tracer(), "unpickleGS");
-    result.creation = timeit.getFlowEdge();
-    if (p.getU4() != Serializer::VERSION) {
-        Exception::raise("Payload version mismatch");
+Pickler SerializerImpl::pickleFileTable(const GlobalState &gs, bool payloadOnly) {
+    Pickler p;
+    SerializerImpl::pickleFileTable(p, gs, payloadOnly);
+    return p;
+}
+
+void SerializerImpl::pickleFileTable(Pickler &p, const GlobalState &gs, bool payloadOnly) {
+    p.putU4(gs.files.size());
+    int i = -1;
+    for (const auto &f : gs.files) {
+        ++i;
+        if (i != 0) {
+            pickle(p, *f);
+        }
     }
+}
 
-    result.kvstoreUuid = p.getU4();
-
+void SerializerImpl::unpickleFileTable(UnPickler &p, GlobalState &result) {
     result.files.clear();
     result.fileRefByPath.clear();
-    result.classAndModules.clear();
-    result.methods.clear();
-    result.fields.clear();
-    result.typeArguments.clear();
-    result.typeMembers.clear();
 
     {
         Timer timeit(result.tracer(), "readFiles");
@@ -925,7 +878,54 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         }
     }
 
-    unpickleNameTable(p, result);
+    int i = 0;
+    for (auto &f : result.files) {
+        if (f && !f->path().empty()) {
+            result.fileRefByPath[string(f->path())] = FileRef(i);
+        }
+        i++;
+    }
+}
+
+Pickler SerializerImpl::pickleSymbolTable(const GlobalState &gs) {
+    Pickler p;
+    SerializerImpl::pickleSymbolTable(p, gs);
+    return p;
+}
+
+void SerializerImpl::pickleSymbolTable(Pickler &p, const GlobalState &gs) {
+    p.putU4(gs.classAndModules.size());
+    for (const ClassOrModule &s : gs.classAndModules) {
+        pickle(p, s);
+    }
+
+    p.putU4(gs.methods.size());
+    for (const Method &s : gs.methods) {
+        pickle(p, s);
+    }
+
+    p.putU4(gs.fields.size());
+    for (const Field &s : gs.fields) {
+        pickle(p, s);
+    }
+
+    p.putU4(gs.typeArguments.size());
+    for (const TypeParameter &s : gs.typeArguments) {
+        pickle(p, s);
+    }
+
+    p.putU4(gs.typeMembers.size());
+    for (const TypeParameter &s : gs.typeMembers) {
+        pickle(p, s);
+    }
+}
+
+void SerializerImpl::unpickleSymbolTable(UnPickler &p, GlobalState &result) {
+    result.classAndModules.clear();
+    result.methods.clear();
+    result.fields.clear();
+    result.typeArguments.clear();
+    result.typeMembers.clear();
 
     {
         Timer timeit(result.tracer(), "readSymbols");
@@ -965,16 +965,12 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
             result.typeMembers.emplace_back(unpickleTypeParameter(p, &result));
         }
     }
+}
 
-    int i = 0;
-    for (auto &f : result.files) {
-        if (f && !f->path().empty()) {
-            result.fileRefByPath[string(f->path())] = FileRef(i);
-        }
-        i++;
-    }
-
-    result.sanityCheck();
+Pickler SerializerImpl::pickleNameTable(const GlobalState &gs) {
+    Pickler p;
+    SerializerImpl::pickleNameTable(p, gs);
+    return p;
 }
 
 void SerializerImpl::pickleNameTable(Pickler &p, const GlobalState &gs) {
@@ -1070,14 +1066,12 @@ vector<uint8_t> Serializer::storeNameTable(const GlobalState &gs) {
     return p.result();
 }
 
-vector<uint8_t> Serializer::store(const GlobalState &gs) {
-    Pickler p = SerializerImpl::pickle(gs);
-    return p.result();
-}
-
-std::vector<uint8_t> Serializer::storePayloadAndNameTable(const GlobalState &gs) {
-    Pickler p = SerializerImpl::pickle(gs, true);
-    return p.result();
+Serializer::SerializedGlobalState Serializer::store(const GlobalState &gs) {
+    SerializedGlobalState result;
+    result.symbolTableData = SerializerImpl::pickleSymbolTable(gs).result();
+    result.nameTableData = SerializerImpl::pickleNameTable(gs).result();
+    result.fileTableData = SerializerImpl::pickleFileTable(gs, false).result();
+    return result;
 }
 
 void Serializer::loadAndOverwriteNameTable(GlobalState &gs, const uint8_t *const data) {
@@ -1113,11 +1107,28 @@ void Serializer::loadAndOverwriteNameTable(GlobalState &gs, const uint8_t *const
     }
 }
 
-void Serializer::loadGlobalState(GlobalState &gs, const uint8_t *const data) {
+void Serializer::loadGlobalState(GlobalState &gs, const uint8_t *const symbolTableData,
+                                 const uint8_t *const nameTableData, const uint8_t *const fileTableData) {
     ENFORCE_NO_TIMER(gs.files.empty() && gs.namesUsedTotal() == 0 && gs.symbolsUsedTotal() == 0,
                      "Can't load into a non-empty state");
-    UnPickler p(data, gs.tracer());
-    SerializerImpl::unpickleGS(p, gs);
+    {
+        UnPickler p(symbolTableData, gs.tracer());
+        SerializerImpl::unpickleSymbolTable(p, gs);
+    }
+    {
+        UnPickler p(nameTableData, gs.tracer());
+        SerializerImpl::unpickleNameTable(p, gs);
+    }
+    {
+        UnPickler p(fileTableData, gs.tracer());
+        SerializerImpl::unpickleFileTable(p, gs);
+    }
+}
+
+void Serializer::loadSymbolTable(GlobalState &gs, const uint8_t *const symbolTableData) {
+    ENFORCE_NO_TIMER(gs.symbolsUsedTotal() == 0, "Can't load into a non-empty symbol table");
+    UnPickler p(symbolTableData, gs.tracer());
+    SerializerImpl::unpickleSymbolTable(p, gs);
 }
 
 uint32_t Serializer::loadGlobalStateUUID(const GlobalState &gs, const uint8_t *const data) {
@@ -1152,8 +1163,6 @@ ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File 
         return nullptr;
     }
     file.setFileHash(SerializerImpl::unpickleFileHash(p));
-    // cached must be set _after_ setting the file hash, as setFileHash unsets the cached flag
-    file.setCached(true);
     return SerializerImpl::unpickleExpr(p, gs);
 }
 
@@ -1451,16 +1460,17 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::ConstantLit: {
             auto &a = ast::cast_tree_nonnull<ast::ConstantLit>(what);
-            pickle(p, a.loc);
-            p.putU4(a.symbol.rawId());
+            pickle(p, a.loc());
+            p.putU4(a.symbol().rawId());
             // This encoding is the same encoding that would be used if we were
             // serializing an UnresolvedConstantLit as an ExpressionPtr, nullptr
             // and all.
-            if (a.original == nullptr) {
+            auto *original = a.original();
+            if (original == nullptr) {
                 p.putU4(0);
             } else {
                 p.putU4(uint32_t(ast::Tag::UnresolvedConstantLit));
-                pickle(p, *a.original);
+                pickle(p, *original);
             }
             break;
         }
@@ -1470,6 +1480,12 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             pickle(p, a.loc);
             p.putU4(a.name.rawId());
             p.putU1(a.isSelfMethod);
+            break;
+        }
+
+        case ast::Tag::Self: {
+            auto &a = ast::cast_tree_nonnull<ast::Self>(what);
+            pickle(p, a.loc);
             break;
         }
 
@@ -1484,7 +1500,7 @@ unique_ptr<ast::UnresolvedConstantLit> SerializerImpl::unpickleUnresolvedConstan
     auto loc = unpickleLocOffsets(p);
     NameRef cnst = unpickleNameRef(p);
     auto scope = unpickleExpr(p, gs);
-    return std::make_unique<ast::UnresolvedConstantLit>(loc, std::move(scope), cnst);
+    return make_unique<ast::UnresolvedConstantLit>(loc, std::move(scope), cnst);
 }
 
 ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalState &gs) {
@@ -1738,19 +1754,25 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto loc = unpickleLocOffsets(p);
             auto sym = SymbolRef::fromRaw(p.getU4());
             auto litTag = p.getU4();
-            std::unique_ptr<ast::UnresolvedConstantLit> orig;
+            unique_ptr<ast::UnresolvedConstantLit> orig;
             if (litTag == uint32_t(ast::Tag::UnresolvedConstantLit)) {
                 orig = unpickleUnresolvedConstantLit(p, gs);
+                return ast::make_expression<ast::ConstantLit>(sym, std::move(orig));
             } else if (litTag != 0) {
                 Exception::raise("Unknown tag for `ConstantLit::original`: {}", litTag);
             }
-            return ast::make_expression<ast::ConstantLit>(loc, sym, std::move(orig));
+            ENFORCE(orig == nullptr);
+            return ast::make_expression<ast::ConstantLit>(loc, sym);
         }
         case ast::Tag::RuntimeMethodDefinition: {
             auto loc = unpickleLocOffsets(p);
             NameRef name = unpickleNameRef(p);
             auto isSelfMethod = p.getU1();
             return ast::make_expression<ast::RuntimeMethodDefinition>(loc, name, isSelfMethod);
+        }
+        case ast::Tag::Self: {
+            auto loc = unpickleLocOffsets(p);
+            return ast::make_expression<ast::Self>(loc);
         }
     }
 

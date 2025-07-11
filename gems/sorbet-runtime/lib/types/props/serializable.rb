@@ -78,7 +78,7 @@ module T::Props::Serializable
 
     if hash.size > hash_keys_matching_props
       serialized_forms = self.class.decorator.prop_by_serialized_forms
-      extra = hash.reject {|k, _| serialized_forms.key?(k)}
+      extra = hash.reject { |k, _| serialized_forms.key?(k) }
 
       # `extra` could still be empty here if the input matches a `dont_store` prop;
       # historically, we just ignore those
@@ -111,7 +111,7 @@ module T::Props::Serializable
         new_obj[k.to_s] = recursive_stringify_keys(v)
       end
     elsif obj.is_a?(Array)
-      new_obj = obj.map {|v| recursive_stringify_keys(v)}
+      new_obj = obj.map { |v| recursive_stringify_keys(v) }
     else
       new_obj = obj
     end
@@ -126,7 +126,7 @@ module T::Props::Serializable
     if old_extra != new_extra
       difference =
         if old_extra
-          new_extra.reject {|k, v| old_extra[k] == v}
+          new_extra.reject { |k, v| old_extra[k] == v }
         else
           new_extra
         end
@@ -195,7 +195,7 @@ module T::Props::Serializable::DecoratorMethods
   end
 
   def required_props
-    @class.props.select {|_, v| T::Props::Utils.required_prop?(v)}.keys
+    @class.props.select { |_, v| T::Props::Utils.required_prop?(v) }.keys
   end
 
   def prop_dont_store?(prop)
@@ -228,11 +228,11 @@ module T::Props::Serializable::DecoratorMethods
     res = super
     prop_by_serialized_forms[serialized_form] = prop
     if T::Configuration.use_vm_prop_serde?
-      enqueue_lazy_vm_method_definition!(:__t_props_generated_serialize) {generate_serialize2}
-      enqueue_lazy_vm_method_definition!(:__t_props_generated_deserialize) {generate_deserialize2}
+      enqueue_lazy_vm_method_definition!(:__t_props_generated_serialize) { generate_serialize2 }
+      enqueue_lazy_vm_method_definition!(:__t_props_generated_deserialize) { generate_deserialize2 }
     else
-      enqueue_lazy_method_definition!(:__t_props_generated_serialize) {generate_serialize_source}
-      enqueue_lazy_method_definition!(:__t_props_generated_deserialize) {generate_deserialize_source}
+      enqueue_lazy_method_definition!(:__t_props_generated_serialize) { generate_serialize_source }
+      enqueue_lazy_method_definition!(:__t_props_generated_deserialize) { generate_deserialize_source }
     end
     res
   end
@@ -263,7 +263,7 @@ module T::Props::Serializable::DecoratorMethods
   def message_with_generated_source_context(error, generated_method, generate_source_method)
     generated_method = generated_method.to_s
     if error.backtrace_locations
-      line_loc = error.backtrace_locations.find {|l| l.base_label == generated_method}
+      line_loc = error.backtrace_locations.find { |l| l.base_label == generated_method }
       return unless line_loc
 
       line_num = line_loc.lineno
@@ -275,7 +275,7 @@ module T::Props::Serializable::DecoratorMethods
         # in `__t_props_generated_serialize'"
         "in `#{generated_method}'"
       end
-      line_label = error.backtrace.find {|l| l.end_with?(label)}
+      line_label = error.backtrace.find { |l| l.end_with?(label) }
       return unless line_label
 
       line_num = if line_label.start_with?("(eval)")

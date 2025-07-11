@@ -44,11 +44,11 @@ module T::Types
       nilable = T::Utils.coerce(NilClass)
       trueclass = T::Utils.coerce(TrueClass)
       falseclass = T::Utils.coerce(FalseClass)
-      if types.any? {|t| t == nilable}
-        remaining_types = types.reject {|t| t == nilable}
+      if types.any? { |t| t == nilable }
+        remaining_types = types.reject { |t| t == nilable }
         "T.nilable(#{type_shortcuts(remaining_types)})"
-      elsif types.any? {|t| t == trueclass} && types.any? {|t| t == falseclass}
-        remaining_types = types.reject {|t| t == trueclass || t == falseclass}
+      elsif types.any? { |t| t == trueclass } && types.any? { |t| t == falseclass }
+        remaining_types = types.reject { |t| t == trueclass || t == falseclass }
         type_shortcuts([T::Private::Types::StringHolder.new("T::Boolean")] + remaining_types)
       else
         names = types.map(&:name).compact.sort
@@ -58,12 +58,12 @@ module T::Types
 
     # overrides Base
     def recursively_valid?(obj)
-      types.any? {|type| type.recursively_valid?(obj)}
+      types.any? { |type| type.recursively_valid?(obj) }
     end
 
     # overrides Base
     def valid?(obj)
-      types.any? {|type| type.valid?(obj)}
+      types.any? { |type| type.valid?(obj) }
     end
 
     # overrides Base
@@ -72,7 +72,7 @@ module T::Types
     end
 
     def unwrap_nilable
-      non_nil_types = types.reject {|t| t == T::Utils::Nilable::NIL_TYPE}
+      non_nil_types = types.reject { |t| t == T::Utils::Nilable::NIL_TYPE }
       return nil if types.length == non_nil_types.length
       case non_nil_types.length
       when 0 then nil

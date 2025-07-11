@@ -1,0 +1,149 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  let1 = <cast:let>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(let1)
+
+  let2 = <cast:let>(nil, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+
+  <emptyTree>::<C T>.reveal_type(let2)
+
+  let3 = <cast:let>(nil, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+
+  <emptyTree>::<C T>.reveal_type(let3)
+
+  let4 = <cast:let>(<emptyTree>::<C ARGV>.first().strip(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(let4)
+
+  let5 = <cast:let>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(let5)
+
+  let6 = <cast:let>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(let6)
+
+  let7 = <cast:let>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(let7)
+
+  let8 = <cast:let>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(let8)
+
+  let9 = <cast:let>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(let9)
+
+  <cast:let>(let10 = <emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(let10)
+
+  <emptyTree>::<C LET1> = <cast:let>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C LET1>)
+
+  <emptyTree>::<C LET2> = <cast:let>(<emptyTree>::<C T>.must("foo".[](0)), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C LET2>)
+
+  @let1 = <cast:let>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(@let1)
+
+  @let2 = <cast:let>(begin
+    ||$2 = <emptyTree>::<C ARGV>.first()
+    if ||$2
+      ||$2
+    else
+      []
+    end
+  end, <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(@let2)
+
+  @let3 = <cast:let>(begin
+    <assignTemp>$3 = <emptyTree>::<C ARGV>.first()
+    if ::NilClass.===(<assignTemp>$3)
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$3)
+    else
+      <assignTemp>$3.strip()
+    end
+  end, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(@let3)
+
+  @@let1 = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
+
+  <emptyTree>::<C T>.reveal_type(@@let1)
+
+  $let1 = <cast:let>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type($let1)
+
+  cast1 = <cast:let>("#: Integer", <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(cast1)
+
+  cast2 = <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(cast2)
+
+  cast3 = <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(cast3)
+
+  cast4 = <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(cast4)
+
+  cast5 = <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(cast5)
+
+  cast6 = <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(cast6)
+
+  cast7 = <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C T>.reveal_type(cast7)
+
+  cast8 = ::<root>::<C T>.unsafe("a").random_method_name()
+
+  must_x = <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  must1 = ::<root>::<C T>.must(must_x)
+
+  <emptyTree>::<C T>.reveal_type(must1)
+
+  must2 = ::<root>::<C T>.must(must_x)
+
+  <emptyTree>::<C T>.reveal_type(must2)
+
+  must3 = ::<root>::<C T>.must(must_x)
+
+  <emptyTree>::<C T>.reveal_type(must3)
+
+  must4 = ::<root>::<C T>.must(must_x)
+
+  <emptyTree>::<C T>.reveal_type(must4)
+
+  must5 = ::<root>::<C T>.must(must_x)
+
+  <emptyTree>::<C T>.reveal_type(must5)
+
+  unsafe_x = <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  unsafe1 = ::<root>::<C T>.unsafe(unsafe_x)
+
+  <emptyTree>::<C T>.reveal_type(unsafe1)
+
+  unsafe2 = ::<root>::<C T>.unsafe(unsafe_x)
+
+  <emptyTree>::<C T>.reveal_type(unsafe2)
+
+  unsafe3 = ::<root>::<C T>.unsafe(unsafe_x)
+
+  <emptyTree>::<C T>.reveal_type(unsafe3)
+end

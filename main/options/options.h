@@ -46,6 +46,7 @@ struct Printers {
     PrinterConfig ParseTreeJson;
     PrinterConfig ParseTreeJsonWithLocs;
     PrinterConfig ParseTreeWhitequark;
+    PrinterConfig RBSRewriteTree;
     PrinterConfig DesugarTree;
     PrinterConfig DesugarTreeRaw;
     PrinterConfig RewriterTree;
@@ -91,12 +92,12 @@ struct Printers {
     // Ensure everything here is in PrinterConfig::printers().
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();
-    bool isAutogen() const;
 };
 
 enum class Phase {
     INIT,
     PARSER,
+    RBS_REWRITER,
     DESUGARER,
     REWRITER,
     LOCAL_VARS,
@@ -137,7 +138,6 @@ struct Options {
     Printers print;
     Phase stopAfterPhase = Phase::INFERENCER;
     Parser parser = Parser::ORIGINAL;
-    bool noStdlib = false;
 
     // Should we monitor STDOUT for HUP and exit if it hangs up. This is a
     // workaround for https://bugzilla.mindrot.org/show_bug.cgi?id=2863
@@ -170,7 +170,6 @@ struct Options {
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
     bool uniquelyDefinedBehavior = false;
-    bool stripePackages = false;
     std::string stripePackagesHint = "";
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
@@ -183,17 +182,56 @@ struct Options {
     // Needs to be a multiple of getpagesize(2) which is 4096 by default on macOS and Linux
     size_t maxCacheSizeBytes = MAX_CACHE_SIZE_BYTES;
     UnorderedMap<std::string, core::StrictLevel> strictnessOverrides;
-    std::string storeState = "";
+    std::vector<std::string> storeState;
     bool enableCounters = false;
     std::string errorUrlBase = "https://srb.help/";
     bool ruby3KeywordArgs = false;
-    bool typedSuper = true;
     std::vector<std::string> suppressPayloadSuperclassRedefinitionFor;
     std::set<int> isolateErrorCode;
     std::set<int> suppressErrorCode;
     bool noErrorSections = false;
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
+
+    // Options which affect the contents of the `--cache-dir`.
+    // If these options change, the cache needs to be invalidated.
+    struct CacheSensitiveOptions {
+        // Ideally, we would have named this option something like `--stdlib=false`, because by
+        // nature of this option being a boolean option with cxxopts, you can do `--no-stdlib=false`
+        // which is a no-op, and also confusing.
+        bool noStdlib : 1;
+
+        bool typedSuper : 1;
+
+        // Enable experimental support for RBS signatures and assertions
+        bool rbsEnabled : 1;
+
+        // Experimental feature `requires_ancestor`
+        bool requiresAncestorEnabled : 1;
+
+        bool runningUnderAutogen : 1;
+
+        bool stripePackages : 1;
+
+        // HELLO! adding/removing MUST also change this number!!
+        constexpr static uint8_t NUMBER_OF_FLAGS = 6;
+
+        // In C++20 we can replace this with bit field initializers
+        CacheSensitiveOptions()
+            : noStdlib(false), typedSuper(true), rbsEnabled(false), requiresAncestorEnabled(false),
+              runningUnderAutogen(false), stripePackages(false) {}
+
+        constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
+
+        uint8_t serialize() const {
+            static_assert(sizeof(CacheSensitiveOptions) == sizeof(uint8_t));
+            // Can replace this with std::bit_cast in C++20
+            auto rawBits = *reinterpret_cast<const uint8_t *>(this);
+            // Mask the valid bits since uninitialized bits can be any value.
+            return rawBits & VALID_BITS_MASK;
+        }
+    };
+    CacheSensitiveOptions cacheSensitiveOptions;
 
     uint32_t reserveClassTableCapacity = 0;
     uint32_t reserveMethodTableCapacity = 0;
@@ -222,14 +260,11 @@ struct Options {
     std::string metricsSha = "none";
     std::map<std::string, std::string> metricsExtraTags; // be super careful with cardinality here
 
-    bool packageRBIGeneration = false;
     std::string dumpPackageInfo = "";
-    std::string singlePackage = "";
-    std::string packageRBIDir = "";
     std::vector<std::string> packageSkipRBIExportEnforcementDirs;
 
     // Contains the allowed extensions Sorbet can parse.
-    UnorderedSet<std::string> allowedExtensions;
+    UnorderedSet<std::string> allowedExtensions = {".rb", ".rbi"};
     // Contains the file names passed in to Sorbet.
     std::vector<std::string> rawInputFileNames;
     // Contains the directory names passed in to Sorbet.
@@ -268,9 +303,6 @@ struct Options {
     // Enables out-of-order reference checking
     bool outOfOrderReferenceChecksEnabled = false;
     core::TrackUntyped trackUntyped = core::TrackUntyped::Nowhere;
-
-    // Experimental feature `requires_ancestor`
-    bool requiresAncestorEnabled = false;
 
     std::string inlineInput; // passed via -e
     std::string debugLogFile;

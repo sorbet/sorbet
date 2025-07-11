@@ -5,5 +5,5 @@
 
 class TooManyArgs < PackageSpec
   strict_dependencies 'false'
-  layer 'a', 'b' # error: Too many arguments provided for method `PackageSpec.layer`. Expected: `1`, got: `2`
+  layer 'a', 'b' # error: Too many arguments provided for method `Sorbet::Private::Static::PackageSpec.layer`. Expected: `1`, got: `2`
 end

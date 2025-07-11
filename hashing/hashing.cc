@@ -41,10 +41,10 @@ bool isEmptyParseResult(const core::GlobalState &gs, const ast::ExpressionPtr &t
     return classDef->rhs.empty();
 }
 
-unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_ptr<core::GlobalState> &lgs,
+unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, core::GlobalState &lgs,
                                                  core::UsageHash usageHash, ast::ParsedFile file) {
-    if (file.file.data(*lgs).hasIndexErrors()) {
-        if (isEmptyParseResult(*lgs, file.tree)) {
+    if (file.file.data(lgs).hasIndexErrors()) {
+        if (isEmptyParseResult(lgs, file.tree)) {
             rapidjson::StringBuffer result;
             rapidjson::Writer<rapidjson::StringBuffer> writer(result);
 
@@ -55,11 +55,11 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_
                 writer.Bool(true);
 
                 writer.String("file_path");
-                auto path = file.file.data(*lgs).path();
+                auto path = file.file.data(lgs).path();
                 writer.String(path.data(), path.size());
 
                 writer.String("contents");
-                auto source = file.file.data(*lgs).source();
+                auto source = file.file.data(lgs).source();
                 writer.String(source.data(), source.size());
 
                 writer.EndObject();
@@ -78,11 +78,11 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_
 
     // We run computeFileHashForAST with the empty set of options which means we can skip calling pipeline::package()
 
-    auto workers = WorkerPool::create(0, lgs->tracer());
+    auto workers = WorkerPool::create(0, lgs.tracer());
     core::FoundDefHashes foundHashes; // out parameter
     realmain::pipeline::nameAndResolve(lgs, move(single), opts(), *workers, &foundHashes);
 
-    return make_unique<core::FileHash>(move(*lgs->hash()), move(usageHash), move(foundHashes));
+    return make_unique<core::FileHash>(move(*lgs.hash()), move(usageHash), move(foundHashes));
 }
 
 // Note: lgs is an outparameter.
@@ -90,10 +90,8 @@ core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<cor
                                           unique_ptr<core::GlobalState> &lgs,
                                           const realmain::options::Options &hashingOpts) {
     lgs = core::GlobalState::makeEmptyGlobalStateForHashing(logger);
-    lgs->requiresAncestorEnabled = hashingOpts.requiresAncestorEnabled;
-    lgs->ruby3KeywordArgs = hashingOpts.ruby3KeywordArgs;
-    lgs->typedSuper = hashingOpts.typedSuper;
-    lgs->suppressPayloadSuperclassRedefinitionFor = hashingOpts.suppressPayloadSuperclassRedefinitionFor;
+    realmain::pipeline::setGlobalStateOptions(*lgs, hashingOpts);
+    lgs->silenceErrors = true;
     {
         core::UnfreezeFileTable fileTableAccess(*lgs);
         auto fref = lgs->enterFile(std::move(forWhat));
@@ -114,7 +112,7 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
     core::LazyNameSubstitution subst(*lgs, *lgs);
     core::MutableContext ctx(*lgs, core::Symbols::root(), fref);
     ast = ast::Substitute::run(ctx, subst, move(ast));
-    return computeFileHashForAST(logger, lgs, subst.getAllNames(), move(ast));
+    return computeFileHashForAST(logger, *lgs, subst.getAllNames(), move(ast));
 }
 }; // namespace
 
@@ -166,12 +164,16 @@ void Hashing::computeFileHashes(absl::Span<const shared_ptr<core::File>> files, 
     }
 }
 
-vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(core::GlobalState &gs,
-                                                           const realmain::options::Options &opts,
-                                                           spdlog::logger &logger, absl::Span<core::FileRef> files,
-                                                           WorkerPool &workers,
-                                                           const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    auto asts = realmain::pipeline::index(gs, files, opts, workers, kvstore);
+ast::ParsedFilesOrCancelled
+Hashing::indexAndComputeFileHashes(core::GlobalState &gs, const realmain::options::Options &opts,
+                                   spdlog::logger &logger, absl::Span<const core::FileRef> files, WorkerPool &workers,
+                                   const unique_ptr<const OwnedKeyValueStore> &kvstore, bool cancelable) {
+    auto indexed = realmain::pipeline::index(gs, files, opts, workers, kvstore, cancelable);
+    if (!indexed.hasResult()) {
+        return indexed;
+    }
+
+    auto asts = std::move(indexed.result());
     ENFORCE_NO_TIMER(asts.size() == files.size());
 
     // Below, we rewrite ASTs to an empty GlobalState and use them for hashing.
@@ -209,7 +211,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(core::GlobalState &gs
                     auto [rewrittenAST, usageHash] = rewriteAST(sharedGs, *lgs, newFref, ast);
 
                     threadResult.emplace_back(ast.file,
-                                              computeFileHashForAST(logger, lgs, move(usageHash), move(rewrittenAST)));
+                                              computeFileHashForAST(logger, *lgs, move(usageHash), move(rewrittenAST)));
                 }
             }
         }

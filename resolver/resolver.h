@@ -4,6 +4,7 @@
 #include "ast/ast.h"
 #include "common/concurrency/WorkerPool.h"
 #include <memory>
+#include <optional>
 
 namespace sorbet::resolver {
 
@@ -22,13 +23,15 @@ public:
      * These two versions are explicitly instantiated in resolver.cc
      */
     static ast::ParsedFilesOrCancelled runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
-                                                      bool ranIncrementalNamer, WorkerPool &workers);
+                                                      bool ranIncrementalNamer, WorkerPool &workers,
+                                                      absl::Span<const core::ClassOrModuleRef> symbolsToRecompute);
 
     // used by autogen only
     static std::vector<ast::ParsedFile> runConstantResolution(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
                                                               WorkerPool &workers);
 
-    static void finalizeSymbols(core::GlobalState &gs);
+    static void finalizeSymbols(core::GlobalState &gs,
+                                std::optional<absl::Span<const core::ClassOrModuleRef>> symbolsToRecompute);
 
 private:
     static void finalizeAncestors(core::GlobalState &gs);

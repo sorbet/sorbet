@@ -6,6 +6,11 @@ template class std::vector<sorbet::core::LocalVariable>;
 using namespace std;
 
 namespace sorbet::core {
+
+LocalVariable::LocalVariable(NameRef name, uint32_t unique) : _name(name), unique(unique) {
+    ENFORCE(name != Names::selfLocal() || unique == 0);
+}
+
 bool LocalVariable::exists() const {
     return _name.exists();
 }

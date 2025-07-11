@@ -11,16 +11,9 @@ title: Shapes
 {'string1' => Type1, 'string2' => Type2}
 ```
 
-This creates a fixed hash type (also referred to as a record), which is a hash
-with known keys and known types for each key. For example,
-`{foo: String, bar: T.nilable(Float)}` validates that an object is a hash with
-exactly those 2 keys as Ruby symbols, with `foo` being a `String` and `bar`
-being a `Float` or `nil`. For example: `{foo: 'hello', bar: 3.14}`.
+This creates a fixed hash type (also referred to as a record), which is a hash with known keys and known types for each key. For example, `{foo: String, bar: T.nilable(Float)}` validates that an object is a hash with exactly those 2 keys as Ruby symbols, with `foo` being a `String` and `bar` being a `Float` or `nil`. For example: `{foo: 'hello', bar: 3.14}`.
 
-> **Warning**: Shape types have many known limitations, and should be considered
-> an experimental feature. They may not work as expected or change without
-> notice. For an alternative that plays better with static type checking, see
-> [Typed Structs](tstruct.md).
+> **Warning**: Shape types have many known limitations, and should be considered an experimental feature. They may not work as expected or change without notice. For an alternative that plays better with static type checking, see [Typed Structs](tstruct.md).
 
 ```ruby
 # typed: true
@@ -34,7 +27,7 @@ being a `Float` or `nil`. For example: `{foo: 'hello', bar: 3.14}`.
 
 extend T::Sig
 
-sig {params(x: {a: Integer, b: String}).void}
+sig { params(x: {a: Integer, b: String}).void }
 def foo(x)
   # Limitation! returns T.untyped!
   T.reveal_type(x[:a]) # Revealed type: `T.untyped`
@@ -60,5 +53,44 @@ y[:a] = '' # ok (!)
   → View on sorbet.run
 </a>
 
-sorbet internals note: the `underlying()` of a shape is a Hash where the key
-type is the union of all keys and the value type is the union of all the values.
+## Hash literals
+
+Poor support for shapes even pollutes Sorbet's support for [typed hashes](stdlib-generics.md):
+
+```ruby
+opts = {symbol_key: 0}
+
+# This should not type check (Symbol is not String),
+# but Sorbet reports no error:
+T.let(
+  opts,
+  T::Hash[String, Integer]
+)
+
+T.reveal_type(opts) # => `{symbol_key: Integer(0)} (shape of T::Hash[T.untyped, T.untyped])`
+```
+
+Hash literals decay to `T::Hash[T.untyped, T.untyped]`, instead of decaying to a union of their keys' and values' types. This is tied to hard-to-change implementation choices in Sorbet's inference algorithm. We will change it one day.
+
+In the mean time, to explicitly create a typed hash, use one of these options:
+
+```ruby
+# Empty, typed hash:
+T::Hash[String, Integer].new
+
+# Hash literal to typed hash:
+{symbol_key: 0}.to_h
+```
+
+In both cases, the expression will be eagerly upcast to a typed hash: Sorbet forgets that the expression is a hash with specific keys:
+
+```ruby
+sig { params(x: {symbol_key: Integer}).void }
+def takes_shape(x)
+  x[:symbol_key]
+end
+
+takes_shape({symbol_key: 0}.to_h) # error: expected shape, got typed hash
+```
+
+For more, see <https://github.com/sorbet/sorbet/issues/11>.

@@ -238,7 +238,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
             // with RuntimeProfiled.
             auto attachedClass = singleton.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
             if (attachedClass.exists()) {
-                auto *lambdaParam =
+                auto lambdaParam =
                     core::cast_type<core::LambdaParam>(attachedClass.asTypeMemberRef().data(gs)->resultType);
                 ENFORCE(lambdaParam != nullptr);
 
@@ -334,7 +334,8 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     prodCounterAdd("types.input.methods.total", methodCount);
 }
 
-void Resolver::finalizeSymbols(core::GlobalState &gs) {
+void Resolver::finalizeSymbols(core::GlobalState &gs,
+                               optional<absl::Span<const core::ClassOrModuleRef>> symbolsToRecompute) {
     Timer timer(gs.tracer(), "resolver.finalize_resolution");
     // TODO(nelhage): Properly this first loop should go in finalizeAncestors,
     // but we currently compute mixes_in_class_methods during the same AST walk
@@ -383,20 +384,32 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
         }
     }
 
-    gs.computeLinearization();
+    vector<vector<pair<core::TypeMemberRef, core::TypeMemberRef>>> typeAliases;
+    typeAliases.resize(gs.classAndModulesUsed());
+    vector<bool> resolved;
+    resolved.resize(gs.classAndModulesUsed());
 
-    {
+    if (symbolsToRecompute.has_value()) {
+        Timer timer(gs.tracer(), "resolver.resolve_type_members.partial");
+        for (auto sym : *symbolsToRecompute) {
+            resolveTypeMembers(gs, sym, typeAliases, resolved);
+
+            if (gs.cacheSensitiveOptions.requiresAncestorEnabled) {
+                // Precompute the list of all required ancestors for this symbol
+                sym.data(gs)->computeRequiredAncestorLinearization(gs);
+            }
+        }
+    } else {
+        // As we don't mutate mixins during incremental resolution, we only compute the linearization of the hieararchy
+        // when we don't have a known set of symbols that need to be updated.
+        gs.computeLinearization();
+
         Timer timer(gs.tracer(), "resolver.resolve_type_members");
-
-        vector<vector<pair<core::TypeMemberRef, core::TypeMemberRef>>> typeAliases;
-        typeAliases.resize(gs.classAndModulesUsed());
-        vector<bool> resolved;
-        resolved.resize(gs.classAndModulesUsed());
         for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
             auto sym = core::ClassOrModuleRef(gs, i);
             resolveTypeMembers(gs, sym, typeAliases, resolved);
 
-            if (gs.requiresAncestorEnabled) {
+            if (gs.cacheSensitiveOptions.requiresAncestorEnabled) {
                 // Precompute the list of all required ancestors for this symbol
                 sym.data(gs)->computeRequiredAncestorLinearization(gs);
             }

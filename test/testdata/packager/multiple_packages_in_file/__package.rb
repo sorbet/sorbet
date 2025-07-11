@@ -5,4 +5,5 @@
 class MyPackage < PackageSpec
 end
 
-class SecondPackage < PackageSpec; end # error: Package files can only declare one package
+class SecondPackage < PackageSpec; end # error: Invalid expression in package: `ClassDef` not allowed
+#                     ^^^^^^^^^^^ error: Unable to resolve constant `PackageSpec`

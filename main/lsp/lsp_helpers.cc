@@ -92,7 +92,7 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
         }
         result = targetClass.data(gs)->externalType();
     } else {
-        auto resultType = constant.resultType(gs);
+        const auto &resultType = constant.resultType(gs);
         result = resultType == nullptr ? core::Types::untyped(constant) : resultType;
     }
 
@@ -137,7 +137,7 @@ namespace {
 
 // Checks if s is a subclass of root or contains root as a mixin, and updates visited and memoized vectors.
 bool isSubclassOrMixin(const core::GlobalState &gs, core::ClassOrModuleRef root, core::ClassOrModuleRef s,
-                       std::vector<bool> &memoized, std::vector<bool> &visited) {
+                       vector<bool> &memoized, vector<bool> &visited) {
     // don't visit the same class twice
     if (visited[s.id()] == true) {
         return memoized[s.id()];
@@ -261,14 +261,14 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     string_view preDefinition = sourceCode.substr(0, sourceCode.rfind('\n', beginIndex));
 
     // Get all the lines before it.
-    std::vector<string_view> all_lines = absl::StrSplit(preDefinition, '\n');
+    vector<string_view> all_lines = absl::StrSplit(preDefinition, '\n');
 
     // if there are no lines before the method definition, we're at the top of the file.
     if (all_lines.empty()) {
         return nullopt;
     }
 
-    std::vector<string_view> documentation_lines;
+    vector<string_view> documentation_lines;
 
     // Iterate from the last line, to the first line
     for (auto it = all_lines.rbegin(); it != all_lines.rend(); it++) {

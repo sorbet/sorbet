@@ -87,7 +87,8 @@ optional<ErrorSection> TypeAndOrigins::explainGot(const GlobalState &gs, Loc ori
 TypeAndOrigins::TypeAndOrigins(TypePtr type, Loc origin) : type(std::move(type)), origins(1, origin) {}
 
 TypeAndOrigins::~TypeAndOrigins() noexcept {
-    histogramInc("TypeAndOrigins.origins.size", origins.size());
+    // This counting turns out to be rather slow for tests.
+    // histogramInc("TypeAndOrigins.origins.size", origins.size());
 }
 
 } // namespace sorbet::core

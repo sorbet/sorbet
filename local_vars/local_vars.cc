@@ -137,7 +137,7 @@ class LocalNameInserter {
         };
         UnorderedMap<core::NameRef, core::LocalVariable> locals;
         vector<Arg> args;
-        std::optional<uint32_t> oldBlockCounter = nullopt;
+        optional<uint32_t> oldBlockCounter = nullopt;
         uint32_t localId = 0;
         bool insideBlock = false;
         bool insideMethod = false;

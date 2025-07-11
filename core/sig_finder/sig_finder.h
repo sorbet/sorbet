@@ -6,6 +6,14 @@
 namespace sorbet::sig_finder {
 
 class SigFinder {
+public:
+    struct Result {
+        resolver::ParsedSig sig;
+        const ast::Send &origSend;
+        Result(resolver::ParsedSig &&sig, const ast::Send &origSend) : sig(std::move(sig)), origSend(origSend) {}
+    };
+
+private:
     const core::Loc queryLoc;
 
     // Track the narrowest location range that still contains the queryLoc.
@@ -17,7 +25,7 @@ class SigFinder {
     // Track whether the current scope has the queryLoc.
     std::vector<bool> scopeContainsQueryLoc;
 
-    std::optional<resolver::ParsedSig> result_;
+    std::optional<Result> result_;
 
 public:
     SigFinder(core::Loc queryLoc)
@@ -30,8 +38,7 @@ public:
     void postTransformRuntimeMethodDefinition(core::Context ctx, const ast::RuntimeMethodDefinition &tree);
     void preTransformSend(core::Context ctx, const ast::Send &tree);
 
-    static std::optional<resolver::ParsedSig> findSignature(core::Context ctx, const ast::ExpressionPtr &tree,
-                                                            core::Loc queryLoc);
+    static std::optional<Result> findSignature(core::Context ctx, const ast::ExpressionPtr &tree, core::Loc queryLoc);
 };
 
 } // namespace sorbet::sig_finder

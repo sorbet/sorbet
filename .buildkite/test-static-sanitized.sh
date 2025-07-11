@@ -31,7 +31,6 @@ err=0
 
 mkdir -p _out_
 
-# NOTE: we skip the compiler tests because llvm doesn't interact well with the sanitizer
 test_args+=(
   "--build_tests_only"
   "//..."
@@ -64,7 +63,7 @@ if [ "$err" -ne 0 ]; then
   # Use --config=dbg instead of sanitized because it's more likely that they've
   # already built this config locally, and most test failures reproduce outside
   # of sanitized mode anyways.
-  echo '  --config=dbg' >> "$failing_tests"
+  echo '  --config=dbg --test_output=errors' >> "$failing_tests"
   echo '```' >> "$failing_tests"
 
   buildkite-agent annotate --context "test-static-sanitized.sh" --style error --append < "$failing_tests"

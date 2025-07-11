@@ -265,6 +265,7 @@ const UnorderedMap<
         {"uniquely-defined-behavior", BooleanPropertyAssertion::make},
         {"check-out-of-order-constant-references", BooleanPropertyAssertion::make},
         {"enable-packager", BooleanPropertyAssertion::make},
+        {"enable-experimental-rbs-comments", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
         {"experimental-ruby3-keyword-args", BooleanPropertyAssertion::make},
         {"typed-super", BooleanPropertyAssertion::make},
@@ -586,10 +587,6 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
     auto lineBreaks = file->lineBreaks();
 
     for (auto lineBreak : lineBreaks) {
-        // Ignore first line break entry.
-        if (lineBreak == -1) {
-            continue;
-        }
         string_view lineView = source.substr(nextChar, lineBreak - nextChar);
         auto line = string(lineView);
         nextChar = lineBreak + 1;
@@ -688,6 +685,60 @@ RangeAssertion::parseAssertions(const UnorderedMap<string, shared_ptr<core::File
     return assertions;
 }
 
+realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeAssertion>> &assertions) {
+    realmain::options::Options opts;
+
+    opts.cacheSensitiveOptions.noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
+    opts.cacheSensitiveOptions.rbsEnabled =
+        BooleanPropertyAssertion::getValue("enable-experimental-rbs-comments", assertions).value_or(false);
+    opts.cacheSensitiveOptions.requiresAncestorEnabled =
+        BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
+    opts.ruby3KeywordArgs =
+        BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
+    opts.cacheSensitiveOptions.typedSuper =
+        BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
+    // TODO(jez) Allow allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
+
+    opts.uniquelyDefinedBehavior =
+        BooleanPropertyAssertion::getValue("uniquely-defined-behavior", assertions).value_or(false);
+
+    opts.outOfOrderReferenceChecksEnabled =
+        BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false);
+
+    if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
+        opts.suggestUnsafe = "T.unsafe";
+    }
+
+    opts.cacheSensitiveOptions.stripePackages =
+        BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
+    auto extraDirUnderscore =
+        StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
+    if (extraDirUnderscore.has_value()) {
+        opts.extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
+    }
+
+    auto extraDirSlashDeprecated =
+        StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash-deprecated", assertions);
+    if (extraDirSlashDeprecated.has_value()) {
+        opts.extraPackageFilesDirectorySlashDeprecatedPrefixes.emplace_back(extraDirSlashDeprecated.value());
+    }
+
+    auto extraDirSlash = StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
+    if (extraDirSlash.has_value()) {
+        opts.extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
+    }
+
+    auto allowRelaxedPackager = StringPropertyAssertion::getValue("allow-relaxed-packager-checks-for", assertions);
+    if (allowRelaxedPackager.has_value()) {
+        opts.allowRelaxedPackagerChecksFor.emplace_back(allowRelaxedPackager.value());
+    }
+
+    vector<string> defaultLayers = {};
+    opts.packagerLayers = StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
+
+    return opts;
+}
+
 unique_ptr<Location> RangeAssertion::getLocation(const LSPConfiguration &config) const {
     auto uri = filePathToUri(config, filename);
     return make_unique<Location>(uri, range->copy());
@@ -769,8 +820,7 @@ vector<unique_ptr<DocumentHighlight>> &extractDocumentHighlights(ResponseMessage
 }
 
 void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
-                         int &nextId, const Location &queryLoc,
-                         const std::vector<std::shared_ptr<DefAssertion>> &definitions) {
+                         int &nextId, const Location &queryLoc, const vector<shared_ptr<DefAssertion>> &definitions) {
     REQUIRE_FALSE(definitions.empty());
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
@@ -1079,7 +1129,7 @@ shared_ptr<TypeDefAssertion> TypeDefAssertion::make(string_view filename, unique
 
 void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                              LSPWrapper &lspWrapper, int &nextId, string_view symbol, const Location &queryLoc,
-                             const std::vector<std::shared_ptr<RangeAssertion>> &typeDefs) {
+                             const vector<shared_ptr<RangeAssertion>> &typeDefs) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
     const int character = queryLoc.range->start->character;
@@ -1204,8 +1254,8 @@ shared_ptr<StringPropertyAssertion> StringPropertyAssertion::make(string_view fi
                                                 assertionType);
 }
 
-optional<std::string> StringPropertyAssertion::getValue(string_view type,
-                                                        const vector<shared_ptr<RangeAssertion>> &assertions) {
+optional<string> StringPropertyAssertion::getValue(string_view type,
+                                                   const vector<shared_ptr<RangeAssertion>> &assertions) {
     {
         INFO("Unrecognized string property assertion: " << type);
         CHECK_NE(assertionConstructors.find(string(type)), assertionConstructors.end());
@@ -1221,10 +1271,10 @@ optional<std::string> StringPropertyAssertion::getValue(string_view type,
 }
 
 StringPropertyAssertion::StringPropertyAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                                 std::string value, string_view assertionType)
+                                                 string value, string_view assertionType)
     : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value){};
 
-std::string StringPropertyAssertion::toString() const {
+string StringPropertyAssertion::toString() const {
     return fmt::format("{}: {}", assertionType, value);
 }
 
@@ -1534,8 +1584,8 @@ void ApplyCompletionAssertion::checkAll(const vector<shared_ptr<RangeAssertion>>
     }
 }
 
-void ApplyCompletionAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                                     LSPWrapper &wrapper, int &nextId, std::string errorPrefix) {
+void ApplyCompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                     LSPWrapper &wrapper, int &nextId, string errorPrefix) {
     auto completionList = doTextDocumentCompletion(wrapper, *this->range, nextId, this->filename);
     {
         INFO("doTextDocumentCompletion failed; see error above.");
@@ -1634,8 +1684,8 @@ void ApplyRenameAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &as
     }
 }
 
-void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                                 LSPWrapper &wrapper, int &nextId, std::string errorPrefix) {
+void ApplyRenameAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                 LSPWrapper &wrapper, int &nextId, string errorPrefix) {
     auto prepareRenameResponse = doTextDocumentPrepareRename(wrapper, *this->range, nextId, this->filename);
 
     // A rename at an invalid position
@@ -1795,8 +1845,7 @@ optional<pair<string, string>> ApplyCodeActionAssertion::expectedFile(string fil
     return make_pair(expectedUpdatedFilePath, expectedEditedFileContents);
 }
 
-void ApplyCodeActionAssertion::assertResults(std::string expectedPath, std::string expectedContents,
-                                             std::string actualContents) {
+void ApplyCodeActionAssertion::assertResults(string expectedPath, string expectedContents, string actualContents) {
     CHECK_EQ_DIFF(
         expectedContents, actualContents,
         fmt::format(
@@ -1804,7 +1853,7 @@ void ApplyCodeActionAssertion::assertResults(std::string expectedPath, std::stri
             expectedPath, expectedContents, actualContents));
 }
 
-std::unique_ptr<TextDocumentEdit> ApplyCodeActionAssertion::sortEdits(std::unique_ptr<TextDocumentEdit> changes) {
+unique_ptr<TextDocumentEdit> ApplyCodeActionAssertion::sortEdits(unique_ptr<TextDocumentEdit> changes) {
     // First, sort the edits by increasing starting location and verify that none overlap.
     fast_sort(changes->edits, [](const auto &l, const auto &r) -> bool { return l->range->cmp(*r->range) < 0; });
     for (uint32_t i = 1; i < changes->edits.size(); i++) {
@@ -1820,9 +1869,9 @@ std::unique_ptr<TextDocumentEdit> ApplyCodeActionAssertion::sortEdits(std::uniqu
 }
 
 namespace {
-shared_ptr<sorbet::core::File>
-getFileByUri(const LSPConfiguration &config,
-             const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, string uri) {
+shared_ptr<sorbet::core::File> getFileByUri(const LSPConfiguration &config,
+                                            const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                            string uri) {
     auto filename = uriToFilePath(config, uri);
     auto it = sourceFileContents.find(filename);
     {
@@ -1833,7 +1882,7 @@ getFileByUri(const LSPConfiguration &config,
 }
 } // namespace
 
-void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+void ApplyCodeActionAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                                      LSPWrapper &wrapper, const CodeAction &codeAction) {
     const auto &config = wrapper.config();
     for (auto &c : *codeAction.edit.value()->documentChanges) {
@@ -1856,15 +1905,14 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
     }
 };
 
-void ApplyCodeActionAssertion::checkAll(
-    const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
-    const CodeAction &codeAction) {
+void ApplyCodeActionAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                        LSPWrapper &wrapper, const CodeAction &codeAction) {
     const auto &config = wrapper.config();
     UnorderedMap<string, string> accumulatedOriginalEditedContents{};
 
     // actualEditedFileContents -> (expectedUpdatedFilePath, expectedEditedFileContents)
     // Maps original file contents to a edited filename and contents
-    UnorderedMap<string, std::pair<std::string, std::string>> fileToUpdatedFile;
+    UnorderedMap<string, pair<string, string>> fileToUpdatedFile;
     string actualEditedFileContents;
     for (auto &c : *codeAction.edit.value()->documentChanges) {
         auto file = getFileByUri(config, sourceFileContents, c->textDocument->uri);
@@ -1895,8 +1943,8 @@ void ApplyCodeActionAssertion::checkAll(
     }
 }
 SymbolSearchAssertion::SymbolSearchAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                             string_view query, optional<std::string> name, optional<string> container,
-                                             std::optional<int> rank, optional<string> uri)
+                                             string_view query, optional<string> name, optional<string> container,
+                                             optional<int> rank, optional<string> uri)
     : RangeAssertion(filename, range, assertionLine), query(query), name(move(name)), container(move(container)),
       rank(rank), uri(move(uri)) {}
 
@@ -2042,7 +2090,7 @@ string pluralized_count(string_view word, int count) {
 
 void addFailureAtLocationWithSource(const Location &location,
                                     const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                                    const LSPConfiguration &config, std::string_view message) {
+                                    const LSPConfiguration &config, string_view message) {
     if (!config.isUriInWorkspace(location.uri)) {
         ADD_FAIL_CHECK_AT(location.uri.c_str(), location.range->start->line + 1,
                           fmt::format("{}\n(source unavailable for {})\n", message, location.uri));
@@ -2155,7 +2203,7 @@ void checkSymbolsReturnedInRankOrder(string_view query,
     }
 }
 
-void checkAllForQuery(std::string query, const vector<shared_ptr<SymbolSearchAssertion>> &assertions,
+void checkAllForQuery(string query, const vector<shared_ptr<SymbolSearchAssertion>> &assertions,
                       const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
                       int &nextId, string_view errorPrefix) {
     const int id = nextId++;
@@ -2195,7 +2243,7 @@ void checkAllForQuery(std::string query, const vector<shared_ptr<SymbolSearchAss
 void SymbolSearchAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
                                      const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                                      LSPWrapper &lspWrapper, int &nextId, string errorPrefix) {
-    UnorderedMap<std::string, vector<shared_ptr<SymbolSearchAssertion>>> queryToAssertionsMap;
+    UnorderedMap<string, vector<shared_ptr<SymbolSearchAssertion>>> queryToAssertionsMap;
     for (auto &assertion : assertions) {
         if (auto searchAssertion = dynamic_pointer_cast<SymbolSearchAssertion>(assertion)) {
             queryToAssertionsMap[searchAssertion->query].push_back(searchAssertion);
@@ -2237,10 +2285,9 @@ string FindImplementationAssertion::toString() const {
     return fmt::format("find-implementation: {}", symbol);
 }
 
-void FindImplementationAssertion::check(
-    const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper, int &nextId,
-    std::string_view symbol, const Location &queryLoc,
-    const std::vector<std::shared_ptr<ImplementationAssertion>> &allImpls) {
+void FindImplementationAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                        LSPWrapper &wrapper, int &nextId, string_view symbol, const Location &queryLoc,
+                                        const vector<shared_ptr<ImplementationAssertion>> &allImpls) {
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
     const int character = queryLoc.range->start->character;
@@ -2264,7 +2311,7 @@ void FindImplementationAssertion::check(
     auto &locations = extractLocations(respMsg);
 
     // casting from ImplementationAssertion to RangeAssertion
-    std::vector<std::shared_ptr<RangeAssertion>> allLocs(allImpls.begin(), allImpls.end());
+    vector<shared_ptr<RangeAssertion>> allLocs(allImpls.begin(), allImpls.end());
     assertLocationsMatch(config, sourceFileContents, symbol, allLocs, line, character, locSourceLine, locFilename,
                          locations, "find implementation");
 };
@@ -2332,10 +2379,10 @@ string ShowSymbolAssertion::toString() const {
 }
 
 namespace {
-string_view trimString(std::string_view s) {
+string_view trimString(string_view s) {
     const char *whitespace = " \t";
     size_t begin = s.find_first_not_of(whitespace);
-    if (begin == std::string::npos) {
+    if (begin == string::npos) {
         return "";
     }
     size_t end = s.find_last_not_of(whitespace);
@@ -2343,23 +2390,21 @@ string_view trimString(std::string_view s) {
 }
 } // namespace
 
-std::shared_ptr<StringPropertyAssertions>
-StringPropertyAssertions::make(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
-                               std::string_view assertionContents, std::string_view assertionType) {
-    std::vector<std::string> values = absl::StrSplit(assertionContents, ',');
+shared_ptr<StringPropertyAssertions> StringPropertyAssertions::make(string_view filename, unique_ptr<Range> &range,
+                                                                    int assertionLine, string_view assertionContents,
+                                                                    string_view assertionType) {
+    vector<string> values = absl::StrSplit(assertionContents, ',');
     transform(values.begin(), values.end(), values.begin(), [](auto val) { return trimString(val); });
 
     return make_shared<StringPropertyAssertions>(filename, range, assertionLine, values, assertionType);
 }
 
-StringPropertyAssertions::StringPropertyAssertions(std::string_view filename, std::unique_ptr<Range> &range,
-                                                   int assertionLine, std::vector<std::string> values,
-                                                   std::string_view assertionType)
+StringPropertyAssertions::StringPropertyAssertions(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                   vector<string> values, string_view assertionType)
     : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values){};
 
-std::optional<std::vector<std::string>>
-StringPropertyAssertions::getValues(std::string_view type,
-                                    const std::vector<std::shared_ptr<RangeAssertion>> &assertions) {
+optional<vector<string>> StringPropertyAssertions::getValues(string_view type,
+                                                             const vector<shared_ptr<RangeAssertion>> &assertions) {
     for (auto &assertion : assertions) {
         if (auto codeActionAssertion = dynamic_pointer_cast<StringPropertyAssertions>(assertion)) {
             if (codeActionAssertion->assertionType == type) {
