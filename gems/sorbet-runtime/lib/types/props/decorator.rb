@@ -47,23 +47,21 @@ class T::Props::Decorator
   # checked(:never) - Rules hash is expensive to check
   sig { params(name: Symbol, rules: Rules).void.checked(:never) }
   def add_prop_definition(name, rules)
-    override = rules.delete(:override)
+    override = elaborate_override(name, rules.delete(:override))
 
-    # Properly, we should just build sigs for the getter and setter and let regular signature
-    # validation handle override checking. However, due to backwards compatibility reasons, we
-    # can't - we have to validate prop definitions at class declaration time, but signature
-    # validation acts on an instance object.
-    #
-    # Luckily, the signatures here are super simple, so we can reproduce the static checks
-    # reasonably easily.
+    typ = T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object))
 
-    if override
-      typ = T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object))
+    if override[:get] && !@class.method_defined?(name)
+      raise ArgumentError.new("You marked the getter for prop #{name.inspect} as `override`, but the method `#{name}` doesn't exist to be overridden.")
+    elsif @class.method_defined?(name) && !override[:get]
+      raise ArgumentError.new("Getter for prop #{name.inspect} overrides method `#{name}` but is not marked `override`")
+    end
 
-      validate_prop_getter(name, typ, override[:get][:allow_incompatible]) if override[:get]
-
-      unless rules[:immutable]
-        validate_prop_setter(name, typ, override[:set][:allow_incompatible]) if override[:set]
+    unless rules[:immutable]
+      if override[:set] && !@class.method_defined?("#{name}=")
+        raise ArgumentError.new("You marked the setter for prop #{name.inspect} as `override`, but the method `#{name}=` doesn't exist to be overridden.")
+      elsif @class.method_defined?("#{name}=") && !override[:set]
+        raise ArgumentError.new("Setter for prop #{name.inspect} overrides method `#{name}=` but is not marked `override`")
       end
     end
 
@@ -247,8 +245,6 @@ class T::Props::Decorator
         "(If using this name is unavoidable, try `without_accessors: true`.)"
       )
     end
-
-    rules[:override] = elaborate_override(name, rules[:override])
 
     extra = rules[:extra]
     if !extra.nil? && !extra.is_a?(Hash)
@@ -705,7 +701,7 @@ class T::Props::Decorator
       result[:set] = {allow_incompatible: !!d[:set][:allow_incompatible]}.to_h
     end
 
-    result
+    return result
   end
 
   sig { params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never) }
@@ -725,60 +721,5 @@ class T::Props::Decorator
     decorated_class.plugins << mod
     T::Props::Plugin::Private.apply_class_methods(mod, decorated_class)
     T::Props::Plugin::Private.apply_decorator_methods(mod, self)
-  end
-
-  sig { params(prop: Symbol, prop_typ: T.untyped, allow_incompatible: T::Boolean).void }
-  private def validate_prop_getter(prop, prop_typ, allow_incompatible)
-    if @class.method_defined?(prop)
-      return if allow_incompatible
-      # cwong: This won't work for methods that are inherited via `include`. Instead, we should
-      super_sig = T::Private::Methods.signature_for_method_by_owner_and_name(@class.superclass, prop)
-      return unless super_sig
-      mode_verb = super_sig.mode == T::Private::Methods::Modes.abstract ? 'implement' : 'override'
-      declared_return_type = super_sig.return_type
-      params = super_sig.parameters
-      unless params.empty?
-        raise ArgumentError.new(
-          "Can't #{mode_verb} method `#{prop}` with getter for prop #{prop.inspect} because that method takes #{params.size} parameters."
-        )
-      end
-      unless prop_typ.subtype_of?(declared_return_type)
-        raise ArgumentError.new(
-          "Can't #{mode_verb} method `#{prop}` with getter for prop #{prop.inspect} because that method returns `#{declared_return_type}`, which is not a superclass of `#{prop_typ}`"
-        )
-        end
-    else
-      raise ArgumentError.new("You marked the getter for prop #{prop.inspect} as `override`, but the method #{prop} doesn't exist to be overridden.")
-    end
-  end
-
-  sig { params(prop: Symbol, prop_typ: T.untyped, allow_incompatible: T::Boolean).void }
-  private def validate_prop_setter(prop, prop_typ, allow_incompatible)
-    name = "#{prop}=".to_sym
-    if @class.method_defined?(name)
-      return if allow_incompatible
-      super_sig = T::Private::Methods.signature_for_method_by_owner_and_name(@class.superclass, name)
-      return unless super_sig
-      mode_verb = super_sig.mode == T::Private::Methods::Modes.abstract ? 'implement' : 'override'
-      declared_return_type = super_sig.return_type
-      params = super_sig.parameters
-      unless params.size == 1
-        raise ArgumentError.new(
-          "Can't #{mode_verb} method `#{name}` with setter for prop #{prop.inspect} because that method takes #{params.size} parameters."
-        )
-      end
-      unless params[0].subtype_of?(prop_typ)
-        raise ArgumentError.new(
-          "Can't #{mode_verb} method `#{name}` with setter for prop #{prop.inspect} because that method takes `#{params[0]}`, which is not a subclass of `#{prop_typ}`"
-        )
-      end
-      unless prop_typ.subtype_of?(declared_return_type)
-        raise ArgumentError.new(
-          "Can't #{mode_verb} method `#{name}` with setter for prop #{prop.inspect} because that method returns `#{declared_return_type}`, which is not a superclass of `#{prop_typ}`"
-        )
-        end
-    else
-      raise ArgumentError.new("You marked the setter for prop #{prop.inspect} as `override`, but the method #{prop} doesn't exist to be overridden.")
-    end
   end
 end
