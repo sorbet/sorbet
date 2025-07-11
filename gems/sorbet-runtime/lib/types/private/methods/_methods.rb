@@ -112,6 +112,10 @@ module T::Private::Methods
     signature_for_key(method_to_key(method))
   end
 
+  def self.signature_for_method_by_owner_and_name(owner, name)
+    signature_for_key(method_owner_and_name_to_key(owner, name))
+  end
+
   private_class_method def self.signature_for_key(key)
     maybe_run_sig_block_for_key(key)
 
