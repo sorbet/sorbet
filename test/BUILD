@@ -306,7 +306,7 @@ pipeline_tests(
             "testdata/parser/invalid_fatal.rb",
             "testdata/parser/invalid_syntax_error.rb",
             "testdata/parser/kwargs_missing_comma.rb",
-            "testdata/parser/kwnil_errors.rb", # See https://github.com/Shopify/sorbet/issues/393
+            "testdata/parser/kwnil_errors.rb",  # See https://github.com/Shopify/sorbet/issues/393
             "testdata/parser/misc.rb",
             "testdata/parser/offset0.rb",
             "testdata/parser/ruby_25.rb",
@@ -326,7 +326,7 @@ pipeline_tests(
             "testdata/infer/crash_after_parse_errors.rb",
 
             # Sorbets' parser incorrectly accepts invalid syntax
-            "testdata/desugar/pattern_matching_hash.rb", # See https://github.com/Shopify/sorbet/issues/362
+            "testdata/desugar/pattern_matching_hash.rb",  # See https://github.com/Shopify/sorbet/issues/362
 
             # RBS rewriting is not yet supported for Prism. https://github.com/Shopify/sorbet/issues/574
             "testdata/rbs/**/*.rb",

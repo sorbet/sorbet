@@ -51,7 +51,7 @@ exp_test = rule(
         "_llvm_symbolizer": attr.label(
             default = "//test:llvm-symbolizer",
         ),
-        "parser": attr.string(default="original"),
+        "parser": attr.string(default = "original"),
     },
 )
 
