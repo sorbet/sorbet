@@ -1756,10 +1756,7 @@ class ComputePackageSCCs {
     void strongConnect(core::packages::MangledName pkgName, NodeInfo &infoAtEntry) {
         auto &packageDB = gs.packageDB();
         auto *pkgInfoPtr = packageDB.getPackageInfoNonConst(pkgName);
-        if (!pkgInfoPtr) {
-            // This is to handle the case where the user imports a package that doesn't exist.
-            return;
-        }
+        ENFORCE(pkgInfoPtr);
         auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
 
         infoAtEntry.index = this->nextIndex;
@@ -1769,51 +1766,42 @@ class ComputePackageSCCs {
         infoAtEntry.onStack = true;
 
         for (auto &i : pkgInfo.importedPackageNames) {
+            if (!packageDB.getPackageInfo(i.name.mangledName).exists()) {
+                // This is to handle the case where the user imports a package that doesn't exist.
+                continue;
+            }
             // We want to consider all imports from test code, but only normal imports for application code.
             if constexpr (EdgeType == core::packages::ImportType::Normal) {
                 if (i.type != core::packages::ImportType::Normal) {
                     continue;
                 }
             }
-            // We need to be careful with this; it's not valid after a call to `strongConnect`,
-            // because our reference might disappear from underneath us during that call.
             auto &importInfo = this->nodeMap[i.name.mangledName];
             if (importInfo.index == NodeInfo::UNVISITED) {
                 // This is a tree edge (ie. a forward edge that we haven't visited yet).
                 this->strongConnect<EdgeType>(i.name.mangledName, importInfo);
 
-                // Need to re-lookup for the reason above.
-                auto &importInfo = this->nodeMap[i.name.mangledName];
                 if (importInfo.index == NodeInfo::UNVISITED) {
                     // This is to handle early return above.
                     continue;
                 }
                 // Since we can follow any number of tree edges for lowLink, the lowLink of child is valid for this
                 // package too.
-                //
-                // Note that we cannot use `infoAtEntry` here because it might have been invalidated.
-                auto &pkgLink = this->nodeMap[pkgName].lowLink;
-                pkgLink = std::min(pkgLink, importInfo.lowLink);
+                infoAtEntry.lowLink = std::min(infoAtEntry.lowLink, importInfo.lowLink);
             } else if (importInfo.onStack) {
                 // This is a back edge (edge to ancestor) or cross edge (edge to a different subtree). Since we can only
                 // follow at most one back/cross edge, the best update we can make to lowlink of the current package is
                 // the child's index.
-                //
-                // Note that we cannot use `infoAtEntry` here because it might have been invalidated.
-                auto &pkgLink = this->nodeMap[pkgName].lowLink;
-                pkgLink = std::min(pkgLink, importInfo.index);
+                infoAtEntry.lowLink = std::min(infoAtEntry.lowLink, importInfo.index);
             }
             // If the child package is already visited and not on the stack, it's in a different SCC, so no update to
             // the lowlink.
         }
 
-        // We cannot re-use `infoAtEntry` here because `nodeMap` might have been re-allocated and
-        // invalidate our reference.
-        auto &ourInfo = this->nodeMap[pkgName];
-        if (ourInfo.index == ourInfo.lowLink) {
+        if (infoAtEntry.index == infoAtEntry.lowLink) {
             // This is the root of an SCC. This means that all packages on the stack from this package to the top of the
-            // top of the stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them
-            // the same SCC ID.
+            // stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them the same SCC
+            // ID.
             core::packages::MangledName poppedPkgName;
             auto &condensationNode = this->condensation.pushNode(EdgeType);
             auto sccId = condensationNode.id;
