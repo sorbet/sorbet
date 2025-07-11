@@ -7,6 +7,7 @@
 #include "common/kvstore/KeyValueStore.h"
 #include "core/FileHash.h"
 #include "main/options/options.h"
+#include "parser/parser.h"
 
 namespace sorbet::core::lsp {
 class PreemptionTaskManager;
