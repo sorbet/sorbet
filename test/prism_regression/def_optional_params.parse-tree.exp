@@ -1,0 +1,38 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = Args {
+        args = [
+          Optarg {
+            name = <U a>
+            default_ = Integer {
+              val = "1"
+            }
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U bar>
+      args = Args {
+        args = [
+          Optarg {
+            name = <U a>
+            default_ = Integer {
+              val = "1"
+            }
+          }
+          Optarg {
+            name = <U b>
+            default_ = Integer {
+              val = "2"
+            }
+          }
+        ]
+      }
+      body = NULL
+    }
+  ]
+}
