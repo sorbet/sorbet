@@ -10,7 +10,6 @@
 namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
 
-// TODO: Remove this before upstreaming
 // This is needed to skip error assertions when running under Prism
 extern realmain::options::Parser parser;
 

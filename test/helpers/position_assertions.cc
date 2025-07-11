@@ -19,6 +19,8 @@ using namespace std;
 
 namespace sorbet::test {
 
+realmain::options::Parser parser = realmain::options::Parser::ORIGINAL;
+
 namespace {
 /**
  * prettyPrintComment("foo.bar", {start: {character: 4}, end: {character: 7}}, "error: bar not defined") ->

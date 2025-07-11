@@ -62,7 +62,6 @@ using namespace std;
 namespace sorbet::test {
 
 string singleTest;
-realmain::options::Parser parser;
 
 constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
 constexpr string_view packageFileName = "__package.rb"sv;
