@@ -638,7 +638,7 @@ class T::Props::Decorator
 
     props.each do |name, rules|
       copied_rules = rules.dup
-      # NB: Calling `child.decorator` here is a timb bomb that's going to give someone a really bad
+      # NB: Calling `child.decorator` here is a time bomb that's going to give someone a really bad
       # time. Any class that defines props and also overrides the `decorator_class` method is going
       # to reach this line before its override take effect, turning it into a no-op.
       child.decorator.add_prop_definition(name, copied_rules)
