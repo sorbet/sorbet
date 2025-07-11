@@ -3,8 +3,10 @@
 #include "absl/strings/match.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/Parallel.h"
+#include "common/sort/sort.h"
 #include "core/Context.h"
 #include "core/errors/packager.h"
+#include "packager/ComputePackageSCCs.h"
 
 using namespace std;
 
@@ -486,6 +488,10 @@ public:
                                       this->fileType != FileType::TestUnitFile;
         bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
         packageReferences[otherPackage] = nullopt;
+        // if (absl::StrContains(ctx.file.data(ctx).path(), "All_state_machines")) {
+        //     fmt::print("in: {} {}, tracking: {}\n", this->package.show(ctx), ctx.file.data(ctx).path(),
+        //                ctx.state.packageDB().getPackageInfo(otherPackage).show(ctx));
+        // }
 
         if (importNeeded || !isExported) {
             auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
@@ -725,6 +731,12 @@ public:
                 }
                 auto nonConstPackageInfo = nonConstGs.packageDB().getPackageInfoNonConst(pkgName);
                 nonConstPackageInfo->untrackPackageReferencesFor(file);
+                nonConstPackageInfo->hasFiles = true;
+                if (absl::StrContains(file.data(gs).path(),
+                                      "Ops_payouts_state_machine_state_machine_with_metaprogramming")) {
+                    fmt::print("file: {}, pkg: {}, {}\n", file.data(gs).path(), nonConstPackageInfo->show(gs),
+                               threadResult.second.size());
+                }
                 for (auto [p, autocorrect] : threadResult.second) {
                     nonConstPackageInfo->trackPackageReference(file, p);
                     if (autocorrect.has_value()) {
@@ -742,6 +754,39 @@ public:
 };
 } // namespace
 
+class TemporaryProvider : public Provider {
+    core::packages::PackageDB &packageDB;
+    const core::GlobalState &gs;
+
+public:
+    struct SCCInfo {
+        int sccId;
+        int testSccId;
+    };
+    UnorderedMap<core::packages::MangledName, SCCInfo> nodeMap;
+
+    TemporaryProvider(const core::GlobalState &gs, core::packages::PackageDB &packageDB)
+        : packageDB(packageDB), gs(gs) {}
+
+    vector<pair<core::packages::MangledName, core::packages::ImportType>>
+    getImports(core::packages::MangledName packageName) {
+        auto &pkgInfo = packageDB.getPackageInfo(packageName);
+        ENFORCE(pkgInfo.exists());
+        return pkgInfo.packageReferencesToImportList(gs);
+    }
+
+    void setSCCId(core::packages::MangledName packageName, int sccId) {
+        nodeMap[packageName].sccId = sccId;
+    }
+
+    int getSCCId(core::packages::MangledName packageName) {
+        return nodeMap[packageName].sccId;
+    }
+
+    void setTestSCCId(core::packages::MangledName packageName, int sccId) {
+        nodeMap[packageName].testSccId = sccId;
+    }
+};
 vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
                                                vector<ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "visibility_checker.run");
@@ -755,14 +800,71 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
 
     auto result = VisibilityCheckerPass::run(gs, workers, std::move(files));
     if (gs.packageDB().genPackages()) {
-        for (auto package : gs.packageDB().packages()) {
-            auto &pkgInfo = gs.packageDB().getPackageInfo(package);
-            ENFORCE(pkgInfo.exists());
-            auto autocorrect = pkgInfo.aggregateMissingImports();
-            if (autocorrect.edits.size() > 0) {
-                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
-                    e.setHeader("{}'s imports are incorrect", pkgInfo.show(gs));
-                    e.addAutocorrect(move(autocorrect));
+        if (gs.packageDB().genPackagesStrict()) {
+            // TODO: delete all unused imports (not needed?)
+            // recompute the SCCs
+            TemporaryProvider temporaryProvider{gs, gs.packageDB()};
+            auto condensation = ComputePackageSCCs::run(gs, temporaryProvider);
+            for (auto package : gs.packageDB().packages()) {
+                auto &pkgInfo = gs.packageDB().getPackageInfo(package);
+                auto &scc = condensation.nodes()[temporaryProvider.getSCCId(package)];
+                ENFORCE(!scc.isTest);
+                // raise strictness
+                auto currentStrictDependenciesLevel = pkgInfo.strictDependenciesLevel();
+                // if (absl::StrContains(pkgInfo.show(gs), "AllStateMachines")) {
+                //     fmt::print("best strictness: {} for {}\n", strictDependenciesLevelToString(scc.bestStrictness),
+                //                pkgInfo.show(gs));
+                // }
+                if (currentStrictDependenciesLevel.has_value()) {
+                    auto file = pkgInfo.fullLoc().file();
+                    auto loc = core::Loc{file, currentStrictDependenciesLevel.value().second};
+                    if (scc.bestStrictness < currentStrictDependenciesLevel.value().first) {
+                        fmt::print("lower best strictness for {}: from {} to {}\n", pkgInfo.show(gs),
+                                   strictDependenciesLevelToString(currentStrictDependenciesLevel.value().first),
+                                   strictDependenciesLevelToString(scc.bestStrictness));
+                    }
+                    if (scc.bestStrictness > currentStrictDependenciesLevel.value().first && pkgInfo.hasFiles &&
+                        !absl::StrContains(file.data(gs).path(), "build/bazel")) {
+                        // TODO: this is wrong
+                        // suppose B -> A and we don't raise A because it has no files, or A is in build/bazel
+                        // then we can't raise B either
+                        // We don't want to lower strict_dependencies, only increase it.
+                        // TODO: maybe we do want to lower it?
+                        if (auto e = gs.beginError(loc, core::errors::Packager::RaiseStrictDependenciesLevel)) {
+                            e.setHeader("This package's {} can be raised", "strict_dependencies");
+                            e.replaceWith("Raise strict_dependencies", loc,
+                                          fmt::format("'{}'", strictDependenciesLevelToString(scc.bestStrictness)));
+                        }
+                    }
+                }
+                // sort imports
+                // auto imports = pkgInfo.packageReferencesToImportList(gs);
+                // fast_sort(
+                //     imports, [&](auto &a, auto &b) -> auto{
+                //         auto &aPkgInfo = gs.packageDB().getPackageInfo(a.first);
+                //         auto &bPkgInfo = gs.packageDB().getPackageInfo(b.first);
+                //         if (!aPkgInfo.exists()) {
+                //             return -1;
+                //         }
+                //         if (!bPkgInfo.exists()) {
+                //             return 1;
+                //         }
+                //         return pkgInfo.orderImports(gs, aPkgInfo, a.second != core::packages::ImportType::Normal,
+                //                                     bPkgInfo, b.second != core::packages::ImportType::Normal);
+                //     });
+                // TODO: serialize import list
+            }
+        } else {
+            // TODO: delete unused imports that cause an error
+            for (auto package : gs.packageDB().packages()) {
+                auto &pkgInfo = gs.packageDB().getPackageInfo(package);
+                ENFORCE(pkgInfo.exists());
+                auto autocorrect = pkgInfo.aggregateMissingImports();
+                if (autocorrect.edits.size() > 0) {
+                    if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
+                        e.setHeader("{}'s imports are incorrect", pkgInfo.show(gs));
+                        e.addAutocorrect(move(autocorrect));
+                    }
                 }
             }
         }

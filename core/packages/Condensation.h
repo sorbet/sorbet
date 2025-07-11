@@ -29,6 +29,10 @@ public:
         // Whether or not this is a node of application or test code.
         const bool isTest = false;
 
+        std::optional<core::NameRef> layer;
+
+        StrictDependenciesLevel bestStrictness = StrictDependenciesLevel::Dag;
+
         Node(int id, bool isTest) : id{id}, isTest{isTest} {}
     };
 

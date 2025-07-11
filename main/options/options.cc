@@ -1255,6 +1255,8 @@ void readOptions(Options &opts,
             logger->error("--gen-packages can only be used when --stripe-packages is also enabled");
             throw EarlyReturnWithCode(1);
         }
+        // TODO
+        opts.stopAfterPhase = options::Phase::CFG;
         opts.genPackagesStrict = raw["gen-packages-strict"].as<bool>();
         if (opts.genPackagesStrict && !opts.cacheSensitiveOptions.stripePackages) {
             logger->error("--gen-packages-strict can only be used when --stripe-packages is also enabled");

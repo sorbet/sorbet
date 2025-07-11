@@ -795,9 +795,9 @@ public:
         }
     }
 
-    UnorderedSet<std::pair<core::packages::MangledName, core::packages::ImportType>>
+    vector<std::pair<core::packages::MangledName, core::packages::ImportType>>
     packageReferencesToImportList(const core::GlobalState &gs) const {
-        UnorderedSet<std::pair<core::packages::MangledName, core::packages::ImportType>> result;
+        vector<std::pair<core::packages::MangledName, core::packages::ImportType>> result;
         for (auto [pkgName, v] : referencedPackages) {
             auto files = v.first;
             auto broadestImport = core::packages::ImportType::TestUnit;
@@ -807,7 +807,7 @@ public:
                     broadestImport = importType;
                 }
             }
-            result.insert({pkgName, broadestImport});
+            result.push_back({pkgName, broadestImport});
         }
         return result;
     }

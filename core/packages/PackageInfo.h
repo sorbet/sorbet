@@ -66,6 +66,7 @@ struct VisibleTo {
 
 class PackageInfo {
 public:
+    bool hasFiles = false;
     virtual MangledName mangledName() const = 0;
     virtual absl::Span<const core::NameRef> fullName() const = 0;
     virtual absl::Span<const std::string> pathPrefixes() const = 0;
@@ -123,8 +124,11 @@ public:
 
     virtual core::AutocorrectSuggestion aggregateMissingImports() const = 0;
 
-    virtual UnorderedSet<std::pair<core::packages::MangledName, core::packages::ImportType>>
+    virtual std::vector<std::pair<core::packages::MangledName, core::packages::ImportType>>
     packageReferencesToImportList(const core::GlobalState &gs) const = 0;
+
+    virtual int orderImports(const core::GlobalState &gs, const PackageInfo &a, bool aIsTestImport,
+                             const PackageInfo &b, bool bIsTestImport) const = 0;
 
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
