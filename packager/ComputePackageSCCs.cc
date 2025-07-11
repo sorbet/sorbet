@@ -76,6 +76,12 @@ void ComputePackageSCCs::strongConnect(core::packages::MangledName pkgName, Node
         core::packages::MangledName poppedPkgName;
         auto &condensationNode = this->condensation.pushNode(EdgeType);
         auto sccId = condensationNode.id;
+        // This SCC layer, if all packages in the SCC have the same one.
+        optional<core::NameRef> condensationNodeLayer = nullopt;
+        auto firstPkgLayer = packageDB.getPackageInfo(this->stack.back()).layer();
+        if (firstPkgLayer.has_value()) {
+            condensationNodeLayer = firstPkgLayer.value().first;
+        }
 
         // Set the SCC ids for all of the members of the SCC
         do {
@@ -86,6 +92,14 @@ void ComputePackageSCCs::strongConnect(core::packages::MangledName pkgName, Node
 
             if constexpr (EdgeType == core::packages::ImportType::Normal) {
                 provider.setSCCId(poppedPkgName, sccId);
+                if (condensationNodeLayer.has_value()) {
+                    auto thisPkgLayer = packageDB.getPackageInfo(poppedPkgName).layer();
+                    if (thisPkgLayer.has_value()) {
+                        if (thisPkgLayer.value().first != condensationNodeLayer.value()) {
+                            condensationNodeLayer = nullopt;
+                        }
+                    }
+                }
             } else if constexpr (EdgeType != core::packages::ImportType::Normal) {
                 provider.setTestSCCId(poppedPkgName, sccId);
 
@@ -95,6 +109,12 @@ void ComputePackageSCCs::strongConnect(core::packages::MangledName pkgName, Node
                 condensationNode.imports.insert(appSccId);
             }
         } while (poppedPkgName != pkgName);
+
+        if (!condensationNodeLayer.has_value()) {
+            condensationNode.bestStrictness = core::packages::StrictDependenciesLevel::False;
+        } else if (condensationNode.members.size() > 1) {
+            condensationNode.bestStrictness = core::packages::StrictDependenciesLevel::Layered;
+        }
 
         // Iterate the imports of each member, building the edges of the condensation. This step is performed after
         // we've visited all members of the SCC once, to ensure that their ids have all been populated.
@@ -121,6 +141,14 @@ void ComputePackageSCCs::strongConnect(core::packages::MangledName pkgName, Node
                 }
 
                 condensationNode.imports.insert(impId);
+                auto &impScc = this->condensation.nodes()[impId];
+                // TODO: check for layering violations
+                if (impScc.bestStrictness == core::packages::StrictDependenciesLevel::False) {
+                    condensationNode.bestStrictness = core::packages::StrictDependenciesLevel::False;
+                } else if (condensationNode.bestStrictness == core::packages::StrictDependenciesLevel::Dag &&
+                           impScc.bestStrictness != core::packages::StrictDependenciesLevel::Dag) {
+                    condensationNode.bestStrictness = core::packages::StrictDependenciesLevel::LayeredDag;
+                }
             }
         }
     }

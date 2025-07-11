@@ -50,7 +50,7 @@ void ErrorFlusherStdout::flushErrors(spdlog::logger &logger, const GlobalState &
 
 void ErrorFlusherStdout::flushErrorCount(spdlog::logger &logger, int count) {
     if (count == 0) {
-        logger.log(spdlog::level::err, "No errors! Great job.", count);
+        logger.log(spdlog::level::err, "No errors! Great job. test", count);
     } else {
         logger.log(spdlog::level::err, "Errors: {}", count);
     }

@@ -42,6 +42,11 @@ public:
         return Loc::none();
     }
 
+    int orderImports(const core::GlobalState &gs, const PackageInfo &a, bool aIsTestImport, const PackageInfo &b,
+                     bool bIsTestImport) const {
+        notImplemented();
+        return 0;
+    }
     optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                     ImportType importType) const {
         notImplemented();
@@ -123,7 +128,8 @@ public:
         notImplemented();
         return core::AutocorrectSuggestion{"notImplemented", {}};
     }
-    UnorderedSet<std::pair<core::packages::MangledName, core::packages::ImportType>>
+
+    vector<std::pair<core::packages::MangledName, core::packages::ImportType>>
     packageReferencesToImportList(const core::GlobalState &gs) const {
         notImplemented();
         return {};
