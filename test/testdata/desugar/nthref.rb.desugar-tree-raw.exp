@@ -7,14 +7,32 @@ ClassDef{
       orig = nullptr
     }]
   rhs = [
-    UnresolvedIdent{
-      kind = Global
-      name = <U 1>
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <regex-backref>>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = 1 }
+      ]
     }
 
-    UnresolvedIdent{
-      kind = Global
-      name = <U 314159>
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <regex-backref>>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = 314159 }
+      ]
     }
   ]
 }
