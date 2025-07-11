@@ -45,17 +45,34 @@ class T::Props::Decorator
   end
 
   # checked(:never) - Rules hash is expensive to check
-  sig { params(prop: Symbol, rules: Rules).void.checked(:never) }
-  def add_prop_definition(prop, rules)
+  sig { params(name: Symbol, rules: Rules).void.checked(:never) }
+  def add_prop_definition(name, rules)
     override = rules.delete(:override)
 
-    if props.include?(prop) && !override
-      raise ArgumentError.new("Attempted to redefine prop #{prop.inspect} on class #{@class} that's already defined without specifying :override => true: #{prop_rules(prop)}")
-    elsif !props.include?(prop) && override
-      raise ArgumentError.new("Attempted to override a prop #{prop.inspect} on class #{@class} that doesn't already exist")
+    # Properly, we should just build sigs for the getter and setter and let regular signature
+    # validation handle override checking. However, due to backwards compatibility reasons, we
+    # can't - we have to validate prop definitions at class declaration time, but signature
+    # validation acts on an instance object.
+    #
+    # Luckily, the signatures here are super simple, so we can reproduce the static checks
+    # reasonably easily.
+
+    if override
+      typ = T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object))
+
+      if override[:get]
+        if @class.method_defined?(name)
+          super_sig = T::Private::Methods.signature_for_method_by_owner_and_name(@class.superclass, name)
+          unless super_sig.parameters.empty?
+            raise ArgumentError.new("You marked the getter for prop `#{name.inspect}` as `override`, but that method can't be overriden because it takes #{super_sig.parameters.size} parameter(s).")
+          end
+        else
+          raise ArgumentError.new("You marked the getter for prop `#{name.inspect}` as `override`, but that method doesn't already exist in this Struct to be overridden.")
+        end
+      end
     end
 
-    @props = @props.merge(prop => rules.freeze).freeze
+    @props = @props.merge(name => rules.freeze).freeze
   end
 
   # Heads up!
@@ -405,6 +422,7 @@ class T::Props::Decorator
           # Fast path (~4x faster as of Ruby 2.6)
           @class.send(:define_method, "#{name}=", &rules.fetch(:setter_proc))
         end
+
       end
 
       if method(:prop_get).owner != T::Props::Decorator || rules.key?(:ifunset)
