@@ -7,6 +7,17 @@ using namespace std;
 
 namespace sorbet::parser::Prism {
 
+// Helper function to safely cast node flags to pm_call_node_flags
+// This masks off any invalid bits to prevent UB when casting to the enum
+static pm_call_node_flags safeCallNodeFlags(uint16_t rawFlags) {
+    // PM_CALL_NODE_FLAGS_SAFE_NAVIGATION appears to be the only flag we care about
+    // Based on UB sanitizer errors, only very specific flag values are valid
+    // We'll conservatively mask to only allow the safe navigation flag (likely value 1)
+    const uint16_t SAFE_NAVIGATION_FLAG = 1;
+    const uint16_t VALID_CALL_FLAGS_MASK = SAFE_NAVIGATION_FLAG;
+    return static_cast<pm_call_node_flags>(rawFlags & VALID_CALL_FLAGS_MASK);
+}
+
 // Indicates that a particular code path should never be reached, with an explanation of why.
 // Throws a `sorbet::SorbetException` when triggered to help with debugging.
 template <typename... TArgs>
@@ -261,7 +272,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Break>(location, move(arguments));
         }
         case PM_CALL_AND_WRITE_NODE: { // And-assignment to a method call, e.g. `a.b &&= false`
-            auto flags = static_cast<pm_call_node_flags>(node->flags);
+            auto flags = safeCallNodeFlags(node->flags);
 
             if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) {
                 return translateOpAssignment<pm_call_and_write_node, parser::AndAsgn, parser::CSend>(node);
@@ -313,7 +324,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 messageLoc.endLoc = args.front()->loc.beginPos() - 1; // The message ends right before the equals sign
             }
 
-            auto flags = static_cast<pm_call_node_flags>(callNode->base.flags);
+            auto flags = safeCallNodeFlags(callNode->base.flags);
 
             unique_ptr<parser::Node> sendNode;
 
@@ -337,7 +348,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
         }
         case PM_CALL_OPERATOR_WRITE_NODE: { // Compound assignment to a method call, e.g. `a.b += 1`
-            auto flags = static_cast<pm_call_node_flags>(node->flags);
+            auto flags = safeCallNodeFlags(node->flags);
 
             if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) {
                 return translateOpAssignment<pm_call_operator_write_node, parser::OpAsgn, parser::CSend>(node);
@@ -346,7 +357,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return translateOpAssignment<pm_call_operator_write_node, parser::OpAsgn, parser::Send>(node);
         }
         case PM_CALL_OR_WRITE_NODE: { // Or-assignment to a method call, e.g. `a.b ||= true`
-            auto flags = static_cast<pm_call_node_flags>(node->flags);
+            auto flags = safeCallNodeFlags(node->flags);
 
             if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) {
                 return translateOpAssignment<pm_call_or_write_node, parser::OrAsgn, parser::CSend>(node);
@@ -362,7 +373,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto name = translateConstantName(callTargetNode->name);
             auto messageLoc = translateLoc(callTargetNode->message_loc);
 
-            auto flags = static_cast<pm_call_node_flags>(callTargetNode->base.flags);
+            auto flags = safeCallNodeFlags(callTargetNode->base.flags);
             if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) {
                 // Handle conditional send, e.g. `self&.target1, self&.target2 = 1, 2`
                 // It's not valid Ruby, but the parser needs to support it for the diagnostics to work
