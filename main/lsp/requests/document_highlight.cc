@@ -94,16 +94,14 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
             }
         } else if (fileIsTyped && resp->isSend()) {
             auto sendResp = resp->isSend();
-            auto start = sendResp->dispatchResult.get();
             vector<unique_ptr<core::lsp::QueryResponse>> references;
-            while (start != nullptr) {
+            for (auto start : sendResp->dispatchResult) {
                 if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
                     // This could be a `prop` or `attr_*`, which have multiple associated symbols.
                     references = getReferencesToAccessorInFile(typechecker, fref,
                                                                getAccessorInfo(typechecker.state(), start->main.method),
                                                                start->main.method, move(references));
                 }
-                start = start->secondary.get();
             }
             response->result = getHighlights(typechecker, references);
         }
