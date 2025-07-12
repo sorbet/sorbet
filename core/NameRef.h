@@ -167,6 +167,7 @@ public:
     NameRef addEq(GlobalState &gs) const;
     NameRef lookupWithEq(const GlobalState &gs) const;
     bool isSetter(const GlobalState &gs) const;
+    static bool isSetterLabel(std::string_view rawName);
 
     NameRef addQuestion(GlobalState &gs) const;
 
