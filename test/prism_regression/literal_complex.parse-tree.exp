@@ -1,0 +1,55 @@
+Begin {
+  stmts = [
+    Complex {
+      value = "1"
+    }
+    Send {
+      receiver = Complex {
+        value = "1"
+      }
+      method = <U +@>
+      args = [
+      ]
+    }
+    Send {
+      receiver = Complex {
+        value = "1.0"
+      }
+      method = <U +@>
+      args = [
+      ]
+    }
+    Send {
+      receiver = Complex {
+        value = "1"
+      }
+      method = <U -@>
+      args = [
+      ]
+    }
+    Send {
+      receiver = Complex {
+        value = "1.0"
+      }
+      method = <U -@>
+      args = [
+      ]
+    }
+    Send {
+      receiver = Complex {
+        value = "1"
+      }
+      method = <U ~>
+      args = [
+      ]
+    }
+    Send {
+      receiver = Complex {
+        value = "1.0"
+      }
+      method = <U ~>
+      args = [
+      ]
+    }
+  ]
+}
