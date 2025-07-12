@@ -392,7 +392,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
         end
       end
 
-      assert(error.message.include?("Attempted to redefine prop :a on class Opus::Types::Test::Props::PropsTest::OverrideProps1 that's already defined without specifying :override => true"))
+      assert(error.message.include?("Getter for prop :a overrides method `a` but is not marked `override`"))
     end
 
     it 'allows overriding with override => true' do
@@ -408,7 +408,47 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
         end
       end
 
-      assert(error.message.include?("Attempted to override a prop :b on class Opus::Types::Test::Props::PropsTest::OverrideProps3 that doesn't already exist"))
+      assert(error.message.include?("You marked the getter for prop :b as `override`, but the method `b` doesn't exist to be overridden."))
+    end
+
+    module ManualGetter
+      extend T::Sig
+
+      sig {overridable.returns(Integer)}
+      def a; 0; end
+    end
+
+    module ManualSetter
+      extend T::Sig
+      extend T::Helpers
+
+      sig {overridable.params(a: Integer).returns(Integer)}
+      def a=(a); 0; end
+    end
+
+    it 'allows overriding normal methods' do
+      class OverrideProps4 < T::Struct
+        include ManualGetter
+        include ManualSetter
+
+        prop :a, Integer, override: true
+      end
+    end
+
+    it 'allows overriding only one half' do
+      class OverrideProps5 < T::Struct
+        include ManualGetter
+
+        prop :a, Integer, override: :get
+      end
+    end
+
+    it 'permits {allow_incompatible: true}' do
+      class OverrideProps6 < T::Struct
+        include ManualSetter
+
+        prop :a, Integer, override: {set: {allow_incompatible: true}}
+      end
     end
   end
 end

@@ -47,24 +47,6 @@ class T::Props::Decorator
   # checked(:never) - Rules hash is expensive to check
   sig { params(name: Symbol, rules: Rules).void.checked(:never) }
   def add_prop_definition(name, rules)
-    override = elaborate_override(name, rules.delete(:override))
-
-    typ = T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object))
-
-    if override[:get] && !@class.method_defined?(name)
-      raise ArgumentError.new("You marked the getter for prop #{name.inspect} as `override`, but the method `#{name}` doesn't exist to be overridden.")
-    elsif @class.method_defined?(name) && !override[:get]
-      raise ArgumentError.new("Getter for prop #{name.inspect} overrides method `#{name}` but is not marked `override`")
-    end
-
-    unless rules[:immutable]
-      if override[:set] && !@class.method_defined?("#{name}=")
-        raise ArgumentError.new("You marked the setter for prop #{name.inspect} as `override`, but the method `#{name}=` doesn't exist to be overridden.")
-      elsif @class.method_defined?("#{name}=") && !override[:set]
-        raise ArgumentError.new("Setter for prop #{name.inspect} overrides method `#{name}=` but is not marked `override`")
-      end
-    end
-
     @props = @props.merge(name => rules.freeze).freeze
   end
 
@@ -312,6 +294,31 @@ class T::Props::Decorator
     T::Utils::Nilable.is_union_with_nilclass(cls) || ((cls == T.untyped || cls == NilClass) && rules.key?(:default) && rules[:default].nil?)
   end
 
+  sig { params(name: Symbol).returns(T::Boolean) }
+  private def is_override?(name)
+    @class.method_defined?(name) && !@class.method_defined?(name, false)
+  end
+
+  sig { params(name: Symbol, rules: Rules).void }
+  def validate_overrides(name, rules)
+    override = elaborate_override(name, rules.delete(:override))
+    typ = T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object))
+
+    if override[:get] && !is_override?(name)
+      raise ArgumentError.new("You marked the getter for prop #{name.inspect} as `override`, but the method `#{name}` doesn't exist to be overridden.")
+    elsif is_override?(name) && !override[:get] && !rules[:clobber_existing_method!]
+      raise ArgumentError.new("Getter for prop #{name.inspect} overrides method `#{name}` but is not marked `override`")
+    end
+
+    unless rules[:immutable]
+      if override[:set] && !is_override?("#{name}=".to_sym)
+        raise ArgumentError.new("You marked the setter for prop #{name.inspect} as `override`, but the method `#{name}=` doesn't exist to be overridden.")
+      elsif is_override?("#{name}=".to_sym) && !override[:set] && !rules[:clobber_existing_method!]
+        raise ArgumentError.new("Setter for prop #{name.inspect} overrides method `#{name}=` but is not marked `override`")
+      end
+    end
+  end
+
   # checked(:never) - Rules hash is expensive to check
   sig do
     params(
@@ -391,6 +398,7 @@ class T::Props::Decorator
     rules[:setter_proc] = setter_proc
     rules[:value_validate_proc] = value_validate_proc
 
+    validate_overrides(name, rules) unless rules[:without_accessors]
     add_prop_definition(name, rules)
 
     # NB: using `without_accessors` doesn't make much sense unless you also define some other way to
