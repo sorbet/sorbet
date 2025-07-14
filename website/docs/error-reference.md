@@ -930,6 +930,27 @@ class B < PackageSpec
 end
 ```
 
+## 3730
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) and [go/strict-dependencies](http://go/strict-dependencies) for more.
+
+It is an error to explicitly import a package marked as `prelude_package`.
+
+```ruby
+class A < PackageSpec
+ import B       # error: Prelude package `B` may not be explicitly imported
+ test_import C  # error: Prelude package `C` may not be explicitly imported
+end
+
+class B < PackageSpec
+  prelude_package
+end
+
+class C < PackageSpec
+  prelude_package
+end
+```
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in `# typed: false` files. Recall from the [strictness levels](static.md#file-level-granularity-strictness-levels) docs that all constants in a Sorbet codebase must resolve, even at `# typed: false`. Parsing `include` blocks is required for this, so incorrect usages of `include` are reported when encountered.
