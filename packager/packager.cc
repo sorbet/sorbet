@@ -2057,7 +2057,7 @@ void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg,
     }
 }
 
-void validatePackage(core::Context ctx) {
+void validatePackage(core::Context ctx, absl::Span<const core::packages::MangledName> preludePackages) {
     const auto &packageDB = ctx.state.packageDB();
     auto absPkg = packageDB.getPackageNameForFile(ctx.file);
     if (!absPkg.exists()) {
@@ -2115,7 +2115,7 @@ void validatePackage(core::Context ctx) {
         }
     } else {
         // We only check implicit prelude imports for non-prelude packages.
-        for (auto name : packageDB.preludePackages()) {
+        for (auto name : preludePackages) {
             if (enforceLayering) {
                 validateLayering(ctx, pkgInfo.declLoc().offsets(), name);
             }
@@ -2206,7 +2206,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 
 } // namespace
 
-vector<core::packages::MangledName> Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
+void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
     // Ensure files are in canonical order.
     // TODO(jez) Is this sort redundant? Should we move this sort to callers?
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
@@ -2248,7 +2248,6 @@ vector<core::packages::MangledName> Packager::findPackages(core::GlobalState &gs
 
     setPackageNameOnFiles(gs, files);
 
-    vector<core::packages::MangledName> preludePackages;
     {
         core::UnfreezeNameTable unfreeze(gs);
         auto packages = gs.unfreezePackages();
@@ -2264,15 +2263,8 @@ vector<core::packages::MangledName> Packager::findPackages(core::GlobalState &gs
             }
             auto &info = PackageInfoImpl::from(gs, pkgName);
             rewritePackageSpec(gs, file, info);
-
-            if (info.isPreludePackage()) {
-                preludePackages.emplace_back(pkgName);
-            }
         }
     }
-
-    preludePackages.shrink_to_fit();
-    return preludePackages;
 }
 
 namespace {
@@ -2348,10 +2340,7 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
     constexpr bool validatePackagedFiles = Mode == PackagerMode::PackagedFilesOnly || Mode == PackagerMode::AllFiles;
 
     if constexpr (buildPackageDB) {
-        auto preludePackages = Packager::findPackages(gs, files);
-
-        // We cache this set here so that it's available in validatePackage.
-        gs.packageDB().setPreludePackages(move(preludePackages));
+        Packager::findPackages(gs, files);
     }
 
     {
@@ -2365,14 +2354,15 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
 
         {
             Timer timeit(gs.tracer(), "packager.validatePackagesAndFiles");
+            auto preludePackages = gs.packageDB().preludePackages();
             Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files),
-                              [&gs = as_const(gs)](auto &job) {
+                              [&gs = as_const(gs), &preludePackages](auto &job) {
                                   auto file = job.file;
                                   core::Context ctx(gs, core::Symbols::root(), file);
 
                                   if (file.data(gs).isPackage(gs)) {
                                       ENFORCE(buildPackageDB);
-                                      validatePackage(ctx);
+                                      validatePackage(ctx, preludePackages);
                                   } else {
                                       ENFORCE(validatePackagedFiles);
                                       validatePackagedFile(ctx, job.tree);
@@ -2394,20 +2384,23 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
     // building in an understanding of the dependencies between packages.
     Timer timeit(gs.tracer(), "packager.runIncremental");
 
-    Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files), [&gs = as_const(gs)](auto &file) {
-        core::Context ctx(gs, core::Symbols::root(), file.file);
-        if (file.file.data(gs).isPackage(gs)) {
-            // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
-            // report some syntactic packager errors.
-            auto info = definePackage(gs, file);
-            if (info != nullptr) {
-                rewritePackageSpec(gs, file, *info);
-            }
-            validatePackage(ctx);
-        } else {
-            validatePackagedFile(ctx, file.tree);
-        }
-    });
+    auto preludePackages = gs.packageDB().preludePackages();
+
+    Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files),
+                      [&gs = as_const(gs), &preludePackages](auto &file) {
+                          core::Context ctx(gs, core::Symbols::root(), file.file);
+                          if (file.file.data(gs).isPackage(gs)) {
+                              // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
+                              // report some syntactic packager errors.
+                              auto info = definePackage(gs, file);
+                              if (info != nullptr) {
+                                  rewritePackageSpec(gs, file, *info);
+                              }
+                              validatePackage(ctx, preludePackages);
+                          } else {
+                              validatePackagedFile(ctx, file.tree);
+                          }
+                      });
 
     return files;
 }

@@ -7,10 +7,6 @@ namespace sorbet {
 class WorkerPool;
 }
 
-namespace sorbet::core::packages {
-class MangledName;
-}
-
 namespace sorbet::packager {
 /**
  * This pass transforms package files (`foo/__package.rb`) from
@@ -43,8 +39,7 @@ namespace sorbet::packager {
  */
 class Packager final {
 public:
-    static std::vector<core::packages::MangledName> findPackages(core::GlobalState &gs,
-                                                                 absl::Span<ast::ParsedFile> files);
+    static void findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files);
 
     // Build the packageDB, and validate packaged files at the same time.
     static void run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files);

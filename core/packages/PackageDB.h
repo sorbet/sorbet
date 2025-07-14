@@ -90,11 +90,8 @@ public:
     // Fetch the condensation graph for queries.
     const Condensation &condensation() const;
 
-    // Overwrite the set of prelude packages.
-    void setPreludePackages(std::vector<MangledName> &&preludePackages);
-
-    // Fetch the set of prelude packages.
-    absl::Span<const MangledName> preludePackages() const;
+    // Return a vector populated with the names of the prelude packages.
+    std::vector<MangledName> preludePackages() const;
 
 private:
     bool enabled_ = false;
@@ -120,8 +117,6 @@ private:
     std::thread::id writerThread;
 
     Condensation condensation_;
-
-    std::vector<MangledName> preludePackages_;
 
     friend class UnfreezePackages;
 };
