@@ -303,12 +303,12 @@ class T::Props::Decorator
   def validate_overrides(name, rules)
     override = elaborate_override(name, rules.delete(:override))
 
-    if override[:get] && !is_override?(name)
+    if override[:reader] && !is_override?(name)
       raise ArgumentError.new("You marked the getter for prop #{name.inspect} as `override`, but the method `#{name}` doesn't exist to be overridden.")
     end
 
     unless rules[:immutable]
-      if override[:set] && !is_override?("#{name}=".to_sym)
+      if override[:writer] && !is_override?("#{name}=".to_sym)
         raise ArgumentError.new("You marked the setter for prop #{name.inspect} as `override`, but the method `#{name}=` doesn't exist to be overridden.")
       end
     end
@@ -676,12 +676,12 @@ class T::Props::Decorator
       .checked(:never)
   end
   private def elaborate_override(name, d)
-    return {get: {allow_incompatible: false}, set: {allow_incompatible: false}}.to_h if d == true
-    return {get: {allow_incompatible: false}}.to_h if d == :get
-    return {set: {allow_incompatible: false}}.to_h if d == :set
+    return {reader: {allow_incompatible: false}, writer: {allow_incompatible: false}}.to_h if d == true
+    return {reader: {allow_incompatible: false}}.to_h if d == :reader
+    return {writer: {allow_incompatible: false}}.to_h if d == :writer
     return {} if d.nil?
     unless d.is_a?(Hash)
-      raise ArgumentError.new("`override` only accepts `true`, `:get`, `:set`, or a Hash in prop #{@class.name}.#{name}")
+      raise ArgumentError.new("`override` only accepts `true`, `:reader`, `:writer`, or a Hash in prop #{@class.name}.#{name}")
     end
 
     # cwong: should we check for bad keys? `sig { override(not_real: true) }` on a normal function
@@ -689,19 +689,19 @@ class T::Props::Decorator
 
     result = {}
 
-    # We do it this way instead of mapping to account for `{get: false}`
-    case d[:get]
+    # We do it this way instead of mapping to account for `{reader: false}`
+    case d[:reader]
     when TrueClass
-      result[:get] = {allow_incompatible: false}.to_h
+      result[:reader] = {allow_incompatible: false}.to_h
     when Hash
-      result[:get] = {allow_incompatible: !!d[:get][:allow_incompatible]}.to_h
+      result[:reader] = {allow_incompatible: !!d[:reader][:allow_incompatible]}.to_h
     end
 
-    case d[:set]
+    case d[:writer]
     when TrueClass
-      result[:set] = {allow_incompatible: false}.to_h
+      result[:writer] = {allow_incompatible: false}.to_h
     when Hash
-      result[:set] = {allow_incompatible: !!d[:set][:allow_incompatible]}.to_h
+      result[:writer] = {allow_incompatible: !!d[:writer][:allow_incompatible]}.to_h
     end
 
     result

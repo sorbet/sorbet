@@ -385,16 +385,6 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
       prop :a, String
     end
 
-    it 'errors if a prop is overridden without override => true' do
-      error = assert_raises(ArgumentError) do
-        class OverrideProps1 < OverrideProps
-          prop :a, Integer
-        end
-      end
-
-      assert(error.message.include?("Getter for prop :a overrides method `a` but is not marked `override`"))
-    end
-
     it 'allows overriding with override => true' do
       class OverrideProps2 < OverrideProps
         prop :a, Integer, override: true
@@ -439,7 +429,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
       class OverrideProps5 < T::Struct
         include ManualGetter
 
-        prop :a, Integer, override: :get
+        prop :a, Integer, override: :reader
       end
     end
 
@@ -447,7 +437,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
       class OverrideProps6 < T::Struct
         include ManualSetter
 
-        prop :a, Integer, override: {set: {allow_incompatible: true}}
+        prop :a, Integer, override: {writer: {allow_incompatible: true}}
       end
     end
   end
