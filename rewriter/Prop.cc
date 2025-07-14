@@ -521,26 +521,7 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
     return result;
 }
 
-} // namespace
-
-void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
-    auto syntacticSuperClass = SyntacticSuperClass::Unknown;
-    if (!klass->ancestors.empty()) {
-        auto &superClass = klass->ancestors[0];
-        if (isTStruct(superClass)) {
-            syntacticSuperClass = SyntacticSuperClass::TStruct;
-        } else if (isTInexactStruct(superClass)) {
-            syntacticSuperClass = SyntacticSuperClass::TInexactStruct;
-        } else if (isTImmutableStruct(superClass)) {
-            syntacticSuperClass = SyntacticSuperClass::TImmutableStruct;
-        }
-    }
-    auto propContext = PropContext{syntacticSuperClass, klass->kind};
-    UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceNodes;
-    replaceNodes.reserve(klass->rhs.size());
-    vector<PropInfo> props;
-    UnorderedMap<core::NameRef, uint32_t> seenProps;
-    for (auto &stat : klass->rhs) {
+vector<ast::ExpressionPtr> runOneStat(core::MutableContext ctx, const PropContext &propContext, vector<PropInfo> &props, UnorderedMap<core::NameRef, uint32_t> &seenProps, const ast::ExpressionPtr &stat) {
         auto send = ast::cast_tree<ast::Send>(stat);
         if (send == nullptr) {
             continue;
@@ -581,6 +562,28 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
 
         seenProps[propInfo->name] = props.size();
         props.emplace_back(std::move(propInfo.value()));
+}
+
+} // namespace
+
+void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
+    auto syntacticSuperClass = SyntacticSuperClass::Unknown;
+    if (!klass->ancestors.empty()) {
+        auto &superClass = klass->ancestors[0];
+        if (isTStruct(superClass)) {
+            syntacticSuperClass = SyntacticSuperClass::TStruct;
+        } else if (isTInexactStruct(superClass)) {
+            syntacticSuperClass = SyntacticSuperClass::TInexactStruct;
+        } else if (isTImmutableStruct(superClass)) {
+            syntacticSuperClass = SyntacticSuperClass::TImmutableStruct;
+        }
+    }
+    auto propContext = PropContext{syntacticSuperClass, klass->kind};
+    UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceNodes;
+    replaceNodes.reserve(klass->rhs.size());
+    vector<PropInfo> props;
+    UnorderedMap<core::NameRef, uint32_t> seenProps;
+    for (auto &stat : klass->rhs) {
     }
     auto oldRHS = std::move(klass->rhs);
     klass->rhs.clear();
