@@ -47,7 +47,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of self.updated_prop>
 
-    <self>.updated_prop(:without_accessors, true)
+    <self>.updated_prop()
 
     <runtime method definition of updated>
 

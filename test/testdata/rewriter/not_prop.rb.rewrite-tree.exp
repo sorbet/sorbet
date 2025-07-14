@@ -22,7 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:array_of, :array, <emptyTree>::<C String>)
 
-    <self>.prop(:array_of_explicit, <emptyTree>::<C Array>, :array, <emptyTree>::<C String>, :without_accessors, true)
+    <self>.prop(:array_of_explicit, <emptyTree>::<C Array>, :array, <emptyTree>::<C String>)
 
     <runtime method definition of array_of_explicit>
 

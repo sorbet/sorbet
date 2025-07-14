@@ -103,7 +103,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:foreign_lazy, <emptyTree>::<C String>, :foreign, <emptyTree>::<C Kernel>.lambda() do ||
         <emptyTree>::<C ForeignClass>
-      end, :without_accessors, true)
+      end)
 
     <runtime method definition of foreign_lazy>
 
@@ -111,7 +111,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:foreign_proc, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         <emptyTree>::<C ForeignClass>
-      end, :without_accessors, true)
+      end)
 
     <runtime method definition of foreign_proc>
 
@@ -119,7 +119,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:foreign_invalid, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         :not_a_type
-      end, :without_accessors, true)
+      end)
 
     <runtime method definition of foreign_invalid>
 

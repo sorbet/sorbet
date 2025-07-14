@@ -55,13 +55,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of initialize>
 
-    <self>.const(:name, <emptyTree>::<C String>, :without_accessors, true)
+    <self>.const(:name, <emptyTree>::<C String>)
 
     <runtime method definition of name>
 
     <self>.prop(:name, <emptyTree>::<C Integer>)
 
-    <self>.prop(:age, <emptyTree>::<C Integer>, :without_accessors, true)
+    <self>.prop(:age, <emptyTree>::<C Integer>)
 
     <runtime method definition of age>
 
@@ -71,7 +71,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.const(:age, <emptyTree>::<C Float>)
 
-    <self>.prop(:"foo \'bar", <emptyTree>::<C Integer>, :without_accessors, true)
+    <self>.prop(:"foo \'bar", <emptyTree>::<C Integer>)
 
     <runtime method definition of foo 'bar>
 

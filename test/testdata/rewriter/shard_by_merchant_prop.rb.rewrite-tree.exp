@@ -58,7 +58,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C ShardByMerchant>)
 
-    <self>.merchant_prop(:without_accessors, true)
+    <self>.merchant_prop()
 
     <runtime method definition of merchant>
   end
@@ -76,7 +76,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C ShardByMerchantBase>)
 
-    <self>.merchant_token_prop(:without_accessors, true)
+    <self>.merchant_token_prop()
 
     <runtime method definition of merchant>
   end
@@ -94,7 +94,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C ShardByMerchantBase>)
 
-    <self>.merchant_token_prop(:name, :linked_merchant, :without_accessors, true)
+    <self>.merchant_token_prop(:name, :linked_merchant)
 
     <runtime method definition of linked_merchant>
   end

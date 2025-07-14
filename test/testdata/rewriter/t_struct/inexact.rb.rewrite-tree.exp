@@ -32,13 +32,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.instance_variable_set(:@bar, arg0)
     end
 
-    <self>.prop(:foo, <emptyTree>::<C Integer>, :without_accessors, true)
+    <self>.prop(:foo, <emptyTree>::<C Integer>)
 
     <runtime method definition of foo>
 
     <runtime method definition of foo=>
 
-    <self>.prop(:bar, <emptyTree>::<C String>, :without_accessors, true)
+    <self>.prop(:bar, <emptyTree>::<C String>)
 
     <runtime method definition of bar>
 
@@ -68,7 +68,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    <self>.prop(:qux, <emptyTree>::<C Symbol>, :without_accessors, true)
+    <self>.prop(:qux, <emptyTree>::<C Symbol>)
 
     <runtime method definition of qux>
 

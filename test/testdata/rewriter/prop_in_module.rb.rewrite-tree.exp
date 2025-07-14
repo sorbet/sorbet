@@ -18,7 +18,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
-    <self>.prop(:foo, <emptyTree>::<C String>, :without_accessors, true)
+    <self>.prop(:foo, <emptyTree>::<C String>)
 
     <runtime method definition of foo>
 

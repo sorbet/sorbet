@@ -1646,8 +1646,6 @@ ClassDef{
               cnst = <C <U String>>
               scope = EmptyTree
             }
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -4531,8 +4529,6 @@ ClassDef{
             }
             Literal{ value = :default }
             Literal{ value = "" }
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -4564,8 +4560,6 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -4585,8 +4579,6 @@ ClassDef{
               cnst = <C <U Array>>
               scope = EmptyTree
             }
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -4621,8 +4613,6 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -4661,8 +4651,6 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -4684,8 +4672,6 @@ ClassDef{
             }
             Literal{ value = :immutable }
             Literal{ value = true }
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -4703,8 +4689,6 @@ ClassDef{
               cnst = <C <U String>>
               scope = EmptyTree
             }
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -4729,8 +4713,6 @@ ClassDef{
                 Literal{ value = "goodbye" }
               ]
             }
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -4755,8 +4737,6 @@ ClassDef{
               cnst = <C <U ForeignClass>>
               scope = EmptyTree
             }
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -4796,8 +4776,6 @@ ClassDef{
               args = [
               ]
             }
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -4834,8 +4812,6 @@ ClassDef{
               args = [
               ]
             }
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -4869,8 +4845,6 @@ ClassDef{
               args = [
               ]
             }
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -4892,8 +4866,6 @@ ClassDef{
             }
             Literal{ value = :ifunset }
             Literal{ value = "" }
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -4927,8 +4899,6 @@ ClassDef{
             }
             Literal{ value = :ifunset }
             Literal{ value = "" }
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -4950,10 +4920,6 @@ ClassDef{
             }
             Hash{
               pairs = [
-                [
-                  key = Literal{ value = :without_accessors }
-                  value = Literal{ value = true }
-                ]
               ]
             }
           ]
@@ -4985,10 +4951,6 @@ ClassDef{
                       Literal{ value = "goodbye" }
                     ]
                   }
-                ]
-                [
-                  key = Literal{ value = :without_accessors }
-                  value = Literal{ value = true }
                 ]
               ]
             }
@@ -5331,8 +5293,6 @@ ClassDef{
           block = nullptr
           pos_args = 0
           args = [
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -5347,8 +5307,6 @@ ClassDef{
           block = nullptr
           pos_args = 0
           args = [
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -5617,8 +5575,6 @@ ClassDef{
           block = nullptr
           pos_args = 0
           args = [
-            Literal{ value = :without_accessors }
-            Literal{ value = true }
           ]
         }
 
@@ -5634,8 +5590,6 @@ ClassDef{
           pos_args = 0
           args = [
             Literal{ value = :immutable }
-            Literal{ value = true }
-            Literal{ value = :without_accessors }
             Literal{ value = true }
           ]
         }
