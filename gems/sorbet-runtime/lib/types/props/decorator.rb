@@ -302,7 +302,6 @@ class T::Props::Decorator
   sig { params(name: Symbol, rules: Rules).void }
   def validate_overrides(name, rules)
     override = elaborate_override(name, rules.delete(:override))
-    typ = T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object))
 
     if override[:get] && !is_override?(name)
       raise ArgumentError.new("You marked the getter for prop #{name.inspect} as `override`, but the method `#{name}` doesn't exist to be overridden.")
@@ -709,7 +708,7 @@ class T::Props::Decorator
       result[:set] = {allow_incompatible: !!d[:set][:allow_incompatible]}.to_h
     end
 
-    return result
+    result
   end
 
   sig { params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never) }
