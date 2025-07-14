@@ -526,19 +526,20 @@ vector<ast::ExpressionPtr> runOneStat(core::MutableContext ctx, const PropContex
                                       const ast::ExpressionPtr &stat) {
     auto send = ast::cast_tree<ast::Send>(stat);
     if (send == nullptr) {
-        continue;
+        return {};
     }
     auto propInfo = parseProp(ctx, send);
     if (!propInfo.has_value()) {
-        continue;
+        return {};
     }
 
+    auto syntacticSuperClass = propContext.syntacticSuperClass;
     if (!propInfo->isImmutable && syntacticSuperClass == SyntacticSuperClass::TImmutableStruct) {
         if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::InvalidStructMember)) {
             e.setHeader("Cannot use `{}` in an immutable struct", "prop");
             e.replaceWith("Use `const`", ctx.locAt(propInfo->loc), "const");
         }
-        continue;
+        return {};
     }
 
     if (wantTypedInitialize(syntacticSuperClass)) {
@@ -550,20 +551,20 @@ vector<ast::ExpressionPtr> runOneStat(core::MutableContext ctx, const PropContex
                 e.setHeader("The `{}` is defined multiple times", headerProp);
                 e.addErrorLine(ctx.locAt(props[it->second].loc), "Originally defined here");
             }
-            continue;
+            return {};
         }
     }
 
     auto processed = processProp(ctx, propInfo.value(), propContext);
     ENFORCE(!processed.empty(), "if parseProp completed successfully, processProp must complete too");
 
+    seenProps[propInfo->name] = props.size();
+    props.emplace_back(std::move(propInfo.value()));
+
     vector<ast::ExpressionPtr> nodes;
     nodes.emplace_back(send->deepCopy());
     nodes.insert(nodes.end(), make_move_iterator(processed.begin()), make_move_iterator(processed.end()));
-    replaceNodes[stat.get()] = std::move(nodes);
-
-    seenProps[propInfo->name] = props.size();
-    props.emplace_back(std::move(propInfo.value()));
+    return nodes;
 }
 
 } // namespace
@@ -585,7 +586,11 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     replaceNodes.reserve(klass->rhs.size());
     vector<PropInfo> props;
     UnorderedMap<core::NameRef, uint32_t> seenProps;
-    for (auto &stat : klass->rhs) {
+
+    for (const auto &stat : klass->rhs) {
+        // This is in a helper function to avoid taking mutable access to `klass->rhs`, to ensure we
+        // don't mutate it while we iterate.
+        replaceNodes[stat.get()] = runOneStat(ctx, propContext, props, seenProps, stat);
     }
     auto oldRHS = std::move(klass->rhs);
     klass->rhs.clear();
