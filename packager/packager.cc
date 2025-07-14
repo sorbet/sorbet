@@ -2120,6 +2120,22 @@ void validatePackage(core::Context ctx) {
                 validateLayering(ctx, pkgInfo.declLoc().offsets(), name);
             }
         }
+
+        for (auto &i : pkgInfo.importedPackageNames) {
+            auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+
+            // this might mean the other package doesn't exist, but that should have been caught already
+            if (!otherPkg.exists()) {
+                continue;
+            }
+
+            // We don't allow explicit imports of prelude packages from non-prelude packages.
+            if (otherPkg.isPreludePackage()) {
+                if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::NoExplicitPreludeImport)) {
+                    e.setHeader("Prelude package `{}` may not be explicitly imported", i.name.toString(ctx));
+                }
+            }
+        }
     }
 
     for (auto &i : pkgInfo.importedPackageNames) {
