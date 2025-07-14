@@ -28,7 +28,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    <self>.prop(:my_parent_method, <emptyTree>::<C String>, :without_accessors, true)
+    <self>.prop(:my_parent_method, <emptyTree>::<C String>)
 
     <runtime method definition of my_parent_method>
 
@@ -52,7 +52,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    <self>.prop(:my_child_method, <emptyTree>::<C Integer>, :without_accessors, true)
+    <self>.prop(:my_child_method, <emptyTree>::<C Integer>)
 
     <runtime method definition of my_child_method>
 

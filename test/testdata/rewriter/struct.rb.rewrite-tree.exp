@@ -645,7 +645,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:a, <emptyTree>::<C Integer>)
 
-    <self>.const(:b, <emptyTree>::<C String>, :without_accessors, true)
+    <self>.const(:b, <emptyTree>::<C String>)
 
     <runtime method definition of b>
   end

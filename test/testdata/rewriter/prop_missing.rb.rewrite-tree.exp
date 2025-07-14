@@ -24,13 +24,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    <self>.prop(:foo, <emptyTree>::<C Integer>, :without_accessors, true)
+    <self>.prop(:foo, <emptyTree>::<C Integer>)
 
     <runtime method definition of foo>
 
     <runtime method definition of foo=>
 
-    <self>.const(:bar, <emptyTree>::<C Integer>, :without_accessors, true)
+    <self>.const(:bar, <emptyTree>::<C Integer>)
 
     <runtime method definition of bar>
   end

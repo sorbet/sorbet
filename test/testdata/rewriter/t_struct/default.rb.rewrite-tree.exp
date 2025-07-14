@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of initialize>
 
-    <self>.prop(:foo, <emptyTree>::<C Integer>, :default, 3, :without_accessors, true)
+    <self>.prop(:foo, <emptyTree>::<C Integer>, :default, 3)
 
     <runtime method definition of foo>
 

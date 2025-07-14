@@ -78,13 +78,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of initialize>
 
-    <self>.prop(:using_t_struct_prop, <emptyTree>::<C Integer>, :without_accessors, true)
+    <self>.prop(:using_t_struct_prop, <emptyTree>::<C Integer>)
 
     <runtime method definition of using_t_struct_prop>
 
     <runtime method definition of using_t_struct_prop=>
 
-    <self>.const(:using_t_struct_const, <emptyTree>::<C Integer>, :without_accessors, true)
+    <self>.const(:using_t_struct_const, <emptyTree>::<C Integer>)
 
     <runtime method definition of using_t_struct_const>
   end
