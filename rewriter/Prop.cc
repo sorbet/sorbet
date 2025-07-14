@@ -521,47 +521,49 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
     return result;
 }
 
-vector<ast::ExpressionPtr> runOneStat(core::MutableContext ctx, const PropContext &propContext, vector<PropInfo> &props, UnorderedMap<core::NameRef, uint32_t> &seenProps, const ast::ExpressionPtr &stat) {
-        auto send = ast::cast_tree<ast::Send>(stat);
-        if (send == nullptr) {
-            continue;
-        }
-        auto propInfo = parseProp(ctx, send);
-        if (!propInfo.has_value()) {
-            continue;
-        }
+vector<ast::ExpressionPtr> runOneStat(core::MutableContext ctx, const PropContext &propContext, vector<PropInfo> &props,
+                                      UnorderedMap<core::NameRef, uint32_t> &seenProps,
+                                      const ast::ExpressionPtr &stat) {
+    auto send = ast::cast_tree<ast::Send>(stat);
+    if (send == nullptr) {
+        continue;
+    }
+    auto propInfo = parseProp(ctx, send);
+    if (!propInfo.has_value()) {
+        continue;
+    }
 
-        if (!propInfo->isImmutable && syntacticSuperClass == SyntacticSuperClass::TImmutableStruct) {
-            if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::InvalidStructMember)) {
-                e.setHeader("Cannot use `{}` in an immutable struct", "prop");
-                e.replaceWith("Use `const`", ctx.locAt(propInfo->loc), "const");
+    if (!propInfo->isImmutable && syntacticSuperClass == SyntacticSuperClass::TImmutableStruct) {
+        if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::InvalidStructMember)) {
+            e.setHeader("Cannot use `{}` in an immutable struct", "prop");
+            e.replaceWith("Use `const`", ctx.locAt(propInfo->loc), "const");
+        }
+        continue;
+    }
+
+    if (wantTypedInitialize(syntacticSuperClass)) {
+        auto it = seenProps.find(propInfo->name);
+        if (it != seenProps.end()) {
+            if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::DuplicateProp)) {
+                auto headerProp = fmt::format("{} {}", propInfo->isImmutable ? "const" : "prop",
+                                              propInfo->name.showAsSymbolLiteral(ctx));
+                e.setHeader("The `{}` is defined multiple times", headerProp);
+                e.addErrorLine(ctx.locAt(props[it->second].loc), "Originally defined here");
             }
             continue;
         }
+    }
 
-        if (wantTypedInitialize(syntacticSuperClass)) {
-            auto it = seenProps.find(propInfo->name);
-            if (it != seenProps.end()) {
-                if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::DuplicateProp)) {
-                    auto headerProp = fmt::format("{} {}", propInfo->isImmutable ? "const" : "prop",
-                                                  propInfo->name.showAsSymbolLiteral(ctx));
-                    e.setHeader("The `{}` is defined multiple times", headerProp);
-                    e.addErrorLine(ctx.locAt(props[it->second].loc), "Originally defined here");
-                }
-                continue;
-            }
-        }
+    auto processed = processProp(ctx, propInfo.value(), propContext);
+    ENFORCE(!processed.empty(), "if parseProp completed successfully, processProp must complete too");
 
-        auto processed = processProp(ctx, propInfo.value(), propContext);
-        ENFORCE(!processed.empty(), "if parseProp completed successfully, processProp must complete too");
+    vector<ast::ExpressionPtr> nodes;
+    nodes.emplace_back(send->deepCopy());
+    nodes.insert(nodes.end(), make_move_iterator(processed.begin()), make_move_iterator(processed.end()));
+    replaceNodes[stat.get()] = std::move(nodes);
 
-        vector<ast::ExpressionPtr> nodes;
-        nodes.emplace_back(send->deepCopy());
-        nodes.insert(nodes.end(), make_move_iterator(processed.begin()), make_move_iterator(processed.end()));
-        replaceNodes[stat.get()] = std::move(nodes);
-
-        seenProps[propInfo->name] = props.size();
-        props.emplace_back(std::move(propInfo.value()));
+    seenProps[propInfo->name] = props.size();
+    props.emplace_back(std::move(propInfo.value()));
 }
 
 } // namespace
