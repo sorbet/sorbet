@@ -388,31 +388,3 @@ test_suite(
     tests = ["prism_regression_corpus"],
 )
 
-sh_binary(
-    name = "single_package_runner",
-    srcs = ["test_single_package_runner.sh"],
-    data = [
-        "single_package_runner_cc",
-        "//main:sorbet",
-    ],
-    tags = ["manual"],
-    deps = [
-        "@bazel_tools//tools/bash/runfiles",
-    ],
-)
-
-cc_binary(
-    name = "single_package_runner_cc",
-    srcs = ["rbi_gen_package_runner.cc"],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
-    tags = ["manual"],
-    visibility = ["//tools:__pkg__"],
-    deps = [
-        "//common",
-        "@com_google_absl//absl/strings",
-        "@rapidjson",
-    ],
-)
