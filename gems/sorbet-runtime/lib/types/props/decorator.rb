@@ -305,15 +305,11 @@ class T::Props::Decorator
 
     if override[:get] && !is_override?(name)
       raise ArgumentError.new("You marked the getter for prop #{name.inspect} as `override`, but the method `#{name}` doesn't exist to be overridden.")
-    elsif is_override?(name) && !override[:get] && !rules[:clobber_existing_method!]
-      raise ArgumentError.new("Getter for prop #{name.inspect} overrides method `#{name}` but is not marked `override`")
     end
 
     unless rules[:immutable]
       if override[:set] && !is_override?("#{name}=".to_sym)
         raise ArgumentError.new("You marked the setter for prop #{name.inspect} as `override`, but the method `#{name}=` doesn't exist to be overridden.")
-      elsif is_override?("#{name}=".to_sym) && !override[:set] && !rules[:clobber_existing_method!]
-        raise ArgumentError.new("Setter for prop #{name.inspect} overrides method `#{name}=` but is not marked `override`")
       end
     end
   end
