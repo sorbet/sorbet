@@ -261,13 +261,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Break>(location, move(arguments));
         }
         case PM_CALL_AND_WRITE_NODE: { // And-assignment to a method call, e.g. `a.b &&= false`
-            auto flags = static_cast<pm_call_node_flags>(node->flags);
-
-            if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) {
+            if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 return translateOpAssignment<pm_call_and_write_node, parser::AndAsgn, parser::CSend>(node);
+            } else {
+                return translateOpAssignment<pm_call_and_write_node, parser::AndAsgn, parser::Send>(node);
             }
-
-            return translateOpAssignment<pm_call_and_write_node, parser::AndAsgn, parser::Send>(node);
         }
         case PM_CALL_NODE: { // A method call like `a.b()` or `a&.b()`
             auto callNode = down_cast<pm_call_node>(node);
@@ -313,11 +311,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 messageLoc.endLoc = args.front()->loc.beginPos() - 1; // The message ends right before the equals sign
             }
 
-            auto flags = static_cast<pm_call_node_flags>(callNode->base.flags);
-
             unique_ptr<parser::Node> sendNode;
-
-            if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) { // Handle conditional send, e.g. `a&.b`
+            if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) { // Handle conditional send, e.g. `a&.b`
                 sendNode = make_unique<parser::CSend>(loc, move(receiver), gs.enterNameUTF8(constantNameString),
                                                       messageLoc, move(args));
             } else { // Regular send, e.g. `a.b`
@@ -337,22 +332,18 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
         }
         case PM_CALL_OPERATOR_WRITE_NODE: { // Compound assignment to a method call, e.g. `a.b += 1`
-            auto flags = static_cast<pm_call_node_flags>(node->flags);
-
-            if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) {
+            if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 return translateOpAssignment<pm_call_operator_write_node, parser::OpAsgn, parser::CSend>(node);
+            } else {
+                return translateOpAssignment<pm_call_operator_write_node, parser::OpAsgn, parser::Send>(node);
             }
-
-            return translateOpAssignment<pm_call_operator_write_node, parser::OpAsgn, parser::Send>(node);
         }
         case PM_CALL_OR_WRITE_NODE: { // Or-assignment to a method call, e.g. `a.b ||= true`
-            auto flags = static_cast<pm_call_node_flags>(node->flags);
-
-            if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) {
+            if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 return translateOpAssignment<pm_call_or_write_node, parser::OrAsgn, parser::CSend>(node);
+            } else {
+                return translateOpAssignment<pm_call_or_write_node, parser::OrAsgn, parser::Send>(node);
             }
-
-            return translateOpAssignment<pm_call_or_write_node, parser::OrAsgn, parser::Send>(node);
         }
         case PM_CALL_TARGET_NODE: { // Target of an indirect write to the result of a method call
             // ... like `self.target1, self.target2 = 1, 2`, `rescue => self.target`, etc.
@@ -362,8 +353,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto name = translateConstantName(callTargetNode->name);
             auto messageLoc = translateLoc(callTargetNode->message_loc);
 
-            auto flags = static_cast<pm_call_node_flags>(callTargetNode->base.flags);
-            if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) {
+            if (PM_NODE_FLAG_P(callTargetNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 // Handle conditional send, e.g. `self&.target1, self&.target2 = 1, 2`
                 // It's not valid Ruby, but the parser needs to support it for the diagnostics to work
                 return make_unique<parser::CSend>(location, move(receiver), name, messageLoc, NodeVec{});
@@ -575,9 +565,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto left = patternTranslate(flipFlopNode->left);
             auto right = patternTranslate(flipFlopNode->right);
 
-            auto flags = flipFlopNode->base.flags;
-
-            if (flags & PM_RANGE_FLAGS_EXCLUDE_END) { // 3 dots: `flip...flop`
+            if (PM_NODE_FLAG_P(flipFlopNode, PM_RANGE_FLAGS_EXCLUDE_END)) { // 3 dots: `flip...flop`
                 return make_unique<parser::EFlipflop>(location, move(left), move(right));
             } else { // 2 dots: `flip..flop`
                 return make_unique<parser::IFlipflop>(location, move(left), move(right));
@@ -1069,11 +1057,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_RANGE_NODE: { // A Range literal, e.g. `a..b`, `a..`, `..b`, `a...b`, `a...`, `...b`
             auto rangeNode = down_cast<pm_range_node>(node);
 
-            auto flags = static_cast<pm_range_flags>(rangeNode->base.flags);
             auto left = translate(rangeNode->left);
             auto right = translate(rangeNode->right);
 
-            if (flags & PM_RANGE_FLAGS_EXCLUDE_END) { // `...`
+            if (PM_NODE_FLAG_P(rangeNode, PM_RANGE_FLAGS_EXCLUDE_END)) { // `...`
                 return make_unique<parser::ERange>(location, move(left), move(right));
             } else { // `..`
                 return make_unique<parser::IRange>(location, move(left), move(right));
@@ -1255,10 +1242,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto predicate = translate(untilNode->predicate);
             auto body = translate(up_cast(untilNode->statements));
 
-            auto flags = untilNode->base.flags;
-
             // When the until loop is placed after a `begin` block, like `begin; end until false`,
-            if (flags & PM_LOOP_FLAGS_BEGIN_MODIFIER) {
+            if (PM_NODE_FLAG_P(untilNode, PM_LOOP_FLAGS_BEGIN_MODIFIER)) {
                 return make_unique<parser::UntilPost>(location, move(predicate), move(body));
             } else {
                 return make_unique<parser::Until>(location, move(predicate), move(body));
@@ -1278,10 +1263,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto predicate = translate(whileNode->predicate);
             auto statements = translateStatements(whileNode->statements);
 
-            auto flags = whileNode->base.flags;
-
             // When the while loop is placed after a `begin` block, like `begin; end while false`,
-            if (flags & PM_LOOP_FLAGS_BEGIN_MODIFIER) {
+            if (PM_NODE_FLAG_P(whileNode, PM_LOOP_FLAGS_BEGIN_MODIFIER)) {
                 return make_unique<parser::WhilePost>(location, move(predicate), move(statements));
             } else {
                 return make_unique<parser::While>(location, move(predicate), move(statements));
