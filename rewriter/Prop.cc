@@ -592,16 +592,28 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         // don't mutate it while we iterate.
         replaceNodes[stat.get()] = runOneStat(ctx, propContext, props, seenProps, stat);
     }
-    auto oldRHS = std::move(klass->rhs);
-    klass->rhs.clear();
-    klass->rhs.reserve(oldRHS.size());
-    // we define our synthesized initialize first so that if the user wrote one themselves, it overrides ours.
+
+    vector<ast::ExpressionPtr> typedInitializeStats;
     if (wantTypedInitialize(syntacticSuperClass)) {
         // For direct T::Struct subclasses, we know that seeing no props means the constructor should be zero-arity.
-        for (auto &stat : mkTypedInitialize(ctx, klass->loc, klass->declLoc, props)) {
-            klass->rhs.emplace_back(std::move(stat));
-        }
+        typedInitializeStats = mkTypedInitialize(ctx, klass->loc, klass->declLoc, props);
     }
+
+    auto capacity = klass->rhs.size() + typedInitializeStats.size();
+    for (const auto &[_oldStat, newStats] : replaceNodes) {
+        // subtract 1 to account for the replacement
+        capacity += newStats.size() - 1;
+    }
+
+    auto oldRHS = std::move(klass->rhs);
+    klass->rhs.clear();
+    klass->rhs.reserve(capacity);
+
+    // we define our synthesized initialize first so that if the user wrote one themselves, it redefines ours.
+    for (auto &stat : typedInitializeStats) {
+        klass->rhs.emplace_back(std::move(stat));
+    }
+
     // this is cargo-culted from rewriter.cc.
     for (auto &stat : oldRHS) {
         auto replacement = replaceNodes.find(stat.get());
