@@ -86,7 +86,6 @@ struct PropContext {
 struct PropInfo {
     core::LocOffsets loc;
     bool isImmutable = false;
-    bool hasWithoutAccessors = false;
     core::NameRef name;
     core::LocOffsets nameLoc;
     ast::ExpressionPtr type;
@@ -266,10 +265,6 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         auto rules = ast::cast_tree<ast::Hash>(rulesTree);
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::immutable())) {
             ret.isImmutable = true;
-        }
-
-        if (ASTUtil::hasHashValue(ctx, *rules, core::Names::withoutAccessors())) {
-            ret.hasWithoutAccessors = true;
         }
 
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::factory())) {
@@ -481,32 +476,6 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
     return nodes;
 }
 
-ast::ExpressionPtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send *send) {
-    ast::ExpressionPtr result = send->deepCopy();
-
-    if (prop.hasWithoutAccessors) {
-        return result;
-    }
-
-    auto withoutAccessors = ast::MK::Symbol(send->loc, core::Names::withoutAccessors());
-    auto true_ = ast::MK::True(send->loc);
-
-    auto copy = ast::cast_tree<ast::Send>(result);
-    if (copy->hasKwArgs() || !copy->hasPosArgs()) {
-        // append to the inline keyword arguments of the send
-        copy->addKwArg(move(withoutAccessors), move(true_));
-    } else {
-        if (auto hash = ast::cast_tree<ast::Hash>(copy->getPosArg(copy->numPosArgs() - 1))) {
-            hash->keys.emplace_back(move(withoutAccessors));
-            hash->values.emplace_back(move(true_));
-        } else {
-            copy->addKwArg(move(withoutAccessors), move(true_));
-        }
-    }
-
-    return result;
-}
-
 vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
                                              core::LocOffsets klassDeclLoc, const vector<PropInfo> &props) {
     ast::MethodDef::ARGS_store args;
@@ -606,7 +575,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         ENFORCE(!processed.empty(), "if parseProp completed successfully, processProp must complete too");
 
         vector<ast::ExpressionPtr> nodes;
-        nodes.emplace_back(ensureWithoutAccessors(propInfo.value(), send));
+        nodes.emplace_back(send->deepCopy());
         nodes.insert(nodes.end(), make_move_iterator(processed.begin()), make_move_iterator(processed.end()));
         replaceNodes[stat.get()] = std::move(nodes);
 
