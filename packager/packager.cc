@@ -1840,7 +1840,7 @@ class ComputePackageSCCs {
 public:
     // NOTE: This function must be called every time an import is added or removed from a package.
     // It is relatively fast, so calling it on every __package.rb edit is an okay overapproximation for simplicity.
-    static void run(core::GlobalState &gs) {
+    static core::packages::Condensation run(core::GlobalState &gs) {
         Timer timeit(gs.tracer(), "packager::computeSCCs");
         ComputePackageSCCs scc(gs);
 
@@ -1849,7 +1849,7 @@ public:
         scc.tarjan<core::packages::ImportType::Normal>();
         scc.tarjan<core::packages::ImportType::TestHelper>();
 
-        gs.packageDB().setCondensation(move(scc.condensation));
+        return move(scc.condensation);
     }
 };
 
@@ -2187,7 +2187,7 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
 
         if constexpr (buildPackageDB) {
-            ComputePackageSCCs::run(gs);
+            gs.packageDB().setCondensation(ComputePackageSCCs::run(gs));
         }
 
         {
