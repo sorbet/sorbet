@@ -118,7 +118,6 @@ compilation_database(
         "//test:pkg-autocorrects-test",
         "//test:pkg-condensation-test",
         "//test:print_document_symbols",
-        "//test:single_package_runner_cc",
         "//test/fuzz:fuzz_dash_e",
         "//test/fuzz:fuzz_dash_e_impl",
         "//test/fuzz:fuzz_doc_symbols",
