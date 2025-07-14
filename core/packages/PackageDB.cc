@@ -201,12 +201,15 @@ const Condensation &PackageDB::condensation() const {
     return this->condensation_;
 }
 
-void PackageDB::setPreludePackages(vector<MangledName> &&preludePackages) {
-    this->preludePackages_ = std::move(preludePackages);
-}
+vector<MangledName> PackageDB::preludePackages() const {
+    vector<MangledName> preludePackages;
+    for (const auto &[name, pkg] : this->packages_) {
+        if (pkg->isPreludePackage()) {
+            preludePackages.push_back(name);
+        }
+    }
 
-absl::Span<const MangledName> PackageDB::preludePackages() const {
-    return this->preludePackages_;
+    return preludePackages;
 }
 
 } // namespace sorbet::core::packages

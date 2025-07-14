@@ -1189,7 +1189,7 @@ void validateVisibility(const core::Context &ctx, const PackageInfo &absPkg, con
     }
 }
 
-void validatePackage(core::Context ctx) {
+void validatePackage(core::Context ctx, absl::Span<const core::packages::MangledName> preludePackages) {
     const auto &packageDB = ctx.state.packageDB();
     auto absPkg = packageDB.getPackageNameForFile(ctx.file);
     if (!absPkg.exists()) {
@@ -1254,7 +1254,7 @@ void validatePackage(core::Context ctx) {
         }
 
         for (auto &i : pkgInfo.importedPackageNames) {
-            auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+            auto &otherPkg = packageDB.getPackageInfo(i.mangledName);
 
             // this might mean the other package doesn't exist, but that should have been caught already
             if (!otherPkg.exists()) {
@@ -1263,8 +1263,8 @@ void validatePackage(core::Context ctx) {
 
             // We don't allow explicit imports of prelude packages from non-prelude packages.
             if (otherPkg.isPreludePackage()) {
-                if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::NoExplicitPreludeImport)) {
-                    e.setHeader("Prelude package `{}` may not be explicitly imported", i.name.toString(ctx));
+                if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoExplicitPreludeImport)) {
+                    e.setHeader("Prelude package `{}` may not be explicitly imported", otherPkg.show(ctx));
                 }
             }
         }
@@ -1338,7 +1338,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 
 } // namespace
 
-vector<core::packages::MangledName> Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
+void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
     // Ensure files are in canonical order.
     // TODO(jez) Is this sort redundant? Should we move this sort to callers?
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
@@ -1380,7 +1380,6 @@ vector<core::packages::MangledName> Packager::findPackages(core::GlobalState &gs
 
     setPackageNameOnFiles(gs, files);
 
-    vector<core::packages::MangledName> preludePackages;
     {
         core::UnfreezeNameTable unfreeze(gs);
         auto packages = gs.unfreezePackages();
@@ -1396,15 +1395,8 @@ vector<core::packages::MangledName> Packager::findPackages(core::GlobalState &gs
             }
             auto &info = PackageInfo::from(gs, pkgName);
             rewritePackageSpec(gs, file, info);
-
-            if (info.isPreludePackage()) {
-                preludePackages.emplace_back(pkgName);
-            }
         }
     }
-
-    preludePackages.shrink_to_fit();
-    return preludePackages;
 }
 
 namespace {
@@ -1514,10 +1506,7 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
     constexpr bool validatePackagedFiles = Mode == PackagerMode::PackagedFilesOnly || Mode == PackagerMode::AllFiles;
 
     if constexpr (buildPackageDB) {
-        auto preludePackages = Packager::findPackages(gs, files);
-
-        // We cache this set here so that it's available in validatePackage.
-        gs.packageDB().setPreludePackages(move(preludePackages));
+        Packager::findPackages(gs, files);
     }
 
     {
@@ -1530,14 +1519,15 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
 
         {
             Timer timeit(gs.tracer(), "packager.validatePackagesAndFiles");
+            auto preludePackages = gs.packageDB().preludePackages();
             Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files),
-                              [&gs = as_const(gs)](auto &job) {
+                              [&gs = as_const(gs), &preludePackages](auto &job) {
                                   auto file = job.file;
                                   core::Context ctx(gs, core::Symbols::root(), file);
 
                                   if (file.data(gs).isPackage(gs)) {
                                       ENFORCE(buildPackageDB);
-                                      validatePackage(ctx);
+                                      validatePackage(ctx, preludePackages);
                                   } else {
                                       ENFORCE(validatePackagedFiles);
                                       validatePackagedFile(ctx, job.tree);
@@ -1559,23 +1549,26 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
     // building in an understanding of the dependencies between packages.
     Timer timeit(gs.tracer(), "packager.runIncremental");
 
-    Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files), [&gs = as_const(gs)](auto &file) {
-        core::Context ctx(gs, core::Symbols::root(), file.file);
-        if (file.file.data(gs).isPackage(gs)) {
-            auto packageName = gs.packageDB().getPackageNameForFile(file.file);
-            auto &info = gs.packageDB().getPackageInfo(packageName);
-            if (info.exists()) {
-                // We aren't going to mutate the packageDB at this point, but we do need something to give to
-                // rewritePackageSpec. We make the most shallow copy possible, to ensure that we don't raise duplicate
-                // errors on the fast path.
-                PackageInfo copy{info.mangledName_, info.loc, info.declLoc_};
-                rewritePackageSpec(gs, file, copy);
-            }
-            validatePackage(ctx);
-        } else {
-            validatePackagedFile(ctx, file.tree);
-        }
-    });
+    const auto preludePackages = gs.packageDB().preludePackages();
+
+    Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files),
+                      [&gs = as_const(gs), &preludePackages](auto &file) {
+                          core::Context ctx(gs, core::Symbols::root(), file.file);
+                          if (file.file.data(gs).isPackage(gs)) {
+                              auto packageName = gs.packageDB().getPackageNameForFile(file.file);
+                              auto &info = gs.packageDB().getPackageInfo(packageName);
+                              if (info.exists()) {
+                                  // We aren't going to mutate the packageDB at this point, but we do need something to
+                                  // give to rewritePackageSpec. We make the most shallow copy possible, to ensure that
+                                  // we don't raise duplicate errors on the fast path.
+                                  PackageInfo copy{info.mangledName_, info.loc, info.declLoc_};
+                                  rewritePackageSpec(gs, file, copy);
+                              }
+                              validatePackage(ctx, preludePackages);
+                          } else {
+                              validatePackagedFile(ctx, file.tree);
+                          }
+                      });
 
     return files;
 }
