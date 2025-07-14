@@ -561,10 +561,7 @@ vector<ast::ExpressionPtr> runOneStat(core::MutableContext ctx, const PropContex
     seenProps[propInfo->name] = props.size();
     props.emplace_back(std::move(propInfo.value()));
 
-    vector<ast::ExpressionPtr> nodes;
-    nodes.emplace_back(send->deepCopy());
-    nodes.insert(nodes.end(), make_move_iterator(processed.begin()), make_move_iterator(processed.end()));
-    return nodes;
+    return processed;
 }
 
 } // namespace
@@ -582,15 +579,15 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         }
     }
     auto propContext = PropContext{syntacticSuperClass, klass->kind};
-    UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceNodes;
-    replaceNodes.reserve(klass->rhs.size());
+    UnorderedMap<void *, vector<ast::ExpressionPtr>> insertNodesAfterStat;
+    insertNodesAfterStat.reserve(klass->rhs.size());
     vector<PropInfo> props;
     UnorderedMap<core::NameRef, uint32_t> seenProps;
 
     for (const auto &stat : klass->rhs) {
         // This is in a helper function to avoid taking mutable access to `klass->rhs`, to ensure we
         // don't mutate it while we iterate.
-        replaceNodes[stat.get()] = runOneStat(ctx, propContext, props, seenProps, stat);
+        insertNodesAfterStat[stat.get()] = runOneStat(ctx, propContext, props, seenProps, stat);
     }
 
     vector<ast::ExpressionPtr> typedInitializeStats;
@@ -600,9 +597,8 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     }
 
     auto capacity = klass->rhs.size() + typedInitializeStats.size();
-    for (const auto &[_oldStat, newStats] : replaceNodes) {
-        // subtract 1 to account for the replacement
-        capacity += newStats.size() - 1;
+    for (const auto &[_oldStat, newStats] : insertNodesAfterStat) {
+        capacity += newStats.size();
     }
 
     auto oldRHS = std::move(klass->rhs);
@@ -614,13 +610,11 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         klass->rhs.emplace_back(std::move(stat));
     }
 
-    // this is cargo-culted from rewriter.cc.
     for (auto &stat : oldRHS) {
-        auto replacement = replaceNodes.find(stat.get());
-        if (replacement == replaceNodes.end()) {
-            klass->rhs.emplace_back(std::move(stat));
-        } else {
-            for (auto &newNode : replacement->second) {
+        auto newNodes = insertNodesAfterStat.find(stat.get());
+        klass->rhs.emplace_back(std::move(stat));
+        if (newNodes != insertNodesAfterStat.end()) {
+            for (auto &newNode : newNodes->second) {
                 klass->rhs.emplace_back(std::move(newNode));
             }
         }
