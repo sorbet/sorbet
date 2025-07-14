@@ -414,7 +414,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
     module ManualGetter
       extend T::Sig
 
-      sig {overridable.returns(Integer)}
+      sig { overridable.returns(Integer) }
       def a; 0; end
     end
 
@@ -422,7 +422,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
       extend T::Sig
       extend T::Helpers
 
-      sig {overridable.params(a: Integer).returns(Integer)}
+      sig { overridable.params(a: Integer).returns(Integer) }
       def a=(a); 0; end
     end
 
