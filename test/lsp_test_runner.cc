@@ -9,6 +9,7 @@
 #include "common/strings/formatting.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/lsp/LSPConfiguration.h"
+#include "main/options/options.h"
 #include "test/helpers/expectations.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
@@ -18,6 +19,9 @@ namespace sorbet::test {
 
 string singleTest;
 string webTraceFile;
+
+// Global parser variable used by position_assertions.cc
+realmain::options::Parser parser = realmain::options::Parser::SORBET;
 
 bool isTestMessage(const LSPMessage &msg) {
     return msg.isNotification() && msg.method() == LSPMethod::SorbetTypecheckRunInfo;
