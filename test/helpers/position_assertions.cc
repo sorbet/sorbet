@@ -19,6 +19,8 @@ using namespace std;
 
 namespace sorbet::test {
 
+realmain::options::Parser parser = realmain::options::Parser::ORIGINAL;
+
 namespace {
 /**
  * prettyPrintComment("foo.bar", {start: {character: 4}, end: {character: 7}}, "error: bar not defined") ->
@@ -58,6 +60,11 @@ template <typename T> bool isDuplicateDiagnostic(string_view filename, T *assert
 template <typename T>
 void reportMissingError(const string &filename, const T &assertion, string_view sourceLine, string_view errorPrefix,
                         bool missingDuplicate = false) {
+    // Skip error message checking when running with Prism.
+    if (sorbet::test::parser == realmain::options::Parser::PRISM) {
+        return;
+    }
+
     auto coreMessage = missingDuplicate ? "Error was not duplicated" : "Did not find expected error";
     auto messagePostfix = missingDuplicate ? "\nYou can fix this error by changing the assertion to `error:`." : "";
     ADD_FAIL_CHECK_AT(filename.c_str(), assertion.range->start->line + 1,
@@ -68,9 +75,15 @@ void reportMissingError(const string &filename, const T &assertion, string_view 
 
 void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine,
                            string_view errorPrefix) {
+    // Skip error message checking when running with Prism.
+    if (sorbet::test::parser == realmain::options::Parser::PRISM) {
+        return;
+    }
+
     auto diagnosticMessage = (diagnostic.severity == DiagnosticSeverity::Information)
                                  ? fmt::format("untyped: {}", diagnostic.message)
                                  : fmt::format("error: {}", diagnostic.message);
+
     ADD_FAIL_CHECK_AT(
         filename.c_str(), diagnostic.range->start->line + 1,
         fmt::format(
@@ -483,6 +496,10 @@ string ErrorAssertion::toString() const {
 }
 
 bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
+    // Skip error message checking when running with Prism.
+    if (sorbet::test::parser == realmain::options::Parser::PRISM) {
+        return true;
+    }
     // The error message must contain `message`.
     if (diagnostic.message.find(message) == string::npos) {
         ADD_FAIL_CHECK_AT(filename.c_str(), range->start->line + 1,

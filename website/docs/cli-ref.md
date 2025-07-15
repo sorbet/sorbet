@@ -426,5 +426,11 @@ Usage:
                                 present in this file (default: "")
   -h, --help [=SECTION(=all)]   Show help. Can pass an optional SECTION to show help for
                                 only one section instead of the default of all sections
+      --parser {[original], prism}
+                                Which parser to use. Prism support is experimental and
+                                still under active development. Correct code should still
+                                parse correctly, but error diagnostics and
+                                auto-corrections are a work-in-progress. (default:
+                                original)
 
 ```
