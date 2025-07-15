@@ -80,6 +80,17 @@ module OpenURI
   Options = T.let(T.unsafe(nil), T::Hash[Symbol, T.untyped])
 end
 
+class OpenURI::Buffer
+  sig {returns(Integer)}
+  attr_reader :size
+
+  StringMax = T.let(10240, Integer)
+
+  def initialize; end
+  def <<(str); end
+  def io;end
+end
+
 class OpenURI::HTTPError < ::StandardError
   def io; end
 
