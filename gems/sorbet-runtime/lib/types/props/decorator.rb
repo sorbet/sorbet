@@ -721,7 +721,8 @@ class T::Props::Decorator
     # cwong: should we check for bad keys? `sig { override(not_real: true) }` on a normal function
     # errors statically but not at runtime.
 
-    # CR cwong: this means {reader: false, allow_incompatible: true} will become {allow_incompatible: true}
+    # XX cwong: this means {reader: false, allow_incompatible: true} will become {allow_incompatible: true},
+    # is that fine?
     unless (allow_incompatible = d[:allow_incompatible]).nil?
       return {reader: {allow_incompatible: !!allow_incompatible},
               writer: {allow_incompatible: !!allow_incompatible}}.to_h
