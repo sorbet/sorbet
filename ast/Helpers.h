@@ -50,7 +50,7 @@ public:
         Send::ARGS_store nargs;
         Send::Flags flags;
         if (blk != nullptr) {
-            flags.hasBlock = true;
+            flags.blockType = Send::BlockType::Present;
             nargs.emplace_back(std::move(blk));
         }
         return Send(loc, std::move(recv), fun, funLoc, 0, std::move(nargs), flags);
@@ -349,7 +349,7 @@ public:
         auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc,
                          Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
         auto sigSend = ast::cast_tree<ast::Send>(sig);
-        sigSend->setBlock(Block0(loc, std::move(returns)));
+        sigSend->setBlock(Block0(loc, std::move(returns)), Send::BlockType::Present);
         sigSend->flags.isRewriterSynthesized = true;
         return sig;
     }
@@ -360,7 +360,7 @@ public:
         auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc,
                          Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
         auto sigSend = ast::cast_tree<ast::Send>(sig);
-        sigSend->setBlock(Block0(loc, std::move(void_)));
+        sigSend->setBlock(Block0(loc, std::move(void_)), Send::BlockType::Present);
         sigSend->flags.isRewriterSynthesized = true;
         return sig;
     }
@@ -370,7 +370,7 @@ public:
         auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc,
                          Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
         auto sigSend = ast::cast_tree<ast::Send>(sig);
-        sigSend->setBlock(Block0(loc, std::move(returns)));
+        sigSend->setBlock(Block0(loc, std::move(returns)), Send::BlockType::Present);
         sigSend->flags.isRewriterSynthesized = true;
         return sig;
     }
