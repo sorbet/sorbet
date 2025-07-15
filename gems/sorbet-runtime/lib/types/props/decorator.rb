@@ -317,11 +317,14 @@ class T::Props::Decorator
   private def validate_overrides(name, rules)
     override = elaborate_override(name, rules.delete(:override))
 
-    if override[:reader] && !is_override?(name)
+    return if rules[:without_accessors]
+
+    if override[:reader] && !is_override?(name) && !props.include?(name)
       raise ArgumentError.new("You marked the getter for prop #{name.inspect} as `override`, but the method `#{name}` doesn't exist to be overridden.")
     end
 
-    if override[:writer] && !is_override?("#{name}=".to_sym) && !rules[:immutable]
+    # Properly, we should also check whether `props[name]` is immutable, but the old code didn't either.
+    if !rules[:immutable] && override[:writer] && !is_override?("#{name}=".to_sym) && !props.include?(name)
       raise ArgumentError.new("You marked the setter for prop #{name.inspect} as `override`, but the method `#{name}=` doesn't exist to be overridden.")
     end
   end
@@ -405,7 +408,7 @@ class T::Props::Decorator
     rules[:setter_proc] = setter_proc
     rules[:value_validate_proc] = value_validate_proc
 
-    validate_overrides(name, rules) unless rules[:without_accessors]
+    validate_overrides(name, rules)
     add_prop_definition(name, rules)
 
     # NB: using `without_accessors` doesn't make much sense unless you also define some other way to
