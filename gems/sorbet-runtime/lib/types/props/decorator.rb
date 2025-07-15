@@ -22,15 +22,18 @@ class T::Props::Decorator
 
   OVERRIDE_TRUE = T.let(
     {reader: {allow_incompatible: false}, writer: {allow_incompatible: false}}.freeze,
-    T::Hash[Symbol, {allow_incompatible: T::Boolean}])
+    T::Hash[Symbol, {allow_incompatible: T::Boolean}]
+  )
 
   OVERRIDE_READER = T.let(
     {reader: {allow_incompatible: false}}.freeze,
-    T::Hash[Symbol, {allow_incompatible: T::Boolean}])
+    T::Hash[Symbol, {allow_incompatible: T::Boolean}]
+  )
 
   OVERRIDE_WRITER = T.let(
     {writer: {allow_incompatible: false}}.freeze,
-    T::Hash[Symbol, {allow_incompatible: T::Boolean}])
+    T::Hash[Symbol, {allow_incompatible: T::Boolean}]
+  )
 
   OVERRIDE_EMPTY = T.let({}.freeze, T::Hash[Symbol, {allow_incompatible: T::Boolean}])
 
@@ -720,8 +723,8 @@ class T::Props::Decorator
 
     # CR cwong: this means {reader: false, allow_incompatible: true} will become {allow_incompatible: true}
     unless (allow_incompatible = d[:allow_incompatible]).nil?
-      return { reader: {allow_incompatible: !!allow_incompatible},
-               writer: {allow_incompatible: !!allow_incompatible}}.to_h
+      return {reader: {allow_incompatible: !!allow_incompatible},
+              writer: {allow_incompatible: !!allow_incompatible}}.to_h
     end
 
     result = {}
