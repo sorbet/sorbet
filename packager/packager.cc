@@ -1706,15 +1706,13 @@ class ComputePackageSCCs {
 
     // DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
     // detecting SCCs.
-    template <core::packages::ImportType EdgeType>
-    void strongConnect(core::packages::MangledName pkgName, NodeInfo &infoAtEntry) {
+    template <core::packages::ImportType EdgeType, typename P>
+    void strongConnect(core::packages::MangledName pkgName, NodeInfo &infoAtEntry, P &packageGraph) {
         auto &packageDB = gs.packageDB();
-        auto *pkgInfoPtr = packageDB.getPackageInfoNonConst(pkgName);
-        if (!pkgInfoPtr) {
+        if (!packageDB.getPackageInfo(pkgName).exists()) {
             // This is to handle the case where the user imports a package that doesn't exist.
             return;
         }
-        auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
 
         infoAtEntry.index = this->nextIndex;
         infoAtEntry.lowLink = this->nextIndex;
@@ -1722,22 +1720,22 @@ class ComputePackageSCCs {
         this->stack.push_back(pkgName);
         infoAtEntry.onStack = true;
 
-        for (auto &i : pkgInfo.importedPackageNames) {
+        for (auto [name, type] : packageGraph.getImports(pkgName)) {
             // We want to consider all imports from test code, but only normal imports for application code.
             if constexpr (EdgeType == core::packages::ImportType::Normal) {
-                if (i.type != core::packages::ImportType::Normal) {
+                if (type != core::packages::ImportType::Normal) {
                     continue;
                 }
             }
             // We need to be careful with this; it's not valid after a call to `strongConnect`,
             // because our reference might disappear from underneath us during that call.
-            auto &importInfo = this->nodeMap[i.name.mangledName];
+            auto &importInfo = this->nodeMap[name];
             if (importInfo.index == NodeInfo::UNVISITED) {
                 // This is a tree edge (ie. a forward edge that we haven't visited yet).
-                this->strongConnect<EdgeType>(i.name.mangledName, importInfo);
+                this->strongConnect<EdgeType>(name, importInfo, packageGraph);
 
                 // Need to re-lookup for the reason above.
-                auto &importInfo = this->nodeMap[i.name.mangledName];
+                auto &importInfo = this->nodeMap[name];
                 if (importInfo.index == NodeInfo::UNVISITED) {
                     // This is to handle early return above.
                     continue;
@@ -1796,24 +1794,23 @@ class ComputePackageSCCs {
             // Iterate the imports of each member, building the edges of the condensation. This step is performed after
             // we've visited all members of the SCC once, to ensure that their ids have all been populated.
             for (auto name : condensationNode.members) {
-                auto &member = PackageInfoImpl::from(*(packageDB.getPackageInfoNonConst(name)));
-                for (auto &i : member.importedPackageNames) {
+                for (auto [name, type] : packageGraph.getImports(name)) {
                     // We want to consider all imports from test code, but only normal imports for application code.
                     if constexpr (EdgeType == core::packages::ImportType::Normal) {
-                        if (i.type != core::packages::ImportType::Normal) {
+                        if (type != core::packages::ImportType::Normal) {
                             continue;
                         }
                     }
 
                     // The mangled name won't exist if the import was to a package that doesn't exist.
-                    if (!i.name.mangledName.exists()) {
+                    if (!name.exists()) {
                         continue;
                     }
 
                     // All of the imports of every member of the SCC will have been processed in the recursive step, so
                     // we can assume the scc id of the target exists. Additionally, all imports are to the original
                     // application code, which is why we don't consider using the `testSccID` here.
-                    auto impId = packageDB.getPackageInfo(i.name.mangledName).sccID();
+                    auto impId = packageDB.getPackageInfo(name).sccID();
                     ENFORCE(impId.has_value());
                     if (*impId == sccId) {
                         continue;
@@ -1826,13 +1823,13 @@ class ComputePackageSCCs {
     }
 
     // Tarjan's algorithm for finding strongly connected components
-    template <core::packages::ImportType EdgeType> void tarjan() {
+    template <core::packages::ImportType EdgeType, typename P> void tarjan(P &packageGraph) {
         this->nodeMap.clear();
         ENFORCE(this->stack.empty());
         for (auto package : gs.packageDB().packages()) {
             auto &info = this->nodeMap[package];
             if (info.index == NodeInfo::UNVISITED) {
-                this->strongConnect<EdgeType>(package, info);
+                this->strongConnect<EdgeType>(package, info, packageGraph);
             }
         }
     }
@@ -1840,14 +1837,14 @@ class ComputePackageSCCs {
 public:
     // NOTE: This function must be called every time an import is added or removed from a package.
     // It is relatively fast, so calling it on every __package.rb edit is an okay overapproximation for simplicity.
-    static core::packages::Condensation run(core::GlobalState &gs) {
+    template <typename P> static core::packages::Condensation run(core::GlobalState &gs, P &packageGraph) {
         Timer timeit(gs.tracer(), "packager::computeSCCs");
         ComputePackageSCCs scc(gs);
 
         // First, compute the SCCs for application code, and then for test code. This allows us to have more granular
         // SCCs, as test_import edges aren't subject to the same restrictions that import edges are.
-        scc.tarjan<core::packages::ImportType::Normal>();
-        scc.tarjan<core::packages::ImportType::TestHelper>();
+        scc.tarjan<core::packages::ImportType::Normal>(packageGraph);
+        scc.tarjan<core::packages::ImportType::TestHelper>(packageGraph);
 
         return move(scc.condensation);
     }
@@ -2159,6 +2156,26 @@ enum class PackagerMode {
     AllFiles,
 };
 
+class PackageDBPackageGraph {
+    core::packages::PackageDB &packageDB;
+
+public:
+    PackageDBPackageGraph(core::packages::PackageDB &packageDB) : packageDB(packageDB) {}
+
+    vector<pair<core::packages::MangledName, core::packages::ImportType>>
+    getImports(core::packages::MangledName packageName) {
+        ENFORCE(packageDB.getPackageInfo(packageName).exists());
+        auto &pkgInfo = PackageInfoImpl::from(packageDB.getPackageInfo(packageName));
+        vector<pair<core::packages::MangledName, core::packages::ImportType>> result;
+        std::transform(pkgInfo.importedPackageNames.begin(), pkgInfo.importedPackageNames.end(),
+                       std::back_inserter(result),
+                       [](Import i) -> pair<core::packages::MangledName, core::packages::ImportType> {
+                           return {i.name.mangledName, i.type};
+                       });
+        return result;
+    }
+};
+
 template <PackagerMode Mode>
 void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
     ENFORCE(!gs.cacheSensitiveOptions.runningUnderAutogen, "Packager pass does not run in autogen");
@@ -2187,7 +2204,8 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
 
         if constexpr (buildPackageDB) {
-            gs.packageDB().setCondensation(ComputePackageSCCs::run(gs));
+            PackageDBPackageGraph packageGraph{gs.packageDB()};
+            gs.packageDB().setCondensation(ComputePackageSCCs::run(gs, packageGraph));
         }
 
         {
