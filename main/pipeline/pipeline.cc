@@ -50,7 +50,6 @@
 #include "rewriter/rewriter.h"
 
 using namespace std;
-namespace Prism = sorbet::parser::Prism;
 
 namespace sorbet::realmain::pipeline {
 
