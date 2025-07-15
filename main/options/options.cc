@@ -812,8 +812,7 @@ string_view stripTrailingSlashes(string_view path) {
 
 } // namespace
 
-Parser extractParser(cxxopts::ParseResult &raw, std::shared_ptr<spdlog::logger> logger) {
-    string opt = raw["parser"].as<string>();
+Parser extractParser(std::string_view opt, std::shared_ptr<spdlog::logger> logger) {
     for (auto &known : parser_options) {
         if (known.option == opt) {
             return known.flag;
@@ -1001,7 +1000,7 @@ void readOptions(Options &opts,
             throw EarlyReturnWithCode(1);
         }
         opts.stopAfterPhase = extractStopAfter(raw, logger);
-        opts.parser = extractParser(raw, logger);
+        opts.parser = extractParser(raw["parser"].as<string>(), logger);
 
         opts.silenceErrors = raw["quiet"].as<bool>();
         opts.autocorrect = raw["autocorrect"].as<bool>();

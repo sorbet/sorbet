@@ -8,7 +8,6 @@
 #include "core/TrackUntyped.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "spdlog/spdlog.h"
-#include <cxxopts.hpp>
 #include <optional>
 
 namespace sorbet::realmain::options {
@@ -343,7 +342,7 @@ void readOptions(
     const std::vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
     std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
 
-Parser extractParser(cxxopts::ParseResult &raw, std::shared_ptr<spdlog::logger> logger);
+Parser extractParser(std::string_view opt, std::shared_ptr<spdlog::logger> logger);
 
 void flushPrinters(Options &);
 } // namespace sorbet::realmain::options
