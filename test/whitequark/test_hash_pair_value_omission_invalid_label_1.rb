@@ -1,3 +1,3 @@
 # typed: true
 
-{ bar!: } # error: identifier bar! is not valid to get
+{ bar!: } # parser-error: identifier bar! is not valid to get
