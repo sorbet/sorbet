@@ -150,6 +150,11 @@ const vector<PrintOptions> print_options({
     {"untyped-blame", &Printers::UntypedBlame, true, true, true},
 });
 
+const vector<ParserOptions> parser_options({
+    {"original", Parser::ORIGINAL},
+    {"prism", Parser::PRISM},
+});
+
 } // namespace
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};

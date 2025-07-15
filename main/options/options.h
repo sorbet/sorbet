@@ -117,11 +117,6 @@ struct ParserOptions {
     Parser flag;
 };
 
-const std::vector<ParserOptions> parser_options({
-    {"original", Parser::ORIGINAL},
-    {"prism", Parser::PRISM},
-});
-
 namespace {
 
 #if !defined(EMSCRIPTEN)
