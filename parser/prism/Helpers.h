@@ -1,6 +1,7 @@
 #ifndef SORBET_PARSER_PRISM_HELPERS_H
 #define SORBET_PARSER_PRISM_HELPERS_H
 
+#include <string_view>
 #include <type_traits>
 extern "C" {
 #include "prism.h"
@@ -200,6 +201,13 @@ template <typename PrismNode> PrismNode *down_cast(pm_node_t *anyNode) {
             pm_node_type_to_str(PrismNodeTypeHelper<PrismNode>::TypeID), PrismNodeTypeHelper<PrismNode>::TypeID,
             pm_node_type_to_str(PM_NODE_TYPE(anyNode)), PM_NODE_TYPE(anyNode));
     return reinterpret_cast<PrismNode *>(anyNode);
+}
+
+inline std::string_view cast_prism_string(const uint8_t *source, size_t length) {
+    // Prism conservatively uses `const uint8_t *` for its string types, to support platforms with non-8-bit chars.
+    // Sorbet can be a bit more lax, and just assume that characters are 8 bits long.
+    static_assert(std::is_same_v<const unsigned char *, const uint8_t *>, "Sorbet assumes that `char` is 8 bits long");
+    return std::string_view(reinterpret_cast<const char *>(source), length);
 }
 
 } // namespace sorbet::parser::Prism
