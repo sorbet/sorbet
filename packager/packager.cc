@@ -1777,17 +1777,15 @@ class ComputePackageSCCs {
                 this->stack.pop_back();
                 this->nodeMap[poppedPkgName].onStack = false;
 
-                auto &poppedPkgInfo = PackageInfoImpl::from(*(packageDB.getPackageInfoNonConst(poppedPkgName)));
                 if constexpr (EdgeType == core::packages::ImportType::Normal) {
-                    poppedPkgInfo.sccID_ = sccId;
+                    packageGraph.setSCCId(poppedPkgName, sccId);
                 } else if constexpr (EdgeType != core::packages::ImportType::Normal) {
-                    poppedPkgInfo.testSccID_ = sccId;
+                    packageGraph.setTestSCCId(poppedPkgName, sccId);
 
                     // Tests have an implicit dependency on their package's application code. Those scc ids must
                     // exist at this point, as we've already traversed all packages once.
-                    auto appSccId = poppedPkgInfo.sccID_;
-                    ENFORCE(appSccId.has_value());
-                    condensationNode.imports.insert(*appSccId);
+                    auto appSccId = packageGraph.getSCCId(poppedPkgName);
+                    condensationNode.imports.insert(appSccId);
                 }
             } while (poppedPkgName != pkgName);
 
@@ -1810,13 +1808,12 @@ class ComputePackageSCCs {
                     // All of the imports of every member of the SCC will have been processed in the recursive step, so
                     // we can assume the scc id of the target exists. Additionally, all imports are to the original
                     // application code, which is why we don't consider using the `testSccID` here.
-                    auto impId = packageDB.getPackageInfo(name).sccID();
-                    ENFORCE(impId.has_value());
-                    if (*impId == sccId) {
+                    auto impId = packageGraph.getSCCId(name);
+                    if (impId == sccId) {
                         continue;
                     }
 
-                    condensationNode.imports.insert(*impId);
+                    condensationNode.imports.insert(impId);
                 }
             }
         }
@@ -2173,6 +2170,30 @@ public:
                            return {i.name.mangledName, i.type};
                        });
         return result;
+    }
+
+    void setSCCId(core::packages::MangledName packageName, int sccID) {
+        auto *pkgInfoPtr = packageDB.getPackageInfoNonConst(packageName);
+        if (!pkgInfoPtr) {
+            return;
+        }
+        auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
+        pkgInfo.sccID_ = sccID;
+    }
+
+    int getSCCId(core::packages::MangledName packageName) {
+        ENFORCE(packageDB.getPackageInfo(packageName).exists());
+        ENFORCE(packageDB.getPackageInfo(packageName).sccID().has_value());
+        return packageDB.getPackageInfo(packageName).sccID().value();
+    }
+
+    void setTestSCCId(core::packages::MangledName packageName, int sccID) {
+        auto *pkgInfoPtr = packageDB.getPackageInfoNonConst(packageName);
+        if (!pkgInfoPtr) {
+            return;
+        }
+        auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
+        pkgInfo.testSccID_ = sccID;
     }
 };
 
