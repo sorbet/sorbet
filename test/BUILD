@@ -123,10 +123,10 @@ sh_test(
 )
 
 # Load the macro that creates a test for every file in the prism_regression folder
-load("//test:prism_location_test.bzl", "prism_test_suite")
+load("//test:prism_location_test.bzl", "prism_location_test_suite")
 
 # Run the macro
-prism_test_suite(
+prism_location_test_suite(
     name = "prism_location_tests",
     srcs = glob(["prism_regression/**/*.rb"]),
 )
