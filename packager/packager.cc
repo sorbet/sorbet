@@ -1847,7 +1847,7 @@ class ComputePackageSCCs {
                 }
             } while (poppedPkgName != pkgName);
 
-            // Seed the imports with the set prelude SCCs.
+            // Seed the imports with the set of prelude SCCs.
             for (auto sccId : implicitImports) {
                 condensationNode.imports.insert(sccId);
             }
