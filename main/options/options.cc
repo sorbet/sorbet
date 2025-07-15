@@ -812,7 +812,7 @@ string_view stripTrailingSlashes(string_view path) {
 
 } // namespace
 
-Parser extractParser(std::string_view opt, std::shared_ptr<spdlog::logger> logger) {
+std::optional<Parser> extractParser(std::string_view opt, std::shared_ptr<spdlog::logger> logger) {
     for (auto &known : parser_options) {
         if (known.option == opt) {
             return known.flag;
@@ -824,7 +824,7 @@ Parser extractParser(std::string_view opt, std::shared_ptr<spdlog::logger> logge
     }
 
     logger->error("Unknown --parser option: {}\nValid values: {}", opt, fmt::join(allOptions, ", "));
-    return Parser::ORIGINAL;
+    return nullopt;
 }
 
 void Options::flushPrinters() {
@@ -1000,7 +1000,7 @@ void readOptions(Options &opts,
             throw EarlyReturnWithCode(1);
         }
         opts.stopAfterPhase = extractStopAfter(raw, logger);
-        opts.parser = extractParser(raw["parser"].as<string>(), logger);
+        opts.parser = extractParser(raw["parser"].as<string>(), logger).value_or(Parser::ORIGINAL);
 
         opts.silenceErrors = raw["quiet"].as<bool>();
         opts.autocorrect = raw["autocorrect"].as<bool>();

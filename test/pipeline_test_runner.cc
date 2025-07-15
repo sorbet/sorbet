@@ -822,20 +822,13 @@ int main(int argc, char *argv[]) {
 
     auto logger = spdlog::stderr_color_mt("test_runner");
 
-    string parserOpt = res["parser"].as<string>();
-    sorbet::test::parser = sorbet::realmain::options::extractParser(parserOpt, logger);
+    auto parser = sorbet::realmain::options::extractParser(res["parser"].as<string>(), logger);
 
-    bool foundParser = false;
-    for (auto &known : sorbet::realmain::options::parser_options) {
-        if (known.option == parserOpt) {
-            foundParser = true;
-            break;
-        }
-    }
-
-    if (!foundParser) {
+    if (!parser) {
         return 1;
     }
+
+    sorbet::test::parser = *parser;
 
     doctest::Context context(argc, argv);
     return context.run();

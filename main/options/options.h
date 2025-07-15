@@ -342,7 +342,7 @@ void readOptions(
     const std::vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
     std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
 
-Parser extractParser(std::string_view opt, std::shared_ptr<spdlog::logger> logger);
+std::optional<Parser> extractParser(std::string_view opt, std::shared_ptr<spdlog::logger> logger);
 
 void flushPrinters(Options &);
 } // namespace sorbet::realmain::options
