@@ -20,6 +20,20 @@ class T::Props::Decorator
   EMPTY_PROPS = T.let({}.freeze, T::Hash[Symbol, Rules], checked: false)
   private_constant :EMPTY_PROPS
 
+  OVERRIDE_TRUE = T.let(
+    {reader: {allow_incompatible: false}, writer: {allow_incompatible: false}}.freeze,
+    T::Hash[Symbol, {allow_incompatible: T::Boolean}])
+
+  OVERRIDE_READER = T.let(
+    {reader: {allow_incompatible: false}}.freeze,
+    T::Hash[Symbol, {allow_incompatible: T::Boolean}])
+
+  OVERRIDE_WRITER = T.let(
+    {writer: {allow_incompatible: false}}.freeze,
+    T::Hash[Symbol, {allow_incompatible: T::Boolean}])
+
+  OVERRIDE_EMPTY = T.let({}.freeze, T::Hash[Symbol, {allow_incompatible: T::Boolean}])
+
   sig { params(klass: T.untyped).void.checked(:never) }
   def initialize(klass)
     @class = T.let(klass, T.all(Module, T::Props::ClassMethods))
@@ -294,13 +308,13 @@ class T::Props::Decorator
     T::Utils::Nilable.is_union_with_nilclass(cls) || ((cls == T.untyped || cls == NilClass) && rules.key?(:default) && rules[:default].nil?)
   end
 
-  sig { params(name: Symbol).returns(T::Boolean) }
+  sig(:final) { params(name: Symbol).returns(T::Boolean).checked(:never) }
   private def is_override?(name)
     @class.method_defined?(name) && !@class.method_defined?(name, false)
   end
 
-  sig { params(name: Symbol, rules: Rules).void }
-  def validate_overrides(name, rules)
+  sig(:final) { params(name: Symbol, rules: Rules).void.checked(:never) }
+  private def validate_overrides(name, rules)
     override = elaborate_override(name, rules.delete(:override))
 
     if override[:reader] && !is_override?(name)
@@ -668,16 +682,33 @@ class T::Props::Decorator
     end
   end
 
-  sig do
+  # CR cwong: account for `allow_incompatible: :visibility`
+  sig(:final) do
+    params(key: Symbol, d: T.untyped, out: T::Hash[Symbol, {allow_incompatible: T::Boolean}])
+      .void
+      .checked(:never)
+  end
+  private def elaborate_override_entry(key, d, out)
+    # It's written this way so that `{reader: false}` will omit the entry for `reader` in the
+    # result entirely
+    case d[key]
+    when TrueClass
+      out[:reader] = {allow_incompatible: false}
+    when Hash
+      out[:reader] = {allow_incompatible: !!d[:reader][:allow_incompatible]}
+    end
+  end
+
+  sig(:final) do
     params(name: Symbol, d: T.untyped)
       .returns(T::Hash[Symbol, {allow_incompatible: T::Boolean}])
       .checked(:never)
   end
   private def elaborate_override(name, d)
-    return {reader: {allow_incompatible: false}, writer: {allow_incompatible: false}}.to_h if d == true
-    return {reader: {allow_incompatible: false}}.to_h if d == :reader
-    return {writer: {allow_incompatible: false}}.to_h if d == :writer
-    return {} if d.nil?
+    return OVERRIDE_TRUE if d == true
+    return OVERRIDE_READER if d == :reader
+    return OVERRIDE_WRITER if d == :writer
+    return OVERRIDE_EMPTY if d == false || d.nil?
     unless d.is_a?(Hash)
       raise ArgumentError.new("`override` only accepts `true`, `:reader`, `:writer`, or a Hash in prop #{@class.name}.#{name}")
     end
@@ -685,23 +716,14 @@ class T::Props::Decorator
     # cwong: should we check for bad keys? `sig { override(not_real: true) }` on a normal function
     # errors statically but not at runtime.
 
+    # CR cwong: this means {reader: false, allow_incompatible: true} will become {allow_incompatible: true}
+    unless (allow_incompatible = d[:allow_incompatible]).nil?
+      return {reader: {allow_incompatible: !!allow_incompatible}, writer: {allow_incompatible: !!allow_incompatible}}.to_h
+    end
+
     result = {}
-
-    # We do it this way instead of mapping to account for `{reader: false}`
-    case d[:reader]
-    when TrueClass
-      result[:reader] = {allow_incompatible: false}.to_h
-    when Hash
-      result[:reader] = {allow_incompatible: !!d[:reader][:allow_incompatible]}.to_h
-    end
-
-    case d[:writer]
-    when TrueClass
-      result[:writer] = {allow_incompatible: false}.to_h
-    when Hash
-      result[:writer] = {allow_incompatible: !!d[:writer][:allow_incompatible]}.to_h
-    end
-
+    elaborate_override_entry(:reader, d, result)
+    elaborate_override_entry(:writer, d, result)
     result
   end
 
