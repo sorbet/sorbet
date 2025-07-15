@@ -682,7 +682,6 @@ class T::Props::Decorator
     end
   end
 
-  # CR cwong: account for `allow_incompatible: :visibility`
   sig(:final) do
     params(key: Symbol, d: T.untyped, out: T::Hash[Symbol, {allow_incompatible: T::Boolean}])
       .void
@@ -710,7 +709,7 @@ class T::Props::Decorator
     return OVERRIDE_WRITER if d == :writer
     return OVERRIDE_EMPTY if d == false || d.nil?
     unless d.is_a?(Hash)
-      raise ArgumentError.new("`override` only accepts `true`, `:reader`, `:writer`, or a Hash in prop #{@class.name}.#{name}")
+      raise ArgumentError.new("`override` only accepts `true`, `:reader`, `:writer`, or a Hash in prop #{@class.name}.#{name} (got #{d.class})")
     end
 
     # cwong: should we check for bad keys? `sig { override(not_real: true) }` on a normal function
@@ -718,7 +717,8 @@ class T::Props::Decorator
 
     # CR cwong: this means {reader: false, allow_incompatible: true} will become {allow_incompatible: true}
     unless (allow_incompatible = d[:allow_incompatible]).nil?
-      return {reader: {allow_incompatible: !!allow_incompatible}, writer: {allow_incompatible: !!allow_incompatible}}.to_h
+      return { reader: {allow_incompatible: !!allow_incompatible},
+               writer: {allow_incompatible: !!allow_incompatible}}.to_h
     end
 
     result = {}
