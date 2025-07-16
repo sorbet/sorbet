@@ -2078,6 +2078,20 @@ void validatePackage(core::Context ctx, absl::Span<const core::packages::Mangled
     }
 
     if (pkgInfo.isPreludePackage()) {
+        // Prelude packages must be in the lowest possible layer, as that's the only way to ensure that the implicit
+        // imports of them are valid.
+        if (enforceLayering) {
+            if (auto layer = pkgInfo.layer()) {
+                if (packageDB.layerIndex(layer->first) != 0) {
+                    if (auto e = ctx.beginError(layer->second, core::errors::Packager::PreludeLowestLayer)) {
+                        auto layers = packageDB.layers();
+                        e.setHeader("Prelude package `{}` must be in layer `{}`", pkgInfo.name.toString(ctx),
+                                    layers.front().toString(ctx));
+                    }
+                }
+            }
+        }
+
         // We disallow `visible_to` annotations in prelude pakcages, as they're implicitly imported by all non-prelude
         // packages.
         for (auto &v : pkgInfo.visibleTo_) {

@@ -35,5 +35,6 @@ constexpr ErrorClass StrictDependenciesViolation{3727, StrictLevel::False};
 constexpr ErrorClass NoPreludeVisibleTo{3728, StrictLevel::False};
 constexpr ErrorClass PreludePackageImport{3729, StrictLevel::False};
 constexpr ErrorClass NoExplicitPreludeImport{3730, StrictLevel::False};
+constexpr ErrorClass PreludeLowestLayer{3731, StrictLevel::False};
 } // namespace sorbet::core::errors::Packager
 #endif
