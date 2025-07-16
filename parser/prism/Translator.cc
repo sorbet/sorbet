@@ -1878,7 +1878,7 @@ unique_ptr<parser::Regexp> Translator::translateRegexp(pm_string_t unescaped, co
 }
 
 string_view Translator::sliceLocation(pm_location_t loc) {
-    return string_view(reinterpret_cast<const char *>(loc.start), loc.end - loc.start);
+    return cast_prism_string(loc.start, loc.end - loc.start);
 }
 
 // Creates a `parser::Mlhs` for either a `PM_MULTI_WRITE_NODE` or `PM_MULTI_TARGET_NODE`.

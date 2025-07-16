@@ -150,6 +150,11 @@ const vector<PrintOptions> print_options({
     {"untyped-blame", &Printers::UntypedBlame, true, true, true},
 });
 
+const vector<ParserOptions> parser_options({
+    {"original", Parser::ORIGINAL},
+    {"prism", Parser::PRISM},
+});
+
 } // namespace
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
@@ -812,8 +817,7 @@ string_view stripTrailingSlashes(string_view path) {
 
 } // namespace
 
-Parser extractParser(cxxopts::ParseResult &raw, std::shared_ptr<spdlog::logger> logger) {
-    string opt = raw["parser"].as<string>();
+std::optional<Parser> extractParser(std::string_view opt, std::shared_ptr<spdlog::logger> logger) {
     for (auto &known : parser_options) {
         if (known.option == opt) {
             return known.flag;
@@ -825,7 +829,7 @@ Parser extractParser(cxxopts::ParseResult &raw, std::shared_ptr<spdlog::logger> 
     }
 
     logger->error("Unknown --parser option: {}\nValid values: {}", opt, fmt::join(allOptions, ", "));
-    return Parser::ORIGINAL;
+    return nullopt;
 }
 
 void Options::flushPrinters() {
@@ -1001,7 +1005,13 @@ void readOptions(Options &opts,
             throw EarlyReturnWithCode(1);
         }
         opts.stopAfterPhase = extractStopAfter(raw, logger);
-        opts.parser = extractParser(raw, logger);
+
+        opts.parser = extractParser(raw["parser"].as<string>(), logger).value_or(Parser::ORIGINAL);
+        if (opts.parser == Parser::PRISM && opts.cacheSensitiveOptions.rbsEnabled) {
+            logger->error("Prism support is experimental and still under active development. It is not yet compatible "
+                          "with RBS signatures. https://github.com/Shopify/sorbet/issues/574");
+            throw EarlyReturnWithCode(1);
+        }
 
         opts.silenceErrors = raw["quiet"].as<bool>();
         opts.autocorrect = raw["autocorrect"].as<bool>();

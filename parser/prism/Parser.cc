@@ -1,4 +1,5 @@
 #include "parser/prism/Parser.h"
+#include "parser/prism/Helpers.h"
 #include "parser/prism/Translator.h"
 
 using namespace std;
@@ -32,11 +33,11 @@ core::LocOffsets Parser::translateLocation(pm_location_t location) const {
 string_view Parser::resolveConstant(pm_constant_id_t constantId) const {
     pm_constant_t *constant = pm_constant_pool_id_to_constant(&parser.constant_pool, constantId);
 
-    return string_view(reinterpret_cast<const char *>(constant->start), constant->length);
+    return cast_prism_string(constant->start, constant->length);
 }
 
 string_view Parser::extractString(pm_string_t *string) const {
-    return string_view(reinterpret_cast<const char *>(pm_string_source(string)), pm_string_length(string));
+    return cast_prism_string(pm_string_source(string), pm_string_length(string));
 }
 
 vector<ParseError> Parser::collectErrors() {
@@ -49,8 +50,7 @@ vector<ParseError> Parser::collectErrors() {
         auto *error = reinterpret_cast<pm_diagnostic_t *>(node);
         auto level = static_cast<pm_error_level_t>(error->level);
 
-        ParseError parseError(error->diag_id, string(reinterpret_cast<const char *>(error->message)), error->location,
-                              level);
+        ParseError parseError(error->diag_id, string(error->message), error->location, level);
 
         parseErrors.push_back(parseError);
     }

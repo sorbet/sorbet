@@ -1,4 +1,4 @@
-def prism_test_suite(name, srcs):
+def prism_location_test_suite(name, srcs):
     for src in srcs:
         test_name = src.replace(".rb", "") + "_location_test"
         native.sh_test(

@@ -8,7 +8,6 @@
 #include "core/TrackUntyped.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "spdlog/spdlog.h"
-#include <cxxopts.hpp>
 #include <optional>
 
 namespace sorbet::realmain::options {
@@ -117,11 +116,6 @@ struct ParserOptions {
     std::string option;
     Parser flag;
 };
-
-const std::vector<ParserOptions> parser_options({
-    {"original", Parser::ORIGINAL},
-    {"prism", Parser::PRISM},
-});
 
 namespace {
 
@@ -343,7 +337,7 @@ void readOptions(
     const std::vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
     std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
 
-Parser extractParser(cxxopts::ParseResult &raw, std::shared_ptr<spdlog::logger> logger);
+std::optional<Parser> extractParser(std::string_view opt, std::shared_ptr<spdlog::logger> logger);
 
 void flushPrinters(Options &);
 } // namespace sorbet::realmain::options
