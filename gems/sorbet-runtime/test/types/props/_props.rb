@@ -440,5 +440,37 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
         prop :a, Integer, override: {writer: {allow_incompatible: true}}
       end
     end
+
+    # This came up with props defined by Chalk::ODM::AbstractModel
+    it 'handles indirect prop definitions' do
+      module A
+        extend T::Helpers
+        def self.included(base = nil, &block)
+          if base.nil?
+            raise "double-defined block" if instance_variable_defined?(:@_included_block)
+
+            @_included_block = block
+          else
+            super
+          end
+        end
+
+        def self.append_features(base)
+          return false if base < self
+          super
+          base.class_eval(&@_included_block) if instance_variable_defined?(:@_included_block)
+        end
+
+        included do
+          T.unsafe(self).prop :foo, T.nilable(String)
+        end
+      end
+
+      class B
+        include T::Props
+        include A
+        prop :foo, String, override: true
+      end
+    end
   end
 end
