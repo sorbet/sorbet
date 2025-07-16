@@ -90,6 +90,9 @@ public:
     // Fetch the condensation graph for queries.
     const Condensation &condensation() const;
 
+    // Return a vector populated with the names of the prelude packages.
+    std::vector<MangledName> preludePackages() const;
+
 private:
     bool enabled_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;

@@ -67,6 +67,11 @@ public:
         return false;
     }
 
+    bool isPreludePackage() const {
+        notImplemented();
+        return false;
+    }
+
     vector<VisibleTo> visibleTo() const {
         return {};
     }
@@ -314,6 +319,17 @@ void PackageDB::setCondensation(Condensation &&condensation) {
 
 const Condensation &PackageDB::condensation() const {
     return this->condensation_;
+}
+
+vector<MangledName> PackageDB::preludePackages() const {
+    vector<MangledName> preludePackages;
+    for (const auto &[name, pkg] : this->packages_) {
+        if (pkg->isPreludePackage()) {
+            preludePackages.push_back(name);
+        }
+    }
+
+    return preludePackages;
 }
 
 } // namespace sorbet::core::packages
