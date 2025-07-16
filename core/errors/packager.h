@@ -37,5 +37,6 @@ constexpr ErrorClass InvalidMinTypedLevel{3729, StrictLevel::False};
 constexpr ErrorClass NoPreludeVisibleTo{3730, StrictLevel::False};
 constexpr ErrorClass PreludePackageImport{3731, StrictLevel::False};
 constexpr ErrorClass NoExplicitPreludeImport{3732, StrictLevel::False};
+constexpr ErrorClass PreludeLowestLayer{3733, StrictLevel::False};
 } // namespace sorbet::core::errors::Packager
 #endif
