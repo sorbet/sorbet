@@ -698,9 +698,9 @@ class T::Props::Decorator
     # result entirely
     case d[key]
     when TrueClass
-      out[:reader] = {allow_incompatible: false}
+      out[key] = {allow_incompatible: false}
     when Hash
-      out[:reader] = {allow_incompatible: !!d[:reader][:allow_incompatible]}
+      out[key] = {allow_incompatible: !!d[key][:allow_incompatible]}
     end
   end
 
