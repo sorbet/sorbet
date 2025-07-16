@@ -150,6 +150,11 @@ const vector<PrintOptions> print_options({
     {"untyped-blame", &Printers::UntypedBlame, true, true, true},
 });
 
+struct ParserOptions {
+    std::string option;
+    Parser flag;
+};
+
 const vector<ParserOptions> parser_options({
     {"original", Parser::ORIGINAL},
     {"prism", Parser::PRISM},

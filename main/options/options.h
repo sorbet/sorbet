@@ -112,11 +112,6 @@ enum class Parser {
     PRISM,
 };
 
-struct ParserOptions {
-    std::string option;
-    Parser flag;
-};
-
 namespace {
 
 #if !defined(EMSCRIPTEN)
