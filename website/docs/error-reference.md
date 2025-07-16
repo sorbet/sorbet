@@ -914,7 +914,7 @@ end
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) and [go/strict-dependencies](http://go/strict-dependencies) for more.
 
-It is an error to explicitly import a package marked as `prelude_package`.
+As all packages marked with `prelude_package` are implicitly imported by all non-prelude packages, we reject explicit imports of them to avoid the confusion of a `test_import` of a prelude package being treated as a normal import, for the purposes of the package graph.
 
 ```ruby
 class A < PackageSpec
@@ -927,6 +927,28 @@ class B < PackageSpec
 end
 
 class C < PackageSpec
+  prelude_package
+end
+```
+
+## 3731
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) and [go/strict-dependencies](http://go/strict-dependencies) for more.
+
+When layering is enabled, all packages marked `prelude_package` must be declared with the lowest level layer. This requirement is because prelude packages are imported implicitly by all non-prelude packages: declaring them at a layer other than the lowest would create layering violations for any package declared at a layer lower than any of the prelude packages.
+
+For example, if two layers exist named `utility` and `product`, the following would be an error:
+
+```ruby
+class A < PackageSpec # The implicit import of `B` causes a layering violation
+  layer 'utility'
+  strict_dependencies 'dag'
+end
+
+class B < PackageSpec
+  layer 'product'
+  strict_dependencies 'dag'
+
   prelude_package
 end
 ```
