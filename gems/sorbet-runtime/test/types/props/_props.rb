@@ -451,7 +451,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
     it 'handles indirect prop definitions' do
       module A
         extend T::Helpers
-        def self.included(base = nil, &block)
+        def self.included(base=nil, &block)
           if base.nil?
             raise "double-defined block" if instance_variable_defined?(:@_included_block)
 
