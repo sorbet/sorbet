@@ -489,7 +489,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
         end
       end
 
-      assert(error.message.include?("Attempted to redefine prop"))
+      assert(err.message.include?("Attempted to redefine prop"))
     end
   end
 end
