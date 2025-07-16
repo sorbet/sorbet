@@ -521,6 +521,49 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
     return result;
 }
 
+vector<ast::ExpressionPtr> runOneStat(core::MutableContext ctx, const PropContext &propContext, vector<PropInfo> &props,
+                                      UnorderedMap<core::NameRef, uint32_t> &seenProps,
+                                      const ast::ExpressionPtr &stat) {
+    auto send = ast::cast_tree<ast::Send>(stat);
+    if (send == nullptr) {
+        return {};
+    }
+    auto propInfo = parseProp(ctx, send);
+    if (!propInfo.has_value()) {
+        return {};
+    }
+
+    auto syntacticSuperClass = propContext.syntacticSuperClass;
+    if (!propInfo->isImmutable && syntacticSuperClass == SyntacticSuperClass::TImmutableStruct) {
+        if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::InvalidStructMember)) {
+            e.setHeader("Cannot use `{}` in an immutable struct", "prop");
+            e.replaceWith("Use `const`", ctx.locAt(propInfo->loc), "const");
+        }
+        return {};
+    }
+
+    if (wantTypedInitialize(syntacticSuperClass)) {
+        auto it = seenProps.find(propInfo->name);
+        if (it != seenProps.end()) {
+            if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::DuplicateProp)) {
+                auto headerProp = fmt::format("{} {}", propInfo->isImmutable ? "const" : "prop",
+                                              propInfo->name.showAsSymbolLiteral(ctx));
+                e.setHeader("The `{}` is defined multiple times", headerProp);
+                e.addErrorLine(ctx.locAt(props[it->second].loc), "Originally defined here");
+            }
+            return {};
+        }
+    }
+
+    auto processed = processProp(ctx, propInfo.value(), propContext);
+    ENFORCE(!processed.empty(), "if parseProp completed successfully, processProp must complete too");
+
+    seenProps[propInfo->name] = props.size();
+    props.emplace_back(std::move(propInfo.value()));
+
+    return processed;
+}
+
 } // namespace
 
 void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
@@ -536,69 +579,42 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         }
     }
     auto propContext = PropContext{syntacticSuperClass, klass->kind};
-    UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceNodes;
-    replaceNodes.reserve(klass->rhs.size());
+    UnorderedMap<void *, vector<ast::ExpressionPtr>> insertNodesAfterStat;
+    insertNodesAfterStat.reserve(klass->rhs.size());
     vector<PropInfo> props;
     UnorderedMap<core::NameRef, uint32_t> seenProps;
-    for (auto &stat : klass->rhs) {
-        auto send = ast::cast_tree<ast::Send>(stat);
-        if (send == nullptr) {
-            continue;
-        }
-        auto propInfo = parseProp(ctx, send);
-        if (!propInfo.has_value()) {
-            continue;
-        }
 
-        if (!propInfo->isImmutable && syntacticSuperClass == SyntacticSuperClass::TImmutableStruct) {
-            if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::InvalidStructMember)) {
-                e.setHeader("Cannot use `{}` in an immutable struct", "prop");
-                e.replaceWith("Use `const`", ctx.locAt(propInfo->loc), "const");
-            }
-            continue;
-        }
-
-        if (wantTypedInitialize(syntacticSuperClass)) {
-            auto it = seenProps.find(propInfo->name);
-            if (it != seenProps.end()) {
-                if (auto e = ctx.beginIndexerError(propInfo->loc, core::errors::Rewriter::DuplicateProp)) {
-                    auto headerProp = fmt::format("{} {}", propInfo->isImmutable ? "const" : "prop",
-                                                  propInfo->name.showAsSymbolLiteral(ctx));
-                    e.setHeader("The `{}` is defined multiple times", headerProp);
-                    e.addErrorLine(ctx.locAt(props[it->second].loc), "Originally defined here");
-                }
-                continue;
-            }
-        }
-
-        auto processed = processProp(ctx, propInfo.value(), propContext);
-        ENFORCE(!processed.empty(), "if parseProp completed successfully, processProp must complete too");
-
-        vector<ast::ExpressionPtr> nodes;
-        nodes.emplace_back(send->deepCopy());
-        nodes.insert(nodes.end(), make_move_iterator(processed.begin()), make_move_iterator(processed.end()));
-        replaceNodes[stat.get()] = std::move(nodes);
-
-        seenProps[propInfo->name] = props.size();
-        props.emplace_back(std::move(propInfo.value()));
+    for (const auto &stat : klass->rhs) {
+        // This is in a helper function to avoid taking mutable access to `klass->rhs`, to ensure we
+        // don't mutate it while we iterate.
+        insertNodesAfterStat[stat.get()] = runOneStat(ctx, propContext, props, seenProps, stat);
     }
-    auto oldRHS = std::move(klass->rhs);
-    klass->rhs.clear();
-    klass->rhs.reserve(oldRHS.size());
-    // we define our synthesized initialize first so that if the user wrote one themselves, it overrides ours.
+
+    vector<ast::ExpressionPtr> typedInitializeStats;
     if (wantTypedInitialize(syntacticSuperClass)) {
         // For direct T::Struct subclasses, we know that seeing no props means the constructor should be zero-arity.
-        for (auto &stat : mkTypedInitialize(ctx, klass->loc, klass->declLoc, props)) {
-            klass->rhs.emplace_back(std::move(stat));
-        }
+        typedInitializeStats = mkTypedInitialize(ctx, klass->loc, klass->declLoc, props);
     }
-    // this is cargo-culted from rewriter.cc.
+
+    auto capacity = klass->rhs.size() + typedInitializeStats.size();
+    for (const auto &[_oldStat, newStats] : insertNodesAfterStat) {
+        capacity += newStats.size();
+    }
+
+    auto oldRHS = std::move(klass->rhs);
+    klass->rhs.clear();
+    klass->rhs.reserve(capacity);
+
+    // we define our synthesized initialize first so that if the user wrote one themselves, it redefines ours.
+    for (auto &stat : typedInitializeStats) {
+        klass->rhs.emplace_back(std::move(stat));
+    }
+
     for (auto &stat : oldRHS) {
-        auto replacement = replaceNodes.find(stat.get());
-        if (replacement == replaceNodes.end()) {
-            klass->rhs.emplace_back(std::move(stat));
-        } else {
-            for (auto &newNode : replacement->second) {
+        auto newNodes = insertNodesAfterStat.find(stat.get());
+        klass->rhs.emplace_back(std::move(stat));
+        if (newNodes != insertNodesAfterStat.end()) {
+            for (auto &newNode : newNodes->second) {
                 klass->rhs.emplace_back(std::move(newNode));
             }
         }
