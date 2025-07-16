@@ -64,6 +64,12 @@ class T::Props::Decorator
   # checked(:never) - Rules hash is expensive to check
   sig { params(name: Symbol, rules: Rules).void.checked(:never) }
   def add_prop_definition(name, rules)
+    override = rules.delete(:override)
+
+    if props.include?(name) && !override
+      raise ArgumentError.new("Attempted to redefine prop #{name.inspect} on class #{@class} that's already defined without specifying :override => true: #{prop_rules(name)}")
+    end
+
     @props = @props.merge(name => rules.freeze).freeze
   end
 
@@ -318,7 +324,7 @@ class T::Props::Decorator
 
   sig(:final) { params(name: Symbol, rules: Rules).void.checked(:never) }
   private def validate_overrides(name, rules)
-    override = elaborate_override(name, rules.delete(:override))
+    override = elaborate_override(name, rules[:override])
 
     return if rules[:without_accessors]
 
