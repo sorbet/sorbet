@@ -20,22 +20,20 @@ class T::Props::Decorator
   EMPTY_PROPS = T.let({}.freeze, T::Hash[Symbol, Rules], checked: false)
   private_constant :EMPTY_PROPS
 
-  OVERRIDE_TRUE = T.let(
-    {reader: {allow_incompatible: false}, writer: {allow_incompatible: false}}.freeze,
-    T::Hash[Symbol, {allow_incompatible: T::Boolean}]
-  )
+  OVERRIDE_TRUE = {
+    reader: {allow_incompatible: false}.freeze,
+    writer: {allow_incompatible: false}.freeze
+  }.freeze
 
-  OVERRIDE_READER = T.let(
-    {reader: {allow_incompatible: false}}.freeze,
-    T::Hash[Symbol, {allow_incompatible: T::Boolean}]
-  )
+  OVERRIDE_READER = {
+    reader: {allow_incompatible: false}.freeze
+  }.freeze
 
-  OVERRIDE_WRITER = T.let(
-    {writer: {allow_incompatible: false}}.freeze,
-    T::Hash[Symbol, {allow_incompatible: T::Boolean}]
-  )
+  OVERRIDE_WRITER = {
+    writer: {allow_incompatible: false}.freeze
+  }.freeze
 
-  OVERRIDE_EMPTY = T.let({}.freeze, T::Hash[Symbol, {allow_incompatible: T::Boolean}])
+  OVERRIDE_EMPTY = {}.freeze
 
   sig { params(klass: T.untyped).void.checked(:never) }
   def initialize(klass)
