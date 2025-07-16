@@ -2,7 +2,7 @@
 # typed: true
 
 module T::Private::Methods
-  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :raw)
+  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :raw, :deprecated)
 
   class DeclBuilder
     attr_reader :decl
@@ -27,7 +27,8 @@ module T::Private::Methods
         ARG_NOT_PROVIDED, # on_failure
         nil, # override_allow_incompatible
         ARG_NOT_PROVIDED, # type_parameters
-        raw
+        raw,
+        false # deprecated
       )
     end
 
@@ -184,6 +185,18 @@ module T::Private::Methods
       when Modes.overridable, Modes.overridable_override
         raise BuilderError.new(".overridable cannot be repeated in a single signature")
       end
+
+      self
+    end
+
+    def deprecated
+      check_live!
+
+      if !decl.deprecated.equal?(false)
+        raise BuilderError.new(".deprecated cannot be repeated in a single signature")
+      end
+
+      decl.deprecated = true
 
       self
     end
