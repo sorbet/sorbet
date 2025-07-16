@@ -441,6 +441,12 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
       end
     end
 
+    it 'accepts override: false' do
+      class OverrideNothing < T::Struct
+        prop :a, Integer, override: false
+      end
+    end
+
     # This came up with props defined by Chalk::ODM::AbstractModel
     it 'handles indirect prop definitions' do
       module A
