@@ -478,5 +478,18 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
         prop :foo, String, override: true
       end
     end
+
+    it 'errors on duplicate prop definitions' do
+      err = assert_raises(ArgumentError) do
+        module A
+          include T::Props
+
+          prop :a, Integer
+          prop :a, Integer
+        end
+      end
+
+      assert(error.message.include?("Attempted to redefine prop"))
+    end
   end
 end
