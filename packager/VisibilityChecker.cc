@@ -80,6 +80,8 @@ class PropagateVisibility final {
         // `A::B`, we explicitly lookup and export them here. This is a design decision inherited from the previous
         // packages implementation, and we could remove it after migrating Stripe's codebase to not depend on package
         // names being exported by default.
+        //
+        // TODO(jez) This method becomes trivial if we can get packages' tests back into `A::B::Test`
         for (auto name : this->package.fullName()) {
             auto next = sym.data(gs)->findMember(gs, name);
             if (!next.exists() || !next.isClassOrModule()) {
@@ -129,14 +131,12 @@ class PropagateVisibility final {
             sym = sym.data(ctx)->owner;
         }
 
-        absl::c_reverse(names);
-
         auto &db = ctx.state.packageDB();
 
         {
             auto packageSym = core::Symbols::root();
-            for (auto name : names) {
-                auto member = packageSym.data(ctx)->findMember(ctx, name);
+            for (auto name = names.rbegin(); name != names.rend(); ++name) {
+                auto member = packageSym.data(ctx)->findMember(ctx, *name);
                 if (!member.exists() || !member.isClassOrModule()) {
                     packageSym = core::Symbols::noClassOrModule();
                     break;
@@ -161,8 +161,8 @@ class PropagateVisibility final {
             }
 
             testSym = member.asClassOrModuleRef();
-            for (auto name : names) {
-                auto member = testSym.data(ctx)->findMember(ctx, name);
+            for (auto name = names.rbegin(); name != names.rend(); ++name) {
+                auto member = testSym.data(ctx)->findMember(ctx, *name);
                 if (!member.exists() || !member.isClassOrModule()) {
                     testSym = core::Symbols::noClassOrModule();
                     break;

@@ -578,6 +578,23 @@ public:
 };
 CheckSize(SymbolRef, 4, 4);
 
+// ---- NOTE to VIM users ----
+//
+// If you want to renumber these IDs and you use Vim, this regex can be helpful:
+//
+//     :'<,'>s/\%(ClassOrModuleRef::fromRaw(\)\@<=\(\d\+\)/\=submatch(1)+1/
+//
+// Using it will require some modification. To use:
+//
+// 1.  Select the lines on which you want to increment or decrement the lines.
+// 2.  Type `:` and paste the command above (treating the `s` as the first character--the `'<,'>`
+//     will be pre-populated after `:`)
+// 3.  Edit the `ClassOrModuleRef` portion to the symbol kind that you want to modify (like
+//     MethodRef)
+// 4.  If you're adding a symbol, leave the `+1` at the end. if you're removing a symbol, change it
+//     to a `-1`. If you're adding/removing more than one, change it from `1` to however many
+//
+// Enjoy
 class Symbols {
     Symbols() = delete;
 
