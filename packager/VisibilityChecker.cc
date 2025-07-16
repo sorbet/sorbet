@@ -461,13 +461,11 @@ public:
         auto currentImportType = this->package.importsPackage(otherPackage);
         bool wasImported = currentImportType.has_value();
 
-        // Prelude packages are always imported (but not from other preluded packages). An implicit import is modeled as
-        // a normal import, but an explicit import of a prelude package can be treated as a test import.
+        // Prelude packages are implicitly imported into all non-prelude packages, and their imports are modeled as
+        // normal imports.
         if (!this->package.isPreludePackage() && pkg.isPreludePackage()) {
             wasImported = true;
-            if (!currentImportType.has_value()) {
-                currentImportType.emplace(core::packages::ImportType::Normal);
-            }
+            currentImportType.emplace(core::packages::ImportType::Normal);
         }
 
         // Is this a test import (whether test helper or not) used in a production context?
