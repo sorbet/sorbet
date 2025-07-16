@@ -1327,13 +1327,6 @@ struct PackageSpecBodyWalk {
             }
         }
 
-        if (send.fun == core::Names::restrictToService() && send.numPosArgs() == 1) {
-            // Transform: `restrict_to_service Foo` -> `restrict_to_service <PackageSpecRegistry>::Foo`
-            auto &posArg = send.getPosArg(0);
-            auto importArg = move(posArg);
-            posArg = ast::packager::prependRegistry(move(importArg));
-        }
-
         if (send.fun == core::Names::exportAll() && send.numPosArgs() == 0) {
             info.exportAll_ = true;
         }
@@ -1529,7 +1522,6 @@ struct PackageSpecBodyWalk {
             case core::Names::import().rawId():
             case core::Names::testImport().rawId():
             case core::Names::export_().rawId():
-            case core::Names::restrictToService().rawId():
             case core::Names::visibleTo().rawId():
             case core::Names::exportAll().rawId():
                 return true;

@@ -1046,10 +1046,6 @@ public:
         return MethodRef::fromRaw(12);
     }
 
-    static MethodRef PackageSpec_restrict_to_service() {
-        return MethodRef::fromRaw(13);
-    }
-
     static ClassOrModuleRef Encoding() {
         return ClassOrModuleRef::fromRaw(88);
     }
@@ -1059,31 +1055,31 @@ public:
     }
 
     static MethodRef Class_new() {
-        return MethodRef::fromRaw(14);
+        return MethodRef::fromRaw(13);
     }
 
     static MethodRef todoMethod() {
-        return MethodRef::fromRaw(15);
+        return MethodRef::fromRaw(14);
     }
 
     static MethodRef rootStaticInit() {
-        return MethodRef::fromRaw(16);
+        return MethodRef::fromRaw(15);
     }
 
     static MethodRef PackageSpec_visible_to() {
-        return MethodRef::fromRaw(17);
+        return MethodRef::fromRaw(16);
     }
 
     static MethodRef PackageSpec_export_all() {
-        return MethodRef::fromRaw(18);
+        return MethodRef::fromRaw(17);
     }
 
     static MethodRef PackageSpec_strict_dependencies() {
-        return MethodRef::fromRaw(19);
+        return MethodRef::fromRaw(18);
     }
 
     static MethodRef PackageSpec_layer() {
-        return MethodRef::fromRaw(20);
+        return MethodRef::fromRaw(19);
     }
 
     static ClassOrModuleRef MagicBindToAttachedClass() {
@@ -1111,11 +1107,11 @@ public:
     }
 
     static MethodRef T_Generic_squareBrackets() {
-        return MethodRef::fromRaw(21);
+        return MethodRef::fromRaw(20);
     }
 
     static MethodRef Kernel_lambda() {
-        return MethodRef::fromRaw(22);
+        return MethodRef::fromRaw(21);
     }
 
     static TypeArgumentRef Kernel_lambda_returnType() {
@@ -1123,11 +1119,11 @@ public:
     }
 
     static MethodRef Kernel_lambdaTLet() {
-        return MethodRef::fromRaw(23);
+        return MethodRef::fromRaw(22);
     }
 
     static MethodRef Kernel_proc() {
-        return MethodRef::fromRaw(24);
+        return MethodRef::fromRaw(23);
     }
 
     static TypeArgumentRef Kernel_proc_returnType() {
@@ -1139,11 +1135,11 @@ public:
     }
 
     static MethodRef Module_syntheticSquareBrackets() {
-        return MethodRef::fromRaw(57);
+        return MethodRef::fromRaw(56);
     }
 
     static MethodRef Sorbet_Private_Static_typeMember() {
-        return MethodRef::fromRaw(58);
+        return MethodRef::fromRaw(57);
     }
 
     static FieldRef Magic_UntypedSource_super() {
