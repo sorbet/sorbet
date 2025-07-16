@@ -447,7 +447,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
       end
     end
 
-    # This came up with props defined by Chalk::ODM::AbstractModel
+    # This came up with props defined by some Stripe-internal classes
     it 'handles indirect prop definitions' do
       module A
         extend T::Helpers

@@ -318,7 +318,7 @@ class T::Props::Decorator
   end
 
   sig(:final) { params(name: Symbol).returns(T::Boolean).checked(:never) }
-  private def is_override?(name)
+  private def method_defined_on_ancestor?(name)
     @class.method_defined?(name) && !@class.method_defined?(name, false)
   end
 
@@ -328,12 +328,12 @@ class T::Props::Decorator
 
     return if rules[:without_accessors]
 
-    if override[:reader] && !is_override?(name) && !props.include?(name)
+    if override[:reader] && !method_defined_on_ancestor?(name) && !props.include?(name)
       raise ArgumentError.new("You marked the getter for prop #{name.inspect} as `override`, but the method `#{name}` doesn't exist to be overridden.")
     end
 
     # Properly, we should also check whether `props[name]` is immutable, but the old code didn't either.
-    if !rules[:immutable] && override[:writer] && !is_override?("#{name}=".to_sym) && !props.include?(name)
+    if !rules[:immutable] && override[:writer] && !method_defined_on_ancestor?("#{name}=".to_sym) && !props.include?(name)
       raise ArgumentError.new("You marked the setter for prop #{name.inspect} as `override`, but the method `#{name}=` doesn't exist to be overridden.")
     end
   end
