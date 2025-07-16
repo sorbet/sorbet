@@ -135,7 +135,7 @@ class PropagateVisibility final {
 
         {
             auto packageSym = core::Symbols::root();
-            for (auto name = names.rbegin(); name != names.rend(); name++) {
+            for (auto name = names.rbegin(); name != names.rend(); ++name) {
                 auto member = packageSym.data(ctx)->findMember(ctx, *name);
                 if (!member.exists() || !member.isClassOrModule()) {
                     packageSym = core::Symbols::noClassOrModule();
@@ -161,7 +161,7 @@ class PropagateVisibility final {
             }
 
             testSym = member.asClassOrModuleRef();
-            for (auto name = names.rbegin(); name != names.rend(); name++) {
+            for (auto name = names.rbegin(); name != names.rend(); ++name) {
                 auto member = testSym.data(ctx)->findMember(ctx, *name);
                 if (!member.exists() || !member.isClassOrModule()) {
                     testSym = core::Symbols::noClassOrModule();
