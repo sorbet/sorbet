@@ -1,5 +1,8 @@
 # Version history
 
+## 0.3.44
+- Allow configuring the diagnostic severity used to highlight untyped code. See [the docs](https://sorbet.org/docs/highlight-untyped) for more.
+
 ## 0.3.43
 - Remove use of SIGINT when terminating Sorbet.
 

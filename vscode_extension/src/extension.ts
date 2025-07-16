@@ -9,6 +9,7 @@ import {
   toggleUntypedCodeHighlighting,
   configureUntypedCodeHighlighting,
 } from "./commands/toggleUntypedCodeHighlighting";
+import { configureUntypedCodeHighlightingDiagnosticSeverity } from "./commands/configureUntypedCodeHighlightingDiagnosticSeverity";
 import { toggleTypedFalseCompletionNudges } from "./commands/toggleTypedFalseCompletionNudges";
 import { getLogLevelFromEnvironment, LogLevel } from "./log";
 import { SorbetContentProvider, SORBET_SCHEME } from "./sorbetContentProvider";
@@ -90,6 +91,13 @@ export async function activate(context: ExtensionContext) {
     commands.registerCommand(
       cmdIds.CONFIGURE_HIGHLIGHT_UNTYPED_COMMAND_ID,
       () => configureUntypedCodeHighlighting(sorbetExtensionContext),
+    ),
+    commands.registerCommand(
+      cmdIds.CONFIGURE_HIGHLIGHT_UNTYPED_DIAGNOSTIC_SEVERITY_COMMAND_ID,
+      () =>
+        configureUntypedCodeHighlightingDiagnosticSeverity(
+          sorbetExtensionContext,
+        ),
     ),
     commands.registerCommand(
       cmdIds.TOGGLE_TYPED_FALSE_COMPLETION_NUDGES_COMMAND_ID,
