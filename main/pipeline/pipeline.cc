@@ -364,7 +364,7 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
                          ast::ExpressionPtr tree) {
     auto &print = opts.print;
-    auto &parser = opts.parser;
+    auto parser = opts.parser;
 
     ast::ParsedFile rewritten{nullptr, file};
     rewritten.setCached(tree != nullptr);
