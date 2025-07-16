@@ -163,6 +163,8 @@ lspconfig.sorbet.setup {
   enableTypedFalseCompletionNudges?: <span class="hljs-built_in">boolean</span>;
   supportsOperationNotifications?: <span class="hljs-built_in">boolean</span>;
   supportsSorbetURIs?: <span class="hljs-built_in">boolean</span>;
+  supportsSorbetURIs?: <span class="hljs-built_in">boolean</span>;
+  highlightUntypedDiagnosticSeverity?: DiagnosticSeverity;
 }
 </code></pre>
 <ul>
@@ -175,6 +177,9 @@ lspconfig.sorbet.setup {
 <p>See <a href="/docs/server-status#api">Showing the Language Server Status</a></p></li>
 <li><p><code>supportsSorbetURIs</code></p>
 <p>See <a href="/docs/sorbet-uris">Working with Synthetic or Missing Files</a></p></li>
+<li><p><code>highlightUntypedDiagnosticSeverity</code></p>
+<p>What “severity” to report usages of untyped in the client. This is to workaround limitations in the LSP specification and VS Code. See <a href="/docs/highlight-untyped#customizing-the-presentation-of-untyped-highlights">the relevant section</a> for more information.</p>
+<p><strong>Note</strong> that <a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#diagnosticSeverity"><code>DiagnosticSeverity</code></a> is an <code>integer</code>-valued enum, as per the LSP specification.</p></li>
 </ul>
 <h3><a class="anchor" aria-hidden="true" id="workspacedidchangeconfiguration-notification"></a><a href="#workspacedidchangeconfiguration-notification" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>workspace/didChangeConfiguration</code> notification</h3>
 <p>Sorbet recognizes the same options in the <code>settings</code> field of the <a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#didChangeConfigurationParams"><code>DidChangeConfigurationParams</code></a> as it recognizes in the <code>initializationOptions</code> of the <a href="#initialize-request"><code>initialize</code> request</a> above.</p>
