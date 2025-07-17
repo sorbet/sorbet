@@ -63,6 +63,7 @@ public:
 
 private:
     std::vector<ParseError> collectErrors();
+    std::vector<core::LocOffsets> collectCommentLocations();
     pm_parser_t *getRawParserPointer();
 };
 
@@ -78,12 +79,15 @@ class ParseResult final {
     friend class Parser;
     friend class Translator;
 
-    const Parser &parser;
-    const std::unique_ptr<pm_node_t, NodeDeleter> node;
-    const std::vector<ParseError> parseErrors;
+    Parser &parser;
+    std::unique_ptr<pm_node_t, NodeDeleter> node;
+    std::vector<ParseError> parseErrors;
+    std::vector<core::LocOffsets> commentLocations;
 
-    ParseResult(Parser &parser, pm_node_t *node, std::vector<ParseError> parseErrors)
-        : parser{parser}, node{node, NodeDeleter{parser}}, parseErrors{parseErrors} {}
+    ParseResult(Parser &parser, pm_node_t *node, std::vector<ParseError> parseErrors,
+                std::vector<core::LocOffsets> commentLocations)
+        : parser{parser}, node{node, NodeDeleter{parser}}, parseErrors{parseErrors}, commentLocations{
+                                                                                         commentLocations} {}
 
     ParseResult(const ParseResult &) = delete;            // Copy constructor
     ParseResult &operator=(const ParseResult &) = delete; // Copy assignment
