@@ -407,9 +407,6 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                         return emptyParsedFile(file);
                     }
 
-                    // RBS rewriting is not yet supported for Prism. https://github.com/Shopify/sorbet/issues/574
-                    ENFORCE(opts.stopAfterPhase != options::Phase::RBS_REWRITER);
-
                     break;
                 }
             }
