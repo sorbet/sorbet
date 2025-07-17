@@ -11,7 +11,8 @@ unique_ptr<parser::Node> Parser::run(core::MutableContext &ctx, bool directlyDes
     auto file = ctx.file;
     auto source = file.data(ctx).source();
     Prism::Parser parser{source};
-    Prism::ParseResult parseResult = parser.parse();
+    bool collectComments = ctx.state.cacheSensitiveOptions.rbsEnabled;
+    Prism::ParseResult parseResult = parser.parse(collectComments);
 
     return Prism::Translator(parser, ctx, parseResult.parseErrors, directlyDesugar, preserveConcreteSyntax)
         .translate(parseResult.getRawNodePointer());
@@ -21,9 +22,10 @@ pm_parser_t *Parser::getRawParserPointer() {
     return &parser;
 }
 
-ParseResult Parser::parse() {
+ParseResult Parser::parse(bool collectComments) {
     pm_node_t *root = pm_parse(&parser);
-    return ParseResult{*this, root, collectErrors()};
+    auto comments = collectComments ? collectCommentLocations() : vector<core::LocOffsets>{};
+    return ParseResult{*this, root, collectErrors(), move(comments)};
 };
 
 core::LocOffsets Parser::translateLocation(pm_location_t location) const {
@@ -57,5 +59,22 @@ vector<ParseError> Parser::collectErrors() {
     }
 
     return parseErrors;
+}
+
+vector<core::LocOffsets> Parser::collectCommentLocations() {
+    auto commentList = parser.comment_list;
+    vector<core::LocOffsets> commentLocations;
+    commentLocations.reserve(parser.comment_list.size);
+
+    for (auto *node = commentList.head; node != nullptr; node = node->next) {
+        auto *comment = reinterpret_cast<pm_comment_t *>(node);
+        ENFORCE(comment != nullptr);
+
+        core::LocOffsets location = translateLocation(comment->location);
+
+        commentLocations.push_back(location);
+    }
+
+    return commentLocations;
 }
 }; // namespace sorbet::parser::Prism
