@@ -55,7 +55,7 @@ public:
     Parser(Parser &&) = delete;
     Parser &operator=(Parser &&) = delete;
 
-    static std::unique_ptr<parser::Node> run(core::MutableContext &ctx, bool directlyDesugar = true);
+    static parser::ParseResult run(core::MutableContext &ctx, bool directlyDesugar = true);
 
     ParseResult parse();
     core::LocOffsets translateLocation(pm_location_t location) const;

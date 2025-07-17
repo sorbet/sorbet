@@ -7,14 +7,14 @@ using namespace std;
 
 namespace sorbet::parser::Prism {
 
-unique_ptr<parser::Node> Parser::run(core::MutableContext &ctx, bool directlyDesugar) {
+parser::ParseResult Parser::run(core::MutableContext &ctx, bool directlyDesugar) {
     auto file = ctx.file;
     auto source = file.data(ctx).source();
     Prism::Parser parser{source};
     Prism::ParseResult parseResult = parser.parse();
-
-    return Prism::Translator(parser, ctx, parseResult.parseErrors, directlyDesugar)
-        .translate(parseResult.getRawNodePointer());
+    auto translatedTree = Prism::Translator(parser, ctx, parseResult.parseErrors, directlyDesugar)
+                              .translate(parseResult.getRawNodePointer());
+    return parser::ParseResult{move(translatedTree), move(parseResult.commentLocations)};
 }
 
 pm_parser_t *Parser::getRawParserPointer() {
