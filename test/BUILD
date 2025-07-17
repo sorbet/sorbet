@@ -329,9 +329,6 @@ pipeline_tests(
 
             # Sorbets' parser incorrectly accepts invalid syntax
             "testdata/desugar/pattern_matching_hash.rb",  # See https://github.com/Shopify/sorbet/issues/362
-
-            # RBS rewriting is not yet supported for Prism. https://github.com/Shopify/sorbet/issues/574
-            "testdata/rbs/**/*.rb",
         ],
     ),
     "PrismPosTests",
