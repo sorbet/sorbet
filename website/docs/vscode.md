@@ -34,9 +34,9 @@ The extension is not active. Here are some steps to try:
 
 Sorbet is installed and active, but has chosen not to start the Sorbet process automatically. To manually enable Sorbet, either:
 
-- Use the [`>Sorbet: Enable`] command. The server will start with [the default server command](#sorbet-lspconfigs).
+- Use the [`>Sorbet: Enable`] command. The server will start with [the default server command](#sorbetlspconfigs).
 
-- Use the [`>Sorbet: Configure`] command. A prompt will appear to choose which server configuration to start the Sorbet process with. See [the configuration docs](#sorbet-lspconfigs) to change the configurations.
+- Use the [`>Sorbet: Configure`] command. A prompt will appear to choose which server configuration to start the Sorbet process with. See [the configuration docs](#sorbetlspconfigs) to change the configurations.
 
 - Edit the `.vscode/settings.json` for the current workspace to include this:
 
@@ -77,7 +77,7 @@ The Sorbet extension uses this command to start the server process by default:
 bundle exec srb typecheck --lsp
 ```
 
-This assumes the project uses [Bundler](https://bundler.io/) to manage Ruby dependencies. If that's not the case, [configure how to launch](#sorbet-lspconfigs) the Sorbet process.
+This assumes the project uses [Bundler](https://bundler.io/) to manage Ruby dependencies. If that's not the case, [configure how to launch](#sorbetlspconfigs) the Sorbet process.
 
 #### "bundler: command not found: srb"
 
@@ -141,7 +141,7 @@ The `>` character in the command names below does not need to be typed, unless i
 
 [`>Sorbet: Enable`]: #sorbet-enable
 
-Enables Sorbet, causing the Sorbet server process to start. It will use the most recently selected [server launch configuration](#sorbet-lspconfigs), or else the default.
+Enables Sorbet, causing the Sorbet server process to start. It will use the most recently selected [server launch configuration](#sorbetlspconfigs), or else the default.
 
 ### `>Sorbet: Disable`
 
@@ -161,7 +161,7 @@ Disables Sorbet, causing the Sorbet server process to stop, then re-enables Sorb
 
 Chooses which configuration to run Sorbet with, or choose to disable Sorbet. After choosing a configuration, any running Sorbet process will stop, and a new one will be launched with the chosen configuration.
 
-By default, [there are three configurations](#sorbet-lspconfigs), which allow opting into experimental features. A given workspace may choose to define its own configurations.
+By default, [there are three configurations](#sorbetlspconfigs), which allow opting into experimental features. A given workspace may choose to define its own configurations.
 
 ![](/img/configure.png)
 
@@ -171,7 +171,7 @@ By default, [there are three configurations](#sorbet-lspconfigs), which allow op
 
 Opens the Sorbet extension's logs in the output pane. Mostly useful for [Troubleshooting startup](#troubleshooting-startup). For debugging the Sorbet extension itself, consider also using [`>Sorbet: Set Log Level...`] to make the logs more verbose.
 
-Note that the Sorbet output **only** includes logs from the Sorbet extension. It does not include debug output from the Sorbet server process. To control log output from the Sorbet server process, see the [`--debug-log-file`](cli-ref.md#debugging-options) command line option. This flag is not passed by default. To pass it, change the [server configurations](#sorbet-lspconfigs).
+Note that the Sorbet output **only** includes logs from the Sorbet extension. It does not include debug output from the Sorbet server process. To control log output from the Sorbet server process, see the [`--debug-log-file`](cli-ref.md#debugging-options) command line option. This flag is not passed by default. To pass it, change the [server configurations](#sorbetlspconfigs).
 
 ### `>Sorbet: Set Log Level...`
 
@@ -302,7 +302,7 @@ Because of this, it's usually not recommended to commit this setting to `.vscode
 
 ### `sorbet.selectedLspConfigId`
 
-Which LSP configuration to pick first (see [`sorbet.lspConfigs`](#sorbet-lspconfigs)).
+Which LSP configuration to pick first (see [`sorbet.lspConfigs`](#sorbetlspconfigs)).
 
 If unset, picks the first one, giving precedence to `sorbet.userLspConfigs`.
 
