@@ -23,15 +23,15 @@ class T::Props::Decorator
 
   OVERRIDE_TRUE = T.let({
     reader: {allow_incompatible: false}.freeze,
-    writer: {allow_incompatible: false}.freeze
+    writer: {allow_incompatible: false}.freeze,
   }.freeze, OverrideRules)
 
   OVERRIDE_READER = T.let({
-    reader: {allow_incompatible: false}.freeze
+    reader: {allow_incompatible: false}.freeze,
   }.freeze, OverrideRules)
 
   OVERRIDE_WRITER = T.let({
-    writer: {allow_incompatible: false}.freeze
+    writer: {allow_incompatible: false}.freeze,
   }.freeze, OverrideRules)
 
   OVERRIDE_EMPTY = T.let({}.freeze, OverrideRules)
