@@ -7,15 +7,17 @@ using namespace std;
 
 namespace sorbet::parser::Prism {
 
-unique_ptr<parser::Node> Parser::run(core::MutableContext &ctx, bool directlyDesugar, bool preserveConcreteSyntax) {
+parser::ParseResult Parser::run(core::MutableContext &ctx, bool directlyDesugar, bool preserveConcreteSyntax) {
     auto file = ctx.file;
     auto source = file.data(ctx).source();
     Prism::Parser parser{source};
     bool collectComments = ctx.state.cacheSensitiveOptions.rbsEnabled;
     Prism::ParseResult parseResult = parser.parse(collectComments);
 
-    return Prism::Translator(parser, ctx, parseResult.parseErrors, directlyDesugar, preserveConcreteSyntax)
-        .translate(parseResult.getRawNodePointer());
+    auto translatedTree =
+        Prism::Translator(parser, ctx, parseResult.parseErrors, directlyDesugar, preserveConcreteSyntax)
+            .translate(parseResult.getRawNodePointer());
+    return parser::ParseResult{move(translatedTree), move(parseResult.commentLocations)};
 }
 
 pm_parser_t *Parser::getRawParserPointer() {
