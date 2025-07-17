@@ -425,18 +425,18 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     return ret;
 }
 
-vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, PropContext propContext) {
+vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, const PropInfo &prop, PropContext propContext) {
     vector<ast::ExpressionPtr> nodes;
 
-    const auto loc = ret.loc;
+    const auto loc = prop.loc;
     const auto locZero = loc.copyWithZeroLength();
-    const auto name = ret.name;
-    const auto nameLoc = ret.nameLoc;
+    const auto name = prop.name;
+    const auto nameLoc = prop.nameLoc;
 
-    const auto getType = ASTUtil::dupType(ret.type);
+    const auto getType = ASTUtil::dupType(prop.type);
 
-    const auto computedByMethodName = ret.computedByMethodName;
-    const auto computedByMethodNameLoc = ret.computedByMethodNameLoc;
+    const auto computedByMethodName = prop.computedByMethodName;
+    const auto computedByMethodNameLoc = prop.computedByMethodNameLoc;
     const auto computedByMethodNameLocZero = computedByMethodNameLoc.copyWithZeroLength();
 
     auto ivarName = name.addAt(ctx);
@@ -448,7 +448,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
     // existence of the computed_by: method.
     if (computedByMethodName.exists()) {
         // Given `const :foo, type, computed_by: <name>`, where <name> is a Symbol pointing to a class method,
-        // assert that the method takes 1 argument (of any type), and returns the same type as the prop,
+        // assert that the method takes 1 argument (of any type), and propurns the same type as the prop,
         // via `T.assert_type!(self.class.compute_foo(T.unsafe(nil)), type)` in the getter.
         auto selfSendClass = ast::MK::Send0(computedByMethodNameLoc, ast::MK::Self(loc), core::Names::class_(),
                                             computedByMethodNameLocZero);
@@ -460,7 +460,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
             ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod), ASTUtil::dupType(getType));
         auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseTypedUnimplemented(loc));
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
-    } else if (ret.ifunset == nullptr) {
+    } else if (prop.ifunset == nullptr) {
         if (wantSimpleIVarGet(propContext.syntacticSuperClass)) {
             ast::MethodDef::Flags flags;
             if (wantTypedInitialize(propContext.syntacticSuperClass)) {
@@ -481,14 +481,14 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
     core::NameRef setName = name.addEq(ctx);
 
     // Compute the setter
-    if (!ret.isImmutable) {
-        auto setType = ASTUtil::dupType(ret.type);
+    if (!prop.isImmutable) {
+        auto setType = ASTUtil::dupType(prop.type);
         ast::Send::ARGS_store sigArgs;
         sigArgs.emplace_back(ast::MK::Symbol(nameLoc, core::Names::arg0()));
         sigArgs.emplace_back(ASTUtil::dupType(setType));
         nodes.emplace_back(ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType)));
 
-        if (ret.enum_ == nullptr) {
+        if (prop.enum_ == nullptr) {
             if (knownNonDocument(propContext.syntacticSuperClass)) {
                 if (wantTypedInitialize(propContext.syntacticSuperClass)) {
                     auto ivarSet = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
@@ -510,19 +510,19 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
     }
 
     // Compute the `_` foreign accessor
-    if (ret.foreign) {
+    if (prop.foreign) {
         ast::ExpressionPtr type;
         ast::ExpressionPtr nonNilType;
-        if (ASTUtil::dupType(ret.foreign) == nullptr) {
+        if (ASTUtil::dupType(prop.foreign) == nullptr) {
             // If it's not a valid type, just use untyped
             type = ast::MK::Untyped(loc);
             nonNilType = ast::MK::Untyped(loc);
         } else {
-            type = ast::MK::Nilable(loc, ASTUtil::dupType(ret.foreign));
-            nonNilType = ASTUtil::dupType(ret.foreign);
+            type = ast::MK::Nilable(loc, ASTUtil::dupType(prop.foreign));
+            nonNilType = ASTUtil::dupType(prop.foreign);
         }
 
-        // sig {params(allow_direct_mutation: T.nilable(T::Boolean)).returns(T.nilable($foreign))}
+        // sig {params(allow_direct_mutation: T.nilable(T::Boolean)).propurns(T.nilable($foreign))}
         nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
                                          ast::MK::Nilable(loc, ast::MK::T_Boolean(loc)), std::move(type)));
 
@@ -537,8 +537,8 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         fkFlags.discardDef = true;
 
         core::LocOffsets methodLoc;
-        if (ret.foreignKwLit != nullptr) {
-            methodLoc = ret.foreignKwLit.loc();
+        if (prop.foreignKwLit != nullptr) {
+            methodLoc = prop.foreignKwLit.loc();
         } else {
             methodLoc = loc;
         }
@@ -547,7 +547,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
                                                      ast::MK::RaiseTypedUnimplemented(loc), fkFlags);
         nodes.emplace_back(std::move(fkMethodDef));
 
-        // sig {params(opts: T.untyped).returns($foreign)}
+        // sig {params(opts: T.untyped).propurns($foreign)}
         nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
                                          ast::MK::Nilable(loc, ast::MK::T_Boolean(loc)), std::move(nonNilType)));
 
