@@ -14,11 +14,27 @@ class T::Props::Decorator
   DecoratedInstance = T.type_alias { Object } # Would be T::Props, but that produces circular reference errors in some circumstances
   PropType = T.type_alias { T::Types::Base }
   PropTypeOrClass = T.type_alias { T.any(PropType, Module) }
+  OverrideRules = T.type_alias { T::Hash[Symbol, {allow_incompatible: T::Boolean}] }
 
   class NoRulesError < StandardError; end
 
   EMPTY_PROPS = T.let({}.freeze, T::Hash[Symbol, Rules], checked: false)
   private_constant :EMPTY_PROPS
+
+  OVERRIDE_TRUE = T.let({
+    reader: {allow_incompatible: false}.freeze,
+    writer: {allow_incompatible: false}.freeze,
+  }.freeze, OverrideRules)
+
+  OVERRIDE_READER = T.let({
+    reader: {allow_incompatible: false}.freeze,
+  }.freeze, OverrideRules)
+
+  OVERRIDE_WRITER = T.let({
+    writer: {allow_incompatible: false}.freeze,
+  }.freeze, OverrideRules)
+
+  OVERRIDE_EMPTY = T.let({}.freeze, OverrideRules)
 
   sig { params(klass: T.untyped).void.checked(:never) }
   def initialize(klass)
@@ -45,17 +61,15 @@ class T::Props::Decorator
   end
 
   # checked(:never) - Rules hash is expensive to check
-  sig { params(prop: Symbol, rules: Rules).void.checked(:never) }
-  def add_prop_definition(prop, rules)
+  sig { params(name: Symbol, rules: Rules).void.checked(:never) }
+  def add_prop_definition(name, rules)
     override = rules.delete(:override)
 
-    if props.include?(prop) && !override
-      raise ArgumentError.new("Attempted to redefine prop #{prop.inspect} on class #{@class} that's already defined without specifying :override => true: #{prop_rules(prop)}")
-    elsif !props.include?(prop) && override
-      raise ArgumentError.new("Attempted to override a prop #{prop.inspect} on class #{@class} that doesn't already exist")
+    if props.include?(name) && !override
+      raise ArgumentError.new("Attempted to redefine prop #{name.inspect} on class #{@class} that's already defined without specifying :override => true: #{prop_rules(name)}")
     end
 
-    @props = @props.merge(prop => rules.freeze).freeze
+    @props = @props.merge(name => rules.freeze).freeze
   end
 
   # Heads up!
@@ -302,6 +316,27 @@ class T::Props::Decorator
     T::Utils::Nilable.is_union_with_nilclass(cls) || ((cls == T.untyped || cls == NilClass) && rules.key?(:default) && rules[:default].nil?)
   end
 
+  sig(:final) { params(name: Symbol).returns(T::Boolean).checked(:never) }
+  private def method_defined_on_ancestor?(name)
+    @class.method_defined?(name) && !@class.method_defined?(name, false)
+  end
+
+  sig(:final) { params(name: Symbol, rules: Rules).void.checked(:never) }
+  private def validate_overrides(name, rules)
+    override = elaborate_override(name, rules[:override])
+
+    return if rules[:without_accessors]
+
+    if override[:reader] && !method_defined_on_ancestor?(name) && !props.include?(name)
+      raise ArgumentError.new("You marked the getter for prop #{name.inspect} as `override`, but the method `#{name}` doesn't exist to be overridden.")
+    end
+
+    # Properly, we should also check whether `props[name]` is immutable, but the old code didn't either.
+    if !rules[:immutable] && override[:writer] && !method_defined_on_ancestor?("#{name}=".to_sym) && !props.include?(name)
+      raise ArgumentError.new("You marked the setter for prop #{name.inspect} as `override`, but the method `#{name}=` doesn't exist to be overridden.")
+    end
+  end
+
   # checked(:never) - Rules hash is expensive to check
   sig do
     params(
@@ -381,6 +416,7 @@ class T::Props::Decorator
     rules[:setter_proc] = setter_proc
     rules[:value_validate_proc] = value_validate_proc
 
+    validate_overrides(name, rules)
     add_prop_definition(name, rules)
 
     # NB: using `without_accessors` doesn't make much sense unless you also define some other way to
@@ -405,6 +441,7 @@ class T::Props::Decorator
           # Fast path (~4x faster as of Ruby 2.6)
           @class.send(:define_method, "#{name}=", &rules.fetch(:setter_proc))
         end
+
       end
 
       if method(:prop_get).owner != T::Props::Decorator || rules.key?(:ifunset)
@@ -627,7 +664,7 @@ class T::Props::Decorator
 
     props.each do |name, rules|
       copied_rules = rules.dup
-      # NB: Calling `child.decorator` here is a timb bomb that's going to give someone a really bad
+      # NB: Calling `child.decorator` here is a time bomb that's going to give someone a really bad
       # time. Any class that defines props and also overrides the `decorator_class` method is going
       # to reach this line before its override take effect, turning it into a no-op.
       child.decorator.add_prop_definition(name, copied_rules)
@@ -654,6 +691,52 @@ class T::Props::Decorator
         end
       end
     end
+  end
+
+  sig(:final) do
+    params(key: Symbol, d: T.untyped, out: T::Hash[Symbol, {allow_incompatible: T::Boolean}])
+      .void
+      .checked(:never)
+  end
+  private def elaborate_override_entry(key, d, out)
+    # It's written this way so that `{reader: false}` will omit the entry for `reader` in the
+    # result entirely
+    case d[key]
+    when TrueClass
+      out[key] = {allow_incompatible: false}
+    when Hash
+      out[key] = {allow_incompatible: !!d[key][:allow_incompatible]}
+    end
+  end
+
+  sig(:final) do
+    params(name: Symbol, d: T.untyped)
+      .returns(T::Hash[Symbol, {allow_incompatible: T::Boolean}])
+      .checked(:never)
+  end
+  private def elaborate_override(name, d)
+    return OVERRIDE_TRUE if d == true
+    return OVERRIDE_READER if d == :reader
+    return OVERRIDE_WRITER if d == :writer
+    return OVERRIDE_EMPTY if d == false || d.nil?
+    unless d.is_a?(Hash)
+      raise ArgumentError.new("`override` only accepts `true`, `:reader`, `:writer`, or a Hash in prop #{@class.name}.#{name} (got #{d.class})")
+    end
+
+    # cwong: should we check for bad keys? `sig { override(not_real: true) }` on a normal function
+    # errors statically but not at runtime.
+
+    # XX cwong: this means {reader: false, allow_incompatible: true} will become {allow_incompatible: true},
+    # is that fine?
+    unless (allow_incompatible = d[:allow_incompatible]).nil?
+      return {reader: {allow_incompatible: !!allow_incompatible},
+              writer: {allow_incompatible: !!allow_incompatible}}.to_h
+    end
+
+    result = {}
+    elaborate_override_entry(:reader, d, result)
+    elaborate_override_entry(:writer, d, result)
+    result
   end
 
   sig { params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never) }
