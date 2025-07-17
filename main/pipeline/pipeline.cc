@@ -251,8 +251,8 @@ parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const o
     return result;
 }
 
-unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file,
-                                       parser::Parser::ParseResult &&parseResult, const options::Printers &print) {
+unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file, parser::ParseResult &&parseResult,
+                                       const options::Printers &print) {
     auto node = move(parseResult.tree);
     auto commentLocations = move(parseResult.commentLocations);
 
@@ -277,32 +277,34 @@ unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file
     return node;
 }
 
-unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
-                                        bool preserveConcreteSyntax = false) {
+parser::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
+                                   bool preserveConcreteSyntax = false) {
     Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
 
-    unique_ptr<parser::Node> nodes;
+    parser::ParseResult parseResult;
     {
         core::MutableContext ctx(gs, core::Symbols::root(), file);
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
-        auto parseResult = parser::Prism::Parser::run(ctx);
-        nodes = std::move(parseResult.tree);
+        // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors in
+        // `PrismDesugar.cc`. For now, disable all direct translation, and fallback to `Desugar.cc`.
+        auto directlyTranslate = !gs.cacheSensitiveOptions.rbsEnabled;
+        parseResult = parser::Prism::Parser::run(ctx, directlyTranslate);
     }
 
     if (print.ParseTree.enabled) {
-        print.ParseTree.fmt("{}\n", nodes->toStringWithTabs(gs, 0));
+        print.ParseTree.fmt("{}\n", parseResult.tree->toStringWithTabs(gs, 0));
     }
     if (print.ParseTreeJson.enabled) {
-        print.ParseTreeJson.fmt("{}\n", nodes->toJSON(gs, 0));
+        print.ParseTreeJson.fmt("{}\n", parseResult.tree->toJSON(gs, 0));
     }
     if (print.ParseTreeJsonWithLocs.enabled) {
-        print.ParseTreeJson.fmt("{}\n", nodes->toJSONWithLocs(gs, file, 0));
+        print.ParseTreeJson.fmt("{}\n", parseResult.tree->toJSONWithLocs(gs, file, 0));
     }
     if (print.ParseTreeWhitequark.enabled) {
-        print.ParseTreeWhitequark.fmt("{}\n", nodes->toWhitequark(gs, 0));
+        print.ParseTreeWhitequark.fmt("{}\n", parseResult.tree->toWhitequark(gs, 0));
     }
 
-    return nodes;
+    return parseResult;
 }
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
@@ -402,7 +404,8 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                     break;
                 }
                 case options::Parser::PRISM: {
-                    parseTree = runPrismParser(lgs, file, print);
+                    auto parseResult = runPrismParser(lgs, file, print);
+                    parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
 
                     if (opts.stopAfterPhase == options::Phase::PARSER) {
                         return emptyParsedFile(file);

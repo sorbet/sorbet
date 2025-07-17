@@ -237,7 +237,10 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
                 core::MutableContext ctx(gs, core::Symbols::root(), file);
-                parseResult = parser::Prism::Parser::run(ctx);
+                // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors in
+                // `PrismDesugar.cc`. For now, disable all direct translation, and fallback to `Desugar.cc`.
+                auto directlyTranslate = !gs.cacheSensitiveOptions.rbsEnabled;
+                parseResult = parser::Prism::Parser::run(ctx, directlyTranslate);
                 break;
             }
         }
@@ -712,8 +715,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 break;
             }
             case realmain::options::Parser::PRISM: {
-                parseResult = parser::Prism::Parser::run(ctx);
-                directlyDesugaredTree = parser::Prism::Parser::run(ctx, true).tree;
+                parseResult = parser::Prism::Parser::run(ctx, false);
+                if (gs->cacheSensitiveOptions.rbsEnabled) {
+                    directlyDesugaredTree = nullptr;
+                } else {
+                    directlyDesugaredTree = parser::Prism::Parser::run(ctx).tree;
+                }
                 break;
             }
         }
@@ -739,7 +746,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             ast = ast::desugar::node2Tree(ctx, move(nodes));
 
             if (directlyDesugaredTree != nullptr) {
-                // This AST would have been desugared deirectly by Prism::Translator
+                // This AST would have been desugared directly by Prism::Translator
                 auto directlyDesugaredAST = ast::prismDesugar::node2Tree(ctx, move(directlyDesugaredTree));
 
                 if (!ast.exactlyEqual(*gs, directlyDesugaredAST, f.file)) {
