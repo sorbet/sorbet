@@ -1,0 +1,36 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = Args {
+        args = [
+          Kwrestarg {
+            name = <U a>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U foo>
+      args = Args {
+        args = [
+          Kwrestarg {
+            name = <P <U **> $2>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U foo>
+      args = Args {
+        args = [
+          Kwnilarg {
+          }
+        ]
+      }
+      body = NULL
+    }
+  ]
+}

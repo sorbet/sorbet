@@ -88,6 +88,7 @@ compilation_database(
         "//parser:parser_test",
         "//parser/parser:generate_diagnostics",
         "//parser/parser:parser",
+        "//parser/prism:prism",
         "//payload:interface",
         "//payload:payload",
         "//payload:text",

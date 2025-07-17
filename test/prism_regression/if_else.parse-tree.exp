@@ -1,0 +1,10 @@
+If {
+  condition = False {
+  }
+  then_ = String {
+    val = <U five>
+  }
+  else_ = String {
+    val = <U six>
+  }
+}

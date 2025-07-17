@@ -12,6 +12,123 @@
             "presentation": {
                 "reveal": "always"
             }
+        },
+        {
+            "label": "(Re)Generate Prism test",
+            "type": "shell",
+            "command": "TEST_NAME=${input:prism_regression_test_name}; $EDITOR -w test/prism_regression/$TEST_NAME.rb; ./bazel-bin/main/sorbet --stop-after=parser --print=parse-tree test/prism_regression/$TEST_NAME.rb > test/prism_regression/$TEST_NAME.parse-tree.exp; $EDITOR test/prism_regression/$TEST_NAME.parse-tree.exp test/prism_regression/$TEST_NAME.rb",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Run a single Prism regression test",
+            "type": "shell",
+            "command": "./bazel test //test:test_PosTests/prism_regression/${input:prism_regression_test_name}_prism //test:prism_regression/${input:prism_regression_test_name}_location_test --config=dbg  --test_output=all",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            },
+            // With this option, when running this task with the `Tasks: Rerun Last Test` command, it'll
+            // reuse the previous run's input, rather than prompting for it again
+            "runOptions": {
+                "reevaluateOnRerun": false
+            }
+        },
+        {
+            "label": "Run all Prism regression tests",
+            "type": "shell",
+            "command": "./bazel test //test:prism_regression //test:prism_location_tests --config=dbg  --test_output=all",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Run all Prism corpus tests",
+            "type": "shell",
+            "command": "./bazel test //test:test_corpus_prism --config=dbg  --test_output=all",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Run a single Prism corpus test",
+            "type": "shell",
+            "command": "./bazel test //test:test_PosTests/testdata/${input:prism_corpus_test_name}_prism --config=dbg  --test_output=all",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            },
+            // With this option, when running this task with the `Tasks: Rerun Last Test` command, it'll
+            // reuse the previous run's input, rather than prompting for it again
+            "runOptions": {
+                "reevaluateOnRerun": false
+            }
+        },
+        {
+            "label": "Typecheck with Prism",
+            "type": "shell",
+            "command": "bazel-bin/main/sorbet --parser=prism ${input:file_path}",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": ["Build with Prism"],
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Display Prism parse tree & errors for Ruby file",
+            "type": "shell",
+            "command": "tools/scripts/inspect_parsing_errors.rb ${file}",
+            "presentation": {
+                "reveal": "always"
+            },
+            "options": {
+                // Makes sure the shell can find the correct Ruby version
+                "shell": {
+                    "executable": "${env:SHELL}",
+                    "args": ["-c"]
+                }
+            },
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "prism_corpus_test_name",
+            "type": "promptString",
+            "description": "Enter the test name, e.g. parser/and_and_bug for running test/testdata/parser/and_and_bug.rb",
+        },
+        {
+            "id": "prism_regression_test_name",
+            "type": "promptString",
+            "description": "Enter the test name, e.g. case for running test/prism_regression/case.rb",
+        },
+        {
+            "id": "file_path",
+            "type": "promptString",
+            "default": "test.rb",
+            "description": "Enter the file path to typecheck, e.g. test.rb",
         }
     ]
 }

@@ -1,0 +1,16 @@
+Begin {
+  stmts = [
+    Or {
+      left = True {
+      }
+      right = False {
+      }
+    }
+    Or {
+      left = False {
+      }
+      right = True {
+      }
+    }
+  ]
+}

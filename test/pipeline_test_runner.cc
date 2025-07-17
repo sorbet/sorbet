@@ -37,6 +37,7 @@
 #include "namer/namer.h"
 #include "packager/packager.h"
 #include "parser/parser.h"
+#include "parser/prism/Parser.h"
 #include "payload/binary/binary.h"
 #include "payload/payload.h"
 #include "rbs/AssertionsRewriter.h"
@@ -88,6 +89,7 @@ public:
 
 UnorderedSet<string> knownExpectations = {"parse-tree",
                                           "parse-tree-json",
+                                          "parse-tree-json-with-locs",
                                           "parse-tree-whitequark",
                                           "rbs-rewrite-tree",
                                           "desugar-tree",
@@ -222,15 +224,24 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             continue;
         }
 
-        unique_ptr<parser::Node> nodes;
         parser::Parser::ParseResult parseResult;
-        {
-            core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+        switch (parser) {
+            case realmain::options::Parser::ORIGINAL: {
+                core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+                auto settings = parser::Parser::Settings{false, false, false, gs.cacheSensitiveOptions.rbsEnabled};
+                parseResult = parser::Parser::run(gs, file, settings);
+                break;
+            }
+            case realmain::options::Parser::PRISM: {
+                core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            auto settings = parser::Parser::Settings{false, false, false, gs.cacheSensitiveOptions.rbsEnabled};
-            parseResult = parser::Parser::run(gs, file, settings);
-            nodes = move(parseResult.tree);
+                auto nodes = parser::Prism::Parser::run(gs, file);
+                parseResult = parser::Parser::ParseResult{move(nodes), {}};
+                break;
+            }
         }
+
+        auto nodes = move(parseResult.tree);
 
         handler.drainErrors(gs);
         handler.addObserved(gs, "parse-tree", [&]() { return nodes->toString(gs); });
@@ -455,6 +466,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     if (!test.minimizeRBI.empty()) {
         auto gsForMinimize = emptyGs->deepCopyGlobalState();
         auto opts = realmain::options::Options{};
+        opts.parser = parser;
         auto minimizeRBI = test.folder + test.minimizeRBI;
         realmain::Minimize::indexAndResolveForMinimize(*gs, *gsForMinimize, opts, *workers, minimizeRBI);
         auto printerConfig = realmain::options::PrinterConfig{};
@@ -468,7 +480,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             *gs, "minimized-rbi", [&]() { return printerConfig.flushToString(); }, addNewline);
     }
 
-    // Simulate what pipeline.cc does: We want to start typeckecking big files first because it helps with better work
+    // Simulate what pipeline.cc does: We want to start typechecking big files first because it helps with better work
     // distribution
     fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
         return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
@@ -675,13 +687,22 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             make_shared<core::File>(string(f.file.data(*gs).path()), move(newSource), f.file.data(*gs).sourceType);
         gs->replaceFile(f.file, move(newFile));
 
-        // this replicates the logic of pipeline::indexOne
-        auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsEnabled};
-        auto parseResult = parser::Parser::run(*gs, f.file, settings);
-        handler.addObserved(*gs, "parse-tree", [&]() { return parseResult.tree->toString(*gs); });
-        handler.addObserved(*gs, "parse-tree-json", [&]() { return parseResult.tree->toJSON(*gs); });
-
         core::MutableContext ctx(*gs, core::Symbols::root(), f.file);
+
+        // this replicates the logic of pipeline::indexOne
+        parser::Parser::ParseResult parseResult;
+        switch (parser) {
+            case realmain::options::Parser::ORIGINAL: {
+                auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsEnabled};
+                parseResult = parser::Parser::run(*gs, f.file, settings);
+                break;
+            }
+            case realmain::options::Parser::PRISM: {
+                auto nodes = parser::Prism::Parser::run(ctx, f.file);
+                parseResult = parser::Parser::ParseResult{move(nodes), {}};
+                break;
+            }
+        }
 
         if (gs->cacheSensitiveOptions.rbsEnabled) {
             auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
@@ -693,7 +714,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             auto rbsAssertions = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
             parseResult.tree = rbsAssertions.run(std::move(parseResult.tree));
         }
+
         auto nodes = move(parseResult.tree);
+
         handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return nodes->toString(*gs); });
 
         ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
@@ -785,6 +808,9 @@ int main(int argc, char *argv[]) {
     cxxopts::Options options("test_corpus", "Test corpus for Sorbet typechecker");
     options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
                                                        cxxopts::value<string>()->default_value(""), "testpath");
+    options.allow_unrecognised_options().add_options()("parser", "The parser to use while testing.",
+                                                       cxxopts::value<string>()->default_value("original"),
+                                                       "{original, prism}");
     auto res = options.parse(argc, argv);
 
     if (res.count("single_test") != 1) {
@@ -793,6 +819,16 @@ int main(int argc, char *argv[]) {
     }
 
     sorbet::test::singleTest = res["single_test"].as<string>();
+
+    auto logger = spdlog::stderr_color_mt("test_runner");
+
+    auto parser = sorbet::realmain::options::extractParser(res["parser"].as<string>(), logger);
+
+    if (!parser) {
+        return 1;
+    }
+
+    sorbet::test::parser = *parser;
 
     doctest::Context context(argc, argv);
     return context.run();

@@ -1,0 +1,46 @@
+Begin {
+  stmts = [
+    Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+        Integer {
+          val = "1"
+        }
+      ]
+    }
+    Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+        Integer {
+          val = "1"
+        }
+      ]
+    }
+    Send {
+      receiver = NULL
+      method = <U bar>
+      args = [
+        Integer {
+          val = "2"
+        }
+        Integer {
+          val = "3"
+        }
+      ]
+    }
+    Send {
+      receiver = NULL
+      method = <U bar>
+      args = [
+        Integer {
+          val = "2"
+        }
+        Integer {
+          val = "3"
+        }
+      ]
+    }
+  ]
+}

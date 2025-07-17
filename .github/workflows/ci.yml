@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  [push, pull_request]
+
+# Runs Prism specific tests in a Github Action workflow only on Shopify's fork
+# This is useful during Prism migration as it contains extra tests.
+# It'll be removed once the migration is complete.
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    name: Prism Parser Regression Tests
+    if: github.repository == 'Shopify/sorbet'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3.0
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@0.9.0
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
+      - name: Verify parse trees
+        run: ./tools/scripts/verify_prism_regression_tests.sh
+      - name: Run tests
+        run: ./bazel test //test:prism_regression --config=dbg --test_output=errors
+      - name: Run location tests
+        run: ./bazel test //test:prism_location_tests --config=dbg --test_output=errors
+      - name: Run corpus tests
+        run: ./bazel test //test:test_corpus_prism --config=dbg --test_output=errors

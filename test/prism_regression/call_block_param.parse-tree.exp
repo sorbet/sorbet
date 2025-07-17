@@ -1,0 +1,296 @@
+Begin {
+  stmts = [
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = NULL
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = NULL
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = NULL
+      body = String {
+        val = <U inline block>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = NULL
+      body = String {
+        val = <U do-end block>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U positional>
+          }
+          Kwarg {
+            name = <U kwarg>
+          }
+          Blockarg {
+            name = <U block>
+          }
+        ]
+      }
+      body = String {
+        val = <U inline block with params>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U positional>
+          }
+          Kwarg {
+            name = <U kwarg>
+          }
+          Blockarg {
+            name = <U block>
+          }
+        ]
+      }
+      body = String {
+        val = <U inline block with params>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U positional>
+          }
+          Mlhs {
+            exprs = [
+              Arg {
+                name = <U multi>
+              }
+              Arg {
+                name = <U target>
+              }
+            ]
+          }
+        ]
+      }
+      body = String {
+        val = <U block with multi-target node in parameter list>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U bar>
+          }
+          Shadowarg {
+            name = <U baz>
+          }
+          Shadowarg {
+            name = <U qux>
+          }
+        ]
+      }
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U positional>
+          }
+          Mlhs {
+            exprs = [
+              Arg {
+                name = <U multi>
+              }
+              Arg {
+                name = <U target>
+              }
+            ]
+          }
+          Shadowarg {
+            name = <U baz>
+          }
+          Shadowarg {
+            name = <U qux>
+          }
+        ]
+      }
+      body = String {
+        val = <U block with multi-target node in parameter list and block locals>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U bar>
+          }
+          Shadowarg {
+            name = <U baz>
+          }
+          Shadowarg {
+            name = <U qux>
+          }
+        ]
+      }
+      body = NULL
+    }
+    Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+        BlockPass {
+          block = Send {
+            receiver = NULL
+            method = <U forwarded_block>
+            args = [
+            ]
+          }
+        }
+      ]
+    }
+    Block {
+      send = CSend {
+        receiver = Send {
+          receiver = NULL
+          method = <U foo>
+          args = [
+          ]
+        }
+        method = <U bar>
+        args = [
+        ]
+      }
+      args = NULL
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Mlhs {
+            exprs = [
+              Restarg {
+                name = <U args>
+              }
+            ]
+          }
+        ]
+      }
+      body = String {
+        val = <U block with multi-target rest args>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Restarg {
+            name = <U args>
+          }
+        ]
+      }
+      body = String {
+        val = <U block with rest args>
+      }
+    }
+    Send {
+      receiver = NULL
+      method = <U def_delegators>
+      args = [
+        Symbol {
+          val = <U foo>
+        }
+        Hash {
+          kwargs = false
+          pairs = [
+            Pair {
+              key = Send {
+                receiver = NULL
+                method = <U local>
+                args = [
+                ]
+              }
+              value = Symbol {
+                val = <U thing>
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

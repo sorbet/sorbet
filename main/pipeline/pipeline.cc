@@ -39,6 +39,8 @@
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
+#include "parser/prism/Parser.h"
+#include "parser/prism/Translator.h"
 #include "payload/binary/binary.h"
 #include "pipeline.h"
 #include "rbs/AssertionsRewriter.h"
@@ -231,6 +233,7 @@ parser::Parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file,
         auto settings = parser::Parser::Settings{traceLexer, traceParser, indentationAware, collectComments};
         result = parser::Parser::run(gs, file, settings);
     }
+
     if (print.ParseTree.enabled) {
         print.ParseTree.fmt("{}\n", result.tree->toStringWithTabs(gs, 0));
     }
@@ -270,6 +273,31 @@ unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file
         }
     }
     return node;
+}
+
+unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print) {
+    Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
+
+    unique_ptr<parser::Node> nodes;
+    {
+        core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
+        nodes = parser::Prism::Parser::run(gs, file);
+    }
+
+    if (print.ParseTree.enabled) {
+        print.ParseTree.fmt("{}\n", nodes->toStringWithTabs(gs, 0));
+    }
+    if (print.ParseTreeJson.enabled) {
+        print.ParseTreeJson.fmt("{}\n", nodes->toJSON(gs, 0));
+    }
+    if (print.ParseTreeJsonWithLocs.enabled) {
+        print.ParseTreeJson.fmt("{}\n", nodes->toJSONWithLocs(gs, file, 0));
+    }
+    if (print.ParseTreeWhitequark.enabled) {
+        print.ParseTreeWhitequark.fmt("{}\n", nodes->toWhitequark(gs, 0));
+    }
+
+    return nodes;
 }
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
@@ -336,6 +364,8 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
                          ast::ExpressionPtr tree) {
     auto &print = opts.print;
+    auto parser = opts.parser;
+
     ast::ParsedFile rewritten{nullptr, file};
     rewritten.setCached(tree != nullptr);
 
@@ -346,19 +376,41 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (file.data(lgs).strictLevel == core::StrictLevel::Ignore) {
                 return emptyParsedFile(file);
             }
-            auto parseResult = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
-            if (opts.stopAfterPhase == options::Phase::PARSER) {
-                return emptyParsedFile(file);
-            }
-            auto parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
-            if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
-                return emptyParsedFile(file);
+
+            unique_ptr<parser::Node> parseTree;
+            switch (parser) {
+                case options::Parser::ORIGINAL: {
+                    auto parseResult = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
+                    if (opts.stopAfterPhase == options::Phase::PARSER) {
+                        return emptyParsedFile(file);
+                    }
+
+                    parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
+                    if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
+                        return emptyParsedFile(file);
+                    }
+
+                    break;
+                }
+                case options::Parser::PRISM: {
+                    parseTree = runPrismParser(lgs, file, print);
+
+                    if (opts.stopAfterPhase == options::Phase::PARSER) {
+                        return emptyParsedFile(file);
+                    }
+
+                    // RBS rewriting is not yet supported for Prism. https://github.com/Shopify/sorbet/issues/574
+                    ENFORCE(opts.stopAfterPhase != options::Phase::RBS_REWRITER);
+
+                    break;
+                }
             }
 
             tree = runDesugar(lgs, file, move(parseTree), print);
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyParsedFile(file);
             }
+
             tree = runRewriter(lgs, file, move(tree));
             if (print.RewriterTree.enabled) {
                 print.RewriterTree.fmt("{}\n", tree.toStringWithTabs(lgs, 0));
@@ -366,6 +418,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (print.RewriterTreeRaw.enabled) {
                 print.RewriterTreeRaw.fmt("{}\n", tree.showRaw(lgs));
             }
+
             tree = runLocalVars(lgs, ast::ParsedFile{move(tree), file}).tree;
             if (opts.stopAfterPhase == options::Phase::LOCAL_VARS) {
                 return emptyParsedFile(file);

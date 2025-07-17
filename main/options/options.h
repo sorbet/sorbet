@@ -107,6 +107,11 @@ enum class Phase {
     INFERENCER,
 };
 
+enum class Parser {
+    ORIGINAL,
+    PRISM,
+};
+
 namespace {
 
 #if !defined(EMSCRIPTEN)
@@ -121,6 +126,7 @@ constexpr size_t MAX_CACHE_SIZE_BYTES = 1L * 1024 * 1024 * 1024; // 1 GiB
 struct Options {
     Printers print;
     Phase stopAfterPhase = Phase::INFERENCER;
+    Parser parser = Parser::ORIGINAL;
 
     // Should we monitor STDOUT for HUP and exit if it hangs up. This is a
     // workaround for https://bugzilla.mindrot.org/show_bug.cgi?id=2863
@@ -325,6 +331,8 @@ void readOptions(
     int argc, char *argv[],
     const std::vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
     std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
+
+std::optional<Parser> extractParser(std::string_view opt, std::shared_ptr<spdlog::logger> logger);
 
 void flushPrinters(Options &);
 } // namespace sorbet::realmain::options

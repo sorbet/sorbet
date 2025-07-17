@@ -150,6 +150,16 @@ const vector<PrintOptions> print_options({
     {"untyped-blame", &Printers::UntypedBlame, true, true, true},
 });
 
+struct ParserOptions {
+    std::string option;
+    Parser flag;
+};
+
+const vector<ParserOptions> parser_options({
+    {"original", Parser::ORIGINAL},
+    {"prism", Parser::PRISM},
+});
+
 } // namespace
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
@@ -726,6 +736,12 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Show help. Can pass an optional SECTION to show help for only one section instead of "
                                  "the default of all sections",
                                  cxxopts::value<vector<string>>()->implicit_value("all"), "SECTION");
+    options.add_options(section)("parser",
+                                 "Which parser to use. Prism support is experimental and still under active "
+                                 "development. Correct code should still parse correctly, but error diagnostics "
+                                 "and auto-corrections are a work-in-progress.",
+                                 cxxopts::value<string>()->default_value("original"), "{[original], prism}");
+
     // }}}
 
     for (auto &provider : semanticExtensionProviders) {
@@ -805,6 +821,21 @@ string_view stripTrailingSlashes(string_view path) {
 }
 
 } // namespace
+
+std::optional<Parser> extractParser(std::string_view opt, std::shared_ptr<spdlog::logger> logger) {
+    for (auto &known : parser_options) {
+        if (known.option == opt) {
+            return known.flag;
+        }
+    }
+    vector<string_view> allOptions;
+    for (auto &known : parser_options) {
+        allOptions.emplace_back(known.option);
+    }
+
+    logger->error("Unknown --parser option: {}\nValid values: {}", opt, fmt::join(allOptions, ", "));
+    return nullopt;
+}
 
 void Options::flushPrinters() {
     for (PrinterConfig &cfg : print.printers()) {
@@ -979,6 +1010,13 @@ void readOptions(Options &opts,
             throw EarlyReturnWithCode(1);
         }
         opts.stopAfterPhase = extractStopAfter(raw, logger);
+
+        opts.parser = extractParser(raw["parser"].as<string>(), logger).value_or(Parser::ORIGINAL);
+        if (opts.parser == Parser::PRISM && opts.cacheSensitiveOptions.rbsEnabled) {
+            logger->error("Prism support is experimental and still under active development. It is not yet compatible "
+                          "with RBS signatures. https://github.com/Shopify/sorbet/issues/574");
+            throw EarlyReturnWithCode(1);
+        }
 
         opts.silenceErrors = raw["quiet"].as<bool>();
         opts.autocorrect = raw["autocorrect"].as<bool>();
@@ -1358,6 +1396,7 @@ void readOptions(Options &opts,
             fmt::print("Sorbet typechecker {}\n", sorbet_full_version_string);
             throw EarlyReturnWithCode(0);
         }
+
     } catch (cxxopts::OptionParseException &e) {
         logger->info("{}. To see all available options pass `--help`.", e.what());
         throw EarlyReturnWithCode(1);
