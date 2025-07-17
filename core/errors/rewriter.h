@@ -31,6 +31,7 @@ constexpr ErrorClass RBSMultilineMisformatted{3555, StrictLevel::False};
 constexpr ErrorClass RBSIncorrectParameterKind{3556, StrictLevel::False};
 constexpr ErrorClass RBSMultipleGenericSignatures{3557, StrictLevel::False};
 constexpr ErrorClass RBSAbstractMethodNoRaises{3558, StrictLevel::False};
+constexpr ErrorClass PropBadOverride{3559, StrictLevel::False};
 
 } // namespace sorbet::core::errors::Rewriter
 #endif
