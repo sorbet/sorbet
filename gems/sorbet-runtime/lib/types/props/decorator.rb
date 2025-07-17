@@ -14,26 +14,27 @@ class T::Props::Decorator
   DecoratedInstance = T.type_alias { Object } # Would be T::Props, but that produces circular reference errors in some circumstances
   PropType = T.type_alias { T::Types::Base }
   PropTypeOrClass = T.type_alias { T.any(PropType, Module) }
+  OverrideRules = T.type_alias { T::Hash[Symbol, {allow_incompatible: T::Boolean}] }
 
   class NoRulesError < StandardError; end
 
   EMPTY_PROPS = T.let({}.freeze, T::Hash[Symbol, Rules], checked: false)
   private_constant :EMPTY_PROPS
 
-  OVERRIDE_TRUE = {
+  OVERRIDE_TRUE = T.let({
     reader: {allow_incompatible: false}.freeze,
     writer: {allow_incompatible: false}.freeze
-  }.freeze
+  }.freeze, OverrideRules)
 
-  OVERRIDE_READER = {
+  OVERRIDE_READER = T.let({
     reader: {allow_incompatible: false}.freeze
-  }.freeze
+  }.freeze, OverrideRules)
 
-  OVERRIDE_WRITER = {
+  OVERRIDE_WRITER = T.let({
     writer: {allow_incompatible: false}.freeze
-  }.freeze
+  }.freeze, OverrideRules)
 
-  OVERRIDE_EMPTY = {}.freeze
+  OVERRIDE_EMPTY = T.let({}.freeze, OverrideRules)
 
   sig { params(klass: T.untyped).void.checked(:never) }
   def initialize(klass)
