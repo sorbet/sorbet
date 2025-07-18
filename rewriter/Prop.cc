@@ -345,7 +345,8 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             if (lit != nullptr && lit->isSymbol()) {
                 ret.computedByMethodNameLoc = lit->loc;
                 ret.computedByMethodName = lit->asSymbol();
-            } else {
+            } else if (auto e = ctx.beginIndexerError(val.loc(), core::errors::Rewriter::ComputedBySymbol)) {
+                e.setHeader("Value for `{}` must be a symbol literal", "computed_by");
             }
         }
 
