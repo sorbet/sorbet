@@ -425,6 +425,39 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     return ret;
 }
 
+// cwong: Should we move this to `Helpers.h`?
+ast::ExpressionPtr insertOverride(ast::Send &oldSig, OverrideKind cfg) {
+    auto &oldBody = oldSig.block()->body;
+    auto loc = oldSig.loc;
+
+    ast::Send::ARGS_store args;
+
+    switch (cfg) {
+        case OverrideKind::Strict:
+            break;
+        case OverrideKind::AllowIncompatibleVisibility:
+            args.push_back(ast::MK::Symbol(loc, core::Names::allowIncompatible()));
+            args.push_back(ast::MK::Symbol(loc, core::Names::visibility()));
+            break;
+        case OverrideKind::AllowIncompatible:
+            args.push_back(ast::MK::Symbol(loc, core::Names::allowIncompatible()));
+            args.push_back(ast::MK::True(loc));
+            break;
+    }
+
+    // cwong: It might be a better user experience to use specifically the `override` keyword
+    // in the prop declaration instead of the entire prop line as the location here.
+    auto withOverride = ast::MK::Send(loc, std::move(oldBody), core::Names::override_(), loc, 0, std::move(args));
+
+    auto sig = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(),
+                              loc, ast::MK::Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
+    auto sigSend = ast::cast_tree<ast::Send>(sig);
+
+    sigSend->setBlock(ast::MK::Block0(loc, std::move(withOverride)));
+
+    return sig;
+}
+
 vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, const PropInfo &prop, PropContext propContext) {
     vector<ast::ExpressionPtr> nodes;
 
@@ -442,13 +475,16 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, const PropInfo 
     auto ivarName = name.addAt(ctx);
 
     auto readerSig = ast::MK::Sig0(loc, ASTUtil::dupType(getType));
+    if (prop.getterOverride) {
+        readerSig = insertOverride(*ASTUtil::castSig(readerSig), prop.getterOverride.value());
+    }
     nodes.emplace_back(std::move(readerSig));
 
     // Generate a real prop body for computed_by: props so Sorbet can assert the
     // existence of the computed_by: method.
     if (computedByMethodName.exists()) {
         // Given `const :foo, type, computed_by: <name>`, where <name> is a Symbol pointing to a class method,
-        // assert that the method takes 1 argument (of any type), and propurns the same type as the prop,
+        // assert that the method takes 1 argument (of any type), and returns the same type as the prop,
         // via `T.assert_type!(self.class.compute_foo(T.unsafe(nil)), type)` in the getter.
         auto selfSendClass = ast::MK::Send0(computedByMethodNameLoc, ast::MK::Self(loc), core::Names::class_(),
                                             computedByMethodNameLocZero);
@@ -486,7 +522,12 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, const PropInfo 
         ast::Send::ARGS_store sigArgs;
         sigArgs.emplace_back(ast::MK::Symbol(nameLoc, core::Names::arg0()));
         sigArgs.emplace_back(ASTUtil::dupType(setType));
-        nodes.emplace_back(ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType)));
+
+        auto writerSig = ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType));
+        if (prop.setterOverride) {
+            writerSig = insertOverride(*ASTUtil::castSig(writerSig), prop.setterOverride.value());
+        }
+        nodes.emplace_back(std::move(writerSig));
 
         if (prop.enum_ == nullptr) {
             if (knownNonDocument(propContext.syntacticSuperClass)) {
@@ -522,7 +563,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, const PropInfo 
             nonNilType = ASTUtil::dupType(prop.foreign);
         }
 
-        // sig {params(allow_direct_mutation: T.nilable(T::Boolean)).propurns(T.nilable($foreign))}
+        // sig {params(allow_direct_mutation: T.nilable(T::Boolean)).returns(T.nilable($foreign))}
         nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
                                          ast::MK::Nilable(loc, ast::MK::T_Boolean(loc)), std::move(type)));
 
@@ -547,7 +588,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, const PropInfo 
                                                      ast::MK::RaiseTypedUnimplemented(loc), fkFlags);
         nodes.emplace_back(std::move(fkMethodDef));
 
-        // sig {params(opts: T.untyped).propurns($foreign)}
+        // sig {params(opts: T.untyped).returns($foreign)}
         nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
                                          ast::MK::Nilable(loc, ast::MK::T_Boolean(loc)), std::move(nonNilType)));
 
