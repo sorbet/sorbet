@@ -70,3 +70,18 @@ def block_inside_lambda
   T.reveal_type(f) # error: `T.proc.returns(NilClass)`
   f.call.to_s
 end
+
+sig { returns(Integer) }
+def t_let_return_keyword
+  f = T.let(
+    ->() {
+      return "not an int" # error: Expected `Integer` but found `String("not an int")` for block result type
+    },
+    T.proc.returns(Integer)
+  )
+
+  T.reveal_type(f) # error: `T.proc.returns(Integer)`
+
+  42
+end
+

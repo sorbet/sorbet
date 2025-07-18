@@ -115,7 +115,7 @@ bool sendRecvIsT(ast::Send &s) {
 }
 
 bool isKernelLambda(ast::Send &s) {
-    if (s.fun != core::Names::lambda()) {
+    if (s.fun != core::Names::lambda() && s.fun != core::Names::lambdaTLet()) {
         return false;
     }
 
