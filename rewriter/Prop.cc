@@ -388,7 +388,6 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                 }
             }
         }
-
         auto [_overrideKey, overrideArg] = ASTUtil::extractHashValue(ctx, *rules, core::Names::override_());
         if (overrideArg != nullptr) {
             if (auto lit = ast::cast_tree<ast::Literal>(overrideArg)) {
@@ -414,7 +413,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                 elaborateOverride(ctx, *opts, core::Names::reader(), "reader", ret.getterOverride);
                 elaborateOverride(ctx, *opts, core::Names::writer(), "writer", ret.setterOverride);
             } else {
-                emitBadOverride(ctx, lit->loc);
+                emitBadOverride(ctx, overrideArg.loc());
             }
         }
     }
