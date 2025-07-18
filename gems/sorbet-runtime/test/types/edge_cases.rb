@@ -825,6 +825,25 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_includes(err.message, "Putting a `sig` on `singleton_method_added` is not supported")
   end
 
+  it "allows defining methods inside a method_added hook" do
+    klass = Class.new do
+      extend T::Sig
+      def self.method_added(method_name)
+        super
+        define_singleton_method("#{method_name}_singleton_class_method") { 'hello, world' }
+      end
+
+      sig { params(x: Integer).returns(Integer) }
+      def example(x)
+        x
+      end
+    end
+
+    inst = klass.new
+    assert_equal(42, inst.example(42))
+    assert_equal('hello, world', klass.example_singleton_class_method)
+  end
+
   it "does not make sig available to attached class" do
     assert_raises(NoMethodError) do
       Class.new do

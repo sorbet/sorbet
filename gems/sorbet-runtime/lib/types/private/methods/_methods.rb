@@ -545,15 +545,15 @@ module T::Private::Methods
 
   module MethodHooks
     def method_added(name)
-      super(name)
       ::T::Private::Methods._on_method_added(self, self, name)
+      super(name)
     end
   end
 
   module SingletonMethodHooks
     def singleton_method_added(name)
-      super(name)
       ::T::Private::Methods._on_method_added(self, singleton_class, name)
+      super(name)
     end
   end
 
