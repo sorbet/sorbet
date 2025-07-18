@@ -210,6 +210,63 @@ Unfortunately, this process left warts in the publicly-accessible `T::Struct` AP
 
 The remainder of this documentation is presented for completeness. Use the APIs below at your own discretion. Our goal here is simply to outline the potential pitfalls that arise when using them.
 
+## Fine-grained inheritance control with `override`
+
+Under the hood, the declaration `prop :foo, Integer`
+
+```ruby
+class A < T::Struct
+  prop :foo, Integer
+end
+```
+
+expands to something like
+
+```ruby
+class A < T::Struct
+  @foo = T.let()
+
+  sig { returns(String) }
+  def foo; @foo; end
+
+  sig { params(arg0: String).returns(String) }
+  def foo=(arg0); @foo = arg0; end
+
+  sig { params(foo: String).void }
+  def initialize(foo)
+    @foo = foo
+  end
+end
+```
+
+If `foo` or `foo=` overrides an `overridable` or `abstract` method, however (such as in the interface method above), it is necessary to also annotate the generated sigs with `override`. To accomplish this with `prop`, you can pass the `override` keyword argument. In the simplest cases, this will be one of:
+
+- `override: :reader` (overrides `foo` only)
+- `override: :writer` (overrides `foo=` only)
+- `override: true` (overrides both `foo` and `foo=`).
+
+If more fine-grained control is needed (for example, because the override is [incompatible](https://sorbet.org/docs/override-checking#use-overrideallow_incompatible-true)), `override` also accepts a Hash containing the keys `reader` and `writer`. For example:
+
+```ruby
+module Interface
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+
+  sig { abstract.returns(T.nilable(String)) }
+  def foo; end
+
+  sig { abstract.params(foo: String).returns(String) }
+  def foo=(foo); end
+end
+
+class Concrete < T::Struct
+  include Interface
+
+  prop :foo, String, override: {reader: {allow_incompatible: true}, writer: true}
+end
+```
+
 ## `serialize` and `from_hash`: Converting `T::Struct` to and from `Hash`
 
 It's possible to convert a `T::Struct` instance to and from `Hash` instances:
