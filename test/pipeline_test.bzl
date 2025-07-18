@@ -15,7 +15,7 @@ def dropExtension(p):
 _TEST_SCRIPT = """#!/usr/bin/env bash
 export ASAN_SYMBOLIZER_PATH=`pwd`/external/llvm_toolchain_15_0_7/bin/llvm-symbolizer
 set -x
-exec {runner} --single_test="{test}" --parser="{parser}"
+exec {runner} --single_test="{test}" {parser}
 """
 
 def _exp_test_impl(ctx):
@@ -24,7 +24,7 @@ def _exp_test_impl(ctx):
         content = _TEST_SCRIPT.format(
             runner = ctx.executable.runner.short_path,
             test = ctx.file.test.path,
-            parser = ctx.attr.parser,
+            parser = "--parser='{parser}'".format(parser = ctx.attr.parser) if ctx.attr.parser else "",
         ),
     )
 
@@ -51,7 +51,7 @@ exp_test = rule(
         "_llvm_symbolizer": attr.label(
             default = "//test:llvm-symbolizer",
         ),
-        "parser": attr.string(default = "original"),
+        "parser": attr.string(mandatory = False),
     },
 )
 
@@ -63,7 +63,7 @@ _TEST_RUNNERS = {
     "PackagerTests": ":pipeline_test_runner",
 }
 
-def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], tags = [], parser = "original"):
+def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], tags = [], parser = None):
     tests = {}  # test_name-> {"path": String, "prefix": String, "sentinel": String, "isPackage": bool}
 
     # The packager step needs folder-based steps since folder structure dictates package membership.
