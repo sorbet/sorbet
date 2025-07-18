@@ -183,7 +183,157 @@ public:
     }
 };
 
+class ConstImportIterator;
+class ImportIterator;
+
+class WrappedImport {
+    friend class ConstImportIterator;
+    friend class ImportIterator;
+    friend class Imports;
+
+    Import &imp;
+
+    explicit WrappedImport(Import &imp) : imp{imp} {}
+
+    WrappedImport() = delete;
+    WrappedImport(WrappedImport &&) = delete;
+    WrappedImport &operator=(WrappedImport &&) = delete;
+    WrappedImport(const WrappedImport &) = delete;
+    WrappedImport &operator=(const WrappedImport &) = delete;
+
+public:
+    core::LocOffsets loc() const {
+        return imp.loc;
+    }
+
+    core::packages::ImportType type() const {
+        return imp.type;
+    }
+
+    const PackageName &name() const {
+        return imp.name;
+    }
+
+    bool isTestImport() const {
+        return imp.isTestImport();
+    }
+};
+
+class Imports;
+
+class ConstImportIterator {
+    friend class Imports;
+
+    vector<Import>::const_iterator it;
+
+    ConstImportIterator() = delete;
+    explicit ConstImportIterator(vector<Import>::const_iterator it) : it{it} {}
+
+public:
+    void operator++() {
+        ++it;
+    }
+
+    bool operator==(const ConstImportIterator &other) {
+        return this->it == other.it;
+    }
+
+    bool operator!=(const ConstImportIterator &other) {
+        return this->it != other.it;
+    }
+
+    const WrappedImport get() {
+        return WrappedImport{const_cast<Import &>(*this->it)};
+    }
+
+    const WrappedImport operator*() {
+        return this->get();
+    }
+};
+
+class ImportIterator {
+    friend class Imports;
+
+    vector<Import>::iterator it;
+
+    ImportIterator() = delete;
+    explicit ImportIterator(vector<Import>::iterator it) : it{it} {}
+
+public:
+    void operator++() {
+        ++it;
+    }
+
+    bool operator==(const ImportIterator &other) {
+        return this->it == other.it;
+    }
+
+    bool operator!=(const ImportIterator &other) {
+        return this->it != other.it;
+    }
+
+    WrappedImport get() {
+        return WrappedImport{*this->it};
+    }
+
+    WrappedImport operator*() {
+        return this->get();
+    }
+};
+
+class PackageInfoImpl;
+
+class Imports {
+    friend class PackageInfoImpl;
+
+    vector<Import> &imports;
+
+    explicit Imports(vector<Import> &imports) : imports{imports} {}
+
+    Imports() = delete;
+    Imports(Imports &&) = delete;
+    Imports &operator=(Imports &&) = delete;
+    Imports(const Imports &) = delete;
+    Imports &operator=(const Imports &) = delete;
+
+public:
+    ConstImportIterator begin() const {
+        return ConstImportIterator(this->imports.begin());
+    }
+
+    ConstImportIterator end() const {
+        return ConstImportIterator(this->imports.end());
+    }
+
+    ImportIterator begin() {
+        return ImportIterator(this->imports.begin());
+    }
+
+    ImportIterator end() {
+        return ImportIterator(this->imports.end());
+    }
+
+    bool empty() const {
+        return this->imports.empty();
+    }
+
+    const WrappedImport front() const {
+        return WrappedImport(this->imports.front());
+    }
+
+    WrappedImport front() {
+        return WrappedImport(this->imports.front());
+    }
+
+    void add(PackageName &&name, core::packages::ImportType type, core::LocOffsets loc) {
+        this->imports.emplace_back(move(name), type, loc);
+    }
+};
+
 class PackageInfoImpl final : public core::packages::PackageInfo {
+    // The names of each package imported by this package.
+    vector<Import> importedPackageNames = {};
+
 public:
     core::packages::MangledName mangledName() const {
         return name.mangledName;
@@ -221,11 +371,20 @@ public:
     core::Loc declLoc_;
     // The possible path prefixes associated with files in the package, including path separator at end.
     vector<string> packagePathPrefixes = {};
-    // The names of each package imported by this package.
-    vector<Import> importedPackageNames = {};
+
     // List of exported items that form the body of this package's public API.
     // These are copied into every package that imports this package.
     vector<Export> exports_ = {};
+
+    const Imports imports() const {
+        // Imports holds a non-const reference, but exposes a const interface.
+        return Imports{const_cast<vector<Import> &>(this->importedPackageNames)};
+    }
+
+    Imports imports() {
+        // Imports holds a non-const reference, but exposes a const interface.
+        return Imports{this->importedPackageNames};
+    }
 
     // Whether this package should just export everything
     bool exportAll_ = false;
@@ -429,19 +588,19 @@ public:
         auto &info = PackageInfoImpl::from(pkg);
         auto insertionLoc = core::Loc::none(loc.file());
         optional<core::AutocorrectSuggestion::Edit> deleteTestImportEdit = nullopt;
-        if (!importedPackageNames.empty()) {
+        if (!this->imports().empty()) {
             core::LocOffsets importToInsertAfter;
-            for (auto &import : importedPackageNames) {
-                if (import.name.mangledName == info.name.mangledName) {
+            for (auto import : this->imports()) {
+                if (import.name().mangledName == info.name.mangledName) {
                     if ((importType == core::packages::ImportType::Normal &&
-                         import.type != core::packages::ImportType::Normal) ||
+                         import.type() != core::packages::ImportType::Normal) ||
                         (importType == core::packages::ImportType::TestHelper &&
-                         import.type == core::packages::ImportType::TestUnit)) {
+                         import.type() == core::packages::ImportType::TestUnit)) {
                         // There's already an import for this package, so we'll "upgrade" it to the desired import.
                         // importToInsertAfter already tracks where we need to insert the import.  So we can craft an
                         // edit to delete the existing line, and then use the regular logic for adding an import to
                         // insert the `import`.
-                        auto importLoc = core::Loc(fullLoc().file(), import.loc);
+                        auto importLoc = core::Loc(fullLoc().file(), import.loc());
                         auto [lineStart, numWhitespace] = importLoc.findStartOfIndentation(gs);
                         auto beginPos =
                             lineStart.adjust(gs, -numWhitespace, 0).beginPos(); // -numWhitespace for the indentation
@@ -466,21 +625,21 @@ public:
                     }
                 }
 
-                auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
+                auto &importInfo = gs.packageDB().getPackageInfo(import.name().mangledName);
                 if (!importInfo.exists()) {
-                    importToInsertAfter = import.loc;
+                    importToInsertAfter = import.loc();
                     continue;
                 }
 
                 auto compareResult = orderImports(gs, info, importType != core::packages::ImportType::Normal,
                                                   importInfo, import.isTestImport());
                 if (compareResult == 1 || compareResult == 0) {
-                    importToInsertAfter = import.loc;
+                    importToInsertAfter = import.loc();
                 }
             }
             if (!importToInsertAfter.exists()) {
                 // Insert before the first import
-                core::Loc beforePackageName = {loc.file(), importedPackageNames.front().name.fullName.loc};
+                core::Loc beforePackageName = {loc.file(), this->imports().front().name().fullName.loc};
                 auto [beforeImport, numWhitespace] = beforePackageName.findStartOfIndentation(gs);
                 auto endOfPrevLine = beforeImport.adjust(gs, -numWhitespace - 1, 0);
                 insertionLoc = endOfPrevLine.copyWithZeroLength();
@@ -609,13 +768,13 @@ public:
             return nullopt;
         }
 
-        auto imp =
-            absl::c_find_if(importedPackageNames, [mangledName](auto &i) { return i.name.mangledName == mangledName; });
-        if (imp == importedPackageNames.end()) {
+        auto imports = this->imports();
+        auto imp = absl::c_find_if(imports, [mangledName](auto i) { return i.name().mangledName == mangledName; });
+        if (imp == imports.end()) {
             return nullopt;
         }
 
-        return imp->type;
+        return imp.get().type();
     }
 
     // Is it a layering violation to import otherPkg from this package?
@@ -703,15 +862,15 @@ public:
             }
 
             auto &currInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfo(curr));
-            for (auto &import : currInfo.importedPackageNames) {
-                auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
-                if (!importInfo.exists() || import.isTestImport() || visited.contains(import.name.mangledName)) {
+            for (auto import : currInfo.imports()) {
+                auto &importInfo = gs.packageDB().getPackageInfo(import.name().mangledName);
+                if (!importInfo.exists() || import.isTestImport() || visited.contains(import.name().mangledName)) {
                     continue;
                 }
-                if (!prev.contains(import.name.mangledName)) {
-                    prev[import.name.mangledName] = curr;
+                if (!prev.contains(import.name().mangledName)) {
+                    prev[import.name().mangledName] = curr;
                 }
-                toVisit.push(import.name.mangledName);
+                toVisit.push(import.name().mangledName);
             }
         }
 
@@ -1312,8 +1471,7 @@ struct PackageSpecBodyWalk {
                 auto importArg = move(posArg);
                 posArg = ast::packager::prependRegistry(move(importArg));
 
-                info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target), method2ImportType(send),
-                                                       send.loc);
+                info.imports().add(getUnresolvedPackageName(ctx, target), method2ImportType(send), send.loc);
             }
             // also validate the keyword args, since one is valid
             for (auto [key, value] : send.kwArgPairs()) {
@@ -1768,22 +1926,22 @@ class ComputePackageSCCs {
         this->stack.push_back(pkgName);
         infoAtEntry.onStack = true;
 
-        for (auto &i : pkgInfo.importedPackageNames) {
+        for (auto i : pkgInfo.imports()) {
             // We want to consider all imports from test code, but only normal imports for application code.
             if constexpr (EdgeType == core::packages::ImportType::Normal) {
-                if (i.type != core::packages::ImportType::Normal) {
+                if (i.type() != core::packages::ImportType::Normal) {
                     continue;
                 }
             }
             // We need to be careful with this; it's not valid after a call to `strongConnect`,
             // because our reference might disappear from underneath us during that call.
-            auto &importInfo = this->nodeMap[i.name.mangledName];
+            auto &importInfo = this->nodeMap[i.name().mangledName];
             if (importInfo.index == NodeInfo::UNVISITED) {
                 // This is a tree edge (ie. a forward edge that we haven't visited yet).
-                this->strongConnect<EdgeType>(i.name.mangledName, importInfo);
+                this->strongConnect<EdgeType>(i.name().mangledName, importInfo);
 
                 // Need to re-lookup for the reason above.
-                auto &importInfo = this->nodeMap[i.name.mangledName];
+                auto &importInfo = this->nodeMap[i.name().mangledName];
                 if (importInfo.index == NodeInfo::UNVISITED) {
                     // This is to handle early return above.
                     continue;
@@ -1843,23 +2001,23 @@ class ComputePackageSCCs {
             // we've visited all members of the SCC once, to ensure that their ids have all been populated.
             for (auto name : condensationNode.members) {
                 auto &member = PackageInfoImpl::from(*(packageDB.getPackageInfoNonConst(name)));
-                for (auto &i : member.importedPackageNames) {
+                for (auto i : member.imports()) {
                     // We want to consider all imports from test code, but only normal imports for application code.
                     if constexpr (EdgeType == core::packages::ImportType::Normal) {
-                        if (i.type != core::packages::ImportType::Normal) {
+                        if (i.type() != core::packages::ImportType::Normal) {
                             continue;
                         }
                     }
 
                     // The mangled name won't exist if the import was to a package that doesn't exist.
-                    if (!i.name.mangledName.exists()) {
+                    if (!i.name().mangledName.exists()) {
                         continue;
                     }
 
                     // All of the imports of every member of the SCC will have been processed in the recursive step, so
                     // we can assume the scc id of the target exists. Additionally, all imports are to the original
                     // application code, which is why we don't consider using the `testSccID` here.
-                    auto impId = packageDB.getPackageInfo(i.name.mangledName).sccID();
+                    auto impId = packageDB.getPackageInfo(i.name().mangledName).sccID();
                     ENFORCE(impId.has_value());
                     if (*impId == sccId) {
                         continue;
@@ -1899,16 +2057,16 @@ public:
     }
 };
 
-void validateLayering(const core::Context &ctx, const Import &i) {
+void validateLayering(const core::Context &ctx, const WrappedImport &i) {
     if (i.isTestImport()) {
         return;
     }
 
     const auto &packageDB = ctx.state.packageDB();
-    ENFORCE(packageDB.getPackageInfo(i.name.mangledName).exists())
+    ENFORCE(packageDB.getPackageInfo(i.name().mangledName).exists())
     ENFORCE(packageDB.getPackageNameForFile(ctx.file).exists())
     auto &thisPkg = PackageInfoImpl::from(ctx, packageDB.getPackageNameForFile(ctx.file));
-    auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name.mangledName));
+    auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name().mangledName));
     ENFORCE(thisPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
     ENFORCE(otherPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
 
@@ -1925,7 +2083,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     auto otherPkgLayer = otherPkg.layer().value().first;
 
     if (thisPkg.causesLayeringViolation(packageDB, otherPkgLayer)) {
-        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::LayeringViolation)) {
+        if (auto e = ctx.beginError(i.name().fullName.loc, core::errors::Packager::LayeringViolation)) {
             e.setHeader("Layering violation: cannot import `{}` (in layer `{}`) from `{}` (in layer `{}`)",
                         otherPkg.show(ctx), otherPkgLayer.show(ctx), thisPkg.show(ctx), pkgLayer.show(ctx));
             e.addErrorLine(core::Loc(thisPkg.loc.file(), thisPkg.layer().value().second), "`{}`'s `{}` declared here",
@@ -1940,7 +2098,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     core::packages::StrictDependenciesLevel otherPkgExpectedLevel = thisPkg.minimumStrictDependenciesLevel();
 
     if (otherPkg.strictDependenciesLevel().value().first < otherPkgExpectedLevel) {
-        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::StrictDependenciesViolation)) {
+        if (auto e = ctx.beginError(i.name().fullName.loc, core::errors::Packager::StrictDependenciesViolation)) {
             e.setHeader("Strict dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
                         "import", core::packages::strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel().value().second),
@@ -1954,7 +2112,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
 
     if (thisPkg.strictDependenciesLevel().value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
         if (thisPkg.sccID() == otherPkg.sccID()) {
-            if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::StrictDependenciesViolation)) {
+            if (auto e = ctx.beginError(i.name().fullName.loc, core::errors::Packager::StrictDependenciesViolation)) {
                 auto level = fmt::format(
                     "strict_dependencies '{}'",
                     core::packages::strictDependenciesLevelToString(thisPkg.strictDependenciesLevel().value().first));
@@ -1972,10 +2130,10 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     }
 }
 
-void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg, const Import i) {
-    ENFORCE(ctx.state.packageDB().getPackageInfo(i.name.mangledName).exists())
+void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg, const WrappedImport &i) {
+    ENFORCE(ctx.state.packageDB().getPackageInfo(i.name().mangledName).exists())
     ENFORCE(ctx.state.packageDB().getPackageNameForFile(ctx.file).exists())
-    auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.name.mangledName);
+    auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.name().mangledName);
 
     const auto &visibleTo = otherPkg.visibleTo();
     if (visibleTo.empty() && !otherPkg.visibleToTests()) {
@@ -1990,7 +2148,7 @@ void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg,
         visibleTo, [&ctx, &absPkg](const auto &other) { return visibilityApplies(ctx, other, absPkg.mangledName()); });
 
     if (!allowed) {
-        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::ImportNotVisible)) {
+        if (auto e = ctx.beginError(i.name().fullName.loc, core::errors::Packager::ImportNotVisible)) {
             e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
                         otherPkg.show(ctx), absPkg.show(ctx));
             e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
@@ -2024,8 +2182,8 @@ void validatePackage(core::Context ctx) {
         return;
     }
 
-    for (auto &i : pkgInfo.importedPackageNames) {
-        auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+    for (auto i : pkgInfo.imports()) {
+        auto &otherPkg = packageDB.getPackageInfo(i.name().mangledName);
 
         // this might mean the other package doesn't exist, but that should have been caught already
         if (!otherPkg.exists()) {
@@ -2040,10 +2198,10 @@ void validatePackage(core::Context ctx) {
             validateVisibility(ctx, pkgInfo, i);
         }
 
-        if (i.name.mangledName == pkgInfo.name.mangledName) {
-            if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::NoSelfImport)) {
+        if (i.name().mangledName == pkgInfo.name.mangledName) {
+            if (auto e = ctx.beginError(i.name().fullName.loc, core::errors::Packager::NoSelfImport)) {
                 string import_;
-                switch (i.type) {
+                switch (i.type()) {
                     case core::packages::ImportType::Normal:
                         import_ = "import";
                         break;
