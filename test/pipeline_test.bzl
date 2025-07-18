@@ -24,7 +24,7 @@ def _exp_test_impl(ctx):
         content = _TEST_SCRIPT.format(
             runner = ctx.executable.runner.short_path,
             test = ctx.file.test.path,
-            parser = "--parser='{parser}'".format(parser = ctx.attr.parser) if (ctx.attr.parser != None) else "",
+            parser = "--parser='{parser}'".format(parser = ctx.attr.parser) if ctx.attr.parser else "",
         ),
     )
 
