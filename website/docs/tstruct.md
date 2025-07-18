@@ -173,13 +173,13 @@ end
 
 class ChildOne < T::Struct
   include Common
-  prop :foo, Integer
+  prop :foo, Integer, override: true
   prop :bar, String
 end
 
 class ChildTwo < T::Struct
   include Common
-  prop :foo, Integer
+  prop :foo, Integer, override: true
   prop :quz, Symbol
 end
 ```
