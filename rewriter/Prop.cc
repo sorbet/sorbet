@@ -410,8 +410,31 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                     emitBadOverride(ctx, lit->loc);
                 }
             } else if (auto opts = ast::cast_tree<ast::Hash>(overrideArg)) {
-                elaborateOverride(ctx, *opts, core::Names::reader(), "reader", ret.getterOverride);
-                elaborateOverride(ctx, *opts, core::Names::writer(), "writer", ret.setterOverride);
+                auto [_k, allowIncompatArg] = ASTUtil::extractHashValue(ctx, *opts, core::Names::allowIncompatible());
+                if (allowIncompatArg != nullptr) {
+                    if (auto lit = ast::cast_tree<ast::Literal>(allowIncompatArg)) {
+                        if (lit->isTrue(ctx)) {
+                            ret.getterOverride = OverrideKind::AllowIncompatible;
+                            ret.setterOverride = OverrideKind::AllowIncompatible;
+                        } else if (lit->isFalse(ctx)) {
+                            ret.getterOverride = OverrideKind::Strict;
+                            ret.setterOverride = OverrideKind::Strict;
+                        } else if (lit->isSymbol() && lit->asSymbol() == core::Names::visibility()) {
+                            ret.getterOverride = OverrideKind::AllowIncompatibleVisibility;
+                            ret.setterOverride = OverrideKind::AllowIncompatibleVisibility;
+                        } else if (auto e = ctx.beginIndexerError(lit->loc, core::errors::Rewriter::PropBadOverride)) {
+                            e.setHeader("Bad option for `{}`", "override.allow_incompatible");
+                            e.addErrorNote("should be `{}` or `{}`", "true", ":visibility");
+                        }
+                    } else if (auto e = ctx.beginIndexerError(allowIncompatArg.loc(),
+                                                              core::errors::Rewriter::PropBadOverride)) {
+                        e.setHeader("Bad option for `{}`", "override.allow_incompatible");
+                        e.addErrorNote("should be `{}` or `{}`", "true", ":visibility");
+                    }
+                } else {
+                    elaborateOverride(ctx, *opts, core::Names::reader(), "reader", ret.getterOverride);
+                    elaborateOverride(ctx, *opts, core::Names::writer(), "writer", ret.setterOverride);
+                }
             } else {
                 emitBadOverride(ctx, overrideArg.loc());
             }
