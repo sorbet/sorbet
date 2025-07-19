@@ -13,7 +13,7 @@ class A
     # completion results for `a.foo.even?` here would not return any results.
     if a.foo && a.foo.to
       #               ^^ error-with-dupes: does not exist
-      #                 ^ completion: to_c, to_f, to_i, to_r, to_s, ...
+      #                 ^ completion: to_c, to_d, to_f, to_i, to_r, ...
       puts a.foo
     end
   end
