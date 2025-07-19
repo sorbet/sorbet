@@ -5,7 +5,6 @@
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
-#include "packager/packager.h"
 
 using namespace std;
 
@@ -28,7 +27,6 @@ vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::
         fullName.emplace_back(sym.name(gs));
         sym = sym.owner(gs);
     }
-    reverse(fullName.begin(), fullName.end());
 
     vector<core::SymbolRef> result;
     vector<core::SymbolRef> namespacesToCheck = {
@@ -55,8 +53,8 @@ vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::
 core::SymbolRef ReferencesTask::findSym(const core::GlobalState &gs, const vector<core::NameRef> &fullName,
                                         core::SymbolRef underNamespace) {
     core::SymbolRef symToCheck = underNamespace;
-    for (auto &part : fullName) {
-        symToCheck = symToCheck.asClassOrModuleRef().data(gs)->findMember(gs, part);
+    for (auto part = fullName.rbegin(); part != fullName.rend(); ++part) {
+        symToCheck = symToCheck.asClassOrModuleRef().data(gs)->findMember(gs, *part);
         if (!symToCheck.exists()) {
             return symToCheck;
         }
