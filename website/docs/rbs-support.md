@@ -605,7 +605,6 @@ RBS annotations can be used to add Sorbet helpers to classes like [`abstract!`](
 ```ruby
 # @abstract
 class Foo; end
-end
 ```
 
 This is equivalent to:
