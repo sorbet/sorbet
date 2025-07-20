@@ -605,7 +605,6 @@ RBS annotations can be used to add Sorbet helpers to classes like [`abstract!`](
 ```ruby
 # @abstract
 class Foo; end
-end
 ```
 
 This is equivalent to:
@@ -618,7 +617,7 @@ class Foo
 end
 ```
 
-The [`@interface!`](abstract.md), [`@final!`](final.md), and [`@sealed!`](sealed.md) annotations are supported in the same way.
+Sorbet's [`interface!`](abstract.md), [`final!`](final.md), and [`sealed!`](sealed.md) annotations are supported in the same way.
 
 The [`@requires_ancestor`](requires-ancestor.md) annotation expects an argument to represent the ancestor to require:
 
