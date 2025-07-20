@@ -417,7 +417,6 @@ sig(<span class="hljs-symbol">:final</span>) { params(<span class="hljs-symbol">
 <p>RBS annotations can be used to add Sorbet helpers to classes like <a href="/docs/abstract"><code>abstract!</code></a>:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># <span class="hljs-doctag">@abstract</span></span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span>;</span> <span class="hljs-keyword">end</span>
-<span class="hljs-keyword">end</span>
 </code></pre>
 <p>This is equivalent to:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span></span>
@@ -426,7 +425,7 @@ sig(<span class="hljs-symbol">:final</span>) { params(<span class="hljs-symbol">
   abstract!
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>The <a href="/docs/abstract"><code>@interface!</code></a>, <a href="/docs/final"><code>@final!</code></a>, and <a href="/docs/sealed"><code>@sealed!</code></a> annotations are supported in the same way.</p>
+<p>Sorbet’s <a href="/docs/abstract"><code>interface!</code></a>, <a href="/docs/final"><code>final!</code></a>, and <a href="/docs/sealed"><code>sealed!</code></a> annotations are supported in the same way.</p>
 <p>The <a href="/docs/requires-ancestor"><code>@requires_ancestor</code></a> annotation expects an argument to represent the ancestor to require:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># <span class="hljs-doctag">@requires</span>_ancestor: ::Some::Ancestor</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span>;</span> <span class="hljs-keyword">end</span>
