@@ -2,7 +2,7 @@
 # typed: true
 
 module T::Private::Methods
-  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :raw, :deprecated)
+  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :raw)
 
   class DeclBuilder
     attr_reader :decl
@@ -27,8 +27,7 @@ module T::Private::Methods
         ARG_NOT_PROVIDED, # on_failure
         nil, # override_allow_incompatible
         ARG_NOT_PROVIDED, # type_parameters
-        raw,
-        false # deprecated
+        raw
       )
     end
 
@@ -191,13 +190,6 @@ module T::Private::Methods
 
     def deprecated
       check_live!
-
-      if !decl.deprecated.equal?(false)
-        raise BuilderError.new(".deprecated cannot be repeated in a single signature")
-      end
-
-      decl.deprecated = true
-
       self
     end
 
