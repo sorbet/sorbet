@@ -448,6 +448,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     return ret;
 }
 
+// cwong: C++23 has `std::optional::transform`, which I think would be a better way to write this.
 optional<ast::Send::ARGS_store> mkOverrideParams(core::LocOffsets loc, optional<OverrideKind> cfg) {
     if (!cfg) {
         return nullopt;
