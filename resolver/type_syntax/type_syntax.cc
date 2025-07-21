@@ -309,12 +309,24 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 }
 
                 bool validBind = false;
-                auto maybeBind = getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent, args);
+                if (auto arg = ast::cast_tree<ast::Send>(send->getPosArg(0))) {
+                    if (arg->fun == core::Names::selfType()) {
+                        sig.bind = core::Symbols::MagicBindToSelfType();
+                        validBind = true;
+                    } else if (arg->fun == core::Names::attachedClass()) {
+                        sig.bind = core::Symbols::MagicBindToAttachedClass();
+                        validBind = true;
+                    }
+                }
+
                 core::TypePtr bind;
-                if (!maybeBind.has_value()) {
-                    validBind = false;
-                } else {
-                    bind = move(maybeBind.value());
+                if (!validBind) {
+                    auto maybeBind = getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent, args);
+                    if (!maybeBind.has_value()) {
+                        validBind = false;
+                    } else {
+                        bind = move(maybeBind.value());
+                    }
                 }
 
                 if (core::isa_type<core::ClassType>(bind)) {
@@ -328,14 +340,6 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                     if (appType->klass.data(ctx)->isSingletonClass(ctx) &&
                         appType->klass.data(ctx)->typeMembers().size() == 1) {
                         sig.bind = appType->klass;
-                        validBind = true;
-                    }
-                } else if (auto arg = ast::cast_tree<ast::Send>(send->getPosArg(0))) {
-                    if (arg->fun == core::Names::selfType()) {
-                        sig.bind = core::Symbols::MagicBindToSelfType();
-                        validBind = true;
-                    } else if (arg->fun == core::Names::attachedClass()) {
-                        sig.bind = core::Symbols::MagicBindToAttachedClass();
                         validBind = true;
                     }
                 }
@@ -1299,7 +1303,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
     } else if (ast::isa_tree<ast::Send>(expr)) {
         const auto &s = ast::cast_tree_nonnull<ast::Send>(expr);
         if (isTProc(ctx, &s)) {
-            auto maybeSig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args);
+            auto maybeSig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args.withoutSelfType());
             if (!maybeSig.has_value()) {
                 return nullopt;
             }
