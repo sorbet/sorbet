@@ -187,6 +187,9 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             action->kind = kind;
             auto workspaceEdit = make_unique<WorkspaceEdit>();
             workspaceEdit->documentChanges = getQuickfixEdits(config, gs, allEdits);
+            if (absl::c_any_of(allEdits, [&](auto edit) { return edit.loc.file().isPackage(gs); })) {
+                action->command = make_unique<Command>("Save package files", "sorbet.savePackageFiles");
+            }
             action->edit = move(workspaceEdit);
             result.emplace_back(move(action));
         }
