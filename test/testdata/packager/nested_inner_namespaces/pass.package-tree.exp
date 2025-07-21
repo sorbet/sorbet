@@ -1,12 +1,12 @@
 # -- test/testdata/packager/nested_inner_namespaces/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::RootPackage<<C RootPackage>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.import(::<PackageSpecRegistry>::<C RootPackage>::<C Foo>)
+  class ::RootPackage::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(<emptyTree>::<C RootPackage>::<C Foo>::<C <PackageSpec>>)
   end
 end
 # -- test/testdata/packager/nested_inner_namespaces/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::RootPackage::Foo<<C Foo>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::RootPackage::Foo::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C RootPackage>::<C Foo>::<C Constant>)
 
     <self>.export(<emptyTree>::<C RootPackage>::<C Foo>::<C Bar>::<C Constant>)

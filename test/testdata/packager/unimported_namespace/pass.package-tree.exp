@@ -1,18 +1,18 @@
 # -- test/testdata/packager/unimported_namespace/aaa/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::AAA<<C AAA>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::AAA::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C AAA>::<C AClass>)
   end
 end
 # -- test/testdata/packager/unimported_namespace/bbb/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::BBB<<C BBB>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.import(::<PackageSpecRegistry>::<C AAA>)
+  class ::BBB::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(<emptyTree>::<C AAA>::<C <PackageSpec>>)
   end
 end
 # -- test/testdata/packager/unimported_namespace/ccc/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::CCC<<C CCC>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::CCC::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
   end
 end
 # -- test/testdata/packager/unimported_namespace/aaa/a_class.rb --

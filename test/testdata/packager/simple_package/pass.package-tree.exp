@@ -1,7 +1,7 @@
 # -- test/testdata/packager/simple_package/bar/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::Project::Bar<<C Bar>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.import(::<PackageSpecRegistry>::<C Project>::<C Foo>)
+  class ::Project::Bar::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(<emptyTree>::<C Project>::<C Foo>::<C <PackageSpec>>)
 
     <self>.export(<emptyTree>::<C Project>::<C Bar>::<C Bar>)
 
@@ -10,8 +10,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/simple_package/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::Project::Foo<<C Foo>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.import(::<PackageSpecRegistry>::<C Project>::<C Bar>)
+  class ::Project::Foo::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(<emptyTree>::<C Project>::<C Bar>::<C <PackageSpec>>)
 
     <self>.export(<emptyTree>::<C Project>::<C Foo>::<C Foo>)
 

@@ -1,16 +1,16 @@
 # -- test/testdata/packager/extra_package_paths/bar/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::Project::Bar<<C Bar>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.import(::<PackageSpecRegistry>::<C Project>::<C Foo>)
+  class ::Project::Bar::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(<emptyTree>::<C Project>::<C Foo>::<C <PackageSpec>>)
 
-    <self>.import(::<PackageSpecRegistry>::<C Project>::<C Baz>::<C Package>)
+    <self>.import(<emptyTree>::<C Project>::<C Baz>::<C Package>::<C <PackageSpec>>)
 
-    <self>.import(::<PackageSpecRegistry>::<C Project>::<C FooBar>)
+    <self>.import(<emptyTree>::<C Project>::<C FooBar>::<C <PackageSpec>>)
   end
 end
 # -- test/testdata/packager/extra_package_paths/baz/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::Project::Baz::Package<<C Package>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::Project::Baz::Package::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C Project>::<C Baz>::<C Package>::<C C>)
 
     <self>.export(<emptyTree>::<C Project>::<C Baz>::<C Package>::<C E>)
@@ -18,7 +18,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/extra_package_paths/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::Project::Foo<<C Foo>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::Project::Foo::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C Project>::<C Foo>::<C B>)
 
     <self>.export(<emptyTree>::<C Project>::<C Foo>::<C D>)
@@ -26,7 +26,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/extra_package_paths/foo_bar/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::Project::FooBar<<C FooBar>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::Project::FooBar::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C Project>::<C FooBar>::<C Z>)
   end
 end
