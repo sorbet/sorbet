@@ -483,6 +483,10 @@ class Info < T::struct
 end
 ```
 
+## 3516
+
+This error indicates that the `override` argument passed to a `prop` or `const` is ill-formed. See [prop overrides](override-checking.md#overrides-and-the-prop-dsl).
+
 ## 3550
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
