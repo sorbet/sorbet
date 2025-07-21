@@ -604,7 +604,13 @@ constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &
         return nullopt;
     }
 
-    auto *block = parsedSig->origSend.block();
+    auto &origSend = parsedSig->origSend;
+
+    if (origSend.flags.isRewriterSynthesized) {
+        return nullopt;
+    }
+
+    auto *block = origSend.block();
     if (!block) {
         return nullopt;
     }
