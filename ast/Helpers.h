@@ -342,19 +342,11 @@ private:
         return recv;
     }
 
-    static ExpressionPtr MaybeOverride(core::LocOffsets loc, std::optional<Send::ARGS_store> args) {
-        if (args) {
-            return Send(loc, Self(loc), core::Names::override_(), loc, 0, std::move(args.value()));
-        } else {
-            return Self(loc);
-        }
-    }
-
 public:
     static ExpressionPtr Sig(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr ret,
-                             std::optional<Send::ARGS_store> overrideArgs = std::nullopt) {
-        auto base = MaybeOverride(loc, std::move(overrideArgs));
-        auto params = Params(loc, std::move(base), std::move(args));
+                             std::optional<ExpressionPtr> recv_ = std::nullopt) {
+        auto recv = recv_ ? std::move(recv_.value()) : Self(loc);
+        auto params = Params(loc, std::move(recv), std::move(args));
         auto returns = Send1(loc, std::move(params), core::Names::returns(), loc, std::move(ret));
         Send::Flags flags;
         flags.isRewriterSynthesized = true;
@@ -365,9 +357,9 @@ public:
     }
 
     static ExpressionPtr SigVoid(core::LocOffsets loc, Send::ARGS_store args,
-                                 std::optional<Send::ARGS_store> overrideArgs = std::nullopt) {
-        auto base = MaybeOverride(loc, std::move(overrideArgs));
-        auto params = Params(loc, std::move(base), std::move(args));
+                                 std::optional<ExpressionPtr> recv_ = std::nullopt) {
+        auto recv = recv_ ? std::move(recv_.value()) : Self(loc);
+        auto params = Params(loc, std::move(recv), std::move(args));
         auto void_ = Send0(loc, std::move(params), core::Names::void_(), loc);
         Send::Flags flags;
         flags.isRewriterSynthesized = true;
@@ -378,9 +370,9 @@ public:
     }
 
     static ExpressionPtr Sig0(core::LocOffsets loc, ExpressionPtr ret,
-                              std::optional<Send::ARGS_store> overrideArgs = std::nullopt) {
-        auto base = MaybeOverride(loc, std::move(overrideArgs));
-        auto returns = Send1(loc, std::move(base), core::Names::returns(), loc, std::move(ret));
+                              std::optional<ExpressionPtr> recv_ = std::nullopt) {
+        auto recv = recv_ ? std::move(recv_.value()) : Self(loc);
+        auto returns = Send1(loc, std::move(recv), core::Names::returns(), loc, std::move(ret));
         Send::Flags flags;
         flags.isRewriterSynthesized = true;
         flags.hasBlock = true;
@@ -390,8 +382,31 @@ public:
     }
 
     static ExpressionPtr Sig1(core::LocOffsets loc, ExpressionPtr key, ExpressionPtr value, ExpressionPtr ret,
-                              std::optional<Send::ARGS_store> overrideArgs = std::nullopt) {
-        return Sig(loc, SendArgs(std::move(key), std::move(value)), std::move(ret), std::move(overrideArgs));
+                              std::optional<ExpressionPtr> recv_ = std::nullopt) {
+        return Sig(loc, SendArgs(std::move(key), std::move(value)), std::move(ret), std::move(recv_));
+    }
+
+    static ExpressionPtr Override(core::LocOffsets loc, Send::ARGS_store args) {
+        return Send(loc, Self(loc), core::Names::override_(), loc, 0, std::move(args));
+    }
+
+    static ExpressionPtr OverrideStrict(core::LocOffsets loc) {
+        Send::ARGS_store args;
+        return Override(loc, std::move(args));
+    }
+
+    static ExpressionPtr OverrideAllowIncompatibleTrue(core::LocOffsets loc) {
+        Send::ARGS_store args;
+        args.push_back(Symbol(loc, core::Names::allowIncompatible()));
+        args.push_back(True(loc));
+        return Override(loc, std::move(args));
+    }
+
+    static ExpressionPtr OverrideAllowIncompatibleVisibility(core::LocOffsets loc) {
+        Send::ARGS_store args;
+        args.push_back(Symbol(loc, core::Names::allowIncompatible()));
+        args.push_back(Symbol(loc, core::Names::visibility()));
+        return Override(loc, std::move(args));
     }
 
     static ExpressionPtr T(core::LocOffsets loc) {
