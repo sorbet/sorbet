@@ -448,14 +448,14 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     return ret;
 }
 
-// cwong: Should we move this to `Helpers.h`?
-ast::ExpressionPtr insertOverride(ast::Send &oldSig, OverrideKind cfg) {
-    auto &oldBody = oldSig.block()->body;
-    auto loc = oldSig.loc;
+optional<ast::Send::ARGS_store> mkOverrideParams(core::LocOffsets loc, optional<OverrideKind> cfg) {
+    if (!cfg) {
+        return nullopt;
+    }
 
     ast::Send::ARGS_store args;
 
-    switch (cfg) {
+    switch (cfg.value()) {
         case OverrideKind::Strict:
             break;
         case OverrideKind::AllowIncompatibleVisibility:
@@ -468,17 +468,7 @@ ast::ExpressionPtr insertOverride(ast::Send &oldSig, OverrideKind cfg) {
             break;
     }
 
-    // cwong: It might be a better user experience to use specifically the `override` keyword
-    // in the prop declaration instead of the entire prop line as the location here.
-    auto withOverride = ast::MK::Send(loc, std::move(oldBody), core::Names::override_(), loc, 0, std::move(args));
-
-    auto sig = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(),
-                              loc, ast::MK::Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
-    auto sigSend = ast::cast_tree<ast::Send>(sig);
-
-    sigSend->setBlock(ast::MK::Block0(loc, std::move(withOverride)));
-
-    return sig;
+    return args;
 }
 
 vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, const PropInfo &prop, PropContext propContext) {
@@ -497,10 +487,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, const PropInfo 
 
     auto ivarName = name.addAt(ctx);
 
-    auto readerSig = ast::MK::Sig0(loc, ASTUtil::dupType(getType));
-    if (prop.getterOverride) {
-        readerSig = insertOverride(*ASTUtil::castSig(readerSig), prop.getterOverride.value());
-    }
+    auto readerSig = ast::MK::Sig0(loc, ASTUtil::dupType(getType), mkOverrideParams(loc, prop.getterOverride));
     nodes.emplace_back(std::move(readerSig));
 
     // Generate a real prop body for computed_by: props so Sorbet can assert the
@@ -546,10 +533,8 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, const PropInfo 
         sigArgs.emplace_back(ast::MK::Symbol(nameLoc, core::Names::arg0()));
         sigArgs.emplace_back(ASTUtil::dupType(setType));
 
-        auto writerSig = ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType));
-        if (prop.setterOverride) {
-            writerSig = insertOverride(*ASTUtil::castSig(writerSig), prop.setterOverride.value());
-        }
+        auto writerSig = ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType),
+                                      mkOverrideParams(loc, prop.setterOverride));
         nodes.emplace_back(std::move(writerSig));
 
         if (prop.enum_ == nullptr) {
