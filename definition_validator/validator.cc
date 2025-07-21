@@ -604,8 +604,8 @@ constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &
         return nullopt;
     }
 
+    // If the sig itself is generated, it doesn't make much sense to suggest an autocorrect for it.
     auto &origSend = parsedSig->origSend;
-
     if (origSend.flags.isRewriterSynthesized) {
         return nullopt;
     }
