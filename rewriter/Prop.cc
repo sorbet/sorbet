@@ -388,8 +388,8 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             }
         }
         auto [overrideKey, overrideArg] = ASTUtil::extractHashValue(ctx, *rules, core::Names::override_());
-        auto overrideLoc = overrideKey.loc();
         if (overrideArg != nullptr) {
+            auto overrideLoc = overrideKey.loc();
             if (auto lit = ast::cast_tree<ast::Literal>(overrideArg)) {
                 if (lit->isTrue(ctx)) {
                     ret.getterOverride = ast::MK::OverrideStrict(overrideLoc);
