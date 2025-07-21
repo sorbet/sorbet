@@ -388,7 +388,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             }
         }
         auto [overrideKey, overrideArg] = ASTUtil::extractHashValue(ctx, *rules, core::Names::override_());
-        auto overrideLoc = overrideKey.loc().copyWithZeroLength();
+        auto overrideLoc = overrideKey.loc();
         if (overrideArg != nullptr) {
             if (auto lit = ast::cast_tree<ast::Literal>(overrideArg)) {
                 if (lit->isTrue(ctx)) {
@@ -432,10 +432,8 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                         e.addErrorNote("should be `{}` or `{}`", "true", ":visibility");
                     }
                 } else {
-                    ret.getterOverride =
-                        elaborateOverride(ctx, overrideKey.loc(), *opts, core::Names::reader(), "reader");
-                    ret.setterOverride =
-                        elaborateOverride(ctx, overrideKey.loc(), *opts, core::Names::writer(), "writer");
+                    ret.getterOverride = elaborateOverride(ctx, overrideLoc, *opts, core::Names::reader(), "reader");
+                    ret.setterOverride = elaborateOverride(ctx, overrideLoc, *opts, core::Names::writer(), "writer");
                 }
             } else {
                 emitBadOverride(ctx, overrideArg.loc());
@@ -466,8 +464,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &prop,
 
     auto ivarName = name.addAt(ctx);
 
-    auto readerSig =
-        ast::MK::Sig0(loc.copyWithZeroLength(), ASTUtil::dupType(getType), std::exchange(prop.getterOverride, nullopt));
+    auto readerSig = ast::MK::Sig0(loc, ASTUtil::dupType(getType), std::exchange(prop.getterOverride, nullopt));
     nodes.emplace_back(std::move(readerSig));
 
     // Generate a real prop body for computed_by: props so Sorbet can assert the
@@ -513,7 +510,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &prop,
         sigArgs.emplace_back(ast::MK::Symbol(nameLoc, core::Names::arg0()));
         sigArgs.emplace_back(ASTUtil::dupType(setType));
 
-        auto writerSig = ast::MK::Sig(loc.copyWithZeroLength(), std::move(sigArgs), ASTUtil::dupType(setType),
+        auto writerSig = ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType),
                                       std::exchange(prop.setterOverride, nullopt));
         nodes.emplace_back(std::move(writerSig));
 
