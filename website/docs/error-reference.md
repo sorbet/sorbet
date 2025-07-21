@@ -493,7 +493,7 @@ This error is raised when a RBS signature comment contains a syntax error. See t
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
 
-This error is raised when a RBS signature comment contains a feature not supported by Sorbet. See [RBS support limitations](rbs-support.md#unsupported-features) for more details.
+This error is raised when a RBS signature comment contains a feature not supported by Sorbet. See the page on [RBS comments support](rbs-support.md) for a list of supported features.
 
 ## 3552
 
