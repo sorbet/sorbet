@@ -267,6 +267,9 @@ class Concrete < T::Struct
 end
 ```
 
+See [Overrides and the `prop` DSL](override-checking.md#overrides-and-the-prop-dsl) for a full
+specification of what `override` accepts.
+
 ## `serialize` and `from_hash`: Converting `T::Struct` to and from `Hash`
 
 It's possible to convert a `T::Struct` instance to and from `Hash` instances:

@@ -487,6 +487,10 @@ end
 
 `attr_reader` and `attr_accessor` may not be given a signature of `void`, as these accessor methods correspond to instance variables which cannot be assigned type `void`.
 
+## 3517
+
+This error indicates that the `override` argument passed to a `prop` or `const` is ill-formed. See [prop overrides](override-checking.md#overrides-and-the-prop-dsl).
+
 ## 3550
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
