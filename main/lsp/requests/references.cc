@@ -17,9 +17,59 @@ bool ReferencesTask::needsMultithreading(const LSPIndexer &indexer) const {
     return true;
 }
 
-vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::GlobalState &gs,
-                                                                    core::SymbolRef symInPackage,
-                                                                    core::packages::MangledName packageName) {
+namespace {
+bool inImport(const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    // Search for the nullptr "gap" which corresponds to the QueryResponse that was selected
+    // by getQueryResponseForFindAllReferences. We only want to look for `import` responses
+    // above that one.
+    auto foundResp = false;
+    for (const auto &queryResponse : queryResponses) {
+        if (queryResponse == nullptr) {
+            foundResp = true;
+            continue;
+        }
+
+        if (!foundResp) {
+            continue;
+        }
+
+        auto sendResp = queryResponse->isSend();
+        if (sendResp == nullptr) {
+            continue;
+        }
+
+        auto method = sendResp->dispatchResult->main.method;
+        if (method == core::Symbols::PackageSpec_import() || method == core::Symbols::PackageSpec_test_import()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+} // namespace
+
+vector<core::SymbolRef>
+ReferencesTask::getSymsToCheckWithinPackage(const core::GlobalState &gs, core::SymbolRef symInPackage,
+                                            core::packages::MangledName packageName,
+                                            const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    vector<core::SymbolRef> result;
+
+    if (symInPackage.name(gs) == core::Names::Constants::PackageSpec_Storage()) {
+        if (!inImport(queryResponses)) {
+            ENFORCE(true);
+            // Early exit, because we don't want to look for something like Test::Proj::A::B,
+            // we want to find references of this package symbol verbatim.
+            return {};
+        } else {
+            // Want to make sure that "find all references" for `import` lines still find references
+            // to the usage in the `import` statement itself (we make Proj::A::B not match
+            // `Proj::A::B::<PackageSpec>` in a `__package.rb` file in DefLocSaver)
+            result.emplace_back(symInPackage);
+            // We want to find references to the actual constant, not the package spec, to show
+            // where the import is used.
+            symInPackage = symInPackage.owner(gs);
+        }
+    }
     vector<core::NameRef> fullName;
 
     auto sym = symInPackage;
@@ -28,7 +78,6 @@ vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::
         sym = sym.owner(gs);
     }
 
-    vector<core::SymbolRef> result;
     vector<core::SymbolRef> namespacesToCheck = {
         core::Symbols::root(),
         core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE),
@@ -119,7 +168,8 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 //  Returns all global usages of Foo::A
 
                 auto packageName = gs.packageDB().getPackageNameForFile(fref);
-                auto symsToCheck = getSymsToCheckWithinPackage(gs, constResp->symbolBeforeDealias, packageName);
+                auto symsToCheck =
+                    getSymsToCheckWithinPackage(gs, constResp->symbolBeforeDealias, packageName, queryResponses);
 
                 if (!symsToCheck.empty()) {
                     vector<unique_ptr<Location>> locations;

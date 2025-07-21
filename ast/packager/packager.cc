@@ -6,8 +6,10 @@ using namespace std;
 namespace sorbet::ast::packager {
 
 ExpressionPtr appendRegistry(ExpressionPtr scope) {
-    return ast::MK::UnresolvedConstant(scope.loc().copyEndWithZeroLength(), move(scope),
-                                       core::Names::Constants::PackageSpec_Storage());
+    // We use the real loc (not a zero-width one) so that this constant does show up in LSP queries.
+    // Various other places will hide <PackageSpec> results from LSP queries, as needed.
+    auto loc = scope.loc();
+    return ast::MK::UnresolvedConstant(loc, move(scope), core::Names::Constants::PackageSpec_Storage());
 }
 
 const ast::ClassDef *asPackageSpecClass(const ast::ExpressionPtr &expr) {

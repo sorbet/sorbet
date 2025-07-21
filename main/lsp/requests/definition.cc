@@ -91,6 +91,12 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
                 auto startOfRBIDefs = absl::c_partition(locMapping, notIsRBI);
                 locMapping.erase(startOfRBIDefs, locMapping.end());
             }
+            // If we're not a `<PackageSpec>` symbol, don't allow jumping into a `__package.rb` file
+            if (sym.isClassOrModule() && !sym.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
+                auto startOfPackageFiles =
+                    absl::c_partition(locMapping, [&gs](const auto &p) { return !p.first.file().isPackage(gs); });
+                locMapping.erase(startOfPackageFiles, locMapping.end());
+            }
             std::transform(locMapping.begin(), locMapping.end(), std::back_inserter(locations),
                            [](auto &p) { return std::move(p.second); });
         } else if (resp->isField() || (fileIsTyped && resp->isIdent())) {
