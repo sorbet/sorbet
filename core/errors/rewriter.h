@@ -22,7 +22,7 @@ constexpr ErrorClass DuplicateProp{3515, StrictLevel::True};
 
 // Let's reserve 3550-3569 for RBS related errors
 constexpr ErrorClass RBSSyntaxError{3550, StrictLevel::False};
-constexpr ErrorClass RBSUnsupported{3551, StrictLevel::False};
+// constexpr ErrorClass RBSUnsupported{3551, StrictLevel::False };
 constexpr ErrorClass RBSParameterMismatch{3552, StrictLevel::False};
 constexpr ErrorClass RBSAssertionError{3553, StrictLevel::False};
 constexpr ErrorClass RBSUnusedComment{3554, StrictLevel::False};
