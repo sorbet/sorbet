@@ -1526,10 +1526,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 ExpressionPtr res = MK::UnresolvedConstant(loc, move(scope), constLhs->name);
                 result = move(res);
             },
-            [&](parser::Cbase *cbase) {
-                ExpressionPtr res = MK::Constant(loc, core::Symbols::root());
-                result = move(res);
-            },
+            [&](parser::Cbase *cbase) { desugaredByPrismTranslator(cbase); },
             [&](parser::Kwbegin *kwbegin) { result = desugarBegin(dctx, loc, kwbegin->stmts); },
             [&](parser::Module *module) {
                 DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
