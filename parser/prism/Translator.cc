@@ -580,7 +580,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             unreachable("PM_ENSURE_NODE is handled separately as part of PM_BEGIN_NODE, see its docs for details.");
         }
         case PM_FALSE_NODE: { // The `false` keyword
-            return make_unique<parser::False>(location);
+            return make_node_with_expr<parser::False>(MK::False(location), location);
         }
         case PM_FLOAT_NODE: { // A floating point number literal, e.g. `1.23`
             auto floatNode = down_cast<pm_float_node>(node);
@@ -955,7 +955,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Next>(location, move(arguments));
         }
         case PM_NIL_NODE: { // The `nil` keyword
-            return make_unique<parser::Nil>(location);
+            return make_node_with_expr<parser::Nil>(MK::Nil(location), location);
         }
         case PM_NO_KEYWORDS_PARAMETER_NODE: { // `**nil`, such as in `def foo(**nil)` or `h in { k: v, **nil}`
             unreachable("PM_NO_KEYWORDS_PARAMETER_NODE is handled separately in `PM_HASH_PATTERN_NODE` and "
@@ -1166,7 +1166,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Retry>(location);
         }
         case PM_SELF_NODE: { // The `self` keyword
-            return make_unique<parser::Self>(location);
+            return make_node_with_expr<parser::Self>(MK::Self(location), location);
         }
         case PM_SHAREABLE_CONSTANT_NODE: {
             // Sorbet doesn't handle `shareable_constant_value` yet (https://bugs.ruby-lang.org/issues/17273).
@@ -1184,10 +1184,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::SClass>(location, translateLoc(declLoc), move(expr), move(body));
         }
         case PM_SOURCE_ENCODING_NODE: { // The `__ENCODING__` keyword
-            return make_unique<parser::EncodingLiteral>(location);
+            return make_node_with_expr<parser::EncodingLiteral>(
+                MK::Send0(location, MK::Magic(location), core::Names::getEncoding(), location.copyWithZeroLength()),
+                location);
         }
         case PM_SOURCE_FILE_NODE: { // The `__FILE__` keyword
-            return make_unique<parser::FileLiteral>(location);
+            return make_node_with_expr<parser::FileLiteral>(MK::String(location, core::Names::currentFile()), location);
         }
         case PM_SOURCE_LINE_NODE: { // The `__LINE__` keyword
             return make_unique<parser::LineLiteral>(location);
@@ -1246,7 +1248,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Symbol>(location, gs.enterNameUTF8(source));
         }
         case PM_TRUE_NODE: { // The `true` keyword
-            return make_unique<parser::True>(location);
+            return make_node_with_expr<parser::True>(MK::True(location), location);
         }
         case PM_UNDEF_NODE: { // The `undef` keyword, like `undef :method_to_undef
             auto undefNode = down_cast<pm_undef_node>(node);
