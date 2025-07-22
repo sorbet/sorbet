@@ -107,7 +107,7 @@ struct NodesAndPropInfo {
 
 void emitBadOverride(core::MutableContext ctx, const core::LocOffsets loc, core::NameRef name) {
     if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::PropBadOverride)) {
-        e.setHeader("Malformed `{}` in prop `{}`", "override", name);
+        e.setHeader("Malformed `{}` in prop `{}`", "override", name.show(ctx));
         e.addErrorNote("The argument to `{}` must be `{}`, `{}`, `{}`, or a hash literal", "override:", "true",
                        ":reader", ":writer");
     }
