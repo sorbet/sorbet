@@ -206,6 +206,15 @@ ast::ExpressionPtr getIteratee(ast::ExpressionPtr &exp) {
     }
 }
 
+bool isRSpec(const ast::ExpressionPtr &recv) {
+    auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(recv);
+    if (cnst == nullptr) {
+        return false;
+    }
+
+    return cnst->cnst == core::Names::Constants::RSpec();
+}
+
 ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
                                        const ast::MethodDef::ARGS_store &args,
                                        absl::Span<const ast::ExpressionPtr> destructuringStmts,
@@ -374,7 +383,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
     auto *block = send->block();
 
-    if (!send->recv.isSelfReference()) {
+    if (!send->recv.isSelfReference() && !(send->fun == core::Names::describe() && isRSpec(send->recv))) {
         return nullptr;
     }
 
@@ -429,19 +438,31 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto argString = to_s(ctx, arg);
         ast::ClassDef::ANCESTORS_store ancestors;
 
-        // First ancestor is the superclass
-        if (isClass) {
-            ancestors.emplace_back(ast::MK::Self(arg.loc()));
-        } else {
-            // Avoid subclassing self when it's a module, as that will produce an error.
-            ancestors.emplace_back(ast::MK::Constant(arg.loc(), core::Symbols::todo()));
+        if (send->recv.isSelfReference()) {
+            // First ancestor is the superclass
+            if (isClass) {
+                ancestors.emplace_back(ast::MK::Self(arg.loc()));
+            } else {
+                // Avoid subclassing self when it's a module, as that will produce an error.
+                ancestors.emplace_back(ast::MK::Constant(arg.loc(), core::Symbols::todo()));
 
-            // Note: For cases like `module M; describe '' {}; end`, minitest does not treat `M` as
-            // an ancestor of the dynamically-created class. Instead, it treats `Minitest::Spec` as
-            // an ancestor, which we're choosing not to model so that this rewriter pass works for
-            // RSpec specs too. This means users might have to add extra `include` lines in their
-            // describe bodies to convince Sorbet what's available, but at least it won't say that
-            // Minitest::Spec is an ancestor for RSpec tests.
+                // Note: For cases like `module M; describe '' {}; end`, minitest does not treat `M` as
+                // an ancestor of the dynamically-created class. Instead, it treats `Minitest::Spec` as
+                // an ancestor, which we're choosing not to model so that this rewriter pass works for
+                // RSpec specs too. This means users might have to add extra `include` lines in their
+                // describe bodies to convince Sorbet what's available, but at least it won't say that
+                // Minitest::Spec is an ancestor for RSpec tests.
+            }
+        } else {
+            ENFORCE(isRSpec(send->recv));
+            auto exampleGroup = ast::MK::EmptyTree();
+            exampleGroup =
+                ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::RSpec());
+            exampleGroup =
+                ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::Core());
+            exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup),
+                                                       core::Names::Constants::ExampleGroup());
+            ancestors.emplace_back(move(exampleGroup));
         }
 
         const bool bodyIsClass = true;
