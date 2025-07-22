@@ -5,6 +5,7 @@
 #include "parser/parser.h"
 #include <memory>
 
+// Any changes made to `Desugar.h` here should also be reflected in `PrismDesugar.h`
 namespace sorbet::ast::desugar {
 
 // preserveConcreteSyntax is used to skip some of desugarings, to aid in implementation of the Extract to Variable code

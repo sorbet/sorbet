@@ -13,6 +13,7 @@
 #include "core/errors/desugar.h"
 #include "core/errors/internal.h"
 
+// Any changes made to `Desugar.cc` here should also be reflected in `PrismDesugar.cc` and `parser/prism/Translator.cc`
 namespace sorbet::ast::desugar {
 
 using namespace std;

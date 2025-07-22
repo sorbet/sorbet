@@ -9,6 +9,7 @@
 #include "absl/strings/str_split.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
+#include "ast/desugar/PrismDesugar.h"
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
@@ -267,11 +268,21 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
 
         // Desugarer
         ast::ParsedFile desugared;
-        {
-            core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+        switch (parser) {
+            case realmain::options::Parser::ORIGINAL: {
+                core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            core::MutableContext ctx(gs, core::Symbols::root(), file);
-            desugared = testSerialize(gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
+                core::MutableContext ctx(gs, core::Symbols::root(), file);
+                desugared = testSerialize(gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
+                break;
+            }
+            case realmain::options::Parser::PRISM: {
+                core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+
+                core::MutableContext ctx(gs, core::Symbols::root(), file);
+                desugared = testSerialize(gs, ast::ParsedFile{ast::prismDesugar::node2Tree(ctx, move(nodes)), file});
+                break;
+            }
         }
 
         handler.addObserved(gs, "desugar-tree", [&]() { return desugared.tree.toString(gs); });
@@ -720,7 +731,18 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return nodes->toString(*gs); });
 
-        ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
+        ast::ParsedFile file;
+        switch (parser) {
+            case realmain::options::Parser::ORIGINAL: {
+                file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
+                break;
+            }
+            case realmain::options::Parser::PRISM: {
+                file = testSerialize(*gs, ast::ParsedFile{ast::prismDesugar::node2Tree(ctx, move(nodes)), f.file});
+                break;
+            }
+        }
+
         handler.addObserved(*gs, "desguar-tree", [&]() { return file.tree.toString(*gs); });
         handler.addObserved(*gs, "desugar-tree-raw", [&]() { return file.tree.showRaw(*gs); });
 

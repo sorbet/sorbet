@@ -13,6 +13,7 @@
 #include "absl/strings/match.h"
 #include "ast/Helpers.h"
 #include "ast/desugar/Desugar.h"
+#include "ast/desugar/PrismDesugar.h"
 #include "ast/substitute/substitute.h"
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
@@ -308,7 +309,8 @@ ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     {
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
-        ast = ast::desugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax);
+        ast = gs.parseWithPrism ? ast::prismDesugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax)
+                                : ast::desugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax);
     }
     if (print.DesugarTree.enabled) {
         print.DesugarTree.fmt("{}\n", ast.toStringWithTabs(gs, 0));

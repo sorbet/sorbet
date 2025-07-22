@@ -5,7 +5,7 @@
 #include "absl/strings/str_replace.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
-#include "ast/desugar/Desugar.h"
+#include "ast/desugar/PrismDesugar.h"
 #include "ast/verifier/verifier.h"
 #include "common/common.h"
 #include "common/strings/formatting.h"
@@ -13,7 +13,10 @@
 #include "core/errors/desugar.h"
 #include "core/errors/internal.h"
 
-namespace sorbet::ast::desugar {
+// The Prism Desugarer starts out as a near-exact copy of the legacy Desugarer. Over time, we migrate more and more of
+// its logic out and into `parser/prism/Translator.cc`. Any changes made to the "upstream" Desugarer also need to be
+// refected here, and in the Translator.
+namespace sorbet::ast::prismDesugar {
 
 using namespace std;
 
@@ -2520,4 +2523,4 @@ ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what,
         throw;
     }
 }
-} // namespace sorbet::ast::desugar
+} // namespace sorbet::ast::prismDesugar
