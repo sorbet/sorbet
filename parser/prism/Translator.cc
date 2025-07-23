@@ -299,7 +299,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 statements = translateMulti(beginNode->statements->body);
             }
 
-            return make_unique<parser::Kwbegin>(location, move(statements));
+            if (statements.empty()) {
+                return make_node_with_expr<parser::Kwbegin>(MK::Nil(location), location, std::move(statements));
+            }
+
+            if (!directlyDesugar || !hasExpr(statements)) {
+                return make_unique<parser::Kwbegin>(location, move(statements));
+            }
+
+            auto args = nodeVecToStore<ast::InsSeq::STATS_store>(statements);
+            auto finalExpr = std::move(args.back());
+            args.pop_back();
+            auto expr = MK::InsSeq(location, std::move(args), std::move(finalExpr));
+            return make_node_with_expr<parser::Kwbegin>(std::move(expr), location, std::move(statements));
         }
         case PM_BLOCK_ARGUMENT_NODE: { // A block arg passed into a method call, e.g. the `&b` in `a.map(&b)`
             auto blockArg = down_cast<pm_block_argument_node>(node);
