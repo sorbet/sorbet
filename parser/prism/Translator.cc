@@ -188,7 +188,7 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
     }
 }
 
-unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
+unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveConcreteSyntax) {
     if (node == nullptr)
         return nullptr;
 
@@ -1329,7 +1329,41 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto left = translate(orNode->left);
             auto right = translate(orNode->right);
 
-            return make_unique<parser::Or>(location, move(left), move(right));
+            // TODO: remove `desugaredExprIsReference` once those cases can all be handled
+            if (!directlyDesugar || !hasExpr(left, right) || !left->desugaredExprIsReference()) {
+                return make_unique<parser::Or>(location, move(left), move(right));
+            }
+
+            auto lhsExpr = left->takeDesugaredExpr();
+            auto rhsExpr = right->takeDesugaredExpr();
+
+            if (preserveConcreteSyntax) {
+                auto orOrLoc = core::LocOffsets{left->loc.endPos(), right->loc.beginPos()};
+                auto magicSend = MK::Send2(location, MK::Magic(location.copyWithZeroLength()), core::Names::orOr(),
+                                           orOrLoc, move(lhsExpr), move(rhsExpr));
+                return make_node_with_expr<parser::Or>(move(magicSend), location, move(left), move(right));
+            }
+
+            if (isa_reference(lhsExpr)) {
+                auto cond = MK::cpRef(lhsExpr);
+                auto if_ = MK::If(location, move(cond), move(lhsExpr), move(rhsExpr));
+                return make_node_with_expr<parser::Or>(move(if_), location, move(left), move(right));
+            }
+
+            ENFORCE(false, "all nextUniqueDesugarName must be handled at the same time");
+
+            // For non-reference expressions, create a temporary variable so we don't evaluate the LHS twice.
+            // E.g. `x = 1 || 2` becomes `x = (temp = 1; temp ? temp : 2)`
+            core::NameRef tempLocalName = nextUniqueDesugarName(core::Names::orOr());
+            auto lhsLoc = left->loc;
+            auto rhsLoc = right->loc;
+            auto condLoc =
+                lhsLoc.exists() && rhsLoc.exists() ? core::LocOffsets{lhsLoc.endPos(), rhsLoc.beginPos()} : lhsLoc;
+            auto temp = MK::Assign(location, tempLocalName, move(lhsExpr));
+            auto if_ =
+                MK::If(location, MK::Local(condLoc, tempLocalName), MK::Local(lhsLoc, tempLocalName), move(rhsExpr));
+            auto wrapped = MK::InsSeq1(location, move(temp), move(if_));
+            return make_node_with_expr<parser::Or>(move(wrapped), location, move(left), move(right));
         }
         case PM_PARAMETERS_NODE: { // The parameters declared at the top of a PM_DEF_NODE
             unreachable("PM_PARAMETERS_NODE is handled separately in translateParametersNode.");

@@ -34,6 +34,10 @@ public:
         return false;
     }
 
+    virtual bool desugaredExprIsReference() {
+        return false;
+    }
+
 protected:
     void printTabs(fmt::memory_buffer &to, int count) const;
     void printNode(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
@@ -108,6 +112,10 @@ public:
 
     virtual bool hasDesugaredExpr() final {
         return this->desugaredExpr != nullptr;
+    }
+
+    virtual bool desugaredExprIsReference() final {
+        return hasDesugaredExpr() && isa_reference(this->desugaredExpr);
     }
 
     // Like `parser::cast_node`, but can cast a `NodeWithExpr` *as if* it was its wrapped node.
