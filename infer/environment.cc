@@ -1834,6 +1834,15 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             updateKnowledge(ctx, bind.bind.variable, ctx.locAt(bind.loc), send, knowledgeFilter);
         } else if (auto i = cfg::cast_instruction<cfg::Ident>(bind.value)) {
             propagateKnowledge(ctx, bind.bind.variable, i->what, knowledgeFilter);
+        } else if (auto l = cfg::cast_instruction<cfg::LoadArg>(bind.value)) {
+            const auto &argInfo = l->argument(ctx);
+            if (argInfo.flags.isBlock && argInfo.type == nullptr && knowledgeFilter.isNeeded(bind.bind.variable)) {
+                auto &whoKnows = getKnowledge(bind.bind.variable);
+                // If we're in a context where we know that bind.bind.variable is falsy, we also
+                // know it must be `nil`, because a `&blk` param can never be `false`
+                whoKnows.falsy().addNoTypeTest(bind.bind.variable, typeTestsWithVar, bind.bind.variable,
+                                               core::Types::falseClass());
+            }
         }
 
         return move(tp.type);
