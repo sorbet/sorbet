@@ -300,8 +300,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto left = translate(andNode->left);
             auto right = translate(andNode->right);
 
-            // TODO: remove `desugaredExprIsReference` once those cases can all be handled
-            if (!directlyDesugar || !hasExpr(left, right) || !left->desugaredExprIsReference()) {
+            // TODO: remove `peekDesugaredExpr` once those cases can all be handled
+            if (!directlyDesugar || !hasExpr(left, right) || !isa_reference(left->peekDesugaredExpr())) {
                 return make_unique<parser::And>(location, move(left), move(right));
             }
 
@@ -1441,8 +1441,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto left = translate(orNode->left);
             auto right = translate(orNode->right);
 
-            // TODO: remove `desugaredExprIsReference` once those cases can all be handled
-            if (!directlyDesugar || !hasExpr(left, right) || !left->desugaredExprIsReference()) {
+            // TODO: remove `peekDesugaredExpr` once those cases can all be handled
+            if (!directlyDesugar || !hasExpr(left, right) || !isa_reference(left->peekDesugaredExpr())) {
                 return make_unique<parser::Or>(location, move(left), move(right));
             }
 

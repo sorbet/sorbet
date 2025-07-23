@@ -34,8 +34,9 @@ public:
         return false;
     }
 
-    virtual bool desugaredExprIsReference() {
-        return false;
+    virtual const ast::ExpressionPtr &peekDesugaredExpr() const {
+        static const ast::ExpressionPtr nullExpr = nullptr;
+        return nullExpr;
     }
 
 protected:
@@ -114,8 +115,8 @@ public:
         return this->desugaredExpr != nullptr;
     }
 
-    virtual bool desugaredExprIsReference() final {
-        return hasDesugaredExpr() && isa_reference(this->desugaredExpr);
+    virtual const ast::ExpressionPtr &peekDesugaredExpr() const final {
+        return this->desugaredExpr;
     }
 
     // Like `parser::cast_node`, but can cast a `NodeWithExpr` *as if* it was its wrapped node.
