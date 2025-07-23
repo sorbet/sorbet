@@ -4,6 +4,11 @@ def takes_untyped_block(&block)
 end
 
 def example1(&xyz)
+  # This would be an error if we naively said that `xyz` had type `T.nilable(Proc)`
+  xyz.call
+  # This can't be treated as unnecessary use of safe navigation
+  xyz&.call
+
   T.reveal_type(xyz) # error: `T.untyped`
   if xyz
     xyz = proc { "default" }
