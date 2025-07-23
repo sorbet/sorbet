@@ -210,7 +210,7 @@ Unfortunately, this process left warts in the publicly-accessible `T::Struct` AP
 
 The remainder of this documentation is presented for completeness. Use the APIs below at your own discretion. Our goal here is simply to outline the potential pitfalls that arise when using them.
 
-## Fine-grained inheritance control with `override`
+## Fine-grained inheritance control with `override:`
 
 Methods defined with `prop` or `const` must also annotate the methods they override (just like if the reader and writer methods had been defined as normal `def` methods). Use the `override` keyword argument on a `prop` or `const` to declare the override. In the simplest cases, this will be one of:
 
