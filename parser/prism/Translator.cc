@@ -239,7 +239,41 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto left = translate(andNode->left);
             auto right = translate(andNode->right);
 
-            return make_unique<parser::And>(location, move(left), move(right));
+            // TODO: remove `desugaredExprIsReference` once those cases can all be handled
+            if (!directlyDesugar || !hasExpr(left, right) || !left->desugaredExprIsReference()) {
+                return make_unique<parser::And>(location, move(left), move(right));
+            }
+
+            auto lhsExpr = left->takeDesugaredExpr();
+            auto rhsExpr = right->takeDesugaredExpr();
+
+            if (preserveConcreteSyntax) {
+                auto andAndLoc = core::LocOffsets{left->loc.endPos(), right->loc.beginPos()};
+                auto magicSend = MK::Send2(location, MK::Magic(location.copyWithZeroLength()), core::Names::andAnd(),
+                                           andAndLoc, move(lhsExpr), move(rhsExpr));
+                return make_node_with_expr<parser::And>(move(magicSend), location, move(left), move(right));
+            }
+
+            if (isa_reference(lhsExpr)) {
+                auto cond = MK::cpRef(lhsExpr);
+                auto if_ = MK::If(location, move(cond), move(rhsExpr), move(lhsExpr));
+                return make_node_with_expr<parser::And>(move(if_), location, move(left), move(right));
+            }
+
+            ENFORCE(false, "all nextUniqueDesugarName must be handled at the same time");
+
+            // For non-reference expressions, create a temporary variable so we don't evaluate the LHS twice.
+            // E.g. `x = 1 && 2` becomes `x = (temp = 1; temp ? temp : 2)`
+            core::NameRef tempLocalName = nextUniqueDesugarName(core::Names::andAnd());
+            auto lhsLoc = left->loc;
+            auto rhsLoc = right->loc;
+            auto condLoc =
+                lhsLoc.exists() && rhsLoc.exists() ? core::LocOffsets{lhsLoc.endPos(), rhsLoc.beginPos()} : lhsLoc;
+            auto temp = MK::Assign(location, tempLocalName, move(lhsExpr));
+            auto if_ =
+                MK::If(location, MK::Local(condLoc, tempLocalName), move(rhsExpr), MK::Local(lhsLoc, tempLocalName));
+            auto wrapped = MK::InsSeq1(location, move(temp), move(if_));
+            return make_node_with_expr<parser::And>(move(wrapped), location, move(left), move(right));
         }
         case PM_ARGUMENTS_NODE: { // A list of arguments in one of several places:
             // 1. The arguments to a method call, e.g the `1, 2, 3` in `f(1, 2, 3)`.
