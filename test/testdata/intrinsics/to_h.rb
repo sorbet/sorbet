@@ -13,6 +13,6 @@ T.assert_type!(
 ["hi"].to_h # error: Expected `T::Enumerable[[T.type_parameter(:U), T.type_parameter(:V)]]`
 
 T.assert_type!(
-  T.cast([], T::Enumerable[[String, Symbol]]).to_h,
+  T.let([], T::Enumerable[[String, Symbol]]).to_h,
   T::Hash[String, Symbol],
 )
