@@ -377,7 +377,8 @@ public:
     vector<Export> exports_ = {};
 
     const Imports imports() const {
-        // Imports holds a non-const reference, but exposes a const interface.
+        // As we're returning `const Imports`, casting away the constness of `importedPackageNames` won't mean that we
+        // have non-const access to it.
         return Imports{const_cast<vector<Import> &>(this->importedPackageNames)};
     }
 
