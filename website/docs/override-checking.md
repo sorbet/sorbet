@@ -299,6 +299,101 @@ end
 
 Compared to `override(allow_incompatible: true)`, this version will still check things like when the parent and child methods have mismatched arities or types—it only silences visibility-related mismatches.
 
+### Overrides and the `prop` DSL
+
+Methods defined via `prop` or `const` (from [`T::Struct`](tstruct.md)) must also declare if they override (or implement) another method. The syntax is special, because `prop` and `const` are not annotated with [`sig`](sigs.md). Use the `override:` keyword argument on a `prop` or `const` definition:
+
+```ruby
+module HasFoo
+  extend T::Helpers
+  extend T::Sig
+  interface!
+  sig { abstract.returns(Integer) }
+  def foo; end
+  sig { abstract.params(foo: Integer).returns(Integer) }
+  def foo=(foo); end
+end
+
+class ChildOne < T::Struct
+  include Common
+  prop :foo, Integer, override: true
+  prop :bar, String
+end
+
+class ChildTwo < T::Struct
+  include Common
+  prop :foo, Integer, override: true
+  prop :quz, Symbol
+end
+```
+
+Passing `override: true` will mark both the reader (`foo`) and writer (`foo=`) functions as `override`. To only override one, you can pass `:reader` or `:writer`:
+
+```ruby
+module ReaderOnly
+  extend T::Helpers
+  extend T::Sig
+  interface!
+  sig { abstract.returns(Integer) }
+  def foo; end
+end
+
+class Child < T::Struct
+  include ReaderOnly
+  prop :foo, Integer, override: :reader
+end
+```
+
+To pass options such as `allow_incompatible`, we can instead pass a hash:
+
+```ruby
+module IncompatibleParent
+  extend T::Helpers
+  extend T::Sig
+  interface!
+  sig { abstract.returns(T.nilable(Integer)) }
+  def foo; end
+  sig { abstract.params(arg0: T.nilable(Integer)).returns(T.nilable(Integer)) }
+  def foo=(arg0); end
+end
+
+class Child < T::Struct
+  include IncompatibleParent
+  prop :foo, Integer, override: {allow_incompatible: true} # also accepts :visibility
+end
+```
+
+For the most fine-grained control, the hash can instead use the `reader` and `writer` keys:
+
+```ruby
+module Parent
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+
+  sig { abstract.returns(T.nilable(String)) }
+  def foo; end
+
+  sig { abstract.params(foo: String).returns(String) }
+  def foo=(foo); end
+end
+
+class Child < T::Struct
+  include Parent
+
+  prop :foo, String, override: {reader: {allow_incompatible: true}, writer: true}
+end
+```
+
+Note that the previous values we've seen are aliases for the fully-expanded version:
+
+| Shorthand                             | is equivalent to:                                                                  |
+| ---                                   | ---                                                                                |
+| `override: true`                      | `override: {reader: true, writer: true}`                                           |
+| `override: :reader`                   | `override: {reader: true}`                                                         |
+| `override: :writer`                   | `override: {writer: true}`                                                         |
+| `override: {allow_incompatible: ...}` | `override: {reader: {allow_incompatible: ...}, writer: {allow_incompatible: ...}}` |
+
 ## What's next?
 
 - [Final Methods, Classes, and Modules](final.md)
