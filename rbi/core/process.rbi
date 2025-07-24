@@ -2106,4 +2106,7 @@ end
 class Process::Waiter < Thread
   sig {returns(Integer)}
   def pid(); end
+
+  sig {returns(Process::Status)}
+  def value; end
 end
