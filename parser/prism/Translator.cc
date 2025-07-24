@@ -1243,10 +1243,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto strNode = down_cast<pm_string_node>(node);
 
             auto unescaped = &strNode->unescaped;
-            auto source = parser.extractString(unescaped);
+            auto content = ctx.state.enterNameUTF8(parser.extractString(unescaped));
 
-            // TODO: handle different string encodings
-            return make_unique<parser::String>(location, ctx.state.enterNameUTF8(source));
+            return make_node_with_expr<parser::String>(MK::String(location, content), location, content);
         }
         case PM_SUPER_NODE: { // The `super` keyword, like `super`, `super(a, b)`
             auto superNode = down_cast<pm_super_node>(node);
