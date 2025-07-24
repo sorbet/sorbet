@@ -176,6 +176,31 @@ end
 [0, 1, 2].fetch(3) # IndexError: index 3 outside of array bounds
 ```
 
+## Why does Sorbet require `T.let(..., T::Boolean)` for variables defined with `true` or `false`?
+
+Sorbet sometimes requires an explicit type annotation when initializing a variable whose type is changed in a loop. For example, code like this produces an error in Sorbet:
+
+```ruby
+found_it = false
+items.each do |item|
+  if item == thing
+    found_it = true
+    #          ^^^^ error:
+    # Changing the type of a variable is not permitted
+    # Existing variable has type: `FalseClass`
+    # Attempting to change type to: `TrueClass`
+  end
+end
+```
+
+[View on sorbet.run →](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Bparams%28items%3A%20T%3A%3AArray%5BString%5D%2C%20thing%3A%20String%29.void%7D%0Adef%20example%28items%2C%20thing%29%0A%20%20found_it%20%3D%20false%0A%20%20items.each%20do%20%7Citem%7C%0A%20%20%20%20if%20item%20%3D%3D%20thing%0A%20%20%20%20%20%20found_it%20%3D%20true%0A%20%20%20%20end%0A%20%20end%0Aend%0A)
+
+The fix is to change `found_it = false` to `found_it = T.let(false, T::Boolean)`.
+
+Sorbet requires this particular error for performance, and cannot change it because certain types of code depend on knowing when a variable is literally `false`, not `T::Boolean`.
+
+For more, see [this blog post](https://blog.jez.io/t-let-boolean/).
+
 ## Sigs are vague for stdlib methods that accept keyword arguments & have multiple return types
 
 You might notice this when calling `Array#sample`, `Pathname#find`, or other stdlib methods that accept a keyword argument and can have different return types based on arguments:
