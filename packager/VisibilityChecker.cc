@@ -76,7 +76,7 @@ class PropagateVisibility final {
     // Lookup the package name on the given root symbol, and mark the final symbol as exported.
     void exportRoot(core::GlobalState &gs, core::ClassOrModuleRef sym) {
         // For a package named `A::B`, the ClassDef that we see in this pass is for a symbol named
-        // `<PackageSpecRegistry>::A::B`. In order to make the name `A::B` visible to packages that have imported
+        // A::B::<PackageSpec>`. In order to make the name `A::B` visible to packages that have imported
         // `A::B`, we explicitly lookup and export them here. This is a design decision inherited from the previous
         // packages implementation, and we could remove it after migrating Stripe's codebase to not depend on package
         // names being exported by default.
@@ -107,7 +107,7 @@ class PropagateVisibility final {
         }
     }
 
-    // While processing the ClassDef for the package, which will be named something like `<PackageSpecRegistry>::A::B`,
+    // While processing the ClassDef for the package, which will be named something like `A::B::<PackageSpec>`,
     // we also check that the symbols `A::B` and `Test::A::B` have locations whose package matches the one we're
     // processing. If they don't match, we add locs to ensure that those symbols are associated with this package.
     //
@@ -120,36 +120,45 @@ class PropagateVisibility final {
     // the package name are always owned by the package that defines them.
     void setPackageLocs(core::MutableContext ctx, core::LocOffsets loc, core::ClassOrModuleRef sym) {
         vector<core::NameRef> names;
-
-        while (sym.exists() && sym != core::Symbols::PackageSpecRegistry()) {
+        if (sym.data(ctx)->name != core::Names::Constants::PackageSpec_Storage()) {
             // The symbol isn't a package name if it's defined outside of the package registry.
-            if (sym == core::Symbols::root()) {
-                return;
-            }
+            return;
+        }
 
+        sym = sym.data(ctx)->owner;
+        auto packageSym = sym;
+
+        while (sym.exists() && sym != core::Symbols::root()) {
             names.emplace_back(sym.data(ctx)->name);
             sym = sym.data(ctx)->owner;
         }
 
         auto &db = ctx.state.packageDB();
 
-        {
-            auto packageSym = core::Symbols::root();
-            for (auto name = names.rbegin(); name != names.rend(); ++name) {
-                auto member = packageSym.data(ctx)->findMember(ctx, *name);
-                if (!member.exists() || !member.isClassOrModule()) {
-                    packageSym = core::Symbols::noClassOrModule();
-                    break;
-                }
-
-                packageSym = member.asClassOrModuleRef();
-            }
-
-            if (packageSym.exists()) {
-                auto file = packageSym.data(ctx)->loc().file();
-                if (db.getPackageNameForFile(file) != this->package.mangledName()) {
-                    packageSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
-                }
+        if (packageSym.exists()) {
+            auto file = packageSym.data(ctx)->loc().file();
+            if (db.getPackageNameForFile(file) != this->package.mangledName()) {
+                // Note: this is a hack. This is the only place outside of the incremental namer
+                // where we remove a loc from a symbol.
+                //
+                // We should eventually be able to remove this call, by removing this entire
+                // setPackageLocs method, and switching to nesting as the source of truth for packge
+                // ownership.
+                //
+                // The problem we're solving: with the switch to `A::B::<PackageSpec>` names, `::A`
+                // and `::A::B` will already have `__package.rb` entries in their loc lists. When we
+                // were using `<PackageSpecRegistry>` to hold all the packages, resolving the
+                // `__package.rb` file would not add locs to `::A` or `::A::B`. Since
+                // `VisibilityChecker` ran after resolver, it meant that calling `addLoc` would
+                // always add a loc to to the locs list on a Symbol, and ties would always be broken
+                // in favor of "last one wins" so `__package.rb` file wins.
+                //
+                // In the new world, since there is already a `__package.rb` loc in the list, the
+                // `addLoc` call only updates that loc, it doesn't change its relative position in
+                // the list (e.g., the intended use case is to update the offset information for the
+                // fast path). Removing and re-adding ensures that the `__package.rb` always wins.
+                packageSym.data(ctx)->removeLocsForFile(ctx.file);
+                packageSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
             }
         }
 

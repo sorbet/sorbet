@@ -1,16 +1,16 @@
 # -- test/testdata/packager/export_for_test/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::RootPkg<<C RootPkg>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::RootPkg::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
   end
 end
 # -- test/testdata/packager/export_for_test/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::Opus::Foo<<C Foo>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.import(::<PackageSpecRegistry>::<C Opus>::<C Foo>::<C Bar>)
+  class ::Opus::Foo::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(<emptyTree>::<C Opus>::<C Foo>::<C Bar>::<C <PackageSpec>>)
 
-    <self>.import(::<PackageSpecRegistry>::<C Opus>::<C Util>)
+    <self>.import(<emptyTree>::<C Opus>::<C Util>::<C <PackageSpec>>)
 
-    <self>.test_import(::<PackageSpecRegistry>::<C Opus>::<C TestImported>)
+    <self>.test_import(<emptyTree>::<C Opus>::<C TestImported>::<C <PackageSpec>>)
 
     <self>.export(<emptyTree>::<C Opus>::<C Foo>::<C FooClass>)
 
@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_for_test/foo/bar/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::Opus::Foo::Bar<<C Bar>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::Opus::Foo::Bar::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>)
 
     <self>.export(<emptyTree>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest>)
@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_for_test/test_imported/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::Opus::TestImported<<C TestImported>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::Opus::TestImported::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C Opus>::<C TestImported>::<C TIClass>)
 
     <self>.export(<emptyTree>::<C Test>::<C Opus>::<C TestImported>::<C TITestClass>)
@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_for_test/util/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::Opus::Util<<C Util>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::Opus::Util::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.export(<emptyTree>::<C Opus>::<C Util>::<C UtilClass>)
 
     <self>.export(<emptyTree>::<C Test>::<C Opus>::<C Util>::<C TestUtil>)

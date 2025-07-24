@@ -33,8 +33,10 @@ constexpr string_view COLON_SEPARATOR = "::"sv;
 constexpr string_view HASH_SEPARATOR = "#"sv;
 
 string showInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name, string_view separator) {
-    if (!owner.exists() || owner == Symbols::root() || owner == core::Symbols::PackageSpecRegistry()) {
+    if (!owner.exists() || owner == Symbols::root()) {
         return name.show(gs);
+    } else if (name == core::Names::Constants::PackageSpec_Storage()) {
+        return owner.show(gs);
     }
     return absl::StrCat(owner.show(gs), separator, name.show(gs));
 }
@@ -618,15 +620,7 @@ bool ClassOrModuleRef::isOnlyDefinedInFile(const GlobalState &gs, core::FileRef 
 // Documented in SymbolRef.h
 bool ClassOrModuleRef::isPackageSpecSymbol(const GlobalState &gs) const {
     auto sym = *this;
-    while (sym.exists() && sym != core::Symbols::root()) {
-        if (sym == core::Symbols::PackageSpecRegistry()) {
-            return true;
-        }
-
-        sym = sym.data(gs)->owner;
-    }
-
-    return false;
+    return sym.exists() && sym.data(gs)->name == core::Names::Constants::PackageSpec_Storage();
 }
 
 bool ClassOrModuleRef::isBuiltinGenericForwarder() const {
@@ -939,8 +933,19 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                 if (member.first.kind() == NameKind::CONSTANT &&
                     member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
                     if (onlySuggestPackageSpecs) {
-                        if (!member.second.isClassOrModule() ||
-                            !member.second.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
+                        if (!member.second.isClassOrModule()) {
+                            continue;
+                        }
+
+                        // Use the list of locs where the ClassOrModule symbol was defined as a way
+                        // to know whether it is either a PackageSpec (`::A::B::<PackageSpec>`) or a prefix of some
+                        // eventual PackageSpec symbol (`::A`).
+                        //
+                        // Short circuit and say that symbols with huge loc lists _might_ be package
+                        // symbols, even if they don't, for performance (500 chosen by gut feel).
+                        const auto &locs = member.second.asClassOrModuleRef().data(gs)->locs();
+                        if (locs.size() <= 500 &&
+                            absl::c_none_of(locs, [&gs](auto loc) { return loc.file().isPackage(gs); })) {
                             continue;
                         }
                     }
@@ -2655,7 +2660,6 @@ void ClassOrModule::addLoc(const core::GlobalState &gs, core::Loc loc) {
     // We shouldn't add locs for <root>, otherwise it'll end up with a massive loc list (O(number
     // of files)). Those locs aren't useful, either.
     ENFORCE(ref(gs) != Symbols::root());
-    ENFORCE(ref(gs) != Symbols::PackageSpecRegistry());
 
     addLocInternal(gs, loc, this->loc(), locs_);
 }

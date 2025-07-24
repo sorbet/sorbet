@@ -100,6 +100,14 @@ core::MethodRef enclosingMethodFromContext(core::Context ctx) {
 
 void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Query &lspQuery,
                   core::SymbolRef symbolBeforeDealias) {
+    if (lspQuery.kind == core::lsp::Query::Kind::SYMBOL && ctx.file.isPackage(ctx) &&
+        symbolBeforeDealias.isClassOrModule() && symbolBeforeDealias.asClassOrModuleRef().isPackageSpecSymbol(ctx) &&
+        !lspQuery.matchesSymbol(symbolBeforeDealias)) {
+        // Short circuit: we don't want a search for `Foo::Bar` to match `Foo::Bar::<PackageSpec_Storage>` if we're in a
+        // `__package.rb` file.
+        return;
+    }
+
     // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
     auto symbol = symbolBeforeDealias.dealias(ctx);
     while (lit && symbol.exists() && lit->original()) {

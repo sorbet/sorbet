@@ -721,6 +721,12 @@ TEST_CASE("LSPTest") {
                                                          importUsageAssertions.emplace_back(assertion);
                                                          return true;
                                                      }
+                                                     if (dynamic_pointer_cast<ImportAssertion>(assertion)) {
+                                                         importUsageAssertions.emplace_back(assertion);
+                                                         // Want to treat every ImportAssertion as ALSO an
+                                                         // ImportUsageAssertion, and also process as an `import:`
+                                                         return false;
+                                                     }
 
                                                      return false;
                                                  }),
