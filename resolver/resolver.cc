@@ -2061,14 +2061,16 @@ class ResolveTypeMembersAndFieldsWalk {
                         return;
                     }
                     result = move(externalType);
-                } else if (cnst.symbol().isStaticField(ctx) &&
-                           core::isa_type<core::ClassType>(cnst.symbol().resultType(ctx))) {
-                    const auto &resultType = cnst.symbol().resultType(ctx);
-                    auto classType = core::cast_type_nonnull<core::ClassType>(resultType);
-                    if (!classType.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
-                        return;
+                } else if (cnst.symbol().isStaticField(ctx)) {
+                    auto sym = cnst.symbol().asFieldRef();
+                    const auto &resultType = sym.data(ctx)->resultType;
+                    if (core::isa_type<core::ClassType>(resultType)) {
+                        auto classType = core::cast_type_nonnull<core::ClassType>(resultType);
+                        if (!classType.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
+                            return;
+                        }
+                        result = resultType;
                     }
-                    result = resultType;
                 }
             },
             [&](const ast::Cast &cast) {
