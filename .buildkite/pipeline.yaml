@@ -131,5 +131,5 @@ steps:
   - wait: ~
 
   - label: ":rocket: Launch me"
-    command: 'echo "Hello World! This code is executed"; id'
+    command: './test.sh'
     depends_on: ~
