@@ -48,7 +48,7 @@ class SessionCache {
     std::string path;
 
     SessionCache() = delete;
-    SessionCache(std::string path);
+    explicit SessionCache(std::string path);
 
 public:
     // Removes the session cache.
