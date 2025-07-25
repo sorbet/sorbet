@@ -470,6 +470,38 @@ vector<string> sorbet::FileOps::listFilesInDir(string_view path, const Unordered
     return result;
 }
 
+vector<string> sorbet::FileOps::listSubdirs(const string &path) {
+    vector<string> result;
+
+    DIR *dir;
+    if ((dir = opendir(path.c_str())) == nullptr) {
+        switch (errno) {
+            case ENOTDIR:
+                throw sorbet::FileNotDirException();
+
+            default:
+                // Mirrors other FileOps functions: Assume other errors are from FileNotFound.
+                auto msg = fmt::format("Couldn't open directory `{}`", path);
+                throw sorbet::FileNotFoundException(msg);
+        }
+    }
+
+    struct dirent *entry = nullptr;
+    while ((entry = readdir(dir)) != nullptr) {
+        if (entry->d_type == DT_DIR) {
+            auto namelen = strlen(entry->d_name);
+            std::string_view name{entry->d_name, namelen};
+            if (name == "." || name == "..") {
+                continue;
+            }
+
+            result.emplace_back(name);
+        }
+    }
+
+    return result;
+}
+
 // https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
 uint32_t sorbet::nextPowerOfTwo(uint32_t v) {
     // Avoid underflow in subtraction on next line.

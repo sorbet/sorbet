@@ -53,6 +53,13 @@ public:
                                                    WorkerPool &workers, bool recursive,
                                                    const std::vector<std::string> &absoluteIgnorePatterns,
                                                    const std::vector<std::string> &relativeIgnorePatterns);
+
+    /**
+     * Lists out the subdirectories of the given directory.
+     * Throws FileNotFoundException if path does not exist, and FileNotDirException if path is not a directory.
+     */
+    static std::vector<std::string> listSubdirs(const std::string &path);
+
     /**
      * Returns 'true' if the file at the given path is ignored.
      * See sorbet::options for information on absolute and relative ignore patterns.

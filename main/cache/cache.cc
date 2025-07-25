@@ -6,6 +6,9 @@
 #include "core/serialize/serialize.h"
 #include "main/options/options.h"
 #include "sorbet_version/sorbet_version.h"
+#include <charconv>
+#include <csignal>
+#include <cstdio>
 
 using namespace std;
 
@@ -234,6 +237,41 @@ SessionCache::SessionCache(string path) : path{std::move(path)} {}
 
 SessionCache::~SessionCache() noexcept(false) {
     removeCacheDir(this->path);
+}
+
+void SessionCache::reapOldCaches(const options::Options &opts) {
+    if (opts.cacheDir.empty() || !FileOps::dirExists(opts.cacheDir)) {
+        return;
+    }
+
+    constexpr string_view prefix = "session-";
+    for (auto dir : FileOps::listSubdirs(opts.cacheDir)) {
+        auto pos = dir.find(prefix);
+        if (pos != 0) {
+            continue;
+        }
+
+        string_view pidStr = string_view(dir).substr(prefix.size());
+        pid_t pid = -1;
+        auto res = std::from_chars(pidStr.begin(), pidStr.end(), pid);
+        if (res.ec != std::errc{} || res.ptr != pidStr.end() || pid <= 0) {
+            continue;
+        }
+
+        // Passing the signal `0` won't send any actual signal here, but can be used as an existence check for the pid.
+        if (kill(pid, 0) != 0) {
+            switch (errno) {
+                // ESRCH indicates that the process doesn't exist, so we know it's reasonable to remove this cache
+                // directory.
+                case ESRCH:
+                    removeCacheDir(fmt::format("{}/{}", opts.cacheDir, dir));
+                    break;
+
+                default:
+                    continue;
+            }
+        }
+    }
 }
 
 unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore> kvstore, ::spdlog::logger &logger,

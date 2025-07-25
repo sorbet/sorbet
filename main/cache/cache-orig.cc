@@ -25,6 +25,8 @@ string_view SessionCache::kvstorePath() const {
     return string_view(this->path);
 }
 
+void SessionCache::reapOldCaches(const options::Options &opts) {}
+
 unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore> kvstore, ::spdlog::logger &logger,
                                             const options::Options &opts) {
     return nullptr;
