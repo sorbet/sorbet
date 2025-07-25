@@ -285,12 +285,20 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args, destructuringStmts,
                                        iteratee,
                                        /* insideDescribe */ true);
-        } else if (insideDescribe && send->fun == core::Names::let() && send->numPosArgs() == 1 && correctBlockArity &&
-                   ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
-            auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(send->getPosArg(0));
-            if (argLiteral.isName()) {
-                auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
-                auto methodName = argLiteral.asName();
+        } else if (insideDescribe &&
+                   ((send->fun == core::Names::let() && send->numPosArgs() == 1) ||
+                    (send->fun == core::Names::subject() && send->numPosArgs() == 0)) &&
+                   correctBlockArity && ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
+            if (send->fun == core::Names::let()) {
+                auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(send->getPosArg(0));
+                if (argLiteral.isName()) {
+                    auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
+                    auto methodName = argLiteral.asName();
+                    return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(send->block()->body));
+                }
+            } else {
+                auto declLoc = send->loc.copyWithZeroLength().join(send->funLoc);
+                auto methodName = core::Names::subject();
                 return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(send->block()->body));
             }
         }
