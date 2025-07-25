@@ -2190,8 +2190,8 @@ class ResolveTypeMembersAndFieldsWalk {
         core::TypeMemberRef parentMember = core::Symbols::noTypeMember();
         if (parentMemberSymbol.exists()) {
             if (parentMemberSymbol.isTypeMember()) {
-                parentType = core::cast_type<core::LambdaParam>(parentMemberSymbol.resultType(ctx));
                 parentMember = parentMemberSymbol.asTypeMemberRef();
+                parentType = core::cast_type<core::LambdaParam>(parentMember.data(ctx)->resultType);
                 ENFORCE(parentType != nullptr);
             } else if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
                 const auto parentShow = parentMemberSymbol.show(ctx);
