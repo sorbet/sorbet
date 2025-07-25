@@ -442,6 +442,11 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
+    if (send->numPosArgs() == 0 && send->fun == core::Names::subject()) {
+        auto declLoc = send->funLoc;
+        return ast::MK::SyntheticMethod0(send->loc, declLoc, core::Names::subject(), std::move(block->body));
+    }
+
     if (send->numPosArgs() != 1) {
         return nullptr;
     }
