@@ -21,7 +21,7 @@ struct NameDef {
             throw std::logic_error("Only pass one arg for '" + string(val) + "'");
         }
     }
-    NameDef(string_view srcName) : srcName(string(srcName)), val(string(srcName)), isConstant(false){};
+    NameDef(string_view srcName) : srcName(string(srcName)), val(string(srcName)), isConstant(false) {};
 };
 
 NameDef names[] = {
