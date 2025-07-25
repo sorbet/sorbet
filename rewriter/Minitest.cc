@@ -498,7 +498,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                                       prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe)));
         method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
         return constantMover.addConstantsToExpression(send->loc, move(method));
-    } else if (insideDescribe && send->fun == core::Names::let() && ast::isa_tree<ast::Literal>(arg)) {
+    } else if (insideDescribe && ((send->fun == core::Names::let() || send->fun == core::Names::subject())) &&
+               ast::isa_tree<ast::Literal>(arg)) {
         auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(arg);
         if (!argLiteral.isName()) {
             return nullptr;
