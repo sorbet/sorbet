@@ -1,5 +1,8 @@
 # Version history
 
+## 0.3.45
+- `Copy Symbol to Clipboard` is enabled and visible only when a workspace is open.
+
 ## 0.3.44
 - Allow configuring the diagnostic severity used to highlight untyped code. See [the docs](https://sorbet.org/docs/highlight-untyped) for more.
 
