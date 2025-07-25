@@ -13,6 +13,11 @@ using namespace std;
 namespace sorbet::rewriter {
 
 namespace {
+
+bool isDescribeOrSimilar(core::NameRef method) {
+    return method == core::Names::describe() || method == core::Names::context();
+}
+
 class ConstantMover {
     uint32_t classDepth = 0;
     vector<ast::ExpressionPtr> movedConstants = {};
@@ -106,10 +111,6 @@ public:
         }
     }
 };
-
-bool isDescribeOrSimilar(core::NameRef method) {
-    return method == core::Names::describe() || method == core::Names::context();
-}
 
 ast::ExpressionPtr addSigVoid(ast::ExpressionPtr expr) {
     core::LocOffsets declLoc;
