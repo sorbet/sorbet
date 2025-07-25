@@ -69,14 +69,14 @@ public:
     // we treat those the same way we treat classes
     void preTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto send = ast::cast_tree<ast::Send>(tree);
-        if (send->recv.isSelfReference() && send->numPosArgs() == 1 && send->fun == core::Names::describe()) {
+        if (send->recv.isSelfReference() && send->numPosArgs() == 1 && isDescribeOrSimilar(send->fun)) {
             classDepth++;
         }
     }
 
     void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto send = ast::cast_tree<ast::Send>(tree);
-        if (send->recv.isSelfReference() && send->numPosArgs() == 1 && send->fun == core::Names::describe()) {
+        if (send->recv.isSelfReference() && send->numPosArgs() == 1 && isDescribeOrSimilar(send->fun)) {
             classDepth--;
             if (classDepth == 0) {
                 movedConstants.emplace_back(move(tree));
@@ -106,6 +106,10 @@ public:
         }
     }
 };
+
+bool isDescribeOrSimilar(core::NameRef method) {
+    return method == core::Names::describe() || method == core::Names::context();
+}
 
 ast::ExpressionPtr addSigVoid(ast::ExpressionPtr expr) {
     core::LocOffsets declLoc;
@@ -276,7 +280,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, declLoc, move(name), move(each)));
             // add back any moved constants
             return constantMover.addConstantsToExpression(send->loc, move(method));
-        } else if (send->fun == core::Names::describe() && send->numPosArgs() == 1 && correctBlockArity) {
+        } else if (isDescribeOrSimilar(send->fun) && send->numPosArgs() == 1 && correctBlockArity) {
             return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args, destructuringStmts,
                                        iteratee,
                                        /* insideDescribe */ true);
@@ -383,7 +387,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
     auto *block = send->block();
 
-    if (!send->recv.isSelfReference() && !(send->fun == core::Names::describe() && isRSpec(send->recv))) {
+    if (!send->recv.isSelfReference() && !(isDescribeOrSimilar(send->fun) && isRSpec(send->recv))) {
         return nullptr;
     }
 
@@ -434,7 +438,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     }
     auto &arg = send->getPosArg(0);
 
-    if (send->fun == core::Names::describe()) {
+    if (isDescribeOrSimilar(send->fun)) {
         auto argString = to_s(ctx, arg);
         ast::ClassDef::ANCESTORS_store ancestors;
 
