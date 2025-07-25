@@ -1844,7 +1844,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
     static bool isLHSResolved(core::Context ctx, core::SymbolRef sym) {
         if (sym.isTypeMember()) {
-            auto lambdaParam = core::cast_type<core::LambdaParam>(sym.resultType(ctx));
+            auto lambdaParam = core::cast_type<core::LambdaParam>(sym.asTypeMemberRef().data(ctx)->resultType);
             ENFORCE(lambdaParam != nullptr);
 
             // both bounds are set to todo in the namer, so it's sufficient to
