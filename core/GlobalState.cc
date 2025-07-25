@@ -212,7 +212,9 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
                 }
             }
         }
+        prodHistogramInc("class_or_module.mixins.original", data->mixins().size());
         data->mixins() = std::move(newMixins);
+        prodHistogramInc("class_or_module.mixins.linearized", data->mixins().size());
         data->flags.isLinearizationComputed = true;
         if constexpr (debug_mode) {
             for (auto oldMixin : currentMixins) {
