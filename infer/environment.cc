@@ -1268,9 +1268,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         tp.type = core::Types::untyped(symbol);
                     }
                 } else if (symbol.isTypeAlias(ctx)) {
-                    ENFORCE(symbol.resultType(ctx) != nullptr);
-                    tp.origins.emplace_back(symbol.loc(ctx));
-                    tp.type = core::make_type<core::MetaType>(symbol.resultType(ctx));
+                    auto sym = symbol.asFieldRef();
+                    ENFORCE(sym.data(ctx)->resultType != nullptr);
+                    tp.origins.emplace_back(sym.data(ctx)->loc());
+                    tp.type = core::make_type<core::MetaType>(sym.data(ctx)->resultType);
                 } else if (symbol.isTypeArgument()) {
                     auto sym = symbol.asTypeArgumentRef();
                     ENFORCE(sym.data(ctx)->resultType != nullptr);
