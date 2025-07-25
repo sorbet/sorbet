@@ -1,5 +1,8 @@
 # Version history
 
+## 0.3.45
+- `Copy Symbol to Clipboard` is enabled and visible only when a workspace is open.
+
 ## 0.3.44
 - Allow configuring the diagnostic severity used to highlight untyped code. See [the docs](https://sorbet.org/docs/highlight-untyped) for more.
 
@@ -31,7 +34,6 @@
   - Sends workspace/didChangeConfiguration notification to LSP server instead
 
 ## 0.3.24
-
 - `Copy Symbol to Clipboard`
   - Disable command when there is a text selection.
   - Show a progress dialog when Sorbet is not ready to process commands.
@@ -54,9 +56,7 @@
   - The `VSCODE_SORBETEXT_LOG_LEVEL` environment variable, if defined, changes the initial value. Use one of these values: `trace`, `debug`, `info`, `warning`, `error` (case-insensitive).
 
 ## 0.3.7
-
 - Add extension icon.
 
 ## 0.3.6
-
 - First open source release!
