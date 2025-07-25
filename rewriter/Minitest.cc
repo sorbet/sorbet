@@ -287,9 +287,9 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                                        /* insideDescribe */ true);
         } else if (insideDescribe &&
                    ((send->fun == core::Names::let() && send->numPosArgs() == 1) ||
-                    (send->fun == core::Names::subject() && send->numPosArgs() == 0)) &&
+                    (send->fun == core::Names::subject() && send->numPosArgs() <= 1)) &&
                    correctBlockArity && ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
-            if (send->fun == core::Names::let()) {
+            if (send->numPosArgs() == 1) {
                 auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(send->getPosArg(0));
                 if (argLiteral.isName()) {
                     auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
