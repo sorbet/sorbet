@@ -1272,13 +1272,14 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     tp.origins.emplace_back(symbol.loc(ctx));
                     tp.type = core::make_type<core::MetaType>(symbol.resultType(ctx));
                 } else if (symbol.isTypeArgument()) {
-                    ENFORCE(symbol.resultType(ctx) != nullptr);
+                    auto sym = symbol.asTypeArgumentRef();
+                    ENFORCE(sym.data(ctx)->resultType != nullptr);
                     tp.origins.emplace_back(ctx.locAt(bind.loc));
 
                     auto owner = ctx.owner.asMethodRef();
                     auto klass = owner.enclosingClass(ctx);
-                    ENFORCE(symbol.resultType(ctx) != nullptr);
-                    auto instantiated = core::Types::resultTypeAsSeenFrom(ctx, symbol.resultType(ctx), klass, klass,
+                    ENFORCE(sym.data(ctx)->resultType != nullptr);
+                    auto instantiated = core::Types::resultTypeAsSeenFrom(ctx, sym.data(ctx)->resultType, klass, klass,
                                                                           klass.data(ctx)->selfTypeArgs(ctx));
                     if (owner.data(ctx)->flags.isGenericMethod) {
                         // instantiate requires a frozen constraint, but the constraint might not be
