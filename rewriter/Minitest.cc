@@ -123,6 +123,9 @@ ast::ExpressionPtr addSigVoid(ast::ExpressionPtr expr) {
     return ast::MK::InsSeq1(expr.loc(), ast::MK::SigVoid(declLoc, {}), std::move(expr));
 }
 
+// add boolean method isDescribeOrSimilar that accepts a Nameref
+
+
 core::LocOffsets declLocForSendWithBlock(const ast::Send &send) {
     return send.loc.copyWithZeroLength().join(send.block()->loc.copyWithZeroLength());
 }
