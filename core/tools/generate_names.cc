@@ -264,6 +264,7 @@ NameDef names[] = {
     {"classAttribute", "class_attribute"},
 
     {"describe"},
+    {"context"},
     {"it"},
     {"before"},
     {"beforeAngles", "<before>"},
