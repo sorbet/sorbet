@@ -186,7 +186,12 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
         if (data->superClass().exists()) {
             computeClassLinearization(gs, data->superClass());
         }
-        InlinedVector<core::ClassOrModuleRef, 4> currentMixins = data->mixins();
+        InlinedVector<core::ClassOrModuleRef, 4> currentMixinsOrig;
+        if constexpr (!debug_mode) {
+            // Don't actually copy the mixins unless we're in a debug build
+            currentMixinsOrig = data->mixins();
+        }
+        const auto currentMixins = data->mixins();
         InlinedVector<core::ClassOrModuleRef, 4> newMixins;
         for (auto mixin : currentMixins) {
             ENFORCE_NO_TIMER(mixin != core::Symbols::PlaceholderMixin(), "Resolver failed to replace all placeholders");
@@ -215,7 +220,7 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
         data->mixins() = std::move(newMixins);
         data->flags.isLinearizationComputed = true;
         if constexpr (debug_mode) {
-            for (auto oldMixin : currentMixins) {
+            for (auto oldMixin : currentMixinsOrig) {
                 ENFORCE(ofClass.data(gs)->derivesFrom(gs, oldMixin), "{} no longer derives from {}",
                         ofClass.showFullName(gs), oldMixin.showFullName(gs));
             }
