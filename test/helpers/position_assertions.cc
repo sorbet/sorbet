@@ -75,7 +75,7 @@ void reportMissingError(const string &filename, const T &assertion, string_view 
 
 void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine,
                            string_view errorPrefix) {
-  // Skip error message checking when running with Prism.
+    // Skip error message checking when running with Prism.
     if (sorbet::test::parser == realmain::options::Parser::PRISM) {
         return;
     }
@@ -609,29 +609,26 @@ RangeAssertion::getErrorAssertions(const vector<shared_ptr<RangeAssertion>> &ass
 }
 
 vector<shared_ptr<ErrorAssertion>>
-RangeAssertion::allAsErrorAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
+RangeAssertion::allTypedAsErrorAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
     vector<shared_ptr<ErrorAssertion>> rv;
     for (auto assertion : assertions) {
         if (auto errorAssertion = dynamic_pointer_cast<ErrorAssertion>(assertion)) {
             rv.push_back(errorAssertion);
             continue;
         }
-        
+
         string message;
         bool matchesDuplicateErrors = false;
         if (auto hintAssertion = dynamic_pointer_cast<HintAssertion>(assertion)) {
             message = hintAssertion->message;
             matchesDuplicateErrors = hintAssertion->matchesDuplicateErrors;
-        } else if (auto untypedAssertion = dynamic_pointer_cast<UntypedAssertion>(assertion)) {
-            message = untypedAssertion->message;
-            matchesDuplicateErrors = untypedAssertion->matchesDuplicateErrors;
         } else {
             continue;
         }
-        
+
         auto rangeCopy = assertion->range->copy();
-        rv.push_back(make_shared<ErrorAssertion>(assertion->filename, rangeCopy,
-                                                  assertion->assertionLine, message, matchesDuplicateErrors));
+        rv.push_back(make_shared<ErrorAssertion>(assertion->filename, rangeCopy, assertion->assertionLine, message,
+                                                 matchesDuplicateErrors));
     }
     return rv;
 }
