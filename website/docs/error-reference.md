@@ -2769,7 +2769,7 @@ To fix this error, mark the override as deprecated:
 ```ruby
 class Child < Parent
   extend T::Sig
-  
+
   sig { override.deprecated.returns(String) }
   def old_method
     "child implementation"

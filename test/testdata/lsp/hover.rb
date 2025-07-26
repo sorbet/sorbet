@@ -188,7 +188,7 @@ end
 
 deprecated_obj = DeprecatedTestClass.new
 deprecated_obj.deprecated_method
-#              ^^^^^^^^^^^^^^^^^ error: Method `DeprecatedTestClass#deprecated_method` is deprecated
+#              ^^^^^^^^^^^^^^^^^ hint: Method `DeprecatedTestClass#deprecated_method` is deprecated
 #              ^^^^^^^^^^^^^^^^^ hover: sig { deprecated.returns(String) }
 deprecated_obj.normal_method
 #              ^^^^^^^^^^^^^ hover: sig { returns(String) }

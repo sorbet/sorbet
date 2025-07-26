@@ -157,6 +157,7 @@ Usage:
                                 assertions as inline comments
       --enable-experimental-requires-ancestor
                                 Enable experimental `requires_ancestor` annotation
+      --enable-deprecated       Enable reporting of errors around deprecated features.
       --uniquely-defined-behavior
                                 Ensure that every class and module only defines
                                 'behavior' in one file. Ensures that every class or

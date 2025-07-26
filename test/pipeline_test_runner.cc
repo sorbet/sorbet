@@ -662,20 +662,15 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             if (error->isSilenced) {
                 continue;
             }
-            // if (
-			//	error->what == sorbet::core::errors::Infer::DeprecatedMethodUsage &&
-			//	!gs->enableDeprecated
-			// ) {
-            //     continue;
-            // }
             auto diag = errorToDiagnostic(*gs, *error);
             ENFORCE(diag != nullptr, "Error was given no valid location - '{}'", error->toString(*gs));
 
             auto path = error->loc.file().data(*gs).path();
             diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
         }
-		// Pipeline treats all errors as the same severity
-        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::allAsErrorAssertions(assertions), diagnostics);
+        // Pipeline treats all errors as the same severity
+        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::allTypedAsErrorAssertions(assertions),
+                                 diagnostics);
     }
 
     // Allow later phases to have errors that we didn't test for

@@ -472,8 +472,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Enable experimental support for RBS signatures and assertions as inline comments");
     options.add_options(section)("enable-experimental-requires-ancestor",
                                  "Enable experimental `requires_ancestor` annotation");
-    options.add_options(section)("enable-deprecated",
-                                 "Enable reporting of errors around deprecated features.");
+    options.add_options(section)("enable-deprecated", "Enable reporting of errors around deprecated features.");
     options.add_options(section)("uniquely-defined-behavior",
                                  "Ensure that every class and module only defines 'behavior' in one file. Ensures "
                                  "that every class or module can be autoloaded by loading exactly one file.",
