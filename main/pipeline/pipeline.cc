@@ -802,6 +802,98 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
     }
 }
 
+vector<CondensationLayerInfo> condensationLayers(const core::GlobalState &gs, absl::Span<ast::ParsedFile> packageFiles,
+                                                 absl::Span<core::FileRef> sourceFiles, const options::Options &opts) {
+    Timer timeit(gs.tracer(), "condensationLayers");
+
+    if (!opts.cacheSensitiveOptions.stripePackages) {
+        return vector{CondensationLayerInfo{packageFiles, sourceFiles}};
+    }
+
+    auto &db = gs.packageDB();
+    auto traversal = db.condensation().computeTraversal(gs);
+
+    vector<uint32_t> fileToLayer(gs.filesUsed());
+    {
+        Timer timeit(gs.tracer(), "condensationLayers.layerMapping");
+
+        auto layerMapping = traversal.buildLayerMapping(gs);
+
+        int ix = 0;
+        for (auto &file : gs.getFiles().subspan(1)) {
+            ++ix;
+            core::FileRef fref(ix);
+            auto pkgName = db.getPackageNameForFile(fref);
+            if (!pkgName.exists()) {
+                // This is an unpackaged file, so we unconditionally put it in the first layer. This means that it'll be
+                // checked at the same time as the first layer of packaged code.
+                fileToLayer[ix] = 0;
+                continue;
+            }
+
+            auto &info = layerMapping[pkgName];
+            if (file->isPackagedTest()) {
+                fileToLayer[ix] = info.testLayer;
+            } else {
+                fileToLayer[ix] = info.applicationLayer;
+            }
+        }
+    }
+
+    auto compareLayerThenFile = [&fileToLayer](core::FileRef l, core::FileRef r) -> bool {
+        auto lid = l.id();
+        auto rid = r.id();
+        auto lLayer = fileToLayer[lid];
+        auto rLayer = fileToLayer[rid];
+        return std::tie(lLayer, lid) < std::tie(rLayer, rid);
+    };
+
+    // Order by layer first, then file id.
+    fast_sort(packageFiles,
+              [compareLayerThenFile](auto &l, auto &r) -> bool { return compareLayerThenFile(l.file, r.file); });
+    fast_sort(sourceFiles, compareLayerThenFile);
+
+    // Reserve enough space for all the layers of the condensation traversal, plus one more for unpackaged code.
+    auto maxLayers = traversal.parallel.size() + 1;
+
+    vector<CondensationLayerInfo> result;
+    result.reserve(maxLayers);
+
+    auto sourceSpan = sourceFiles;
+    auto packageSpan = packageFiles;
+
+    do {
+        auto currentLayer = fileToLayer[packageSpan.front().file.id()];
+        auto &resultLayer = result.emplace_back();
+
+        {
+            auto it = absl::c_find_if(packageSpan, [&fileToLayer, currentLayer](const auto &f) {
+                return fileToLayer[f.file.id()] > currentLayer;
+            });
+            auto len = std::distance(packageSpan.begin(), it);
+            ENFORCE(len > 0);
+            resultLayer.packageFiles = packageSpan.subspan(0, len);
+            packageSpan = packageSpan.subspan(len);
+        }
+
+        {
+            auto it = absl::c_find_if(
+                sourceSpan, [&fileToLayer, currentLayer](auto f) { return fileToLayer[f.id()] > currentLayer; });
+            auto len = std::distance(sourceSpan.begin(), it);
+            // It's possible for there to be no source files associated with this layer, if all packages were empty, so
+            // we can't add the same ENFORCE as with the package span above.
+            resultLayer.sourceFiles = sourceSpan.subspan(0, len);
+            sourceSpan = sourceSpan.subspan(len);
+        }
+    } while (!packageSpan.empty());
+
+    ENFORCE(sourceSpan.empty());
+    ENFORCE(!result.empty());
+    ENFORCE(result.size() <= maxLayers);
+
+    return result;
+}
+
 // packager intentionally runs outside of rewriter so that its output does not get cached.
 // TODO(jez) How much of this still needs to be outside of rewriter?
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
