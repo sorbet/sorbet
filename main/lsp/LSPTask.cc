@@ -105,6 +105,10 @@ ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
                     // sorbet/showSymbol
                     return holds_alternative<JSONNullObject>(res) ? ResponseMessageStatus::EmptyResult
                                                                   : ResponseMessageStatus::Succeeded;
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, unique_ptr<QuerySendsResponse>>>) {
+                    // sorbet/querySends
+                    return holds_alternative<JSONNullObject>(res) ? ResponseMessageStatus::EmptyResult
+                                                                  : ResponseMessageStatus::Succeeded;
                 } else {
                     static_assert(always_false_v<T>, "non-exhaustive visitor!");
                 }
@@ -159,6 +163,8 @@ ConstExprStr LSPTask::methodString() const {
             return "sorbet.readFile";
         case LSPMethod::SorbetIndexerInitialization:
             return "sorbet.indexerInitialization";
+        case LSPMethod::SorbetQuerySends:
+            return "sorbet.querySends";
         case LSPMethod::SorbetShowSymbol:
             return "sorbet.showSymbol";
         case LSPMethod::SorbetWatchmanFileChange:
