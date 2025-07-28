@@ -1005,9 +1005,22 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto name = translate(moduleNode->constant_path);
             auto declLoc = translateLoc(moduleNode->module_keyword_loc).join(name->loc);
-            auto body = this->enterModuleContext().translate(moduleNode->body);
+            auto bodyNode = this->enterModuleContext().translate(moduleNode->body);
 
-            return make_unique<parser::Module>(location, declLoc, move(name), move(body));
+            if (!hasExpr(name)) {
+                return make_unique<parser::Module>(location, declLoc, move(name), move(bodyNode));
+            }
+
+            auto bodyStore = bodyToRHSStore(bodyNode);
+            if (!bodyStore.has_value()) {
+                return make_unique<parser::Module>(location, declLoc, move(name), move(bodyNode));
+            }
+
+            auto nameExpr = name->takeDesugaredExpr();
+            ast::ClassDef::ANCESTORS_store ancestors;
+            auto expr = MK::Module(location, declLoc, move(nameExpr), move(ancestors), move(*bodyStore));
+
+            return make_node_with_expr<parser::Module>(move(expr), location, declLoc, move(name), move(bodyNode));
         }
         case PM_MULTI_TARGET_NODE: { // A multi-target like the `(x2, y2)` in `p1, (x2, y2) = a`
             auto multiTargetNode = down_cast<pm_multi_target_node>(node);
