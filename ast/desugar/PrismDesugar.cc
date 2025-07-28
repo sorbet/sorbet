@@ -1610,7 +1610,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 auto res = node2TreeImpl(dctx, send);
                 result = move(res);
             },
-            [&](parser::ZSuper *zuper) { result = MK::ZSuper(loc, maybeTypedSuper(dctx)); },
+            [&](parser::ZSuper *zuper) { desugaredByPrismTranslator(zuper); },
             [&](parser::For *for_) {
                 MethodDef::ARGS_store args;
                 bool canProvideNiceDesugar = true;

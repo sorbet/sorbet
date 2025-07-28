@@ -149,6 +149,9 @@ private:
 
     void reportError(core::LocOffsets loc, const std::string &message) const;
 
+    // Helper to determine whether to use super or untypedSuper based on context
+    core::NameRef maybeTypedSuper() const;
+
     // Context management helpers. These return a copy of `this` with some change to the context.
     bool isInMethodDef() const;
     Translator enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc, core::NameRef methodName,
