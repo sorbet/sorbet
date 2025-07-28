@@ -1171,7 +1171,21 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto declLoc = translateLoc(moduleNode->module_keyword_loc).join(name->loc);
             auto body = this->enterModuleContext().translate(moduleNode->body);
 
-            return make_unique<parser::Module>(location, declLoc, move(name), move(body));
+            if (!directlyDesugar || !hasExpr(name, body)) {
+                return make_unique<parser::Module>(location, declLoc, move(name), move(body));
+            }
+
+            auto bodyExprsOpt = desugarScopeBodyToRHSStore(body);
+            if (!bodyExprsOpt.has_value()) {
+                return make_unique<parser::Module>(location, declLoc, move(name), move(body));
+            }
+            auto bodyExprs = move(*bodyExprsOpt);
+
+            auto nameExpr = name->takeDesugaredExpr();
+            ast::ClassDef::ANCESTORS_store ancestors;
+            auto moduleDef = MK::Module(location, declLoc, move(nameExpr), move(ancestors), move(bodyExprs));
+
+            return make_node_with_expr<parser::Module>(move(moduleDef), location, declLoc, move(name), move(body));
         }
         case PM_MULTI_TARGET_NODE: { // A multi-target like the `(x2, y2)` in `p1, (x2, y2) = a`
             auto multiTargetNode = down_cast<pm_multi_target_node>(node);
