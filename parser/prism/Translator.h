@@ -25,14 +25,14 @@ class Translator final {
     // Whether to directly desugar during in the Translator, or wait until the usual `Desugar.cc` code path.
     bool directlyDesugar;
 
-    // Context variables
-    bool isInMethodDef = false;
-
     // Keep track of the unique ID counter
     // uniqueCounterStorage is the source of truth maintained by the parent Translator
     // uniqueCounter is a pointer to uniqueCounterStorage and is passed down to child Translators
     int uniqueCounterStorage;
     int *uniqueCounter;
+
+    // Context variables
+    bool isInMethodDef = false;
 
     Translator(Translator &&) = delete;                 // Move constructor
     Translator(const Translator &) = delete;            // Copy constructor
@@ -52,14 +52,12 @@ public:
     std::unique_ptr<parser::Node> translate(pm_node_t *node);
 
 private:
-    // Private constructor used only for creating child translators
+    // This private constructor is used for creating child translators with modified context.
     // uniqueCounterStorage is passed as the minimum integer value and is never used
-    Translator(const Parser &parser, core::MutableContext ctx, const absl::Span<const ParseError> &parseErrors,
-               bool directlyDesugar, bool isInMethodDef, int *uniqueCounter)
-        : parser(parser), ctx(ctx), parseErrors(parseErrors), directlyDesugar(directlyDesugar),
-          isInMethodDef(isInMethodDef), uniqueCounterStorage(std::numeric_limits<int>::min()),
-          uniqueCounter(uniqueCounter) {}
-    void reportError(core::LocOffsets loc, const std::string &message);
+    Translator(const Translator &parent, bool isInMethodDef)
+        : parser(parent.parser), ctx(parent.ctx), parseErrors(parent.parseErrors),
+          directlyDesugar(parent.directlyDesugar), uniqueCounterStorage(std::numeric_limits<int>::min()),
+          uniqueCounter(parent.uniqueCounter), isInMethodDef(isInMethodDef) {}
 
     template <typename SorbetNode, typename... TArgs>
     std::unique_ptr<parser::Node> make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args);
@@ -105,6 +103,8 @@ private:
     void patternTranslateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);
 
     std::string_view sliceLocation(pm_location_t loc);
+
+    void reportError(core::LocOffsets loc, const std::string &message);
 
     // Context management helpers. These return a copy of `this` with some change to the context.
     Translator enterMethodDef();

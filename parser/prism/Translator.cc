@@ -2018,7 +2018,7 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
 // Context management methods
 Translator Translator::enterMethodDef() {
     auto isInMethodDef = true;
-    return Translator(parser, ctx, parseErrors, directlyDesugar, isInMethodDef, uniqueCounter);
+    return Translator(*this, isInMethodDef);
 }
 
 void Translator::reportError(core::LocOffsets loc, const string &message) {
