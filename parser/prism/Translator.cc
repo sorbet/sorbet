@@ -1238,7 +1238,34 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto expr = translate(classNode->expression);
             auto body = this->enterClassContext().translate(classNode->body);
 
-            return make_unique<parser::SClass>(location, translateLoc(declLoc), move(expr), move(body));
+            if (!directlyDesugar || !hasExpr(expr)) {
+                return make_unique<parser::SClass>(location, translateLoc(declLoc), move(expr), move(body));
+            }
+
+            if (!parser::NodeWithExpr::isa_node<parser::Self>(expr.get())) {
+                if (auto e = ctx.state.beginIndexerError(core::Loc(ctx.file, expr->loc),
+                                                         core::errors::Desugar::InvalidSingletonDef)) {
+                    e.setHeader("`{}` is only supported for `{}`", "class << EXPRESSION", "class << self");
+                }
+                auto emptyTree = MK::EmptyTree();
+                return make_node_with_expr<parser::SClass>(move(emptyTree), location, translateLoc(declLoc), move(expr),
+                                                           nullptr);
+            }
+
+            auto bodyExprsOpt = bodyToRHSStore(body);
+            if (!bodyExprsOpt) {
+                return make_unique<parser::SClass>(location, translateLoc(declLoc), move(expr), move(body));
+            }
+            auto bodyExprs = move(*bodyExprsOpt);
+
+            ast::ClassDef::ANCESTORS_store emptyAncestors;
+            auto classDef = MK::Class(location, translateLoc(declLoc),
+                                      ast::make_expression<ast::UnresolvedIdent>(
+                                          expr->loc, ast::UnresolvedIdent::Kind::Class, core::Names::singleton()),
+                                      move(emptyAncestors), move(bodyExprs));
+
+            return make_node_with_expr<parser::SClass>(move(classDef), location, translateLoc(declLoc), move(expr),
+                                                       move(body));
         }
         case PM_SOURCE_ENCODING_NODE: { // The `__ENCODING__` keyword
             return make_node_with_expr<parser::EncodingLiteral>(
@@ -2030,6 +2057,38 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
     translateMultiInto(sorbetLhs, prismRights);
 
     return make_unique<parser::Mlhs>(location, move(sorbetLhs));
+}
+
+// Extracts the the desugared expressions out of the body of a class, singleton class, or module.
+optional<ast::ClassDef::RHS_store> Translator::bodyToRHSStore(unique_ptr<parser::Node> &body) {
+    ENFORCE(directlyDesugar, "bodyToRHSStore should only be called when direct desugaring is enabled");
+
+    if (body == nullptr) {
+        ast::ClassDef::RHS_store result;
+        result.emplace_back(MK::EmptyTree());
+        return result;
+    }
+
+    if (auto *begin = parser::NodeWithExpr::cast_node<parser::Begin>(body.get())) { // Handle multi-statement body
+        if (!hasExpr(begin->stmts)) {
+            return nullopt;
+        }
+
+        ast::ClassDef::RHS_store result;
+        result.reserve(begin->stmts.size());
+        for (auto &stmt : begin->stmts) {
+            result.emplace_back(stmt->takeDesugaredExpr());
+        }
+        return result;
+    } else { // Handle single-statement body
+        if (!hasExpr(body)) {
+            return nullopt;
+        }
+
+        ast::ClassDef::RHS_store result;
+        result.emplace_back(body->takeDesugaredExpr());
+        return result;
+    }
 }
 
 // Context management methods

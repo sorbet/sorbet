@@ -125,6 +125,13 @@ private:
 
     std::string_view sliceLocation(pm_location_t loc) const;
 
+    // Helper function to determine which super method to use
+    core::NameRef maybeTypedSuper();
+
+    // Helper function to convert a body node to ClassDef::RHS_store
+    // Returns nullopt if not all nodes are desugared yet
+    std::optional<ast::ClassDef::RHS_store> bodyToRHSStore(std::unique_ptr<parser::Node> &body);
+
     void reportError(core::LocOffsets loc, const std::string &message) const;
 
     // Context management helpers. These return a copy of `this` with some change to the context.
