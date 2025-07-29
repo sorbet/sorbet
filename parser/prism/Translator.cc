@@ -306,7 +306,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto expr = translate(blockArg->expression);
 
-            return make_unique<parser::BlockPass>(location, move(expr));
+            if (!directlyDesugar || !hasExpr(expr)) {
+                return make_unique<parser::BlockPass>(location, std::move(expr));
+            }
+
+            // TODO: we copy here to prevent segfaults, but why are we getting segfaults with takeDesugaredExpr?
+            auto desugaredExpr = expr == nullptr ? MK::EmptyTree() : expr->copyDesugaredExpr();
+            auto blockArgNode = MK::BlockArg(location, move(desugaredExpr));
+            return make_node_with_expr<parser::BlockPass>(std::move(blockArgNode), location, std::move(expr));
         }
         case PM_BLOCK_NODE: { // An explicit block passed to a method call, i.e. `{ ... }` or `do ... end`
             unreachable("PM_BLOCK_NODE has special handling in translateCallWithBlock, see its docs for details.");
