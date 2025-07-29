@@ -25,6 +25,9 @@ class Translator final {
     // Whether to directly desugar during in the Translator, or wait until the usual `Desugar.cc` code path.
     const bool directlyDesugar;
 
+    // TODO: document me
+    const bool preserveConcreteSyntax;
+
     // Unique counters used to create synthetic names via `ctx.state.freshNameUnique`.
     // - The storage integers either store an "active" count used by a translator and some of its children,
     //   or a dummy value (int min).
@@ -47,9 +50,9 @@ class Translator final {
     Translator &operator=(const Translator &) = delete; // Copy assignment
 public:
     Translator(const Parser &parser, core::MutableContext ctx, const absl::Span<const ParseError> parseErrors,
-               bool directlyDesugar)
+               bool directlyDesugar, bool preserveConcreteSyntax)
         : parser(parser), ctx(ctx), parseErrors(parseErrors), directlyDesugar(directlyDesugar),
-          parserUniqueCounterStorage(1), desugarUniqueCounterStorage(1),
+          preserveConcreteSyntax(preserveConcreteSyntax), parserUniqueCounterStorage(1), desugarUniqueCounterStorage(1),
           parserUniqueCounter(this->parserUniqueCounterStorage),
           desugarUniqueCounter(this->desugarUniqueCounterStorage) {}
 
@@ -62,7 +65,8 @@ private:
     Translator(const Translator &parent, bool resetDesugarUniqueCounter, core::LocOffsets enclosingMethodLoc,
                core::NameRef enclosingMethodName, bool isInModule, bool isInAnyBlock)
         : parser(parent.parser), ctx(parent.ctx), parseErrors(parent.parseErrors),
-          directlyDesugar(parent.directlyDesugar), parserUniqueCounterStorage(std::numeric_limits<uint16_t>::min()),
+          directlyDesugar(parent.directlyDesugar), preserveConcreteSyntax(parent.preserveConcreteSyntax),
+          parserUniqueCounterStorage(std::numeric_limits<uint16_t>::min()),
           desugarUniqueCounterStorage(resetDesugarUniqueCounter ? std::numeric_limits<uint32_t>::min() : 1),
           parserUniqueCounter(parent.parserUniqueCounter),
           desugarUniqueCounter(resetDesugarUniqueCounter ? this->desugarUniqueCounterStorage
