@@ -337,6 +337,9 @@ public:
     // If 'true', enforce use of Ruby 3.0-style keyword args.
     bool ruby3KeywordArgs = false;
 
+    // If 'true', use the Prism parser.
+    bool parseWithPrism = false;
+
     // Some options change the behavior of things that might be cached, including ASTs, the file
     // table, the name table, the symbol table, etc.
     //

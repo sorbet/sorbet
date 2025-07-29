@@ -349,6 +349,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     auto opts = RangeAssertion::parseOptions(assertions);
     opts.censorForSnapshotTests = true;
     opts.stripePackagesHint = "PACKAGE_ERROR_HINT";
+    opts.parser = sorbet::test::parser;
 
     auto logger = spdlog::stderr_color_mt("fixtures: " + inputPath);
     auto workers = WorkerPool::create(0, *logger);
