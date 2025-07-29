@@ -125,6 +125,9 @@ private:
 
     std::string_view sliceLocation(pm_location_t loc) const;
 
+    // Extracts the desugared expressions out of a "scope" (class/sclass/module) body.
+    std::optional<ast::ClassDef::RHS_store> desugarScopeBodyToRHSStore(std::unique_ptr<parser::Node> &scopeBody);
+
     void reportError(core::LocOffsets loc, const std::string &message) const;
 
     // Context management helpers. These return a copy of `this` with some change to the context.
