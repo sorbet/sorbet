@@ -1844,7 +1844,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
     static bool isLHSResolved(core::Context ctx, core::SymbolRef sym) {
         if (sym.isTypeMember()) {
-            auto lambdaParam = core::cast_type<core::LambdaParam>(sym.resultType(ctx));
+            auto lambdaParam = core::cast_type<core::LambdaParam>(sym.asTypeMemberRef().data(ctx)->resultType);
             ENFORCE(lambdaParam != nullptr);
 
             // both bounds are set to todo in the namer, so it's sufficient to
@@ -2061,14 +2061,16 @@ class ResolveTypeMembersAndFieldsWalk {
                         return;
                     }
                     result = move(externalType);
-                } else if (cnst.symbol().isStaticField(ctx) &&
-                           core::isa_type<core::ClassType>(cnst.symbol().resultType(ctx))) {
-                    const auto &resultType = cnst.symbol().resultType(ctx);
-                    auto classType = core::cast_type_nonnull<core::ClassType>(resultType);
-                    if (!classType.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
-                        return;
+                } else if (cnst.symbol().isStaticField(ctx)) {
+                    auto sym = cnst.symbol().asFieldRef();
+                    const auto &resultType = sym.data(ctx)->resultType;
+                    if (core::isa_type<core::ClassType>(resultType)) {
+                        auto classType = core::cast_type_nonnull<core::ClassType>(resultType);
+                        if (!classType.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
+                            return;
+                        }
+                        result = resultType;
                     }
-                    result = resultType;
                 }
             },
             [&](const ast::Cast &cast) {
@@ -2190,8 +2192,8 @@ class ResolveTypeMembersAndFieldsWalk {
         core::TypeMemberRef parentMember = core::Symbols::noTypeMember();
         if (parentMemberSymbol.exists()) {
             if (parentMemberSymbol.isTypeMember()) {
-                parentType = core::cast_type<core::LambdaParam>(parentMemberSymbol.resultType(ctx));
                 parentMember = parentMemberSymbol.asTypeMemberRef();
+                parentType = core::cast_type<core::LambdaParam>(parentMember.data(ctx)->resultType);
                 ENFORCE(parentType != nullptr);
             } else if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
                 const auto parentShow = parentMemberSymbol.show(ctx);
