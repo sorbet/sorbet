@@ -1,7 +1,16 @@
 # We currently have 3 execution environments:
+#
 # - arbiter, a linux box that does security enforcement. Should never run tests.
 # - our mac machine that has 12 cores that is used to run mac tests, build mac _and_ emscripten release
 # - autoscaling linux cloud that's used for everything else
+#
+# The main entrypoint to the sorbet pipeline is the "YAML Steps" configuration
+# of the `sorbet` pipeline:
+#
+# https://buildkite.com/sorbet/sorbet/settings/steps
+#
+# That config validates whether a change is from an external contributor, and
+# then either blocks or runs the steps in this file.
 
 steps:
 
