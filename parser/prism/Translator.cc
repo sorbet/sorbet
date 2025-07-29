@@ -357,7 +357,31 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto arguments = translateArguments(breakNode->arguments);
 
-            return make_unique<parser::Break>(location, move(arguments));
+            if (arguments.empty()) {
+                auto expr = MK::Break(location, MK::EmptyTree());
+                return make_node_with_expr<parser::Break>(move(expr), location, move(arguments));
+            }
+
+            if (!directlyDesugar || !hasExpr(arguments)) {
+                return make_unique<parser::Break>(location, move(arguments));
+            }
+
+            bool hasBlock = absl::c_any_of(arguments, [](const auto &node) {
+                return node != nullptr && parser::isa_node<parser::BlockPass>(node.get());
+            });
+            ENFORCE(!hasBlock, "Prism expected to disallow block argument for `break` as invalid syntax.");
+
+            ExpressionPtr breakArgs;
+            if (arguments.size() == 1) {
+                auto &first = arguments[0];
+                breakArgs = first == nullptr ? MK::EmptyTree() : first->takeDesugaredExpr();
+            } else {
+                auto args = nodeVecToStore<ast::Array::ENTRY_store>(arguments);
+                auto arrayLocation = parser.translateLocation(breakNode->arguments->base.location);
+                breakArgs = MK::Array(arrayLocation, std::move(args));
+            }
+            auto expr = MK::Break(location, std::move(breakArgs));
+            return make_node_with_expr<parser::Break>(move(expr), location, move(arguments));
         }
         case PM_CALL_AND_WRITE_NODE: { // And-assignment to a method call, e.g. `a.b &&= false`
             if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
