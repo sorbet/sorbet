@@ -64,7 +64,7 @@ current_rev=$(git rev-parse HEAD)
 git checkout gh-pages
 # Remove all tracked files, but leave untracked files (like _out_) untouched
 git rm -rf '*'
-tar -xjf _out_/website/website.tar.bz2 .
+tar -xf _out_/website/website.tar.gz .
 git add .
 git reset HEAD _out_
 git reset HEAD sha.html
@@ -103,7 +103,7 @@ mkdir release
 cp -R _out_/* release/
 mv release/gems/* release
 rmdir release/gems
-rm release/website/website.tar.bz2
+rm release/website/website.tar.gz
 rmdir release/website
 rm -r release/webasm
 
