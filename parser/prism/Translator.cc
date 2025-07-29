@@ -2023,16 +2023,15 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
                                                             unique_ptr<parser::Node> sendNode) {
     unique_ptr<parser::Node> parametersNode;
     unique_ptr<parser::Node> body;
-
     if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
         auto prismBlockNode = down_cast<pm_block_node>(prismBlockOrLambdaNode);
         parametersNode = translate(prismBlockNode->parameters);
-        body = translate(prismBlockNode->body);
+        body = this->enterBlockContext().translate(prismBlockNode->body);
     } else {
         ENFORCE(PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_LAMBDA_NODE))
         auto prismLambdaNode = down_cast<pm_lambda_node>(prismBlockOrLambdaNode);
         parametersNode = translate(prismLambdaNode->parameters);
-        body = translate(prismLambdaNode->body);
+        body = this->enterBlockContext().translate(prismLambdaNode->body);
     }
 
     if (parser::NodeWithExpr::cast_node<parser::NumParams>(parametersNode.get())) {
@@ -2301,21 +2300,30 @@ Translator Translator::enterMethodDef(bool isSingletonMethod, core::LocOffsets m
                                       core::NameRef methodName) const {
     auto resetDesugarUniqueCounter = true;
     auto isInModule = this->isInModule && !isSingletonMethod;
-    return Translator(*this, resetDesugarUniqueCounter, methodLoc, methodName, isInModule);
+    return Translator(*this, resetDesugarUniqueCounter, methodLoc, methodName, this->isInAnyBlock, isInModule);
+}
+
+Translator Translator::enterBlockContext() const {
+    auto resetDesugarUniqueCounter = false; // Blocks inherit their parent's numbering
+    auto isInAnyBlock = true;
+    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                      isInAnyBlock, this->isInModule);
 }
 
 Translator Translator::enterModuleContext() const {
     auto resetDesugarUniqueCounter = true;
     auto isInModule = true;
+    auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
     return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      isInModule);
+                      isInAnyBlock, isInModule);
 }
 
 Translator Translator::enterClassContext() const {
     auto resetDesugarUniqueCounter = true;
     auto isInModule = false;
+    auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
     return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      isInModule);
+                      isInAnyBlock, isInModule);
 }
 
 void Translator::reportError(core::LocOffsets loc, const string &message) const {
