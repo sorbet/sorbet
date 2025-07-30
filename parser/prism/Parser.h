@@ -78,16 +78,16 @@ class ParseResult final {
     friend class Parser;
     friend class Translator;
 
-    Parser &parser;
-    std::unique_ptr<pm_node_t, NodeDeleter> node;
-    std::vector<ParseError> parseErrors;
+    const Parser &parser;
+    const std::unique_ptr<pm_node_t, NodeDeleter> node;
+    const std::vector<ParseError> parseErrors;
 
     ParseResult(Parser &parser, pm_node_t *node, std::vector<ParseError> parseErrors)
         : parser{parser}, node{node, NodeDeleter{parser}}, parseErrors{parseErrors} {}
 
     ParseResult(const ParseResult &) = delete;            // Copy constructor
     ParseResult &operator=(const ParseResult &) = delete; // Copy assignment
-    ParseResult(ParseResult &&) = default;                // Move constructor
+    ParseResult(ParseResult &&) = delete;                 // Move constructor
     ParseResult &operator=(ParseResult &&) = delete;      // Move assignment
 
     pm_node_t *getRawNodePointer() const {

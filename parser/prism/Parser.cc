@@ -1,4 +1,5 @@
 #include "parser/prism/Parser.h"
+#include "absl/types/span.h"
 #include "parser/prism/Helpers.h"
 #include "parser/prism/Translator.h"
 
@@ -11,7 +12,7 @@ unique_ptr<parser::Node> Parser::run(core::GlobalState &gs, core::FileRef file) 
     Prism::Parser parser{source};
     Prism::ParseResult parseResult = parser.parse();
 
-    return Prism::Translator(parser, gs, file).translate(move(parseResult));
+    return Prism::Translator(parser, gs, file, parseResult.parseErrors).translate(parseResult.getRawNodePointer());
 }
 
 pm_parser_t *Parser::getRawParserPointer() {
@@ -50,9 +51,7 @@ vector<ParseError> Parser::collectErrors() {
         auto *error = reinterpret_cast<pm_diagnostic_t *>(node);
         auto level = static_cast<pm_error_level_t>(error->level);
 
-        ParseError parseError(error->diag_id, string(error->message), error->location, level);
-
-        parseErrors.push_back(parseError);
+        parseErrors.emplace_back(error->diag_id, string(error->message), error->location, level);
     }
 
     return parseErrors;

@@ -1,6 +1,7 @@
 #ifndef SORBET_PARSER_PRISM_TRANSLATOR_H
 #define SORBET_PARSER_PRISM_TRANSLATOR_H
 
+#include "absl/types/span.h"
 #include "core/errors/parser.h"
 #include "parser/Node.h" // To clarify: these are Sorbet Parser nodes, not Prism ones.
 #include "parser/prism/Parser.h"
@@ -23,8 +24,8 @@ class Translator final {
     // Needed for reporting diagnostics
     core::FileRef file;
 
-    // The parse errors that occurred while parsing the root node
-    std::vector<ParseError> parseErrors;
+    // The errors that were found by Prism during parsing
+    const absl::Span<const ParseError> parseErrors;
 
     // Context variables
     bool isInMethodDef = false;
@@ -40,8 +41,10 @@ class Translator final {
     Translator &operator=(Translator &&) = delete;      // Move assignment
     Translator &operator=(const Translator &) = delete; // Copy assignment
 public:
-    Translator(const Parser &parser, core::GlobalState &gs, core::FileRef file)
-        : parser(parser), gs(gs), file(file), uniqueCounterStorage(1), uniqueCounter(&this->uniqueCounterStorage) {}
+    Translator(const Parser &parser, core::GlobalState &gs, core::FileRef file,
+               const absl::Span<const ParseError> parseErrors)
+        : parser(parser), gs(gs), file(file), parseErrors(parseErrors), uniqueCounterStorage(1),
+          uniqueCounter(&this->uniqueCounterStorage) {}
 
     int nextUniqueID() {
         return *uniqueCounter += 1;
@@ -49,13 +52,12 @@ public:
 
     // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
     std::unique_ptr<parser::Node> translate(pm_node_t *node);
-    std::unique_ptr<parser::Node> translate(const ParseResult &parseResult);
 
 private:
     // Private constructor used only for creating child translators
     // uniqueCounterStorage is passed as the minimum integer value and is never used
-    Translator(const Parser &parser, core::GlobalState &gs, core::FileRef file, std::vector<ParseError> parseErrors,
-               bool isInMethodDef, int *uniqueCounter)
+    Translator(const Parser &parser, core::GlobalState &gs, core::FileRef file,
+               const absl::Span<const ParseError> &parseErrors, bool isInMethodDef, int *uniqueCounter)
         : parser(parser), gs(gs), file(file), parseErrors(parseErrors), isInMethodDef(isInMethodDef),
           uniqueCounterStorage(std::numeric_limits<int>::min()), uniqueCounter(uniqueCounter) {}
     void reportError(core::LocOffsets loc, const std::string &message);

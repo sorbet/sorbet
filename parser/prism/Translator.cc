@@ -1352,11 +1352,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
     }
 }
 
-unique_ptr<parser::Node> Translator::translate(const ParseResult &parseResult) {
-    this->parseErrors = parseResult.parseErrors;
-    return translate(parseResult.getRawNodePointer());
-}
-
 core::LocOffsets Translator::translateLoc(pm_location_t loc) {
     return parser.translateLocation(loc);
 }
