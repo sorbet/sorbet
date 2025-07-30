@@ -51,9 +51,7 @@ vector<ParseError> Parser::collectErrors() {
         auto *error = reinterpret_cast<pm_diagnostic_t *>(node);
         auto level = static_cast<pm_error_level_t>(error->level);
 
-        ParseError parseError(error->diag_id, string(error->message), error->location, level);
-
-        parseErrors.push_back(parseError);
+        parseErrors.emplace_back(error->diag_id, string(error->message), error->location, level);
     }
 
     return parseErrors;
