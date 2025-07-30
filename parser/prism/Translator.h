@@ -64,6 +64,9 @@ private:
     template <typename SorbetNode, typename... TArgs>
     std::unique_ptr<parser::Node> make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args);
 
+    template <typename SorbetNode, typename... TArgs>
+    std::unique_ptr<parser::Node> make_unsupported_node(TArgs &&...args);
+
     core::LocOffsets translateLoc(pm_location_t loc);
 
     parser::NodeVec translateMulti(pm_node_list prismNodes);
