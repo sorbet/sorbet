@@ -1120,6 +1120,9 @@ private:
 
         if (couldBePrefix) {
             return ownsPackage(gs, pkgForScope, this->pkg.mangledName());
+        } else if (scopeSym.exists() && scopeSym == maybeTestNamespace) {
+            // Okay to write `module Test; end`, becuase this is essentially the empty path.
+            return true;
         } else {
             return pkgForScope == this->pkg.mangledName();
         }
