@@ -147,6 +147,8 @@ class Fiber < Object
   # [`Fiber.yield`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-yield)
   def resume(*_); end
 
+  def transfer(*_); end
+
   # Also aliased as:
   # [`inspect`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-i-inspect)
   def to_s; end
