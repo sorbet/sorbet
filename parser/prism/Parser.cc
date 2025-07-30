@@ -1,4 +1,5 @@
 #include "parser/prism/Parser.h"
+#include "absl/types/span.h"
 #include "parser/prism/Helpers.h"
 #include "parser/prism/Translator.h"
 
@@ -11,7 +12,7 @@ unique_ptr<parser::Node> Parser::run(core::GlobalState &gs, core::FileRef file) 
     Prism::Parser parser{source};
     Prism::ParseResult parseResult = parser.parse();
 
-    return Prism::Translator(parser, gs, file).translate(move(parseResult));
+    return Prism::Translator(parser, gs, file, parseResult.parseErrors).translate(parseResult.getRawNodePointer());
 }
 
 pm_parser_t *Parser::getRawParserPointer() {
