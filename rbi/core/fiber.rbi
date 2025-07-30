@@ -102,7 +102,7 @@
 # non-blocking manner. Its actual implementation is up to the scheduler.
 class Fiber < Object
   sig {returns(Fiber)}
-  def current; end
+  def self.current; end
 
   # Returns true if the fiber can still be resumed (or transferred to). After
   # finishing execution of the fiber block this method will always return
