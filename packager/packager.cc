@@ -896,6 +896,11 @@ class EnforcePackagePrefix final {
     // for the package.)
     const bool mustUseTestNamespace;
 
+    // So that we only have to compute this once (makes certain comparisons easier)
+    // Note that we don't enter this in GlobalState::initEmpty with a well-known ID,
+    // because Sorbet does not always run with --stripe-packages.
+    const core::SymbolRef maybeTestNamespace;
+
     // TODO(jez) Document me
     vector<pair<core::SymbolRef, core::LocOffsets>> scope;
 
@@ -914,7 +919,9 @@ class EnforcePackagePrefix final {
 
 public:
     EnforcePackagePrefix(core::Context ctx, const PackageInfoImpl &pkg)
-        : pkg(pkg), mustUseTestNamespace(ctx.file.data(ctx).isPackagedTest() && !isTestOnlyPackage(ctx, pkg)) {
+        : pkg(pkg), mustUseTestNamespace(ctx.file.data(ctx).isPackagedTest() && !isTestOnlyPackage(ctx, pkg)),
+          maybeTestNamespace(
+              core::Symbols::root().data(ctx)->findMember(ctx, core::packages::PackageDB::TEST_NAMESPACE)) {
         ENFORCE(pkg.exists());
     }
 
@@ -1122,12 +1129,11 @@ private:
         const auto &[scopeSym, _scopeLoc] = scope.back();
         auto cur = scopeSym;
         while (cur.exists() && cur != core::Symbols::root()) {
-            auto owner = cur.owner(gs);
-            if (owner == core::Symbols::root() && cur.name(gs) == core::packages::PackageDB::TEST_NAMESPACE) {
+            if (cur == maybeTestNamespace) {
                 return true;
             }
 
-            cur = owner;
+            cur = cur.owner(gs);
         }
 
         return false;
