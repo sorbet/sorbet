@@ -23,6 +23,7 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//ast",
         "//core",
         "//parser/parser",
         "@com_google_absl//absl/algorithm:container",
