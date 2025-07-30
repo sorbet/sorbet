@@ -952,7 +952,7 @@ public:
             // A class definition that includes a parent `class Foo::Bar < Baz`
             // must be made in that package
             checkBehaviorLoc(ctx, classDef.declLoc);
-        } else if (!onPackagePath(ctx)) {
+        } else if (!onPackagePath(ctx) || (mustUseTestNamespace && !inTestNamespace(ctx))) {
             ENFORCE(errorDepth == 0);
             errorDepth++;
             if (auto e = ctx.beginError(constantLit->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
@@ -1003,7 +1003,8 @@ public:
 
         pushScope(lhs);
 
-        if (rootConsts == 0 && packageForNamespace(ctx) != pkg.mangledName()) {
+        if (rootConsts == 0 &&
+            (packageForNamespace(ctx) != pkg.mangledName() || (mustUseTestNamespace && !inTestNamespace(ctx)))) {
             ENFORCE(errorDepth == 0);
             errorDepth++;
             if (auto e = ctx.beginError(lhs->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
@@ -1115,6 +1116,21 @@ private:
         } else {
             return pkgForScope == this->pkg.mangledName();
         }
+    }
+
+    bool inTestNamespace(const core::GlobalState &gs) {
+        const auto &[scopeSym, _scopeLoc] = scope.back();
+        auto cur = scopeSym;
+        while (cur.exists() && cur != core::Symbols::root()) {
+            auto owner = cur.owner(gs);
+            if (owner == core::Symbols::root() && cur.name(gs) == core::packages::PackageDB::TEST_NAMESPACE) {
+                return true;
+            }
+
+            cur = owner;
+        }
+
+        return false;
     }
 
     const string requiredNamespace(const core::GlobalState &gs) const {
