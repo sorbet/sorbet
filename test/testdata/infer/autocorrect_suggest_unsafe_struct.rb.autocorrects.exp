@@ -1,0 +1,17 @@
+# -- test/testdata/infer/autocorrect_suggest_unsafe_struct.rb --
+# typed: true
+# enable-suggest-unsafe: true
+
+class S < T::Struct
+  prop :foo, String
+  prop :bar, Integer
+end
+
+# Missing required keyword arguments
+T.unsafe(S.new)
+T.unsafe(S.new(foo: "hello"))
+T.unsafe(S.new(bar: 42))
+
+# This should work fine (no error)
+S.new(foo: "hello", bar: 42)
+# ------------------------------

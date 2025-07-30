@@ -341,6 +341,19 @@ unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc
         }
         e.addErrorLine(arg.loc, "Keyword argument `{}` declared to expect type `{}` here:", argName,
                        expectedType.show(gs));
+        
+        // Add autocorrect suggestion for T::Struct constructor calls when --suggest-unsafe is enabled
+        if (gs.suggestUnsafe.has_value() && method.data(gs)->name == core::Names::initialize()) {
+            // Check if this is a T::Struct subclass by checking if the owner inherits from T::Struct
+            auto owner = method.data(gs)->owner;
+            if (owner.data(gs)->derivesFrom(gs, core::Symbols::T_Struct())) {
+                // Find the constructor call location (S.new) to suggest T.unsafe(S).new
+                auto wrapMethod = gs.suggestUnsafe.value();
+                e.replaceWith(fmt::format("Wrap in `{}`", wrapMethod), argsLoc, 
+                              "{}({})", wrapMethod, receiverLoc.source(gs));
+            }
+        }
+        
         return e.build();
     }
     return nullptr;
