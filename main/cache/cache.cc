@@ -208,26 +208,32 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
     return kvstore;
 }
 
-SessionCache::SessionCache(string path) : path{std::move(path)} {}
-
-SessionCache::~SessionCache() noexcept(false) {
-    if (!FileOps::dirExists(this->path)) {
+namespace {
+void removeCacheDir(const string &path) {
+    if (!FileOps::dirExists(path)) {
         return;
     }
 
-    auto dataMdb = fmt::format("{}/data.mdb", this->path);
+    auto dataMdb = fmt::format("{}/data.mdb", path);
     if (FileOps::exists(dataMdb)) {
         FileOps::removeFile(dataMdb);
     }
 
-    auto lockMdb = fmt::format("{}/lock.mdb", this->path);
+    auto lockMdb = fmt::format("{}/lock.mdb", path);
     if (FileOps::exists(lockMdb)) {
         FileOps::removeFile(lockMdb);
     }
 
     // Fail silently if the directory has files other than those created by LMDB. This should be fine though, as we will
     // have removed the largest files.
-    FileOps::removeEmptyDir(this->path);
+    FileOps::removeEmptyDir(path);
+}
+} // namespace
+
+SessionCache::SessionCache(string path) : path{std::move(path)} {}
+
+SessionCache::~SessionCache() noexcept(false) {
+    removeCacheDir(this->path);
 }
 
 unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore> kvstore, ::spdlog::logger &logger,
@@ -236,22 +242,12 @@ unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore>
         return nullptr;
     }
 
-    string path;
+    auto pid = getpid();
+    auto path = fmt::format("{}/session-{}", opts.cacheDir, pid);
 
-    // Pretty unlikely that we'll see a collision, as we're removing the directory on exit and also generating random
-    // names, but make two attempts to find a new one anyway.
-    for (int i = 0; i < 2; i++) {
-        // Store the session cache as a sub folder of the cacheDir, so we don't write additional cache data to
-        // an unexpected location.
-        path = fmt::format("{}/session-{:x}", opts.cacheDir, Random::uniformU4());
-        if (!FileOps::dirExists(path)) {
-            break;
-        }
-        path.clear();
-    }
-
-    if (path.empty()) {
-        Exception::raise("Cache copying failed: failed to make a unique temp directory");
+    // If the directory already exists, we're reusing a PID from a previous run of Sorbet.
+    if (FileOps::dirExists(path)) {
+        removeCacheDir(path);
     }
 
     kvstore->copyTo(path);

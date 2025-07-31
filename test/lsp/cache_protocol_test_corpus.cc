@@ -524,4 +524,85 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
         REQUIRE_EQ(copy, nullptr);
     }
 }
+
+TEST_CASE_FIXTURE(CacheProtocolTest, "ReopenExistingSessionCacheDir") {
+    // Write a file to disk.
+    auto relativeFilepath = "test.rb";
+    auto filePath = fmt::format("{}/{}", rootPath, relativeFilepath);
+    // This file has an error to indirectly assert that LSP is actually typechecking the file during initialization.
+    auto fileContents = "# typed: true\n"
+                        "class Foo\n"
+                        "  extend T::Sig\n"
+                        "  sig {returns(Integer)}\n"
+                        "  def bar\n"
+                        "    'hello'\n"
+                        "  end\n"
+                        "end\n";
+    auto key = core::serialize::Serializer::fileKey(
+        core::File(string(filePath), string(fileContents), core::File::Type::Normal, 0));
+
+    // LSP should write a cache to disk corresponding to initialization state.
+    {
+        writeFilesToFS({{relativeFilepath, fileContents}});
+
+        lspWrapper->opts->inputFileNames.push_back(filePath);
+        assertErrorDiagnostics(
+            initializeLSP(),
+            {{relativeFilepath, 5, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
+    }
+
+    // LSP should have written cache to disk with file hashes from initialization.
+    // It should not include data from file updates made during the editor session.
+    auto opts = lspWrapper->opts;
+
+    // Release cache lock by dropping the entire LSP wrapper which holds onto a kvstore.
+    lspWrapper = nullptr;
+
+    auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = make_shared<spdlog::logger>("null", sink);
+    unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+
+    // Create a session copy of the cache, consuming the original
+    auto sessionCache = realmain::cache::SessionCache::make(std::move(kvstore), *logger, *opts);
+
+    // Ensure that we can open it
+    auto copy = make_unique<OwnedKeyValueStore>(sessionCache->open(logger, *opts));
+    REQUIRE(copy != nullptr);
+    OwnedKeyValueStore::abort(std::move(copy));
+
+    // Add another file into the session cache directory, to ensure that it sticks around
+    string sessionPath(sessionCache->kvstorePath());
+    auto emptyFilePath = fmt::format("{}/empty", sessionPath);
+    sorbet::FileOps::write(emptyFilePath, "");
+    REQUIRE(sorbet::FileOps::exists(emptyFilePath));
+
+    // Close the session cache, checking that the directory still exists because of the empty file
+    REQUIRE(FileOps::exists(sessionPath));
+    sessionCache.reset();
+    REQUIRE(FileOps::exists(sessionPath));
+
+    // Write empty lock and data files to simulate an existing cache, and remove the temp file that was used to persist
+    // the directory.
+    sorbet::FileOps::write(fmt::format("{}/data.mdb", sessionPath), "");
+    sorbet::FileOps::write(fmt::format("{}/lock.mdb", sessionPath), "");
+    sorbet::FileOps::removeFile(emptyFilePath);
+
+    // Reopen the cache, and write it to a new session cache.
+    kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+    sessionCache = realmain::cache::SessionCache::make(std::move(kvstore), *logger, *opts);
+
+    // That new cache should be in the old directory, as our PID hasn't changed
+    REQUIRE_EQ(sessionPath, sessionCache->kvstorePath());
+
+    // Ensure that we can still open this copy
+    copy = make_unique<OwnedKeyValueStore>(sessionCache->open(logger, *opts));
+    REQUIRE(copy != nullptr);
+    OwnedKeyValueStore::abort(std::move(copy));
+
+    // Close the session cache, and check that the directory does get cleaned up this time.
+    REQUIRE(FileOps::exists(sessionPath));
+    sessionCache.reset();
+    REQUIRE(!FileOps::exists(sessionPath));
+}
+
 } // namespace sorbet::test::lsp

@@ -1268,17 +1268,19 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         tp.type = core::Types::untyped(symbol);
                     }
                 } else if (symbol.isTypeAlias(ctx)) {
-                    ENFORCE(symbol.resultType(ctx) != nullptr);
-                    tp.origins.emplace_back(symbol.loc(ctx));
-                    tp.type = core::make_type<core::MetaType>(symbol.resultType(ctx));
+                    auto sym = symbol.asFieldRef();
+                    ENFORCE(sym.data(ctx)->resultType != nullptr);
+                    tp.origins.emplace_back(sym.data(ctx)->loc());
+                    tp.type = core::make_type<core::MetaType>(sym.data(ctx)->resultType);
                 } else if (symbol.isTypeArgument()) {
-                    ENFORCE(symbol.resultType(ctx) != nullptr);
+                    auto sym = symbol.asTypeArgumentRef();
+                    ENFORCE(sym.data(ctx)->resultType != nullptr);
                     tp.origins.emplace_back(ctx.locAt(bind.loc));
 
                     auto owner = ctx.owner.asMethodRef();
                     auto klass = owner.enclosingClass(ctx);
-                    ENFORCE(symbol.resultType(ctx) != nullptr);
-                    auto instantiated = core::Types::resultTypeAsSeenFrom(ctx, symbol.resultType(ctx), klass, klass,
+                    ENFORCE(sym.data(ctx)->resultType != nullptr);
+                    auto instantiated = core::Types::resultTypeAsSeenFrom(ctx, sym.data(ctx)->resultType, klass, klass,
                                                                           klass.data(ctx)->selfTypeArgs(ctx));
                     if (owner.data(ctx)->flags.isGenericMethod) {
                         // instantiate requires a frozen constraint, but the constraint might not be
@@ -1834,6 +1836,15 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             updateKnowledge(ctx, bind.bind.variable, ctx.locAt(bind.loc), send, knowledgeFilter);
         } else if (auto i = cfg::cast_instruction<cfg::Ident>(bind.value)) {
             propagateKnowledge(ctx, bind.bind.variable, i->what, knowledgeFilter);
+        } else if (auto l = cfg::cast_instruction<cfg::LoadArg>(bind.value)) {
+            const auto &argInfo = l->argument(ctx);
+            if (argInfo.flags.isBlock && argInfo.type == nullptr && knowledgeFilter.isNeeded(bind.bind.variable)) {
+                auto &whoKnows = getKnowledge(bind.bind.variable);
+                // If we're in a context where we know that bind.bind.variable is falsy, we also
+                // know it must be `nil`, because a `&blk` param can never be `false`
+                whoKnows.falsy().addNoTypeTest(bind.bind.variable, typeTestsWithVar, bind.bind.variable,
+                                               core::Types::falseClass());
+            }
         }
 
         return move(tp.type);
