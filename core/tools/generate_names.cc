@@ -280,7 +280,6 @@ NameDef names[] = {
     {"subject"},
     {"sharedExamples", "shared_examples"},
     {"letBang", "let!"},
-    {"its"},
 
     {"dslOptional", "dsl_optional"},
     {"dslRequired", "dsl_required"},
