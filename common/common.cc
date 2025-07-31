@@ -499,6 +499,7 @@ vector<string> sorbet::FileOps::listSubdirs(const string &path) {
         }
     }
 
+    closedir(dir);
     return result;
 }
 

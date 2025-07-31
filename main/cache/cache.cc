@@ -245,7 +245,7 @@ void SessionCache::reapOldCaches(const options::Options &opts) {
     }
 
     constexpr string_view prefix = "session-";
-    for (auto dir : FileOps::listSubdirs(opts.cacheDir)) {
+    for (const auto &dir : FileOps::listSubdirs(opts.cacheDir)) {
         auto pos = dir.find(prefix);
         if (pos != 0) {
             continue;
