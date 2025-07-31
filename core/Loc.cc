@@ -159,6 +159,24 @@ void addLocLine(stringstream &buf, int line, const File &file, int tabs, int lin
     }
     buf.write(file.source().data() + offset, numToWrite);
 }
+
+void printLocDetails(stringstream &to, pair<Loc::Detail, Loc::Detail> details, bool showFull, bool censor) {
+    if (censor) {
+        if (showFull) {
+            to << "CENSORED:CENSORED-CENSORED:CENSORED";
+        } else {
+            to << "CENSORED";
+        }
+    } else {
+        if (showFull) {
+            to << to_string(details.first.line) << ':' << to_string(details.first.column) << '-';
+            to << to_string(details.second.line) << ':' << to_string(details.second.column);
+        } else {
+            to << to_string(details.first.line);
+            // Second line is intentionally not printed so that iTerm2 can open file name:line_number as links
+        }
+    }
+}
 } // namespace
 
 string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
@@ -264,6 +282,19 @@ string Loc::showRaw(const GlobalState &gs) const {
     return fmt::format("Loc {{file={} start={}:{} end={}:{}}}", path, start.line, start.column, end.line, end.column);
 }
 
+string Loc::fileShortPosToString(const GlobalState &gs) const {
+    stringstream buf;
+    if (!file().exists()) {
+        buf << "???";
+    } else if (exists()) {
+        auto details = toDetails(gs);
+        auto showFull = true;
+        auto censor = gs.censorForSnapshotTests && file().data(gs).isPayload();
+        printLocDetails(buf, details, showFull, censor);
+    }
+    return buf.str();
+}
+
 string Loc::filePosToString(const GlobalState &gs, bool showFull) const {
     stringstream buf;
     if (!file().exists()) {
@@ -286,21 +317,7 @@ string Loc::filePosToString(const GlobalState &gs, bool showFull) const {
             }
 
             auto censor = gs.censorForSnapshotTests && file().data(gs).isPayload();
-            if (censor) {
-                if (showFull) {
-                    buf << "CENSORED:CENSORED-CENSORED:CENSORED";
-                } else {
-                    buf << "CENSORED";
-                }
-            } else {
-                if (showFull) {
-                    buf << to_string(details.first.line) << ':' << to_string(details.first.column) << '-';
-                    buf << to_string(details.second.line) << ':' << to_string(details.second.column);
-                } else {
-                    buf << to_string(details.first.line);
-                    // Second line is intentionally not printed so that iTerm2 can open file name:line_number as links
-                }
-            }
+            printLocDetails(buf, details, showFull, censor);
         }
     }
     return buf.str();
@@ -391,7 +408,8 @@ pair<Loc, uint32_t> Loc::findStartOfIndentation(const GlobalState &gs) const {
 
     size_t padding = lineView.find_first_not_of(" \t");
     if (padding == string::npos) {
-        // if this line didn't have a whitespace prefix, then don't add any padding to it, so startOffset = lineStart.
+        // if this line didn't have a whitespace prefix, then don't add any padding to it, so startOffset =
+        // lineStart.
         padding = 0;
     }
     uint32_t startOffset = lineStart + padding;
