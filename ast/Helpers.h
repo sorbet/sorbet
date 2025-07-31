@@ -393,17 +393,10 @@ public:
         return Override(loc, std::move(args));
     }
 
-    static ExpressionPtr OverrideAllowIncompatibleTrue(core::LocOffsets loc) {
+    static ExpressionPtr OverrideAllowIncompatible(core::LocOffsets loc, core::LocOffsets allowLoc, ExpressionPtr arg) {
         Send::ARGS_store args;
-        args.push_back(Symbol(loc, core::Names::allowIncompatible()));
-        args.push_back(True(loc));
-        return Override(loc, std::move(args));
-    }
-
-    static ExpressionPtr OverrideAllowIncompatibleVisibility(core::LocOffsets loc) {
-        Send::ARGS_store args;
-        args.push_back(Symbol(loc, core::Names::allowIncompatible()));
-        args.push_back(Symbol(loc, core::Names::visibility()));
+        args.push_back(Symbol(allowLoc, core::Names::allowIncompatible()));
+        args.push_back(std::move(arg));
         return Override(loc, std::move(args));
     }
 
