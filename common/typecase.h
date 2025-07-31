@@ -7,16 +7,10 @@
 #include <functional>
 #include <string>
 #include <typeinfo>
-#include <type_traits>
 
 namespace sorbet {
-// taken from https://stackoverflow.com/questions/22822836/type-switch-construct-in-c11  
+// taken from https://stackoverflow.com/questions/22822836/type-switch-construct-in-c11
 // should be replaced by variant when we're good with c++17
-
-// Fallback implementation if std::remove_reference is not available
-template<typename T> struct remove_reference_impl { typedef T type; };
-template<typename T> struct remove_reference_impl<T&> { typedef T type; };
-template<typename T> struct remove_reference_impl<T&&> { typedef T type; };
 
 // Begin ecatmur's code
 template <typename T> struct remove_class {};
@@ -34,7 +28,7 @@ template <typename C, typename R, typename... A> struct remove_class<R (C::*)(A.
 };
 
 template <typename T> struct get_signature_impl {
-    using type = typename remove_class<decltype(&remove_reference_impl<T>::type::operator())>::type;
+    using type = typename remove_class<decltype(&std::remove_reference<T>::type::operator())>::type;
 };
 template <typename R, typename... A> struct get_signature_impl<R(A...)> {
     using type = R(A...);
@@ -90,7 +84,7 @@ template <typename Base, typename... Subclasses> void typecase(Base *base, Subcl
 template <typename Base, typename FUNC> bool typecaseHelper(Base &base, FUNC &&func) {
     using traits = argtype_extractor<std::function<get_signature<FUNC>>>;
     // We specialize (const and non-const) references
-    using ArgType = typename std::remove_const<typename remove_reference_impl<typename traits::arg_type>::type>::type;
+    using ArgType = typename std::remove_const<typename std::remove_reference<typename traits::arg_type>::type>::type;
     if (Base::template isa<ArgType>(base)) {
         func(Base::template cast<ArgType>(base));
         return true;
