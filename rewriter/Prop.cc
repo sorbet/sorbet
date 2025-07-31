@@ -127,16 +127,19 @@ ast::ExpressionPtr elaborateOverride(core::MutableContext ctx, core::LocOffsets 
                            "{allow_incompatible: true}");
         }
     } else if (auto rOpts = ast::cast_tree<ast::Hash>(arg)) {
-        auto [_key, cfg] = ASTUtil::extractHashValue(ctx, *rOpts, core::Names::allowIncompatible());
+        auto [allowIncompatKey, cfg] = ASTUtil::extractHashValue(ctx, *rOpts, core::Names::allowIncompatible());
         if (auto clit = ast::cast_tree<ast::Literal>(cfg)) {
+            auto allowIncompatLoc = allowIncompatKey.loc();
             if (clit->isTrue(ctx)) {
-                return ast::MK::OverrideAllowIncompatibleTrue(overrideLoc);
+                auto trueNode = ast::MK::True(clit->loc);
+                return ast::MK::OverrideAllowIncompatible(overrideLoc, allowIncompatLoc, std::move(trueNode));
             } else if (clit->isFalse(ctx)) {
                 return nullptr;
             } else if (clit->isSymbol()) {
                 auto sym = clit->asSymbol();
                 if (sym == core::Names::visibility()) {
-                    return ast::MK::OverrideAllowIncompatibleVisibility(overrideLoc);
+                    auto visibilityNode = ast::MK::Symbol(clit->loc, core::Names::visibility());
+                    return ast::MK::OverrideAllowIncompatible(overrideLoc, allowIncompatLoc, std::move(visibilityNode));
                 } else if (auto e = ctx.beginIndexerError(clit->loc, core::errors::Rewriter::PropBadOverride)) {
                     e.setHeader("Malformed `{}`", fmt::format("override.{}.allow_incompatible", rendered));
                     e.addErrorNote("should be `{}` or `{}`", "true", ":visibility");
@@ -411,18 +414,29 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                     emitBadOverride(ctx, lit->loc, ret.name);
                 }
             } else if (auto opts = ast::cast_tree<ast::Hash>(overrideArg)) {
-                auto [_k, allowIncompatArg] = ASTUtil::extractHashValue(ctx, *opts, core::Names::allowIncompatible());
+                auto [allowIncompatKey, allowIncompatArg] =
+                    ASTUtil::extractHashValue(ctx, *opts, core::Names::allowIncompatible());
                 if (allowIncompatArg != nullptr) {
+                    auto allowIncompatLoc = allowIncompatKey.loc();
                     if (auto lit = ast::cast_tree<ast::Literal>(allowIncompatArg)) {
                         if (lit->isTrue(ctx)) {
-                            ret.getterOverride = ast::MK::OverrideAllowIncompatibleTrue(overrideLoc);
-                            ret.setterOverride = ast::MK::OverrideAllowIncompatibleTrue(overrideLoc);
+                            // XXX cwong: Can we share these/are they interned somehow?
+                            auto trueNodeGetter = ast::MK::True(lit->loc);
+                            auto trueNodeSetter = ast::MK::True(lit->loc);
+                            ret.getterOverride = ast::MK::OverrideAllowIncompatible(overrideLoc, allowIncompatLoc,
+                                                                                    std::move(trueNodeGetter));
+                            ret.setterOverride = ast::MK::OverrideAllowIncompatible(overrideLoc, allowIncompatLoc,
+                                                                                    std::move(trueNodeSetter));
                         } else if (lit->isFalse(ctx)) {
                             ret.getterOverride = ast::MK::OverrideStrict(overrideLoc);
                             ret.setterOverride = ast::MK::OverrideStrict(overrideLoc);
                         } else if (lit->isSymbol() && lit->asSymbol() == core::Names::visibility()) {
-                            ret.getterOverride = ast::MK::OverrideAllowIncompatibleVisibility(overrideLoc);
-                            ret.setterOverride = ast::MK::OverrideAllowIncompatibleVisibility(overrideLoc);
+                            auto visibilityNodeGetter = ast::MK::Symbol(lit->loc, core::Names::visibility());
+                            auto visibilityNodeSetter = ast::MK::Symbol(lit->loc, core::Names::visibility());
+                            ret.getterOverride = ast::MK::OverrideAllowIncompatible(overrideLoc, allowIncompatLoc,
+                                                                                    std::move(visibilityNodeGetter));
+                            ret.setterOverride = ast::MK::OverrideAllowIncompatible(overrideLoc, allowIncompatLoc,
+                                                                                    std::move(visibilityNodeSetter));
                         } else if (auto e = ctx.beginIndexerError(lit->loc, core::errors::Rewriter::PropBadOverride)) {
                             e.setHeader("Malformed `{}`", "override.allow_incompatible");
                             e.addErrorNote("should be `{}` or `{}`", "true", ":visibility");
