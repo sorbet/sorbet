@@ -237,8 +237,8 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
     // this statement must be a send
     if (auto send = ast::cast_tree<ast::Send>(stmt)) {
         auto correctBlockArity = send->hasBlock() && send->block()->args.size() == 0;
-        // the send must be a call to `it` with a single argument (the test name) and a block with no arguments
-        if ((send->fun == core::Names::it() && send->numPosArgs() == 1 && correctBlockArity) ||
+        // the send must be a call to `it` or `its` with a single argument (the test name) and a block with no arguments
+        if (((send->fun == core::Names::it() || send->fun == core::Names::its()) && send->numPosArgs() == 1 && correctBlockArity) ||
             ((send->fun == core::Names::before() || send->fun == core::Names::after()) && send->numPosArgs() == 0 &&
              correctBlockArity)) {
             core::NameRef name;
@@ -249,7 +249,11 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             } else {
                 // we use this for the name of our test
                 auto argString = to_s(ctx, send->getPosArg(0));
-                name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+                if (send->fun == core::Names::its()) {
+                    name = ctx.state.enterNameUTF8("<its " + argString + ">");
+                } else {
+                    name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+                }
             }
 
             // pull constants out of the block
