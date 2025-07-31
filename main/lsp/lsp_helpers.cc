@@ -25,10 +25,8 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
         return true;
     }
     auto name = sym.name(gs);
-    // static-init for a class
-    if (name == core::Names::staticInit() ||
-        // <unresolved-ancestors> is a fake method created to ensure IDE takes slow path for class hierarchy changes
-        name == core::Names::unresolvedAncestors() || name == core::Names::Constants::AttachedClass()) {
+    // <unresolved-ancestors> is a fake method created to ensure IDE takes slow path for class hierarchy changes
+    if (name == core::Names::unresolvedAncestors() || name == core::Names::Constants::AttachedClass()) {
         return true;
     }
     // TODO(jez) We probably want to get rid of anything with angle brackets (like what
@@ -40,8 +38,8 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     if (sym.isClassOrModule() && sym.asClassOrModuleRef().data(gs)->name.isTEnumName(gs)) {
         return true;
     }
-    // static-init for a file
-    if (name.kind() == core::NameKind::UNIQUE && name.dataUnique(gs)->original == core::Names::staticInit()) {
+    // static-init for a class or file
+    if (name.isAnyStaticInitName(gs)) {
         return true;
     }
     // <block>
