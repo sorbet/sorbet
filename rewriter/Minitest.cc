@@ -15,7 +15,7 @@ namespace sorbet::rewriter {
 namespace {
 
 bool isDescribeOrSimilar(core::NameRef method) {
-    return method == core::Names::describe() || method == core::Names::context();
+    return method == core::Names::describe() || method == core::Names::context() || method == core::Names::sharedExamples();
 }
 
 class ConstantMover {

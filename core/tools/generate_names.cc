@@ -278,6 +278,7 @@ NameDef names[] = {
     {"ExampleGroup", "ExampleGroup", true},
     {"context"},
     {"subject"},
+    {"sharedExamples", "shared_examples"},
 
     {"dslOptional", "dsl_optional"},
     {"dslRequired", "dsl_required"},
