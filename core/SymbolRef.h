@@ -163,9 +163,12 @@ public:
 
     bool isOnlyDefinedInFile(const GlobalState &gs, core::FileRef file) const;
 
-    // Given a symbol like <PackageSpecRegistry>::Project::Foo, returns true.
+    // Given a symbol like Project::Foo::<PackageSpec>, returns true.
     // Given any other symbol, returns false.
     // Also returns false if called on core::Symbols::noClassOrModule().
+    //
+    // TODO(jez) When we start entering symbols for packages, make this method more like the other
+    // `isFoo` methods (rename to `isPackage`, no GlobalState param).
     bool isPackageSpecSymbol(const GlobalState &gs) const;
 
     // Certain classes that need to be generic in the standard library already have a definition for
@@ -1022,16 +1025,12 @@ public:
         return MethodRef::fromRaw(9);
     }
 
-    static ClassOrModuleRef PackageSpecRegistry() {
+    static ClassOrModuleRef PackageSpec() {
         return ClassOrModuleRef::fromRaw(85);
     }
 
-    static ClassOrModuleRef PackageSpec() {
-        return ClassOrModuleRef::fromRaw(86);
-    }
-
     static ClassOrModuleRef PackageSpecSingleton() {
-        return ClassOrModuleRef::fromRaw(87);
+        return ClassOrModuleRef::fromRaw(86);
     }
 
     static MethodRef PackageSpec_import() {
@@ -1047,11 +1046,11 @@ public:
     }
 
     static ClassOrModuleRef Encoding() {
-        return ClassOrModuleRef::fromRaw(88);
+        return ClassOrModuleRef::fromRaw(87);
     }
 
     static ClassOrModuleRef Thread() {
-        return ClassOrModuleRef::fromRaw(89);
+        return ClassOrModuleRef::fromRaw(88);
     }
 
     static MethodRef Class_new() {
@@ -1083,27 +1082,27 @@ public:
     }
 
     static ClassOrModuleRef MagicBindToAttachedClass() {
-        return ClassOrModuleRef::fromRaw(90);
+        return ClassOrModuleRef::fromRaw(89);
     }
 
     static ClassOrModuleRef MagicBindToSelfType() {
-        return ClassOrModuleRef::fromRaw(91);
+        return ClassOrModuleRef::fromRaw(90);
     }
 
     static ClassOrModuleRef T_Types() {
-        return ClassOrModuleRef::fromRaw(92);
+        return ClassOrModuleRef::fromRaw(91);
     }
 
     static ClassOrModuleRef T_Types_Base() {
-        return ClassOrModuleRef::fromRaw(93);
+        return ClassOrModuleRef::fromRaw(92);
     }
 
     static ClassOrModuleRef Data() {
-        return ClassOrModuleRef::fromRaw(94);
+        return ClassOrModuleRef::fromRaw(93);
     }
 
     static ClassOrModuleRef T_Class() {
-        return ClassOrModuleRef::fromRaw(95);
+        return ClassOrModuleRef::fromRaw(94);
     }
 
     static MethodRef T_Generic_squareBrackets() {
@@ -1131,7 +1130,7 @@ public:
     }
 
     static ClassOrModuleRef Magic_UntypedSource() {
-        return ClassOrModuleRef::fromRaw(96);
+        return ClassOrModuleRef::fromRaw(95);
     }
 
     static MethodRef Module_syntheticSquareBrackets() {

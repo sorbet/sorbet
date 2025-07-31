@@ -1,17 +1,17 @@
 # -- test/testdata/packager/invalid_imports_and_exports/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::A<<C A>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::A::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(123)
 
     <self>.import("hello")
 
     <self>.import(<self>.method())
 
-    <self>.import(::<PackageSpecRegistry>::<C REFERENCE>)
+    <self>.import(<emptyTree>::<C REFERENCE>::<C <PackageSpec>>)
 
-    <self>.import(::<PackageSpecRegistry>::<C B>)
+    <self>.import(<emptyTree>::<C B>::<C <PackageSpec>>)
 
-    <self>.import(::<PackageSpecRegistry>::<C B>)
+    <self>.import(<emptyTree>::<C B>::<C <PackageSpec>>)
 
     <self>.export(123)
 
@@ -25,27 +25,27 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.export(<emptyTree>::<C A>::<C AModule>)
 
-    <self>.test_import(::<PackageSpecRegistry>::<C B>)
+    <self>.test_import(<emptyTree>::<C B>::<C <PackageSpec>>)
 
-    <self>.test_import(::<PackageSpecRegistry>::<C C>)
+    <self>.test_import(<emptyTree>::<C C>::<C <PackageSpec>>)
 
-    <self>.test_import(::<PackageSpecRegistry>::<C C>, :only, :A_MYSTERIOUS_PURPOSE)
+    <self>.test_import(<emptyTree>::<C C>::<C <PackageSpec>>, :only, :A_MYSTERIOUS_PURPOSE)
 
-    <self>.test_import(::<PackageSpecRegistry>::<C C>, :only, "something else")
+    <self>.test_import(<emptyTree>::<C C>::<C <PackageSpec>>, :only, "something else")
 
-    <self>.test_import(::<PackageSpecRegistry>::<C C>, :only, <emptyTree>::<C Kernel>.lambda() do ||
+    <self>.test_import(<emptyTree>::<C C>::<C <PackageSpec>>, :only, <emptyTree>::<C Kernel>.lambda() do ||
         "naught"
       end)
 
-    <self>.test_import(::<PackageSpecRegistry>::<C C>, :only, "test_rb", :only, "test_rb")
+    <self>.test_import(<emptyTree>::<C C>::<C <PackageSpec>>, :only, "test_rb", :only, "test_rb")
 
-    <self>.test_import(::<PackageSpecRegistry>::<C C>, :with, "cheese")
+    <self>.test_import(<emptyTree>::<C C>::<C <PackageSpec>>, :with, "cheese")
   end
 end
 # -- test/testdata/packager/invalid_imports_and_exports/b/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::B<<C B>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.import(::<PackageSpecRegistry>::<C A>)
+  class ::B::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(<emptyTree>::<C A>::<C <PackageSpec>>)
 
     <self>.export(<emptyTree>::<C B>::<C BClass>)
 
@@ -54,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/invalid_imports_and_exports/c/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::C<<C C>> < (::Sorbet::Private::Static::PackageSpec)
+  class ::C::<PackageSpec><<C <PackageSpec>>> < (::Sorbet::Private::Static::PackageSpec)
   end
 end
 # -- test/testdata/packager/invalid_imports_and_exports/a.rb --

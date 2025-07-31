@@ -1,4 +1,4 @@
-__package.rb:6: Unable to resolve constant `ProjectWithLongDiscernibleName` https://srb.help/5002
+__package.rb:6: Unable to resolve constant `Example` https://srb.help/5002
      6 |  export ProjectWithLongDiscernibleName::Foo::Example
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1

@@ -5,15 +5,11 @@ using namespace std;
 
 namespace sorbet::ast::packager {
 
-ExpressionPtr prependRegistry(ExpressionPtr scope) {
-    auto lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
-    ENFORCE(lastConstLit != nullptr);
-    while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
-        lastConstLit = constLit;
-    }
-    lastConstLit->scope =
-        ast::MK::Constant(lastConstLit->scope.loc().copyWithZeroLength(), core::Symbols::PackageSpecRegistry());
-    return scope;
+ExpressionPtr appendRegistry(ExpressionPtr scope) {
+    // We use the real loc (not a zero-width one) so that this constant does show up in LSP queries.
+    // Various other places will hide <PackageSpec> results from LSP queries, as needed.
+    auto loc = scope.loc();
+    return ast::MK::UnresolvedConstant(loc, move(scope), core::Names::Constants::PackageSpec_Storage());
 }
 
 const ast::ClassDef *asPackageSpecClass(const ast::ExpressionPtr &expr) {
