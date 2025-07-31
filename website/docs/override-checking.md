@@ -330,60 +330,35 @@ end
 Passing `override: true` will mark both the reader (`foo`) and writer (`foo=`) functions as `override`. To only override one, you can pass `:reader` or `:writer`:
 
 ```ruby
-module ReaderOnly
-  extend T::Helpers
-  extend T::Sig
-  interface!
-  sig { abstract.returns(Integer) }
-  def foo; end
-end
-
-class Child < T::Struct
+class ReaderOnlyChild < T::Struct
   include ReaderOnly
   prop :foo, Integer, override: :reader
 end
 ```
 
+[→ View full example on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20ReaderOnly%0A%20%20extend%20T%3A%3AHelpers%0A%20%20extend%20T%3A%3ASig%0A%20%20interface!%0A%20%20sig%20%7B%20abstract.returns%28Integer%29%20%7D%0A%20%20def%20foo%3B%20end%0Aend%0A%0Aclass%20ReaderOnlyChild%20%3C%20T%3A%3AStruct%0A%20%20include%20ReaderOnly%0A%20%20prop%20%3Afoo%2C%20Integer%2C%20override%3A%20%3Areader%0Aend)
+
 To pass options such as `allow_incompatible`, we can instead pass a hash:
 
 ```ruby
-module IncompatibleParent
-  extend T::Helpers
-  extend T::Sig
-  interface!
-  sig { abstract.returns(T.nilable(Integer)) }
-  def foo; end
-  sig { abstract.params(arg0: T.nilable(Integer)).returns(T.nilable(Integer)) }
-  def foo=(arg0); end
-end
-
-class Child < T::Struct
-  include IncompatibleParent
+class IncompatibleChild < T::Struct
+  include Parent
   prop :foo, Integer, override: {allow_incompatible: true} # also accepts :visibility
 end
 ```
 
+[→ View full example on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20Parent%0A%20%20extend%20T%3A%3AHelpers%0A%20%20extend%20T%3A%3ASig%0A%20%20interface!%0A%20%20sig%20%7B%20abstract.returns%28T.nilable%28Integer%29%29%20%7D%0A%20%20def%20foo%3B%20end%0A%20%20sig%20%7B%20abstract.params%28arg0%3A%20T.nilable%28Integer%29%29.returns%28T.nilable%28Integer%29%29%20%7D%0A%20%20def%20foo%3D%28arg0%29%3B%20end%0Aend%0A%0Aclass%20IncompatibleChild%20%3C%20T%3A%3AStruct%0A%20%20include%20Parent%0A%20%20prop%20%3Afoo%2C%20Integer%2C%20override%3A%20%7Ballow_incompatible%3A%20true%7D%20%23%20also%20accepts%20%3Avisibility%0Aend)
+
 For the most fine-grained control, the hash can instead use the `reader` and `writer` keys:
 
 ```ruby
-module Parent
-  extend T::Sig
-  extend T::Helpers
-  abstract!
-
-  sig { abstract.returns(T.nilable(String)) }
-  def foo; end
-
-  sig { abstract.params(foo: String).returns(String) }
-  def foo=(foo); end
-end
-
 class Child < T::Struct
   include Parent
-
   prop :foo, String, override: {reader: {allow_incompatible: true}, writer: true}
 end
 ```
+
+[→ View full example on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20Parent%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AHelpers%0A%20%20abstract!%0A%0A%20%20sig%20%7B%20abstract.returns%28T.nilable%28String%29%29%20%7D%0A%20%20def%20foo%3B%20end%0A%0A%20%20sig%20%7B%20abstract.params%28foo%3A%20String%29.returns%28String%29%20%7D%0A%20%20def%20foo%3D%28foo%29%3B%20end%0Aend%0A%0Aclass%20Child%20%3C%20T%3A%3AStruct%0A%20%20include%20Parent%0A%0A%20%20prop%20%3Afoo%2C%20String%2C%20override%3A%20%7Breader%3A%20%7Ballow_incompatible%3A%20true%7D%2C%20writer%3A%20true%7D%0Aend)
 
 Note that the previous values we've seen are aliases for the fully-expanded version:
 
