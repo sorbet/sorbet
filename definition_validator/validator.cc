@@ -1109,11 +1109,10 @@ private:
                     continue;
                 }
                 const auto &method = sym.asMethodRef().data(gs);
+                // Ignore mangle renames, because users shouldn't have to create *another*
+                // mangle rename error in order to implement such an abstract method.
                 if (method->flags.isAbstract &&
-                    // Ignore mangle renames, because users shouldn't have to create *another*
-                    // mangle rename error in order to implement such an abstract method.
-                    !(method->name.kind() == core::NameKind::UNIQUE &&
-                      method->name.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename)) {
+                    !method->name.hasUniqueNameKind(gs, core::UniqueNameKind::MangleRename)) {
                     abstract.emplace_back(sym.asMethodRef());
                 }
             }

@@ -18,6 +18,24 @@ enum class NameKind : uint8_t {
 
 CheckSize(NameKind, 1, 1);
 
+enum class UniqueNameKind : uint8_t {
+    Parser,
+    Desugar,
+    Namer,
+    MangleRename,
+    Singleton,
+    Overload,
+    TypeVarName,
+    PositionalArg,        // num >=0 - normal args, -1 ==> restarg, -2 => kwrest arg
+    MangledKeywordArg,    // only used when we have duplicated keyword arguments
+    ResolverMissingClass, // used by resolver when we want to enter a stub class into a static field. see
+                          // test/resolver/stub_missing_class_alias.rb
+    TEnum,
+    Struct,
+    Packager,
+    DesugarCsend, // Used for Extract to Variable; see the CSend case in desugar.cc for more details
+};
+
 struct NameDataDebugCheck {
     const GlobalState &gs;
     const unsigned int nameCountAtCreation;
@@ -191,6 +209,8 @@ public:
     bool isAnyStaticInitName(const GlobalState &gs) const;
 
     bool isUniqueNameOf(const GlobalState &gs, NameRef name) const;
+
+    bool hasUniqueNameKind(const GlobalState &gs, UniqueNameKind uniqueNameKind) const;
 
     // All the names that Environment::updateKnowledge treats as special for the purposes of
     // updating control flow-sensitive type knowledge.

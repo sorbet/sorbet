@@ -73,11 +73,6 @@ core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef
     }
 }
 
-bool isMangleRenameUniqueName(core::GlobalState &gs, core::NameRef name) {
-    return name.kind() == core::NameKind::UNIQUE &&
-           name.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename;
-}
-
 /**
  * Used with TreeWalk to locate all of the class, method, static field, and type member symbols defined in the tree.
  * Does not mutate GlobalState, which allows us to parallelize this process.
@@ -1283,7 +1278,7 @@ private:
         if (sym.exists()) {
             ENFORCE(currSym.exists());
             name = sym.data(ctx)->name;
-            if (isMangleRenameUniqueName(ctx, name)) {
+            if (name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
                 ENFORCE(currSym != sym);
                 emitRedefinedConstantError(ctx, staticField.asgnLoc, sym, currSym);
             }
@@ -1355,7 +1350,7 @@ private:
             // need to do is find out whether there was a redefinition the first time, and in that case display the
             // same error
             auto name = existingTypeMember.data(ctx)->name;
-            if (isMangleRenameUniqueName(ctx, name)) {
+            if (name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
                 auto oldSym = ctx.state.lookupSymbol(onSymbol, typeMember.name);
                 emitRedefinedConstantError(ctx, typeMember.nameLoc, existingTypeMember, oldSym);
             }

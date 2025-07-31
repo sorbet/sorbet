@@ -282,6 +282,15 @@ bool NameRef::isUniqueNameOf(const GlobalState &gs, NameRef name) const {
     return this->kind() == NameKind::UNIQUE && this->dataUnique(gs)->original == name;
 }
 
+bool NameRef::hasUniqueNameKind(const GlobalState &gs, UniqueNameKind uniqueNameKind) const {
+    if (this->kind() != NameKind::UNIQUE) {
+        return false;
+    }
+
+    auto &data = this->dataUnique(gs);
+    return data->uniqueNameKind == uniqueNameKind;
+}
+
 bool NameRef::isUpdateKnowledgeName() const {
     switch (this->rawId()) {
         case Names::bang().rawId():
