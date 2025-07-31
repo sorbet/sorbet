@@ -344,8 +344,8 @@ private:
 
 public:
     static ExpressionPtr Sig(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr ret,
-                             std::optional<ExpressionPtr> recv_ = std::nullopt) {
-        auto recv = recv_ ? std::move(recv_.value()) : Self(loc);
+                             ExpressionPtr recv_ = nullptr) {
+        auto recv = recv_ ? std::move(recv_) : Self(loc);
         auto params = Params(loc, std::move(recv), std::move(args));
         auto returns = Send1(loc, std::move(params), core::Names::returns(), loc, std::move(ret));
         Send::Flags flags;
@@ -356,9 +356,8 @@ public:
                     flags);
     }
 
-    static ExpressionPtr SigVoid(core::LocOffsets loc, Send::ARGS_store args,
-                                 std::optional<ExpressionPtr> recv_ = std::nullopt) {
-        auto recv = recv_ ? std::move(recv_.value()) : Self(loc);
+    static ExpressionPtr SigVoid(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr recv_ = nullptr) {
+        auto recv = recv_ ? std::move(recv_) : Self(loc);
         auto params = Params(loc, std::move(recv), std::move(args));
         auto void_ = Send0(loc, std::move(params), core::Names::void_(), loc);
         Send::Flags flags;
@@ -369,9 +368,8 @@ public:
                     flags);
     }
 
-    static ExpressionPtr Sig0(core::LocOffsets loc, ExpressionPtr ret,
-                              std::optional<ExpressionPtr> recv_ = std::nullopt) {
-        auto recv = recv_ ? std::move(recv_.value()) : Self(loc);
+    static ExpressionPtr Sig0(core::LocOffsets loc, ExpressionPtr ret, ExpressionPtr recv_ = nullptr) {
+        auto recv = recv_ ? std::move(recv_) : Self(loc);
         auto returns = Send1(loc, std::move(recv), core::Names::returns(), loc, std::move(ret));
         Send::Flags flags;
         flags.isRewriterSynthesized = true;
@@ -382,7 +380,7 @@ public:
     }
 
     static ExpressionPtr Sig1(core::LocOffsets loc, ExpressionPtr key, ExpressionPtr value, ExpressionPtr ret,
-                              std::optional<ExpressionPtr> recv_ = std::nullopt) {
+                              ExpressionPtr recv_ = nullptr) {
         return Sig(loc, SendArgs(std::move(key), std::move(value)), std::move(ret), std::move(recv_));
     }
 

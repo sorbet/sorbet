@@ -86,8 +86,8 @@ struct PropContext {
 struct PropInfo {
     core::LocOffsets loc;
     bool isImmutable = false;
-    optional<ast::ExpressionPtr> getterOverride;
-    optional<ast::ExpressionPtr> setterOverride;
+    ast::ExpressionPtr getterOverride;
+    ast::ExpressionPtr setterOverride;
     core::NameRef name;
     core::LocOffsets nameLoc;
     ast::ExpressionPtr type;
@@ -113,14 +113,14 @@ void emitBadOverride(core::MutableContext ctx, const core::LocOffsets loc, core:
     }
 }
 
-optional<ast::ExpressionPtr> elaborateOverride(core::MutableContext ctx, core::LocOffsets overrideLoc, ast::Hash &opts,
-                                               core::NameRef key, std::string rendered) {
+ast::ExpressionPtr elaborateOverride(core::MutableContext ctx, core::LocOffsets overrideLoc, ast::Hash &opts,
+                                     core::NameRef key, std::string rendered) {
     auto [_key, arg] = ASTUtil::extractHashValue(ctx, opts, key);
     if (auto lit = ast::cast_tree<ast::Literal>(arg)) {
         if (lit->isTrue(ctx)) {
             return ast::MK::OverrideStrict(overrideLoc);
         } else if (lit->isFalse(ctx)) {
-            return nullopt;
+            return nullptr;
         } else if (auto e = ctx.beginIndexerError(lit->loc, core::errors::Rewriter::PropBadOverride)) {
             e.setHeader("Malformed `{}`", fmt::format("override.{}", rendered));
             e.addErrorNote("should be `{}`, `{}` or `{}`", "true", "{allow_incompatible: :visibility}",
@@ -132,7 +132,7 @@ optional<ast::ExpressionPtr> elaborateOverride(core::MutableContext ctx, core::L
             if (clit->isTrue(ctx)) {
                 return ast::MK::OverrideAllowIncompatibleTrue(overrideLoc);
             } else if (clit->isFalse(ctx)) {
-                return nullopt;
+                return nullptr;
             } else if (clit->isSymbol()) {
                 auto sym = clit->asSymbol();
                 if (sym == core::Names::visibility()) {
@@ -163,7 +163,7 @@ optional<ast::ExpressionPtr> elaborateOverride(core::MutableContext ctx, core::L
                            "{allow_incompatible: true}");
         }
     }
-    return nullopt;
+    return nullptr;
 }
 
 optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
@@ -396,8 +396,8 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                     ret.getterOverride = ast::MK::OverrideStrict(overrideLoc);
                     ret.setterOverride = ast::MK::OverrideStrict(overrideLoc);
                 } else if (lit->isFalse(ctx)) {
-                    ret.getterOverride = nullopt;
-                    ret.setterOverride = nullopt;
+                    ret.getterOverride = nullptr;
+                    ret.setterOverride = nullptr;
                 } else if (lit->isSymbol()) {
                     auto sym = lit->asSymbol();
                     if (sym == core::Names::reader()) {
@@ -465,7 +465,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &prop,
 
     auto ivarName = name.addAt(ctx);
 
-    auto readerSig = ast::MK::Sig0(loc, ASTUtil::dupType(getType), std::exchange(prop.getterOverride, nullopt));
+    auto readerSig = ast::MK::Sig0(loc, ASTUtil::dupType(getType), std::exchange(prop.getterOverride, nullptr));
     nodes.emplace_back(std::move(readerSig));
 
     // Generate a real prop body for computed_by: props so Sorbet can assert the
@@ -512,7 +512,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &prop,
         sigArgs.emplace_back(ASTUtil::dupType(setType));
 
         auto writerSig = ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType),
-                                      std::exchange(prop.setterOverride, nullopt));
+                                      std::exchange(prop.setterOverride, nullptr));
         nodes.emplace_back(std::move(writerSig));
 
         if (prop.enum_ == nullptr) {
