@@ -279,9 +279,11 @@ NameDef names[] = {
     {"context"},
     {"subject"},
     {"sharedExamples", "shared_examples"},
+    {"sharedContext", "shared_context"},
     {"letBang", "let!"},
     {"its"},
     {"xit"},
+    {"includeContext", "include_context"},
 
     {"dslOptional", "dsl_optional"},
     {"dslRequired", "dsl_required"},
