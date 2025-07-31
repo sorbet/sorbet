@@ -281,6 +281,7 @@ NameDef names[] = {
     {"sharedExamples", "shared_examples"},
     {"letBang", "let!"},
     {"its"},
+    {"xit"},
 
     {"dslOptional", "dsl_optional"},
     {"dslRequired", "dsl_required"},

@@ -236,11 +236,20 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
     // this statement must be a send
     if (auto send = ast::cast_tree<ast::Send>(stmt)) {
         auto correctBlockArity = send->hasBlock() && send->block()->args.size() == 0;
-        // the send must be a call to `it` with zero or single argument, or `its` with single argument, and a block with no arguments
-        if ((((send->fun == core::Names::it() && (send->numPosArgs() == 0 || send->numPosArgs() == 1)) ||
-              (send->fun == core::Names::its() && send->numPosArgs() == 1)) && correctBlockArity) ||
-            ((send->fun == core::Names::before() || send->fun == core::Names::after()) && send->numPosArgs() == 0 &&
-             correctBlockArity)) {
+        
+        // Check for different types of test blocks
+        auto isItOrXit = (send->fun == core::Names::it() || send->fun == core::Names::xit());
+        auto isIts = (send->fun == core::Names::its());
+        auto isBeforeOrAfter = (send->fun == core::Names::before() || send->fun == core::Names::after());
+        
+        auto itOrXitWithValidArgs = isItOrXit && (send->numPosArgs() == 0 || send->numPosArgs() == 1);
+        auto itsWithValidArgs = isIts && send->numPosArgs() == 1;
+        auto beforeOrAfterWithValidArgs = isBeforeOrAfter && send->numPosArgs() == 0;
+        
+        auto isValidTestBlock = (itOrXitWithValidArgs || itsWithValidArgs) && correctBlockArity;
+        auto isValidSetupTeardown = beforeOrAfterWithValidArgs && correctBlockArity;
+        
+        if (isValidTestBlock || isValidSetupTeardown) {
             core::NameRef name;
             if (send->fun == core::Names::before()) {
                 name = core::Names::beforeAngles();
@@ -252,13 +261,19 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                     auto argString = to_s(ctx, send->getPosArg(0));
                     if (send->fun == core::Names::its()) {
                         name = ctx.state.enterNameUTF8("<its " + argString + ">");
+                    } else if (send->fun == core::Names::xit()) {
+                        name = ctx.state.enterNameUTF8("<xit '" + argString + "'>");
                     } else {
                         name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
                     }
                 } else {
                     // no argument provided, use a deterministic unique name based on location
                     auto pos = send->loc.beginPos();
-                    name = ctx.state.enterNameUTF8("<anonymous_it_" + to_string(pos) + ">");
+                    if (send->fun == core::Names::xit()) {
+                        name = ctx.state.enterNameUTF8("<anonymous_xit_" + to_string(pos) + ">");
+                    } else {
+                        name = ctx.state.enterNameUTF8("<anonymous_it_" + to_string(pos) + ">");
+                    }
                 }
             }
 
@@ -505,11 +520,20 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto declLoc = declLocForSendWithBlock(*send);
         return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
                               flattenDescribeBody(move(rhs)));
-    } else if (send->fun == core::Names::it()) {
+    } else if (send->fun == core::Names::it() || send->fun == core::Names::xit() || send->fun == core::Names::its()) {
         auto argString = to_s(ctx, arg);
         ConstantMover constantMover;
         ast::TreeWalk::apply(ctx, constantMover, block->body);
-        auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+        
+        core::NameRef name;
+        if (send->fun == core::Names::its()) {
+            name = ctx.state.enterNameUTF8("<its " + argString + ">");
+        } else if (send->fun == core::Names::xit()) {
+            name = ctx.state.enterNameUTF8("<xit '" + argString + "'>");
+        } else {
+            name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+        }
+        
         const bool bodyIsClass = false;
         auto declLoc = declLocForSendWithBlock(*send);
         auto method = addSigVoid(
