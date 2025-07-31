@@ -107,14 +107,13 @@ struct NodesAndPropInfo {
 
 void emitBadOverride(core::MutableContext ctx, const core::LocOffsets loc, core::NameRef name) {
     if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::PropBadOverride)) {
-        e.setHeader("Malformed `{}` in prop `{}`", "override", name.show(ctx));
-        e.addErrorNote("The argument to `{}` must be `{}`, `{}`, `{}`, or a hash literal", "override:", "true",
-                       ":reader", ":writer");
+        e.setHeader("Malformed `{}` in prop `{}`: valid values are `{}`, `{}`, `{}`, or a hash literal", "override",
+                    name.show(ctx), "true", ":reader", ":writer");
     }
 }
 
 ast::ExpressionPtr elaborateOverride(core::MutableContext ctx, core::LocOffsets overrideLoc, ast::Hash &opts,
-                                     core::NameRef key, std::string rendered) {
+                                     core::NameRef propName, core::NameRef key, std::string rendered) {
     auto [_key, arg] = ASTUtil::extractHashValue(ctx, opts, key);
     if (auto lit = ast::cast_tree<ast::Literal>(arg)) {
         if (lit->isTrue(ctx)) {
@@ -122,9 +121,8 @@ ast::ExpressionPtr elaborateOverride(core::MutableContext ctx, core::LocOffsets 
         } else if (lit->isFalse(ctx)) {
             return nullptr;
         } else if (auto e = ctx.beginIndexerError(lit->loc, core::errors::Rewriter::PropBadOverride)) {
-            e.setHeader("Malformed `{}`", fmt::format("override.{}", rendered));
-            e.addErrorNote("should be `{}`, `{}` or `{}`", "true", "{allow_incompatible: :visibility}",
-                           "{allow_incompatible: true}");
+            e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}`, `{}` or `{}`", rendered,
+                        propName.show(ctx), "true", "{allow_incompatible: :visibility}", "{allow_incompatible: true}");
         }
     } else if (auto rOpts = ast::cast_tree<ast::Hash>(arg)) {
         auto [allowIncompatKey, cfg] = ASTUtil::extractHashValue(ctx, *rOpts, core::Names::allowIncompatible());
@@ -141,29 +139,29 @@ ast::ExpressionPtr elaborateOverride(core::MutableContext ctx, core::LocOffsets 
                     auto visibilityNode = ast::MK::Symbol(clit->loc, core::Names::visibility());
                     return ast::MK::OverrideAllowIncompatible(overrideLoc, allowIncompatLoc, std::move(visibilityNode));
                 } else if (auto e = ctx.beginIndexerError(clit->loc, core::errors::Rewriter::PropBadOverride)) {
-                    e.setHeader("Malformed `{}`", fmt::format("override.{}.allow_incompatible", rendered));
-                    e.addErrorNote("should be `{}` or `{}`", "true", ":visibility");
+                    e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}`, `{}` or `{}`", rendered,
+                                propName.show(ctx), "true", "{allow_incompatible: :visibility}",
+                                "{allow_incompatible: true}");
                 }
             } else if (auto e = ctx.beginIndexerError(clit->loc, core::errors::Rewriter::PropBadOverride)) {
-                e.setHeader("Malformed for `{}`", fmt::format("override.{}.allow_incompatible", rendered));
-                e.addErrorNote("should be `{}` or `{}`", "true", ":visibility");
+                e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}`, `{}` or `{}`", rendered,
+                            propName.show(ctx), "true", "{allow_incompatible: :visibility}",
+                            "{allow_incompatible: true}");
             }
         } else if (cfg != nullptr) {
             if (auto e = ctx.beginIndexerError(cfg.loc(), core::errors::Rewriter::PropBadOverride)) {
-                e.setHeader("Malformed `{}`", fmt::format("override.{}", rendered));
-                e.addErrorNote("should be `{}`, `{}` or `{}`", "true", "{allow_incompatible: :visibility}",
-                               "{allow_incompatible: true}");
+                e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}`, `{}` or `{}`", rendered,
+                            propName.show(ctx), "true", "{allow_incompatible: :visibility}",
+                            "{allow_incompatible: true}");
             }
         } else if (auto e = ctx.beginIndexerError(rOpts->loc, core::errors::Rewriter::PropBadOverride)) {
-            e.setHeader("Malformed for `{}`", fmt::format("override.{}", rendered));
-            e.addErrorNote("should be `{}`, `{}` or `{}`", "true", "{allow_incompatible: :visibility}",
-                           "{allow_incompatible: true}");
+            e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}`, `{}` or `{}`", rendered,
+                        propName.show(ctx), "true", "{allow_incompatible: :visibility}", "{allow_incompatible: true}");
         }
     } else if (arg != nullptr) {
         if (auto e = ctx.beginIndexerError(arg.loc(), core::errors::Rewriter::PropBadOverride)) {
-            e.setHeader("Malformed for `{}`", fmt::format("override.{}", rendered));
-            e.addErrorNote("should be `{}`, `{}` or `{}`", "true", "{allow_incompatible: :visibility}",
-                           "{allow_incompatible: true}");
+            e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}`, `{}` or `{}`", rendered,
+                        propName.show(ctx), "true", "{allow_incompatible: :visibility}", "{allow_incompatible: true}");
         }
     }
     return nullptr;
@@ -438,17 +436,19 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                             ret.setterOverride = ast::MK::OverrideAllowIncompatible(overrideLoc, allowIncompatLoc,
                                                                                     std::move(visibilityNodeSetter));
                         } else if (auto e = ctx.beginIndexerError(lit->loc, core::errors::Rewriter::PropBadOverride)) {
-                            e.setHeader("Malformed `{}`", "override.allow_incompatible");
-                            e.addErrorNote("should be `{}` or `{}`", "true", ":visibility");
+                            e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}` or `{}`",
+                                        "allow_incompatible", ret.name.show(ctx), "true", ":visibility");
                         }
                     } else if (auto e = ctx.beginIndexerError(allowIncompatArg.loc(),
                                                               core::errors::Rewriter::PropBadOverride)) {
-                        e.setHeader("Malformed `{}`", "override.allow_incompatible");
-                        e.addErrorNote("should be `{}` or `{}`", "true", ":visibility");
+                        e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}` or `{}`",
+                                    "allow_incompatible", ret.name.show(ctx), "true", ":visibility");
                     }
                 } else {
-                    ret.getterOverride = elaborateOverride(ctx, overrideLoc, *opts, core::Names::reader(), "reader");
-                    ret.setterOverride = elaborateOverride(ctx, overrideLoc, *opts, core::Names::writer(), "writer");
+                    ret.getterOverride =
+                        elaborateOverride(ctx, overrideLoc, *opts, ret.name, core::Names::reader(), "reader");
+                    ret.setterOverride =
+                        elaborateOverride(ctx, overrideLoc, *opts, ret.name, core::Names::writer(), "writer");
                 }
             } else {
                 emitBadOverride(ctx, overrideArg.loc(), ret.name);
