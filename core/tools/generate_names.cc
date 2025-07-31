@@ -284,6 +284,8 @@ NameDef names[] = {
     {"its"},
     {"xit"},
     {"includeContext", "include_context"},
+    {"expect"},
+    {"change"},
 
     {"dslOptional", "dsl_optional"},
     {"dslRequired", "dsl_required"},
