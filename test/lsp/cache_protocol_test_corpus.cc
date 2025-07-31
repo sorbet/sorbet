@@ -625,9 +625,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
             // Handle wrap around, as pid_t is a signed type and we don't know where we're starting with `getpid()`.
             pid = std::max(pid+1, 2);
 
-            if (kill(pid, 0) == 0) {
-                continue;
-            } else if (errno != ESRCH) {
+            if (sorbet::processExists(pid) != ProcessStatus::Missing) {
                 continue;
             }
 

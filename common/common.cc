@@ -520,6 +520,31 @@ uint32_t sorbet::nextPowerOfTwo(uint32_t v) {
     return v;
 }
 
+sorbet::ProcessStatus sorbet::processExists(pid_t pid) {
+    if (kill(pid, 0) == 0) {
+        return ProcessStatus::Running;
+    }
+
+    switch (errno) {
+        case EINVAL:
+            // This should be impossible, as we're using the signal value of `0`, which is well-defined.
+            return ProcessStatus::Unknown;
+
+        case EPERM:
+            // The process does exist, but we don't have permissions to send it signals.
+            return ProcessStatus::Running;
+
+        case ESRCH:
+            // No process exists with this pid.
+            return ProcessStatus::Missing;
+
+        default:
+            // We return `Unknown` here as the above three cases are the only ones called out in the man page for the
+            // kill syscall.
+            return ProcessStatus::Unknown;
+    }
+}
+
 vector<uint32_t> sorbet::findLineBreaks(string_view s) {
     vector<uint32_t> res;
     size_t next_pos = 0;

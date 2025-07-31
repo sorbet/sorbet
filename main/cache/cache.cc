@@ -258,19 +258,11 @@ void SessionCache::reapOldCaches(const options::Options &opts) {
             continue;
         }
 
-        // Passing the signal `0` won't send any actual signal here, but can be used as an existence check for the pid.
-        if (kill(pid, 0) != 0) {
-            switch (errno) {
-                // ESRCH indicates that the process doesn't exist, so we know it's reasonable to remove this cache
-                // directory.
-                case ESRCH:
-                    removeCacheDir(fmt::format("{}/{}", opts.cacheDir, dir));
-                    break;
-
-                default:
-                    continue;
-            }
+        if (processExists(pid) != ProcessStatus::Missing) {
+            continue;
         }
+
+        removeCacheDir(fmt::format("{}/{}", opts.cacheDir, dir));
     }
 }
 
