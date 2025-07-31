@@ -433,9 +433,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         // For now, create a method call that references the shared_examples class
         // This is a placeholder approach - we may need to refine this
         // Use proper scoping - if we're inside a describe block, look locally; otherwise use root
-        auto className = ast::MK::UnresolvedConstant(arg.loc(), 
-                                                     insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
-                                                     ctx.state.enterNameUTF8("<shared_examples '" + argString + "'>"));
+        auto className = ast::MK::UnresolvedConstant(
+            arg.loc(), insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
+            ctx.state.enterNameUTF8("<shared_examples '" + argString + "'>"));
         // Create a call to new on the shared_examples class to instantiate it
         return ast::MK::Send0(send->loc, std::move(className), core::Names::new_(), send->funLoc);
     }
@@ -446,8 +446,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
     auto *block = send->block();
 
-    if (!send->recv.isSelfReference() &&
-        !((isDescribeOrSimilar(send->fun) || isSharedExamples(send->fun) || send->fun == core::Names::includeContext()) && isRSpec(send->recv))) {
+    if (!send->recv.isSelfReference() && !((isDescribeOrSimilar(send->fun) || isSharedExamples(send->fun) ||
+                                            send->fun == core::Names::includeContext()) &&
+                                           isRSpec(send->recv))) {
         return nullptr;
     }
 
@@ -505,9 +506,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         // For now, create a method call that references the shared_examples class
         // This is a placeholder approach - we may need to refine this
         // Use proper scoping - if we're inside a describe block, look locally; otherwise use root
-        auto className = ast::MK::UnresolvedConstant(arg.loc(), 
-                                                     insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
-                                                     ctx.state.enterNameUTF8("<shared_examples '" + argString + "'>"));
+        auto className = ast::MK::UnresolvedConstant(
+            arg.loc(), insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
+            ctx.state.enterNameUTF8("<shared_examples '" + argString + "'>"));
         // Create a call to new on the shared_examples class to instantiate it
         return ast::MK::Send0(send->loc, std::move(className), core::Names::new_(), send->funLoc);
     }
@@ -563,12 +564,12 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
         // Create a class that inherits from RSpec::Core::ExampleGroup like describe/context
         // Use proper scoping - if we're inside a describe block, nest under it; otherwise use root
-        auto name = ast::MK::UnresolvedConstant(arg.loc(), 
-                                                insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
-                                                ctx.state.enterNameUTF8("<shared_examples '" + argString + "'>"));
+        auto name = ast::MK::UnresolvedConstant(
+            arg.loc(), insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
+            ctx.state.enterNameUTF8("<shared_examples '" + argString + "'>"));
         auto declLoc = declLocForSendWithBlock(*send);
         ast::ClassDef::ANCESTORS_store ancestors;
-        
+
         if (send->recv.isSelfReference()) {
             // First ancestor is the superclass
             if (isClass) {
@@ -579,12 +580,15 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         } else {
             ENFORCE(isRSpec(send->recv));
             auto exampleGroup = ast::MK::EmptyTree();
-            exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::RSpec());
-            exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::Core());
-            exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::ExampleGroup());
+            exampleGroup =
+                ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::RSpec());
+            exampleGroup =
+                ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::Core());
+            exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup),
+                                                       core::Names::Constants::ExampleGroup());
             ancestors.emplace_back(move(exampleGroup));
         }
-        
+
         return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
                               flattenDescribeBody(move(rhs)));
     } else if (send->fun == core::Names::it() || send->fun == core::Names::xit() || send->fun == core::Names::its()) {
@@ -620,31 +624,32 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
         auto methodName = argLiteral.asName();
         return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(block->body));
-    } else if (insideDescribe && (send->fun == core::Names::expect() || send->fun == core::Names::change()) && send->hasBlock()) {
+    } else if (insideDescribe && (send->fun == core::Names::expect() || send->fun == core::Names::change()) &&
+               send->hasBlock()) {
         // Handle expect { ... } and change { ... } blocks
         // Process the block body in the current context so it has access to the same scope as the it block
         const bool bodyIsClass = false;
         auto processedBlockBody = prepareBody(ctx, bodyIsClass, std::move(send->block()->body), insideDescribe);
-        
+
         // Create a new block with the processed body
-        auto newBlock = ast::MK::Block(send->block()->loc, std::move(processedBlockBody), 
-                                       std::move(send->block()->args));
-        
+        auto newBlock =
+            ast::MK::Block(send->block()->loc, std::move(processedBlockBody), std::move(send->block()->args));
+
         // Create args store with positional arguments
         ast::Send::ARGS_store args;
         for (uint16_t i = 0; i < send->numPosArgs(); i++) {
             args.emplace_back(send->getPosArg(i).deepCopy());
         }
-        
+
         // Add the processed block
         args.emplace_back(std::move(newBlock));
-        
+
         // Create new send with block flag
         ast::Send::Flags flags = send->flags;
         flags.hasBlock = true;
-        
-        return ast::MK::Send(send->loc, send->recv.deepCopy(), send->fun, send->funLoc, 
-                             send->numPosArgs(), std::move(args), flags);
+
+        return ast::MK::Send(send->loc, send->recv.deepCopy(), send->fun, send->funLoc, send->numPosArgs(),
+                             std::move(args), flags);
     }
 
     return nullptr;
