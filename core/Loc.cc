@@ -278,23 +278,28 @@ string Loc::filePosToString(const GlobalState &gs, bool showFull) const {
 
         if (exists()) {
             auto details = toDetails(gs);
-            if (path.find("https://") == 0) {
+            if (absl::StartsWith(path, "https://")) {
                 // For github permalinks
                 buf << "#L";
             } else {
-                buf << ":";
+                buf << ':';
             }
+
             auto censor = gs.censorForSnapshotTests && file().data(gs).isPayload();
-            buf << (censor ? "CENSORED" : to_string(details.first.line));
-            if (showFull) {
-                buf << ":";
-                buf << (censor ? "CENSORED" : to_string(details.first.column));
-                buf << "-";
-                buf << (censor ? "CENSORED" : to_string(details.second.line));
-                buf << ":";
-                buf << (censor ? "CENSORED" : to_string(details.second.column));
+            if (censor) {
+                if (showFull) {
+                    buf << "CENSORED:CENSORED-CENSORED:CENSORED";
+                } else {
+                    buf << "CENSORED";
+                }
             } else {
-                // pos.second.line; is intentionally not printed so that iterm2 can open file name:line_number as links
+                if (showFull) {
+                    buf << to_string(details.first.line) << ':' << to_string(details.first.column) << '-';
+                    buf << to_string(details.second.line) << ':' << to_string(details.second.column);
+                } else {
+                    buf << to_string(details.first.line);
+                    // Second line is intentionally not printed so that iTerm2 can open file name:line_number as links
+                }
             }
         }
     }
