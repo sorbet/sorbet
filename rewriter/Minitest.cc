@@ -430,10 +430,14 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     if (send->fun == core::Names::includeContext() && send->numPosArgs() == 1) {
         auto &arg = send->getPosArg(0);
         auto argString = to_s(ctx, arg);
-        auto moduleName = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::Constant(arg.loc(), core::Symbols::root()),
-                                                      ctx.state.enterNameUTF8("<shared_examples '" + argString + "'>"));
-        return ast::MK::Send1(send->loc, ast::MK::Self(send->recv.loc()), core::Names::extend(), send->funLoc,
-                              std::move(moduleName));
+        // For now, create a method call that references the shared_examples class
+        // This is a placeholder approach - we may need to refine this
+        // Use proper scoping - if we're inside a describe block, look locally; otherwise use root
+        auto className = ast::MK::UnresolvedConstant(arg.loc(), 
+                                                     insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
+                                                     ctx.state.enterNameUTF8("<shared_examples '" + argString + "'>"));
+        // Create a call to new on the shared_examples class to instantiate it
+        return ast::MK::Send0(send->loc, std::move(className), core::Names::new_(), send->funLoc);
     }
 
     if (!send->hasBlock()) {
@@ -498,10 +502,14 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     if (send->fun == core::Names::includeContext() && send->numPosArgs() == 1) {
         auto &arg = send->getPosArg(0);
         auto argString = to_s(ctx, arg);
-        auto moduleName = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::Constant(arg.loc(), core::Symbols::root()),
-                                                      ctx.state.enterNameUTF8("<shared_examples '" + argString + "'>"));
-        return ast::MK::Send1(send->loc, ast::MK::Self(send->recv.loc()), core::Names::extend(), send->funLoc,
-                              std::move(moduleName));
+        // For now, create a method call that references the shared_examples class
+        // This is a placeholder approach - we may need to refine this
+        // Use proper scoping - if we're inside a describe block, look locally; otherwise use root
+        auto className = ast::MK::UnresolvedConstant(arg.loc(), 
+                                                     insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
+                                                     ctx.state.enterNameUTF8("<shared_examples '" + argString + "'>"));
+        // Create a call to new on the shared_examples class to instantiate it
+        return ast::MK::Send0(send->loc, std::move(className), core::Names::new_(), send->funLoc);
     }
 
     if (send->numPosArgs() != 1) {
@@ -550,22 +558,35 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                               flattenDescribeBody(move(rhs)));
     } else if (isSharedExamples(send->fun)) {
         auto argString = to_s(ctx, arg);
-        const bool bodyIsClass = true; // Match the current context - true for class context, false for root
+        const bool bodyIsClass = true;
         auto rhs = prepareBody(ctx, bodyIsClass, std::move(block->body), /* insideDescribe */ true);
 
-        // Both shared_examples and shared_context create the same module format for include_context
-        auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::Constant(arg.loc(), core::Symbols::root()),
+        // Create a class that inherits from RSpec::Core::ExampleGroup like describe/context
+        // Use proper scoping - if we're inside a describe block, nest under it; otherwise use root
+        auto name = ast::MK::UnresolvedConstant(arg.loc(), 
+                                                insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
                                                 ctx.state.enterNameUTF8("<shared_examples '" + argString + "'>"));
         auto declLoc = declLocForSendWithBlock(*send);
         ast::ClassDef::ANCESTORS_store ancestors;
-        // Include RSpec::Core::ExampleGroup to get access to expect, subject, etc.
-        auto exampleGroup = ast::MK::EmptyTree();
-        exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::RSpec());
-        exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::Core());
-        exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::ExampleGroup());
-        ancestors.emplace_back(move(exampleGroup));
+        
+        if (send->recv.isSelfReference()) {
+            // First ancestor is the superclass
+            if (isClass) {
+                ancestors.emplace_back(ast::MK::Self(arg.loc()));
+            } else {
+                ancestors.emplace_back(ast::MK::Constant(arg.loc(), core::Symbols::todo()));
+            }
+        } else {
+            ENFORCE(isRSpec(send->recv));
+            auto exampleGroup = ast::MK::EmptyTree();
+            exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::RSpec());
+            exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::Core());
+            exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::ExampleGroup());
+            ancestors.emplace_back(move(exampleGroup));
+        }
+        
         return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
-                               flattenDescribeBody(move(rhs)));
+                              flattenDescribeBody(move(rhs)));
     } else if (send->fun == core::Names::it() || send->fun == core::Names::xit() || send->fun == core::Names::its()) {
         auto argString = to_s(ctx, arg);
         ConstantMover constantMover;
