@@ -1249,7 +1249,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             if (auto stmtsNode = parensNode->body; stmtsNode != nullptr) {
                 auto inlineIfSingle = false;
-                return translateStatements(down_cast<pm_statements_node>(stmtsNode), inlineIfSingle);
+                // Override the begin node location to be the parentheses location instead of the statements location
+                return translateStatements(down_cast<pm_statements_node>(stmtsNode), inlineIfSingle,
+                                           parensNode->base.location);
             } else {
                 return make_unique<parser::Begin>(location, NodeVec{});
             }
@@ -2051,7 +2053,9 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescue
 
 // Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
 // @param inlineIfSingle If enabled and there's 1 child node, we skip the `Begin` and just return the one `parser::Node`
-unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle) {
+// @param overrideLocation If provided, use this location for the Begin node instead of the statements node location
+unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle,
+                                                         std::optional<pm_location_t> overrideLocation) {
     if (stmtsNode == nullptr)
         return nullptr;
 
@@ -2063,7 +2067,8 @@ unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stm
     // For multiple statements, convert each statement and add them to the body of a Begin node
     parser::NodeVec sorbetStmts = translateMulti(stmtsNode->body);
 
-    return make_unique<parser::Begin>(translateLoc(stmtsNode->base.location), move(sorbetStmts));
+    pm_location_t beginLocation = overrideLocation.value_or(stmtsNode->base.location);
+    return make_unique<parser::Begin>(translateLoc(beginLocation), move(sorbetStmts));
 }
 
 // Handles any one of the Prism nodes that models any kind of constant or constant path.
