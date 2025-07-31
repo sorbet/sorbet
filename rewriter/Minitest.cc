@@ -620,44 +620,6 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
         auto methodName = argLiteral.asName();
         return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(block->body));
-    } else if (insideDescribe && (send->fun == core::Names::expect() || send->fun == core::Names::change())) {
-        // Handle expect(...) and change(...) calls - they should have access to the same context as it blocks
-        // This includes both expect { ... } and expect(value) forms
-        
-        if (send->hasBlock()) {
-            // Handle expect { ... } and change { ... } blocks
-            const bool bodyIsClass = false;
-            auto blockBody = prepareBody(ctx, bodyIsClass, std::move(send->block()->body), insideDescribe);
-            
-            // Create args store with positional arguments
-            ast::Send::ARGS_store args;
-            for (uint16_t i = 0; i < send->numPosArgs(); i++) {
-                args.emplace_back(send->getPosArg(i).deepCopy());
-            }
-            
-            // Add the block with the prepared body
-            auto newBlock = ast::MK::Block(send->block()->loc, std::move(blockBody), 
-                                           std::move(send->block()->args));
-            args.emplace_back(std::move(newBlock));
-            
-            // Create new send with block flag
-            ast::Send::Flags flags = send->flags;
-            flags.hasBlock = true;
-            
-            return ast::MK::Send(send->loc, send->recv.deepCopy(), send->fun, send->funLoc, 
-                                 send->numPosArgs(), std::move(args), flags);
-        } else {
-            // Handle expect(value) forms - process arguments in the current context
-            ast::Send::ARGS_store args;
-            for (uint16_t i = 0; i < send->numPosArgs(); i++) {
-                const bool bodyIsClass = false;
-                auto processedArg = prepareBody(ctx, bodyIsClass, send->getPosArg(i).deepCopy(), insideDescribe);
-                args.emplace_back(std::move(processedArg));
-            }
-            
-            return ast::MK::Send(send->loc, send->recv.deepCopy(), send->fun, send->funLoc, 
-                                 send->numPosArgs(), std::move(args), send->flags);
-        }
     }
 
     return nullptr;
