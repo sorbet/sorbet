@@ -2084,10 +2084,41 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
         body = this->enterBlockContext().translate(prismLambdaNode->body);
     }
 
+    auto blockLoc = sendNode->loc;
+
+    // Modify send node's endLoc to be position before first space
+    // This fixes location for cases like:
+    //   Module.new do
+    //     #: (Integer) -> void
+    //     def bar(x); end
+    //   end
+    // Where we want the send node to only cover "Module.new", not the entire block.
+    // This mirrors how WQ stores send location and is needed for RBS rewriting.
+    if (sendNode->loc.exists()) {
+        auto source = ctx.file.data(ctx).source();
+        auto beginPos = sendNode->loc.beginPos();
+        auto endPos = sendNode->loc.endPos();
+
+        // Find block keyword (do or {) within the send node bounds
+        auto doPos = source.find(" do", beginPos);
+        auto bracePos = source.find("{", beginPos);
+
+        auto blockPos = std::string_view::npos;
+        if (doPos != std::string_view::npos && doPos < endPos) {
+            blockPos = doPos;
+        } else if (bracePos != std::string_view::npos && bracePos < endPos) {
+            blockPos = bracePos;
+        }
+
+        if (blockPos != std::string_view::npos) {
+            sendNode->loc = core::LocOffsets{beginPos, static_cast<uint32_t>(blockPos)};
+        }
+    }
+
     if (parser::NodeWithExpr::cast_node<parser::NumParams>(parametersNode.get())) {
-        return make_unique<parser::NumBlock>(sendNode->loc, move(sendNode), move(parametersNode), move(body));
+        return make_unique<parser::NumBlock>(blockLoc, move(sendNode), move(parametersNode), move(body));
     } else {
-        return make_unique<parser::Block>(sendNode->loc, move(sendNode), move(parametersNode), move(body));
+        return make_unique<parser::Block>(blockLoc, move(sendNode), move(parametersNode), move(body));
     }
 }
 
