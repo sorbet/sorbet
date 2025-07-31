@@ -1977,10 +1977,24 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
         body = translate(prismLambdaNode->body);
     }
 
+    auto blockLoc = sendNode->loc;
+
+    // Modify send node's endLoc to be position before first space
+    if (sendNode->loc.exists()) {
+        auto source = ctx.file.data(ctx).source();
+        auto beginPos = sendNode->loc.beginPos();
+
+        // Find first space character starting from begin position
+        auto spacePos = source.find(' ', beginPos);
+        if (spacePos != std::string_view::npos) {
+            sendNode->loc = core::LocOffsets{beginPos, static_cast<uint32_t>(spacePos)};
+        }
+    }
+
     if (parser::NodeWithExpr::cast_node<parser::NumParams>(parametersNode.get())) {
-        return make_unique<parser::NumBlock>(sendNode->loc, move(sendNode), move(parametersNode), move(body));
+        return make_unique<parser::NumBlock>(blockLoc, move(sendNode), move(parametersNode), move(body));
     } else {
-        return make_unique<parser::Block>(sendNode->loc, move(sendNode), move(parametersNode), move(body));
+        return make_unique<parser::Block>(blockLoc, move(sendNode), move(parametersNode), move(body));
     }
 }
 
