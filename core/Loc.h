@@ -97,6 +97,7 @@ public:
         return toStringWithTabs(gs);
     }
     std::string showRaw(const GlobalState &gs) const;
+    std::string fileShortPosToString(const GlobalState &gs) const;
     std::string filePosToString(const GlobalState &gs, bool showFull = false) const;
     std::optional<std::string_view> source(const GlobalState &gs) const;
 
