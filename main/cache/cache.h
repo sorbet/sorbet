@@ -51,6 +51,8 @@ class SessionCache {
     explicit SessionCache(std::string path);
 
 public:
+    static const std::string_view SESSION_DIR_PREFIX;
+
     // Removes the session cache.
     ~SessionCache() noexcept(false);
 

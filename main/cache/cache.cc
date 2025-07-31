@@ -233,6 +233,8 @@ void removeCacheDir(const string &path) {
 }
 } // namespace
 
+const string_view SessionCache::SESSION_DIR_PREFIX = "sorbet-session-";
+
 SessionCache::SessionCache(string path) : path{std::move(path)} {}
 
 SessionCache::~SessionCache() noexcept(false) {
@@ -244,14 +246,13 @@ void SessionCache::reapOldCaches(const options::Options &opts) {
         return;
     }
 
-    constexpr string_view prefix = "session-";
     for (const auto &dir : FileOps::listSubdirs(opts.cacheDir)) {
-        auto pos = dir.find(prefix);
+        auto pos = dir.find(SESSION_DIR_PREFIX);
         if (pos != 0) {
             continue;
         }
 
-        string_view pidStr = string_view(dir).substr(prefix.size());
+        string_view pidStr = string_view(dir).substr(SESSION_DIR_PREFIX.size());
         pid_t pid = -1;
         auto res = std::from_chars(pidStr.begin(), pidStr.end(), pid);
         if (res.ec != std::errc{} || res.ptr != pidStr.end() || pid <= 0) {
@@ -273,7 +274,7 @@ unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore>
     }
 
     auto pid = getpid();
-    auto path = fmt::format("{}/session-{}", opts.cacheDir, pid);
+    auto path = fmt::format("{}/{}{}", opts.cacheDir, SESSION_DIR_PREFIX, pid);
 
     // If the directory already exists, we're reusing a PID from a previous run of Sorbet.
     if (FileOps::dirExists(path)) {

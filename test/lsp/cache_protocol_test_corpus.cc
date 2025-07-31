@@ -489,9 +489,10 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
 
     auto workers = WorkerPool::create(0, *logger);
     vector<string> toRemove;
+    string needle = fmt::format("/{}", realmain::cache::SessionCache::SESSION_DIR_PREFIX);
     for (auto &path : FileOps::listFilesInDir(opts->cacheDir, {".mdb"}, *workers, true, {}, {})) {
         fmt::println(stderr, "path = {}", path);
-        if (path.find("/session-") != string::npos) {
+        if (path.find(needle) != string::npos) {
             toRemove.emplace_back(std::move(path));
         }
     }
@@ -623,7 +624,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
         auto pid = getpid();
         while (needed > 0) {
             // Handle wrap around, as pid_t is a signed type and we don't know where we're starting with `getpid()`.
-            pid = std::max(pid+1, 2);
+            pid = std::max(pid + 1, 2);
 
             if (sorbet::processExists(pid) != ProcessStatus::Missing) {
                 continue;
@@ -631,7 +632,8 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
 
             --needed;
 
-            const auto &path = caches.emplace_back(fmt::format("{}/session-{}", opts->cacheDir, pid));
+            const auto &path = caches.emplace_back(
+                fmt::format("{}/{}{}", opts->cacheDir, realmain::cache::SessionCache::SESSION_DIR_PREFIX, pid));
             FileOps::createDir(path);
 
             // Create data and lock files to simulate a fully populated cache
