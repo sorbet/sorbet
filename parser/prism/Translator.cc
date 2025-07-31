@@ -2128,8 +2128,39 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescue
                 ? nullptr
                 : make_unique<parser::Array>(translateLoc(currentRescueNode->base.location), move(exceptions));
 
-        rescueBodies.emplace_back(make_unique<parser::Resbody>(translateLoc(currentRescueNode->base.location),
-                                                               move(exceptionsArray), move(var), move(rescueBody)));
+        auto resbodyLoc = translateLoc(currentRescueNode->base.location);
+
+        // If there's a subsequent rescue clause, we want the previous resbody to end at the end of the line
+        // before the subsequent rescue starts, instead of extending all the way to the subsequent rescue.
+        //
+        // For example, in this code:
+        //   begin
+        //   rescue => e
+        //   rescue => e
+        //     e #: as String
+        //   end
+        //
+        // In Prism, the first `rescue` clause extends all the way to `end`, which would consume
+        // the assertion comment. In Whitequark (WQ), the first `rescue` ends at the end of its line.
+        // We need proper location for RBS rewriting.
+        if (currentRescueNode->subsequent != nullptr) {
+            auto subsequentLoc = translateLoc(currentRescueNode->subsequent->base.location);
+
+            // We want to end just before the subsequent rescue begins
+            // So we use the position right before the subsequent rescue starts
+            auto endPos = subsequentLoc.beginPos();
+
+            // Move back to find the end of the previous line (before any whitespace)
+            const auto &source = ctx.file.data(ctx).source();
+            while (endPos > resbodyLoc.beginPos() && isspace(source[endPos - 1])) {
+                endPos--;
+            }
+
+            resbodyLoc = core::LocOffsets{resbodyLoc.beginPos(), endPos};
+        }
+
+        rescueBodies.emplace_back(
+            make_unique<parser::Resbody>(resbodyLoc, move(exceptionsArray), move(var), move(rescueBody)));
     }
 
     // The `Rescue` node combines the main body, the rescue clauses, and the else clause.
