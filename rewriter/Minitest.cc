@@ -125,7 +125,6 @@ ast::ExpressionPtr addSigVoid(ast::ExpressionPtr expr) {
 
 // add boolean method isDescribeOrSimilar that accepts a Nameref
 
-
 core::LocOffsets declLocForSendWithBlock(const ast::Send &send) {
     return send.loc.copyWithZeroLength().join(send.block()->loc.copyWithZeroLength());
 }
@@ -237,8 +236,9 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
     // this statement must be a send
     if (auto send = ast::cast_tree<ast::Send>(stmt)) {
         auto correctBlockArity = send->hasBlock() && send->block()->args.size() == 0;
-        // the send must be a call to `it` or `its` with a single argument (the test name) and a block with no arguments
-        if (((send->fun == core::Names::it() || send->fun == core::Names::its()) && send->numPosArgs() == 1 && correctBlockArity) ||
+        // the send must be a call to `it` with zero or single argument, or `its` with single argument, and a block with no arguments
+        if ((((send->fun == core::Names::it() && (send->numPosArgs() == 0 || send->numPosArgs() == 1)) ||
+              (send->fun == core::Names::its() && send->numPosArgs() == 1)) && correctBlockArity) ||
             ((send->fun == core::Names::before() || send->fun == core::Names::after()) && send->numPosArgs() == 0 &&
              correctBlockArity)) {
             core::NameRef name;
@@ -248,11 +248,17 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                 name = core::Names::afterAngles();
             } else {
                 // we use this for the name of our test
-                auto argString = to_s(ctx, send->getPosArg(0));
-                if (send->fun == core::Names::its()) {
-                    name = ctx.state.enterNameUTF8("<its " + argString + ">");
+                if (send->numPosArgs() == 1) {
+                    auto argString = to_s(ctx, send->getPosArg(0));
+                    if (send->fun == core::Names::its()) {
+                        name = ctx.state.enterNameUTF8("<its " + argString + ">");
+                    } else {
+                        name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+                    }
                 } else {
-                    name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+                    // no argument provided, use a deterministic unique name based on location
+                    auto pos = send->loc.beginPos();
+                    name = ctx.state.enterNameUTF8("<anonymous_it_" + to_string(pos) + ">");
                 }
             }
 
