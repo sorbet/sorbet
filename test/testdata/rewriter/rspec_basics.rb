@@ -62,6 +62,10 @@ class RSpecBasicsTest
   end
 
   module RSpec
+    module Core
+      class ExampleGroup
+      end
+    end
   end
 
   describe Foo::Baz do
