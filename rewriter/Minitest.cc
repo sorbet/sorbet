@@ -244,13 +244,15 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
         auto correctBlockArity = send->hasBlock() && send->block()->args.size() == 0;
 
         // Check for different types of test blocks
+        auto isItOrXit = (send->fun == core::Names::it() || send->fun == core::Names::xit());
         auto isIts = (send->fun == core::Names::its());
         auto isBeforeOrAfter = (send->fun == core::Names::before() || send->fun == core::Names::after());
 
+        auto itOrXitWithValidArgs = isItOrXit && (send->numPosArgs() == 0 || send->numPosArgs() == 1);
         auto itsWithValidArgs = isIts && send->numPosArgs() == 1;
         auto beforeOrAfterWithValidArgs = isBeforeOrAfter && send->numPosArgs() == 0;
 
-        auto isValidTestBlock = itsWithValidArgs && correctBlockArity;
+        auto isValidTestBlock = (itOrXitWithValidArgs || itsWithValidArgs) && correctBlockArity;
         auto isValidSetupTeardown = beforeOrAfterWithValidArgs && correctBlockArity;
 
         if (isValidTestBlock || isValidSetupTeardown) {
@@ -260,9 +262,25 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             } else if (send->fun == core::Names::after()) {
                 name = core::Names::afterAngles();
             } else {
-                // we use this for the name of our test (only its is handled here now)
-                auto argString = to_s(ctx, send->getPosArg(0));
-                name = ctx.state.enterNameUTF8("<its " + argString + ">");
+                // we use this for the name of our test
+                if (send->numPosArgs() == 1) {
+                    auto argString = to_s(ctx, send->getPosArg(0));
+                    if (send->fun == core::Names::its()) {
+                        name = ctx.state.enterNameUTF8("<its " + argString + ">");
+                    } else if (send->fun == core::Names::xit()) {
+                        name = ctx.state.enterNameUTF8("<xit '" + argString + "'>");
+                    } else {
+                        name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+                    }
+                } else {
+                    // no argument provided, use a deterministic unique name based on location
+                    auto pos = send->loc.beginPos();
+                    if (send->fun == core::Names::xit()) {
+                        name = ctx.state.enterNameUTF8("<anonymous_xit_" + to_string(pos) + ">");
+                    } else {
+                        name = ctx.state.enterNameUTF8("<anonymous_it_" + to_string(pos) + ">");
+                    }
+                }
             }
 
             // pull constants out of the block
