@@ -156,6 +156,10 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 action->kind = CodeActionKind::Quickfix;
                 auto workspaceEdit = make_unique<WorkspaceEdit>();
                 workspaceEdit->documentChanges = getQuickfixEdits(config, gs, autocorrect.edits);
+                // TODO(neil): this is specifc to just package files, but the root problem is when a code action edits a
+                // file that the user doesn't have open in their editor. The more generic fix would be to save all files
+                // that this code action edits that are also not open in the editor. This also applies below to "Apply
+                // All" code action we construct.
                 if (absl::c_any_of(autocorrect.edits, [&](auto edit) { return edit.loc.file().isPackage(gs); })) {
                     action->command = make_unique<Command>("Save package files", "sorbet.savePackageFiles");
                 }
