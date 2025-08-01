@@ -418,7 +418,6 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                     auto allowIncompatLoc = allowIncompatKey.loc();
                     if (auto lit = ast::cast_tree<ast::Literal>(allowIncompatArg)) {
                         if (lit->isTrue(ctx)) {
-                            // XXX cwong: Can we share these/are they interned somehow?
                             auto trueNodeGetter = ast::MK::True(lit->loc);
                             auto trueNodeSetter = ast::MK::True(lit->loc);
                             ret.getterOverride = ast::MK::OverrideAllowIncompatible(overrideLoc, allowIncompatLoc,
