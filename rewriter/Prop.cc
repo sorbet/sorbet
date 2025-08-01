@@ -115,7 +115,10 @@ void emitBadOverride(core::MutableContext ctx, const core::LocOffsets loc, core:
 ast::ExpressionPtr elaborateOverride(core::MutableContext ctx, core::LocOffsets overrideLoc, ast::Hash &opts,
                                      core::NameRef propName, core::NameRef key, string_view rendered) {
     auto [_key, arg] = ASTUtil::extractHashValue(ctx, opts, key);
-    if (auto lit = ast::cast_tree<ast::Literal>(arg)) {
+    // no override key present
+    if (arg == nullptr) {
+        return nullptr;
+    } else if (auto lit = ast::cast_tree<ast::Literal>(arg)) {
         if (lit->isTrue(ctx)) {
             return ast::MK::OverrideStrict(overrideLoc);
         } else if (lit->isFalse(ctx)) {
@@ -158,7 +161,7 @@ ast::ExpressionPtr elaborateOverride(core::MutableContext ctx, core::LocOffsets 
             e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}`, `{}` or `{}`", rendered,
                         propName.show(ctx), "true", "{allow_incompatible: :visibility}", "{allow_incompatible: true}");
         }
-    } else if (arg != nullptr) {
+    } else {
         if (auto e = ctx.beginIndexerError(arg.loc(), core::errors::Rewriter::PropBadOverride)) {
             e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}`, `{}` or `{}`", rendered,
                         propName.show(ctx), "true", "{allow_incompatible: :visibility}", "{allow_incompatible: true}");
