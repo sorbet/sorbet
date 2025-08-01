@@ -605,7 +605,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 auto inlineIfSingle = false;
                 return translateStatements(stmtsNode, inlineIfSingle);
             } else {
-                return make_unique<parser::Begin>(translateLoc(embeddedStmtsNode->base.location), NodeVec{});
+                return make_unique<parser::Begin>(location, NodeVec{});
             }
         }
         case PM_EMBEDDED_VARIABLE_NODE: {
@@ -1639,7 +1639,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             // Sorbet's parser always wraps the pinned expression in a `Begin` node.
             NodeVec statements;
             statements.emplace_back(move(expr));
-            auto beginNode = make_unique<parser::Begin>(translateLoc(pinnedExprNode->base.location), move(statements));
+            auto beginNode = make_unique<parser::Begin>(location, move(statements));
 
             return make_unique<Pin>(location, move(beginNode));
         }
@@ -1653,8 +1653,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
         case PM_SPLAT_NODE: { // A splat, like `*a` in an array pattern
             auto prismSplatNode = down_cast<pm_splat_node>(node);
             auto expr = patternTranslate(prismSplatNode->expression);
-            auto splatLoc = translateLoc(prismSplatNode->base.location);
-            return make_unique<MatchRest>(splatLoc, move(expr));
+            return make_unique<MatchRest>(location, move(expr));
         }
         default: {
             return translate(node);
