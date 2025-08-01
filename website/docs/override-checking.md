@@ -362,9 +362,12 @@ end
 
 Note that the previous values we've seen are aliases for the fully-expanded version:
 
-- `true` expands to `{reader: true, writer: true}`.
-- `:reader` and `:writer` expand to `{reader: true}` and `{writer: true}`, respectively.
-- `{allow_incompatible: x}` expands to `{reader: {allow_incompatible: x}, writer: {allow_incompatible: x}}`.
+| Shorthand                             | is equivalent to:                                                                  |
+| ---                                   | ---                                                                                |
+| `override: true`                      | `override: {reader: true, writer: true}`                                           |
+| `override: :reader`                   | `override: {reader: true}`                                                         |
+| `override: :writer`                   | `override: {writer: true}`                                                         |
+| `override: {allow_incompatible: ...}` | `override: {reader: {allow_incompatible: ...}, writer: {allow_incompatible: ...}}` |
 
 ## What's next?
 
