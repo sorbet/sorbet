@@ -214,9 +214,9 @@ The remainder of this documentation is presented for completeness. Use the APIs 
 
 Methods defined with `prop` or `const` must also annotate the methods they override (just like if the reader and writer methods had been defined as normal `def` methods). Use the `override` keyword argument on a `prop` or `const` to declare the override. In the simplest cases, this will be one of:
 
-- `override: :reader` (overrides `foo` only)
-- `override: :writer` (overrides `foo=` only)
-- `override: true` (overrides both `foo` and `foo=`).
+- `..., override: :reader` (only overrides `foo`, the reader method)
+- `..., override: :writer` (only overrides `foo=`, the writer method)
+- `..., override: true` (overrides both `foo` and `foo=`).
 
 If more fine-grained control is needed (for example, because the override is [incompatible](https://sorbet.org/docs/override-checking#use-overrideallow_incompatible-true)), `override` also accepts a Hash containing the keys `reader` and `writer`. For example:
 
