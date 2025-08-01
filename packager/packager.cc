@@ -850,15 +850,20 @@ pair<core::packages::MangledName, bool> packageForSymbol(const core::GlobalState
     }
 
     auto best = core::packages::MangledName(core::Symbols::PackageSpecRegistry());
+    auto prev = best.owner;
     for (auto it = fullNameReversed.rbegin(); it != fullNameReversed.rend(); it++) {
-        auto curr = best.owner.data(gs)->findMember(gs, *it);
+        auto curr = prev.data(gs)->findMember(gs, *it);
         if (!curr.exists()) {
             // Can't be prefix, because there was extra stuff we're dropping that we could not find
-            return {core::packages::MangledName(best), false};
+            return {best, false};
         }
 
         ENFORCE(curr.isClassOrModule(), "All names on path to PackageSpec should be ClassOrModule");
-        best = core::packages::MangledName(curr.asClassOrModuleRef());
+        prev = curr.asClassOrModuleRef();
+        auto currPkg = core::packages::MangledName(prev);
+        if (gs.packageDB().getPackageInfo(currPkg).exists()) {
+            best = currPkg;
+        }
     }
 
     if (best.owner == core::Symbols::PackageSpecRegistry()) {
@@ -959,11 +964,22 @@ public:
             // A class definition that includes a parent `class Foo::Bar < Baz`
             // must be made in that package
             checkBehaviorLoc(ctx, classDef.declLoc);
-        } else if (!onPackagePath(ctx) || (mustUseTestNamespace && !inTestNamespace(ctx))) {
+            return;
+        }
+
+        auto isOnPackagePath = onPackagePath(ctx);
+
+        if (!isOnPackagePath) {
             ENFORCE(errorDepth == 0);
             errorDepth++;
             if (auto e = ctx.beginError(constantLit->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
-                definitionPackageMismatch(ctx, e);
+                definitionPackageMismatch(ctx, e, isOnPackagePath);
+            }
+        } else if (mustUseTestNamespace && !inTestNamespace(ctx)) {
+            ENFORCE(errorDepth == 0);
+            errorDepth++;
+            if (auto e = ctx.beginError(constantLit->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
+                definitionPackageMismatch(ctx, e, isOnPackagePath);
             }
         }
     }
@@ -1010,12 +1026,20 @@ public:
 
         pushScope(lhs);
 
-        if (rootConsts == 0 &&
-            (packageForNamespace(ctx) != pkg.mangledName() || (mustUseTestNamespace && !inTestNamespace(ctx)))) {
-            ENFORCE(errorDepth == 0);
-            errorDepth++;
-            if (auto e = ctx.beginError(lhs->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
-                definitionPackageMismatch(ctx, e);
+        if (rootConsts == 0) {
+            auto isOnPackagePath = packageForNamespace(ctx) == pkg.mangledName();
+            if (!isOnPackagePath) {
+                ENFORCE(errorDepth == 0);
+                errorDepth++;
+                if (auto e = ctx.beginError(lhs->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
+                    definitionPackageMismatch(ctx, e, isOnPackagePath);
+                }
+            } else if (mustUseTestNamespace && !inTestNamespace(ctx)) {
+                ENFORCE(errorDepth == 0);
+                errorDepth++;
+                if (auto e = ctx.beginError(lhs->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
+                    definitionPackageMismatch(ctx, e, isOnPackagePath);
+                }
             }
         }
 
@@ -1155,7 +1179,7 @@ private:
                ast::isa_tree<ast::UnresolvedConstantLit>(def.ancestors[0]);
     }
 
-    void definitionPackageMismatch(const core::GlobalState &gs, core::ErrorBuilder &e) const {
+    void definitionPackageMismatch(const core::GlobalState &gs, core::ErrorBuilder &e, bool isOnPackagePath) const {
         auto requiredName = requiredNamespace(gs);
         if (mustUseTestNamespace) {
             e.setHeader("Tests in the `{}` package must define tests in the `{}` namespace", pkg.show(gs),
@@ -1169,13 +1193,15 @@ private:
 
         e.addErrorLine(pkg.declLoc(), "Enclosing package declared here");
 
-        auto reqMangledName = packageForNamespace(gs);
-        if (reqMangledName.exists()) {
-            auto &reqPkg = gs.packageDB().getPackageInfo(reqMangledName);
-            if (reqPkg.exists()) {
-                const auto &[scopeSym, _scopeLoc] = scope.back();
-                e.addErrorLine(reqPkg.declLoc(), "Must belong to this package, given constant name `{}`",
-                               scopeSym.show(gs));
+        if (!isOnPackagePath) {
+            auto reqMangledName = packageForNamespace(gs);
+            if (reqMangledName.exists()) {
+                auto &reqPkg = gs.packageDB().getPackageInfo(reqMangledName);
+                if (reqPkg.exists()) {
+                    const auto &[scopeSym, _scopeLoc] = scope.back();
+                    e.addErrorLine(reqPkg.declLoc(), "Must belong to this package, given constant name `{}`",
+                                   scopeSym.show(gs));
+                }
             }
         }
     }
