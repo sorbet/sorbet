@@ -527,8 +527,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &prop,
         sigArgs.emplace_back(ast::MK::Symbol(nameLoc, core::Names::arg0()));
         sigArgs.emplace_back(ASTUtil::dupType(setType));
 
-        auto writerSig = ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType),
-                                      std::exchange(prop.setterOverride, nullptr));
+        auto writerSig = ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType), move(prop.setterOverride));
         nodes.emplace_back(std::move(writerSig));
 
         if (prop.enum_ == nullptr) {
