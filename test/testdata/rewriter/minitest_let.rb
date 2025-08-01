@@ -86,7 +86,7 @@ class MyTestHelper < Minitest::Spec
   test_each(['foo', 'bar']) do |test_case|
     describe("for #{test_case}") do
       sig { returns(NilClass) } # error: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each`
-      let(:another_helper) { puts('another') }
+      let(:another_helper) { puts('another') } # error: Expected `NilClass` but found `T::Array[String]` for method result type
       it 'does the thing' do
         begin
           # This one is from the other describe block, not ours
