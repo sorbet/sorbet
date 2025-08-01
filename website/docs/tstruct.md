@@ -218,7 +218,7 @@ Methods defined with `prop` or `const` must also annotate the methods they overr
 - `..., override: :writer` (only overrides `foo=`, the writer method)
 - `..., override: true` (overrides both `foo` and `foo=`).
 
-If more fine-grained control is needed (for example, because the override is [incompatible](https://sorbet.org/docs/override-checking#use-overrideallow_incompatible-true)), `override` also accepts a Hash containing the keys `reader` and `writer`. For example:
+The `override` keyword also accepts a `Hash` to declare more fine-grained overrides (for example, if an override [incompatibly overrides](https://sorbet.org/docs/override-checking#use-overrideallow_incompatible-true) another method). Use the `reader` and `writer` keys:
 
 ```ruby
 module Interface
