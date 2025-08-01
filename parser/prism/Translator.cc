@@ -32,6 +32,17 @@ bool hasExpr(const parser::NodeVec &nodes) {
     return absl::c_all_of(nodes, [](const auto &node) { return node == nullptr || node->hasDesugaredExpr(); });
 }
 
+// Helper template to convert nodes to any store type with takeDesugaredExpr or EmptyTree for nulls.
+// This is used to convert a NodeVec to the store type argument for nodes including `Send`, `InsSeq`.
+template <typename StoreType> StoreType nodeVecToStore(const sorbet::parser::NodeVec &nodes) {
+    StoreType store;
+    store.reserve(nodes.size());
+    for (const auto &node : nodes) {
+        store.emplace_back(node ? node->takeDesugaredExpr() : sorbet::ast::MK::EmptyTree());
+    }
+    return store;
+}
+
 // Allocates a new `NodeWithExpr` with a pre-computed `ExpressionPtr` AST.
 template <typename SorbetNode, typename... TArgs>
 unique_ptr<parser::Node> Translator::make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) const {
@@ -1429,8 +1440,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto undefNode = down_cast<pm_undef_node>(node);
 
             auto names = translateMulti(undefNode->names);
+            auto numPosArgs = names.size();
 
-            return make_unique<parser::Undef>(location, move(names));
+            if (!directlyDesugar || !hasExpr(names)) {
+                return make_unique<parser::Undef>(location, move(names));
+            }
+
+            auto args = nodeVecToStore<ast::Send::ARGS_store>(names);
+            auto expr = MK::Send(location, MK::Constant(location, core::Symbols::Kernel()), core::Names::undef(),
+                                 location.copyWithZeroLength(), numPosArgs, std::move(args));
+            // It wasn't a Send to begin with--there's no way this could result in a private
+            // method call error.
+            ast::cast_tree_nonnull<ast::Send>(expr).flags.isPrivateOk = true;
+            return make_node_with_expr<parser::Undef>(std::move(expr), location, std::move(names));
         }
         case PM_UNLESS_NODE: { // An `unless` branch, either in a statement or modifier form.
             auto unlessNode = down_cast<pm_unless_node>(node);
