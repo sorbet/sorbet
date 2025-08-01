@@ -244,15 +244,13 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
         auto correctBlockArity = send->hasBlock() && send->block()->args.size() == 0;
 
         // Check for different types of test blocks
-        auto isItOrXit = (send->fun == core::Names::it() || send->fun == core::Names::xit());
         auto isIts = (send->fun == core::Names::its());
         auto isBeforeOrAfter = (send->fun == core::Names::before() || send->fun == core::Names::after());
 
-        auto itOrXitWithValidArgs = isItOrXit && (send->numPosArgs() == 0 || send->numPosArgs() == 1);
         auto itsWithValidArgs = isIts && send->numPosArgs() == 1;
         auto beforeOrAfterWithValidArgs = isBeforeOrAfter && send->numPosArgs() == 0;
 
-        auto isValidTestBlock = (itOrXitWithValidArgs || itsWithValidArgs) && correctBlockArity;
+        auto isValidTestBlock = itsWithValidArgs && correctBlockArity;
         auto isValidSetupTeardown = beforeOrAfterWithValidArgs && correctBlockArity;
 
         if (isValidTestBlock || isValidSetupTeardown) {
@@ -262,25 +260,9 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             } else if (send->fun == core::Names::after()) {
                 name = core::Names::afterAngles();
             } else {
-                // we use this for the name of our test
-                if (send->numPosArgs() == 1) {
-                    auto argString = to_s(ctx, send->getPosArg(0));
-                    if (send->fun == core::Names::its()) {
-                        name = ctx.state.enterNameUTF8("<its " + argString + ">");
-                    } else if (send->fun == core::Names::xit()) {
-                        name = ctx.state.enterNameUTF8("<xit '" + argString + "'>");
-                    } else {
-                        name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
-                    }
-                } else {
-                    // no argument provided, use a deterministic unique name based on location
-                    auto pos = send->loc.beginPos();
-                    if (send->fun == core::Names::xit()) {
-                        name = ctx.state.enterNameUTF8("<anonymous_xit_" + to_string(pos) + ">");
-                    } else {
-                        name = ctx.state.enterNameUTF8("<anonymous_it_" + to_string(pos) + ">");
-                    }
-                }
+                // we use this for the name of our test (only its is handled here now)
+                auto argString = to_s(ctx, send->getPosArg(0));
+                name = ctx.state.enterNameUTF8("<its " + argString + ">");
             }
 
             // pull constants out of the block
@@ -513,6 +495,46 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         return ast::MK::Send0(send->loc, std::move(className), core::Names::new_(), send->funLoc);
     }
 
+    // Handle it/xit blocks with 0 arguments separately
+    if (send->fun == core::Names::it() || send->fun == core::Names::xit()) {
+        if (send->numPosArgs() != 0 && send->numPosArgs() != 1) {
+            return nullptr;
+        }
+        
+        ConstantMover constantMover;
+        ast::TreeWalk::apply(ctx, constantMover, block->body);
+
+        core::NameRef name;
+        if (send->numPosArgs() == 1) {
+            auto argString = to_s(ctx, send->getPosArg(0));
+            if (send->fun == core::Names::xit()) {
+                name = ctx.state.enterNameUTF8("<xit '" + argString + "'>");
+            } else {
+                name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+            }
+        } else {
+            // no argument provided, use a deterministic unique name based on location
+            auto pos = send->loc.beginPos();
+            if (send->fun == core::Names::xit()) {
+                name = ctx.state.enterNameUTF8("<anonymous_xit_" + to_string(pos) + ">");
+            } else {
+                name = ctx.state.enterNameUTF8("<anonymous_it_" + to_string(pos) + ">");
+            }
+        }
+
+        const bool bodyIsClass = false;
+        auto declLoc = declLocForSendWithBlock(*send);
+        auto method = addSigVoid(
+            ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
+                                      prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe)));
+        
+        // Only add the argument copy if there's an argument
+        if (send->numPosArgs() == 1) {
+            method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
+        }
+        return constantMover.addConstantsToExpression(send->loc, move(method));
+    }
+
     if (send->numPosArgs() != 1) {
         return nullptr;
     }
@@ -591,19 +613,12 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
         return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
                               flattenDescribeBody(move(rhs)));
-    } else if (send->fun == core::Names::it() || send->fun == core::Names::xit() || send->fun == core::Names::its()) {
+    } else if (send->fun == core::Names::its()) {
         auto argString = to_s(ctx, arg);
         ConstantMover constantMover;
         ast::TreeWalk::apply(ctx, constantMover, block->body);
 
-        core::NameRef name;
-        if (send->fun == core::Names::its()) {
-            name = ctx.state.enterNameUTF8("<its " + argString + ">");
-        } else if (send->fun == core::Names::xit()) {
-            name = ctx.state.enterNameUTF8("<xit '" + argString + "'>");
-        } else {
-            name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
-        }
+        auto name = ctx.state.enterNameUTF8("<its " + argString + ">");
 
         const bool bodyIsClass = false;
         auto declLoc = declLocForSendWithBlock(*send);
