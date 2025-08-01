@@ -304,7 +304,7 @@ Compared to `override(allow_incompatible: true)`, this version will still check 
 Methods defined via `prop` or `const` (from [`T::Struct`](tstruct.md)) must also declare if they override (or implement) another method. The syntax is special, because `prop` and `const` are not annotated with [`sig`](sigs.md). Use the `override:` keyword argument on a `prop` or `const` definition:
 
 ```ruby
-module Common
+module HasFoo
   extend T::Helpers
   extend T::Sig
   interface!
