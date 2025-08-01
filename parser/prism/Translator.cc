@@ -29,8 +29,7 @@ template <typename... Rest> bool hasExpr(const std::unique_ptr<parser::Node> &fi
 
 // Check if all nodes in NodeVec are null or have a desugared expr.
 bool hasExpr(const parser::NodeVec &nodes) {
-    return absl::c_find_if(nodes, [](const auto &node) { return node != nullptr && !node->hasDesugaredExpr(); }) ==
-           nodes.end();
+    return absl::c_all_of(nodes, [](const auto &node) { return node == nullptr || node->hasDesugaredExpr(); });
 }
 
 // Allocates a new `NodeWithExpr` with a pre-computed `ExpressionPtr` AST.
