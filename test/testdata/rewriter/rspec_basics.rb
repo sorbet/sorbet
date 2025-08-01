@@ -50,4 +50,29 @@ class RSpecBasicsTest
       end
     end
   end
+
+  module Foo
+    class Baz
+    end
+  end
+
+  module Bar
+    class Baz
+    end
+  end
+
+  module RSpec
+  end
+
+  describe Foo::Baz do
+    it 'should work fine' do
+      puts 'nested traditional in describe'
+    end
+  end
+
+  RSpec.describe Bar::Baz do
+    it 'should work fine' do
+      puts 'nested traditional in describe'
+    end
+  end
 end
