@@ -129,8 +129,6 @@ ast::ExpressionPtr addSigVoid(ast::ExpressionPtr expr) {
     return ast::MK::InsSeq1(expr.loc(), ast::MK::SigVoid(declLoc, {}), std::move(expr));
 }
 
-// add boolean method isDescribeOrSimilar that accepts a Nameref
-
 core::LocOffsets declLocForSendWithBlock(const ast::Send &send) {
     return send.loc.copyWithZeroLength().join(send.block()->loc.copyWithZeroLength());
 }
@@ -475,7 +473,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         // Use proper scoping - if we're inside a describe block, look locally; otherwise use root
         auto className = ast::MK::UnresolvedConstant(
             arg.loc(), insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
-            ctx.state.enterNameUTF8("<shared_examples '" + argString + "'>"));
+            ctx.state.enterNameConstant("<shared_examples '" + argString + "'>"));
         // Create a call to new on the shared_examples class to instantiate it
         return ast::MK::Send0(send->loc, std::move(className), core::Names::new_(), send->funLoc);
     }
@@ -548,7 +546,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         // Use proper scoping - if we're inside a describe block, look locally; otherwise use root
         auto className = ast::MK::UnresolvedConstant(
             arg.loc(), insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
-            ctx.state.enterNameUTF8("<shared_examples '" + argString + "'>"));
+            ctx.state.enterNameConstant("<shared_examples '" + argString + "'>"));
         // Create a call to new on the shared_examples class to instantiate it
         return ast::MK::Send0(send->loc, std::move(className), core::Names::new_(), send->funLoc);
     }
@@ -646,7 +644,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         // Use proper scoping - if we're inside a describe block, nest under it; otherwise use root
         auto name = ast::MK::UnresolvedConstant(
             arg.loc(), insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
-            ctx.state.enterNameUTF8("<shared_examples '" + argString + "'>"));
+            ctx.state.enterNameConstant("<shared_examples '" + argString + "'>"));
         auto declLoc = declLocForSendWithBlock(*send);
         ast::ClassDef::ANCESTORS_store ancestors;
 
