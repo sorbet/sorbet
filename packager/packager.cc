@@ -822,7 +822,8 @@ bool isRootScopedDefinition(const ast::ConstantLit *lit) {
 // symbols under PackageSpecRegistry.
 // TODO(jez) Make this a struct with named fields.
 // TODO(jez) This solution is hacky: is it the best?
-pair<core::packages::MangledName, bool> packageForSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
+tuple<core::packages::MangledName, core::ClassOrModuleRef, bool> packageForSymbol(const core::GlobalState &gs,
+                                                                                  core::SymbolRef sym) {
     // Skip until we get to the ClassOrModule things (ignore static-fields / type members to find package namespace)
     bool couldBePrefix = true;
     while (!sym.isClassOrModule()) {
@@ -842,42 +843,42 @@ pair<core::packages::MangledName, bool> packageForSymbol(const core::GlobalState
 
     if (fullNameReversed.empty()) {
         // This would be like, a static field at the top level?
-        return {{}, couldBePrefix};
+        return {{}, {}, couldBePrefix};
     }
 
     if (fullNameReversed.back() == core::packages::PackageDB::TEST_NAMESPACE) {
         fullNameReversed.pop_back();
     }
 
-    auto best = core::packages::MangledName(core::Symbols::PackageSpecRegistry());
-    auto prev = best.owner;
+    if (fullNameReversed.empty()) {
+        return {};
+    }
+
+    auto bestOwner = core::Symbols::PackageSpecRegistry();
+    auto bestPkg = core::packages::MangledName();
     for (auto it = fullNameReversed.rbegin(); it != fullNameReversed.rend(); it++) {
-        auto curr = prev.data(gs)->findMember(gs, *it);
+        auto curr = bestOwner.data(gs)->findMember(gs, *it);
         if (!curr.exists()) {
             // Can't be prefix, because there was extra stuff we're dropping that we could not find
-            return {best, false};
+            return {bestPkg, bestOwner, false};
         }
 
         ENFORCE(curr.isClassOrModule(), "All names on path to PackageSpec should be ClassOrModule");
-        prev = curr.asClassOrModuleRef();
-        auto currPkg = core::packages::MangledName(prev);
+        bestOwner = curr.asClassOrModuleRef();
+        auto currPkg = core::packages::MangledName(bestOwner);
         if (gs.packageDB().getPackageInfo(currPkg).exists()) {
-            best = currPkg;
+            bestPkg = currPkg;
         }
     }
 
-    if (best.owner == core::Symbols::PackageSpecRegistry()) {
-        // TODO(jez) I this actually dead?
-        return {};
-    }
-    return {best, couldBePrefix};
+    return {bestPkg, bestOwner, couldBePrefix};
 }
 
-bool ownsPackage(const core::GlobalState &gs, const core::packages::MangledName owningPkg,
+bool ownsPackage(const core::GlobalState &gs, const core::ClassOrModuleRef ownerForScope,
                  core::packages::MangledName pkg) {
     auto owner = pkg.owner;
     while (owner != core::Symbols::PackageSpecRegistry()) {
-        if (owner == owningPkg.owner) {
+        if (owner == ownerForScope) {
             return true;
         }
 
@@ -1134,16 +1135,16 @@ private:
 
     core::packages::MangledName packageForNamespace(const core::GlobalState &gs) const {
         const auto &[scopeSym, _scopeLoc] = scope.back();
-        const auto &[pkg, _couldBePrefix] = packageForSymbol(gs, scopeSym);
+        const auto &[pkg, _owner, _couldBePrefix] = packageForSymbol(gs, scopeSym);
         return pkg;
     }
 
     bool onPackagePath(const core::GlobalState &gs) const {
         const auto &[scopeSym, _scopeLoc] = scope.back();
-        const auto &[pkgForScope, couldBePrefix] = packageForSymbol(gs, scopeSym);
+        const auto &[pkgForScope, ownerForScope, couldBePrefix] = packageForSymbol(gs, scopeSym);
 
         if (couldBePrefix) {
-            return ownsPackage(gs, pkgForScope, this->pkg.mangledName());
+            return ownsPackage(gs, ownerForScope, this->pkg.mangledName());
         } else if (scopeSym.exists() && scopeSym == maybeTestNamespace) {
             // Okay to write `module Test; end`, becuase this is essentially the empty path.
             return true;
