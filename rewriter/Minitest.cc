@@ -325,18 +325,50 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                     (send->fun == core::Names::letBang() && send->numPosArgs() == 1) ||
                     (send->fun == core::Names::subject() && send->numPosArgs() <= 1)) &&
                    correctBlockArity && ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
+            core::NameRef methodName;
+            core::LocOffsets declLoc;
+            
             if (send->numPosArgs() == 1) {
                 auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(send->getPosArg(0));
                 if (argLiteral.isName()) {
-                    auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
-                    auto methodName = argLiteral.asName();
-                    return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(send->block()->body));
+                    declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
+                    methodName = argLiteral.asName();
+                } else {
+                    return nullptr;
                 }
             } else {
-                auto declLoc = send->loc.copyWithZeroLength().join(send->funLoc);
-                auto methodName = core::Names::subject();
-                return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(send->block()->body));
+                declLoc = send->loc.copyWithZeroLength().join(send->funLoc);
+                methodName = core::Names::subject();
             }
+
+            // Handle let blocks the same way as it blocks - give them access to test_each arguments
+            ConstantMover constantMover;
+            ast::ExpressionPtr body = move(send->block()->body);
+
+            if (!ast::isa_tree<ast::EmptyTree>(body)) {
+                ast::TreeWalk::apply(ctx, constantMover, body);
+
+                // add the destructuring statements to the block if they're present
+                if (!destructuringStmts.empty()) {
+                    ast::InsSeq::STATS_store stmts;
+                    for (auto &stmt : destructuringStmts) {
+                        stmts.emplace_back(stmt.deepCopy());
+                    }
+                    body = ast::MK::InsSeq(body.loc(), std::move(stmts), std::move(body));
+                }
+            }
+
+            // pull the arg and the iteratee in and synthesize `iterate.each { |arg| body }`
+            ast::MethodDef::ARGS_store new_args;
+            for (auto &arg : args) {
+                new_args.emplace_back(arg.deepCopy());
+            }
+
+            auto blk = ast::MK::Block(send->block()->loc, move(body), std::move(new_args));
+            auto each = ast::MK::Send0Block(send->loc, iteratee.deepCopy(), core::Names::each(),
+                                            send->loc.copyWithZeroLength(), move(blk));
+            auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, move(each)));
+            return constantMover.addConstantsToExpression(send->loc, move(method));
         }
     }
 
