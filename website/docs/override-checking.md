@@ -362,11 +362,11 @@ end
 
 Note that the previous values we've seen are aliases for the fully-expanded version:
 
-| Shorthand                             | is equivalent to:                                                                  |
-| ---                                   | ---                                                                                |
-| `override: true`                      | `override: {reader: true, writer: true}`                                           |
-| `override: :reader`                   | `override: {reader: true}`                                                         |
-| `override: :writer`                   | `override: {writer: true}`                                                         |
+| Shorthand | is equivalent to: |
+| --- | --- |
+| `override: true` | `override: {reader: true, writer: true}` |
+| `override: :reader` | `override: {reader: true}` |
+| `override: :writer` | `override: {writer: true}` |
 | `override: {allow_incompatible: ...}` | `override: {reader: {allow_incompatible: ...}, writer: {allow_incompatible: ...}}` |
 
 ## What's next?
