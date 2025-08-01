@@ -343,8 +343,10 @@ private:
     }
 
 public:
-    static ExpressionPtr Sig(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr ret) {
-        auto params = Params(loc, Self(loc), std::move(args));
+    static ExpressionPtr Sig(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr ret,
+                             ExpressionPtr recv_ = nullptr) {
+        auto recv = recv_ ? std::move(recv_) : Self(loc);
+        auto params = Params(loc, std::move(recv), std::move(args));
         auto returns = Send1(loc, std::move(params), core::Names::returns(), loc, std::move(ret));
         auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc,
                          Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
@@ -354,8 +356,9 @@ public:
         return sig;
     }
 
-    static ExpressionPtr SigVoid(core::LocOffsets loc, Send::ARGS_store args) {
-        auto params = Params(loc, Self(loc), std::move(args));
+    static ExpressionPtr SigVoid(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr recv_ = nullptr) {
+        auto recv = recv_ ? std::move(recv_) : Self(loc);
+        auto params = Params(loc, std::move(recv), std::move(args));
         auto void_ = Send0(loc, std::move(params), core::Names::void_(), loc);
         auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc,
                          Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
@@ -365,8 +368,9 @@ public:
         return sig;
     }
 
-    static ExpressionPtr Sig0(core::LocOffsets loc, ExpressionPtr ret) {
-        auto returns = Send1(loc, Self(loc), core::Names::returns(), loc, std::move(ret));
+    static ExpressionPtr Sig0(core::LocOffsets loc, ExpressionPtr ret, ExpressionPtr recv_ = nullptr) {
+        auto recv = recv_ ? std::move(recv_) : Self(loc);
+        auto returns = Send1(loc, std::move(recv), core::Names::returns(), loc, std::move(ret));
         auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc,
                          Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
         auto sigSend = ast::cast_tree<ast::Send>(sig);
@@ -375,8 +379,25 @@ public:
         return sig;
     }
 
-    static ExpressionPtr Sig1(core::LocOffsets loc, ExpressionPtr key, ExpressionPtr value, ExpressionPtr ret) {
-        return Sig(loc, SendArgs(std::move(key), std::move(value)), std::move(ret));
+    static ExpressionPtr Sig1(core::LocOffsets loc, ExpressionPtr key, ExpressionPtr value, ExpressionPtr ret,
+                              ExpressionPtr recv_ = nullptr) {
+        return Sig(loc, SendArgs(std::move(key), std::move(value)), std::move(ret), std::move(recv_));
+    }
+
+    static ExpressionPtr Override(core::LocOffsets loc, Send::ARGS_store args) {
+        return Send(loc, Self(loc), core::Names::override_(), loc, 0, std::move(args));
+    }
+
+    static ExpressionPtr OverrideStrict(core::LocOffsets loc) {
+        Send::ARGS_store args;
+        return Override(loc, std::move(args));
+    }
+
+    static ExpressionPtr OverrideAllowIncompatible(core::LocOffsets loc, core::LocOffsets allowLoc, ExpressionPtr arg) {
+        Send::ARGS_store args;
+        args.push_back(Symbol(allowLoc, core::Names::allowIncompatible()));
+        args.push_back(std::move(arg));
+        return Override(loc, std::move(args));
     }
 
     static ExpressionPtr T(core::LocOffsets loc) {

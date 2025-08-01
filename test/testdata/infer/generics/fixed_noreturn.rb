@@ -38,8 +38,8 @@ class Cons < T::Struct
 
   Elem = type_member
 
-  const :head, Elem, override: true
-  const :tail, List[Elem], override: true
+  const :head, Elem
+  const :tail, List[Elem]
 
   sig {override.returns(Elem)}
   def head!; head; end
