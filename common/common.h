@@ -129,6 +129,20 @@ uint32_t nextPowerOfTwo(uint32_t v);
 
 std::vector<uint32_t> findLineBreaks(std::string_view s);
 
+enum class ProcessStatus {
+    // The process exists and is running.
+    Running,
+
+    // The process does not exist.
+    Missing,
+
+    // Unable to determine if the process exists.
+    Unknown,
+};
+
+// Check if the process with the given pid exists.
+ProcessStatus processExists(pid_t pid);
+
 // To get exhaustiveness checking with std::visit.
 // From: https://en.cppreference.com/w/cpp/utility/variant/visit#Example
 template <class> inline constexpr bool always_false_v = false;
