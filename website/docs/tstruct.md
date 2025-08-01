@@ -212,34 +212,7 @@ The remainder of this documentation is presented for completeness. Use the APIs 
 
 ## Fine-grained inheritance control with `override:`
 
-Under the hood, the declaration `prop :foo, Integer`
-
-```ruby
-class A < T::Struct
-  prop :foo, Integer
-end
-```
-
-expands to something like
-
-```ruby
-class A < T::Struct
-  @foo = T.let()
-
-  sig { returns(String) }
-  def foo; @foo; end
-
-  sig { params(arg0: String).returns(String) }
-  def foo=(arg0); @foo = arg0; end
-
-  sig { params(foo: String).void }
-  def initialize(foo)
-    @foo = foo
-  end
-end
-```
-
-If `foo` or `foo=` overrides an `overridable` or `abstract` method, however (such as in the interface method above), it is necessary to also annotate the generated sigs with `override`. To accomplish this with `prop`, you can pass the `override` keyword argument. In the simplest cases, this will be one of:
+Methods defined with `prop` or `const` must also annotate the methods they override (just like if the reader and writer methods had been defined as normal `def` methods). Use the `override` keyword argument on a `prop` or `const` to declare the override. In the simplest cases, this will be one of:
 
 - `override: :reader` (overrides `foo` only)
 - `override: :writer` (overrides `foo=` only)
