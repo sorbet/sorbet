@@ -113,7 +113,7 @@ void emitBadOverride(core::MutableContext ctx, const core::LocOffsets loc, core:
 }
 
 ast::ExpressionPtr elaborateOverride(core::MutableContext ctx, core::LocOffsets overrideLoc, ast::Hash &opts,
-                                     core::NameRef propName, core::NameRef key, std::string rendered) {
+                                     core::NameRef propName, core::NameRef key, string_view rendered) {
     auto [_key, arg] = ASTUtil::extractHashValue(ctx, opts, key);
     if (auto lit = ast::cast_tree<ast::Literal>(arg)) {
         if (lit->isTrue(ctx)) {
