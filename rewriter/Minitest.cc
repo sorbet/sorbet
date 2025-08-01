@@ -367,7 +367,14 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             auto blk = ast::MK::Block(send->block()->loc, move(body), std::move(new_args));
             auto each = ast::MK::Send0Block(send->loc, iteratee.deepCopy(), core::Names::each(),
                                             send->loc.copyWithZeroLength(), move(blk));
-            auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, move(each)));
+            
+            // let/subject blocks should return their computed value, not void
+            ast::ExpressionPtr method;
+            if (send->fun == core::Names::let() || send->fun == core::Names::letBang() || send->fun == core::Names::subject()) {
+                method = ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, move(each));
+            } else {
+                method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, move(each)));
+            }
             return constantMover.addConstantsToExpression(send->loc, move(method));
         }
     }
