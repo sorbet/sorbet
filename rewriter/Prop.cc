@@ -481,7 +481,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &prop,
 
     auto ivarName = name.addAt(ctx);
 
-    auto readerSig = ast::MK::Sig0(loc, ASTUtil::dupType(getType), std::exchange(prop.getterOverride, nullptr));
+    auto readerSig = ast::MK::Sig0(loc, ASTUtil::dupType(getType), move(prop.getterOverride));
     nodes.emplace_back(std::move(readerSig));
 
     // Generate a real prop body for computed_by: props so Sorbet can assert the
