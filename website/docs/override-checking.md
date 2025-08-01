@@ -301,7 +301,7 @@ Compared to `override(allow_incompatible: true)`, this version will still check 
 
 ### Overrides and the `prop` DSL
 
-It is possible for a method defined via `prop` or `const` to override a method from a parent module or class. In such cases, pass the `override:` keyword argument:
+Methods defined via `prop` or `const` (from [`T::Struct`](tstruct.md)) must also declare if they override (or implement) another method. The syntax is special, because `prop` and `const` are not annotated with [`sig`](sigs.md). Use the `override:` keyword argument on a `prop` or `const` definition:
 
 ```ruby
 module Common
