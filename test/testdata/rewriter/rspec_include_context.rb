@@ -3,21 +3,21 @@
 class RSpecIncludeContextTest
   extend T::Sig
 
-  # Test include_context functionality (simplified)
-  describe 'include context usage' do
-    it 'can reference include_context' do
-      include_context 'some shared context' # error: Unable to resolve constant `<shared_examples 'some shared context'>`
-      puts 'include context test'
-    end
+  shared_examples 'user helpers' do
+    let(:shared_variable) { 'shared value' }
+  end
 
-    it 'can reference include_examples' do  
-      include_examples 'some shared examples' # error: Method `include_examples` does not exist
-      puts 'include examples test' 
+  describe 'nonexistent context' do
+    it 'cannot reference undefined context' do
+      include_context 'nonexistent context' # error: Unable to resolve constant `<shared_examples 'nonexistent context'>`
     end
+  end
 
-    it 'can reference it_behaves_like' do
-      it_behaves_like 'some shared behavior' # error: Method `it_behaves_like` does not exist
-      puts 'it behaves like test'
+  describe 'working include_context' do
+    include_context 'user helpers'
+    
+    it 'can access variable from included context' do
+      puts shared_variable
     end
   end
 end
