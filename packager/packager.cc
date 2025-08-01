@@ -545,7 +545,7 @@ public:
             {insertionLoc, fmt::format("\n  {} {}{}", importTypeMethod, packageToImport, importTypeTrailing)}};
         if (deleteTestImportEdit.has_value()) {
             edits.push_back(deleteTestImportEdit.value());
-            suggestionTitle = fmt::format("Convert existing import to `{}`", "test_import", importTypeMethod);
+            suggestionTitle = fmt::format("Convert existing import to `{}`", importTypeMethod);
         }
 
         core::AutocorrectSuggestion suggestion(suggestionTitle, edits);
