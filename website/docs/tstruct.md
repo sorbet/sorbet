@@ -210,7 +210,7 @@ Unfortunately, this process left warts in the publicly-accessible `T::Struct` AP
 
 The remainder of this documentation is presented for completeness. Use the APIs below at your own discretion. Our goal here is simply to outline the potential pitfalls that arise when using them.
 
-## Fine-grained inheritance control with `override`
+## Fine-grained inheritance control with `override:`
 
 Under the hood, the declaration `prop :foo, Integer`
 
