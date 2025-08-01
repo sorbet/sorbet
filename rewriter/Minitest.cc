@@ -327,7 +327,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                    correctBlockArity && ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
             core::NameRef methodName;
             core::LocOffsets declLoc;
-            
+
             if (send->numPosArgs() == 1) {
                 auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(send->getPosArg(0));
                 if (argLiteral.isName()) {
@@ -367,10 +367,11 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             auto blk = ast::MK::Block(send->block()->loc, move(body), std::move(new_args));
             auto each = ast::MK::Send0Block(send->loc, iteratee.deepCopy(), core::Names::each(),
                                             send->loc.copyWithZeroLength(), move(blk));
-            
+
             // let/subject blocks should return their computed value, not void
             ast::ExpressionPtr method;
-            if (send->fun == core::Names::let() || send->fun == core::Names::letBang() || send->fun == core::Names::subject()) {
+            if (send->fun == core::Names::let() || send->fun == core::Names::letBang() ||
+                send->fun == core::Names::subject()) {
                 method = ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, move(each));
             } else {
                 method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, move(each)));
@@ -557,7 +558,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         if (send->numPosArgs() != 0 && send->numPosArgs() != 1) {
             return nullptr;
         }
-        
+
         ConstantMover constantMover;
         ast::TreeWalk::apply(ctx, constantMover, block->body);
 
@@ -584,7 +585,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto method = addSigVoid(
             ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
                                       prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe)));
-        
+
         // Only add the argument copy if there's an argument
         if (send->numPosArgs() == 1) {
             method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
