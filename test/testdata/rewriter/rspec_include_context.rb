@@ -60,4 +60,21 @@ RSpec.describe 'RSpec context with shared_context' do
       expect(auth_helper).to eq('authenticated_user with auth_token_123')
     end
   end
+
+  # Test include_context with parameters (should ignore parameters)
+  describe 'e2e context' do
+    shared_context 'e2e context' do
+      let(:foo) { 'bar' }
+      let(:config) { 'default_config' }
+    end
+
+    describe 'with parameters' do
+      include_context 'e2e context', { foo: 'bar' }
+      
+      it 'should include the context and ignore parameters' do
+        expect(foo).to eq('bar')
+        expect(config).to eq('default_config')
+      end
+    end
+  end
 end

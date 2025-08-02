@@ -474,8 +474,8 @@ ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef e
 }
 
 ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *send, bool insideDescribe) {
-    // Handle include_context first (1 pos arg + optional kwargs/block)
-    if (send->fun == core::Names::includeContext() && send->numPosArgs() == 1) {
+    // Handle include_context first (1+ pos args + optional kwargs/block)
+    if (send->fun == core::Names::includeContext() && send->numPosArgs() >= 1) {
         auto &arg = send->getPosArg(0);
         auto argString = to_s(ctx, arg);
         // Create an include statement that includes the shared_examples companion module
@@ -547,8 +547,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         return ast::MK::SyntheticMethod0(send->loc, declLoc, core::Names::subject(), std::move(block->body));
     }
 
-    // Handle include_context with block (1 pos arg + optional kwargs/block)
-    if (send->fun == core::Names::includeContext() && send->numPosArgs() == 1) {
+    // Handle include_context with block (1+ pos args + optional kwargs/block)
+    if (send->fun == core::Names::includeContext() && send->numPosArgs() >= 1) {
         auto &arg = send->getPosArg(0);
         auto argString = to_s(ctx, arg);
         // Create an include statement that includes the filtered shared_examples module
