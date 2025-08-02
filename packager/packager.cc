@@ -1143,7 +1143,9 @@ private:
         const auto &[scopeSym, _scopeLoc] = scope.back();
         const auto &[pkgForScope, ownerForScope, couldBePrefix] = packageForSymbol(gs, scopeSym);
 
-        if (couldBePrefix) {
+        if (pkgForScope == this->pkg.mangledName()) {
+            return true;
+        } else if (couldBePrefix) {
             return ownsPackage(gs, ownerForScope, this->pkg.mangledName());
         } else if (scopeSym.exists() && scopeSym == maybeTestNamespace) {
             // Okay to write `module Test; end`, becuase this is essentially the empty path.
