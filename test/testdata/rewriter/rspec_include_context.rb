@@ -27,3 +27,37 @@ class RSpecIncludeContextTest
     end
   end
 end
+
+# Test shared_context within RSpec.describe (proper RSpec context)
+# Define minimal RSpec for testing
+module RSpec
+  module Core
+    class ExampleGroup
+      def self.describe(name, &block); end
+      def expect(*args); end
+      def eq(*args); end
+    end
+  end
+  
+  def self.describe(name, &block)
+    Core::ExampleGroup.describe(name, &block)
+  end
+end
+
+RSpec.describe 'RSpec context with shared_context' do
+  shared_context 'authenticated user' do
+    let(:user) { 'authenticated_user' }
+    let(:token) { 'auth_token_123' }
+    let(:auth_helper) { "#{user} with #{token}" }
+  end
+
+  describe 'API endpoint' do
+    include_context 'authenticated user'
+    
+    it 'has access to shared context variables and methods' do
+      expect(user).to eq('authenticated_user')
+      expect(token).to eq('auth_token_123') 
+      expect(auth_helper).to eq('authenticated_user with auth_token_123')
+    end
+  end
+end
