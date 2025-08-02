@@ -188,6 +188,11 @@ module T::Private::Methods
       self
     end
 
+    def deprecated
+      check_live!
+      self
+    end
+
     # Declares valid type parameters which can be used with `T.type_parameter` in
     # this `sig`.
     #

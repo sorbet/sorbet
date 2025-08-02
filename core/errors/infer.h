@@ -55,6 +55,7 @@ constexpr ErrorClass UnknownSuperMethod{7048, StrictLevel::True};
 constexpr ErrorClass TypecheckOverloadBody{7049, StrictLevel::True};
 constexpr ErrorClass RedundantMust{7050, StrictLevel::Strict};
 constexpr ErrorClass BranchOnVoid{7051, StrictLevel::True};
+constexpr ErrorClass DeprecatedMethodUsage{7052, StrictLevel::True};
 // N.B infer does not run for untyped call at all. StrictLevel::False here would be meaningless
 
 ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file, const TypePtr &ptr);
