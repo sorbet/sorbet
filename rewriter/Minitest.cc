@@ -168,15 +168,12 @@ ast::ClassDef::RHS_store flattenDescribeBody(ast::ExpressionPtr body) {
 
 string to_s(core::Context ctx, ast::ExpressionPtr &arg) {
     auto argLit = ast::cast_tree<ast::Literal>(arg);
-    string argString;
     if (argLit != nullptr && argLit->isName()) {
         return argLit->asName().show(ctx);
     }
     auto argConstant = ast::cast_tree<ast::UnresolvedConstantLit>(arg);
     if (argConstant != nullptr) {
-        // Use the full toString representation to get the complete qualified constant name
-        // instead of just the last part
-        return arg.toString(ctx);
+        return argConstant->cnst.show(ctx);
     }
     return arg.toString(ctx);
 }
