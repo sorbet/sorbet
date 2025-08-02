@@ -390,8 +390,8 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
 
     // if any of the above tests were not satisfied, then mark this statement as being invalid here
     if (auto e = ctx.beginIndexerError(stmt.loc(), core::errors::Rewriter::BadTestEach)) {
-        e.setHeader("Only valid `{}`, `{}`, `{}`, `{}`, and `{}` blocks can appear within `{}`", "it", "before", "after",
-                    "describe", "it_behaves_like", eachName.show(ctx));
+        e.setHeader("Only valid `{}`, `{}`, `{}`, `{}`, and `{}` blocks can appear within `{}`", "it", "before",
+                    "after", "describe", "it_behaves_like", eachName.show(ctx));
         e.addErrorNote("For other things, like constant and variable assignments,"
                        "    hoist them to constants or methods defined outside the `{}` block.",
                        eachName.show(ctx));
@@ -647,7 +647,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                               flattenDescribeBody(move(rhs)));
     } else if (isSharedExamples(send->fun)) {
         auto argString = to_s(ctx, arg);
-        const bool bodyIsClass = true;  // Process body as class context to get proper RSpec context
+        const bool bodyIsClass = true; // Process body as class context to get proper RSpec context
         auto rhs = prepareBody(ctx, bodyIsClass, std::move(block->body), /* insideDescribe */ true);
 
         // Create a class for shared_examples that inherits from the same parent as the current describe block
@@ -680,42 +680,47 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         }
 
         // Create the class version (contains everything)
-        auto classResult = ast::MK::Class(send->loc, declLoc, name.deepCopy(), std::move(ancestors), flattenDescribeBody(rhs.deepCopy()));
-        
+        auto classResult = ast::MK::Class(send->loc, declLoc, name.deepCopy(), std::move(ancestors),
+                                          flattenDescribeBody(rhs.deepCopy()));
+
         // Create a filtered module version that contains only includable methods (let, etc.)
         auto moduleName = ast::MK::UnresolvedConstant(
             arg.loc(), insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
             ctx.state.enterNameConstant("<shared_examples_module '" + argString + "'>"));
-        
+
         // Filter the RHS to include only methods that should be includable
         ast::ClassDef::RHS_store filteredModuleRhs;
         auto flattenedRhs = flattenDescribeBody(move(rhs));
-        
+
         // Add extend T::Helpers at the beginning
         auto tHelpers = ast::MK::EmptyTree();
         tHelpers = ast::MK::UnresolvedConstant(arg.loc(), move(tHelpers), core::Names::Constants::T());
         tHelpers = ast::MK::UnresolvedConstant(arg.loc(), move(tHelpers), core::Names::Constants::Helpers());
-        auto extendStatement = ast::MK::Send1(send->loc, ast::MK::Self(send->loc), core::Names::extend(), send->funLoc, std::move(tHelpers));
+        auto extendStatement = ast::MK::Send1(send->loc, ast::MK::Self(send->loc), core::Names::extend(), send->funLoc,
+                                              std::move(tHelpers));
         filteredModuleRhs.emplace_back(std::move(extendStatement));
-        
+
         // Add requires_ancestor { RSpec::Core::ExampleGroup }
         if (!send->recv.isSelfReference() && isRSpec(send->recv)) {
             // Add requires_ancestor when we have explicit RSpec receiver (RSpec context)
             auto rspecExampleGroup = ast::MK::EmptyTree();
-            rspecExampleGroup = ast::MK::UnresolvedConstant(arg.loc(), move(rspecExampleGroup), core::Names::Constants::RSpec());
-            rspecExampleGroup = ast::MK::UnresolvedConstant(arg.loc(), move(rspecExampleGroup), core::Names::Constants::Core());
-            rspecExampleGroup = ast::MK::UnresolvedConstant(arg.loc(), move(rspecExampleGroup), core::Names::Constants::ExampleGroup());
-            
+            rspecExampleGroup =
+                ast::MK::UnresolvedConstant(arg.loc(), move(rspecExampleGroup), core::Names::Constants::RSpec());
+            rspecExampleGroup =
+                ast::MK::UnresolvedConstant(arg.loc(), move(rspecExampleGroup), core::Names::Constants::Core());
+            rspecExampleGroup =
+                ast::MK::UnresolvedConstant(arg.loc(), move(rspecExampleGroup), core::Names::Constants::ExampleGroup());
+
             // Create a block that returns the RSpec::Core::ExampleGroup constant
             auto blockBody = std::move(rspecExampleGroup);
             ast::MethodDef::ARGS_store blockArgs;
             auto block = ast::MK::Block(send->loc, std::move(blockBody), std::move(blockArgs));
-            
-            auto requiresAncestorStatement = ast::MK::Send0Block(send->loc, ast::MK::Self(send->loc), 
-                                                                core::Names::requiresAncestor(), send->loc, std::move(block));
+
+            auto requiresAncestorStatement = ast::MK::Send0Block(
+                send->loc, ast::MK::Self(send->loc), core::Names::requiresAncestor(), send->loc, std::move(block));
             filteredModuleRhs.emplace_back(std::move(requiresAncestorStatement));
         }
-        
+
         for (auto &expr : flattenedRhs) {
             // Only include method definitions (let, subject, etc.) in the module
             // Skip describe blocks and other non-includable constructs
@@ -723,10 +728,11 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 filteredModuleRhs.emplace_back(expr.deepCopy());
             }
         }
-        
+
         ast::ClassDef::ANCESTORS_store moduleAncestors;
-        auto moduleResult = ast::MK::Module(send->loc, declLoc, std::move(moduleName), std::move(moduleAncestors), std::move(filteredModuleRhs));
-        
+        auto moduleResult = ast::MK::Module(send->loc, declLoc, std::move(moduleName), std::move(moduleAncestors),
+                                            std::move(filteredModuleRhs));
+
         // Return both the class and filtered module in a sequence
         ast::InsSeq::STATS_store statements;
         statements.emplace_back(std::move(classResult));
