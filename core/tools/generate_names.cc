@@ -286,6 +286,7 @@ NameDef names[] = {
     {"includeContext", "include_context"},
     {"expect"},
     {"change"},
+    {"itBehavesLike", "it_behaves_like"},
 
     {"dslOptional", "dsl_optional"},
     {"dslRequired", "dsl_required"},
