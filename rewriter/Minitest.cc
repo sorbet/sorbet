@@ -317,6 +317,17 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args, destructuringStmts,
                                        iteratee,
                                        /* insideDescribe */ true);
+        } else if (insideDescribe && send->fun == core::Names::itBehavesLike() && send->numPosArgs() == 1) {
+            // Handle it_behaves_like within test_each blocks
+            auto &arg = send->getPosArg(0);
+            auto argString = to_s(ctx, arg);
+            // Create an include statement that includes the shared_examples companion module
+            auto moduleName = ast::MK::UnresolvedConstant(
+                arg.loc(), ast::MK::EmptyTree(),
+                ctx.state.enterNameConstant("<shared_examples_module '" + argString + "'>"));
+            // Create an include statement to include the shared_examples companion module
+            return ast::MK::Send1(send->loc, ast::MK::Self(send->loc), core::Names::include(), send->funLoc,
+                                  std::move(moduleName));
         } else if (insideDescribe &&
                    ((send->fun == core::Names::let() && send->numPosArgs() == 1) ||
                     (send->fun == core::Names::letBang() && send->numPosArgs() == 1) ||
@@ -379,8 +390,8 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
 
     // if any of the above tests were not satisfied, then mark this statement as being invalid here
     if (auto e = ctx.beginIndexerError(stmt.loc(), core::errors::Rewriter::BadTestEach)) {
-        e.setHeader("Only valid `{}`, `{}`, `{}`, and `{}` blocks can appear within `{}`", "it", "before", "after",
-                    "describe", eachName.show(ctx));
+        e.setHeader("Only valid `{}`, `{}`, `{}`, `{}`, and `{}` blocks can appear within `{}`", "it", "before", "after",
+                    "describe", "it_behaves_like", eachName.show(ctx));
         e.addErrorNote("For other things, like constant and variable assignments,"
                        "    hoist them to constants or methods defined outside the `{}` block.",
                        eachName.show(ctx));
