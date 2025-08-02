@@ -14,6 +14,10 @@ class RSpecIncludeContextTest
   describe 'working include_context' do
     shared_examples 'user helpers' do
       let(:shared_variable) { 'shared value' }
+
+      it 'can use test assertions within shared examples' do
+        expect(shared_variable).to eq('shared value')
+      end
     end
 
     include_context 'user helpers'

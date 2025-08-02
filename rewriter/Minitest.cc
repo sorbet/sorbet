@@ -470,14 +470,14 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     if (send->fun == core::Names::includeContext() && send->numPosArgs() == 1) {
         auto &arg = send->getPosArg(0);
         auto argString = to_s(ctx, arg);
-        // Create an include statement that includes the shared_examples class
+        // Create an include statement that includes the shared_examples module
         // Use proper scoping - if we're inside a describe block, look locally; otherwise use root
-        auto className = ast::MK::UnresolvedConstant(
+        auto moduleName = ast::MK::UnresolvedConstant(
             arg.loc(), insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
             ctx.state.enterNameConstant("<shared_examples '" + argString + "'>"));
-        // Create an include statement to include the shared_examples class
+        // Create an include statement to include the shared_examples module
         return ast::MK::Send1(send->loc, ast::MK::Self(send->loc), core::Names::include(), send->funLoc,
-                              std::move(className));
+                              std::move(moduleName));
     }
 
     if (!send->hasBlock()) {
@@ -543,14 +543,14 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     if (send->fun == core::Names::includeContext() && send->numPosArgs() == 1) {
         auto &arg = send->getPosArg(0);
         auto argString = to_s(ctx, arg);
-        // Create an include statement that includes the shared_examples class
+        // Create an include statement that includes the shared_examples module
         // Use proper scoping - if we're inside a describe block, look locally; otherwise use root
-        auto className = ast::MK::UnresolvedConstant(
+        auto moduleName = ast::MK::UnresolvedConstant(
             arg.loc(), insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
             ctx.state.enterNameConstant("<shared_examples '" + argString + "'>"));
-        // Create an include statement to include the shared_examples class
+        // Create an include statement to include the shared_examples module
         return ast::MK::Send1(send->loc, ast::MK::Self(send->loc), core::Names::include(), send->funLoc,
-                              std::move(className));
+                              std::move(moduleName));
     }
 
     // Handle it/xit blocks with 0 arguments separately
@@ -605,7 +605,19 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         if (send->recv.isSelfReference()) {
             // First ancestor is the superclass
             if (isClass) {
-                ancestors.emplace_back(ast::MK::Self(arg.loc()));
+                // When inside a describe context, inherit from RSpec::Core::ExampleGroup to get RSpec methods
+                if (insideDescribe) {
+                    auto exampleGroup = ast::MK::EmptyTree();
+                    exampleGroup =
+                        ast::MK::UnresolvedConstant(arg.loc(), move(exampleGroup), core::Names::Constants::RSpec());
+                    exampleGroup =
+                        ast::MK::UnresolvedConstant(arg.loc(), move(exampleGroup), core::Names::Constants::Core());
+                    exampleGroup = ast::MK::UnresolvedConstant(arg.loc(), move(exampleGroup),
+                                                               core::Names::Constants::ExampleGroup());
+                    ancestors.emplace_back(move(exampleGroup));
+                } else {
+                    ancestors.emplace_back(ast::MK::Self(arg.loc()));
+                }
             } else {
                 // Avoid subclassing self when it's a module, as that will produce an error.
                 ancestors.emplace_back(ast::MK::Constant(arg.loc(), core::Symbols::todo()));
@@ -639,18 +651,18 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                               flattenDescribeBody(move(rhs)));
     } else if (isSharedExamples(send->fun)) {
         auto argString = to_s(ctx, arg);
-        const bool bodyIsClass = false;  // Create as module, not class
+        const bool bodyIsClass = false;  // Process body as module context to avoid inheritance issues
         auto rhs = prepareBody(ctx, bodyIsClass, std::move(block->body), /* insideDescribe */ true);
 
-        // Create a module for shared_examples so it can be included
+        // Create a class for shared_examples - classes can inherit from other classes
         // Use proper scoping - if we're inside a describe block, nest under it; otherwise use root
         auto name = ast::MK::UnresolvedConstant(
             arg.loc(), insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
             ctx.state.enterNameConstant("<shared_examples '" + argString + "'>"));
         auto declLoc = declLocForSendWithBlock(*send);
-
-        // Create a module instead of a class
+        // shared_examples modules don't need ancestors - they're just containers for methods
         ast::ClassDef::ANCESTORS_store ancestors;
+
         return ast::MK::Module(send->loc, declLoc, std::move(name), std::move(ancestors), flattenDescribeBody(move(rhs)));
     } else if (send->fun == core::Names::its()) {
         auto argString = to_s(ctx, arg);
