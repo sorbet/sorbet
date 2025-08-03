@@ -429,14 +429,8 @@ public:
             return;
         }
 
-        // Skip test namespace validation for symbols from the synthetic __UNPACKAGED__ package
-        auto &db = ctx.state.packageDB();
-        auto otherPackage = db.getPackageNameForFile(otherFile);
-        bool isFromUnpackagedPackage = (otherPackage == db.getUnpackagedPackage(ctx));
-        
         // If the imported symbol comes from the test namespace, we must also be in the test namespace.
-        if (!isFromUnpackagedPackage && 
-            (otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
+        if ((otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
             !this->isAnyTestFile()) {
             if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                 e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
@@ -445,7 +439,10 @@ public:
             return;
         }
 
+        auto &db = ctx.state.packageDB();
+
         // no need to check visibility for these cases
+        auto otherPackage = db.getPackageNameForFile(otherFile);
         if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
             return;
         }
