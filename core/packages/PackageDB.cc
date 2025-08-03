@@ -206,12 +206,18 @@ MangledName PackageDB::findPackageByPath(const core::GlobalState &gs, core::File
 }
 
 MangledName PackageDB::getUnpackagedPackage(const core::GlobalState &gs) const {
-    auto unpackagedSymbol = core::Symbols::root().data(gs)->findMember(gs, core::Names::Constants::Unpackaged());
-    if (unpackagedSymbol.exists() && unpackagedSymbol.isClassOrModule()) {
-        return MangledName(unpackagedSymbol.asClassOrModuleRef());
+    // Look for the registered UnpackagedPackageInfo in our packages
+    for (const auto &[mangledName, pkg] : packages_) {
+        if (pkg && pkg->exists()) {
+            auto fullName = pkg->fullName();
+            // Check if this is an UnpackagedPackageInfo (empty fullName span)
+            if (fullName.empty()) {
+                return mangledName;
+            }
+        }
     }
     
-    // If the __UNPACKAGED__ symbol doesn't exist, return empty
+    // If no unpackaged package found, return empty
     return MangledName();
 }
 

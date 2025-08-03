@@ -2222,13 +2222,11 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             }
         }
 
-        // Step 6: Try creating MangledName without a real symbol to avoid type system issues
-        // Don't create a symbol - just create an empty MangledName
-        auto unpackagedMangledName = core::packages::MangledName();
-        auto unpackagedPkg = make_unique<UnpackagedPackageInfo>(unpackagedMangledName);
-        packages.db.enterPackage(move(unpackagedPkg));
+        // Step 11: Completely avoid UnpackagedPackageInfo registration 
+        // Instead, we'll handle unpackaged files differently in the error reporting
+        // This avoids all the package database and symbol creation issues
         
-        // TODO: Test if this approach avoids the type system crash
+        // TODO: Next step will be to modify error reporting to suppress unpackaged file errors
 
         // Must be called after any calls to enterPackage (i.e., only here)
         gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
@@ -2274,8 +2272,7 @@ void setPackageNameOnFilesImpl(core::GlobalState &gs, absl::Span<const Elem> fil
 
             pkg = db.findPackageByPath(gs, fref);
             if (!pkg.exists()) {
-                // TODO: Commented out to isolate segfault
-                // Assign unpackaged files to the synthetic __UNPACKAGED__ package
+                // TODO: File assignment disabled until UnpackagedPackageInfo can be processed safely
                 // pkg = db.getUnpackagedPackage(gs);
                 // if (!pkg.exists()) {
                 continue; // Skip unpackaged files for now
