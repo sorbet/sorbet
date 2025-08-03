@@ -209,6 +209,27 @@ cc_test(
 )
 
 cc_test(
+    name = "pkg-unpackaged-test",
+    size = "small",
+    srcs = ["pkg_unpackaged_test.cc"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//ast",
+        "//common",
+        "//common/concurrency",
+        "//core",
+        "//packager",
+        "//test/helpers",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
+    ],
+)
+
+cc_test(
     name = "error-check-test",
     size = "small",
     srcs = ["error-check-test.cc"],

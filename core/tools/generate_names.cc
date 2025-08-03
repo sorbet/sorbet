@@ -576,6 +576,7 @@ NameDef names[] = {
     {"Thread", "Thread", true},
     {"Configuration", "Configuration", true},
     {"Test", "Test", true},
+    {"Unpackaged", "__UNPACKAGED__", true},
     {"Autogen", "Autogen", true},
     {"Tokens", "Tokens", true},
     {"AccountModelMerchant", "AccountModelMerchant", true},

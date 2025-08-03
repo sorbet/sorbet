@@ -720,6 +720,110 @@ public:
     }
 };
 
+// Synthetic package for unpackaged code - allows incremental adoption of packages
+class UnpackagedPackageInfo final : public core::packages::PackageInfo {
+public:
+    core::packages::MangledName mangledName() const override {
+        return mangledName_;
+    }
+
+    absl::Span<const core::NameRef> fullName() const override {
+        return absl::MakeSpan(name_);
+    }
+
+    absl::Span<const string> pathPrefixes() const override {
+        return absl::MakeSpan(pathPrefixes_);
+    }
+
+    vector<core::packages::VisibleTo> visibleTo() const override {
+        return {};
+    }
+
+    unique_ptr<PackageInfo> deepCopy() const override {
+        return make_unique<UnpackagedPackageInfo>(*this);
+    }
+
+    optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>>
+    strictDependenciesLevel() const override {
+        return nullopt;
+    }
+
+    optional<pair<core::NameRef, core::LocOffsets>> layer() const override {
+        return nullopt;
+    }
+
+    optional<int> sccID() const override {
+        return nullopt;
+    }
+
+    optional<int> testSccID() const override {
+        return nullopt;
+    }
+
+    core::Loc fullLoc() const override {
+        return core::Loc::none();
+    }
+
+    core::Loc declLoc() const override {
+        return core::Loc::none();
+    }
+
+    optional<core::packages::ImportType> importsPackage(core::packages::MangledName mangledName) const override {
+        // __UNPACKAGED__ imports nothing by default
+        return nullopt;
+    }
+
+    bool causesLayeringViolation(const core::packages::PackageDB &packageDB,
+                                 const PackageInfo &otherPkg) const override {
+        return false;
+    }
+
+    core::packages::StrictDependenciesLevel minimumStrictDependenciesLevel() const override {
+        return core::packages::StrictDependenciesLevel::False;
+    }
+
+    optional<string> pathTo(const core::GlobalState &gs,
+                            const core::packages::MangledName dest) const override {
+        return nullopt;
+    }
+
+    optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
+                                                    core::packages::ImportType importType) const override {
+        // __UNPACKAGED__ cannot have imports added to it
+        return nullopt;
+    }
+
+    optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
+                                                    const core::SymbolRef name) const override {
+        // __UNPACKAGED__ cannot have exports added to it
+        return nullopt;
+    }
+
+    bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const override {
+        auto file = symbol.loc(gs).file();
+        auto pkg = gs.packageDB().getPackageNameForFile(file);
+        return this->mangledName() == pkg;
+    }
+
+    bool exportAll() const override {
+        return true; // __UNPACKAGED__ exports everything within itself
+    }
+
+    bool visibleToTests() const override {
+        return true;
+    }
+
+    explicit UnpackagedPackageInfo(core::packages::MangledName mangledName) : mangledName_(mangledName) {
+        // Use the pre-allocated constant for performance
+        name_.push_back(core::Names::Constants::Unpackaged());
+    }
+
+private:
+    core::packages::MangledName mangledName_;
+    vector<core::NameRef> name_;
+    vector<string> pathPrefixes_;
+};
+
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.
 // For example, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
 bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) {
@@ -2097,6 +2201,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
     // Find packages and determine their imports/exports.
     {
         core::UnfreezeNameTable unfreeze(gs);
+        core::UnfreezeSymbolTable unfreezeSymbols(gs);
         core::packages::UnfreezePackages packages = gs.unfreezePackages();
         for (auto &file : files) {
             if (!file.file.data(gs).isPackage(gs)) {
@@ -2122,6 +2227,13 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
                 packages.db.enterPackage(move(pkg));
             }
         }
+
+        // Always create and register the synthetic __UNPACKAGED__ package
+        // This allows any unpackaged files to be assigned to it
+        auto unpackagedSymbol = gs.enterClassSymbol(core::Loc::none(), core::Symbols::root(), core::Names::Constants::Unpackaged());
+        auto unpackagedMangledName = core::packages::MangledName(unpackagedSymbol);
+        auto unpackagedPkg = make_unique<UnpackagedPackageInfo>(unpackagedMangledName);
+        packages.db.enterPackage(move(unpackagedPkg));
 
         // Must be called after any calls to enterPackage (i.e., only here)
         gs.packageDB().resolvePackagesWithRelaxedChecks(gs);

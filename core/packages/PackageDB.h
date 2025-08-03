@@ -90,6 +90,9 @@ public:
     // Fetch the condensation graph for queries.
     const Condensation &condensation() const;
 
+    // Get the synthetic __UNPACKAGED__ package for files not owned by any explicit package
+    MangledName getUnpackagedPackage(const core::GlobalState &gs) const;
+
 private:
     bool enabled_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;

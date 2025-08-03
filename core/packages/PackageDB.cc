@@ -5,6 +5,8 @@
 #include "core/AutocorrectSuggestion.h"
 #include "core/GlobalState.h"
 #include "core/Loc.h"
+#include "core/Names.h"
+#include "core/Symbols.h"
 
 using namespace std;
 
@@ -200,6 +202,17 @@ MangledName PackageDB::findPackageByPath(const core::GlobalState &gs, core::File
         }
         curPrefixPos = path.find_last_of('/', curPrefixPos - 1);
     }
+    // If no package found and packaging is enabled, assign to __UNPACKAGED__
+    return getUnpackagedPackage(gs);
+}
+
+MangledName PackageDB::getUnpackagedPackage(const core::GlobalState &gs) const {
+    auto unpackagedSymbol = core::Symbols::root().data(gs)->findMember(gs, core::Names::Constants::Unpackaged());
+    if (unpackagedSymbol.exists() && unpackagedSymbol.isClassOrModule()) {
+        return MangledName(unpackagedSymbol.asClassOrModuleRef());
+    }
+    
+    // If the __UNPACKAGED__ symbol doesn't exist, return empty
     return MangledName();
 }
 
