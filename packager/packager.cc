@@ -800,7 +800,14 @@ public:
     }
 
     bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const override {
-        auto file = symbol.loc(gs).file();
+        auto loc = symbol.loc(gs);
+        if (!loc.exists()) {
+            return false; // Synthetic symbols don't belong to any package
+        }
+        auto file = loc.file();
+        if (!file.exists()) {
+            return false; // No file means no package ownership
+        }
         auto pkg = gs.packageDB().getPackageNameForFile(file);
         return this->mangledName() == pkg;
     }
