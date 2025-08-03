@@ -834,6 +834,10 @@ private:
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.
 // For example, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
 bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) {
+    // The synthetic __UNPACKAGED__ package doesn't have a real file, so it's never test-only
+    if (pkg.mangledName() == gs.packageDB().getUnpackagedPackage(gs)) {
+        return false;
+    }
     return pkg.loc.file().data(gs).isPackagedTest();
 }
 
@@ -2286,7 +2290,11 @@ void setPackageNameOnFilesImpl(core::GlobalState &gs, absl::Span<const Elem> fil
 
             pkg = db.findPackageByPath(gs, fref);
             if (!pkg.exists()) {
-                continue;
+                // Assign unpackaged files to the synthetic __UNPACKAGED__ package
+                pkg = db.getUnpackagedPackage(gs);
+                if (!pkg.exists()) {
+                    continue; // If __UNPACKAGED__ doesn't exist, skip the file
+                }
             }
 
             mapping.emplace_back(fref, pkg);

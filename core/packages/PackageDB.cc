@@ -202,8 +202,7 @@ MangledName PackageDB::findPackageByPath(const core::GlobalState &gs, core::File
         }
         curPrefixPos = path.find_last_of('/', curPrefixPos - 1);
     }
-    // If no package found and packaging is enabled, assign to __UNPACKAGED__
-    return getUnpackagedPackage(gs);
+    return MangledName();
 }
 
 MangledName PackageDB::getUnpackagedPackage(const core::GlobalState &gs) const {
