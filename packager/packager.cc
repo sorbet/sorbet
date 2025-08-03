@@ -1185,11 +1185,16 @@ public:
         pushConstantLit(ctx, constantLit);
 
         if (rootConsts == 0) {
+            // Skip namespace validation for the synthetic __UNPACKAGED__ package
+            bool isUnpackagedPackage = (pkg.mangledName() == ctx.state.packageDB().getUnpackagedPackage(ctx));
+            
             if (hasParentClass(classDef)) {
                 // A class definition that includes a parent `class Foo::Bar < Baz`
                 // must be made in that package
-                checkBehaviorLoc(ctx, classDef.declLoc);
-            } else if (!namespaces.onPackagePath(ctx)) {
+                if (!isUnpackagedPackage) {
+                    checkBehaviorLoc(ctx, classDef.declLoc);
+                }
+            } else if (!isUnpackagedPackage && !namespaces.onPackagePath(ctx)) {
                 ENFORCE(errorDepth == 0);
                 errorDepth++;
                 if (auto e = ctx.beginError(constantLit->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
@@ -1233,7 +1238,10 @@ public:
         if (lhs != nullptr && rootConsts == 0) {
             pushConstantLit(ctx, lhs);
 
-            if (rootConsts == 0 && namespaces.packageForNamespace() != pkg.mangledName()) {
+            // Skip namespace validation for the synthetic __UNPACKAGED__ package
+            bool isUnpackagedPackage = (pkg.mangledName() == ctx.state.packageDB().getUnpackagedPackage(ctx));
+
+            if (rootConsts == 0 && !isUnpackagedPackage && namespaces.packageForNamespace() != pkg.mangledName()) {
                 ENFORCE(errorDepth == 0);
                 errorDepth++;
                 if (auto e = ctx.beginError(lhs->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
@@ -1284,6 +1292,13 @@ public:
         if (rootConsts > 0 || namespaces.depth() == 0) {
             return;
         }
+        
+        // Skip namespace validation for the synthetic __UNPACKAGED__ package
+        bool isUnpackagedPackage = (pkg.mangledName() == ctx.state.packageDB().getUnpackagedPackage(ctx));
+        if (isUnpackagedPackage) {
+            return;
+        }
+        
         auto packageForNamespace = namespaces.packageForNamespace();
         if (packageForNamespace != pkg.mangledName()) {
             ENFORCE(errorDepth == 0);
