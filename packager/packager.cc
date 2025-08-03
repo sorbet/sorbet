@@ -2168,12 +2168,8 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 
     auto pkg = ctx.state.packageDB().getPackageNameForFile(ctx.file);
     if (!pkg.exists()) {
-        // Don't transform, but raise an error on the first line.
-        if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
-            e.setHeader("File `{}` does not belong to a package; add a `{}` file to one "
-                        "of its parent directories",
-                        ctx.file.data(ctx).path(), PACKAGE_FILE_NAME);
-        }
+        // Silently ignore unpackaged files (simulates __UNPACKAGED__ package behavior)
+        // This avoids the "does not belong to a package" errors
         return;
     }
 
