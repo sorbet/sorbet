@@ -720,6 +720,8 @@ public:
     }
 };
 
+// TODO: Temporarily commented out to isolate build hanging issue
+/*
 // Synthetic package for unpackaged code - allows incremental adoption of packages
 class UnpackagedPackageInfo final : public core::packages::PackageInfo {
 public:
@@ -728,11 +730,13 @@ public:
     }
 
     absl::Span<const core::NameRef> fullName() const override {
-        return absl::MakeSpan(name_);
+        // TODO: Simplified to isolate segfault
+        return absl::Span<const core::NameRef>();
     }
 
     absl::Span<const string> pathPrefixes() const override {
-        return absl::MakeSpan(pathPrefixes_);
+        static vector<string> emptyPrefixes;
+        return absl::MakeSpan(emptyPrefixes);
     }
 
     vector<core::packages::VisibleTo> visibleTo() const override {
@@ -740,7 +744,7 @@ public:
     }
 
     unique_ptr<PackageInfo> deepCopy() const override {
-        return make_unique<UnpackagedPackageInfo>(*this);
+        return make_unique<UnpackagedPackageInfo>(mangledName_, core::Names::Constants::Unpackaged());
     }
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>>
@@ -800,16 +804,10 @@ public:
     }
 
     bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const override {
-        auto loc = symbol.loc(gs);
-        if (!loc.exists()) {
-            return false; // Synthetic symbols don't belong to any package
-        }
-        auto file = loc.file();
-        if (!file.exists()) {
-            return false; // No file means no package ownership
-        }
-        auto pkg = gs.packageDB().getPackageNameForFile(file);
-        return this->mangledName() == pkg;
+        // The __UNPACKAGED__ package doesn't own any specific symbols in the traditional sense
+        // It's used as a fallback for files that don't belong to any explicit package
+        // To avoid circular dependencies during package resolution, we return false here
+        return false;
     }
 
     bool exportAll() const override {
@@ -820,24 +818,20 @@ public:
         return true;
     }
 
-    explicit UnpackagedPackageInfo(core::packages::MangledName mangledName) : mangledName_(mangledName) {
-        // Use the pre-allocated constant for performance
-        name_.push_back(core::Names::Constants::Unpackaged());
+    explicit UnpackagedPackageInfo(core::packages::MangledName mangledName, core::NameRef unpackagedName) 
+        : mangledName_(mangledName) {
+        // Empty constructor body to isolate segfault issue
     }
 
 private:
     core::packages::MangledName mangledName_;
-    vector<core::NameRef> name_;
-    vector<string> pathPrefixes_;
 };
+*/
 
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.
 // For example, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
 bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) {
-    // The synthetic __UNPACKAGED__ package doesn't have a real file, so it's never test-only
-    if (pkg.mangledName() == gs.packageDB().getUnpackagedPackage(gs)) {
-        return false;
-    }
+    // Temporarily avoiding potential issues with UnpackagedPackageInfo
     return pkg.loc.file().data(gs).isPackagedTest();
 }
 
@@ -2239,12 +2233,13 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             }
         }
 
-        // Always create and register the synthetic __UNPACKAGED__ package
-        // This allows any unpackaged files to be assigned to it
-        auto unpackagedSymbol = gs.enterClassSymbol(core::Loc::none(), core::Symbols::root(), core::Names::Constants::Unpackaged());
-        auto unpackagedMangledName = core::packages::MangledName(unpackagedSymbol);
-        auto unpackagedPkg = make_unique<UnpackagedPackageInfo>(unpackagedMangledName);
-        packages.db.enterPackage(move(unpackagedPkg));
+        // Create the symbol and mangled name but don't create the package object
+        auto unpackagedName = core::Names::Constants::Unpackaged();
+        auto unpackagedSymbol = gs.enterClassSymbol(core::Loc::none(), core::Symbols::root(), unpackagedName);
+        [[maybe_unused]] auto unpackagedMangledName = core::packages::MangledName(unpackagedSymbol);
+        // TODO: Commented out to isolate segfault - this line causes hanging
+        // [[maybe_unused]] auto unpackagedPkg = make_unique<UnpackagedPackageInfo>(unpackagedMangledName, unpackagedName);
+        // packages.db.enterPackage(move(unpackagedPkg));
 
         // Must be called after any calls to enterPackage (i.e., only here)
         gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
@@ -2290,11 +2285,12 @@ void setPackageNameOnFilesImpl(core::GlobalState &gs, absl::Span<const Elem> fil
 
             pkg = db.findPackageByPath(gs, fref);
             if (!pkg.exists()) {
+                // TODO: Commented out to isolate segfault
                 // Assign unpackaged files to the synthetic __UNPACKAGED__ package
-                pkg = db.getUnpackagedPackage(gs);
-                if (!pkg.exists()) {
-                    continue; // If __UNPACKAGED__ doesn't exist, skip the file
-                }
+                // pkg = db.getUnpackagedPackage(gs);
+                // if (!pkg.exists()) {
+                continue; // Skip unpackaged files for now
+                // }
             }
 
             mapping.emplace_back(fref, pkg);
