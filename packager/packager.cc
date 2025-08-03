@@ -2222,14 +2222,13 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             }
         }
 
-        // Step 5.1: Create UnpackagedPackageInfo but DON'T register it yet (registration causes type system crash)
-        auto unpackagedName = core::Names::Constants::Unpackaged();
-        auto unpackagedSymbol = gs.enterClassSymbol(core::Loc::none(), core::Symbols::root(), unpackagedName);
-        auto unpackagedMangledName = core::packages::MangledName(unpackagedSymbol);
-        [[maybe_unused]] auto unpackagedPkg = make_unique<UnpackagedPackageInfo>(unpackagedMangledName);
-        // TODO: packages.db.enterPackage(move(unpackagedPkg)); // This line causes type system crash
+        // Step 6: Try creating MangledName without a real symbol to avoid type system issues
+        // Don't create a symbol - just create an empty MangledName
+        auto unpackagedMangledName = core::packages::MangledName();
+        auto unpackagedPkg = make_unique<UnpackagedPackageInfo>(unpackagedMangledName);
+        packages.db.enterPackage(move(unpackagedPkg));
         
-        // TODO: Need to investigate why registration causes type system to crash
+        // TODO: Test if this approach avoids the type system crash
 
         // Must be called after any calls to enterPackage (i.e., only here)
         gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
