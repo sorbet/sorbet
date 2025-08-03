@@ -720,23 +720,20 @@ public:
     }
 };
 
-// TODO: Temporarily commented out to isolate build hanging issue
-/*
-// Synthetic package for unpackaged code - allows incremental adoption of packages
+// Step 3: Minimal UnpackagedPackageInfo class
 class UnpackagedPackageInfo final : public core::packages::PackageInfo {
 public:
     core::packages::MangledName mangledName() const override {
         return mangledName_;
     }
 
+    // Minimal implementations to avoid segfaults
     absl::Span<const core::NameRef> fullName() const override {
-        // TODO: Simplified to isolate segfault
         return absl::Span<const core::NameRef>();
     }
 
     absl::Span<const string> pathPrefixes() const override {
-        static vector<string> emptyPrefixes;
-        return absl::MakeSpan(emptyPrefixes);
+        return absl::Span<const string>();
     }
 
     vector<core::packages::VisibleTo> visibleTo() const override {
@@ -744,7 +741,7 @@ public:
     }
 
     unique_ptr<PackageInfo> deepCopy() const override {
-        return make_unique<UnpackagedPackageInfo>(mangledName_, core::Names::Constants::Unpackaged());
+        return nullptr;
     }
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>>
@@ -773,7 +770,6 @@ public:
     }
 
     optional<core::packages::ImportType> importsPackage(core::packages::MangledName mangledName) const override {
-        // __UNPACKAGED__ imports nothing by default
         return nullopt;
     }
 
@@ -793,40 +789,33 @@ public:
 
     optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                     core::packages::ImportType importType) const override {
-        // __UNPACKAGED__ cannot have imports added to it
         return nullopt;
     }
 
     optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                     const core::SymbolRef name) const override {
-        // __UNPACKAGED__ cannot have exports added to it
         return nullopt;
     }
 
     bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const override {
-        // The __UNPACKAGED__ package doesn't own any specific symbols in the traditional sense
-        // It's used as a fallback for files that don't belong to any explicit package
-        // To avoid circular dependencies during package resolution, we return false here
         return false;
     }
 
     bool exportAll() const override {
-        return true; // __UNPACKAGED__ exports everything within itself
+        return false;
     }
 
     bool visibleToTests() const override {
-        return true;
+        return false;
     }
 
-    explicit UnpackagedPackageInfo(core::packages::MangledName mangledName, core::NameRef unpackagedName) 
+    explicit UnpackagedPackageInfo(core::packages::MangledName mangledName) 
         : mangledName_(mangledName) {
-        // Empty constructor body to isolate segfault issue
     }
 
 private:
     core::packages::MangledName mangledName_;
 };
-*/
 
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.
 // For example, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
@@ -2233,13 +2222,12 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             }
         }
 
-        // Create the symbol and mangled name but don't create the package object
+        // Step 2: Create symbol and MangledName
         auto unpackagedName = core::Names::Constants::Unpackaged();
         auto unpackagedSymbol = gs.enterClassSymbol(core::Loc::none(), core::Symbols::root(), unpackagedName);
         [[maybe_unused]] auto unpackagedMangledName = core::packages::MangledName(unpackagedSymbol);
-        // TODO: Commented out to isolate segfault - this line causes hanging
-        // [[maybe_unused]] auto unpackagedPkg = make_unique<UnpackagedPackageInfo>(unpackagedMangledName, unpackagedName);
-        // packages.db.enterPackage(move(unpackagedPkg));
+        
+        // TODO: Next step will add package creation
 
         // Must be called after any calls to enterPackage (i.e., only here)
         gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
