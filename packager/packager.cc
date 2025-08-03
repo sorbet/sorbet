@@ -2222,12 +2222,13 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             }
         }
 
-        // Step 2: Create symbol and MangledName
+        // Step 4: Create symbol, MangledName, and UnpackagedPackageInfo instance
         auto unpackagedName = core::Names::Constants::Unpackaged();
         auto unpackagedSymbol = gs.enterClassSymbol(core::Loc::none(), core::Symbols::root(), unpackagedName);
-        [[maybe_unused]] auto unpackagedMangledName = core::packages::MangledName(unpackagedSymbol);
+        auto unpackagedMangledName = core::packages::MangledName(unpackagedSymbol);
+        [[maybe_unused]] auto unpackagedPkg = make_unique<UnpackagedPackageInfo>(unpackagedMangledName);
         
-        // TODO: Next step will add package creation
+        // TODO: Next step will register the package with the database
 
         // Must be called after any calls to enterPackage (i.e., only here)
         gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
