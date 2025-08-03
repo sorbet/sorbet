@@ -19,7 +19,7 @@ auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 namespace sorbet {
 
-TEST_CASE("Unpackaged files are assigned to synthetic __UNPACKAGED__ package") {
+TEST_CASE("Unpackaged files are not assigned to any package") {
     core::GlobalState gs(errorQueue);
     test::PackageHelpers::makeDefaultPackagerGlobalState(gs, test::PackageHelpers::LAYERS_UTIL_LIB_APP);
     
@@ -62,36 +62,23 @@ TEST_CASE("Unpackaged files are assigned to synthetic __UNPACKAGED__ package") {
     CHECK(anotherUnpackagedFile.exists());
     CHECK(packagedFile.exists());
     
-    // Test that unpackaged files are assigned to __UNPACKAGED__ package
+    // Test that unpackaged files are NOT assigned to any package
     {
         auto unpackagedPkg = gs.packageDB().getPackageNameForFile(unpackagedFile);
-        CHECK(unpackagedPkg.exists());
-        
-        const auto &pkgInfo = gs.packageDB().getPackageInfo(unpackagedPkg);
-        CHECK(pkgInfo.exists());
-        
-        // The package name should be "__UNPACKAGED__"
-        auto fullName = pkgInfo.fullName();
-        CHECK_EQ(1, fullName.size());
-        CHECK_EQ("__UNPACKAGED__", fullName[0].show(gs));
+        CHECK_FALSE(unpackagedPkg.exists());
     }
     
-    // Test that another unpackaged file gets the same package
+    // Test that another unpackaged file is also not assigned to any package
     {
         auto anotherUnpackagedPkg = gs.packageDB().getPackageNameForFile(anotherUnpackagedFile);
-        auto originalUnpackagedPkg = gs.packageDB().getPackageNameForFile(unpackagedFile);
-        
-        CHECK(anotherUnpackagedPkg.exists());
-        CHECK_EQ(originalUnpackagedPkg, anotherUnpackagedPkg);
+        CHECK_FALSE(anotherUnpackagedPkg.exists());
     }
     
-    // Test that regular packaged file gets its proper package (not __UNPACKAGED__)
+    // Test that regular packaged file gets its proper package
     {
         auto packagedPkg = gs.packageDB().getPackageNameForFile(packagedFile);
-        auto unpackagedPkg = gs.packageDB().getPackageNameForFile(unpackagedFile);
         
         CHECK(packagedPkg.exists());
-        CHECK_NE(packagedPkg, unpackagedPkg);
         
         const auto &pkgInfo = gs.packageDB().getPackageInfo(packagedPkg);
         auto fullName = pkgInfo.fullName();
@@ -99,39 +86,20 @@ TEST_CASE("Unpackaged files are assigned to synthetic __UNPACKAGED__ package") {
         CHECK_EQ("Lib", fullName[0].show(gs));
         CHECK_EQ("MyPackage", fullName[1].show(gs));
     }
-    
-    // Test __UNPACKAGED__ package properties
-    {
-        auto unpackagedPkg = gs.packageDB().getPackageNameForFile(unpackagedFile);
-        const auto &pkgInfo = gs.packageDB().getPackageInfo(unpackagedPkg);
-        
-        // Should export all (no restrictions within unpackaged code)
-        CHECK(pkgInfo.exportAll());
-        
-        // Should be visible to tests
-        CHECK(pkgInfo.visibleToTests());
-        
-        // Should have no strict dependencies constraints
-        CHECK_FALSE(pkgInfo.strictDependenciesLevel().has_value());
-        CHECK_FALSE(pkgInfo.layer().has_value());
-        
-        // Should have no path prefixes (can contain code anywhere)
-        CHECK_EQ(0, pkgInfo.pathPrefixes().size());
-    }
 }
 
-TEST_CASE("__UNPACKAGED__ package exists in package list") {
+TEST_CASE("No synthetic __UNPACKAGED__ package is created") {
     core::GlobalState gs(errorQueue);
     test::PackageHelpers::makeDefaultPackagerGlobalState(gs, test::PackageHelpers::LAYERS_UTIL_LIB_APP);
     
-    // Create at least one unpackaged file to trigger __UNPACKAGED__ creation
+    // Create at least one unpackaged file
     vector<pair<string, string>> sources = {
         {"unpackaged.rb", "# frozen_string_literal: true\nclass Test\nend\n"}
     };
     
     test::PackageHelpers::enterPackages(gs, sources);
     
-    // Check that __UNPACKAGED__ package appears in the package list
+    // Check that NO __UNPACKAGED__ package appears in the package list
     auto packages = gs.packageDB().packages();
     bool foundUnpackaged = false;
     
@@ -146,7 +114,7 @@ TEST_CASE("__UNPACKAGED__ package exists in package list") {
         }
     }
     
-    CHECK(foundUnpackaged);
+    CHECK_FALSE(foundUnpackaged);
 }
 
 } // namespace sorbet
