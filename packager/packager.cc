@@ -818,12 +818,20 @@ bool isRootScopedDefinition(const ast::ConstantLit *lit) {
     return false;
 }
 
-// Some of this gets simpler after we move packager into namer, because we can stop defining package
-// symbols under PackageSpecRegistry.
-// TODO(jez) Make this a struct with named fields.
-// TODO(jez) This solution is hacky: is it the best?
-tuple<core::packages::MangledName, core::ClassOrModuleRef, bool> packageForSymbol(const core::GlobalState &gs,
-                                                                                  core::SymbolRef sym) {
+struct PackageForSymbolResult {
+    // The closest package for `sym`
+    core::packages::MangledName bestPkg;
+
+    // The closest owner symbol inside `<PackageSpecRegistry>`. Might not actually correspond to a
+    // package if it's just a namespace, e.g. `<PSR>::Pkg1::NS` for `::Pkg1::Inner::NS::A`
+    core::ClassOrModuleRef bestOwner;
+
+    // Could be a prefix if `sym` is a `ClassOrModuleRef`
+    bool couldBePrefix;
+};
+
+// TODO(jez) Once ClassOrModule symbols link to the Package Symbol that owns them, this should go away.
+PackageForSymbolResult packageForSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     // Skip until we get to the ClassOrModule things (ignore static-fields / type members to find package namespace)
     bool couldBePrefix = true;
     while (!sym.isClassOrModule()) {
@@ -914,14 +922,25 @@ class EnforcePackagePrefix final {
     // because Sorbet does not always run with --stripe-packages.
     const core::SymbolRef maybeTestNamespace;
 
-    // TODO(jez) Document me
+    // By contrast with `Context::owner`, this `scope` field:
+    //
+    // - Only tracks constant symbols (`owner` will be a MethodRef inside `{pre,post}TransformMethodDef`)
+    // - `Context::owner` does not track a loc
     vector<pair<core::SymbolRef, core::LocOffsets>> scope;
 
     // Meant to track when we're inside something like `class ::A; class B; end; end` instead of
     // `class A; class B; end; end`. Classes that start from an absolutely qualified "cbase" with a
     // leading `::` are opted out of the EnforcePackagePrefix checks.
-    // TODO(jez) Document this in the public docs for the packager (at least in the error reference,
-    // but also in any eventual docs on the package system).
+    //
+    // TODO(jez) Document this in the public docs for the packager
+    //   (at least in the error reference, but also in any eventual docs on the package system).
+    //
+    //   It's not clear what the long term behavior for this should be. I think that we're going to
+    //   have to invent a concept of "prelude packages" and have all root-scoped stuff like this
+    //   live in those prelude packages.
+    //
+    //   (The motivation is: if 100% of code in a repo is packaged, where do monkey patches live,
+    //   because the stdlib and gems are unpackaged?)
     size_t rootConsts = 0;
 
     // Counter to avoid duplicate errors:
@@ -958,13 +977,6 @@ public:
         if (rootConsts > 0) {
             // This is a root-scoped constant, like `class ::A; end`.
             // These are exempted from package prefix checking.
-            //
-            // TODO(jez) It's not clear what the long term behavior for this should be.
-            // I think that we're going to have to invent a concept of "prelude packages" and have
-            // all root-scoped stuff like this live in those prelude packages.
-            //
-            // (The motivation is: if 100% of code in a repo is packaged, where do monkey patches
-            // live, because the stdlib and gems are unpackaged?)
             return;
         }
 
@@ -1115,18 +1127,6 @@ public:
 
 private:
     void pushScope(const ast::ConstantLit *lit) {
-        // TODO(jez) Do I need to handle things like
-        //
-        //     class A
-        //       class B::C
-        //       end
-        //     end
-        //
-        // and things like
-        //
-        //     A::B::X = 1
-        //
-        // ?
         scope.emplace_back(lit->symbol(), lit->loc());
         if (isRootScopedDefinition(lit)) {
             rootConsts++;
