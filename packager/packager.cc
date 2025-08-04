@@ -837,6 +837,13 @@ tuple<core::packages::MangledName, core::ClassOrModuleRef, bool> packageForSymbo
     while (klassSym != core::Symbols::root()) {
         ENFORCE(klassSym != core::Symbols::PackageSpecRegistry(), "Should only be called from non-__package.rb file");
 
+        auto klass = klassSym.data(gs);
+        auto maybeAttachedClass = klass->attachedClass(gs);
+        if (maybeAttachedClass.exists()) {
+            klassSym = maybeAttachedClass;
+            continue;
+        }
+
         fullNameReversed.emplace_back(klassSym.data(gs)->name);
         klassSym = klassSym.data(gs)->owner;
     }
