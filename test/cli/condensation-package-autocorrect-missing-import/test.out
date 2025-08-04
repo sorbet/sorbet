@@ -1,0 +1,486 @@
+use_other_package/foo.rb:16: Unable to resolve constant `MyClass` https://srb.help/5002
+    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+          ^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_other_package/foo.rb:16: Replaced with `Class`
+    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+          ^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: `Class` defined here
+    NN |class Class < Module
+        ^^^^^^^^^^^^^^^^^^^^
+
+use_other_package/foo.rb:7: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
+     7 |      Foo::Bar::OtherPackage::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_other_package/__package.rb:7: Inserted `import Foo::Bar::OtherPackage`
+     7 |  strict_dependencies 'layered'
+                                       ^
+
+use_other_package/foo.rb:8: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
+     8 |      Bar::OtherPackage::OtherClass # resolves via `module Foo`
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_other_package/__package.rb:7: Inserted `import Foo::Bar::OtherPackage`
+     7 |  strict_dependencies 'layered'
+                                       ^
+
+use_other_package/foo.rb:9: Used `test_import` constant `Foo::Bar::OtherPackageTest::OtherClass` in non-test file https://srb.help/3720
+     9 |      Foo::Bar::OtherPackageTest::OtherClass
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other_test/__package.rb:3: Defined here
+     3 |class Foo::Bar::OtherPackageTest < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_other_package/__package.rb:7: Inserted `import Foo::Bar::OtherPackageTest`
+     7 |  strict_dependencies 'layered'
+                                       ^
+    use_other_package/__package.rb:8: Deleted
+     8 |  test_import Foo::Bar::OtherPackageTest
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+use_other_package/foo.rb:15: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
+    15 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_other_package/__package.rb:7: Inserted `import Foo::Bar::OtherPackage`
+     7 |  strict_dependencies 'layered'
+                                       ^
+
+use_other_package/foo.rb:18: `Test::Foo::Bar::OtherPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    18 |  Test::Foo::Bar::OtherPackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+use_other_package/foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+     4 |  Test::Foo::Bar::OtherPackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_other_package/__package.rb:7: Inserted `test_import Foo::Bar::OtherPackage, only: "test_rb"`
+     7 |  strict_dependencies 'layered'
+                                       ^
+
+use_other_package/foo.test.rb:6: `Foo::Bar::OtherPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
+     6 |  Foo::Bar::OtherPackage::ImportMeTestOnly
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_other_package/__package.rb:7: Inserted `test_import Foo::Bar::OtherPackage, only: "test_rb"`
+     7 |  strict_dependencies 'layered'
+                                       ^
+Errors: 8
+# frozen_string_literal: true
+# typed: strict
+# enable-packager: true
+
+class Foo::MyPackage < PackageSpec
+  layer 'lib'
+  strict_dependencies 'layered'
+  import Foo::Bar::OtherPackage
+
+end
+
+--------------------------------------------------------------------------
+
+use_app_package/foo.rb:6: `Foo::Bar::AppPackage::OtherClass` cannot be referenced here because importing its package would cause a layering violation https://srb.help/3726
+     6 |      Foo::Bar::AppPackage::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_package/__package.rb:4: Package `Foo::Bar::AppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     4 |  layer 'app'
+                ^^^^^
+  Note:
+    `Foo::Bar::AppPackage::OtherClass`'s package is not imported
+
+use_app_package/foo.rb:7: `Foo::Bar::AppPackageTest::OtherClass` cannot be referenced here because importing its package would cause a layering violation https://srb.help/3726
+     7 |      Foo::Bar::AppPackageTest::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_package_test/__package.rb:4: Package `Foo::Bar::AppPackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     4 |  layer 'app'
+                ^^^^^
+  Note:
+    `Foo::Bar::AppPackageTest::OtherClass`'s package is imported as `test_import`
+
+use_app_package/foo.rb:13: `Test::Foo::Bar::AppPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    13 |  Test::Foo::Bar::AppPackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+use_app_package/foo.test.rb:6: `Foo::Bar::AppPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
+     6 |  Foo::Bar::AppPackage::ImportMeTestOnly
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_package/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::AppPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_app_package/__package.rb:7: Inserted `test_import Foo::Bar::AppPackage, only: "test_rb"`
+     7 |  strict_dependencies 'layered'
+                                       ^
+Errors: 4
+# frozen_string_literal: true
+# typed: strict
+# enable-packager: true
+
+class Foo::MyPackage < PackageSpec
+  layer 'lib'
+  strict_dependencies 'layered'
+  test_import Foo::Bar::AppPackage, only: "test_rb"
+  test_import Foo::Bar::AppPackageTest
+end
+
+--------------------------------------------------------------------------
+
+use_false_package/foo.rb:6: `Foo::Bar::FalsePackage::OtherClass` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
+     6 |      Foo::Bar::FalsePackage::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_package/__package.rb:5: `Foo::Bar::FalsePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     5 |  strict_dependencies 'false'
+                              ^^^^^^^
+  Note:
+    `Foo::Bar::FalsePackage::OtherClass`'s package is not imported
+
+use_false_package/foo.rb:7: `Foo::Bar::FalsePackageTest::OtherClass` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
+     7 |      Foo::Bar::FalsePackageTest::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_package_test/__package.rb:5: `Foo::Bar::FalsePackageTest` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     5 |  strict_dependencies 'false'
+                              ^^^^^^^
+  Note:
+    `Foo::Bar::FalsePackageTest::OtherClass`'s package is imported as `test_import`
+
+use_false_package/foo.rb:13: `Test::Foo::Bar::FalsePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    13 |  Test::Foo::Bar::FalsePackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+use_false_package/foo.test.rb:4: `Test::Foo::Bar::FalsePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+     4 |  Test::Foo::Bar::FalsePackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_package/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::FalsePackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_false_package/__package.rb:7: Inserted `test_import Foo::Bar::FalsePackage, only: "test_rb"`
+     7 |  strict_dependencies 'layered'
+                                       ^
+Errors: 4
+# frozen_string_literal: true
+# typed: strict
+# enable-packager: true
+
+class Foo::MyPackage < PackageSpec
+  layer 'lib'
+  strict_dependencies 'layered'
+  test_import Foo::Bar::FalsePackage, only: "test_rb"
+  test_import Foo::Bar::FalsePackageTest
+end
+
+--------------------------------------------------------------------------
+
+use_false_and_app_package/foo.rb:6: `Foo::Bar::FalseAndAppPackage::OtherClass` cannot be referenced here because importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3726
+     6 |      Foo::Bar::FalseAndAppPackage::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_and_app_package/__package.rb:4: Package `Foo::Bar::FalseAndAppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     4 |  layer 'app'
+                ^^^^^
+    false_and_app_package/__package.rb:5: `Foo::Bar::FalseAndAppPackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     5 |  strict_dependencies 'false'
+                              ^^^^^^^
+  Note:
+    `Foo::Bar::FalseAndAppPackage::OtherClass`'s package is not imported
+
+use_false_and_app_package/foo.rb:7: `Foo::Bar::FalseAndAppPackageTest::OtherClass` cannot be referenced here because importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3726
+     7 |      Foo::Bar::FalseAndAppPackageTest::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_and_app_package_test/__package.rb:4: Package `Foo::Bar::FalseAndAppPackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     4 |  layer 'app'
+                ^^^^^
+    false_and_app_package_test/__package.rb:5: `Foo::Bar::FalseAndAppPackageTest` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     5 |  strict_dependencies 'false'
+                              ^^^^^^^
+  Note:
+    `Foo::Bar::FalseAndAppPackageTest::OtherClass`'s package is imported as `test_import`
+
+use_false_and_app_package/foo.rb:13: `Test::Foo::Bar::FalseAndAppPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    13 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+use_false_and_app_package/foo.test.rb:4: `Test::Foo::Bar::FalseAndAppPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+     4 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_and_app_package/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::FalseAndAppPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_false_and_app_package/__package.rb:7: Inserted `test_import Foo::Bar::FalseAndAppPackage, only: "test_rb"`
+     7 |  strict_dependencies 'layered'
+                                       ^
+Errors: 4
+# frozen_string_literal: true
+# typed: strict
+# enable-packager: true
+
+class Foo::MyPackage < PackageSpec
+  layer 'lib'
+  strict_dependencies 'layered'
+  test_import Foo::Bar::FalseAndAppPackage, only: "test_rb"
+  test_import Foo::Bar::FalseAndAppPackageTest
+end
+
+--------------------------------------------------------------------------
+
+use_cycle_package/foo.rb:6: `Foo::Bar::CyclePackage::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle https://srb.help/3727
+     6 |      Foo::Bar::CyclePackage::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::CyclePackage` to `Foo::MyPackage`:
+    `Foo::Bar::CyclePackage` →
+    `Foo::MyPackage`
+
+  Note:
+    `Foo::Bar::CyclePackage::OtherClass`'s package is not imported
+
+use_cycle_package/foo.rb:7: `Foo::Bar::CyclePackageTest::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle https://srb.help/3727
+     7 |      Foo::Bar::CyclePackageTest::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::CyclePackageTest` to `Foo::MyPackage`:
+    `Foo::Bar::CyclePackageTest` →
+    `Foo::MyPackage`
+
+  Note:
+    `Foo::Bar::CyclePackageTest::OtherClass`'s package is imported as `test_import`
+
+use_cycle_package/foo.rb:13: `Test::Foo::Bar::CyclePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    13 |  Test::Foo::Bar::CyclePackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+use_cycle_package/foo.test.rb:4: `Test::Foo::Bar::CyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+     4 |  Test::Foo::Bar::CyclePackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    cycle_package/__package.rb:5: Exported from package here
+     5 |class Foo::Bar::CyclePackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_cycle_package/__package.rb:7: Inserted `test_import Foo::Bar::CyclePackage, only: "test_rb"`
+     7 |  strict_dependencies 'layered_dag'
+                                           ^
+Errors: 4
+# frozen_string_literal: true
+# typed: strict
+# enable-packager: true
+
+class Foo::MyPackage < PackageSpec
+  layer 'lib'
+  strict_dependencies 'layered_dag'
+  test_import Foo::Bar::CyclePackage, only: "test_rb"
+  test_import Foo::Bar::CyclePackageTest
+end
+
+--------------------------------------------------------------------------
+
+use_app_cycle_package/foo.rb:6: `Foo::Bar::AppCyclePackage::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, and importing its package would cause a layering violation https://srb.help/3727
+     6 |      Foo::Bar::AppCyclePackage::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::AppCyclePackage` to `Foo::MyPackage`:
+    `Foo::Bar::AppCyclePackage` →
+    `Foo::MyPackage`
+
+    app_cycle_package/__package.rb:6: Package `Foo::Bar::AppCyclePackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     6 |  layer 'app'
+                ^^^^^
+  Note:
+    `Foo::Bar::AppCyclePackage::OtherClass`'s package is not imported
+
+use_app_cycle_package/foo.rb:7: `Foo::Bar::AppCyclePackageTest::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, and importing its package would cause a layering violation https://srb.help/3727
+     7 |      Foo::Bar::AppCyclePackageTest::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::AppCyclePackageTest` to `Foo::MyPackage`:
+    `Foo::Bar::AppCyclePackageTest` →
+    `Foo::MyPackage`
+
+    app_cycle_package_test/__package.rb:6: Package `Foo::Bar::AppCyclePackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     6 |  layer 'app'
+                ^^^^^
+  Note:
+    `Foo::Bar::AppCyclePackageTest::OtherClass`'s package is imported as `test_import`
+
+use_app_cycle_package/foo.rb:13: `Test::Foo::Bar::AppCyclePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    13 |  Test::Foo::Bar::AppCyclePackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+use_app_cycle_package/foo.test.rb:4: `Test::Foo::Bar::AppCyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+     4 |  Test::Foo::Bar::AppCyclePackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_cycle_package/__package.rb:5: Exported from package here
+     5 |class Foo::Bar::AppCyclePackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_app_cycle_package/__package.rb:7: Inserted `test_import Foo::Bar::AppCyclePackage, only: "test_rb"`
+     7 |  strict_dependencies 'layered_dag'
+                                           ^
+Errors: 4
+# frozen_string_literal: true
+# typed: strict
+# enable-packager: true
+
+class Foo::MyPackage < PackageSpec
+  layer 'lib'
+  strict_dependencies 'layered_dag'
+  test_import Foo::Bar::AppCyclePackage, only: "test_rb"
+  test_import Foo::Bar::AppCyclePackageTest
+end
+
+--------------------------------------------------------------------------
+
+use_false_cycle_package/foo.rb:6: `Foo::Bar::FalseCyclePackage::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, and its `strict_dependencies` is not strict enough https://srb.help/3727
+     6 |      Foo::Bar::FalseCyclePackage::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::FalseCyclePackage` to `Foo::MyPackage`:
+    `Foo::Bar::FalseCyclePackage` →
+    `Foo::MyPackage`
+
+    false_cycle_package/__package.rb:7: `Foo::Bar::FalseCyclePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     7 |  strict_dependencies 'false'
+                              ^^^^^^^
+  Note:
+    `Foo::Bar::FalseCyclePackage::OtherClass`'s package is not imported
+
+use_false_cycle_package/foo.rb:7: `Foo::Bar::FalseCyclePackageTest::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, and its `strict_dependencies` is not strict enough https://srb.help/3727
+     7 |      Foo::Bar::FalseCyclePackageTest::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::FalseCyclePackageTest` to `Foo::MyPackage`:
+    `Foo::Bar::FalseCyclePackageTest` →
+    `Foo::MyPackage`
+
+    false_cycle_package_test/__package.rb:7: `Foo::Bar::FalseCyclePackageTest` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     7 |  strict_dependencies 'false'
+                              ^^^^^^^
+  Note:
+    `Foo::Bar::FalseCyclePackageTest::OtherClass`'s package is imported as `test_import`
+
+use_false_cycle_package/foo.rb:13: `Test::Foo::Bar::FalseCyclePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    13 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+use_false_cycle_package/foo.test.rb:4: `Test::Foo::Bar::FalseCyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+     4 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_cycle_package/__package.rb:5: Exported from package here
+     5 |class Foo::Bar::FalseCyclePackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_false_cycle_package/__package.rb:7: Inserted `test_import Foo::Bar::FalseCyclePackage, only: "test_rb"`
+     7 |  strict_dependencies 'layered_dag'
+                                           ^
+Errors: 4
+# frozen_string_literal: true
+# typed: strict
+# enable-packager: true
+
+class Foo::MyPackage < PackageSpec
+  layer 'lib'
+  strict_dependencies 'layered_dag'
+  test_import Foo::Bar::FalseCyclePackage, only: "test_rb"
+  test_import Foo::Bar::FalseCyclePackageTest
+end
+
+--------------------------------------------------------------------------
+
+use_app_false_cycle_package/foo.rb:6: `Foo::Bar::AppFalseCyclePackage::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3727
+     6 |      Foo::Bar::AppFalseCyclePackage::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::AppFalseCyclePackage` to `Foo::MyPackage`:
+    `Foo::Bar::AppFalseCyclePackage` →
+    `Foo::MyPackage`
+
+    app_false_cycle_package/__package.rb:6: Package `Foo::Bar::AppFalseCyclePackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     6 |  layer 'app'
+                ^^^^^
+    app_false_cycle_package/__package.rb:7: `Foo::Bar::AppFalseCyclePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     7 |  strict_dependencies 'false'
+                              ^^^^^^^
+  Note:
+    `Foo::Bar::AppFalseCyclePackage::OtherClass`'s package is not imported
+
+use_app_false_cycle_package/foo.rb:7: `Foo::Bar::AppFalseCyclePackageTest::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3727
+     7 |      Foo::Bar::AppFalseCyclePackageTest::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::AppFalseCyclePackageTest` to `Foo::MyPackage`:
+    `Foo::Bar::AppFalseCyclePackageTest` →
+    `Foo::MyPackage`
+
+    app_false_cycle_package_test/__package.rb:6: Package `Foo::Bar::AppFalseCyclePackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     6 |  layer 'app'
+                ^^^^^
+    app_false_cycle_package_test/__package.rb:7: `Foo::Bar::AppFalseCyclePackageTest` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     7 |  strict_dependencies 'false'
+                              ^^^^^^^
+  Note:
+    `Foo::Bar::AppFalseCyclePackageTest::OtherClass`'s package is imported as `test_import`
+
+use_app_false_cycle_package/foo.rb:13: `Test::Foo::Bar::AppFalseCyclePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+    13 |  Test::Foo::Bar::AppFalseCyclePackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+use_app_false_cycle_package/foo.test.rb:4: `Test::Foo::Bar::AppFalseCyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+     4 |  Test::Foo::Bar::AppFalseCyclePackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_false_cycle_package/__package.rb:5: Exported from package here
+     5 |class Foo::Bar::AppFalseCyclePackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_app_false_cycle_package/__package.rb:7: Inserted `test_import Foo::Bar::AppFalseCyclePackage, only: "test_rb"`
+     7 |  strict_dependencies 'layered_dag'
+                                           ^
+Errors: 4
+# frozen_string_literal: true
+# typed: strict
+# enable-packager: true
+
+class Foo::MyPackage < PackageSpec
+  layer 'lib'
+  strict_dependencies 'layered_dag'
+  test_import Foo::Bar::AppFalseCyclePackage, only: "test_rb"
+  test_import Foo::Bar::AppFalseCyclePackageTest
+end
