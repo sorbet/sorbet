@@ -448,6 +448,9 @@ int realmain(int argc, char *argv[]) {
     unique_ptr<core::GlobalState> gs =
         make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, errorFlusher));
 
+    logger->trace("cleaning up old state");
+    cache::SessionCache::reapOldCaches(opts);
+
     logger->trace("building initial global state");
 
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(logger, opts);

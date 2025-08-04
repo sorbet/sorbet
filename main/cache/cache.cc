@@ -6,6 +6,9 @@
 #include "core/serialize/serialize.h"
 #include "main/options/options.h"
 #include "sorbet_version/sorbet_version.h"
+#include <charconv>
+#include <csignal>
+#include <cstdio>
 
 using namespace std;
 
@@ -230,10 +233,38 @@ void removeCacheDir(const string &path) {
 }
 } // namespace
 
+const string_view SessionCache::SESSION_DIR_PREFIX = "sorbet-session-";
+
 SessionCache::SessionCache(string path) : path{std::move(path)} {}
 
 SessionCache::~SessionCache() noexcept(false) {
     removeCacheDir(this->path);
+}
+
+void SessionCache::reapOldCaches(const options::Options &opts) {
+    if (opts.cacheDir.empty() || !FileOps::dirExists(opts.cacheDir)) {
+        return;
+    }
+
+    for (const auto &dir : FileOps::listSubdirs(opts.cacheDir)) {
+        auto pos = dir.find(SESSION_DIR_PREFIX);
+        if (pos != 0) {
+            continue;
+        }
+
+        string_view pidStr = string_view(dir).substr(SESSION_DIR_PREFIX.size());
+        pid_t pid = -1;
+        auto res = std::from_chars(pidStr.begin(), pidStr.end(), pid);
+        if (res.ec != std::errc{} || res.ptr != pidStr.end() || pid <= 0) {
+            continue;
+        }
+
+        if (processExists(pid) != ProcessStatus::Missing) {
+            continue;
+        }
+
+        removeCacheDir(fmt::format("{}/{}", opts.cacheDir, dir));
+    }
 }
 
 unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore> kvstore, ::spdlog::logger &logger,
@@ -243,7 +274,7 @@ unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore>
     }
 
     auto pid = getpid();
-    auto path = fmt::format("{}/session-{}", opts.cacheDir, pid);
+    auto path = fmt::format("{}/{}{}", opts.cacheDir, SESSION_DIR_PREFIX, pid);
 
     // If the directory already exists, we're reusing a PID from a previous run of Sorbet.
     if (FileOps::dirExists(path)) {
