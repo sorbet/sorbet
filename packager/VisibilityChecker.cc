@@ -62,40 +62,6 @@ class PropagateVisibility final {
         }
     }
 
-    // Lookup the package name on the given root symbol, and mark the final symbol as exported.
-    void exportRoot(core::GlobalState &gs, core::ClassOrModuleRef sym) {
-        // For a package named `A::B`, the ClassDef that we see in this pass is for a symbol named
-        // `<PackageSpecRegistry>::A::B`. In order to make the name `A::B` visible to packages that have imported
-        // `A::B`, we explicitly lookup and export them here. This is a design decision inherited from the previous
-        // packages implementation, and we could remove it after migrating Stripe's codebase to not depend on package
-        // names being exported by default.
-        //
-        // TODO(jez) This method becomes trivial if we can get packages' tests back into `A::B::Test`
-        for (auto name : this->package.fullName()) {
-            auto next = sym.data(gs)->findMember(gs, name);
-            if (!next.exists() || !next.isClassOrModule()) {
-                sym = core::Symbols::noClassOrModule();
-                return;
-            }
-
-            sym = next.asClassOrModuleRef();
-        }
-
-        sym.data(gs)->flags.isExported = true;
-    }
-
-    // Mark both `::A::B` and `::Test::A::B` as exported (given package `A::B`).
-    // This will terminate the recursive exporting in `exportParentNamespace`, as it stops when it
-    // hits either the root or an exported symbol.
-    void exportPackageRoots(core::GlobalState &gs) {
-        this->exportRoot(gs, core::Symbols::root());
-
-        auto test = core::Symbols::root().data(gs)->findMember(gs, core::Names::Constants::Test());
-        if (test.exists() && test.isClassOrModule()) {
-            this->exportRoot(gs, test.asClassOrModuleRef());
-        }
-    }
-
     bool ignoreRBIExportEnforcement(core::MutableContext &ctx, core::FileRef file) {
         const auto path = file.data(ctx).path();
 
@@ -236,8 +202,6 @@ public:
         ENFORCE(package.exists(), "Package is associated with a file, but doesn't exist");
 
         PropagateVisibility pass{package};
-
-        pass.exportPackageRoots(gs);
 
         core::MutableContext ctx{gs, core::Symbols::root(), f.file};
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
