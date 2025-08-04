@@ -384,7 +384,7 @@ class T::Props::Decorator
         #
         if sensitivity_and_pii[:pii] && @class.is_a?(Class) && !T.unsafe(@class).contains_pii?
           raise ArgumentError.new(
-            'Cannot include a pii prop in a class that declares `contains_no_pii`'
+            "Cannot define pii prop `#{@class}##{name}` because `#{@class}` is `contains_no_pii`"
           )
         end
       end
