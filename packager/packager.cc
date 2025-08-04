@@ -1116,6 +1116,11 @@ public:
         auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
 
         if (lhs != nullptr && rootConsts == 0) {
+            if (lhs->symbol().name(ctx).hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
+                // Don't need to report definitionPackageMismatch if the symbol was mangle renamed
+                return;
+            }
+
             pushConstantLit(ctx, lhs);
 
             if (rootConsts == 0 && namespaces.packageForNamespace() != pkg.mangledName()) {

@@ -104,16 +104,6 @@ nested/nested.rb:68: File belongs to package `Root::Nested` but defines a consta
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.rb:70: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
-    70 |Root = 1
-        ^^^^
-    nested/__package.rb:3: Enclosing package declared here
-     3 |class Root::Nested < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    __package.rb:3: Must belong to this package, given constant name `Root`
-     3 |class Root < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^
-
 nested/nested.test.rb:21: Cannot initialize the module `Root` by constant assignment https://srb.help/4022
     21 |Test::Root = 1
         ^^^^^^^^^^^^^^
@@ -161,16 +151,6 @@ nested/nested.test.rb:19: Tests in the `Root::Nested` package must define tests 
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.test.rb:21: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/3713
-    21 |Test::Root = 1
-        ^^^^^^^^^^
-    nested/__package.rb:3: Enclosing package declared here
-     3 |class Root::Nested < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    __package.rb:3: Must belong to this package, given constant name `Test::Root`
-     3 |class Root < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^
-
 critic_prefix/real.test.rb:3: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
      3 |module Critic::SomePkg::Real
                ^^^^^^^^^^^^^^^^^^^^^
@@ -201,4 +181,4 @@ commands/foo_command.rb:4: File belongs to package `Root::Commands::Foo` but def
     __package.rb:3: Must belong to this package, given constant name `Root::Commands::Baz::Ban`
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 21
+Errors: 19
