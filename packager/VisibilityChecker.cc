@@ -95,18 +95,6 @@ class PropagateVisibility final {
         sym.data(gs)->flags.isExported = true;
     }
 
-    // Mark both `::A::B` and `::Test::A::B` as exported (given package `A::B`).
-    // This will terminate the recursive exporting in `exportParentNamespace`, as it stops when it
-    // hits either the root or an exported symbol.
-    void exportPackageRoots(core::GlobalState &gs) {
-        this->exportRoot(gs, core::Symbols::root());
-
-        auto test = core::Symbols::root().data(gs)->findMember(gs, core::Names::Constants::Test());
-        if (test.exists() && test.isClassOrModule()) {
-            this->exportRoot(gs, test.asClassOrModuleRef());
-        }
-    }
-
     // While processing the ClassDef for the package, which will be named something like `<PackageSpecRegistry>::A::B`,
     // we also check that the symbols `A::B` and `Test::A::B` have locations whose package matches the one we're
     // processing. If they don't match, we add locs to ensure that those symbols are associated with this package.
@@ -330,8 +318,6 @@ public:
         ENFORCE(package.exists(), "Package is associated with a file, but doesn't exist");
 
         PropagateVisibility pass{package};
-
-        pass.exportPackageRoots(gs);
 
         core::MutableContext ctx{gs, core::Symbols::root(), f.file};
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
