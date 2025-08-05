@@ -1532,6 +1532,21 @@ class Integer < ::Numeric
   def to_d; end
 end
 
+class NilClass
+  # call-seq:
+  #     nil.to_d -> bigdecimal
+  #
+  # Returns nil represented as a BigDecimal.
+  #
+  #     require 'bigdecimal'
+  #     require 'bigdecimal/util'
+  #
+  #     nil.to_d   # => 0.0
+  #
+  sig { returns(BigDecimal) }
+  def to_d; end
+end
+
 # A rational number can be represented as a pair of integer numbers: a/b (b>0),
 # where a is the numerator and b is the denominator.
 # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) a equals
