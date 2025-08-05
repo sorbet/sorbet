@@ -286,6 +286,10 @@ pipeline_tests(
             "testdata/**/*.rb",
             "testdata/**/*.exp",
         ],
+        exclude = [
+            # Specific test that is modified for Prism, contains minor differences in the exp file
+            "testdata/rbs/assertions_heredoc_modified.rb",
+        ],
     ),
     "PosTests",
 )
@@ -329,6 +333,9 @@ pipeline_tests(
 
             # Sorbets' parser incorrectly accepts invalid syntax
             "testdata/desugar/pattern_matching_hash.rb",  # See https://github.com/Shopify/sorbet/issues/362
+
+            # Minor differences in the parse tree lead to different exp files
+            "testdata/rbs/assertions_heredoc.rb",
         ],
     ),
     "PrismPosTests",
