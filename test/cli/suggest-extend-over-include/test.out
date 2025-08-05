@@ -1,0 +1,52 @@
+test/cli/suggest-extend-over-include/suggest-extend-over-include.rb:11: Method `foo` does not exist on `T.class_of(A)` https://srb.help/7003
+    11 |A.foo
+          ^^^
+  Got `T.class_of(A)` originating from:
+    test/cli/suggest-extend-over-include/suggest-extend-over-include.rb:11:
+    11 |A.foo
+        ^
+  Note:
+    The method `foo` exists as an instance method in module `Foo`
+    Changing `include Foo` to `extend Foo` can sometimes fix this, but might also cause more problems
+
+test/cli/suggest-extend-over-include/suggest-extend-over-include.rb:20: Method `foo` does not exist on `T.class_of(Child)` https://srb.help/7003
+    20 |Child.foo
+              ^^^
+  Got `T.class_of(Child)` originating from:
+    test/cli/suggest-extend-over-include/suggest-extend-over-include.rb:20:
+    20 |Child.foo
+        ^^^^^
+
+test/cli/suggest-extend-over-include/suggest-extend-over-include.rb:30: Method `foo` does not exist on `T.class_of(B)` https://srb.help/7003
+    30 |B.foo
+          ^^^
+  Got `T.class_of(B)` originating from:
+    test/cli/suggest-extend-over-include/suggest-extend-over-include.rb:30:
+    30 |B.foo
+        ^
+  Note:
+    The method `foo` exists as an instance method in module `Foo`
+    Changing `include Foo` to `extend Foo` can sometimes fix this, but might also cause more problems
+
+test/cli/suggest-extend-over-include/suggest-extend-over-include.rb:48: Method `foo` does not exist on `T.class_of(C)` https://srb.help/7003
+    48 |C.foo
+          ^^^
+  Got `T.class_of(C)` originating from:
+    test/cli/suggest-extend-over-include/suggest-extend-over-include.rb:48:
+    48 |C.foo
+        ^
+  Note:
+    The method `foo` exists as an instance method in module `Foo`
+    Changing `include Foo` to `extend Foo` can sometimes fix this, but might also cause more problems
+
+test/cli/suggest-extend-over-include/suggest-extend-over-include.rb:64: Method `foo` does not exist on `T.class_of(D)` https://srb.help/7003
+    64 |D.foo
+          ^^^
+  Got `T.class_of(D)` originating from:
+    test/cli/suggest-extend-over-include/suggest-extend-over-include.rb:64:
+    64 |D.foo
+        ^
+  Note:
+    The method `foo` exists as an instance method in module `Hoge`
+    Changing `include Hoge` to `extend Hoge` can sometimes fix this, but might also cause more problems
+Errors: 5

@@ -914,6 +914,19 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 }
             }
+
+            auto attachedClass = symbol.data(gs)->attachedClass(gs);
+            if (attachedClass.exists()) {
+                for (auto mixin : attachedClass.data(gs)->mixins()) {
+                    if (mixin.data(gs)->findMethod(gs, targetName).exists()) {
+                        e.addErrorNote("The method `{}` exists as an instance method in module `{}`\n"
+                                       "    Changing `include {}` to `extend {}` can sometimes fix this, but might "
+                                       "also cause more problems",
+                                       targetName.show(gs), mixin.show(gs), mixin.show(gs), mixin.show(gs));
+                        break;
+                    }
+                }
+            }
         }
         result.main.errors.emplace_back(e.build());
         return result;
