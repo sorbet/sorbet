@@ -1,6 +1,9 @@
 # typed: strict
 # enable-experimental-rbs-comments: true
 
+# Modified for Prism, contains a minor difference in the exp file for HEREDOC14
+# ("  ", 42, "\n", "  ", 42, "\n") vs ("  ", 42, "\n  ", 42, "\n")
+
 HEREDOC1 = <<~MSG.strip # error: Constants must have type annotations with `T.let` when specifying `# typed: strict
   #: Integer
 MSG
