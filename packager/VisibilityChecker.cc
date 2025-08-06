@@ -402,7 +402,7 @@ class VisibilityCheckerPass final {
                                        make_move_iterator(exportAutocorrect.edits.begin()),
                                        make_move_iterator(exportAutocorrect.edits.end()));
         core::AutocorrectSuggestion combinedAutocorrect(combinedTitle, move(importAutocorrect.edits));
-        return importAutocorrect;
+        return combinedAutocorrect;
     }
 
 public:
