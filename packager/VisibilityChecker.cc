@@ -410,18 +410,14 @@ class VisibilityCheckerPass final {
                 e.addErrorNote("{}", db.errorHint());
             }
         } else if (importAutocorrect.has_value()) {
-            if (importAutocorrect.has_value()) {
-                e.addAutocorrect(std::move(importAutocorrect.value()));
-                if (!db.errorHint().empty()) {
-                    e.addErrorNote("{}", db.errorHint());
-                }
+            e.addAutocorrect(std::move(importAutocorrect.value()));
+            if (!db.errorHint().empty()) {
+                e.addErrorNote("{}", db.errorHint());
             }
         } else if (exportAutocorrect.has_value()) {
-            if (exportAutocorrect.has_value()) {
-                e.addAutocorrect(std::move(exportAutocorrect.value()));
-                if (!db.errorHint().empty()) {
-                    e.addErrorNote("{}", db.errorHint());
-                }
+            e.addAutocorrect(std::move(exportAutocorrect.value()));
+            if (!db.errorHint().empty()) {
+                e.addErrorNote("{}", db.errorHint());
             }
         }
     }
