@@ -365,6 +365,22 @@ struct StructurallyEqualComparator {
     }
 };
 
+struct ExactlyEqualComparator {
+    static bool compareNodes(const core::GlobalState &gs, const void *avoid, const ExpressionPtr &tree,
+                             const ExpressionPtr &other, const core::FileRef file) {
+        if (tree.loc() != other.loc()) {
+            return false;
+        }
+
+        return traverse<ExactlyEqualComparator>(gs, avoid, tree, other, file);
+    }
+
+    static bool compareSpans(const core::GlobalState &gs, const void *avoid, absl::Span<const ExpressionPtr> a,
+                             absl::Span<const ExpressionPtr> b, const core::FileRef file) {
+        return traverseSpan<ExactlyEqualComparator>(gs, avoid, a, b, file);
+    }
+};
+
 } // namespace
 
 bool ExpressionPtr::structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
@@ -379,18 +395,42 @@ bool ExpressionPtr::structurallyEqual(const core::GlobalState &gs, const Express
     }
 }
 
-#define EQUAL_IMPL(name)                                                                                            \
-    bool name::structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) \
-        const {                                                                                                     \
-        if (ExpressionToTag<name>::value != other.tag()) {                                                          \
-            return false;                                                                                           \
-        }                                                                                                           \
-        try {                                                                                                       \
-            return sorbet::ast::traverse<StructurallyEqualComparator>(gs, this, ExpressionToTag<name>::value, this, \
-                                                                      other.get(), file, true);                     \
-        } catch (StructurallyEqualError & e) {                                                                      \
-            return false;                                                                                           \
-        }                                                                                                           \
+bool ExpressionPtr::exactlyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                                 const core::FileRef file) const {
+    if (tag() != other.tag()) {
+        return false;
+    }
+    try {
+        return sorbet::ast::traverse<ExactlyEqualComparator>(gs, get(), tag(), get(), other.get(), file, true);
+    } catch (StructurallyEqualError &e) {
+        return false;
+    }
+}
+
+#define EQUAL_IMPL(name)                                                                                               \
+    bool name::structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file)    \
+        const {                                                                                                        \
+        if (ExpressionToTag<name>::value != other.tag()) {                                                             \
+            return false;                                                                                              \
+        }                                                                                                              \
+        try {                                                                                                          \
+            return sorbet::ast::traverse<StructurallyEqualComparator>(gs, this, ExpressionToTag<name>::value, this,    \
+                                                                      other.get(), file, true);                        \
+        } catch (StructurallyEqualError & e) {                                                                         \
+            return false;                                                                                              \
+        }                                                                                                              \
+    }                                                                                                                  \
+                                                                                                                       \
+    bool name::exactlyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const { \
+        if (ExpressionToTag<name>::value != other.tag()) {                                                             \
+            return false;                                                                                              \
+        }                                                                                                              \
+        try {                                                                                                          \
+            return sorbet::ast::traverse<ExactlyEqualComparator>(gs, this, ExpressionToTag<name>::value, this,         \
+                                                                 other.get(), file, true);                             \
+        } catch (StructurallyEqualError & e) {                                                                         \
+            return false;                                                                                              \
+        }                                                                                                              \
     }
 
 EQUAL_IMPL(EmptyTree);
