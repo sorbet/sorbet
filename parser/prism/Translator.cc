@@ -364,6 +364,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             pm_node_t *prismBlock = callNode->block;
+
             NodeVec args;
             // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
             // but not an explicit block with `{ ... }` or `do ... end`
@@ -388,10 +389,46 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) { // Handle conditional send, e.g. `a&.b`
                 sendNode = make_unique<parser::CSend>(loc, move(receiver), name, messageLoc, move(args));
             } else { // Regular send, e.g. `a.b`
+                // The keyword arguments hash (if there is one) can be the last argument if there is no block,
+                // and is otherwise located in the second-to-last argument, before the block.
+                auto hasBlockArg = prismBlock != nullptr;
+                auto kwargsHashIndex = hasBlockArg ? (args.size() - 2) : (args.size() - 1);
+                auto hasKwargsHash = kwargsHashIndex < args.size() &&
+                                     parser::NodeWithExpr::isa_node<parser::Hash>(args[kwargsHashIndex].get());
+
+                // Detect special arguments that will require the call to be desugared to magic call.
+                auto hasFwdArgs = false;
+                auto hasFwdRestArg = false;
+                auto hasSplat = false;
+                if (auto prismArgsNode = callNode->arguments; prismArgsNode != nullptr) {
+                    for (auto &arg : absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size)) {
+                        switch (PM_NODE_TYPE(arg)) {
+                            case PM_SPLAT_NODE: {
+                                auto splatNode = down_cast<pm_splat_node>(arg);
+                                if (splatNode->expression == nullptr) { // An anonymous splat like `f(*)`
+                                    hasFwdRestArg = true;
+                                } else { // Splatting an expression like `f(*a)`
+                                    hasSplat = true;
+                                }
+                                break;
+                            }
+
+                            case PM_FORWARDING_ARGUMENTS_NODE: {
+                                hasFwdArgs = true;
+                                break;
+                            }
+
+                            default:
+                                break;
+                        }
+                    }
+                }
+
                 // Method calls are really complex, and we're building support for different kinds of arguments bit by
                 // bit. This bool is true when this particular method call is supported by our desugar logic.
-                auto supportedCallType = receiver == nullptr && args.empty() && constantNameString != "block_given?" &&
-                                         hasExpr(receiver) && hasExpr(args);
+                auto supportedCallType = constantNameString != "block_given?" && !hasKwargsHash && !hasBlockArg &&
+                                         !hasFwdArgs && !hasFwdRestArg && !hasSplat && hasExpr(receiver) &&
+                                         hasExpr(args);
 
                 if (supportedCallType) {
                     ast::Send::Flags flags;
@@ -406,8 +443,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
                     flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
 
+                    int numPosArgs = args.size() - (hasKwargsHash ? 1 : 0) - (hasBlockArg ? 1 : 0);
+
+                    ast::Send::ARGS_store sendArgs{};
+                    sendArgs.reserve(args.size());
+                    for (auto &arg : args) {
+                        sendArgs.emplace_back(arg->takeDesugaredExpr());
+                    }
+
                     auto expr =
-                        MK::Send(location, move(receiverExpr), name, messageLoc, 0, ast::Send::ARGS_store{}, flags);
+                        MK::Send(location, move(receiverExpr), name, messageLoc, numPosArgs, move(sendArgs), flags);
                     sendNode = make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc,
                                                                  move(args));
                 } else {
