@@ -2228,9 +2228,7 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
 
         if constexpr (buildPackageDB) {
-            if (gs.packageDB().enforceLayering()) {
-                ComputePackageSCCs::run(gs);
-            }
+            ComputePackageSCCs::run(gs);
         }
 
         {
