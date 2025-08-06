@@ -390,8 +390,7 @@ class VisibilityCheckerPass final {
             importAutocorrect->edits.insert(importAutocorrect->edits.end(),
                                             make_move_iterator(exportAutocorrect->edits.begin()),
                                             make_move_iterator(exportAutocorrect->edits.end()));
-            core::AutocorrectSuggestion combinedAutocorrect(combinedTitle, move(importAutocorrect->edits));
-            e.addAutocorrect(move(combinedAutocorrect));
+            e.addAutocorrect(core::AutocorrectSuggestion{combinedTitle, move(importAutocorrect->edits)});
             if (!db.errorHint().empty()) {
                 e.addErrorNote("{}", db.errorHint());
             }
