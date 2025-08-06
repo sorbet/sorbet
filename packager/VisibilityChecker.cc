@@ -398,9 +398,10 @@ class VisibilityCheckerPass final {
     core::AutocorrectSuggestion combineImportExportAutocorrect(core::AutocorrectSuggestion &importAutocorrect,
                                                                core::AutocorrectSuggestion &exportAutocorrect) {
         auto combinedTitle = fmt::format("{} and {}", importAutocorrect.title, exportAutocorrect.title);
-        importAutocorrect.edits.insert(importAutocorrect.edits.end(), exportAutocorrect.edits.begin(),
-                                       exportAutocorrect.edits.end());
-        core::AutocorrectSuggestion combinedAutocorrect(combinedTitle, importAutocorrect.edits);
+        importAutocorrect.edits.insert(importAutocorrect.edits.end(),
+                                       make_move_iterator(exportAutocorrect.edits.begin()),
+                                       make_move_iterator(exportAutocorrect.edits.end()));
+        core::AutocorrectSuggestion combinedAutocorrect(combinedTitle, move(importAutocorrect.edits));
         return importAutocorrect;
     }
 
