@@ -368,7 +368,7 @@ class VisibilityCheckerPass final {
         }
     }
 
-    void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol) {
+    void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol, bool definesBehavior) {
         auto definedHereLoc = litSymbol.loc(ctx);
         if (definedHereLoc.file().data(ctx).isRBI()) {
             e.addErrorSection(
@@ -376,8 +376,13 @@ class VisibilityCheckerPass final {
                                                              "declare unpackaged constants",
                                                              "# packaged: false"),
                                    {core::ErrorLine(definedHereLoc, "")}));
-        } else {
+        } else if (definesBehavior) {
             e.addErrorLine(definedHereLoc, "Defined here");
+        } else {
+            e.addErrorSection(core::ErrorSection(
+                core::ErrorColors::format("`{}` does not define behavior and thus will not be automatically exported",
+                                          litSymbol.show(ctx)),
+                {core::ErrorLine(definedHereLoc, "")}));
         }
     }
 
@@ -454,6 +459,8 @@ public:
             isExported = litSymbol.asFieldRef().data(ctx)->flags.isExported;
         }
         isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
+        bool definesBehavior =
+            !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
         auto currentImportType = this->package.importsPackage(otherPackage);
         auto wasImported = currentImportType.has_value();
 
@@ -510,8 +517,10 @@ public:
                     if (enumClass.exists()) {
                         symToExport = enumClass;
                     }
-                    if (auto exp = pkg.addExport(ctx, symToExport)) {
-                        exportAutocorrect.emplace(exp.value());
+                    if (definesBehavior) {
+                        if (auto exp = pkg.addExport(ctx, symToExport)) {
+                            exportAutocorrect.emplace(exp.value());
+                        }
                     }
                 }
 
@@ -519,7 +528,7 @@ public:
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                         e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is not imported",
                                     litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx));
-                        addExportInfo(ctx, e, litSymbol);
+                        addExportInfo(ctx, e, litSymbol, definesBehavior);
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                         addPackagedFalseNote(ctx, e);
                     }
@@ -527,7 +536,7 @@ public:
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                         e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed",
                                     litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import");
-                        addExportInfo(ctx, e, litSymbol);
+                        addExportInfo(ctx, e, litSymbol, definesBehavior);
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
                 } else if (!isExported && testUnitImportInHelper) {
@@ -537,13 +546,13 @@ public:
                         e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
                                        "only be used in `{}` files.",
                                        "test_import", "only: 'test_rb'", ".test.rb");
-                        addExportInfo(ctx, e, litSymbol);
+                        addExportInfo(ctx, e, litSymbol, definesBehavior);
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
                 } else if (!isExported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
                         e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
-                        addExportInfo(ctx, e, litSymbol);
+                        addExportInfo(ctx, e, litSymbol, definesBehavior);
 
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
