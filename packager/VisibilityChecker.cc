@@ -395,13 +395,14 @@ class VisibilityCheckerPass final {
         }
     }
 
-    core::AutocorrectSuggestion combineImportExportAutocorrect(core::AutocorrectSuggestion &importAutocorrect,
-                                                               core::AutocorrectSuggestion &exportAutocorrect) {
-        auto combinedTitle = fmt::format("{} and {}", importAutocorrect.title, exportAutocorrect.title);
-        importAutocorrect.edits.insert(importAutocorrect.edits.end(),
-                                       make_move_iterator(exportAutocorrect.edits.begin()),
-                                       make_move_iterator(exportAutocorrect.edits.end()));
-        core::AutocorrectSuggestion combinedAutocorrect(combinedTitle, move(importAutocorrect.edits));
+    core::AutocorrectSuggestion
+    combineImportExportAutocorrect(optional<core::AutocorrectSuggestion> &&importAutocorrect,
+                                   optional<core::AutocorrectSuggestion> &&exportAutocorrect) {
+        auto combinedTitle = fmt::format("{} and {}", importAutocorrect->title, exportAutocorrect->title);
+        importAutocorrect->edits.insert(importAutocorrect->edits.end(),
+                                        make_move_iterator(exportAutocorrect->edits.begin()),
+                                        make_move_iterator(exportAutocorrect->edits.end()));
+        core::AutocorrectSuggestion combinedAutocorrect(combinedTitle, move(importAutocorrect->edits));
         return combinedAutocorrect;
     }
 
@@ -522,8 +523,8 @@ public:
                                     litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx));
                         addExportInfo(ctx, e, litSymbol);
                         if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
-                            core::AutocorrectSuggestion combinedAutocorrect =
-                                combineImportExportAutocorrect(importAutocorrect.value(), exportAutocorrect.value());
+                            core::AutocorrectSuggestion combinedAutocorrect = combineImportExportAutocorrect(
+                                move(importAutocorrect.value()), move(exportAutocorrect.value()));
                             e.addAutocorrect(std::move(combinedAutocorrect));
                             if (!db.errorHint().empty()) {
                                 e.addErrorNote("{}", db.errorHint());
@@ -539,8 +540,8 @@ public:
                                     litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import");
                         addExportInfo(ctx, e, litSymbol);
                         if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
-                            core::AutocorrectSuggestion combinedAutocorrect =
-                                combineImportExportAutocorrect(importAutocorrect.value(), exportAutocorrect.value());
+                            core::AutocorrectSuggestion combinedAutocorrect = combineImportExportAutocorrect(
+                                move(importAutocorrect.value()), move(exportAutocorrect.value()));
                             e.addAutocorrect(std::move(combinedAutocorrect));
                             if (!db.errorHint().empty()) {
                                 e.addErrorNote("{}", db.errorHint());
@@ -558,8 +559,8 @@ public:
                                        "test_import", "only: 'test_rb'", ".test.rb");
                         addExportInfo(ctx, e, litSymbol);
                         if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
-                            core::AutocorrectSuggestion combinedAutocorrect =
-                                combineImportExportAutocorrect(importAutocorrect.value(), exportAutocorrect.value());
+                            core::AutocorrectSuggestion combinedAutocorrect = combineImportExportAutocorrect(
+                                move(importAutocorrect.value()), move(exportAutocorrect.value()));
                             e.addAutocorrect(std::move(combinedAutocorrect));
                             if (!db.errorHint().empty()) {
                                 e.addErrorNote("{}", db.errorHint());
