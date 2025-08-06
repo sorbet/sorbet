@@ -395,13 +395,35 @@ class VisibilityCheckerPass final {
         }
     }
 
-    core::AutocorrectSuggestion combineImportExportAutocorrect(core::AutocorrectSuggestion &importAutocorrect,
-                                                               core::AutocorrectSuggestion &exportAutocorrect) {
-        auto combinedTitle = fmt::format("{} and {}", importAutocorrect.title, exportAutocorrect.title);
-        importAutocorrect.edits.insert(importAutocorrect.edits.end(), exportAutocorrect.edits.begin(),
-                                       exportAutocorrect.edits.end());
-        core::AutocorrectSuggestion combinedAutocorrect(combinedTitle, importAutocorrect.edits);
-        return importAutocorrect;
+    void addImportExportAutocorrect(core::Context ctx, core::ErrorBuilder &e,
+                                    optional<core::AutocorrectSuggestion> &&importAutocorrect,
+                                    optional<core::AutocorrectSuggestion> &&exportAutocorrect) {
+        auto &db = ctx.state.packageDB();
+        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
+            auto combinedTitle = fmt::format("{} and {}", importAutocorrect->title, exportAutocorrect->title);
+            importAutocorrect->edits.insert(importAutocorrect->edits.end(),
+                                            make_move_iterator(exportAutocorrect->edits.begin()),
+                                            make_move_iterator(exportAutocorrect->edits.end()));
+            core::AutocorrectSuggestion combinedAutocorrect(combinedTitle, move(importAutocorrect->edits));
+            e.addAutocorrect(move(combinedAutocorrect));
+            if (!db.errorHint().empty()) {
+                e.addErrorNote("{}", db.errorHint());
+            }
+        } else if (importAutocorrect.has_value()) {
+            if (importAutocorrect.has_value()) {
+                e.addAutocorrect(std::move(importAutocorrect.value()));
+                if (!db.errorHint().empty()) {
+                    e.addErrorNote("{}", db.errorHint());
+                }
+            }
+        } else if (exportAutocorrect.has_value()) {
+            if (exportAutocorrect.has_value()) {
+                e.addAutocorrect(std::move(exportAutocorrect.value()));
+                if (!db.errorHint().empty()) {
+                    e.addErrorNote("{}", db.errorHint());
+                }
+            }
+        }
     }
 
 public:
@@ -520,16 +542,7 @@ public:
                         e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is not imported",
                                     litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx));
                         addExportInfo(ctx, e, litSymbol);
-                        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
-                            core::AutocorrectSuggestion combinedAutocorrect =
-                                combineImportExportAutocorrect(importAutocorrect.value(), exportAutocorrect.value());
-                            e.addAutocorrect(std::move(combinedAutocorrect));
-                            if (!db.errorHint().empty()) {
-                                e.addErrorNote("{}", db.errorHint());
-                            }
-                        } else {
-                            ENFORCE(false);
-                        }
+                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                         addPackagedFalseNote(ctx, e);
                     }
                 } else if (!isExported && testImportInProd) {
@@ -537,16 +550,7 @@ public:
                         e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed",
                                     litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import");
                         addExportInfo(ctx, e, litSymbol);
-                        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
-                            core::AutocorrectSuggestion combinedAutocorrect =
-                                combineImportExportAutocorrect(importAutocorrect.value(), exportAutocorrect.value());
-                            e.addAutocorrect(std::move(combinedAutocorrect));
-                            if (!db.errorHint().empty()) {
-                                e.addErrorNote("{}", db.errorHint());
-                            }
-                        } else {
-                            ENFORCE(false);
-                        }
+                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
                 } else if (!isExported && testUnitImportInHelper) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
@@ -556,39 +560,20 @@ public:
                                        "only be used in `{}` files.",
                                        "test_import", "only: 'test_rb'", ".test.rb");
                         addExportInfo(ctx, e, litSymbol);
-                        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
-                            core::AutocorrectSuggestion combinedAutocorrect =
-                                combineImportExportAutocorrect(importAutocorrect.value(), exportAutocorrect.value());
-                            e.addAutocorrect(std::move(combinedAutocorrect));
-                            if (!db.errorHint().empty()) {
-                                e.addErrorNote("{}", db.errorHint());
-                            }
-                        } else {
-                            ENFORCE(false);
-                        }
+                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
                 } else if (!isExported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
                         e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
                         addExportInfo(ctx, e, litSymbol);
 
-                        if (exportAutocorrect.has_value()) {
-                            e.addAutocorrect(std::move(exportAutocorrect.value()));
-                            if (!db.errorHint().empty()) {
-                                e.addErrorNote("{}", db.errorHint());
-                            }
-                        }
+                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
                 } else if (!wasImported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                         e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                        if (importAutocorrect.has_value()) {
-                            e.addAutocorrect(std::move(importAutocorrect.value()));
-                            if (!db.errorHint().empty()) {
-                                e.addErrorNote("{}", db.errorHint());
-                            }
-                        }
+                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                         addPackagedFalseNote(ctx, e);
                     }
                 } else if (testImportInProd) {
@@ -596,12 +581,7 @@ public:
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                         e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Defined here");
-                        if (importAutocorrect.has_value()) {
-                            e.addAutocorrect(std::move(importAutocorrect.value()));
-                            if (!db.errorHint().empty()) {
-                                e.addErrorNote("{}", db.errorHint());
-                            }
-                        }
+                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
                 } else if (testUnitImportInHelper) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
@@ -611,12 +591,7 @@ public:
                         e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
                                        "only be used in `{}` files.",
                                        "test_import", "only: 'test_rb'", ".test.rb");
-                        if (importAutocorrect.has_value()) {
-                            e.addAutocorrect(std::move(importAutocorrect.value()));
-                            if (!db.errorHint().empty()) {
-                                e.addErrorNote("{}", db.errorHint());
-                            }
-                        }
+                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
                 } else {
                     ENFORCE(false);
