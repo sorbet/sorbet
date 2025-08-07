@@ -706,6 +706,40 @@ public:
     }
 };
 
+parser::NodeVec flattenKwargs(parser::Send *send, parser::Hash *hash, int kwargsHashIndex) {
+    // hold a reference to the node, and remove it from the back of the send list
+    auto hashNode = std::move(send->args[kwargsHashIndex]);
+    send->args.erase(send->args.begin() + kwargsHashIndex);
+
+    parser::NodeVec kwargElements;
+
+    // skip inlining the kwargs if there are any kwsplat nodes present
+    if (absl::c_any_of(hash->pairs, [](auto &node) {
+            // the parser guarantees that if we see a kwargs hash it only contains pair,
+            // kwsplat, or forwarded kwrest arg nodes
+            ENFORCE(parser::isa_node<parser::Kwsplat>(node.get()) || parser::isa_node<parser::Pair>(node.get()) ||
+                    parser::isa_node<parser::ForwardedKwrestArg>(node.get()));
+
+            return parser::isa_node<parser::Kwsplat>(node.get()) ||
+                   parser::isa_node<parser::ForwardedKwrestArg>(node.get());
+        })) {
+        kwargElements.emplace_back(std::move(hashNode));
+    } else {
+        // inline the hash into the send args
+        for (auto &entry : hash->pairs) {
+            typecase(
+                entry.get(),
+                [&](parser::Pair *pair) {
+                    kwargElements.emplace_back(std::move(pair->key));
+                    kwargElements.emplace_back(std::move(pair->value));
+                },
+                [&](parser::Node *node) { Exception::raise("Unhandled case"); });
+        }
+    }
+
+    return kwargElements;
+}
+
 // Translate a tree to an expression. NOTE: this should only be called from `node2TreeImpl`.
 ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
     try {
@@ -762,36 +796,11 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     if (!send->args.empty()) {
                         if (auto *hash = parser::cast_node<parser::Hash>(send->args.back().get())) {
                             if (hash->kwargs) {
-                                // hold a reference to the node, and remove it from the back of the send list
-                                auto hashNode = std::move(send->args.back());
-                                send->args.pop_back();
+                                // If we have a Kwargs Hash, it will always be at the last position,
+                                // because we already popped off our `savedBlockPass` above.
+                                auto kwargsHashIndex = send->args.size() - 1;
 
-                                parser::NodeVec kwargElements;
-
-                                // skip inlining the kwargs if there are any kwsplat nodes present
-                                if (absl::c_any_of(hash->pairs, [](auto &node) {
-                                        // the parser guarantees that if we see a kwargs hash it only contains pair,
-                                        // kwsplat, or forwarded kwrest arg nodes
-                                        ENFORCE(parser::isa_node<parser::Kwsplat>(node.get()) ||
-                                                parser::isa_node<parser::Pair>(node.get()) ||
-                                                parser::isa_node<parser::ForwardedKwrestArg>(node.get()));
-
-                                        return parser::isa_node<parser::Kwsplat>(node.get()) ||
-                                               parser::isa_node<parser::ForwardedKwrestArg>(node.get());
-                                    })) {
-                                    kwargElements.emplace_back(std::move(hashNode));
-                                } else {
-                                    // inline the hash into the send args
-                                    for (auto &entry : hash->pairs) {
-                                        typecase(
-                                            entry.get(),
-                                            [&](parser::Pair *pair) {
-                                                kwargElements.emplace_back(std::move(pair->key));
-                                                kwargElements.emplace_back(std::move(pair->value));
-                                            },
-                                            [&](parser::Node *node) { Exception::raise("Unhandled case"); });
-                                    }
-                                }
+                                parser::NodeVec kwargElements = flattenKwargs(send, hash, kwargsHashIndex);
 
                                 kwArray = make_unique<parser::Array>(loc, std::move(kwargElements));
                             }
@@ -932,36 +941,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             if (hash->kwargs) {
                                 numPosArgs--;
 
-                                // hold a reference to the node, and remove it from the back of the send list
-                                auto hashNode = std::move(send->args[kwargsHashIndex]);
-                                send->args.erase(send->args.begin() + kwargsHashIndex);
-
-                                parser::NodeVec kwargElements;
-
-                                // skip inlining the kwargs if there are any non-key/value pairs present
-                                if (absl::c_any_of(hash->pairs, [](auto &node) {
-                                        // the parser guarantees that if we see a kwargs hash it only contains pair,
-                                        // kwsplat, or forwarded kwrest nodes
-                                        ENFORCE(parser::isa_node<parser::Kwsplat>(node.get()) ||
-                                                parser::isa_node<parser::ForwardedKwrestArg>(node.get()) ||
-                                                parser::isa_node<parser::Pair>(node.get()));
-                                        return parser::isa_node<parser::Kwsplat>(node.get()) ||
-                                               parser::isa_node<parser::ForwardedKwrestArg>(node.get());
-                                    })) {
-                                    // We pulled the Hash node out of the args list, so we need to put it back.
-                                    kwargElements.emplace_back(std::move(hashNode));
-                                } else {
-                                    // inline the hash into the send args
-                                    for (auto &entry : hash->pairs) {
-                                        typecase(
-                                            entry.get(),
-                                            [&](parser::Pair *pair) {
-                                                kwargElements.emplace_back(std::move(pair->key));
-                                                kwargElements.emplace_back(std::move(pair->value));
-                                            },
-                                            [&](parser::Node *node) { Exception::raise("Unhandled case"); });
-                                    }
-                                }
+                                parser::NodeVec kwargElements = flattenKwargs(send, hash, kwargsHashIndex);
 
                                 // Concat the flattened Hash elements on the end of the args list.
                                 send->args.insert(send->args.end(), make_move_iterator(kwargElements.begin()),
