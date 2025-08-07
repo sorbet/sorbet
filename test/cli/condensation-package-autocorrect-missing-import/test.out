@@ -9,6 +9,24 @@ use_other_package/foo.rb:16: Unable to resolve constant `MyClass` https://srb.he
     NN |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
 
+use_other_package/foo.rb:18: Unable to resolve constant `Test` https://srb.help/5002
+    18 |  Test::Foo::Bar::OtherPackage::TestUtil
+          ^^^^
+  Autocorrect: Done
+    use_other_package/foo.rb:18: Replaced with `Set`
+    18 |  Test::Foo::Bar::OtherPackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#LCENSORED: `Set` defined here
+      NN |class Set < Object
+          ^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_other_package/foo.rb:18: Replaced with `Net`
+    18 |  Test::Foo::Bar::OtherPackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#LCENSORED: `Net` defined here
+    NN |module Net
+        ^^^^^^^^^^
+
 use_other_package/foo.rb:7: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
      7 |      Foo::Bar::OtherPackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -56,10 +74,6 @@ use_other_package/foo.rb:15: `Foo::Bar::OtherPackage::OtherClass` resolves but i
      7 |  strict_dependencies 'layered'
                                        ^
 
-use_other_package/foo.rb:18: `Test::Foo::Bar::OtherPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
-    18 |  Test::Foo::Bar::OtherPackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 use_other_package/foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::OtherPackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -95,6 +109,24 @@ end
 
 --------------------------------------------------------------------------
 
+use_app_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
+    13 |  Test::Foo::Bar::AppPackage::TestUtil
+          ^^^^
+  Autocorrect: Done
+    use_app_package/foo.rb:13: Replaced with `Set`
+    13 |  Test::Foo::Bar::AppPackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#LCENSORED: `Set` defined here
+      NN |class Set < Object
+          ^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_app_package/foo.rb:13: Replaced with `Net`
+    13 |  Test::Foo::Bar::AppPackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#LCENSORED: `Net` defined here
+    NN |module Net
+        ^^^^^^^^^^
+
 use_app_package/foo.rb:6: `Foo::Bar::AppPackage::OtherClass` cannot be referenced here because importing its package would cause a layering violation https://srb.help/3726
      6 |      Foo::Bar::AppPackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -112,10 +144,6 @@ use_app_package/foo.rb:7: `Foo::Bar::AppPackageTest::OtherClass` cannot be refer
                 ^^^^^
   Note:
     `Foo::Bar::AppPackageTest::OtherClass`'s package is imported as `test_import`
-
-use_app_package/foo.rb:13: `Test::Foo::Bar::AppPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
-    13 |  Test::Foo::Bar::AppPackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 use_app_package/foo.test.rb:6: `Foo::Bar::AppPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
      6 |  Foo::Bar::AppPackage::ImportMeTestOnly
@@ -141,6 +169,24 @@ end
 
 --------------------------------------------------------------------------
 
+use_false_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
+    13 |  Test::Foo::Bar::FalsePackage::TestUtil
+          ^^^^
+  Autocorrect: Done
+    use_false_package/foo.rb:13: Replaced with `Set`
+    13 |  Test::Foo::Bar::FalsePackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#LCENSORED: `Set` defined here
+      NN |class Set < Object
+          ^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_false_package/foo.rb:13: Replaced with `Net`
+    13 |  Test::Foo::Bar::FalsePackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#LCENSORED: `Net` defined here
+    NN |module Net
+        ^^^^^^^^^^
+
 use_false_package/foo.rb:6: `Foo::Bar::FalsePackage::OtherClass` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      6 |      Foo::Bar::FalsePackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -158,10 +204,6 @@ use_false_package/foo.rb:7: `Foo::Bar::FalsePackageTest::OtherClass` cannot be r
                               ^^^^^^^
   Note:
     `Foo::Bar::FalsePackageTest::OtherClass`'s package is imported as `test_import`
-
-use_false_package/foo.rb:13: `Test::Foo::Bar::FalsePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
-    13 |  Test::Foo::Bar::FalsePackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 use_false_package/foo.test.rb:4: `Test::Foo::Bar::FalsePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::FalsePackage::TestUtil
@@ -187,6 +229,24 @@ end
 
 --------------------------------------------------------------------------
 
+use_false_and_app_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
+    13 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
+          ^^^^
+  Autocorrect: Done
+    use_false_and_app_package/foo.rb:13: Replaced with `Set`
+    13 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#LCENSORED: `Set` defined here
+      NN |class Set < Object
+          ^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_false_and_app_package/foo.rb:13: Replaced with `Net`
+    13 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#LCENSORED: `Net` defined here
+    NN |module Net
+        ^^^^^^^^^^
+
 use_false_and_app_package/foo.rb:6: `Foo::Bar::FalseAndAppPackage::OtherClass` cannot be referenced here because importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3726
      6 |      Foo::Bar::FalseAndAppPackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -210,10 +270,6 @@ use_false_and_app_package/foo.rb:7: `Foo::Bar::FalseAndAppPackageTest::OtherClas
                               ^^^^^^^
   Note:
     `Foo::Bar::FalseAndAppPackageTest::OtherClass`'s package is imported as `test_import`
-
-use_false_and_app_package/foo.rb:13: `Test::Foo::Bar::FalseAndAppPackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
-    13 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 use_false_and_app_package/foo.test.rb:4: `Test::Foo::Bar::FalseAndAppPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
@@ -239,37 +295,45 @@ end
 
 --------------------------------------------------------------------------
 
-use_cycle_package/foo.rb:6: `Foo::Bar::CyclePackage::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle https://srb.help/3727
+use_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://srb.help/5002
      6 |      Foo::Bar::CyclePackage::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    use_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
-     7 |  strict_dependencies 'layered_dag'
-                              ^^^^^^^^^^^^^
-  Note:
-    Path from `Foo::Bar::CyclePackage` to `Foo::MyPackage`:
-    `Foo::Bar::CyclePackage` →
-    `Foo::MyPackage`
+              ^^^^^^^^
+  Autocorrect: Done
+    use_cycle_package/foo.rb:6: Replaced with `Dir`
+     6 |      Foo::Bar::CyclePackage::OtherClass # resolves via root
+              ^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
+    NN |class Dir < Object
+        ^^^^^^^^^^^^^^^^^^
 
-  Note:
-    `Foo::Bar::CyclePackage::OtherClass`'s package is not imported
-
-use_cycle_package/foo.rb:7: `Foo::Bar::CyclePackageTest::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle https://srb.help/3727
+use_cycle_package/foo.rb:7: Unable to resolve constant `Bar` https://srb.help/5002
      7 |      Foo::Bar::CyclePackageTest::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    use_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
-     7 |  strict_dependencies 'layered_dag'
-                              ^^^^^^^^^^^^^
-  Note:
-    Path from `Foo::Bar::CyclePackageTest` to `Foo::MyPackage`:
-    `Foo::Bar::CyclePackageTest` →
-    `Foo::MyPackage`
+              ^^^^^^^^
+  Autocorrect: Done
+    use_cycle_package/foo.rb:7: Replaced with `Dir`
+     7 |      Foo::Bar::CyclePackageTest::OtherClass # resolves via root
+              ^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
+    NN |class Dir < Object
+        ^^^^^^^^^^^^^^^^^^
 
-  Note:
-    `Foo::Bar::CyclePackageTest::OtherClass`'s package is imported as `test_import`
-
-use_cycle_package/foo.rb:13: `Test::Foo::Bar::CyclePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+use_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
     13 |  Test::Foo::Bar::CyclePackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^
+  Autocorrect: Done
+    use_cycle_package/foo.rb:13: Replaced with `Set`
+    13 |  Test::Foo::Bar::CyclePackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#LCENSORED: `Set` defined here
+      NN |class Set < Object
+          ^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_cycle_package/foo.rb:13: Replaced with `Net`
+    13 |  Test::Foo::Bar::CyclePackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#LCENSORED: `Net` defined here
+    NN |module Net
+        ^^^^^^^^^^
 
 use_cycle_package/foo.test.rb:4: `Test::Foo::Bar::CyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::CyclePackage::TestUtil
@@ -295,43 +359,45 @@ end
 
 --------------------------------------------------------------------------
 
-use_app_cycle_package/foo.rb:6: `Foo::Bar::AppCyclePackage::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, and importing its package would cause a layering violation https://srb.help/3727
+use_app_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://srb.help/5002
      6 |      Foo::Bar::AppCyclePackage::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    use_app_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
-     7 |  strict_dependencies 'layered_dag'
-                              ^^^^^^^^^^^^^
-  Note:
-    Path from `Foo::Bar::AppCyclePackage` to `Foo::MyPackage`:
-    `Foo::Bar::AppCyclePackage` →
-    `Foo::MyPackage`
+              ^^^^^^^^
+  Autocorrect: Done
+    use_app_cycle_package/foo.rb:6: Replaced with `Dir`
+     6 |      Foo::Bar::AppCyclePackage::OtherClass # resolves via root
+              ^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
+    NN |class Dir < Object
+        ^^^^^^^^^^^^^^^^^^
 
-    app_cycle_package/__package.rb:6: Package `Foo::Bar::AppCyclePackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
-     6 |  layer 'app'
-                ^^^^^
-  Note:
-    `Foo::Bar::AppCyclePackage::OtherClass`'s package is not imported
-
-use_app_cycle_package/foo.rb:7: `Foo::Bar::AppCyclePackageTest::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, and importing its package would cause a layering violation https://srb.help/3727
+use_app_cycle_package/foo.rb:7: Unable to resolve constant `Bar` https://srb.help/5002
      7 |      Foo::Bar::AppCyclePackageTest::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    use_app_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
-     7 |  strict_dependencies 'layered_dag'
-                              ^^^^^^^^^^^^^
-  Note:
-    Path from `Foo::Bar::AppCyclePackageTest` to `Foo::MyPackage`:
-    `Foo::Bar::AppCyclePackageTest` →
-    `Foo::MyPackage`
+              ^^^^^^^^
+  Autocorrect: Done
+    use_app_cycle_package/foo.rb:7: Replaced with `Dir`
+     7 |      Foo::Bar::AppCyclePackageTest::OtherClass # resolves via root
+              ^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
+    NN |class Dir < Object
+        ^^^^^^^^^^^^^^^^^^
 
-    app_cycle_package_test/__package.rb:6: Package `Foo::Bar::AppCyclePackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
-     6 |  layer 'app'
-                ^^^^^
-  Note:
-    `Foo::Bar::AppCyclePackageTest::OtherClass`'s package is imported as `test_import`
-
-use_app_cycle_package/foo.rb:13: `Test::Foo::Bar::AppCyclePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+use_app_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
     13 |  Test::Foo::Bar::AppCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^
+  Autocorrect: Done
+    use_app_cycle_package/foo.rb:13: Replaced with `Set`
+    13 |  Test::Foo::Bar::AppCyclePackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#LCENSORED: `Set` defined here
+      NN |class Set < Object
+          ^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_app_cycle_package/foo.rb:13: Replaced with `Net`
+    13 |  Test::Foo::Bar::AppCyclePackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#LCENSORED: `Net` defined here
+    NN |module Net
+        ^^^^^^^^^^
 
 use_app_cycle_package/foo.test.rb:4: `Test::Foo::Bar::AppCyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::AppCyclePackage::TestUtil
@@ -357,43 +423,45 @@ end
 
 --------------------------------------------------------------------------
 
-use_false_cycle_package/foo.rb:6: `Foo::Bar::FalseCyclePackage::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, and its `strict_dependencies` is not strict enough https://srb.help/3727
+use_false_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://srb.help/5002
      6 |      Foo::Bar::FalseCyclePackage::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    use_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
-     7 |  strict_dependencies 'layered_dag'
-                              ^^^^^^^^^^^^^
-  Note:
-    Path from `Foo::Bar::FalseCyclePackage` to `Foo::MyPackage`:
-    `Foo::Bar::FalseCyclePackage` →
-    `Foo::MyPackage`
+              ^^^^^^^^
+  Autocorrect: Done
+    use_false_cycle_package/foo.rb:6: Replaced with `Dir`
+     6 |      Foo::Bar::FalseCyclePackage::OtherClass # resolves via root
+              ^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
+    NN |class Dir < Object
+        ^^^^^^^^^^^^^^^^^^
 
-    false_cycle_package/__package.rb:7: `Foo::Bar::FalseCyclePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
-     7 |  strict_dependencies 'false'
-                              ^^^^^^^
-  Note:
-    `Foo::Bar::FalseCyclePackage::OtherClass`'s package is not imported
-
-use_false_cycle_package/foo.rb:7: `Foo::Bar::FalseCyclePackageTest::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, and its `strict_dependencies` is not strict enough https://srb.help/3727
+use_false_cycle_package/foo.rb:7: Unable to resolve constant `Bar` https://srb.help/5002
      7 |      Foo::Bar::FalseCyclePackageTest::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    use_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
-     7 |  strict_dependencies 'layered_dag'
-                              ^^^^^^^^^^^^^
-  Note:
-    Path from `Foo::Bar::FalseCyclePackageTest` to `Foo::MyPackage`:
-    `Foo::Bar::FalseCyclePackageTest` →
-    `Foo::MyPackage`
+              ^^^^^^^^
+  Autocorrect: Done
+    use_false_cycle_package/foo.rb:7: Replaced with `Dir`
+     7 |      Foo::Bar::FalseCyclePackageTest::OtherClass # resolves via root
+              ^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
+    NN |class Dir < Object
+        ^^^^^^^^^^^^^^^^^^
 
-    false_cycle_package_test/__package.rb:7: `Foo::Bar::FalseCyclePackageTest` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
-     7 |  strict_dependencies 'false'
-                              ^^^^^^^
-  Note:
-    `Foo::Bar::FalseCyclePackageTest::OtherClass`'s package is imported as `test_import`
-
-use_false_cycle_package/foo.rb:13: `Test::Foo::Bar::FalseCyclePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+use_false_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
     13 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^
+  Autocorrect: Done
+    use_false_cycle_package/foo.rb:13: Replaced with `Set`
+    13 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#LCENSORED: `Set` defined here
+      NN |class Set < Object
+          ^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_false_cycle_package/foo.rb:13: Replaced with `Net`
+    13 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#LCENSORED: `Net` defined here
+    NN |module Net
+        ^^^^^^^^^^
 
 use_false_cycle_package/foo.test.rb:4: `Test::Foo::Bar::FalseCyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
@@ -419,49 +487,45 @@ end
 
 --------------------------------------------------------------------------
 
-use_app_false_cycle_package/foo.rb:6: `Foo::Bar::AppFalseCyclePackage::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3727
+use_app_false_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://srb.help/5002
      6 |      Foo::Bar::AppFalseCyclePackage::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    use_app_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
-     7 |  strict_dependencies 'layered_dag'
-                              ^^^^^^^^^^^^^
-  Note:
-    Path from `Foo::Bar::AppFalseCyclePackage` to `Foo::MyPackage`:
-    `Foo::Bar::AppFalseCyclePackage` →
-    `Foo::MyPackage`
+              ^^^^^^^^
+  Autocorrect: Done
+    use_app_false_cycle_package/foo.rb:6: Replaced with `Dir`
+     6 |      Foo::Bar::AppFalseCyclePackage::OtherClass # resolves via root
+              ^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
+    NN |class Dir < Object
+        ^^^^^^^^^^^^^^^^^^
 
-    app_false_cycle_package/__package.rb:6: Package `Foo::Bar::AppFalseCyclePackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
-     6 |  layer 'app'
-                ^^^^^
-    app_false_cycle_package/__package.rb:7: `Foo::Bar::AppFalseCyclePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
-     7 |  strict_dependencies 'false'
-                              ^^^^^^^
-  Note:
-    `Foo::Bar::AppFalseCyclePackage::OtherClass`'s package is not imported
-
-use_app_false_cycle_package/foo.rb:7: `Foo::Bar::AppFalseCyclePackageTest::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3727
+use_app_false_cycle_package/foo.rb:7: Unable to resolve constant `Bar` https://srb.help/5002
      7 |      Foo::Bar::AppFalseCyclePackageTest::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    use_app_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
-     7 |  strict_dependencies 'layered_dag'
-                              ^^^^^^^^^^^^^
-  Note:
-    Path from `Foo::Bar::AppFalseCyclePackageTest` to `Foo::MyPackage`:
-    `Foo::Bar::AppFalseCyclePackageTest` →
-    `Foo::MyPackage`
+              ^^^^^^^^
+  Autocorrect: Done
+    use_app_false_cycle_package/foo.rb:7: Replaced with `Dir`
+     7 |      Foo::Bar::AppFalseCyclePackageTest::OtherClass # resolves via root
+              ^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
+    NN |class Dir < Object
+        ^^^^^^^^^^^^^^^^^^
 
-    app_false_cycle_package_test/__package.rb:6: Package `Foo::Bar::AppFalseCyclePackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
-     6 |  layer 'app'
-                ^^^^^
-    app_false_cycle_package_test/__package.rb:7: `Foo::Bar::AppFalseCyclePackageTest` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
-     7 |  strict_dependencies 'false'
-                              ^^^^^^^
-  Note:
-    `Foo::Bar::AppFalseCyclePackageTest::OtherClass`'s package is imported as `test_import`
-
-use_app_false_cycle_package/foo.rb:13: `Test::Foo::Bar::AppFalseCyclePackage::TestUtil` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+use_app_false_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
     13 |  Test::Foo::Bar::AppFalseCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^
+  Autocorrect: Done
+    use_app_false_cycle_package/foo.rb:13: Replaced with `Set`
+    13 |  Test::Foo::Bar::AppFalseCyclePackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#LCENSORED: `Set` defined here
+      NN |class Set < Object
+          ^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_app_false_cycle_package/foo.rb:13: Replaced with `Net`
+    13 |  Test::Foo::Bar::AppFalseCyclePackage::TestUtil
+          ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#LCENSORED: `Net` defined here
+    NN |module Net
+        ^^^^^^^^^^
 
 use_app_false_cycle_package/foo.test.rb:4: `Test::Foo::Bar::AppFalseCyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::AppFalseCyclePackage::TestUtil
