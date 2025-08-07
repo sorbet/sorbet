@@ -825,22 +825,20 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                parser::NodeWithExpr::isa_node<parser::ForwardedArgs>(arg.get()) ||
                                parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(arg.get());
                     })) {
-                    // Build up an array that represents the keyword args for the send. When there is a Kwsplat, treat
-                    // all keyword arguments as a single argument.
-                    unique_ptr<parser::Node> kwArray;
-
                     int numPosArgs = send->args.size();
 
                     // Deconstruct the kwargs hash if it's present.
                     optional<parser::NodeVec> kwargElements = flattenKwargs(send, numPosArgs);
+
+                    // Build up an array that represents the keyword args for the send.
+                    // When there is a Kwsplat, treat all keyword arguments as a single argument.
+                    // If the kwargs hash is not present, make a `nil` to put in the place of that argument.
+                    // This will be used in the implementation of the intrinsic to tell the difference between keyword
+                    // args, keyword args with kw splats, and no keyword args at all.
+                    unique_ptr<parser::Node> kwArray;
                     if (kwargElements.has_value()) {
                         kwArray = make_unique<parser::Array>(loc, std::move(*kwargElements));
-                    }
-
-                    // If the kwargs hash is not present, make a `nil` to put in the place of that argument. This
-                    // will be used in the implementation of the intrinsic to tell the difference between keyword
-                    // args, keyword args with kw splats, and no keyword args at all.
-                    if (kwArray == nullptr) {
+                    } else {
                         kwArray = make_unique<parser::Nil>(loc);
                     }
 
