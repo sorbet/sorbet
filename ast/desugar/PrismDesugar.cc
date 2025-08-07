@@ -777,7 +777,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                 auto hashNode = std::move(send->args.back());
                                 send->args.pop_back();
 
-                                parser::NodeVec elts;
+                                parser::NodeVec kwargElements;
 
                                 // skip inlining the kwargs if there are any kwsplat nodes present
                                 if (absl::c_any_of(hash->pairs, [](auto &node) {
@@ -790,21 +790,21 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                         return parser::NodeWithExpr::isa_node<parser::Kwsplat>(node.get()) ||
                                                parser::NodeWithExpr::isa_node<parser::ForwardedKwrestArg>(node.get());
                                     })) {
-                                    elts.emplace_back(std::move(hashNode));
+                                    kwargElements.emplace_back(std::move(hashNode));
                                 } else {
                                     // inline the hash into the send args
                                     for (auto &entry : hash->pairs) {
                                         typecase(
                                             entry.get(),
                                             [&](parser::Pair *pair) {
-                                                elts.emplace_back(std::move(pair->key));
-                                                elts.emplace_back(std::move(pair->value));
+                                                kwargElements.emplace_back(std::move(pair->key));
+                                                kwargElements.emplace_back(std::move(pair->value));
                                             },
                                             [&](parser::Node *node) { Exception::raise("Unhandled case"); });
                                     }
                                 }
 
-                                kwArray = make_unique<parser::Array>(loc, std::move(elts));
+                                kwArray = make_unique<parser::Array>(loc, std::move(kwargElements));
                             }
                         }
                     }
@@ -951,6 +951,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                 auto hashNode = std::move(send->args[kwargsHashIndex]);
                                 send->args.erase(send->args.begin() + kwargsHashIndex);
 
+                                parser::NodeVec kwargElements;
+
                                 // skip inlining the kwargs if there are any non-key/value pairs present
                                 if (absl::c_any_of(hash->pairs, [](auto &node) {
                                         // the parser guarantees that if we see a kwargs hash it only contains pair,
@@ -963,19 +965,23 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                                parser::NodeWithExpr::isa_node<parser::ForwardedKwrestArg>(node.get());
                                     })) {
                                     // We pulled the Hash node out of the args list, so we need to put it back.
-                                    send->args.emplace_back(std::move(hashNode));
+                                    kwargElements.emplace_back(std::move(hashNode));
                                 } else {
                                     // inline the hash into the send args
                                     for (auto &entry : hash->pairs) {
                                         typecase(
                                             entry.get(),
                                             [&](parser::Pair *pair) {
-                                                send->args.emplace_back(std::move(pair->key));
-                                                send->args.emplace_back(std::move(pair->value));
+                                                kwargElements.emplace_back(std::move(pair->key));
+                                                kwargElements.emplace_back(std::move(pair->value));
                                             },
                                             [&](parser::Node *node) { Exception::raise("Unhandled case"); });
                                     }
                                 }
+
+                                // Concat the flattened Hash elements on the end of the args list.
+                                send->args.insert(send->args.end(), make_move_iterator(kwargElements.begin()),
+                                                  make_move_iterator(kwargElements.end()));
                             }
                         }
                     }
