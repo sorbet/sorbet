@@ -3,6 +3,5 @@
 
 class Project::ConsumerAuth
   class IdentifierType
-    puts("behavior")
   end
 end
