@@ -710,41 +710,15 @@ public:
 // If Kwargs Hash contains any splats, we skip the flattening.
 //
 // Returns nullopt if there was no Kwargs Hash
-//
-// * Coming in, the numPosArgs is the *total* number of of arguments in the send node.
-// * Going out, the numPosArgs is decremented by 1 if there was a Kwargs Hash
-//   (it shouldn't be counted as a positional argument)
-optional<parser::NodeVec> flattenKwargs(parser::Send *send, int &numPosArgs) {
-    if (numPosArgs == 0) {
-        // There were no arguments, so there couldn't possibly by a Kwargs Hash.
+optional<parser::NodeVec> flattenKwargs(unique_ptr<parser::Hash> kwargsHash) {
+    if (kwargsHash == nullptr) {
         return nullopt;
     }
-
-    // If there is a Kwargs Hash, we know it will be in the last position,
-    // since we've already pulled out the BlockPass node before calling `flattenKwargs()`.
-    auto *hash = parser::cast_node<parser::Hash>(send->args.back().get());
-
-    if (hash == nullptr) {
-        // Not a Hash, so nothing to flatten.
-        return nullopt;
-    }
-
-    if (!hash->kwargs) {
-        // This Hash was a regular Hash literal, not keyword arguments.
-        return nullopt;
-    }
-
-    // The send node's arguments includes a Kwargs Hash, which isn't a positional argument.
-    numPosArgs--;
-
-    // hold a reference to the node, and remove it from the back of the send list
-    auto hashNode = std::move(send->args.back());
-    send->args.pop_back();
 
     parser::NodeVec kwargElements;
 
     // skip inlining the kwargs if there are any kwsplat nodes present
-    if (absl::c_any_of(hash->pairs, [](auto &node) {
+    if (absl::c_any_of(kwargsHash->pairs, [](auto &node) {
             // the parser guarantees that if we see a kwargs hash it only contains pair,
             // kwsplat, or forwarded kwrest arg nodes
             ENFORCE(parser::isa_node<parser::Kwsplat>(node.get()) || parser::isa_node<parser::Pair>(node.get()) ||
@@ -753,10 +727,10 @@ optional<parser::NodeVec> flattenKwargs(parser::Send *send, int &numPosArgs) {
             return parser::isa_node<parser::Kwsplat>(node.get()) ||
                    parser::isa_node<parser::ForwardedKwrestArg>(node.get());
         })) {
-        kwargElements.emplace_back(std::move(hashNode));
+        kwargElements.emplace_back(std::move(kwargsHash));
     } else {
         // inline the hash into the send args
-        for (auto &entry : hash->pairs) {
+        for (auto &entry : kwargsHash->pairs) {
             typecase(
                 entry.get(),
                 [&](parser::Pair *pair) {
@@ -820,6 +794,18 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     send->args.pop_back();
                 }
 
+                // Pop the Kwargs Hash off the end of the arguments, if there is one.
+                unique_ptr<parser::Hash> kwargsHash;
+                if (!send->args.empty()) {
+                    auto *hash = parser::cast_node<parser::Hash>(send->args.back().get());
+
+                    // Only pop if it's a Hash, and if it's a kwargs Hash (as opposed to a regular Hash literal)
+                    if (hash != nullptr && hash->kwargs) {
+                        kwargsHash = unique_ptr<parser::Hash>(static_cast<parser::Hash *>(send->args.back().release()));
+                        send->args.pop_back();
+                    }
+                }
+
                 auto hasFwdArgs = false;
                 auto hasFwdRestArg = false;
                 auto hasSplat = false;
@@ -853,10 +839,10 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
                 }
 
-                int numPosArgs = send->args.size();
-
                 // Deconstruct the kwargs hash if it's present.
-                optional<parser::NodeVec> kwargElements = flattenKwargs(send, numPosArgs);
+                optional<parser::NodeVec> kwargElements = flattenKwargs(std::move(kwargsHash));
+
+                int numPosArgs = send->args.size();
 
                 if (hasFwdArgs || hasFwdRestArg || hasSplat) {
                     // If we have a splat anywhere in the argument list, desugar
