@@ -812,16 +812,25 @@ public:
     core::NameRef fun;
     const core::LocOffsets funLoc;
 
+    // Whether a block is present on the send, and if the style of the block argument is known (do/end vs braces). A
+    // value of `Present` is always valid here if it's not known if the block was defined with do/end or braces.
+    enum class BlockType : uint8_t {
+        None = 0,
+        Present = 1,
+        DoEnd = 2,
+        Braces = 3,
+    };
+
     struct Flags {
         bool isPrivateOk : 1;
         bool isRewriterSynthesized : 1;
-        bool hasBlock : 1;
+        BlockType blockType : 2;
 
         // In C++20 we can replace this with bit field initialzers
-        Flags() : isPrivateOk(false), isRewriterSynthesized(false), hasBlock(false) {}
+        Flags() : isPrivateOk(false), isRewriterSynthesized(false), blockType(BlockType::None) {}
         bool operator==(const Flags &other) const noexcept {
             return isPrivateOk == other.isPrivateOk && isRewriterSynthesized == other.isRewriterSynthesized &&
-                   hasBlock == other.hasBlock;
+                   blockType == other.blockType;
         }
 
         bool operator!=(const Flags &other) const noexcept {
@@ -882,7 +891,7 @@ public:
     const ExpressionPtr *kwSplat() const;
     ExpressionPtr *kwSplat();
 
-    void setBlock(ExpressionPtr block);
+    void setBlock(ExpressionPtr block, BlockType type);
     void setKwSplat(ExpressionPtr splat);
 
     // Add the given keyword argument to the end of the list of keyword arguments.
@@ -998,7 +1007,7 @@ public:
 
     // True when this send contains a block argument.
     bool hasBlock() const {
-        return flags.hasBlock;
+        return flags.blockType != BlockType::None;
     }
 
     // True when this send contains at least 1 position argument.

@@ -94,7 +94,8 @@ parser::NodeVec extractHelpers(core::MutableContext ctx, vector<Comment> annotat
                 body->stmts.emplace_back(move(type));
                 auto send = parser::MK::Send0(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
                                               core::Names::requiresAncestor(), annotation.typeLoc);
-                auto block = make_unique<parser::Block>(annotation.typeLoc, move(send), nullptr, move(body));
+                auto style = static_cast<uint32_t>(parser::BlockStyle::Present);
+                auto block = make_unique<parser::Block>(annotation.typeLoc, move(send), nullptr, move(body), style);
                 helpers.emplace_back(move(block));
             }
         }

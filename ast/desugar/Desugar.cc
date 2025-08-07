@@ -173,9 +173,21 @@ void checkBlockRestArg(DesugarContext dctx, const MethodDef::ARGS_store &args) {
     }
 }
 
+namespace {
+ast::Send::BlockType blockStyleToType(uint32_t style) {
+    auto type = ast::Send::BlockType::Present;
+    if (style == static_cast<uint32_t>(parser::BlockStyle::Braces)) {
+        type = ast::Send::BlockType::Braces;
+    } else if (style == static_cast<uint32_t>(parser::BlockStyle::DoEnd)) {
+        type = ast::Send::BlockType::DoEnd;
+    }
+    return type;
+}
+} // namespace
+
 ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets blockLoc,
                            unique_ptr<parser::Node> &blockSend, parser::Node *blockArgs,
-                           unique_ptr<parser::Node> &blockBody) {
+                           unique_ptr<parser::Node> &blockBody, ast::Send::BlockType type) {
     blockSend->loc = loc;
     auto recv = node2TreeImpl(dctx, blockSend);
     Send *send;
@@ -208,7 +220,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
     auto desugaredBody = desugarBody(dctx1, loc, blockBody, std::move(destructures));
 
     // TODO the send->block's loc is too big and includes the whole send
-    send->setBlock(MK::Block(loc, std::move(desugaredBody), std::move(args)));
+    send->setBlock(MK::Block(loc, std::move(desugaredBody), std::move(args)), type);
     return res;
 }
 
@@ -908,8 +920,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         if (auto lit = cast_tree<Literal>(convertedBlock); lit && lit->isSymbol()) {
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                            std::move(sendargs), flags);
-                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(
-                                symbol2Proc(dctx, std::move(convertedBlock)));
+                            auto block = symbol2Proc(dctx, std::move(convertedBlock));
+                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(std::move(block),
+                                                                            ast::Send::BlockType::Present);
                         } else {
                             sendargs.emplace_back(std::move(convertedBlock));
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlock(), send->methodLoc,
@@ -1001,8 +1014,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         if (auto lit = cast_tree<Literal>(convertedBlock); lit && lit->isSymbol()) {
                             res = MK::Send(loc, std::move(rec), send->method, send->methodLoc, numPosArgs,
                                            std::move(args), flags);
-                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(
-                                symbol2Proc(dctx, std::move(convertedBlock)));
+                            auto block = symbol2Proc(dctx, std::move(convertedBlock));
+                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(std::move(block),
+                                                                            ast::Send::BlockType::Present);
                         } else {
                             Send::ARGS_store sendargs;
                             sendargs.emplace_back(std::move(rec));
@@ -1165,7 +1179,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
             },
             [&](parser::Block *block) {
-                result = desugarBlock(dctx, loc, block->loc, block->send, block->args.get(), block->body);
+                result = desugarBlock(dctx, loc, block->loc, block->send, block->args.get(), block->body,
+                                      blockStyleToType(block->style));
             },
             [&](parser::Begin *begin) { result = desugarBegin(dctx, loc, begin->stmts); },
             [&](parser::Assign *asgn) {
@@ -1688,7 +1703,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             [&](parser::NumBlock *block) {
                 DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
                                      dctx.enclosingMethodName, true, dctx.inModule, dctx.preserveConcreteSyntax);
-                result = desugarBlock(dctx1, loc, block->loc, block->send, block->args.get(), block->body);
+                result = desugarBlock(dctx1, loc, block->loc, block->send, block->args.get(), block->body,
+                                      blockStyleToType(block->style));
             },
             [&](parser::While *wl) {
                 auto cond = node2TreeImpl(dctx, wl->cond);
