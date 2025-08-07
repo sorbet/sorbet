@@ -848,18 +848,6 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // The callWithSplat implementation (in C++) will unpack a
                     // tuple type and call into the normal call mechanism.
 
-                    // Build up an array that represents the keyword args for the send.
-                    // When there is a Kwsplat, treat all keyword arguments as a single argument.
-                    // If the kwargs hash is not present, make a `nil` to put in the place of that argument.
-                    // This will be used in the implementation of the intrinsic to tell the difference between keyword
-                    // args, keyword args with kw splats, and no keyword args at all.
-                    unique_ptr<parser::Node> kwArray;
-                    if (kwargElements.has_value()) {
-                        kwArray = make_unique<parser::Array>(loc, std::move(*kwargElements));
-                    } else {
-                        kwArray = make_unique<parser::Nil>(loc);
-                    }
-
                     auto hasFwdArgs = false;
                     { // Pull out the ForwardedArgs (the `...` argument in a method call, like `foo(...)`)
                         auto fwdIt = absl::c_find_if(send->args, [](auto &arg) {
@@ -914,12 +902,23 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         args = std::move(argsConcat);
                     }
 
-                    auto kwargs = node2TreeImpl(dctx, kwArray);
-                    auto method = MK::Symbol(locZeroLen, send->method);
+                    // Build up an array that represents the keyword args for the send.
+                    // When there is a Kwsplat, treat all keyword arguments as a single argument.
+                    // If the kwargs hash is not present, make a `nil` to put in the place of that argument.
+                    // This will be used in the implementation of the intrinsic to tell the difference between keyword
+                    // args, keyword args with kw splats, and no keyword args at all.
+                    ExpressionPtr kwargs;
+                    if (kwargElements.has_value()) {
+                        unique_ptr<parser::Node> kwArray = make_unique<parser::Array>(loc, std::move(*kwargElements));
 
-                    if (auto array = cast_tree<Array>(kwargs)) {
-                        DuplicateHashKeyCheck::checkSendArgs(dctx, 0, array->elems);
+                        kwargs = node2TreeImpl(dctx, kwArray);
+
+                        DuplicateHashKeyCheck::checkSendArgs(dctx, 0, cast_tree<Array>(kwargs)->elems);
+                    } else {
+                        kwargs = MK::Nil(loc);
                     }
+
+                    auto method = MK::Symbol(locZeroLen, send->method);
 
                     Send::ARGS_store sendargs;
                     sendargs.emplace_back(std::move(rec));
