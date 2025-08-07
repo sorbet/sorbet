@@ -815,6 +815,27 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     flags.isPrivateOk = true;
                 }
 
+                // Pop the BlockPass off the end of the arguments, if there is one.
+                unique_ptr<parser::Node> block;
+                bool anonymousBlockPass = false;
+                core::LocOffsets bpLoc;
+                if (!send->args.empty() && parser::NodeWithExpr::isa_node<parser::BlockPass>(send->args.back().get())) {
+                    auto *bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(send->args.back().get());
+                    if (bp->block == nullptr) {
+                        anonymousBlockPass = true;
+                        bpLoc = bp->loc;
+                    } else {
+                        block = std::move(bp->block);
+                    }
+
+                    send->args.pop_back();
+                }
+
+                int numPosArgs = send->args.size();
+
+                // Deconstruct the kwargs hash if it's present.
+                optional<parser::NodeVec> kwargElements = flattenKwargs(send, numPosArgs);
+
                 if (absl::c_any_of(send->args, [](auto &arg) {
                         return parser::NodeWithExpr::isa_node<parser::Splat>(arg.get()) ||
                                parser::NodeWithExpr::isa_node<parser::ForwardedArgs>(arg.get()) ||
@@ -826,28 +847,6 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     //   Magic.callWithSplat(receiver, method, argArray, [&blk])
                     // The callWithSplat implementation (in C++) will unpack a
                     // tuple type and call into the normal call mechanism.
-
-                    // Pop the BlockPass off the end of the arguments, if there is one.
-                    unique_ptr<parser::Node> block;
-                    bool anonymousBlockPass = false;
-                    core::LocOffsets bpLoc;
-                    if (!send->args.empty() &&
-                        parser::NodeWithExpr::isa_node<parser::BlockPass>(send->args.back().get())) {
-                        auto *bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(send->args.back().get());
-                        if (bp->block == nullptr) {
-                            anonymousBlockPass = true;
-                            bpLoc = bp->loc;
-                        } else {
-                            block = std::move(bp->block);
-                        }
-
-                        send->args.pop_back();
-                    }
-
-                    int numPosArgs = send->args.size();
-
-                    // Deconstruct the kwargs hash if it's present.
-                    optional<parser::NodeVec> kwargElements = flattenKwargs(send, numPosArgs);
 
                     // Build up an array that represents the keyword args for the send.
                     // When there is a Kwsplat, treat all keyword arguments as a single argument.
@@ -952,28 +951,6 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
                     result = std::move(res);
                 } else {
-                    // Pop the BlockPass off the end of the arguments, if there is one.
-                    unique_ptr<parser::Node> block;
-                    bool anonymousBlockPass = false;
-                    core::LocOffsets bpLoc;
-                    if (!send->args.empty() &&
-                        parser::NodeWithExpr::isa_node<parser::BlockPass>(send->args.back().get())) {
-                        auto *bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(send->args.back().get());
-                        if (bp->block == nullptr) {
-                            anonymousBlockPass = true;
-                            bpLoc = bp->loc;
-                        } else {
-                            block = std::move(bp->block);
-                        }
-
-                        send->args.pop_back();
-                    }
-
-                    int numPosArgs = send->args.size();
-
-                    // Deconstruct the kwargs hash if it's present.
-                    optional<parser::NodeVec> kwargElements = flattenKwargs(send, numPosArgs);
-
                     if (kwargElements.has_value()) {
                         // Concat the flattened Hash elements on the end of the args list.
                         send->args.insert(send->args.end(), make_move_iterator(kwargElements->begin()),
