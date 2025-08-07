@@ -427,6 +427,12 @@ public:
                         symToExport = enumClass;
                     }
                     if (definesBehavior) {
+                        // For compatibility with gen-packages, we do _not_ add an export if it doesn't define
+                        // behavior. This is mostly because it's easier to get Sorbet to behave like gen-packages
+                        // than the other way around.
+                        //
+                        // If we move to a world where all __package.rb edits are done via Sorbet autocorrects,
+                        // we could make this addExport call unconditional.
                         if (auto exp = pkg.addExport(ctx, symToExport)) {
                             exportAutocorrect.emplace(exp.value());
                         }
