@@ -864,6 +864,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                 block = std::move(bp->block);
                             }
                             send->args.erase(blockPassIt);
+
+                            // we don't count the block arg as part of the positional arguments anymore.
+                            numPosArgs = max(0, numPosArgs - 1);
                         }
                     }
 
@@ -969,26 +972,31 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                           make_move_iterator(kwargElements->end()));
                     }
 
-                    Send::ARGS_store args;
                     unique_ptr<parser::Node> block;
-                    args.reserve(send->args.size());
                     bool anonymousBlockPass = false;
                     core::LocOffsets bpLoc;
-                    for (auto &stat : send->args) {
-                        if (auto bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(stat.get())) {
-                            ENFORCE(block == nullptr, "passing a block where there is no block");
+                    { // Pull out the BlockPass, if any (e.g. the `&b` in `a.map(&b)`)
+                        auto blockPassIt = absl::c_find_if(
+                            send->args, [](auto &arg) { return parser::NodeWithExpr::isa_node<parser::BlockPass>(arg.get()); });
+                        if (blockPassIt != send->args.end()) {
+                            auto *bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(blockPassIt->get());
                             if (bp->block == nullptr) {
                                 anonymousBlockPass = true;
                                 bpLoc = bp->loc;
                             } else {
                                 block = std::move(bp->block);
                             }
+                            send->args.erase(blockPassIt);
 
                             // we don't count the block arg as part of the positional arguments anymore.
                             numPosArgs = max(0, numPosArgs - 1);
-                        } else {
-                            args.emplace_back(node2TreeImpl(dctx, stat));
                         }
+                    }
+
+                    Send::ARGS_store args;
+                    args.reserve(send->args.size());
+                    for (auto &stat : send->args) {
+                        args.emplace_back(node2TreeImpl(dctx, stat));
                     };
 
                     DuplicateHashKeyCheck::checkSendArgs(dctx, numPosArgs, args);
