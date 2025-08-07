@@ -3,7 +3,7 @@
 
 class AAA::AClass
   BBB
-# ^^^ error: `BBB` resolves but is not exported from `BBB` and `BBB` is not imported
+# ^^^ error: `BBB` resolves but its package is not imported
 
   CCC
 # ^^^ error: Unable to resolve constant `CCC`
