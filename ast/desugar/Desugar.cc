@@ -842,8 +842,6 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 // Deconstruct the kwargs hash if it's present.
                 optional<parser::NodeVec> kwargElements = flattenKwargs(std::move(kwargsHash));
 
-                int numPosArgs = send->args.size();
-
                 if (hasFwdArgs || hasFwdRestArg || hasSplat) {
                     // If we have a splat anywhere in the argument list, desugar
                     // the argument list as a single Array node, and then
@@ -931,6 +929,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
                     result = std::move(res);
                 } else {
+                    // Count the arguments before we concat in the Kwarg key/value pairs
+                    int numPosArgs = send->args.size();
+
                     if (kwargElements.has_value()) {
                         // Concat the flattened Hash elements on the end of the args list.
                         send->args.insert(send->args.end(), make_move_iterator(kwargElements->begin()),
