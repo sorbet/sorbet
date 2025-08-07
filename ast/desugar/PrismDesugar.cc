@@ -851,37 +851,43 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     unique_ptr<parser::Node> block;
                     bool anonymousBlockPass = false;
                     core::LocOffsets bpLoc;
-                    auto it = absl::c_find_if(send->args, [](auto &arg) {
-                        return parser::NodeWithExpr::isa_node<parser::BlockPass>(arg.get());
-                    });
-                    if (it != send->args.end()) {
-                        auto *bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(it->get());
-                        if (bp->block == nullptr) {
-                            anonymousBlockPass = true;
-                            bpLoc = bp->loc;
-                        } else {
-                            block = std::move(bp->block);
+                    { // Pull out the BlockPass, if any (e.g. the `&b` in `a.map(&b)`)
+                        auto blockPassIt = absl::c_find_if(send->args, [](auto &arg) {
+                            return parser::NodeWithExpr::isa_node<parser::BlockPass>(arg.get());
+                        });
+                        if (blockPassIt != send->args.end()) {
+                            auto *bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(blockPassIt->get());
+                            if (bp->block == nullptr) {
+                                anonymousBlockPass = true;
+                                bpLoc = bp->loc;
+                            } else {
+                                block = std::move(bp->block);
+                            }
+                            send->args.erase(blockPassIt);
                         }
-                        send->args.erase(it);
                     }
 
                     auto hasFwdArgs = false;
-                    auto fwdIt = absl::c_find_if(send->args, [](auto &arg) {
-                        return parser::NodeWithExpr::isa_node<parser::ForwardedArgs>(arg.get());
-                    });
-                    if (fwdIt != send->args.end()) {
-                        block = make_unique<parser::LVar>(loc, core::Names::fwdBlock());
-                        hasFwdArgs = true;
-                        send->args.erase(fwdIt);
+                    { // Pull out the ForwardedArgs (the `...` argument in a method call, like `foo(...)`)
+                        auto fwdIt = absl::c_find_if(send->args, [](auto &arg) {
+                            return parser::NodeWithExpr::isa_node<parser::ForwardedArgs>(arg.get());
+                        });
+                        if (fwdIt != send->args.end()) {
+                            block = make_unique<parser::LVar>(loc, core::Names::fwdBlock());
+                            hasFwdArgs = true;
+                            send->args.erase(fwdIt);
+                        }
                     }
 
                     auto hasFwdRestArg = false;
-                    auto fwdRestIt = absl::c_find_if(send->args, [](auto &arg) {
-                        return parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(arg.get());
-                    });
-                    if (fwdRestIt != send->args.end()) {
-                        hasFwdRestArg = true;
-                        send->args.erase(fwdRestIt);
+                    { // Pull out the ForwardedRestArg (an anonymous splat like `f(*)`)
+                        auto fwdRestIt = absl::c_find_if(send->args, [](auto &arg) {
+                            return parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(arg.get());
+                        });
+                        if (fwdRestIt != send->args.end()) {
+                            hasFwdRestArg = true;
+                            send->args.erase(fwdRestIt);
+                        }
                     }
 
                     unique_ptr<parser::Node> array = make_unique<parser::Array>(locZeroLen, std::move(send->args));
