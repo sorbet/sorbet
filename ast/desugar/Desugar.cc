@@ -717,7 +717,7 @@ optional<parser::NodeVec> flattenKwargs(unique_ptr<parser::Hash> kwargsHash) {
 
     parser::NodeVec kwargElements;
 
-    // skip inlining the kwargs if there are any kwsplat nodes present
+    // Skip inlining the kwargs if there are any kwsplat nodes present
     if (absl::c_any_of(kwargsHash->pairs, [](auto &node) {
             // the parser guarantees that if we see a kwargs hash it only contains pair,
             // kwsplat, or forwarded kwrest arg nodes
@@ -728,16 +728,16 @@ optional<parser::NodeVec> flattenKwargs(unique_ptr<parser::Hash> kwargsHash) {
                    parser::isa_node<parser::ForwardedKwrestArg>(node.get());
         })) {
         kwargElements.emplace_back(std::move(kwargsHash));
-    } else {
-        // inline the hash into the send args
-        for (auto &entry : kwargsHash->pairs) {
-            typecase(
-                entry.get(),
-                [&](parser::Pair *pair) {
-                    kwargElements.emplace_back(std::move(pair->key));
-                    kwargElements.emplace_back(std::move(pair->value));
-                },
-                [&](parser::Node *node) { Exception::raise("Unhandled case"); });
+        return kwargElements;
+    }
+
+    // Flatten the key/value pairs into the result
+    for (auto &entry : kwargsHash->pairs) {
+        if (auto pair = parser::cast_node<parser::Pair>(entry.get())) {
+            kwargElements.emplace_back(std::move(pair->key));
+            kwargElements.emplace_back(std::move(pair->value));
+        } else {
+            Exception::raise("Unhandled case");
         }
     }
 
