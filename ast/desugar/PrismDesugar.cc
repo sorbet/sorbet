@@ -726,14 +726,9 @@ optional<parser::NodeVec> flattenKwargs(parser::Send *send, int &numPosArgs) {
         return nullopt;
     }
 
-    // The keyword arguments hash can be the last argument if there is no block
-    // or second to last argument otherwise
-    int kwargsHashIndex = send->args.size() - 1;
-    if (!parser::NodeWithExpr::isa_node<parser::Hash>(send->args[kwargsHashIndex].get())) {
-        kwargsHashIndex = max(0, kwargsHashIndex - 1);
-    }
-
-    auto *hash = parser::NodeWithExpr::cast_node<parser::Hash>(send->args[kwargsHashIndex].get());
+    // If there is a Kwargs Hash, we know it will be in the last position,
+    // since we've already pulled out the BlockPass node before calling `flattenKwargs()`.
+    auto *hash = parser::NodeWithExpr::cast_node<parser::Hash>(send->args.back().get());
 
     if (hash == nullptr) {
         // Not a Hash, so nothing to flatten.
@@ -749,8 +744,8 @@ optional<parser::NodeVec> flattenKwargs(parser::Send *send, int &numPosArgs) {
     numPosArgs--;
 
     // hold a reference to the node, and remove it from the back of the send list
-    auto hashNode = std::move(send->args[kwargsHashIndex]);
-    send->args.erase(send->args.begin() + kwargsHashIndex);
+    auto hashNode = std::move(send->args.back());
+    send->args.pop_back();
 
     parser::NodeVec kwargElements;
 
@@ -825,6 +820,30 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                parser::NodeWithExpr::isa_node<parser::ForwardedArgs>(arg.get()) ||
                                parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(arg.get());
                     })) {
+                    // If we have a splat anywhere in the argument list, desugar
+                    // the argument list as a single Array node, and then
+                    // synthesize a call to
+                    //   Magic.callWithSplat(receiver, method, argArray, [&blk])
+                    // The callWithSplat implementation (in C++) will unpack a
+                    // tuple type and call into the normal call mechanism.
+
+                    // Pop the BlockPass off the end of the arguments, if there is one.
+                    unique_ptr<parser::Node> block;
+                    bool anonymousBlockPass = false;
+                    core::LocOffsets bpLoc;
+                    if (!send->args.empty() &&
+                        parser::NodeWithExpr::isa_node<parser::BlockPass>(send->args.back().get())) {
+                        auto *bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(send->args.back().get());
+                        if (bp->block == nullptr) {
+                            anonymousBlockPass = true;
+                            bpLoc = bp->loc;
+                        } else {
+                            block = std::move(bp->block);
+                        }
+
+                        send->args.pop_back();
+                    }
+
                     int numPosArgs = send->args.size();
 
                     // Deconstruct the kwargs hash if it's present.
@@ -840,34 +859,6 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         kwArray = make_unique<parser::Array>(loc, std::move(*kwargElements));
                     } else {
                         kwArray = make_unique<parser::Nil>(loc);
-                    }
-
-                    // If we have a splat anywhere in the argument list, desugar
-                    // the argument list as a single Array node, and then
-                    // synthesize a call to
-                    //   Magic.callWithSplat(receiver, method, argArray, [&blk])
-                    // The callWithSplat implementation (in C++) will unpack a
-                    // tuple type and call into the normal call mechanism.
-                    unique_ptr<parser::Node> block;
-                    bool anonymousBlockPass = false;
-                    core::LocOffsets bpLoc;
-                    { // Pull out the BlockPass, if any (e.g. the `&b` in `a.map(&b)`)
-                        auto blockPassIt = absl::c_find_if(send->args, [](auto &arg) {
-                            return parser::NodeWithExpr::isa_node<parser::BlockPass>(arg.get());
-                        });
-                        if (blockPassIt != send->args.end()) {
-                            auto *bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(blockPassIt->get());
-                            if (bp->block == nullptr) {
-                                anonymousBlockPass = true;
-                                bpLoc = bp->loc;
-                            } else {
-                                block = std::move(bp->block);
-                            }
-                            send->args.erase(blockPassIt);
-
-                            // we don't count the block arg as part of the positional arguments anymore.
-                            numPosArgs = max(0, numPosArgs - 1);
-                        }
                     }
 
                     auto hasFwdArgs = false;
@@ -961,6 +952,23 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
                     result = std::move(res);
                 } else {
+                    // Pop the BlockPass off the end of the arguments, if there is one.
+                    unique_ptr<parser::Node> block;
+                    bool anonymousBlockPass = false;
+                    core::LocOffsets bpLoc;
+                    if (!send->args.empty() &&
+                        parser::NodeWithExpr::isa_node<parser::BlockPass>(send->args.back().get())) {
+                        auto *bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(send->args.back().get());
+                        if (bp->block == nullptr) {
+                            anonymousBlockPass = true;
+                            bpLoc = bp->loc;
+                        } else {
+                            block = std::move(bp->block);
+                        }
+
+                        send->args.pop_back();
+                    }
+
                     int numPosArgs = send->args.size();
 
                     // Deconstruct the kwargs hash if it's present.
@@ -970,27 +978,6 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         // Concat the flattened Hash elements on the end of the args list.
                         send->args.insert(send->args.end(), make_move_iterator(kwargElements->begin()),
                                           make_move_iterator(kwargElements->end()));
-                    }
-
-                    unique_ptr<parser::Node> block;
-                    bool anonymousBlockPass = false;
-                    core::LocOffsets bpLoc;
-                    { // Pull out the BlockPass, if any (e.g. the `&b` in `a.map(&b)`)
-                        auto blockPassIt = absl::c_find_if(
-                            send->args, [](auto &arg) { return parser::NodeWithExpr::isa_node<parser::BlockPass>(arg.get()); });
-                        if (blockPassIt != send->args.end()) {
-                            auto *bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(blockPassIt->get());
-                            if (bp->block == nullptr) {
-                                anonymousBlockPass = true;
-                                bpLoc = bp->loc;
-                            } else {
-                                block = std::move(bp->block);
-                            }
-                            send->args.erase(blockPassIt);
-
-                            // we don't count the block arg as part of the positional arguments anymore.
-                            numPosArgs = max(0, numPosArgs - 1);
-                        }
                     }
 
                     Send::ARGS_store args;
