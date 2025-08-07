@@ -829,27 +829,12 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // all keyword arguments as a single argument.
                     unique_ptr<parser::Node> kwArray;
 
-                    // If there's a &blk node in the last position, pop that off (we'll put it back later, but
-                    // subsequent logic for dealing with the kwargs hash is simpler this way).
-                    unique_ptr<parser::Node> savedBlockPass = nullptr;
-
-                    if (!send->args.empty() &&
-                        parser::NodeWithExpr::isa_node<parser::BlockPass>(send->args.back().get())) {
-                        savedBlockPass = std::move(send->args.back());
-                        send->args.pop_back();
-                    }
-
                     int numPosArgs = send->args.size();
 
                     // Deconstruct the kwargs hash if it's present.
                     optional<parser::NodeVec> kwargElements = flattenKwargs(send, numPosArgs);
                     if (kwargElements.has_value()) {
                         kwArray = make_unique<parser::Array>(loc, std::move(*kwargElements));
-                    }
-
-                    // Put the &blk arg back, if present.
-                    if (savedBlockPass) {
-                        send->args.emplace_back(std::move(savedBlockPass));
                     }
 
                     // If the kwargs hash is not present, make a `nil` to put in the place of that argument. This
