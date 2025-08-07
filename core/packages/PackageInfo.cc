@@ -33,11 +33,6 @@ PackageInfo::~PackageInfo() {
     // see https://eli.thegreenplace.net/2010/11/13/pure-virtual-destructors-in-c
 }
 
-bool PackageInfo::lexCmp(absl::Span<const core::NameRef> lhs, absl::Span<const core::NameRef> rhs) {
-    return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
-                                        [](NameRef a, NameRef b) -> bool { return a.rawId() < b.rawId(); });
-}
-
 string PackageInfo::show(const core::GlobalState &gs) const {
     return absl::StrJoin(fullName(),
                          "::", [&](string *out, core::NameRef name) { absl::StrAppend(out, name.show(gs)); });

@@ -119,10 +119,6 @@ public:
     virtual bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const = 0;
     virtual bool exportAll() const = 0;
     virtual bool visibleToTests() const = 0;
-
-    // Utilities:
-
-    static bool lexCmp(absl::Span<const core::NameRef> lhs, absl::Span<const core::NameRef> rhs);
 };
 
 } // namespace sorbet::core::packages

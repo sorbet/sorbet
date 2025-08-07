@@ -129,9 +129,10 @@ struct Export {
         return fqn.parts;
     }
 
+    // Lex sort by name.
     static bool lexCmp(const Export &a, const Export &b) {
-        // Lex sort by name.
-        return core::packages::PackageInfo::lexCmp(a.parts(), b.parts());
+        return absl::c_lexicographical_compare(a.parts(), b.parts(),
+                                               [](auto a, auto b) -> bool { return a.rawId() < b.rawId(); });
     }
 };
 
