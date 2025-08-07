@@ -710,7 +710,14 @@ public:
 // If Kwargs Hash contains any splats, we skip the flattening.
 //
 // Returns nullopt if there was no Kwargs Hash
-optional<parser::NodeVec> flattenKwargs(parser::Send *send, parser::Hash *hash, int kwargsHashIndex, int &numPosArgs) {
+optional<parser::NodeVec> flattenKwargs(parser::Send *send, int kwargsHashIndex, int &numPosArgs) {
+    auto *hash = parser::cast_node<parser::Hash>(send->args[kwargsHashIndex].get());
+
+    if (hash == nullptr) {
+        // Not a Hash, so nothing to flatten.
+        return nullopt;
+    }
+
     if (!hash->kwargs) {
         // This Hash was a regular Hash literal, not keyword arguments.
         return nullopt;
@@ -805,18 +812,15 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                     // Deconstruct the kwargs hash if it's present.
                     if (!send->args.empty()) {
-                        if (auto *hash = parser::cast_node<parser::Hash>(send->args.back().get())) {
-                            // If we have a Kwargs Hash, it will always be at the last position,
-                            // because we already popped off our `savedBlockPass` above.
-                            auto kwargsHashIndex = send->args.size() - 1;
+                        // If we have a Kwargs Hash, it will always be at the last position,
+                        // because we already popped off our `savedBlockPass` above.
+                        auto kwargsHashIndex = send->args.size() - 1;
 
-                            auto _numPosArgs = INT_MAX; // Dummy value, this code path doesn't use it.
+                        auto _numPosArgs = INT_MAX; // Dummy value, this code path doesn't use it.
 
-                            optional<parser::NodeVec> kwargElements =
-                                flattenKwargs(send, hash, kwargsHashIndex, _numPosArgs);
-                            if (kwargElements.has_value()) {
-                                kwArray = make_unique<parser::Array>(loc, std::move(*kwargElements));
-                            }
+                        optional<parser::NodeVec> kwargElements = flattenKwargs(send, kwargsHashIndex, _numPosArgs);
+                        if (kwargElements.has_value()) {
+                            kwArray = make_unique<parser::Array>(loc, std::move(*kwargElements));
                         }
                     }
 
@@ -950,15 +954,12 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         }
 
                         // Deconstruct the kwargs hash if it's present.
-                        if (auto *hash = parser::cast_node<parser::Hash>(send->args[kwargsHashIndex].get())) {
-                            optional<parser::NodeVec> kwargElements =
-                                flattenKwargs(send, hash, kwargsHashIndex, numPosArgs);
+                        optional<parser::NodeVec> kwargElements = flattenKwargs(send, kwargsHashIndex, numPosArgs);
 
-                            if (kwargElements.has_value()) {
-                                // Concat the flattened Hash elements on the end of the args list.
-                                send->args.insert(send->args.end(), make_move_iterator(kwargElements->begin()),
-                                                  make_move_iterator(kwargElements->end()));
-                            }
+                        if (kwargElements.has_value()) {
+                            // Concat the flattened Hash elements on the end of the args list.
+                            send->args.insert(send->args.end(), make_move_iterator(kwargElements->begin()),
+                                              make_move_iterator(kwargElements->end()));
                         }
                     }
 
