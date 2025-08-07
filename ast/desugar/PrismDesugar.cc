@@ -977,6 +977,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                 symbol2Proc(dctx, std::move(convertedBlock)));
                         } else {
                             Send::ARGS_store sendargs;
+                            sendargs.reserve(3 + args.size());
                             sendargs.emplace_back(std::move(rec));
                             sendargs.emplace_back(std::move(method));
                             sendargs.emplace_back(std::move(convertedBlock));
