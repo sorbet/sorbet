@@ -27,6 +27,9 @@ class Translator final {
     // The errors that were found by Prism during parsing
     const absl::Span<const ParseError> parseErrors;
 
+    // Whether to directly desugar during in the Translator, or wait until the usual `Desugar.cc` code path.
+    bool directlyDesugar;
+
     // Context variables
     bool isInMethodDef = false;
 
@@ -42,9 +45,9 @@ class Translator final {
     Translator &operator=(const Translator &) = delete; // Copy assignment
 public:
     Translator(const Parser &parser, core::GlobalState &gs, core::FileRef file,
-               const absl::Span<const ParseError> parseErrors)
-        : parser(parser), gs(gs), file(file), parseErrors(parseErrors), uniqueCounterStorage(1),
-          uniqueCounter(&this->uniqueCounterStorage) {}
+               const absl::Span<const ParseError> parseErrors, bool directlyDesugar)
+        : parser(parser), gs(gs), file(file), parseErrors(parseErrors), directlyDesugar(directlyDesugar),
+          uniqueCounterStorage(1), uniqueCounter(&this->uniqueCounterStorage) {}
 
     int nextUniqueID() {
         return *uniqueCounter += 1;
@@ -57,10 +60,15 @@ private:
     // Private constructor used only for creating child translators
     // uniqueCounterStorage is passed as the minimum integer value and is never used
     Translator(const Parser &parser, core::GlobalState &gs, core::FileRef file,
-               const absl::Span<const ParseError> &parseErrors, bool isInMethodDef, int *uniqueCounter)
-        : parser(parser), gs(gs), file(file), parseErrors(parseErrors), isInMethodDef(isInMethodDef),
-          uniqueCounterStorage(std::numeric_limits<int>::min()), uniqueCounter(uniqueCounter) {}
+               const absl::Span<const ParseError> &parseErrors, bool directlyDesugar, bool isInMethodDef,
+               int *uniqueCounter)
+        : parser(parser), gs(gs), file(file), parseErrors(parseErrors), directlyDesugar(directlyDesugar),
+          isInMethodDef(isInMethodDef), uniqueCounterStorage(std::numeric_limits<int>::min()),
+          uniqueCounter(uniqueCounter) {}
     void reportError(core::LocOffsets loc, const std::string &message);
+
+    template <typename SorbetNode, typename... TArgs>
+    std::unique_ptr<parser::Node> make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args);
 
     core::LocOffsets translateLoc(pm_location_t loc);
 
