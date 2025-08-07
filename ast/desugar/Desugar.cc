@@ -706,7 +706,9 @@ public:
     }
 };
 
-parser::NodeVec flattenKwargs(parser::Send *send, parser::Hash *hash, int kwargsHashIndex) {
+parser::NodeVec flattenKwargs(parser::Send *send, parser::Hash *hash, int kwargsHashIndex, int &numPosArgs) {
+    numPosArgs--;
+
     // hold a reference to the node, and remove it from the back of the send list
     auto hashNode = std::move(send->args[kwargsHashIndex]);
     send->args.erase(send->args.begin() + kwargsHashIndex);
@@ -800,8 +802,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                 // because we already popped off our `savedBlockPass` above.
                                 auto kwargsHashIndex = send->args.size() - 1;
 
-                                parser::NodeVec kwargElements = flattenKwargs(send, hash, kwargsHashIndex);
+                                auto _numPosArgs = INT_MAX; // Dummy value, this code path doesn't use it.
 
+                                parser::NodeVec kwargElements = flattenKwargs(send, hash, kwargsHashIndex, _numPosArgs);
                                 kwArray = make_unique<parser::Array>(loc, std::move(kwargElements));
                             }
                         }
@@ -939,9 +942,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         // Deconstruct the kwargs hash if it's present.
                         if (auto *hash = parser::cast_node<parser::Hash>(send->args[kwargsHashIndex].get())) {
                             if (hash->kwargs) {
-                                numPosArgs--;
-
-                                parser::NodeVec kwargElements = flattenKwargs(send, hash, kwargsHashIndex);
+                                parser::NodeVec kwargElements = flattenKwargs(send, hash, kwargsHashIndex, numPosArgs);
 
                                 // Concat the flattened Hash elements on the end of the args list.
                                 send->args.insert(send->args.end(), make_move_iterator(kwargElements.begin()),
