@@ -838,12 +838,11 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // The callWithSplat implementation (in C++) will unpack a
                     // tuple type and call into the normal call mechanism.
                     unique_ptr<parser::Node> block;
-                    auto argnodes = std::move(send->args);
                     bool anonymousBlockPass = false;
                     core::LocOffsets bpLoc;
-                    auto it = absl::c_find_if(argnodes,
+                    auto it = absl::c_find_if(send->args,
                                               [](auto &arg) { return parser::isa_node<parser::BlockPass>(arg.get()); });
-                    if (it != argnodes.end()) {
+                    if (it != send->args.end()) {
                         auto *bp = parser::cast_node<parser::BlockPass>(it->get());
                         if (bp->block == nullptr) {
                             anonymousBlockPass = true;
@@ -851,27 +850,27 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         } else {
                             block = std::move(bp->block);
                         }
-                        argnodes.erase(it);
+                        send->args.erase(it);
                     }
 
                     auto hasFwdArgs = false;
                     auto fwdIt = absl::c_find_if(
-                        argnodes, [](auto &arg) { return parser::isa_node<parser::ForwardedArgs>(arg.get()); });
-                    if (fwdIt != argnodes.end()) {
+                        send->args, [](auto &arg) { return parser::isa_node<parser::ForwardedArgs>(arg.get()); });
+                    if (fwdIt != send->args.end()) {
                         block = make_unique<parser::LVar>(loc, core::Names::fwdBlock());
                         hasFwdArgs = true;
-                        argnodes.erase(fwdIt);
+                        send->args.erase(fwdIt);
                     }
 
                     auto hasFwdRestArg = false;
                     auto fwdRestIt = absl::c_find_if(
-                        argnodes, [](auto &arg) { return parser::isa_node<parser::ForwardedRestArg>(arg.get()); });
-                    if (fwdRestIt != argnodes.end()) {
+                        send->args, [](auto &arg) { return parser::isa_node<parser::ForwardedRestArg>(arg.get()); });
+                    if (fwdRestIt != send->args.end()) {
                         hasFwdRestArg = true;
-                        argnodes.erase(fwdRestIt);
+                        send->args.erase(fwdRestIt);
                     }
 
-                    unique_ptr<parser::Node> array = make_unique<parser::Array>(locZeroLen, std::move(argnodes));
+                    unique_ptr<parser::Node> array = make_unique<parser::Array>(locZeroLen, std::move(send->args));
                     auto args = node2TreeImpl(dctx, array);
 
                     if (hasFwdArgs) {
