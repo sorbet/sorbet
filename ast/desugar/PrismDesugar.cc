@@ -716,7 +716,14 @@ public:
 // If Kwargs Hash contains any splats, we skip the flattening.
 //
 // Returns nullopt if there was no Kwargs Hash
-optional<parser::NodeVec> flattenKwargs(parser::Send *send, int kwargsHashIndex, int &numPosArgs) {
+optional<parser::NodeVec> flattenKwargs(parser::Send *send, int &numPosArgs) {
+    // The keyword arguments hash can be the last argument if there is no block
+    // or second to last argument otherwise
+    int kwargsHashIndex = send->args.size() - 1;
+    if (!parser::NodeWithExpr::isa_node<parser::Hash>(send->args[kwargsHashIndex].get())) {
+        kwargsHashIndex = max(0, kwargsHashIndex - 1);
+    }
+
     auto *hash = parser::NodeWithExpr::cast_node<parser::Hash>(send->args[kwargsHashIndex].get());
 
     if (hash == nullptr) {
@@ -824,13 +831,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                     // Deconstruct the kwargs hash if it's present.
                     if (!send->args.empty()) {
-                        // If we have a Kwargs Hash, it will always be at the last position,
-                        // because we already popped off our `savedBlockPass` above.
-                        auto kwargsHashIndex = send->args.size() - 1;
-
                         auto _numPosArgs = INT_MAX; // Dummy value, this code path doesn't use it.
 
-                        optional<parser::NodeVec> kwargElements = flattenKwargs(send, kwargsHashIndex, _numPosArgs);
+                        optional<parser::NodeVec> kwargElements = flattenKwargs(send, _numPosArgs);
                         if (kwargElements.has_value()) {
                             kwArray = make_unique<parser::Array>(loc, std::move(*kwargElements));
                         }
@@ -961,15 +964,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 } else {
                     int numPosArgs = send->args.size();
                     if (numPosArgs > 0) {
-                        // The keyword arguments hash can be the last argument if there is no block
-                        // or second to last argument otherwise
-                        int kwargsHashIndex = send->args.size() - 1;
-                        if (!parser::NodeWithExpr::isa_node<parser::Hash>(send->args[kwargsHashIndex].get())) {
-                            kwargsHashIndex = max(0, kwargsHashIndex - 1);
-                        }
-
                         // Deconstruct the kwargs hash if it's present.
-                        optional<parser::NodeVec> kwargElements = flattenKwargs(send, kwargsHashIndex, numPosArgs);
+                        optional<parser::NodeVec> kwargElements = flattenKwargs(send, numPosArgs);
 
                         if (kwargElements.has_value()) {
                             // Concat the flattened Hash elements on the end of the args list.
