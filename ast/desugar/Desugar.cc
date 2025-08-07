@@ -848,7 +848,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // If we have a splat anywhere in the argument list, desugar
                     // the argument list as a single Array node, and then
                     // synthesize a call to
-                    //   Magic.callWithSplat(receiver, method, argArray, [&blk])
+                    //   Magic.callWithSplat(receiver, method, argArray[, &blk])
                     // The callWithSplat implementation (in C++) will unpack a
                     // tuple type and call into the normal call mechanism.
 
