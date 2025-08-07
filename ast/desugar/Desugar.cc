@@ -821,30 +821,39 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
 
                 auto hasFwdArgs = false;
-                { // Pull out the ForwardedArgs (the `...` argument in a method call, like `foo(...)`)
-                    auto fwdIt = absl::c_find_if(
-                        send->args, [](auto &arg) { return parser::isa_node<parser::ForwardedArgs>(arg.get()); });
-                    if (fwdIt != send->args.end()) {
-                        block = make_unique<parser::LVar>(loc, core::Names::fwdBlock());
-                        hasFwdArgs = true;
-                        send->args.erase(fwdIt);
-                    }
-                }
-
                 auto hasFwdRestArg = false;
-                { // Pull out the ForwardedRestArg (an anonymous splat like `f(*)`)
-                    auto fwdRestIt = absl::c_find_if(
-                        send->args, [](auto &arg) { return parser::isa_node<parser::ForwardedRestArg>(arg.get()); });
-                    if (fwdRestIt != send->args.end()) {
-                        hasFwdRestArg = true;
-                        send->args.erase(fwdRestIt);
+                auto hasSplat = false;
+                for (auto it = send->args.begin(); it != send->args.end(); /* incremented below */) {
+                    bool eraseFromArgs = false;
+
+                    typecase(
+                        it->get(),
+                        [&](parser::ForwardedArgs *fwdArgs) {
+                            // Pull out the ForwardedArgs (the `...` argument in a method call, like `foo(...)`)
+                            hasFwdArgs = true;
+                            block = make_unique<parser::LVar>(loc, core::Names::fwdBlock());
+                            eraseFromArgs = true;
+                        },
+                        [&](parser::ForwardedRestArg *fwdRestArg) {
+                            // Pull out the ForwardedRestArg (an anonymous splat like `f(*)`)
+                            hasFwdRestArg = true;
+                            eraseFromArgs = true;
+                        },
+                        [&](parser::Splat *splat) {
+                            // Detect if there's a splat in the argument list.
+                            hasSplat = true;
+                            eraseFromArgs = false;
+                        },
+                        [&](parser::Node *node) { eraseFromArgs = false; });
+
+                    if (eraseFromArgs) {
+                        it = send->args.erase(it);
+                    } else {
+                        ++it;
                     }
                 }
 
                 int numPosArgs = send->args.size();
-
-                auto hasSplat =
-                    absl::c_any_of(send->args, [](auto &arg) { return parser::isa_node<parser::Splat>(arg.get()); });
 
                 // Deconstruct the kwargs hash if it's present.
                 optional<parser::NodeVec> kwargElements = flattenKwargs(send, numPosArgs);
