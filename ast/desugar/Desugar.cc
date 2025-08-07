@@ -820,44 +820,42 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     send->args.pop_back();
                 }
 
+                auto hasFwdArgs = false;
+                { // Pull out the ForwardedArgs (the `...` argument in a method call, like `foo(...)`)
+                    auto fwdIt = absl::c_find_if(
+                        send->args, [](auto &arg) { return parser::isa_node<parser::ForwardedArgs>(arg.get()); });
+                    if (fwdIt != send->args.end()) {
+                        block = make_unique<parser::LVar>(loc, core::Names::fwdBlock());
+                        hasFwdArgs = true;
+                        send->args.erase(fwdIt);
+                    }
+                }
+
+                auto hasFwdRestArg = false;
+                { // Pull out the ForwardedRestArg (an anonymous splat like `f(*)`)
+                    auto fwdRestIt = absl::c_find_if(
+                        send->args, [](auto &arg) { return parser::isa_node<parser::ForwardedRestArg>(arg.get()); });
+                    if (fwdRestIt != send->args.end()) {
+                        hasFwdRestArg = true;
+                        send->args.erase(fwdRestIt);
+                    }
+                }
+
                 int numPosArgs = send->args.size();
+
+                auto hasSplat =
+                    absl::c_any_of(send->args, [](auto &arg) { return parser::isa_node<parser::Splat>(arg.get()); });
 
                 // Deconstruct the kwargs hash if it's present.
                 optional<parser::NodeVec> kwargElements = flattenKwargs(send, numPosArgs);
 
-                if (absl::c_any_of(send->args, [](auto &arg) {
-                        return parser::isa_node<parser::Splat>(arg.get()) ||
-                               parser::isa_node<parser::ForwardedArgs>(arg.get()) ||
-                               parser::isa_node<parser::ForwardedRestArg>(arg.get());
-                    })) {
+                if (hasFwdArgs || hasFwdRestArg || hasSplat) {
                     // If we have a splat anywhere in the argument list, desugar
                     // the argument list as a single Array node, and then
                     // synthesize a call to
                     //   Magic.callWithSplat(receiver, method, argArray, [&blk])
                     // The callWithSplat implementation (in C++) will unpack a
                     // tuple type and call into the normal call mechanism.
-
-                    auto hasFwdArgs = false;
-                    { // Pull out the ForwardedArgs (the `...` argument in a method call, like `foo(...)`)
-                        auto fwdIt = absl::c_find_if(
-                            send->args, [](auto &arg) { return parser::isa_node<parser::ForwardedArgs>(arg.get()); });
-                        if (fwdIt != send->args.end()) {
-                            block = make_unique<parser::LVar>(loc, core::Names::fwdBlock());
-                            hasFwdArgs = true;
-                            send->args.erase(fwdIt);
-                        }
-                    }
-
-                    auto hasFwdRestArg = false;
-                    { // Pull out the ForwardedRestArg (an anonymous splat like `f(*)`)
-                        auto fwdRestIt = absl::c_find_if(send->args, [](auto &arg) {
-                            return parser::isa_node<parser::ForwardedRestArg>(arg.get());
-                        });
-                        if (fwdRestIt != send->args.end()) {
-                            hasFwdRestArg = true;
-                            send->args.erase(fwdRestIt);
-                        }
-                    }
 
                     unique_ptr<parser::Node> array = make_unique<parser::Array>(locZeroLen, std::move(send->args));
                     auto args = node2TreeImpl(dctx, array);
