@@ -716,7 +716,16 @@ public:
 // If Kwargs Hash contains any splats, we skip the flattening.
 //
 // Returns nullopt if there was no Kwargs Hash
+//
+// * Coming in, the numPosArgs is the *total* number of of arguments in the send node.
+// * Going out, the numPosArgs is decremented by 1 if there was a Kwargs Hash
+//   (it shouldn't be counted as a positional argument)
 optional<parser::NodeVec> flattenKwargs(parser::Send *send, int &numPosArgs) {
+    if (numPosArgs == 0) {
+        // There were no arguments, so there couldn't possibly by a Kwargs Hash.
+        return nullopt;
+    }
+
     // The keyword arguments hash can be the last argument if there is no block
     // or second to last argument otherwise
     int kwargsHashIndex = send->args.size() - 1;
@@ -736,6 +745,7 @@ optional<parser::NodeVec> flattenKwargs(parser::Send *send, int &numPosArgs) {
         return nullopt;
     }
 
+    // The send node's arguments includes a Kwargs Hash, which isn't a positional argument.
     numPosArgs--;
 
     // hold a reference to the node, and remove it from the back of the send list
@@ -832,11 +842,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     int numPosArgs = send->args.size();
 
                     // Deconstruct the kwargs hash if it's present.
-                    if (numPosArgs > 0) {
-                        optional<parser::NodeVec> kwargElements = flattenKwargs(send, numPosArgs);
-                        if (kwargElements.has_value()) {
-                            kwArray = make_unique<parser::Array>(loc, std::move(*kwargElements));
-                        }
+                    optional<parser::NodeVec> kwargElements = flattenKwargs(send, numPosArgs);
+                    if (kwargElements.has_value()) {
+                        kwArray = make_unique<parser::Array>(loc, std::move(*kwargElements));
                     }
 
                     // Put the &blk arg back, if present.
@@ -963,15 +971,14 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     result = std::move(res);
                 } else {
                     int numPosArgs = send->args.size();
-                    if (numPosArgs > 0) {
-                        // Deconstruct the kwargs hash if it's present.
-                        optional<parser::NodeVec> kwargElements = flattenKwargs(send, numPosArgs);
 
-                        if (kwargElements.has_value()) {
-                            // Concat the flattened Hash elements on the end of the args list.
-                            send->args.insert(send->args.end(), make_move_iterator(kwargElements->begin()),
-                                              make_move_iterator(kwargElements->end()));
-                        }
+                    // Deconstruct the kwargs hash if it's present.
+                    optional<parser::NodeVec> kwargElements = flattenKwargs(send, numPosArgs);
+
+                    if (kwargElements.has_value()) {
+                        // Concat the flattened Hash elements on the end of the args list.
+                        send->args.insert(send->args.end(), make_move_iterator(kwargElements->begin()),
+                                          make_move_iterator(kwargElements->end()));
                     }
 
                     Send::ARGS_store args;
