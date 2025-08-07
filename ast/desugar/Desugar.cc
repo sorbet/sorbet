@@ -817,11 +817,11 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         send->args.pop_back();
                     }
 
-                    // Deconstruct the kwargs hash if it's present.
-                    if (!send->args.empty()) {
-                        auto _numPosArgs = INT_MAX; // Dummy value, this code path doesn't use it.
+                    int numPosArgs = send->args.size();
 
-                        optional<parser::NodeVec> kwargElements = flattenKwargs(send, _numPosArgs);
+                    // Deconstruct the kwargs hash if it's present.
+                    if (numPosArgs > 0) {
+                        optional<parser::NodeVec> kwargElements = flattenKwargs(send, numPosArgs);
                         if (kwargElements.has_value()) {
                             kwArray = make_unique<parser::Array>(loc, std::move(*kwargElements));
                         }
