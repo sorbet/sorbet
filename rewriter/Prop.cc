@@ -86,6 +86,8 @@ struct PropContext {
 struct PropInfo {
     core::LocOffsets loc;
     bool isImmutable = false;
+    ast::ExpressionPtr getterOverride;
+    ast::ExpressionPtr setterOverride;
     core::NameRef name;
     core::LocOffsets nameLoc;
     ast::ExpressionPtr type;
@@ -102,6 +104,71 @@ struct NodesAndPropInfo {
     vector<ast::ExpressionPtr> nodes;
     PropInfo propInfo;
 };
+
+void emitBadOverride(core::MutableContext ctx, const core::LocOffsets loc, core::NameRef name) {
+    if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::PropBadOverride)) {
+        e.setHeader("Malformed `{}` in prop `{}`: valid values are `{}`, `{}`, `{}`, or a hash literal", "override",
+                    name.show(ctx), "true", ":reader", ":writer");
+    }
+}
+
+ast::ExpressionPtr elaborateOverride(core::MutableContext ctx, core::LocOffsets overrideLoc, ast::Hash &opts,
+                                     core::NameRef propName, core::NameRef key, string_view rendered) {
+    auto [_key, arg] = ASTUtil::extractHashValue(ctx, opts, key);
+    // no override key present
+    if (arg == nullptr) {
+        return nullptr;
+    } else if (auto lit = ast::cast_tree<ast::Literal>(arg)) {
+        if (lit->isTrue(ctx)) {
+            return ast::MK::OverrideStrict(overrideLoc);
+        } else if (lit->isFalse(ctx)) {
+            return nullptr;
+        } else if (auto e = ctx.beginIndexerError(lit->loc, core::errors::Rewriter::PropBadOverride)) {
+            e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}`, `{}` or `{}`", rendered,
+                        propName.show(ctx), "true", "{allow_incompatible: :visibility}", "{allow_incompatible: true}");
+        }
+    } else if (auto rOpts = ast::cast_tree<ast::Hash>(arg)) {
+        auto [allowIncompatKey, cfg] = ASTUtil::extractHashValue(ctx, *rOpts, core::Names::allowIncompatible());
+        if (auto clit = ast::cast_tree<ast::Literal>(cfg)) {
+            auto allowIncompatLoc = allowIncompatKey.loc();
+            if (clit->isTrue(ctx)) {
+                auto trueNode = ast::MK::True(clit->loc);
+                return ast::MK::OverrideAllowIncompatible(overrideLoc, allowIncompatLoc, std::move(trueNode));
+            } else if (clit->isFalse(ctx)) {
+                return nullptr;
+            } else if (clit->isSymbol()) {
+                auto sym = clit->asSymbol();
+                if (sym == core::Names::visibility()) {
+                    auto visibilityNode = ast::MK::Symbol(clit->loc, core::Names::visibility());
+                    return ast::MK::OverrideAllowIncompatible(overrideLoc, allowIncompatLoc, std::move(visibilityNode));
+                } else if (auto e = ctx.beginIndexerError(clit->loc, core::errors::Rewriter::PropBadOverride)) {
+                    e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}`, `{}` or `{}`", rendered,
+                                propName.show(ctx), "true", "{allow_incompatible: :visibility}",
+                                "{allow_incompatible: true}");
+                }
+            } else if (auto e = ctx.beginIndexerError(clit->loc, core::errors::Rewriter::PropBadOverride)) {
+                e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}`, `{}` or `{}`", rendered,
+                            propName.show(ctx), "true", "{allow_incompatible: :visibility}",
+                            "{allow_incompatible: true}");
+            }
+        } else if (cfg != nullptr) {
+            if (auto e = ctx.beginIndexerError(cfg.loc(), core::errors::Rewriter::PropBadOverride)) {
+                e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}`, `{}` or `{}`", rendered,
+                            propName.show(ctx), "true", "{allow_incompatible: :visibility}",
+                            "{allow_incompatible: true}");
+            }
+        } else if (auto e = ctx.beginIndexerError(rOpts->loc, core::errors::Rewriter::PropBadOverride)) {
+            e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}`, `{}` or `{}`", rendered,
+                        propName.show(ctx), "true", "{allow_incompatible: :visibility}", "{allow_incompatible: true}");
+        }
+    } else {
+        if (auto e = ctx.beginIndexerError(arg.loc(), core::errors::Rewriter::PropBadOverride)) {
+            e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}`, `{}` or `{}`", rendered,
+                        propName.show(ctx), "true", "{allow_incompatible: :visibility}", "{allow_incompatible: true}");
+        }
+    }
+    return nullptr;
+}
 
 optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     PropInfo ret;
@@ -281,10 +348,8 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             if (lit != nullptr && lit->isSymbol()) {
                 ret.computedByMethodNameLoc = lit->loc;
                 ret.computedByMethodName = lit->asSymbol();
-            } else {
-                if (auto e = ctx.beginIndexerError(val.loc(), core::errors::Rewriter::ComputedBySymbol)) {
-                    e.setHeader("Value for `{}` must be a symbol literal", "computed_by");
-                }
+            } else if (auto e = ctx.beginIndexerError(val.loc(), core::errors::Rewriter::ComputedBySymbol)) {
+                e.setHeader("Value for `{}` must be a symbol literal", "computed_by");
             }
         }
 
@@ -326,6 +391,71 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                 }
             }
         }
+        auto [overrideKey, overrideArg] = ASTUtil::extractHashValue(ctx, *rules, core::Names::override_());
+        ENFORCE(ret.name.exists());
+        if (overrideArg != nullptr) {
+            auto overrideLoc = overrideKey.loc();
+            if (auto lit = ast::cast_tree<ast::Literal>(overrideArg)) {
+                if (lit->isTrue(ctx)) {
+                    ret.getterOverride = ast::MK::OverrideStrict(overrideLoc);
+                    ret.setterOverride = ast::MK::OverrideStrict(overrideLoc);
+                } else if (lit->isFalse(ctx)) {
+                    ret.getterOverride = nullptr;
+                    ret.setterOverride = nullptr;
+                } else if (lit->isSymbol()) {
+                    auto sym = lit->asSymbol();
+                    if (sym == core::Names::reader()) {
+                        ret.getterOverride = ast::MK::OverrideStrict(overrideLoc);
+                    } else if (sym == core::Names::writer()) {
+                        ret.setterOverride = ast::MK::OverrideStrict(overrideLoc);
+                    } else {
+                        emitBadOverride(ctx, lit->loc, ret.name);
+                    }
+                } else {
+                    emitBadOverride(ctx, lit->loc, ret.name);
+                }
+            } else if (auto opts = ast::cast_tree<ast::Hash>(overrideArg)) {
+                auto [allowIncompatKey, allowIncompatArg] =
+                    ASTUtil::extractHashValue(ctx, *opts, core::Names::allowIncompatible());
+                if (allowIncompatArg != nullptr) {
+                    auto allowIncompatLoc = allowIncompatKey.loc();
+                    if (auto lit = ast::cast_tree<ast::Literal>(allowIncompatArg)) {
+                        if (lit->isTrue(ctx)) {
+                            auto trueNodeGetter = ast::MK::True(lit->loc);
+                            auto trueNodeSetter = ast::MK::True(lit->loc);
+                            ret.getterOverride = ast::MK::OverrideAllowIncompatible(overrideLoc, allowIncompatLoc,
+                                                                                    std::move(trueNodeGetter));
+                            ret.setterOverride = ast::MK::OverrideAllowIncompatible(overrideLoc, allowIncompatLoc,
+                                                                                    std::move(trueNodeSetter));
+                        } else if (lit->isFalse(ctx)) {
+                            ret.getterOverride = ast::MK::OverrideStrict(overrideLoc);
+                            ret.setterOverride = ast::MK::OverrideStrict(overrideLoc);
+                        } else if (lit->isSymbol() && lit->asSymbol() == core::Names::visibility()) {
+                            auto visibilityNodeGetter = ast::MK::Symbol(lit->loc, core::Names::visibility());
+                            auto visibilityNodeSetter = ast::MK::Symbol(lit->loc, core::Names::visibility());
+                            ret.getterOverride = ast::MK::OverrideAllowIncompatible(overrideLoc, allowIncompatLoc,
+                                                                                    std::move(visibilityNodeGetter));
+                            ret.setterOverride = ast::MK::OverrideAllowIncompatible(overrideLoc, allowIncompatLoc,
+                                                                                    std::move(visibilityNodeSetter));
+                        } else if (auto e = ctx.beginIndexerError(lit->loc, core::errors::Rewriter::PropBadOverride)) {
+                            e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}` or `{}`",
+                                        "allow_incompatible", ret.name.show(ctx), "true", ":visibility");
+                        }
+                    } else if (auto e = ctx.beginIndexerError(allowIncompatArg.loc(),
+                                                              core::errors::Rewriter::PropBadOverride)) {
+                        e.setHeader("Malformed `{}` in override for prop `{}`: expected `{}` or `{}`",
+                                    "allow_incompatible", ret.name.show(ctx), "true", ":visibility");
+                    }
+                } else {
+                    ret.getterOverride =
+                        elaborateOverride(ctx, overrideLoc, *opts, ret.name, core::Names::reader(), "reader");
+                    ret.setterOverride =
+                        elaborateOverride(ctx, overrideLoc, *opts, ret.name, core::Names::writer(), "writer");
+                }
+            } else {
+                emitBadOverride(ctx, overrideArg.loc(), ret.name);
+            }
+        }
     }
 
     if (ret.default_ == nullptr && ast::MK::isTNilable(ret.type)) {
@@ -335,23 +465,24 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     return ret;
 }
 
-vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, PropContext propContext) {
+vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &prop, PropContext propContext) {
     vector<ast::ExpressionPtr> nodes;
 
-    const auto loc = ret.loc;
+    const auto loc = prop.loc;
     const auto locZero = loc.copyWithZeroLength();
-    const auto name = ret.name;
-    const auto nameLoc = ret.nameLoc;
+    const auto name = prop.name;
+    const auto nameLoc = prop.nameLoc;
 
-    const auto getType = ASTUtil::dupType(ret.type);
+    const auto getType = ASTUtil::dupType(prop.type);
 
-    const auto computedByMethodName = ret.computedByMethodName;
-    const auto computedByMethodNameLoc = ret.computedByMethodNameLoc;
+    const auto computedByMethodName = prop.computedByMethodName;
+    const auto computedByMethodNameLoc = prop.computedByMethodNameLoc;
     const auto computedByMethodNameLocZero = computedByMethodNameLoc.copyWithZeroLength();
 
     auto ivarName = name.addAt(ctx);
 
-    nodes.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(getType)));
+    auto readerSig = ast::MK::Sig0(loc, ASTUtil::dupType(getType), move(prop.getterOverride));
+    nodes.emplace_back(std::move(readerSig));
 
     // Generate a real prop body for computed_by: props so Sorbet can assert the
     // existence of the computed_by: method.
@@ -369,7 +500,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
             ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod), ASTUtil::dupType(getType));
         auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseTypedUnimplemented(loc));
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
-    } else if (ret.ifunset == nullptr) {
+    } else if (prop.ifunset == nullptr) {
         if (wantSimpleIVarGet(propContext.syntacticSuperClass)) {
             ast::MethodDef::Flags flags;
             if (wantTypedInitialize(propContext.syntacticSuperClass)) {
@@ -390,14 +521,16 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
     core::NameRef setName = name.addEq(ctx);
 
     // Compute the setter
-    if (!ret.isImmutable) {
-        auto setType = ASTUtil::dupType(ret.type);
+    if (!prop.isImmutable) {
+        auto setType = ASTUtil::dupType(prop.type);
         ast::Send::ARGS_store sigArgs;
         sigArgs.emplace_back(ast::MK::Symbol(nameLoc, core::Names::arg0()));
         sigArgs.emplace_back(ASTUtil::dupType(setType));
-        nodes.emplace_back(ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType)));
 
-        if (ret.enum_ == nullptr) {
+        auto writerSig = ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType), move(prop.setterOverride));
+        nodes.emplace_back(std::move(writerSig));
+
+        if (prop.enum_ == nullptr) {
             if (knownNonDocument(propContext.syntacticSuperClass)) {
                 if (wantTypedInitialize(propContext.syntacticSuperClass)) {
                     auto ivarSet = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
@@ -419,16 +552,16 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
     }
 
     // Compute the `_` foreign accessor
-    if (ret.foreign) {
+    if (prop.foreign) {
         ast::ExpressionPtr type;
         ast::ExpressionPtr nonNilType;
-        if (ASTUtil::dupType(ret.foreign) == nullptr) {
+        if (ASTUtil::dupType(prop.foreign) == nullptr) {
             // If it's not a valid type, just use untyped
             type = ast::MK::Untyped(loc);
             nonNilType = ast::MK::Untyped(loc);
         } else {
-            type = ast::MK::Nilable(loc, ASTUtil::dupType(ret.foreign));
-            nonNilType = ASTUtil::dupType(ret.foreign);
+            type = ast::MK::Nilable(loc, ASTUtil::dupType(prop.foreign));
+            nonNilType = ASTUtil::dupType(prop.foreign);
         }
 
         // sig {params(allow_direct_mutation: T.nilable(T::Boolean)).returns(T.nilable($foreign))}
@@ -446,8 +579,8 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         fkFlags.discardDef = true;
 
         core::LocOffsets methodLoc;
-        if (ret.foreignKwLit != nullptr) {
-            methodLoc = ret.foreignKwLit.loc();
+        if (prop.foreignKwLit != nullptr) {
+            methodLoc = prop.foreignKwLit.loc();
         } else {
             methodLoc = loc;
         }
