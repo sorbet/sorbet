@@ -4,6 +4,7 @@
 #include "absl/types/span.h"
 
 #include "core/NameRef.h"
+#include "core/StrictLevel.h"
 #include "core/SymbolRef.h"
 #include "core/packages/MangledName.h"
 #include <optional>
@@ -60,6 +61,10 @@ public:
     virtual std::optional<std::pair<core::packages::StrictDependenciesLevel, core::LocOffsets>>
     strictDependenciesLevel() const = 0;
     virtual std::optional<std::pair<core::NameRef, core::LocOffsets>> layer() const = 0;
+    virtual std::optional<std::pair<core::NameRef, core::LocOffsets>> project() const = 0;
+    virtual std::optional<std::pair<core::NameRef, core::LocOffsets>> service() const = 0;
+    virtual std::optional<std::pair<core::StrictLevel, core::LocOffsets>> min_typed_level() const = 0;
+    virtual std::optional<std::pair<core::StrictLevel, core::LocOffsets>> tests_min_typed_level() const = 0;
 
     // The id of the SCC that this package's normal imports belong to.
     //

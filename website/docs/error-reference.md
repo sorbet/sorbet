@@ -881,6 +881,15 @@ The following directives can only appear once per `__package.rb` file:
 
 - `layer`
 - `strict_dependencies`
+- `service`
+- `project`
+- `sorbet min_typed_level: ..., tests_min_typed_level: ...`.
+
+## 3729
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+TODO
 
 ## 4001
 

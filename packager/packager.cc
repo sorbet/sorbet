@@ -245,6 +245,11 @@ public:
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_ = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer_ = nullopt;
+    std::optional<std::pair<core::NameRef, core::LocOffsets>> project_ = nullopt;
+    std::optional<std::pair<core::NameRef, core::LocOffsets>> service_ = nullopt;
+    std::optional<
+        std::pair<std::pair<core::StrictLevel, core::LocOffsets>, std::pair<core::StrictLevel, core::LocOffsets>>>
+        min_typed_level_ = nullopt;
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
         return strictDependenciesLevel_;
@@ -252,6 +257,28 @@ public:
 
     optional<pair<core::NameRef, core::LocOffsets>> layer() const {
         return layer_;
+    }
+
+    std::optional<std::pair<core::NameRef, core::LocOffsets>> project() const {
+        return project_;
+    }
+
+    std::optional<std::pair<core::NameRef, core::LocOffsets>> service() const {
+        return service_;
+    }
+
+    std::optional<std::pair<core::StrictLevel, core::LocOffsets>> min_typed_level() const {
+        if (min_typed_level_.has_value()) {
+            return min_typed_level_.value().first;
+        }
+        return nullopt;
+    }
+
+    std::optional<std::pair<core::StrictLevel, core::LocOffsets>> tests_min_typed_level() const {
+        if (min_typed_level_.has_value()) {
+            return min_typed_level_.value().second;
+        }
+        return nullopt;
     }
 
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
@@ -1449,6 +1476,90 @@ struct PackageSpecBodyWalk {
                 }
             }
         }
+
+        if (send.fun == core::Names::project()) {
+            if (info.project_.has_value()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::DuplicateDirective)) {
+                    e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
+                    e.addErrorLine(ctx.locAt(info.project_.value().second), "Previously declared here");
+                    e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
+                }
+                return;
+            }
+
+            if (send.numPosArgs() > 0) {
+                auto lit = ast::cast_tree<ast::Literal>(send.getPosArg(0));
+                if (!lit || !lit->isString()) {
+                    // We'll return an error for this elsewhere
+                    // TODO: test out a = "abc"; project a
+                    return;
+                }
+                auto value = lit->asString();
+                info.project_ = make_pair(value, send.getPosArg(0).loc());
+            }
+        }
+        if (send.fun == core::Names::service()) {
+            if (info.service_.has_value()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::DuplicateDirective)) {
+                    e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
+                    e.addErrorLine(ctx.locAt(info.service_.value().second), "Previously declared here");
+                    e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
+                }
+                return;
+            }
+
+            if (send.numPosArgs() > 0) {
+                auto lit = ast::cast_tree<ast::Literal>(send.getPosArg(0));
+                if (!lit || !lit->isString()) {
+                    // We'll return an error for this elsewhere
+                    // TODO: test out a = "abc"; service a
+                    return;
+                }
+                auto value = lit->asString();
+                info.service_ = make_pair(value, send.getPosArg(0).loc());
+            }
+        }
+        if (send.fun == core::Names::sorbet()) {
+            if (info.min_typed_level_.has_value()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::DuplicateDirective)) {
+                    e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
+                    e.addErrorLine(ctx.locAt(info.min_typed_level_.value().first.second), "Previously declared here");
+                    e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
+                }
+                return;
+            }
+
+            if (send.numKwArgs() >= 2) {
+                std::optional<std::pair<core::StrictLevel, core::LocOffsets>> min_typed_level;
+                std::optional<std::pair<core::StrictLevel, core::LocOffsets>> tests_min_typed_level;
+                for (const auto [key, value] : send.kwArgPairs()) {
+                    auto keyLit = ast::cast_tree<ast::Literal>(key);
+                    ENFORCE(keyLit);
+                    auto typedLevel = parseTypedLevelOption(ctx, value);
+                    if (!typedLevel.has_value()) {
+                        if (keyLit->asSymbol() == core::Names::min_typed_level() ||
+                            keyLit->asSymbol() == core::Names::tests_min_typed_level()) {
+                            if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidMinTypedLevel)) {
+                                e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}`, `{}`, or `{}`",
+                                            keyLit->asSymbol().show(ctx), "ignore", "false", "true", "strict",
+                                            "strong");
+                            }
+                        }
+                        continue;
+                    }
+                    if (keyLit->asSymbol() == core::Names::min_typed_level()) {
+                        min_typed_level = make_pair(typedLevel.value(), value.loc());
+                    } else if (keyLit->asSymbol() == core::Names::tests_min_typed_level()) {
+                        tests_min_typed_level = make_pair(typedLevel.value(), value.loc());
+                    } else {
+                        // Handled elsewhere
+                    }
+                }
+                if (min_typed_level.has_value() && tests_min_typed_level.has_value()) {
+                    info.min_typed_level_ = make_pair(min_typed_level.value(), tests_min_typed_level.value());
+                }
+            }
+        }
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -1611,6 +1722,25 @@ private:
             return value;
         }
         return nullopt;
+    }
+
+    optional<core::StrictLevel> parseTypedLevelOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
+        auto lit = ast::cast_tree<ast::Literal>(arg);
+        if (!lit || !lit->isString()) {
+            return nullopt;
+        }
+        auto value = lit->asString();
+        auto strictLevel = core::SigilTraits<core::StrictLevel>::fromString(value.show(gs));
+        switch (strictLevel) {
+            case core::StrictLevel::Ignore:
+            case core::StrictLevel::False:
+            case core::StrictLevel::True:
+            case core::StrictLevel::Strict:
+            case core::StrictLevel::Strong:
+                return strictLevel;
+            default:
+                return nullopt;
+        }
     }
 };
 
