@@ -877,6 +877,15 @@ Additionally, if a package is at `strict_dependencies 'dag'`, all packages it im
 
 Note: `test_import`s are not checked for strict dependency violations.
 
+## 3728
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+The following directives can only appear once per `__package.rb` file:
+
+- `layer`
+- `strict_dependencies`
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in `# typed: false` files. Recall from the [strictness levels](static.md#file-level-granularity-strictness-levels) docs that all constants in a Sorbet codebase must resolve, even at `# typed: false`. Parsing `include` blocks is required for this, so incorrect usages of `include` are reported when encountered.
