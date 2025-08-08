@@ -143,6 +143,8 @@ private:
 
     bool traceLexer;
 
+    bool singleLineStrings = true;
+
     size_t line_start(token_type type, size_t beginPos);
     void check_stack_capacity();
     int stack_pop();

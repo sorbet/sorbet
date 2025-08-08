@@ -203,7 +203,7 @@ static bool lookahead_quoted_label(std::string_view lookahead) {
 }
 
 bool literal::nest_and_try_closing(std::string_view delimiter, const char *ts, const char *te,
-                                   std::string_view lookahead) {
+                                   std::string_view lookahead, bool singleLineStrings) {
     if (start_delim.size() > 0 && start_delim == delimiter) {
         _nesting++;
     } else if (is_delimiter(delimiter)) {
@@ -235,6 +235,16 @@ bool literal::nest_and_try_closing(std::string_view delimiter, const char *ts, c
             emit(token_type::tSTRING_END, end_delim, ts, te);
             return true;
         }
+    }
+
+    if (singleLineStrings && !this->heredoc()) {
+        if (monolithic) {
+            // Emit the string as a single token.
+            emit(token_type::tSTRING, buffer, str_s, te);
+        } else {
+            emit(token_type::tSTRING_END, end_delim, ts, te);
+        }
+        return true;
     }
 
     return false;

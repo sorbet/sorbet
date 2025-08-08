@@ -84,7 +84,7 @@ public:
     bool end_interp_brace_and_try_closing();
 
     bool nest_and_try_closing(std::string_view delimiter, const char *ts, const char *te,
-                              std::string_view lookahead = "");
+                              std::string_view lookahead = "", bool singleLineLiteral = false);
 
     void extend_space(const char *ts, const char *te);
     void extend_string(std::string_view str, const char *ts, const char *te);

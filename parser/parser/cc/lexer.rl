@@ -1300,7 +1300,10 @@ void lexer::set_state_expr_value() {
     } else {
       // Try ending the literal with a newline.
       auto str = tok_view();
-      if (current_literal.nest_and_try_closing(str, ts, te)) {
+      if (current_literal.nest_and_try_closing(str, ts, te, "", this->singleLineStrings)) {
+        if (this->singleLineStrings) {
+          fhold;
+        }
         fnext *pop_literal(); fbreak;
       }
 
