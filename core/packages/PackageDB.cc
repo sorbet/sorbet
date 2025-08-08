@@ -129,10 +129,6 @@ UnfreezePackages::UnfreezePackages(PackageDB &db) : db(db) {
 
 UnfreezePackages::~UnfreezePackages() {
     ENFORCE(!db.frozen);
-    fast_sort(db.mangledNames, [&db = this->db](auto a, auto b) -> bool {
-        return PackageInfo::lexCmp(db.getPackageInfo(a).fullName(), db.getPackageInfo(b).fullName());
-    });
-
     db.writerThread = std::thread::id();
     db.frozen = true;
 }
