@@ -800,14 +800,15 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
                 }
 
+                // Remove "special" arguments from the list, and keep track of what we found along the way.
                 auto hasFwdArgs = false;
                 auto hasFwdRestArg = false;
                 auto hasSplat = false;
-                for (auto it = send->args.begin(); it != send->args.end(); /* incremented below */) {
+                auto newEndIt = std::remove_if(send->args.begin(), send->args.end(), [&](auto &arg) {
                     bool eraseFromArgs = false;
 
                     typecase(
-                        it->get(),
+                        arg.get(),
                         [&](parser::ForwardedArgs *fwdArgs) {
                             // Pull out the ForwardedArgs (the `...` argument in a method call, like `foo(...)`)
                             hasFwdArgs = true;
@@ -820,18 +821,15 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             eraseFromArgs = true;
                         },
                         [&](parser::Splat *splat) {
-                            // Detect if there's a splat in the argument list.
+                            // Detect if there's a splat in the argument list
                             hasSplat = true;
                             eraseFromArgs = false;
                         },
                         [&](parser::Node *node) { eraseFromArgs = false; });
 
-                    if (eraseFromArgs) {
-                        it = send->args.erase(it);
-                    } else {
-                        ++it;
-                    }
-                }
+                    return eraseFromArgs;
+                });
+                send->args.erase(newEndIt, send->args.end());
 
                 if (hasFwdArgs || hasFwdRestArg || hasSplat) {
                     // If we have a splat anywhere in the argument list, desugar
