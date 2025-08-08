@@ -84,6 +84,13 @@ struct MethodBuilder {
         return *this;
     }
 
+    MethodBuilder &keywordArg(NameRef name, TypePtr &&type) {
+        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        arg.type = std::move(type);
+        arg.flags.isKeyword = true;
+        return *this;
+    }
+
     MethodBuilder &defaultKeywordArg(NameRef name) {
         auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
         arg.flags.isDefault = true;
@@ -661,6 +668,12 @@ void GlobalState::initEmpty() {
                  .typedArg(Names::arg0(), Types::String())
                  .build();
     ENFORCE_NO_TIMER(method == Symbols::PackageSpec_layer());
+
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::sorbet())
+                 .keywordArg(Names::min_typed_level(), Types::String())
+                 .keywordArg(Names::tests_min_typed_level(), Types::String())
+                 .build();
+    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_sorbet());
 
     // Magic classes for special proc bindings
     klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToAttachedClass());

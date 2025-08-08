@@ -81,6 +81,16 @@ public:
         return nullopt;
     }
 
+    std::optional<std::pair<core::StrictLevel, core::LocOffsets>> min_typed_level() const {
+        notImplemented();
+        return nullopt;
+    }
+
+    std::optional<std::pair<core::StrictLevel, core::LocOffsets>> tests_min_typed_level() const {
+        notImplemented();
+        return nullopt;
+    }
+
     optional<int> sccID() const {
         notImplemented();
         return nullopt;
