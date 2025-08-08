@@ -20,6 +20,8 @@ struct ParsedSig {
     std::vector<ArgSpec> argTypes;
     core::TypePtr returns;
     core::LocOffsets returnsLoc;
+    core::TypePtr narrowsTo;
+    core::Loc narrowsToLoc;
 
     struct TypeArgSpec {
         core::LocOffsets loc;
