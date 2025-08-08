@@ -8,6 +8,10 @@
 #include "core/FileHash.h"
 #include "main/options/options.h"
 
+extern "C" {
+#include "prism.h"
+}
+
 namespace sorbet::core::lsp {
 class PreemptionTaskManager;
 }
@@ -120,5 +124,11 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
 // Create a copy of `from` that has its symbol table reset to the payload.
 std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts);
 
+// RBS Prism rewriter function
+pm_node_t *runRBSRewritePrism(sorbet::core::GlobalState &gs, sorbet::core::FileRef file, pm_node_t *node,
+                              const std::vector<sorbet::core::LocOffsets> &commentLocations,
+                              const sorbet::realmain::options::Printers &print, sorbet::core::MutableContext &ctx);
+
 } // namespace sorbet::realmain::pipeline
+
 #endif // RUBY_TYPER_PIPELINE_H

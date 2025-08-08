@@ -60,6 +60,7 @@
 #include <vector>
 
 using namespace std;
+
 namespace sorbet::test {
 
 string singleTest;
@@ -240,16 +241,22 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                     break;
                 }
                 case realmain::options::Parser::PRISM: {
-                    auto directlyDesugar = false;
-                    parseResult = parser::Prism::Parser::run(ctx, directlyDesugar);
-
                     // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors in
                     // `PrismDesugar.cc`. For now, disable direct desugaring, and fallback to `Desugar.cc`.
                     if (gs.cacheSensitiveOptions.rbsEnabled) {
+                        realmain::options::Printers print{};
+                        auto prismParseResult = parser::Prism::Parser::parseOnly(ctx);
+                        pm_node_t *rewrittenNode =
+                            realmain::pipeline::runRBSRewritePrism(gs, file, prismParseResult.getRawNodePointer(),
+                                                                   prismParseResult.getCommentLocations(), print, ctx);
+                        parseResult = parser::Prism::Parser::translateOnly(
+                            ctx, prismParseResult.getParser(), rewrittenNode, prismParseResult.getParseErrors(),
+                            prismParseResult.getCommentLocations(),
+                            false); // TODO: preserveConcreteSyntax set to false
                         directlyDesugaredTree = nullptr;
                     } else {
-                        auto directlyDesugar = true;
-                        directlyDesugaredTree = parser::Prism::Parser::run(ctx, directlyDesugar).tree;
+                        parseResult = parser::Prism::Parser::run(ctx, false);
+                        directlyDesugaredTree = parser::Prism::Parser::run(ctx, true).tree;
                     }
 
                     break;
@@ -290,7 +297,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             ast::ExpressionPtr ast = ast::desugar::node2Tree(ctx, move(nodes));
 
             if (directlyDesugaredTree != nullptr) {
-                // This AST would have been desugared deirectly by Prism::Translator
+                // This AST would have been desugared directly by Prism::Translator
                 auto directlyDesugaredAST = ast::prismDesugar::node2Tree(ctx, move(directlyDesugaredTree));
 
                 if (!ast.prismDesugarEqual(gs, directlyDesugaredAST, file)) {
@@ -735,8 +742,17 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 break;
             }
             case realmain::options::Parser::PRISM: {
-                auto directlyDesugar = false;
-                parseResult = parser::Prism::Parser::run(ctx, directlyDesugar);
+                if (gs->cacheSensitiveOptions.rbsEnabled) {
+                    realmain::options::Printers print{};
+                    auto prismParseResult = parser::Prism::Parser::parseOnly(ctx);
+                    pm_node_t *rewrittenNode = realmain::pipeline::runRBSRewritePrism(*gs, f.file, prismParseResult.getRawNodePointer(),
+                                                                                     prismParseResult.getCommentLocations(), print, ctx);
+                    parseResult = parser::Prism::Parser::translateOnly(
+                        ctx, prismParseResult.getParser(), rewrittenNode, prismParseResult.getParseErrors(),
+                        prismParseResult.getCommentLocations(), false); // TODO: preserveConcreteSyntax set to false
+                } else {
+                    parseResult = parser::Prism::Parser::run(ctx, false);
+                }
                 break;
             }
         }

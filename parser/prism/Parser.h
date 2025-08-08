@@ -28,6 +28,14 @@ public:
     pm_error_level_t level;
 };
 
+struct SimpleParseResult {
+    std::vector<ParseError> parseErrors;
+    std::vector<core::LocOffsets> commentLocations;
+
+    SimpleParseResult(std::vector<ParseError> parseErrors, std::vector<core::LocOffsets> commentLocations)
+        : parseErrors(std::move(parseErrors)), commentLocations(std::move(commentLocations)) {}
+};
+
 class Parser final {
     // The version of Ruby syntax that we're parsing with Prism. This determines what syntax is supported or not.
     static constexpr std::string_view ParsedRubyVersion = "3.3.0";
@@ -57,6 +65,11 @@ public:
 
     static parser::ParseResult run(core::MutableContext ctx, bool directlyDesugar = true,
                                    bool preserveConcreteSyntax = false);
+    static ParseResult parseOnly(core::MutableContext &ctx);
+    static parser::ParseResult translateOnly(core::MutableContext &ctx, const Parser &parser, pm_node_t *node,
+                                             const std::vector<ParseError> &parseErrors,
+                                             const std::vector<core::LocOffsets> &commentLocations,
+                                             bool preserveConcreteSyntax);
 
     ParseResult parse(bool collectComments = false);
     core::LocOffsets translateLocation(pm_location_t location) const;
@@ -96,8 +109,21 @@ class ParseResult final {
     ParseResult(ParseResult &&) = delete;                 // Move constructor
     ParseResult &operator=(ParseResult &&) = delete;      // Move assignment
 
+public:
     pm_node_t *getRawNodePointer() const {
         return node.get();
+    }
+
+    const std::vector<core::LocOffsets> &getCommentLocations() const {
+        return commentLocations;
+    }
+
+    const std::vector<ParseError> &getParseErrors() const {
+        return parseErrors;
+    }
+
+    const Parser &getParser() const {
+        return parser;
     }
 };
 
