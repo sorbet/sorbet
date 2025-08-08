@@ -706,16 +706,10 @@ public:
     }
 };
 
-// Returns the flattened key/value pairs from the Kwargs Hash, if there was one.
-// If Kwargs Hash contains any splats, we skip the flattening.
-//
-// Returns nullopt if there was no Kwargs Hash
-optional<parser::NodeVec> flattenKwargs(unique_ptr<parser::Hash> kwargsHash) {
-    if (kwargsHash == nullptr) {
-        return nullopt;
-    }
-
-    parser::NodeVec kwargElements;
+// Flattens the key/value pairs from the Kwargs Hash into the destination container.
+// If Kwargs Hash contains any splats, we skip the flattening and append the hash as-is.
+template <typename Container> void flattenKwargs(unique_ptr<parser::Hash> kwargsHash, Container &destination) {
+    ENFORCE(kwargsHash != nullptr);
 
     // Skip inlining the kwargs if there are any kwsplat nodes present
     if (absl::c_any_of(kwargsHash->pairs, [](auto &node) {
@@ -727,21 +721,21 @@ optional<parser::NodeVec> flattenKwargs(unique_ptr<parser::Hash> kwargsHash) {
             return parser::isa_node<parser::Kwsplat>(node.get()) ||
                    parser::isa_node<parser::ForwardedKwrestArg>(node.get());
         })) {
-        kwargElements.emplace_back(std::move(kwargsHash));
-        return kwargElements;
+        destination.emplace_back(std::move(kwargsHash));
+        return;
     }
 
-    // Flatten the key/value pairs into the result
+    // Flatten the key/value pairs into the destination
     for (auto &entry : kwargsHash->pairs) {
         if (auto pair = parser::cast_node<parser::Pair>(entry.get())) {
-            kwargElements.emplace_back(std::move(pair->key));
-            kwargElements.emplace_back(std::move(pair->value));
+            destination.emplace_back(std::move(pair->key));
+            destination.emplace_back(std::move(pair->value));
         } else {
             Exception::raise("Unhandled case");
         }
     }
 
-    return kwargElements;
+    return;
 }
 
 // Translate a tree to an expression. NOTE: this should only be called from `node2TreeImpl`.
@@ -839,9 +833,6 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
                 }
 
-                // Deconstruct the kwargs hash if it's present.
-                optional<parser::NodeVec> kwargElements = flattenKwargs(std::move(kwargsHash));
-
                 if (hasFwdArgs || hasFwdRestArg || hasSplat) {
                     // If we have a splat anywhere in the argument list, desugar
                     // the argument list as a single Array node, and then
@@ -887,8 +878,11 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // This will be used in the implementation of the intrinsic to tell the difference between keyword
                     // args, keyword args with kw splats, and no keyword args at all.
                     ExpressionPtr kwargs;
-                    if (kwargElements.has_value()) {
-                        unique_ptr<parser::Node> kwArray = make_unique<parser::Array>(loc, std::move(*kwargElements));
+                    if (kwargsHash != nullptr) {
+                        parser::NodeVec kwargElements;
+                        flattenKwargs(std::move(kwargsHash), kwargElements);
+
+                        unique_ptr<parser::Node> kwArray = make_unique<parser::Array>(loc, std::move(kwargElements));
 
                         kwargs = node2TreeImpl(dctx, kwArray);
 
@@ -932,10 +926,10 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // Count the arguments before we concat in the Kwarg key/value pairs
                     int numPosArgs = send->args.size();
 
-                    if (kwargElements.has_value()) {
-                        // Concat the flattened Hash elements on the end of the args list.
-                        send->args.insert(send->args.end(), make_move_iterator(kwargElements->begin()),
-                                          make_move_iterator(kwargElements->end()));
+                    if (kwargsHash != nullptr) {
+                        // Deconstruct the kwargs hash if it's present,
+                        // concating the key/value pairs to the end of the args list
+                        flattenKwargs(std::move(kwargsHash), send->args);
                     }
 
                     Send::ARGS_store args;
