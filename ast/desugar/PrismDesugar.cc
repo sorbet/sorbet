@@ -712,6 +712,39 @@ public:
     }
 };
 
+// Flattens the key/value pairs from the Kwargs Hash into the destination container.
+// If Kwargs Hash contains any splats, we skip the flattening and append the hash as-is.
+template <typename Container> void flattenKwargs(unique_ptr<parser::Hash> kwargsHash, Container &destination) {
+    ENFORCE(kwargsHash != nullptr);
+
+    // Skip inlining the kwargs if there are any kwsplat nodes present
+    if (absl::c_any_of(kwargsHash->pairs, [](auto &node) {
+            // the parser guarantees that if we see a kwargs hash it only contains pair,
+            // kwsplat, or forwarded kwrest arg nodes
+            ENFORCE(parser::NodeWithExpr::isa_node<parser::Kwsplat>(node.get()) ||
+                    parser::NodeWithExpr::isa_node<parser::Pair>(node.get()) ||
+                    parser::NodeWithExpr::isa_node<parser::ForwardedKwrestArg>(node.get()));
+
+            return parser::NodeWithExpr::isa_node<parser::Kwsplat>(node.get()) ||
+                   parser::NodeWithExpr::isa_node<parser::ForwardedKwrestArg>(node.get());
+        })) {
+        destination.emplace_back(std::move(kwargsHash));
+        return;
+    }
+
+    // Flatten the key/value pairs into the destination
+    for (auto &entry : kwargsHash->pairs) {
+        if (auto pair = parser::NodeWithExpr::cast_node<parser::Pair>(entry.get())) {
+            destination.emplace_back(std::move(pair->key));
+            destination.emplace_back(std::move(pair->value));
+        } else {
+            Exception::raise("Unhandled case");
+        }
+    }
+
+    return;
+}
+
 [[noreturn]] void desugaredByPrismTranslator(parser::Node *node) {
     Exception::raise("The {} node should have already been desugared by the Prism Translator.", node->nodeName());
 }
@@ -750,121 +783,74 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     flags.isPrivateOk = true;
                 }
 
-                if (absl::c_any_of(send->args, [](auto &arg) {
-                        return parser::NodeWithExpr::isa_node<parser::Splat>(arg.get()) ||
-                               parser::NodeWithExpr::isa_node<parser::ForwardedArgs>(arg.get()) ||
-                               parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(arg.get());
-                    })) {
-                    // Build up an array that represents the keyword args for the send. When there is a Kwsplat, treat
-                    // all keyword arguments as a single argument.
-                    unique_ptr<parser::Node> kwArray;
+                // Pop the BlockPass off the end of the arguments, if there is one.
+                unique_ptr<parser::Node> block;
+                bool anonymousBlockPass = false;
+                core::LocOffsets bpLoc;
+                if (!send->args.empty() && parser::NodeWithExpr::isa_node<parser::BlockPass>(send->args.back().get())) {
+                    auto *bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(send->args.back().get());
+                    if (bp->block == nullptr) {
+                        anonymousBlockPass = true;
+                        bpLoc = bp->loc;
+                    } else {
+                        block = std::move(bp->block);
+                    }
 
-                    // If there's a &blk node in the last position, pop that off (we'll put it back later, but
-                    // subsequent logic for dealing with the kwargs hash is simpler this way).
-                    unique_ptr<parser::Node> savedBlockPass = nullptr;
+                    send->args.pop_back();
+                }
 
-                    if (!send->args.empty() &&
-                        parser::NodeWithExpr::isa_node<parser::BlockPass>(send->args.back().get())) {
-                        savedBlockPass = std::move(send->args.back());
+                // Pop the Kwargs Hash off the end of the arguments, if there is one.
+                unique_ptr<parser::Hash> kwargsHash;
+                if (!send->args.empty()) {
+                    auto *hash = parser::NodeWithExpr::cast_node<parser::Hash>(send->args.back().get());
+
+                    // Only pop if it's a Hash, and if it's a kwargs Hash (as opposed to a regular Hash literal)
+                    if (hash != nullptr && hash->kwargs) {
+                        kwargsHash = unique_ptr<parser::Hash>(static_cast<parser::Hash *>(send->args.back().release()));
                         send->args.pop_back();
                     }
+                }
 
-                    // Deconstruct the kwargs hash if it's present.
-                    if (!send->args.empty()) {
-                        if (auto *hash = parser::NodeWithExpr::cast_node<parser::Hash>(send->args.back().get())) {
-                            if (hash->kwargs) {
-                                // hold a reference to the node, and remove it from the back of the send list
-                                auto node = std::move(send->args.back());
-                                send->args.pop_back();
+                // Remove "special" arguments from the list, and keep track of what we found along the way.
+                auto hasFwdArgs = false;
+                auto hasFwdRestArg = false;
+                auto hasSplat = false;
+                auto newEndIt = std::remove_if(send->args.begin(), send->args.end(), [&](auto &arg) {
+                    bool eraseFromArgs = false;
 
-                                parser::NodeVec elts;
+                    typecase(
+                        arg.get(),
+                        [&](parser::ForwardedArgs *fwdArgs) {
+                            // Pull out the ForwardedArgs (the `...` argument in a method call, like `foo(...)`)
+                            hasFwdArgs = true;
+                            block = make_unique<parser::LVar>(loc, core::Names::fwdBlock());
+                            eraseFromArgs = true;
+                        },
+                        [&](parser::ForwardedRestArg *fwdRestArg) {
+                            // Pull out the ForwardedRestArg (an anonymous splat like `f(*)`)
+                            hasFwdRestArg = true;
+                            eraseFromArgs = true;
+                        },
+                        [&](parser::Splat *splat) {
+                            // Detect if there's a splat in the argument list
+                            hasSplat = true;
+                            eraseFromArgs = false;
+                        },
+                        [&](parser::Node *node) { eraseFromArgs = false; });
 
-                                // skip inlining the kwargs if there are any kwsplat nodes present
-                                if (absl::c_any_of(hash->pairs, [](auto &node) {
-                                        // the parser guarantees that if we see a kwargs hash it only contains pair,
-                                        // kwsplat, or forwarded kwrest arg nodes
-                                        ENFORCE(parser::NodeWithExpr::isa_node<parser::Kwsplat>(node.get()) ||
-                                                parser::NodeWithExpr::isa_node<parser::Pair>(node.get()) ||
-                                                parser::NodeWithExpr::isa_node<parser::ForwardedKwrestArg>(node.get()));
+                    return eraseFromArgs;
+                });
+                send->args.erase(newEndIt, send->args.end());
 
-                                        return parser::NodeWithExpr::isa_node<parser::Kwsplat>(node.get()) ||
-                                               parser::NodeWithExpr::isa_node<parser::ForwardedKwrestArg>(node.get());
-                                    })) {
-                                    elts.emplace_back(std::move(node));
-                                } else {
-                                    // inline the hash into the send args
-                                    for (auto &entry : hash->pairs) {
-                                        typecase(
-                                            entry.get(),
-                                            [&](parser::Pair *pair) {
-                                                elts.emplace_back(std::move(pair->key));
-                                                elts.emplace_back(std::move(pair->value));
-                                            },
-                                            [&](parser::Node *node) { Exception::raise("Unhandled case"); });
-                                    }
-                                }
-
-                                kwArray = make_unique<parser::Array>(loc, std::move(elts));
-                            }
-                        }
-                    }
-
-                    // Put the &blk arg back, if present.
-                    if (savedBlockPass) {
-                        send->args.emplace_back(std::move(savedBlockPass));
-                    }
-
-                    // If the kwargs hash is not present, make a `nil` to put in the place of that argument. This
-                    // will be used in the implementation of the intrinsic to tell the difference between keyword
-                    // args, keyword args with kw splats, and no keyword args at all.
-                    if (kwArray == nullptr) {
-                        kwArray = make_unique<parser::Nil>(loc);
-                    }
-
+                if (hasFwdArgs || hasFwdRestArg || hasSplat) {
                     // If we have a splat anywhere in the argument list, desugar
                     // the argument list as a single Array node, and then
                     // synthesize a call to
-                    //   Magic.callWithSplat(receiver, method, argArray, [&blk])
+                    //   Magic.callWithSplat(receiver, method, argArray[, &blk])
                     // The callWithSplat implementation (in C++) will unpack a
                     // tuple type and call into the normal call mechanism.
-                    unique_ptr<parser::Node> block;
-                    auto argnodes = std::move(send->args);
-                    bool anonymousBlockPass = false;
-                    core::LocOffsets bpLoc;
-                    auto it = absl::c_find_if(argnodes, [](auto &arg) {
-                        return parser::NodeWithExpr::isa_node<parser::BlockPass>(arg.get());
-                    });
-                    if (it != argnodes.end()) {
-                        auto *bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(it->get());
-                        if (bp->block == nullptr) {
-                            anonymousBlockPass = true;
-                            bpLoc = bp->loc;
-                        } else {
-                            block = std::move(bp->block);
-                        }
-                        argnodes.erase(it);
-                    }
 
-                    auto hasFwdArgs = false;
-                    auto fwdIt = absl::c_find_if(argnodes, [](auto &arg) {
-                        return parser::NodeWithExpr::isa_node<parser::ForwardedArgs>(arg.get());
-                    });
-                    if (fwdIt != argnodes.end()) {
-                        block = make_unique<parser::LVar>(loc, core::Names::fwdBlock());
-                        hasFwdArgs = true;
-                        argnodes.erase(fwdIt);
-                    }
-
-                    auto hasFwdRestArg = false;
-                    auto fwdRestIt = absl::c_find_if(argnodes, [](auto &arg) {
-                        return parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(arg.get());
-                    });
-                    if (fwdRestIt != argnodes.end()) {
-                        hasFwdRestArg = true;
-                        argnodes.erase(fwdRestIt);
-                    }
-
-                    unique_ptr<parser::Node> array = make_unique<parser::Array>(locZeroLen, std::move(argnodes));
+                    unique_ptr<parser::Node> array = make_unique<parser::Array>(locZeroLen, std::move(send->args));
                     auto args = node2TreeImpl(dctx, array);
 
                     if (hasFwdArgs) {
@@ -895,12 +881,26 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         args = std::move(argsConcat);
                     }
 
-                    auto kwargs = node2TreeImpl(dctx, kwArray);
-                    auto method = MK::Symbol(locZeroLen, send->method);
+                    // Build up an array that represents the keyword args for the send.
+                    // When there is a Kwsplat, treat all keyword arguments as a single argument.
+                    // If the kwargs hash is not present, make a `nil` to put in the place of that argument.
+                    // This will be used in the implementation of the intrinsic to tell the difference between keyword
+                    // args, keyword args with kw splats, and no keyword args at all.
+                    ExpressionPtr kwargs;
+                    if (kwargsHash != nullptr) {
+                        parser::NodeVec kwargElements;
+                        flattenKwargs(std::move(kwargsHash), kwargElements);
 
-                    if (auto array = cast_tree<Array>(kwargs)) {
-                        DuplicateHashKeyCheck::checkSendArgs(dctx, 0, array->elems);
+                        unique_ptr<parser::Node> kwArray = make_unique<parser::Array>(loc, std::move(kwargElements));
+
+                        kwargs = node2TreeImpl(dctx, kwArray);
+
+                        DuplicateHashKeyCheck::checkSendArgs(dctx, 0, cast_tree<Array>(kwargs)->elems);
+                    } else {
+                        kwargs = MK::Nil(loc);
                     }
+
+                    auto method = MK::Symbol(locZeroLen, send->method);
 
                     Send::ARGS_store sendargs;
                     sendargs.emplace_back(std::move(rec));
@@ -932,71 +932,19 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
                     result = std::move(res);
                 } else {
+                    // Count the arguments before we concat in the Kwarg key/value pairs
                     int numPosArgs = send->args.size();
-                    if (numPosArgs > 0) {
-                        // The keyword arguments hash can be the last argument if there is no block
-                        // or second to last argument otherwise
-                        int kwargsHashIndex = send->args.size() - 1;
-                        if (!parser::NodeWithExpr::isa_node<parser::Hash>(send->args[kwargsHashIndex].get())) {
-                            kwargsHashIndex = max(0, kwargsHashIndex - 1);
-                        }
 
-                        // Deconstruct the kwargs hash if it's present.
-                        if (auto *hash =
-                                parser::NodeWithExpr::cast_node<parser::Hash>(send->args[kwargsHashIndex].get())) {
-                            if (hash->kwargs) {
-                                numPosArgs--;
-
-                                // skip inlining the kwargs if there are any non-key/value pairs present
-                                if (!absl::c_any_of(hash->pairs, [](auto &node) {
-                                        // the parser guarantees that if we see a kwargs hash it only contains pair,
-                                        // kwsplat, or forwarded kwrest nodes
-                                        ENFORCE(
-                                            parser::NodeWithExpr::isa_node<parser::Kwsplat>(node.get()) ||
-                                            parser::NodeWithExpr::isa_node<parser::ForwardedKwrestArg>(node.get()) ||
-                                            parser::NodeWithExpr::isa_node<parser::Pair>(node.get()));
-                                        return parser::NodeWithExpr::isa_node<parser::Kwsplat>(node.get()) ||
-                                               parser::NodeWithExpr::isa_node<parser::ForwardedKwrestArg>(node.get());
-                                    })) {
-                                    // hold a reference to the node, and remove it from the back of the send list
-                                    auto node = std::move(send->args[kwargsHashIndex]);
-                                    send->args.erase(send->args.begin() + kwargsHashIndex);
-
-                                    // inline the hash into the send args
-                                    for (auto &entry : hash->pairs) {
-                                        typecase(
-                                            entry.get(),
-                                            [&](parser::Pair *pair) {
-                                                send->args.emplace_back(std::move(pair->key));
-                                                send->args.emplace_back(std::move(pair->value));
-                                            },
-                                            [&](parser::Node *node) { Exception::raise("Unhandled case"); });
-                                    }
-                                }
-                            }
-                        }
+                    if (kwargsHash != nullptr) {
+                        // Deconstruct the kwargs hash if it's present,
+                        // concating the key/value pairs to the end of the args list
+                        flattenKwargs(std::move(kwargsHash), send->args);
                     }
 
                     Send::ARGS_store args;
-                    unique_ptr<parser::Node> block;
                     args.reserve(send->args.size());
-                    bool anonymousBlockPass = false;
-                    core::LocOffsets bpLoc;
                     for (auto &stat : send->args) {
-                        if (auto bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(stat.get())) {
-                            ENFORCE(block == nullptr, "passing a block where there is no block");
-                            if (bp->block == nullptr) {
-                                anonymousBlockPass = true;
-                                bpLoc = bp->loc;
-                            } else {
-                                block = std::move(bp->block);
-                            }
-
-                            // we don't count the block arg as part of the positional arguments anymore.
-                            numPosArgs = max(0, numPosArgs - 1);
-                        } else {
-                            args.emplace_back(node2TreeImpl(dctx, stat));
-                        }
+                        args.emplace_back(node2TreeImpl(dctx, stat));
                     };
 
                     DuplicateHashKeyCheck::checkSendArgs(dctx, numPosArgs, args);
@@ -1021,6 +969,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                 symbol2Proc(dctx, std::move(convertedBlock)));
                         } else {
                             Send::ARGS_store sendargs;
+                            sendargs.reserve(3 + args.size());
                             sendargs.emplace_back(std::move(rec));
                             sendargs.emplace_back(std::move(method));
                             sendargs.emplace_back(std::move(convertedBlock));
