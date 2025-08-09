@@ -190,15 +190,20 @@ constructAllowIncompatibleAutocorrect(const core::Context ctx, const ast::Expres
     auto blockBody = ast::cast_tree<ast::Send>(block->body);
     ENFORCE(blockBody != nullptr);
 
+    auto dot = "";
     auto replaceLoc = ctx.locAt(parsedSig->sig.seen.override_);
 
     if (!replaceLoc.exists()) {
-        return nullopt;
+        dot = ".";
+        replaceLoc = ctx.locAt(resolver::TypeSyntax::sigSpecStart(parsedSig->sig));
+        if (!replaceLoc.exists()) {
+            return nullopt;
+        }
     }
 
     vector<core::AutocorrectSuggestion::Edit> edits;
     edits.emplace_back(
-        core::AutocorrectSuggestion::Edit{replaceLoc, fmt::format("override(allow_incompatible: {})", what)});
+        core::AutocorrectSuggestion::Edit{replaceLoc, fmt::format("override(allow_incompatible: {}){}", what, dot)});
     return core::AutocorrectSuggestion{
         fmt::format("Add `{}` to `{}` in `{}` sig", fmt::format("allow_incompatible: {}", what), "override",
                     methodDef.symbol.data(ctx)->name.show(ctx)),
