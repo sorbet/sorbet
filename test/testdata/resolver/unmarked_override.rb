@@ -16,9 +16,10 @@ class B < A
 # ^^^^^^^ error: Return type `String` does not match return type of overridden method `A#foo`
 end
 
-# don't validate if no child sig
 class C < A
-  def foo(x); ""; end
+  extend T::Sig
+
+  def foo; ""; end
 end
 
 class D < A
@@ -49,7 +50,6 @@ class F < A
 
   sig { void.abstract }
   def foo; end
-# ^^^^^^^ error: Method `F#foo` is marked as abstract, but overrides the non-abstract method `A#foo`
 # ^^^^^^^ error: Return type `void` does not match return type of overridden method `A#foo`
 end
 
