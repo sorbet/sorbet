@@ -440,19 +440,9 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                         e.setHeader("Method that is both `{}` and `{}` cannot be implemented", "final", "abstract");
                     }
                 }
-                if (sig.seen.override_.exists()) {
-                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("`{}` cannot be combined with `{}`", "abstract", "override");
-                    }
-                }
                 sig.seen.abstract = send->funLoc;
                 break;
             case core::Names::override_().rawId(): {
-                if (sig.seen.abstract.exists()) {
-                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("`{}` cannot be combined with `{}`", "override", "abstract");
-                    }
-                }
                 sig.seen.override_ = send->funLoc.join(send->loc.copyEndWithZeroLength());
 
                 if (send->hasPosArgs()) {

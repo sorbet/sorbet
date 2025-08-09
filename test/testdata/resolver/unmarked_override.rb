@@ -16,9 +16,8 @@ class B < A
 # ^^^^^^^ error: Return type `String` does not match return type of overridden method `A#foo`
 end
 
+# No sig is untyped
 class C < A
-  extend T::Sig
-
   def foo; ""; end
 end
 
