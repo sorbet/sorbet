@@ -28,6 +28,12 @@ ast::Send *findSendReturns(ast::Send *sharedSig) {
         body = ast::cast_tree<ast::Send>(body->recv);
     }
 
+    return body;
+}
+
+ast::Send *ensureReturns(ast::Send *sig) {
+    auto body = findSendReturns(sig);
+
     return body->fun == core::Names::returns() ? body : nullptr;
 }
 
@@ -36,7 +42,7 @@ bool hasNilableOrUntypedReturns(ast::ExpressionPtr &sharedSig) {
 
     ENFORCE(sig != nullptr, "We weren't given a send node that's a valid signature");
 
-    auto *body = findSendReturns(sig);
+    auto *body = ensureReturns(sig);
 
     ENFORCE(body->fun == core::Names::returns());
     if (body->numPosArgs() != 1) {
@@ -50,7 +56,7 @@ ast::ExpressionPtr dupReturnsType(ast::Send *sharedSig) {
 
     ENFORCE(sig != nullptr, "We weren't given a send node that's a valid signature");
 
-    auto *body = findSendReturns(sig);
+    auto *body = ensureReturns(sig);
 
     ENFORCE(body->fun == core::Names::returns());
     if (body->numPosArgs() != 1) {
@@ -87,7 +93,7 @@ ast::ExpressionPtr toWriterSigForName(ast::Send *sharedSig, const core::NameRef 
     auto sig = ast::cast_tree<ast::Send>(sigExpr);
     ENFORCE(sig != nullptr, "Just deep copied this, so it should be non-null");
 
-    auto *body = findSendReturns(sig);
+    auto *body = ensureReturns(sig);
 
     ENFORCE(body->fun == core::Names::returns());
     if (body->numPosArgs() != 1) {
@@ -166,7 +172,14 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
     ast::Send *sig = nullptr;
     if (prevStat) {
         sig = ASTUtil::castSig(*prevStat);
-        if (sig != nullptr && findSendReturns(sig) == nullptr) {
+        if (sig != nullptr) {
+            auto ret = findSendReturns(sig);
+            if (ret->fun == core::Names::void_() && makeReader) {
+                if (auto e = ctx.beginIndexerError(ret->loc, core::errors::Rewriter::VoidAttrReader)) {
+                    auto what = makeWriter ? "attr_accessor" : "attr_reader";
+                    e.setHeader("An `{}` cannot be `{}`", what, "void");
+                }
+            }
             sig = nullptr;
         } else if (sig != nullptr) {
             ensureSafeSig(ctx, send->fun, sig);
