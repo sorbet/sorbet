@@ -485,7 +485,7 @@ end
 
 ## 3516
 
-`attr_reader`, `attr_writer` and `attr_accessor` may not be given a signature of `void`, as these accessor methods correspond to instance variables which cannot be assigned type `void`.
+`attr_reader` and `attr_accessor` may not be given a signature of `void`, as these accessor methods correspond to instance variables which cannot be assigned type `void`.
 
 ## 3550
 
