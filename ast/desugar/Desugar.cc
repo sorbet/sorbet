@@ -1798,7 +1798,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
 
                 if (hasTilde) {
-                    core::LocOffsets adjustedLoc = dctx.ctx.locAt(loc).adjust(dctx.ctx, 1, 1).offsets();
+                    core::LocOffsets adjustedLoc = dctx.ctx.locAt(loc).adjust(dctx.ctx, 1, 0).offsets();
                     result = MK::Int(adjustedLoc, val);
                     result = MK::Send0(loc, move(result), core::Names::tilde(), loc.copyEndWithZeroLength());
                 } else {
