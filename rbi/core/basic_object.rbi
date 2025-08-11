@@ -117,6 +117,7 @@ class BasicObject
   # 1.eql? 1.0   #=> false
   # ```
   sig do
+    overridable.
     params(
         other: BasicObject,
     )
