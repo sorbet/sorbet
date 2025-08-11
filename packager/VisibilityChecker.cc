@@ -62,17 +62,6 @@ class PropagateVisibility final {
         }
     }
 
-    void exportParentNamespace(core::GlobalState &gs, core::ClassOrModuleRef owner) {
-        // Implicitly export parent namespace (symbol owner) until we hit the root of the package.
-        // NOTE that we make an exception for namespaces that define behavior: these CANNOT get exported implicitly,
-        // as that violates the private-by-default paradigm.
-        while (owner.exists() && !owner.data(gs)->flags.isExported && !owner.data(gs)->flags.isBehaviorDefining &&
-               this->definedByThisPackage(gs, owner)) {
-            owner.data(gs)->flags.isExported = true;
-            owner = owner.data(gs)->owner;
-        }
-    }
-
     // Lookup the package name on the given root symbol, and mark the final symbol as exported.
     void exportRoot(core::GlobalState &gs, core::ClassOrModuleRef sym) {
         // For a package named `A::B`, the ClassDef that we see in this pass is for a symbol named
@@ -266,18 +255,10 @@ public:
             auto sym = litSymbol.asClassOrModuleRef();
             checkExportPackage(ctx, send.loc, litSymbol);
             recursiveExportSymbol(ctx, true, sym);
-
-            // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would be
-            // great to remove this, but this was the behavior of the previous packager implementation.
-            exportParentNamespace(ctx, sym.data(ctx)->owner);
         } else if (litSymbol.isFieldOrStaticField()) {
             auto sym = litSymbol.asFieldRef();
             checkExportPackage(ctx, send.loc, litSymbol);
             sym.data(ctx)->flags.isExported = true;
-
-            // When exporting a field, we also export its parent namespace. This is a bit of a hack, and it would be
-            // great to remove this, but this was the behavior of the previous packager implementation.
-            exportParentNamespace(ctx, sym.data(ctx)->owner);
         } else {
             string_view kind = ""sv;
             switch (litSymbol.kind()) {
