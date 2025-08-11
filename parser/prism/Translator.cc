@@ -260,7 +260,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 // A named block parameter, like `def foo(&block)`
                 sorbetName = translateConstantName(prismName);
             } else { // An anonymous block parameter, like `def foo(&)`
-                sorbetName = gs.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), nextUniqueID());
+                sorbetName =
+                    ctx.state.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), nextUniqueID());
             }
 
             auto blockLoc = core::LocOffsets{location.beginPos() + 1, location.endPos()};
@@ -345,11 +346,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             unique_ptr<parser::Node> sendNode;
+
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) { // Handle conditional send, e.g. `a&.b`
-                sendNode = make_unique<parser::CSend>(loc, move(receiver), gs.enterNameUTF8(constantNameString),
+                sendNode = make_unique<parser::CSend>(loc, move(receiver), ctx.state.enterNameUTF8(constantNameString),
                                                       messageLoc, move(args));
             } else { // Regular send, e.g. `a.b`
-                sendNode = make_unique<parser::Send>(loc, move(receiver), gs.enterNameUTF8(constantNameString),
+                sendNode = make_unique<parser::Send>(loc, move(receiver), ctx.state.enterNameUTF8(constantNameString),
                                                      messageLoc, move(args));
             }
 
@@ -854,7 +856,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 // A named keyword rest parameter, like `def foo(**kwargs)`
                 sorbetName = translateConstantName(prismName);
             } else { // An anonymous keyword rest parameter, like `def foo(**)`
-                sorbetName = gs.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), nextUniqueID());
+                sorbetName =
+                    ctx.state.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), nextUniqueID());
             }
 
             auto kwrestLoc = core::LocOffsets{location.beginPos() + 2, location.endPos()};
@@ -976,7 +979,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             for (auto i = 1; i <= paramCount; i++) {
                 // The location is arbitrary and not really used, since these aren't explicitly written in the source.
-                auto paramNode = make_unique<parser::LVar>(location, gs.enterNameUTF8("_" + to_string(i)));
+                auto paramNode = make_unique<parser::LVar>(location, ctx.state.enterNameUTF8("_" + to_string(i)));
                 params.emplace_back(move(paramNode));
             }
 
@@ -1218,7 +1221,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto source = parser.extractString(unescaped);
 
             // TODO: handle different string encodings
-            return make_unique<parser::String>(location, gs.enterNameUTF8(source));
+            return make_unique<parser::String>(location, ctx.state.enterNameUTF8(source));
         }
         case PM_SUPER_NODE: { // The `super` keyword, like `super`, `super(a, b)`
             auto superNode = down_cast<pm_super_node>(node);
@@ -1249,7 +1252,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             // TODO: can these have different encodings?
-            return make_unique<parser::Symbol>(location, gs.enterNameUTF8(source));
+            return make_unique<parser::Symbol>(location, ctx.state.enterNameUTF8(source));
         }
         case PM_TRUE_NODE: { // The `true` keyword
             return make_node_with_expr<parser::True>(MK::True(location), location);
@@ -1312,7 +1315,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto source = parser.extractString(unescaped);
 
             // TODO: handle different string encodings
-            unique_ptr<parser::Node> string = make_unique<parser::String>(location, gs.enterNameUTF8(source));
+            unique_ptr<parser::Node> string = make_unique<parser::String>(location, ctx.state.enterNameUTF8(source));
 
             NodeVec nodes{};
             nodes.emplace_back(move(string)); // Multiple nodes is only possible for interpolated x strings.
@@ -1868,11 +1871,11 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
         parent = nullptr;
     }
 
-    return make_unique<SorbetLHSNode>(location, move(parent), gs.enterNameConstant(name));
+    return make_unique<SorbetLHSNode>(location, move(parent), ctx.state.enterNameConstant(name));
 }
 
-core::NameRef Translator::translateConstantName(pm_constant_id_t constantId) {
-    return gs.enterNameUTF8(parser.resolveConstant(constantId));
+core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
+    return ctx.state.enterNameUTF8(parser.resolveConstant(constant_id));
 }
 
 // Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
@@ -1898,7 +1901,7 @@ unique_ptr<parser::Regexp> Translator::translateRegexp(pm_string_t unescaped, co
     parser::NodeVec parts;
     auto source = parser.extractString(&unescaped);
     if (!source.empty()) {
-        auto sourceStringNode = make_unique<parser::String>(location, gs.enterNameUTF8(source));
+        auto sourceStringNode = make_unique<parser::String>(location, ctx.state.enterNameUTF8(source));
         parts.emplace_back(move(sourceStringNode));
     }
 
@@ -1965,12 +1968,12 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
 // Context management methods
 Translator Translator::enterMethodDef() {
     auto isInMethodDef = true;
-    return Translator(parser, gs, file, parseErrors, directlyDesugar, isInMethodDef, uniqueCounter);
+    return Translator(parser, ctx, parseErrors, directlyDesugar, isInMethodDef, uniqueCounter);
 }
 
 void Translator::reportError(core::LocOffsets loc, const string &message) {
-    auto errorLoc = core::Loc(file, loc);
-    if (auto e = gs.beginError(errorLoc, core::errors::Parser::ParserError)) {
+    auto errorLoc = core::Loc(ctx.file, loc);
+    if (auto e = ctx.state.beginError(errorLoc, core::errors::Parser::ParserError)) {
         e.setHeader("{}", message);
     }
 }

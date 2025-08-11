@@ -15,14 +15,9 @@ namespace sorbet::parser::Prism {
 
 class Translator final {
     const Parser &parser;
-
-    // The functions in Pipeline.cc pass around a reference to the global state as a parameter,
-    // but don't have explicit ownership over it. We take a temporary reference to it, but we can't
-    // escape that scope, which is why Translator objects can't be copied, or even moved.
-    core::GlobalState &gs;
-
-    // Needed for reporting diagnostics
-    core::FileRef file;
+    // This context holds a reference to the GlobalState allocated up the call stack, which is why we don't allow
+    // Translator objects to be copied or moved.
+    core::MutableContext ctx;
 
     // The errors that were found by Prism during parsing
     const absl::Span<const ParseError> parseErrors;
@@ -44,10 +39,10 @@ class Translator final {
     Translator &operator=(Translator &&) = delete;      // Move assignment
     Translator &operator=(const Translator &) = delete; // Copy assignment
 public:
-    Translator(const Parser &parser, core::GlobalState &gs, core::FileRef file,
-               const absl::Span<const ParseError> parseErrors, bool directlyDesugar)
-        : parser(parser), gs(gs), file(file), parseErrors(parseErrors), directlyDesugar(directlyDesugar),
-          uniqueCounterStorage(1), uniqueCounter(&this->uniqueCounterStorage) {}
+    Translator(const Parser &parser, core::MutableContext ctx, const absl::Span<const ParseError> parseErrors,
+               bool directlyDesugar)
+        : parser(parser), ctx(ctx), parseErrors(parseErrors), directlyDesugar(directlyDesugar), uniqueCounterStorage(1),
+          uniqueCounter(&this->uniqueCounterStorage) {}
 
     int nextUniqueID() {
         return *uniqueCounter += 1;
@@ -59,10 +54,9 @@ public:
 private:
     // Private constructor used only for creating child translators
     // uniqueCounterStorage is passed as the minimum integer value and is never used
-    Translator(const Parser &parser, core::GlobalState &gs, core::FileRef file,
-               const absl::Span<const ParseError> &parseErrors, bool directlyDesugar, bool isInMethodDef,
-               int *uniqueCounter)
-        : parser(parser), gs(gs), file(file), parseErrors(parseErrors), directlyDesugar(directlyDesugar),
+    Translator(const Parser &parser, core::MutableContext ctx, const absl::Span<const ParseError> &parseErrors,
+               bool directlyDesugar, bool isInMethodDef, int *uniqueCounter)
+        : parser(parser), ctx(ctx), parseErrors(parseErrors), directlyDesugar(directlyDesugar),
           isInMethodDef(isInMethodDef), uniqueCounterStorage(std::numeric_limits<int>::min()),
           uniqueCounter(uniqueCounter) {}
     void reportError(core::LocOffsets loc, const std::string &message);
