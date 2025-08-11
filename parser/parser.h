@@ -5,6 +5,12 @@
 
 namespace sorbet::parser {
 
+enum class BlockStyle : uint32_t {
+    Present,
+    DoEnd,
+    Braces,
+};
+
 class Parser final {
 public:
     struct Settings {

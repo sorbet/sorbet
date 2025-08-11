@@ -1284,7 +1284,7 @@ public:
                 // that won't match our expected invariants (and in fact will fail our sanity checks)
                 // auto temporaryUntyped = ast::MK::Untyped(asgn->lhs.get()->loc);
                 auto temporaryUntyped = ast::MK::Block0(asgn.lhs.loc(), ast::MK::Untyped(asgn.lhs.loc()));
-                send->setBlock(std::move(temporaryUntyped));
+                send->setBlock(std::move(temporaryUntyped), ast::Send::BlockType::Present);
 
                 // because we're synthesizing a fake "untyped" here and actually adding it to the AST, we won't report
                 // an arity mismatch for `T.untyped` in the future, so report the arity mismatch now
