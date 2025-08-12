@@ -3,6 +3,9 @@
 
 #include "ast/Helpers.h"
 #include "ast/Trees.h"
+#include "core/errors/desugar.h"
+
+#include "absl/strings/str_replace.h"
 
 template class std::unique_ptr<sorbet::parser::Node>;
 
@@ -11,6 +14,7 @@ using namespace std;
 namespace sorbet::parser::Prism {
 
 using sorbet::ast::MK;
+using ExpressionPtr = sorbet::ast::ExpressionPtr;
 
 // Returns true if all nodes have a desugared expr or are null.
 // Call this with all of a node's children, to check if that node can be desugared.
@@ -321,10 +325,20 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // Handle `~[Integer]`, like `~42`
             // Unlike `-[Integer]`, Prism treats `~[Integer]` as a method call
             // But Sorbet's legacy parser treats both `~[Integer]` and `-[Integer]` as integer literals
-            if (constantNameString == "~" && parser::cast_node<parser::Integer>(receiver.get())) {
+            if (constantNameString == "~" && parser::NodeWithExpr::cast_node<parser::Integer>(receiver.get())) {
                 string valueString(sliceLocation(callNode->base.location));
 
-                return make_unique<parser::Integer>(location, move(valueString));
+                if (!directlyDesugar) {
+                    return make_unique<parser::Integer>(location, move(valueString));
+                }
+
+                // The purely integer part of it, not including the `~`
+                auto integerExpr = receiver->takeDesugaredExpr();
+                ENFORCE(integerExpr != nullptr, "All Integer nodes should have been desugared already");
+
+                // Model this as an Integer in the parse tree, but desugar to a method call like `42.~()`
+                auto sendNode = MK::Send0(loc, move(integerExpr), core::Names::tilde(), loc.copyEndWithZeroLength());
+                return make_node_with_expr<parser::Integer>(move(sendNode), location, move(valueString));
             }
 
             pm_node_t *prismBlock = callNode->block;
@@ -755,7 +769,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto intNode = down_cast<pm_integer_node>(node);
             // For normal integers, retain the original valueString including any sign
             string valueString(sliceLocation(intNode->base.location));
-
             ENFORCE(!valueString.empty());
 
             // Index to track position in valueString after optional sign
@@ -793,7 +806,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 }
             }
 
-            return make_unique<parser::Integer>(location, move(valueString));
+            auto underscorePos = valueString.find("_");
+            const string &withoutUnderscores =
+                (underscorePos == string::npos) ? valueString : absl::StrReplaceAll(valueString, {{"_", ""}});
+
+            int64_t val;
+            if (!absl::SimpleAtoi(withoutUnderscores, &val)) {
+                val = 0;
+                if (auto e = ctx.beginIndexerError(location, core::errors::Desugar::IntegerOutOfRange)) {
+                    e.setHeader("Unsupported integer literal: `{}`", valueString);
+                }
+            }
+
+            return make_node_with_expr<parser::Integer>(MK::Int(location, val), location, move(valueString));
         }
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE: { // An interpolated regex literal in a conditional...
             // ...that implicitly checks against the last read line by an IO object, e.g. `if /wat #{123}/`
