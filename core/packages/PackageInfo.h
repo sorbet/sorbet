@@ -61,6 +61,8 @@ public:
     strictDependenciesLevel() const = 0;
     virtual std::optional<std::pair<core::NameRef, core::LocOffsets>> layer() const = 0;
 
+    virtual std::vector<core::LocOffsets> extraDirectives() const = 0;
+
     // The id of the SCC that this package's normal imports belong to.
     //
     // WARNING: Modifying the contents of the package DB after this operation will cause this id to go out of

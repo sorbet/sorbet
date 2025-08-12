@@ -242,6 +242,7 @@ public:
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_ = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer_ = nullopt;
+    vector<core::LocOffsets> extraDirectives_ = {};
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
         return strictDependenciesLevel_;
@@ -249,6 +250,10 @@ public:
 
     optional<pair<core::NameRef, core::LocOffsets>> layer() const {
         return layer_;
+    }
+
+    vector<core::LocOffsets> extraDirectives() const {
+        return extraDirectives_;
     }
 
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
@@ -1399,6 +1404,9 @@ struct PackageSpecBodyWalk {
                     }
                 }
             }
+        } else {
+            // Extra directives
+            info.extraDirectives_.push_back(send.loc);
         }
     }
 
