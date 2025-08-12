@@ -19,6 +19,9 @@ struct SymbolDataDebugCheck {
     SymbolDataDebugCheck(const GlobalState &gs);
     void check() const;
 };
+namespace packages {
+class MangledName;
+}
 
 /** These classes are intended to be a safe way to pass symbol references around.
  *  Entering new symbols can invalidate `Symbol &`s and thus they are generally unsafe.

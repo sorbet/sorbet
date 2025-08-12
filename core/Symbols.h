@@ -8,6 +8,7 @@
 #include "core/Polarity.h"
 #include "core/SymbolRef.h"
 #include "core/Types.h"
+#include "core/packages/MangledName.h"
 #include <memory>
 #include <tuple>
 #include <vector>
@@ -597,7 +598,34 @@ public:
 
     bool ignoreInHashing(const GlobalState &gs) const;
 
+private:
+    // A link to the corresponding spot in the `<PackageSpecRegistry>` hierarchy.
+    //
+    // Might correspond to an intermediate `<PackageSpecRegistry>` namespace (not a package), but at least
+    // will always correspond to the tightest possible namespace in the `<PackageSpecRegistry>` subtree.
+    //
+    // Only set if `gs.packageDB().enabled()`
+    //
+    // - Given ::Opus::MyPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg
+    // - Given ::Opus::MyPkg::Foo, contains ::<PackageSpecRegistry>::Opus::MyPkg::Foo
+    // - Given ::Opus::MyPkg::Foo::InnerPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg::Foo::InnerPkg
+    // - Given ::Test::Opus::MyPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg
+    //
+    // When set to `::<PackageSpecRegistry>`, this represents "unpackaged"
+    // When set to `::<none>`, look at `owner->packageRegistryOwner` instead
+    ClassOrModuleRef packageRegistryOwner = core::Symbols::PackageSpecRegistry();
+
+public:
+    // TODO(jez) Put this in the symbol-table print output
+    packages::MangledName package;
+
+    // The class or module that this class or module is nested inside of.
+    //
+    // Given `::A::B`, the owner is `::A`
+    // Given `::A`, the owner is `::<root>`
+    // Given `::<root>`, the owner is `::<root>`
     ClassOrModuleRef owner;
+
     ClassOrModuleRef superClass_;
 
     inline ClassOrModuleRef superClass() const {
@@ -683,7 +711,7 @@ private:
 
     void addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> index);
 };
-CheckSize(ClassOrModule, 120, 8);
+CheckSize(ClassOrModule, 128, 8);
 
 } // namespace sorbet::core
 #endif // SORBET_SYMBOLS_H
