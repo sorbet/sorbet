@@ -493,20 +493,12 @@ private:
                         // TODO (aadi-stripe) Find a less brittle way of ascertaining whether the error comes from an
                         // export statement. Currently (1/9/23) this happens to work because export statements are the
                         // only part of the packager DSL that do not prepend PackageSpec to the relevant constant.
-
-                        // Can't use pkg.ownsSymbol since it uses symbol definition locs, which have an edge case that
-                        // isn't handled until the VisibilityChecker pass.
-                        // TODO(jez) This is not true anymore, can we delete/simplify this?
                         auto enclosingPackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
                         if (enclosingPackage.exists()) {
-                            const auto pkgRootSymbol = ctx.state.packageDB()
-                                                           .getPackageInfo(enclosingPackage)
-                                                           .getRootSymbolForAutocorrectSearch(ctx.state, suggestScope);
-
-                            auto it = std::remove_if(suggested.begin(), suggested.end(),
-                                                     [&pkgRootSymbol, &gs](auto &suggestion) -> bool {
-                                                         return !suggestion.symbol.isUnderNamespace(gs, pkgRootSymbol);
-                                                     });
+                            auto it = std::remove_if(
+                                suggested.begin(), suggested.end(), [&enclosingPackage, &gs](auto &suggestion) {
+                                    return suggestion.symbol.enclosingClass(gs).data(gs)->package != enclosingPackage;
+                                });
                             suggested.erase(it, suggested.end());
                         }
                     }
