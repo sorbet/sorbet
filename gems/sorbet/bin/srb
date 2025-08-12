@@ -147,4 +147,7 @@ esac
 exit $?
 # The closing comment for ruby to be ok with this file
 =end
-exec(__FILE__, *ARGV)
+
+require 'shellwords'
+
+exec(Shellwords.escape(__FILE__), *ARGV)
