@@ -106,76 +106,6 @@ class PropagateVisibility final {
         }
     }
 
-    // While processing the ClassDef for the package, which will be named something like `<PackageSpecRegistry>::A::B`,
-    // we also check that the symbols `A::B` and `Test::A::B` have locations whose package matches the one we're
-    // processing. If they don't match, we add locs to ensure that those symbols are associated with this package.
-    //
-    // The reason for this step is that it's currently allowed to refer to the name of the package outside of the
-    // context of the package spec, even if it doesn't explicitly export its top-level name. So in the case above, there
-    // would be no `export A::B` line in the package spec. However, if there is a package that is defined in the child
-    // namespace of `A::B`, and it at some point has a declaration of the form `module A::B`, the file that contains
-    // that declaration will be marked as owning `A::B`, thus breaking the invariant that the file can be used to
-    // determine the package that owns a symbol. So, to avoid this case we ensure that the symbols that correspond to
-    // the package name are always owned by the package that defines them.
-    void setPackageLocs(core::MutableContext ctx, core::LocOffsets loc, core::ClassOrModuleRef sym) {
-        // TODO(jez) Should be able to delete this now
-        vector<core::NameRef> names;
-
-        while (sym.exists() && sym != core::Symbols::PackageSpecRegistry()) {
-            // The symbol isn't a package name if it's defined outside of the package registry.
-            if (sym == core::Symbols::root()) {
-                return;
-            }
-
-            names.emplace_back(sym.data(ctx)->name);
-            sym = sym.data(ctx)->owner;
-        }
-
-        {
-            auto packageSym = core::Symbols::root();
-            for (auto name = names.rbegin(); name != names.rend(); ++name) {
-                auto member = packageSym.data(ctx)->findMember(ctx, *name);
-                if (!member.exists() || !member.isClassOrModule()) {
-                    packageSym = core::Symbols::noClassOrModule();
-                    break;
-                }
-
-                packageSym = member.asClassOrModuleRef();
-            }
-
-            if (packageSym.exists()) {
-                if (packageSym.data(ctx)->package != this->package.mangledName()) {
-                    packageSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
-                }
-            }
-        }
-
-        {
-            auto testSym = core::Symbols::root();
-            auto member = testSym.data(ctx)->findMember(ctx, core::Names::Constants::Test());
-            if (!member.exists() || !member.isClassOrModule()) {
-                return;
-            }
-
-            testSym = member.asClassOrModuleRef();
-            for (auto name = names.rbegin(); name != names.rend(); ++name) {
-                auto member = testSym.data(ctx)->findMember(ctx, *name);
-                if (!member.exists() || !member.isClassOrModule()) {
-                    testSym = core::Symbols::noClassOrModule();
-                    break;
-                }
-
-                testSym = member.asClassOrModuleRef();
-            }
-
-            if (testSym.exists()) {
-                if (testSym.data(ctx)->package != this->package.mangledName()) {
-                    testSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
-                }
-            }
-        }
-    }
-
     bool ignoreRBIExportEnforcement(core::MutableContext &ctx, core::FileRef file) {
         const auto path = file.data(ctx).path();
 
@@ -300,15 +230,6 @@ public:
                 e.addErrorNote("`{}` is a `{}`", litSymbol.show(ctx), kind);
             }
         }
-    }
-
-    void preTransformClassDef(core::MutableContext ctx, const ast::ClassDef &original) {
-        if (original.symbol == core::Symbols::root()) {
-            return;
-        }
-
-        ENFORCE(original.symbol != core::Symbols::todo());
-        setPackageLocs(ctx, original.name.loc(), original.symbol);
     }
 
     static void run(core::GlobalState &gs, ast::ParsedFile &f) {
