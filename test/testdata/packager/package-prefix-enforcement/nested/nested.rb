@@ -30,12 +30,19 @@ end
 
 module Root
   module Nested
+    extend T::Sig
+
     class SomeClass
       class Deeper; end
     end
 
     class OtherClass
       class Deep2; end
+    end
+
+    sig { void }
+    def example
+      NOT_IN_PACKAGE
     end
   end
 end
