@@ -294,8 +294,7 @@ public:
     }
 
     bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const {
-        auto file = symbol.loc(gs).file();
-        auto pkg = gs.packageDB().getPackageNameForFile(file);
+        auto pkg = symbol.enclosingClass(gs).data(gs)->package;
         return this->mangledName() == pkg;
     }
 

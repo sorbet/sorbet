@@ -31,8 +31,7 @@ class PropagateVisibility final {
     const core::packages::PackageInfo &package;
 
     bool definedByThisPackage(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
-        auto pkg = gs.packageDB().getPackageNameForFile(sym.data(gs)->loc().file());
-        return this->package.mangledName() == pkg;
+        return this->package.mangledName() == sym.data(gs)->package;
     }
 
     void recursiveExportSymbol(core::GlobalState &gs, bool firstSymbol, core::ClassOrModuleRef klass) {
@@ -119,6 +118,7 @@ class PropagateVisibility final {
     // determine the package that owns a symbol. So, to avoid this case we ensure that the symbols that correspond to
     // the package name are always owned by the package that defines them.
     void setPackageLocs(core::MutableContext ctx, core::LocOffsets loc, core::ClassOrModuleRef sym) {
+        // TODO(jez) Should be able to delete this now
         vector<core::NameRef> names;
 
         while (sym.exists() && sym != core::Symbols::PackageSpecRegistry()) {
@@ -130,8 +130,6 @@ class PropagateVisibility final {
             names.emplace_back(sym.data(ctx)->name);
             sym = sym.data(ctx)->owner;
         }
-
-        auto &db = ctx.state.packageDB();
 
         {
             auto packageSym = core::Symbols::root();
@@ -146,8 +144,7 @@ class PropagateVisibility final {
             }
 
             if (packageSym.exists()) {
-                auto file = packageSym.data(ctx)->loc().file();
-                if (db.getPackageNameForFile(file) != this->package.mangledName()) {
+                if (packageSym.data(ctx)->package != this->package.mangledName()) {
                     packageSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
                 }
             }
@@ -172,8 +169,7 @@ class PropagateVisibility final {
             }
 
             if (testSym.exists()) {
-                auto file = testSym.data(ctx)->loc().file();
-                if (db.getPackageNameForFile(file) != this->package.mangledName()) {
+                if (testSym.data(ctx)->package != this->package.mangledName()) {
                     testSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
                 }
             }
@@ -202,8 +198,7 @@ class PropagateVisibility final {
             }
         }
 
-        auto definingFile = sym.loc(ctx).file();
-        auto symPackage = ctx.state.packageDB().getPackageNameForFile(definingFile);
+        auto symPackage = sym.enclosingClass(ctx).data(ctx)->package;
         if (symPackage != this->package.mangledName()) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Cannot export `{}` because it is owned by another package", sym.show(ctx));
@@ -460,7 +455,7 @@ public:
         auto &db = ctx.state.packageDB();
 
         // no need to check visibility for these cases
-        auto otherPackage = db.getPackageNameForFile(otherFile);
+        auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
         if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
             return;
         }
