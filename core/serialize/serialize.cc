@@ -696,6 +696,8 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
 }
 
 void SerializerImpl::pickle(Pickler &p, const ClassOrModule &what) {
+    p.putU4(what.packageRegistryOwner.id());
+    p.putU4(what.package.owner.id());
     p.putU4(what.owner.id());
     p.putU4(what.name.rawId());
     p.putU4(what.superClass_.id());
@@ -732,6 +734,8 @@ void SerializerImpl::pickle(Pickler &p, const ClassOrModule &what) {
 
 ClassOrModule SerializerImpl::unpickleClassOrModule(UnPickler &p, const GlobalState *gs) {
     ClassOrModule result;
+    result.packageRegistryOwner = ClassOrModuleRef::fromRaw(p.getU4());
+    result.package = packages::MangledName(ClassOrModuleRef::fromRaw(p.getU4()));
     result.owner = ClassOrModuleRef::fromRaw(p.getU4());
     result.name = NameRef::fromRaw(*gs, p.getU4());
     result.superClass_ = ClassOrModuleRef::fromRaw(p.getU4());
