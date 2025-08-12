@@ -1,4 +1,28 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C EmptyTypeAlias>::<C type a>)
+  end
+
+  def empty_module_type_alias<<todo method>>(&<blk>)
+    "42"
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C EmptyClass>::<C type b>)
+  end
+
+  def empty_class_alias_type<<todo method>>(&<blk>)
+    42
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C EmptyClass>::<C type b>)
+  end
+
+  def self.empty_class_alias_type<<todo method>>(&<blk>)
+    42
+  end
+
   module <emptyTree>::<C Errors><<C <todo sym>>> < ()
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.void()
@@ -250,6 +274,36 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C EmptyTypeAlias><<C <todo sym>>> < ()
     <emptyTree>::<C type a> = ::<root>::<C T>.type_alias() do ||
       <emptyTree>::<C Integer>
+    end
+  end
+
+  <runtime method definition of empty_module_type_alias>
+
+  class <emptyTree>::<C EmptyClass><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>::<C type b> = ::<root>::<C T>.type_alias() do ||
+      <emptyTree>::<C String>
+    end
+  end
+
+  <runtime method definition of empty_class_alias_type>
+
+  <runtime method definition of self.empty_class_alias_type>
+
+  class <emptyTree>::<C EmptySingleton><<C <todo sym>>> < (::<todo sym>)
+    class <singleton class><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(<emptyTree>::<C type c>)
+      end
+
+      def foo<<todo method>>(&<blk>)
+        "42"
+      end
+
+      <emptyTree>::<C type c> = ::<root>::<C T>.type_alias() do ||
+        <emptyTree>::<C Integer>
+      end
+
+      <runtime method definition of foo>
     end
   end
 end
