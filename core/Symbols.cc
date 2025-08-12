@@ -2151,6 +2151,8 @@ void ArgInfo::ArgFlags::setFromU1(uint8_t flags) {
 ClassOrModule ClassOrModule::deepCopy(const GlobalState &to, bool keepGsId) const {
     ClassOrModule result;
     result.owner = this->owner;
+    result.packageRegistryOwner = this->packageRegistryOwner;
+    result.package = this->package;
     result.flags = this->flags;
     result.mixins_ = this->mixins_;
     result.resultType = this->resultType;
@@ -2357,6 +2359,8 @@ uint32_t ClassOrModule::hash(const GlobalState &gs, bool skipTypeMemberNames) co
     flagsCopy.isBehaviorDefining = false;
     result = mix(result, std::move(flagsCopy).serialize());
 
+    result = mix(result, this->packageRegistryOwner.id());
+    result = mix(result, this->package.owner.id());
     result = mix(result, this->owner.id());
     result = mix(result, this->superClass_.id());
     // argumentsOrMixins, typeParams, typeAliases
