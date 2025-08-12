@@ -9,6 +9,6 @@ class Root::A
     RBI::Foo.one
     GlobalFoo.foo
     RBI::Bar.one
-    GlobalBar.foo # error: `GlobalBar` resolves but is not exported from `RBI`
+    GlobalBar.foo
   end
 end
