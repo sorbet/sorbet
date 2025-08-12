@@ -421,6 +421,11 @@ public:
     const core::packages::PackageInfo &package;
     const FileType fileType;
 
+    // We only want to validate visibility for usages of constants, not definitions.
+    // postTransformConstantLit does not discriminate, so we have to remember whether a given
+    // ConstantLit was a definition.
+    UnorderedSet<void *> constantAssignmentDefinitions;
+
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
         : package{package}, fileType{fileTypeFromCtx(ctx)} {}
 
@@ -428,8 +433,28 @@ public:
         return fileType != FileType::ProdFile;
     }
 
+    void preTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+        auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
+        if (lhs != nullptr) {
+            constantAssignmentDefinitions.insert(lhs.get());
+        }
+    }
+
+    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+        auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
+        if (lhs != nullptr) {
+            constantAssignmentDefinitions.erase(lhs.get());
+        }
+    }
+
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
+        if (constantAssignmentDefinitions.contains(tree.get())) {
+            return;
+        }
+
         auto litSymbol = lit.symbol();
         if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
             return;
