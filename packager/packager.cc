@@ -242,6 +242,7 @@ public:
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_ = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer_ = nullopt;
+    vector<core::LocOffsets> extraDirectives_ = {};
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
         return strictDependenciesLevel_;
@@ -1249,92 +1250,93 @@ struct PackageSpecBodyWalk {
             }
         }
 
-        if (send.fun == core::Names::export_() && send.numPosArgs() == 1) {
-            // null indicates an invalid export.
-            if (auto target = verifyConstant(ctx, core::Names::export_(), send.getPosArg(0))) {
-                exported.emplace_back(getFullyQualifiedName(ctx, target));
+        if (send.fun == core::Names::export_()) {
+            if (send.numPosArgs() == 1) {
+                // null indicates an invalid export.
+                if (auto target = verifyConstant(ctx, core::Names::export_(), send.getPosArg(0))) {
+                    exported.emplace_back(getFullyQualifiedName(ctx, target));
+                }
             }
-        }
+        } else if ((send.fun == core::Names::import() || send.fun == core::Names::testImport())) {
+            if (send.numPosArgs() == 1) {
+                // null indicates an invalid import.
+                if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
+                    // Transform: `import Foo` -> `import <PackageSpecRegistry>::Foo`
+                    auto &posArg = send.getPosArg(0);
+                    auto importArg = move(posArg);
+                    posArg = ast::packager::prependRegistry(move(importArg));
 
-        if ((send.fun == core::Names::import() || send.fun == core::Names::testImport()) && send.numPosArgs() == 1) {
-            // null indicates an invalid import.
-            if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
-                // Transform: `import Foo` -> `import <PackageSpecRegistry>::Foo`
-                auto &posArg = send.getPosArg(0);
-                auto importArg = move(posArg);
-                posArg = ast::packager::prependRegistry(move(importArg));
-
-                info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target), method2ImportType(send),
-                                                       send.loc);
-            }
-            // also validate the keyword args, since one is valid
-            for (auto [key, value] : send.kwArgPairs()) {
-                auto keyLit = ast::cast_tree<ast::Literal>(key);
-                ENFORCE(keyLit);
-                if (keyLit->asSymbol() == core::Names::only()) {
-                    auto valLit = ast::cast_tree<ast::Literal>(value);
-                    // if it's not a literal, then it'll get caught elsewhere
-                    if (valLit && (!valLit->isString() || valLit->asString() != core::Names::testRb())) {
-                        if (auto e = ctx.beginError(value.loc(), core::errors::Packager::InvalidPackageExpression)) {
-                            e.setHeader("Invalid expression in package: the only valid value for `{}` is `{}`",
-                                        "only:", "\"test_rb\"");
+                    info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target),
+                                                           method2ImportType(send), send.loc);
+                }
+                // also validate the keyword args, since one is valid
+                for (auto [key, value] : send.kwArgPairs()) {
+                    auto keyLit = ast::cast_tree<ast::Literal>(key);
+                    ENFORCE(keyLit);
+                    if (keyLit->asSymbol() == core::Names::only()) {
+                        auto valLit = ast::cast_tree<ast::Literal>(value);
+                        // if it's not a literal, then it'll get caught elsewhere
+                        if (valLit && (!valLit->isString() || valLit->asString() != core::Names::testRb())) {
+                            if (auto e =
+                                    ctx.beginError(value.loc(), core::errors::Packager::InvalidPackageExpression)) {
+                                e.setHeader("Invalid expression in package: the only valid value for `{}` is `{}`",
+                                            "only:", "\"test_rb\"");
+                            }
                         }
                     }
                 }
             }
-        }
-
-        if (send.fun == core::Names::exportAll() && send.numPosArgs() == 0) {
-            info.exportAll_ = true;
-        }
-
-        if (send.fun == core::Names::visibleTo() && send.numPosArgs() == 1) {
-            if (auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
-                // the only valid literal here is `visible_to "tests"`; others should be rejected
-                if (!target->isString() || target->asString() != core::Names::tests()) {
-                    if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
-                        e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
-                                    send.fun.show(ctx), "\"tests\"");
-                    }
-                    return;
-                }
-                info.visibleToTests_ = true;
-            } else if (auto target = ast::cast_tree<ast::Send>(send.getPosArg(0))) {
-                // Constant::* is valid Ruby, and parses as a send of the method * to Constant
-                // so let's take advantage of this to implement wildcards
-                if (target->fun != core::Names::star() || target->numPosArgs() > 0 || target->numKwArgs() > 0 ||
-                    target->hasBlock()) {
-                    if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
-                        e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
-                                    send.fun.show(ctx), "\"tests\"");
-                    }
-                    return;
-                }
-
-                if (auto *recv = verifyConstant(ctx, send.fun, target->recv)) {
-                    auto &posArg = send.getPosArg(0);
-                    auto importArg = move(target->recv);
-                    posArg = ast::packager::prependRegistry(move(importArg));
-                    info.visibleTo_.emplace_back(getUnresolvedPackageName(ctx, recv),
-                                                 core::packages::VisibleToType::Wildcard);
-                } else {
-                    if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
-                        e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
-                                    send.fun.show(ctx), "\"tests\"");
-                    }
-                    return;
-                }
-            } else if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
-                auto &posArg = send.getPosArg(0);
-                auto importArg = move(posArg);
-                posArg = ast::packager::prependRegistry(move(importArg));
-
-                info.visibleTo_.emplace_back(getUnresolvedPackageName(ctx, target),
-                                             core::packages::VisibleToType::Normal);
+        } else if (send.fun == core::Names::exportAll()) {
+            if (send.numPosArgs() == 0) {
+                info.exportAll_ = true;
             }
-        }
+        } else if (send.fun == core::Names::visibleTo()) {
+            if (send.numPosArgs() == 1) {
+                if (auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
+                    // the only valid literal here is `visible_to "tests"`; others should be rejected
+                    if (!target->isString() || target->asString() != core::Names::tests()) {
+                        if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
+                            e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
+                                        send.fun.show(ctx), "\"tests\"");
+                        }
+                        return;
+                    }
+                    info.visibleToTests_ = true;
+                } else if (auto target = ast::cast_tree<ast::Send>(send.getPosArg(0))) {
+                    // Constant::* is valid Ruby, and parses as a send of the method * to Constant
+                    // so let's take advantage of this to implement wildcards
+                    if (target->fun != core::Names::star() || target->numPosArgs() > 0 || target->numKwArgs() > 0 ||
+                        target->hasBlock()) {
+                        if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
+                            e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
+                                        send.fun.show(ctx), "\"tests\"");
+                        }
+                        return;
+                    }
 
-        if (send.fun == core::Names::strictDependencies()) {
+                    if (auto *recv = verifyConstant(ctx, send.fun, target->recv)) {
+                        auto &posArg = send.getPosArg(0);
+                        auto importArg = move(target->recv);
+                        posArg = ast::packager::prependRegistry(move(importArg));
+                        info.visibleTo_.emplace_back(getUnresolvedPackageName(ctx, recv),
+                                                     core::packages::VisibleToType::Wildcard);
+                    } else {
+                        if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
+                            e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
+                                        send.fun.show(ctx), "\"tests\"");
+                        }
+                        return;
+                    }
+                } else if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
+                    auto &posArg = send.getPosArg(0);
+                    auto importArg = move(posArg);
+                    posArg = ast::packager::prependRegistry(move(importArg));
+
+                    info.visibleTo_.emplace_back(getUnresolvedPackageName(ctx, target),
+                                                 core::packages::VisibleToType::Normal);
+                }
+            }
+        } else if (send.fun == core::Names::strictDependencies()) {
             foundStrictDependenciesDeclaration = true;
             if (!ctx.state.packageDB().enforceLayering()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
@@ -1366,9 +1368,7 @@ struct PackageSpecBodyWalk {
                     }
                 }
             }
-        }
-
-        if (send.fun == core::Names::layer()) {
+        } else if (send.fun == core::Names::layer()) {
             foundLayerDeclaration = true;
             if (!ctx.state.packageDB().enforceLayering()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidLayer)) {
@@ -1400,6 +1400,9 @@ struct PackageSpecBodyWalk {
                     }
                 }
             }
+        } else {
+            // Extra directives
+            info.extraDirectives_.push_back(send.loc);
         }
     }
 
