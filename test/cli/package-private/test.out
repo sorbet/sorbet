@@ -1,3 +1,43 @@
+a/a.rb:25: Method `Global#foo` is not in a package and so cannot be made `package_private` https://srb.help/4025
+    25 |    package_private def foo; end
+                            ^^^^^^^
+    a/a.rb:22: This class has no package
+    22 |  class ::Global
+          ^^^^^^^^^^^^^^
+    a/a.rb:25: Method defined here
+    25 |    package_private def foo; end
+                            ^^^^^^^
+
+a/a.rb:28: Method `Global.foo` is not in a package and so cannot be made `package_private_class_method` https://srb.help/4025
+    28 |    package_private_class_method def self.foo; end
+                                         ^^^^^^^^^^^^
+    a/a.rb:22: This class has no package
+    22 |  class ::Global
+          ^^^^^^^^^^^^^^
+    a/a.rb:28: Method defined here
+    28 |    package_private_class_method def self.foo; end
+                                         ^^^^^^^^^^^^
+
+a/a.rb:36: Method `Global#bar` is not in a package and so cannot be made `package_private` https://srb.help/4025
+    36 |    package_private :bar
+                            ^^^^
+    a/a.rb:22: This class has no package
+    22 |  class ::Global
+          ^^^^^^^^^^^^^^
+    a/a.rb:31: Method defined here
+    31 |    def bar; end
+            ^^^^^^^
+
+a/a.rb:37: Method `Global.bar` is not in a package and so cannot be made `package_private_class_method` https://srb.help/4025
+    37 |    package_private_class_method :bar
+                                         ^^^^
+    a/a.rb:22: This class has no package
+    22 |  class ::Global
+          ^^^^^^^^^^^^^^
+    a/a.rb:34: Method defined here
+    34 |    def self.bar; end
+            ^^^^^^^^^^^^
+
 b/b.rb:8: Method `foo` on `T.class_of(A)` is package-private and cannot be called from package `B` https://srb.help/7036
      8 |    A.foo
             ^^^^^
@@ -25,4 +65,4 @@ b/b.rb:19: Method `foo` on `A` is package-private and cannot be called from pack
     a/a.rb:12: Defined in `A` here
     12 |  package_private def foo
                           ^^^^^^^
-Errors: 4
+Errors: 8
