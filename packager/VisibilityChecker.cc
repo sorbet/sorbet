@@ -323,7 +323,7 @@ public:
         auto loc = litSymbol.loc(ctx);
 
         auto otherFile = loc.file();
-        if (!otherFile.exists() || !otherFile.data(ctx).isPackaged()) {
+        if (!otherFile.exists()) {
             return;
         }
 
