@@ -1880,7 +1880,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     auto otherPkgLayer = otherPkg.layer().value().first;
 
     if (thisPkg.causesLayeringViolation(packageDB, otherPkgLayer)) {
-        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::LayeringViolation)) {
+        if (auto e = ctx.beginError(i.loc, core::errors::Packager::LayeringViolation)) {
             e.setHeader("Layering violation: cannot import `{}` (in layer `{}`) from `{}` (in layer `{}`)",
                         otherPkg.show(ctx), otherPkgLayer.show(ctx), thisPkg.show(ctx), pkgLayer.show(ctx));
             e.addErrorLine(core::Loc(thisPkg.loc.file(), thisPkg.layer().value().second), "`{}`'s `{}` declared here",
@@ -1895,7 +1895,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     core::packages::StrictDependenciesLevel otherPkgExpectedLevel = thisPkg.minimumStrictDependenciesLevel();
 
     if (otherPkg.strictDependenciesLevel().value().first < otherPkgExpectedLevel) {
-        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::StrictDependenciesViolation)) {
+        if (auto e = ctx.beginError(i.loc, core::errors::Packager::StrictDependenciesViolation)) {
             e.setHeader("Strict dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
                         "import", core::packages::strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel().value().second),
@@ -1909,7 +1909,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
 
     if (thisPkg.strictDependenciesLevel().value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
         if (thisPkg.sccID() == otherPkg.sccID()) {
-            if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::StrictDependenciesViolation)) {
+            if (auto e = ctx.beginError(i.loc, core::errors::Packager::StrictDependenciesViolation)) {
                 auto level = fmt::format(
                     "strict_dependencies '{}'",
                     core::packages::strictDependenciesLevelToString(thisPkg.strictDependenciesLevel().value().first));
@@ -1945,7 +1945,7 @@ void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg,
         visibleTo, [&ctx, &absPkg](const auto &other) { return visibilityApplies(ctx, other, absPkg.mangledName()); });
 
     if (!allowed) {
-        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::ImportNotVisible)) {
+        if (auto e = ctx.beginError(i.loc, core::errors::Packager::ImportNotVisible)) {
             e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
                         otherPkg.show(ctx), absPkg.show(ctx));
             e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
@@ -1996,7 +1996,7 @@ void validatePackage(core::Context ctx) {
         }
 
         if (i.name.mangledName == pkgInfo.name.mangledName) {
-            if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::NoSelfImport)) {
+            if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoSelfImport)) {
                 string import_;
                 switch (i.type) {
                     case core::packages::ImportType::Normal:
