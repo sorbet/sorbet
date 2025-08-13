@@ -293,11 +293,6 @@ public:
         return make_unique<PackageInfoImpl>(*this);
     }
 
-    bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const {
-        auto pkg = symbol.enclosingClass(gs).data(gs)->package;
-        return this->mangledName() == pkg;
-    }
-
     PackageInfoImpl(PackageName name, core::Loc loc, core::Loc declLoc_) : name(name), loc(loc), declLoc_(declLoc_) {}
     explicit PackageInfoImpl(const PackageInfoImpl &) = default;
     PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;

@@ -114,7 +114,6 @@ public:
         core::NameRef srcPkg;
     };
 
-    virtual bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const = 0;
     virtual bool exportAll() const = 0;
     virtual bool visibleToTests() const = 0;
 };
