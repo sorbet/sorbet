@@ -252,10 +252,6 @@ public:
         return layer_;
     }
 
-    vector<core::LocOffsets> extraDirectives() const {
-        return extraDirectives_;
-    }
-
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
     optional<int> sccID_ = nullopt;
 

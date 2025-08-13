@@ -81,11 +81,6 @@ public:
         return nullopt;
     }
 
-    vector<core::LocOffsets> extraDirectives() const {
-        notImplemented();
-        return {};
-    }
-
     optional<int> sccID() const {
         notImplemented();
         return nullopt;
