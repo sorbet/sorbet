@@ -478,7 +478,7 @@ public:
             }
             if (!importToInsertAfter.exists()) {
                 // Insert before the first import
-                core::Loc beforePackageName = {loc.file(), importedPackageNames.front().name.fullName.loc};
+                core::Loc beforePackageName = {loc.file(), importedPackageNames.front().loc};
                 auto [beforeImport, numWhitespace] = beforePackageName.findStartOfIndentation(gs);
                 auto endOfPrevLine = beforeImport.adjust(gs, -numWhitespace - 1, 0);
                 insertionLoc = endOfPrevLine.copyWithZeroLength();
@@ -1605,12 +1605,12 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
     if (gs.packageDB().enforceLayering()) {
         if (!bodyWalk.foundLayerDeclaration) {
-            if (auto e = ctx.beginError(info.name.fullName.loc, core::errors::Packager::InvalidLayer)) {
+            if (auto e = gs.beginError(info.declLoc(), core::errors::Packager::InvalidLayer)) {
                 e.setHeader("This package does not declare a `{}`", "layer");
             }
         }
         if (!bodyWalk.foundStrictDependenciesDeclaration) {
-            if (auto e = ctx.beginError(info.name.fullName.loc, core::errors::Packager::InvalidStrictDependencies)) {
+            if (auto e = gs.beginError(info.declLoc(), core::errors::Packager::InvalidStrictDependencies)) {
                 e.setHeader("This package does not declare a `{}` level", "strict_dependencies");
             }
         }
