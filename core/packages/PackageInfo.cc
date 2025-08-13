@@ -37,41 +37,4 @@ string PackageInfo::show(const core::GlobalState &gs) const {
     return this->mangledName().owner.show(gs);
 }
 
-namespace {
-
-core::ClassOrModuleRef lookupNameOn(const core::GlobalState &gs, const core::ClassOrModuleRef root,
-                                    absl::Span<const core::NameRef> name) {
-    auto curSym = root;
-    if (!curSym.exists()) {
-        return {};
-    }
-
-    for (const auto part : name) {
-        auto member = curSym.data(gs)->findMember(gs, part);
-        if (!member.exists() || !member.isClassOrModule()) {
-            return {};
-        }
-        curSym = member.asClassOrModuleRef();
-    }
-
-    return curSym;
-}
-
-} // namespace
-
-core::ClassOrModuleRef PackageInfo::getPackageScope(const core::GlobalState &gs) const {
-    // return lookupNameOn(gs, core::Symbols::root(), fullName());
-    Exception::notImplemented();
-}
-
-core::ClassOrModuleRef PackageInfo::getPackageTestScope(const core::GlobalState &gs) const {
-    auto testSym = core::Symbols::root().data(gs)->findMember(gs, core::Names::Constants::Test());
-    if (!testSym.isClassOrModule()) {
-        return {};
-    }
-
-    // return lookupNameOn(gs, testSym.asClassOrModuleRef(), fullName());
-    Exception::notImplemented();
-}
-
 } // namespace sorbet::core::packages

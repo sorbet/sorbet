@@ -205,24 +205,6 @@ public:
 
         core::MutableContext ctx{gs, core::Symbols::root(), f.file};
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
-
-        // if we used `export_all`, then there were no `export`
-        // directives in the previous pass; we should instead export
-        // the package root
-        if (package.exportAll()) {
-            // we check if these exist because if no constants were
-            // defined in the package then we might not have actually
-            // ever created the relevant namespaces
-            auto pkgRoot = package.getPackageScope(gs);
-            if (pkgRoot.exists()) {
-                pass.recursiveExportSymbol(gs, true, pkgRoot);
-            }
-
-            auto pkgTestRoot = package.getPackageTestScope(gs);
-            if (pkgTestRoot.exists()) {
-                pass.recursiveExportSymbol(gs, true, pkgTestRoot);
-            }
-        }
     }
 };
 
@@ -360,14 +342,15 @@ public:
         if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
             return;
         }
+        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
 
-        bool isExported = false;
+        bool isExported = pkg.exportAll();
         if (litSymbol.isClassOrModule()) {
-            isExported = litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
+            isExported |= litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
         } else if (litSymbol.isFieldOrStaticField()) {
-            isExported = litSymbol.asFieldRef().data(ctx)->flags.isExported;
+            isExported |= litSymbol.asFieldRef().data(ctx)->flags.isExported;
         }
-        isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
+        isExported |= db.allowRelaxedPackagerChecksFor(this->package.mangledName());
         bool definesBehavior =
             !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
         auto currentImportType = this->package.importsPackage(otherPackage);
@@ -382,7 +365,6 @@ public:
                                       this->fileType != FileType::TestUnitFile;
 
         if (!wasImported || testImportInProd || testUnitImportInHelper || !isExported) {
-            auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
             core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
             if (isTestImport) {

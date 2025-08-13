@@ -92,9 +92,6 @@ public:
     virtual bool exists() const final;
     std::string show(const core::GlobalState &gs) const;
 
-    core::ClassOrModuleRef getPackageScope(const core::GlobalState &gs) const;
-    core::ClassOrModuleRef getPackageTestScope(const core::GlobalState &gs) const;
-
     virtual std::optional<ImportType> importsPackage(MangledName mangledName) const = 0;
 
     // Is it a layering violation to import otherPkg from this package?
