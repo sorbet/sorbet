@@ -1230,18 +1230,27 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
 
     auto ownerData = owner.data(*this);
     auto ownerPackageRegistryOwner = ownerData->packageRegistryOwner;
-    if (ownerPackageRegistryOwner.exists()) {
-        auto packageRegistryOwner = ownerPackageRegistryOwner.data(*this)->findMember(*this, name);
-
-        data->packageRegistryOwner = packageRegistryOwner.exists() && packageRegistryOwner.isClassOrModule()
-                                         // Found narrower entry in <PackageSpecRegistry> hierarchy
-                                         ? packageRegistryOwner.asClassOrModuleRef()
-                                         // Set to `noClassOrModule()` to ensure that we don't keep
-                                         // looking for something (e.g., don't want Opus::A::B::C::D
-                                         // to find <PackageSpecRegistry>::Opus::A::D even if it
-                                         // exists--the intermediate namespaces were missing).
-                                         : Symbols::noClassOrModule();
+    if (!ownerPackageRegistryOwner.exists()) {
+        // Our owner was already past the end of the PackageSpecRegistry namespace.
+        // Propogate that we are too, and mark us as being owned by whatever package our owner was.
+        data->packageRegistryOwner = Symbols::noClassOrModule();
+        data->package = ownerData->package;
+        return ret;
     }
+
+    auto registryName = name;
+    while (registryName.hasUniqueNameKind(*this, UniqueNameKind::Singleton)) {
+        registryName = registryName.dataUnique(*this)->original;
+    }
+    auto packageRegistryOwner = ownerPackageRegistryOwner.data(*this)->findMember(*this, registryName);
+    data->packageRegistryOwner = packageRegistryOwner.exists() && packageRegistryOwner.isClassOrModule()
+                                     // Found narrower entry in <PackageSpecRegistry> hierarchy
+                                     ? packageRegistryOwner.asClassOrModuleRef()
+                                     // Set to `noClassOrModule()` to ensure that we don't keep
+                                     // looking for something (e.g., don't want Opus::A::B::C::D
+                                     // to find <PackageSpecRegistry>::Opus::A::D even if it
+                                     // exists--the intermediate namespaces were missing).
+                                     : Symbols::noClassOrModule();
 
     if (!data->packageRegistryOwner.exists()) {
         data->package = ownerData->package;
