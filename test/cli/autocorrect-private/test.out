@@ -29,7 +29,27 @@ autocorrect-private.rb:29: Use `package_private` to define package-private insta
     autocorrect-private.rb:29: Replaced with `package_private`
     29 |  package_private_class_method def foo
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 4
+
+autocorrect-private.rb:34: Method `G#foo` is not in a package and so cannot be made `package_private` https://srb.help/4025
+    34 |  package_private def foo
+                          ^^^^^^^
+    autocorrect-private.rb:33: This class has no package
+    33 |class G
+        ^^^^^^^
+    autocorrect-private.rb:34: Method defined here
+    34 |  package_private def foo
+                          ^^^^^^^
+
+autocorrect-private.rb:39: Method `H.foo` is not in a package and so cannot be made `package_private_class_method` https://srb.help/4025
+    39 |  package_private_class_method def self.foo
+                                       ^^^^^^^^^^^^
+    autocorrect-private.rb:38: This class has no package
+    38 |class H
+        ^^^^^^^
+    autocorrect-private.rb:39: Method defined here
+    39 |  package_private_class_method def self.foo
+                                       ^^^^^^^^^^^^
+Errors: 6
 
 --------------------------------------------------------------------------
 
