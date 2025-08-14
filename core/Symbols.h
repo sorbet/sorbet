@@ -598,7 +598,6 @@ public:
 
     bool ignoreInHashing(const GlobalState &gs) const;
 
-private:
     // A link to the corresponding spot in the `<PackageSpecRegistry>` hierarchy.
     //
     // Might correspond to an intermediate `<PackageSpecRegistry>` namespace (not a package), but at least
@@ -606,28 +605,30 @@ private:
     //
     // Only set if `gs.packageDB().enabled()`
     //
+    // - Given ::<root>, contains ::<PackageSpecRegistry>
     // - Given ::Opus::MyPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg
     // - Given ::Opus::MyPkg::Foo, contains ::<PackageSpecRegistry>::Opus::MyPkg::Foo
     // - Given ::Opus::MyPkg::Foo::InnerPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg::Foo::InnerPkg
+    // - Given ::Test, contains ::<PackageSpecRegistry>
     // - Given ::Test::Opus::MyPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg
     //
-    // When set to `::<PackageSpecRegistry>`, this represents "unpackaged"
-    // When set to `::<none>`, look at `owner->packageRegistryOwner` instead
+    // When set to `::<none>`, inherit whatever our owner has for `package`.
     ClassOrModuleRef packageRegistryOwner = core::Symbols::PackageSpecRegistry();
 
-public:
     // The package that this symbol belongs to.
     //
     // Only set if `gs.packageDB().enabled()`
     //
-    // If `!package.exists()`, then this symbol is "unpackaged." This is the case for all
-    // definitions in Sorbet's payload.
+    // If `!package.exists()`, then this symbol is "unpackaged."
+    // This is the case for all definitions in Sorbet's payload.
     //
     // TODO(jez): If someone creates a `__package.rb` for something in the standard library after
     // the payload has already loaded, we won't retroactively determine the package for those
     // constants, which could cause problems. Probably we should ban that? Because e.g. we won't
     // have checked the implementation of the payload RBI files against whatever constraints the
     // __package.rb declares (e.g. imports).
+    //
+    // TODO(jez) Ban defining a package called `Test`
     packages::MangledName package;
 
     // The class or module that this class or module is nested inside of.
