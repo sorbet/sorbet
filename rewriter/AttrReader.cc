@@ -18,7 +18,7 @@ bool isTNilableOrUntyped(const ast::ExpressionPtr &expr) {
            ast::MK::isT(send->recv);
 }
 
-ast::Send *findSendReturns(ast::Send *sharedSig) {
+ast::Send *findReturnSpecSend(ast::Send *sharedSig) {
     ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
     auto *block = sharedSig->block();
@@ -31,8 +31,8 @@ ast::Send *findSendReturns(ast::Send *sharedSig) {
     return body;
 }
 
-ast::Send *ensureReturns(ast::Send *sig) {
-    auto body = findSendReturns(sig);
+ast::Send *findReturnsSend(ast::Send *sig) {
+    auto body = findReturnSpecSend(sig);
 
     return body->fun == core::Names::returns() ? body : nullptr;
 }
@@ -42,7 +42,7 @@ bool hasNilableOrUntypedReturns(ast::ExpressionPtr &sharedSig) {
 
     ENFORCE(sig != nullptr, "We weren't given a send node that's a valid signature");
 
-    auto *body = ensureReturns(sig);
+    auto *body = findReturnsSend(sig);
 
     ENFORCE(body->fun == core::Names::returns());
     if (body->numPosArgs() != 1) {
@@ -56,7 +56,7 @@ ast::ExpressionPtr dupReturnsType(ast::Send *sharedSig) {
 
     ENFORCE(sig != nullptr, "We weren't given a send node that's a valid signature");
 
-    auto *body = ensureReturns(sig);
+    auto *body = findReturnsSend(sig);
 
     ENFORCE(body->fun == core::Names::returns());
     if (body->numPosArgs() != 1) {
@@ -93,7 +93,7 @@ ast::ExpressionPtr toWriterSigForName(ast::Send *sharedSig, const core::NameRef 
     auto sig = ast::cast_tree<ast::Send>(sigExpr);
     ENFORCE(sig != nullptr, "Just deep copied this, so it should be non-null");
 
-    auto *body = ensureReturns(sig);
+    auto *body = findReturnsSend(sig);
 
     ENFORCE(body->fun == core::Names::returns());
     if (body->numPosArgs() != 1) {
@@ -173,14 +173,15 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
     if (prevStat) {
         sig = ASTUtil::castSig(*prevStat);
         if (sig != nullptr) {
-            auto ret = findSendReturns(sig);
-            if (ret->fun == core::Names::void_() && makeReader) {
+            auto ret = findReturnSpecSend(sig);
+            if (ret == nullptr) {
+                sig = nullptr;
+            } else if (ret->fun == core::Names::void_() && makeReader) {
                 if (auto e = ctx.beginIndexerError(ret->loc, core::errors::Rewriter::VoidAttrReader)) {
                     auto what = makeWriter ? "attr_accessor" : "attr_reader";
                     e.setHeader("An `{}` cannot be `{}`", what, "void");
                 }
             }
-            sig = nullptr;
         } else if (sig != nullptr) {
             ensureSafeSig(ctx, send->fun, sig);
         }
