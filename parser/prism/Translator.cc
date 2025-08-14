@@ -279,8 +279,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 // A named block parameter, like `def foo(&block)`
                 sorbetName = translateConstantName(prismName);
             } else { // An anonymous block parameter, like `def foo(&)`
-                sorbetName =
-                    ctx.state.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), nextUniqueID());
+                sorbetName = nextUniqueParserName(core::Names::ampersand());
             }
 
             auto blockLoc = core::LocOffsets{location.beginPos() + 1, location.endPos()};
@@ -896,8 +895,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 // A named keyword rest parameter, like `def foo(**kwargs)`
                 sorbetName = translateConstantName(prismName);
             } else { // An anonymous keyword rest parameter, like `def foo(**)`
-                sorbetName =
-                    ctx.state.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), nextUniqueID());
+                sorbetName = nextUniqueParserName(core::Names::starStar());
             }
 
             auto kwrestLoc = core::LocOffsets{location.beginPos() + 2, location.endPos()};
@@ -1928,6 +1926,20 @@ core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
     return ctx.state.enterNameUTF8(parser.resolveConstant(constant_id));
 }
 
+core::NameRef Translator::nextUniqueParserName(core::NameRef original) {
+    auto nextId = *parserUniqueCounter + 1;
+    *parserUniqueCounter = nextId;
+    return ctx.state.freshNameUnique(core::UniqueNameKind::Parser, original, nextId);
+}
+
+core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
+    ENFORCE(directlyDesugar, "This shouldn't be called if we're not directly desugaring.");
+
+    auto nextId = *desugarUniqueCounter + 1;
+    *desugarUniqueCounter = nextId;
+    return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, nextId);
+}
+
 // Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
 unique_ptr<parser::Regopt> Translator::translateRegexpOptions(pm_location_t closingLoc) {
     auto length = closingLoc.end - closingLoc.start;
@@ -2017,8 +2029,9 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
 
 // Context management methods
 Translator Translator::enterMethodDef() const {
+    auto resetDesugarUniqueCounter = true;
     auto isInMethodDef = true;
-    return Translator(*this, isInMethodDef);
+    return Translator(*this, resetDesugarUniqueCounter, isInMethodDef);
 }
 
 void Translator::reportError(core::LocOffsets loc, const string &message) const {

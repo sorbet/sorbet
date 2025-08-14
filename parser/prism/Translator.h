@@ -25,11 +25,15 @@ class Translator final {
     // Whether to directly desugar during in the Translator, or wait until the usual `Desugar.cc` code path.
     const bool directlyDesugar;
 
-    // Keep track of the unique ID counter
-    // uniqueCounterStorage is the source of truth maintained by the parent Translator
-    // uniqueCounter is a pointer to uniqueCounterStorage and is passed down to child Translators
-    int uniqueCounterStorage;
-    int *const uniqueCounter;
+    // Unique counters used to create synthetic names via `ctx.state.freshNameUnique`.
+    // - The storage integers either store an "active" count used by a translator and some of its children,
+    //   or a dummy value (int min).
+    // - The pointer variables point to the "active" count for each translator,
+    //   which is either pointing to its own storage, or to a parent's storage.
+    uint16_t parserUniqueCounterStorage;  // Minics the `Builder::Impl.uniqueCounter_` in `parser/Builder.cc`
+    uint32_t desugarUniqueCounterStorage; // Minics the `DesugarContext.uniqueCounter`  in `ast/desugar/Desugar.cc`
+    uint16_t *const parserUniqueCounter;  // Points to the active `parserUniqueCounterStorage`
+    uint32_t *const desugarUniqueCounter; // Points to the active `desugarUniqueCounterStorage`
 
     // Context variables
     const bool isInMethodDef = false;
@@ -41,12 +45,10 @@ class Translator final {
 public:
     Translator(const Parser &parser, core::MutableContext ctx, const absl::Span<const ParseError> parseErrors,
                bool directlyDesugar)
-        : parser(parser), ctx(ctx), parseErrors(parseErrors), directlyDesugar(directlyDesugar), uniqueCounterStorage(1),
-          uniqueCounter(&this->uniqueCounterStorage) {}
-
-    int nextUniqueID() {
-        return *uniqueCounter += 1;
-    }
+        : parser(parser), ctx(ctx), parseErrors(parseErrors), directlyDesugar(directlyDesugar),
+          parserUniqueCounterStorage(1), desugarUniqueCounterStorage(1),
+          parserUniqueCounter(&this->parserUniqueCounterStorage),
+          desugarUniqueCounter(&this->desugarUniqueCounterStorage) {}
 
     // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
     std::unique_ptr<parser::Node> translate(pm_node_t *node);
@@ -54,10 +56,14 @@ public:
 private:
     // This private constructor is used for creating child translators with modified context.
     // uniqueCounterStorage is passed as the minimum integer value and is never used
-    Translator(const Translator &parent, bool isInMethodDef)
+    Translator(const Translator &parent, bool resetDesugarUniqueCounter, bool isInMethodDef)
         : parser(parent.parser), ctx(parent.ctx), parseErrors(parent.parseErrors),
-          directlyDesugar(parent.directlyDesugar), uniqueCounterStorage(std::numeric_limits<int>::min()),
-          uniqueCounter(parent.uniqueCounter), isInMethodDef(isInMethodDef) {}
+          directlyDesugar(parent.directlyDesugar), parserUniqueCounterStorage(std::numeric_limits<uint16_t>::min()),
+          desugarUniqueCounterStorage(resetDesugarUniqueCounter ? std::numeric_limits<uint32_t>::min() : 1),
+          parserUniqueCounter(parent.parserUniqueCounter),
+          desugarUniqueCounter(resetDesugarUniqueCounter ? &this->desugarUniqueCounterStorage
+                                                         : parent.desugarUniqueCounter),
+          isInMethodDef(isInMethodDef) {}
 
     template <typename SorbetNode, typename... TArgs>
     std::unique_ptr<parser::Node> make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) const;
@@ -95,6 +101,12 @@ private:
     template <typename PrismLhsNode, typename SorbetLHSNode>
     std::unique_ptr<parser::Node> translateConst(PrismLhsNode *node, bool replaceWithDynamicConstAssign = false);
     core::NameRef translateConstantName(pm_constant_id_t constantId);
+
+    // Generates a unique name for a `parser::Node`.
+    core::NameRef nextUniqueParserName(core::NameRef original);
+
+    // Generates a unique name for a directly desugared `ast::ExpressionPtr`.
+    core::NameRef nextUniqueDesugarName(core::NameRef original);
 
     // Pattern-matching
     // ... variations of the main translation functions for pattern-matching related nodes.
