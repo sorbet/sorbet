@@ -414,13 +414,6 @@ ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
     return MK::Block1(loc, move(body), MK::RestArg(zeroLengthLoc, MK::Local(zeroLengthLoc, temp)));
 }
 
-ExpressionPtr unsupportedNode(DesugarContext dctx, parser::Node *node) {
-    if (auto e = dctx.ctx.beginIndexerError(node->loc, core::errors::Desugar::UnsupportedNode)) {
-        e.setHeader("Unsupported node type `{}`", node->nodeName());
-    }
-    return MK::EmptyTree();
-}
-
 // Desugar multiple left hand side assignments into a sequence of assignments
 //
 // Considering this example:
@@ -2274,14 +2267,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                      desugarDString(dctx, loc, move(xstring->nodes)));
                 result = move(res);
             },
-            [&](parser::Preexe *preexe) {
-                auto res = unsupportedNode(dctx, preexe);
-                result = move(res);
-            },
-            [&](parser::Postexe *postexe) {
-                auto res = unsupportedNode(dctx, postexe);
-                result = move(res);
-            },
+            [&](parser::Preexe *preexe) { desugaredByPrismTranslator(preexe); },
+            [&](parser::Postexe *postexe) { desugaredByPrismTranslator(postexe); },
             [&](parser::Undef *undef) {
                 if (auto e = dctx.ctx.beginIndexerError(what->loc, core::errors::Desugar::UndefUsage)) {
                     e.setHeader("Unsupported method: undef");
@@ -2336,22 +2323,10 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 auto arg = MK::Symbol(backref->loc, backref->name);
                 result = MK::Send1(loc, move(recv), core::Names::regexBackref(), locZeroLen, move(arg));
             },
-            [&](parser::EFlipflop *eflipflop) {
-                auto res = unsupportedNode(dctx, eflipflop);
-                result = move(res);
-            },
-            [&](parser::IFlipflop *iflipflop) {
-                auto res = unsupportedNode(dctx, iflipflop);
-                result = move(res);
-            },
-            [&](parser::MatchCurLine *matchCurLine) {
-                auto res = unsupportedNode(dctx, matchCurLine);
-                result = move(res);
-            },
-            [&](parser::Redo *redo) {
-                auto res = unsupportedNode(dctx, redo);
-                result = move(res);
-            },
+            [&](parser::EFlipflop *eflipflop) { desugaredByPrismTranslator(eflipflop); },
+            [&](parser::IFlipflop *iflipflop) { desugaredByPrismTranslator(iflipflop); },
+            [&](parser::MatchCurLine *matchCurLine) { desugaredByPrismTranslator(matchCurLine); },
+            [&](parser::Redo *redo) { desugaredByPrismTranslator(redo); },
             [&](parser::EncodingLiteral *encodingLiteral) { desugaredByPrismTranslator(encodingLiteral); },
             [&](parser::MatchPattern *pattern) {
                 auto res = desugarOnelinePattern(dctx, pattern->loc, pattern->rhs.get());
