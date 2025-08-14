@@ -174,12 +174,14 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
         sig = ASTUtil::castSig(*prevStat);
         if (sig != nullptr) {
             auto ret = findReturnSpecSend(sig);
-            if (ret == nullptr) {
+            ENFORCE(ret->fun == core::Names::void_() || ret->fun == core::Names::returns());
+            if (ret->fun == core::Names::void_()) {
                 sig = nullptr;
-            } else if (ret->fun == core::Names::void_() && makeReader) {
-                if (auto e = ctx.beginIndexerError(ret->loc, core::errors::Rewriter::VoidAttrReader)) {
-                    auto what = makeWriter ? "attr_accessor" : "attr_reader";
-                    e.setHeader("An `{}` cannot be `{}`", what, "void");
+                if (makeReader) {
+                    if (auto e = ctx.beginIndexerError(ret->loc, core::errors::Rewriter::VoidAttrReader)) {
+                        auto what = makeWriter ? "attr_accessor" : "attr_reader";
+                        e.setHeader("An `{}` cannot be `{}`", what, "void");
+                    }
                 }
             }
         } else if (sig != nullptr) {
