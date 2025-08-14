@@ -108,11 +108,11 @@ struct PackageName {
 };
 
 struct Import {
-    PackageName name;
+    core::packages::MangledName name;
     core::packages::ImportType type;
     core::LocOffsets loc;
 
-    Import(PackageName &&name, core::packages::ImportType type, core::LocOffsets loc)
+    Import(core::packages::MangledName &&name, core::packages::ImportType type, core::LocOffsets loc)
         : name(std::move(name)), type(type), loc(loc) {}
 
     bool isTestImport() const {
@@ -431,7 +431,7 @@ public:
         if (!importedPackageNames.empty()) {
             core::LocOffsets importToInsertAfter;
             for (auto &import : importedPackageNames) {
-                if (import.name.mangledName == info.name.mangledName) {
+                if (import.name == info.name.mangledName) {
                     if ((importType == core::packages::ImportType::Normal &&
                          import.type != core::packages::ImportType::Normal) ||
                         (importType == core::packages::ImportType::TestHelper &&
@@ -465,7 +465,7 @@ public:
                     }
                 }
 
-                auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
+                auto &importInfo = gs.packageDB().getPackageInfo(import.name);
                 if (!importInfo.exists()) {
                     importToInsertAfter = import.loc;
                     continue;
@@ -608,8 +608,7 @@ public:
             return nullopt;
         }
 
-        auto imp =
-            absl::c_find_if(importedPackageNames, [mangledName](auto &i) { return i.name.mangledName == mangledName; });
+        auto imp = absl::c_find_if(importedPackageNames, [mangledName](auto &i) { return i.name == mangledName; });
         if (imp == importedPackageNames.end()) {
             return nullopt;
         }
@@ -703,14 +702,14 @@ public:
 
             auto &currInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfo(curr));
             for (auto &import : currInfo.importedPackageNames) {
-                auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
-                if (!importInfo.exists() || import.isTestImport() || visited.contains(import.name.mangledName)) {
+                auto &importInfo = gs.packageDB().getPackageInfo(import.name);
+                if (!importInfo.exists() || import.isTestImport() || visited.contains(import.name)) {
                     continue;
                 }
-                if (!prev.contains(import.name.mangledName)) {
-                    prev[import.name.mangledName] = curr;
+                if (!prev.contains(import.name)) {
+                    prev[import.name] = curr;
                 }
-                toVisit.push(import.name.mangledName);
+                toVisit.push(import.name);
             }
         }
 
@@ -1266,7 +1265,7 @@ struct PackageSpecBodyWalk {
                     auto importArg = move(posArg);
                     posArg = ast::packager::prependRegistry(move(importArg));
 
-                    info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target),
+                    info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target).mangledName,
                                                            method2ImportType(send), send.loc);
                 }
                 // also validate the keyword args, since one is valid
@@ -1677,10 +1676,10 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     }
 
     const auto &packageDB = ctx.state.packageDB();
-    ENFORCE(packageDB.getPackageInfo(i.name.mangledName).exists())
+    ENFORCE(packageDB.getPackageInfo(i.name).exists())
     ENFORCE(packageDB.getPackageNameForFile(ctx.file).exists())
     auto &thisPkg = PackageInfoImpl::from(ctx, packageDB.getPackageNameForFile(ctx.file));
-    auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name.mangledName));
+    auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name));
     ENFORCE(thisPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
     ENFORCE(otherPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
 
@@ -1745,9 +1744,9 @@ void validateLayering(const core::Context &ctx, const Import &i) {
 }
 
 void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg, const Import i) {
-    ENFORCE(ctx.state.packageDB().getPackageInfo(i.name.mangledName).exists())
+    ENFORCE(ctx.state.packageDB().getPackageInfo(i.name).exists())
     ENFORCE(ctx.state.packageDB().getPackageNameForFile(ctx.file).exists())
-    auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.name.mangledName);
+    auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.name);
 
     const auto &visibleTo = otherPkg.visibleTo();
     if (visibleTo.empty() && !otherPkg.visibleToTests()) {
@@ -1797,7 +1796,7 @@ void validatePackage(core::Context ctx) {
     }
 
     for (auto &i : pkgInfo.importedPackageNames) {
-        auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+        auto &otherPkg = packageDB.getPackageInfo(i.name);
 
         // this might mean the other package doesn't exist, but that should have been caught already
         if (!otherPkg.exists()) {
@@ -1812,7 +1811,7 @@ void validatePackage(core::Context ctx) {
             validateVisibility(ctx, pkgInfo, i);
         }
 
-        if (i.name.mangledName == pkgInfo.name.mangledName) {
+        if (i.name == pkgInfo.name.mangledName) {
             if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoSelfImport)) {
                 string import_;
                 switch (i.type) {
@@ -1991,7 +1990,7 @@ public:
         std::transform(pkgInfo.importedPackageNames.begin(), pkgInfo.importedPackageNames.end(),
                        std::back_inserter(result),
                        [](Import i) -> pair<core::packages::MangledName, core::packages::ImportType> {
-                           return {i.name.mangledName, i.type};
+                           return {i.name, i.type};
                        });
         return result;
     }
