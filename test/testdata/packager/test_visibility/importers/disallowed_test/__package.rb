@@ -8,7 +8,7 @@ class Importers::DisallowedTest < PackageSpec
 
   # not allowed---this package is NOT referenced using `visible_to`
   test_import Exporters::ExplicitVisibleTo
-            # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: includes explicit visibility modifiers
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: includes explicit visibility modifiers
 
   # allowed---not mentioned, but `visible_to 'tests'` permits this
   test_import Exporters::TestVisibleTo

@@ -8,13 +8,13 @@ class Importers::Disallowed < PackageSpec
 
   # not allowed---this package is NOT referenced using `visible_to`
   import Exporters::ExplicitVisibleTo
-       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: includes explicit visibility modifiers
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: includes explicit visibility modifiers
 
   # not allowed---this package is NOT referenced using `visible_to`
   import Exporters::TestVisibleTo
-       # ^^^^^^^^^^^^^^^^^^^^^^^^ error: includes explicit visibility modifiers
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: includes explicit visibility modifiers
 
   # not allowed---this package is NOT referenced using `visible_to`
   import Exporters::OnlyTestVisibleTo
-       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: includes explicit visibility modifiers
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: includes explicit visibility modifiers
 end
