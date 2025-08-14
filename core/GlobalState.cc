@@ -1218,6 +1218,8 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     DEBUG_ONLY(categoryCounterInc("symbols", "class"));
 
     if (!this->packageDB().enabled()) {
+        // Note that this case also initializes `<PackageSpecRegistry>` itself as being not owned by
+        // a package, because we run initEmpty without the package DB enabled.
         data->packageRegistryOwner = Symbols::noClassOrModule();
         return ret;
     }
