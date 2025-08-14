@@ -183,9 +183,9 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
                         e.setHeader("An `{}` cannot be `{}`", what, "void");
                     }
                 }
+            } else {
+                ensureSafeSig(ctx, send->fun, sig);
             }
-        } else if (sig != nullptr) {
-            ensureSafeSig(ctx, send->fun, sig);
         }
     }
 
