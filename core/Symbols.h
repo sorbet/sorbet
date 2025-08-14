@@ -616,7 +616,18 @@ private:
     ClassOrModuleRef packageRegistryOwner = core::Symbols::PackageSpecRegistry();
 
 public:
-    // TODO(jez) Put this in the symbol-table print output
+    // The package that this symbol belongs to.
+    //
+    // Only set if `gs.packageDB().enabled()`
+    //
+    // If `!package.exists()`, then this symbol is "unpackaged." This is the case for all
+    // definitions in Sorbet's payload.
+    //
+    // TODO(jez): If someone creates a `__package.rb` for something in the standard library after
+    // the payload has already loaded, we won't retroactively determine the package for those
+    // constants, which could cause problems. Probably we should ban that? Because e.g. we won't
+    // have checked the implementation of the payload RBI files against whatever constraints the
+    // __package.rb declares (e.g. imports).
     packages::MangledName package;
 
     // The class or module that this class or module is nested inside of.
