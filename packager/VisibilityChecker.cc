@@ -30,13 +30,9 @@ static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, cor
 class PropagateVisibility final {
     const core::packages::PackageInfo &package;
 
-    bool definedByThisPackage(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
-        return this->package.mangledName() == sym.data(gs)->package;
-    }
-
     void recursiveExportSymbol(core::GlobalState &gs, bool firstSymbol, core::ClassOrModuleRef klass) {
         // Stop recursing at package boundary
-        if (!this->definedByThisPackage(gs, klass)) {
+        if (this->package.mangledName() != klass.data(gs)->package) {
             return;
         }
 
@@ -60,7 +56,7 @@ class PropagateVisibility final {
         // NOTE that we make an exception for namespaces that define behavior: these CANNOT get exported implicitly,
         // as that violates the private-by-default paradigm.
         while (owner.exists() && !owner.data(gs)->flags.isExported && !owner.data(gs)->flags.isBehaviorDefining &&
-               this->definedByThisPackage(gs, owner)) {
+               this->package.mangledName() == owner.data(gs)->package) {
             owner.data(gs)->flags.isExported = true;
             owner = owner.data(gs)->owner;
         }
