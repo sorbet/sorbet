@@ -483,6 +483,10 @@ class Info < T::struct
 end
 ```
 
+## 3516
+
+`attr_reader` and `attr_accessor` may not be given a signature of `void`, as these accessor methods correspond to instance variables which cannot be assigned type `void`.
+
 ## 3550
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.

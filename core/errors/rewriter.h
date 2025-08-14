@@ -19,6 +19,7 @@ constexpr ErrorClass NilableUntyped{3512, StrictLevel::False};
 // constexpr ErrorClass HasAttachedClassInClass{3513, StrictLevel::False};
 constexpr ErrorClass ContravariantHasAttachedClass{3514, StrictLevel::False};
 constexpr ErrorClass DuplicateProp{3515, StrictLevel::True};
+constexpr ErrorClass VoidAttrReader{3516, StrictLevel::True};
 
 // Let's reserve 3550-3569 for RBS related errors
 constexpr ErrorClass RBSSyntaxError{3550, StrictLevel::False};
