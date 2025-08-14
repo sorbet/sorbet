@@ -64,10 +64,9 @@ string buildValidLayersStr(const core::GlobalState &gs) {
 
 struct FullyQualifiedName {
     vector<core::NameRef> parts;
-    core::LocOffsets loc;
 
     FullyQualifiedName() = default;
-    FullyQualifiedName(vector<core::NameRef> parts, core::LocOffsets loc) : parts(parts), loc(loc) {}
+    FullyQualifiedName(vector<core::NameRef> parts) : parts(parts) {}
     explicit FullyQualifiedName(const FullyQualifiedName &) = default;
     FullyQualifiedName(FullyQualifiedName &&) = default;
     FullyQualifiedName &operator=(const FullyQualifiedName &) = delete;
@@ -78,7 +77,7 @@ struct FullyQualifiedName {
         prefixed[0] = prefix;
         std::copy(parts.begin(), parts.end(), prefixed.begin() + 1);
         ENFORCE(prefixed.size() == parts.size() + 1);
-        return {move(prefixed), loc};
+        return move(prefixed);
     }
 
     bool isSuffix(const FullyQualifiedName &prefix) const {
@@ -122,8 +121,9 @@ struct Import {
 
 struct Export {
     FullyQualifiedName fqn;
+    core::LocOffsets loc;
 
-    explicit Export(FullyQualifiedName &&fqn) : fqn(move(fqn)) {}
+    explicit Export(FullyQualifiedName &&fqn, core::LocOffsets loc) : fqn(move(fqn)), loc(loc) {}
 
     const vector<core::NameRef> &parts() const {
         return fqn.parts;
@@ -491,7 +491,7 @@ public:
             // exports, then right before the final `end`
             int64_t exportLoc;
             if (!exports_.empty()) {
-                exportLoc = exports_.front().fqn.loc.beginPos() - "export "sv.size() - 1;
+                exportLoc = exports_.front().loc.beginPos() - "export "sv.size() - 1;
             } else {
                 exportLoc = loc.endPos() - "end"sv.size() - 1;
             }
@@ -555,20 +555,20 @@ public:
         auto pkgFile = loc.file();
         auto insertionLoc = core::Loc::none(pkgFile);
         if (!exports_.empty()) {
-            FullyQualifiedName const *exportToInsertAfter = nullptr;
+            core::LocOffsets exportToInsertAfter;
             for (auto &e : exports_) {
                 if (newExport.show(gs) > e.fqn.show(gs)) {
-                    exportToInsertAfter = &e.fqn;
+                    exportToInsertAfter = e.loc;
                 }
             }
-            if (!exportToInsertAfter) {
+            if (!exportToInsertAfter.exists()) {
                 // Insert before the first export
-                auto beforeConstantName = exports_.front().fqn.loc;
+                auto beforeConstantName = exports_.front().loc;
                 auto [beforeExport, numWhitespace] = core::Loc(pkgFile, beforeConstantName).findStartOfIndentation(gs);
                 auto endOfPrevLine = beforeExport.adjust(gs, -numWhitespace - 1, 0);
                 insertionLoc = endOfPrevLine.copyWithZeroLength();
             } else {
-                insertionLoc = core::Loc(pkgFile, exportToInsertAfter->loc.copyEndWithZeroLength());
+                insertionLoc = core::Loc(pkgFile, exportToInsertAfter.copyEndWithZeroLength());
             }
         } else {
             // if we don't have any exports, then we can try adding it right before the final `end`
@@ -726,7 +726,6 @@ bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) 
 
 FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     FullyQualifiedName fqn;
-    fqn.loc = constantLit->loc;
     while (constantLit != nullptr) {
         fqn.parts.emplace_back(constantLit->cnst);
         if (auto resolvedLit = ast::cast_tree<ast::ConstantLit>(constantLit->scope)) {
@@ -1254,7 +1253,7 @@ struct PackageSpecBodyWalk {
             if (send.numPosArgs() == 1) {
                 // null indicates an invalid export.
                 if (auto target = verifyConstant(ctx, core::Names::export_(), send.getPosArg(0))) {
-                    exported.emplace_back(getFullyQualifiedName(ctx, target));
+                    exported.emplace_back(getFullyQualifiedName(ctx, target), target->loc);
                 }
             }
         } else if ((send.fun == core::Names::import() || send.fun == core::Names::testImport())) {
@@ -1436,7 +1435,7 @@ struct PackageSpecBodyWalk {
             // `exportAll` is set then we've got conflicting
             // information about export; flag the exports as wrong
             for (auto it = exported.begin(); it != exported.end(); ++it) {
-                if (auto e = ctx.beginError(it->fqn.loc, core::errors::Packager::ExportConflict)) {
+                if (auto e = ctx.beginError(it->loc, core::errors::Packager::ExportConflict)) {
                     e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
                                 info.name.toString(ctx), "export_all!");
                 }
@@ -1449,7 +1448,7 @@ struct PackageSpecBodyWalk {
             LexNext upperBound(it->parts());
             auto longer = it + 1;
             for (; longer != exported.end() && !(upperBound < *longer); ++longer) {
-                if (auto e = ctx.beginError(longer->fqn.loc, core::errors::Packager::ExportConflict)) {
+                if (auto e = ctx.beginError(longer->loc, core::errors::Packager::ExportConflict)) {
                     if (it->parts() == longer->parts()) {
                         e.setHeader("Duplicate export of `{}`",
                                     fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
@@ -1458,7 +1457,7 @@ struct PackageSpecBodyWalk {
                                     fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }),
                                     fmt::map_join(it->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
                     }
-                    e.addErrorLine(ctx.locAt(it->fqn.loc), "Prefix exported here");
+                    e.addErrorLine(ctx.locAt(it->loc), "Prefix exported here");
                 }
 
                 dupInds.emplace_back(distance(exported.begin(), longer));
