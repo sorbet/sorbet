@@ -104,19 +104,6 @@ void sorbet::FileOps::removeDir(const string &path) {
     }
 }
 
-bool sorbet::FileOps::removeEmptyDir(const string &path) {
-    auto err = rmdir(path.c_str());
-    if (err) {
-        if (errno == ENOTEMPTY) {
-            return false;
-        }
-        auto msg = fmt::format("Error in removeEmptyDir('{}'): {}", path, errno);
-        throw sorbet::RemoveDirException(msg);
-    }
-
-    return true;
-}
-
 void sorbet::FileOps::removeFile(const string &path) {
     auto err = remove(path.c_str());
     if (err) {
