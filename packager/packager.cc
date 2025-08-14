@@ -64,10 +64,9 @@ string buildValidLayersStr(const core::GlobalState &gs) {
 
 struct FullyQualifiedName {
     vector<core::NameRef> parts;
-    core::LocOffsets loc;
 
     FullyQualifiedName() = default;
-    FullyQualifiedName(vector<core::NameRef> parts, core::LocOffsets loc) : parts(parts), loc(loc) {}
+    FullyQualifiedName(vector<core::NameRef> parts) : parts(parts) {}
     explicit FullyQualifiedName(const FullyQualifiedName &) = default;
     FullyQualifiedName(FullyQualifiedName &&) = default;
     FullyQualifiedName &operator=(const FullyQualifiedName &) = delete;
@@ -78,7 +77,7 @@ struct FullyQualifiedName {
         prefixed[0] = prefix;
         std::copy(parts.begin(), parts.end(), prefixed.begin() + 1);
         ENFORCE(prefixed.size() == parts.size() + 1);
-        return {move(prefixed), loc};
+        return move(prefixed);
     }
 
     bool isSuffix(const FullyQualifiedName &prefix) const {
@@ -122,8 +121,9 @@ struct Import {
 
 struct Export {
     FullyQualifiedName fqn;
+    core::LocOffsets loc;
 
-    explicit Export(FullyQualifiedName &&fqn) : fqn(move(fqn)) {}
+    explicit Export(FullyQualifiedName &&fqn, core::LocOffsets loc) : fqn(move(fqn)), loc(loc) {}
 
     const vector<core::NameRef> &parts() const {
         return fqn.parts;
@@ -478,7 +478,7 @@ public:
             }
             if (!importToInsertAfter.exists()) {
                 // Insert before the first import
-                core::Loc beforePackageName = {loc.file(), importedPackageNames.front().name.fullName.loc};
+                core::Loc beforePackageName = {loc.file(), importedPackageNames.front().loc};
                 auto [beforeImport, numWhitespace] = beforePackageName.findStartOfIndentation(gs);
                 auto endOfPrevLine = beforeImport.adjust(gs, -numWhitespace - 1, 0);
                 insertionLoc = endOfPrevLine.copyWithZeroLength();
@@ -491,7 +491,7 @@ public:
             // exports, then right before the final `end`
             int64_t exportLoc;
             if (!exports_.empty()) {
-                exportLoc = exports_.front().fqn.loc.beginPos() - "export "sv.size() - 1;
+                exportLoc = exports_.front().loc.beginPos() - "export "sv.size() - 1;
             } else {
                 exportLoc = loc.endPos() - "end"sv.size() - 1;
             }
@@ -555,20 +555,20 @@ public:
         auto pkgFile = loc.file();
         auto insertionLoc = core::Loc::none(pkgFile);
         if (!exports_.empty()) {
-            FullyQualifiedName const *exportToInsertAfter = nullptr;
+            core::LocOffsets exportToInsertAfter;
             for (auto &e : exports_) {
                 if (newExport.show(gs) > e.fqn.show(gs)) {
-                    exportToInsertAfter = &e.fqn;
+                    exportToInsertAfter = e.loc;
                 }
             }
-            if (!exportToInsertAfter) {
+            if (!exportToInsertAfter.exists()) {
                 // Insert before the first export
-                auto beforeConstantName = exports_.front().fqn.loc;
+                auto beforeConstantName = exports_.front().loc;
                 auto [beforeExport, numWhitespace] = core::Loc(pkgFile, beforeConstantName).findStartOfIndentation(gs);
                 auto endOfPrevLine = beforeExport.adjust(gs, -numWhitespace - 1, 0);
                 insertionLoc = endOfPrevLine.copyWithZeroLength();
             } else {
-                insertionLoc = core::Loc(pkgFile, exportToInsertAfter->loc.copyEndWithZeroLength());
+                insertionLoc = core::Loc(pkgFile, exportToInsertAfter.copyEndWithZeroLength());
             }
         } else {
             // if we don't have any exports, then we can try adding it right before the final `end`
@@ -726,7 +726,6 @@ bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) 
 
 FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     FullyQualifiedName fqn;
-    fqn.loc = constantLit->loc;
     while (constantLit != nullptr) {
         fqn.parts.emplace_back(constantLit->cnst);
         if (auto resolvedLit = ast::cast_tree<ast::ConstantLit>(constantLit->scope)) {
@@ -1254,7 +1253,7 @@ struct PackageSpecBodyWalk {
             if (send.numPosArgs() == 1) {
                 // null indicates an invalid export.
                 if (auto target = verifyConstant(ctx, core::Names::export_(), send.getPosArg(0))) {
-                    exported.emplace_back(getFullyQualifiedName(ctx, target));
+                    exported.emplace_back(getFullyQualifiedName(ctx, target), target->loc);
                 }
             }
         } else if ((send.fun == core::Names::import() || send.fun == core::Names::testImport())) {
@@ -1436,7 +1435,7 @@ struct PackageSpecBodyWalk {
             // `exportAll` is set then we've got conflicting
             // information about export; flag the exports as wrong
             for (auto it = exported.begin(); it != exported.end(); ++it) {
-                if (auto e = ctx.beginError(it->fqn.loc, core::errors::Packager::ExportConflict)) {
+                if (auto e = ctx.beginError(it->loc, core::errors::Packager::ExportConflict)) {
                     e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
                                 info.name.toString(ctx), "export_all!");
                 }
@@ -1449,7 +1448,7 @@ struct PackageSpecBodyWalk {
             LexNext upperBound(it->parts());
             auto longer = it + 1;
             for (; longer != exported.end() && !(upperBound < *longer); ++longer) {
-                if (auto e = ctx.beginError(longer->fqn.loc, core::errors::Packager::ExportConflict)) {
+                if (auto e = ctx.beginError(longer->loc, core::errors::Packager::ExportConflict)) {
                     if (it->parts() == longer->parts()) {
                         e.setHeader("Duplicate export of `{}`",
                                     fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
@@ -1458,7 +1457,7 @@ struct PackageSpecBodyWalk {
                                     fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }),
                                     fmt::map_join(it->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
                     }
-                    e.addErrorLine(ctx.locAt(it->fqn.loc), "Prefix exported here");
+                    e.addErrorLine(ctx.locAt(it->loc), "Prefix exported here");
                 }
 
                 dupInds.emplace_back(distance(exported.begin(), longer));
@@ -1605,12 +1604,12 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
     if (gs.packageDB().enforceLayering()) {
         if (!bodyWalk.foundLayerDeclaration) {
-            if (auto e = ctx.beginError(info.name.fullName.loc, core::errors::Packager::InvalidLayer)) {
+            if (auto e = gs.beginError(info.declLoc(), core::errors::Packager::InvalidLayer)) {
                 e.setHeader("This package does not declare a `{}`", "layer");
             }
         }
         if (!bodyWalk.foundStrictDependenciesDeclaration) {
-            if (auto e = ctx.beginError(info.name.fullName.loc, core::errors::Packager::InvalidStrictDependencies)) {
+            if (auto e = gs.beginError(info.declLoc(), core::errors::Packager::InvalidStrictDependencies)) {
                 e.setHeader("This package does not declare a `{}` level", "strict_dependencies");
             }
         }
@@ -1880,7 +1879,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     auto otherPkgLayer = otherPkg.layer().value().first;
 
     if (thisPkg.causesLayeringViolation(packageDB, otherPkgLayer)) {
-        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::LayeringViolation)) {
+        if (auto e = ctx.beginError(i.loc, core::errors::Packager::LayeringViolation)) {
             e.setHeader("Layering violation: cannot import `{}` (in layer `{}`) from `{}` (in layer `{}`)",
                         otherPkg.show(ctx), otherPkgLayer.show(ctx), thisPkg.show(ctx), pkgLayer.show(ctx));
             e.addErrorLine(core::Loc(thisPkg.loc.file(), thisPkg.layer().value().second), "`{}`'s `{}` declared here",
@@ -1895,7 +1894,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     core::packages::StrictDependenciesLevel otherPkgExpectedLevel = thisPkg.minimumStrictDependenciesLevel();
 
     if (otherPkg.strictDependenciesLevel().value().first < otherPkgExpectedLevel) {
-        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::StrictDependenciesViolation)) {
+        if (auto e = ctx.beginError(i.loc, core::errors::Packager::StrictDependenciesViolation)) {
             e.setHeader("Strict dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
                         "import", core::packages::strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel().value().second),
@@ -1909,7 +1908,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
 
     if (thisPkg.strictDependenciesLevel().value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
         if (thisPkg.sccID() == otherPkg.sccID()) {
-            if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::StrictDependenciesViolation)) {
+            if (auto e = ctx.beginError(i.loc, core::errors::Packager::StrictDependenciesViolation)) {
                 auto level = fmt::format(
                     "strict_dependencies '{}'",
                     core::packages::strictDependenciesLevelToString(thisPkg.strictDependenciesLevel().value().first));
@@ -1945,7 +1944,7 @@ void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg,
         visibleTo, [&ctx, &absPkg](const auto &other) { return visibilityApplies(ctx, other, absPkg.mangledName()); });
 
     if (!allowed) {
-        if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::ImportNotVisible)) {
+        if (auto e = ctx.beginError(i.loc, core::errors::Packager::ImportNotVisible)) {
             e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
                         otherPkg.show(ctx), absPkg.show(ctx));
             e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
@@ -1996,7 +1995,7 @@ void validatePackage(core::Context ctx) {
         }
 
         if (i.name.mangledName == pkgInfo.name.mangledName) {
-            if (auto e = ctx.beginError(i.name.fullName.loc, core::errors::Packager::NoSelfImport)) {
+            if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoSelfImport)) {
                 string import_;
                 switch (i.type) {
                     case core::packages::ImportType::Normal:
