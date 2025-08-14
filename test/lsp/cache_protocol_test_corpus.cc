@@ -518,7 +518,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
     for (auto &file : toRemove) {
         FileOps::removeFile(file);
     }
-    REQUIRE(FileOps::removeEmptyDir(sessionCacheDir));
+    FileOps::removeDir(sessionCacheDir);
 
     {
         auto copy = sessionCache->open(logger, *opts);
@@ -669,7 +669,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
 
     // Clean up
     FileOps::removeFile(fmt::format("{}/keep-around", path));
-    FileOps::removeEmptyDir(path);
+    FileOps::removeDir(path);
 }
 
 } // namespace sorbet::test::lsp
