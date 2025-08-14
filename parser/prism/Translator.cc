@@ -298,7 +298,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // parameters. So we need to extract the args vector from the Args node, and insert the locals at the end of
             // it.
             auto sorbetArgsNode = translate(up_cast(paramsNode->parameters));
-            auto argsNode = parser::cast_node<parser::Args>(sorbetArgsNode.get());
+            auto argsNode = parser::NodeWithExpr::cast_node<parser::Args>(sorbetArgsNode.get());
             auto sorbetShadowArgs = translateMulti(paramsNode->locals);
             // Sorbet's legacy parser inserts locals (Shadowargs) at the end of the the block's Args node
             argsNode->args.insert(argsNode->args.end(), make_move_iterator(sorbetShadowArgs.begin()),
@@ -562,11 +562,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 // If that's the case, we need to check if the body contains an ensure or rescue clause, and if so,
                 // we need to elevate that node to the top level of the method definition, without the Kwbegin node to
                 // match the behavior of Sorbet's legacy parser.
-                auto kwbeginNode = parser::cast_node<parser::Kwbegin>(body.get());
+                auto kwbeginNode = parser::NodeWithExpr::cast_node<parser::Kwbegin>(body.get());
 
                 if (kwbeginNode != nullptr && kwbeginNode->stmts[0] != nullptr &&
-                    (parser::cast_node<parser::Rescue>(kwbeginNode->stmts[0].get()) ||
-                     parser::cast_node<parser::Ensure>(kwbeginNode->stmts[0].get()))) {
+                    (parser::NodeWithExpr::cast_node<parser::Rescue>(kwbeginNode->stmts[0].get()) ||
+                     parser::NodeWithExpr::cast_node<parser::Ensure>(kwbeginNode->stmts[0].get()))) {
                     if (kwbeginNode->stmts.size() == 1) {
                         body = move(kwbeginNode->stmts[0]);
                     } else {
@@ -1771,7 +1771,7 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
         body = translate(prismLambdaNode->body);
     }
 
-    if (parser::cast_node<parser::NumParams>(parametersNode.get())) {
+    if (parser::NodeWithExpr::cast_node<parser::NumParams>(parametersNode.get())) {
         return make_unique<parser::NumBlock>(sendNode->loc, move(sendNode), move(parametersNode), move(body));
     } else {
         return make_unique<parser::Block>(sendNode->loc, move(sendNode), move(parametersNode), move(body));
