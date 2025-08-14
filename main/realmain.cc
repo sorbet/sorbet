@@ -269,7 +269,7 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
                         serialized.strval = pf.toString(ctx, autogenVersion);
                     }
                     if (opts.print.AutogenMsgPack.enabled) {
-                        Timer timeit(logger, "autogenToMsgpack");
+                        Timer timeit(logger, "autogenToMsgpackIndex");
                         serialized.msgpack = pf.toMsgpack(ctx, autogenVersion, autogenCfg);
                     }
 
@@ -307,16 +307,23 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
     if (opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled) {
         {
             Timer timeit(logger, "autogenDependencyDBPrint");
+            auto msgpackfiletotaloffset = 0;
             if (opts.print.AutogenMsgPack.enabled) {
-                opts.print.AutogenMsgPack.print(
-                    autogen::ParsedFile::msgpackGlobalHeader(autogenVersion, merged.size(), autogenCfg));
+                auto header = autogen::ParsedFile::msgpackGlobalHeader(autogenVersion, merged.size(), autogenCfg);
+                opts.print.AutogenMsgPack.print(header);
+                msgpackfileoffset += header.length();
             }
             for (auto &elem : merged) {
                 if (opts.print.Autogen.enabled) {
                     opts.print.Autogen.print(elem.strval);
                 }
+                if (opts.print.AutogenMsgPackIndex.enabled) {
+                    opts.print.AutogenMsgPackIndex.print(fmt::format("{}\n", msgpackfiletotaloffset));
+                }
                 if (opts.print.AutogenMsgPack.enabled) {
-                    opts.print.AutogenMsgPack.print(elem.msgpack);
+                    auto mp = elem.msgpack;
+                    opts.print.AutogenMsgPack.print(mp);
+                    msgpackfileoffset += mp.length();
                 }
             }
         }

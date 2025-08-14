@@ -85,6 +85,7 @@ struct Printers {
     PrinterConfig MissingConstants;
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
+    PrinterConfig AutogenMsgPackIndex;
     PrinterConfig AutogenSubclasses;
     PrinterConfig Packager;
     PrinterConfig MinimizeRBI;
