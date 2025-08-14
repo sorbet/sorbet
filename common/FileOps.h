@@ -38,11 +38,6 @@ public:
     // when it's removed.
     static void removeDir(const std::string &path);
 
-    // NOTE: this is a minimal wrapper around rmdir, and will return false if the directory is not empty
-    // when it's removed. For any other errno, it will throw an exception. This exists as an convenience function to
-    // prevent the caller from needing to try/catch removeDir.
-    static bool removeEmptyDir(const std::string &path);
-
     static void removeFile(const std::string &path);
 
     /**

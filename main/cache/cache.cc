@@ -2,13 +2,14 @@
 #include "common/FileOps.h"
 #include "common/Random.h"
 #include "common/concurrency/ConcurrentQueue.h"
+#include "common/exception/Exception.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/serialize/serialize.h"
 #include "main/options/options.h"
 #include "sorbet_version/sorbet_version.h"
 #include <charconv>
-#include <csignal>
 #include <cstdio>
+#include <unistd.h>
 
 using namespace std;
 
@@ -227,9 +228,23 @@ void removeCacheDir(const string &path) {
         FileOps::removeFile(lockMdb);
     }
 
-    // Fail silently if the directory has files other than those created by LMDB. This should be fine though, as we will
-    // have removed the largest files.
-    FileOps::removeEmptyDir(path);
+    // Fail silently if the directory has files other than those created by LMDB. This should be fine though, as we
+    // will have removed the largest files.
+    auto err = rmdir(path.c_str());
+    if (err) {
+        switch (errno) {
+            // Return `false` if the directory is missing, isn't actually a directory, or wasn't empty.
+            case ENOENT:
+            case ENOTDIR:
+            case ENOTEMPTY:
+                break;
+
+            default: {
+                auto msg = fmt::format("Error in removeCacheDir('{}'): {}", path, errno);
+                throw sorbet::RemoveDirException(msg);
+            }
+        }
+    }
 }
 } // namespace
 
