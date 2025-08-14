@@ -25,12 +25,6 @@ public:
     MangledName() = default;
     explicit MangledName(ClassOrModuleRef owner) : owner(owner) {}
 
-    // ["Foo", "Bar"] => :Foo_Bar
-    static MangledName mangledNameFromParts(GlobalState &gs, const std::vector<std::string_view> &parts,
-                                            ClassOrModuleRef owner);
-    // [:Foo, :Bar] => :Foo_Bar
-    static MangledName mangledNameFromParts(GlobalState &gs, const std::vector<NameRef> &parts, ClassOrModuleRef owner);
-
     // [:Foo, :Bar] => :Foo_Bar
     // (might not exist)
     static MangledName lookupMangledName(const core::GlobalState &gs, const std::vector<std::string> &parts);
