@@ -107,19 +107,6 @@ struct PackageName {
     }
 };
 
-struct Import {
-    core::packages::MangledName name;
-    core::packages::ImportType type;
-    core::LocOffsets loc;
-
-    Import(core::packages::MangledName &&name, core::packages::ImportType type, core::LocOffsets loc)
-        : name(std::move(name)), type(type), loc(loc) {}
-
-    bool isTestImport() const {
-        return type != core::packages::ImportType::Normal;
-    }
-};
-
 struct Export {
     FullyQualifiedName fqn;
     core::LocOffsets loc;
@@ -220,7 +207,7 @@ public:
     // The possible path prefixes associated with files in the package, including path separator at end.
     vector<string> packagePathPrefixes = {};
     // The names of each package imported by this package.
-    vector<Import> importedPackageNames = {};
+    vector<core::packages::Import> importedPackageNames = {};
     // List of exported items that form the body of this package's public API.
     // These are copied into every package that imports this package.
     vector<Export> exports_ = {};
@@ -1670,7 +1657,7 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     }
 }
 
-void validateLayering(const core::Context &ctx, const Import &i) {
+void validateLayering(const core::Context &ctx, const core::packages::Import &i) {
     if (i.isTestImport()) {
         return;
     }
@@ -1743,7 +1730,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     }
 }
 
-void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg, const Import i) {
+void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg, const core::packages::Import i) {
     ENFORCE(ctx.state.packageDB().getPackageInfo(i.name).exists())
     ENFORCE(ctx.state.packageDB().getPackageNameForFile(ctx.file).exists())
     auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.name);
@@ -1989,7 +1976,7 @@ public:
         vector<pair<core::packages::MangledName, core::packages::ImportType>> result;
         std::transform(pkgInfo.importedPackageNames.begin(), pkgInfo.importedPackageNames.end(),
                        std::back_inserter(result),
-                       [](Import i) -> pair<core::packages::MangledName, core::packages::ImportType> {
+                       [](core::packages::Import i) -> pair<core::packages::MangledName, core::packages::ImportType> {
                            return {i.name, i.type};
                        });
         return result;

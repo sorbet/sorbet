@@ -27,6 +27,19 @@ enum class ImportType {
     TestUnit,
 };
 
+struct Import {
+    MangledName name;
+    ImportType type;
+    core::LocOffsets loc;
+
+    Import(core::packages::MangledName &&name, core::packages::ImportType type, core::LocOffsets loc)
+        : name(std::move(name)), type(type), loc(loc) {}
+
+    bool isTestImport() const {
+        return type != core::packages::ImportType::Normal;
+    }
+};
+
 enum class VisibleToType {
     Normal,
     Wildcard,
