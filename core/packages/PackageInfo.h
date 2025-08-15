@@ -50,6 +50,13 @@ struct VisibleTo {
         : packageName(std::move(packageName)), visibleToType(visibleToType){};
 };
 
+struct Export {
+    core::SymbolRef sym;
+    core::LocOffsets loc;
+
+    explicit Export(core::SymbolRef sym, core::LocOffsets loc) : sym(sym), loc(loc) {}
+};
+
 class PackageInfo {
 public:
     virtual MangledName mangledName() const = 0;
@@ -111,6 +118,7 @@ public:
     };
 
     virtual bool exportAll() const = 0;
+    virtual std::vector<Export> &exports() = 0;
     virtual bool visibleToTests() const = 0;
 };
 

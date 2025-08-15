@@ -52,6 +52,12 @@ public:
         return false;
     }
 
+    vector<Export> &exports() {
+        notImplemented();
+        static vector<Export> exports_;
+        return exports_;
+    }
+
     bool visibleToTests() const {
         notImplemented();
         return false;

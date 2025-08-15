@@ -28,7 +28,7 @@ static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, cor
 
 // For each __package.rb file, traverse the resolved tree and apply the visibility annotations to the symbols.
 class PropagateVisibility final {
-    const core::packages::PackageInfo &package;
+    core::packages::PackageInfo &package;
 
     void recursiveExportSymbol(core::GlobalState &gs, bool firstSymbol, core::ClassOrModuleRef klass) {
         // Stop recursing at package boundary
@@ -119,7 +119,7 @@ class PropagateVisibility final {
         }
     }
 
-    PropagateVisibility(const core::packages::PackageInfo &package) : package{package} {}
+    PropagateVisibility(core::packages::PackageInfo &package) : package{package} {}
 
 public:
     // Find uses of export and mark the symbols they mention as exported.
@@ -143,6 +143,7 @@ public:
         }
 
         auto litSymbol = lit->symbol();
+        this->package.exports().emplace_back(litSymbol, lit->loc());
         if (litSymbol.isClassOrModule()) {
             auto sym = litSymbol.asClassOrModuleRef();
             checkExportPackage(ctx, send.loc, litSymbol);
@@ -188,6 +189,58 @@ public:
         }
     }
 
+    static void finalizeExports(const core::Context ctx, const core::packages::PackageInfo &info) {
+        auto exported = info.exports();
+        if (exported.empty()) {
+            return;
+        }
+
+        if (info.exportAll()) {
+            // we're only here because exports exist, which means if
+            // `exportAll` is set then we've got conflicting
+            // information about export; flag the exports as wrong
+            for (auto it = exported.begin(); it != exported.end(); ++it) {
+                if (auto e = ctx.beginError(it->loc, core::errors::Packager::ExportConflict)) {
+                    e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
+                                info.mangledName().owner.show(ctx), "export_all!");
+                }
+            }
+        }
+
+        fast_sort(exported, Export::lexCmp);
+        vector<size_t> dupInds;
+        for (auto it = exported.begin(); it != exported.end(); ++it) {
+            LexNext upperBound(it->parts());
+            auto longer = it + 1;
+            for (; longer != exported.end() && !(upperBound < *longer); ++longer) {
+                if (auto e = ctx.beginError(longer->loc, core::errors::Packager::ExportConflict)) {
+                    if (it->parts() == longer->parts()) {
+                        e.setHeader("Duplicate export of `{}`",
+                                    fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
+                    } else {
+                        e.setHeader("Cannot export `{}` because another exported name `{}` is a prefix of it",
+                                    fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }),
+                                    fmt::map_join(it->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
+                    }
+                    e.addErrorLine(ctx.locAt(it->loc), "Prefix exported here");
+                }
+
+                dupInds.emplace_back(distance(exported.begin(), longer));
+            }
+        }
+
+        // Remove duplicates we found (in reverse order)
+        fast_sort(dupInds);
+        dupInds.erase(unique(dupInds.begin(), dupInds.end()), dupInds.end());
+        for (auto indIt = dupInds.rbegin(); indIt != dupInds.rend(); ++indIt) {
+            // Yes this is quadratic, but this only happens in an error condition.
+            exported.erase(exported.begin() + *indIt);
+        }
+
+        ENFORCE(info.exports_.empty());
+        std::swap(exported, info.exports_);
+    }
+
     static void run(core::GlobalState &gs, ast::ParsedFile &f) {
         if (!f.file.data(gs).isPackage(gs)) {
             return;
@@ -198,10 +251,10 @@ public:
             return;
         }
 
-        const auto &package = gs.packageDB().getPackageInfo(pkgName);
-        ENFORCE(package.exists(), "Package is associated with a file, but doesn't exist");
+        auto *package = gs.packageDB().getPackageInfoNonConst(pkgName);
+        ENFORCE(package->exists(), "Package is associated with a file, but doesn't exist");
 
-        PropagateVisibility pass{package};
+        PropagateVisibility pass{*package};
 
         core::MutableContext ctx{gs, core::Symbols::root(), f.file};
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);

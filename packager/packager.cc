@@ -89,66 +89,12 @@ struct Import {
     }
 };
 
-struct Export {
-    FullyQualifiedName fqn;
-    core::LocOffsets loc;
-
-    explicit Export(FullyQualifiedName &&fqn, core::LocOffsets loc) : fqn(move(fqn)), loc(loc) {}
-
-    const vector<core::NameRef> &parts() const {
-        return fqn.parts;
-    }
-
-    // Lex sort by name.
-    static bool lexCmp(const Export &a, const Export &b) {
-        return absl::c_lexicographical_compare(a.parts(), b.parts(),
-                                               [](auto a, auto b) -> bool { return a.rawId() < b.rawId(); });
-    }
-};
-
 struct VisibleTo {
     core::packages::MangledName mangledName;
     core::packages::VisibleToType type;
 
     VisibleTo(core::packages::MangledName mangledName, core::packages::VisibleToType type)
         : mangledName(mangledName), type(type) {}
-};
-
-// For a given vector of NameRefs, this represents the "next" vector that does not begin with its
-// prefix (without actually constructing it). Consider the following sorted names:
-//
-// [A B]
-// [A B C]
-// [A B D E]
-//    <<<< Position of LexNext([A B]) roughly equivalent to [A B <Infinity>]
-// [X Y]
-// [X Y Z]
-class LexNext final {
-    absl::Span<const core::NameRef> names;
-
-public:
-    LexNext(const vector<core::NameRef> &names) : names(names) {}
-
-    bool operator<(absl::Span<const core::NameRef> rhs) const {
-        // Lexicographic comparison:
-        for (auto lhsIt = names.begin(), rhsIt = rhs.begin(); lhsIt != names.end() && rhsIt != rhs.end();
-             ++lhsIt, ++rhsIt) {
-            if (lhsIt->rawId() < rhsIt->rawId()) {
-                return true;
-            } else if (rhsIt->rawId() < lhsIt->rawId()) {
-                return false;
-            }
-        }
-
-        // This is where this implementation differs from `std::lexicographic_compare`: if one name is the prefix of
-        // another they're considered equal, wheras `std::lexicographic_compare` would return `true` if the LHS
-        // was shorter.
-        return false;
-    }
-
-    bool operator<(const Export &e) const {
-        return *this < e.parts();
-    }
 };
 
 class PackageInfoImpl final : public core::packages::PackageInfo {
@@ -173,6 +119,10 @@ public:
         return exportAll_;
     }
 
+    vector<core::packages::Export> &exports() {
+        return exports_;
+    }
+
     bool visibleToTests() const {
         return visibleToTests_;
     }
@@ -189,7 +139,7 @@ public:
     vector<Import> importedPackageNames = {};
     // List of exported items that form the body of this package's public API.
     // These are copied into every package that imports this package.
-    vector<Export> exports_ = {};
+    vector<core::packages::Export> exports_ = {};
 
     // Whether this package should just export everything
     bool exportAll_ = false;
@@ -514,12 +464,13 @@ public:
 
     optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                     const core::SymbolRef newExport) const {
+        auto strName = newExport.show(gs);
         auto pkgFile = loc.file();
         auto insertionLoc = core::Loc::none(pkgFile);
         if (!exports_.empty()) {
             core::LocOffsets exportToInsertAfter;
             for (auto &e : exports_) {
-                if (newExport.show(gs) > e.fqn.show(gs)) {
+                if (strName > e.sym.show(gs)) {
                     exportToInsertAfter = e.loc;
                 }
             }
@@ -550,7 +501,6 @@ public:
         }
         ENFORCE(insertionLoc.exists());
 
-        auto strName = newExport.show(gs);
         core::AutocorrectSuggestion suggestion(
             fmt::format("Export `{}` in package `{}`", strName, mangledName_.owner.show(gs)),
             {{insertionLoc, fmt::format("\n  export {}", strName)}});
@@ -1179,10 +1129,7 @@ struct PackageSpecBodyWalk {
 
         if (send.fun == core::Names::export_()) {
             if (send.numPosArgs() == 1) {
-                // null indicates an invalid export.
-                if (auto target = verifyConstant(ctx, core::Names::export_(), send.getPosArg(0))) {
-                    exported.emplace_back(getFullyQualifiedName(ctx, target), target->loc);
-                }
+                verifyConstant(ctx, core::Names::export_(), send.getPosArg(0));
             }
         } else if ((send.fun == core::Names::import() || send.fun == core::Names::testImport())) {
             if (send.numPosArgs() == 1) {
@@ -1352,58 +1299,6 @@ struct PackageSpecBodyWalk {
         illegalNode(ctx, tree);
     }
 
-    // Generate a list of FQNs exported by this package. No export may be a prefix of another.
-    void finalize(core::Context ctx) {
-        if (exported.empty()) {
-            return;
-        }
-
-        if (info.exportAll()) {
-            // we're only here because exports exist, which means if
-            // `exportAll` is set then we've got conflicting
-            // information about export; flag the exports as wrong
-            for (auto it = exported.begin(); it != exported.end(); ++it) {
-                if (auto e = ctx.beginError(it->loc, core::errors::Packager::ExportConflict)) {
-                    e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
-                                info.mangledName_.owner.show(ctx), "export_all!");
-                }
-            }
-        }
-
-        fast_sort(exported, Export::lexCmp);
-        vector<size_t> dupInds;
-        for (auto it = exported.begin(); it != exported.end(); ++it) {
-            LexNext upperBound(it->parts());
-            auto longer = it + 1;
-            for (; longer != exported.end() && !(upperBound < *longer); ++longer) {
-                if (auto e = ctx.beginError(longer->loc, core::errors::Packager::ExportConflict)) {
-                    if (it->parts() == longer->parts()) {
-                        e.setHeader("Duplicate export of `{}`",
-                                    fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
-                    } else {
-                        e.setHeader("Cannot export `{}` because another exported name `{}` is a prefix of it",
-                                    fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }),
-                                    fmt::map_join(it->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
-                    }
-                    e.addErrorLine(ctx.locAt(it->loc), "Prefix exported here");
-                }
-
-                dupInds.emplace_back(distance(exported.begin(), longer));
-            }
-        }
-
-        // Remove duplicates we found (in reverse order)
-        fast_sort(dupInds);
-        dupInds.erase(unique(dupInds.begin(), dupInds.end()), dupInds.end());
-        for (auto indIt = dupInds.rbegin(); indIt != dupInds.rend(); ++indIt) {
-            // Yes this is quadratic, but this only happens in an error condition.
-            exported.erase(exported.begin() + *indIt);
-        }
-
-        ENFORCE(info.exports_.empty());
-        std::swap(exported, info.exports_);
-    }
-
     bool isSpecMethod(const sorbet::ast::Send &send) const {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
@@ -1542,7 +1437,6 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
             }
         }
     }
-    bodyWalk.finalize(ctx);
 }
 
 void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
