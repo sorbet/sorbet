@@ -104,17 +104,8 @@ public:
     strictDependenciesLevel() const = 0;
     virtual std::optional<std::pair<core::NameRef, core::LocOffsets>> layer() const = 0;
 
-    // The id of the SCC that this package's normal imports belong to.
-    //
-    // WARNING: Modifying the contents of the package DB after this operation will cause this id to go out of
-    // date.
     virtual std::optional<int> sccID() const = 0;
 
-    // The ID of the SCC that this package's tests belong to. This ID is only useful in the context of the package graph
-    // condensation graph.
-    //
-    // WARNING: Modifying the contents of the package DB after this operation will cause this id to go out of
-    // date.
     virtual std::optional<int> testSccID() const = 0;
 
     virtual core::Loc fullLoc() const = 0;
@@ -124,17 +115,12 @@ public:
 
     virtual std::optional<ImportType> importsPackage(MangledName mangledName) const = 0;
 
-    // Is it a layering violation to import otherPkg from this package?
     virtual bool causesLayeringViolation(const core::packages::PackageDB &packageDB,
                                          const PackageInfo &otherPkg) const = 0;
-    // What is the minimum strict dependencies level that this package's imports must have?
     virtual core::packages::StrictDependenciesLevel minimumStrictDependenciesLevel() const = 0;
-    // Returns a string representing the path to the given package from this package, if it exists. Note: this only
-    // looks at non-test imports.
     virtual std::optional<std::string> pathTo(const core::GlobalState &gs,
                                               const core::packages::MangledName dest) const = 0;
 
-    // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                                  ImportType importType) const = 0;
     virtual std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
@@ -227,6 +213,10 @@ public:
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
     optional<int> sccID_ = nullopt;
 
+    // The id of the SCC that this package's normal imports belong to.
+    //
+    // WARNING: Modifying the contents of the package DB after this operation will cause this id to go out of
+    // date.
     optional<int> sccID() const {
         return sccID_;
     }
@@ -235,6 +225,11 @@ public:
     // dependencies
     optional<int> testSccID_ = nullopt;
 
+    // The ID of the SCC that this package's tests belong to. This ID is only useful in the context of the package graph
+    // condensation graph.
+    //
+    // WARNING: Modifying the contents of the package DB after this operation will cause this id to go out of
+    // date.
     optional<int> testSccID() const {
         return testSccID_;
     }
@@ -388,6 +383,8 @@ public:
         }
         return aStrName < bStrName ? -1 : 1;
     }
+
+    // autocorrects
 
     optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                     core::packages::ImportType importType) const {
@@ -632,6 +629,8 @@ public:
         return pathMessage;
     }
 
+    // Returns a string representing the path to the given package from this package, if it exists. Note: this only
+    // looks at non-test imports.
     optional<string> pathTo(const core::GlobalState &gs, const core::packages::MangledName dest) const {
         // Note: This implements BFS.
         auto src = mangledName();
