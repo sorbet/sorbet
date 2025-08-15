@@ -1997,10 +1997,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     result = move(res);
                 }
             },
-            [&](parser::Retry *ret) {
-                ExpressionPtr res = make_expression<Retry>(loc);
-                result = move(res);
-            },
+            [&](parser::Retry *ret) { desugaredByPrismTranslator(ret); },
             [&](parser::Yield *ret) {
                 Send::ARGS_store args;
                 args.reserve(ret->exprs.size());

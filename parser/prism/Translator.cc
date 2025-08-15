@@ -1223,7 +1223,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Return>(location, move(returnValues));
         }
         case PM_RETRY_NODE: { // The `retry` keyword
-            return make_unique<parser::Retry>(location);
+            return make_node_with_expr<parser::Retry>(ast::make_expression<ast::Retry>(location), location);
         }
         case PM_SELF_NODE: { // The `self` keyword
             return make_node_with_expr<parser::Self>(MK::Self(location), location);
