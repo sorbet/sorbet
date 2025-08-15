@@ -96,51 +96,6 @@ struct VisibleTo {
 
 class PackageInfo {
 public:
-    virtual MangledName mangledName() const = 0;
-    virtual absl::Span<const std::string> pathPrefixes() const = 0;
-    virtual std::vector<VisibleTo> visibleTo() const = 0;
-    virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
-    virtual std::optional<std::pair<core::packages::StrictDependenciesLevel, core::LocOffsets>>
-    strictDependenciesLevel() const = 0;
-    virtual std::optional<std::pair<core::NameRef, core::LocOffsets>> layer() const = 0;
-
-    virtual std::optional<int> sccID() const = 0;
-
-    virtual std::optional<int> testSccID() const = 0;
-
-    virtual core::Loc fullLoc() const = 0;
-    virtual core::Loc declLoc() const = 0;
-    virtual bool exists() const final;
-    std::string show(const core::GlobalState &gs) const;
-
-    virtual std::optional<ImportType> importsPackage(MangledName mangledName) const = 0;
-
-    virtual bool causesLayeringViolation(const core::packages::PackageDB &packageDB,
-                                         const PackageInfo &otherPkg) const = 0;
-    virtual core::packages::StrictDependenciesLevel minimumStrictDependenciesLevel() const = 0;
-    virtual std::optional<std::string> pathTo(const core::GlobalState &gs,
-                                              const core::packages::MangledName dest) const = 0;
-
-    virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
-                                                                 ImportType importType) const = 0;
-    virtual std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
-                                                                 const core::SymbolRef name) const = 0;
-
-    bool operator==(const PackageInfo &rhs) const;
-
-    virtual ~PackageInfo() = 0;
-    PackageInfo() = default;
-    PackageInfo(PackageInfo &) = delete;
-    explicit PackageInfo(const PackageInfo &) = default;
-    PackageInfo &operator=(PackageInfo &&) = delete;
-    PackageInfo &operator=(const PackageInfo &) = delete;
-
-    virtual bool exportAll() const = 0;
-    virtual bool visibleToTests() const = 0;
-};
-
-class PackageInfoImpl final : public core::packages::PackageInfo {
-public:
     core::packages::MangledName mangledName() const {
         return mangledName_;
     }
