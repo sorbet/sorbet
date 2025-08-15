@@ -4,6 +4,7 @@
 #include "absl/types/span.h"
 
 #include "core/NameRef.h"
+#include "core/StrictLevel.h"
 #include "core/SymbolRef.h"
 #include "core/packages/MangledName.h"
 #include <optional>

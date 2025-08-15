@@ -1082,6 +1082,10 @@ public:
         return MethodRef::fromRaw(19);
     }
 
+    static MethodRef PackageSpec_sorbet() {
+        return MethodRef::fromRaw(20);
+    }
+
     static ClassOrModuleRef MagicBindToAttachedClass() {
         return ClassOrModuleRef::fromRaw(90);
     }
@@ -1107,11 +1111,11 @@ public:
     }
 
     static MethodRef T_Generic_squareBrackets() {
-        return MethodRef::fromRaw(20);
+        return MethodRef::fromRaw(21);
     }
 
     static MethodRef Kernel_lambda() {
-        return MethodRef::fromRaw(21);
+        return MethodRef::fromRaw(22);
     }
 
     static TypeArgumentRef Kernel_lambda_returnType() {
@@ -1119,11 +1123,11 @@ public:
     }
 
     static MethodRef Kernel_lambdaTLet() {
-        return MethodRef::fromRaw(22);
+        return MethodRef::fromRaw(23);
     }
 
     static MethodRef Kernel_proc() {
-        return MethodRef::fromRaw(23);
+        return MethodRef::fromRaw(24);
     }
 
     static TypeArgumentRef Kernel_proc_returnType() {
@@ -1135,11 +1139,11 @@ public:
     }
 
     static MethodRef Module_syntheticSquareBrackets() {
-        return MethodRef::fromRaw(56);
+        return MethodRef::fromRaw(57);
     }
 
     static MethodRef Sorbet_Private_Static_typeMember() {
-        return MethodRef::fromRaw(57);
+        return MethodRef::fromRaw(58);
     }
 
     static FieldRef Magic_UntypedSource_super() {
