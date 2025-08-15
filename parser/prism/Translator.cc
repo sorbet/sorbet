@@ -731,7 +731,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_IMPLICIT_REST_NODE: { // An implicit splat, like the `,` in `a, = 1, 2, 3`
             auto restLoc = core::LocOffsets{location.beginLoc + 1, location.beginLoc + 1};
-            return make_unique<parser::Restarg>(restLoc, core::Names::restargs(), restLoc);
+            core::NameRef sorbetName = core::Names::restargs();
+            auto expr = MK::RestArg(restLoc, MK::Local(restLoc, sorbetName));
+
+            return make_node_with_expr<parser::Restarg>(move(expr), restLoc, sorbetName, restLoc);
         }
         case PM_INDEX_AND_WRITE_NODE: { // And-assignment to an index, e.g. `a[i] &&= false`
             return translateOpAssignment<pm_index_and_write_node, parser::AndAsgn, void>(node);
@@ -1178,8 +1181,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_REQUIRED_PARAMETER_NODE: { // A required positional parameter, like `def foo(a)`
             auto requiredParamNode = down_cast<pm_required_parameter_node>(node);
             auto name = translateConstantName(requiredParamNode->name);
+            auto expr = MK::Local(location, name);
 
-            return make_unique<parser::Arg>(location, name);
+            return make_node_with_expr<parser::Arg>(move(expr), location, name);
         }
         case PM_RESCUE_MODIFIER_NODE: {
             auto rescueModifierNode = down_cast<pm_rescue_modifier_node>(node);
@@ -1208,7 +1212,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 nameLoc = location;
             }
 
-            return make_unique<parser::Restarg>(location, sorbetName, nameLoc);
+            auto expr = MK::RestArg(location, MK::Local(nameLoc, sorbetName));
+            return make_node_with_expr<parser::Restarg>(move(expr), location, sorbetName, nameLoc);
         }
         case PM_RETURN_NODE: { // A `return` statement, like `return 1, 2, 3`
             auto returnNode = down_cast<pm_return_node>(node);
