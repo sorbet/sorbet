@@ -43,16 +43,16 @@ enum class StrictDependenciesLevel {
 std::string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level);
 
 struct FullyQualifiedName {
-    vector<core::NameRef> parts;
+    std::vector<core::NameRef> parts;
 
     FullyQualifiedName() = default;
-    FullyQualifiedName(vector<core::NameRef> parts) : parts(parts) {}
+    FullyQualifiedName(std::vector<core::NameRef> parts) : parts(parts) {}
     explicit FullyQualifiedName(const FullyQualifiedName &) = default;
     FullyQualifiedName(FullyQualifiedName &&) = default;
     FullyQualifiedName &operator=(const FullyQualifiedName &) = delete;
     FullyQualifiedName &operator=(FullyQualifiedName &&) = default;
 
-    string show(const core::GlobalState &gs) const {
+    std::string show(const core::GlobalState &gs) const {
         return absl::StrJoin(parts, "::", core::packages::NameFormatter(gs));
     }
 };
@@ -74,9 +74,9 @@ struct Export {
     FullyQualifiedName fqn;
     core::LocOffsets loc;
 
-    explicit Export(FullyQualifiedName &&fqn, core::LocOffsets loc) : fqn(move(fqn)), loc(loc) {}
+    explicit Export(FullyQualifiedName &&fqn, core::LocOffsets loc) : fqn(std::move(fqn)), loc(loc) {}
 
-    const vector<core::NameRef> &parts() const {
+    const std::vector<core::NameRef> &parts() const {
         return fqn.parts;
     }
 
@@ -100,7 +100,7 @@ public:
         return mangledName_;
     }
 
-    absl::Span<const string> pathPrefixes() const {
+    absl::Span<const std::string> pathPrefixes() const {
         return absl::MakeSpan(packagePathPrefixes);
     }
 
@@ -127,12 +127,12 @@ public:
     // loc for the package definition. Single line (just the class def). Used for error messages.
     core::Loc declLoc_;
     // The possible path prefixes associated with files in the package, including path separator at end.
-    vector<string> packagePathPrefixes = {};
+    std::vector<std::string> packagePathPrefixes = {};
     // The names of each package imported by this package.
-    vector<core::packages::Import> importedPackageNames = {};
+    std::vector<Import> importedPackageNames = {};
     // List of exported items that form the body of this package's public API.
     // These are copied into every package that imports this package.
-    vector<Export> exports_ = {};
+    std::vector<Export> exports_ = {};
 
     // Whether this package should just export everything
     bool exportAll_ = false;
@@ -145,47 +145,48 @@ public:
     // but also any package name underneath it. `Normal` means the package can be imported
     // by the referenced package name but not any child packages (unless they have a separate
     // `visible_to` line of their own.)
-    vector<core::packages::VisibleTo> visibleTo_ = {};
+    std::vector<core::packages::VisibleTo> visibleTo_ = {};
 
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
 
-    optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_ = nullopt;
-    optional<pair<core::NameRef, core::LocOffsets>> layer_ = nullopt;
-    vector<core::LocOffsets> extraDirectives_ = {};
+    std::optional<std::pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_;
+    std::optional<std::pair<core::NameRef, core::LocOffsets>> layer_;
+    std::vector<core::LocOffsets> extraDirectives_;
     std::optional<
         std::pair<std::pair<core::StrictLevel, core::LocOffsets>, std::pair<core::StrictLevel, core::LocOffsets>>>
-        min_typed_level_ = nullopt;
+        min_typed_level_;
 
-    optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
+    std::optional<std::pair<core::packages::StrictDependenciesLevel, core::LocOffsets>>
+    strictDependenciesLevel() const {
         return strictDependenciesLevel_;
     }
 
-    optional<pair<core::NameRef, core::LocOffsets>> layer() const {
+    std::optional<std::pair<core::NameRef, core::LocOffsets>> layer() const {
         return layer_;
     }
 
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
-    optional<int> sccID_ = nullopt;
+    std::optional<int> sccID_;
 
     // The id of the SCC that this package's normal imports belong to.
     //
     // WARNING: Modifying the contents of the package DB after this operation will cause this id to go out of
     // date.
-    optional<int> sccID() const {
+    std::optional<int> sccID() const {
         return sccID_;
     }
 
     // ID of the strongly-connected component that this package's tests are in, according to its graph of import
     // dependencies
-    optional<int> testSccID_ = nullopt;
+    std::optional<int> testSccID_;
 
     // The ID of the SCC that this package's tests belong to. This ID is only useful in the context of the package graph
     // condensation graph.
     //
     // WARNING: Modifying the contents of the package DB after this operation will cause this id to go out of
     // date.
-    optional<int> testSccID() const {
+    std::optional<int> testSccID() const {
         return testSccID_;
     }
 
@@ -199,7 +200,7 @@ public:
         return gs.packageDB().getPackageInfo(pkg);
     }
 
-    unique_ptr<PackageInfo> deepCopy() const {
+    std::unique_ptr<PackageInfo> deepCopy() const {
         return make_unique<PackageInfo>(*this);
     }
 
@@ -329,8 +330,8 @@ public:
 
     // autocorrects
 
-    optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &info,
-                                                    core::packages::ImportType importType) const {
+    std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &info,
+                                                         core::packages::ImportType importType) const {
         auto insertionLoc = core::Loc::none(loc.file());
         optional<core::AutocorrectSuggestion::Edit> deleteTestImportEdit = nullopt;
         if (!importedPackageNames.empty()) {
@@ -456,8 +457,8 @@ public:
         return {suggestion};
     }
 
-    optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
-                                                    const core::SymbolRef newExport) const {
+    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
+                                                         const core::SymbolRef newExport) const {
         auto pkgFile = loc.file();
         auto insertionLoc = core::Loc::none(pkgFile);
         if (!exports_.empty()) {
@@ -501,11 +502,11 @@ public:
         return {suggestion};
     }
 
-    vector<core::packages::VisibleTo> visibleTo() const {
+    std::vector<core::packages::VisibleTo> visibleTo() const {
         return visibleTo_;
     }
 
-    optional<core::packages::ImportType> importsPackage(core::packages::MangledName mangledName) const {
+    std::optional<core::packages::ImportType> importsPackage(core::packages::MangledName mangledName) const {
         if (!mangledName.exists()) {
             return nullopt;
         }
@@ -557,7 +558,7 @@ public:
         }
     }
 
-    string renderPath(const core::GlobalState &gs, const vector<core::packages::MangledName> &path) const {
+    std::string renderPath(const core::GlobalState &gs, const std::vector<core::packages::MangledName> &path) const {
         // TODO(neil): if the cycle has a large number of nodes (10?), show partial path (first 5, ... (n omitted), last
         // 5) to prevent error being too long
         // Note: This function iterates through path in reverse order because pathTo generates it in that order, so
@@ -573,7 +574,7 @@ public:
 
     // Returns a string representing the path to the given package from this package, if it exists. Note: this only
     // looks at non-test imports.
-    optional<string> pathTo(const core::GlobalState &gs, const core::packages::MangledName dest) const {
+    std::optional<std::string> pathTo(const core::GlobalState &gs, const core::packages::MangledName dest) const {
         // Note: This implements BFS.
         auto src = mangledName();
         queue<core::packages::MangledName> toVisit;
