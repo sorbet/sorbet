@@ -693,7 +693,8 @@ FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::Unresolve
     return fqn;
 }
 
-core::packages::MangledName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
+// TODO(jez) Might be nice to eagerly resolve these UnresolvedConstantLit to ConstantLit so resolver doesn't have to.
+core::packages::MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     ENFORCE(constantLit != nullptr);
 
     auto fullName = getFullyQualifiedName(ctx, constantLit);
@@ -1163,8 +1164,8 @@ struct PackageSpecBodyWalk {
                     auto importArg = move(posArg);
                     posArg = ast::packager::prependRegistry(move(importArg));
 
-                    info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target).mangledName,
-                                                           method2ImportType(send), send.loc);
+                    info.importedPackageNames.emplace_back(resolvePackageName(ctx, target), method2ImportType(send),
+                                                           send.loc);
                 }
                 // also validate the keyword args, since one is valid
                 for (auto [key, value] : send.kwArgPairs()) {
@@ -1215,7 +1216,7 @@ struct PackageSpecBodyWalk {
                         auto &posArg = send.getPosArg(0);
                         auto importArg = move(target->recv);
                         posArg = ast::packager::prependRegistry(move(importArg));
-                        info.visibleTo_.emplace_back(getUnresolvedPackageName(ctx, recv),
+                        info.visibleTo_.emplace_back(resolvePackageName(ctx, recv),
                                                      core::packages::VisibleToType::Wildcard);
                     } else {
                         if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
@@ -1229,7 +1230,7 @@ struct PackageSpecBodyWalk {
                     auto importArg = move(posArg);
                     posArg = ast::packager::prependRegistry(move(importArg));
 
-                    info.visibleTo_.emplace_back(getUnresolvedPackageName(ctx, target),
+                    info.visibleTo_.emplace_back(resolvePackageName(ctx, target),
                                                  core::packages::VisibleToType::Normal);
                 }
             }
