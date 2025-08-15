@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SORBET_PACKAGER_COMPUTE_PACKAGE_SCCS_H
+#define SORBET_PACKAGER_COMPUTE_PACKAGE_SCCS_H
 
 #include "common/common.h"
 #include "core/GlobalState.h"
@@ -185,3 +186,5 @@ public:
 };
 
 } // namespace sorbet::packager
+
+#endif
