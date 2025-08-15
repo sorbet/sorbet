@@ -1151,7 +1151,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto value = sliceLocation(rationalNode->base.location);
             value = value.substr(0, value.size() - 1);
 
-            return make_unique<parser::Rational>(location, value);
+            auto kernel = MK::Constant(location, core::Symbols::Kernel());
+            core::NameRef rationalName = core::Names::Constants::Rational().dataCnst(ctx)->original;
+            core::NameRef valueName = ctx.state.enterNameUTF8(value);
+
+            // Desugar to `123r` to `::Kernel.Rational("123")`
+            auto send = MK::Send1(location, move(kernel), rationalName, location.copyWithZeroLength(),
+                                  MK::String(location, valueName));
+
+            return make_node_with_expr<parser::Rational>(move(send), location, value);
         }
         case PM_REDO_NODE: { // The `redo` keyword
             return make_unsupported_node<parser::Redo>(location);
