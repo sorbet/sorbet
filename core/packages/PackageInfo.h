@@ -28,19 +28,6 @@ enum class ImportType {
     TestUnit,
 };
 
-struct Import {
-    MangledName name;
-    ImportType type;
-    core::LocOffsets loc;
-
-    Import(core::packages::MangledName &&name, core::packages::ImportType type, core::LocOffsets loc)
-        : name(std::move(name)), type(type), loc(loc) {}
-
-    bool isTestImport() const {
-        return type != core::packages::ImportType::Normal;
-    }
-};
-
 enum class VisibleToType {
     Normal,
     Wildcard,
@@ -54,6 +41,19 @@ enum class StrictDependenciesLevel {
 };
 
 std::string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level);
+
+struct Import {
+    MangledName mangledName;
+    ImportType type;
+    core::LocOffsets loc;
+
+    Import(MangledName mangledName, ImportType type, core::LocOffsets loc)
+        : mangledName(mangledName), type(type), loc(loc) {}
+
+    bool isTestImport() const {
+        return type != ImportType::Normal;
+    }
+};
 
 // TODO(jez) Why is this struct different from the `struct VisibleTo` defined in packager.cc?
 struct VisibleTo {
