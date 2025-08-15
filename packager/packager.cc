@@ -19,13 +19,13 @@
 using namespace std;
 
 namespace sorbet::packager {
+using namespace core::packages;
 namespace {
 
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 
-bool visibilityApplies(const core::GlobalState &gs, const core::packages::VisibleTo &vt,
-                       core::packages::MangledName name) {
-    if (vt.type == core::packages::VisibleToType::Wildcard) {
+bool visibilityApplies(const core::GlobalState &gs, const VisibleTo &vt, MangledName name) {
+    if (vt.type == VisibleToType::Wildcard) {
         // a wildcard will match if it's a proper prefix of the package name
         auto curPkg = name.owner;
         auto prefix = vt.mangledName.owner;
@@ -103,7 +103,7 @@ bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfo &pkg) {
     return pkg.loc.file().data(gs).isPackagedTest();
 }
 
-vector<core::NameRef> fullyQualifiedNameFromMangledName(const core::GlobalState &gs, core::packages::MangledName pkg) {
+vector<core::NameRef> fullyQualifiedNameFromMangledName(const core::GlobalState &gs, MangledName pkg) {
     auto klass = pkg.owner;
     vector<core::NameRef> fqn;
     while (klass != core::Symbols::PackageSpecRegistry()) {
@@ -141,7 +141,7 @@ FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::Unresolve
 }
 
 // TODO(jez) Might be nice to eagerly resolve these UnresolvedConstantLit to ConstantLit so resolver doesn't have to.
-core::packages::MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
+MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     ENFORCE(constantLit != nullptr);
 
     auto fullName = getFullyQualifiedName(ctx, constantLit);
@@ -167,7 +167,7 @@ core::packages::MangledName resolvePackageName(core::Context ctx, const ast::Unr
         owner = core::Symbols::noClassOrModule();
     }
 
-    return core::packages::MangledName(owner);
+    return MangledName(owner);
 }
 
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
@@ -216,7 +216,7 @@ bool isRootScopedDefinition(const ast::ConstantLit *lit) {
 
 struct PackageForSymbolResult {
     // The closest package for `sym`
-    core::packages::MangledName bestPkg;
+    MangledName bestPkg;
 
     // The closest owner symbol inside `<PackageSpecRegistry>`. Might not actually correspond to a
     // package if it's just a namespace, e.g. `<PSR>::Pkg1::NS` for `::Pkg1::Inner::NS::A`
@@ -226,8 +226,7 @@ struct PackageForSymbolResult {
     bool couldBePrefix;
 };
 
-bool ownsPackage(const core::GlobalState &gs, const core::ClassOrModuleRef ownerForScope,
-                 core::packages::MangledName pkg) {
+bool ownsPackage(const core::GlobalState &gs, const core::ClassOrModuleRef ownerForScope, MangledName pkg) {
     auto owner = pkg.owner;
     while (owner != core::Symbols::root()) {
         if (owner == ownerForScope) {
@@ -289,8 +288,7 @@ class EnforcePackagePrefix final {
 public:
     EnforcePackagePrefix(core::Context ctx, const PackageInfo &pkg)
         : pkg(pkg), mustUseTestNamespace(ctx.file.data(ctx).isPackagedTest() && !isTestOnlyPackage(ctx, pkg)),
-          maybeTestNamespace(
-              core::Symbols::root().data(ctx)->findMember(ctx, core::packages::PackageDB::TEST_NAMESPACE)) {
+          maybeTestNamespace(core::Symbols::root().data(ctx)->findMember(ctx, PackageDB::TEST_NAMESPACE)) {
         ENFORCE(pkg.exists());
     }
 
@@ -477,7 +475,7 @@ private:
         scope.pop_back();
     }
 
-    core::packages::MangledName packageForNamespace(const core::GlobalState &gs) const {
+    MangledName packageForNamespace(const core::GlobalState &gs) const {
         const auto &[scopeSym, _scopeLoc] = scope.back();
         return scopeSym.enclosingClass(gs).data(gs)->package;
     }
@@ -526,7 +524,7 @@ private:
     const string requiredNamespace(const core::GlobalState &gs) const {
         auto result = pkg.mangledName_.owner.show(gs);
         if (mustUseTestNamespace) {
-            result = fmt::format("{}::{}", core::packages::PackageDB::TEST_NAMESPACE.show(gs), result);
+            result = fmt::format("{}::{}", PackageDB::TEST_NAMESPACE.show(gs), result);
         }
         return result;
     }
@@ -663,8 +661,7 @@ struct PackageSpecBodyWalk {
                         auto &posArg = send.getPosArg(0);
                         auto importArg = move(target->recv);
                         posArg = ast::packager::prependRegistry(move(importArg));
-                        info.visibleTo_.emplace_back(resolvePackageName(ctx, recv),
-                                                     core::packages::VisibleToType::Wildcard);
+                        info.visibleTo_.emplace_back(resolvePackageName(ctx, recv), VisibleToType::Wildcard);
                     } else {
                         if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
                             e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
@@ -677,8 +674,7 @@ struct PackageSpecBodyWalk {
                     auto importArg = move(posArg);
                     posArg = ast::packager::prependRegistry(move(importArg));
 
-                    info.visibleTo_.emplace_back(resolvePackageName(ctx, target),
-                                                 core::packages::VisibleToType::Normal);
+                    info.visibleTo_.emplace_back(resolvePackageName(ctx, target), VisibleToType::Normal);
                 }
             }
         } else if (send.fun == core::Names::strictDependencies()) {
@@ -876,17 +872,17 @@ struct PackageSpecBodyWalk {
         }
     }
 
-    core::packages::ImportType method2ImportType(const ast::Send &send) const {
+    ImportType method2ImportType(const ast::Send &send) const {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
-                return core::packages::ImportType::Normal;
+                return ImportType::Normal;
             case core::Names::testImport().rawId():
                 // we'll validate elsewhere that the only valid keyword args to appear here are `only: :test_rb`,
                 // which means if there are keyword args _at all_, they must indicate a test unit import
                 if (send.numKwArgs() > 0) {
-                    return core::packages::ImportType::TestUnit;
+                    return ImportType::TestUnit;
                 } else {
-                    return core::packages::ImportType::TestHelper;
+                    return ImportType::TestHelper;
                 }
             default:
                 ENFORCE(false);
@@ -921,7 +917,7 @@ struct PackageSpecBodyWalk {
     }
 
 private:
-    optional<core::packages::StrictDependenciesLevel> parseStrictDependenciesOption(ast::ExpressionPtr &arg) {
+    optional<StrictDependenciesLevel> parseStrictDependenciesOption(ast::ExpressionPtr &arg) {
         auto lit = ast::cast_tree<ast::Literal>(arg);
         if (!lit || !lit->isString()) {
             return nullopt;
@@ -929,13 +925,13 @@ private:
         auto value = lit->asString();
 
         if (value == core::Names::false_()) {
-            return core::packages::StrictDependenciesLevel::False;
+            return StrictDependenciesLevel::False;
         } else if (value == core::Names::layered()) {
-            return core::packages::StrictDependenciesLevel::Layered;
+            return StrictDependenciesLevel::Layered;
         } else if (value == core::Names::layeredDag()) {
-            return core::packages::StrictDependenciesLevel::LayeredDag;
+            return StrictDependenciesLevel::LayeredDag;
         } else if (value == core::Names::dag()) {
-            return core::packages::StrictDependenciesLevel::Dag;
+            return StrictDependenciesLevel::Dag;
         }
 
         return nullopt;
@@ -997,8 +993,8 @@ unique_ptr<PackageInfo> definePackage(const core::GlobalState &gs, ast::ParsedFi
         auto nameTree = ast::cast_tree<ast::ConstantLit>(packageSpecClass->name);
         ENFORCE(nameTree != nullptr, "Invariant from rewriter");
 
-        return make_unique<PackageInfo>(core::packages::MangledName(packageSpecClass->symbol),
-                                        ctx.locAt(packageSpecClass->loc), ctx.locAt(packageSpecClass->declLoc));
+        return make_unique<PackageInfo>(MangledName(packageSpecClass->symbol), ctx.locAt(packageSpecClass->loc),
+                                        ctx.locAt(packageSpecClass->declLoc));
     }
 
     return nullptr;
@@ -1037,8 +1033,8 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
     info.packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
     auto fullName = fullyQualifiedNameFromMangledName(gs, info.mangledName_);
-    const auto shortName = absl::StrJoin(fullName, "_", core::packages::NameFormatter(gs));
-    const auto slashDirName = absl::StrJoin(fullName, "/", core::packages::NameFormatter(gs)) + "/";
+    const auto shortName = absl::StrJoin(fullName, "_", NameFormatter(gs));
+    const auto slashDirName = absl::StrJoin(fullName, "/", NameFormatter(gs)) + "/";
     const string_view dirNameFromShortName = shortName;
 
     for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
@@ -1095,7 +1091,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
         return;
     }
 
-    if (thisPkg.strictDependenciesLevel().value().first == core::packages::StrictDependenciesLevel::False) {
+    if (thisPkg.strictDependenciesLevel().value().first == StrictDependenciesLevel::False) {
         return;
     }
 
@@ -1115,12 +1111,12 @@ void validateLayering(const core::Context &ctx, const Import &i) {
         }
     }
 
-    core::packages::StrictDependenciesLevel otherPkgExpectedLevel = thisPkg.minimumStrictDependenciesLevel();
+    StrictDependenciesLevel otherPkgExpectedLevel = thisPkg.minimumStrictDependenciesLevel();
 
     if (otherPkg.strictDependenciesLevel().value().first < otherPkgExpectedLevel) {
         if (auto e = ctx.beginError(i.loc, core::errors::Packager::StrictDependenciesViolation)) {
             e.setHeader("Strict dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
-                        "import", core::packages::strictDependenciesLevelToString(otherPkgExpectedLevel));
+                        "import", strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel().value().second),
                            "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
             // TODO(neil): if the import is unused (ie. there are no references in this package to the imported
@@ -1130,12 +1126,12 @@ void validateLayering(const core::Context &ctx, const Import &i) {
         }
     }
 
-    if (thisPkg.strictDependenciesLevel().value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
+    if (thisPkg.strictDependenciesLevel().value().first >= StrictDependenciesLevel::LayeredDag) {
         if (thisPkg.sccID() == otherPkg.sccID()) {
             if (auto e = ctx.beginError(i.loc, core::errors::Packager::StrictDependenciesViolation)) {
-                auto level = fmt::format(
-                    "strict_dependencies '{}'",
-                    core::packages::strictDependenciesLevelToString(thisPkg.strictDependenciesLevel().value().first));
+                auto level =
+                    fmt::format("strict_dependencies '{}'",
+                                strictDependenciesLevelToString(thisPkg.strictDependenciesLevel().value().first));
                 e.setHeader("Strict dependencies violation: importing `{}` will put `{}` into a cycle, which is not "
                             "valid at `{}`",
                             otherPkg.show(ctx), thisPkg.show(ctx), level);
@@ -1222,11 +1218,11 @@ void validatePackage(core::Context ctx) {
             if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoSelfImport)) {
                 string import_;
                 switch (i.type) {
-                    case core::packages::ImportType::Normal:
+                    case ImportType::Normal:
                         import_ = "import";
                         break;
-                    case core::packages::ImportType::TestUnit:
-                    case core::packages::ImportType::TestHelper:
+                    case ImportType::TestUnit:
+                    case ImportType::TestHelper:
                         import_ = "test_import";
                         break;
                 }
@@ -1280,7 +1276,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
     // Find packages and determine their imports/exports.
     {
         core::UnfreezeNameTable unfreeze(gs);
-        core::packages::UnfreezePackages packages = gs.unfreezePackages();
+        UnfreezePackages packages = gs.unfreezePackages();
         for (auto &file : files) {
             if (!file.file.data(gs).isPackage(gs)) {
                 continue;
@@ -1335,7 +1331,7 @@ namespace {
 
 template <typename Elem, typename Proj>
 void setPackageNameOnFilesImpl(core::GlobalState &gs, absl::Span<const Elem> files, Proj &&proj) {
-    vector<pair<core::FileRef, core::packages::MangledName>> mapping;
+    vector<pair<core::FileRef, MangledName>> mapping;
     mapping.reserve(files.size());
 
     {
@@ -1384,17 +1380,17 @@ enum class PackagerMode {
 };
 
 class PackageDBPackageGraph {
-    core::packages::PackageDB &packageDB;
+    PackageDB &packageDB;
 
 public:
-    PackageDBPackageGraph(core::packages::PackageDB &packageDB) : packageDB(packageDB) {}
+    PackageDBPackageGraph(PackageDB &packageDB) : packageDB(packageDB) {}
 
-    const absl::Span<const core::packages::Import> getImports(core::packages::MangledName packageName) const {
+    const absl::Span<const Import> getImports(MangledName packageName) const {
         ENFORCE(packageDB.getPackageInfo(packageName).exists());
         return packageDB.getPackageInfo(packageName).importedPackageNames;
     }
 
-    void setSCCId(core::packages::MangledName packageName, int sccID) {
+    void setSCCId(MangledName packageName, int sccID) {
         auto *pkgInfoPtr = packageDB.getPackageInfoNonConst(packageName);
         if (!pkgInfoPtr) {
             return;
@@ -1402,13 +1398,13 @@ public:
         pkgInfoPtr->sccID_ = sccID;
     }
 
-    int getSCCId(core::packages::MangledName packageName) const {
+    int getSCCId(MangledName packageName) const {
         ENFORCE(packageDB.getPackageInfo(packageName).exists());
         ENFORCE(packageDB.getPackageInfo(packageName).sccID().has_value());
         return packageDB.getPackageInfo(packageName).sccID().value();
     }
 
-    void setTestSCCId(core::packages::MangledName packageName, int sccID) {
+    void setTestSCCId(MangledName packageName, int sccID) {
         auto *pkgInfoPtr = packageDB.getPackageInfoNonConst(packageName);
         if (!pkgInfoPtr) {
             return;
