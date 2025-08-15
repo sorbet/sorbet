@@ -156,7 +156,7 @@ int PackageInfo::orderByStrictness(const PackageDB &packageDB, const PackageInfo
     }
 }
 
-int orderByAlphabetical(const core::GlobalState &gs, const PackageInfo &a, const PackageInfo &b) const {
+int PackageInfo::orderByAlphabetical(const core::GlobalState &gs, const PackageInfo &a, const PackageInfo &b) const {
     auto aStrName = a.show(gs);
     auto bStrName = b.show(gs);
     if (aStrName == bStrName) {
