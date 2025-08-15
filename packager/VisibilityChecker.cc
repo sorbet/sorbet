@@ -62,40 +62,6 @@ class PropagateVisibility final {
         }
     }
 
-    // Lookup the package name on the given root symbol, and mark the final symbol as exported.
-    void exportRoot(core::GlobalState &gs, core::ClassOrModuleRef sym) {
-        // For a package named `A::B`, the ClassDef that we see in this pass is for a symbol named
-        // `<PackageSpecRegistry>::A::B`. In order to make the name `A::B` visible to packages that have imported
-        // `A::B`, we explicitly lookup and export them here. This is a design decision inherited from the previous
-        // packages implementation, and we could remove it after migrating Stripe's codebase to not depend on package
-        // names being exported by default.
-        //
-        // TODO(jez) This method becomes trivial if we can get packages' tests back into `A::B::Test`
-        for (auto name : this->package.fullName()) {
-            auto next = sym.data(gs)->findMember(gs, name);
-            if (!next.exists() || !next.isClassOrModule()) {
-                sym = core::Symbols::noClassOrModule();
-                return;
-            }
-
-            sym = next.asClassOrModuleRef();
-        }
-
-        sym.data(gs)->flags.isExported = true;
-    }
-
-    // Mark both `::A::B` and `::Test::A::B` as exported (given package `A::B`).
-    // This will terminate the recursive exporting in `exportParentNamespace`, as it stops when it
-    // hits either the root or an exported symbol.
-    void exportPackageRoots(core::GlobalState &gs) {
-        this->exportRoot(gs, core::Symbols::root());
-
-        auto test = core::Symbols::root().data(gs)->findMember(gs, core::Names::Constants::Test());
-        if (test.exists() && test.isClassOrModule()) {
-            this->exportRoot(gs, test.asClassOrModuleRef());
-        }
-    }
-
     bool ignoreRBIExportEnforcement(core::MutableContext &ctx, core::FileRef file) {
         const auto path = file.data(ctx).path();
 
@@ -237,8 +203,6 @@ public:
 
         PropagateVisibility pass{package};
 
-        pass.exportPackageRoots(gs);
-
         core::MutableContext ctx{gs, core::Symbols::root(), f.file};
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
 
@@ -288,7 +252,7 @@ class VisibilityCheckerPass final {
         }
     }
 
-    void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol) {
+    void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol, bool definesBehavior) {
         auto definedHereLoc = litSymbol.loc(ctx);
         if (definedHereLoc.file().data(ctx).isRBI()) {
             e.addErrorSection(
@@ -296,8 +260,13 @@ class VisibilityCheckerPass final {
                                                              "declare unpackaged constants",
                                                              "# packaged: false"),
                                    {core::ErrorLine(definedHereLoc, "")}));
-        } else {
+        } else if (definesBehavior) {
             e.addErrorLine(definedHereLoc, "Defined here");
+        } else {
+            e.addErrorSection(core::ErrorSection(
+                core::ErrorColors::format("`{}` does not define behavior and thus will not be automatically exported",
+                                          litSymbol.show(ctx)),
+                {core::ErrorLine(definedHereLoc, "")}));
         }
     }
 
@@ -305,26 +274,22 @@ class VisibilityCheckerPass final {
                                     optional<core::AutocorrectSuggestion> &&importAutocorrect,
                                     optional<core::AutocorrectSuggestion> &&exportAutocorrect) {
         auto &db = ctx.state.packageDB();
+        auto hasAutocorrect = importAutocorrect.has_value() || exportAutocorrect.has_value();
+
         if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
             auto combinedTitle = fmt::format("{} and {}", importAutocorrect->title, exportAutocorrect->title);
             importAutocorrect->edits.insert(importAutocorrect->edits.end(),
                                             make_move_iterator(exportAutocorrect->edits.begin()),
                                             make_move_iterator(exportAutocorrect->edits.end()));
-            core::AutocorrectSuggestion combinedAutocorrect(combinedTitle, move(importAutocorrect->edits));
-            e.addAutocorrect(move(combinedAutocorrect));
-            if (!db.errorHint().empty()) {
-                e.addErrorNote("{}", db.errorHint());
-            }
+            e.addAutocorrect(core::AutocorrectSuggestion{combinedTitle, move(importAutocorrect->edits)});
         } else if (importAutocorrect.has_value()) {
             e.addAutocorrect(std::move(importAutocorrect.value()));
-            if (!db.errorHint().empty()) {
-                e.addErrorNote("{}", db.errorHint());
-            }
         } else if (exportAutocorrect.has_value()) {
             e.addAutocorrect(std::move(exportAutocorrect.value()));
-            if (!db.errorHint().empty()) {
-                e.addErrorNote("{}", db.errorHint());
-            }
+        }
+
+        if (hasAutocorrect && !db.errorHint().empty()) {
+            e.addErrorNote("{}", db.errorHint());
         }
     }
 
@@ -403,6 +368,8 @@ public:
             isExported = litSymbol.asFieldRef().data(ctx)->flags.isExported;
         }
         isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
+        bool definesBehavior =
+            !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
         auto currentImportType = this->package.importsPackage(otherPackage);
         auto wasImported = currentImportType.has_value();
 
@@ -459,8 +426,16 @@ public:
                     if (enumClass.exists()) {
                         symToExport = enumClass;
                     }
-                    if (auto exp = pkg.addExport(ctx, symToExport)) {
-                        exportAutocorrect.emplace(exp.value());
+                    if (definesBehavior) {
+                        // For compatibility with gen-packages, we do _not_ add an export if it doesn't define
+                        // behavior. This is mostly because it's easier to get Sorbet to behave like gen-packages
+                        // than the other way around.
+                        //
+                        // If we move to a world where all __package.rb edits are done via Sorbet autocorrects,
+                        // we could make this addExport call unconditional.
+                        if (auto exp = pkg.addExport(ctx, symToExport)) {
+                            exportAutocorrect.emplace(exp.value());
+                        }
                     }
                 }
 
@@ -468,7 +443,7 @@ public:
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                         e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is not imported",
                                     litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx));
-                        addExportInfo(ctx, e, litSymbol);
+                        addExportInfo(ctx, e, litSymbol, definesBehavior);
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                         addPackagedFalseNote(ctx, e);
                     }
@@ -476,7 +451,7 @@ public:
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                         e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed",
                                     litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import");
-                        addExportInfo(ctx, e, litSymbol);
+                        addExportInfo(ctx, e, litSymbol, definesBehavior);
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
                 } else if (!isExported && testUnitImportInHelper) {
@@ -486,13 +461,13 @@ public:
                         e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
                                        "only be used in `{}` files.",
                                        "test_import", "only: 'test_rb'", ".test.rb");
-                        addExportInfo(ctx, e, litSymbol);
+                        addExportInfo(ctx, e, litSymbol, definesBehavior);
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
                 } else if (!isExported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
                         e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
-                        addExportInfo(ctx, e, litSymbol);
+                        addExportInfo(ctx, e, litSymbol, definesBehavior);
 
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
