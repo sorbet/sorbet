@@ -35,7 +35,7 @@ bool hasExpr(const parser::NodeVec &nodes) {
 
 // Allocates a new `NodeWithExpr` with a pre-computed `ExpressionPtr` AST.
 template <typename SorbetNode, typename... TArgs>
-unique_ptr<parser::Node> Translator::make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) {
+unique_ptr<parser::Node> Translator::make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) const {
     auto whiteQuarkNode = make_unique<SorbetNode>(std::forward<TArgs>(args)...);
     if (directlyDesugar) {
         return make_unique<NodeWithExpr>(move(whiteQuarkNode), move(desugaredExpr));
@@ -46,7 +46,7 @@ unique_ptr<parser::Node> Translator::make_node_with_expr(ast::ExpressionPtr desu
 
 // Like `make_node_with_expr`, but specifically for unsupported nodes.
 template <typename SorbetNode, typename... TArgs>
-std::unique_ptr<parser::Node> Translator::make_unsupported_node(TArgs &&...args) {
+std::unique_ptr<parser::Node> Translator::make_unsupported_node(TArgs &&...args) const {
     auto whiteQuarkNode = make_unique<SorbetNode>(std::forward<TArgs>(args)...);
     if (directlyDesugar) {
         if (auto e = ctx.beginIndexerError(whiteQuarkNode->loc, core::errors::Desugar::UnsupportedNode)) {
@@ -280,8 +280,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 // A named block parameter, like `def foo(&block)`
                 sorbetName = translateConstantName(prismName);
             } else { // An anonymous block parameter, like `def foo(&)`
-                sorbetName =
-                    ctx.state.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), nextUniqueID());
+                sorbetName = nextUniqueParserName(core::Names::ampersand());
             }
 
             auto blockLoc = core::LocOffsets{location.beginPos() + 1, location.endPos()};
@@ -300,7 +299,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // parameters. So we need to extract the args vector from the Args node, and insert the locals at the end of
             // it.
             auto sorbetArgsNode = translate(up_cast(paramsNode->parameters));
-            auto argsNode = parser::cast_node<parser::Args>(sorbetArgsNode.get());
+            auto argsNode = parser::NodeWithExpr::cast_node<parser::Args>(sorbetArgsNode.get());
             auto sorbetShadowArgs = translateMulti(paramsNode->locals);
             // Sorbet's legacy parser inserts locals (Shadowargs) at the end of the the block's Args node
             argsNode->args.insert(argsNode->args.end(), make_move_iterator(sorbetShadowArgs.begin()),
@@ -564,11 +563,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 // If that's the case, we need to check if the body contains an ensure or rescue clause, and if so,
                 // we need to elevate that node to the top level of the method definition, without the Kwbegin node to
                 // match the behavior of Sorbet's legacy parser.
-                auto kwbeginNode = parser::cast_node<parser::Kwbegin>(body.get());
+                auto kwbeginNode = parser::NodeWithExpr::cast_node<parser::Kwbegin>(body.get());
 
                 if (kwbeginNode != nullptr && kwbeginNode->stmts[0] != nullptr &&
-                    (parser::cast_node<parser::Rescue>(kwbeginNode->stmts[0].get()) ||
-                     parser::cast_node<parser::Ensure>(kwbeginNode->stmts[0].get()))) {
+                    (parser::NodeWithExpr::cast_node<parser::Rescue>(kwbeginNode->stmts[0].get()) ||
+                     parser::NodeWithExpr::cast_node<parser::Ensure>(kwbeginNode->stmts[0].get()))) {
                     if (kwbeginNode->stmts.size() == 1) {
                         body = move(kwbeginNode->stmts[0]);
                     } else {
@@ -901,8 +900,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 // A named keyword rest parameter, like `def foo(**kwargs)`
                 sorbetName = translateConstantName(prismName);
             } else { // An anonymous keyword rest parameter, like `def foo(**)`
-                sorbetName =
-                    ctx.state.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), nextUniqueID());
+                sorbetName = nextUniqueParserName(core::Names::starStar());
             }
 
             auto kwrestLoc = core::LocOffsets{location.beginPos() + 2, location.endPos()};
@@ -1413,7 +1411,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
     }
 }
 
-core::LocOffsets Translator::translateLoc(pm_location_t loc) {
+core::LocOffsets Translator::translateLoc(pm_location_t loc) const {
     return parser.translateLocation(loc);
 }
 
@@ -1787,7 +1785,7 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
         body = translate(prismLambdaNode->body);
     }
 
-    if (parser::cast_node<parser::NumParams>(parametersNode.get())) {
+    if (parser::NodeWithExpr::cast_node<parser::NumParams>(parametersNode.get())) {
         return make_unique<parser::NumBlock>(sendNode->loc, move(sendNode), move(parametersNode), move(body));
     } else {
         return make_unique<parser::Block>(sendNode->loc, move(sendNode), move(parametersNode), move(body));
@@ -1944,6 +1942,20 @@ core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
     return ctx.state.enterNameUTF8(parser.resolveConstant(constant_id));
 }
 
+core::NameRef Translator::nextUniqueParserName(core::NameRef original) {
+    auto nextId = *parserUniqueCounter + 1;
+    *parserUniqueCounter = nextId;
+    return ctx.state.freshNameUnique(core::UniqueNameKind::Parser, original, nextId);
+}
+
+core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
+    ENFORCE(directlyDesugar, "This shouldn't be called if we're not directly desugaring.");
+
+    auto nextId = *desugarUniqueCounter + 1;
+    *desugarUniqueCounter = nextId;
+    return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, nextId);
+}
+
 // Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
 unique_ptr<parser::Regopt> Translator::translateRegexpOptions(pm_location_t closingLoc) {
     auto length = closingLoc.end - closingLoc.start;
@@ -1976,7 +1988,7 @@ unique_ptr<parser::Regexp> Translator::translateRegexp(pm_string_t unescaped, co
     return make_unique<parser::Regexp>(location, move(parts), move(options));
 }
 
-string_view Translator::sliceLocation(pm_location_t loc) {
+string_view Translator::sliceLocation(pm_location_t loc) const {
     return cast_prism_string(loc.start, loc.end - loc.start);
 }
 
@@ -2032,12 +2044,13 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
 }
 
 // Context management methods
-Translator Translator::enterMethodDef() {
+Translator Translator::enterMethodDef() const {
+    auto resetDesugarUniqueCounter = true;
     auto isInMethodDef = true;
-    return Translator(parser, ctx, parseErrors, directlyDesugar, isInMethodDef, uniqueCounter);
+    return Translator(*this, resetDesugarUniqueCounter, isInMethodDef);
 }
 
-void Translator::reportError(core::LocOffsets loc, const string &message) {
+void Translator::reportError(core::LocOffsets loc, const string &message) const {
     auto errorLoc = core::Loc(ctx.file, loc);
     if (auto e = ctx.state.beginError(errorLoc, core::errors::Parser::ParserError)) {
         e.setHeader("{}", message);
