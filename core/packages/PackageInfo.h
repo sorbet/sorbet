@@ -149,11 +149,6 @@ public:
     PackageInfo &operator=(PackageInfo &&) = delete;
     PackageInfo &operator=(const PackageInfo &) = delete;
 
-    struct MissingExportMatch {
-        core::SymbolRef symbol;
-        core::NameRef srcPkg;
-    };
-
     virtual bool exportAll() const = 0;
     virtual bool visibleToTests() const = 0;
 };
