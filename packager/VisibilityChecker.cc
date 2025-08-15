@@ -267,6 +267,8 @@ class VisibilityCheckerPass final {
                 core::ErrorColors::format("`{}` does not define behavior and thus will not be automatically exported",
                                           litSymbol.show(ctx)),
                 {core::ErrorLine(definedHereLoc, "")}));
+            e.addErrorNote("Either export it manually, or better, "
+                           "restructure the code so that package namespaces do not define behavior.");
         }
     }
 
