@@ -1,10 +1,6 @@
 #include "core/packages/PackageDB.h"
 #include "absl/strings/str_split.h"
-#include "absl/types/span.h"
-#include "common/sort/sort.h"
-#include "core/AutocorrectSuggestion.h"
 #include "core/GlobalState.h"
-#include "core/Loc.h"
 
 using namespace std;
 
