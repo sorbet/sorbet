@@ -362,7 +362,13 @@ public:
                 break;
             }
             case core::Names::packagePrivate().rawId():
-            case core::Names::packagePrivateClassMethod().rawId():
+            case core::Names::packagePrivateClassMethod().rawId(): {
+                if (!ctx.state.packageDB().enabled()) {
+                    // These are only special if running in the packager.
+                    break;
+                }
+                [[fallthrough]];
+            }
             case core::Names::private_().rawId():
             case core::Names::protected_().rawId():
             case core::Names::public_().rawId():
