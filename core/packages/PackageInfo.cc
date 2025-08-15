@@ -5,6 +5,8 @@
 #include "core/NameRef.h"
 #include "core/Symbols.h"
 
+#include <queue>
+
 using namespace std;
 
 namespace sorbet::core::packages {

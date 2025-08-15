@@ -15,7 +15,6 @@
 #include "packager/ComputePackageSCCs.h"
 #include <algorithm>
 #include <cctype>
-#include <queue>
 #include <sys/stat.h>
 
 using namespace std;
