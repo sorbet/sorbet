@@ -696,9 +696,10 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
     }
 
     shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex(
-        opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
-        opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-        opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint);
+        opts.cacheSensitiveOptions.stripePackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
+        opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
+        opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.packagerLayers,
+        opts.stripePackagesHint);
 
     workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore, cancelable]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
