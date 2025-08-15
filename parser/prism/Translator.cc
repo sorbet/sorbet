@@ -269,7 +269,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_BLOCK_LOCAL_VARIABLE_NODE: { // A named block local variable, like `baz` in `|bar; baz|`
             auto blockLocalNode = down_cast<pm_block_local_variable_node>(node);
             auto sorbetName = translateConstantName(blockLocalNode->name);
-            return make_unique<parser::Shadowarg>(location, sorbetName);
+            return make_node_with_expr<parser::Shadowarg>(MK::ShadowArg(location, MK::Local(location, sorbetName)),
+                                                          location, sorbetName);
         }
         case PM_BLOCK_PARAMETER_NODE: { // A block parameter declared at the top of a method, e.g. `def m(&block)`
             auto blockParamNode = down_cast<pm_block_parameter_node>(node);
@@ -285,7 +286,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto blockLoc = core::LocOffsets{location.beginPos() + 1, location.endPos()};
 
-            return make_unique<parser::Blockarg>(blockLoc, sorbetName);
+            return make_node_with_expr<parser::Blockarg>(MK::BlockArg(blockLoc, MK::Local(blockLoc, sorbetName)),
+                                                         blockLoc, sorbetName);
         }
         case PM_BLOCK_PARAMETERS_NODE: { // The parameters declared at the top of a PM_BLOCK_NODE
             auto paramsNode = down_cast<pm_block_parameters_node>(node);
@@ -904,7 +906,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             auto kwrestLoc = core::LocOffsets{location.beginPos() + 2, location.endPos()};
-            return make_unique<parser::Kwrestarg>(kwrestLoc, sorbetName);
+            return make_node_with_expr<parser::Kwrestarg>(MK::RestArg(kwrestLoc, MK::KeywordArg(kwrestLoc, sorbetName)),
+                                                          kwrestLoc, sorbetName);
         }
         case PM_LAMBDA_NODE: { // lambda literals, like `-> { 123 }`
             auto lambdaNode = down_cast<pm_lambda_node>(node);
@@ -1176,7 +1179,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto requiredKeywordParamNode = down_cast<pm_required_keyword_parameter_node>(node);
             auto name = translateConstantName(requiredKeywordParamNode->name);
 
-            return make_unique<parser::Kwarg>(location, name);
+            return make_node_with_expr<parser::Kwarg>(MK::KeywordArg(location, name), location, name);
         }
         case PM_REQUIRED_PARAMETER_NODE: { // A required positional parameter, like `def foo(a)`
             auto requiredParamNode = down_cast<pm_required_parameter_node>(node);
