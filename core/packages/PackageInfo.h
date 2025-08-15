@@ -189,36 +189,24 @@ public:
         return testSccID_;
     }
 
-    // PackageInfoImpl is the only implementation of PackageInfo
-    static PackageInfoImpl &from(core::GlobalState &gs, core::packages::MangledName pkg) {
+    static PackageInfo &from(core::GlobalState &gs, core::packages::MangledName pkg) {
         ENFORCE(pkg.exists());
-        return from(*gs.packageDB().getPackageInfoNonConst(pkg));
+        return *gs.packageDB().getPackageInfoNonConst(pkg);
     }
 
-    const static PackageInfoImpl &from(const core::GlobalState &gs, core::packages::MangledName pkg) {
+    const static PackageInfo &from(const core::GlobalState &gs, core::packages::MangledName pkg) {
         ENFORCE(pkg.exists());
-        return from(gs.packageDB().getPackageInfo(pkg));
-    }
-
-    // PackageInfoImpl is the only implementation of PackageInfo
-    const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
-        ENFORCE(pkg.exists());
-        return reinterpret_cast<const PackageInfoImpl &>(pkg); // TODO is there a more idiomatic way to do this?
-    }
-
-    static PackageInfoImpl &from(core::packages::PackageInfo &pkg) {
-        ENFORCE(pkg.exists());
-        return reinterpret_cast<PackageInfoImpl &>(pkg); // TODO is there a more idiomatic way to do this?
+        return gs.packageDB().getPackageInfo(pkg);
     }
 
     unique_ptr<PackageInfo> deepCopy() const {
-        return make_unique<PackageInfoImpl>(*this);
+        return make_unique<PackageInfo>(*this);
     }
 
-    PackageInfoImpl(core::packages::MangledName mangledName, core::Loc loc, core::Loc declLoc_)
+    PackageInfo(core::packages::MangledName mangledName, core::Loc loc, core::Loc declLoc_)
         : mangledName_(mangledName), loc(loc), declLoc_(declLoc_) {}
-    explicit PackageInfoImpl(const PackageInfoImpl &) = default;
-    PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;
+    explicit PackageInfo(const PackageInfo &) = default;
+    PackageInfo &operator=(const PackageInfo &) = delete;
 
     // What order should these packages be in the import list?
     // Returns -1 if a should come before b, 0 if they are equivalent, and 1 if a should come after b.
@@ -341,9 +329,8 @@ public:
 
     // autocorrects
 
-    optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
+    optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &info,
                                                     core::packages::ImportType importType) const {
-        auto &info = PackageInfoImpl::from(pkg);
         auto insertionLoc = core::Loc::none(loc.file());
         optional<core::AutocorrectSuggestion::Edit> deleteTestImportEdit = nullopt;
         if (!importedPackageNames.empty()) {
@@ -618,7 +605,7 @@ public:
                 return renderPath(gs, path);
             }
 
-            auto &currInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfo(curr));
+            auto &currInfo = gs.packageDB().getPackageInfo(curr);
             for (auto &import : currInfo.importedPackageNames) {
                 auto &importInfo = gs.packageDB().getPackageInfo(import.mangledName);
                 if (!importInfo.exists() || import.isTestImport() || visited.contains(import.mangledName)) {

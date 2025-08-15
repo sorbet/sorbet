@@ -101,7 +101,7 @@ public:
 
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.
 // For example, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
-bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) {
+bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfo &pkg) {
     return pkg.loc.file().data(gs).isPackagedTest();
 }
 
@@ -245,7 +245,7 @@ bool ownsPackage(const core::GlobalState &gs, const core::ClassOrModuleRef owner
 // Visitor that ensures for constants defined within a package that all have the package as a
 // prefix.
 class EnforcePackagePrefix final {
-    const PackageInfoImpl &pkg;
+    const PackageInfo &pkg;
 
     // Whether code in this file must use the `Test::` namespace.
     //
@@ -289,7 +289,7 @@ class EnforcePackagePrefix final {
     int errorDepth = 0;
 
 public:
-    EnforcePackagePrefix(core::Context ctx, const PackageInfoImpl &pkg)
+    EnforcePackagePrefix(core::Context ctx, const PackageInfo &pkg)
         : pkg(pkg), mustUseTestNamespace(ctx.file.data(ctx).isPackagedTest() && !isTestOnlyPackage(ctx, pkg)),
           maybeTestNamespace(
               core::Symbols::root().data(ctx)->findMember(ctx, core::packages::PackageDB::TEST_NAMESPACE)) {
@@ -567,9 +567,9 @@ private:
 };
 
 struct PackageSpecBodyWalk {
-    PackageSpecBodyWalk(PackageInfoImpl &info) : info(info) {}
+    PackageSpecBodyWalk(PackageInfo &info) : info(info) {}
 
-    PackageInfoImpl &info;
+    PackageInfo &info;
     vector<Export> exported;
     bool foundFirstPackageSpec = false;
     bool foundLayerDeclaration = false;
@@ -976,7 +976,7 @@ private:
     }
 };
 
-unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::ParsedFile &package) {
+unique_ptr<PackageInfo> definePackage(const core::GlobalState &gs, ast::ParsedFile &package) {
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(gs).isPackage(gs));
     // Assumption: Root of AST is <root> class. (This won't be true
@@ -999,14 +999,14 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
         auto nameTree = ast::cast_tree<ast::ConstantLit>(packageSpecClass->name);
         ENFORCE(nameTree != nullptr, "Invariant from rewriter");
 
-        return make_unique<PackageInfoImpl>(core::packages::MangledName(packageSpecClass->symbol),
-                                            ctx.locAt(packageSpecClass->loc), ctx.locAt(packageSpecClass->declLoc));
+        return make_unique<PackageInfo>(core::packages::MangledName(packageSpecClass->symbol),
+                                        ctx.locAt(packageSpecClass->loc), ctx.locAt(packageSpecClass->declLoc));
     }
 
     return nullptr;
 }
 
-void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
+void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfo &info) {
     PackageSpecBodyWalk bodyWalk(info);
     core::Context ctx(gs, core::Symbols::root(), package.file);
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
@@ -1025,7 +1025,7 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     bodyWalk.finalize(ctx);
 }
 
-void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
+void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package, PackageInfo &info) {
     auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
     auto extraPackageFilesDirectorySlashDeprecatedPrefixes =
         gs.packageDB().extraPackageFilesDirectorySlashDeprecatedPrefixes();
@@ -1079,7 +1079,7 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     }
 }
 
-void validateLayering(const core::Context &ctx, const core::packages::Import &i) {
+void validateLayering(const core::Context &ctx, const Import &i) {
     if (i.isTestImport()) {
         return;
     }
@@ -1087,8 +1087,8 @@ void validateLayering(const core::Context &ctx, const core::packages::Import &i)
     const auto &packageDB = ctx.state.packageDB();
     ENFORCE(packageDB.getPackageInfo(i.mangledName).exists())
     ENFORCE(packageDB.getPackageNameForFile(ctx.file).exists())
-    auto &thisPkg = PackageInfoImpl::from(ctx, packageDB.getPackageNameForFile(ctx.file));
-    auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.mangledName));
+    auto &thisPkg = PackageInfo::from(ctx, packageDB.getPackageNameForFile(ctx.file));
+    auto &otherPkg = packageDB.getPackageInfo(i.mangledName);
     ENFORCE(thisPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
     ENFORCE(otherPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
 
@@ -1152,7 +1152,7 @@ void validateLayering(const core::Context &ctx, const core::packages::Import &i)
     }
 }
 
-void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg, const core::packages::Import i) {
+void validateVisibility(const core::Context &ctx, const PackageInfo &absPkg, const Import i) {
     ENFORCE(ctx.state.packageDB().getPackageInfo(i.mangledName).exists())
     ENFORCE(ctx.state.packageDB().getPackageNameForFile(ctx.file).exists())
     auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.mangledName);
@@ -1196,7 +1196,7 @@ void validatePackage(core::Context ctx) {
         }
     }
 
-    auto &pkgInfo = PackageInfoImpl::from(ctx, absPkg);
+    auto &pkgInfo = PackageInfo::from(ctx, absPkg);
     bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
     auto enforceLayering = ctx.state.packageDB().enforceLayering();
 
@@ -1264,7 +1264,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
         return;
     }
 
-    auto &pkgImpl = PackageInfoImpl::from(ctx, pkg);
+    auto &pkgImpl = PackageInfo::from(ctx, pkg);
 
     EnforcePackagePrefix enforcePrefix(ctx, pkgImpl);
     ast::ConstShallowWalk::apply(ctx, enforcePrefix, tree);
@@ -1290,7 +1290,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 
             auto pkg = definePackage(gs, file);
             if (pkg == nullptr) {
-                // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
+                // There was an error creating a PackageInfo for this file, and getPackageInfo has already
                 // surfaced that error to the user. Nothing to do here.
                 continue;
             }
@@ -1327,7 +1327,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             if (!pkgName.exists()) {
                 continue;
             }
-            auto &info = PackageInfoImpl::from(gs, pkgName);
+            auto &info = PackageInfo::from(gs, pkgName);
             rewritePackageSpec(gs, file, info);
         }
     }
@@ -1393,7 +1393,7 @@ public:
 
     const absl::Span<const core::packages::Import> getImports(core::packages::MangledName packageName) const {
         ENFORCE(packageDB.getPackageInfo(packageName).exists());
-        return PackageInfoImpl::from(packageDB.getPackageInfo(packageName)).importedPackageNames;
+        return packageDB.getPackageInfo(packageName).importedPackageNames;
     }
 
     void setSCCId(core::packages::MangledName packageName, int sccID) {
@@ -1401,8 +1401,7 @@ public:
         if (!pkgInfoPtr) {
             return;
         }
-        auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
-        pkgInfo.sccID_ = sccID;
+        pkgInfoPtr->sccID_ = sccID;
     }
 
     int getSCCId(core::packages::MangledName packageName) const {
@@ -1416,8 +1415,7 @@ public:
         if (!pkgInfoPtr) {
             return;
         }
-        auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
-        pkgInfo.testSccID_ = sccID;
+        pkgInfoPtr->testSccID_ = sccID;
     }
 };
 
