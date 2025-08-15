@@ -1969,7 +1969,7 @@ class PackageDBPackageGraph {
 public:
     PackageDBPackageGraph(core::packages::PackageDB &packageDB) : packageDB(packageDB) {}
 
-    const vector<core::packages::Import> &getImports(core::packages::MangledName packageName) const {
+    const absl::Span<const core::packages::Import> getImports(core::packages::MangledName packageName) const {
         ENFORCE(packageDB.getPackageInfo(packageName).exists());
         return PackageInfoImpl::from(packageDB.getPackageInfo(packageName)).importedPackageNames;
     }
