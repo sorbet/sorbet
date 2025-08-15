@@ -73,22 +73,6 @@ struct FullyQualifiedName {
     FullyQualifiedName &operator=(const FullyQualifiedName &) = delete;
     FullyQualifiedName &operator=(FullyQualifiedName &&) = default;
 
-    FullyQualifiedName withPrefix(core::NameRef prefix) const {
-        vector<core::NameRef> prefixed(parts.size() + 1);
-        prefixed[0] = prefix;
-        std::copy(parts.begin(), parts.end(), prefixed.begin() + 1);
-        ENFORCE(prefixed.size() == parts.size() + 1);
-        return move(prefixed);
-    }
-
-    bool isSuffix(const FullyQualifiedName &prefix) const {
-        if (prefix.parts.size() >= parts.size()) {
-            return false;
-        }
-
-        return std::equal(prefix.parts.begin(), prefix.parts.end(), parts.begin());
-    }
-
     string show(const core::GlobalState &gs) const {
         return absl::StrJoin(parts, "::", core::packages::NameFormatter(gs));
     }
