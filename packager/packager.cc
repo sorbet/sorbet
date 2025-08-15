@@ -284,12 +284,6 @@ public:
         return make_unique<PackageInfoImpl>(*this);
     }
 
-    bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const {
-        auto file = symbol.loc(gs).file();
-        auto pkg = gs.packageDB().getPackageNameForFile(file);
-        return this->mangledName() == pkg;
-    }
-
     PackageInfoImpl(PackageName name, core::Loc loc, core::Loc declLoc_) : name(name), loc(loc), declLoc_(declLoc_) {}
     explicit PackageInfoImpl(const PackageInfoImpl &) = default;
     PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;
@@ -821,69 +815,10 @@ struct PackageForSymbolResult {
     bool couldBePrefix;
 };
 
-// TODO(jez) Once ClassOrModule symbols link to the Package Symbol that owns them, this should go away.
-PackageForSymbolResult packageForSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
-    // Skip until we get to the ClassOrModule things (ignore static-fields / type members to find package namespace)
-    bool couldBePrefix = true;
-    while (!sym.isClassOrModule()) {
-        couldBePrefix = false;
-        sym = sym.owner(gs);
-    }
-
-    vector<core::NameRef> fullNameReversed;
-
-    auto klassSym = sym.asClassOrModuleRef();
-    while (klassSym != core::Symbols::root()) {
-        ENFORCE(klassSym != core::Symbols::PackageSpecRegistry(), "Should only be called from non-__package.rb file");
-
-        auto klass = klassSym.data(gs);
-        auto maybeAttachedClass = klass->attachedClass(gs);
-        if (maybeAttachedClass.exists()) {
-            klassSym = maybeAttachedClass;
-            continue;
-        }
-
-        fullNameReversed.emplace_back(klassSym.data(gs)->name);
-        klassSym = klassSym.data(gs)->owner;
-    }
-
-    if (fullNameReversed.empty()) {
-        // This would be like, a static field at the top level?
-        return {{}, {}, couldBePrefix};
-    }
-
-    if (fullNameReversed.back() == core::packages::PackageDB::TEST_NAMESPACE) {
-        fullNameReversed.pop_back();
-    }
-
-    if (fullNameReversed.empty()) {
-        return {};
-    }
-
-    auto bestOwner = core::Symbols::PackageSpecRegistry();
-    auto bestPkg = core::packages::MangledName();
-    for (auto it = fullNameReversed.rbegin(); it != fullNameReversed.rend(); it++) {
-        auto curr = bestOwner.data(gs)->findMember(gs, *it);
-        if (!curr.exists()) {
-            // Can't be prefix, because there was extra stuff we're dropping that we could not find
-            return {bestPkg, bestOwner, false};
-        }
-
-        ENFORCE(curr.isClassOrModule(), "All names on path to PackageSpec should be ClassOrModule");
-        bestOwner = curr.asClassOrModuleRef();
-        auto currPkg = core::packages::MangledName(bestOwner);
-        if (gs.packageDB().getPackageInfo(currPkg).exists()) {
-            bestPkg = currPkg;
-        }
-    }
-
-    return {bestPkg, bestOwner, couldBePrefix};
-}
-
 bool ownsPackage(const core::GlobalState &gs, const core::ClassOrModuleRef ownerForScope,
                  core::packages::MangledName pkg) {
     auto owner = pkg.owner;
-    while (owner != core::Symbols::PackageSpecRegistry()) {
+    while (owner != core::Symbols::root()) {
         if (owner == ownerForScope) {
             return true;
         }
@@ -1133,21 +1068,31 @@ private:
 
     core::packages::MangledName packageForNamespace(const core::GlobalState &gs) const {
         const auto &[scopeSym, _scopeLoc] = scope.back();
-        const auto &[pkg, _owner, _couldBePrefix] = packageForSymbol(gs, scopeSym);
-        return pkg;
+        return scopeSym.enclosingClass(gs).data(gs)->package;
     }
 
     bool onPackagePath(const core::GlobalState &gs) const {
         const auto &[scopeSym, _scopeLoc] = scope.back();
-        const auto &[pkgForScope, ownerForScope, couldBePrefix] = packageForSymbol(gs, scopeSym);
+
+        core::ClassOrModuleRef klassSym;
+        bool couldBePrefix = true;
+        if (!scopeSym.isClassOrModule()) {
+            couldBePrefix = false;
+            klassSym = scopeSym.enclosingClass(gs);
+        } else {
+            klassSym = scopeSym.asClassOrModuleRef();
+        }
+        auto klassData = klassSym.data(gs);
+        auto pkgForScope = klassData->package;
+        auto ownerForScope = klassData->packageRegistryOwner;
+        if (!ownerForScope.exists()) {
+            couldBePrefix = false;
+        }
 
         if (pkgForScope == this->pkg.mangledName()) {
             return true;
         } else if (couldBePrefix) {
             return ownsPackage(gs, ownerForScope, this->pkg.mangledName());
-        } else if (scopeSym.exists() && scopeSym == maybeTestNamespace) {
-            // Okay to write `module Test; end`, becuase this is essentially the empty path.
-            return true;
         } else {
             return pkgForScope == this->pkg.mangledName();
         }

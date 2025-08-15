@@ -92,8 +92,6 @@ public:
     virtual core::Loc declLoc() const = 0;
     virtual bool exists() const final;
     std::string show(const core::GlobalState &gs) const;
-    core::ClassOrModuleRef getRootSymbolForAutocorrectSearch(const core::GlobalState &gs,
-                                                             core::SymbolRef suggestionScope) const;
 
     core::ClassOrModuleRef getPackageScope(const core::GlobalState &gs) const;
     core::ClassOrModuleRef getPackageTestScope(const core::GlobalState &gs) const;
@@ -130,7 +128,6 @@ public:
         core::NameRef srcPkg;
     };
 
-    virtual bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const = 0;
     virtual bool exportAll() const = 0;
     virtual bool visibleToTests() const = 0;
 };

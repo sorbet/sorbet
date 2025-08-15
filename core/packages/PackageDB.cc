@@ -52,11 +52,6 @@ public:
         return {};
     }
 
-    bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const {
-        notImplemented();
-        return false;
-    }
-
     bool exportAll() const {
         notImplemented();
         return false;

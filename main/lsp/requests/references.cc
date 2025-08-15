@@ -42,7 +42,7 @@ vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::
         auto symFound = findSym(gs, fullName, namespaceToCheck);
         // Do nothing if the symbol is not found or is from the same package -- i.e. for class ... < PackageSpec
         // declarations
-        if (symFound.exists() && gs.packageDB().getPackageNameForFile(symFound.loc(gs).file()) != packageName) {
+        if (symFound.exists() && symFound.enclosingClass(gs).data(gs)->package != packageName) {
             result.emplace_back(std::move(symFound));
         }
     }

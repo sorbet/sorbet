@@ -41,6 +41,7 @@ public:
         return this->owner.exists();
     }
 };
+CheckSize(MangledName, 4, 4);
 
 class NameFormatter final {
     const GlobalState &gs;

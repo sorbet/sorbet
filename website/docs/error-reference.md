@@ -1204,6 +1204,23 @@ end
 
 You can resolve this error by giving a different name to one of the conflicting arguments.
 
+## 4025
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A method can only be made package-private if the class it's defined in has a package. For example:
+
+```ruby
+# -- lib/some_package/example.rb
+class SomePackage::Example
+  class ::SomeGlobalClass
+    package_private def foo; end # 💥
+  end
+end
+```
+
+This file defines a global class called `::SomeGlobalClass` outside of the enclosing namespace of the current package. This means it will not be treated as belonging to the package `SomePackage`, and therefore cannot be made `package_private`.
+
 ## 5001
 
 Sorbet cannot resolve references to dynamic constants. The common case occurs when a constant is dynamically referenced through the singleton class of `self`:

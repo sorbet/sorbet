@@ -30,20 +30,9 @@ static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, cor
 class PropagateVisibility final {
     const core::packages::PackageInfo &package;
 
-    bool definedByThisPackage(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
-        auto pkg = gs.packageDB().getPackageNameForFile(sym.data(gs)->loc().file());
-        return this->package.mangledName() == pkg;
-    }
-
     void recursiveExportSymbol(core::GlobalState &gs, bool firstSymbol, core::ClassOrModuleRef klass) {
-        // We only mark symbols from this package. However, there's a
-        // tough case where non-behavior-defining "namespace-like"
-        // constants might get attributed to other packages (since we
-        // don't have a canonical location, so we use the first place
-        // we see them... which might be in a subpackage) and
-        // therefore this might stop too soon. That's why we only stop
-        // recursing if the thing is actually behavior-defining.
-        if (!this->definedByThisPackage(gs, klass) && klass.data(gs)->flags.isBehaviorDefining) {
+        // Stop recursing at package boundary
+        if (this->package.mangledName() != klass.data(gs)->package) {
             return;
         }
 
@@ -67,7 +56,7 @@ class PropagateVisibility final {
         // NOTE that we make an exception for namespaces that define behavior: these CANNOT get exported implicitly,
         // as that violates the private-by-default paradigm.
         while (owner.exists() && !owner.data(gs)->flags.isExported && !owner.data(gs)->flags.isBehaviorDefining &&
-               this->definedByThisPackage(gs, owner)) {
+               this->package.mangledName() == owner.data(gs)->package) {
             owner.data(gs)->flags.isExported = true;
             owner = owner.data(gs)->owner;
         }
@@ -107,79 +96,6 @@ class PropagateVisibility final {
         }
     }
 
-    // While processing the ClassDef for the package, which will be named something like `<PackageSpecRegistry>::A::B`,
-    // we also check that the symbols `A::B` and `Test::A::B` have locations whose package matches the one we're
-    // processing. If they don't match, we add locs to ensure that those symbols are associated with this package.
-    //
-    // The reason for this step is that it's currently allowed to refer to the name of the package outside of the
-    // context of the package spec, even if it doesn't explicitly export its top-level name. So in the case above, there
-    // would be no `export A::B` line in the package spec. However, if there is a package that is defined in the child
-    // namespace of `A::B`, and it at some point has a declaration of the form `module A::B`, the file that contains
-    // that declaration will be marked as owning `A::B`, thus breaking the invariant that the file can be used to
-    // determine the package that owns a symbol. So, to avoid this case we ensure that the symbols that correspond to
-    // the package name are always owned by the package that defines them.
-    void setPackageLocs(core::MutableContext ctx, core::LocOffsets loc, core::ClassOrModuleRef sym) {
-        vector<core::NameRef> names;
-
-        while (sym.exists() && sym != core::Symbols::PackageSpecRegistry()) {
-            // The symbol isn't a package name if it's defined outside of the package registry.
-            if (sym == core::Symbols::root()) {
-                return;
-            }
-
-            names.emplace_back(sym.data(ctx)->name);
-            sym = sym.data(ctx)->owner;
-        }
-
-        auto &db = ctx.state.packageDB();
-
-        {
-            auto packageSym = core::Symbols::root();
-            for (auto name = names.rbegin(); name != names.rend(); ++name) {
-                auto member = packageSym.data(ctx)->findMember(ctx, *name);
-                if (!member.exists() || !member.isClassOrModule()) {
-                    packageSym = core::Symbols::noClassOrModule();
-                    break;
-                }
-
-                packageSym = member.asClassOrModuleRef();
-            }
-
-            if (packageSym.exists()) {
-                auto file = packageSym.data(ctx)->loc().file();
-                if (db.getPackageNameForFile(file) != this->package.mangledName()) {
-                    packageSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
-                }
-            }
-        }
-
-        {
-            auto testSym = core::Symbols::root();
-            auto member = testSym.data(ctx)->findMember(ctx, core::Names::Constants::Test());
-            if (!member.exists() || !member.isClassOrModule()) {
-                return;
-            }
-
-            testSym = member.asClassOrModuleRef();
-            for (auto name = names.rbegin(); name != names.rend(); ++name) {
-                auto member = testSym.data(ctx)->findMember(ctx, *name);
-                if (!member.exists() || !member.isClassOrModule()) {
-                    testSym = core::Symbols::noClassOrModule();
-                    break;
-                }
-
-                testSym = member.asClassOrModuleRef();
-            }
-
-            if (testSym.exists()) {
-                auto file = testSym.data(ctx)->loc().file();
-                if (db.getPackageNameForFile(file) != this->package.mangledName()) {
-                    testSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
-                }
-            }
-        }
-    }
-
     bool ignoreRBIExportEnforcement(core::MutableContext &ctx, core::FileRef file) {
         const auto path = file.data(ctx).path();
 
@@ -202,8 +118,7 @@ class PropagateVisibility final {
             }
         }
 
-        auto definingFile = sym.loc(ctx).file();
-        auto symPackage = ctx.state.packageDB().getPackageNameForFile(definingFile);
+        auto symPackage = sym.enclosingClass(ctx).data(ctx)->package;
         if (symPackage != this->package.mangledName()) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Cannot export `{}` because it is owned by another package", sym.show(ctx));
@@ -305,15 +220,6 @@ public:
                 e.addErrorNote("`{}` is a `{}`", litSymbol.show(ctx), kind);
             }
         }
-    }
-
-    void preTransformClassDef(core::MutableContext ctx, const ast::ClassDef &original) {
-        if (original.symbol == core::Symbols::root()) {
-            return;
-        }
-
-        ENFORCE(original.symbol != core::Symbols::todo());
-        setPackageLocs(ctx, original.name.loc(), original.symbol);
     }
 
     static void run(core::GlobalState &gs, ast::ParsedFile &f) {
@@ -426,6 +332,11 @@ public:
     const core::packages::PackageInfo &package;
     const FileType fileType;
 
+    // We only want to validate visibility for usages of constants, not definitions.
+    // postTransformConstantLit does not discriminate, so we have to remember whether a given
+    // ConstantLit was a definition.
+    UnorderedSet<void *> constantAssignmentDefinitions;
+
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
         : package{package}, fileType{fileTypeFromCtx(ctx)} {}
 
@@ -433,8 +344,28 @@ public:
         return fileType != FileType::ProdFile;
     }
 
+    void preTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+        auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
+        if (lhs != nullptr) {
+            constantAssignmentDefinitions.insert(lhs.get());
+        }
+    }
+
+    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+        auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
+        if (lhs != nullptr) {
+            constantAssignmentDefinitions.erase(lhs.get());
+        }
+    }
+
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
+        if (constantAssignmentDefinitions.contains(tree.get())) {
+            return;
+        }
+
         auto litSymbol = lit.symbol();
         if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
             return;
@@ -460,7 +391,7 @@ public:
         auto &db = ctx.state.packageDB();
 
         // no need to check visibility for these cases
-        auto otherPackage = db.getPackageNameForFile(otherFile);
+        auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
         if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
             return;
         }
