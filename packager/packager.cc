@@ -243,20 +243,6 @@ public:
         return layer_;
     }
 
-    std::optional<std::pair<core::StrictLevel, core::LocOffsets>> min_typed_level() const {
-        if (min_typed_level_.has_value()) {
-            return min_typed_level_.value().first;
-        }
-        return nullopt;
-    }
-
-    std::optional<std::pair<core::StrictLevel, core::LocOffsets>> tests_min_typed_level() const {
-        if (min_typed_level_.has_value()) {
-            return min_typed_level_.value().second;
-        }
-        return nullopt;
-    }
-
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
     optional<int> sccID_ = nullopt;
 
