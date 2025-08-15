@@ -40,7 +40,7 @@ enum class StrictDependenciesLevel {
     Dag,
 };
 
-std::string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level);
+std::string_view strictDependenciesLevelToString(StrictDependenciesLevel level);
 
 struct FullyQualifiedName {
     std::vector<core::NameRef> parts;
@@ -91,7 +91,7 @@ struct VisibleTo {
 
 class PackageInfo {
 public:
-    core::packages::MangledName mangledName() const {
+    MangledName mangledName() const {
         return mangledName_;
     }
 
@@ -119,7 +119,7 @@ public:
         return visibleToTests_;
     }
 
-    core::packages::MangledName mangledName_;
+    MangledName mangledName_;
 
     // loc for the package definition. Full loc, from class to end keyword. Used for autocorrects.
     core::Loc loc;
@@ -144,20 +144,19 @@ public:
     // but also any package name underneath it. `Normal` means the package can be imported
     // by the referenced package name but not any child packages (unless they have a separate
     // `visible_to` line of their own.)
-    std::vector<core::packages::VisibleTo> visibleTo_ = {};
+    std::vector<VisibleTo> visibleTo_ = {};
 
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
 
-    std::optional<std::pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_;
+    std::optional<std::pair<StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_;
     std::optional<std::pair<core::NameRef, core::LocOffsets>> layer_;
     std::vector<core::LocOffsets> extraDirectives_;
     std::optional<
         std::pair<std::pair<core::StrictLevel, core::LocOffsets>, std::pair<core::StrictLevel, core::LocOffsets>>>
         min_typed_level_;
 
-    std::optional<std::pair<core::packages::StrictDependenciesLevel, core::LocOffsets>>
-    strictDependenciesLevel() const {
+    std::optional<std::pair<StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
         return strictDependenciesLevel_;
     }
 
@@ -189,13 +188,13 @@ public:
         return testSccID_;
     }
 
-    static PackageInfo &from(core::GlobalState &gs, core::packages::MangledName pkg);
+    static PackageInfo &from(core::GlobalState &gs, MangledName pkg);
 
-    static const PackageInfo &from(const core::GlobalState &gs, core::packages::MangledName pkg);
+    static const PackageInfo &from(const core::GlobalState &gs, MangledName pkg);
 
     std::unique_ptr<PackageInfo> deepCopy() const;
 
-    PackageInfo(core::packages::MangledName mangledName, core::Loc loc, core::Loc declLoc_)
+    PackageInfo(MangledName mangledName, core::Loc loc, core::Loc declLoc_)
         : mangledName_(mangledName), loc(loc), declLoc_(declLoc_) {}
     explicit PackageInfo(const PackageInfo &) = default;
     PackageInfo &operator=(const PackageInfo &) = delete;
@@ -203,37 +202,37 @@ public:
     int orderImports(const core::GlobalState &gs, const PackageInfo &a, bool aIsTestImport, const PackageInfo &b,
                      bool bIsTestImport) const;
 
-    int orderByStrictness(const core::packages::PackageDB &packageDB, const PackageInfo &a, const PackageInfo &b) const;
+    int orderByStrictness(const PackageDB &packageDB, const PackageInfo &a, const PackageInfo &b) const;
 
     int orderByAlphabetical(const core::GlobalState &gs, const PackageInfo &a, const PackageInfo &b) const;
 
     // autocorrects
 
     std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &info,
-                                                         core::packages::ImportType importType) const;
+                                                         ImportType importType) const;
 
     std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                          const core::SymbolRef newExport) const;
 
-    std::vector<core::packages::VisibleTo> visibleTo() const {
+    std::vector<VisibleTo> visibleTo() const {
         return visibleTo_;
     }
 
-    std::optional<core::packages::ImportType> importsPackage(core::packages::MangledName mangledName) const;
+    std::optional<ImportType> importsPackage(MangledName mangledName) const;
 
     // Is it a layering violation to import otherPkg from this package?
-    bool causesLayeringViolation(const core::packages::PackageDB &packageDB, const PackageInfo &otherPkg) const;
+    bool causesLayeringViolation(const PackageDB &packageDB, const PackageInfo &otherPkg) const;
 
-    bool causesLayeringViolation(const core::packages::PackageDB &packageDB, core::NameRef otherPkgLayer) const;
+    bool causesLayeringViolation(const PackageDB &packageDB, core::NameRef otherPkgLayer) const;
 
     // What is the minimum strict dependencies level that this package's imports must have?
-    core::packages::StrictDependenciesLevel minimumStrictDependenciesLevel() const;
+    StrictDependenciesLevel minimumStrictDependenciesLevel() const;
 
-    std::string renderPath(const core::GlobalState &gs, const std::vector<core::packages::MangledName> &path) const;
+    std::string renderPath(const core::GlobalState &gs, const std::vector<MangledName> &path) const;
 
     // Returns a string representing the path to the given package from this package, if it exists. Note: this only
     // looks at non-test imports.
-    std::optional<std::string> pathTo(const core::GlobalState &gs, const core::packages::MangledName dest) const;
+    std::optional<std::string> pathTo(const core::GlobalState &gs, const MangledName dest) const;
 };
 
 } // namespace sorbet::core::packages
