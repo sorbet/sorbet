@@ -41,11 +41,8 @@ const PackageInfo &PackageInfo::from(const core::GlobalState &gs, MangledName pk
 }
 
 unique_ptr<PackageInfo> PackageInfo::deepCopy() const {
+    ENFORCE(exists());
     return make_unique<PackageInfo>(*this);
-}
-
-bool PackageInfo::exists() const {
-    return mangledName().exists();
 }
 
 // What order should these packages be in the import list?
@@ -353,6 +350,7 @@ optional<ImportType> PackageInfo::importsPackage(MangledName mangledName) const 
 
 // Is it a layering violation to import otherPkg from this package?
 bool PackageInfo::causesLayeringViolation(const PackageDB &packageDB, const PackageInfo &otherPkg) const {
+    ENFORCE(exists());
     if (!otherPkg.layer().has_value()) {
         return false;
     }
@@ -361,6 +359,7 @@ bool PackageInfo::causesLayeringViolation(const PackageDB &packageDB, const Pack
 }
 
 bool PackageInfo::causesLayeringViolation(const PackageDB &packageDB, core::NameRef otherPkgLayer) const {
+    ENFORCE(exists());
     if (!layer().has_value()) {
         return false;
     }
@@ -406,6 +405,7 @@ string PackageInfo::renderPath(const core::GlobalState &gs, const vector<Mangled
 // Returns a string representing the path to the given package from this package, if it exists. Note: this only
 // looks at non-test imports.
 optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const MangledName dest) const {
+    ENFORCE(exists());
     // Note: This implements BFS.
     auto src = mangledName();
     queue<MangledName> toVisit;
