@@ -112,6 +112,10 @@ public:
         return declLoc_;
     }
 
+    bool exists() const;
+    std::string show(const core::GlobalState &gs) const;
+    bool operator==(const PackageInfo &rhs) const;
+
     bool exportAll() const {
         return exportAll_;
     }
