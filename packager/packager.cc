@@ -27,10 +27,10 @@ constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 
 bool visibilityApplies(const core::GlobalState &gs, const core::packages::VisibleTo &vt,
                        core::packages::MangledName name) {
-    if (vt.visibleToType == core::packages::VisibleToType::Wildcard) {
+    if (vt.type == core::packages::VisibleToType::Wildcard) {
         // a wildcard will match if it's a proper prefix of the package name
         auto curPkg = name.owner;
-        auto prefix = vt.packageName.owner;
+        auto prefix = vt.mangledName.owner;
         do {
             if (curPkg == prefix) {
                 return true;
@@ -40,7 +40,7 @@ bool visibilityApplies(const core::GlobalState &gs, const core::packages::Visibl
         return false;
     } else {
         // otherwise it needs to be the same
-        return vt.packageName == name;
+        return vt.mangledName == name;
     }
 }
 
@@ -92,14 +92,6 @@ struct Export {
         return absl::c_lexicographical_compare(a.parts(), b.parts(),
                                                [](auto a, auto b) -> bool { return a.rawId() < b.rawId(); });
     }
-};
-
-struct VisibleTo {
-    core::packages::MangledName mangledName;
-    core::packages::VisibleToType type;
-
-    VisibleTo(core::packages::MangledName mangledName, core::packages::VisibleToType type)
-        : mangledName(mangledName), type(type) {}
 };
 
 // For a given vector of NameRefs, this represents the "next" vector that does not begin with its
@@ -190,7 +182,7 @@ public:
     // but also any package name underneath it. `Normal` means the package can be imported
     // by the referenced package name but not any child packages (unless they have a separate
     // `visible_to` line of their own.)
-    vector<VisibleTo> visibleTo_ = {};
+    vector<core::packages::VisibleTo> visibleTo_ = {};
 
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
@@ -549,11 +541,7 @@ public:
     }
 
     vector<core::packages::VisibleTo> visibleTo() const {
-        vector<core::packages::VisibleTo> rv;
-        for (auto &v : visibleTo_) {
-            rv.emplace_back(v.mangledName, v.type);
-        }
-        return rv;
+        return visibleTo_;
     }
 
     optional<core::packages::ImportType> importsPackage(core::packages::MangledName mangledName) const {

@@ -55,13 +55,11 @@ struct Import {
     }
 };
 
-// TODO(jez) Why is this struct different from the `struct VisibleTo` defined in packager.cc?
 struct VisibleTo {
-    MangledName packageName;
-    VisibleToType visibleToType;
+    MangledName mangledName;
+    VisibleToType type;
 
-    VisibleTo(MangledName packageName, VisibleToType visibleToType)
-        : packageName(std::move(packageName)), visibleToType(visibleToType){};
+    VisibleTo(MangledName mangledName, VisibleToType type) : mangledName(mangledName), type(type){};
 };
 
 class PackageInfo {
