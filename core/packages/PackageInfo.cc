@@ -8,21 +8,21 @@
 using namespace std;
 
 namespace sorbet::core::packages {
-string_view strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level) {
+string_view strictDependenciesLevelToString(StrictDependenciesLevel level) {
     switch (level) {
-        case core::packages::StrictDependenciesLevel::False:
+        case StrictDependenciesLevel::False:
             return "false";
-        case core::packages::StrictDependenciesLevel::Layered:
+        case StrictDependenciesLevel::Layered:
             return "layered";
-        case core::packages::StrictDependenciesLevel::LayeredDag:
+        case StrictDependenciesLevel::LayeredDag:
             return "layered_dag";
-        case core::packages::StrictDependenciesLevel::Dag:
+        case StrictDependenciesLevel::Dag:
             return "dag";
     }
 }
 
 string FullyQualifiedName::show(const core::GlobalState &gs) const {
-    return absl::StrJoin(parts, "::", core::packages::NameFormatter(gs));
+    return absl::StrJoin(parts, "::", NameFormatter(gs));
 }
 
 bool Export::lexCmp(const Export &a, const Export &b) {
@@ -30,12 +30,12 @@ bool Export::lexCmp(const Export &a, const Export &b) {
                                            [](auto a, auto b) -> bool { return a.rawId() < b.rawId(); });
 }
 
-PackageInfo &PackageInfo::from(core::GlobalState &gs, core::packages::MangledName pkg) {
+PackageInfo &PackageInfo::from(core::GlobalState &gs, MangledName pkg) {
     ENFORCE(pkg.exists());
     return *gs.packageDB().getPackageInfoNonConst(pkg);
 }
 
-const PackageInfo &PackageInfo::from(const core::GlobalState &gs, core::packages::MangledName pkg) {
+const PackageInfo &PackageInfo::from(const core::GlobalState &gs, MangledName pkg) {
     ENFORCE(pkg.exists());
     return gs.packageDB().getPackageInfo(pkg);
 }
@@ -90,8 +90,7 @@ int PackageInfo::orderImports(const core::GlobalState &gs, const PackageInfo &a,
     return strictnessCompareResult;
 }
 
-int PackageInfo::orderByStrictness(const core::packages::PackageDB &packageDB, const PackageInfo &a,
-                                   const PackageInfo &b) const {
+int PackageInfo::orderByStrictness(const PackageDB &packageDB, const PackageInfo &a, const PackageInfo &b) const {
     if (!packageDB.enforceLayering() || !strictDependenciesLevel().has_value() ||
         !a.strictDependenciesLevel().has_value() || !b.strictDependenciesLevel().has_value() ||
         !a.layer().has_value() || !b.layer().has_value()) {
@@ -112,47 +111,47 @@ int PackageInfo::orderByStrictness(const core::packages::PackageDB &packageDB, c
     auto aStrictDependenciesLevel = a.strictDependenciesLevel().value().first;
     auto bStrictDependenciesLevel = b.strictDependenciesLevel().value().first;
     switch (strictDependenciesLevel().value().first) {
-        case core::packages::StrictDependenciesLevel::False: {
+        case StrictDependenciesLevel::False: {
             // Sort order: Layering violations, false, layered or stricter
             switch (aStrictDependenciesLevel) {
-                case core::packages::StrictDependenciesLevel::False:
-                    return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::False ? 0 : -1;
-                case core::packages::StrictDependenciesLevel::Layered:
-                case core::packages::StrictDependenciesLevel::LayeredDag:
-                case core::packages::StrictDependenciesLevel::Dag:
-                    return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::False ? 1 : 0;
+                case StrictDependenciesLevel::False:
+                    return bStrictDependenciesLevel == StrictDependenciesLevel::False ? 0 : -1;
+                case StrictDependenciesLevel::Layered:
+                case StrictDependenciesLevel::LayeredDag:
+                case StrictDependenciesLevel::Dag:
+                    return bStrictDependenciesLevel == StrictDependenciesLevel::False ? 1 : 0;
             }
         }
-        case core::packages::StrictDependenciesLevel::Layered:
-        case core::packages::StrictDependenciesLevel::LayeredDag: {
+        case StrictDependenciesLevel::Layered:
+        case StrictDependenciesLevel::LayeredDag: {
             // Sort order: Layering violations, false, layered or layered_dag, dag
             switch (aStrictDependenciesLevel) {
-                case core::packages::StrictDependenciesLevel::False:
-                    return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::False ? 0 : -1;
-                case core::packages::StrictDependenciesLevel::Layered:
-                case core::packages::StrictDependenciesLevel::LayeredDag:
+                case StrictDependenciesLevel::False:
+                    return bStrictDependenciesLevel == StrictDependenciesLevel::False ? 0 : -1;
+                case StrictDependenciesLevel::Layered:
+                case StrictDependenciesLevel::LayeredDag:
                     switch (bStrictDependenciesLevel) {
-                        case core::packages::StrictDependenciesLevel::False:
+                        case StrictDependenciesLevel::False:
                             return 1;
-                        case core::packages::StrictDependenciesLevel::Layered:
-                        case core::packages::StrictDependenciesLevel::LayeredDag:
+                        case StrictDependenciesLevel::Layered:
+                        case StrictDependenciesLevel::LayeredDag:
                             return 0;
-                        case core::packages::StrictDependenciesLevel::Dag:
+                        case StrictDependenciesLevel::Dag:
                             return -1;
                     }
-                case core::packages::StrictDependenciesLevel::Dag:
-                    return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::Dag ? 0 : 1;
+                case StrictDependenciesLevel::Dag:
+                    return bStrictDependenciesLevel == StrictDependenciesLevel::Dag ? 0 : 1;
             }
         }
-        case core::packages::StrictDependenciesLevel::Dag: {
+        case StrictDependenciesLevel::Dag: {
             // Sort order: Layering violations, false or layered or layered_dag, dag
             switch (aStrictDependenciesLevel) {
-                case core::packages::StrictDependenciesLevel::False:
-                case core::packages::StrictDependenciesLevel::Layered:
-                case core::packages::StrictDependenciesLevel::LayeredDag:
-                    return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::Dag ? -1 : 0;
-                case core::packages::StrictDependenciesLevel::Dag:
-                    return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::Dag ? 0 : 1;
+                case StrictDependenciesLevel::False:
+                case StrictDependenciesLevel::Layered:
+                case StrictDependenciesLevel::LayeredDag:
+                    return bStrictDependenciesLevel == StrictDependenciesLevel::Dag ? -1 : 0;
+                case StrictDependenciesLevel::Dag:
+                    return bStrictDependenciesLevel == StrictDependenciesLevel::Dag ? 0 : 1;
             }
         }
     }
@@ -170,17 +169,15 @@ int orderByAlphabetical(const core::GlobalState &gs, const PackageInfo &a, const
 // autocorrects
 
 optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalState &gs, const PackageInfo &info,
-                                                             core::packages::ImportType importType) const {
+                                                             ImportType importType) const {
     auto insertionLoc = core::Loc::none(loc.file());
     optional<core::AutocorrectSuggestion::Edit> deleteTestImportEdit = nullopt;
     if (!importedPackageNames.empty()) {
         core::LocOffsets importToInsertAfter;
         for (auto &import : importedPackageNames) {
             if (import.mangledName == info.mangledName()) {
-                if ((importType == core::packages::ImportType::Normal &&
-                     import.type != core::packages::ImportType::Normal) ||
-                    (importType == core::packages::ImportType::TestHelper &&
-                     import.type == core::packages::ImportType::TestUnit)) {
+                if ((importType == ImportType::Normal && import.type != ImportType::Normal) ||
+                    (importType == ImportType::TestHelper && import.type == ImportType::TestUnit)) {
                     // There's already an import for this package, so we'll "upgrade" it to the desired import.
                     // importToInsertAfter already tracks where we need to insert the import.  So we can craft an
                     // edit to delete the existing line, and then use the regular logic for adding an import to
@@ -200,7 +197,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
                     // TODO: we should find and delete just the `, only: ...` in this case, but that's slightly
                     // tricky
 
-                    if (importType == core::packages::ImportType::TestHelper) {
+                    if (importType == ImportType::TestHelper) {
                         insertionLoc = {importLoc.file(), beginPos - 1, beginPos - 1};
                         break;
                     }
@@ -216,8 +213,8 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
                 continue;
             }
 
-            auto compareResult = orderImports(gs, info, importType != core::packages::ImportType::Normal, importInfo,
-                                              import.isTestImport());
+            auto compareResult =
+                orderImports(gs, info, importType != ImportType::Normal, importInfo, import.isTestImport());
             if (compareResult == 1 || compareResult == 0) {
                 importToInsertAfter = import.loc;
             }
@@ -269,16 +266,16 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
     string_view importTypeMethod;
     string_view importTypeTrailing = "";
     switch (importType) {
-        case core::packages::ImportType::Normal:
+        case ImportType::Normal:
             importTypeHuman = "Import";
             importTypeMethod = "import";
             break;
-        case core::packages::ImportType::TestUnit:
+        case ImportType::TestUnit:
             importTypeHuman = "Test Import";
             importTypeMethod = "test_import";
             importTypeTrailing = ", only: \"test_rb\"";
             break;
-        case core::packages::ImportType::TestHelper:
+        case ImportType::TestHelper:
             importTypeHuman = "Test Import";
             importTypeMethod = "test_import";
             break;
@@ -341,7 +338,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
     return {suggestion};
 }
 
-optional<core::packages::ImportType> PackageInfo::importsPackage(core::packages::MangledName mangledName) const {
+optional<ImportType> PackageInfo::importsPackage(MangledName mangledName) const {
     if (!mangledName.exists()) {
         return nullopt;
     }
@@ -355,8 +352,7 @@ optional<core::packages::ImportType> PackageInfo::importsPackage(core::packages:
 }
 
 // Is it a layering violation to import otherPkg from this package?
-bool PackageInfo::causesLayeringViolation(const core::packages::PackageDB &packageDB,
-                                          const PackageInfo &otherPkg) const {
+bool PackageInfo::causesLayeringViolation(const PackageDB &packageDB, const PackageInfo &otherPkg) const {
     if (!otherPkg.layer().has_value()) {
         return false;
     }
@@ -364,8 +360,7 @@ bool PackageInfo::causesLayeringViolation(const core::packages::PackageDB &packa
     return causesLayeringViolation(packageDB, otherPkg.layer().value().first);
 }
 
-bool PackageInfo::causesLayeringViolation(const core::packages::PackageDB &packageDB,
-                                          core::NameRef otherPkgLayer) const {
+bool PackageInfo::causesLayeringViolation(const PackageDB &packageDB, core::NameRef otherPkgLayer) const {
     if (!layer().has_value()) {
         return false;
     }
@@ -378,23 +373,23 @@ bool PackageInfo::causesLayeringViolation(const core::packages::PackageDB &packa
 }
 
 // What is the minimum strict dependencies level that this package's imports must have?
-core::packages::StrictDependenciesLevel PackageInfo::minimumStrictDependenciesLevel() const {
+StrictDependenciesLevel PackageInfo::minimumStrictDependenciesLevel() const {
     if (!strictDependenciesLevel().has_value()) {
-        return core::packages::StrictDependenciesLevel::False;
+        return StrictDependenciesLevel::False;
     }
 
     switch (strictDependenciesLevel().value().first) {
-        case core::packages::StrictDependenciesLevel::False:
-            return core::packages::StrictDependenciesLevel::False;
-        case core::packages::StrictDependenciesLevel::Layered:
-        case core::packages::StrictDependenciesLevel::LayeredDag:
-            return core::packages::StrictDependenciesLevel::Layered;
-        case core::packages::StrictDependenciesLevel::Dag:
-            return core::packages::StrictDependenciesLevel::Dag;
+        case StrictDependenciesLevel::False:
+            return StrictDependenciesLevel::False;
+        case StrictDependenciesLevel::Layered:
+        case StrictDependenciesLevel::LayeredDag:
+            return StrictDependenciesLevel::Layered;
+        case StrictDependenciesLevel::Dag:
+            return StrictDependenciesLevel::Dag;
     }
 }
 
-string PackageInfo::renderPath(const core::GlobalState &gs, const vector<core::packages::MangledName> &path) const {
+string PackageInfo::renderPath(const core::GlobalState &gs, const vector<MangledName> &path) const {
     // TODO(neil): if the cycle has a large number of nodes (10?), show partial path (first 5, ... (n omitted), last
     // 5) to prevent error being too long
     // Note: This function iterates through path in reverse order because pathTo generates it in that order, so
@@ -410,14 +405,14 @@ string PackageInfo::renderPath(const core::GlobalState &gs, const vector<core::p
 
 // Returns a string representing the path to the given package from this package, if it exists. Note: this only
 // looks at non-test imports.
-optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const core::packages::MangledName dest) const {
+optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const MangledName dest) const {
     // Note: This implements BFS.
     auto src = mangledName();
-    queue<core::packages::MangledName> toVisit;
+    queue<MangledName> toVisit;
     // Maps from package to what package we came from to get to that package, used to construct the path
     // Ex. A -> B -> C means that prev[C] = B and prev[B] = A
-    UnorderedMap<core::packages::MangledName, core::packages::MangledName> prev;
-    UnorderedSet<core::packages::MangledName> visited;
+    UnorderedMap<MangledName, MangledName> prev;
+    UnorderedSet<MangledName> visited;
 
     toVisit.push(src);
     while (!toVisit.empty()) {
@@ -430,7 +425,7 @@ optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const core::pa
 
         if (curr == dest) {
             // Found the target node, walk backward through the prev map to construct the path
-            vector<core::packages::MangledName> path;
+            vector<MangledName> path;
             path.push_back(curr);
             while (curr != src) {
                 curr = prev[curr];
