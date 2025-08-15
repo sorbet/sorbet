@@ -142,6 +142,13 @@ public:
             return;
         }
 
+        if (this->package.exportAll()) {
+            if (auto e = ctx.beginError(send.loc, core::errors::Packager::ExportConflict)) {
+                e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
+                            this->package.mangledName().owner.show(ctx), "export_all!");
+            }
+        }
+
         auto litSymbol = lit->symbol();
         this->package.exports().emplace_back(litSymbol, lit->loc());
         if (litSymbol.isClassOrModule()) {
@@ -195,18 +202,6 @@ public:
             return;
         }
 
-        if (info.exportAll()) {
-            // we're only here because exports exist, which means if
-            // `exportAll` is set then we've got conflicting
-            // information about export; flag the exports as wrong
-            for (auto it = exported.begin(); it != exported.end(); ++it) {
-                if (auto e = ctx.beginError(it->loc, core::errors::Packager::ExportConflict)) {
-                    e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
-                                info.mangledName().owner.show(ctx), "export_all!");
-                }
-            }
-        }
-
         fast_sort(exported, Export::lexCmp);
         vector<size_t> dupInds;
         for (auto it = exported.begin(); it != exported.end(); ++it) {
@@ -251,10 +246,14 @@ public:
             return;
         }
 
-        const auto &package = gs.packageDB().getPackageInfo(pkgName);
-        ENFORCE(package.exists(), "Package is associated with a file, but doesn't exist");
+        auto *package = gs.packageDB().getPackageInfoNonConst(pkgName);
+        ENFORCE(package->exists(), "Package is associated with a file, but doesn't exist");
 
-        PropagateVisibility pass{package};
+        if (!package->exports().empty()) {
+            // We're on the fast path. We need to mark all the constants owned by this package as
+            // not exported in case any have changed.
+        }
+        PropagateVisibility pass{*package};
 
         core::MutableContext ctx{gs, core::Symbols::root(), f.file};
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
